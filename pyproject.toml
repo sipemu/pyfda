@@ -1,0 +1,37 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "pyfda"
+version = "0.1.0"
+description = "Python bindings for fdars – Functional Data Analysis in Rust"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "Simon Mueller" },
+]
+keywords = ["functional-data", "statistics", "fda", "depth", "clustering", "alignment"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+dev = ["pytest", "matplotlib"]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "python"
+module-name = "pyfda._native"

@@ -1,0 +1,124 @@
+site_name: pyfda - Functional Data Analysis for Python
+site_url: https://sipemu.github.io/pyfda
+site_description: High-performance functional data analysis for Python, powered by Rust
+repo_url: https://github.com/sipemu/pyfda
+repo_name: sipemu/pyfda
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.tabs.link
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.arithmatex:
+      generic: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js
+  - javascripts/katex.js
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sipemu/pyfda
+
+nav:
+  - Home: index.md
+  - Learn:
+    - learn/index.md
+    - Introduction: learn/introduction.md
+    - Simulation: learn/simulation.md
+    - Smoothing: learn/smoothing.md
+    - Derivatives: learn/derivatives.md
+  - Represent:
+    - represent/index.md
+    - Functional PCA: represent/fpca.md
+    - Basis Representation: represent/basis-representation.md
+    - Depth Functions: represent/depth-functions.md
+    - Distance Metrics: represent/distance-metrics.md
+  - Align:
+    - align/index.md
+    - Elastic Alignment: align/elastic-alignment.md
+    - Shape Analysis: align/shape-analysis.md
+  - Regression:
+    - regression/index.md
+    - Scalar-on-Function: regression/scalar-on-function.md
+    - Function-on-Scalar: regression/function-on-scalar.md
+    - Classification: regression/classification.md
+    - Elastic Regression: regression/elastic-regression.md
+    - Explainability: regression/explainability.md
+    - Conformal Prediction: regression/conformal-prediction.md
+    - Robust Regression: regression/robust-regression.md
+  - Monitoring:
+    - monitoring/index.md
+    - Process Monitoring: monitoring/spm.md
+  - Analyze:
+    - analyze/index.md
+    - Tolerance Bands: analyze/tolerance-bands.md
+    - Clustering: analyze/clustering.md
+    - Outlier Detection: analyze/outlier-detection.md
+    - Seasonal Analysis: analyze/seasonal-analysis.md
+    - Equivalence Testing: analyze/equivalence-testing.md
+    - Covariance Functions: analyze/covariance-functions.md
+  - Reference:
+    - reference/index.md
+    - pyfda.fdata: reference/fdata.md
+    - pyfda.depth: reference/depth.md
+    - pyfda.metric: reference/metric.md
+    - pyfda.basis: reference/basis.md
+    - pyfda.smoothing: reference/smoothing.md
+    - pyfda.clustering: reference/clustering.md
+    - pyfda.regression: reference/regression.md
+    - pyfda.alignment: reference/alignment.md
+    - pyfda.outliers: reference/outliers.md
+    - pyfda.seasonal: reference/seasonal.md
+    - pyfda.spm: reference/spm.md
+    - pyfda.classification: reference/classification.md
+    - pyfda.tolerance: reference/tolerance.md
+    - pyfda.conformal: reference/conformal.md
+    - pyfda.simulation: reference/simulation.md
+    - pyfda.explain: reference/explain.md
