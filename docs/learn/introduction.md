@@ -70,6 +70,7 @@ metadata.  It mirrors the R package's `fdata` S3 class.
 
 ```python
 import numpy as np
+import pandas as pd
 from pyfda import Fdata
 
 # 50 curves observed at 200 equally spaced points on [0, 1]
@@ -90,27 +91,32 @@ print(fd)
 
 #### With Identifiers and Metadata
 
-You can attach identifiers and per-observation covariates:
+You can attach identifiers and a `pandas.DataFrame` of per-observation
+covariates:
 
 ```python
+meta = pd.DataFrame({
+    "group": ["control"] * 25 + ["treatment"] * 25,
+    "age": rng.integers(20, 60, size=n_obs),
+})
 fd = Fdata(
     X, argvals=argvals,
     id=[f"patient_{i}" for i in range(n_obs)],
-    metadata={
-        "group": ["control"] * 25 + ["treatment"] * 25,
-        "age": rng.integers(20, 60, size=n_obs).tolist(),
-    },
+    metadata=meta,
 )
 print(fd)
 # Fdata (1D)  –  50 obs × 200 points  –  range [0.0, 1.0]  –  metadata: group, age
+
+# Access metadata columns directly
+fd.metadata["group"].value_counts()
 ```
 
 Metadata is preserved when subsetting:
 
 ```python
 fd_sub = fd[0:10]
-print(fd_sub.id[:3])          # ['patient_0', 'patient_1', 'patient_2']
-print(fd_sub.metadata["group"][:3])  # ['control', 'control', 'control']
+print(fd_sub.id[:3])               # ['patient_0', 'patient_1', 'patient_2']
+print(fd_sub.metadata["group"][:3]) # 'control', 'control', 'control'
 ```
 
 !!! info "Row = observation, Column = grid point"
@@ -127,8 +133,11 @@ from pyfda.simulation import simulate
 
 argvals = np.linspace(0, 1, 100)
 data = simulate(n=50, argvals=argvals, n_basis=5, seed=42)
+
 fd = Fdata(data, argvals=argvals)
 print(fd)  # Fdata (1D)  –  50 obs × 100 points  –  range [0.0, 1.0]
+
+# All examples below use this fd object
 ```
 
 See the [Simulation Toolbox](simulation.md) guide for details on eigenfunction

@@ -27,7 +27,7 @@ Fdata(data, argvals=None, rangeval=None, names=None, id=None, metadata=None)
 | `rangeval` | `tuple` | auto | Domain range |
 | `names` | `dict` | auto | Plot labels (`main`, `xlab`, `ylab`, `zlab`) |
 | `id` | `list[str]` | `["obs_1", …]` | Observation identifiers |
-| `metadata` | `DataFrame` or `dict` | `None` | Per-observation covariates |
+| `metadata` | `DataFrame` or `dict` | `None` | Per-observation covariates (dict auto-converted to DataFrame) |
 
 ### Properties
 
@@ -77,16 +77,19 @@ fd_sum = fd1 + fd2
 
 ```python
 import numpy as np
+import pandas as pd
 from pyfda import Fdata
 
 t = np.linspace(0, 1, 100)
 X = np.random.randn(20, 100)
-fd = Fdata(X, argvals=t, id=[f"s_{i}" for i in range(20)],
-           metadata={"group": ["A"] * 10 + ["B"] * 10})
+meta = pd.DataFrame({"group": ["A"] * 10 + ["B"] * 10,
+                      "score": np.random.randn(20)})
+fd = Fdata(X, argvals=t, id=[f"s_{i}" for i in range(20)], metadata=meta)
 
-fd_c = fd.center()          # centered, metadata preserved
-depths = fd.depth("band")   # band depth values
-D = fd.distance(method="lp") # L2 distance matrix
+fd_c = fd.center()            # centered, metadata DataFrame preserved
+depths = fd.depth("band")     # band depth values
+D = fd.distance(method="lp")  # L2 distance matrix
+fd.metadata.head()             # pandas DataFrame
 ```
 
 ---

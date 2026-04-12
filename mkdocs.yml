@@ -39,6 +39,7 @@ plugins:
 
 extra_css:
   - stylesheets/extra.css
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css
 
 markdown_extensions:
   - pymdownx.highlight:

@@ -10,6 +10,12 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
+try:
+    import pandas as pd
+    _HAS_PANDAS = True
+except ImportError:
+    _HAS_PANDAS = False
+
 from pyfda import _native
 
 # ---------------------------------------------------------------------------
@@ -20,30 +26,30 @@ def _default_ids(n: int) -> List[str]:
     return [f"obs_{i + 1}" for i in range(n)]
 
 
-def _validate_metadata(metadata, n: int, ids: List[str]) -> None:
-    """Validate metadata row count and optional id column consistency."""
+def _to_dataframe(metadata, n: int, ids: List[str]):
+    """Convert metadata to a pandas DataFrame and validate."""
     if metadata is None:
-        return
-    if hasattr(metadata, "columns"):
-        # pandas DataFrame
-        _len = len(metadata)
-        if _len != n:
-            raise ValueError(
-                f"metadata must have {n} rows (one per observation), got {_len}"
-            )
-        if "id" in metadata.columns:
-            meta_ids = list(metadata["id"].astype(str))
-            if meta_ids != ids:
-                raise ValueError("IDs in metadata do not match fdata identifiers")
+        return None
+    if not _HAS_PANDAS:
+        raise ImportError(
+            "pandas is required for metadata support. "
+            "Install it with: pip install pandas"
+        )
+    if isinstance(metadata, pd.DataFrame):
+        df = metadata.reset_index(drop=True)
     elif isinstance(metadata, dict):
-        # dict of lists — validate that all value lists have length n
-        for key, vals in metadata.items():
-            if len(vals) != n:
-                raise ValueError(
-                    f"metadata['{key}'] must have length {n}, got {len(vals)}"
-                )
+        df = pd.DataFrame(metadata)
     else:
-        raise TypeError("metadata must be a pandas DataFrame or dict of lists")
+        raise TypeError("metadata must be a pandas DataFrame or dict")
+    if len(df) != n:
+        raise ValueError(
+            f"metadata must have {n} rows (one per observation), got {len(df)}"
+        )
+    if "id" in df.columns:
+        meta_ids = list(df["id"].astype(str))
+        if meta_ids != ids:
+            raise ValueError("IDs in metadata do not match fdata identifiers")
+    return df
 
 
 # ---------------------------------------------------------------------------
@@ -76,6 +82,7 @@ class Fdata:
         Observation identifiers.  Defaults to ``["obs_1", "obs_2", …]``.
     metadata : pandas.DataFrame or dict, optional
         Per-observation covariates.  Must have one row per observation.
+        Dicts are automatically converted to ``pandas.DataFrame``.
 
     Examples
     --------
@@ -179,7 +186,7 @@ class Fdata:
                 raise ValueError(f"id must have length {n}, got {len(id)}")
 
         # ---- metadata -------------------------------------------------------
-        _validate_metadata(metadata, n, id)
+        metadata = _to_dataframe(metadata, n, id)
 
         # ---- store ----------------------------------------------------------
         self.data: np.ndarray = data
@@ -189,7 +196,7 @@ class Fdata:
         self.fdata2d: bool = is_2d
         self.dims: Optional[Tuple[int, int]] = dims
         self.id: List[str] = list(id)
-        self.metadata = metadata
+        self.metadata: Optional["pd.DataFrame"] = metadata
 
     # ---- properties ---------------------------------------------------------
 
@@ -223,10 +230,7 @@ class Fdata:
             rng = f"range [{self.rangeval[0]}, {self.rangeval[1]}]"
         meta = ""
         if self.metadata is not None:
-            if hasattr(self.metadata, "columns"):
-                cols = ", ".join(self.metadata.columns)
-            else:
-                cols = ", ".join(str(k) for k in self.metadata)
+            cols = ", ".join(self.metadata.columns)
             meta = f"  –  metadata: {cols}"
         return f"Fdata ({kind})  –  {self.n_obs} obs × {grid}  –  {rng}{meta}"
 
@@ -251,16 +255,13 @@ class Fdata:
 
         if self.metadata is not None:
             print(f"\nMetadata:")
-            if hasattr(self.metadata, "columns"):
-                for col in self.metadata.columns:
-                    vals = self.metadata[col]
-                    if np.issubdtype(vals.dtype, np.number):
-                        print(f"  {col}: numeric, range [{vals.min()}, {vals.max()}]")
-                    else:
-                        nuniq = vals.nunique()
-                        print(f"  {col}: {vals.dtype}, {nuniq} unique values")
-            else:
-                print(f"  Keys: {', '.join(str(k) for k in self.metadata)}")
+            for col in self.metadata.columns:
+                vals = self.metadata[col]
+                if np.issubdtype(vals.dtype, np.number):
+                    print(f"  {col}: numeric, range [{vals.min()}, {vals.max()}]")
+                else:
+                    nuniq = vals.nunique()
+                    print(f"  {col}: {vals.dtype}, {nuniq} unique values")
 
     # ---- indexing / subsetting ----------------------------------------------
 
@@ -306,13 +307,7 @@ class Fdata:
         new_id = [self.id[k] for k in (range(*i.indices(self.n_obs)) if isinstance(i, slice) else i)]
         new_meta = None
         if self.metadata is not None:
-            if hasattr(self.metadata, "iloc"):
-                new_meta = self.metadata.iloc[i].reset_index(drop=True)
-            elif isinstance(self.metadata, dict):
-                new_meta = {
-                    k: [v[idx] for idx in (range(*i.indices(self.n_obs)) if isinstance(i, slice) else i)]
-                    for k, v in self.metadata.items()
-                }
+            new_meta = self.metadata.iloc[i].reset_index(drop=True)
 
         return Fdata(
             data=new_data,
@@ -548,12 +543,7 @@ class Fdata:
 
     def copy(self) -> "Fdata":
         """Return a deep copy."""
-        meta = None
-        if self.metadata is not None:
-            if hasattr(self.metadata, "copy"):
-                meta = self.metadata.copy()
-            else:
-                meta = {k: list(v) for k, v in self.metadata.items()}
+        meta = self.metadata.copy() if self.metadata is not None else None
         av = (self.argvals[0].copy(), self.argvals[1].copy()) if self.fdata2d else self.argvals.copy()
         return Fdata(
             data=self.data.copy(),

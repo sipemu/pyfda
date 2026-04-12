@@ -1,6 +1,7 @@
 """Tests for the Fdata class."""
 
 import numpy as np
+import pandas as pd
 import pytest
 
 
@@ -83,30 +84,37 @@ class TestFdataConstruction:
 
 
 class TestFdataMetadata:
-    def test_dict_metadata(self):
+    def test_dict_metadata_converted_to_dataframe(self):
         from pyfda import Fdata
 
         meta = {"group": ["A", "B", "A"], "value": [1.0, 2.0, 3.0]}
         fd = Fdata(np.random.randn(3, 10), metadata=meta)
-        assert fd.metadata is not None
+        assert isinstance(fd.metadata, pd.DataFrame)
+        assert list(fd.metadata.columns) == ["group", "value"]
+        assert len(fd.metadata) == 3
 
     def test_dataframe_metadata(self):
-        pytest.importorskip("pandas")
-        import pandas as pd
         from pyfda import Fdata
 
         meta = pd.DataFrame({"group": ["A", "B", "C"], "value": [1, 2, 3]})
         fd = Fdata(np.random.randn(3, 10), metadata=meta)
+        assert isinstance(fd.metadata, pd.DataFrame)
         assert list(fd.metadata.columns) == ["group", "value"]
 
     def test_metadata_row_mismatch(self):
-        pytest.importorskip("pandas")
-        import pandas as pd
         from pyfda import Fdata
 
         meta = pd.DataFrame({"x": [1, 2]})
         with pytest.raises(ValueError, match="must have 3 rows"):
             Fdata(np.random.randn(3, 10), metadata=meta)
+
+    def test_metadata_column_access(self):
+        from pyfda import Fdata
+
+        meta = pd.DataFrame({"group": ["A", "B"], "score": [1.5, 2.5]})
+        fd = Fdata(np.random.randn(2, 10), metadata=meta)
+        assert fd.metadata["score"].sum() == 4.0
+        assert list(fd.metadata["group"]) == ["A", "B"]
 
 
 class TestFdataRepr:
@@ -131,10 +139,11 @@ class TestFdataRepr:
     def test_repr_with_metadata(self):
         from pyfda import Fdata
 
-        meta = {"group": ["A", "B"], "score": [1.0, 2.0]}
+        meta = pd.DataFrame({"group": ["A", "B"], "score": [1.0, 2.0]})
         fd = Fdata(np.random.randn(2, 10), metadata=meta)
         r = repr(fd)
         assert "metadata" in r
+        assert "group" in r
 
 
 class TestFdataSubsetting:
@@ -143,23 +152,29 @@ class TestFdataSubsetting:
 
         np.random.seed(42)
         self.t = np.linspace(0, 1, 50)
+        meta = pd.DataFrame({
+            "group": list("AABBBCCCDD"),
+            "val": list(range(10)),
+        })
         self.fd = Fdata(
             np.random.randn(10, 50),
             argvals=self.t,
             id=[f"p_{i}" for i in range(10)],
-            metadata={"group": list("AABBBCCCDD"), "val": list(range(10))},
+            metadata=meta,
         )
 
     def test_slice(self):
         sub = self.fd[0:3]
         assert sub.n_obs == 3
         assert sub.id == ["p_0", "p_1", "p_2"]
-        assert sub.metadata["group"] == ["A", "A", "B"]
+        assert isinstance(sub.metadata, pd.DataFrame)
+        assert list(sub.metadata["group"]) == ["A", "A", "B"]
 
     def test_list_index(self):
         sub = self.fd[[0, 5, 9]]
         assert sub.n_obs == 3
         assert sub.id == ["p_0", "p_5", "p_9"]
+        assert isinstance(sub.metadata, pd.DataFrame)
 
     def test_column_subset(self):
         sub = self.fd[0:3, 10:20]
@@ -169,6 +184,10 @@ class TestFdataSubsetting:
 
     def test_len(self):
         assert len(self.fd) == 10
+
+    def test_subset_metadata_reset_index(self):
+        sub = self.fd[5:8]
+        assert list(sub.metadata.index) == [0, 1, 2]
 
 
 class TestFdataArithmetic:
@@ -262,26 +281,26 @@ class TestFdataMetadataPreserved:
     def test_center_preserves_metadata(self):
         from pyfda import Fdata
 
-        meta = {"group": ["A", "B", "C"]}
+        meta = pd.DataFrame({"group": ["A", "B", "C"]})
         fd = Fdata(np.random.randn(3, 10), metadata=meta)
         centered = fd.center()
-        assert centered.metadata is not None
+        assert isinstance(centered.metadata, pd.DataFrame)
         assert centered.id == fd.id
 
     def test_normalize_preserves_metadata(self):
         from pyfda import Fdata
 
-        meta = {"group": ["A", "B", "C"]}
+        meta = pd.DataFrame({"group": ["A", "B", "C"]})
         fd = Fdata(np.random.randn(3, 10), metadata=meta)
         normed = fd.normalize("autoscale")
-        assert normed.metadata is not None
+        assert isinstance(normed.metadata, pd.DataFrame)
 
-    def test_subset_preserves_metadata_dataframe(self):
-        pytest.importorskip("pandas")
-        import pandas as pd
+    def test_subset_preserves_metadata(self):
         from pyfda import Fdata
 
         meta = pd.DataFrame({"group": ["A", "B", "C"], "val": [1, 2, 3]})
         fd = Fdata(np.random.randn(3, 10), metadata=meta)
         sub = fd[0:2]
+        assert isinstance(sub.metadata, pd.DataFrame)
         assert list(sub.metadata["group"]) == ["A", "B"]
+        assert list(sub.metadata["val"]) == [1, 2]

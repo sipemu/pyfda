@@ -14,6 +14,7 @@ observation data, evaluation grid, identifiers, and metadata into a single objec
 
 ```python
 import numpy as np
+import pandas as pd
 from pyfda import Fdata
 
 # Create functional data: 30 sine curves on [0, 1]
@@ -21,22 +22,16 @@ t = np.linspace(0, 1, 100)
 X = np.array([np.sin(2 * np.pi * t + p) + np.random.normal(0, 0.1, 100)
               for p in np.random.uniform(0, np.pi, 30)])
 
-fd = Fdata(X, argvals=t, id=[f"curve_{i}" for i in range(30)])
+# Attach metadata as a pandas DataFrame
+meta = pd.DataFrame({"group": ["A"] * 15 + ["B"] * 15,
+                      "score": np.random.randn(30)})
+fd = Fdata(X, argvals=t, metadata=meta)
 fd
-# Fdata (1D)  –  30 obs × 100 points  –  range [0.0, 1.0]
+# Fdata (1D)  –  30 obs × 100 points  –  range [0.0, 1.0]  –  metadata: group, score
 
-# Attach metadata (pandas DataFrame or dict of lists)
-fd = Fdata(X, argvals=t,
-           metadata={"group": ["A"] * 15 + ["B"] * 15,
-                     "score": np.random.randn(30).tolist()})
-
-# Subset — metadata and IDs are preserved
+# Subset — metadata DataFrame and IDs are preserved
 fd_sub = fd[0:10]
-fd_sub = fd[[0, 5, 15]]
-
-# Arithmetic
-fd_centered = fd - fd.mean()
-fd_scaled = fd * 2.0
+fd_sub.metadata  # DataFrame with 10 rows
 
 # Methods delegate to the Rust backend
 mu = fd.mean()                    # pointwise mean

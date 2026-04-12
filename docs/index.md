@@ -32,18 +32,21 @@ metadata into a single object (mirroring the R package's `fdata` class).
 
 ```python
 import numpy as np
+import pandas as pd
 from pyfda import Fdata
 
 # Create functional data from a (n_obs, n_points) array + grid
 t = np.linspace(0, 1, 100)
 X = np.random.randn(30, 100)
-fd = Fdata(X, argvals=t, id=[f"curve_{i}" for i in range(30)])
-fd
-# Fdata (1D)  –  30 obs × 100 points  –  range [0.0, 1.0]
 
-# Attach metadata (pandas DataFrame or dict of lists)
-fd = Fdata(X, argvals=t,
-           metadata={"group": ["A"] * 15 + ["B"] * 15})
+# Attach metadata as a pandas DataFrame
+meta = pd.DataFrame({
+    "group": ["control"] * 15 + ["treatment"] * 15,
+    "age": np.random.randint(20, 60, 30),
+})
+fd = Fdata(X, argvals=t, metadata=meta)
+fd
+# Fdata (1D)  –  30 obs × 100 points  –  range [0.0, 1.0]  –  metadata: group, age
 
 # Methods delegate to the Rust backend
 mu = fd.mean()                     # pointwise mean
@@ -53,11 +56,9 @@ norms = fd.norm(p=2.0)             # L2 norms per curve
 depths = fd.depth("fraiman_muniz") # depth values
 D = fd.distance(method="lp")       # self-distance matrix
 
-# Subset -- metadata and IDs are preserved
+# Subset -- metadata DataFrame and IDs are preserved
 fd_sub = fd[0:10]
-
-# Arithmetic
-fd_scaled = fd * 2.0
+fd_sub.metadata  # DataFrame with 10 rows
 ```
 
 See the [Fdata reference](reference/fdata.md) and
@@ -69,7 +70,7 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="pyfda-section-heading pyfda-learn">Learn</div>
 <p class="pyfda-section-desc">Tutorials and guides to get started with functional data analysis in Python.</p>
 
-<div class="pyfda-gallery" markdown>
+<div class="pyfda-gallery">
 <a class="pyfda-gallery-item" href="learn/introduction/">
 <div class="pyfda-gallery-title">Introduction to pyfda</div>
 <div class="pyfda-gallery-desc">What is FDA? Core concepts, data layout, and your first analysis with pyfda.</div>
@@ -92,7 +93,7 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="pyfda-section-heading pyfda-represent">Represent</div>
 <p class="pyfda-section-desc">Basis expansions, dimensionality reduction, depth, and distances for functional data.</p>
 
-<div class="pyfda-gallery" markdown>
+<div class="pyfda-gallery">
 <a class="pyfda-gallery-item" href="represent/fpca/">
 <div class="pyfda-gallery-title">Functional PCA</div>
 <div class="pyfda-gallery-desc">Extract dominant modes of variation with weighted FPCA.</div>
@@ -115,7 +116,7 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="pyfda-section-heading pyfda-align">Align</div>
 <p class="pyfda-section-desc">Curve registration and elastic alignment methods.</p>
 
-<div class="pyfda-gallery" markdown>
+<div class="pyfda-gallery">
 <a class="pyfda-gallery-item" href="align/elastic-alignment/">
 <div class="pyfda-gallery-title">Elastic Alignment</div>
 <div class="pyfda-gallery-desc">SRSF-based alignment, Karcher mean, and elastic FPCA.</div>
@@ -130,7 +131,7 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="pyfda-section-heading pyfda-regression">Regression</div>
 <p class="pyfda-section-desc">Functional regression, classification, and prediction.</p>
 
-<div class="pyfda-gallery" markdown>
+<div class="pyfda-gallery">
 <a class="pyfda-gallery-item" href="regression/scalar-on-function/">
 <div class="pyfda-gallery-title">Scalar-on-Function</div>
 <div class="pyfda-gallery-desc">FPC linear, PLS, and nonparametric regression with a scalar response.</div>
@@ -165,7 +166,7 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="pyfda-section-heading pyfda-monitoring">Monitoring</div>
 <p class="pyfda-section-desc">Statistical process monitoring for functional profiles.</p>
 
-<div class="pyfda-gallery" markdown>
+<div class="pyfda-gallery">
 <a class="pyfda-gallery-item" href="monitoring/spm/">
 <div class="pyfda-gallery-title">Process Monitoring</div>
 <div class="pyfda-gallery-desc">Phase I/II control charts, EWMA, CUSUM for functional quality profiles.</div>
@@ -176,7 +177,7 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="pyfda-section-heading pyfda-analyze">Analyze</div>
 <p class="pyfda-section-desc">Clustering, outlier detection, tolerance bands, and seasonal decomposition.</p>
 
-<div class="pyfda-gallery" markdown>
+<div class="pyfda-gallery">
 <a class="pyfda-gallery-item" href="analyze/clustering/">
 <div class="pyfda-gallery-title">Clustering</div>
 <div class="pyfda-gallery-desc">K-means, fuzzy c-means, and GMM clustering for functional data.</div>
@@ -232,6 +233,7 @@ rankings, and cluster.
 
 ```python
 import numpy as np
+import pandas as pd
 from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.clustering import kmeans_fd
@@ -240,16 +242,21 @@ from pyfda.clustering import kmeans_fd
 argvals = np.linspace(0, 1, 100)
 data = simulate(n=60, argvals=argvals, n_basis=7, seed=42)
 
-# 2. Wrap in an Fdata object
-fd = Fdata(data, argvals=argvals)
-print(fd)  # Fdata (1D)  –  60 obs × 100 points  –  range [0.0, 1.0]
+# 2. Wrap in an Fdata object with metadata
+meta = pd.DataFrame({"batch": np.repeat(["A", "B", "C"], 20)})
+fd = Fdata(data, argvals=argvals, metadata=meta)
+print(fd)
+# Fdata (1D)  –  60 obs × 100 points  –  range [0.0, 1.0]  –  metadata: batch
 
 # 3. Rank curves by Fraiman-Muniz depth
 depths = fd.depth("fraiman_muniz")
 deepest = np.argmax(depths)
 print(f"Most central curve: {deepest}, depth = {depths[deepest]:.4f}")
 
-# 4. Cluster into 3 groups
+# 4. Center the data
+fd_c = fd.center()     # returns Fdata with metadata preserved
+
+# 5. Cluster into 3 groups
 result = kmeans_fd(fd.data, fd.argvals, k=3, seed=0)
 print(f"Cluster sizes: {np.bincount(result['cluster'])}")
 ```
