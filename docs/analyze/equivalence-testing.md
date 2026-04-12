@@ -28,18 +28,19 @@ Equivalence is concluded when $T < \delta - c_\alpha$, where $c_\alpha$ is the $
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.tolerance import equivalence_test
 
 argvals = np.linspace(0, 1, 100)
 
 # Two groups with very similar means
-group_a = simulate(50, argvals, n_basis=5, seed=1)
-group_b = simulate(50, argvals, n_basis=5, seed=2) + 0.2  # small offset
+fd_a = Fdata(simulate(50, argvals, n_basis=5, seed=1), argvals=argvals)
+fd_b = Fdata(simulate(50, argvals, n_basis=5, seed=2) + 0.2, argvals=argvals)  # small offset
 
 result = equivalence_test(
-    data1=group_a,
-    data2=group_b,
+    data1=fd_a.data,
+    data2=fd_b.data,
     delta=1.0,       # equivalence margin
     alpha=0.05,      # significance level
     nb=1000,         # bootstrap replicates
@@ -93,6 +94,7 @@ The margin $\delta$ is the maximum allowable pointwise difference between the tw
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.tolerance import equivalence_test
 
@@ -100,17 +102,17 @@ argvals = np.linspace(0, 1, 100)
 delta = 1.0
 
 # ── Case 1: Similar groups (should be equivalent) ────────────
-a = simulate(40, argvals, n_basis=5, seed=10)
-b = simulate(40, argvals, n_basis=5, seed=20) + 0.1
+fd_a = Fdata(simulate(40, argvals, n_basis=5, seed=10), argvals=argvals)
+fd_b = Fdata(simulate(40, argvals, n_basis=5, seed=20) + 0.1, argvals=argvals)
 
-r1 = equivalence_test(a, b, delta=delta, alpha=0.05, nb=2000, seed=42)
+r1 = equivalence_test(fd_a.data, fd_b.data, delta=delta, alpha=0.05, nb=2000, seed=42)
 print(f"Case 1 — Equivalent: {r1['equivalent']}  p={r1['p_value']:.4f}")
 
 # ── Case 2: Different groups (should NOT be equivalent) ──────
-c = simulate(40, argvals, n_basis=5, seed=10)
-d = simulate(40, argvals, n_basis=5, seed=20) + 5.0  # large shift
+fd_c = Fdata(simulate(40, argvals, n_basis=5, seed=10), argvals=argvals)
+fd_d = Fdata(simulate(40, argvals, n_basis=5, seed=20) + 5.0, argvals=argvals)  # large shift
 
-r2 = equivalence_test(c, d, delta=delta, alpha=0.05, nb=2000, seed=42)
+r2 = equivalence_test(fd_c.data, fd_d.data, delta=delta, alpha=0.05, nb=2000, seed=42)
 print(f"Case 2 — Equivalent: {r2['equivalent']}  p={r2['p_value']:.4f}")
 ```
 
@@ -129,15 +131,16 @@ You can sweep over a range of margins to understand how sensitive the conclusion
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.tolerance import equivalence_test
 
 argvals = np.linspace(0, 1, 100)
-a = simulate(50, argvals, n_basis=5, seed=1)
-b = simulate(50, argvals, n_basis=5, seed=2) + 0.3
+fd_a = Fdata(simulate(50, argvals, n_basis=5, seed=1), argvals=argvals)
+fd_b = Fdata(simulate(50, argvals, n_basis=5, seed=2) + 0.3, argvals=argvals)
 
 for delta in [0.2, 0.5, 1.0, 2.0, 5.0]:
-    r = equivalence_test(a, b, delta=delta, nb=1000, seed=42)
+    r = equivalence_test(fd_a.data, fd_b.data, delta=delta, nb=1000, seed=42)
     status = "equivalent" if r["equivalent"] else "not equivalent"
     print(f"delta={delta:.1f}  T={r['test_statistic']:.3f}  p={r['p_value']:.3f}  -> {status}")
 ```

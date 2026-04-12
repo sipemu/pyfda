@@ -89,6 +89,7 @@ The **Karcher mean** (Frechet mean under the elastic metric) simultaneously alig
 2. Recomputing the mean from the aligned curves.
 
 ```python
+from pyfda import Fdata
 from pyfda.alignment import karcher_mean
 
 # Simulate 30 curves with random phase shifts
@@ -96,9 +97,9 @@ np.random.seed(0)
 n, m = 30, 101
 t = np.linspace(0, 1, m)
 shifts = np.random.uniform(-0.15, 0.15, n)
-data = np.array([np.sin(2 * np.pi * (t - s)) for s in shifts])
+fd = Fdata(np.array([np.sin(2 * np.pi * (t - s)) for s in shifts]), argvals=t)
 
-result = karcher_mean(data, t, lambda_=0.0, max_iter=20, tol=1e-4)
+result = karcher_mean(fd.data, t, lambda_=0.0, max_iter=20, tol=1e-4)
 
 mu          = result["mean"]          # Karcher mean, shape (m,)
 mu_srsf     = result["mean_srsf"]     # mean in SRSF space, shape (m,)
@@ -128,7 +129,7 @@ The Karcher **median** replaces the squared elastic distance with the unsquared 
 ```python
 from pyfda.alignment import karcher_median
 
-result = karcher_median(data, t, lambda_=0.0, max_iter=20, tol=1e-3)
+result = karcher_median(fd.data, t, lambda_=0.0, max_iter=20, tol=1e-3)
 
 mu_median = result["mean"]       # elastic median
 weights   = result["weights"]    # observation weights, shape (n,)
@@ -146,7 +147,7 @@ When the dataset contains outliers, the **robust (trimmed) Karcher mean** down-w
 from pyfda.alignment import robust_karcher_mean
 
 result = robust_karcher_mean(
-    data, t,
+    fd.data, t,
     lambda_=0.0,
     max_iter=20,
     tol=1e-3,
@@ -204,13 +205,13 @@ Compute pairwise elastic distances for an entire dataset. These matrices can be 
 from pyfda.alignment import elastic_self_distance_matrix, elastic_cross_distance_matrix
 
 # Self-distance matrix (symmetric, zero diagonal)
-D = elastic_self_distance_matrix(data, t, lambda_=0.0)
+D = elastic_self_distance_matrix(fd.data, fd.argvals, lambda_=0.0)
 print("Distance matrix shape:", D.shape)  # (30, 30)
 
 # Cross-distance matrix between two datasets
-data_train = data[:20]
-data_test  = data[20:]
-D_cross = elastic_cross_distance_matrix(data_train, data_test, t, lambda_=0.0)
+fd_train = fd[:20]
+fd_test  = fd[20:]
+D_cross = elastic_cross_distance_matrix(fd_train.data, fd_test.data, fd.argvals, lambda_=0.0)
 print("Cross-distance shape:", D_cross.shape)  # (20, 10)
 ```
 
@@ -291,6 +292,7 @@ print(f"Check: {d_amp**2 + d_phase**2:.4f} ~ {d_total**2:.4f}")
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.alignment import (
     karcher_mean,
     elastic_distance,
@@ -316,28 +318,30 @@ for i in range(n):
     t_warped = np.clip(t + shift * np.sin(2 * np.pi * t), 0, 1)
     data[i] = amp * np.interp(t, t_warped, base) + 0.1 * np.random.randn(m)
 
+fd = Fdata(data, argvals=t)
+
 # --- Align ---
-result = karcher_mean(data, t, lambda_=0.1, max_iter=30, tol=1e-5)
+result = karcher_mean(fd.data, fd.argvals, lambda_=0.1, max_iter=30, tol=1e-5)
 print(f"Karcher mean converged: {result['converged']} ({result['n_iter']} iters)")
 
 aligned = result["aligned_data"]
 gammas  = result["gammas"]
 
 # --- Analyze warps ---
-complexities = np.array([warp_complexity(gammas[i], t) for i in range(n)])
+complexities = np.array([warp_complexity(gammas[i], fd.argvals) for i in range(n)])
 print(f"Mean warp complexity: {complexities.mean():.4f}")
 print(f"Max  warp complexity: {complexities.max():.4f}")
 
 # --- Variance reduction ---
-var_before = np.mean(np.var(data, axis=0))
+var_before = np.mean(np.var(fd.data, axis=0))
 var_after  = np.mean(np.var(aligned, axis=0))
 print(f"Cross-sectional variance: {var_before:.4f} -> {var_after:.4f}")
 print(f"Variance reduction: {100 * (1 - var_after / var_before):.1f}%")
 
 # --- Distance decomposition ---
-D = elastic_self_distance_matrix(data, t)
-d_a = amplitude_distance(data[0], data[1], t)
-d_p = phase_distance(data[0], data[1], t)
+D = elastic_self_distance_matrix(fd.data, fd.argvals)
+d_a = amplitude_distance(fd.data[0], fd.data[1], fd.argvals)
+d_p = phase_distance(fd.data[0], fd.data[1], fd.argvals)
 print(f"\nCurves 0 vs 1:")
 print(f"  Amplitude distance: {d_a:.4f}")
 print(f"  Phase distance:     {d_p:.4f}")

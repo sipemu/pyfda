@@ -16,6 +16,7 @@ where $q_i$ is the SRSF of the $i$-th predictor. This is phase-invariant: the pr
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.alignment import elastic_regression
 
 # --- Simulate data with phase variability ---
@@ -24,18 +25,19 @@ n, m = 80, 101
 t = np.linspace(0, 1, m)
 
 beta_true = np.sin(4 * np.pi * t)
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 for i in range(n):
     shift = 0.08 * np.random.randn()
     t_warped = np.clip(t + shift * np.sin(np.pi * t), 0, 1)
     c = np.random.randn() * np.sin(2 * np.pi * t) + np.random.randn() * t
-    data[i] = np.interp(t_warped, t, c)
+    raw[i] = np.interp(t_warped, t, c)
+fd = Fdata(raw, argvals=t)
 
-response = np.trapz(data * beta_true, t, axis=1) + 0.5 * np.random.randn(n)
+response = np.trapz(fd.data * beta_true, fd.argvals, axis=1) + 0.5 * np.random.randn(n)
 
 # --- Fit elastic regression ---
 result = elastic_regression(
-    data, t, response,
+    fd.data, fd.argvals, response,
     ncomp_beta=10,  # basis dimension for beta
     lambda_=0.1,    # regularization on warping
     max_iter=20,
@@ -81,6 +83,7 @@ $$
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.alignment import elastic_logistic
 
 # --- Simulate two classes with phase variability ---
@@ -88,7 +91,7 @@ np.random.seed(7)
 n, m = 100, 101
 t = np.linspace(0, 1, m)
 
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 labels = np.zeros(n, dtype=np.int64)
 
 for i in range(n):
@@ -100,11 +103,12 @@ for i in range(n):
     else:
         base = np.cos(2 * np.pi * t)
         labels[i] = 1
-    data[i] = np.interp(t_warped, t, base) + 0.2 * np.random.randn(m)
+    raw[i] = np.interp(t_warped, t, base) + 0.2 * np.random.randn(m)
+fd = Fdata(raw, argvals=t)
 
 # --- Fit elastic logistic regression ---
 result = elastic_logistic(
-    data, t, labels,
+    fd.data, fd.argvals, labels,
     ncomp_beta=10,
     lambda_=0.1,
     max_iter=20,
@@ -154,6 +158,7 @@ print(f"Final loss: {loss:.4f}")
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.regression import fregre_lm
 from pyfda.alignment import elastic_regression, karcher_mean
 
@@ -163,25 +168,26 @@ t = np.linspace(0, 1, m)
 
 # Generate curves with increasing phase variability
 beta_true = np.exp(-((t - 0.5)**2) / 0.02)
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 for i in range(n):
     shift = 0.12 * np.random.randn()  # substantial phase noise
     t_warped = np.clip(t + shift * np.sin(np.pi * t), 0, 1)
     c = np.random.randn() * np.sin(2 * np.pi * t) + np.random.randn() * t**2
-    data[i] = np.interp(t_warped, t, c)
+    raw[i] = np.interp(t_warped, t, c)
+fd = Fdata(raw, argvals=t)
 
-response = np.trapz(data * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
+response = np.trapz(fd.data * beta_true, fd.argvals, axis=1) + 0.3 * np.random.randn(n)
 
 # --- Standard FPC regression (no alignment) ---
-lm_result = fregre_lm(data, response, n_comp=5)
+lm_result = fregre_lm(fd.data, response, n_comp=5)
 print(f"Standard FPC R-squared: {lm_result['r_squared']:.4f}")
 
 # --- Pre-align then regress ---
-km = karcher_mean(data, t, lambda_=0.1)
+km = karcher_mean(fd.data, fd.argvals, lambda_=0.1)
 lm_aligned = fregre_lm(km["aligned_data"], response, n_comp=5)
 print(f"Align-then-regress R-squared: {lm_aligned['r_squared']:.4f}")
 
 # --- Elastic regression (joint alignment + regression) ---
-elastic = elastic_regression(data, t, response, ncomp_beta=10, lambda_=0.1)
+elastic = elastic_regression(fd.data, fd.argvals, response, ncomp_beta=10, lambda_=0.1)
 print(f"Elastic regression R-squared: {elastic['r_squared']:.4f}")
 ```

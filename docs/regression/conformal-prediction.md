@@ -34,6 +34,7 @@ Wraps `fregre_lm` with split conformal calibration to produce prediction interva
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.conformal import conformal_fregre_lm
 
 # --- Simulate data ---
@@ -43,22 +44,23 @@ t = np.linspace(0, 1, m)
 beta_true = np.sin(4 * np.pi * t)
 
 def make_data(n):
-    data = np.zeros((n, m))
+    raw = np.zeros((n, m))
     for i in range(n):
-        data[i] = (
+        raw[i] = (
             np.random.randn() * np.sin(2 * np.pi * t)
             + np.random.randn() * np.cos(2 * np.pi * t)
             + 0.3 * np.random.randn(m)
         )
-    response = np.trapz(data * beta_true, t, axis=1) + 0.5 * np.random.randn(n)
-    return data, response
+    fd = Fdata(raw, argvals=t)
+    response = np.trapz(fd.data * beta_true, fd.argvals, axis=1) + 0.5 * np.random.randn(n)
+    return fd, response
 
-train_data, train_response = make_data(n_train)
-test_data, test_response = make_data(n_test)
+fd_train, train_response = make_data(n_train)
+fd_test, test_response = make_data(n_test)
 
 # --- Conformal prediction ---
 result = conformal_fregre_lm(
-    train_data, train_response, test_data,
+    fd_train.data, train_response, fd_test.data,
     ncomp=3,
     cal_fraction=0.25,   # 25% of training data for calibration
     alpha=0.1,           # 90% prediction intervals
@@ -101,7 +103,7 @@ Uses kernel regression (`fregre_np`) as the base model, with conformal calibrati
 from pyfda.conformal import conformal_fregre_np
 
 result = conformal_fregre_np(
-    train_data, train_response, test_data, t,
+    fd_train.data, train_response, fd_test.data, fd_train.argvals,
     cal_fraction=0.25,
     alpha=0.1,
     h_func=1.0,
@@ -130,6 +132,7 @@ Produces **prediction sets** for classification: a set of possible labels for ea
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.conformal import conformal_classif
 
 # --- Simulate three-class data ---
@@ -145,19 +148,20 @@ templates = [
 ]
 
 def make_classif_data(n):
-    data = np.zeros((n, m))
+    raw = np.zeros((n, m))
     labels = np.zeros(n, dtype=np.int64)
     for i in range(n):
         k = i % 3
-        data[i] = templates[k] + 0.4 * np.random.randn(m)
+        raw[i] = templates[k] + 0.4 * np.random.randn(m)
         labels[i] = k
-    return data, labels
+    fd = Fdata(raw, argvals=t)
+    return fd, labels
 
-train_data, train_labels = make_classif_data(n_train)
-test_data, test_labels = make_classif_data(n_test)
+fd_train, train_labels = make_classif_data(n_train)
+fd_test, test_labels = make_classif_data(n_test)
 
 result = conformal_classif(
-    train_data, train_labels, test_data,
+    fd_train.data, train_labels, fd_test.data,
     ncomp=3,
     classifier="lda",
     cal_fraction=0.25,
@@ -225,6 +229,7 @@ A common choice is `cal_fraction=0.25`.
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.conformal import conformal_fregre_lm, conformal_fregre_np
 
 np.random.seed(123)
@@ -233,22 +238,23 @@ t = np.linspace(0, 1, m)
 beta_true = np.exp(-((t - 0.5)**2) / 0.02)
 
 def make_data(n):
-    data = np.zeros((n, m))
+    raw = np.zeros((n, m))
     for i in range(n):
-        data[i] = sum(
+        raw[i] = sum(
             np.random.randn() * np.sin((2*k+1) * np.pi * t)
             for k in range(4)
         ) + 0.2 * np.random.randn(m)
-    resp = np.trapz(data * beta_true, t, axis=1) + 0.4 * np.random.randn(n)
-    return data, resp
+    fd = Fdata(raw, argvals=t)
+    resp = np.trapz(fd.data * beta_true, fd.argvals, axis=1) + 0.4 * np.random.randn(n)
+    return fd, resp
 
-train_data, train_resp = make_data(n_train)
-test_data, test_resp = make_data(n_test)
+fd_train, train_resp = make_data(n_train)
+fd_test, test_resp = make_data(n_test)
 
 for alpha in [0.05, 0.10, 0.20]:
     # Linear conformal
     lm = conformal_fregre_lm(
-        train_data, train_resp, test_data,
+        fd_train.data, train_resp, fd_test.data,
         ncomp=4, cal_fraction=0.25, alpha=alpha,
     )
     cov_lm = np.mean((test_resp >= lm["lower"]) & (test_resp <= lm["upper"]))
@@ -256,7 +262,7 @@ for alpha in [0.05, 0.10, 0.20]:
 
     # Nonparametric conformal
     np_r = conformal_fregre_np(
-        train_data, train_resp, test_data, t,
+        fd_train.data, train_resp, fd_test.data, fd_train.argvals,
         cal_fraction=0.25, alpha=alpha,
     )
     cov_np = np.mean((test_resp >= np_r["lower"]) & (test_resp <= np_r["upper"]))

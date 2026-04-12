@@ -23,21 +23,23 @@ We start by simulating a clean signal and adding Gaussian noise:
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 
 # Clean signal
 argvals = np.linspace(0, 1, 200)
 clean = simulate(n=1, argvals=argvals, n_basis=5, seed=42)
+fd_clean = Fdata(clean, argvals=argvals)
 
 # Add noise
 rng = np.random.default_rng(0)
 noise = rng.normal(0, 0.3, size=clean.shape)
-noisy = clean + noise
+fd_noisy = fd_clean + noise
 
 # Extract single curve for 1D smoothing
-x = argvals
-y = noisy[0]
-y_true = clean[0]
+x = fd_noisy.argvals
+y = fd_noisy.data[0]
+y_true = fd_clean.data[0]
 ```
 
 ---
@@ -208,8 +210,8 @@ from pyfda.basis import smooth_basis_gcv
 
 # Smooth all curves in a dataset at once
 result = smooth_basis_gcv(
-    noisy,               # (n_obs, n_points) array
-    argvals,
+    fd_noisy.data,       # (n_obs, n_points) array
+    fd_noisy.argvals,
     n_basis=20,          # number of B-spline basis functions
     basis_type="bspline",
     lfd_order=2,         # penalize second derivative (curvature)
@@ -217,6 +219,7 @@ result = smooth_basis_gcv(
 
 fitted = result["fitted"]        # (n_obs, n_points) smoothed curves
 coeffs = result["coefficients"]  # (n_obs, n_basis) basis coefficients
+fd_fitted = Fdata(fitted, argvals=fd_noisy.argvals)
 print(f"Effective df: {result['edf']:.2f}")
 print(f"GCV score:    {result['gcv']:.6f}")
 ```
@@ -231,11 +234,12 @@ For periodic data, use a Fourier basis:
 
 ```python
 result_fourier = smooth_basis_gcv(
-    noisy, argvals,
+    fd_noisy.data, fd_noisy.argvals,
     n_basis=15,
     basis_type="fourier",
     lfd_order=2,
 )
+fd_fourier = Fdata(result_fourier["fitted"], argvals=fd_noisy.argvals)
 ```
 
 ### P-Spline Fit with Known Penalty
@@ -246,7 +250,7 @@ If you already know a good $\lambda$, skip the GCV search:
 from pyfda.basis import pspline_fit_1d
 
 result_ps = pspline_fit_1d(
-    noisy, argvals,
+    fd_noisy.data, fd_noisy.argvals,
     n_basis=20,
     lambda_=0.01,       # fixed smoothing parameter
     order=2,            # second-order difference penalty
@@ -262,7 +266,7 @@ print(f"BIC: {result_ps['bic']:.2f}")
 ```python
 from pyfda.basis import pspline_fit_gcv
 
-result_auto = pspline_fit_gcv(noisy, argvals, n_basis=20, order=2)
+result_auto = pspline_fit_gcv(fd_noisy.data, fd_noisy.argvals, n_basis=20, order=2)
 print(f"Selected lambda -> GCV = {result_auto['gcv']:.6f}")
 print(f"Effective df: {result_auto['edf']:.2f}")
 ```
@@ -276,6 +280,7 @@ noisy signal:
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.smoothing import nadaraya_watson, local_linear, knn_smoother, optim_bandwidth
 from pyfda.basis import smooth_basis_gcv
@@ -283,9 +288,11 @@ from pyfda.basis import smooth_basis_gcv
 # Generate data
 argvals = np.linspace(0, 1, 200)
 clean = simulate(n=1, argvals=argvals, n_basis=5, seed=42)
+fd_clean = Fdata(clean, argvals=argvals)
+
 rng = np.random.default_rng(7)
-noisy = clean + rng.normal(0, 0.25, size=clean.shape)
-x, y, y_true = argvals, noisy[0], clean[0]
+fd_noisy = fd_clean + rng.normal(0, 0.25, size=clean.shape)
+x, y, y_true = fd_noisy.argvals, fd_noisy.data[0], fd_clean.data[0]
 
 # 1. Nadaraya-Watson with GCV bandwidth
 bw = optim_bandwidth(x, y)
@@ -298,7 +305,7 @@ y_ll = local_linear(x, y, x, bandwidth=bw["h_opt"])
 y_knn = knn_smoother(x, y, x, k=20)
 
 # 4. B-spline smoothing
-result_bs = smooth_basis_gcv(noisy, argvals, n_basis=25)
+result_bs = smooth_basis_gcv(fd_noisy.data, fd_noisy.argvals, n_basis=25)
 y_bs = result_bs["fitted"][0]
 
 # Compare MSEs
@@ -317,15 +324,16 @@ curve simultaneously:
 ```python
 # Simulate and corrupt 50 curves
 data_clean = simulate(n=50, argvals=argvals, n_basis=5, seed=99)
-data_noisy = data_clean + rng.normal(0, 0.2, size=data_clean.shape)
+fd_clean_50 = Fdata(data_clean, argvals=argvals)
+fd_noisy_50 = fd_clean_50 + rng.normal(0, 0.2, size=data_clean.shape)
 
 # Smooth all 50 curves in one call
-result = smooth_basis_gcv(data_noisy, argvals, n_basis=20)
-data_smooth = result["fitted"]
-print(data_smooth.shape)  # (50, 200)
+result = smooth_basis_gcv(fd_noisy_50.data, fd_noisy_50.argvals, n_basis=20)
+fd_smooth_50 = Fdata(result["fitted"], argvals=fd_noisy_50.argvals)
+print(fd_smooth_50)  # Fdata (1D)  –  50 obs × 200 points  –  range [0.0, 1.0]
 
 # Check reconstruction quality
-mse_per_curve = np.mean((data_smooth - data_clean) ** 2, axis=1)
+mse_per_curve = np.mean((fd_smooth_50.data - fd_clean_50.data) ** 2, axis=1)
 print(f"Mean MSE across curves: {mse_per_curve.mean():.6f}")
 ```
 

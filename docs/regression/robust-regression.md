@@ -17,6 +17,7 @@ Standard FPC regression (`fregre_lm`) uses ordinary least squares, which is sens
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.regression import fregre_l1
 
 # --- Simulate data with outliers ---
@@ -25,15 +26,16 @@ n, m = 100, 81
 t = np.linspace(0, 1, m)
 beta_true = np.sin(4 * np.pi * t)
 
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 for i in range(n):
-    data[i] = (
+    raw[i] = (
         np.random.randn() * np.sin(2 * np.pi * t)
         + np.random.randn() * np.cos(2 * np.pi * t)
         + 0.2 * np.random.randn(m)
     )
+fd = Fdata(raw, argvals=t)
 
-response = np.trapz(data * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
+response = np.trapz(fd.data * beta_true, fd.argvals, axis=1) + 0.3 * np.random.randn(n)
 
 # Add 10% outliers
 n_outliers = 10
@@ -41,7 +43,7 @@ outlier_idx = np.random.choice(n, n_outliers, replace=False)
 response[outlier_idx] += 10 * np.random.randn(n_outliers)
 
 # --- Fit L1 regression ---
-result = fregre_l1(data, response, n_comp=3)
+result = fregre_l1(fd.data, response, n_comp=3)
 
 fitted  = result["fitted_values"]  # (n,)
 resid   = result["residuals"]      # (n,)
@@ -74,7 +76,7 @@ The tuning constant $k$ controls the transition point. The default $k = 1.345$ g
 ```python
 from pyfda.regression import fregre_huber
 
-result = fregre_huber(data, response, n_comp=3, huber_k=1.345)
+result = fregre_huber(fd.data, response, n_comp=3, huber_k=1.345)
 
 fitted     = result["fitted_values"]  # (n,)
 resid      = result["residuals"]      # (n,)
@@ -109,6 +111,8 @@ print(f"Huber median absolute residual: {np.median(np.abs(resid)):.4f}")
 
 ```python
 import numpy as np
+import pandas as pd
+from pyfda import Fdata
 from pyfda.regression import fregre_lm, fregre_l1, fregre_huber
 
 np.random.seed(0)
@@ -117,14 +121,15 @@ t = np.linspace(0, 1, m)
 beta_true = np.exp(-((t - 0.5)**2) / 0.02)
 
 # Clean data
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 for i in range(n):
-    data[i] = sum(
+    raw[i] = sum(
         np.random.randn() * np.sin((2*k+1) * np.pi * t)
         for k in range(4)
     ) + 0.15 * np.random.randn(m)
+fd = Fdata(raw, argvals=t)
 
-response_clean = np.trapz(data * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
+response_clean = np.trapz(fd.data * beta_true, fd.argvals, axis=1) + 0.3 * np.random.randn(n)
 
 # Contaminated response (15% outliers)
 response = response_clean.copy()
@@ -132,25 +137,20 @@ contaminated = np.random.choice(n, int(0.15 * n), replace=False)
 response[contaminated] += 8 * np.random.choice([-1, 1], size=len(contaminated))
 
 # --- Fit all three ---
-ols   = fregre_lm(data, response, n_comp=4)
-l1    = fregre_l1(data, response, n_comp=4)
-huber = fregre_huber(data, response, n_comp=4, huber_k=1.345)
+ols   = fregre_lm(fd.data, response, n_comp=4)
+l1    = fregre_l1(fd.data, response, n_comp=4)
+huber = fregre_huber(fd.data, response, n_comp=4, huber_k=1.345)
 
-# --- Evaluate beta recovery ---
-corr_ols   = np.corrcoef(beta_true, ols["beta_t"])[0, 1]
-corr_l1    = np.corrcoef(beta_true, l1["beta_t"])[0, 1]
-corr_huber = np.corrcoef(beta_true, huber["beta_t"])[0, 1]
-
-print("Beta(t) correlation with truth:")
-print(f"  OLS:   {corr_ols:.4f}")
-print(f"  L1:    {corr_l1:.4f}")
-print(f"  Huber: {corr_huber:.4f}")
-
-# --- Evaluate prediction on clean observations ---
+# --- Evaluate beta recovery and prediction on clean observations ---
 clean_idx = np.setdiff1d(np.arange(n), contaminated)
+rows = []
 for name, res in [("OLS", ols), ("L1", l1), ("Huber", huber)]:
+    corr = np.corrcoef(beta_true, res["beta_t"])[0, 1]
     mse = np.mean((res["fitted_values"][clean_idx] - response_clean[clean_idx])**2)
-    print(f"  {name:>5s} MSE (clean): {mse:.4f}")
+    rows.append({"method": name, "beta_corr": corr, "mse_clean": mse})
+
+results_df = pd.DataFrame(rows)
+print(results_df.to_string(index=False))
 ```
 
 ---

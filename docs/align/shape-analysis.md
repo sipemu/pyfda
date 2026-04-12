@@ -40,18 +40,22 @@ f2_aligned = result["f2_aligned"]   # f2 after alignment
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.alignment import elastic_depth
 
 np.random.seed(0)
 n, m = 40, 101
 t = np.linspace(0, 1, m)
-data = np.array([
-    np.sin(2 * np.pi * (t - 0.1 * np.random.randn()))
-    + 0.3 * np.random.randn()
-    for _ in range(n)
-])
+fd = Fdata(
+    np.array([
+        np.sin(2 * np.pi * (t - 0.1 * np.random.randn()))
+        + 0.3 * np.random.randn()
+        for _ in range(n)
+    ]),
+    argvals=t,
+)
 
-result = elastic_depth(data, t, lambda_=0.0)
+result = elastic_depth(fd.data, fd.argvals, lambda_=0.0)
 
 amp_depth  = result["amplitude_depth"]    # (n,)
 ph_depth   = result["phase_depth"]        # (n,)
@@ -94,7 +98,7 @@ Extracts the principal modes of **amplitude** variation from the aligned curves.
 ```python
 from pyfda.alignment import vert_fpca
 
-result = vert_fpca(data, t, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
+result = vert_fpca(fd.data, fd.argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
 
 scores      = result["scores"]              # (n, 3) -- amplitude PC scores
 eigfun_q    = result["eigenfunctions_q"]     # (3, m+1) -- eigenfunctions in SRSF space
@@ -122,7 +126,7 @@ Extracts the principal modes of **phase** variation from the estimated warping f
 ```python
 from pyfda.alignment import horiz_fpca
 
-result = horiz_fpca(data, t, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
+result = horiz_fpca(fd.data, fd.argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
 
 scores      = result["scores"]                # (n, 3) -- phase PC scores
 eigfun_psi  = result["eigenfunctions_psi"]     # (3, m) -- in psi space
@@ -152,7 +156,7 @@ Combines amplitude and phase variation into a **single joint decomposition**, we
 ```python
 from pyfda.alignment import joint_fpca
 
-result = joint_fpca(data, t, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
+result = joint_fpca(fd.data, fd.argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
 
 scores     = result["scores"]              # (n, 3)
 eigenvalues = result["eigenvalues"]        # (3,)
@@ -185,6 +189,7 @@ print(f"Joint variance explained: {cum_var[-1]*100:.1f}%")
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.alignment import (
     karcher_mean,
     vert_fpca,
@@ -204,20 +209,22 @@ for i in range(n):
     t_warp = np.clip(t + shift * np.sin(np.pi * t), 0, 1)
     data[i] = amp * np.sin(2 * np.pi * np.interp(t, t_warp, t))
 
+fd = Fdata(data, argvals=t)
+
 # --- Alignment ---
-km = karcher_mean(data, t, lambda_=0.05)
+km = karcher_mean(fd.data, fd.argvals, lambda_=0.05)
 print(f"Karcher mean converged: {km['converged']}")
 
 # --- Amplitude FPCA ---
-vfpca = vert_fpca(data, t, n_comp=3, lambda_=0.05)
+vfpca = vert_fpca(fd.data, fd.argvals, n_comp=3, lambda_=0.05)
 print(f"Amplitude variance (3 PCs): {vfpca['cumulative_variance'][-1]*100:.1f}%")
 
 # --- Phase FPCA ---
-hfpca = horiz_fpca(data, t, n_comp=3, lambda_=0.05)
+hfpca = horiz_fpca(fd.data, fd.argvals, n_comp=3, lambda_=0.05)
 print(f"Phase variance (3 PCs):     {hfpca['cumulative_variance'][-1]*100:.1f}%")
 
 # --- Elastic depth ---
-depth = elastic_depth(data, t)
+depth = elastic_depth(fd.data, fd.argvals)
 median_idx = np.argmax(depth["combined_depth"])
 print(f"Elastic median: curve {median_idx}")
 print(f"  Amp depth:  {depth['amplitude_depth'][median_idx]:.4f}")

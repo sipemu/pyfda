@@ -56,21 +56,22 @@ print(f"Symmetric: {np.allclose(cov_gauss, cov_gauss.T)}")  # True
 `gaussian_process` draws $n$ sample paths from a zero-mean GP with the specified kernel. The function internally constructs the covariance matrix and performs a Cholesky decomposition.
 
 ```python
+from pyfda import Fdata
 from pyfda.simulation import gaussian_process
 
 argvals = np.linspace(0, 1, 200)
 
 # 50 smooth curves (Gaussian kernel)
-samples_gauss = gaussian_process(50, argvals, kernel="gaussian", length_scale=0.15, seed=1)
+fd_gauss = Fdata(gaussian_process(50, argvals, kernel="gaussian", length_scale=0.15, seed=1), argvals=argvals)
 
 # 50 rough curves (exponential kernel)
-samples_exp = gaussian_process(50, argvals, kernel="exponential", length_scale=0.15, seed=1)
+fd_exp = Fdata(gaussian_process(50, argvals, kernel="exponential", length_scale=0.15, seed=1), argvals=argvals)
 
 # 50 Matern curves
-samples_mat = gaussian_process(50, argvals, kernel="matern", length_scale=0.15, seed=1)
+fd_mat = Fdata(gaussian_process(50, argvals, kernel="matern", length_scale=0.15, seed=1), argvals=argvals)
 
 # 50 periodic curves
-samples_per = gaussian_process(50, argvals, kernel="periodic", length_scale=0.15, seed=1)
+fd_per = Fdata(gaussian_process(50, argvals, kernel="periodic", length_scale=0.15, seed=1), argvals=argvals)
 ```
 
 **Parameters**
@@ -94,6 +95,7 @@ The following script visualizes the covariance structure and sample paths for ea
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import covariance_matrix, gaussian_process
 
 argvals = np.linspace(0, 1, 200)
@@ -113,8 +115,8 @@ try:
         axes[0, col].set_xlabel("t")
 
         # Sample paths
-        samples = gaussian_process(10, argvals, kernel=kern, length_scale=0.15, seed=42)
-        for s in samples:
+        fd_samples = Fdata(gaussian_process(10, argvals, kernel=kern, length_scale=0.15, seed=42), argvals=argvals)
+        for s in fd_samples.data:
             axes[1, col].plot(argvals, s, linewidth=0.7, alpha=0.7)
         axes[1, col].set_title(f"{kern.title()} — 10 sample paths")
         axes[1, col].set_xlabel("t")
@@ -134,6 +136,7 @@ GP samples provide a convenient way to create realistic synthetic functional dat
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import gaussian_process
 from pyfda.clustering import kmeans_fd, silhouette_score
 from pyfda.metric import lp_self_1d
@@ -146,14 +149,14 @@ g1 = gaussian_process(30, argvals, kernel="gaussian", length_scale=0.25, seed=1)
 # Group 2: rough exponential kernel + vertical shift
 g2 = gaussian_process(30, argvals, kernel="exponential", length_scale=0.10, seed=2) + 2.0
 
-data = np.vstack([g1, g2])
+fd = Fdata(np.vstack([g1, g2]), argvals=argvals)
 
 # Cluster
-km = kmeans_fd(data, argvals, k=2, seed=42)
+km = kmeans_fd(fd.data, fd.argvals, k=2, seed=42)
 print(f"Converged: {km['converged']}, iterations: {km['iter']}")
 
 # Evaluate
-dist = lp_self_1d(data, argvals)
+dist = lp_self_1d(fd.data, fd.argvals)
 labels = km["cluster"].astype(np.int64)
 sil = silhouette_score(dist, labels)
 print(f"Mean silhouette: {np.mean(sil):.3f}")

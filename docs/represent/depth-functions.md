@@ -244,8 +244,8 @@ For 2D data, `data` and `ref_data` are still 2D NumPy arrays of shape `(n, m)`, 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from pyfda import Fdata
 from pyfda.simulation import simulate
-from pyfda.depth import modified_band_1d, fraiman_muniz_1d, random_tukey_1d
 
 # --- 1. Simulate data with an outlier ------------------------------------
 argvals = np.linspace(0, 1, 150)
@@ -254,11 +254,12 @@ data = simulate(n=50, argvals=argvals, n_basis=5, seed=42)
 # Inject 2 magnitude outliers
 data[0] += 3.0
 data[1] -= 2.5
+fd = Fdata(data, argvals=argvals)
 
 # --- 2. Compute three different depths ------------------------------------
-depths_mbd = modified_band_1d(data, data)
-depths_fm  = fraiman_muniz_1d(data, data)
-depths_rt  = random_tukey_1d(data, data, n_proj=100)
+depths_mbd = fd.depth("modified_band")
+depths_fm  = fd.depth("fraiman_muniz")
+depths_rt  = fd.depth("random_tukey")
 
 # --- 3. Functional median (deepest curve) ---------------------------------
 median_idx = np.argmax(depths_mbd)
@@ -275,15 +276,15 @@ for ax, depths, name in zip(axes,
     # Plot all curves, colored by depth
     for i in order:
         c = plt.cm.viridis(depths[i] / depths.max())
-        ax.plot(argvals, data[i], color=c, alpha=0.5, lw=0.8)
+        ax.plot(fd.argvals, fd.data[i], color=c, alpha=0.5, lw=0.8)
 
     # Highlight median
     med = np.argmax(depths)
-    ax.plot(argvals, data[med], "r-", lw=2.5, label=f"Median (#{med})")
+    ax.plot(fd.argvals, fd.data[med], "r-", lw=2.5, label=f"Median (#{med})")
 
     # Highlight two outliers
     for out_idx in order[:2]:
-        ax.plot(argvals, data[out_idx], "k--", lw=1.5, alpha=0.7)
+        ax.plot(fd.argvals, fd.data[out_idx], "k--", lw=1.5, alpha=0.7)
 
     ax.set_title(name)
     ax.legend(fontsize=8)
@@ -317,7 +318,7 @@ Depth values can serve as features for classification or as weights for robust e
 ```python
 # Weighted mean (depth-weighted, robust to outliers)
 weights = depths_mbd / depths_mbd.sum()
-robust_mean = np.average(data, axis=0, weights=weights)
+robust_mean = np.average(fd.data, axis=0, weights=weights)
 ```
 
 ## API summary

@@ -16,6 +16,7 @@ Each coefficient function $\beta_j(t)$ describes how predictor $j$ influences th
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.regression import fosr
 
 # --- Simulate data ---
@@ -33,10 +34,10 @@ beta_true[1] = 0.5 * np.cos(4 * np.pi * t)    # predictor 2 effect
 beta_true[2] = t * (1 - t)                     # predictor 3 effect
 
 # Functional response
-response = predictors @ beta_true + 0.2 * np.random.randn(n, m)
+fd = Fdata(predictors @ beta_true + 0.2 * np.random.randn(n, m), argvals=t)
 
 # --- Fit FOSR ---
-result = fosr(response, predictors, lambda_=-1.0)  # lambda < 0 => GCV selection
+result = fosr(fd.data, predictors, lambda_=-1.0)  # lambda < 0 => GCV selection
 
 fitted    = result["fitted"]      # (n, m) -- fitted functional responses
 beta_hat  = result["beta"]        # (p, m) -- estimated coefficient functions
@@ -86,6 +87,7 @@ A pointwise $F$-statistic $F(t)$ is computed at each $t$, and a permutation test
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.regression import fanova
 
 # --- Simulate three groups ---
@@ -100,14 +102,17 @@ group_means = [
     np.sin(2 * np.pi * t) - 0.3 * (1 - t),   # another shifted group
 ]
 
-data = np.vstack([
-    mean + 0.3 * np.random.randn(n_per_group, m)
-    for mean in group_means
-])
+fd = Fdata(
+    np.vstack([
+        mean + 0.3 * np.random.randn(n_per_group, m)
+        for mean in group_means
+    ]),
+    argvals=t,
+)
 groups = np.array([0]*n_per_group + [1]*n_per_group + [2]*n_per_group, dtype=np.int64)
 
 # --- Run FANOVA ---
-result = fanova(data, groups, n_perm=999)
+result = fanova(fd.data, groups, n_perm=999)
 
 print(f"Global F-statistic: {result['global_statistic']:.4f}")
 print(f"Permutation p-value: {result['p_value']:.4f}")
@@ -131,6 +136,7 @@ print(f"Pointwise F(t) shape: {result['f_statistic_t'].shape}")  # (101,)
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.regression import fosr, fanova
 
 np.random.seed(77)
@@ -145,19 +151,20 @@ predictors = treatment.reshape(-1, 1).astype(np.float64)
 effect = 2.0 * np.exp(-((t - 0.5)**2) / 0.02)
 
 # Simulate response
-response = np.zeros((n, m))
+raw = np.zeros((n, m))
 for i in range(n):
     baseline = np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(np.pi * t)
-    response[i] = baseline + treatment[i] * effect + 0.4 * np.random.randn(m)
+    raw[i] = baseline + treatment[i] * effect + 0.4 * np.random.randn(m)
+fd = Fdata(raw, argvals=t)
 
 # --- FOSR: estimate the treatment effect curve ---
-fosr_result = fosr(response, predictors, lambda_=-1.0)
+fosr_result = fosr(fd.data, predictors, lambda_=-1.0)
 beta_treatment = fosr_result["beta"][0]  # estimated effect of treatment
 print(f"FOSR R-squared: {fosr_result['r_squared']:.4f}")
-print(f"Peak treatment effect at t={t[np.argmax(beta_treatment)]:.2f}")
+print(f"Peak treatment effect at t={fd.argvals[np.argmax(beta_treatment)]:.2f}")
 
 # --- FANOVA: test whether groups differ ---
-fanova_result = fanova(response, treatment, n_perm=999)
+fanova_result = fanova(fd.data, treatment, n_perm=999)
 print(f"FANOVA p-value: {fanova_result['p_value']:.4f}")
 if fanova_result["p_value"] < 0.05:
     print("Significant treatment effect detected.")

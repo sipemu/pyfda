@@ -18,17 +18,18 @@ A likelihood-ratio test approach that compares the likelihood of the data with a
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.outliers import detect_outliers_lrt
 
 argvals = np.linspace(0, 1, 100)
-data = simulate(50, argvals, n_basis=5, seed=1)
+fd = Fdata(simulate(50, argvals, n_basis=5, seed=1), argvals=argvals)
 
 # Inject two magnitude outliers
-data[0] += 8.0
-data[1] -= 8.0
+fd.data[0] += 8.0
+fd.data[1] -= 8.0
 
-result = detect_outliers_lrt(data, alpha=0.05, n_bootstrap=200, trim=0.1, smo=0.02)
+result = detect_outliers_lrt(fd.data, alpha=0.05, n_bootstrap=200, trim=0.1, smo=0.02)
 ```
 
 **Parameters**
@@ -63,7 +64,7 @@ The outliergram plots the **Modified Epigraph Index** (MEI) against the **Modifi
 ```python
 from pyfda.outliers import outliergram
 
-result_og = outliergram(data, factor=1.5)
+result_og = outliergram(fd.data, factor=1.5)
 ```
 
 **Parameters**
@@ -93,7 +94,7 @@ This method decomposes each observation's outlyingness into a *magnitude* compon
 ```python
 from pyfda.outliers import magnitude_shape
 
-result_ms = magnitude_shape(data)
+result_ms = magnitude_shape(fd.data)
 ```
 
 **Parameters**
@@ -126,32 +127,33 @@ print(f"Shape outliers:     {np.where(shape_outliers)[0]}")
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.outliers import detect_outliers_lrt, outliergram, magnitude_shape
 
 # ── 1. Generate clean data + outliers ─────────────────────────
 argvals = np.linspace(0, 1, 100)
-data = simulate(50, argvals, n_basis=5, seed=42)
+fd = Fdata(simulate(50, argvals, n_basis=5, seed=42), argvals=argvals)
 
 # Magnitude outlier
-data[0] += 7.0
+fd.data[0] += 7.0
 
 # Shape outlier (reversed curve)
-data[1] = -data[1]
+fd.data[1] = -fd.data[1]
 
 # Amplitude outlier (exaggerated)
-data[2] *= 3.0
+fd.data[2] *= 3.0
 
 # ── 2. LRT detection ─────────────────────────────────────────
-lrt = detect_outliers_lrt(data, alpha=0.05, n_bootstrap=200)
+lrt = detect_outliers_lrt(fd.data, alpha=0.05, n_bootstrap=200)
 print("LRT outliers:", np.where(lrt["outliers"])[0])
 
 # ── 3. Outliergram ───────────────────────────────────────────
-og = outliergram(data, factor=1.5)
+og = outliergram(fd.data, factor=1.5)
 print("Outliergram outliers:", np.where(og["outliers"])[0])
 
 # ── 4. Magnitude-shape ──────────────────────────────────────
-ms = magnitude_shape(data)
+ms = magnitude_shape(fd.data)
 print(f"Top magnitude scores: indices {np.argsort(ms['magnitude'])[-3:][::-1]}")
 print(f"Top shape scores:     indices {np.argsort(ms['shape'])[-3:][::-1]}")
 
@@ -163,10 +165,10 @@ try:
 
     # Panel 1: data with LRT outliers highlighted
     ax = axes[0]
-    for i in range(len(data)):
+    for i in range(len(fd)):
         color = "red" if lrt["outliers"][i] else "steelblue"
         alpha = 1.0 if lrt["outliers"][i] else 0.15
-        ax.plot(argvals, data[i], color=color, alpha=alpha, linewidth=0.8)
+        ax.plot(fd.argvals, fd.data[i], color=color, alpha=alpha, linewidth=0.8)
     ax.set_title("LRT outliers")
 
     # Panel 2: outliergram

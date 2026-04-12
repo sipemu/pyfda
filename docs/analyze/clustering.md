@@ -10,6 +10,7 @@ The functional k-means algorithm minimises the total within-cluster $L^2$ distan
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.clustering import kmeans_fd
 
@@ -17,9 +18,9 @@ from pyfda.clustering import kmeans_fd
 argvals = np.linspace(0, 1, 100)
 group_a = simulate(30, argvals, n_basis=5, seed=1)
 group_b = simulate(30, argvals, n_basis=5, seed=2) + 3.0
-data = np.vstack([group_a, group_b])
+fd = Fdata(np.vstack([group_a, group_b]), argvals=argvals)
 
-result = kmeans_fd(data, argvals, k=2, max_iter=100, tol=1e-6, seed=42)
+result = kmeans_fd(fd.data, fd.argvals, k=2, max_iter=100, tol=1e-6, seed=42)
 ```
 
 **Parameters**
@@ -53,7 +54,7 @@ Fuzzy c-means assigns each observation a *membership degree* for every cluster r
 from pyfda.clustering import fuzzy_cmeans_fd
 
 result_fcm = fuzzy_cmeans_fd(
-    data, argvals, k=2, fuzziness=2.0, max_iter=100, tol=1e-6, seed=42
+    fd.data, fd.argvals, k=2, fuzziness=2.0, max_iter=100, tol=1e-6, seed=42
 )
 ```
 
@@ -90,7 +91,7 @@ The GMM approach projects the functional data onto a B-spline basis, fits a mult
 from pyfda.clustering import gmm_cluster
 
 result_gmm = gmm_cluster(
-    data, argvals,
+    fd.data, fd.argvals,
     k_range=[2, 3, 4],
     nbasis=5,
     max_iter=200,
@@ -135,7 +136,7 @@ The silhouette score measures how similar each observation is to its own cluster
 from pyfda.clustering import silhouette_score
 from pyfda.metric import lp_self_1d
 
-dist_matrix = lp_self_1d(data, argvals, p=2.0)
+dist_matrix = lp_self_1d(fd.data, fd.argvals, p=2.0)
 labels = result["cluster"].astype(np.int64)
 sil = silhouette_score(dist_matrix, labels)
 print(f"Mean silhouette: {np.mean(sil):.3f}")
@@ -160,6 +161,7 @@ A common strategy is to run k-means for several values of $k$ and pick the one t
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.clustering import kmeans_fd, silhouette_score
 from pyfda.metric import lp_self_1d
@@ -169,13 +171,13 @@ argvals = np.linspace(0, 1, 100)
 g1 = simulate(25, argvals, n_basis=5, seed=1)
 g2 = simulate(25, argvals, n_basis=5, seed=2) + 3.0
 g3 = simulate(25, argvals, n_basis=5, seed=3) - 3.0
-data = np.vstack([g1, g2, g3])
+fd = Fdata(np.vstack([g1, g2, g3]), argvals=argvals)
 
-dist = lp_self_1d(data, argvals, p=2.0)
+dist = lp_self_1d(fd.data, fd.argvals, p=2.0)
 
 scores = {}
 for k in range(2, 9):
-    res = kmeans_fd(data, argvals, k=k, seed=42)
+    res = kmeans_fd(fd.data, fd.argvals, k=k, seed=42)
     labels = res["cluster"].astype(np.int64)
     sil = silhouette_score(dist, labels)
     scores[k] = float(np.mean(sil))
@@ -195,10 +197,10 @@ The clustering functions use $L^2$ distance internally. To cluster with a differ
 from pyfda.metric import dtw_self_1d, hausdorff_self_1d
 
 # DTW-based distance matrix
-dist_dtw = dtw_self_1d(data, p=2.0, w=10)
+dist_dtw = dtw_self_1d(fd.data, p=2.0, w=10)
 
 # Hausdorff distance matrix
-dist_haus = hausdorff_self_1d(data, argvals)
+dist_haus = hausdorff_self_1d(fd.data, fd.argvals)
 ```
 
 You can then use these matrices with `silhouette_score` and `calinski_harabasz` to evaluate how well a given labeling fits under an alternative metric.
@@ -209,6 +211,7 @@ You can then use these matrices with `silhouette_score` and `calinski_harabasz` 
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.clustering import kmeans_fd, fuzzy_cmeans_fd, gmm_cluster
 
@@ -217,21 +220,21 @@ argvals = np.linspace(0, 1, 100)
 g1 = simulate(30, argvals, n_basis=5, seed=10)
 g2 = simulate(30, argvals, n_basis=5, seed=20) + 4.0
 g3 = simulate(30, argvals, n_basis=5, seed=30) - 4.0
-data = np.vstack([g1, g2, g3])
+fd = Fdata(np.vstack([g1, g2, g3]), argvals=argvals)
 true_labels = np.array([0]*30 + [1]*30 + [2]*30)
 
 # ── K-means ───────────────────────────────────────────────────
-km = kmeans_fd(data, argvals, k=3, seed=42)
+km = kmeans_fd(fd.data, fd.argvals, k=3, seed=42)
 print("K-means converged:", km["converged"])
 
 # ── Fuzzy C-means ─────────────────────────────────────────────
-fcm = fuzzy_cmeans_fd(data, argvals, k=3, seed=42)
+fcm = fuzzy_cmeans_fd(fd.data, fd.argvals, k=3, seed=42)
 # Show membership entropy per observation
 entropy = -np.sum(fcm["membership"] * np.log(fcm["membership"] + 1e-12), axis=1)
 print(f"Mean membership entropy: {entropy.mean():.3f}")
 
 # ── GMM (auto-select k) ──────────────────────────────────────
-gm = gmm_cluster(data, argvals, k_range=[2, 3, 4, 5], nbasis=7, seed=42)
+gm = gmm_cluster(fd.data, fd.argvals, k_range=[2, 3, 4, 5], nbasis=7, seed=42)
 print("BIC values:", gm["bic_values"])
 
 # ── Visualize cluster centers (optional) ──────────────────────
@@ -244,10 +247,10 @@ try:
     for ax, (name, res) in zip(axes, methods):
         for i in range(3):
             mask = res["cluster"] == i
-            ax.plot(argvals, data[mask].T, alpha=0.15)
+            ax.plot(fd.argvals, fd.data[mask].T, alpha=0.15)
         if "centers" in res:
             for c in res["centers"]:
-                ax.plot(argvals, c, "k-", linewidth=2)
+                ax.plot(fd.argvals, c, "k-", linewidth=2)
         ax.set_title(name)
 
     plt.tight_layout()

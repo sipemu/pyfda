@@ -12,13 +12,14 @@ This method uses the FPCA representation of the sample to generate bootstrap rep
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.tolerance import fpca_tolerance_band
 
 argvals = np.linspace(0, 1, 100)
-data = simulate(60, argvals, n_basis=5, seed=1)
+fd = Fdata(simulate(60, argvals, n_basis=5, seed=1), argvals=argvals)
 
-band = fpca_tolerance_band(data, ncomp=3, nb=1000, coverage=0.95, seed=42)
+band = fpca_tolerance_band(fd.data, ncomp=3, nb=1000, coverage=0.95, seed=42)
 ```
 
 **Parameters**
@@ -49,7 +50,7 @@ A distribution-free alternative that splits the data into a proper training set 
 ```python
 from pyfda.tolerance import conformal_prediction_band
 
-band_cp = conformal_prediction_band(data, coverage=0.95, cal_fraction=0.25, seed=42)
+band_cp = conformal_prediction_band(fd.data, coverage=0.95, cal_fraction=0.25, seed=42)
 ```
 
 **Parameters**
@@ -75,7 +76,7 @@ Constructs a simultaneous confidence band for the **mean function** using the Ga
 ```python
 from pyfda.tolerance import scb_mean_degras
 
-band_scb = scb_mean_degras(data, argvals, bandwidth=0.0, nb=1000, confidence=0.95)
+band_scb = scb_mean_degras(fd.data, fd.argvals, bandwidth=0.0, nb=1000, confidence=0.95)
 ```
 
 Setting `bandwidth=0.0` enables automatic bandwidth selection.
@@ -105,10 +106,10 @@ Test whether two groups of functional observations are *equivalent* -- i.e., the
 from pyfda.tolerance import equivalence_test
 
 # Two groups with similar means
-group_a = simulate(40, argvals, n_basis=5, seed=10)
-group_b = simulate(40, argvals, n_basis=5, seed=20) + 0.1  # small shift
+fd_a = Fdata(simulate(40, argvals, n_basis=5, seed=10), argvals=argvals)
+fd_b = Fdata(simulate(40, argvals, n_basis=5, seed=20) + 0.1, argvals=argvals)  # small shift
 
-result = equivalence_test(group_a, group_b, delta=0.5, alpha=0.05, nb=1000, seed=42)
+result = equivalence_test(fd_a.data, fd_b.data, delta=0.5, alpha=0.05, nb=1000, seed=42)
 print(f"Equivalent: {result['equivalent']}")
 print(f"p-value:    {result['p_value']:.4f}")
 print(f"Test stat:  {result['test_statistic']:.4f}")
@@ -139,6 +140,7 @@ print(f"Test stat:  {result['test_statistic']:.4f}")
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.tolerance import (
     fpca_tolerance_band,
@@ -148,12 +150,12 @@ from pyfda.tolerance import (
 
 # ── Data ──────────────────────────────────────────────────────
 argvals = np.linspace(0, 1, 100)
-data = simulate(80, argvals, n_basis=5, seed=7)
+fd = Fdata(simulate(80, argvals, n_basis=5, seed=7), argvals=argvals)
 
 # ── Bands ─────────────────────────────────────────────────────
-tol_fpca = fpca_tolerance_band(data, ncomp=3, nb=2000, coverage=0.95, seed=1)
-tol_conf = conformal_prediction_band(data, coverage=0.95, cal_fraction=0.25, seed=1)
-scb      = scb_mean_degras(data, argvals, bandwidth=0.0, nb=2000, confidence=0.95)
+tol_fpca = fpca_tolerance_band(fd.data, ncomp=3, nb=2000, coverage=0.95, seed=1)
+tol_conf = conformal_prediction_band(fd.data, coverage=0.95, cal_fraction=0.25, seed=1)
+scb      = scb_mean_degras(fd.data, fd.argvals, bandwidth=0.0, nb=2000, confidence=0.95)
 
 # ── Visualize (optional) ─────────────────────────────────────
 try:
@@ -164,9 +166,9 @@ try:
     bands  = [tol_fpca, tol_conf, scb]
 
     for ax, title, b in zip(axes, titles, bands):
-        ax.plot(argvals, data.T, color="0.85", linewidth=0.5)
-        ax.fill_between(argvals, b["lower"], b["upper"], alpha=0.25, label="band")
-        ax.plot(argvals, b["center"], "k-", linewidth=1.5, label="center")
+        ax.plot(fd.argvals, fd.data.T, color="0.85", linewidth=0.5)
+        ax.fill_between(fd.argvals, b["lower"], b["upper"], alpha=0.25, label="band")
+        ax.plot(fd.argvals, b["center"], "k-", linewidth=1.5, label="center")
         ax.set_title(title)
         ax.legend(fontsize=8)
 

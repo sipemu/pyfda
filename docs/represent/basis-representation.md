@@ -23,21 +23,23 @@ Representing functional data in a finite basis -- B-splines, Fourier, or P-splin
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.basis import fdata_to_basis_1d, basis_to_fdata_1d
 
 # Simulate some data
 argvals = np.linspace(0, 1, 200)
 data = np.column_stack([np.sin(2 * np.pi * argvals) + 0.2 * np.random.randn(200)
                         for _ in range(30)]).T  # shape (30, 200)
+fd = Fdata(data, argvals=argvals)
 
 # Project onto a B-spline basis with 15 functions
-coeffs, actual_nbasis = fdata_to_basis_1d(data, argvals, n_basis=15,
+coeffs, actual_nbasis = fdata_to_basis_1d(fd.data, fd.argvals, n_basis=15,
                                            basis_type="bspline")
 print(f"Coefficients shape: {coeffs.shape}")   # (30, 15)
 print(f"Actual n_basis used: {actual_nbasis}")
 
 # Reconstruct back to the evaluation grid
-reconstructed = basis_to_fdata_1d(coeffs, argvals, n_basis=actual_nbasis,
+reconstructed = basis_to_fdata_1d(coeffs, fd.argvals, n_basis=actual_nbasis,
                                    basis_type="bspline")
 print(f"Reconstructed shape: {reconstructed.shape}")  # (30, 200)
 ```
@@ -51,10 +53,11 @@ periodic_data = np.column_stack([
     np.sin(argvals_p) + 0.5 * np.cos(3 * argvals_p) + 0.15 * np.random.randn(200)
     for _ in range(30)
 ]).T
+fd_p = Fdata(periodic_data, argvals=argvals_p)
 
-coeffs_f, nbasis_f = fdata_to_basis_1d(periodic_data, argvals_p, n_basis=11,
+coeffs_f, nbasis_f = fdata_to_basis_1d(fd_p.data, fd_p.argvals, n_basis=11,
                                          basis_type="fourier")
-reconstructed_f = basis_to_fdata_1d(coeffs_f, argvals_p, n_basis=nbasis_f,
+reconstructed_f = basis_to_fdata_1d(coeffs_f, fd_p.argvals, n_basis=nbasis_f,
                                      basis_type="fourier")
 ```
 
@@ -108,7 +111,7 @@ where $B$ is the B-spline basis matrix, $D^d$ is the $d$-th order difference mat
 ```python
 from pyfda.basis import pspline_fit_1d
 
-result = pspline_fit_1d(data, argvals, n_basis=25, lambda_=1e-2, order=2)
+result = pspline_fit_1d(fd.data, fd.argvals, n_basis=25, lambda_=1e-2, order=2)
 
 print(result.keys())
 # dict_keys(['fitted', 'coefficients', 'edf', 'rss', 'gcv', 'aic', 'bic'])
@@ -131,7 +134,7 @@ When you do not know the right smoothing level, let GCV choose:
 ```python
 from pyfda.basis import pspline_fit_gcv
 
-result = pspline_fit_gcv(data, argvals, n_basis=25, order=2)
+result = pspline_fit_gcv(fd.data, fd.argvals, n_basis=25, order=2)
 print(f"GCV score: {result['gcv']:.6f}")
 print(f"Effective degrees of freedom: {result['edf']:.1f}")
 ```
@@ -148,9 +151,9 @@ fig, axes = plt.subplots(1, 3, figsize=(14, 4), sharey=True)
 idx = 0  # curve to visualize
 
 for ax, lam in zip(axes, [1e-6, 1e-2, 1e2]):
-    res = pspline_fit_1d(data, argvals, n_basis=25, lambda_=lam)
-    ax.plot(argvals, data[idx], ".", ms=2, alpha=0.4, label="Raw")
-    ax.plot(argvals, res["fitted"][idx], "r-", lw=2,
+    res = pspline_fit_1d(fd.data, fd.argvals, n_basis=25, lambda_=lam)
+    ax.plot(fd.argvals, fd.data[idx], ".", ms=2, alpha=0.4, label="Raw")
+    ax.plot(fd.argvals, res["fitted"][idx], "r-", lw=2,
             label=f"edf={res['edf']:.1f}")
     ax.set_title(f"$\\lambda$ = {lam:.0e}")
     ax.legend(fontsize=8)
@@ -171,7 +174,7 @@ plt.show()
 ```python
 from pyfda.basis import select_basis_auto_1d
 
-selections = select_basis_auto_1d(data, argvals, criterion="gcv")
+selections = select_basis_auto_1d(fd.data, fd.argvals, criterion="gcv")
 
 # Each element corresponds to one curve
 for i, sel in enumerate(selections[:3]):
@@ -208,7 +211,7 @@ When you want to fix the basis type and only search over the number of basis fun
 from pyfda.basis import basis_nbasis_cv
 
 cv_result = basis_nbasis_cv(
-    data, argvals,
+    fd.data, fd.argvals,
     nbasis_min=4,
     nbasis_max=30,
     basis_type="bspline",
@@ -255,6 +258,7 @@ plt.show()
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.basis import pspline_fit_gcv, basis_nbasis_cv, fdata_to_basis_1d
 
@@ -262,22 +266,24 @@ from pyfda.basis import pspline_fit_gcv, basis_nbasis_cv, fdata_to_basis_1d
 argvals = np.linspace(0, 1, 300)
 clean = simulate(n=50, argvals=argvals, n_basis=5, seed=7)
 noisy = clean + 0.3 * np.random.randn(*clean.shape)
+fd_noisy = Fdata(noisy, argvals=argvals)
+fd_clean = Fdata(clean, argvals=argvals)
 
 # 2. Find optimal basis count
-cv = basis_nbasis_cv(noisy, argvals, nbasis_min=5, nbasis_max=35,
+cv = basis_nbasis_cv(fd_noisy.data, fd_noisy.argvals, nbasis_min=5, nbasis_max=35,
                      basis_type="bspline", criterion="gcv")
 print(f"Optimal basis count: {cv['optimal_nbasis']}")
 
 # 3. Smooth with P-splines using optimal basis count
-smooth = pspline_fit_gcv(noisy, argvals, n_basis=cv["optimal_nbasis"])
+smooth = pspline_fit_gcv(fd_noisy.data, fd_noisy.argvals, n_basis=cv["optimal_nbasis"])
 
 # 4. Visualize
 fig, axes = plt.subplots(1, 3, figsize=(15, 4))
 
 for ax, idx in zip(axes, [0, 10, 25]):
-    ax.plot(argvals, noisy[idx], ".", ms=1, alpha=0.3, color="gray", label="Noisy")
-    ax.plot(argvals, clean[idx], "k-", lw=1, alpha=0.5, label="True")
-    ax.plot(argvals, smooth["fitted"][idx], "r-", lw=2, label="P-spline")
+    ax.plot(fd_noisy.argvals, fd_noisy.data[idx], ".", ms=1, alpha=0.3, color="gray", label="Noisy")
+    ax.plot(fd_clean.argvals, fd_clean.data[idx], "k-", lw=1, alpha=0.5, label="True")
+    ax.plot(fd_noisy.argvals, smooth["fitted"][idx], "r-", lw=2, label="P-spline")
     ax.set_title(f"Curve {idx}")
     if idx == 0:
         ax.legend(fontsize=8)

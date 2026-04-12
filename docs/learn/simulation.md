@@ -14,9 +14,12 @@ building intuition. pyfda provides two complementary generators:
 
 Both live in the `pyfda.simulation` module and return a 2D NumPy array of shape
 `(n, m)` where `n` is the number of curves and `m` is the number of grid points.
+Wrapping the result in an `Fdata` object bundles the data with its evaluation
+grid and unlocks convenience methods for depth, distances, derivatives, and more.
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate, gaussian_process
 ```
 
@@ -51,7 +54,8 @@ data = simulate(
     eval_type="linear",   # eigenvalue decay
     seed=42,           # reproducibility
 )
-print(data.shape)  # (50, 100)
+fd = Fdata(data, argvals=argvals)
+print(fd)  # Fdata (1D)  –  50 obs × 100 points  –  range [0.0, 1.0]
 ```
 
 ---
@@ -69,6 +73,7 @@ data_fourier = simulate(
     n=30, argvals=argvals, n_basis=7,
     efun_type="fourier", seed=1,
 )
+fd_fourier = Fdata(data_fourier, argvals=argvals)
 ```
 
 #### `"poly"`
@@ -81,6 +86,7 @@ data_poly = simulate(
     n=30, argvals=argvals, n_basis=5,
     efun_type="poly", seed=1,
 )
+fd_poly = Fdata(data_poly, argvals=argvals)
 ```
 
 #### `"poly_high"`
@@ -93,6 +99,7 @@ data_poly_high = simulate(
     n=30, argvals=argvals, n_basis=5,
     efun_type="poly_high", seed=1,
 )
+fd_poly_high = Fdata(data_poly_high, argvals=argvals)
 ```
 
 #### `"wiener"`
@@ -105,6 +112,7 @@ data_wiener = simulate(
     n=30, argvals=argvals, n_basis=5,
     efun_type="wiener", seed=1,
 )
+fd_wiener = Fdata(data_wiener, argvals=argvals)
 ```
 
 !!! tip "Choosing an eigenfunction type"
@@ -128,6 +136,7 @@ data_linear = simulate(
     n=30, argvals=argvals, n_basis=10,
     eval_type="linear", seed=2,
 )
+fd_linear = Fdata(data_linear, argvals=argvals)
 ```
 
 #### `"exponential"`
@@ -140,6 +149,7 @@ data_exp = simulate(
     n=30, argvals=argvals, n_basis=10,
     eval_type="exponential", seed=2,
 )
+fd_exp = Fdata(data_exp, argvals=argvals)
 ```
 
 #### `"wiener"`
@@ -152,6 +162,7 @@ data_wiener_eval = simulate(
     n=30, argvals=argvals, n_basis=10,
     eval_type="wiener", seed=2,
 )
+fd_wiener_eval = Fdata(data_wiener_eval, argvals=argvals)
 ```
 
 ---
@@ -166,12 +177,14 @@ smooth_osc = simulate(
     n=40, argvals=argvals, n_basis=7,
     efun_type="fourier", eval_type="exponential", seed=10,
 )
+fd_smooth_osc = Fdata(smooth_osc, argvals=argvals)
 
 # Polynomial shapes with linear decay -> complex trending curves
 complex_trend = simulate(
     n=40, argvals=argvals, n_basis=7,
     efun_type="poly", eval_type="linear", seed=10,
 )
+fd_complex_trend = Fdata(complex_trend, argvals=argvals)
 ```
 
 ### Effect of `n_basis`
@@ -181,9 +194,11 @@ Increasing `n_basis` adds higher-frequency variation:
 ```python
 # Low complexity
 simple = simulate(n=20, argvals=argvals, n_basis=3, seed=0)
+fd_simple = Fdata(simple, argvals=argvals)
 
 # High complexity
 complex_ = simulate(n=20, argvals=argvals, n_basis=15, seed=0)
+fd_complex = Fdata(complex_, argvals=argvals)
 ```
 
 !!! info "Reproducibility"
@@ -210,7 +225,8 @@ gp_data = gaussian_process(
     variance=1.0,
     seed=42,
 )
-print(gp_data.shape)  # (40, 100)
+fd_gp = Fdata(gp_data, argvals=argvals)
+print(fd_gp)  # Fdata (1D)  –  40 obs × 100 points  –  range [0.0, 1.0]
 ```
 
 ---
@@ -230,6 +246,7 @@ gp_gauss = gaussian_process(
     n=30, argvals=argvals,
     kernel="gaussian", length_scale=0.15, variance=1.0, seed=1,
 )
+fd_gp_gauss = Fdata(gp_gauss, argvals=argvals)
 ```
 
 #### `"exponential"` (Ornstein-Uhlenbeck)
@@ -245,6 +262,7 @@ gp_exp = gaussian_process(
     n=30, argvals=argvals,
     kernel="exponential", length_scale=0.15, variance=1.0, seed=1,
 )
+fd_gp_exp = Fdata(gp_exp, argvals=argvals)
 ```
 
 #### `"matern"`
@@ -263,6 +281,7 @@ gp_matern = gaussian_process(
     n=30, argvals=argvals,
     kernel="matern", length_scale=0.15, variance=1.0, seed=1,
 )
+fd_gp_matern = Fdata(gp_matern, argvals=argvals)
 ```
 
 #### `"periodic"`
@@ -278,6 +297,7 @@ gp_periodic = gaussian_process(
     n=30, argvals=argvals,
     kernel="periodic", length_scale=0.3, variance=1.0, seed=1,
 )
+fd_gp_periodic = Fdata(gp_periodic, argvals=argvals)
 ```
 
 ---
@@ -294,12 +314,14 @@ rough = gaussian_process(
     n=20, argvals=argvals,
     kernel="gaussian", length_scale=0.05, seed=0,
 )
+fd_rough = Fdata(rough, argvals=argvals)
 
 # Long length scale -> smooth
 smooth = gaussian_process(
     n=20, argvals=argvals,
     kernel="gaussian", length_scale=0.5, seed=0,
 )
+fd_smooth = Fdata(smooth, argvals=argvals)
 ```
 
 ### Controlling Amplitude with `variance`
@@ -311,11 +333,13 @@ low_var = gaussian_process(
     n=20, argvals=argvals,
     kernel="gaussian", length_scale=0.2, variance=0.1, seed=0,
 )
+fd_low_var = Fdata(low_var, argvals=argvals)
 
 high_var = gaussian_process(
     n=20, argvals=argvals,
     kernel="gaussian", length_scale=0.2, variance=5.0, seed=0,
 )
+fd_high_var = Fdata(high_var, argvals=argvals)
 ```
 
 ---
@@ -344,9 +368,9 @@ Bringing it all together in a realistic workflow:
 
 ```python
 import numpy as np
+import pandas as pd
+from pyfda import Fdata
 from pyfda.simulation import simulate
-from pyfda.fdata import mean_1d, center_1d, norm_lp_1d
-from pyfda.depth import fraiman_muniz_1d
 from pyfda.clustering import kmeans_fd
 
 # -- Step 1: Generate two groups with different eigenfunction types --
@@ -354,26 +378,31 @@ argvals = np.linspace(0, 1, 150)
 group_a = simulate(n=40, argvals=argvals, n_basis=5, efun_type="fourier", seed=10)
 group_b = simulate(n=40, argvals=argvals, n_basis=5, efun_type="poly", seed=20)
 
-# Shift group_b upward so the groups are distinguishable
-group_b += 2.0
+# Wrap each group in Fdata; shift group_b upward so the groups are distinguishable
+fd_a = Fdata(group_a, argvals=argvals)
+fd_b = Fdata(group_b, argvals=argvals) + 2.0
 
-# Stack into a single dataset
-data = np.vstack([group_a, group_b])  # (80, 150)
+# Stack into a single dataset with metadata tracking the true group
+data = np.vstack([fd_a.data, fd_b.data])  # (80, 150)
 true_labels = np.array([0] * 40 + [1] * 40)
+fd = Fdata(
+    data, argvals=argvals,
+    metadata=pd.DataFrame({"group": true_labels}),
+)
 
-# -- Step 2: Summary statistics --
-mu = mean_1d(data)
-norms = norm_lp_1d(data, argvals)
+# -- Step 2: Summary statistics (Fdata convenience methods) --
+mu = fd.mean()
+norms = fd.norm()
 print(f"Grand mean range: [{mu.min():.2f}, {mu.max():.2f}]")
 print(f"Norm range: [{norms.min():.2f}, {norms.max():.2f}]")
 
 # -- Step 3: Depth ranking --
-depths = fraiman_muniz_1d(data, data)
+depths = fd.depth("fraiman_muniz")
 median_idx = np.argmax(depths)
 print(f"Deepest curve: index {median_idx}, depth {depths[median_idx]:.4f}")
 
 # -- Step 4: Clustering --
-result = kmeans_fd(data, argvals, k=2, seed=0)
+result = kmeans_fd(fd.data, fd.argvals, k=2, seed=0)
 pred_labels = result["cluster"]
 
 # Compare with truth (up to label permutation)

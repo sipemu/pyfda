@@ -10,6 +10,7 @@ After fitting a functional regression model, the natural question is: *why does 
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.explain import fpc_permutation_importance
 
 # --- Setup ---
@@ -18,18 +19,19 @@ n, m = 100, 81
 t = np.linspace(0, 1, m)
 beta_true = np.sin(4 * np.pi * t)
 
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 for i in range(n):
-    data[i] = (
+    raw[i] = (
         np.random.randn() * np.sin(2 * np.pi * t)
         + np.random.randn() * np.cos(2 * np.pi * t)
         + np.random.randn() * np.sin(4 * np.pi * t)
         + 0.2 * np.random.randn(m)
     )
-response = np.trapz(data * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
+fd = Fdata(raw, argvals=t)
+response = np.trapz(fd.data * beta_true, fd.argvals, axis=1) + 0.3 * np.random.randn(n)
 
 # --- Compute importance ---
-result = fpc_permutation_importance(data, response, ncomp=5, n_perm=20, seed=42)
+result = fpc_permutation_importance(fd.data, response, ncomp=5, n_perm=20, seed=42)
 
 importance = result["importance"]        # (5,) -- importance per FPC
 baseline   = result["baseline_metric"]   # baseline MSE
@@ -58,7 +60,7 @@ A **partial dependence plot** shows the marginal effect of a single FPC score on
 ```python
 from pyfda.explain import functional_pdp
 
-result = functional_pdp(data, response, ncomp=5, component=0, n_grid=50)
+result = functional_pdp(fd.data, response, ncomp=5, component=0, n_grid=50)
 
 grid    = result["grid_values"]  # (50,) -- score values on the x-axis
 pdp     = result["pdp_curve"]    # (50,) -- partial dependence on the y-axis
@@ -93,7 +95,7 @@ where $\phi_0$ is the base value (mean prediction) and $\phi_{ij}$ is the SHAP v
 ```python
 from pyfda.explain import fpc_shap_values
 
-result = fpc_shap_values(data, response, ncomp=5)
+result = fpc_shap_values(fd.data, response, ncomp=5)
 
 shap_vals  = result["values"]      # (n, 5) -- SHAP values per observation
 base_value = result["base_value"]  # mean prediction
@@ -136,7 +138,7 @@ $$
 ```python
 from pyfda.explain import beta_decomposition
 
-result = beta_decomposition(data, response, ncomp=5)
+result = beta_decomposition(fd.data, response, ncomp=5)
 
 components  = result["components"]           # list of 5 arrays, each (m,)
 coefficients = result["coefficients"]        # (5,) -- the c_j values
@@ -166,7 +168,7 @@ from pyfda.explain import significant_regions
 # Here we create simple illustrative bounds
 from pyfda.regression import fregre_lm
 
-fit = fregre_lm(data, response, n_comp=5)
+fit = fregre_lm(fd.data, response, n_comp=5)
 beta_hat = fit["beta_t"]
 
 # Approximate confidence bounds (illustrative)
@@ -177,8 +179,8 @@ upper = beta_hat + 1.96 * se
 regions = significant_regions(lower, upper)
 print(f"Found {len(regions)} significant regions:")
 for start, end, direction in regions:
-    t_start = t[start] if start < len(t) else 1.0
-    t_end = t[end] if end < len(t) else 1.0
+    t_start = fd.argvals[start] if start < len(fd.argvals) else 1.0
+    t_end = fd.argvals[end] if end < len(fd.argvals) else 1.0
     print(f"  t in [{t_start:.3f}, {t_end:.3f}]: {direction}")
 ```
 
@@ -190,6 +192,7 @@ Each region is a tuple `(start_idx, end_idx, direction)` where `direction` is `"
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.regression import fregre_lm
 from pyfda.explain import (
     fpc_permutation_importance,
@@ -205,31 +208,32 @@ t = np.linspace(0, 1, m)
 # Beta that is significant only in [0.3, 0.7]
 beta_true = np.where((t > 0.3) & (t < 0.7), np.sin(4 * np.pi * t), 0.0)
 
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 for i in range(n):
-    data[i] = sum(
+    raw[i] = sum(
         np.random.randn() * np.sin((2*k+1) * np.pi * t)
         for k in range(5)
     ) + 0.15 * np.random.randn(m)
+fd = Fdata(raw, argvals=t)
 
-response = np.trapz(data * beta_true, t, axis=1) + 0.2 * np.random.randn(n)
+response = np.trapz(fd.data * beta_true, fd.argvals, axis=1) + 0.2 * np.random.randn(n)
 
 # --- Fit model ---
-fit = fregre_lm(data, response, n_comp=5)
+fit = fregre_lm(fd.data, response, n_comp=5)
 print(f"R-squared: {fit['r_squared']:.4f}")
 
 # --- Permutation importance ---
-imp = fpc_permutation_importance(data, response, ncomp=5, n_perm=30, seed=0)
+imp = fpc_permutation_importance(fd.data, response, ncomp=5, n_perm=30, seed=0)
 print("\nPermutation importance:")
 for j in range(5):
     print(f"  FPC {j+1}: {imp['importance'][j]:.4f}")
 
 # --- SHAP ---
-shap = fpc_shap_values(data, response, ncomp=5)
+shap = fpc_shap_values(fd.data, response, ncomp=5)
 print(f"\nMean |SHAP| per FPC: {np.mean(np.abs(shap['values']), axis=0)}")
 
 # --- Beta decomposition ---
-decomp = beta_decomposition(data, response, ncomp=5)
+decomp = beta_decomposition(fd.data, response, ncomp=5)
 print("\nBeta decomposition:")
 for j in range(5):
     print(f"  FPC {j+1}: coef={decomp['coefficients'][j]:+.3f}, "
@@ -237,7 +241,7 @@ for j in range(5):
 
 # --- PDP for the most important component ---
 most_important = int(np.argmax(imp["importance"]))
-pdp = functional_pdp(data, response, ncomp=5, component=most_important, n_grid=40)
+pdp = functional_pdp(fd.data, response, ncomp=5, component=most_important, n_grid=40)
 print(f"\nPDP for FPC {most_important + 1}:")
 print(f"  Score range: [{pdp['grid_values'].min():.2f}, {pdp['grid_values'].max():.2f}]")
 print(f"  PDP range:   [{pdp['pdp_curve'].min():.2f}, {pdp['pdp_curve'].max():.2f}]")

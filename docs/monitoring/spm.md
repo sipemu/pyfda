@@ -26,15 +26,16 @@ Control limits for both are estimated from the Phase I data so that the in-contr
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.spm import spm_phase1
 
 # Generate 80 in-control curves on a 100-point grid
 argvals = np.linspace(0, 1, 100)
-data_ic = simulate(80, argvals, n_basis=5, seed=1)
+fd_ic = Fdata(simulate(80, argvals, n_basis=5, seed=1), argvals=argvals)
 
 # Phase I estimation (3 components, alpha = 0.05)
-p1 = spm_phase1(data_ic, argvals, ncomp=3, alpha=0.05)
+p1 = spm_phase1(fd_ic.data, fd_ic.argvals, ncomp=3, alpha=0.05)
 ```
 
 `spm_phase1` returns a dictionary with the following keys:
@@ -65,7 +66,7 @@ data_new_ic = simulate(20, argvals, n_basis=5, seed=2)
 
 # Inject a mean shift into the last 10 curves
 data_fault = simulate(10, argvals, n_basis=5, seed=3) + 2.0
-data_new = np.vstack([data_new_ic, data_fault])
+fd_new = Fdata(np.vstack([data_new_ic, data_fault]), argvals=argvals)
 
 # Monitor
 p2 = spm_monitor(
@@ -75,8 +76,8 @@ p2 = spm_monitor(
     eigenvalues=p1["eigenvalues"],
     t2_limit=p1["t2_limit"],
     spe_limit=p1["spe_limit"],
-    new_data=data_new,
-    argvals=argvals,
+    new_data=fd_new.data,
+    argvals=fd_new.argvals,
 )
 ```
 
@@ -118,22 +119,23 @@ The script below ties everything together: simulate in-control data, run Phase I
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.spm import spm_phase1, spm_monitor
 
 # ── 1. Simulate in-control data ──────────────────────────────
 argvals = np.linspace(0, 1, 100)
-data_ic = simulate(100, argvals, n_basis=5, seed=10)
+fd_ic = Fdata(simulate(100, argvals, n_basis=5, seed=10), argvals=argvals)
 
 # ── 2. Phase I ───────────────────────────────────────────────
-p1 = spm_phase1(data_ic, argvals, ncomp=3, alpha=0.05)
+p1 = spm_phase1(fd_ic.data, fd_ic.argvals, ncomp=3, alpha=0.05)
 print(f"T2 limit : {p1['t2_limit']:.3f}")
 print(f"SPE limit: {p1['spe_limit']:.3f}")
 
 # ── 3. Simulate Phase II data (in-control + fault) ──────────
 data_ok  = simulate(30, argvals, n_basis=5, seed=20)
 data_bad = simulate(20, argvals, n_basis=5, seed=30) + 3.0  # mean shift
-data_new = np.vstack([data_ok, data_bad])
+fd_new = Fdata(np.vstack([data_ok, data_bad]), argvals=argvals)
 
 # ── 4. Phase II monitoring ───────────────────────────────────
 p2 = spm_monitor(
@@ -143,12 +145,12 @@ p2 = spm_monitor(
     eigenvalues=p1["eigenvalues"],
     t2_limit=p1["t2_limit"],
     spe_limit=p1["spe_limit"],
-    new_data=data_new,
-    argvals=argvals,
+    new_data=fd_new.data,
+    argvals=fd_new.argvals,
 )
 
 # ── 5. Report ────────────────────────────────────────────────
-obs_ids = np.arange(1, len(data_new) + 1)
+obs_ids = np.arange(1, len(fd_new) + 1)
 alarm_idx = obs_ids[p2["t2_alarm"] | p2["spe_alarm"]]
 print(f"Alarm observations: {alarm_idx}")
 

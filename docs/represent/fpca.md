@@ -56,6 +56,7 @@ result = fpca(data, argvals, n_comp=3)
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
 from pyfda.regression import fpca
 
@@ -64,9 +65,10 @@ np.random.seed(42)
 argvals = np.linspace(0, 1, 200)
 data = simulate(n=80, argvals=argvals, n_basis=5, efun_type="fourier",
                 eval_type="linear", seed=42)
+fd = Fdata(data, argvals=argvals)
 
 # --- 2. Run FPCA keeping 4 components ------------------------------------
-result = fpca(data, argvals, n_comp=4)
+result = fpca(fd.data, fd.argvals, n_comp=4)
 
 print("Score matrix shape:", result["scores"].shape)      # (80, 4)
 print("Eigenfunction shape:", result["rotation"].shape)    # (200, 4)
@@ -93,7 +95,7 @@ $$
 import matplotlib.pyplot as plt
 
 sv = result["singular_values"]
-eigenvalues = sv ** 2 / (data.shape[0] - 1)
+eigenvalues = sv ** 2 / (fd.data.shape[0] - 1)
 pve = np.cumsum(eigenvalues) / np.sum(eigenvalues)
 
 fig, axes = plt.subplots(1, 2, figsize=(10, 4))
@@ -128,9 +130,9 @@ for k in range(4):
     ax = axes[k]
     phi = result["rotation"][:, k]
     spread = 2 * np.sqrt(eigenvalues[k])
-    ax.plot(argvals, mean, "k-", label="mean")
-    ax.plot(argvals, mean + spread * phi, "r--", label=f"+2 SD")
-    ax.plot(argvals, mean - spread * phi, "b--", label=f"-2 SD")
+    ax.plot(fd.argvals, mean, "k-", label="mean")
+    ax.plot(fd.argvals, mean + spread * phi, "r--", label=f"+2 SD")
+    ax.plot(fd.argvals, mean - spread * phi, "b--", label=f"-2 SD")
     ax.set_title(f"PC {k + 1} ({eigenvalues[k]/eigenvalues.sum()*100:.1f} %)")
     if k == 0:
         ax.legend(fontsize=8)
@@ -169,8 +171,8 @@ reconstructed = result["mean"] + result["scores"][:, :K] @ result["rotation"][:,
 # Compare original vs reconstructed for one curve
 idx = 0
 plt.figure(figsize=(8, 3))
-plt.plot(argvals, data[idx], "gray", alpha=0.6, label="Original")
-plt.plot(argvals, reconstructed[idx], "steelblue", lw=2, label=f"K={K} reconstruction")
+plt.plot(fd.argvals, fd.data[idx], "gray", alpha=0.6, label="Original")
+plt.plot(fd.argvals, reconstructed[idx], "steelblue", lw=2, label=f"K={K} reconstruction")
 plt.legend()
 plt.title("FPCA denoising")
 plt.tight_layout()
@@ -188,12 +190,12 @@ from pyfda.regression import fregre_lm
 response = np.random.randn(80)
 
 # Option A: let fregre_lm handle PCA internally
-result_lm = fregre_lm(data, response, n_comp=4)
+result_lm = fregre_lm(fd.data, response, n_comp=4)
 
 # Option B: use pre-computed scores as features in any model
 from sklearn.linear_model import LinearRegression
 
-scores = fpca(data, argvals, n_comp=4)["scores"]
+scores = fpca(fd.data, fd.argvals, n_comp=4)["scores"]
 model = LinearRegression().fit(scores, response)
 print("R^2:", model.score(scores, response))
 ```
@@ -207,7 +209,7 @@ print("R^2:", model.score(scores, response))
     ```python
     from pyfda.regression import model_selection_ncomp
 
-    sel = model_selection_ncomp(data, response, max_comp=10, criterion="gcv")
+    sel = model_selection_ncomp(fd.data, response, max_comp=10, criterion="gcv")
     print("Best K:", sel["best_ncomp"])
 
     # Inspect all criteria
@@ -225,11 +227,11 @@ Smoothing before FPCA often improves results, especially with noisy data. Use P-
 from pyfda.basis import pspline_fit_gcv
 
 # Smooth with GCV-selected P-splines
-smooth = pspline_fit_gcv(data, argvals, n_basis=25)
-smoothed_data = smooth["fitted"]
+smooth = pspline_fit_gcv(fd.data, fd.argvals, n_basis=25)
+fd_smooth = Fdata(smooth["fitted"], argvals=fd.argvals)
 
 # Then run FPCA on the smoothed curves
-result_smooth = fpca(smoothed_data, argvals, n_comp=4)
+result_smooth = fpca(fd_smooth.data, fd_smooth.argvals, n_comp=4)
 ```
 
 !!! note "FPCA in the alignment module"

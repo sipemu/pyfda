@@ -14,14 +14,17 @@ SAZED (Seasonal And Zero-crossing Estimation of Periodicity via Distance) combin
 
 ```python
 import numpy as np
-from pyfda.simulation import simulate
+from pyfda import Fdata
 from pyfda.seasonal import sazed
 
 argvals = np.linspace(0, 10, 500)
 # Create data with a known period
-data = np.sin(2 * np.pi * argvals / 2.5)[None, :] + np.random.default_rng(1).normal(0, 0.1, (10, 500))
+fd = Fdata(
+    np.sin(2 * np.pi * argvals / 2.5)[None, :] + np.random.default_rng(1).normal(0, 0.1, (10, 500)),
+    argvals=argvals,
+)
 
-result = sazed(data, argvals, tolerance=0.05)
+result = sazed(fd.data, fd.argvals, tolerance=0.05)
 print(f"Detected period: {result['period']:.3f}")
 print(f"Confidence:      {result['confidence']:.3f}")
 print(f"Agreeing comps:  {result['agreeing_components']}")
@@ -50,7 +53,7 @@ Uses FFT peak detection followed by autocorrelation validation. Best for clean, 
 ```python
 from pyfda.seasonal import autoperiod
 
-result_ap = autoperiod(data, argvals, n_candidates=5, gradient_steps=10)
+result_ap = autoperiod(fd.data, fd.argvals, n_candidates=5, gradient_steps=10)
 print(f"Period: {result_ap['period']:.3f}")
 print(f"FFT power: {result_ap['fft_power']:.3f}")
 print(f"ACF validation: {result_ap['acf_validation']:.3f}")
@@ -81,7 +84,7 @@ A cluster-based variant of autoperiod that can detect *multiple* periodicities s
 ```python
 from pyfda.seasonal import cfd_autoperiod
 
-result_cfd = cfd_autoperiod(data, argvals, cluster_tolerance=0.1, min_cluster_size=1)
+result_cfd = cfd_autoperiod(fd.data, fd.argvals, cluster_tolerance=0.1, min_cluster_size=1)
 print(f"Primary period: {result_cfd['period']:.3f}")
 print(f"All periods:    {result_cfd['periods']}")
 ```
@@ -114,7 +117,7 @@ Locate peaks in each functional observation, optionally smoothing the data first
 from pyfda.seasonal import detect_peaks
 
 peaks = detect_peaks(
-    data, argvals,
+    fd.data, fd.argvals,
     min_distance=0.5,
     min_prominence=0.1,
     smooth_first=True,
@@ -154,7 +157,7 @@ Seasonal and Trend decomposition using Loess (STL) splits each functional observ
 ```python
 from pyfda.seasonal import stl_decompose
 
-decomp = stl_decompose(data, period=25, robust=False)
+decomp = stl_decompose(fd.data, period=25, robust=False)
 # decomp["trend"]     shape (n, m)
 # decomp["seasonal"]  shape (n, m)
 # decomp["remainder"] shape (n, m)
@@ -187,10 +190,10 @@ Quantify how strongly seasonal a signal is, using either a variance-based or spe
 ```python
 from pyfda.seasonal import seasonal_strength
 
-strength = seasonal_strength(data, argvals, period=2.5, method="variance")
+strength = seasonal_strength(fd.data, fd.argvals, period=2.5, method="variance")
 print(f"Seasonal strength (variance): {strength:.3f}")
 
-strength_spec = seasonal_strength(data, argvals, period=2.5, method="spectral")
+strength_spec = seasonal_strength(fd.data, fd.argvals, period=2.5, method="spectral")
 print(f"Seasonal strength (spectral): {strength_spec:.3f}")
 ```
 
@@ -211,6 +214,7 @@ print(f"Seasonal strength (spectral): {strength_spec:.3f}")
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.seasonal import sazed, stl_decompose, seasonal_strength, detect_peaks
 
 # ── 1. Create seasonal data ──────────────────────────────────
@@ -218,24 +222,27 @@ rng = np.random.default_rng(42)
 argvals = np.linspace(0, 20, 1000)
 trend = 0.05 * argvals
 seasonal = np.sin(2 * np.pi * argvals / 4.0)
-data = (trend + seasonal)[None, :] + rng.normal(0, 0.15, (15, 1000))
+fd = Fdata(
+    (trend + seasonal)[None, :] + rng.normal(0, 0.15, (15, 1000)),
+    argvals=argvals,
+)
 
 # ── 2. Detect the period ─────────────────────────────────────
-detected = sazed(data, argvals)
+detected = sazed(fd.data, fd.argvals)
 print(f"Detected period: {detected['period']:.2f}  (true = 4.0)")
 
 # ── 3. Decompose ─────────────────────────────────────────────
-period_pts = int(round(detected["period"] / (argvals[1] - argvals[0])))
-decomp = stl_decompose(data, period=period_pts)
+period_pts = int(round(detected["period"] / (fd.argvals[1] - fd.argvals[0])))
+decomp = stl_decompose(fd.data, period=period_pts)
 print(f"Trend range:     [{decomp['trend'][0].min():.2f}, {decomp['trend'][0].max():.2f}]")
 print(f"Seasonal range:  [{decomp['seasonal'][0].min():.2f}, {decomp['seasonal'][0].max():.2f}]")
 
 # ── 4. Measure strength ──────────────────────────────────────
-s = seasonal_strength(data, argvals, period=detected["period"])
+s = seasonal_strength(fd.data, fd.argvals, period=detected["period"])
 print(f"Seasonal strength: {s:.3f}")
 
 # ── 5. Find peaks ────────────────────────────────────────────
-pk = detect_peaks(data, argvals, smooth_first=True, smooth_nbasis=30)
+pk = detect_peaks(fd.data, fd.argvals, smooth_first=True, smooth_nbasis=30)
 print(f"Mean inter-peak distance: {pk['mean_period']:.2f}")
 
 # ── 6. Visualize (optional) ──────────────────────────────────
@@ -245,16 +252,16 @@ try:
     fig, axes = plt.subplots(4, 1, figsize=(12, 8), sharex=True)
     i = 0  # show first observation
 
-    axes[0].plot(argvals, data[i], linewidth=0.7)
+    axes[0].plot(fd.argvals, fd.data[i], linewidth=0.7)
     axes[0].set_ylabel("Original")
 
-    axes[1].plot(argvals, decomp["trend"][i])
+    axes[1].plot(fd.argvals, decomp["trend"][i])
     axes[1].set_ylabel("Trend")
 
-    axes[2].plot(argvals, decomp["seasonal"][i])
+    axes[2].plot(fd.argvals, decomp["seasonal"][i])
     axes[2].set_ylabel("Seasonal")
 
-    axes[3].plot(argvals, decomp["remainder"][i])
+    axes[3].plot(fd.argvals, decomp["remainder"][i])
     axes[3].set_ylabel("Remainder")
     axes[3].set_xlabel("t")
 

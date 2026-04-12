@@ -16,6 +16,7 @@ The most common approach: project the functional predictors onto their principal
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.regression import fregre_lm
 
 # Simulate data
@@ -25,20 +26,21 @@ t = np.linspace(0, 1, m)
 beta_true = np.sin(4 * np.pi * t)
 
 # Generate functional predictors (smooth random curves)
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 for i in range(n):
-    data[i] = (
+    raw[i] = (
         np.random.randn() * np.sin(2 * np.pi * t)
         + np.random.randn() * np.cos(2 * np.pi * t)
         + np.random.randn() * np.sin(4 * np.pi * t)
         + 0.3 * np.random.randn(m)
     )
+fd = Fdata(raw, argvals=t)
 
 # Scalar response = integral of data * beta + noise
-response = np.trapz(data * beta_true, t, axis=1) + 0.5 * np.random.randn(n)
+response = np.trapz(fd.data * beta_true, fd.argvals, axis=1) + 0.5 * np.random.randn(n)
 
 # Fit the model
-result = fregre_lm(data, response, n_comp=3)
+result = fregre_lm(fd.data, response, n_comp=3)
 
 fitted   = result["fitted_values"]   # (n,)
 resid    = result["residuals"]       # (n,)
@@ -71,7 +73,7 @@ print(f"R-squared: {r2:.4f}")
 ```python
 from pyfda.regression import fregre_pls
 
-result = fregre_pls(data, t, response, n_comp=3)
+result = fregre_pls(fd.data, fd.argvals, response, n_comp=3)
 
 print(f"PLS R-squared: {result['r_squared']:.4f}")
 print(f"Beta shape:    {result['beta_t'].shape}")
@@ -98,7 +100,7 @@ from pyfda.regression import fregre_np
 from pyfda.metric import lp_self_distance_matrix
 
 # Compute L2 distance matrix
-D = lp_self_distance_matrix(data, t, p=2.0)
+D = lp_self_distance_matrix(fd.data, fd.argvals, p=2.0)
 
 result = fregre_np(D, response, h=0.0)  # h=0.0 -> automatic bandwidth
 
@@ -125,7 +127,7 @@ Automatically select the optimal number of FPC components using **GCV**, **AIC**
 ```python
 from pyfda.regression import model_selection_ncomp
 
-result = model_selection_ncomp(data, response, max_comp=10, criterion="gcv")
+result = model_selection_ncomp(fd.data, response, max_comp=10, criterion="gcv")
 
 best_k = result["best_ncomp"]
 print(f"Best number of components: {best_k}")
@@ -151,7 +153,7 @@ from pyfda.regression import fpca
 import numpy as np
 
 # Step 1: FPCA
-pca = fpca(data, t, n_comp=5)
+pca = fpca(fd.data, fd.argvals, n_comp=5)
 scores   = pca["scores"]       # (n, 5)
 rotation = pca["rotation"]     # (m, 5)
 mean_fn  = pca["mean"]         # (m,)
@@ -173,6 +175,8 @@ beta_t = rotation @ beta_hat[1:]
 
 ```python
 import numpy as np
+import pandas as pd
+from pyfda import Fdata
 from pyfda.regression import fregre_lm, fregre_pls, fregre_np, model_selection_ncomp
 from pyfda.metric import lp_self_distance_matrix
 
@@ -184,33 +188,41 @@ t = np.linspace(0, 1, m)
 # True coefficient: tensile strength depends on the late-stage behavior
 beta_true = np.where(t > 0.6, 5 * (t - 0.6), 0.0)
 
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 for i in range(n):
     c1, c2, c3 = np.random.randn(3)
-    data[i] = c1 * t + c2 * t**2 + c3 * np.sin(np.pi * t) + 0.2 * np.random.randn(m)
+    raw[i] = c1 * t + c2 * t**2 + c3 * np.sin(np.pi * t) + 0.2 * np.random.randn(m)
+fd = Fdata(raw, argvals=t)
 
-response = np.trapz(data * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
+response = np.trapz(fd.data * beta_true, fd.argvals, axis=1) + 0.3 * np.random.randn(n)
 
 # --- Model selection ---
-sel = model_selection_ncomp(data, response, max_comp=8, criterion="gcv")
+sel = model_selection_ncomp(fd.data, response, max_comp=8, criterion="gcv")
 print(f"Optimal components: {sel['best_ncomp']}")
 
 # --- FPC regression ---
-lm_result = fregre_lm(data, response, n_comp=sel["best_ncomp"])
+lm_result = fregre_lm(fd.data, response, n_comp=sel["best_ncomp"])
 print(f"FPC R-squared:  {lm_result['r_squared']:.4f}")
 
 # --- PLS regression ---
-pls_result = fregre_pls(data, t, response, n_comp=sel["best_ncomp"])
+pls_result = fregre_pls(fd.data, fd.argvals, response, n_comp=sel["best_ncomp"])
 print(f"PLS R-squared:  {pls_result['r_squared']:.4f}")
 
 # --- Nonparametric regression ---
-D = lp_self_distance_matrix(data, t, p=2.0)
+D = lp_self_distance_matrix(fd.data, fd.argvals, p=2.0)
 np_result = fregre_np(D, response)
 print(f"NP  R-squared:  {np_result['r_squared']:.4f}")
 print(f"NP  bandwidth:  {np_result['h_func']:.4f}")
 
 # --- Compare beta estimates ---
-print(f"\nBeta(t) correlation with truth:")
-print(f"  FPC: {np.corrcoef(beta_true, lm_result['beta_t'])[0,1]:.4f}")
-print(f"  PLS: {np.corrcoef(beta_true, pls_result['beta_t'])[0,1]:.4f}")
+results_df = pd.DataFrame({
+    "method": ["FPC", "PLS", "NP"],
+    "r_squared": [lm_result["r_squared"], pls_result["r_squared"], np_result["r_squared"]],
+    "beta_corr": [
+        np.corrcoef(beta_true, lm_result["beta_t"])[0, 1],
+        np.corrcoef(beta_true, pls_result["beta_t"])[0, 1],
+        float("nan"),  # NP has no beta(t)
+    ],
+})
+print(results_df.to_string(index=False))
 ```

@@ -12,6 +12,7 @@ Projects FPC scores onto the direction that maximizes the between-class to withi
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.classification import fclassif_lda
 
 # --- Simulate two-class functional data ---
@@ -19,17 +20,18 @@ np.random.seed(0)
 n, m = 80, 101
 t = np.linspace(0, 1, m)
 
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 labels = np.zeros(n, dtype=np.int64)
 for i in range(n):
     if i < n // 2:
-        data[i] = np.sin(2 * np.pi * t) + 0.3 * np.random.randn(m)
+        raw[i] = np.sin(2 * np.pi * t) + 0.3 * np.random.randn(m)
         labels[i] = 0
     else:
-        data[i] = np.cos(2 * np.pi * t) + 0.3 * np.random.randn(m)
+        raw[i] = np.cos(2 * np.pi * t) + 0.3 * np.random.randn(m)
         labels[i] = 1
+fd = Fdata(raw, argvals=t)
 
-result = fclassif_lda(data, labels, ncomp=3)
+result = fclassif_lda(fd.data, labels, ncomp=3)
 print(f"LDA accuracy: {result['accuracy']:.2%}")
 print(f"Predictions:  {result['predicted'][:10]}")
 ```
@@ -46,7 +48,7 @@ Relaxes the equal-covariance assumption of LDA, estimating a separate covariance
 ```python
 from pyfda.classification import fclassif_qda
 
-result = fclassif_qda(data, labels, ncomp=3)
+result = fclassif_qda(fd.data, labels, ncomp=3)
 print(f"QDA accuracy: {result['accuracy']:.2%}")
 ```
 
@@ -62,7 +64,7 @@ Classifies each observation by a majority vote among its $k$ nearest neighbors i
 ```python
 from pyfda.classification import fclassif_knn
 
-result = fclassif_knn(data, labels, ncomp=3, k=5)
+result = fclassif_knn(fd.data, labels, ncomp=3, k=5)
 print(f"k-NN accuracy (k=5): {result['accuracy']:.2%}")
 ```
 
@@ -77,7 +79,7 @@ A nonparametric classifier using kernel density estimation in the functional spa
 ```python
 from pyfda.classification import fclassif_kernel
 
-result = fclassif_kernel(data, t, labels, h_func=1.0, h_scalar=1.0)
+result = fclassif_kernel(fd.data, fd.argvals, labels, h_func=1.0, h_scalar=1.0)
 print(f"Kernel accuracy: {result['accuracy']:.2%}")
 ```
 
@@ -98,7 +100,7 @@ from pyfda.classification import fclassif_cv
 # Compare methods
 for method in ["lda", "qda", "knn"]:
     result = fclassif_cv(
-        data, t, labels,
+        fd.data, fd.argvals, labels,
         method=method,
         ncomp=5,
         nfold=5,
@@ -129,7 +131,7 @@ $$
 ```python
 from pyfda.regression import functional_logistic
 
-result = functional_logistic(data, labels.astype(np.float64), n_comp=3)
+result = functional_logistic(fd.data, labels.astype(np.float64), n_comp=3)
 
 probs     = result["probabilities"]      # (n,) -- P(G=1 | x)
 predicted = result["predicted_classes"]   # (n,)
@@ -156,6 +158,7 @@ print(f"Intercept: {intercept:.4f}")
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.classification import fclassif_lda, fclassif_qda, fclassif_knn, fclassif_cv
 from pyfda.regression import functional_logistic
 
@@ -167,42 +170,43 @@ t = np.linspace(0, 1, m)
 
 # Class 0: normal waveform
 # Class 1: abnormal waveform (extra peak)
-data = np.zeros((n, m))
+raw = np.zeros((n, m))
 labels = np.zeros(n, dtype=np.int64)
 
 for i in range(n):
     noise = 0.2 * np.random.randn(m)
     if i < n_per_class:
         # Normal: single peak
-        data[i] = np.exp(-((t - 0.5)**2) / 0.01) + noise
+        raw[i] = np.exp(-((t - 0.5)**2) / 0.01) + noise
         labels[i] = 0
     else:
         # Abnormal: double peak
-        data[i] = (
+        raw[i] = (
             np.exp(-((t - 0.35)**2) / 0.008)
             + 0.7 * np.exp(-((t - 0.65)**2) / 0.008)
             + noise
         )
         labels[i] = 1
+fd = Fdata(raw, argvals=t)
 
 # --- Compare classifiers ---
 print("Resubstitution accuracy:")
 for name, fn in [("LDA", fclassif_lda), ("QDA", fclassif_qda)]:
-    r = fn(data, labels, ncomp=4)
+    r = fn(fd.data, labels, ncomp=4)
     print(f"  {name}: {r['accuracy']:.2%}")
 
-r = fclassif_knn(data, labels, ncomp=4, k=5)
+r = fclassif_knn(fd.data, labels, ncomp=4, k=5)
 print(f"  k-NN: {r['accuracy']:.2%}")
 
 # --- Cross-validated comparison ---
 print("\nCross-validated error rates:")
 for method in ["lda", "qda", "knn"]:
-    cv = fclassif_cv(data, t, labels, method=method, ncomp=6, nfold=5)
+    cv = fclassif_cv(fd.data, fd.argvals, labels, method=method, ncomp=6, nfold=5)
     print(f"  {method.upper()}: {cv['error_rate']:.2%} (best k={cv['best_ncomp']})")
 
 # --- Functional logistic regression ---
-logit = functional_logistic(data, labels.astype(np.float64), n_comp=4)
+logit = functional_logistic(fd.data, labels.astype(np.float64), n_comp=4)
 acc = np.mean(logit["predicted_classes"] == labels)
 print(f"\nLogistic regression accuracy: {acc:.2%}")
-print(f"Most influential time point: t = {t[np.argmax(np.abs(logit['beta_t']))]:.2f}")
+print(f"Most influential time point: t = {fd.argvals[np.argmax(np.abs(logit['beta_t']))]:.2f}")
 ```

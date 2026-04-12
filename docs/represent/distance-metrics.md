@@ -25,18 +25,21 @@ with numerical integration via the trapezoidal rule.
 
 ```python
 import numpy as np
-from pyfda.metric import lp_self_1d, lp_cross_1d
+from pyfda import Fdata
 
 argvals = np.linspace(0, 1, 200)
 
+# Assuming `data` is a numpy array of curves, wrap it in Fdata
+fd = Fdata(data, argvals=argvals)
+
 # L2 distance (default)
-D_l2 = lp_self_1d(data, argvals, p=2.0)
+D_l2 = fd.distance(method="lp", p=2.0)
 
 # L1 distance (more robust to spikes)
-D_l1 = lp_self_1d(data, argvals, p=1.0)
+D_l1 = fd.distance(method="lp", p=1.0)
 
 # L-infinity (supremum norm)
-D_linf = lp_self_1d(data, argvals, p=float('inf'))
+D_linf = fd.distance(method="lp", p=float('inf'))
 ```
 
 | Parameter | Default | Description |
@@ -314,8 +317,9 @@ Do you need amplitude/phase decomposition?
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from pyfda import Fdata
 from pyfda.simulation import simulate
-from pyfda.metric import lp_self_1d, dtw_self_1d, hausdorff_self_1d, fourier_self_1d
+from pyfda.metric import dtw_self_1d, hausdorff_self_1d, fourier_self_1d
 
 # --- 1. Simulate data with phase variation --------------------------------
 argvals = np.linspace(0, 1, 150)
@@ -326,12 +330,13 @@ shifted_data = data.copy()
 for i in range(15, 30):
     shift = np.random.randint(-10, 10)
     shifted_data[i] = np.roll(data[i], shift)
+fd = Fdata(shifted_data, argvals=argvals)
 
 # --- 2. Compute distance matrices ----------------------------------------
-D_l2      = lp_self_1d(shifted_data, argvals, p=2.0)
-D_dtw     = dtw_self_1d(shifted_data, p=2.0, w=15)
-D_haus    = hausdorff_self_1d(shifted_data, argvals)
-D_fourier = fourier_self_1d(shifted_data, n_basis=7)
+D_l2      = fd.distance(method="lp", p=2.0)
+D_dtw     = dtw_self_1d(fd.data, p=2.0, w=15)
+D_haus    = hausdorff_self_1d(fd.data, fd.argvals)
+D_fourier = fourier_self_1d(fd.data, n_basis=7)
 
 # --- 3. Visualize --------------------------------------------------------
 fig, axes = plt.subplots(1, 4, figsize=(18, 4))
@@ -357,7 +362,7 @@ from pyfda.regression import fregre_np
 from pyfda.clustering import kmeans_fd
 
 # Nonparametric kernel regression from distances
-D = lp_self_1d(data, argvals, p=2.0)
+D = fd.distance(method="lp", p=2.0)
 reg = fregre_np(D, response, h=0.0)  # h=0 -> automatic bandwidth
 
 # Functional k-means also accepts precomputed distances
