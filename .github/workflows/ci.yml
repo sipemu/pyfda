@@ -25,10 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: sipemu/fdars
-          path: ../fdars
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
@@ -43,10 +39,6 @@ jobs:
         toolchain: [stable, "1.81"]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: sipemu/fdars
-          path: ../fdars
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
@@ -63,10 +55,6 @@ jobs:
         python-version: ["3.10", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: sipemu/fdars
-          path: ../fdars
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:

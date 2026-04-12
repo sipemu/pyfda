@@ -12,6 +12,6 @@ name = "_native"
 crate-type = ["cdylib"]
 
 [dependencies]
-fdars-core = { path = "../fdars/fdars-core", features = ["parallel"] }
+fdars-core = { version = "0.13.0", features = ["parallel"] }
 pyo3 = { version = "0.28", features = ["extension-module"] }
 numpy = "0.28"

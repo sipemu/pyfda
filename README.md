@@ -32,11 +32,7 @@ High-performance Functional Data Analysis for Python, powered by a Rust backend 
 ### Installation
 
 ```sh
-# Clone with fdars-core dependency
 git clone https://github.com/sipemu/pyfda.git
-git clone https://github.com/sipemu/fdars.git
-
-# Build and install
 cd pyfda
 python -m venv .venv && source .venv/bin/activate
 pip install maturin numpy

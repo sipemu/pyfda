@@ -17,10 +17,6 @@ jobs:
         target: [x86_64, aarch64]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: sipemu/fdars
-          path: ../fdars
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -42,10 +38,6 @@ jobs:
         target: [x86_64, aarch64]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: sipemu/fdars
-          path: ../fdars
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -62,10 +54,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: sipemu/fdars
-          path: ../fdars
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -81,10 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: sipemu/fdars
-          path: ../fdars
       - uses: PyO3/maturin-action@v1
         with:
           command: sdist
