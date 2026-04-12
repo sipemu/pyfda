@@ -1,8 +1,100 @@
 # pyfda.fdata
 
-Core functional data operations: pointwise statistics, derivatives, norms, and normalization.
+Core functional data container and operations.
 
-## Functions
+---
+
+## `Fdata` class
+
+```python
+from pyfda import Fdata
+```
+
+The **main entry point** for working with functional data in pyfda. Bundles
+observation data, evaluation grid, identifiers, and metadata into a single
+object — mirroring the R package's `fdata` class.
+
+### Constructor
+
+```python
+Fdata(data, argvals=None, rangeval=None, names=None, id=None, metadata=None)
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `data` | `array_like` | | `(n, m)` matrix, `(n, m1, m2)` 3-D array (surfaces), or 1-D array (single curve) |
+| `argvals` | `ndarray` or `(ndarray, ndarray)` | `arange(m)` | Evaluation grid. Tuple of two arrays for 2-D surfaces. |
+| `rangeval` | `tuple` | auto | Domain range |
+| `names` | `dict` | auto | Plot labels (`main`, `xlab`, `ylab`, `zlab`) |
+| `id` | `list[str]` | `["obs_1", …]` | Observation identifiers |
+| `metadata` | `DataFrame` or `dict` | `None` | Per-observation covariates |
+
+### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `n_obs` | `int` | Number of observations |
+| `n_points` | `int` | Number of evaluation points |
+| `shape` | `tuple` | Shape of the data matrix |
+| `fdata2d` | `bool` | Whether this is 2-D surface data |
+| `dims` | `tuple` or `None` | `(m1, m2)` grid dimensions (2-D only) |
+
+### Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `mean()` | `ndarray` | Pointwise mean across observations |
+| `center()` | `Fdata` | Subtract the pointwise mean |
+| `deriv(nderiv=1)` | `Fdata` | Numerical derivatives |
+| `norm(p=2.0)` | `ndarray` | Lp norms per observation |
+| `normalize(method)` | `Fdata` | Normalize (center, autoscale, pareto, …) |
+| `geometric_median()` | `ndarray` | L1 geometric median |
+| `depth(method, **kw)` | `ndarray` | Depth values (fraiman_muniz, modal, band, …) |
+| `distance(other, method, **kw)` | `ndarray` | Distance matrix (lp, dtw, hausdorff, …) |
+| `copy()` | `Fdata` | Deep copy |
+| `summary()` | `None` | Print detailed summary |
+
+### Subsetting
+
+```python
+fd[0:5]           # first 5 observations — metadata preserved
+fd[[0, 3, 7]]     # specific observations by index
+fd[0:5, 10:50]    # observations + grid points (1-D only)
+```
+
+### Arithmetic
+
+`Fdata` supports element-wise `+`, `-`, `*`, `/` with other `Fdata` objects
+or scalars:
+
+```python
+fd_centered = fd - fd.mean()
+fd_scaled = fd * 2.0
+fd_sum = fd1 + fd2
+```
+
+### Example
+
+```python
+import numpy as np
+from pyfda import Fdata
+
+t = np.linspace(0, 1, 100)
+X = np.random.randn(20, 100)
+fd = Fdata(X, argvals=t, id=[f"s_{i}" for i in range(20)],
+           metadata={"group": ["A"] * 10 + ["B"] * 10})
+
+fd_c = fd.center()          # centered, metadata preserved
+depths = fd.depth("band")   # band depth values
+D = fd.distance(method="lp") # L2 distance matrix
+```
+
+---
+
+## Low-level functions
+
+The functions below operate on raw NumPy arrays. They are called internally
+by `Fdata` methods but can also be used directly.
 
 | Function | Description |
 |----------|-------------|
@@ -21,7 +113,7 @@ Core functional data operations: pointwise statistics, derivatives, norms, and n
 ### `mean_1d`
 
 ```python
-pyfda.mean_1d(data)
+pyfda.fdata.mean_1d(data)
 ```
 
 Compute the pointwise mean of 1D functional data.

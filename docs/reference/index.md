@@ -1,16 +1,17 @@
 # API Reference
 
-Complete reference for all `pyfda` modules. Every function listed here is implemented in Rust and exposed to Python via PyO3.
+Complete reference for all `pyfda` modules.
 
 ```python
-import pyfda
+from pyfda import Fdata  # main entry point
 ```
 
 ## Modules
 
 | Module | Description |
 |--------|-------------|
-| [fdata](fdata.md) | Core functional data operations: mean, centering, derivatives, norms, median, normalization |
+| [**Fdata**](fdata.md) | **Functional data container** — the main entry point (1D curves, 2D surfaces, metadata, methods) |
+| [fdata](fdata.md#low-level-functions) | Low-level functional data operations: mean, centering, derivatives, norms, median, normalization |
 | [depth](depth.md) | Depth measures for functional data (Fraiman-Muniz, modal, band, projection, spatial) |
 | [metric](metric.md) | Distance metrics and matrices (Lp, Hausdorff, DTW, Soft-DTW, Fourier, horizontal shift) |
 | [basis](basis.md) | Basis representations: B-spline, Fourier, P-spline fitting, automatic selection |

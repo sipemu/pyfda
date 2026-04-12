@@ -24,6 +24,47 @@ native-speed computation with a familiar NumPy interface.
 
 ---
 
+## The `Fdata` Class
+
+The central object in pyfda is **`Fdata`** -- a functional data container that
+bundles observation data, evaluation grid, identifiers, and per-observation
+metadata into a single object (mirroring the R package's `fdata` class).
+
+```python
+import numpy as np
+from pyfda import Fdata
+
+# Create functional data from a (n_obs, n_points) array + grid
+t = np.linspace(0, 1, 100)
+X = np.random.randn(30, 100)
+fd = Fdata(X, argvals=t, id=[f"curve_{i}" for i in range(30)])
+fd
+# Fdata (1D)  –  30 obs × 100 points  –  range [0.0, 1.0]
+
+# Attach metadata (pandas DataFrame or dict of lists)
+fd = Fdata(X, argvals=t,
+           metadata={"group": ["A"] * 15 + ["B"] * 15})
+
+# Methods delegate to the Rust backend
+mu = fd.mean()                     # pointwise mean
+fd_c = fd.center()                 # centered Fdata
+d1 = fd.deriv(nderiv=1)            # first derivative (returns Fdata)
+norms = fd.norm(p=2.0)             # L2 norms per curve
+depths = fd.depth("fraiman_muniz") # depth values
+D = fd.distance(method="lp")       # self-distance matrix
+
+# Subset -- metadata and IDs are preserved
+fd_sub = fd[0:10]
+
+# Arithmetic
+fd_scaled = fd * 2.0
+```
+
+See the [Fdata reference](reference/fdata.md) and
+[Introduction](learn/introduction.md) for a full walkthrough.
+
+---
+
 <!-- ===== Learn ===== -->
 <div class="pyfda-section-heading pyfda-learn">Learn</div>
 <p class="pyfda-section-desc">Tutorials and guides to get started with functional data analysis in Python.</p>
@@ -186,33 +227,35 @@ The only runtime dependency is **NumPy**.
 
 ## Quick Example
 
-A minimal end-to-end workflow: simulate functional data, compute depth
+A minimal end-to-end workflow: create an `Fdata` object, compute depth
 rankings, and cluster.
 
 ```python
 import numpy as np
+from pyfda import Fdata
 from pyfda.simulation import simulate
-from pyfda.depth import fraiman_muniz_1d
 from pyfda.clustering import kmeans_fd
 
 # 1. Simulate 60 curves on a regular grid
 argvals = np.linspace(0, 1, 100)
 data = simulate(n=60, argvals=argvals, n_basis=7, seed=42)
-print(data.shape)  # (60, 100)
 
-# 2. Rank curves by Fraiman-Muniz depth
-depths = fraiman_muniz_1d(data, data)
+# 2. Wrap in an Fdata object
+fd = Fdata(data, argvals=argvals)
+print(fd)  # Fdata (1D)  –  60 obs × 100 points  –  range [0.0, 1.0]
+
+# 3. Rank curves by Fraiman-Muniz depth
+depths = fd.depth("fraiman_muniz")
 deepest = np.argmax(depths)
 print(f"Most central curve: {deepest}, depth = {depths[deepest]:.4f}")
 
-# 3. Cluster into 3 groups
-result = kmeans_fd(data, argvals, k=3, seed=0)
+# 4. Cluster into 3 groups
+result = kmeans_fd(fd.data, fd.argvals, k=3, seed=0)
 print(f"Cluster sizes: {np.bincount(result['cluster'])}")
-print(f"Converged in {result['iter']} iterations")
 ```
 
 !!! info "Rust under the hood"
-    Every function call above crosses into compiled Rust code via
+    Every method call on `Fdata` crosses into compiled Rust code via
     [PyO3](https://pyo3.rs).  There is no Python loop over the 60
     curves -- the entire computation runs at native speed with
     multithreaded parallelism where applicable.
@@ -223,7 +266,8 @@ print(f"Converged in {result['iter']} iterations")
 
 | Module | Description |
 |--------|-------------|
-| `pyfda.fdata` | Mean, center, derivatives, norms, normalization |
+| [`pyfda.Fdata`](reference/fdata.md) | **Functional data container** — the main entry point (1D curves, 2D surfaces, metadata) |
+| `pyfda.fdata` | Low-level functional data operations: mean, center, derivatives, norms, normalization |
 | `pyfda.depth` | Fraiman-Muniz, modal, band, random projection, Tukey, spatial depth |
 | `pyfda.metric` | Lp, Hausdorff, DTW, Soft-DTW, Fourier, horizontal-shift |
 | `pyfda.basis` | B-spline, Fourier, P-spline basis operations |

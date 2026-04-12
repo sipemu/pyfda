@@ -43,8 +43,10 @@ through [PyO3](https://pyo3.rs).  This gives you:
 
 - **Native speed** -- all heavy computation runs in compiled Rust with
   multithreading, not in Python loops.
-- **NumPy interface** -- input and output are ordinary `numpy.ndarray` objects.
-  No wrapper classes to learn.
+- **`Fdata` class** -- a functional data container that bundles data, grid,
+  IDs, and metadata into a single object (mirroring the R package's `fdata`).
+- **NumPy interface** -- you can also work directly with `numpy.ndarray` for
+  full control.
 - **Broad coverage** -- depth, distance, smoothing, basis representation, FPCA,
   regression, clustering, alignment, outlier detection, monitoring, and more.
 
@@ -60,47 +62,73 @@ The only runtime dependency is **NumPy**.
 
 ## Getting Started
 
-### Data Layout
+### The `Fdata` Class
 
-pyfda expects functional data as a **2D NumPy array** of shape
-`(n_obs, n_points)`, where:
-
-- `n_obs` is the number of curves (observations),
-- `n_points` is the number of grid points at which each curve is evaluated.
-
-A separate 1D array `argvals` of length `n_points` holds the evaluation grid
-(e.g., time stamps or wavelengths).
+The central object in pyfda is **`Fdata`** -- a functional data container that
+bundles observation data, evaluation grid, identifiers, and per-observation
+metadata.  It mirrors the R package's `fdata` S3 class.
 
 ```python
 import numpy as np
+from pyfda import Fdata
 
 # 50 curves observed at 200 equally spaced points on [0, 1]
 n_obs = 50
 n_points = 200
 argvals = np.linspace(0, 1, n_points)
 
-# For demonstration, create sine curves with random phase shifts
+# Create sine curves with random phase shifts
 rng = np.random.default_rng(0)
 phases = rng.uniform(0, 2 * np.pi, size=n_obs)
-data = np.array([np.sin(2 * np.pi * argvals + phi) for phi in phases])
-print(data.shape)  # (50, 200)
+X = np.array([np.sin(2 * np.pi * argvals + phi) for phi in phases])
+
+# Wrap in an Fdata object
+fd = Fdata(X, argvals=argvals)
+print(fd)
+# Fdata (1D)  –  50 obs × 200 points  –  range [0.0, 1.0]
+```
+
+#### With Identifiers and Metadata
+
+You can attach identifiers and per-observation covariates:
+
+```python
+fd = Fdata(
+    X, argvals=argvals,
+    id=[f"patient_{i}" for i in range(n_obs)],
+    metadata={
+        "group": ["control"] * 25 + ["treatment"] * 25,
+        "age": rng.integers(20, 60, size=n_obs).tolist(),
+    },
+)
+print(fd)
+# Fdata (1D)  –  50 obs × 200 points  –  range [0.0, 1.0]  –  metadata: group, age
+```
+
+Metadata is preserved when subsetting:
+
+```python
+fd_sub = fd[0:10]
+print(fd_sub.id[:3])          # ['patient_0', 'patient_1', 'patient_2']
+print(fd_sub.metadata["group"][:3])  # ['control', 'control', 'control']
 ```
 
 !!! info "Row = observation, Column = grid point"
-    This is the same convention used by scikit-learn for tabular data, making
-    it easy to mix functional and scalar analyses.
+    The underlying `fd.data` array has shape `(n_obs, n_points)` -- the same
+    convention used by scikit-learn, making it easy to mix functional and scalar
+    analyses.
 
 ### Simulating Data
 
-For reproducible experiments, use the built-in simulation module instead of
-hand-crafting arrays:
+For reproducible experiments, use the built-in simulation module:
 
 ```python
 from pyfda.simulation import simulate
 
 argvals = np.linspace(0, 1, 100)
 data = simulate(n=50, argvals=argvals, n_basis=5, seed=42)
-print(data.shape)  # (50, 100)
+fd = Fdata(data, argvals=argvals)
+print(fd)  # Fdata (1D)  –  50 obs × 100 points  –  range [0.0, 1.0]
 ```
 
 See the [Simulation Toolbox](simulation.md) guide for details on eigenfunction
@@ -110,30 +138,26 @@ types, eigenvalue decays, and Gaussian process generation.
 
 ## Core Operations
 
-The `pyfda.fdata` module provides fundamental operations that work directly on
-the `(n_obs, n_points)` data matrix.
+`Fdata` methods delegate to the Rust backend. They return either numpy arrays
+(for scalar results) or new `Fdata` objects (for transformed functional data),
+preserving metadata.
 
 ### Pointwise Mean
 
 ```python
-from pyfda.fdata import mean_1d
-
-mu = mean_1d(data)
+mu = fd.mean()
 print(mu.shape)  # (100,) -- one value per grid point
 ```
-
-The result is the pointwise average across all 50 curves.
 
 ### Centering
 
 ```python
-from pyfda.fdata import center_1d
-
-centered = center_1d(data)
-print(centered.shape)  # (50, 100) -- same shape, mean subtracted
+fd_centered = fd.center()
+print(fd_centered.shape)  # (50, 100) -- same shape, mean subtracted
+print(fd_centered.id[:3])  # metadata preserved
 ```
 
-After centering, `mean_1d(centered)` is numerically zero at every grid point.
+After centering, the mean is numerically zero at every grid point.
 
 ### Norms
 
@@ -144,9 +168,7 @@ $$
 $$
 
 ```python
-from pyfda.fdata import norm_lp_1d
-
-l2_norms = norm_lp_1d(data, argvals, p=2.0)
+l2_norms = fd.norm(p=2.0)
 print(l2_norms.shape)  # (50,) -- one norm per curve
 print(f"Mean L2 norm: {l2_norms.mean():.4f}")
 ```
@@ -154,13 +176,11 @@ print(f"Mean L2 norm: {l2_norms.mean():.4f}")
 ### Normalization
 
 ```python
-from pyfda.fdata import normalize
-
 # Center and scale each grid point (like sklearn's StandardScaler)
-data_scaled = normalize(data, method="autoscale")
+fd_scaled = fd.normalize("autoscale")
 
 # Or normalize each curve individually
-data_curve = normalize(data, method="curve_standardize")
+fd_curve = fd.normalize("curve_standardize")
 ```
 
 Available methods: `"center"`, `"autoscale"`, `"pareto"`, `"range"`,
@@ -176,43 +196,41 @@ Depth measures quantify how "central" a curve is within a sample. Deeper curves
 are more typical; shallow curves are potential outliers.
 
 ```python
-from pyfda.depth import fraiman_muniz_1d, modified_band_1d
-
-# Fraiman-Muniz depth
-fm_depth = fraiman_muniz_1d(data, data)
+# Via Fdata convenience method
+fm_depth = fd.depth("fraiman_muniz")
 print(f"Most central curve index: {np.argmax(fm_depth)}")
 
-# Modified band depth
-mbd = modified_band_1d(data, data)
+# Or via low-level functions
+from pyfda.depth import modified_band_1d
+mbd = modified_band_1d(fd.data, fd.data)
 ```
 
-Other depth functions available: `modal_1d`, `band_1d`, `random_projection_1d`,
-`random_tukey_1d`, `functional_spatial_1d`, `kernel_functional_spatial_1d`, and
+Other depth functions available: `modal`, `band`, `random_projection`,
+`random_tukey`, `functional_spatial`, `kernel_functional_spatial`, and
 their 2D counterparts.
 
 ### Distance Metrics
 
 ```python
-from pyfda.metric import lp_self_1d, dtw_self_1d
-
-# L2 distance matrix
-dist_l2 = lp_self_1d(data, argvals, p=2.0)
+# Via Fdata convenience method
+dist_l2 = fd.distance(method="lp", p=2.0)
 print(dist_l2.shape)  # (50, 50)
 
-# DTW distance matrix
-dist_dtw = dtw_self_1d(data, p=2.0)
+# Or via low-level functions
+from pyfda.metric import dtw_self_1d
+dist_dtw = dtw_self_1d(fd.data, p=2.0)
 print(dist_dtw.shape)  # (50, 50)
 ```
 
-See also: `hausdorff_self_1d`, `soft_dtw_self_1d`, `fourier_self_1d`,
-`hshift_self_1d`, and cross-distance variants.
+See also: `hausdorff`, `soft_dtw`, `fourier`, `hshift`, and cross-distance
+variants.
 
 ### Regression and FPCA
 
 ```python
 from pyfda.regression import fpca
 
-result = fpca(data, argvals, n_comp=3)
+result = fpca(fd.data, fd.argvals, n_comp=3)
 scores = result["scores"]        # (50, 3)
 rotation = result["rotation"]    # (100, 3) -- eigenfunctions
 print(f"Variance explained by PC1: singular_value = {result['singular_values'][0]:.4f}")
@@ -223,7 +241,7 @@ print(f"Variance explained by PC1: singular_value = {result['singular_values'][0
 ```python
 from pyfda.clustering import kmeans_fd
 
-clusters = kmeans_fd(data, argvals, k=3, seed=0)
+clusters = kmeans_fd(fd.data, fd.argvals, k=3, seed=0)
 print(f"Cluster labels: {clusters['cluster']}")
 print(f"Total within-cluster SS: {clusters['tot_withinss']:.4f}")
 ```
@@ -233,7 +251,7 @@ print(f"Total within-cluster SS: {clusters['tot_withinss']:.4f}")
 ```python
 from pyfda.outliers import outliergram
 
-og = outliergram(data)
+og = outliergram(fd.data)
 n_outliers = og["outliers"].sum()
 print(f"Detected {n_outliers} outlier(s)")
 ```
@@ -244,8 +262,8 @@ print(f"Detected {n_outliers} outlier(s)")
 from pyfda.smoothing import nadaraya_watson, optim_bandwidth
 
 # Pick one noisy curve
-x = argvals
-y = data[0] + np.random.default_rng(0).normal(0, 0.1, size=len(x))
+x = fd.argvals
+y = fd.data[0] + np.random.default_rng(0).normal(0, 0.1, size=len(x))
 
 # Find optimal bandwidth via GCV
 bw = optim_bandwidth(x, y)

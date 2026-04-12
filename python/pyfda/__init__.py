@@ -24,6 +24,7 @@ All computations are performed in Rust via fdars-core for maximum performance.
 import sys as _sys
 
 from pyfda import _native
+from pyfda.fdata_class import Fdata
 
 __version__ = "0.1.0"
 

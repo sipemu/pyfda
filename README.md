@@ -6,11 +6,69 @@
 
 High-performance Functional Data Analysis for Python, powered by a Rust backend ([fdars-core](https://github.com/sipemu/fdars)).
 
+## The `Fdata` Class
+
+The central object in pyfda is `Fdata` — a functional data container that bundles
+observation data, evaluation grid, identifiers, and metadata into a single object
+(mirroring the R package's `fdata` class).
+
+```python
+import numpy as np
+from pyfda import Fdata
+
+# Create functional data: 30 sine curves on [0, 1]
+t = np.linspace(0, 1, 100)
+X = np.array([np.sin(2 * np.pi * t + p) + np.random.normal(0, 0.1, 100)
+              for p in np.random.uniform(0, np.pi, 30)])
+
+fd = Fdata(X, argvals=t, id=[f"curve_{i}" for i in range(30)])
+fd
+# Fdata (1D)  –  30 obs × 100 points  –  range [0.0, 1.0]
+
+# Attach metadata (pandas DataFrame or dict of lists)
+fd = Fdata(X, argvals=t,
+           metadata={"group": ["A"] * 15 + ["B"] * 15,
+                     "score": np.random.randn(30).tolist()})
+
+# Subset — metadata and IDs are preserved
+fd_sub = fd[0:10]
+fd_sub = fd[[0, 5, 15]]
+
+# Arithmetic
+fd_centered = fd - fd.mean()
+fd_scaled = fd * 2.0
+
+# Methods delegate to the Rust backend
+mu = fd.mean()                    # pointwise mean
+fd_c = fd.center()                # centered Fdata
+d1 = fd.deriv(nderiv=1)           # first derivative (returns Fdata)
+norms = fd.norm(p=2.0)            # L2 norms per curve
+depths = fd.depth("fraiman_muniz") # depth values
+D = fd.distance(method="lp")      # self-distance matrix
+
+# 2D surfaces work the same way
+surfaces = np.random.randn(5, 8, 10)       # 5 surfaces on 8×10 grid
+fd2d = Fdata(surfaces, argvals=(np.arange(8), np.arange(10)))
+```
+
+You can still call low-level functions directly with raw NumPy arrays:
+
+```python
+from pyfda.depth import fraiman_muniz_1d
+from pyfda.metric import lp_self_1d
+from pyfda.clustering import kmeans_fd
+
+depths = fraiman_muniz_1d(X, X)
+D = lp_self_1d(X, t, p=2.0)
+result = kmeans_fd(X, t, k=3, seed=42)
+```
+
 ## Modules
 
 | Module | Description |
 |---|---|
-| `pyfda.fdata` | Functional data operations (mean, derivatives, norms, centering) |
+| `pyfda.Fdata` | Functional data container (1D curves, 2D surfaces) with metadata |
+| `pyfda.fdata` | Low-level functional data operations (mean, derivatives, norms, centering) |
 | `pyfda.depth` | Depth functions (Fraiman-Muniz, modal, band, random projection, …) |
 | `pyfda.metric` | Distance metrics (Lp, Hausdorff, DTW, soft-DTW, Fourier, h-shift) |
 | `pyfda.basis` | Basis representations (B-splines, P-splines, Fourier) |
@@ -29,52 +87,12 @@ High-performance Functional Data Analysis for Python, powered by a Rust backend 
 
 ## Quick Start
 
-### Installation
-
 ```sh
 git clone https://github.com/sipemu/pyfda.git
 cd pyfda
 python -m venv .venv && source .venv/bin/activate
 pip install maturin numpy
 maturin develop --release
-```
-
-### Usage
-
-```python
-import numpy as np
-import pyfda
-
-# Create functional data: 30 curves on [0, 1]
-t = np.linspace(0, 1, 100)
-X = np.array([np.sin(2 * np.pi * t + p) + np.random.normal(0, 0.1, 100)
-              for p in np.random.uniform(0, np.pi, 30)])
-
-# Functional mean and derivatives
-from pyfda.fdata import mean_1d, deriv_1d
-mu = mean_1d(X, t)
-dX = deriv_1d(X, t, nderiv=1)
-
-# Depth measures
-from pyfda.depth import fraiman_muniz_1d, band_1d
-depths_fm = fraiman_muniz_1d(X, t)
-depths_band = band_1d(X, t)
-
-# Distance matrix (L2)
-from pyfda.metric import lp_self_1d
-D = lp_self_1d(X, t, p=2.0)
-
-# Clustering
-from pyfda.clustering import kmeans_1d
-result = kmeans_1d(X, t, n_clusters=2, seed=42)
-
-# Smoothing
-from pyfda.smoothing import nadaraya_watson_1d
-X_smooth = nadaraya_watson_1d(X, t, bandwidth=0.05)
-
-# Simulation
-from pyfda.simulation import simulate_kl
-curves = simulate_kl(n_obs=50, n_points=100, n_basis=5, seed=123)
 ```
 
 The package exposes 16 submodules wrapping 130+ functions with zero-copy NumPy conversion. Requires Python >= 3.9.
