@@ -113,7 +113,7 @@ mkdocs serve
 
 ## MSRV
 
-The minimum supported Rust version is **1.81**.
+The minimum supported Rust version is **1.83**.
 
 ## License
 

@@ -3,7 +3,7 @@ name = "fdars"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-rust-version = "1.81"
+rust-version = "1.83"
 description = "Python bindings for fdars-core – Functional Data Analysis in Rust"
 authors = ["Simon Mueller"]
 
