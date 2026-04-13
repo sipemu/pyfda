@@ -1,0 +1,4317 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="High-performance functional data analysis for Python, powered by Rust">
+      
+      
+      
+        <link rel="canonical" href="https://sipemu.github.io/pyfda/reference/alignment/">
+      
+      
+        <link rel="prev" href="../regression/">
+      
+      
+        <link rel="next" href="../outliers/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>fdars.alignment - fdars - Functional Data Analysis for Python</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#fdarsalignment" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="fdars - Functional Data Analysis for Python" class="md-header__button md-logo" aria-label="fdars - Functional Data Analysis for Python" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            fdars - Functional Data Analysis for Python
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              fdars.alignment
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="blue"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sipemu/pyfda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sipemu/pyfda
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../learn/" class="md-tabs__link">
+          
+  
+  
+  Learn
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../represent/" class="md-tabs__link">
+          
+  
+  
+  Represent
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../align/" class="md-tabs__link">
+          
+  
+  
+  Align
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../regression/" class="md-tabs__link">
+          
+  
+  
+  Regression
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../monitoring/" class="md-tabs__link">
+          
+  
+  
+  Monitoring
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../analyze/" class="md-tabs__link">
+          
+  
+  
+  Analyze
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="fdars - Functional Data Analysis for Python" class="md-nav__button md-logo" aria-label="fdars - Functional Data Analysis for Python" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    fdars - Functional Data Analysis for Python
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sipemu/pyfda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sipemu/pyfda
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/derivatives/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Derivatives
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Represent
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Represent
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Represent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional PCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/basis-representation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basis Representation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/depth-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Depth Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/distance-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distance Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Align
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Align
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Align
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/elastic-alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Elastic Alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/shape-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shape Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Regression
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/scalar-on-function/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scalar-on-Function
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/function-on-scalar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Function-on-Scalar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/classification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/elastic-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Elastic Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/explainability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explainability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/conformal-prediction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conformal Prediction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/robust-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Robust Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/spm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyze
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Analyze
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/tolerance-bands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tolerance Bands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/outlier-detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Outlier Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/seasonal-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Seasonal Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/equivalence-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Equivalence Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/covariance-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Covariance Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fdata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.fdata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../depth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.depth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metric/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.metric
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.basis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.alignment
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Functions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#elastic_align_pair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_align_pair
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#karcher_mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        karcher_mean
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#karcher_median" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        karcher_median
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#robust_karcher_mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        robust_karcher_mean
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_distance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_distance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_self_distance_matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_self_distance_matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_cross_distance_matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_cross_distance_matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#srsf_transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        srsf_transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#srsf_inverse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        srsf_inverse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compose_warps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        compose_warps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invert_warp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        invert_warp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warp_smoothness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        warp_smoothness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warp_complexity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        warp_complexity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#amplitude_distance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        amplitude_distance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase_distance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        phase_distance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_depth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shape_distance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        shape_distance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vert_fpca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vert_fpca
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#horiz_fpca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        horiz_fpca
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fpca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        joint_fpca
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_regression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_regression
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_logistic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_logistic
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../outliers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.outliers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../seasonal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.seasonal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.spm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../classification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tolerance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.tolerance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conformal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.conformal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../explain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.explain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Functions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#elastic_align_pair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_align_pair
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#karcher_mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        karcher_mean
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#karcher_median" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        karcher_median
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#robust_karcher_mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        robust_karcher_mean
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_distance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_distance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_self_distance_matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_self_distance_matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_cross_distance_matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_cross_distance_matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#srsf_transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        srsf_transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#srsf_inverse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        srsf_inverse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compose_warps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        compose_warps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invert_warp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        invert_warp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warp_smoothness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        warp_smoothness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warp_complexity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        warp_complexity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#amplitude_distance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        amplitude_distance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase_distance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        phase_distance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_depth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shape_distance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        shape_distance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vert_fpca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vert_fpca
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#horiz_fpca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        horiz_fpca
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joint_fpca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        joint_fpca
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_regression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_regression
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic_logistic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        elastic_logistic
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="fdarsalignment">fdars.alignment<a class="headerlink" href="#fdarsalignment" title="Permanent link">&para;</a></h1>
+<p>Elastic alignment, shape analysis, and warping operations for functional data using the Fisher-Rao metric and SRSF representation.</p>
+<h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#elastic_align_pair"><code>elastic_align_pair</code></a></td>
+<td>Pairwise elastic alignment of two curves</td>
+</tr>
+<tr>
+<td><a href="#karcher_mean"><code>karcher_mean</code></a></td>
+<td>Karcher (Frechet) mean under elastic metric</td>
+</tr>
+<tr>
+<td><a href="#karcher_median"><code>karcher_median</code></a></td>
+<td>Karcher median under elastic metric</td>
+</tr>
+<tr>
+<td><a href="#robust_karcher_mean"><code>robust_karcher_mean</code></a></td>
+<td>Trimmed robust Karcher mean</td>
+</tr>
+<tr>
+<td><a href="#elastic_distance"><code>elastic_distance</code></a></td>
+<td>Elastic (Fisher-Rao) distance between two curves</td>
+</tr>
+<tr>
+<td><a href="#elastic_self_distance_matrix"><code>elastic_self_distance_matrix</code></a></td>
+<td>Elastic self-distance matrix</td>
+</tr>
+<tr>
+<td><a href="#elastic_cross_distance_matrix"><code>elastic_cross_distance_matrix</code></a></td>
+<td>Elastic cross-distance matrix</td>
+</tr>
+<tr>
+<td><a href="#srsf_transform"><code>srsf_transform</code></a></td>
+<td>Square Root Slope Function transform</td>
+</tr>
+<tr>
+<td><a href="#srsf_inverse"><code>srsf_inverse</code></a></td>
+<td>Inverse SRSF transform</td>
+</tr>
+<tr>
+<td><a href="#compose_warps"><code>compose_warps</code></a></td>
+<td>Compose two warping functions</td>
+</tr>
+<tr>
+<td><a href="#invert_warp"><code>invert_warp</code></a></td>
+<td>Invert a warping function</td>
+</tr>
+<tr>
+<td><a href="#warp_smoothness"><code>warp_smoothness</code></a></td>
+<td>Warp smoothness (bending energy)</td>
+</tr>
+<tr>
+<td><a href="#warp_complexity"><code>warp_complexity</code></a></td>
+<td>Warp complexity (geodesic distance from identity)</td>
+</tr>
+<tr>
+<td><a href="#amplitude_distance"><code>amplitude_distance</code></a></td>
+<td>Amplitude distance between two curves</td>
+</tr>
+<tr>
+<td><a href="#phase_distance"><code>phase_distance</code></a></td>
+<td>Phase distance between two curves</td>
+</tr>
+<tr>
+<td><a href="#elastic_depth"><code>elastic_depth</code></a></td>
+<td>Depth under the elastic metric</td>
+</tr>
+<tr>
+<td><a href="#shape_distance"><code>shape_distance</code></a></td>
+<td>Shape (quotient space) distance</td>
+</tr>
+<tr>
+<td><a href="#vert_fpca"><code>vert_fpca</code></a></td>
+<td>Vertical (amplitude) FPCA on aligned data</td>
+</tr>
+<tr>
+<td><a href="#horiz_fpca"><code>horiz_fpca</code></a></td>
+<td>Horizontal (phase) FPCA</td>
+</tr>
+<tr>
+<td><a href="#joint_fpca"><code>joint_fpca</code></a></td>
+<td>Joint amplitude + phase FPCA</td>
+</tr>
+<tr>
+<td><a href="#elastic_regression"><code>elastic_regression</code></a></td>
+<td>Elastic scalar-on-function regression</td>
+</tr>
+<tr>
+<td><a href="#elastic_logistic"><code>elastic_logistic</code></a></td>
+<td>Elastic logistic regression</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="elastic_align_pair"><code>elastic_align_pair</code><a class="headerlink" href="#elastic_align_pair" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">elastic_align_pair</span><span class="p">(</span><span class="n">curve1</span><span class="p">,</span> <span class="n">curve2</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</code></pre></div>
+<p>Align <code>curve2</code> to <code>curve1</code> using elastic (Fisher-Rao) alignment.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>curve1</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Target curve</td>
+</tr>
+<tr>
+<td><code>curve2</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Curve to be aligned</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization parameter</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>f_aligned</code> (m,), <code>gamma</code> (m,), <code>distance</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">result</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">elastic_align_pair</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">aligned</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;f_aligned&quot;</span><span class="p">]</span>
+</code></pre></div>
+<hr />
+<h3 id="karcher_mean"><code>karcher_mean</code><a class="headerlink" href="#karcher_mean" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">karcher_mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+</code></pre></div>
+<p>Compute the Karcher (Frechet) mean under the elastic metric. Iteratively aligns all curves and updates the mean.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td></td>
+<td>Functional data</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+<tr>
+<td><code>max_iter</code></td>
+<td><code>int</code></td>
+<td><code>20</code></td>
+<td>Maximum iterations</td>
+</tr>
+<tr>
+<td><code>tol</code></td>
+<td><code>float</code></td>
+<td><code>1e-4</code></td>
+<td>Convergence tolerance</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>mean</code> (m,), <code>mean_srsf</code> (m,), <code>aligned_data</code> (n, m), <code>gammas</code> (n, m), <code>n_iter</code>, <code>converged</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">km</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">karcher_mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">mean_curve</span> <span class="o">=</span> <span class="n">km</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span>
+</code></pre></div>
+<hr />
+<h3 id="karcher_median"><code>karcher_median</code><a class="headerlink" href="#karcher_median" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">karcher_median</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+</code></pre></div>
+<p>Karcher median under the elastic metric.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td></td>
+<td>Functional data</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+<tr>
+<td><code>max_iter</code></td>
+<td><code>int</code></td>
+<td><code>20</code></td>
+<td>Maximum iterations</td>
+</tr>
+<tr>
+<td><code>tol</code></td>
+<td><code>float</code></td>
+<td><code>1e-3</code></td>
+<td>Convergence tolerance</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>mean</code> (m,), <code>mean_srsf</code> (m,), <code>aligned_data</code> (n, m), <code>gammas</code> (n, m), <code>weights</code> (n,), <code>n_iter</code>, <code>converged</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">karcher_median</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="robust_karcher_mean"><code>robust_karcher_mean</code><a class="headerlink" href="#robust_karcher_mean" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">robust_karcher_mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>                          <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">trim_fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</code></pre></div>
+<p>Trimmed robust Karcher mean. Down-weights outlying curves.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td></td>
+<td>Functional data</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+<tr>
+<td><code>max_iter</code></td>
+<td><code>int</code></td>
+<td><code>20</code></td>
+<td>Maximum iterations</td>
+</tr>
+<tr>
+<td><code>tol</code></td>
+<td><code>float</code></td>
+<td><code>1e-3</code></td>
+<td>Convergence tolerance</td>
+</tr>
+<tr>
+<td><code>trim_fraction</code></td>
+<td><code>float</code></td>
+<td><code>0.1</code></td>
+<td>Fraction of curves to trim</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>mean</code> (m,), <code>mean_srsf</code> (m,), <code>aligned_data</code> (n, m), <code>gammas</code> (n, m), <code>weights</code> (n,), <code>n_iter</code>, <code>converged</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">robust_karcher_mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">trim_fraction</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="elastic_distance"><code>elastic_distance</code><a class="headerlink" href="#elastic_distance" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">elastic_distance</span><span class="p">(</span><span class="n">curve1</span><span class="p">,</span> <span class="n">curve2</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</code></pre></div>
+<p>Compute the elastic (Fisher-Rao) distance between two curves.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>curve1</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>First curve</td>
+</tr>
+<tr>
+<td><code>curve2</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Second curve</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>distance</td>
+<td><code>float</code></td>
+<td>Elastic distance</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">d</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">elastic_distance</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="elastic_self_distance_matrix"><code>elastic_self_distance_matrix</code><a class="headerlink" href="#elastic_self_distance_matrix" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">elastic_self_distance_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</code></pre></div>
+<p>Pairwise elastic distance matrix for a single dataset.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td></td>
+<td>Functional data</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dist</td>
+<td><code>ndarray (n, n)</code></td>
+<td>Symmetric distance matrix</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">D</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">elastic_self_distance_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="elastic_cross_distance_matrix"><code>elastic_cross_distance_matrix</code><a class="headerlink" href="#elastic_cross_distance_matrix" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">elastic_cross_distance_matrix</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="n">data2</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</code></pre></div>
+<p>Elastic cross-distance matrix between two datasets.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data1</code></td>
+<td><code>ndarray (n1, m)</code></td>
+<td></td>
+<td>First dataset</td>
+</tr>
+<tr>
+<td><code>data2</code></td>
+<td><code>ndarray (n2, m)</code></td>
+<td></td>
+<td>Second dataset</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dist</td>
+<td><code>ndarray (n1, n2)</code></td>
+<td>Distance matrix</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="srsf_transform"><code>srsf_transform</code><a class="headerlink" href="#srsf_transform" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">srsf_transform</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="n">argvals</span><span class="p">)</span>
+</code></pre></div>
+<p>Compute the Square Root Slope Function (SRSF) of a curve.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>curve</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Input curve</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Evaluation points</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>srsf</td>
+<td><code>ndarray (m,)</code></td>
+<td>SRSF representation</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">q</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">srsf_transform</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="srsf_inverse"><code>srsf_inverse</code><a class="headerlink" href="#srsf_inverse" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">srsf_inverse</span><span class="p">(</span><span class="n">srsf</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</code></pre></div>
+<p>Reconstruct a curve from its SRSF representation.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>srsf</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>SRSF values</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>initial_value</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Starting value f(t_0)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>curve</td>
+<td><code>ndarray (m,)</code></td>
+<td>Reconstructed curve</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">f_rec</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">srsf_inverse</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div>
+<hr />
+<h3 id="compose_warps"><code>compose_warps</code><a class="headerlink" href="#compose_warps" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">compose_warps</span><span class="p">(</span><span class="n">warp1</span><span class="p">,</span> <span class="n">warp2</span><span class="p">,</span> <span class="n">argvals</span><span class="p">)</span>
+</code></pre></div>
+<p>Compose two warping functions: result = warp1(warp2(t)).</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>warp1</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Outer warping function</td>
+</tr>
+<tr>
+<td><code>warp2</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Inner warping function</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Evaluation points</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>composed</td>
+<td><code>ndarray (m,)</code></td>
+<td>Composed warping function</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">gamma_composed</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">compose_warps</span><span class="p">(</span><span class="n">gamma1</span><span class="p">,</span> <span class="n">gamma2</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="invert_warp"><code>invert_warp</code><a class="headerlink" href="#invert_warp" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">invert_warp</span><span class="p">(</span><span class="n">warp</span><span class="p">,</span> <span class="n">argvals</span><span class="p">)</span>
+</code></pre></div>
+<p>Compute the inverse of a warping function.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>warp</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Warping function</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Evaluation points</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>inverse</td>
+<td><code>ndarray (m,)</code></td>
+<td>Inverse warp</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">gamma_inv</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">invert_warp</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="warp_smoothness"><code>warp_smoothness</code><a class="headerlink" href="#warp_smoothness" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">warp_smoothness</span><span class="p">(</span><span class="n">warp</span><span class="p">,</span> <span class="n">argvals</span><span class="p">)</span>
+</code></pre></div>
+<p>Compute the smoothness (bending energy) of a warping function.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>warp</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Warping function</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Evaluation points</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>smoothness</td>
+<td><code>float</code></td>
+<td>Bending energy</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="n">s</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">warp_smoothness</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="warp_complexity"><code>warp_complexity</code><a class="headerlink" href="#warp_complexity" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">warp_complexity</span><span class="p">(</span><span class="n">warp</span><span class="p">,</span> <span class="n">argvals</span><span class="p">)</span>
+</code></pre></div>
+<p>Geodesic distance of a warping function from the identity.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>warp</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Warping function</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>Evaluation points</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>complexity</td>
+<td><code>float</code></td>
+<td>Geodesic distance from identity</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="n">c</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">warp_complexity</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="amplitude_distance"><code>amplitude_distance</code><a class="headerlink" href="#amplitude_distance" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">amplitude_distance</span><span class="p">(</span><span class="n">curve1</span><span class="p">,</span> <span class="n">curve2</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</code></pre></div>
+<p>Amplitude (vertical) component of the elastic distance.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>curve1</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>First curve</td>
+</tr>
+<tr>
+<td><code>curve2</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Second curve</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>distance</td>
+<td><code>float</code></td>
+<td>Amplitude distance</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="n">da</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">amplitude_distance</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="phase_distance"><code>phase_distance</code><a class="headerlink" href="#phase_distance" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">phase_distance</span><span class="p">(</span><span class="n">curve1</span><span class="p">,</span> <span class="n">curve2</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</code></pre></div>
+<p>Phase (horizontal) component of the elastic distance.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>curve1</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>First curve</td>
+</tr>
+<tr>
+<td><code>curve2</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Second curve</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>distance</td>
+<td><code>float</code></td>
+<td>Phase distance</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="n">dp</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">phase_distance</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="elastic_depth"><code>elastic_depth</code><a class="headerlink" href="#elastic_depth" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">elastic_depth</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</code></pre></div>
+<p>Depth under the elastic metric, decomposed into amplitude and phase components.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td></td>
+<td>Functional data</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>amplitude_depth</code> (n,), <code>phase_depth</code> (n,), <code>combined_depth</code> (n,), <code>amplitude_distances</code> (n, n), <code>phase_distances</code> (n, n)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="n">ed</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">elastic_depth</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="n">deepest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">ed</span><span class="p">[</span><span class="s2">&quot;combined_depth&quot;</span><span class="p">])</span>
+</code></pre></div>
+<hr />
+<h3 id="shape_distance"><code>shape_distance</code><a class="headerlink" href="#shape_distance" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">shape_distance</span><span class="p">(</span><span class="n">curve1</span><span class="p">,</span> <span class="n">curve2</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</code></pre></div>
+<p>Shape distance in the quotient space (invariant to translation, scaling, and reparameterization).</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>curve1</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>First curve</td>
+</tr>
+<tr>
+<td><code>curve2</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Second curve</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>distance</code>, <code>gamma</code> (m,), <code>f2_aligned</code> (m,)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="n">sd</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">shape_distance</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Shape distance: </span><span class="si">{</span><span class="n">sd</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="vert_fpca"><code>vert_fpca</code><a class="headerlink" href="#vert_fpca" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">vert_fpca</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">n_comp</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+</code></pre></div>
+<p>Vertical (amplitude) FPCA. Aligns data via Karcher mean, then performs PCA on the aligned SRSFs.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td></td>
+<td>Functional data</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>n_comp</code></td>
+<td><code>int</code></td>
+<td><code>3</code></td>
+<td>Number of components</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+<tr>
+<td><code>max_iter</code></td>
+<td><code>int</code></td>
+<td><code>20</code></td>
+<td>Karcher mean iterations</td>
+</tr>
+<tr>
+<td><code>tol</code></td>
+<td><code>float</code></td>
+<td><code>1e-4</code></td>
+<td>Convergence tolerance</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>scores</code> (n, n_comp), <code>eigenfunctions_q</code> (n_comp, m+1), <code>eigenfunctions_f</code> (n_comp, m), <code>eigenvalues</code> (n_comp,), <code>cumulative_variance</code> (n_comp,), <code>mean_q</code> (m+1,)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="n">vfpca</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">vert_fpca</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">n_comp</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="horiz_fpca"><code>horiz_fpca</code><a class="headerlink" href="#horiz_fpca" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">horiz_fpca</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">n_comp</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+</code></pre></div>
+<p>Horizontal (phase) FPCA. Analyzes the warping functions from elastic alignment.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td></td>
+<td>Functional data</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>n_comp</code></td>
+<td><code>int</code></td>
+<td><code>3</code></td>
+<td>Number of components</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+<tr>
+<td><code>max_iter</code></td>
+<td><code>int</code></td>
+<td><code>20</code></td>
+<td>Karcher mean iterations</td>
+</tr>
+<tr>
+<td><code>tol</code></td>
+<td><code>float</code></td>
+<td><code>1e-4</code></td>
+<td>Convergence tolerance</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>scores</code> (n, n_comp), <code>eigenfunctions_psi</code> (n_comp, m), <code>eigenfunctions_gam</code> (n_comp, m), <code>eigenvalues</code> (n_comp,), <code>cumulative_variance</code> (n_comp,), <code>mean_psi</code> (m,), <code>shooting_vectors</code> (n, m)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="n">hfpca</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">horiz_fpca</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">n_comp</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="joint_fpca"><code>joint_fpca</code><a class="headerlink" href="#joint_fpca" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">joint_fpca</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">n_comp</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+</code></pre></div>
+<p>Joint amplitude + phase FPCA. Combines vertical and horizontal variability into a single decomposition.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td></td>
+<td>Functional data</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>n_comp</code></td>
+<td><code>int</code></td>
+<td><code>3</code></td>
+<td>Number of components</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+<tr>
+<td><code>max_iter</code></td>
+<td><code>int</code></td>
+<td><code>20</code></td>
+<td>Karcher mean iterations</td>
+</tr>
+<tr>
+<td><code>tol</code></td>
+<td><code>float</code></td>
+<td><code>1e-4</code></td>
+<td>Convergence tolerance</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>scores</code> (n, n_comp), <code>eigenvalues</code> (n_comp,), <code>cumulative_variance</code> (n_comp,), <code>balance_c</code>, <code>vert_component</code> (n_comp, ...), <code>horiz_component</code> (n_comp, ...)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="n">jfpca</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">joint_fpca</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">n_comp</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="elastic_regression"><code>elastic_regression</code><a class="headerlink" href="#elastic_regression" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">elastic_regression</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">ncomp_beta</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>                         <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+</code></pre></div>
+<p>Elastic scalar-on-function regression. Simultaneously aligns and regresses.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td></td>
+<td>Functional predictors</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>response</code></td>
+<td><code>ndarray (n,)</code></td>
+<td></td>
+<td>Scalar response</td>
+</tr>
+<tr>
+<td><code>ncomp_beta</code></td>
+<td><code>int</code></td>
+<td><code>10</code></td>
+<td>Number of basis functions for beta</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+<tr>
+<td><code>max_iter</code></td>
+<td><code>int</code></td>
+<td><code>20</code></td>
+<td>Maximum iterations</td>
+</tr>
+<tr>
+<td><code>tol</code></td>
+<td><code>float</code></td>
+<td><code>1e-4</code></td>
+<td>Convergence tolerance</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>alpha</code>, <code>beta</code> (m,), <code>fitted_values</code> (n,), <code>residuals</code> (n,), <code>sse</code>, <code>r_squared</code>, <code>gammas</code> (n, m), <code>n_iter</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="n">fit</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">elastic_regression</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ncomp_beta</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R-squared: </span><span class="si">{</span><span class="n">fit</span><span class="p">[</span><span class="s1">&#39;r_squared&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h3 id="elastic_logistic"><code>elastic_logistic</code><a class="headerlink" href="#elastic_logistic" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="n">fdars</span><span class="o">.</span><span class="n">elastic_logistic</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argvals</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">ncomp_beta</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>                       <span class="n">lambda_</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+</code></pre></div>
+<p>Elastic logistic regression for binary classification.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td></td>
+<td>Functional predictors</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td></td>
+<td>Evaluation points</td>
+</tr>
+<tr>
+<td><code>labels</code></td>
+<td><code>ndarray (n,)</code> of <code>int64</code></td>
+<td></td>
+<td>Binary labels (0/1)</td>
+</tr>
+<tr>
+<td><code>ncomp_beta</code></td>
+<td><code>int</code></td>
+<td><code>10</code></td>
+<td>Number of basis functions for beta</td>
+</tr>
+<tr>
+<td><code>lambda_</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Regularization</td>
+</tr>
+<tr>
+<td><code>max_iter</code></td>
+<td><code>int</code></td>
+<td><code>20</code></td>
+<td>Maximum iterations</td>
+</tr>
+<tr>
+<td><code>tol</code></td>
+<td><code>float</code></td>
+<td><code>1e-4</code></td>
+<td>Convergence tolerance</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Returns</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>result</td>
+<td><code>dict</code></td>
+<td>Keys: <code>alpha</code>, <code>beta</code> (m,), <code>probabilities</code> (n,), <code>predicted_classes</code> (n,), <code>accuracy</code>, <code>loss</code>, <code>gammas</code> (n, m), <code>n_iter</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="n">fit</span> <span class="o">=</span> <span class="n">fdars</span><span class="o">.</span><span class="n">elastic_logistic</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">ncomp_beta</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accuracy: </span><span class="si">{</span><span class="n">fit</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/sipemu/pyfda" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+      
+        <script src="../../javascripts/katex.js"></script>
+      
+    
+  </body>
+</html>
