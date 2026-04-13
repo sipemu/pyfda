@@ -277,6 +277,55 @@ pub fn normalize<'py>(
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
+/// Normalize functional data (with argvals for Lp normalization).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     2D array of shape (n_obs, n_points).
+/// argvals : numpy.ndarray
+///     1D array of evaluation points.
+/// method : str
+///     One of "center", "autoscale", "pareto", "range",
+///     "curve_center", "curve_standardize", "curve_range", "curve_lp".
+/// p : float, optional
+///     Lp norm order, only used when method="curve_lp" (default 2.0).
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Normalized data of shape (n_obs, n_points).
+#[pyfunction]
+#[pyo3(signature = (data, argvals, method="center", p=2.0))]
+pub fn normalize_with_argvals<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    method: &str,
+    p: f64,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let norm_method = match method {
+        "center" => fdars_core::fdata::NormalizationMethod::Center,
+        "autoscale" => fdars_core::fdata::NormalizationMethod::Autoscale,
+        "pareto" => fdars_core::fdata::NormalizationMethod::Pareto,
+        "range" => fdars_core::fdata::NormalizationMethod::Range,
+        "curve_center" => fdars_core::fdata::NormalizationMethod::CurveCenter,
+        "curve_standardize" => fdars_core::fdata::NormalizationMethod::CurveStandardize,
+        "curve_range" => fdars_core::fdata::NormalizationMethod::CurveRange,
+        "curve_lp" => fdars_core::fdata::NormalizationMethod::CurveLp(p),
+        _ => {
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "method must be one of: 'center', 'autoscale', 'pareto', 'range', \
+                 'curve_center', 'curve_standardize', 'curve_range', 'curve_lp'",
+            ))
+        }
+    };
+    let result = fdars_core::fdata::normalize_with_argvals(&mat, &av, norm_method);
+    Ok(fdmatrix_to_numpy2d(py, &result))
+}
+
 /// Register fdata functions on the module.
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(mean_1d, m)?)?;
@@ -288,5 +337,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(geometric_median_1d, m)?)?;
     m.add_function(wrap_pyfunction!(geometric_median_2d, m)?)?;
     m.add_function(wrap_pyfunction!(normalize, m)?)?;
+    m.add_function(wrap_pyfunction!(normalize_with_argvals, m)?)?;
     Ok(())
 }

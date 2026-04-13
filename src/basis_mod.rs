@@ -490,6 +490,175 @@ fn parse_smooth_basis_type(
     }
 }
 
+/// Evaluate a Fourier basis with specified period at given points.
+///
+/// Parameters
+/// ----------
+/// argvals : numpy.ndarray
+///     Evaluation points.
+/// n_basis : int
+///     Number of basis functions (should be odd).
+/// period : float
+///     Fourier period.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Basis matrix of shape (len(argvals), n_basis).
+#[pyfunction]
+pub fn fourier_basis_with_period<'py>(
+    py: Python<'py>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    n_basis: usize,
+    period: f64,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let av = numpy1d_to_vec(argvals);
+    let m = av.len();
+    let flat = fdars_core::basis::fourier_basis_with_period(&av, n_basis, period);
+    let actual_nbasis = if m > 0 { flat.len() / m } else { 0 };
+    let row_major: Vec<Vec<f64>> = (0..m)
+        .map(|i| (0..actual_nbasis).map(|j| flat[i + j * m]).collect())
+        .collect();
+    Ok(PyArray2::from_vec2(py, &row_major).unwrap())
+}
+
+/// Evaluate a B-spline basis from a given knot vector.
+///
+/// Parameters
+/// ----------
+/// argvals : numpy.ndarray
+///     Evaluation points.
+/// knots : numpy.ndarray
+///     Full knot vector (including boundary knots).
+/// order : int, optional
+///     Spline order (default 4 = cubic).
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Basis matrix of shape (len(argvals), nbasis).
+#[pyfunction]
+#[pyo3(signature = (argvals, knots, order=4))]
+pub fn bspline_basis_from_knots<'py>(
+    py: Python<'py>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    knots: PyReadonlyArray1<'py, f64>,
+    order: usize,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let av = numpy1d_to_vec(argvals);
+    let kn = numpy1d_to_vec(knots);
+    let m = av.len();
+    let flat = fdars_core::basis::bspline_basis_from_knots(&av, &kn, order);
+    let nbasis = if m > 0 { flat.len() / m } else { 0 };
+    let row_major: Vec<Vec<f64>> = (0..m)
+        .map(|i| (0..nbasis).map(|j| flat[i + j * m]).collect())
+        .collect();
+    Ok(PyArray2::from_vec2(py, &row_major).unwrap())
+}
+
+/// Construct B-spline knot vector.
+///
+/// Parameters
+/// ----------
+/// t_min : float
+///     Left boundary of domain.
+/// t_max : float
+///     Right boundary of domain.
+/// nknots : int
+///     Number of interior knots.
+/// order : int, optional
+///     Spline order (default 4 = cubic).
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Full knot vector.
+#[pyfunction]
+#[pyo3(signature = (t_min, t_max, nknots, order=4))]
+pub fn construct_bspline_knots<'py>(
+    py: Python<'py>,
+    t_min: f64,
+    t_max: f64,
+    nknots: usize,
+    order: usize,
+) -> PyResult<Bound<'py, numpy::PyArray1<f64>>> {
+    let knots = fdars_core::basis::construct_bspline_knots(t_min, t_max, nknots, order);
+    Ok(vec_to_numpy1d(py, knots))
+}
+
+/// Fit Fourier basis to functional data using least squares.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// nbasis : int
+///     Number of Fourier basis functions (should be odd).
+///
+/// Returns
+/// -------
+/// dict
+///     fitted (n, m), coefficients (n, nbasis),
+///     edf, rss, gcv, aic, bic, n_basis.
+#[pyfunction]
+pub fn fourier_fit_1d<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    nbasis: usize,
+) -> PyResult<Bound<'py, PyAny>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = to_pyresult(fdars_core::basis::fourier_fit_1d(&mat, &av, nbasis))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
+    dict.set_item(
+        "coefficients",
+        fdmatrix_to_numpy2d(py, &result.coefficients),
+    )?;
+    dict.set_item("edf", result.edf)?;
+    dict.set_item("rss", result.rss)?;
+    dict.set_item("gcv", result.gcv)?;
+    dict.set_item("aic", result.aic)?;
+    dict.set_item("bic", result.bic)?;
+    dict.set_item("n_basis", result.n_basis)?;
+    Ok(dict.into_any())
+}
+
+/// Select optimal number of Fourier basis functions via GCV.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// min_nbasis : int
+///     Minimum number of basis functions to try.
+/// max_nbasis : int
+///     Maximum number of basis functions to try.
+///
+/// Returns
+/// -------
+/// int
+///     Optimal number of basis functions.
+#[pyfunction]
+pub fn select_fourier_nbasis_gcv(
+    _py: Python<'_>,
+    data: PyReadonlyArray2<'_, f64>,
+    argvals: PyReadonlyArray1<'_, f64>,
+    min_nbasis: usize,
+    max_nbasis: usize,
+) -> PyResult<usize> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    Ok(fdars_core::basis::select_fourier_nbasis_gcv(
+        &mat, &av, min_nbasis, max_nbasis,
+    ))
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fdata_to_basis_1d, m)?)?;
     m.add_function(wrap_pyfunction!(basis_to_fdata_1d, m)?)?;
@@ -500,5 +669,10 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fourier_basis, m)?)?;
     m.add_function(wrap_pyfunction!(smooth_basis_gcv, m)?)?;
     m.add_function(wrap_pyfunction!(basis_nbasis_cv, m)?)?;
+    m.add_function(wrap_pyfunction!(fourier_basis_with_period, m)?)?;
+    m.add_function(wrap_pyfunction!(bspline_basis_from_knots, m)?)?;
+    m.add_function(wrap_pyfunction!(construct_bspline_knots, m)?)?;
+    m.add_function(wrap_pyfunction!(fourier_fit_1d, m)?)?;
+    m.add_function(wrap_pyfunction!(select_fourier_nbasis_gcv, m)?)?;
     Ok(())
 }

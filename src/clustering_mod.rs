@@ -229,11 +229,70 @@ pub fn calinski_harabasz(
     ))
 }
 
+/// Silhouette score for cluster quality assessment (from data and argvals).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// labels : numpy.ndarray
+///     Cluster labels, shape (n,).
+///
+/// Returns
+/// -------
+/// list of float
+///     Per-observation silhouette scores.
+#[pyfunction]
+pub fn silhouette_score_data<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    labels: PyReadonlyArray1<'py, i64>,
+) -> PyResult<Bound<'py, PyAny>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let lab = numpy1d_to_usize_vec(labels);
+    let scores = fdars_core::clustering::silhouette_score(&mat, &av, &lab);
+    let arr = vec_to_numpy1d(py, scores);
+    Ok(arr.into_any())
+}
+
+/// Calinski-Harabasz index for cluster quality (from data and argvals).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// labels : numpy.ndarray
+///     Cluster labels, shape (n,).
+///
+/// Returns
+/// -------
+/// float
+///     Calinski-Harabasz score.
+#[pyfunction]
+pub fn calinski_harabasz_data(
+    data: PyReadonlyArray2<'_, f64>,
+    argvals: PyReadonlyArray1<'_, f64>,
+    labels: PyReadonlyArray1<'_, i64>,
+) -> PyResult<f64> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let lab = numpy1d_to_usize_vec(labels);
+    Ok(fdars_core::clustering::calinski_harabasz(&mat, &av, &lab))
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(kmeans_fd, m)?)?;
     m.add_function(wrap_pyfunction!(fuzzy_cmeans_fd, m)?)?;
     m.add_function(wrap_pyfunction!(gmm_cluster, m)?)?;
     m.add_function(wrap_pyfunction!(silhouette_score, m)?)?;
     m.add_function(wrap_pyfunction!(calinski_harabasz, m)?)?;
+    m.add_function(wrap_pyfunction!(silhouette_score_data, m)?)?;
+    m.add_function(wrap_pyfunction!(calinski_harabasz_data, m)?)?;
     Ok(())
 }
