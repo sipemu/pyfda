@@ -35,7 +35,10 @@ pub fn fpca<'py>(
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("scores", fdmatrix_to_numpy2d(py, &result.scores))?;
     dict.set_item("rotation", fdmatrix_to_numpy2d(py, &result.rotation))?;
-    dict.set_item("singular_values", vec_to_numpy1d(py, result.singular_values))?;
+    dict.set_item(
+        "singular_values",
+        vec_to_numpy1d(py, result.singular_values),
+    )?;
     dict.set_item("mean", vec_to_numpy1d(py, result.mean))?;
     dict.set_item("centered", fdmatrix_to_numpy2d(py, &result.centered))?;
     dict.set_item("weights", vec_to_numpy1d(py, result.weights))?;
@@ -81,7 +84,10 @@ pub fn fpls<'py>(
     dict.set_item("loadings", fdmatrix_to_numpy2d(py, &result.loadings))?;
     dict.set_item("weights", fdmatrix_to_numpy2d(py, &result.weights))?;
     dict.set_item("x_means", vec_to_numpy1d(py, result.x_means))?;
-    dict.set_item("integration_weights", vec_to_numpy1d(py, result.integration_weights))?;
+    dict.set_item(
+        "integration_weights",
+        vec_to_numpy1d(py, result.integration_weights),
+    )?;
     Ok(dict.into_any())
 }
 
@@ -194,7 +200,11 @@ pub fn fregre_np<'py>(
     // fregre_np_from_distances takes flat &[f64] of length n*n
     let flat_dists = dm.to_row_major();
     let result = to_pyresult(fdars_core::scalar_on_function::fregre_np_from_distances(
-        &flat_dists, &resp, None, h, 0.0,
+        &flat_dists,
+        &resp,
+        None,
+        h,
+        0.0,
     ))?;
 
     let dict = pyo3::types::PyDict::new(py);
@@ -318,7 +328,10 @@ pub fn functional_logistic<'py>(
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("probabilities", vec_to_numpy1d(py, result.probabilities))?;
-    dict.set_item("predicted_classes", usize_vec_to_numpy1d(py, result.predicted_classes))?;
+    dict.set_item(
+        "predicted_classes",
+        usize_vec_to_numpy1d(py, result.predicted_classes),
+    )?;
     dict.set_item("beta_t", vec_to_numpy1d(py, result.beta_t))?;
     dict.set_item("intercept", result.intercept)?;
     dict.set_item("coefficients", vec_to_numpy1d(py, result.coefficients))?;

@@ -41,9 +41,8 @@ pub fn fdata_to_basis_1d<'py>(
             ))
         }
     };
-    let result = fdars_core::basis::fdata_to_basis_1d(&mat, &av, n_basis, bt).ok_or_else(|| {
-        pyo3::exceptions::PyValueError::new_err("fdata_to_basis_1d failed")
-    })?;
+    let result = fdars_core::basis::fdata_to_basis_1d(&mat, &av, n_basis, bt)
+        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("fdata_to_basis_1d failed"))?;
     Ok((
         fdmatrix_to_numpy2d(py, &result.coefficients),
         result.n_basis,
@@ -127,7 +126,10 @@ pub fn pspline_fit_1d<'py>(
         .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("pspline_fit_1d failed"))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
-    dict.set_item("coefficients", fdmatrix_to_numpy2d(py, &result.coefficients))?;
+    dict.set_item(
+        "coefficients",
+        fdmatrix_to_numpy2d(py, &result.coefficients),
+    )?;
     dict.set_item("edf", result.edf)?;
     dict.set_item("rss", result.rss)?;
     dict.set_item("gcv", result.gcv)?;
@@ -169,7 +171,10 @@ pub fn pspline_fit_gcv<'py>(
         .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("pspline_fit_gcv failed"))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
-    dict.set_item("coefficients", fdmatrix_to_numpy2d(py, &result.coefficients))?;
+    dict.set_item(
+        "coefficients",
+        fdmatrix_to_numpy2d(py, &result.coefficients),
+    )?;
     dict.set_item("edf", result.edf)?;
     dict.set_item("rss", result.rss)?;
     dict.set_item("gcv", result.gcv)?;
@@ -374,7 +379,10 @@ pub fn smooth_basis_gcv<'py>(
     .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("smooth_basis_gcv failed"))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
-    dict.set_item("coefficients", fdmatrix_to_numpy2d(py, &result.coefficients))?;
+    dict.set_item(
+        "coefficients",
+        fdmatrix_to_numpy2d(py, &result.coefficients),
+    )?;
     dict.set_item("edf", result.edf)?;
     dict.set_item("gcv", result.gcv)?;
     dict.set_item("aic", result.aic)?;

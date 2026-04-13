@@ -104,12 +104,8 @@ pub fn cfd_autoperiod<'py>(
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = fdars_core::seasonal::cfd_autoperiod_fdata(
-        &mat,
-        &av,
-        cluster_tolerance,
-        min_cluster_size,
-    );
+    let result =
+        fdars_core::seasonal::cfd_autoperiod_fdata(&mat, &av, cluster_tolerance, min_cluster_size);
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("period", result.period)?;

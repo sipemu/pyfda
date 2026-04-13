@@ -79,7 +79,10 @@ pub fn karcher_mean<'py>(
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("mean", vec_to_numpy1d(py, result.mean))?;
     dict.set_item("mean_srsf", vec_to_numpy1d(py, result.mean_srsf))?;
-    dict.set_item("aligned_data", fdmatrix_to_numpy2d(py, &result.aligned_data))?;
+    dict.set_item(
+        "aligned_data",
+        fdmatrix_to_numpy2d(py, &result.aligned_data),
+    )?;
     dict.set_item("gammas", fdmatrix_to_numpy2d(py, &result.gammas))?;
     dict.set_item("n_iter", result.n_iter)?;
     dict.set_item("converged", result.converged)?;
@@ -110,7 +113,10 @@ pub fn karcher_median<'py>(
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("mean", vec_to_numpy1d(py, result.mean))?;
     dict.set_item("mean_srsf", vec_to_numpy1d(py, result.mean_srsf))?;
-    dict.set_item("aligned_data", fdmatrix_to_numpy2d(py, &result.aligned_data))?;
+    dict.set_item(
+        "aligned_data",
+        fdmatrix_to_numpy2d(py, &result.aligned_data),
+    )?;
     dict.set_item("gammas", fdmatrix_to_numpy2d(py, &result.gammas))?;
     dict.set_item("weights", vec_to_numpy1d(py, result.weights))?;
     dict.set_item("n_iter", result.n_iter)?;
@@ -138,12 +144,17 @@ pub fn robust_karcher_mean<'py>(
         lambda: lambda_,
         trim_fraction,
     };
-    let result = to_pyresult(fdars_core::alignment::robust_karcher_mean(&mat, &av, &config))?;
+    let result = to_pyresult(fdars_core::alignment::robust_karcher_mean(
+        &mat, &av, &config,
+    ))?;
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("mean", vec_to_numpy1d(py, result.mean))?;
     dict.set_item("mean_srsf", vec_to_numpy1d(py, result.mean_srsf))?;
-    dict.set_item("aligned_data", fdmatrix_to_numpy2d(py, &result.aligned_data))?;
+    dict.set_item(
+        "aligned_data",
+        fdmatrix_to_numpy2d(py, &result.aligned_data),
+    )?;
     dict.set_item("gammas", fdmatrix_to_numpy2d(py, &result.gammas))?;
     dict.set_item("weights", vec_to_numpy1d(py, result.weights))?;
     dict.set_item("n_iter", result.n_iter)?;
@@ -251,8 +262,7 @@ pub fn srsf_transform<'py>(
     let av = numpy1d_to_vec(argvals);
     let m = c.len();
     // srsf_transform takes FdMatrix; wrap single curve as 1 x m matrix
-    let mat = fdars_core::matrix::FdMatrix::from_slice(&c, 1, m)
-        .map_err(to_pyerr)?;
+    let mat = fdars_core::matrix::FdMatrix::from_slice(&c, 1, m).map_err(to_pyerr)?;
     let result_mat = fdars_core::alignment::srsf_transform(&mat, &av);
     Ok(vec_to_numpy1d(py, result_mat.row(0)))
 }
@@ -316,10 +326,7 @@ pub fn invert_warp<'py>(
 
 /// Warp smoothness (bending energy).
 #[pyfunction]
-pub fn warp_smoothness(
-    warp: PyReadonlyArray1<'_, f64>,
-    argvals: PyReadonlyArray1<'_, f64>,
-) -> f64 {
+pub fn warp_smoothness(warp: PyReadonlyArray1<'_, f64>, argvals: PyReadonlyArray1<'_, f64>) -> f64 {
     let w = numpy1d_to_vec(warp);
     let av = numpy1d_to_vec(argvals);
     fdars_core::alignment::warp_smoothness(&w, &av)
@@ -327,10 +334,7 @@ pub fn warp_smoothness(
 
 /// Warp complexity (geodesic distance from identity).
 #[pyfunction]
-pub fn warp_complexity(
-    warp: PyReadonlyArray1<'_, f64>,
-    argvals: PyReadonlyArray1<'_, f64>,
-) -> f64 {
+pub fn warp_complexity(warp: PyReadonlyArray1<'_, f64>, argvals: PyReadonlyArray1<'_, f64>) -> f64 {
     let w = numpy1d_to_vec(warp);
     let av = numpy1d_to_vec(argvals);
     fdars_core::alignment::warp_complexity(&w, &av)
@@ -395,11 +399,20 @@ pub fn elastic_depth<'py>(
     let result = to_pyresult(fdars_core::alignment::elastic_depth(&mat, &av, lambda_))?;
 
     let dict = pyo3::types::PyDict::new(py);
-    dict.set_item("amplitude_depth", vec_to_numpy1d(py, result.amplitude_depth))?;
+    dict.set_item(
+        "amplitude_depth",
+        vec_to_numpy1d(py, result.amplitude_depth),
+    )?;
     dict.set_item("phase_depth", vec_to_numpy1d(py, result.phase_depth))?;
     dict.set_item("combined_depth", vec_to_numpy1d(py, result.combined_depth))?;
-    dict.set_item("amplitude_distances", fdmatrix_to_numpy2d(py, &result.amplitude_distances))?;
-    dict.set_item("phase_distances", fdmatrix_to_numpy2d(py, &result.phase_distances))?;
+    dict.set_item(
+        "amplitude_distances",
+        fdmatrix_to_numpy2d(py, &result.amplitude_distances),
+    )?;
+    dict.set_item(
+        "phase_distances",
+        fdmatrix_to_numpy2d(py, &result.phase_distances),
+    )?;
     Ok(dict)
 }
 
@@ -473,10 +486,19 @@ pub fn vert_fpca<'py>(
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("scores", fdmatrix_to_numpy2d(py, &result.scores))?;
-    dict.set_item("eigenfunctions_q", fdmatrix_to_numpy2d(py, &result.eigenfunctions_q))?;
-    dict.set_item("eigenfunctions_f", fdmatrix_to_numpy2d(py, &result.eigenfunctions_f))?;
+    dict.set_item(
+        "eigenfunctions_q",
+        fdmatrix_to_numpy2d(py, &result.eigenfunctions_q),
+    )?;
+    dict.set_item(
+        "eigenfunctions_f",
+        fdmatrix_to_numpy2d(py, &result.eigenfunctions_f),
+    )?;
     dict.set_item("eigenvalues", vec_to_numpy1d(py, result.eigenvalues))?;
-    dict.set_item("cumulative_variance", vec_to_numpy1d(py, result.cumulative_variance))?;
+    dict.set_item(
+        "cumulative_variance",
+        vec_to_numpy1d(py, result.cumulative_variance),
+    )?;
     dict.set_item("mean_q", vec_to_numpy1d(py, result.mean_q))?;
     Ok(dict)
 }
@@ -500,12 +522,24 @@ pub fn horiz_fpca<'py>(
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("scores", fdmatrix_to_numpy2d(py, &result.scores))?;
-    dict.set_item("eigenfunctions_psi", fdmatrix_to_numpy2d(py, &result.eigenfunctions_psi))?;
-    dict.set_item("eigenfunctions_gam", fdmatrix_to_numpy2d(py, &result.eigenfunctions_gam))?;
+    dict.set_item(
+        "eigenfunctions_psi",
+        fdmatrix_to_numpy2d(py, &result.eigenfunctions_psi),
+    )?;
+    dict.set_item(
+        "eigenfunctions_gam",
+        fdmatrix_to_numpy2d(py, &result.eigenfunctions_gam),
+    )?;
     dict.set_item("eigenvalues", vec_to_numpy1d(py, result.eigenvalues))?;
-    dict.set_item("cumulative_variance", vec_to_numpy1d(py, result.cumulative_variance))?;
+    dict.set_item(
+        "cumulative_variance",
+        vec_to_numpy1d(py, result.cumulative_variance),
+    )?;
     dict.set_item("mean_psi", vec_to_numpy1d(py, result.mean_psi))?;
-    dict.set_item("shooting_vectors", fdmatrix_to_numpy2d(py, &result.shooting_vectors))?;
+    dict.set_item(
+        "shooting_vectors",
+        fdmatrix_to_numpy2d(py, &result.shooting_vectors),
+    )?;
     Ok(dict)
 }
 
@@ -531,10 +565,19 @@ pub fn joint_fpca<'py>(
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("scores", fdmatrix_to_numpy2d(py, &result.scores))?;
     dict.set_item("eigenvalues", vec_to_numpy1d(py, result.eigenvalues))?;
-    dict.set_item("cumulative_variance", vec_to_numpy1d(py, result.cumulative_variance))?;
+    dict.set_item(
+        "cumulative_variance",
+        vec_to_numpy1d(py, result.cumulative_variance),
+    )?;
     dict.set_item("balance_c", result.balance_c)?;
-    dict.set_item("vert_component", fdmatrix_to_numpy2d(py, &result.vert_component))?;
-    dict.set_item("horiz_component", fdmatrix_to_numpy2d(py, &result.horiz_component))?;
+    dict.set_item(
+        "vert_component",
+        fdmatrix_to_numpy2d(py, &result.vert_component),
+    )?;
+    dict.set_item(
+        "horiz_component",
+        fdmatrix_to_numpy2d(py, &result.horiz_component),
+    )?;
     Ok(dict)
 }
 
@@ -595,7 +638,10 @@ pub fn elastic_logistic<'py>(
     dict.set_item("alpha", result.alpha)?;
     dict.set_item("beta", vec_to_numpy1d(py, result.beta))?;
     dict.set_item("probabilities", vec_to_numpy1d(py, result.probabilities))?;
-    dict.set_item("predicted_classes", usize_vec_to_numpy1d(py, result.predicted_classes))?;
+    dict.set_item(
+        "predicted_classes",
+        usize_vec_to_numpy1d(py, result.predicted_classes),
+    )?;
     dict.set_item("accuracy", result.accuracy)?;
     dict.set_item("loss", result.loss)?;
     dict.set_item("gammas", fdmatrix_to_numpy2d(py, &result.gammas))?;

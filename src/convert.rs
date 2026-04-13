@@ -50,11 +50,6 @@ pub fn vec_to_numpy1d<'py>(py: Python<'py>, v: Vec<f64>) -> Bound<'py, PyArray1<
     PyArray1::from_vec(py, v)
 }
 
-/// Convert a Vec<Vec<f64>> to a numpy 2D array.
-pub fn vec2d_to_numpy2d<'py>(py: Python<'py>, v: &[Vec<f64>]) -> Bound<'py, PyArray2<f64>> {
-    PyArray2::from_vec2(py, v).unwrap()
-}
-
 /// Convert a numpy 1D i64 array to Vec<usize>.
 pub fn numpy1d_to_usize_vec(arr: PyReadonlyArray1<'_, i64>) -> Vec<usize> {
     arr.as_array().iter().map(|&x| x as usize).collect()

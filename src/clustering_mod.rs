@@ -167,7 +167,10 @@ pub fn gmm_cluster<'py>(
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("cluster", usize_vec_to_numpy1d(py, result.best.cluster))?;
-    dict.set_item("membership", fdmatrix_to_numpy2d(py, &result.best.membership))?;
+    dict.set_item(
+        "membership",
+        fdmatrix_to_numpy2d(py, &result.best.membership),
+    )?;
     let bic_list: Vec<(usize, f64)> = result.bic_values;
     dict.set_item("bic_values", bic_list)?;
     let icl_list: Vec<(usize, f64)> = result.icl_values;
@@ -221,7 +224,9 @@ pub fn calinski_harabasz(
 ) -> PyResult<f64> {
     let dm = numpy2d_to_fdmatrix(dist_matrix)?;
     let lab = numpy1d_to_usize_vec(labels);
-    Ok(fdars_core::clustering::calinski_harabasz_from_distances(&dm, &lab))
+    Ok(fdars_core::clustering::calinski_harabasz_from_distances(
+        &dm, &lab,
+    ))
 }
 
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {

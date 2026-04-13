@@ -219,7 +219,11 @@ pub fn dtw_cross_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d1 = numpy2d_to_fdmatrix(data1)?;
     let d2 = numpy2d_to_fdmatrix(data2)?;
-    let band = if w == 0 { d1.ncols().max(d2.ncols()) } else { w };
+    let band = if w == 0 {
+        d1.ncols().max(d2.ncols())
+    } else {
+        w
+    };
     let result = fdars_core::metric::dtw_cross_1d(&d1, &d2, p, band);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
@@ -357,7 +361,11 @@ pub fn hshift_self_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let shift = if max_shift == 0 { av.len() / 4 } else { max_shift };
+    let shift = if max_shift == 0 {
+        av.len() / 4
+    } else {
+        max_shift
+    };
     let result = fdars_core::metric::hshift_self_1d(&d, &av, shift);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
@@ -391,7 +399,11 @@ pub fn hshift_cross_1d<'py>(
     let d1 = numpy2d_to_fdmatrix(data1)?;
     let d2 = numpy2d_to_fdmatrix(data2)?;
     let av = numpy1d_to_vec(argvals);
-    let shift = if max_shift == 0 { av.len() / 4 } else { max_shift };
+    let shift = if max_shift == 0 {
+        av.len() / 4
+    } else {
+        max_shift
+    };
     let result = fdars_core::metric::hshift_cross_1d(&d1, &d2, &av, shift);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }

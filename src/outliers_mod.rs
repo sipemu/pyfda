@@ -35,14 +35,8 @@ pub fn detect_outliers_lrt<'py>(
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let percentile = 1.0 - alpha;
-    let threshold = fdars_core::outliers::outliers_threshold_lrt(
-        &mat,
-        n_bootstrap,
-        smo,
-        trim,
-        42,
-        percentile,
-    );
+    let threshold =
+        fdars_core::outliers::outliers_threshold_lrt(&mat, n_bootstrap, smo, trim, 42, percentile);
     let outliers = fdars_core::outliers::detect_outliers_lrt(&mat, threshold, trim);
 
     let dict = pyo3::types::PyDict::new(py);

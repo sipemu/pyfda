@@ -47,7 +47,10 @@ pub fn fpc_permutation_importance<'py>(
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("importance", vec_to_numpy1d(py, result.importance))?;
     dict.set_item("baseline_metric", result.baseline_metric)?;
-    dict.set_item("permuted_metric", vec_to_numpy1d(py, result.permuted_metric))?;
+    dict.set_item(
+        "permuted_metric",
+        vec_to_numpy1d(py, result.permuted_metric),
+    )?;
     Ok(dict)
 }
 
@@ -128,9 +131,7 @@ pub fn fpc_shap_values<'py>(
     let fit = to_pyresult(fdars_core::scalar_on_function::fregre_lm(
         &mat, &resp, None, ncomp,
     ))?;
-    let result = to_pyresult(fdars_core::explain::fpc_shap_values(
-        &fit, &mat, None,
-    ))?;
+    let result = to_pyresult(fdars_core::explain::fpc_shap_values(&fit, &mat, None))?;
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("values", fdmatrix_to_numpy2d(py, &result.values))?;
@@ -172,7 +173,7 @@ pub fn significant_regions<'py>(
             (r.start_idx, r.end_idx, dir)
         })
         .collect();
-    Ok(pyo3::types::PyList::new(py, regions)?)
+    pyo3::types::PyList::new(py, regions)
 }
 
 /// Beta function decomposition.
@@ -215,7 +216,10 @@ pub fn beta_decomposition<'py>(
         .collect();
     dict.set_item("components", components)?;
     dict.set_item("coefficients", vec_to_numpy1d(py, result.coefficients))?;
-    dict.set_item("variance_proportion", vec_to_numpy1d(py, result.variance_proportion))?;
+    dict.set_item(
+        "variance_proportion",
+        vec_to_numpy1d(py, result.variance_proportion),
+    )?;
     Ok(dict)
 }
 

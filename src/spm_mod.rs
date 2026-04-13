@@ -48,7 +48,10 @@ pub fn spm_phase1<'py>(
     dict.set_item("mean", vec_to_numpy1d(py, result.fpca.mean.clone()))?;
     dict.set_item("loadings", fdmatrix_to_numpy2d(py, &result.fpca.rotation))?;
     dict.set_item("weights", vec_to_numpy1d(py, result.fpca.weights.clone()))?;
-    dict.set_item("eigenvalues", vec_to_numpy1d(py, result.eigenvalues.clone()))?;
+    dict.set_item(
+        "eigenvalues",
+        vec_to_numpy1d(py, result.eigenvalues.clone()),
+    )?;
     Ok(dict)
 }
 

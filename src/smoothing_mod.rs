@@ -149,9 +149,7 @@ pub fn knn_smoother<'py>(
     let xv = numpy1d_to_vec(x);
     let yv = numpy1d_to_vec(y);
     let xnv = numpy1d_to_vec(x_new);
-    let result = to_pyresult(fdars_core::smoothing::knn_smoother(
-        &xv, &yv, &xnv, k,
-    ))?;
+    let result = to_pyresult(fdars_core::smoothing::knn_smoother(&xv, &yv, &xnv, k))?;
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -205,9 +203,7 @@ pub fn optim_bandwidth<'py>(
         (Some(lo), Some(hi)) => Some((lo, hi)),
         _ => None,
     };
-    let result = fdars_core::smoothing::optim_bandwidth(
-        &xv, &yv, h_range, crit, kernel, n_grid,
-    );
+    let result = fdars_core::smoothing::optim_bandwidth(&xv, &yv, h_range, crit, kernel, n_grid);
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("h_opt", result.h_opt)?;
     let crit_str = match result.criterion {

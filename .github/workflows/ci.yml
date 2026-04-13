@@ -62,9 +62,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: pip install maturin numpy pytest
+      - name: Create virtualenv and install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install maturin numpy pandas pytest
       - name: Build and install
-        run: maturin develop --release
+        run: |
+          source .venv/bin/activate
+          maturin develop --release
       - name: Run tests
-        run: pytest tests/ -v
+        run: |
+          source .venv/bin/activate
+          pytest tests/ -v
