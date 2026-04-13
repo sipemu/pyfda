@@ -5,22 +5,22 @@ title: Simulation Toolbox
 # Simulation Toolbox
 
 Synthetic functional data is essential for benchmarking, validating methods, and
-building intuition. pyfda provides two complementary generators:
+building intuition. fdars provides two complementary generators:
 
 1. **Karhunen-Loeve (KL) simulation** -- construct curves as random linear
    combinations of basis eigenfunctions.
 2. **Gaussian process (GP) generation** -- sample from a zero-mean GP with a
    specified covariance kernel.
 
-Both live in the `pyfda.simulation` module and return a 2D NumPy array of shape
+Both live in the `fdars.simulation` module and return a 2D NumPy array of shape
 `(n, m)` where `n` is the number of curves and `m` is the number of grid points.
 Wrapping the result in an `Fdata` object bundles the data with its evaluation
 grid and unlocks convenience methods for depth, distances, derivatives, and more.
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate, gaussian_process
+from fdars import Fdata
+from fdars.simulation import simulate, gaussian_process
 ```
 
 ---
@@ -350,7 +350,7 @@ If you need the raw covariance matrix $C(s_i, t_j)$ for custom purposes (e.g.,
 feeding into your own sampler), use `covariance_matrix`:
 
 ```python
-from pyfda.simulation import covariance_matrix
+from fdars.simulation import covariance_matrix
 
 argvals = np.linspace(0, 1, 50)
 cov = covariance_matrix(
@@ -369,9 +369,9 @@ Bringing it all together in a realistic workflow:
 ```python
 import numpy as np
 import pandas as pd
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.clustering import kmeans_fd
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.clustering import kmeans_fd
 
 # -- Step 1: Generate two groups with different eigenfunction types --
 argvals = np.linspace(0, 1, 150)
@@ -417,7 +417,7 @@ print(f"Clustering agreement: {agreement:.1%}")
 
 ## Next Steps
 
-- [Introduction to pyfda](introduction.md) -- if you haven't read it yet.
+- [Introduction to fdars](introduction.md) -- if you haven't read it yet.
 - [Smoothing](smoothing.md) -- apply smoothing to your simulated data.
 - [Working with Derivatives](derivatives.md) -- differentiate your curves.
 - [Covariance Functions](../analyze/covariance-functions.md) -- deeper look at

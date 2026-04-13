@@ -1,4 +1,4 @@
-# pyfda.alignment
+# fdars.alignment
 
 Elastic alignment, shape analysis, and warping operations for functional data using the Fisher-Rao metric and SRSF representation.
 
@@ -34,7 +34,7 @@ Elastic alignment, shape analysis, and warping operations for functional data us
 ### `elastic_align_pair`
 
 ```python
-pyfda.elastic_align_pair(curve1, curve2, argvals, lambda_=0.0)
+fdars.elastic_align_pair(curve1, curve2, argvals, lambda_=0.0)
 ```
 
 Align `curve2` to `curve1` using elastic (Fisher-Rao) alignment.
@@ -52,7 +52,7 @@ Align `curve2` to `curve1` using elastic (Fisher-Rao) alignment.
 
 ```python
 t = np.linspace(0, 1, 100)
-result = pyfda.elastic_align_pair(f1, f2, t, lambda_=0.0)
+result = fdars.elastic_align_pair(f1, f2, t, lambda_=0.0)
 aligned = result["f_aligned"]
 ```
 
@@ -61,7 +61,7 @@ aligned = result["f_aligned"]
 ### `karcher_mean`
 
 ```python
-pyfda.karcher_mean(data, argvals, lambda_=0.0, max_iter=20, tol=1e-4)
+fdars.karcher_mean(data, argvals, lambda_=0.0, max_iter=20, tol=1e-4)
 ```
 
 Compute the Karcher (Frechet) mean under the elastic metric. Iteratively aligns all curves and updates the mean.
@@ -79,7 +79,7 @@ Compute the Karcher (Frechet) mean under the elastic metric. Iteratively aligns 
 | result | `dict` | Keys: `mean` (m,), `mean_srsf` (m,), `aligned_data` (n, m), `gammas` (n, m), `n_iter`, `converged` |
 
 ```python
-km = pyfda.karcher_mean(data, t, lambda_=0.0)
+km = fdars.karcher_mean(data, t, lambda_=0.0)
 mean_curve = km["mean"]
 ```
 
@@ -88,7 +88,7 @@ mean_curve = km["mean"]
 ### `karcher_median`
 
 ```python
-pyfda.karcher_median(data, argvals, lambda_=0.0, max_iter=20, tol=1e-3)
+fdars.karcher_median(data, argvals, lambda_=0.0, max_iter=20, tol=1e-3)
 ```
 
 Karcher median under the elastic metric.
@@ -106,7 +106,7 @@ Karcher median under the elastic metric.
 | result | `dict` | Keys: `mean` (m,), `mean_srsf` (m,), `aligned_data` (n, m), `gammas` (n, m), `weights` (n,), `n_iter`, `converged` |
 
 ```python
-result = pyfda.karcher_median(data, t)
+result = fdars.karcher_median(data, t)
 ```
 
 ---
@@ -114,7 +114,7 @@ result = pyfda.karcher_median(data, t)
 ### `robust_karcher_mean`
 
 ```python
-pyfda.robust_karcher_mean(data, argvals, lambda_=0.0, max_iter=20,
+fdars.robust_karcher_mean(data, argvals, lambda_=0.0, max_iter=20,
                           tol=1e-3, trim_fraction=0.1)
 ```
 
@@ -134,7 +134,7 @@ Trimmed robust Karcher mean. Down-weights outlying curves.
 | result | `dict` | Keys: `mean` (m,), `mean_srsf` (m,), `aligned_data` (n, m), `gammas` (n, m), `weights` (n,), `n_iter`, `converged` |
 
 ```python
-result = pyfda.robust_karcher_mean(data, t, trim_fraction=0.15)
+result = fdars.robust_karcher_mean(data, t, trim_fraction=0.15)
 ```
 
 ---
@@ -142,7 +142,7 @@ result = pyfda.robust_karcher_mean(data, t, trim_fraction=0.15)
 ### `elastic_distance`
 
 ```python
-pyfda.elastic_distance(curve1, curve2, argvals, lambda_=0.0)
+fdars.elastic_distance(curve1, curve2, argvals, lambda_=0.0)
 ```
 
 Compute the elastic (Fisher-Rao) distance between two curves.
@@ -159,7 +159,7 @@ Compute the elastic (Fisher-Rao) distance between two curves.
 | distance | `float` | Elastic distance |
 
 ```python
-d = pyfda.elastic_distance(f1, f2, t)
+d = fdars.elastic_distance(f1, f2, t)
 ```
 
 ---
@@ -167,7 +167,7 @@ d = pyfda.elastic_distance(f1, f2, t)
 ### `elastic_self_distance_matrix`
 
 ```python
-pyfda.elastic_self_distance_matrix(data, argvals, lambda_=0.0)
+fdars.elastic_self_distance_matrix(data, argvals, lambda_=0.0)
 ```
 
 Pairwise elastic distance matrix for a single dataset.
@@ -183,7 +183,7 @@ Pairwise elastic distance matrix for a single dataset.
 | dist | `ndarray (n, n)` | Symmetric distance matrix |
 
 ```python
-D = pyfda.elastic_self_distance_matrix(data, t)
+D = fdars.elastic_self_distance_matrix(data, t)
 ```
 
 ---
@@ -191,7 +191,7 @@ D = pyfda.elastic_self_distance_matrix(data, t)
 ### `elastic_cross_distance_matrix`
 
 ```python
-pyfda.elastic_cross_distance_matrix(data1, data2, argvals, lambda_=0.0)
+fdars.elastic_cross_distance_matrix(data1, data2, argvals, lambda_=0.0)
 ```
 
 Elastic cross-distance matrix between two datasets.
@@ -212,7 +212,7 @@ Elastic cross-distance matrix between two datasets.
 ### `srsf_transform`
 
 ```python
-pyfda.srsf_transform(curve, argvals)
+fdars.srsf_transform(curve, argvals)
 ```
 
 Compute the Square Root Slope Function (SRSF) of a curve.
@@ -227,7 +227,7 @@ Compute the Square Root Slope Function (SRSF) of a curve.
 | srsf | `ndarray (m,)` | SRSF representation |
 
 ```python
-q = pyfda.srsf_transform(f, t)
+q = fdars.srsf_transform(f, t)
 ```
 
 ---
@@ -235,7 +235,7 @@ q = pyfda.srsf_transform(f, t)
 ### `srsf_inverse`
 
 ```python
-pyfda.srsf_inverse(srsf, argvals, initial_value=0.0)
+fdars.srsf_inverse(srsf, argvals, initial_value=0.0)
 ```
 
 Reconstruct a curve from its SRSF representation.
@@ -251,7 +251,7 @@ Reconstruct a curve from its SRSF representation.
 | curve | `ndarray (m,)` | Reconstructed curve |
 
 ```python
-f_rec = pyfda.srsf_inverse(q, t, initial_value=f[0])
+f_rec = fdars.srsf_inverse(q, t, initial_value=f[0])
 ```
 
 ---
@@ -259,7 +259,7 @@ f_rec = pyfda.srsf_inverse(q, t, initial_value=f[0])
 ### `compose_warps`
 
 ```python
-pyfda.compose_warps(warp1, warp2, argvals)
+fdars.compose_warps(warp1, warp2, argvals)
 ```
 
 Compose two warping functions: result = warp1(warp2(t)).
@@ -275,7 +275,7 @@ Compose two warping functions: result = warp1(warp2(t)).
 | composed | `ndarray (m,)` | Composed warping function |
 
 ```python
-gamma_composed = pyfda.compose_warps(gamma1, gamma2, t)
+gamma_composed = fdars.compose_warps(gamma1, gamma2, t)
 ```
 
 ---
@@ -283,7 +283,7 @@ gamma_composed = pyfda.compose_warps(gamma1, gamma2, t)
 ### `invert_warp`
 
 ```python
-pyfda.invert_warp(warp, argvals)
+fdars.invert_warp(warp, argvals)
 ```
 
 Compute the inverse of a warping function.
@@ -298,7 +298,7 @@ Compute the inverse of a warping function.
 | inverse | `ndarray (m,)` | Inverse warp |
 
 ```python
-gamma_inv = pyfda.invert_warp(gamma, t)
+gamma_inv = fdars.invert_warp(gamma, t)
 ```
 
 ---
@@ -306,7 +306,7 @@ gamma_inv = pyfda.invert_warp(gamma, t)
 ### `warp_smoothness`
 
 ```python
-pyfda.warp_smoothness(warp, argvals)
+fdars.warp_smoothness(warp, argvals)
 ```
 
 Compute the smoothness (bending energy) of a warping function.
@@ -321,7 +321,7 @@ Compute the smoothness (bending energy) of a warping function.
 | smoothness | `float` | Bending energy |
 
 ```python
-s = pyfda.warp_smoothness(gamma, t)
+s = fdars.warp_smoothness(gamma, t)
 ```
 
 ---
@@ -329,7 +329,7 @@ s = pyfda.warp_smoothness(gamma, t)
 ### `warp_complexity`
 
 ```python
-pyfda.warp_complexity(warp, argvals)
+fdars.warp_complexity(warp, argvals)
 ```
 
 Geodesic distance of a warping function from the identity.
@@ -344,7 +344,7 @@ Geodesic distance of a warping function from the identity.
 | complexity | `float` | Geodesic distance from identity |
 
 ```python
-c = pyfda.warp_complexity(gamma, t)
+c = fdars.warp_complexity(gamma, t)
 ```
 
 ---
@@ -352,7 +352,7 @@ c = pyfda.warp_complexity(gamma, t)
 ### `amplitude_distance`
 
 ```python
-pyfda.amplitude_distance(curve1, curve2, argvals, lambda_=0.0)
+fdars.amplitude_distance(curve1, curve2, argvals, lambda_=0.0)
 ```
 
 Amplitude (vertical) component of the elastic distance.
@@ -369,7 +369,7 @@ Amplitude (vertical) component of the elastic distance.
 | distance | `float` | Amplitude distance |
 
 ```python
-da = pyfda.amplitude_distance(f1, f2, t)
+da = fdars.amplitude_distance(f1, f2, t)
 ```
 
 ---
@@ -377,7 +377,7 @@ da = pyfda.amplitude_distance(f1, f2, t)
 ### `phase_distance`
 
 ```python
-pyfda.phase_distance(curve1, curve2, argvals, lambda_=0.0)
+fdars.phase_distance(curve1, curve2, argvals, lambda_=0.0)
 ```
 
 Phase (horizontal) component of the elastic distance.
@@ -394,7 +394,7 @@ Phase (horizontal) component of the elastic distance.
 | distance | `float` | Phase distance |
 
 ```python
-dp = pyfda.phase_distance(f1, f2, t)
+dp = fdars.phase_distance(f1, f2, t)
 ```
 
 ---
@@ -402,7 +402,7 @@ dp = pyfda.phase_distance(f1, f2, t)
 ### `elastic_depth`
 
 ```python
-pyfda.elastic_depth(data, argvals, lambda_=0.0)
+fdars.elastic_depth(data, argvals, lambda_=0.0)
 ```
 
 Depth under the elastic metric, decomposed into amplitude and phase components.
@@ -418,7 +418,7 @@ Depth under the elastic metric, decomposed into amplitude and phase components.
 | result | `dict` | Keys: `amplitude_depth` (n,), `phase_depth` (n,), `combined_depth` (n,), `amplitude_distances` (n, n), `phase_distances` (n, n) |
 
 ```python
-ed = pyfda.elastic_depth(data, t)
+ed = fdars.elastic_depth(data, t)
 deepest = np.argmax(ed["combined_depth"])
 ```
 
@@ -427,7 +427,7 @@ deepest = np.argmax(ed["combined_depth"])
 ### `shape_distance`
 
 ```python
-pyfda.shape_distance(curve1, curve2, argvals, lambda_=0.0)
+fdars.shape_distance(curve1, curve2, argvals, lambda_=0.0)
 ```
 
 Shape distance in the quotient space (invariant to translation, scaling, and reparameterization).
@@ -444,7 +444,7 @@ Shape distance in the quotient space (invariant to translation, scaling, and rep
 | result | `dict` | Keys: `distance`, `gamma` (m,), `f2_aligned` (m,) |
 
 ```python
-sd = pyfda.shape_distance(f1, f2, t)
+sd = fdars.shape_distance(f1, f2, t)
 print(f"Shape distance: {sd['distance']:.4f}")
 ```
 
@@ -453,7 +453,7 @@ print(f"Shape distance: {sd['distance']:.4f}")
 ### `vert_fpca`
 
 ```python
-pyfda.vert_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
+fdars.vert_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
 ```
 
 Vertical (amplitude) FPCA. Aligns data via Karcher mean, then performs PCA on the aligned SRSFs.
@@ -472,7 +472,7 @@ Vertical (amplitude) FPCA. Aligns data via Karcher mean, then performs PCA on th
 | result | `dict` | Keys: `scores` (n, n_comp), `eigenfunctions_q` (n_comp, m+1), `eigenfunctions_f` (n_comp, m), `eigenvalues` (n_comp,), `cumulative_variance` (n_comp,), `mean_q` (m+1,) |
 
 ```python
-vfpca = pyfda.vert_fpca(data, t, n_comp=3)
+vfpca = fdars.vert_fpca(data, t, n_comp=3)
 ```
 
 ---
@@ -480,7 +480,7 @@ vfpca = pyfda.vert_fpca(data, t, n_comp=3)
 ### `horiz_fpca`
 
 ```python
-pyfda.horiz_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
+fdars.horiz_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
 ```
 
 Horizontal (phase) FPCA. Analyzes the warping functions from elastic alignment.
@@ -499,7 +499,7 @@ Horizontal (phase) FPCA. Analyzes the warping functions from elastic alignment.
 | result | `dict` | Keys: `scores` (n, n_comp), `eigenfunctions_psi` (n_comp, m), `eigenfunctions_gam` (n_comp, m), `eigenvalues` (n_comp,), `cumulative_variance` (n_comp,), `mean_psi` (m,), `shooting_vectors` (n, m) |
 
 ```python
-hfpca = pyfda.horiz_fpca(data, t, n_comp=3)
+hfpca = fdars.horiz_fpca(data, t, n_comp=3)
 ```
 
 ---
@@ -507,7 +507,7 @@ hfpca = pyfda.horiz_fpca(data, t, n_comp=3)
 ### `joint_fpca`
 
 ```python
-pyfda.joint_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
+fdars.joint_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
 ```
 
 Joint amplitude + phase FPCA. Combines vertical and horizontal variability into a single decomposition.
@@ -526,7 +526,7 @@ Joint amplitude + phase FPCA. Combines vertical and horizontal variability into 
 | result | `dict` | Keys: `scores` (n, n_comp), `eigenvalues` (n_comp,), `cumulative_variance` (n_comp,), `balance_c`, `vert_component` (n_comp, ...), `horiz_component` (n_comp, ...) |
 
 ```python
-jfpca = pyfda.joint_fpca(data, t, n_comp=3)
+jfpca = fdars.joint_fpca(data, t, n_comp=3)
 ```
 
 ---
@@ -534,7 +534,7 @@ jfpca = pyfda.joint_fpca(data, t, n_comp=3)
 ### `elastic_regression`
 
 ```python
-pyfda.elastic_regression(data, argvals, response, ncomp_beta=10,
+fdars.elastic_regression(data, argvals, response, ncomp_beta=10,
                          lambda_=0.0, max_iter=20, tol=1e-4)
 ```
 
@@ -555,7 +555,7 @@ Elastic scalar-on-function regression. Simultaneously aligns and regresses.
 | result | `dict` | Keys: `alpha`, `beta` (m,), `fitted_values` (n,), `residuals` (n,), `sse`, `r_squared`, `gammas` (n, m), `n_iter` |
 
 ```python
-fit = pyfda.elastic_regression(data, t, y, ncomp_beta=10)
+fit = fdars.elastic_regression(data, t, y, ncomp_beta=10)
 print(f"R-squared: {fit['r_squared']:.3f}")
 ```
 
@@ -564,7 +564,7 @@ print(f"R-squared: {fit['r_squared']:.3f}")
 ### `elastic_logistic`
 
 ```python
-pyfda.elastic_logistic(data, argvals, labels, ncomp_beta=10,
+fdars.elastic_logistic(data, argvals, labels, ncomp_beta=10,
                        lambda_=0.0, max_iter=20, tol=1e-4)
 ```
 
@@ -585,6 +585,6 @@ Elastic logistic regression for binary classification.
 | result | `dict` | Keys: `alpha`, `beta` (m,), `probabilities` (n,), `predicted_classes` (n,), `accuracy`, `loss`, `gammas` (n, m), `n_iter` |
 
 ```python
-fit = pyfda.elastic_logistic(data, t, labels, ncomp_beta=10)
+fit = fdars.elastic_logistic(data, t, labels, ncomp_beta=10)
 print(f"Accuracy: {fit['accuracy']:.3f}")
 ```

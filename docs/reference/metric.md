@@ -1,4 +1,4 @@
-# pyfda.metric
+# fdars.metric
 
 Distance metrics for functional data. "Self" functions compute an n-by-n distance matrix from a single dataset. "Cross" functions compute an n1-by-n2 matrix between two datasets.
 
@@ -30,7 +30,7 @@ Distance metrics for functional data. "Self" functions compute an n-by-n distanc
 ### `lp_self_1d`
 
 ```python
-pyfda.lp_self_1d(data, argvals, p=2.0)
+fdars.lp_self_1d(data, argvals, p=2.0)
 ```
 
 Lp distance matrix for a single 1D functional dataset.
@@ -47,7 +47,7 @@ Lp distance matrix for a single 1D functional dataset.
 
 ```python
 t = np.linspace(0, 1, 100)
-D = pyfda.lp_self_1d(data, t, p=2.0)
+D = fdars.lp_self_1d(data, t, p=2.0)
 ```
 
 ---
@@ -55,7 +55,7 @@ D = pyfda.lp_self_1d(data, t, p=2.0)
 ### `lp_cross_1d`
 
 ```python
-pyfda.lp_cross_1d(data1, data2, argvals, p=2.0)
+fdars.lp_cross_1d(data1, data2, argvals, p=2.0)
 ```
 
 Lp distance matrix between two 1D functional datasets.
@@ -72,7 +72,7 @@ Lp distance matrix between two 1D functional datasets.
 | dist | `ndarray (n1, n2)` | Distance matrix |
 
 ```python
-D = pyfda.lp_cross_1d(train, test, t, p=2.0)
+D = fdars.lp_cross_1d(train, test, t, p=2.0)
 ```
 
 ---
@@ -80,7 +80,7 @@ D = pyfda.lp_cross_1d(train, test, t, p=2.0)
 ### `lp_self_2d`
 
 ```python
-pyfda.lp_self_2d(data, argvals_s, argvals_t, p=2.0)
+fdars.lp_self_2d(data, argvals_s, argvals_t, p=2.0)
 ```
 
 Lp self-distance matrix for 2D functional data.
@@ -97,7 +97,7 @@ Lp self-distance matrix for 2D functional data.
 | dist | `ndarray (n, n)` | Distance matrix |
 
 ```python
-D = pyfda.lp_self_2d(data, s_grid, t_grid, p=2.0)
+D = fdars.lp_self_2d(data, s_grid, t_grid, p=2.0)
 ```
 
 ---
@@ -105,7 +105,7 @@ D = pyfda.lp_self_2d(data, s_grid, t_grid, p=2.0)
 ### `lp_cross_2d`
 
 ```python
-pyfda.lp_cross_2d(data1, data2, argvals_s, argvals_t, p=2.0)
+fdars.lp_cross_2d(data1, data2, argvals_s, argvals_t, p=2.0)
 ```
 
 Lp cross-distance matrix for 2D functional data.
@@ -127,7 +127,7 @@ Lp cross-distance matrix for 2D functional data.
 ### `hausdorff_self_1d`
 
 ```python
-pyfda.hausdorff_self_1d(data, argvals)
+fdars.hausdorff_self_1d(data, argvals)
 ```
 
 Hausdorff distance matrix for 1D functional data. Treats each curve as a set of (t, y(t)) points.
@@ -142,7 +142,7 @@ Hausdorff distance matrix for 1D functional data. Treats each curve as a set of 
 | dist | `ndarray (n, n)` | Distance matrix |
 
 ```python
-D = pyfda.hausdorff_self_1d(data, t)
+D = fdars.hausdorff_self_1d(data, t)
 ```
 
 ---
@@ -150,7 +150,7 @@ D = pyfda.hausdorff_self_1d(data, t)
 ### `hausdorff_cross_1d`
 
 ```python
-pyfda.hausdorff_cross_1d(data1, data2, argvals)
+fdars.hausdorff_cross_1d(data1, data2, argvals)
 ```
 
 Hausdorff cross-distance for 1D data.
@@ -170,7 +170,7 @@ Hausdorff cross-distance for 1D data.
 ### `hausdorff_self_2d`
 
 ```python
-pyfda.hausdorff_self_2d(data, argvals_s, argvals_t)
+fdars.hausdorff_self_2d(data, argvals_s, argvals_t)
 ```
 
 Hausdorff self-distance for 2D data.
@@ -190,7 +190,7 @@ Hausdorff self-distance for 2D data.
 ### `hausdorff_cross_2d`
 
 ```python
-pyfda.hausdorff_cross_2d(data1, data2, argvals_s, argvals_t)
+fdars.hausdorff_cross_2d(data1, data2, argvals_s, argvals_t)
 ```
 
 Hausdorff cross-distance for 2D data.
@@ -211,7 +211,7 @@ Hausdorff cross-distance for 2D data.
 ### `dtw_self_1d`
 
 ```python
-pyfda.dtw_self_1d(data, p=2.0, w=0)
+fdars.dtw_self_1d(data, p=2.0, w=0)
 ```
 
 Dynamic Time Warping self-distance matrix for 1D data.
@@ -227,7 +227,7 @@ Dynamic Time Warping self-distance matrix for 1D data.
 | dist | `ndarray (n, n)` | Distance matrix |
 
 ```python
-D = pyfda.dtw_self_1d(data, p=2.0, w=10)
+D = fdars.dtw_self_1d(data, p=2.0, w=10)
 ```
 
 ---
@@ -235,7 +235,7 @@ D = pyfda.dtw_self_1d(data, p=2.0, w=10)
 ### `dtw_cross_1d`
 
 ```python
-pyfda.dtw_cross_1d(data1, data2, p=2.0, w=0)
+fdars.dtw_cross_1d(data1, data2, p=2.0, w=0)
 ```
 
 DTW cross-distance for 1D data (curves may have different lengths).
@@ -256,7 +256,7 @@ DTW cross-distance for 1D data (curves may have different lengths).
 ### `soft_dtw_self_1d`
 
 ```python
-pyfda.soft_dtw_self_1d(data, gamma=1.0)
+fdars.soft_dtw_self_1d(data, gamma=1.0)
 ```
 
 Soft-DTW distance matrix (differentiable approximation to DTW).
@@ -271,7 +271,7 @@ Soft-DTW distance matrix (differentiable approximation to DTW).
 | dist | `ndarray (n, n)` | Distance matrix |
 
 ```python
-D = pyfda.soft_dtw_self_1d(data, gamma=0.1)
+D = fdars.soft_dtw_self_1d(data, gamma=0.1)
 ```
 
 ---
@@ -279,7 +279,7 @@ D = pyfda.soft_dtw_self_1d(data, gamma=0.1)
 ### `soft_dtw_cross_1d`
 
 ```python
-pyfda.soft_dtw_cross_1d(data1, data2, gamma=1.0)
+fdars.soft_dtw_cross_1d(data1, data2, gamma=1.0)
 ```
 
 Soft-DTW cross-distance for 1D data.
@@ -299,7 +299,7 @@ Soft-DTW cross-distance for 1D data.
 ### `soft_dtw_div_self_1d`
 
 ```python
-pyfda.soft_dtw_div_self_1d(data, gamma=1.0)
+fdars.soft_dtw_div_self_1d(data, gamma=1.0)
 ```
 
 Soft-DTW divergence self-distance. Bias-corrected version of Soft-DTW that is a proper divergence.
@@ -314,7 +314,7 @@ Soft-DTW divergence self-distance. Bias-corrected version of Soft-DTW that is a 
 | dist | `ndarray (n, n)` | Divergence matrix |
 
 ```python
-D = pyfda.soft_dtw_div_self_1d(data, gamma=1.0)
+D = fdars.soft_dtw_div_self_1d(data, gamma=1.0)
 ```
 
 ---
@@ -322,7 +322,7 @@ D = pyfda.soft_dtw_div_self_1d(data, gamma=1.0)
 ### `soft_dtw_div_cross_1d`
 
 ```python
-pyfda.soft_dtw_div_cross_1d(data1, data2, gamma=1.0)
+fdars.soft_dtw_div_cross_1d(data1, data2, gamma=1.0)
 ```
 
 Soft-DTW divergence cross-distance.
@@ -342,7 +342,7 @@ Soft-DTW divergence cross-distance.
 ### `fourier_self_1d`
 
 ```python
-pyfda.fourier_self_1d(data, n_basis=5)
+fdars.fourier_self_1d(data, n_basis=5)
 ```
 
 Distance based on Fourier coefficients. Projects curves onto a Fourier basis and computes Euclidean distances in coefficient space.
@@ -357,7 +357,7 @@ Distance based on Fourier coefficients. Projects curves onto a Fourier basis and
 | dist | `ndarray (n, n)` | Distance matrix |
 
 ```python
-D = pyfda.fourier_self_1d(data, n_basis=7)
+D = fdars.fourier_self_1d(data, n_basis=7)
 ```
 
 ---
@@ -365,7 +365,7 @@ D = pyfda.fourier_self_1d(data, n_basis=7)
 ### `fourier_cross_1d`
 
 ```python
-pyfda.fourier_cross_1d(data1, data2, n_basis=5)
+fdars.fourier_cross_1d(data1, data2, n_basis=5)
 ```
 
 Fourier coefficient cross-distance.
@@ -385,7 +385,7 @@ Fourier coefficient cross-distance.
 ### `hshift_self_1d`
 
 ```python
-pyfda.hshift_self_1d(data, argvals, max_shift=0)
+fdars.hshift_self_1d(data, argvals, max_shift=0)
 ```
 
 Horizontal shift distance. Finds the optimal horizontal translation minimizing L2 distance.
@@ -401,7 +401,7 @@ Horizontal shift distance. Finds the optimal horizontal translation minimizing L
 | dist | `ndarray (n, n)` | Distance matrix |
 
 ```python
-D = pyfda.hshift_self_1d(data, t, max_shift=20)
+D = fdars.hshift_self_1d(data, t, max_shift=20)
 ```
 
 ---
@@ -409,7 +409,7 @@ D = pyfda.hshift_self_1d(data, t, max_shift=20)
 ### `hshift_cross_1d`
 
 ```python
-pyfda.hshift_cross_1d(data1, data2, argvals, max_shift=0)
+fdars.hshift_cross_1d(data1, data2, argvals, max_shift=0)
 ```
 
 Horizontal shift cross-distance.

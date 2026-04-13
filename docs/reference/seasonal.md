@@ -1,4 +1,4 @@
-# pyfda.seasonal
+# fdars.seasonal
 
 Seasonal analysis: period detection, peak detection, STL decomposition, and seasonal strength.
 
@@ -18,7 +18,7 @@ Seasonal analysis: period detection, peak detection, STL decomposition, and seas
 ### `sazed`
 
 ```python
-pyfda.sazed(data, argvals, tolerance=None)
+fdars.sazed(data, argvals, tolerance=None)
 ```
 
 SAZED period detection algorithm. Combines multiple approaches (ACF, zero-crossings, extrema, etc.) and returns a consensus period.
@@ -35,7 +35,7 @@ SAZED period detection algorithm. Combines multiple approaches (ACF, zero-crossi
 
 ```python
 t = np.linspace(0, 10, 500)
-result = pyfda.sazed(data, t)
+result = fdars.sazed(data, t)
 print(f"Period: {result['period']:.2f}, confidence: {result['confidence']:.2f}")
 ```
 
@@ -44,7 +44,7 @@ print(f"Period: {result['period']:.2f}, confidence: {result['confidence']:.2f}")
 ### `autoperiod`
 
 ```python
-pyfda.autoperiod(data, argvals, n_candidates=None, gradient_steps=None)
+fdars.autoperiod(data, argvals, n_candidates=None, gradient_steps=None)
 ```
 
 Autoperiod algorithm: uses FFT to find candidate periods, then validates with ACF.
@@ -61,7 +61,7 @@ Autoperiod algorithm: uses FFT to find candidate periods, then validates with AC
 | result | `dict` | Keys: `period`, `confidence`, `fft_power`, `acf_validation` |
 
 ```python
-result = pyfda.autoperiod(data, t)
+result = fdars.autoperiod(data, t)
 print(f"Detected period: {result['period']:.2f}")
 ```
 
@@ -70,7 +70,7 @@ print(f"Detected period: {result['period']:.2f}")
 ### `cfd_autoperiod`
 
 ```python
-pyfda.cfd_autoperiod(data, argvals, cluster_tolerance=None, min_cluster_size=None)
+fdars.cfd_autoperiod(data, argvals, cluster_tolerance=None, min_cluster_size=None)
 ```
 
 CFD autoperiod with clustering-based consensus among per-curve period estimates.
@@ -87,7 +87,7 @@ CFD autoperiod with clustering-based consensus among per-curve period estimates.
 | result | `dict` | Keys: `period`, `confidence`, `periods` (array), `confidences` (array) |
 
 ```python
-result = pyfda.cfd_autoperiod(data, t)
+result = fdars.cfd_autoperiod(data, t)
 ```
 
 ---
@@ -95,7 +95,7 @@ result = pyfda.cfd_autoperiod(data, t)
 ### `detect_peaks`
 
 ```python
-pyfda.detect_peaks(data, argvals, min_distance=None, min_prominence=None,
+fdars.detect_peaks(data, argvals, min_distance=None, min_prominence=None,
                    smooth_first=False, smooth_nbasis=None)
 ```
 
@@ -115,7 +115,7 @@ Detect peaks in functional data curves.
 | result | `dict` | Keys: `peaks` (list of lists of (time, value, prominence) tuples), `mean_period` |
 
 ```python
-result = pyfda.detect_peaks(data, t, min_prominence=0.5)
+result = fdars.detect_peaks(data, t, min_prominence=0.5)
 for curve_peaks in result["peaks"]:
     for time, value, prominence in curve_peaks:
         print(f"  t={time:.2f}, val={value:.2f}")
@@ -126,7 +126,7 @@ for curve_peaks in result["peaks"]:
 ### `stl_decompose`
 
 ```python
-pyfda.stl_decompose(data, period, s_window=None, t_window=None, robust=False)
+fdars.stl_decompose(data, period, s_window=None, t_window=None, robust=False)
 ```
 
 STL (Seasonal and Trend decomposition using Loess) for functional data.
@@ -144,7 +144,7 @@ STL (Seasonal and Trend decomposition using Loess) for functional data.
 | result | `dict` | Keys: `trend` (n, m), `seasonal` (n, m), `remainder` (n, m) |
 
 ```python
-result = pyfda.stl_decompose(data, period=24, robust=True)
+result = fdars.stl_decompose(data, period=24, robust=True)
 trend = result["trend"]
 ```
 
@@ -153,7 +153,7 @@ trend = result["trend"]
 ### `seasonal_strength`
 
 ```python
-pyfda.seasonal_strength(data, argvals, period, method="variance")
+fdars.seasonal_strength(data, argvals, period, method="variance")
 ```
 
 Compute the strength of seasonality in functional data.
@@ -170,6 +170,6 @@ Compute the strength of seasonality in functional data.
 | strength | `float` | Seasonal strength in [0, 1]; higher means stronger seasonality |
 
 ```python
-strength = pyfda.seasonal_strength(data, t, period=2*np.pi)
+strength = fdars.seasonal_strength(data, t, period=2*np.pi)
 print(f"Seasonal strength: {strength:.3f}")
 ```

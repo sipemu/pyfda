@@ -16,8 +16,8 @@ where $q_i$ is the SRSF of the $i$-th predictor. This is phase-invariant: the pr
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.alignment import elastic_regression
+from fdars import Fdata
+from fdars.alignment import elastic_regression
 
 # --- Simulate data with phase variability ---
 np.random.seed(42)
@@ -83,8 +83,8 @@ $$
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.alignment import elastic_logistic
+from fdars import Fdata
+from fdars.alignment import elastic_logistic
 
 # --- Simulate two classes with phase variability ---
 np.random.seed(7)
@@ -158,9 +158,9 @@ print(f"Final loss: {loss:.4f}")
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.regression import fregre_lm
-from pyfda.alignment import elastic_regression, karcher_mean
+from fdars import Fdata
+from fdars.regression import fregre_lm
+from fdars.alignment import elastic_regression, karcher_mean
 
 np.random.seed(55)
 n, m = 100, 101

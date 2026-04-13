@@ -7,7 +7,7 @@ import pytest
 
 class TestFdataConstruction:
     def test_1d_basic(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         t = np.linspace(0, 1, 50)
         X = np.random.randn(10, 50)
@@ -22,38 +22,38 @@ class TestFdataConstruction:
         assert fd.metadata is None
 
     def test_1d_default_argvals(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         fd = Fdata(np.random.randn(5, 20))
         np.testing.assert_array_equal(fd.argvals, np.arange(20, dtype=np.float64))
 
     def test_1d_single_curve(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         fd = Fdata(np.array([1.0, 2.0, 3.0]))
         assert fd.n_obs == 1
         assert fd.n_points == 3
 
     def test_1d_with_ids(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         fd = Fdata(np.random.randn(3, 10), id=["a", "b", "c"])
         assert fd.id == ["a", "b", "c"]
 
     def test_1d_id_length_mismatch(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         with pytest.raises(ValueError, match="id must have length"):
             Fdata(np.random.randn(3, 10), id=["a", "b"])
 
     def test_1d_argvals_length_mismatch(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         with pytest.raises(ValueError, match="Length of argvals"):
             Fdata(np.random.randn(3, 10), argvals=np.linspace(0, 1, 5))
 
     def test_2d_from_3d_array(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         surfaces = np.random.randn(5, 8, 10)
         fd = Fdata(surfaces)
@@ -64,7 +64,7 @@ class TestFdataConstruction:
         assert fd.dims == (8, 10)
 
     def test_2d_from_tuple_argvals(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         s = np.linspace(0, 1, 8)
         t = np.linspace(0, 2, 10)
@@ -75,7 +75,7 @@ class TestFdataConstruction:
         assert fd.rangeval == ((0.0, 1.0), (0.0, 2.0))
 
     def test_2d_grid_mismatch(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         s = np.linspace(0, 1, 5)
         t = np.linspace(0, 1, 5)
@@ -85,7 +85,7 @@ class TestFdataConstruction:
 
 class TestFdataMetadata:
     def test_dict_metadata_converted_to_dataframe(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         meta = {"group": ["A", "B", "A"], "value": [1.0, 2.0, 3.0]}
         fd = Fdata(np.random.randn(3, 10), metadata=meta)
@@ -94,7 +94,7 @@ class TestFdataMetadata:
         assert len(fd.metadata) == 3
 
     def test_dataframe_metadata(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         meta = pd.DataFrame({"group": ["A", "B", "C"], "value": [1, 2, 3]})
         fd = Fdata(np.random.randn(3, 10), metadata=meta)
@@ -102,14 +102,14 @@ class TestFdataMetadata:
         assert list(fd.metadata.columns) == ["group", "value"]
 
     def test_metadata_row_mismatch(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         meta = pd.DataFrame({"x": [1, 2]})
         with pytest.raises(ValueError, match="must have 3 rows"):
             Fdata(np.random.randn(3, 10), metadata=meta)
 
     def test_metadata_column_access(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         meta = pd.DataFrame({"group": ["A", "B"], "score": [1.5, 2.5]})
         fd = Fdata(np.random.randn(2, 10), metadata=meta)
@@ -119,7 +119,7 @@ class TestFdataMetadata:
 
 class TestFdataRepr:
     def test_repr_1d(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         fd = Fdata(np.random.randn(10, 50), argvals=np.linspace(0, 1, 50))
         r = repr(fd)
@@ -128,7 +128,7 @@ class TestFdataRepr:
         assert "50 points" in r
 
     def test_repr_2d(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         fd = Fdata(np.random.randn(5, 8, 10))
         r = repr(fd)
@@ -137,7 +137,7 @@ class TestFdataRepr:
         assert "8" in r and "10" in r
 
     def test_repr_with_metadata(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         meta = pd.DataFrame({"group": ["A", "B"], "score": [1.0, 2.0]})
         fd = Fdata(np.random.randn(2, 10), metadata=meta)
@@ -148,7 +148,7 @@ class TestFdataRepr:
 
 class TestFdataSubsetting:
     def setup_method(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         np.random.seed(42)
         self.t = np.linspace(0, 1, 50)
@@ -192,7 +192,7 @@ class TestFdataSubsetting:
 
 class TestFdataArithmetic:
     def setup_method(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         self.fd1 = Fdata(np.ones((5, 10)))
         self.fd2 = Fdata(np.full((5, 10), 2.0))
@@ -218,7 +218,7 @@ class TestFdataArithmetic:
         np.testing.assert_allclose(result.data, 1.0)
 
     def test_shape_mismatch(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         other = Fdata(np.ones((5, 20)))
         with pytest.raises(ValueError, match="dimensions must match"):
@@ -227,7 +227,7 @@ class TestFdataArithmetic:
 
 class TestFdataOperations:
     def setup_method(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         np.random.seed(42)
         self.t = np.linspace(0, 1, 50)
@@ -279,7 +279,7 @@ class TestFdataOperations:
 
 class TestFdataMetadataPreserved:
     def test_center_preserves_metadata(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         meta = pd.DataFrame({"group": ["A", "B", "C"]})
         fd = Fdata(np.random.randn(3, 10), metadata=meta)
@@ -288,7 +288,7 @@ class TestFdataMetadataPreserved:
         assert centered.id == fd.id
 
     def test_normalize_preserves_metadata(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         meta = pd.DataFrame({"group": ["A", "B", "C"]})
         fd = Fdata(np.random.randn(3, 10), metadata=meta)
@@ -296,7 +296,7 @@ class TestFdataMetadataPreserved:
         assert isinstance(normed.metadata, pd.DataFrame)
 
     def test_subset_preserves_metadata(self):
-        from pyfda import Fdata
+        from fdars import Fdata
 
         meta = pd.DataFrame({"group": ["A", "B", "C"], "val": [1, 2, 3]})
         fd = Fdata(np.random.randn(3, 10), metadata=meta)

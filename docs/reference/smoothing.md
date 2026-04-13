@@ -1,4 +1,4 @@
-# pyfda.smoothing
+# fdars.smoothing
 
 Nonparametric smoothing methods for scalar-valued data.
 
@@ -17,7 +17,7 @@ Nonparametric smoothing methods for scalar-valued data.
 ### `nadaraya_watson`
 
 ```python
-pyfda.nadaraya_watson(x, y, x_new, bandwidth, kernel="gaussian")
+fdars.nadaraya_watson(x, y, x_new, bandwidth, kernel="gaussian")
 ```
 
 Nadaraya-Watson kernel regression estimator.
@@ -37,7 +37,7 @@ Nadaraya-Watson kernel regression estimator.
 ```python
 x, y = np.sort(np.random.rand(100)), np.random.randn(100)
 x_new = np.linspace(0, 1, 200)
-y_hat = pyfda.nadaraya_watson(x, y, x_new, bandwidth=0.1)
+y_hat = fdars.nadaraya_watson(x, y, x_new, bandwidth=0.1)
 ```
 
 ---
@@ -45,7 +45,7 @@ y_hat = pyfda.nadaraya_watson(x, y, x_new, bandwidth=0.1)
 ### `local_linear`
 
 ```python
-pyfda.local_linear(x, y, x_new, bandwidth, kernel="gaussian")
+fdars.local_linear(x, y, x_new, bandwidth, kernel="gaussian")
 ```
 
 Local linear regression smoother. Fits a linear model in a kernel-weighted neighborhood around each evaluation point.
@@ -63,7 +63,7 @@ Local linear regression smoother. Fits a linear model in a kernel-weighted neigh
 | smoothed | `ndarray (m,)` | Smoothed values at `x_new` |
 
 ```python
-y_hat = pyfda.local_linear(x, y, x_new, bandwidth=0.1)
+y_hat = fdars.local_linear(x, y, x_new, bandwidth=0.1)
 ```
 
 ---
@@ -71,7 +71,7 @@ y_hat = pyfda.local_linear(x, y, x_new, bandwidth=0.1)
 ### `local_polynomial`
 
 ```python
-pyfda.local_polynomial(x, y, x_new, bandwidth, degree=1, kernel="gaussian")
+fdars.local_polynomial(x, y, x_new, bandwidth, degree=1, kernel="gaussian")
 ```
 
 Local polynomial regression smoother of arbitrary degree.
@@ -90,7 +90,7 @@ Local polynomial regression smoother of arbitrary degree.
 | smoothed | `ndarray (m,)` | Smoothed values at `x_new` |
 
 ```python
-y_hat = pyfda.local_polynomial(x, y, x_new, bandwidth=0.1, degree=2)
+y_hat = fdars.local_polynomial(x, y, x_new, bandwidth=0.1, degree=2)
 ```
 
 ---
@@ -98,7 +98,7 @@ y_hat = pyfda.local_polynomial(x, y, x_new, bandwidth=0.1, degree=2)
 ### `knn_smoother`
 
 ```python
-pyfda.knn_smoother(x, y, x_new, k)
+fdars.knn_smoother(x, y, x_new, k)
 ```
 
 K-nearest neighbors smoother. Averages the response of the k closest observations.
@@ -115,7 +115,7 @@ K-nearest neighbors smoother. Averages the response of the k closest observation
 | smoothed | `ndarray (m,)` | Smoothed values at `x_new` |
 
 ```python
-y_hat = pyfda.knn_smoother(x, y, x_new, k=10)
+y_hat = fdars.knn_smoother(x, y, x_new, k=10)
 ```
 
 ---
@@ -123,7 +123,7 @@ y_hat = pyfda.knn_smoother(x, y, x_new, k=10)
 ### `optim_bandwidth`
 
 ```python
-pyfda.optim_bandwidth(x, y, criterion="gcv", kernel="gaussian",
+fdars.optim_bandwidth(x, y, criterion="gcv", kernel="gaussian",
                       n_grid=50, h_min=None, h_max=None)
 ```
 
@@ -144,6 +144,6 @@ Select optimal bandwidth for kernel smoothing via cross-validation.
 | result | `dict` | Keys: `h_opt` (optimal bandwidth), `criterion`, `value` (criterion value) |
 
 ```python
-result = pyfda.optim_bandwidth(x, y, criterion="gcv")
-y_hat = pyfda.nadaraya_watson(x, y, x_new, bandwidth=result["h_opt"])
+result = fdars.optim_bandwidth(x, y, criterion="gcv")
+y_hat = fdars.nadaraya_watson(x, y, x_new, bandwidth=result["h_opt"])
 ```

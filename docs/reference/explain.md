@@ -1,4 +1,4 @@
-# pyfda.explain
+# fdars.explain
 
 Explainability and interpretability methods for functional regression models. All functions internally fit a `fregre_lm` model and then compute explanations.
 
@@ -17,7 +17,7 @@ Explainability and interpretability methods for functional regression models. Al
 ### `fpc_permutation_importance`
 
 ```python
-pyfda.fpc_permutation_importance(data, response, ncomp=3, n_perm=10, seed=42)
+fdars.fpc_permutation_importance(data, response, ncomp=3, n_perm=10, seed=42)
 ```
 
 Compute permutation importance of each FPC score. Measures the increase in prediction error when each FPC score column is randomly shuffled.
@@ -35,7 +35,7 @@ Compute permutation importance of each FPC score. Measures the increase in predi
 | result | `dict` | Keys: `importance` (ncomp,), `baseline_metric`, `permuted_metric` (ncomp,) |
 
 ```python
-result = pyfda.fpc_permutation_importance(data, y, ncomp=5, n_perm=20)
+result = fdars.fpc_permutation_importance(data, y, ncomp=5, n_perm=20)
 for i, imp in enumerate(result["importance"]):
     print(f"FPC {i+1}: importance = {imp:.4f}")
 ```
@@ -45,7 +45,7 @@ for i, imp in enumerate(result["importance"]):
 ### `functional_pdp`
 
 ```python
-pyfda.functional_pdp(data, response, ncomp=3, component=0, n_grid=50)
+fdars.functional_pdp(data, response, ncomp=3, component=0, n_grid=50)
 ```
 
 Partial dependence plot for a single FPC component. Shows the marginal effect of one FPC score on the predicted response.
@@ -63,7 +63,7 @@ Partial dependence plot for a single FPC component. Shows the marginal effect of
 | result | `dict` | Keys: `grid_values` (n_grid,), `pdp_curve` (n_grid,), `component` |
 
 ```python
-pdp = pyfda.functional_pdp(data, y, ncomp=5, component=0)
+pdp = fdars.functional_pdp(data, y, ncomp=5, component=0)
 # Plot: plt.plot(pdp["grid_values"], pdp["pdp_curve"])
 ```
 
@@ -72,7 +72,7 @@ pdp = pyfda.functional_pdp(data, y, ncomp=5, component=0)
 ### `fpc_shap_values`
 
 ```python
-pyfda.fpc_shap_values(data, response, ncomp=3)
+fdars.fpc_shap_values(data, response, ncomp=3)
 ```
 
 Compute SHAP values for FPC scores in a linear regression model. For linear models, SHAP values have a closed-form solution.
@@ -88,7 +88,7 @@ Compute SHAP values for FPC scores in a linear regression model. For linear mode
 | result | `dict` | Keys: `values` (n, ncomp), `base_value` |
 
 ```python
-shap = pyfda.fpc_shap_values(data, y, ncomp=5)
+shap = fdars.fpc_shap_values(data, y, ncomp=5)
 # shap["values"][i, j] = contribution of FPC j for observation i
 ```
 
@@ -97,7 +97,7 @@ shap = pyfda.fpc_shap_values(data, y, ncomp=5)
 ### `significant_regions`
 
 ```python
-pyfda.significant_regions(lower, upper)
+fdars.significant_regions(lower, upper)
 ```
 
 Identify regions of the domain where the coefficient function beta(t) is significantly different from zero, based on confidence interval bounds.
@@ -112,7 +112,7 @@ Identify regions of the domain where the coefficient function beta(t) is signifi
 | regions | `list` | List of `(start_idx, end_idx, direction)` tuples where `direction` is `"positive"` or `"negative"` |
 
 ```python
-regions = pyfda.significant_regions(ci_lower, ci_upper)
+regions = fdars.significant_regions(ci_lower, ci_upper)
 for start, end, direction in regions:
     print(f"  [{start}:{end}] -> {direction}")
 ```
@@ -122,7 +122,7 @@ for start, end, direction in regions:
 ### `beta_decomposition`
 
 ```python
-pyfda.beta_decomposition(data, response, ncomp=3)
+fdars.beta_decomposition(data, response, ncomp=3)
 ```
 
 Decompose the estimated beta(t) function into contributions from each FPC.
@@ -138,7 +138,7 @@ Decompose the estimated beta(t) function into contributions from each FPC.
 | result | `dict` | Keys: `components` (list of ncomp arrays, each (m,)), `coefficients` (ncomp,), `variance_proportion` (ncomp,) |
 
 ```python
-decomp = pyfda.beta_decomposition(data, y, ncomp=5)
+decomp = fdars.beta_decomposition(data, y, ncomp=5)
 for i, comp in enumerate(decomp["components"]):
     print(f"FPC {i+1}: coeff={decomp['coefficients'][i]:.3f}, "
           f"var_prop={decomp['variance_proportion'][i]:.3f}")

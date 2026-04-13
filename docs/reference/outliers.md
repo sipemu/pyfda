@@ -1,4 +1,4 @@
-# pyfda.outliers
+# fdars.outliers
 
 Outlier detection methods for functional data.
 
@@ -15,7 +15,7 @@ Outlier detection methods for functional data.
 ### `detect_outliers_lrt`
 
 ```python
-pyfda.detect_outliers_lrt(data, alpha=0.05, n_bootstrap=200, trim=0.1, smo=0.02)
+fdars.detect_outliers_lrt(data, alpha=0.05, n_bootstrap=200, trim=0.1, smo=0.02)
 ```
 
 Likelihood ratio test for outlier detection with bootstrap calibration.
@@ -33,7 +33,7 @@ Likelihood ratio test for outlier detection with bootstrap calibration.
 | result | `dict` | Keys: `outliers` (bool array of length n), `threshold` |
 
 ```python
-result = pyfda.detect_outliers_lrt(data, alpha=0.05)
+result = fdars.detect_outliers_lrt(data, alpha=0.05)
 outlier_idx = np.where(result["outliers"])[0]
 ```
 
@@ -42,7 +42,7 @@ outlier_idx = np.where(result["outliers"])[0]
 ### `outliergram`
 
 ```python
-pyfda.outliergram(data, factor=1.5)
+fdars.outliergram(data, factor=1.5)
 ```
 
 Outliergram method. Computes Modified Epigraph Index (MEI) and Modified Band Depth (MBD), then flags outliers based on a parabolic rule.
@@ -57,7 +57,7 @@ Outliergram method. Computes Modified Epigraph Index (MEI) and Modified Band Dep
 | result | `dict` | Keys: `mei` (n,), `mbd` (n,), `outliers` (bool array of length n) |
 
 ```python
-result = pyfda.outliergram(data, factor=1.5)
+result = fdars.outliergram(data, factor=1.5)
 ```
 
 ---
@@ -65,7 +65,7 @@ result = pyfda.outliergram(data, factor=1.5)
 ### `magnitude_shape`
 
 ```python
-pyfda.magnitude_shape(data)
+fdars.magnitude_shape(data)
 ```
 
 Compute magnitude and shape outlyingness measures. Magnitude captures vertical outliers; shape captures curves with unusual patterns.
@@ -79,7 +79,7 @@ Compute magnitude and shape outlyingness measures. Magnitude captures vertical o
 | result | `dict` | Keys: `magnitude` (n,), `shape` (n,) |
 
 ```python
-result = pyfda.magnitude_shape(data)
+result = fdars.magnitude_shape(data)
 # Flag observations with extreme magnitude or shape
 outliers = (result["magnitude"] > 3) | (result["shape"] > 3)
 ```

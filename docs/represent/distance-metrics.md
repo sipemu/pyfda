@@ -1,6 +1,6 @@
 # Distance Metrics
 
-Distance (and dissimilarity) measures between curves are fundamental building blocks for clustering, classification, nonparametric regression, and outlier detection. pyfda provides a comprehensive set of metrics -- from classical $L^p$ norms to elastic distances that factor out time warping.
+Distance (and dissimilarity) measures between curves are fundamental building blocks for clustering, classification, nonparametric regression, and outlier detection. fdars provides a comprehensive set of metrics -- from classical $L^p$ norms to elastic distances that factor out time warping.
 
 ## Self vs cross distances
 
@@ -25,7 +25,7 @@ with numerical integration via the trapezoidal rule.
 
 ```python
 import numpy as np
-from pyfda import Fdata
+from fdars import Fdata
 
 argvals = np.linspace(0, 1, 200)
 
@@ -61,7 +61,7 @@ print(D_cross.shape)  # (n_train, n_test)
 For surface data observed on a product grid:
 
 ```python
-from pyfda.metric import lp_self_2d, lp_cross_2d
+from fdars.metric import lp_self_2d, lp_cross_2d
 
 D_2d = lp_self_2d(surface_data, argvals_s, argvals_t, p=2.0)
 ```
@@ -77,7 +77,7 @@ d_H(X, Y) = \max\!\left(\sup_t \inf_s \bigl\|(t, X(t)) - (s, Y(s))\bigr\|,\; \su
 $$
 
 ```python
-from pyfda.metric import hausdorff_self_1d, hausdorff_cross_1d
+from fdars.metric import hausdorff_self_1d, hausdorff_cross_1d
 
 D_haus = hausdorff_self_1d(data, argvals)
 ```
@@ -94,7 +94,7 @@ D_haus = hausdorff_self_1d(data, argvals)
 ### 2D variants
 
 ```python
-from pyfda.metric import hausdorff_self_2d, hausdorff_cross_2d
+from fdars.metric import hausdorff_self_2d, hausdorff_cross_2d
 ```
 
 ---
@@ -110,7 +110,7 @@ $$
 where $\pi$ is a monotone warping path.
 
 ```python
-from pyfda.metric import dtw_self_1d, dtw_cross_1d
+from fdars.metric import dtw_self_1d, dtw_cross_1d
 
 # Unconstrained DTW
 D_dtw = dtw_self_1d(data, p=2.0)
@@ -143,7 +143,7 @@ $$
 where $\mathrm{soft\text{-}min}^{\gamma}$ uses the log-sum-exp with smoothing parameter $\gamma$.
 
 ```python
-from pyfda.metric import soft_dtw_self_1d, soft_dtw_cross_1d
+from fdars.metric import soft_dtw_self_1d, soft_dtw_cross_1d
 
 D_sdtw = soft_dtw_self_1d(data, gamma=1.0)
 ```
@@ -156,7 +156,7 @@ D_sdtw = soft_dtw_self_1d(data, gamma=1.0)
     Soft-DTW does not satisfy the triangle inequality. If you need a proper metric, use the **Soft-DTW divergence** instead:
 
     ```python
-    from pyfda.metric import soft_dtw_div_self_1d, soft_dtw_div_cross_1d
+    from fdars.metric import soft_dtw_div_self_1d, soft_dtw_div_cross_1d
 
     D_div = soft_dtw_div_self_1d(data, gamma=1.0)
     ```
@@ -176,7 +176,7 @@ $$
 where $\hat{X}, \hat{Y} \in \mathbb{R}^{n_{\text{basis}}}$ are truncated Fourier coefficient vectors.
 
 ```python
-from pyfda.metric import fourier_self_1d, fourier_cross_1d
+from fdars.metric import fourier_self_1d, fourier_cross_1d
 
 D_fourier = fourier_self_1d(data, n_basis=5)
 ```
@@ -202,7 +202,7 @@ d_{\mathrm{shift}}(X, Y) = \min_{|\delta| \le \Delta} \|X(t) - Y(t - \delta)\|_2
 $$
 
 ```python
-from pyfda.metric import hshift_self_1d, hshift_cross_1d
+from fdars.metric import hshift_self_1d, hshift_cross_1d
 
 D_shift = hshift_self_1d(data, argvals, max_shift=0)
 ```
@@ -221,10 +221,10 @@ D_shift = hshift_self_1d(data, argvals, max_shift=0)
 
 ## Elastic distances
 
-The elastic (Fisher-Rao) framework separates **amplitude** (vertical) and **phase** (horizontal) variation via the Square Root Slope Function (SRSF) transform. These distances live in the `pyfda.alignment` module.
+The elastic (Fisher-Rao) framework separates **amplitude** (vertical) and **phase** (horizontal) variation via the Square Root Slope Function (SRSF) transform. These distances live in the `fdars.alignment` module.
 
 ```python
-from pyfda.alignment import elastic_distance, amplitude_distance, phase_distance
+from fdars.alignment import elastic_distance, amplitude_distance, phase_distance
 ```
 
 ### Elastic distance
@@ -256,7 +256,7 @@ d_phase = phase_distance(curve1, curve2, argvals, lambda_=0.0)
 For pairwise computations across a full sample:
 
 ```python
-from pyfda.alignment import elastic_self_distance_matrix, elastic_cross_distance_matrix
+from fdars.alignment import elastic_self_distance_matrix, elastic_cross_distance_matrix
 
 D_elastic = elastic_self_distance_matrix(data, argvals, lambda_=0.0)
 D_cross   = elastic_cross_distance_matrix(train_data, test_data, argvals)
@@ -317,9 +317,9 @@ Do you need amplitude/phase decomposition?
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.metric import dtw_self_1d, hausdorff_self_1d, fourier_self_1d
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.metric import dtw_self_1d, hausdorff_self_1d, fourier_self_1d
 
 # --- 1. Simulate data with phase variation --------------------------------
 argvals = np.linspace(0, 1, 150)
@@ -355,11 +355,11 @@ plt.show()
 
 ## Using distance matrices downstream
 
-Distance matrices plug directly into several pyfda methods:
+Distance matrices plug directly into several fdars methods:
 
 ```python
-from pyfda.regression import fregre_np
-from pyfda.clustering import kmeans_fd
+from fdars.regression import fregre_np
+from fdars.clustering import kmeans_fd
 
 # Nonparametric kernel regression from distances
 D = fd.distance(method="lp", p=2.0)
@@ -371,7 +371,7 @@ reg = fregre_np(D, response, h=0.0)  # h=0 -> automatic bandwidth
 
 ## API summary
 
-### `pyfda.metric`
+### `fdars.metric`
 
 | Function | Key parameters | Description |
 |----------|---------------|-------------|
@@ -394,7 +394,7 @@ reg = fregre_np(D, response, h=0.0)  # h=0 -> automatic bandwidth
 | `hshift_self_1d(data, argvals, max_shift)` | `max_shift=0` | Horizontal shift self |
 | `hshift_cross_1d(data1, data2, argvals, max_shift)` | `max_shift=0` | Horizontal shift cross |
 
-### `pyfda.alignment` (elastic distances)
+### `fdars.alignment` (elastic distances)
 
 | Function | Key parameters | Description |
 |----------|---------------|-------------|

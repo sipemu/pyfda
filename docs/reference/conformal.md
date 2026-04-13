@@ -1,4 +1,4 @@
-# pyfda.conformal
+# fdars.conformal
 
 Conformal prediction and inference methods for functional data: regression intervals, nonparametric intervals, and classification prediction sets.
 
@@ -15,7 +15,7 @@ Conformal prediction and inference methods for functional data: regression inter
 ### `conformal_fregre_lm`
 
 ```python
-pyfda.conformal_fregre_lm(data, response, test_data, ncomp=3,
+fdars.conformal_fregre_lm(data, response, test_data, ncomp=3,
                           cal_fraction=0.25, alpha=0.1, seed=42)
 ```
 
@@ -36,7 +36,7 @@ Split conformal prediction intervals for scalar-on-function linear regression.
 | result | `dict` | Keys: `lower` (n_test,), `upper` (n_test,), `predictions` (n_test,), `coverage` |
 
 ```python
-result = pyfda.conformal_fregre_lm(X_train, y_train, X_test, ncomp=5, alpha=0.1)
+result = fdars.conformal_fregre_lm(X_train, y_train, X_test, ncomp=5, alpha=0.1)
 for i in range(len(result["predictions"])):
     print(f"  [{result['lower'][i]:.2f}, {result['upper'][i]:.2f}]")
 ```
@@ -46,7 +46,7 @@ for i in range(len(result["predictions"])):
 ### `conformal_fregre_np`
 
 ```python
-pyfda.conformal_fregre_np(data, response, test_data, argvals,
+fdars.conformal_fregre_np(data, response, test_data, argvals,
                           cal_fraction=0.25, alpha=0.1,
                           h_func=1.0, h_scalar=1.0, seed=42)
 ```
@@ -71,7 +71,7 @@ Split conformal prediction intervals for nonparametric kernel regression.
 
 ```python
 t = np.linspace(0, 1, 100)
-result = pyfda.conformal_fregre_np(X_train, y_train, X_test, t, alpha=0.1)
+result = fdars.conformal_fregre_np(X_train, y_train, X_test, t, alpha=0.1)
 ```
 
 ---
@@ -79,7 +79,7 @@ result = pyfda.conformal_fregre_np(X_train, y_train, X_test, t, alpha=0.1)
 ### `conformal_classif`
 
 ```python
-pyfda.conformal_classif(data, labels, test_data, ncomp=3,
+fdars.conformal_classif(data, labels, test_data, ncomp=3,
                         classifier="lda", cal_fraction=0.25,
                         alpha=0.1, seed=42)
 ```
@@ -102,7 +102,7 @@ Conformal classification prediction sets. Returns a set of plausible classes for
 | result | `dict` | Keys: `prediction_sets` (list of lists of int), `coverage` |
 
 ```python
-result = pyfda.conformal_classif(X_train, y_train, X_test, classifier="lda")
+result = fdars.conformal_classif(X_train, y_train, X_test, classifier="lda")
 for i, pset in enumerate(result["prediction_sets"]):
     print(f"  Obs {i}: possible classes = {pset}")
 ```

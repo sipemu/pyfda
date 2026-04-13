@@ -1,9 +1,9 @@
 # API Reference
 
-Complete reference for all `pyfda` modules.
+Complete reference for all `fdars` modules.
 
 ```python
-from pyfda import Fdata  # main entry point
+from fdars import Fdata  # main entry point
 ```
 
 ## Modules

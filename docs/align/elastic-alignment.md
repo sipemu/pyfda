@@ -14,7 +14,7 @@ f_{\text{aligned}}(t) = (f \circ \gamma)(t) = f(\gamma(t))
 $$
 
 !!! info "Fisher-Rao framework"
-    All alignment in `pyfda` is performed under the **elastic (Fisher-Rao) metric**, which is the unique Riemannian metric on the function space that is invariant to simultaneous reparameterization. This guarantees that the alignment is *proper* -- the distance between two functions does not depend on how they are parameterized.
+    All alignment in `fdars` is performed under the **elastic (Fisher-Rao) metric**, which is the unique Riemannian metric on the function space that is invariant to simultaneous reparameterization. This guarantees that the alignment is *proper* -- the distance between two functions does not depend on how they are parameterized.
 
 ---
 
@@ -28,7 +28,7 @@ $$
 
 ```python
 import numpy as np
-from pyfda.alignment import srsf_transform, srsf_inverse
+from fdars.alignment import srsf_transform, srsf_inverse
 
 # Create a simple curve
 t = np.linspace(0, 1, 101)
@@ -53,7 +53,7 @@ print("Max reconstruction error:", np.max(np.abs(f - f_recovered)))
 Align a single curve to a reference curve. The optimizer finds the warping function $\gamma^*$ that minimizes the elastic distance.
 
 ```python
-from pyfda.alignment import elastic_align_pair
+from fdars.alignment import elastic_align_pair
 
 # Two curves that differ in phase
 t = np.linspace(0, 1, 101)
@@ -89,8 +89,8 @@ The **Karcher mean** (Frechet mean under the elastic metric) simultaneously alig
 2. Recomputing the mean from the aligned curves.
 
 ```python
-from pyfda import Fdata
-from pyfda.alignment import karcher_mean
+from fdars import Fdata
+from fdars.alignment import karcher_mean
 
 # Simulate 30 curves with random phase shifts
 np.random.seed(0)
@@ -127,7 +127,7 @@ print(f"Converged in {n_iter} iterations: {converged}")
 The Karcher **median** replaces the squared elastic distance with the unsquared distance, producing a more robust central tendency estimate.
 
 ```python
-from pyfda.alignment import karcher_median
+from fdars.alignment import karcher_median
 
 result = karcher_median(fd.data, t, lambda_=0.0, max_iter=20, tol=1e-3)
 
@@ -144,7 +144,7 @@ The result dictionary has the same keys as `karcher_mean`, plus `weights` -- the
 When the dataset contains outliers, the **robust (trimmed) Karcher mean** down-weights or excludes the most extreme observations.
 
 ```python
-from pyfda.alignment import robust_karcher_mean
+from fdars.alignment import robust_karcher_mean
 
 result = robust_karcher_mean(
     fd.data, t,
@@ -189,7 +189,7 @@ print(f"Compressed regions: {compressed[[0, -1]]}")
 Compute the elastic (Fisher-Rao) distance between two curves without explicitly returning the warping function.
 
 ```python
-from pyfda.alignment import elastic_distance
+from fdars.alignment import elastic_distance
 
 d = elastic_distance(f1, f2, t)
 print(f"Elastic distance: {d:.4f}")
@@ -202,7 +202,7 @@ print(f"Elastic distance: {d:.4f}")
 Compute pairwise elastic distances for an entire dataset. These matrices can be fed into nonparametric regression, clustering, or classification.
 
 ```python
-from pyfda.alignment import elastic_self_distance_matrix, elastic_cross_distance_matrix
+from fdars.alignment import elastic_self_distance_matrix, elastic_cross_distance_matrix
 
 # Self-distance matrix (symmetric, zero diagonal)
 D = elastic_self_distance_matrix(fd.data, fd.argvals, lambda_=0.0)
@@ -219,14 +219,14 @@ print("Cross-distance shape:", D_cross.shape)  # (20, 10)
 
 ## Warp utilities
 
-Warping functions form a group under composition. `pyfda` provides utilities for working with them.
+Warping functions form a group under composition. `fdars` provides utilities for working with them.
 
 ### Compose warps
 
 Apply warp $\gamma_2$ after $\gamma_1$:
 
 ```python
-from pyfda.alignment import compose_warps
+from fdars.alignment import compose_warps
 
 gamma_composed = compose_warps(gamma_1, gamma_2, t)
 ```
@@ -236,7 +236,7 @@ gamma_composed = compose_warps(gamma_1, gamma_2, t)
 Find $\gamma^{-1}$ such that $\gamma \circ \gamma^{-1} = \text{id}$:
 
 ```python
-from pyfda.alignment import invert_warp
+from fdars.alignment import invert_warp
 
 gamma_inv = invert_warp(gamma_0, t)
 ```
@@ -246,7 +246,7 @@ gamma_inv = invert_warp(gamma_0, t)
 The **bending energy** quantifies how far $\gamma$ deviates from smooth:
 
 ```python
-from pyfda.alignment import warp_smoothness
+from fdars.alignment import warp_smoothness
 
 energy = warp_smoothness(gamma_0, t)
 print(f"Bending energy: {energy:.4f}")
@@ -257,7 +257,7 @@ print(f"Bending energy: {energy:.4f}")
 The **geodesic distance from the identity** measures the overall magnitude of the warp:
 
 ```python
-from pyfda.alignment import warp_complexity
+from fdars.alignment import warp_complexity
 
 complexity = warp_complexity(gamma_0, t)
 print(f"Warp complexity: {complexity:.4f}")
@@ -274,7 +274,7 @@ d_{\text{elastic}}^2 = d_{\text{amplitude}}^2 + d_{\text{phase}}^2
 $$
 
 ```python
-from pyfda.alignment import amplitude_distance, phase_distance
+from fdars.alignment import amplitude_distance, phase_distance
 
 d_amp   = amplitude_distance(f1, f2, t)
 d_phase = phase_distance(f1, f2, t)
@@ -292,8 +292,8 @@ print(f"Check: {d_amp**2 + d_phase**2:.4f} ~ {d_total**2:.4f}")
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.alignment import (
+from fdars import Fdata
+from fdars.alignment import (
     karcher_mean,
     elastic_distance,
     elastic_self_distance_matrix,

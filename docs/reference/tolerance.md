@@ -1,4 +1,4 @@
-# pyfda.tolerance
+# fdars.tolerance
 
 Tolerance bands, confidence bands, and equivalence testing for functional data.
 
@@ -16,7 +16,7 @@ Tolerance bands, confidence bands, and equivalence testing for functional data.
 ### `fpca_tolerance_band`
 
 ```python
-pyfda.fpca_tolerance_band(data, ncomp=3, nb=1000, coverage=0.95, seed=42)
+fdars.fpca_tolerance_band(data, ncomp=3, nb=1000, coverage=0.95, seed=42)
 ```
 
 FPCA-based simultaneous tolerance band via bootstrap.
@@ -34,7 +34,7 @@ FPCA-based simultaneous tolerance band via bootstrap.
 | result | `dict` | Keys: `upper` (m,), `lower` (m,), `center` (m,), `half_width` (m,) |
 
 ```python
-band = pyfda.fpca_tolerance_band(data, ncomp=3, coverage=0.95)
+band = fdars.fpca_tolerance_band(data, ncomp=3, coverage=0.95)
 ```
 
 ---
@@ -42,7 +42,7 @@ band = pyfda.fpca_tolerance_band(data, ncomp=3, coverage=0.95)
 ### `conformal_prediction_band`
 
 ```python
-pyfda.conformal_prediction_band(data, coverage=0.95, cal_fraction=0.25, seed=42)
+fdars.conformal_prediction_band(data, coverage=0.95, cal_fraction=0.25, seed=42)
 ```
 
 Distribution-free conformal prediction band.
@@ -59,7 +59,7 @@ Distribution-free conformal prediction band.
 | result | `dict` | Keys: `upper` (m,), `lower` (m,), `center` (m,), `half_width` (m,) |
 
 ```python
-band = pyfda.conformal_prediction_band(data, coverage=0.90)
+band = fdars.conformal_prediction_band(data, coverage=0.90)
 ```
 
 ---
@@ -67,7 +67,7 @@ band = pyfda.conformal_prediction_band(data, coverage=0.90)
 ### `scb_mean_degras`
 
 ```python
-pyfda.scb_mean_degras(data, argvals, bandwidth=0.0, nb=1000, confidence=0.95)
+fdars.scb_mean_degras(data, argvals, bandwidth=0.0, nb=1000, confidence=0.95)
 ```
 
 Simultaneous confidence band for the mean function using the Degras (2011) multiplier bootstrap method.
@@ -86,7 +86,7 @@ Simultaneous confidence band for the mean function using the Degras (2011) multi
 
 ```python
 t = np.linspace(0, 1, 100)
-scb = pyfda.scb_mean_degras(data, t, confidence=0.95)
+scb = fdars.scb_mean_degras(data, t, confidence=0.95)
 ```
 
 ---
@@ -94,7 +94,7 @@ scb = pyfda.scb_mean_degras(data, t, confidence=0.95)
 ### `equivalence_test`
 
 ```python
-pyfda.equivalence_test(data1, data2, delta, alpha=0.05, nb=1000, seed=42)
+fdars.equivalence_test(data1, data2, delta, alpha=0.05, nb=1000, seed=42)
 ```
 
 Functional equivalence test (TOST procedure). Tests whether two groups of curves are equivalent within a margin delta.
@@ -113,7 +113,7 @@ Functional equivalence test (TOST procedure). Tests whether two groups of curves
 | result | `dict` | Keys: `equivalent` (bool), `p_value`, `test_statistic` |
 
 ```python
-result = pyfda.equivalence_test(group1, group2, delta=0.5, alpha=0.05)
+result = fdars.equivalence_test(group1, group2, delta=0.5, alpha=0.05)
 if result["equivalent"]:
     print(f"Groups are equivalent (p={result['p_value']:.4f})")
 ```

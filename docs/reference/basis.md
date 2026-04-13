@@ -1,4 +1,4 @@
-# pyfda.basis
+# fdars.basis
 
 Basis representations for functional data: projection, reconstruction, P-spline fitting, automatic basis selection, and smoothing.
 
@@ -21,7 +21,7 @@ Basis representations for functional data: projection, reconstruction, P-spline 
 ### `fdata_to_basis_1d`
 
 ```python
-pyfda.fdata_to_basis_1d(data, argvals, n_basis, basis_type="bspline")
+fdars.fdata_to_basis_1d(data, argvals, n_basis, basis_type="bspline")
 ```
 
 Project functional data onto a basis system.
@@ -39,7 +39,7 @@ Project functional data onto a basis system.
 
 ```python
 t = np.linspace(0, 1, 100)
-coefs, nb = pyfda.fdata_to_basis_1d(data, t, n_basis=10, basis_type="bspline")
+coefs, nb = fdars.fdata_to_basis_1d(data, t, n_basis=10, basis_type="bspline")
 ```
 
 ---
@@ -47,7 +47,7 @@ coefs, nb = pyfda.fdata_to_basis_1d(data, t, n_basis=10, basis_type="bspline")
 ### `basis_to_fdata_1d`
 
 ```python
-pyfda.basis_to_fdata_1d(coefficients, argvals, n_basis, basis_type="bspline")
+fdars.basis_to_fdata_1d(coefficients, argvals, n_basis, basis_type="bspline")
 ```
 
 Reconstruct functional data from basis coefficients.
@@ -64,7 +64,7 @@ Reconstruct functional data from basis coefficients.
 | reconstructed | `ndarray (n, m)` | Reconstructed functional data |
 
 ```python
-reconstructed = pyfda.basis_to_fdata_1d(coefs, t, n_basis=10)
+reconstructed = fdars.basis_to_fdata_1d(coefs, t, n_basis=10)
 ```
 
 ---
@@ -72,7 +72,7 @@ reconstructed = pyfda.basis_to_fdata_1d(coefs, t, n_basis=10)
 ### `pspline_fit_1d`
 
 ```python
-pyfda.pspline_fit_1d(data, argvals, n_basis, lambda_, order=2)
+fdars.pspline_fit_1d(data, argvals, n_basis, lambda_, order=2)
 ```
 
 Fit P-splines to 1D functional data with a fixed smoothing parameter.
@@ -90,7 +90,7 @@ Fit P-splines to 1D functional data with a fixed smoothing parameter.
 | result | `dict` | Keys: `fitted` (n, m), `coefficients` (n, n_basis), `edf`, `rss`, `gcv`, `aic`, `bic` |
 
 ```python
-result = pyfda.pspline_fit_1d(data, t, n_basis=20, lambda_=1.0, order=2)
+result = fdars.pspline_fit_1d(data, t, n_basis=20, lambda_=1.0, order=2)
 smoothed = result["fitted"]
 ```
 
@@ -99,7 +99,7 @@ smoothed = result["fitted"]
 ### `pspline_fit_gcv`
 
 ```python
-pyfda.pspline_fit_gcv(data, argvals, n_basis, order=2)
+fdars.pspline_fit_gcv(data, argvals, n_basis, order=2)
 ```
 
 P-spline fit with GCV-selected smoothing parameter.
@@ -116,7 +116,7 @@ P-spline fit with GCV-selected smoothing parameter.
 | result | `dict` | Keys: `fitted` (n, m), `coefficients` (n, n_basis), `edf`, `rss`, `gcv`, `aic`, `bic` |
 
 ```python
-result = pyfda.pspline_fit_gcv(data, t, n_basis=20)
+result = fdars.pspline_fit_gcv(data, t, n_basis=20)
 ```
 
 ---
@@ -124,7 +124,7 @@ result = pyfda.pspline_fit_gcv(data, t, n_basis=20)
 ### `select_basis_auto_1d`
 
 ```python
-pyfda.select_basis_auto_1d(data, argvals, criterion="gcv", nbasis_min=0,
+fdars.select_basis_auto_1d(data, argvals, criterion="gcv", nbasis_min=0,
                            nbasis_max=0, lambda_pspline=-1.0,
                            use_seasonal_hint=True)
 ```
@@ -146,7 +146,7 @@ Automatic basis selection using GCV, AIC, or BIC. Optionally detects seasonality
 | selections | `list[dict]` | Per-curve results with keys: `basis_type`, `nbasis`, `score`, `coefficients`, `fitted`, `edf`, `seasonal_detected`, `lambda_val` |
 
 ```python
-results = pyfda.select_basis_auto_1d(data, t, criterion="bic")
+results = fdars.select_basis_auto_1d(data, t, criterion="bic")
 print(results[0]["basis_type"], results[0]["nbasis"])
 ```
 
@@ -155,7 +155,7 @@ print(results[0]["basis_type"], results[0]["nbasis"])
 ### `bspline_basis`
 
 ```python
-pyfda.bspline_basis(argvals, nknots, order=4)
+fdars.bspline_basis(argvals, nknots, order=4)
 ```
 
 Evaluate a B-spline basis at given points.
@@ -172,7 +172,7 @@ Evaluate a B-spline basis at given points.
 
 ```python
 t = np.linspace(0, 1, 100)
-B = pyfda.bspline_basis(t, nknots=10, order=4)  # shape (100, 14)
+B = fdars.bspline_basis(t, nknots=10, order=4)  # shape (100, 14)
 ```
 
 ---
@@ -180,7 +180,7 @@ B = pyfda.bspline_basis(t, nknots=10, order=4)  # shape (100, 14)
 ### `fourier_basis`
 
 ```python
-pyfda.fourier_basis(argvals, n_basis)
+fdars.fourier_basis(argvals, n_basis)
 ```
 
 Evaluate a Fourier basis at given points.
@@ -195,7 +195,7 @@ Evaluate a Fourier basis at given points.
 | basis | `ndarray (m, n_basis)` | Fourier basis matrix |
 
 ```python
-F = pyfda.fourier_basis(t, n_basis=7)  # shape (100, 7)
+F = fdars.fourier_basis(t, n_basis=7)  # shape (100, 7)
 ```
 
 ---
@@ -203,7 +203,7 @@ F = pyfda.fourier_basis(t, n_basis=7)  # shape (100, 7)
 ### `smooth_basis_gcv`
 
 ```python
-pyfda.smooth_basis_gcv(data, argvals, n_basis, basis_type="bspline",
+fdars.smooth_basis_gcv(data, argvals, n_basis, basis_type="bspline",
                        lfd_order=2, log_lambda_min=-8.0,
                        log_lambda_max=4.0, n_grid=25)
 ```
@@ -226,7 +226,7 @@ Smooth functional data using a penalized basis expansion with GCV-selected smoot
 | result | `dict` | Keys: `fitted` (n, m), `coefficients` (n, nbasis), `edf`, `gcv`, `aic`, `bic`, `nbasis` |
 
 ```python
-result = pyfda.smooth_basis_gcv(data, t, n_basis=20, basis_type="bspline")
+result = fdars.smooth_basis_gcv(data, t, n_basis=20, basis_type="bspline")
 ```
 
 ---
@@ -234,7 +234,7 @@ result = pyfda.smooth_basis_gcv(data, t, n_basis=20, basis_type="bspline")
 ### `basis_nbasis_cv`
 
 ```python
-pyfda.basis_nbasis_cv(data, argvals, nbasis_min=4, nbasis_max=20,
+fdars.basis_nbasis_cv(data, argvals, nbasis_min=4, nbasis_max=20,
                       basis_type="bspline", criterion="gcv",
                       n_folds=5, lambda_=1.0)
 ```
@@ -257,6 +257,6 @@ Cross-validated selection of the number of basis functions.
 | result | `dict` | Keys: `optimal_nbasis`, `scores` (array), `nbasis_range` (array), `criterion` |
 
 ```python
-result = pyfda.basis_nbasis_cv(data, t, nbasis_min=5, nbasis_max=30)
+result = fdars.basis_nbasis_cv(data, t, nbasis_min=5, nbasis_max=30)
 print(f"Best: {result['optimal_nbasis']} basis functions")
 ```

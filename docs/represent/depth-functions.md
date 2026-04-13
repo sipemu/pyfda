@@ -18,10 +18,10 @@ $$
 
 ## Available depth measures
 
-All depth functions live in `pyfda.depth` and share a common interface:
+All depth functions live in `fdars.depth` and share a common interface:
 
 ```python
-from pyfda.depth import fraiman_muniz_1d  # example
+from fdars.depth import fraiman_muniz_1d  # example
 
 depths = fraiman_muniz_1d(data, ref_data)
 ```
@@ -44,7 +44,7 @@ The return value is always a 1D array of length `n` with depth values.
 ### Fraiman-Muniz depth
 
 ```python
-from pyfda.depth import fraiman_muniz_1d
+from fdars.depth import fraiman_muniz_1d
 
 depths = fraiman_muniz_1d(data, ref_data, scale=True)
 ```
@@ -66,7 +66,7 @@ where $D_1$ is the univariate simplicial depth $D_1(x) = 2 \min\bigl(F_n(x),\, 1
 ### Modified Band Depth
 
 ```python
-from pyfda.depth import modified_band_1d
+from fdars.depth import modified_band_1d
 
 depths = modified_band_1d(data, ref_data)
 ```
@@ -84,7 +84,7 @@ where $\lambda$ denotes the proportion of the domain.
 ### Band Depth
 
 ```python
-from pyfda.depth import band_1d
+from fdars.depth import band_1d
 
 depths = band_1d(data, ref_data)
 ```
@@ -96,7 +96,7 @@ The "strict" version of modified band depth: a curve gets credit only if it is *
 ### Modified Epigraph Index
 
 ```python
-from pyfda.depth import modified_epigraph_index_1d
+from fdars.depth import modified_epigraph_index_1d
 
 depths = modified_epigraph_index_1d(data, ref_data)
 ```
@@ -108,7 +108,7 @@ Measures the proportion of curves in the reference sample that lie above the eva
 ### Random Projection Depth
 
 ```python
-from pyfda.depth import random_projection_1d
+from fdars.depth import random_projection_1d
 
 depths = random_projection_1d(data, ref_data, n_proj=50)
 ```
@@ -124,7 +124,7 @@ Projects functional data onto random directions and averages univariate depth ov
 ### Random Tukey Depth
 
 ```python
-from pyfda.depth import random_tukey_1d
+from fdars.depth import random_tukey_1d
 
 depths = random_tukey_1d(data, ref_data, n_proj=50)
 ```
@@ -140,7 +140,7 @@ Similar to random projection depth but uses Tukey (halfspace) depth for each uni
 ### Modal Depth
 
 ```python
-from pyfda.depth import modal_1d
+from fdars.depth import modal_1d
 
 depths = modal_1d(data, ref_data, h=1.0)
 ```
@@ -165,7 +165,7 @@ where $K_h$ is a kernel function with bandwidth $h$.
 ### Functional Spatial Depth
 
 ```python
-from pyfda.depth import functional_spatial_1d
+from fdars.depth import functional_spatial_1d
 
 depths = functional_spatial_1d(data, ref_data, argvals=None)
 ```
@@ -187,7 +187,7 @@ where $S(f) = f / \|f\|$ is the spatial sign.
 ### Kernel Functional Spatial Depth
 
 ```python
-from pyfda.depth import kernel_functional_spatial_1d
+from fdars.depth import kernel_functional_spatial_1d
 
 depths = kernel_functional_spatial_1d(data, ref_data, argvals, h=1.0)
 ```
@@ -206,7 +206,7 @@ A kernelized version of functional spatial depth that adds local weighting. Usef
 All depth measures that support surfaces (bivariate functional data) have `_2d` counterparts:
 
 ```python
-from pyfda.depth import (
+from fdars.depth import (
     fraiman_muniz_2d,
     modal_2d,
     random_projection_2d,
@@ -244,8 +244,8 @@ For 2D data, `data` and `ref_data` are still 2D NumPy arrays of shape `(n, m)`, 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from pyfda import Fdata
-from pyfda.simulation import simulate
+from fdars import Fdata
+from fdars.simulation import simulate
 
 # --- 1. Simulate data with an outlier ------------------------------------
 argvals = np.linspace(0, 1, 150)
@@ -335,4 +335,4 @@ robust_mean = np.average(fd.data, axis=0, weights=weights)
 | `functional_spatial_1d(data, ref_data, argvals)` | `argvals=None` | Spatial sign depth |
 | `kernel_functional_spatial_1d(data, ref_data, argvals, h)` | `argvals`, `h=1.0` | Kernelized spatial depth |
 
-All `_1d` variants have `_2d` counterparts for surface data, imported from the same `pyfda.depth` module.
+All `_1d` variants have `_2d` counterparts for surface data, imported from the same `fdars.depth` module.

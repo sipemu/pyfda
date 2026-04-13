@@ -1,18 +1,18 @@
 /* ===== Gallery card grid ===== */
-.pyfda-gallery {
+.fdars-gallery {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.2rem;
   margin: 1.5rem 0 2.5rem;
 }
 @media (max-width: 900px) {
-  .pyfda-gallery { grid-template-columns: repeat(2, 1fr); }
+  .fdars-gallery { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 540px) {
-  .pyfda-gallery { grid-template-columns: 1fr; }
+  .fdars-gallery { grid-template-columns: 1fr; }
 }
 
-.pyfda-gallery-item {
+.fdars-gallery-item {
   border: 1px solid var(--md-default-fg-color--lightest);
   border-radius: 8px;
   overflow: hidden;
@@ -20,51 +20,51 @@
   color: inherit !important;
   transition: box-shadow 0.2s, transform 0.15s;
 }
-.pyfda-gallery-item:hover {
+.fdars-gallery-item:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
   transform: translateY(-2px);
 }
 
-.pyfda-gallery-title {
+.fdars-gallery-title {
   padding: 0.75rem 1rem;
   font-weight: 600;
   font-size: 0.92rem;
   color: var(--md-typeset-a-color);
   border-top: 1px solid var(--md-default-fg-color--lightest);
 }
-.pyfda-gallery-item:hover .pyfda-gallery-title {
+.fdars-gallery-item:hover .fdars-gallery-title {
   text-decoration: underline;
 }
 
-.pyfda-gallery-desc {
+.fdars-gallery-desc {
   padding: 0 1rem 0.75rem;
   font-size: 0.82rem;
   color: var(--md-default-fg-color--light);
 }
 
 /* ===== Section headings ===== */
-.pyfda-section-heading {
+.fdars-section-heading {
   font-size: 1.4rem;
   font-weight: 700;
   margin-top: 2rem;
   padding-bottom: 0.4rem;
   border-bottom: 3px solid;
 }
-.pyfda-section-desc {
+.fdars-section-desc {
   color: var(--md-default-fg-color--light);
   margin-bottom: 0.5rem;
 }
 
 /* Section colors */
-.pyfda-learn       { border-color: #0d6efd; }
-.pyfda-represent   { border-color: #198754; }
-.pyfda-align       { border-color: #fd7e14; }
-.pyfda-regression  { border-color: #dc3545; }
-.pyfda-monitoring  { border-color: #6610f2; }
-.pyfda-analyze     { border-color: #6f42c1; }
+.fdars-learn       { border-color: #0d6efd; }
+.fdars-represent   { border-color: #198754; }
+.fdars-align       { border-color: #fd7e14; }
+.fdars-regression  { border-color: #dc3545; }
+.fdars-monitoring  { border-color: #6610f2; }
+.fdars-analyze     { border-color: #6f42c1; }
 
 /* ===== Method tag badges ===== */
-.pyfda-tag {
+.fdars-tag {
   display: inline-block;
   padding: 0.15em 0.5em;
   font-size: 0.75rem;
@@ -72,8 +72,8 @@
   border-radius: 4px;
   margin-right: 0.3em;
 }
-.pyfda-tag-learn      { background: #0d6efd22; color: #0d6efd; }
-.pyfda-tag-represent  { background: #19875422; color: #198754; }
-.pyfda-tag-align      { background: #fd7e1422; color: #fd7e14; }
-.pyfda-tag-regression { background: #dc354522; color: #dc3545; }
-.pyfda-tag-analyze    { background: #6f42c122; color: #6f42c1; }
+.fdars-tag-learn      { background: #0d6efd22; color: #0d6efd; }
+.fdars-tag-represent  { background: #19875422; color: #198754; }
+.fdars-tag-align      { background: #fd7e1422; color: #fd7e14; }
+.fdars-tag-regression { background: #dc354522; color: #dc3545; }
+.fdars-tag-analyze    { background: #6f42c122; color: #6f42c1; }

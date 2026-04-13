@@ -1,4 +1,4 @@
-# pyfda.classification
+# fdars.classification
 
 Classification methods for functional data via FPC score projection.
 
@@ -17,7 +17,7 @@ Classification methods for functional data via FPC score projection.
 ### `fclassif_lda`
 
 ```python
-pyfda.fclassif_lda(data, labels, ncomp=3)
+fdars.fclassif_lda(data, labels, ncomp=3)
 ```
 
 LDA classification for functional data. Projects onto FPC scores, then applies linear discriminant analysis.
@@ -33,7 +33,7 @@ LDA classification for functional data. Projects onto FPC scores, then applies l
 | result | `dict` | Keys: `predicted` (n,), `accuracy` |
 
 ```python
-result = pyfda.fclassif_lda(data, labels, ncomp=5)
+result = fdars.fclassif_lda(data, labels, ncomp=5)
 print(f"Accuracy: {result['accuracy']:.3f}")
 ```
 
@@ -42,7 +42,7 @@ print(f"Accuracy: {result['accuracy']:.3f}")
 ### `fclassif_qda`
 
 ```python
-pyfda.fclassif_qda(data, labels, ncomp=3)
+fdars.fclassif_qda(data, labels, ncomp=3)
 ```
 
 QDA classification for functional data. Uses class-specific covariance matrices.
@@ -58,7 +58,7 @@ QDA classification for functional data. Uses class-specific covariance matrices.
 | result | `dict` | Keys: `predicted` (n,), `accuracy` |
 
 ```python
-result = pyfda.fclassif_qda(data, labels, ncomp=5)
+result = fdars.fclassif_qda(data, labels, ncomp=5)
 ```
 
 ---
@@ -66,7 +66,7 @@ result = pyfda.fclassif_qda(data, labels, ncomp=5)
 ### `fclassif_knn`
 
 ```python
-pyfda.fclassif_knn(data, labels, ncomp=3, k=5)
+fdars.fclassif_knn(data, labels, ncomp=3, k=5)
 ```
 
 K-nearest neighbors classification in FPC score space.
@@ -83,7 +83,7 @@ K-nearest neighbors classification in FPC score space.
 | result | `dict` | Keys: `predicted` (n,), `accuracy` |
 
 ```python
-result = pyfda.fclassif_knn(data, labels, ncomp=5, k=7)
+result = fdars.fclassif_knn(data, labels, ncomp=5, k=7)
 ```
 
 ---
@@ -91,7 +91,7 @@ result = pyfda.fclassif_knn(data, labels, ncomp=5, k=7)
 ### `fclassif_kernel`
 
 ```python
-pyfda.fclassif_kernel(data, argvals, labels, h_func=1.0, h_scalar=1.0)
+fdars.fclassif_kernel(data, argvals, labels, h_func=1.0, h_scalar=1.0)
 ```
 
 Kernel classification directly on functional data using functional and scalar bandwidths.
@@ -109,7 +109,7 @@ Kernel classification directly on functional data using functional and scalar ba
 | result | `dict` | Keys: `predicted` (n,), `accuracy` |
 
 ```python
-result = pyfda.fclassif_kernel(data, t, labels, h_func=0.5, h_scalar=0.5)
+result = fdars.fclassif_kernel(data, t, labels, h_func=0.5, h_scalar=0.5)
 ```
 
 ---
@@ -117,7 +117,7 @@ result = pyfda.fclassif_kernel(data, t, labels, h_func=0.5, h_scalar=0.5)
 ### `fclassif_cv`
 
 ```python
-pyfda.fclassif_cv(data, argvals, labels, method="lda", ncomp=3, nfold=5)
+fdars.fclassif_cv(data, argvals, labels, method="lda", ncomp=3, nfold=5)
 ```
 
 Cross-validated classification with error rate estimation.
@@ -136,6 +136,6 @@ Cross-validated classification with error rate estimation.
 | result | `dict` | Keys: `error_rate`, `fold_errors` (nfold,), `best_ncomp` |
 
 ```python
-result = pyfda.fclassif_cv(data, t, labels, method="knn", ncomp=5, nfold=10)
+result = fdars.fclassif_cv(data, t, labels, method="knn", ncomp=5, nfold=10)
 print(f"CV error rate: {result['error_rate']:.3f}")
 ```

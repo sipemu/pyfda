@@ -2,7 +2,7 @@
 
 Standard FPC regression (`fregre_lm`) uses ordinary least squares, which is sensitive to outliers in the response. Robust regression methods replace the squared loss with loss functions that down-weight extreme residuals, yielding estimators that resist contamination.
 
-`pyfda` provides two robust alternatives:
+`fdars` provides two robust alternatives:
 
 | Method | Loss function | Breakdown point | Notes |
 |--------|--------------|-----------------|-------|
@@ -17,8 +17,8 @@ Standard FPC regression (`fregre_lm`) uses ordinary least squares, which is sens
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.regression import fregre_l1
+from fdars import Fdata
+from fdars.regression import fregre_l1
 
 # --- Simulate data with outliers ---
 np.random.seed(42)
@@ -74,7 +74,7 @@ $$
 The tuning constant $k$ controls the transition point. The default $k = 1.345$ gives 95% efficiency relative to OLS when the errors are truly Gaussian.
 
 ```python
-from pyfda.regression import fregre_huber
+from fdars.regression import fregre_huber
 
 result = fregre_huber(fd.data, response, n_comp=3, huber_k=1.345)
 
@@ -112,8 +112,8 @@ print(f"Huber median absolute residual: {np.median(np.abs(resid)):.4f}")
 ```python
 import numpy as np
 import pandas as pd
-from pyfda import Fdata
-from pyfda.regression import fregre_lm, fregre_l1, fregre_huber
+from fdars import Fdata
+from fdars.regression import fregre_lm, fregre_l1, fregre_huber
 
 np.random.seed(0)
 n, m = 120, 101

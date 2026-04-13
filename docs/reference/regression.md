@@ -1,4 +1,4 @@
-# pyfda.regression
+# fdars.regression
 
 Regression and dimensionality reduction for functional data: FPCA, FPLS, scalar-on-function, function-on-scalar, ANOVA, and logistic regression.
 
@@ -23,7 +23,7 @@ Regression and dimensionality reduction for functional data: FPCA, FPLS, scalar-
 ### `fpca`
 
 ```python
-pyfda.fpca(data, argvals, n_comp=3)
+fdars.fpca(data, argvals, n_comp=3)
 ```
 
 Functional principal component analysis with integration-weighted covariance.
@@ -40,7 +40,7 @@ Functional principal component analysis with integration-weighted covariance.
 
 ```python
 t = np.linspace(0, 1, 100)
-pca = pyfda.fpca(data, t, n_comp=5)
+pca = fdars.fpca(data, t, n_comp=5)
 scores = pca["scores"]  # project new data via these loadings
 ```
 
@@ -49,7 +49,7 @@ scores = pca["scores"]  # project new data via these loadings
 ### `fpls`
 
 ```python
-pyfda.fpls(data, argvals, response, n_comp=3)
+fdars.fpls(data, argvals, response, n_comp=3)
 ```
 
 Functional partial least squares. Finds directions that maximize covariance between functional predictors and scalar response.
@@ -66,7 +66,7 @@ Functional partial least squares. Finds directions that maximize covariance betw
 | result | `dict` | Keys: `scores` (n, n_comp), `loadings` (m, n_comp), `weights` (m, n_comp), `x_means` (m,), `integration_weights` (m,) |
 
 ```python
-pls = pyfda.fpls(data, t, y, n_comp=3)
+pls = fdars.fpls(data, t, y, n_comp=3)
 ```
 
 ---
@@ -74,7 +74,7 @@ pls = pyfda.fpls(data, t, y, n_comp=3)
 ### `fregre_lm`
 
 ```python
-pyfda.fregre_lm(data, response, n_comp=3)
+fdars.fregre_lm(data, response, n_comp=3)
 ```
 
 Scalar-on-function linear regression via FPC scores. Projects data onto FPCs, then fits OLS.
@@ -90,7 +90,7 @@ Scalar-on-function linear regression via FPC scores. Projects data onto FPCs, th
 | result | `dict` | Keys: `fitted_values` (n,), `residuals` (n,), `beta_t` (m,), `r_squared`, `coefficients` (n_comp,), `intercept` |
 
 ```python
-fit = pyfda.fregre_lm(data, y, n_comp=5)
+fit = fdars.fregre_lm(data, y, n_comp=5)
 print(f"R-squared: {fit['r_squared']:.3f}")
 ```
 
@@ -99,7 +99,7 @@ print(f"R-squared: {fit['r_squared']:.3f}")
 ### `fregre_pls`
 
 ```python
-pyfda.fregre_pls(data, argvals, response, n_comp=3)
+fdars.fregre_pls(data, argvals, response, n_comp=3)
 ```
 
 Scalar-on-function regression via PLS components.
@@ -116,7 +116,7 @@ Scalar-on-function regression via PLS components.
 | result | `dict` | Keys: `fitted_values` (n,), `residuals` (n,), `beta_t` (m,), `r_squared` |
 
 ```python
-fit = pyfda.fregre_pls(data, t, y, n_comp=3)
+fit = fdars.fregre_pls(data, t, y, n_comp=3)
 ```
 
 ---
@@ -124,7 +124,7 @@ fit = pyfda.fregre_pls(data, t, y, n_comp=3)
 ### `fregre_np`
 
 ```python
-pyfda.fregre_np(dist_matrix, response, h=0.0)
+fdars.fregre_np(dist_matrix, response, h=0.0)
 ```
 
 Nonparametric kernel regression from a precomputed distance matrix.
@@ -140,8 +140,8 @@ Nonparametric kernel regression from a precomputed distance matrix.
 | result | `dict` | Keys: `fitted_values` (n,), `residuals` (n,), `h_func`, `r_squared` |
 
 ```python
-D = pyfda.lp_self_1d(data, t)
-fit = pyfda.fregre_np(D, y)
+D = fdars.lp_self_1d(data, t)
+fit = fdars.fregre_np(D, y)
 print(f"Selected bandwidth: {fit['h_func']:.3f}")
 ```
 
@@ -150,7 +150,7 @@ print(f"Selected bandwidth: {fit['h_func']:.3f}")
 ### `fregre_l1`
 
 ```python
-pyfda.fregre_l1(data, response, n_comp=3)
+fdars.fregre_l1(data, response, n_comp=3)
 ```
 
 L1 (least absolute deviations) robust regression for functional data via FPCs.
@@ -166,7 +166,7 @@ L1 (least absolute deviations) robust regression for functional data via FPCs.
 | result | `dict` | Keys: `fitted_values` (n,), `residuals` (n,), `beta_t` (m,) |
 
 ```python
-fit = pyfda.fregre_l1(data, y, n_comp=3)
+fit = fdars.fregre_l1(data, y, n_comp=3)
 ```
 
 ---
@@ -174,7 +174,7 @@ fit = pyfda.fregre_l1(data, y, n_comp=3)
 ### `fregre_huber`
 
 ```python
-pyfda.fregre_huber(data, response, n_comp=3, huber_k=1.345)
+fdars.fregre_huber(data, response, n_comp=3, huber_k=1.345)
 ```
 
 Huber M-estimation robust regression for functional data.
@@ -191,7 +191,7 @@ Huber M-estimation robust regression for functional data.
 | result | `dict` | Keys: `fitted_values` (n,), `residuals` (n,), `beta_t` (m,) |
 
 ```python
-fit = pyfda.fregre_huber(data, y, n_comp=3, huber_k=1.345)
+fit = fdars.fregre_huber(data, y, n_comp=3, huber_k=1.345)
 ```
 
 ---
@@ -199,7 +199,7 @@ fit = pyfda.fregre_huber(data, y, n_comp=3, huber_k=1.345)
 ### `functional_logistic`
 
 ```python
-pyfda.functional_logistic(data, labels, n_comp=3, max_iter=25, tol=1e-6)
+fdars.functional_logistic(data, labels, n_comp=3, max_iter=25, tol=1e-6)
 ```
 
 Functional logistic regression for binary classification via IRLS.
@@ -217,7 +217,7 @@ Functional logistic regression for binary classification via IRLS.
 | result | `dict` | Keys: `probabilities` (n,), `predicted_classes` (n,), `beta_t` (m,), `intercept`, `coefficients` (n_comp,) |
 
 ```python
-fit = pyfda.functional_logistic(data, labels.astype(float), n_comp=3)
+fit = fdars.functional_logistic(data, labels.astype(float), n_comp=3)
 pred = fit["predicted_classes"]
 ```
 
@@ -226,7 +226,7 @@ pred = fit["predicted_classes"]
 ### `fosr`
 
 ```python
-pyfda.fosr(response, predictors, lambda_=0.0)
+fdars.fosr(response, predictors, lambda_=0.0)
 ```
 
 Function-on-scalar regression. Models a functional response as a linear combination of scalar predictors.
@@ -242,7 +242,7 @@ Function-on-scalar regression. Models a functional response as a linear combinat
 | result | `dict` | Keys: `fitted` (n, m), `beta` (p, m), `residuals` (n, m), `r_squared` |
 
 ```python
-fit = pyfda.fosr(Y_func, X_scalar, lambda_=-1.0)  # GCV selection
+fit = fdars.fosr(Y_func, X_scalar, lambda_=-1.0)  # GCV selection
 beta = fit["beta"]  # coefficient functions
 ```
 
@@ -251,7 +251,7 @@ beta = fit["beta"]  # coefficient functions
 ### `fanova`
 
 ```python
-pyfda.fanova(data, groups, n_perm=999)
+fdars.fanova(data, groups, n_perm=999)
 ```
 
 Functional ANOVA with permutation-based p-values.
@@ -267,7 +267,7 @@ Functional ANOVA with permutation-based p-values.
 | result | `dict` | Keys: `f_statistic_t` (m,), `p_value`, `group_means` (k, m), `global_statistic` |
 
 ```python
-result = pyfda.fanova(data, groups.astype(np.int64), n_perm=999)
+result = fdars.fanova(data, groups.astype(np.int64), n_perm=999)
 print(f"p-value: {result['p_value']:.4f}")
 ```
 
@@ -276,7 +276,7 @@ print(f"p-value: {result['p_value']:.4f}")
 ### `model_selection_ncomp`
 
 ```python
-pyfda.model_selection_ncomp(data, response, max_comp=10, criterion="gcv")
+fdars.model_selection_ncomp(data, response, max_comp=10, criterion="gcv")
 ```
 
 Cross-validated selection of the number of FPC components for scalar-on-function regression.
@@ -293,6 +293,6 @@ Cross-validated selection of the number of FPC components for scalar-on-function
 | result | `dict` | Keys: `best_ncomp`, `criteria` (list of (ncomp, aic, bic, gcv) tuples) |
 
 ```python
-result = pyfda.model_selection_ncomp(data, y, max_comp=10, criterion="bic")
+result = fdars.model_selection_ncomp(data, y, max_comp=10, criterion="bic")
 print(f"Best n_comp: {result['best_ncomp']}")
 ```

@@ -8,7 +8,7 @@ Functional outliers come in three flavours:
 | **Shape** | The curve has an unusual pattern even if its overall level is normal | A growth curve that dips where all others rise |
 | **Amplitude** | The curve has exaggerated peaks and troughs | A vibration signal with double the usual amplitude |
 
-`pyfda` provides three complementary methods that target different outlier types.
+`fdars` provides three complementary methods that target different outlier types.
 
 ---
 
@@ -18,9 +18,9 @@ A likelihood-ratio test approach that compares the likelihood of the data with a
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.outliers import detect_outliers_lrt
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.outliers import detect_outliers_lrt
 
 argvals = np.linspace(0, 1, 100)
 fd = Fdata(simulate(50, argvals, n_basis=5, seed=1), argvals=argvals)
@@ -62,7 +62,7 @@ print(f"Threshold: {result['threshold']:.4f}")
 The outliergram plots the **Modified Epigraph Index** (MEI) against the **Modified Band Depth** (MBD) for every curve. Points that fall far from the parabolic relationship $\mathrm{MBD} = a_0 + a_1 \cdot \mathrm{MEI} + a_2 \cdot \mathrm{MEI}^2$ are flagged as shape outliers.
 
 ```python
-from pyfda.outliers import outliergram
+from fdars.outliers import outliergram
 
 result_og = outliergram(fd.data, factor=1.5)
 ```
@@ -92,7 +92,7 @@ result_og = outliergram(fd.data, factor=1.5)
 This method decomposes each observation's outlyingness into a *magnitude* component and a *shape* component using the directional outlyingness framework. It is particularly effective at detecting curves that are unusual in shape even when their overall level is normal.
 
 ```python
-from pyfda.outliers import magnitude_shape
+from fdars.outliers import magnitude_shape
 
 result_ms = magnitude_shape(fd.data)
 ```
@@ -127,9 +127,9 @@ print(f"Shape outliers:     {np.where(shape_outliers)[0]}")
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.outliers import detect_outliers_lrt, outliergram, magnitude_shape
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.outliers import detect_outliers_lrt, outliergram, magnitude_shape
 
 # ── 1. Generate clean data + outliers ─────────────────────────
 argvals = np.linspace(0, 1, 100)

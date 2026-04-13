@@ -6,7 +6,7 @@ $$
 y_i = \alpha + \int_{\mathcal{T}} x_i(t)\,\beta(t)\,dt + \varepsilon_i
 $$
 
-The coefficient function $\beta(t)$ reveals *which regions* of the functional predictor drive the response. `pyfda` provides five complementary approaches to estimate this model.
+The coefficient function $\beta(t)$ reveals *which regions* of the functional predictor drive the response. `fdars` provides five complementary approaches to estimate this model.
 
 ---
 
@@ -16,8 +16,8 @@ The most common approach: project the functional predictors onto their principal
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.regression import fregre_lm
+from fdars import Fdata
+from fdars.regression import fregre_lm
 
 # Simulate data
 np.random.seed(42)
@@ -71,7 +71,7 @@ print(f"R-squared: {r2:.4f}")
 **Partial Least Squares** finds components that maximize the covariance between the functional predictor and the response, often performing better than FPCA when the dominant modes of variation are not the most predictive.
 
 ```python
-from pyfda.regression import fregre_pls
+from fdars.regression import fregre_pls
 
 result = fregre_pls(fd.data, fd.argvals, response, n_comp=3)
 
@@ -96,8 +96,8 @@ print(f"Beta shape:    {result['beta_t'].shape}")
 When the relationship between $x(t)$ and $y$ is nonlinear, use **kernel regression** based on a pre-computed distance matrix. This avoids any linearity assumption.
 
 ```python
-from pyfda.regression import fregre_np
-from pyfda.metric import lp_self_distance_matrix
+from fdars.regression import fregre_np
+from fdars.metric import lp_self_distance_matrix
 
 # Compute L2 distance matrix
 D = lp_self_distance_matrix(fd.data, fd.argvals, p=2.0)
@@ -125,7 +125,7 @@ print(f"Bandwidth:    {result['h_func']:.4f}")
 Automatically select the optimal number of FPC components using **GCV**, **AIC**, or **BIC**.
 
 ```python
-from pyfda.regression import model_selection_ncomp
+from fdars.regression import model_selection_ncomp
 
 result = model_selection_ncomp(fd.data, response, max_comp=10, criterion="gcv")
 
@@ -149,7 +149,7 @@ for ncomp, aic, bic, gcv in result["criteria"]:
 For maximum control, run FPCA explicitly and feed the scores into your own regression pipeline.
 
 ```python
-from pyfda.regression import fpca
+from fdars.regression import fpca
 import numpy as np
 
 # Step 1: FPCA
@@ -176,9 +176,9 @@ beta_t = rotation @ beta_hat[1:]
 ```python
 import numpy as np
 import pandas as pd
-from pyfda import Fdata
-from pyfda.regression import fregre_lm, fregre_pls, fregre_np, model_selection_ncomp
-from pyfda.metric import lp_self_distance_matrix
+from fdars import Fdata
+from fdars.regression import fregre_lm, fregre_pls, fregre_np, model_selection_ncomp
+from fdars.metric import lp_self_distance_matrix
 
 # --- Simulate stress-strain curves and tensile strength ---
 np.random.seed(99)

@@ -10,8 +10,8 @@ After fitting a functional regression model, the natural question is: *why does 
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.explain import fpc_permutation_importance
+from fdars import Fdata
+from fdars.explain import fpc_permutation_importance
 
 # --- Setup ---
 np.random.seed(42)
@@ -58,7 +58,7 @@ for i in range(5):
 A **partial dependence plot** shows the marginal effect of a single FPC score on the prediction, averaging over the values of all other components.
 
 ```python
-from pyfda.explain import functional_pdp
+from fdars.explain import functional_pdp
 
 result = functional_pdp(fd.data, response, ncomp=5, component=0, n_grid=50)
 
@@ -93,7 +93,7 @@ $$
 where $\phi_0$ is the base value (mean prediction) and $\phi_{ij}$ is the SHAP value of FPC $j$ for observation $i$.
 
 ```python
-from pyfda.explain import fpc_shap_values
+from fdars.explain import fpc_shap_values
 
 result = fpc_shap_values(fd.data, response, ncomp=5)
 
@@ -136,7 +136,7 @@ $$
 $$
 
 ```python
-from pyfda.explain import beta_decomposition
+from fdars.explain import beta_decomposition
 
 result = beta_decomposition(fd.data, response, ncomp=5)
 
@@ -162,11 +162,11 @@ for j in range(5):
 Identify the regions of the domain where $\beta(t)$ is significantly different from zero, based on confidence interval bounds.
 
 ```python
-from pyfda.explain import significant_regions
+from fdars.explain import significant_regions
 
 # Assume you have bootstrap or asymptotic CI bounds for beta(t)
 # Here we create simple illustrative bounds
-from pyfda.regression import fregre_lm
+from fdars.regression import fregre_lm
 
 fit = fregre_lm(fd.data, response, n_comp=5)
 beta_hat = fit["beta_t"]
@@ -192,9 +192,9 @@ Each region is a tuple `(start_idx, end_idx, direction)` where `direction` is `"
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.regression import fregre_lm
-from pyfda.explain import (
+from fdars import Fdata
+from fdars.regression import fregre_lm
+from fdars.explain import (
     fpc_permutation_importance,
     functional_pdp,
     fpc_shap_values,

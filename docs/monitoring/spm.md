@@ -26,9 +26,9 @@ Control limits for both are estimated from the Phase I data so that the in-contr
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.spm import spm_phase1
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.spm import spm_phase1
 
 # Generate 80 in-control curves on a 100-point grid
 argvals = np.linspace(0, 1, 100)
@@ -59,7 +59,7 @@ p1 = spm_phase1(fd_ic.data, fd_ic.argvals, ncomp=3, alpha=0.05)
 ## Phase II -- monitoring new observations
 
 ```python
-from pyfda.spm import spm_monitor
+from fdars.spm import spm_monitor
 
 # Simulate 20 new in-control observations + 10 faulty ones
 data_new_ic = simulate(20, argvals, n_basis=5, seed=2)
@@ -104,7 +104,7 @@ print(f"T2 alarms: {n_t2_alarms}, SPE alarms: {n_spe_alarms}")
 If you already have FPC scores (e.g., from your own FPCA), you can compute the $T^2$ statistic directly:
 
 ```python
-from pyfda.spm import hotelling_t2
+from fdars.spm import hotelling_t2
 
 # scores: (n, p) array of FPC scores
 # eigenvalues: (p,) array
@@ -119,9 +119,9 @@ The script below ties everything together: simulate in-control data, run Phase I
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.spm import spm_phase1, spm_monitor
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.spm import spm_phase1, spm_monitor
 
 # ── 1. Simulate in-control data ──────────────────────────────
 argvals = np.linspace(0, 1, 100)

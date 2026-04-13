@@ -1,6 +1,6 @@
 # Covariance Functions
 
-Covariance functions (kernels) describe the correlation structure of a stochastic process. They are the building blocks for Gaussian process simulation, Kriging, and kernel-based smoothing. `pyfda` provides kernel-based covariance matrix construction and Gaussian process sample generation, all computed in Rust.
+Covariance functions (kernels) describe the correlation structure of a stochastic process. They are the building blocks for Gaussian process simulation, Kriging, and kernel-based smoothing. `fdars` provides kernel-based covariance matrix construction and Gaussian process sample generation, all computed in Rust.
 
 ---
 
@@ -21,7 +21,7 @@ In all formulas, $\ell$ is the **length scale** and $\sigma^2$ is the **variance
 
 ```python
 import numpy as np
-from pyfda.simulation import covariance_matrix
+from fdars.simulation import covariance_matrix
 
 argvals = np.linspace(0, 1, 100)
 
@@ -56,8 +56,8 @@ print(f"Symmetric: {np.allclose(cov_gauss, cov_gauss.T)}")  # True
 `gaussian_process` draws $n$ sample paths from a zero-mean GP with the specified kernel. The function internally constructs the covariance matrix and performs a Cholesky decomposition.
 
 ```python
-from pyfda import Fdata
-from pyfda.simulation import gaussian_process
+from fdars import Fdata
+from fdars.simulation import gaussian_process
 
 argvals = np.linspace(0, 1, 200)
 
@@ -95,8 +95,8 @@ The following script visualizes the covariance structure and sample paths for ea
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import covariance_matrix, gaussian_process
+from fdars import Fdata
+from fdars.simulation import covariance_matrix, gaussian_process
 
 argvals = np.linspace(0, 1, 200)
 kernels = ["gaussian", "exponential"]
@@ -136,10 +136,10 @@ GP samples provide a convenient way to create realistic synthetic functional dat
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import gaussian_process
-from pyfda.clustering import kmeans_fd, silhouette_score
-from pyfda.metric import lp_self_1d
+from fdars import Fdata
+from fdars.simulation import gaussian_process
+from fdars.clustering import kmeans_fd, silhouette_score
+from fdars.metric import lp_self_1d
 
 argvals = np.linspace(0, 1, 150)
 

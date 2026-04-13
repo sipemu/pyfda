@@ -1,4 +1,4 @@
-"""pyfda – Functional Data Analysis for Python, powered by Rust.
+"""fdars – Functional Data Analysis for Python, powered by Rust.
 
 High-performance functional data analysis toolkit providing:
 - Functional data operations (mean, derivatives, norms)
@@ -23,14 +23,14 @@ All computations are performed in Rust via fdars-core for maximum performance.
 
 import sys as _sys
 
-from pyfda import _native
-from pyfda.fdata_class import Fdata
+from fdars import _native
+from fdars.fdata_class import Fdata
 
 __version__ = "0.1.0"
 
 # Register submodules at expected paths so both access patterns work:
-#   from pyfda.depth import fraiman_muniz_1d
-#   from pyfda import depth; depth.fraiman_muniz_1d(...)
+#   from fdars.depth import fraiman_muniz_1d
+#   from fdars import depth; depth.fraiman_muniz_1d(...)
 _submodule_names = (
     "fdata",
     "depth",

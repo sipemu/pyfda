@@ -7,11 +7,11 @@ title: Working with Derivatives
 Derivatives of functional data reveal *how* curves change -- velocity,
 acceleration, curvature, and higher-order dynamics. The `Fdata` class provides a
 `deriv()` convenience method for both 1D and 2D functional data (low-level
-functions are still available in `pyfda.fdata`).
+functions are still available in `fdars.fdata`).
 
 ```python
 import numpy as np
-from pyfda import Fdata
+from fdars import Fdata
 ```
 
 ---
@@ -41,7 +41,7 @@ absolute levels:
 object already carries the data matrix and evaluation grid `argvals`.
 
 ```python
-from pyfda.simulation import simulate
+from fdars.simulation import simulate
 
 # Simulate smooth curves
 argvals = np.linspace(0, 1, 200)
@@ -117,7 +117,7 @@ derivative.
 ### Data Layout for 2D
 
 A 2D functional observation is a surface $x_i(s, t)$ evaluated on an
-$m_1 \times m_2$ grid. In pyfda, this is stored as a 2D array of shape
+$m_1 \times m_2$ grid. In fdars, this is stored as a 2D array of shape
 `(n_obs, m1 * m2)` -- each surface is flattened into a single row.
 
 ```python
@@ -180,8 +180,8 @@ Differentiating noisy data amplifies the noise. The standard workflow is:
 ### Kernel Smoothing + Derivative
 
 ```python
-from pyfda.simulation import simulate
-from pyfda.smoothing import nadaraya_watson, optim_bandwidth
+from fdars.simulation import simulate
+from fdars.smoothing import nadaraya_watson, optim_bandwidth
 
 # Noisy data
 argvals = np.linspace(0, 1, 200)
@@ -215,7 +215,7 @@ Basis smoothing is more efficient for large datasets because you smooth all
 curves at once:
 
 ```python
-from pyfda.basis import smooth_basis_gcv
+from fdars.basis import smooth_basis_gcv
 
 # Smooth all 20 curves simultaneously
 result = smooth_basis_gcv(fd_noisy.data, fd_noisy.argvals, n_basis=25)
@@ -244,9 +244,9 @@ growth-like curves and extract velocity and acceleration:
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.basis import smooth_basis_gcv
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.basis import smooth_basis_gcv
 
 # Simulate growth-like curves (monotone, decelerating)
 age = np.linspace(1, 18, 200)   # ages 1 to 18
@@ -289,8 +289,8 @@ print(f"Growth acceleration sign changes at ages: {fd_growth.argvals[zero_crossi
 |-------------------|-------|-------------|
 | `fd.deriv(nderiv=1)` | `Fdata` convenience | Numerical derivative; returns a new `Fdata` |
 | `fd.deriv()` (2D) | `Fdata` convenience | Returns `(fd_ds, fd_dt, fd_dsdt)` tuple of `Fdata` |
-| `deriv_1d(data, argvals, nderiv=1)` | `pyfda.fdata` | Low-level: derivative of a raw 2D array |
-| `deriv_2d(data, argvals_s, argvals_t)` | `pyfda.fdata` | Low-level: partial derivatives of raw 2D data |
+| `deriv_1d(data, argvals, nderiv=1)` | `fdars.fdata` | Low-level: derivative of a raw 2D array |
+| `deriv_2d(data, argvals_s, argvals_t)` | `fdars.fdata` | Low-level: partial derivatives of raw 2D data |
 
 Key points:
 

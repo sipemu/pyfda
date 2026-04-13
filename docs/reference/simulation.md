@@ -1,4 +1,4 @@
-# pyfda.simulation
+# fdars.simulation
 
 Simulation of functional data: Karhunen-Loeve expansion, Gaussian processes, and covariance matrices.
 
@@ -15,7 +15,7 @@ Simulation of functional data: Karhunen-Loeve expansion, Gaussian processes, and
 ### `simulate`
 
 ```python
-pyfda.simulate(n, argvals, n_basis=5, efun_type="fourier",
+fdars.simulate(n, argvals, n_basis=5, efun_type="fourier",
                eval_type="linear", seed=None)
 ```
 
@@ -36,7 +36,7 @@ Simulate functional data using a Karhunen-Loeve expansion with configurable eige
 
 ```python
 t = np.linspace(0, 1, 100)
-data = pyfda.simulate(50, t, n_basis=5, efun_type="fourier", seed=42)
+data = fdars.simulate(50, t, n_basis=5, efun_type="fourier", seed=42)
 ```
 
 ---
@@ -44,7 +44,7 @@ data = pyfda.simulate(50, t, n_basis=5, efun_type="fourier", seed=42)
 ### `gaussian_process`
 
 ```python
-pyfda.gaussian_process(n, argvals, kernel="gaussian", length_scale=0.2,
+fdars.gaussian_process(n, argvals, kernel="gaussian", length_scale=0.2,
                        variance=1.0, seed=None)
 ```
 
@@ -65,7 +65,7 @@ Generate samples from a Gaussian process with a specified kernel.
 
 ```python
 t = np.linspace(0, 1, 200)
-gp = pyfda.gaussian_process(30, t, kernel="matern", length_scale=0.1, seed=42)
+gp = fdars.gaussian_process(30, t, kernel="matern", length_scale=0.1, seed=42)
 ```
 
 ---
@@ -73,7 +73,7 @@ gp = pyfda.gaussian_process(30, t, kernel="matern", length_scale=0.1, seed=42)
 ### `covariance_matrix`
 
 ```python
-pyfda.covariance_matrix(argvals, kernel="gaussian", length_scale=0.2, variance=1.0)
+fdars.covariance_matrix(argvals, kernel="gaussian", length_scale=0.2, variance=1.0)
 ```
 
 Compute a covariance matrix from a specified kernel function.
@@ -91,5 +91,5 @@ Compute a covariance matrix from a specified kernel function.
 
 ```python
 t = np.linspace(0, 1, 100)
-C = pyfda.covariance_matrix(t, kernel="gaussian", length_scale=0.2)
+C = fdars.covariance_matrix(t, kernel="gaussian", length_scale=0.2)
 ```

@@ -1,4 +1,4 @@
-# pyfda – Functional Data Analysis for Python
+# fdars – Functional Data Analysis for Python
 
 [![CI](https://github.com/sipemu/pyfda/actions/workflows/ci.yml/badge.svg)](https://github.com/sipemu/pyfda/actions/workflows/ci.yml)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
@@ -8,14 +8,14 @@ High-performance Functional Data Analysis for Python, powered by a Rust backend 
 
 ## The `Fdata` Class
 
-The central object in pyfda is `Fdata` — a functional data container that bundles
+The central object in fdars is `Fdata` — a functional data container that bundles
 observation data, evaluation grid, identifiers, and metadata into a single object
 (mirroring the R package's `fdata` class).
 
 ```python
 import numpy as np
 import pandas as pd
-from pyfda import Fdata
+from fdars import Fdata
 
 # Create functional data: 30 sine curves on [0, 1]
 t = np.linspace(0, 1, 100)
@@ -49,9 +49,9 @@ fd2d = Fdata(surfaces, argvals=(np.arange(8), np.arange(10)))
 You can still call low-level functions directly with raw NumPy arrays:
 
 ```python
-from pyfda.depth import fraiman_muniz_1d
-from pyfda.metric import lp_self_1d
-from pyfda.clustering import kmeans_fd
+from fdars.depth import fraiman_muniz_1d
+from fdars.metric import lp_self_1d
+from fdars.clustering import kmeans_fd
 
 depths = fraiman_muniz_1d(X, X)
 D = lp_self_1d(X, t, p=2.0)
@@ -62,23 +62,23 @@ result = kmeans_fd(X, t, k=3, seed=42)
 
 | Module | Description |
 |---|---|
-| `pyfda.Fdata` | Functional data container (1D curves, 2D surfaces) with metadata |
-| `pyfda.fdata` | Low-level functional data operations (mean, derivatives, norms, centering) |
-| `pyfda.depth` | Depth functions (Fraiman-Muniz, modal, band, random projection, …) |
-| `pyfda.metric` | Distance metrics (Lp, Hausdorff, DTW, soft-DTW, Fourier, h-shift) |
-| `pyfda.basis` | Basis representations (B-splines, P-splines, Fourier) |
-| `pyfda.smoothing` | Nonparametric smoothing (Nadaraya-Watson, local polynomial, k-NN) |
-| `pyfda.clustering` | Clustering (k-means, fuzzy c-means, GMM) |
-| `pyfda.regression` | Regression (FPC linear, PLS, nonparametric, robust, FOSR, FANOVA) |
-| `pyfda.alignment` | Elastic alignment (SRSF, Karcher mean, elastic FPCA) |
-| `pyfda.outliers` | Outlier detection (LRT, outliergram, magnitude-shape) |
-| `pyfda.seasonal` | Seasonal analysis (SAZED, autoperiod, STL, peak detection) |
-| `pyfda.spm` | Statistical process monitoring (Phase I/II, EWMA, CUSUM) |
-| `pyfda.classification` | Classification (LDA, QDA, k-NN, kernel with cross-validation) |
-| `pyfda.tolerance` | Tolerance bands (FPCA, conformal, Degras SCB) |
-| `pyfda.conformal` | Conformal prediction (split, jackknife+) |
-| `pyfda.simulation` | Simulation (Karhunen-Loève, Gaussian processes) |
-| `pyfda.explain` | Explainability (SHAP, PDP, permutation importance, significant regions) |
+| `fdars.Fdata` | Functional data container (1D curves, 2D surfaces) with metadata |
+| `fdars.fdata` | Low-level functional data operations (mean, derivatives, norms, centering) |
+| `fdars.depth` | Depth functions (Fraiman-Muniz, modal, band, random projection, …) |
+| `fdars.metric` | Distance metrics (Lp, Hausdorff, DTW, soft-DTW, Fourier, h-shift) |
+| `fdars.basis` | Basis representations (B-splines, P-splines, Fourier) |
+| `fdars.smoothing` | Nonparametric smoothing (Nadaraya-Watson, local polynomial, k-NN) |
+| `fdars.clustering` | Clustering (k-means, fuzzy c-means, GMM) |
+| `fdars.regression` | Regression (FPC linear, PLS, nonparametric, robust, FOSR, FANOVA) |
+| `fdars.alignment` | Elastic alignment (SRSF, Karcher mean, elastic FPCA) |
+| `fdars.outliers` | Outlier detection (LRT, outliergram, magnitude-shape) |
+| `fdars.seasonal` | Seasonal analysis (SAZED, autoperiod, STL, peak detection) |
+| `fdars.spm` | Statistical process monitoring (Phase I/II, EWMA, CUSUM) |
+| `fdars.classification` | Classification (LDA, QDA, k-NN, kernel with cross-validation) |
+| `fdars.tolerance` | Tolerance bands (FPCA, conformal, Degras SCB) |
+| `fdars.conformal` | Conformal prediction (split, jackknife+) |
+| `fdars.simulation` | Simulation (Karhunen-Loève, Gaussian processes) |
+| `fdars.explain` | Explainability (SHAP, PDP, permutation importance, significant regions) |
 
 ## Quick Start
 

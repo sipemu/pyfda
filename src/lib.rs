@@ -1,4 +1,4 @@
-//! pyfda – Python bindings for fdars-core (Functional Data Analysis in Rust).
+//! fdars – Python bindings for fdars-core (Functional Data Analysis in Rust).
 
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::type_complexity)]
@@ -33,7 +33,7 @@ macro_rules! register_submodule {
     }};
 }
 
-/// pyfda – Functional Data Analysis for Python, powered by Rust.
+/// fdars – Functional Data Analysis for Python, powered by Rust.
 #[pymodule]
 fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     register_submodule!(m, "fdata", fdata_mod::register);

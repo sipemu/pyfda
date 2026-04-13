@@ -1,6 +1,6 @@
 # Clustering
 
-Partition a set of functional observations into homogeneous groups. `pyfda` provides three clustering algorithms -- hard (k-means), soft (fuzzy c-means), and model-based (GMM) -- together with two cluster-quality indices for selecting the number of clusters.
+Partition a set of functional observations into homogeneous groups. `fdars` provides three clustering algorithms -- hard (k-means), soft (fuzzy c-means), and model-based (GMM) -- together with two cluster-quality indices for selecting the number of clusters.
 
 ---
 
@@ -10,9 +10,9 @@ The functional k-means algorithm minimises the total within-cluster $L^2$ distan
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.clustering import kmeans_fd
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.clustering import kmeans_fd
 
 # Two well-separated groups
 argvals = np.linspace(0, 1, 100)
@@ -51,7 +51,7 @@ result = kmeans_fd(fd.data, fd.argvals, k=2, max_iter=100, tol=1e-6, seed=42)
 Fuzzy c-means assigns each observation a *membership degree* for every cluster rather than a hard label, controlled by the fuzziness parameter $m$ (default 2).
 
 ```python
-from pyfda.clustering import fuzzy_cmeans_fd
+from fdars.clustering import fuzzy_cmeans_fd
 
 result_fcm = fuzzy_cmeans_fd(
     fd.data, fd.argvals, k=2, fuzziness=2.0, max_iter=100, tol=1e-6, seed=42
@@ -88,7 +88,7 @@ result_fcm = fuzzy_cmeans_fd(
 The GMM approach projects the functional data onto a B-spline basis, fits a multivariate Gaussian mixture in the coefficient space, and selects the best number of components via BIC.
 
 ```python
-from pyfda.clustering import gmm_cluster
+from fdars.clustering import gmm_cluster
 
 result_gmm = gmm_cluster(
     fd.data, fd.argvals,
@@ -133,8 +133,8 @@ result_gmm = gmm_cluster(
 The silhouette score measures how similar each observation is to its own cluster compared with the nearest neighbouring cluster. Values range from $-1$ (misclassified) to $+1$ (perfectly clustered).
 
 ```python
-from pyfda.clustering import silhouette_score
-from pyfda.metric import lp_self_1d
+from fdars.clustering import silhouette_score
+from fdars.metric import lp_self_1d
 
 dist_matrix = lp_self_1d(fd.data, fd.argvals, p=2.0)
 labels = result["cluster"].astype(np.int64)
@@ -147,7 +147,7 @@ print(f"Mean silhouette: {np.mean(sil):.3f}")
 A higher Calinski-Harabasz index indicates better-defined clusters (larger between-cluster variance relative to within-cluster variance).
 
 ```python
-from pyfda.clustering import calinski_harabasz
+from fdars.clustering import calinski_harabasz
 
 ch = calinski_harabasz(dist_matrix, labels)
 print(f"Calinski-Harabasz: {ch:.1f}")
@@ -161,10 +161,10 @@ A common strategy is to run k-means for several values of $k$ and pick the one t
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.clustering import kmeans_fd, silhouette_score
-from pyfda.metric import lp_self_1d
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.clustering import kmeans_fd, silhouette_score
+from fdars.metric import lp_self_1d
 
 # Three-group data
 argvals = np.linspace(0, 1, 100)
@@ -194,7 +194,7 @@ print(f"\nOptimal k = {best_k}")
 The clustering functions use $L^2$ distance internally. To cluster with a different metric you can compute the distance matrix first, then pass the resulting labels to the quality indices.
 
 ```python
-from pyfda.metric import dtw_self_1d, hausdorff_self_1d
+from fdars.metric import dtw_self_1d, hausdorff_self_1d
 
 # DTW-based distance matrix
 dist_dtw = dtw_self_1d(fd.data, p=2.0, w=10)
@@ -211,9 +211,9 @@ You can then use these matrices with `silhouette_score` and `calinski_harabasz` 
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.clustering import kmeans_fd, fuzzy_cmeans_fd, gmm_cluster
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.clustering import kmeans_fd, fuzzy_cmeans_fd, gmm_cluster
 
 # ── Simulate three groups ─────────────────────────────────────
 argvals = np.linspace(0, 1, 100)

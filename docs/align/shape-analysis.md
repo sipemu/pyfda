@@ -1,6 +1,6 @@
 # Shape Analysis
 
-Shape analysis studies the *geometry* of functional data after removing nuisance transformations (translation, scaling, reparameterization). `pyfda` provides tools for shape distances, elastic depth measures, and elastic FPCA that decomposes variability into amplitude and phase components.
+Shape analysis studies the *geometry* of functional data after removing nuisance transformations (translation, scaling, reparameterization). `fdars` provides tools for shape distances, elastic depth measures, and elastic FPCA that decomposes variability into amplitude and phase components.
 
 ---
 
@@ -10,7 +10,7 @@ The **shape distance** measures how different two curves are in the quotient spa
 
 ```python
 import numpy as np
-from pyfda.alignment import shape_distance
+from fdars.alignment import shape_distance
 
 t = np.linspace(0, 1, 101)
 f1 = np.sin(2 * np.pi * t)
@@ -40,8 +40,8 @@ f2_aligned = result["f2_aligned"]   # f2 after alignment
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.alignment import elastic_depth
+from fdars import Fdata
+from fdars.alignment import elastic_depth
 
 np.random.seed(0)
 n, m = 40, 101
@@ -96,7 +96,7 @@ Standard FPCA conflates amplitude and phase variation into a single set of princ
 Extracts the principal modes of **amplitude** variation from the aligned curves.
 
 ```python
-from pyfda.alignment import vert_fpca
+from fdars.alignment import vert_fpca
 
 result = vert_fpca(fd.data, fd.argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
 
@@ -124,7 +124,7 @@ print(f"Amplitude variance explained: {cum_var[-1]*100:.1f}%")
 Extracts the principal modes of **phase** variation from the estimated warping functions.
 
 ```python
-from pyfda.alignment import horiz_fpca
+from fdars.alignment import horiz_fpca
 
 result = horiz_fpca(fd.data, fd.argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
 
@@ -154,7 +154,7 @@ print(f"Phase variance explained: {cum_var[-1]*100:.1f}%")
 Combines amplitude and phase variation into a **single joint decomposition**, weighting the two sources via a balance parameter $c$.
 
 ```python
-from pyfda.alignment import joint_fpca
+from fdars.alignment import joint_fpca
 
 result = joint_fpca(fd.data, fd.argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
 
@@ -189,8 +189,8 @@ print(f"Joint variance explained: {cum_var[-1]*100:.1f}%")
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.alignment import (
+from fdars import Fdata
+from fdars.alignment import (
     karcher_mean,
     vert_fpca,
     horiz_fpca,

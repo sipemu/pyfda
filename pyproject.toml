@@ -3,7 +3,7 @@ requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "pyfda"
+name = "fdars"
 version = "0.1.0"
 description = "Python bindings for fdars – Functional Data Analysis in Rust"
 requires-python = ">=3.9"
@@ -34,4 +34,4 @@ dev = ["pytest", "matplotlib"]
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
-module-name = "pyfda._native"
+module-name = "fdars._native"

@@ -16,8 +16,8 @@ Each coefficient function $\beta_j(t)$ describes how predictor $j$ influences th
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.regression import fosr
+from fdars import Fdata
+from fdars.regression import fosr
 
 # --- Simulate data ---
 np.random.seed(0)
@@ -87,8 +87,8 @@ A pointwise $F$-statistic $F(t)$ is computed at each $t$, and a permutation test
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.regression import fanova
+from fdars import Fdata
+from fdars.regression import fanova
 
 # --- Simulate three groups ---
 np.random.seed(1)
@@ -136,8 +136,8 @@ print(f"Pointwise F(t) shape: {result['f_statistic_t'].shape}")  # (101,)
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.regression import fosr, fanova
+from fdars import Fdata
+from fdars.regression import fosr, fanova
 
 np.random.seed(77)
 n, m = 90, 121

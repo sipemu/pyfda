@@ -23,8 +23,8 @@ Representing functional data in a finite basis -- B-splines, Fourier, or P-splin
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.basis import fdata_to_basis_1d, basis_to_fdata_1d
+from fdars import Fdata
+from fdars.basis import fdata_to_basis_1d, basis_to_fdata_1d
 
 # Simulate some data
 argvals = np.linspace(0, 1, 200)
@@ -68,7 +68,7 @@ For advanced use (e.g., building your own penalty matrices), you can evaluate th
 ### B-spline basis
 
 ```python
-from pyfda.basis import bspline_basis
+from fdars.basis import bspline_basis
 
 argvals = np.linspace(0, 1, 100)
 B = bspline_basis(argvals, nknots=10, order=4)
@@ -84,7 +84,7 @@ print(B.shape)  # (100, 14) -- nknots + order = 14 basis functions
 ### Fourier basis
 
 ```python
-from pyfda.basis import fourier_basis
+from fdars.basis import fourier_basis
 
 argvals = np.linspace(0, 2 * np.pi, 100)
 F = fourier_basis(argvals, n_basis=11)
@@ -109,7 +109,7 @@ where $B$ is the B-spline basis matrix, $D^d$ is the $d$-th order difference mat
 ### Fixed lambda
 
 ```python
-from pyfda.basis import pspline_fit_1d
+from fdars.basis import pspline_fit_1d
 
 result = pspline_fit_1d(fd.data, fd.argvals, n_basis=25, lambda_=1e-2, order=2)
 
@@ -132,7 +132,7 @@ print(result.keys())
 When you do not know the right smoothing level, let GCV choose:
 
 ```python
-from pyfda.basis import pspline_fit_gcv
+from fdars.basis import pspline_fit_gcv
 
 result = pspline_fit_gcv(fd.data, fd.argvals, n_basis=25, order=2)
 print(f"GCV score: {result['gcv']:.6f}")
@@ -172,7 +172,7 @@ plt.show()
 3. **P-spline penalty** -- when using B-splines.
 
 ```python
-from pyfda.basis import select_basis_auto_1d
+from fdars.basis import select_basis_auto_1d
 
 selections = select_basis_auto_1d(fd.data, fd.argvals, criterion="gcv")
 
@@ -208,7 +208,7 @@ Each element of the returned list is a dict with:
 When you want to fix the basis type and only search over the number of basis functions:
 
 ```python
-from pyfda.basis import basis_nbasis_cv
+from fdars.basis import basis_nbasis_cv
 
 cv_result = basis_nbasis_cv(
     fd.data, fd.argvals,
@@ -258,9 +258,9 @@ plt.show()
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.basis import pspline_fit_gcv, basis_nbasis_cv, fdata_to_basis_1d
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.basis import pspline_fit_gcv, basis_nbasis_cv, fdata_to_basis_1d
 
 # 1. Generate noisy data
 argvals = np.linspace(0, 1, 300)
@@ -308,4 +308,4 @@ plt.show()
 | `basis_nbasis_cv(data, argvals, ...)` | Cross-validated basis count selection |
 | `smooth_basis_gcv(data, argvals, n_basis, ...)` | Basis smoothing with GCV penalty selection |
 
-All functions are imported from `pyfda.basis`.
+All functions are imported from `fdars.basis`.

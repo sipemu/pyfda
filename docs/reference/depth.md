@@ -1,4 +1,4 @@
-# pyfda.depth
+# fdars.depth
 
 Depth measures for functional data. All functions compute depth values for observations in `data` relative to a reference sample `ref_data`.
 
@@ -27,7 +27,7 @@ Depth measures for functional data. All functions compute depth values for obser
 ### `fraiman_muniz_1d`
 
 ```python
-pyfda.fraiman_muniz_1d(data, ref_data, scale=True)
+fdars.fraiman_muniz_1d(data, ref_data, scale=True)
 ```
 
 Fraiman-Muniz integrated depth for 1D functional data.
@@ -43,7 +43,7 @@ Fraiman-Muniz integrated depth for 1D functional data.
 | depth | `ndarray (n,)` | Depth values |
 
 ```python
-depth = pyfda.fraiman_muniz_1d(data, data)  # self-referencing
+depth = fdars.fraiman_muniz_1d(data, data)  # self-referencing
 ```
 
 ---
@@ -51,7 +51,7 @@ depth = pyfda.fraiman_muniz_1d(data, data)  # self-referencing
 ### `fraiman_muniz_2d`
 
 ```python
-pyfda.fraiman_muniz_2d(data, ref_data, scale=True)
+fdars.fraiman_muniz_2d(data, ref_data, scale=True)
 ```
 
 Fraiman-Muniz depth for 2D (surface) functional data. Same interface as `fraiman_muniz_1d`.
@@ -61,7 +61,7 @@ Fraiman-Muniz depth for 2D (surface) functional data. Same interface as `fraiman
 ### `modal_1d`
 
 ```python
-pyfda.modal_1d(data, ref_data, h=1.0)
+fdars.modal_1d(data, ref_data, h=1.0)
 ```
 
 Modal depth for 1D functional data. Uses kernel density estimation.
@@ -77,7 +77,7 @@ Modal depth for 1D functional data. Uses kernel density estimation.
 | depth | `ndarray (n,)` | Depth values |
 
 ```python
-depth = pyfda.modal_1d(data, data, h=0.5)
+depth = fdars.modal_1d(data, data, h=0.5)
 ```
 
 ---
@@ -85,7 +85,7 @@ depth = pyfda.modal_1d(data, data, h=0.5)
 ### `modal_2d`
 
 ```python
-pyfda.modal_2d(data, ref_data, h=1.0)
+fdars.modal_2d(data, ref_data, h=1.0)
 ```
 
 Modal depth for 2D data. Same interface as `modal_1d`.
@@ -95,7 +95,7 @@ Modal depth for 2D data. Same interface as `modal_1d`.
 ### `random_projection_1d`
 
 ```python
-pyfda.random_projection_1d(data, ref_data, n_proj=50)
+fdars.random_projection_1d(data, ref_data, n_proj=50)
 ```
 
 Random projection depth for 1D functional data. Projects onto random directions and averages univariate depth.
@@ -111,7 +111,7 @@ Random projection depth for 1D functional data. Projects onto random directions 
 | depth | `ndarray (n,)` | Depth values |
 
 ```python
-depth = pyfda.random_projection_1d(data, data, n_proj=100)
+depth = fdars.random_projection_1d(data, data, n_proj=100)
 ```
 
 ---
@@ -119,7 +119,7 @@ depth = pyfda.random_projection_1d(data, data, n_proj=100)
 ### `random_projection_2d`
 
 ```python
-pyfda.random_projection_2d(data, ref_data, n_proj=50)
+fdars.random_projection_2d(data, ref_data, n_proj=50)
 ```
 
 Random projection depth for 2D data. Same interface as `random_projection_1d`.
@@ -129,7 +129,7 @@ Random projection depth for 2D data. Same interface as `random_projection_1d`.
 ### `random_tukey_1d`
 
 ```python
-pyfda.random_tukey_1d(data, ref_data, n_proj=50)
+fdars.random_tukey_1d(data, ref_data, n_proj=50)
 ```
 
 Random Tukey (halfspace) depth for 1D functional data.
@@ -145,7 +145,7 @@ Random Tukey (halfspace) depth for 1D functional data.
 | depth | `ndarray (n,)` | Depth values |
 
 ```python
-depth = pyfda.random_tukey_1d(data, data, n_proj=50)
+depth = fdars.random_tukey_1d(data, data, n_proj=50)
 ```
 
 ---
@@ -153,7 +153,7 @@ depth = pyfda.random_tukey_1d(data, data, n_proj=50)
 ### `random_tukey_2d`
 
 ```python
-pyfda.random_tukey_2d(data, ref_data, n_proj=50)
+fdars.random_tukey_2d(data, ref_data, n_proj=50)
 ```
 
 Random Tukey depth for 2D data. Same interface as `random_tukey_1d`.
@@ -163,7 +163,7 @@ Random Tukey depth for 2D data. Same interface as `random_tukey_1d`.
 ### `band_1d`
 
 ```python
-pyfda.band_1d(data, ref_data)
+fdars.band_1d(data, ref_data)
 ```
 
 Band depth for 1D functional data. Measures the proportion of bands (defined by pairs of reference curves) that contain the target curve.
@@ -178,7 +178,7 @@ Band depth for 1D functional data. Measures the proportion of bands (defined by 
 | depth | `ndarray (n,)` | Depth values |
 
 ```python
-depth = pyfda.band_1d(data, data)
+depth = fdars.band_1d(data, data)
 ```
 
 ---
@@ -186,7 +186,7 @@ depth = pyfda.band_1d(data, data)
 ### `modified_band_1d`
 
 ```python
-pyfda.modified_band_1d(data, ref_data)
+fdars.modified_band_1d(data, ref_data)
 ```
 
 Modified band depth for 1D data. Relaxed version of band depth that measures the proportion of time a curve is inside each band.
@@ -201,7 +201,7 @@ Modified band depth for 1D data. Relaxed version of band depth that measures the
 | depth | `ndarray (n,)` | Depth values |
 
 ```python
-depth = pyfda.modified_band_1d(data, data)
+depth = fdars.modified_band_1d(data, data)
 ```
 
 ---
@@ -209,7 +209,7 @@ depth = pyfda.modified_band_1d(data, data)
 ### `modified_epigraph_index_1d`
 
 ```python
-pyfda.modified_epigraph_index_1d(data, ref_data)
+fdars.modified_epigraph_index_1d(data, ref_data)
 ```
 
 Modified epigraph index for 1D data. Measures how often each curve lies above the reference curves.
@@ -224,7 +224,7 @@ Modified epigraph index for 1D data. Measures how often each curve lies above th
 | index | `ndarray (n,)` | Epigraph index values |
 
 ```python
-mei = pyfda.modified_epigraph_index_1d(data, data)
+mei = fdars.modified_epigraph_index_1d(data, data)
 ```
 
 ---
@@ -232,7 +232,7 @@ mei = pyfda.modified_epigraph_index_1d(data, data)
 ### `functional_spatial_1d`
 
 ```python
-pyfda.functional_spatial_1d(data, ref_data, argvals=None)
+fdars.functional_spatial_1d(data, ref_data, argvals=None)
 ```
 
 Functional spatial depth for 1D data. Extends multivariate spatial depth to functional setting.
@@ -249,7 +249,7 @@ Functional spatial depth for 1D data. Extends multivariate spatial depth to func
 
 ```python
 t = np.linspace(0, 1, 100)
-depth = pyfda.functional_spatial_1d(data, data, argvals=t)
+depth = fdars.functional_spatial_1d(data, data, argvals=t)
 ```
 
 ---
@@ -257,7 +257,7 @@ depth = pyfda.functional_spatial_1d(data, data, argvals=t)
 ### `functional_spatial_2d`
 
 ```python
-pyfda.functional_spatial_2d(data, ref_data)
+fdars.functional_spatial_2d(data, ref_data)
 ```
 
 Functional spatial depth for 2D data.
@@ -272,7 +272,7 @@ Functional spatial depth for 2D data.
 | depth | `ndarray (n,)` | Depth values |
 
 ```python
-depth = pyfda.functional_spatial_2d(data, data)
+depth = fdars.functional_spatial_2d(data, data)
 ```
 
 ---
@@ -280,7 +280,7 @@ depth = pyfda.functional_spatial_2d(data, data)
 ### `kernel_functional_spatial_1d`
 
 ```python
-pyfda.kernel_functional_spatial_1d(data, ref_data, argvals, h=1.0)
+fdars.kernel_functional_spatial_1d(data, ref_data, argvals, h=1.0)
 ```
 
 Kernel functional spatial depth for 1D data. Uses a Gaussian kernel with bandwidth `h`.
@@ -298,7 +298,7 @@ Kernel functional spatial depth for 1D data. Uses a Gaussian kernel with bandwid
 
 ```python
 t = np.linspace(0, 1, 100)
-depth = pyfda.kernel_functional_spatial_1d(data, data, t, h=0.5)
+depth = fdars.kernel_functional_spatial_1d(data, data, t, h=0.5)
 ```
 
 ---
@@ -306,7 +306,7 @@ depth = pyfda.kernel_functional_spatial_1d(data, data, t, h=0.5)
 ### `kernel_functional_spatial_2d`
 
 ```python
-pyfda.kernel_functional_spatial_2d(data, ref_data, h=1.0)
+fdars.kernel_functional_spatial_2d(data, ref_data, h=1.0)
 ```
 
 Kernel functional spatial depth for 2D data.
@@ -322,5 +322,5 @@ Kernel functional spatial depth for 2D data.
 | depth | `ndarray (n,)` | Depth values |
 
 ```python
-depth = pyfda.kernel_functional_spatial_2d(data, data, h=0.5)
+depth = fdars.kernel_functional_spatial_2d(data, data, h=0.5)
 ```

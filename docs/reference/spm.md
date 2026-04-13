@@ -1,4 +1,4 @@
-# pyfda.spm
+# fdars.spm
 
 Statistical Process Monitoring (SPM) for functional data using FPCA-based control charts.
 
@@ -15,7 +15,7 @@ Statistical Process Monitoring (SPM) for functional data using FPCA-based contro
 ### `spm_phase1`
 
 ```python
-pyfda.spm_phase1(data, argvals, ncomp=3, alpha=0.05)
+fdars.spm_phase1(data, argvals, ncomp=3, alpha=0.05)
 ```
 
 Phase I: estimate the in-control model from historical data. Computes FPCA, T-squared, and SPE statistics with control limits.
@@ -33,7 +33,7 @@ Phase I: estimate the in-control model from historical data. Computes FPCA, T-sq
 
 ```python
 t = np.linspace(0, 1, 100)
-phase1 = pyfda.spm_phase1(data, t, ncomp=3, alpha=0.05)
+phase1 = fdars.spm_phase1(data, t, ncomp=3, alpha=0.05)
 print(f"T2 limit: {phase1['t2_limit']:.2f}")
 print(f"SPE limit: {phase1['spe_limit']:.2f}")
 ```
@@ -43,7 +43,7 @@ print(f"SPE limit: {phase1['spe_limit']:.2f}")
 ### `spm_monitor`
 
 ```python
-pyfda.spm_monitor(mean, loadings, weights, eigenvalues,
+fdars.spm_monitor(mean, loadings, weights, eigenvalues,
                   t2_limit, spe_limit, new_data, argvals)
 ```
 
@@ -65,7 +65,7 @@ Phase II: monitor new observations against the in-control model from Phase I.
 | result | `dict` | Keys: `t2` (n_new,), `spe` (n_new,), `t2_alarm` (bool array), `spe_alarm` (bool array) |
 
 ```python
-monitor = pyfda.spm_monitor(
+monitor = fdars.spm_monitor(
     phase1["mean"], phase1["loadings"], phase1["weights"],
     phase1["eigenvalues"], phase1["t2_limit"], phase1["spe_limit"],
     new_data, t
@@ -79,7 +79,7 @@ if any(monitor["t2_alarm"]):
 ### `hotelling_t2`
 
 ```python
-pyfda.hotelling_t2(scores, eigenvalues)
+fdars.hotelling_t2(scores, eigenvalues)
 ```
 
 Compute the Hotelling T-squared statistic from FPC scores.
@@ -94,6 +94,6 @@ Compute the Hotelling T-squared statistic from FPC scores.
 | t2 | `ndarray (n,)` | T-squared statistics |
 
 ```python
-pca = pyfda.fpca(data, t, n_comp=3)
-t2 = pyfda.hotelling_t2(pca["scores"], pca["singular_values"]**2)
+pca = fdars.fpca(data, t, n_comp=3)
+t2 = fdars.hotelling_t2(pca["scores"], pca["singular_values"]**2)
 ```

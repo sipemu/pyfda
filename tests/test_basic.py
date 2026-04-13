@@ -1,4 +1,4 @@
-"""Basic tests for pyfda package."""
+"""Basic tests for fdars package."""
 
 import numpy as np
 import pytest
@@ -6,14 +6,14 @@ import pytest
 
 def test_import():
     """Verify the package can be imported."""
-    import pyfda
-    assert hasattr(pyfda, "__version__")
-    assert pyfda.__version__ == "0.1.0"
+    import fdars
+    assert hasattr(fdars, "__version__")
+    assert fdars.__version__ == "0.1.0"
 
 
 def test_submodules():
     """Verify all submodules are accessible."""
-    from pyfda import (
+    from fdars import (
         fdata, depth, metric, basis, smoothing,
         clustering, regression, alignment, outliers,
         seasonal, spm, classification, tolerance,
@@ -23,19 +23,19 @@ def test_submodules():
 
 class TestFdata:
     def test_mean_1d(self):
-        from pyfda.fdata import mean_1d
+        from fdars.fdata import mean_1d
         data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
         result = mean_1d(data)
         np.testing.assert_allclose(result, [2.5, 3.5, 4.5])
 
     def test_center_1d(self):
-        from pyfda.fdata import center_1d
+        from fdars.fdata import center_1d
         data = np.array([[1.0, 2.0, 3.0], [3.0, 4.0, 5.0]])
         result = center_1d(data)
         np.testing.assert_allclose(result, [[-1.0, -1.0, -1.0], [1.0, 1.0, 1.0]])
 
     def test_norm_lp_1d(self):
-        from pyfda.fdata import norm_lp_1d
+        from fdars.fdata import norm_lp_1d
         data = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         argvals = np.linspace(0, 1, 3)
         result = norm_lp_1d(data, argvals)
@@ -43,7 +43,7 @@ class TestFdata:
         assert all(r >= 0 for r in result)
 
     def test_normalize(self):
-        from pyfda.fdata import normalize
+        from fdars.fdata import normalize
         data = np.random.randn(10, 50)
         result = normalize(data, method="center")
         # centered data should have zero mean per column
@@ -57,18 +57,18 @@ class TestDepth:
         self.data = np.random.randn(20, 50)
 
     def test_fraiman_muniz(self):
-        from pyfda.depth import fraiman_muniz_1d
+        from fdars.depth import fraiman_muniz_1d
         depths = fraiman_muniz_1d(self.data, self.data)
         assert depths.shape == (20,)
         assert all(0 <= d <= 1 for d in depths)
 
     def test_modified_band(self):
-        from pyfda.depth import modified_band_1d
+        from fdars.depth import modified_band_1d
         depths = modified_band_1d(self.data, self.data)
         assert depths.shape == (20,)
 
     def test_random_projection(self):
-        from pyfda.depth import random_projection_1d
+        from fdars.depth import random_projection_1d
         depths = random_projection_1d(self.data, self.data, n_proj=10)
         assert depths.shape == (20,)
 
@@ -80,20 +80,20 @@ class TestMetric:
         self.argvals = np.linspace(0, 1, 30)
 
     def test_lp_self(self):
-        from pyfda.metric import lp_self_1d
+        from fdars.metric import lp_self_1d
         dist = lp_self_1d(self.data, self.argvals, p=2.0)
         assert dist.shape == (10, 10)
         np.testing.assert_allclose(np.diag(dist), 0.0, atol=1e-10)
 
     def test_dtw_self(self):
-        from pyfda.metric import dtw_self_1d
+        from fdars.metric import dtw_self_1d
         dist = dtw_self_1d(self.data)
         assert dist.shape == (10, 10)
 
 
 class TestClustering:
     def test_kmeans(self):
-        from pyfda.clustering import kmeans_fd
+        from fdars.clustering import kmeans_fd
         np.random.seed(42)
         data = np.vstack([np.random.randn(10, 30), np.random.randn(10, 30) + 3])
         argvals = np.linspace(0, 1, 30)
@@ -105,7 +105,7 @@ class TestClustering:
 
 class TestRegression:
     def test_fregre_lm(self):
-        from pyfda.regression import fregre_lm
+        from fdars.regression import fregre_lm
         np.random.seed(42)
         data = np.random.randn(30, 50)
         response = data.mean(axis=1) + 0.1 * np.random.randn(30)
@@ -115,7 +115,7 @@ class TestRegression:
         assert "r_squared" in result
 
     def test_fpca(self):
-        from pyfda.regression import fpca
+        from fdars.regression import fpca
         np.random.seed(42)
         data = np.random.randn(20, 50)
         argvals = np.linspace(0, 1, 50)
@@ -128,7 +128,7 @@ class TestRegression:
 
 class TestAlignment:
     def test_elastic_distance(self):
-        from pyfda.alignment import elastic_distance
+        from fdars.alignment import elastic_distance
         argvals = np.linspace(0, 1, 100)
         c1 = np.sin(2 * np.pi * argvals)
         c2 = np.sin(2 * np.pi * argvals + 0.5)
@@ -136,14 +136,14 @@ class TestAlignment:
         assert d >= 0
 
     def test_srsf_transform(self):
-        from pyfda.alignment import srsf_transform
+        from fdars.alignment import srsf_transform
         argvals = np.linspace(0, 1, 100)
         curve = np.sin(2 * np.pi * argvals)
         srsf = srsf_transform(curve, argvals)
         assert len(srsf) == 100
 
     def test_elastic_align_pair(self):
-        from pyfda.alignment import elastic_align_pair
+        from fdars.alignment import elastic_align_pair
         argvals = np.linspace(0, 1, 100)
         c1 = np.sin(2 * np.pi * argvals)
         c2 = np.sin(2 * np.pi * (argvals ** 1.5))
@@ -155,13 +155,13 @@ class TestAlignment:
 
 class TestSimulation:
     def test_simulate(self):
-        from pyfda.simulation import simulate
+        from fdars.simulation import simulate
         argvals = np.linspace(0, 1, 100)
         data = simulate(20, argvals, n_basis=5)
         assert data.shape == (20, 100)
 
     def test_gaussian_process(self):
-        from pyfda.simulation import gaussian_process
+        from fdars.simulation import gaussian_process
         argvals = np.linspace(0, 1, 50)
         data = gaussian_process(10, argvals, kernel="gaussian")
         assert data.shape == (10, 50)
@@ -169,7 +169,7 @@ class TestSimulation:
 
 class TestOutliers:
     def test_outliergram(self):
-        from pyfda.outliers import outliergram
+        from fdars.outliers import outliergram
         np.random.seed(42)
         data = np.random.randn(20, 50)
         result = outliergram(data)
@@ -180,7 +180,7 @@ class TestOutliers:
 
 class TestSPM:
     def test_spm_phase1(self):
-        from pyfda.spm import spm_phase1
+        from fdars.spm import spm_phase1
         np.random.seed(42)
         data = np.random.randn(30, 50)
         argvals = np.linspace(0, 1, 50)
@@ -193,7 +193,7 @@ class TestSPM:
 
 class TestTolerance:
     def test_fpca_tolerance_band(self):
-        from pyfda.tolerance import fpca_tolerance_band
+        from fdars.tolerance import fpca_tolerance_band
         np.random.seed(42)
         data = np.random.randn(30, 50)
         result = fpca_tolerance_band(data, ncomp=3, nb=100)

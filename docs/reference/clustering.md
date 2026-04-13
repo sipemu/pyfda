@@ -1,4 +1,4 @@
-# pyfda.clustering
+# fdars.clustering
 
 Clustering methods for functional data with cluster quality metrics.
 
@@ -17,7 +17,7 @@ Clustering methods for functional data with cluster quality metrics.
 ### `kmeans_fd`
 
 ```python
-pyfda.kmeans_fd(data, argvals, k, max_iter=100, tol=1e-6, seed=42)
+fdars.kmeans_fd(data, argvals, k, max_iter=100, tol=1e-6, seed=42)
 ```
 
 K-means clustering for functional data using L2 distance.
@@ -37,7 +37,7 @@ K-means clustering for functional data using L2 distance.
 
 ```python
 t = np.linspace(0, 1, 100)
-result = pyfda.kmeans_fd(data, t, k=3)
+result = fdars.kmeans_fd(data, t, k=3)
 labels = result["cluster"]
 ```
 
@@ -46,7 +46,7 @@ labels = result["cluster"]
 ### `fuzzy_cmeans_fd`
 
 ```python
-pyfda.fuzzy_cmeans_fd(data, argvals, k, fuzziness=2.0, max_iter=100,
+fdars.fuzzy_cmeans_fd(data, argvals, k, fuzziness=2.0, max_iter=100,
                       tol=1e-6, seed=42)
 ```
 
@@ -67,7 +67,7 @@ Fuzzy C-means clustering for functional data.
 | result | `dict` | Keys: `cluster` (n,), `membership` (n, k), `centers` (k, m) |
 
 ```python
-result = pyfda.fuzzy_cmeans_fd(data, t, k=3, fuzziness=2.0)
+result = fdars.fuzzy_cmeans_fd(data, t, k=3, fuzziness=2.0)
 soft_labels = result["membership"]  # shape (n, 3)
 ```
 
@@ -76,7 +76,7 @@ soft_labels = result["membership"]  # shape (n, 3)
 ### `gmm_cluster`
 
 ```python
-pyfda.gmm_cluster(data, argvals, k_range, nbasis=5, max_iter=200,
+fdars.gmm_cluster(data, argvals, k_range, nbasis=5, max_iter=200,
                   tol=1e-6, seed=42)
 ```
 
@@ -97,7 +97,7 @@ Gaussian mixture model clustering via basis projection. Tries multiple values of
 | result | `dict` | Keys: `cluster` (n,), `membership` (n, k), `bic_values` (list of (k, bic)), `icl_values` (list of (k, icl)) |
 
 ```python
-result = pyfda.gmm_cluster(data, t, k_range=[2, 3, 4, 5])
+result = fdars.gmm_cluster(data, t, k_range=[2, 3, 4, 5])
 best_labels = result["cluster"]
 ```
 
@@ -106,7 +106,7 @@ best_labels = result["cluster"]
 ### `silhouette_score`
 
 ```python
-pyfda.silhouette_score(dist_matrix, labels)
+fdars.silhouette_score(dist_matrix, labels)
 ```
 
 Compute per-observation silhouette scores from a precomputed distance matrix.
@@ -121,8 +121,8 @@ Compute per-observation silhouette scores from a precomputed distance matrix.
 | scores | `ndarray (n,)` | Per-observation silhouette scores in [-1, 1] |
 
 ```python
-D = pyfda.lp_self_1d(data, t)
-scores = pyfda.silhouette_score(D, result["cluster"].astype(np.int64))
+D = fdars.lp_self_1d(data, t)
+scores = fdars.silhouette_score(D, result["cluster"].astype(np.int64))
 print(f"Mean silhouette: {scores.mean():.3f}")
 ```
 
@@ -131,7 +131,7 @@ print(f"Mean silhouette: {scores.mean():.3f}")
 ### `calinski_harabasz`
 
 ```python
-pyfda.calinski_harabasz(dist_matrix, labels)
+fdars.calinski_harabasz(dist_matrix, labels)
 ```
 
 Calinski-Harabasz index (variance ratio criterion) from a precomputed distance matrix. Higher values indicate better-defined clusters.
@@ -146,5 +146,5 @@ Calinski-Harabasz index (variance ratio criterion) from a precomputed distance m
 | score | `float` | Calinski-Harabasz score |
 
 ```python
-ch = pyfda.calinski_harabasz(D, result["cluster"].astype(np.int64))
+ch = fdars.calinski_harabasz(D, result["cluster"].astype(np.int64))
 ```

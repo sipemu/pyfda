@@ -26,7 +26,7 @@ In practice the sum is truncated at $K$ components, giving the best rank-$K$ app
 FPCA lives in the **regression** module because principal component scores are the primary features for scalar-on-function regression.
 
 ```python
-from pyfda.regression import fpca
+from fdars.regression import fpca
 ```
 
 The function signature is:
@@ -56,9 +56,9 @@ result = fpca(data, argvals, n_comp=3)
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.regression import fpca
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.regression import fpca
 
 # --- 1. Simulate 80 curves on a fine grid ---------------------------------
 np.random.seed(42)
@@ -184,7 +184,7 @@ plt.show()
 FPC scores are the standard features for downstream supervised learning.
 
 ```python
-from pyfda.regression import fregre_lm
+from fdars.regression import fregre_lm
 
 # Suppose we have a scalar response
 response = np.random.randn(80)
@@ -204,10 +204,10 @@ print("R^2:", model.score(scores, response))
 
 !!! tip "Model selection"
 
-    Use `model_selection_ncomp` from `pyfda.regression` to choose $K$ via GCV, AIC, or BIC when the goal is regression:
+    Use `model_selection_ncomp` from `fdars.regression` to choose $K$ via GCV, AIC, or BIC when the goal is regression:
 
     ```python
-    from pyfda.regression import model_selection_ncomp
+    from fdars.regression import model_selection_ncomp
 
     sel = model_selection_ncomp(fd.data, response, max_comp=10, criterion="gcv")
     print("Best K:", sel["best_ncomp"])
@@ -224,7 +224,7 @@ When the goal is pure representation (no response), a common rule is to retain e
 Smoothing before FPCA often improves results, especially with noisy data. Use P-splines or basis smoothing first:
 
 ```python
-from pyfda.basis import pspline_fit_gcv
+from fdars.basis import pspline_fit_gcv
 
 # Smooth with GCV-selected P-splines
 smooth = pspline_fit_gcv(fd.data, fd.argvals, n_basis=25)
@@ -236,14 +236,14 @@ result_smooth = fpca(fd_smooth.data, fd_smooth.argvals, n_comp=4)
 
 !!! note "FPCA in the alignment module"
 
-    For data with significant phase variation (horizontal shifts), consider **elastic FPCA** via `vert_fpca`, `horiz_fpca`, or `joint_fpca` from `pyfda.alignment`. These separate amplitude and phase variation before extracting components. See the [Elastic Alignment](../align/elastic-alignment.md) guide.
+    For data with significant phase variation (horizontal shifts), consider **elastic FPCA** via `vert_fpca`, `horiz_fpca`, or `joint_fpca` from `fdars.alignment`. These separate amplitude and phase variation before extracting components. See the [Elastic Alignment](../align/elastic-alignment.md) guide.
 
 ## API summary
 
 | Function | Module | Purpose |
 |----------|--------|---------|
-| `fpca(data, argvals, n_comp)` | `pyfda.regression` | Standard FPCA |
-| `model_selection_ncomp(data, response, ...)` | `pyfda.regression` | Cross-validated component selection |
-| `vert_fpca(data, argvals, n_comp, ...)` | `pyfda.alignment` | Amplitude FPCA (elastic) |
-| `horiz_fpca(data, argvals, n_comp, ...)` | `pyfda.alignment` | Phase FPCA (elastic) |
-| `joint_fpca(data, argvals, n_comp, ...)` | `pyfda.alignment` | Joint amplitude-phase FPCA |
+| `fpca(data, argvals, n_comp)` | `fdars.regression` | Standard FPCA |
+| `model_selection_ncomp(data, response, ...)` | `fdars.regression` | Cross-validated component selection |
+| `vert_fpca(data, argvals, n_comp, ...)` | `fdars.alignment` | Amplitude FPCA (elastic) |
+| `horiz_fpca(data, argvals, n_comp, ...)` | `fdars.alignment` | Phase FPCA (elastic) |
+| `joint_fpca(data, argvals, n_comp, ...)` | `fdars.alignment` | Joint amplitude-phase FPCA |

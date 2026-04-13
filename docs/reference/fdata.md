@@ -1,4 +1,4 @@
-# pyfda.fdata
+# fdars.fdata
 
 Core functional data container and operations.
 
@@ -7,10 +7,10 @@ Core functional data container and operations.
 ## `Fdata` class
 
 ```python
-from pyfda import Fdata
+from fdars import Fdata
 ```
 
-The **main entry point** for working with functional data in pyfda. Bundles
+The **main entry point** for working with functional data in fdars. Bundles
 observation data, evaluation grid, identifiers, and metadata into a single
 object — mirroring the R package's `fdata` class.
 
@@ -78,7 +78,7 @@ fd_sum = fd1 + fd2
 ```python
 import numpy as np
 import pandas as pd
-from pyfda import Fdata
+from fdars import Fdata
 
 t = np.linspace(0, 1, 100)
 X = np.random.randn(20, 100)
@@ -116,7 +116,7 @@ by `Fdata` methods but can also be used directly.
 ### `mean_1d`
 
 ```python
-pyfda.fdata.mean_1d(data)
+fdars.fdata.mean_1d(data)
 ```
 
 Compute the pointwise mean of 1D functional data.
@@ -130,9 +130,9 @@ Compute the pointwise mean of 1D functional data.
 | mean | `ndarray (m,)` | Pointwise mean across observations |
 
 ```python
-import numpy as np, pyfda
+import numpy as np, fdars
 data = np.random.randn(50, 100)
-mu = pyfda.mean_1d(data)  # shape (100,)
+mu = fdars.mean_1d(data)  # shape (100,)
 ```
 
 ---
@@ -140,7 +140,7 @@ mu = pyfda.mean_1d(data)  # shape (100,)
 ### `mean_2d`
 
 ```python
-pyfda.mean_2d(data)
+fdars.mean_2d(data)
 ```
 
 Compute the pointwise mean of 2D (surface) functional data.
@@ -155,7 +155,7 @@ Compute the pointwise mean of 2D (surface) functional data.
 
 ```python
 data = np.random.randn(30, 400)  # 30 surfaces on 20x20 grid
-mu = pyfda.mean_2d(data)
+mu = fdars.mean_2d(data)
 ```
 
 ---
@@ -163,7 +163,7 @@ mu = pyfda.mean_2d(data)
 ### `center_1d`
 
 ```python
-pyfda.center_1d(data)
+fdars.center_1d(data)
 ```
 
 Center functional data by subtracting the pointwise mean.
@@ -177,7 +177,7 @@ Center functional data by subtracting the pointwise mean.
 | centered | `ndarray (n, m)` | Centered data |
 
 ```python
-centered = pyfda.center_1d(data)
+centered = fdars.center_1d(data)
 assert np.allclose(centered.mean(axis=0), 0)
 ```
 
@@ -186,7 +186,7 @@ assert np.allclose(centered.mean(axis=0), 0)
 ### `deriv_1d`
 
 ```python
-pyfda.deriv_1d(data, argvals, nderiv=1)
+fdars.deriv_1d(data, argvals, nderiv=1)
 ```
 
 Compute numerical derivatives of 1D functional data using finite differences.
@@ -204,7 +204,7 @@ Compute numerical derivatives of 1D functional data using finite differences.
 ```python
 t = np.linspace(0, 1, 100)
 data = np.sin(2 * np.pi * t).reshape(1, -1)
-d1 = pyfda.deriv_1d(data, t, nderiv=1)
+d1 = fdars.deriv_1d(data, t, nderiv=1)
 ```
 
 ---
@@ -212,7 +212,7 @@ d1 = pyfda.deriv_1d(data, t, nderiv=1)
 ### `deriv_2d`
 
 ```python
-pyfda.deriv_2d(data, argvals_s, argvals_t)
+fdars.deriv_2d(data, argvals_s, argvals_t)
 ```
 
 Compute partial derivatives of 2D functional data.
@@ -230,7 +230,7 @@ Compute partial derivatives of 2D functional data.
 ```python
 s = np.linspace(0, 1, 20)
 t = np.linspace(0, 1, 20)
-ds, dt, dsdt = pyfda.deriv_2d(data, s, t)
+ds, dt, dsdt = fdars.deriv_2d(data, s, t)
 ```
 
 ---
@@ -238,7 +238,7 @@ ds, dt, dsdt = pyfda.deriv_2d(data, s, t)
 ### `norm_lp_1d`
 
 ```python
-pyfda.norm_lp_1d(data, argvals, p=2.0)
+fdars.norm_lp_1d(data, argvals, p=2.0)
 ```
 
 Compute Lp norms of 1D functional data via numerical integration.
@@ -255,7 +255,7 @@ Compute Lp norms of 1D functional data via numerical integration.
 
 ```python
 t = np.linspace(0, 1, 100)
-norms = pyfda.norm_lp_1d(data, t, p=2.0)
+norms = fdars.norm_lp_1d(data, t, p=2.0)
 ```
 
 ---
@@ -263,7 +263,7 @@ norms = pyfda.norm_lp_1d(data, t, p=2.0)
 ### `geometric_median_1d`
 
 ```python
-pyfda.geometric_median_1d(data, argvals, max_iter=100, tol=1e-8)
+fdars.geometric_median_1d(data, argvals, max_iter=100, tol=1e-8)
 ```
 
 Compute the geometric (L1) median of 1D functional data via Weiszfeld's algorithm.
@@ -281,7 +281,7 @@ Compute the geometric (L1) median of 1D functional data via Weiszfeld's algorith
 
 ```python
 t = np.linspace(0, 1, 100)
-med = pyfda.geometric_median_1d(data, t)
+med = fdars.geometric_median_1d(data, t)
 ```
 
 ---
@@ -289,7 +289,7 @@ med = pyfda.geometric_median_1d(data, t)
 ### `geometric_median_2d`
 
 ```python
-pyfda.geometric_median_2d(data, argvals_s, argvals_t, max_iter=100, tol=1e-8)
+fdars.geometric_median_2d(data, argvals_s, argvals_t, max_iter=100, tol=1e-8)
 ```
 
 Compute the geometric (L1) median of 2D functional data.
@@ -308,7 +308,7 @@ Compute the geometric (L1) median of 2D functional data.
 
 ```python
 s, t = np.linspace(0, 1, 20), np.linspace(0, 1, 20)
-med = pyfda.geometric_median_2d(data, s, t)
+med = fdars.geometric_median_2d(data, s, t)
 ```
 
 ---
@@ -316,7 +316,7 @@ med = pyfda.geometric_median_2d(data, s, t)
 ### `normalize`
 
 ```python
-pyfda.normalize(data, method="center")
+fdars.normalize(data, method="center")
 ```
 
 Normalize functional data using one of several methods.
@@ -343,5 +343,5 @@ Normalize functional data using one of several methods.
 | normalized | `ndarray (n, m)` | Normalized data |
 
 ```python
-normed = pyfda.normalize(data, method="autoscale")
+normed = fdars.normalize(data, method="autoscale")
 ```

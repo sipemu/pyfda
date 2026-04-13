@@ -5,12 +5,12 @@ title: Smoothing
 # Smoothing
 
 Real-world curves are almost always corrupted by noise. Smoothing recovers the
-underlying signal while respecting the functional nature of the data. pyfda
+underlying signal while respecting the functional nature of the data. fdars
 provides two families of smoothers:
 
-1. **Nonparametric kernel smoothers** (`pyfda.smoothing`) -- Nadaraya-Watson,
+1. **Nonparametric kernel smoothers** (`fdars.smoothing`) -- Nadaraya-Watson,
    local linear, local polynomial, and k-NN.
-2. **Basis smoothers** (`pyfda.basis`) -- project noisy curves onto a smooth
+2. **Basis smoothers** (`fdars.basis`) -- project noisy curves onto a smooth
    basis (B-spline or Fourier) with a roughness penalty.
 
 This guide covers both, including automatic bandwidth and penalty selection.
@@ -23,8 +23,8 @@ We start by simulating a clean signal and adding Gaussian noise:
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
+from fdars import Fdata
+from fdars.simulation import simulate
 
 # Clean signal
 argvals = np.linspace(0, 1, 200)
@@ -55,7 +55,7 @@ $$
 where $K_h$ is a kernel function with bandwidth $h$.
 
 ```python
-from pyfda.smoothing import nadaraya_watson
+from fdars.smoothing import nadaraya_watson
 
 y_hat = nadaraya_watson(x, y, x, bandwidth=0.05, kernel="gaussian")
 ```
@@ -88,7 +88,7 @@ regression** fits a weighted least-squares line at each point, which
 automatically corrects for boundary effects.
 
 ```python
-from pyfda.smoothing import local_linear
+from fdars.smoothing import local_linear
 
 y_ll = local_linear(x, y, x, bandwidth=0.05, kernel="gaussian")
 ```
@@ -107,7 +107,7 @@ bandwidth parameter.
 Generalize local linear to higher polynomial degrees:
 
 ```python
-from pyfda.smoothing import local_polynomial
+from fdars.smoothing import local_polynomial
 
 # Degree 0 = Nadaraya-Watson
 y_d0 = local_polynomial(x, y, x, bandwidth=0.05, degree=0)
@@ -134,7 +134,7 @@ Instead of a global bandwidth, the k-NN smoother adapts locally by averaging the
 `k` nearest observations to each evaluation point:
 
 ```python
-from pyfda.smoothing import knn_smoother
+from fdars.smoothing import knn_smoother
 
 y_knn = knn_smoother(x, y, x, k=15)
 ```
@@ -150,13 +150,13 @@ The effective bandwidth grows in sparse regions and shrinks in dense regions.
 ## Bandwidth Selection via Cross-Validation
 
 Choosing the bandwidth $h$ is the most important decision in kernel smoothing.
-pyfda automates this with `optim_bandwidth`, which searches over a grid and
+fdars automates this with `optim_bandwidth`, which searches over a grid and
 minimizes either cross-validation (CV) or generalized cross-validation (GCV).
 
 ### Generalized Cross-Validation (default)
 
 ```python
-from pyfda.smoothing import optim_bandwidth
+from fdars.smoothing import optim_bandwidth
 
 result = optim_bandwidth(x, y, criterion="gcv", kernel="gaussian")
 print(f"Optimal bandwidth: {result['h_opt']:.4f}")
@@ -206,7 +206,7 @@ overfitting. This is often called **penalized regression splines** or
 smoothing penalty $\lambda$ by GCV:
 
 ```python
-from pyfda.basis import smooth_basis_gcv
+from fdars.basis import smooth_basis_gcv
 
 # Smooth all curves in a dataset at once
 result = smooth_basis_gcv(
@@ -247,7 +247,7 @@ fd_fourier = Fdata(result_fourier["fitted"], argvals=fd_noisy.argvals)
 If you already know a good $\lambda$, skip the GCV search:
 
 ```python
-from pyfda.basis import pspline_fit_1d
+from fdars.basis import pspline_fit_1d
 
 result_ps = pspline_fit_1d(
     fd_noisy.data, fd_noisy.argvals,
@@ -264,7 +264,7 @@ print(f"BIC: {result_ps['bic']:.2f}")
 ### P-Spline Fit with GCV-Selected Penalty
 
 ```python
-from pyfda.basis import pspline_fit_gcv
+from fdars.basis import pspline_fit_gcv
 
 result_auto = pspline_fit_gcv(fd_noisy.data, fd_noisy.argvals, n_basis=20, order=2)
 print(f"Selected lambda -> GCV = {result_auto['gcv']:.6f}")
@@ -280,10 +280,10 @@ noisy signal:
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.smoothing import nadaraya_watson, local_linear, knn_smoother, optim_bandwidth
-from pyfda.basis import smooth_basis_gcv
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.smoothing import nadaraya_watson, local_linear, knn_smoother, optim_bandwidth
+from fdars.basis import smooth_basis_gcv
 
 # Generate data
 argvals = np.linspace(0, 1, 200)
@@ -343,12 +343,12 @@ print(f"Mean MSE across curves: {mse_per_curve.mean():.6f}")
 
 | Method | Module | Strengths |
 |--------|--------|-----------|
-| Nadaraya-Watson | `pyfda.smoothing` | Simple, nonparametric, automatic bandwidth via GCV |
-| Local linear | `pyfda.smoothing` | Corrects boundary bias |
-| Local polynomial | `pyfda.smoothing` | Flexible, can estimate derivatives |
-| k-NN | `pyfda.smoothing` | Adapts to local density |
-| B-spline / P-spline | `pyfda.basis` | Smooth all curves at once, automatic penalty |
-| Fourier basis | `pyfda.basis` | Natural for periodic data |
+| Nadaraya-Watson | `fdars.smoothing` | Simple, nonparametric, automatic bandwidth via GCV |
+| Local linear | `fdars.smoothing` | Corrects boundary bias |
+| Local polynomial | `fdars.smoothing` | Flexible, can estimate derivatives |
+| k-NN | `fdars.smoothing` | Adapts to local density |
+| B-spline / P-spline | `fdars.basis` | Smooth all curves at once, automatic penalty |
+| Fourier basis | `fdars.basis` | Natural for periodic data |
 
 ---
 

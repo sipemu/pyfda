@@ -1,11 +1,11 @@
 ---
-title: Introduction to pyfda
+title: Introduction to fdars
 ---
 
-# Introduction to pyfda
+# Introduction to fdars
 
 This guide introduces **Functional Data Analysis (FDA)** and shows you how to
-use pyfda's Python API to perform common tasks. By the end, you will understand
+use fdars's Python API to perform common tasks. By the end, you will understand
 the data layout, core operations, and the breadth of functionality available.
 
 ---
@@ -35,9 +35,9 @@ prediction, and interpretation.
 
 ---
 
-## The pyfda Package
+## The fdars Package
 
-**pyfda** provides a comprehensive set of FDA methods implemented in Rust
+**fdars** provides a comprehensive set of FDA methods implemented in Rust
 (via [fdars-core](https://github.com/sipemu/fdars)) and exposed to Python
 through [PyO3](https://pyo3.rs).  This gives you:
 
@@ -53,7 +53,7 @@ through [PyO3](https://pyo3.rs).  This gives you:
 ### Installation
 
 ```bash
-pip install pyfda
+pip install fdars
 ```
 
 The only runtime dependency is **NumPy**.
@@ -64,14 +64,14 @@ The only runtime dependency is **NumPy**.
 
 ### The `Fdata` Class
 
-The central object in pyfda is **`Fdata`** -- a functional data container that
+The central object in fdars is **`Fdata`** -- a functional data container that
 bundles observation data, evaluation grid, identifiers, and per-observation
 metadata.  It mirrors the R package's `fdata` S3 class.
 
 ```python
 import numpy as np
 import pandas as pd
-from pyfda import Fdata
+from fdars import Fdata
 
 # 50 curves observed at 200 equally spaced points on [0, 1]
 n_obs = 50
@@ -129,7 +129,7 @@ print(fd_sub.metadata["group"][:3]) # 'control', 'control', 'control'
 For reproducible experiments, use the built-in simulation module:
 
 ```python
-from pyfda.simulation import simulate
+from fdars.simulation import simulate
 
 argvals = np.linspace(0, 1, 100)
 data = simulate(n=50, argvals=argvals, n_basis=5, seed=42)
@@ -210,7 +210,7 @@ fm_depth = fd.depth("fraiman_muniz")
 print(f"Most central curve index: {np.argmax(fm_depth)}")
 
 # Or via low-level functions
-from pyfda.depth import modified_band_1d
+from fdars.depth import modified_band_1d
 mbd = modified_band_1d(fd.data, fd.data)
 ```
 
@@ -226,7 +226,7 @@ dist_l2 = fd.distance(method="lp", p=2.0)
 print(dist_l2.shape)  # (50, 50)
 
 # Or via low-level functions
-from pyfda.metric import dtw_self_1d
+from fdars.metric import dtw_self_1d
 dist_dtw = dtw_self_1d(fd.data, p=2.0)
 print(dist_dtw.shape)  # (50, 50)
 ```
@@ -237,7 +237,7 @@ variants.
 ### Regression and FPCA
 
 ```python
-from pyfda.regression import fpca
+from fdars.regression import fpca
 
 result = fpca(fd.data, fd.argvals, n_comp=3)
 scores = result["scores"]        # (50, 3)
@@ -248,7 +248,7 @@ print(f"Variance explained by PC1: singular_value = {result['singular_values'][0
 ### Clustering
 
 ```python
-from pyfda.clustering import kmeans_fd
+from fdars.clustering import kmeans_fd
 
 clusters = kmeans_fd(fd.data, fd.argvals, k=3, seed=0)
 print(f"Cluster labels: {clusters['cluster']}")
@@ -258,7 +258,7 @@ print(f"Total within-cluster SS: {clusters['tot_withinss']:.4f}")
 ### Outlier Detection
 
 ```python
-from pyfda.outliers import outliergram
+from fdars.outliers import outliergram
 
 og = outliergram(fd.data)
 n_outliers = og["outliers"].sum()
@@ -268,7 +268,7 @@ print(f"Detected {n_outliers} outlier(s)")
 ### Smoothing
 
 ```python
-from pyfda.smoothing import nadaraya_watson, optim_bandwidth
+from fdars.smoothing import nadaraya_watson, optim_bandwidth
 
 # Pick one noisy curve
 x = fd.argvals
@@ -286,7 +286,7 @@ y_hat = nadaraya_watson(x, y, x, bandwidth=bw["h_opt"])
 
 ## Performance Notes
 
-pyfda compiles all FDA algorithms to native machine code via Rust. Key
+fdars compiles all FDA algorithms to native machine code via Rust. Key
 performance characteristics:
 
 - **No GIL contention** -- Rust computations release the Python GIL, so they
@@ -299,7 +299,7 @@ performance characteristics:
   microseconds per call, so even small problems benefit.
 
 !!! tip "Benchmarks"
-    On a dataset of 500 curves with 1000 grid points, pyfda computes the full
+    On a dataset of 500 curves with 1000 grid points, fdars computes the full
     $500 \times 500$ L2 distance matrix in milliseconds -- orders of magnitude
     faster than a pure-Python double loop.
 

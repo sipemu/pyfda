@@ -1,4 +1,4 @@
-site_name: pyfda - Functional Data Analysis for Python
+site_name: fdars - Functional Data Analysis for Python
 site_url: https://sipemu.github.io/pyfda
 site_description: High-performance functional data analysis for Python, powered by Rust
 repo_url: https://github.com/sipemu/pyfda
@@ -107,19 +107,19 @@ nav:
     - Covariance Functions: analyze/covariance-functions.md
   - Reference:
     - reference/index.md
-    - pyfda.fdata: reference/fdata.md
-    - pyfda.depth: reference/depth.md
-    - pyfda.metric: reference/metric.md
-    - pyfda.basis: reference/basis.md
-    - pyfda.smoothing: reference/smoothing.md
-    - pyfda.clustering: reference/clustering.md
-    - pyfda.regression: reference/regression.md
-    - pyfda.alignment: reference/alignment.md
-    - pyfda.outliers: reference/outliers.md
-    - pyfda.seasonal: reference/seasonal.md
-    - pyfda.spm: reference/spm.md
-    - pyfda.classification: reference/classification.md
-    - pyfda.tolerance: reference/tolerance.md
-    - pyfda.conformal: reference/conformal.md
-    - pyfda.simulation: reference/simulation.md
-    - pyfda.explain: reference/explain.md
+    - fdars.fdata: reference/fdata.md
+    - fdars.depth: reference/depth.md
+    - fdars.metric: reference/metric.md
+    - fdars.basis: reference/basis.md
+    - fdars.smoothing: reference/smoothing.md
+    - fdars.clustering: reference/clustering.md
+    - fdars.regression: reference/regression.md
+    - fdars.alignment: reference/alignment.md
+    - fdars.outliers: reference/outliers.md
+    - fdars.seasonal: reference/seasonal.md
+    - fdars.spm: reference/spm.md
+    - fdars.classification: reference/classification.md
+    - fdars.tolerance: reference/tolerance.md
+    - fdars.conformal: reference/conformal.md
+    - fdars.simulation: reference/simulation.md
+    - fdars.explain: reference/explain.md

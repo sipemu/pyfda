@@ -16,7 +16,7 @@ try:
 except ImportError:
     _HAS_PANDAS = False
 
-from pyfda import _native
+from fdars import _native
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -87,7 +87,7 @@ class Fdata:
     Examples
     --------
     >>> import numpy as np
-    >>> from pyfda import Fdata
+    >>> from fdars import Fdata
     >>> t = np.linspace(0, 1, 100)
     >>> X = np.array([np.sin(2 * np.pi * t + p) for p in np.linspace(0, np.pi, 20)])
     >>> fd = Fdata(X, argvals=t)

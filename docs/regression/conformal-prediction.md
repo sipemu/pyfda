@@ -6,7 +6,7 @@ $$
 P\bigl(Y_{\text{new}} \in \hat{C}(X_{\text{new}})\bigr) \geq 1 - \alpha
 $$
 
-`pyfda` implements split conformal methods for functional regression and classification.
+`fdars` implements split conformal methods for functional regression and classification.
 
 ---
 
@@ -34,8 +34,8 @@ Wraps `fregre_lm` with split conformal calibration to produce prediction interva
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.conformal import conformal_fregre_lm
+from fdars import Fdata
+from fdars.conformal import conformal_fregre_lm
 
 # --- Simulate data ---
 np.random.seed(42)
@@ -100,7 +100,7 @@ print(f"Mean interval width: {np.mean(upper - lower):.4f}")
 Uses kernel regression (`fregre_np`) as the base model, with conformal calibration on top.
 
 ```python
-from pyfda.conformal import conformal_fregre_np
+from fdars.conformal import conformal_fregre_np
 
 result = conformal_fregre_np(
     fd_train.data, train_response, fd_test.data, fd_train.argvals,
@@ -132,8 +132,8 @@ Produces **prediction sets** for classification: a set of possible labels for ea
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.conformal import conformal_classif
+from fdars import Fdata
+from fdars.conformal import conformal_classif
 
 # --- Simulate three-class data ---
 np.random.seed(7)
@@ -229,8 +229,8 @@ A common choice is `cal_fraction=0.25`.
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.conformal import conformal_fregre_lm, conformal_fregre_np
+from fdars import Fdata
+from fdars.conformal import conformal_fregre_lm, conformal_fregre_np
 
 np.random.seed(123)
 n_train, n_test, m = 300, 100, 81

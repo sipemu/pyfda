@@ -6,7 +6,7 @@ Many real-world functional datasets exhibit periodic patterns -- daily temperatu
 
 ## Period detection
 
-`pyfda` offers three period-detection algorithms, each with different strengths:
+`fdars` offers three period-detection algorithms, each with different strengths:
 
 ### SAZED
 
@@ -14,8 +14,8 @@ SAZED (Seasonal And Zero-crossing Estimation of Periodicity via Distance) combin
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.seasonal import sazed
+from fdars import Fdata
+from fdars.seasonal import sazed
 
 argvals = np.linspace(0, 10, 500)
 # Create data with a known period
@@ -51,7 +51,7 @@ print(f"Agreeing comps:  {result['agreeing_components']}")
 Uses FFT peak detection followed by autocorrelation validation. Best for clean, well-defined periodic signals.
 
 ```python
-from pyfda.seasonal import autoperiod
+from fdars.seasonal import autoperiod
 
 result_ap = autoperiod(fd.data, fd.argvals, n_candidates=5, gradient_steps=10)
 print(f"Period: {result_ap['period']:.3f}")
@@ -82,7 +82,7 @@ print(f"ACF validation: {result_ap['acf_validation']:.3f}")
 A cluster-based variant of autoperiod that can detect *multiple* periodicities simultaneously.
 
 ```python
-from pyfda.seasonal import cfd_autoperiod
+from fdars.seasonal import cfd_autoperiod
 
 result_cfd = cfd_autoperiod(fd.data, fd.argvals, cluster_tolerance=0.1, min_cluster_size=1)
 print(f"Primary period: {result_cfd['period']:.3f}")
@@ -114,7 +114,7 @@ print(f"All periods:    {result_cfd['periods']}")
 Locate peaks in each functional observation, optionally smoothing the data first. The function also estimates the mean period from inter-peak distances.
 
 ```python
-from pyfda.seasonal import detect_peaks
+from fdars.seasonal import detect_peaks
 
 peaks = detect_peaks(
     fd.data, fd.argvals,
@@ -155,7 +155,7 @@ for t, v, p in peaks["peaks"][0]:
 Seasonal and Trend decomposition using Loess (STL) splits each functional observation into trend, seasonal, and remainder components.
 
 ```python
-from pyfda.seasonal import stl_decompose
+from fdars.seasonal import stl_decompose
 
 decomp = stl_decompose(fd.data, period=25, robust=False)
 # decomp["trend"]     shape (n, m)
@@ -188,7 +188,7 @@ decomp = stl_decompose(fd.data, period=25, robust=False)
 Quantify how strongly seasonal a signal is, using either a variance-based or spectral method. The returned value lies in $[0, 1]$, where 0 means no seasonality and 1 means a purely periodic signal.
 
 ```python
-from pyfda.seasonal import seasonal_strength
+from fdars.seasonal import seasonal_strength
 
 strength = seasonal_strength(fd.data, fd.argvals, period=2.5, method="variance")
 print(f"Seasonal strength (variance): {strength:.3f}")
@@ -214,8 +214,8 @@ print(f"Seasonal strength (spectral): {strength_spec:.3f}")
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.seasonal import sazed, stl_decompose, seasonal_strength, detect_peaks
+from fdars import Fdata
+from fdars.seasonal import sazed, stl_decompose, seasonal_strength, detect_peaks
 
 # ── 1. Create seasonal data ──────────────────────────────────
 rng = np.random.default_rng(42)

@@ -2,7 +2,7 @@
 
 Tolerance bands define a region that is expected to contain a specified proportion of future functional observations. They are the functional analogue of prediction intervals and are widely used in quality control, clinical trials, and environmental monitoring.
 
-`pyfda` provides three complementary approaches plus a functional equivalence test.
+`fdars` provides three complementary approaches plus a functional equivalence test.
 
 ---
 
@@ -12,9 +12,9 @@ This method uses the FPCA representation of the sample to generate bootstrap rep
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.tolerance import fpca_tolerance_band
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.tolerance import fpca_tolerance_band
 
 argvals = np.linspace(0, 1, 100)
 fd = Fdata(simulate(60, argvals, n_basis=5, seed=1), argvals=argvals)
@@ -48,7 +48,7 @@ band = fpca_tolerance_band(fd.data, ncomp=3, nb=1000, coverage=0.95, seed=42)
 A distribution-free alternative that splits the data into a proper training set and a calibration set, then uses the calibration residuals to determine the band width.
 
 ```python
-from pyfda.tolerance import conformal_prediction_band
+from fdars.tolerance import conformal_prediction_band
 
 band_cp = conformal_prediction_band(fd.data, coverage=0.95, cal_fraction=0.25, seed=42)
 ```
@@ -74,7 +74,7 @@ band_cp = conformal_prediction_band(fd.data, coverage=0.95, cal_fraction=0.25, s
 Constructs a simultaneous confidence band for the **mean function** using the Gaussian multiplier bootstrap method of Degras (2011).
 
 ```python
-from pyfda.tolerance import scb_mean_degras
+from fdars.tolerance import scb_mean_degras
 
 band_scb = scb_mean_degras(fd.data, fd.argvals, bandwidth=0.0, nb=1000, confidence=0.95)
 ```
@@ -103,7 +103,7 @@ Setting `bandwidth=0.0` enables automatic bandwidth selection.
 Test whether two groups of functional observations are *equivalent* -- i.e., their mean functions differ by no more than a margin $\delta$ -- using a functional TOST (two one-sided tests) procedure.
 
 ```python
-from pyfda.tolerance import equivalence_test
+from fdars.tolerance import equivalence_test
 
 # Two groups with similar means
 fd_a = Fdata(simulate(40, argvals, n_basis=5, seed=10), argvals=argvals)
@@ -140,9 +140,9 @@ print(f"Test stat:  {result['test_statistic']:.4f}")
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.tolerance import (
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.tolerance import (
     fpca_tolerance_band,
     conformal_prediction_band,
     scb_mean_degras,

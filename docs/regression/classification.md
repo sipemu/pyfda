@@ -1,6 +1,6 @@
 # Classification
 
-Functional classification assigns a class label $g_i \in \{0, 1, \dots, K-1\}$ to each functional observation $x_i(t)$. `pyfda` provides discriminant analysis, nearest-neighbor, and kernel-based classifiers, all operating on FPC score representations, plus functional logistic regression and cross-validated model comparison.
+Functional classification assigns a class label $g_i \in \{0, 1, \dots, K-1\}$ to each functional observation $x_i(t)$. `fdars` provides discriminant analysis, nearest-neighbor, and kernel-based classifiers, all operating on FPC score representations, plus functional logistic regression and cross-validated model comparison.
 
 ---
 
@@ -12,8 +12,8 @@ Projects FPC scores onto the direction that maximizes the between-class to withi
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.classification import fclassif_lda
+from fdars import Fdata
+from fdars.classification import fclassif_lda
 
 # --- Simulate two-class functional data ---
 np.random.seed(0)
@@ -46,7 +46,7 @@ print(f"Predictions:  {result['predicted'][:10]}")
 Relaxes the equal-covariance assumption of LDA, estimating a separate covariance matrix for each class.
 
 ```python
-from pyfda.classification import fclassif_qda
+from fdars.classification import fclassif_qda
 
 result = fclassif_qda(fd.data, labels, ncomp=3)
 print(f"QDA accuracy: {result['accuracy']:.2%}")
@@ -62,7 +62,7 @@ print(f"QDA accuracy: {result['accuracy']:.2%}")
 Classifies each observation by a majority vote among its $k$ nearest neighbors in FPC score space.
 
 ```python
-from pyfda.classification import fclassif_knn
+from fdars.classification import fclassif_knn
 
 result = fclassif_knn(fd.data, labels, ncomp=3, k=5)
 print(f"k-NN accuracy (k=5): {result['accuracy']:.2%}")
@@ -77,7 +77,7 @@ The `k` parameter controls the smoothness of the decision boundary.
 A nonparametric classifier using kernel density estimation in the functional space. Unlike the FPC-based methods above, this operates directly on the curves via a functional semi-metric.
 
 ```python
-from pyfda.classification import fclassif_kernel
+from fdars.classification import fclassif_kernel
 
 result = fclassif_kernel(fd.data, fd.argvals, labels, h_func=1.0, h_scalar=1.0)
 print(f"Kernel accuracy: {result['accuracy']:.2%}")
@@ -95,7 +95,7 @@ print(f"Kernel accuracy: {result['accuracy']:.2%}")
 Compare classifiers and select the best number of components via $k$-fold cross-validation.
 
 ```python
-from pyfda.classification import fclassif_cv
+from fdars.classification import fclassif_cv
 
 # Compare methods
 for method in ["lda", "qda", "knn"]:
@@ -129,7 +129,7 @@ $$
 $$
 
 ```python
-from pyfda.regression import functional_logistic
+from fdars.regression import functional_logistic
 
 result = functional_logistic(fd.data, labels.astype(np.float64), n_comp=3)
 
@@ -158,9 +158,9 @@ print(f"Intercept: {intercept:.4f}")
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.classification import fclassif_lda, fclassif_qda, fclassif_knn, fclassif_cv
-from pyfda.regression import functional_logistic
+from fdars import Fdata
+from fdars.classification import fclassif_lda, fclassif_qda, fclassif_knn, fclassif_cv
+from fdars.regression import functional_logistic
 
 np.random.seed(42)
 n_per_class = 50

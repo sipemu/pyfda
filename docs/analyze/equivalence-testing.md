@@ -8,7 +8,7 @@ This is critical in manufacturing (batch-to-batch consistency), bioequivalence s
 
 ## The TOST framework
 
-The functional equivalence test in `pyfda` implements a **Two One-Sided Tests (TOST)** procedure adapted for functional data:
+The functional equivalence test in `fdars` implements a **Two One-Sided Tests (TOST)** procedure adapted for functional data:
 
 1. Define an equivalence margin $\delta > 0$.
 2. Test $H_0^-: \|\mu_1 - \mu_2\|_\infty \ge \delta$ against $H_1^-: \|\mu_1 - \mu_2\|_\infty < \delta$.
@@ -28,9 +28,9 @@ Equivalence is concluded when $T < \delta - c_\alpha$, where $c_\alpha$ is the $
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.tolerance import equivalence_test
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.tolerance import equivalence_test
 
 argvals = np.linspace(0, 1, 100)
 
@@ -94,9 +94,9 @@ The margin $\delta$ is the maximum allowable pointwise difference between the tw
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.tolerance import equivalence_test
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.tolerance import equivalence_test
 
 argvals = np.linspace(0, 1, 100)
 delta = 1.0
@@ -131,9 +131,9 @@ You can sweep over a range of margins to understand how sensitive the conclusion
 
 ```python
 import numpy as np
-from pyfda import Fdata
-from pyfda.simulation import simulate
-from pyfda.tolerance import equivalence_test
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.tolerance import equivalence_test
 
 argvals = np.linspace(0, 1, 100)
 fd_a = Fdata(simulate(50, argvals, n_basis=5, seed=1), argvals=argvals)
