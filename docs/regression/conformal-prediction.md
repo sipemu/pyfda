@@ -26,6 +26,26 @@ $$
 
     This holds marginally (over both the calibration set and new data) without any distributional assumptions.
 
+## Choosing a method
+
+Conformal comes in several flavors that trade data efficiency against computation. The
+`fdars` Python bindings implement the **split** variants — one model fit, a clean $\ge 1-\alpha$
+guarantee, at the cost of holding out a calibration fraction.
+
+| Variant | Data use | Model fits | Guarantee | In `fdars` Python? |
+|---------|----------|------------|-----------|--------------------|
+| Split | reserves a calibration fraction | 1 | $\ge 1-\alpha$ | **yes** (`conformal_fregre_lm`, `conformal_fregre_np`, `conformal_classif`, ...) |
+| CV+ | all data used | $K$ folds | $\ge 1-2\alpha$ | not yet |
+| Jackknife+ | all data used | $n$ (leave-one-out) | $\ge 1-2\alpha$ | not yet |
+| Generic | pre-fitted model | 0 | heuristic only | not yet |
+
+!!! warning "CV+, jackknife+ and generic conformal are R-only for now"
+    The R `fdars` package also ships `cv.conformal.regression()`, `jackknife.plus()` and
+    `conformal.generic.regression()`. These are **not yet exposed** in the Python bindings, so
+    this page uses only the split-conformal functions that exist here. For limited data where
+    you would reach for CV+, the practical Python substitute is a larger `cal_fraction`
+    (0.3-0.5) or repeating the split across seeds and averaging.
+
 ---
 
 ## Conformal FPC regression
@@ -169,6 +189,66 @@ print(f"Mean interval width:   {np.mean(result['upper'] - result['lower']):.4f}"
 
 ---
 
+## Linear vs. nonparametric width
+
+Conformal coverage is guaranteed *regardless of the base model* — but the base model
+determines how *tight* the intervals are. A well-specified linear model usually gives the
+narrowest intervals; the flexible nonparametric model pays for its flexibility with wider,
+noisier calibration residuals. The following simulation mimics near-infrared spectra with a
+localized absorption peak near $t=0.4$ whose height drives the response, then compares the two
+base models at the same 90% level.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.conformal import conformal_fregre_lm, conformal_fregre_np
+
+np.random.seed(42)
+n_train, n_test, m = 160, 40, 80
+t = np.linspace(0, 1, m)
+
+def make(n):
+    raw = np.zeros((n, m))
+    for i in range(n):
+        baseline = 0.8 * np.sin(np.pi * t) + 0.3 * np.cos(2 * np.pi * t)
+        peak_loc = 0.4 + 0.03 * np.random.randn()
+        peak_h = 2.0 + 0.6 * np.random.randn()
+        peak = np.exp(-((t - peak_loc) / 0.05) ** 2 / 2)     # unit-height Gaussian bump
+        raw[i] = baseline + peak_h * peak + 0.08 * np.random.randn(m)
+    beta_true = np.exp(-((t - 0.4) / 0.06) ** 2 / 2)
+    y = np.trapezoid(raw * beta_true, t, axis=1) + 0.15 * np.random.randn(n)
+    return raw, y
+
+Xtr, ytr = make(n_train)
+Xte, yte = make(n_test)
+
+lm = conformal_fregre_lm(Xtr, ytr, Xte, ncomp=5, cal_fraction=0.25, alpha=0.10, seed=42)
+npr = conformal_fregre_np(Xtr, ytr, Xte, t, cal_fraction=0.25, alpha=0.10,
+                          h_func=1.0, h_scalar=1.0, seed=42)
+
+def summary(res):
+    lo, hi = np.asarray(res["lower"]), np.asarray(res["upper"])
+    cov = float(np.mean((yte >= lo) & (yte <= hi)))
+    return hi - lo, cov
+
+w_lm, c_lm = summary(lm)
+w_np, c_np = summary(npr)
+
+f, ax = fig()
+ax.boxplot([w_lm, w_np],
+           tick_labels=[f"linear\n(cov {c_lm*100:.0f}%)", f"nonparametric\n(cov {c_np*100:.0f}%)"])
+ax.set(title="Conformal interval width by base model (90% nominal)",
+       ylabel="interval width")
+print(render(f))
+```
+
+Both models cover at or above the 90% target, but the linear base model — which matches the
+data-generating process — produces the tighter intervals. When you suspect a nonlinear
+predictor-response relationship, the nonparametric base is the safer choice despite the wider
+bands.
+
+---
+
 ## Conformal classification
 
 Produces **prediction sets** for classification: a set of possible labels for each test observation, with guaranteed marginal coverage.
@@ -265,6 +345,56 @@ A common choice is `cal_fraction=0.25`.
 | 0.05 | 95% | Standard scientific inference |
 | 0.10 | 90% | Exploratory analysis |
 | 0.20 | 80% | Screening / ranking |
+
+As $\alpha$ shrinks, the guarantee tightens and the intervals must widen to keep up. Sweeping
+$\alpha$ makes the trade-off concrete: empirical coverage tracks the $1-\alpha$ target while
+the mean width grows monotonically.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.conformal import conformal_fregre_lm
+
+np.random.seed(123)
+n_train, n_test, m = 200, 60, 80
+t = np.linspace(0, 1, m)
+beta_true = np.exp(-((t - 0.5) ** 2) / 0.02)
+
+def make(n):
+    raw = np.zeros((n, m))
+    for i in range(n):
+        raw[i] = sum(np.random.randn() * np.sin((2 * k + 1) * np.pi * t)
+                     for k in range(4)) + 0.2 * np.random.randn(m)
+    y = np.trapezoid(raw * beta_true, t, axis=1) + 0.4 * np.random.randn(n)
+    return raw, y
+
+Xtr, ytr = make(n_train)
+Xte, yte = make(n_test)
+
+alphas = [0.02, 0.05, 0.10, 0.20]
+cov, width = [], []
+for a in alphas:
+    r = conformal_fregre_lm(Xtr, ytr, Xte, ncomp=4, cal_fraction=0.25, alpha=a, seed=42)
+    lo, hi = np.asarray(r["lower"]), np.asarray(r["upper"])
+    cov.append(float(np.mean((yte >= lo) & (yte <= hi))))
+    width.append(float(np.mean(hi - lo)))
+
+targets = [1 - a for a in alphas]
+f, ax = fig()
+ax.plot(targets, cov, "o-", color="#198754", label="empirical coverage")
+ax.plot([min(targets), 1], [min(targets), 1], color="#6c757d", ls="--", lw=1,
+        label="target = 1 - alpha")
+ax.set(title="Coverage tracks the target as alpha varies",
+       xlabel=r"target coverage $1-\alpha$", ylabel="empirical coverage")
+ax2 = ax.twinx()
+ax2.plot(targets, width, "s--", color="#7b2d8e", alpha=0.7, label="mean width")
+ax2.set_ylabel("mean interval width", color="#7b2d8e")
+ax.legend(loc="upper left", fontsize=8)
+print(render(f))
+```
+
+Coverage stays on or above the diagonal at every level, and the widths (purple) climb as the
+guarantee tightens — the price of higher confidence.
 
 ---
 

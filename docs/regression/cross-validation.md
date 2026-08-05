@@ -59,11 +59,24 @@ error. This is the resampling counterpart to the information criteria in
 [`model_selection_ncomp`](scalar-on-function.md#4-model-selection) (GCV/AIC/BIC), which
 approximate the same quantity analytically without refitting.
 
+The choice of $K$ (the number of *folds*, not components) is itself a
+bias–variance trade-off:
+
+| $K$ | Name | Bias of error estimate | Variance | Cost |
+|-----|------|------------------------|----------|------|
+| $n$ | leave-one-out | low | high | $n$ fits |
+| 10 | 10-fold | moderate | moderate | 10 fits |
+| 5 | 5-fold | higher | lower | 5 fits |
+
+Five- and ten-fold are the usual defaults: cheap, and stable enough for honest
+model selection.
+
 !!! warning "Only the *number* of components is tuned on CV"
-    Cross-validation here selects $k$. It does not, by itself, protect against leaking
-    information via preprocessing done on the full sample before splitting (e.g. centering,
-    scaling, or FPCA on all $n$ curves). `fregre_cv` refits the whole pipeline inside each
-    fold, so its OOF predictions are clean.
+    Cross-validation here selects the number of components. It does not, by
+    itself, protect against leaking information via preprocessing done on the full
+    sample before splitting (e.g. centering, scaling, or FPCA on all $n$ curves).
+    `fregre_cv` refits the whole pipeline inside each fold, so its OOF predictions
+    are clean.
 
 ## Regression: `fregre_cv`
 
@@ -177,6 +190,122 @@ print(f"best ncomp:    {cv['best_ncomp']}")
     is itself noisy, often because $n$ is small relative to the model complexity. Prefer the
     simpler model (fewer components) when two settings are within one fold-standard-error of
     each other (the "one-standard-error rule").
+
+## Comparing methods on shared folds
+
+`fregre_cv` tunes a single FPC model. To compare *different* methods fairly, score
+them on the **same** fold split using out-of-fold predictions. `fdars` has no
+single `cv.fdata` harness (the R package does), but the `predict_*` functions make
+a hand-rolled comparison a few lines:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from numpy.random import default_rng
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.regression import predict_fregre_lm, predict_fregre_pls, fregre_np
+from fdars.metric import lp_self_1d, lp_cross_1d
+
+np.random.seed(0)
+t = np.linspace(0, 1, 60)
+X = np.asarray(simulate(n=60, argvals=t, n_basis=6, efun_type="fourier", seed=1))
+beta_true = np.sin(2 * np.pi * t)
+y = np.trapezoid(X * beta_true, t, axis=1) + 0.3 * np.random.randn(len(X))
+
+def make_folds(n, n_folds, seed):
+    return np.array_split(default_rng(seed).permutation(n), n_folds)
+
+def oof(predict, folds):
+    out = np.zeros(len(y))
+    for f in folds:
+        tr = np.setdiff1d(np.arange(len(y)), f)
+        out[f] = predict(X[tr], y[tr], X[f])
+    return out
+
+def r2(pred):
+    return 1 - np.sum((y - pred) ** 2) / np.sum((y - y.mean()) ** 2)
+
+def np_predict(Xtr, ytr, Xte):
+    Dtr = lp_self_1d(Xtr, t, p=2.0)
+    h = fregre_np(Dtr, ytr, h=0.0)["h_func"]
+    Dc = np.asarray(lp_cross_1d(Xte, Xtr, t, p=2.0))
+    w = np.exp(-0.5 * (Dc / h) ** 2)
+    return (w @ ytr) / w.sum(axis=1)
+
+folds = make_folds(len(y), 5, seed=0)          # SAME folds for every method
+methods = {
+    "FPC (k=4)": oof(lambda a, b, c: predict_fregre_lm(a, b, c, n_comp=4), folds),
+    "PLS (k=4)": oof(lambda a, b, c: predict_fregre_pls(a, t, b, c, n_comp=4), folds),
+    "NP (kernel)": oof(np_predict, folds),
+}
+
+f, ax = fig()
+colors = ["#3f51b5", "#e8710a", "#198754"]
+for (name, pred), c in zip(methods.items(), colors):
+    ax.scatter(y, pred, s=28, alpha=0.7, color=c, label=f"{name}  R²={r2(pred):.2f}")
+lim = [y.min(), y.max()]
+ax.plot(lim, lim, color="#6c757d", ls="--", lw=1.5)
+ax.set(title="Out-of-fold predictions on shared 5-fold split",
+       xlabel="observed y", ylabel="OOF prediction")
+ax.legend(fontsize=8)
+print(render(f))
+```
+
+Using one fold split for all methods removes split-to-split noise from the
+comparison — differences in OOF $R^2$ then reflect the methods, not the shuffle.
+
+## Repeated cross-validation
+
+A single $K$-fold split is one random partition; its error estimate carries
+sampling noise. **Repeated CV** reruns the split with different seeds and averages,
+and — usefully — exposes *per-observation prediction variability*. Observations
+with high spread across repetitions are the fragile ones the model struggles to
+pin down.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from numpy.random import default_rng
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.regression import predict_fregre_lm
+
+np.random.seed(0)
+t = np.linspace(0, 1, 60)
+X = np.asarray(simulate(n=60, argvals=t, n_basis=6, efun_type="fourier", seed=1))
+beta_true = np.sin(2 * np.pi * t)
+y = np.trapezoid(X * beta_true, t, axis=1) + 0.3 * np.random.randn(len(X))
+
+def repeated_oof(n_rep=15, n_folds=5):
+    preds = np.zeros((n_rep, len(y)))
+    for r in range(n_rep):
+        folds = np.array_split(default_rng(r).permutation(len(y)), n_folds)
+        for fold in folds:
+            tr = np.setdiff1d(np.arange(len(y)), fold)
+            preds[r, fold] = predict_fregre_lm(X[tr], y[tr], X[fold], n_comp=4)
+    return preds
+
+preds = repeated_oof()
+mean_pred = preds.mean(0)
+sd_pred = preds.std(0)
+
+f, ax = fig()
+sc = ax.scatter(y, mean_pred, c=sd_pred, cmap="viridis", s=44)
+ax.errorbar(y, mean_pred, yerr=sd_pred, fmt="none",
+            ecolor="#adb5bd", alpha=0.6, lw=0.8)
+lim = [y.min(), y.max()]
+ax.plot(lim, lim, color="#6c757d", ls="--", lw=1.5)
+ax.set(title=f"Repeated CV: mean OOF ± SD (mean SD = {sd_pred.mean():.3f})",
+       xlabel="observed y", ylabel="mean out-of-fold prediction")
+f.colorbar(sc, ax=ax, label="prediction SD")
+print(render(f))
+```
+
+!!! note "No packaged repeated / nested CV harness in Python"
+    The R reference bundles repeated CV, nested CV, and stratified folds into one
+    `cv.fdata()` function. `fdars` for Python exposes the tuned cross-validators
+    (`fregre_cv`, `fclassif_cv`) plus the `predict_*` functions; the repeated- and
+    shared-fold patterns above show how to assemble the rest transparently in a few
+    lines of numpy.
 
 ## Related pages
 

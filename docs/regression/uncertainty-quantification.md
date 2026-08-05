@@ -156,6 +156,152 @@ ax.legend(fontsize=8)
 print(render(f))
 ```
 
+### Coverage and width
+
+Two numbers summarize a prediction interval: does it *cover* the truth at the nominal rate,
+and how *wide* is it? Parametric intervals widen for high-leverage test points — curves
+whose FPC-score profile sits far from the training center — because the leverage term
+$z^{*\top}(Z^\top Z)^{-1}z^*$ under the root grows. That variable width is the interval
+honestly reporting where the model is extrapolating.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.explain import prediction_intervals
+
+np.random.seed(0)
+t = np.linspace(0, 1, 60)
+X = np.asarray(simulate(n=40, argvals=t, n_basis=6, efun_type="fourier", seed=1))
+beta_true = np.sin(2 * np.pi * t)
+y = np.trapezoid(X * beta_true, t, axis=1) + 0.3 * np.random.randn(len(X))
+
+pi = prediction_intervals(X[:30], y[:30], X[30:], ncomp=4, confidence_level=0.95)
+lo, hi = np.asarray(pi["lower"]), np.asarray(pi["upper"])
+width = hi - lo
+covered = float(np.mean((y[30:] >= lo) & (y[30:] <= hi)))
+
+f, ax = fig()
+ax.bar(np.arange(len(width)), width, color="#7b2d8e", alpha=0.75)
+ax.set(title=f"Prediction-interval width (coverage = {covered*100:.0f}%, nominal 95%)",
+       xlabel="held-out observation", ylabel="interval width")
+print(render(f))
+```
+
+Empirical coverage lands near the 95% target and the widths vary point-to-point with
+leverage. Parametric intervals are *exact* only when the errors are Gaussian; the
+[regression diagnostics](regression-diagnostics.md) Q-Q plot is the check that justifies
+them.
+
+### Parametric vs. distribution-free width
+
+When the Gaussian assumption is shaky, [conformal prediction](conformal-prediction.md)
+trades the parametric formula for a calibration step that guarantees coverage regardless of
+the error distribution. The split-conformal variant produces a *constant-width* band (one
+calibration quantile applied to every test point), which is the visible signature separating
+it from the leverage-dependent parametric width.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.explain import prediction_intervals
+from fdars.conformal import conformal_fregre_lm
+
+np.random.seed(0)
+t = np.linspace(0, 1, 60)
+# Larger sample so the split-conformal calibration set is big enough for a
+# finite 90% quantile.
+X = np.asarray(simulate(n=80, argvals=t, n_basis=6, efun_type="fourier", seed=1))
+beta_true = np.sin(2 * np.pi * t)
+y = np.trapezoid(X * beta_true, t, axis=1) + 0.3 * np.random.randn(len(X))
+
+# Both at 90% nominal, fit on the first 60 and predict the last 20.
+pi = prediction_intervals(X[:60], y[:60], X[60:], ncomp=4, confidence_level=0.90)
+param_w = np.asarray(pi["upper"]) - np.asarray(pi["lower"])
+cf = conformal_fregre_lm(X[:60], y[:60], X[60:], ncomp=4, cal_fraction=0.25,
+                         alpha=0.10, seed=42)
+conf_w = np.asarray(cf["upper"]) - np.asarray(cf["lower"])
+
+f, ax = fig()
+ax.boxplot([param_w, conf_w], tick_labels=["parametric", "conformal"])
+ax.set(title="Interval width: parametric vs. split conformal (90% nominal)",
+       ylabel="interval width")
+print(render(f))
+```
+
+The conformal widths collapse to a single value; the parametric widths spread out with
+leverage. Which you prefer depends on whether you trust the Gaussian model (parametric,
+tighter on average) or want a finite-sample guarantee (conformal, assumption-free).
+
+## Model assessment: leave-one-out CV — `loo_cv_press`
+
+A confidence band tells you about the *coefficient*; leave-one-out cross-validation tells you
+about the *model as a whole* — can it predict a point it has never seen? For the linear FPC
+model there is no need to refit $n$ times: the hat matrix gives every leave-one-out residual
+in closed form,
+
+$$
+e_i^{(-i)} = \frac{e_i}{1 - h_{ii}},
+$$
+
+which inflates each in-sample residual by $1/(1-h_{ii})$ — a factor that grows with leverage.
+Summing their squares gives the PRESS statistic and an out-of-sample $R^2$:
+
+$$
+\text{PRESS} = \sum_i \big(e_i^{(-i)}\big)^2, \qquad
+R^2_{\text{LOO}} = 1 - \frac{\text{PRESS}}{\text{TSS}}.
+$$
+
+```python
+from fdars.explain import loo_cv_press
+
+loo = loo_cv_press(X, y, ncomp=4)
+print(f"PRESS:   {loo['press']:.3f}")
+print(f"LOO R²:  {loo['loo_r_squared']:.3f}")
+```
+
+The gap between $R^2_{\text{LOO}}$ and the in-sample $R^2$ measures how optimistic the
+training fit is. High-leverage points drive that gap: their LOO residuals inflate most.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.explain import loo_cv_press
+
+np.random.seed(0)
+t = np.linspace(0, 1, 60)
+X = np.asarray(simulate(n=40, argvals=t, n_basis=6, efun_type="fourier", seed=1))
+beta_true = np.sin(2 * np.pi * t)
+y = np.trapezoid(X * beta_true, t, axis=1) + 0.3 * np.random.randn(len(X))
+
+loo = loo_cv_press(X, y, ncomp=4)
+loo_res = np.asarray(loo["loo_residuals"])
+lev = np.asarray(loo["leverage"])
+# in-sample residual = loo_residual * (1 - leverage)
+in_res = loo_res * (1 - lev)
+
+f, ax = fig()
+lim = [min(in_res.min(), loo_res.min()), max(in_res.max(), loo_res.max())]
+ax.plot(lim, lim, color="#6c757d", ls="--", lw=1)
+ax.scatter(in_res, loo_res, color="#7b2d8e", s=36, alpha=0.75)
+ax.set(title=f"In-sample vs. LOO residuals (LOO R² = {loo['loo_r_squared']:.3f})",
+       xlabel="in-sample residual", ylabel="LOO residual")
+print(render(f))
+```
+
+Points drift off the diagonal exactly where leverage is high — those are the observations the
+model leans on to fit itself, and the ones a train/test split would penalize.
+
+| Return key | Type | Description |
+|------------|------|-------------|
+| `loo_residuals` | `ndarray (n,)` | Leave-one-out residuals $e_i^{(-i)}$ |
+| `press` | `float` | Predicted residual sum of squares |
+| `loo_r_squared` | `float` | Out-of-sample $R^2$ |
+| `leverage` | `ndarray (n,)` | Hat-matrix diagonal $h_{ii}$ |
+| `tss` | `float` | Total sum of squares of the response |
+
 !!! tip "Pointwise or simultaneous?"
     Use the **pointwise** band to ask "is $\beta$ nonzero *here*?" at a pre-specified $t$.
     Use the **simultaneous** band whenever you scan the whole curve for regions of
