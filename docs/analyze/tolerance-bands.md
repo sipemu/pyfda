@@ -22,6 +22,28 @@ fd = Fdata(simulate(60, argvals, n_basis=5, seed=1), argvals=argvals)
 band = fpca_tolerance_band(fd.data, ncomp=3, nb=1000, coverage=0.95, seed=42)
 ```
 
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.tolerance import fpca_tolerance_band
+
+t = np.linspace(0, 1, 100)
+X = np.asarray(simulate(45, t, n_basis=5, seed=1))
+band = fpca_tolerance_band(X, ncomp=3, nb=600, coverage=0.95, seed=42)
+lower, upper, center = (np.asarray(band[k]) for k in ("lower", "upper", "center"))
+
+f, ax = fig()
+ax.plot(t, X.T, color="#6c757d", lw=0.6, alpha=0.4)
+ax.fill_between(t, lower, upper, color="#3f51b5", alpha=0.18,
+                label="95% tolerance band")
+ax.plot(t, center, color="#e8710a", lw=2.2, label="center (mean)")
+ax.set(title="FPCA bootstrap tolerance band (45 curves)",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
+
 **Parameters**
 
 | Parameter | Type | Default | Description |
@@ -92,6 +114,37 @@ Setting `bandwidth=0.0` enables automatic bandwidth selection.
 | `confidence` | `float` | `0.95` | Confidence level |
 
 **Returns** the same dictionary structure (`upper`, `lower`, `center`, `half_width`).
+
+The three bands answer different questions: the two tolerance bands are wide enough to
+contain individual future curves, while the Degras SCB is a much narrower band around
+the *mean function* only.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.tolerance import (
+    fpca_tolerance_band, conformal_prediction_band, scb_mean_degras)
+
+t = np.linspace(0, 1, 100)
+X = np.asarray(simulate(45, t, n_basis=5, seed=7))
+bands = [
+    ("FPCA tolerance", fpca_tolerance_band(X, ncomp=3, nb=600, coverage=0.95, seed=1)),
+    ("Conformal prediction", conformal_prediction_band(X, coverage=0.95,
+                                                       cal_fraction=0.25, seed=1)),
+    ("Degras SCB (mean)", scb_mean_degras(X, t, bandwidth=0.1, nb=600, confidence=0.95)),
+]
+
+f, axes = fig(1, 3, figsize=(11.5, 3.4), sharey=True)
+for ax, (name, b) in zip(axes, bands):
+    lower, upper, center = (np.asarray(b[k]) for k in ("lower", "upper", "center"))
+    ax.plot(t, X.T, color="#6c757d", lw=0.5, alpha=0.35)
+    ax.fill_between(t, lower, upper, color="#3f51b5", alpha=0.2)
+    ax.plot(t, center, color="#e8710a", lw=1.8)
+    ax.set(title=name, xlabel="t")
+axes[0].set_ylabel("X(t)")
+print(render(f))
+```
 
 !!! info "Tolerance band vs. confidence band"
     A **tolerance band** targets individual future curves (analogous to a prediction interval). A **confidence band** targets the mean function (analogous to a confidence interval). Use `fpca_tolerance_band` or `conformal_prediction_band` for the former, and `scb_mean_degras` for the latter.

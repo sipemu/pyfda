@@ -13,6 +13,35 @@ Every metric comes in two flavors:
 
 Both return a NumPy array. Self-distance matrices are symmetric with zeros on the diagonal.
 
+Different metrics induce different geometries on the same sample. Below, four self-distance matrices are computed on a set of curves (half of which are randomly time-shifted). Note how $L^2$ and Hausdorff see the shifted curves as far apart, while DTW -- which absorbs local time warping -- pulls them back together.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.metric import lp_self_1d, dtw_self_1d, hausdorff_self_1d, fourier_self_1d
+
+rng = np.random.default_rng(123)
+t = np.linspace(0, 1, 120)
+X = np.asarray(simulate(n=24, argvals=t, n_basis=3, seed=123))
+for i in range(12, 24):                       # time-shift half the sample
+    X[i] = np.roll(X[i], int(rng.integers(-12, 12)))
+
+mats = [
+    ("$L^2$", np.asarray(lp_self_1d(X, t, p=2.0))),
+    ("DTW (w=12)", np.asarray(dtw_self_1d(X, p=2.0, w=12))),
+    ("Hausdorff", np.asarray(hausdorff_self_1d(X, t))),
+    ("Fourier", np.asarray(fourier_self_1d(X, n_basis=7))),
+]
+
+f, axes = fig(1, 4, figsize=(12, 3.2))
+for ax, (name, D) in zip(axes, mats):
+    im = ax.imshow(D, cmap="viridis", aspect="equal")
+    ax.set(title=name, xticks=[], yticks=[])
+    f.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+print(render(f))
+```
+
 ## $L^p$ distances
 
 The most common functional distances, defined as
@@ -129,6 +158,30 @@ D_dtw_sc = dtw_self_1d(data, p=2.0, w=10)
 
     1. **Speed** -- constrains the DP search from $O(m^2)$ to $O(m \cdot w)$.
     2. **Prevents pathological warps** -- disallows extreme temporal distortions.
+
+To see why DTW matters, take a curve and a time-shifted copy of it. Pointwise $L^2$ reports a large distance because peaks no longer line up vertically; DTW re-aligns the time axis first and reports a much smaller value.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.metric import lp_self_1d, dtw_self_1d
+
+t = np.linspace(0, 1, 120)
+base = np.asarray(simulate(n=1, argvals=t, n_basis=4, efun_type="fourier", seed=5))[0]
+pair = np.vstack([base, np.roll(base, 12)])          # curve + shifted copy
+
+d_l2 = float(np.asarray(lp_self_1d(pair, t, p=2.0))[0, 1])
+d_dtw = float(np.asarray(dtw_self_1d(pair, p=2.0, w=25))[0, 1])
+
+f, ax = fig()
+ax.plot(t, pair[0], color="#3f51b5", lw=2, label="curve")
+ax.plot(t, pair[1], color="#e8710a", lw=2, label="shifted copy")
+ax.set(title=f"$L^2$ = {d_l2:.3f}   vs   DTW = {d_dtw:.3f}",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
 
 ---
 

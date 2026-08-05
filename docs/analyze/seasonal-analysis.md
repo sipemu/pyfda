@@ -163,6 +163,32 @@ decomp = stl_decompose(fd.data, period=25, robust=False)
 # decomp["remainder"] shape (n, m)
 ```
 
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.seasonal import stl_decompose
+
+rng = np.random.default_rng(1)
+t = np.linspace(0, 12, 300)
+signal = 0.15 * t + 1.5 * np.sin(2 * np.pi * t / 2.0)
+X = signal[None, :] + rng.normal(0, 0.15, (6, 300))
+
+period_pts = int(round(2.0 / (t[1] - t[0])))
+d = stl_decompose(X, period=period_pts)
+trend, seasonal, remainder = (np.asarray(d[k])[0] for k in
+                              ("trend", "seasonal", "remainder"))
+
+f, axes = fig(4, 1, figsize=(8.0, 6.4), sharex=True)
+rows = [("Original", X[0], "#3f51b5"), ("Trend", trend, "#e8710a"),
+        ("Seasonal", seasonal, "#198754"), ("Remainder", remainder, "#6c757d")]
+for ax, (name, y, color) in zip(axes, rows):
+    ax.plot(t, y, color=color, lw=1.1)
+    ax.set_ylabel(name)
+axes[0].set_title("STL decomposition of a seasonal curve")
+axes[-1].set_xlabel("t")
+print(render(f))
+```
+
 **Parameters**
 
 | Parameter | Type | Default | Description |
@@ -207,6 +233,31 @@ print(f"Seasonal strength (spectral): {strength_spec:.3f}")
 | `method` | `str` | `"variance"` | `"variance"` or `"spectral"` |
 
 **Returns** a `float` -- the seasonal strength.
+
+Scanning the candidate period reveals sharp peaks at the true period and its harmonics,
+which is exactly how period-detection methods locate the dominant cycle.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.seasonal import seasonal_strength
+
+rng = np.random.default_rng(5)
+t = np.linspace(0, 12, 400)
+X = (1.5 * np.sin(2 * np.pi * t / 2.0))[None, :] + rng.normal(0, 0.2, (8, 400))
+
+periods = np.linspace(0.75, 4.5, 60)
+strength = [float(seasonal_strength(X, t, period=float(p), method="variance"))
+            for p in periods]
+
+f, ax = fig(figsize=(7.4, 3.6))
+ax.plot(periods, strength, color="#3f51b5", lw=1.8)
+ax.axvline(2.0, color="#e8710a", ls="--", lw=1.4, label="true period = 2.0")
+ax.set(title="Seasonal strength vs. candidate period",
+       xlabel="candidate period", ylabel="seasonal strength")
+ax.legend()
+print(render(f))
+```
 
 ---
 

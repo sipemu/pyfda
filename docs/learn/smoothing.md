@@ -79,6 +79,32 @@ y_tri   = nadaraya_watson(x, y, x, bandwidth=0.05, kernel="tricube")
     Gaussian kernel is a safe default. Epanechnikov is theoretically optimal in
     terms of MSE efficiency.
 
+The Nadaraya-Watson smoother recovers the underlying signal by averaging away the
+noise. The bandwidth $h$ trades bias against variance -- too small and the fit
+chases the noise, too large and it flattens real features:
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.smoothing import nadaraya_watson
+
+t = np.linspace(0, 1, 200)
+clean = np.asarray(simulate(n=1, argvals=t, n_basis=5, seed=42))[0]
+y = clean + np.random.default_rng(0).normal(0, 0.3, size=t.shape)
+
+f, ax = fig()
+ax.scatter(t, y, s=9, color="#6c757d", alpha=0.5, label="noisy data")
+ax.plot(t, clean, color="#198754", lw=2.2, label="true signal")
+for h, col in [(0.01, "#dc3545"), (0.05, "#3f51b5")]:
+    yh = np.asarray(nadaraya_watson(t, y, t, bandwidth=h, kernel="gaussian"))
+    ax.plot(t, yh, color=col, lw=2.0, label=f"NW (h={h})")
+ax.set(title="Nadaraya-Watson smoothing of a noisy curve",
+       xlabel="t", ylabel="y")
+ax.legend()
+print(render(f))
+```
+
 ---
 
 ## Local Linear Regression
@@ -312,6 +338,41 @@ y_bs = result_bs["fitted"][0]
 for name, y_hat in [("NW", y_nw), ("LocLin", y_ll), ("k-NN", y_knn), ("B-spline", y_bs)]:
     mse = np.mean((y_hat - y_true) ** 2)
     print(f"{name:8s}  MSE = {mse:.6f}")
+```
+
+All four smoothers track the underlying signal closely, differing mostly in how
+they behave near the boundaries and in noisy regions:
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.smoothing import nadaraya_watson, local_linear, knn_smoother, optim_bandwidth
+from fdars.basis import smooth_basis_gcv
+
+t = np.linspace(0, 1, 200)
+clean = np.asarray(simulate(n=1, argvals=t, n_basis=5, seed=42))
+fd_clean = Fdata(clean, argvals=t)
+fd_noisy = fd_clean + np.random.default_rng(7).normal(0, 0.25, size=clean.shape)
+x, y, y_true = fd_noisy.argvals, np.asarray(fd_noisy.data)[0], np.asarray(fd_clean.data)[0]
+
+bw = optim_bandwidth(x, y)
+curves = {
+    "Nadaraya-Watson": np.asarray(nadaraya_watson(x, y, x, bandwidth=bw["h_opt"])),
+    "Local linear": np.asarray(local_linear(x, y, x, bandwidth=bw["h_opt"])),
+    "k-NN": np.asarray(knn_smoother(x, y, x, k=20)),
+    "B-spline": np.asarray(smooth_basis_gcv(fd_noisy.data, x, n_basis=25)["fitted"])[0],
+}
+
+f, ax = fig()
+ax.scatter(x, y, s=8, color="#6c757d", alpha=0.4, label="noisy data")
+ax.plot(x, y_true, color="#000000", lw=2.4, alpha=0.55, label="true signal")
+for name, yh in curves.items():
+    ax.plot(x, yh, lw=1.8, label=name)
+ax.set(title="Four smoothers on the same noisy curve", xlabel="t", ylabel="y")
+ax.legend(ncol=2)
+print(render(f))
 ```
 
 ---

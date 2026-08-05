@@ -1,8 +1,13 @@
 # Analyze
 
+<div class="fdars-section-hero fdars-sec-analyze" markdown>
+<img src="../assets/cards/analyze.svg" alt="Analyze illustration: nested depth bands around a median curve with an outlier">
+<div class="fdars-section-hero__text" markdown>
 **Infer, cluster, detect outliers, and test functional data.**
 
 The Analyze module collects the tools you reach for once your curves are represented and aligned: find groups via clustering, flag anomalous observations, construct tolerance bands, test whether two populations are equivalent, decompose seasonal patterns, and explore covariance structure. Every algorithm runs in Rust for maximum throughput.
+</div>
+</div>
 
 <div class="grid cards" markdown>
 

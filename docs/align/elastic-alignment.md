@@ -13,6 +13,45 @@ $$
 f_{\text{aligned}}(t) = (f \circ \gamma)(t) = f(\gamma(t))
 $$
 
+The panels below show the same set of two-peak curves *before* alignment -- where the peaks land at different times, blurring the cross-sectional mean -- and *after* Karcher-mean alignment, where the peaks snap into register and the mean recovers a sharp two-peak profile.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.alignment import karcher_mean
+
+rng = np.random.default_rng(1)
+n, m = 15, 120
+t = np.linspace(0, 1, m)
+
+# A two-peak template, warped in time and scaled in amplitude per curve
+base = np.exp(-((t - 0.4) ** 2) / 0.01) + 0.7 * np.exp(-((t - 0.75) ** 2) / 0.006)
+data = np.zeros((n, m))
+for i in range(n):
+    amp = 3.0 * rng.uniform(0.6, 1.0)
+    warp = t ** rng.uniform(0.7, 1.6)          # random monotone time warp
+    warp = (warp - warp.min()) / np.ptp(warp)
+    data[i] = amp * np.interp(t, warp, base)
+
+fd = Fdata(data, argvals=t)
+res = karcher_mean(fd.data, fd.argvals, lambda_=0.0, max_iter=20, tol=1e-4)
+aligned = np.asarray(res["aligned_data"])
+mu = np.asarray(res["mean"])
+
+f, (a1, a2) = fig(ncols=2, figsize=(9.5, 4.0))
+a1.plot(t, data.T, color="#3f51b5", lw=1, alpha=0.5)
+a1.plot(t, data.mean(0), color="#dc3545", lw=2.5, label="cross-sec. mean")
+a1.set(title="Misaligned (phase variation)", xlabel="t", ylabel="f(t)")
+a1.legend(fontsize=8)
+
+a2.plot(t, aligned.T, color="#198754", lw=1, alpha=0.5)
+a2.plot(t, mu, color="#e8710a", lw=2.5, label="Karcher mean")
+a2.set(title="Aligned (elastic / Fisher-Rao)", xlabel="t")
+a2.legend(fontsize=8)
+print(render(f))
+```
+
 !!! info "Fisher-Rao framework"
     All alignment in `fdars` is performed under the **elastic (Fisher-Rao) metric**, which is the unique Riemannian metric on the function space that is invariant to simultaneous reparameterization. This guarantees that the alignment is *proper* -- the distance between two functions does not depend on how they are parameterized.
 
@@ -172,6 +211,37 @@ A warping function $\gamma: [0,1] \to [0,1]$ is a monotonically increasing diffe
 | $\gamma'(t) > 1$ | The original curve is **compressed** at time $t$ -- features happen faster than in the template |
 | $\gamma'(t) < 1$ | The original curve is **stretched** at time $t$ -- features happen slower than in the template |
 | $\gamma'(t) = 1$ | No timing distortion at $t$ |
+
+Each aligned curve carries its own warping function $\gamma$. Plotted together, the warps fan out around the identity diagonal (dashed): a $\gamma$ that bows above the diagonal pulls features earlier, one that bows below pushes them later. Their spread *is* the phase variability that alignment has separated out of the amplitude.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.alignment import karcher_mean
+
+rng = np.random.default_rng(2)
+n, m = 15, 120
+t = np.linspace(0, 1, m)
+base = np.exp(-((t - 0.4) ** 2) / 0.01) + 0.7 * np.exp(-((t - 0.75) ** 2) / 0.006)
+data = np.zeros((n, m))
+for i in range(n):
+    warp = t ** rng.uniform(0.6, 1.7)
+    warp = (warp - warp.min()) / np.ptp(warp)
+    data[i] = rng.uniform(0.6, 1.0) * np.interp(t, warp, base)
+
+fd = Fdata(data, argvals=t)
+res = karcher_mean(fd.data, fd.argvals, lambda_=0.0, max_iter=20, tol=1e-4)
+gammas = np.asarray(res["gammas"])
+
+f, ax = fig()
+ax.plot(t, gammas.T, color="#6f42c1", lw=1.1, alpha=0.6)
+ax.plot([0, 1], [0, 1], color="#6c757d", lw=1.5, ls="--", label="identity")
+ax.set(title="Estimated warping functions $\\gamma_i$",
+       xlabel="t", ylabel="$\\gamma(t)$", aspect="equal")
+ax.legend()
+print(render(f))
+```
 
 ```python
 # Inspect warping for the first curve

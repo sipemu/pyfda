@@ -8,6 +8,67 @@ $$
 
 The coefficient function $\beta(t)$ reveals *which regions* of the functional predictor drive the response. `fdars` provides five complementary approaches to estimate this model.
 
+The two figures below show what a fitted model produces: the recovered coefficient function $\hat\beta(t)$ (compared against the truth) and a predicted-vs-actual scatter of the scalar response.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.regression import fregre_lm, fregre_pls
+
+np.random.seed(1)
+n, m = 40, 81
+t = np.linspace(0, 1, m)
+beta_true = np.sin(4 * np.pi * t)
+
+raw = np.zeros((n, m))
+for i in range(n):
+    raw[i] = (np.random.randn() * np.sin(2 * np.pi * t)
+              + np.random.randn() * np.cos(2 * np.pi * t)
+              + np.random.randn() * np.sin(4 * np.pi * t)
+              + 0.3 * np.random.randn(m))
+y = np.trapezoid(raw * beta_true, t, axis=1) + 0.5 * np.random.randn(n)
+
+lm = fregre_lm(raw, y, n_comp=4)
+pls = fregre_pls(raw, t, y, n_comp=4)
+
+f, ax = fig()
+ax.plot(t, beta_true, color="#6c757d", lw=2, ls="--", label=r"true $\beta(t)$")
+ax.plot(t, np.asarray(lm["beta_t"]), color="#3f51b5", lw=2, label="FPC estimate")
+ax.plot(t, np.asarray(pls["beta_t"]), color="#e8710a", lw=2, label="PLS estimate")
+ax.set(title="Estimated coefficient function", xlabel="t", ylabel=r"$\beta(t)$")
+ax.legend()
+print(render(f))
+```
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.regression import fregre_lm
+
+np.random.seed(1)
+n, m = 40, 81
+t = np.linspace(0, 1, m)
+beta_true = np.sin(4 * np.pi * t)
+raw = np.zeros((n, m))
+for i in range(n):
+    raw[i] = (np.random.randn() * np.sin(2 * np.pi * t)
+              + np.random.randn() * np.cos(2 * np.pi * t)
+              + np.random.randn() * np.sin(4 * np.pi * t)
+              + 0.3 * np.random.randn(m))
+y = np.trapezoid(raw * beta_true, t, axis=1) + 0.5 * np.random.randn(n)
+
+lm = fregre_lm(raw, y, n_comp=4)
+yhat = np.asarray(lm["fitted_values"])
+
+f, ax = fig()
+ax.scatter(y, yhat, color="#3f51b5", s=28, alpha=0.8)
+lim = [min(y.min(), yhat.min()), max(y.max(), yhat.max())]
+ax.plot(lim, lim, color="#6c757d", ls="--", lw=1.5)
+ax.set(title=f"Predicted vs actual (R² = {lm['r_squared']:.2f})",
+       xlabel="observed y", ylabel="predicted y")
+print(render(f))
+```
+
 ---
 
 ## 1. FPC regression
@@ -97,10 +158,10 @@ When the relationship between $x(t)$ and $y$ is nonlinear, use **kernel regressi
 
 ```python
 from fdars.regression import fregre_np
-from fdars.metric import lp_self_distance_matrix
+from fdars.metric import lp_self_1d
 
 # Compute L2 distance matrix
-D = lp_self_distance_matrix(fd.data, fd.argvals, p=2.0)
+D = lp_self_1d(fd.data, fd.argvals, p=2.0)
 
 result = fregre_np(D, response, h=0.0)  # h=0.0 -> automatic bandwidth
 
@@ -178,7 +239,7 @@ import numpy as np
 import pandas as pd
 from fdars import Fdata
 from fdars.regression import fregre_lm, fregre_pls, fregre_np, model_selection_ncomp
-from fdars.metric import lp_self_distance_matrix
+from fdars.metric import lp_self_1d
 
 # --- Simulate stress-strain curves and tensile strength ---
 np.random.seed(99)
@@ -209,7 +270,7 @@ pls_result = fregre_pls(fd.data, fd.argvals, response, n_comp=sel["best_ncomp"])
 print(f"PLS R-squared:  {pls_result['r_squared']:.4f}")
 
 # --- Nonparametric regression ---
-D = lp_self_distance_matrix(fd.data, fd.argvals, p=2.0)
+D = lp_self_1d(fd.data, fd.argvals, p=2.0)
 np_result = fregre_np(D, response)
 print(f"NP  R-squared:  {np_result['r_squared']:.4f}")
 print(f"NP  bandwidth:  {np_result['h_func']:.4f}")

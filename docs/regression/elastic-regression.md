@@ -71,6 +71,40 @@ print(f"Iterations: {n_iter}")
 !!! info "Comparison with standard regression"
     Elastic regression typically outperforms `fregre_lm` when the predictors have substantial phase variability. If curves are already well-aligned, the two methods produce similar results but `fregre_lm` is faster.
 
+When the predictors carry substantial phase variability, standard FPC regression smears the coefficient function, while elastic regression recovers the sharp true peak by aligning the curves first:
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.regression import fregre_lm
+from fdars.alignment import elastic_regression
+
+np.random.seed(55)
+n, m = 40, 81
+t = np.linspace(0, 1, m)
+beta_true = np.exp(-((t - 0.5) ** 2) / 0.02)
+
+raw = np.zeros((n, m))
+for i in range(n):
+    shift = 0.12 * np.random.randn()
+    tw = np.clip(t + shift * np.sin(np.pi * t), 0, 1)
+    c = np.random.randn() * np.sin(2 * np.pi * t) + np.random.randn() * t ** 2
+    raw[i] = np.interp(tw, t, c)
+y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
+
+lm = fregre_lm(raw, y, n_comp=5)
+el = elastic_regression(raw, t, y, ncomp_beta=10, lambda_=0.1)
+
+f, ax = fig()
+ax.plot(t, beta_true, color="#6c757d", lw=2, ls="--", label=r"true $\beta(t)$")
+ax.plot(t, np.asarray(lm["beta_t"]), color="#dc3545", lw=2, label="standard FPC")
+ax.plot(t, np.asarray(el["beta"]), color="#198754", lw=2, label="elastic")
+ax.set(title="Coefficient recovery under phase variability",
+       xlabel="t", ylabel=r"$\beta(t)$")
+ax.legend()
+print(render(f))
+```
+
 ---
 
 ## Elastic logistic regression

@@ -155,6 +155,39 @@ for j in range(5):
 | `coefficients` | `ndarray (k,)` | Regression coefficients $c_j$ |
 | `variance_proportion` | `ndarray (k,)` | Proportion of $\hat{\beta}$ variance attributable to each FPC |
 
+The estimated coefficient function (black) is the sum of the individual FPC contributions $c_j\,\phi_j(t)$. Plotting the leading contributions shows which eigenfunctions shape $\hat\beta(t)$:
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.regression import fregre_lm
+from fdars.explain import beta_decomposition
+
+np.random.seed(42)
+n, m = 40, 81
+t = np.linspace(0, 1, m)
+beta_true = np.sin(4 * np.pi * t)
+raw = np.zeros((n, m))
+for i in range(n):
+    raw[i] = (np.random.randn() * np.sin(2 * np.pi * t)
+              + np.random.randn() * np.cos(2 * np.pi * t)
+              + np.random.randn() * np.sin(4 * np.pi * t)
+              + 0.2 * np.random.randn(m))
+y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
+
+fit = fregre_lm(raw, y, n_comp=5)
+comps = [np.asarray(c) for c in beta_decomposition(raw, y, ncomp=5)["components"]]
+
+f, ax = fig()
+ax.plot(t, np.asarray(fit["beta_t"]), color="#111", lw=2.6, label=r"$\hat\beta(t)$")
+for j in range(3):
+    ax.plot(t, comps[j], lw=1.6, alpha=0.85, label=f"FPC {j+1} contribution")
+ax.set(title="Beta decomposition into FPC contributions",
+       xlabel="t", ylabel=r"$\beta(t)$")
+ax.legend(ncol=2)
+print(render(f))
+```
+
 ---
 
 ## Significant regions

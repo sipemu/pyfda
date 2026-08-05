@@ -23,6 +23,33 @@ fd = Fdata(np.vstack([group_a, group_b]), argvals=argvals)
 result = kmeans_fd(fd.data, fd.argvals, k=2, max_iter=100, tol=1e-6, seed=42)
 ```
 
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.clustering import kmeans_fd
+
+t = np.linspace(0, 1, 100)
+g1 = np.asarray(simulate(20, t, n_basis=5, seed=1))
+g2 = np.asarray(simulate(20, t, n_basis=5, seed=2)) + 3.0
+X = np.vstack([g1, g2])
+
+km = kmeans_fd(X, t, k=2, seed=42)
+labels = np.asarray(km["cluster"])
+centers = np.asarray(km["centers"])
+palette = ["#3f51b5", "#e8710a"]
+
+f, ax = fig()
+for i, xi in enumerate(X):
+    ax.plot(t, xi, color=palette[labels[i]], lw=0.9, alpha=0.4)
+for k, c in enumerate(centers):
+    ax.plot(t, c, color=palette[k], lw=2.8, label=f"cluster {k} center")
+ax.set(title="Functional k-means: two groups colored by cluster",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
+
 **Parameters**
 
 | Parameter | Type | Default | Description |
@@ -185,6 +212,38 @@ for k in range(2, 9):
 
 best_k = max(scores, key=scores.get)
 print(f"\nOptimal k = {best_k}")
+```
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.clustering import kmeans_fd, silhouette_score
+from fdars.metric import lp_self_1d
+
+t = np.linspace(0, 1, 100)
+g1 = np.asarray(simulate(15, t, n_basis=5, seed=1))
+g2 = np.asarray(simulate(15, t, n_basis=5, seed=2)) + 3.0
+g3 = np.asarray(simulate(15, t, n_basis=5, seed=3)) - 3.0
+X = np.vstack([g1, g2, g3])
+dist = np.asarray(lp_self_1d(X, t, p=2.0))
+
+ks = list(range(2, 8))
+scores = []
+for k in ks:
+    res = kmeans_fd(X, t, k=k, seed=42)
+    labels = np.asarray(res["cluster"]).astype(np.int64)
+    scores.append(float(np.mean(np.asarray(silhouette_score(dist, labels)))))
+best = int(np.argmax(scores))
+
+f, ax = fig(figsize=(7.0, 3.6))
+ax.plot(ks, scores, "-o", color="#3f51b5", lw=1.8)
+ax.plot(ks[best], scores[best], "o", color="#e8710a", ms=11,
+        label=f"best k = {ks[best]}")
+ax.set(title="Mean silhouette vs. number of clusters (3 true groups)",
+       xlabel="k", ylabel="mean silhouette")
+ax.legend()
+print(render(f))
 ```
 
 ---

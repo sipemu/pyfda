@@ -119,6 +119,24 @@ fd_wiener = Fdata(data_wiener, argvals=argvals)
     Use `"fourier"` for periodic or oscillatory data, `"poly"` for smooth
     monotonic trends, and `"wiener"` for random-walk-like behavior.
 
+Each eigenfunction family imprints a distinctive character on the sampled curves:
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+
+t = np.linspace(0, 1, 120)
+f, axes = fig(2, 2, figsize=(9.0, 6.0), sharex=True)
+for ax, kind in zip(axes.ravel(), ["fourier", "poly", "poly_high", "wiener"]):
+    X = np.asarray(simulate(n=20, argvals=t, n_basis=5, efun_type=kind, seed=1))
+    ax.plot(t, X.T, color="#3f51b5", lw=1, alpha=0.5)
+    ax.set(title=f'efun_type="{kind}"', ylabel="X(t)")
+for ax in axes[-1]:
+    ax.set_xlabel("t")
+print(render(f))
+```
+
 ---
 
 ### Eigenvalue Decay Patterns
@@ -300,6 +318,28 @@ gp_periodic = gaussian_process(
 fd_gp_periodic = Fdata(gp_periodic, argvals=argvals)
 ```
 
+The choice of kernel controls the roughness of the sample paths -- from the
+infinitely smooth Gaussian kernel to the jagged exponential (Ornstein-Uhlenbeck):
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import gaussian_process
+
+t = np.linspace(0, 1, 150)
+f, axes = fig(2, 2, figsize=(9.0, 6.0), sharex=True)
+kernels = ["gaussian", "exponential", "matern", "periodic"]
+ls = {"gaussian": 0.15, "exponential": 0.15, "matern": 0.15, "periodic": 0.3}
+for ax, k in zip(axes.ravel(), kernels):
+    X = np.asarray(gaussian_process(n=8, argvals=t, kernel=k,
+                                    length_scale=ls[k], variance=1.0, seed=1))
+    ax.plot(t, X.T, lw=1.2, alpha=0.8)
+    ax.set(title=f'kernel="{k}"', ylabel="X(t)")
+for ax in axes[-1]:
+    ax.set_xlabel("t")
+print(render(f))
+```
+
 ---
 
 ### Controlling Smoothness with `length_scale`
@@ -322,6 +362,24 @@ smooth = gaussian_process(
     kernel="gaussian", length_scale=0.5, seed=0,
 )
 fd_smooth = Fdata(smooth, argvals=argvals)
+```
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import gaussian_process
+
+t = np.linspace(0, 1, 150)
+f, (a1, a2) = fig(1, 2, figsize=(9.0, 3.6), sharex=True, sharey=True)
+rough = np.asarray(gaussian_process(n=6, argvals=t, kernel="gaussian",
+                                    length_scale=0.05, seed=0))
+smooth = np.asarray(gaussian_process(n=6, argvals=t, kernel="gaussian",
+                                     length_scale=0.5, seed=0))
+a1.plot(t, rough.T, color="#dc3545", lw=1.2, alpha=0.8)
+a1.set(title="length_scale = 0.05 (rough)", xlabel="t", ylabel="X(t)")
+a2.plot(t, smooth.T, color="#198754", lw=1.2, alpha=0.8)
+a2.set(title="length_scale = 0.5 (smooth)", xlabel="t")
+print(render(f))
 ```
 
 ### Controlling Amplitude with `variance`

@@ -21,6 +21,38 @@ where
 
 In practice the sum is truncated at $K$ components, giving the best rank-$K$ approximation in $L^2$.
 
+The figure below decomposes a sample of curves: the mean function $\hat\mu(t)$ plus the leading eigenfunctions $\phi_k(t)$, each scaled by $2\sqrt{\lambda_k}$ to show the mode of variation it captures.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.regression import fpca
+
+t = np.linspace(0, 1, 150)
+X = np.asarray(simulate(n=60, argvals=t, n_basis=5, efun_type="fourier", seed=7))
+res = fpca(X, t, n_comp=3)
+mean = np.asarray(res["mean"])
+rot = np.asarray(res["rotation"])
+sv = np.asarray(res["singular_values"])
+ev = sv ** 2 / (X.shape[0] - 1)
+
+f, (a0, a1) = fig(1, 2, figsize=(10, 3.8))
+a0.plot(t, X.T, color="#3f51b5", lw=0.8, alpha=0.25)
+a0.plot(t, mean, color="#dc3545", lw=2.4, label="mean $\\hat\\mu(t)$")
+a0.set(title="60 curves and their mean", xlabel="t", ylabel="X(t)")
+a0.legend()
+
+for k in range(3):
+    a1.plot(t, mean + 2 * np.sqrt(ev[k]) * rot[:, k], lw=1.8,
+            label=f"$\\phi_{{{k+1}}}$ ({ev[k]/ev.sum()*100:.0f}%)")
+a1.plot(t, mean, color="#6c757d", lw=1.2, ls="--", label="mean")
+a1.set(title="Modes of variation $\\hat\\mu + 2\\sqrt{\\lambda_k}\\,\\phi_k$",
+       xlabel="t", ylabel="X(t)")
+a1.legend()
+print(render(f))
+```
+
 ## Quick start
 
 FPCA lives in the **regression** module because principal component scores are the primary features for scalar-on-function regression.
@@ -116,6 +148,33 @@ axes[1].legend()
 
 plt.tight_layout()
 plt.show()
+```
+
+Running the same computation on a simulated sample produces the paired scree / cumulative-variance view below -- the elbow and the 95 % line are the two most common rules for choosing $K$.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.regression import fpca
+
+t = np.linspace(0, 1, 150)
+X = np.asarray(simulate(n=80, argvals=t, n_basis=5, efun_type="fourier", seed=7))
+sv = np.asarray(fpca(X, t, n_comp=8)["singular_values"])
+ev = sv ** 2 / (X.shape[0] - 1)
+pve = np.cumsum(ev) / ev.sum()
+ks = np.arange(1, len(ev) + 1)
+
+f, (a0, a1) = fig(1, 2, figsize=(10, 3.8))
+a0.bar(ks, ev, color="#3f51b5")
+a0.set(title="Scree plot", xlabel="Component", ylabel="Eigenvalue $\\lambda_k$")
+
+a1.plot(ks, pve, "o-", color="#e8710a")
+a1.axhline(0.95, ls="--", color="#6c757d", lw=1, label="95 %")
+a1.set(title="Cumulative variance explained", xlabel="Number of components",
+       ylabel="PVE", ylim=(0, 1.02))
+a1.legend()
+print(render(f))
 ```
 
 ## Visualizing eigenfunctions

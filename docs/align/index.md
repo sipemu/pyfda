@@ -1,8 +1,13 @@
 # Align
 
+<div class="fdars-section-hero fdars-sec-align" markdown>
+<img src="../assets/cards/align.svg" alt="Align illustration: two phase-shifted curves warped onto a shared template">
+<div class="fdars-section-hero__text" markdown>
 **Register and align curves to separate amplitude from phase variability.**
 
 Functional observations often exhibit two fundamentally different sources of variation: *amplitude* (how tall or deep the features are) and *phase* (when those features occur). Standard statistical methods conflate the two, leading to washed-out means and inflated variance estimates. The Align module provides elastic alignment tools built on the Fisher-Rao metric and the Square Root Slope Function (SRSF) framework to cleanly decompose these sources of variability.
+</div>
+</div>
 
 <div class="grid cards" markdown>
 

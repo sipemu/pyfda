@@ -143,6 +143,29 @@ print(fd)  # Fdata (1D)  –  50 obs × 100 points  –  range [0.0, 1.0]
 See the [Simulation Toolbox](simulation.md) guide for details on eigenfunction
 types, eigenvalue decays, and Gaussian process generation.
 
+A functional sample is a *family of curves* rather than a cloud of points. Here
+are 30 such curves together with their pointwise mean -- the kind of object every
+fdars method operates on:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.simulation import simulate
+
+t = np.linspace(0, 1, 100)
+fd = Fdata(np.asarray(simulate(n=30, argvals=t, n_basis=6, seed=42)), argvals=t)
+mu = np.asarray(fd.mean())
+
+f, ax = fig()
+ax.plot(t, np.asarray(fd.data).T, color="#3f51b5", lw=1, alpha=0.35)
+ax.plot(t, mu, color="#e8710a", lw=2.6, label="pointwise mean")
+ax.set(title="A functional sample: 30 curves and their mean",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
+
 ---
 
 ## Core Operations
@@ -166,7 +189,29 @@ print(fd_centered.shape)  # (50, 100) -- same shape, mean subtracted
 print(fd_centered.id[:3])  # metadata preserved
 ```
 
-After centering, the mean is numerically zero at every grid point.
+After centering, the mean is numerically zero at every grid point. Centering
+removes the common level so that subsequent analyses focus on *variation around
+the mean*:
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.simulation import simulate
+
+t = np.linspace(0, 1, 100)
+fd = Fdata(np.asarray(simulate(n=30, argvals=t, n_basis=6, seed=42)), argvals=t)
+fd_c = fd.center()
+
+f, (a1, a2) = fig(1, 2, figsize=(9.0, 3.6), sharex=True)
+a1.plot(t, np.asarray(fd.data).T, color="#3f51b5", lw=1, alpha=0.35)
+a1.plot(t, np.asarray(fd.mean()), color="#e8710a", lw=2.4)
+a1.set(title="Raw curves", xlabel="t", ylabel="X(t)")
+a2.plot(t, np.asarray(fd_c.data).T, color="#198754", lw=1, alpha=0.35)
+a2.axhline(0.0, color="#e8710a", lw=2.4)
+a2.set(title="Centered curves", xlabel="t")
+print(render(f))
+```
 
 ### Norms
 

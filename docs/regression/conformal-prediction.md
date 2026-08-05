@@ -86,6 +86,49 @@ print(f"Mean interval width: {np.mean(upper - lower):.4f}")
 | `predictions` | `ndarray (n_test,)` | Point predictions |
 | `coverage` | `float` | Reported coverage |
 
+Each vertical band is a 90% conformal prediction interval for a test observation (sorted by prediction). Points inside their band are covered (green); the occasional miss (red) is expected at the 10% miscoverage level:
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.conformal import conformal_fregre_lm
+
+np.random.seed(42)
+n_train, n_test, m = 120, 30, 81
+t = np.linspace(0, 1, m)
+beta_true = np.sin(4 * np.pi * t)
+
+def make(n):
+    raw = np.zeros((n, m))
+    for i in range(n):
+        raw[i] = (np.random.randn() * np.sin(2 * np.pi * t)
+                  + np.random.randn() * np.cos(2 * np.pi * t)
+                  + 0.3 * np.random.randn(m))
+    y = np.trapezoid(raw * beta_true, t, axis=1) + 0.5 * np.random.randn(n)
+    return raw, y
+
+Xtr, ytr = make(n_train)
+Xte, yte = make(n_test)
+res = conformal_fregre_lm(Xtr, ytr, Xte, ncomp=3, cal_fraction=0.25, alpha=0.1, seed=42)
+lo, hi = np.asarray(res["lower"]), np.asarray(res["upper"])
+pr = np.asarray(res["predictions"])
+
+order = np.argsort(pr)
+x = np.arange(n_test)
+cov = ((yte >= lo) & (yte <= hi))[order]
+
+f, ax = fig()
+ax.vlines(x, lo[order], hi[order], color="#3f51b5", alpha=0.35, lw=6)
+ax.scatter(x[cov], yte[order][cov], color="#198754", s=26, label="covered", zorder=3)
+if (~cov).any():
+    ax.scatter(x[~cov], yte[order][~cov], color="#dc3545", s=32, label="missed", zorder=3)
+ax.plot(x, pr[order], color="#e8710a", lw=1.5, label="prediction")
+ax.set(title="90% conformal prediction intervals (test set)",
+       xlabel="test observation (sorted by prediction)", ylabel="y")
+ax.legend()
+print(render(f))
+```
+
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `ncomp` | 3 | Number of FPC components |

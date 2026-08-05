@@ -2,18 +2,28 @@
 title: fdars - Functional Data Analysis for Python
 ---
 
-<div style="text-align: center; margin-bottom: 1.5rem;">
-<h1 style="margin-bottom: 0.3rem;">fdars</h1>
-<p style="font-size: 1.15rem; color: var(--md-default-fg-color--light);">
-High-performance Functional Data Analysis for Python, powered by Rust
+<div class="fdars-hero" markdown>
+<div class="fdars-hero__text" markdown>
+<h1 class="fdars-hero__title">fdars</h1>
+<p class="fdars-hero__tagline">
+High-performance functional data analysis for Python &mdash; treat entire
+curves, spectra, and trajectories as single observations, powered by a Rust backend.
 </p>
+<div class="fdars-hero__cta" markdown>
+[Get started](learn/introduction.md){ .md-button .md-button--primary }
+[Fdata reference](reference/fdata.md){ .md-button }
+[View on GitHub](https://github.com/sipemu/pyfda){ .md-button }
+</div>
+</div>
+<img class="fdars-hero__art" src="assets/cards/hero.svg" alt="A family of functional data curves with a highlighted mean and confidence band">
 </div>
 
-[![PyPI](https://img.shields.io/pypi/v/fdars)](https://pypi.org/project/fdars)
-
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/sipemu/pyfda/actions/workflows/ci.yml/badge.svg)](https://github.com/sipemu/pyfda/actions)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+<p style="text-align:center;">
+<img src="https://img.shields.io/pypi/v/fdars" alt="PyPI">
+&nbsp;<img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT">
+&nbsp;<img src="https://github.com/sipemu/pyfda/actions/workflows/ci.yml/badge.svg" alt="CI">
+&nbsp;<img src="https://img.shields.io/badge/python-3.9%2B-blue.svg" alt="Python 3.9+">
+</p>
 
 **fdars** is a high-performance Python toolkit for functional data analysis powered
 by a Rust backend. Treat entire curves, spectra, and trajectories as single

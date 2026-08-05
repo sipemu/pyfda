@@ -9,6 +9,43 @@ Standard FPC regression (`fregre_lm`) uses ordinary least squares, which is sens
 | **L1 regression** | $\lvert r \rvert$ | 50% | Median regression; completely ignores outlier magnitude |
 | **Huber M-estimation** | Quadratic near 0, linear in tails | Depends on $k$ | Smooth compromise between L2 and L1 |
 
+With 15% of the responses contaminated by large outliers, the OLS estimate of $\beta(t)$ is pulled away from the truth, while the L1 and Huber estimates stay close to it:
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.regression import fregre_lm, fregre_l1, fregre_huber
+
+np.random.seed(0)
+n, m = 40, 81
+t = np.linspace(0, 1, m)
+beta_true = np.exp(-((t - 0.5) ** 2) / 0.02)
+
+raw = np.zeros((n, m))
+for i in range(n):
+    raw[i] = sum(np.random.randn() * np.sin((2 * k + 1) * np.pi * t)
+                 for k in range(4)) + 0.15 * np.random.randn(m)
+y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
+
+# Contaminate 15% of the responses
+cont = np.random.choice(n, int(0.15 * n), replace=False)
+y[cont] += 8 * np.random.choice([-1, 1], size=len(cont))
+
+ols = fregre_lm(raw, y, n_comp=4)
+l1 = fregre_l1(raw, y, n_comp=4)
+hub = fregre_huber(raw, y, n_comp=4, huber_k=1.345)
+
+f, ax = fig()
+ax.plot(t, beta_true, color="#6c757d", lw=2, ls="--", label=r"true $\beta(t)$")
+ax.plot(t, np.asarray(ols["beta_t"]), color="#dc3545", lw=2, label="OLS")
+ax.plot(t, np.asarray(l1["beta_t"]), color="#3f51b5", lw=2, label="L1")
+ax.plot(t, np.asarray(hub["beta_t"]), color="#198754", lw=2, label="Huber")
+ax.set(title="Coefficient estimates under 15% response contamination",
+       xlabel="t", ylabel=r"$\beta(t)$")
+ax.legend()
+print(render(f))
+```
+
 ---
 
 ## L1 regression

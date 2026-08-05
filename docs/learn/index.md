@@ -4,9 +4,14 @@ title: Learn
 
 # Learn
 
+<div class="fdars-section-hero fdars-sec-learn" markdown>
+<img src="../assets/cards/learn.svg" alt="Learn illustration: a family of curves with a highlighted trace">
+<div class="fdars-section-hero__text" markdown>
 Welcome to the **fdars** learning hub. These guides walk you through the core
 ideas of functional data analysis and show you how to apply them with fdars's
 Python API.
+</div>
+</div>
 
 !!! tip "Where to start"
     If you are new to FDA or fdars, begin with the **Introduction** -- it covers

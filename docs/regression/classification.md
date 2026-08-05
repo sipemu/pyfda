@@ -2,6 +2,37 @@
 
 Functional classification assigns a class label $g_i \in \{0, 1, \dots, K-1\}$ to each functional observation $x_i(t)$. `fdars` provides discriminant analysis, nearest-neighbor, and kernel-based classifiers, all operating on FPC score representations, plus functional logistic regression and cross-validated model comparison.
 
+Classification exploits differences in the class-mean curves. Below, two classes are separated by a phase difference (a sine vs. a cosine); the bold curves are the per-class mean functions the classifiers learn to distinguish.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.classification import fclassif_lda
+
+np.random.seed(0)
+n, m = 40, 101
+t = np.linspace(0, 1, m)
+raw = np.zeros((n, m))
+labels = np.zeros(n, dtype=np.int64)
+for i in range(n):
+    if i < n // 2:
+        raw[i] = np.sin(2 * np.pi * t) + 0.3 * np.random.randn(m)
+    else:
+        raw[i] = np.cos(2 * np.pi * t) + 0.3 * np.random.randn(m)
+        labels[i] = 1
+
+res = fclassif_lda(raw, labels, ncomp=3)
+
+f, ax = fig()
+for cls, color, name in [(0, "#3f51b5", "class 0"), (1, "#e8710a", "class 1")]:
+    ax.plot(t, raw[labels == cls].T, color=color, lw=0.7, alpha=0.25)
+    ax.plot(t, raw[labels == cls].mean(0), color=color, lw=2.6, label=f"{name} mean")
+ax.set(title=f"Class-mean curves (LDA accuracy {res['accuracy']:.0%})",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
+
 ---
 
 ## Discriminant analysis

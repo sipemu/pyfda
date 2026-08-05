@@ -9,6 +9,29 @@ Representing functional data in a finite basis -- B-splines, Fourier, or P-splin
 - **Derivative computation** -- analytic derivatives come for free from the basis expansion.
 - **Regularization** -- roughness penalties in the basis domain prevent overfitting in regression.
 
+The core trade-off is resolution versus compression: too few basis functions oversmooth and miss features, too many reproduce noise. The figure below projects one curve onto B-spline bases of increasing size and reconstructs it -- the fit sharpens as the basis grows.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.basis import fdata_to_basis_1d, basis_to_fdata_1d
+
+t = np.linspace(0, 1, 200)
+X = np.asarray(simulate(n=1, argvals=t, n_basis=8, efun_type="fourier", seed=3))
+
+f, ax = fig()
+ax.plot(t, X[0], color="#6c757d", lw=1.0, alpha=0.6, label="target curve")
+for nb in (4, 8, 20):
+    c, actual = fdata_to_basis_1d(X, t, n_basis=nb, basis_type="bspline")
+    rec = np.asarray(basis_to_fdata_1d(c, t, n_basis=actual, basis_type="bspline"))
+    ax.plot(t, rec[0], lw=1.8, label=f"n_basis = {actual}")
+ax.set(title="B-spline reconstruction at increasing basis size",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
+
 ## B-spline vs Fourier basis
 
 | Property | B-spline | Fourier |
@@ -92,6 +115,29 @@ print(F.shape)  # (100, 11)
 ```
 
 The Fourier basis consists of $1, \sin(\omega t), \cos(\omega t), \sin(2\omega t), \cos(2\omega t), \ldots$ where $\omega = 2\pi / T$ and $T$ is the period (range of `argvals`).
+
+The two basis families look very different: B-splines are local bumps with compact support, while Fourier functions are global sinusoids. This is why B-splines excel at local features and Fourier at periodic signals.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.basis import bspline_basis, fourier_basis
+
+f, (a0, a1) = fig(1, 2, figsize=(10, 3.8))
+
+tb = np.linspace(0, 1, 200)
+B = np.asarray(bspline_basis(tb, nknots=6, order=4))
+a0.plot(tb, B, lw=1.4)
+a0.set(title=f"B-spline basis ({B.shape[1]} local functions)",
+       xlabel="t", ylabel="$B_j(t)$")
+
+tf = np.linspace(0, 2 * np.pi, 200)
+F = np.asarray(fourier_basis(tf, n_basis=7))
+a1.plot(tf, F, lw=1.4)
+a1.set(title="Fourier basis (7 global functions)",
+       xlabel="t", ylabel="$F_j(t)$")
+print(render(f))
+```
 
 !!! info "Fourier n_basis"
     `n_basis` should be odd. If an even value is given, it will be adjusted to the next odd number so the basis contains matched sine-cosine pairs plus the constant function.
