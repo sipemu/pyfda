@@ -69,7 +69,32 @@ print(render(f))
 ```
 
 !!! tip "Effect of length scale"
-    A small $\ell$ produces rapidly varying (wiggly) functions; a large $\ell$ produces smooth, slowly varying functions. Try values from 0.05 to 0.5 on $[0,1]$ to build intuition.
+    A small $\ell$ produces rapidly varying (wiggly) functions; a large $\ell$ produces smooth, slowly varying functions.
+
+The length scale $\ell$ is the single most important knob: it sets the distance over which
+function values stay correlated. The panels below draw the *same* seed at three length
+scales, so the only difference is how quickly the paths wiggle.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import gaussian_process
+
+t = np.linspace(0, 1, 200)
+scales = [0.05, 0.2, 0.5]
+
+f, axes = fig(1, 3, figsize=(11.5, 3.4), sharey=True)
+for ax, ls in zip(axes, scales):
+    paths = np.asarray(gaussian_process(5, t, kernel="gaussian",
+                                        length_scale=ls, variance=1.0, seed=42))
+    ax.plot(t, paths.T, lw=1.1, alpha=0.85)
+    ax.set(title=f"length_scale = {ls}", xlabel="t")
+axes[0].set_ylabel("X(t)")
+print(render(f))
+```
+
+As $\ell$ grows from 0.05 to 0.5 the sample paths go from jagged to gently undulating,
+even though the seed (and hence the underlying randomness) is identical.
 
 ---
 
@@ -136,42 +161,110 @@ for ax in axes[-1]:
 print(render(f))
 ```
 
-The following script visualizes the covariance structure and sample paths for each kernel side by side.
+Looking at a single **row** of the covariance matrix -- $C(0.5, t)$, the correlation of
+the midpoint with every other point -- makes the decay rate explicit: the Gaussian kernel
+falls off smoothly and quadratically near the diagonal, while the exponential kernel has a
+sharp cusp at $s = t$, which is exactly why its sample paths are non-differentiable.
 
-```python
+```python exec="1" html="1" source="above"
 import numpy as np
-from fdars import Fdata
-from fdars.simulation import covariance_matrix, gaussian_process
+from docs_fig import fig, render
+from fdars.simulation import covariance_matrix
 
-argvals = np.linspace(0, 1, 200)
-kernels = ["gaussian", "exponential"]
+t = np.linspace(0, 1, 200)
+mid = len(t) // 2
 
-try:
-    import matplotlib.pyplot as plt
-
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
-
-    for col, kern in enumerate(kernels):
-        # Covariance row from the midpoint
-        cov = covariance_matrix(argvals, kernel=kern, length_scale=0.15)
-        mid = len(argvals) // 2
-        axes[0, col].plot(argvals, cov[mid, :])
-        axes[0, col].set_title(f"{kern.title()} kernel — C(0.5, t)")
-        axes[0, col].set_xlabel("t")
-
-        # Sample paths
-        fd_samples = Fdata(gaussian_process(10, argvals, kernel=kern, length_scale=0.15, seed=42), argvals=argvals)
-        for s in fd_samples.data:
-            axes[1, col].plot(argvals, s, linewidth=0.7, alpha=0.7)
-        axes[1, col].set_title(f"{kern.title()} — 10 sample paths")
-        axes[1, col].set_xlabel("t")
-
-    plt.tight_layout()
-    plt.savefig("covariance_kernels.png", dpi=150)
-    plt.show()
-except ImportError:
-    pass
+f, ax = fig(figsize=(7.2, 3.6))
+for kern, color in [("gaussian", "#3f51b5"), ("exponential", "#e8710a")]:
+    cov = np.asarray(covariance_matrix(t, kernel=kern, length_scale=0.15, variance=1.0))
+    ax.plot(t, cov[mid, :], color=color, lw=1.8, label=f"{kern} C(0.5, t)")
+ax.set(title="Covariance cross-section at s = 0.5", xlabel="t", ylabel="C(0.5, t)")
+ax.legend()
+print(render(f))
 ```
+
+---
+
+## Empirical covariance and its eigenstructure
+
+Given an observed sample, the **empirical covariance** $\hat C(s,t)$ is the sample
+covariance of the curve values across observations. Its spectral decomposition is the
+basis of functional PCA: the leading eigenfunctions are the dominant modes of variation
+and the eigenvalues give the variance each mode explains. (`covariance_matrix` builds a
+*theoretical* kernel; here we estimate $\hat C$ from data with plain numpy.)
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import gaussian_process
+
+t = np.linspace(0, 1, 100)
+X = np.asarray(gaussian_process(120, t, kernel="gaussian",
+                                length_scale=0.15, variance=1.0, seed=1))
+
+# Empirical covariance surface and its eigendecomposition
+Xc = X - X.mean(0)
+C = (Xc.T @ Xc) / (X.shape[0] - 1)
+evals, evecs = np.linalg.eigh(C)
+evals, evecs = evals[::-1], evecs[:, ::-1]          # descending
+explained = evals[:5] / evals.sum()
+
+f, (a0, a1) = fig(1, 2, figsize=(10.5, 4.0))
+im = a0.imshow(C, origin="lower", extent=(0, 1, 0, 1), cmap="viridis", aspect="equal")
+a0.grid(False)
+a0.set(title="Empirical covariance Ĉ(s, t)", xlabel="s", ylabel="t")
+f.colorbar(im, ax=a0, fraction=0.046, pad=0.04)
+for k in range(3):
+    a1.plot(t, evecs[:, k], lw=1.8, label=f"φ{k+1} ({explained[k]:.0%})")
+a1.set(title="Leading eigenfunctions of Ĉ", xlabel="t", ylabel="φ(t)")
+a1.legend()
+print(render(f))
+```
+
+The first three eigenfunctions here already account for the bulk of the variance -- a GP
+with a moderate length scale is effectively low-dimensional, which is what makes FPCA and
+the FPCA-based methods elsewhere in this section work so well.
+
+---
+
+## Karhunen--Loève simulation
+
+The flip side of the eigendecomposition is *synthesis*: the Karhunen--Loève expansion
+builds curves as $X(t) = \sum_{k=1}^{M} \sqrt{\lambda_k}\,\xi_k\,\phi_k(t)$ with
+independent standard-normal scores $\xi_k$. `sim_kl` does this given a set of basis
+functions $\phi_k$ (columns) and eigenvalues $\lambda_k$ -- letting you dial the
+smoothness directly through the eigenvalue decay rather than through a kernel.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import eigenfunctions, eigenvalues, sim_kl
+
+t = np.linspace(0, 1, 120)
+n_basis = 6
+phi = np.asarray(eigenfunctions(t, n_basis, efun_type="fourier"))   # (m, n_basis)
+lam = np.asarray(eigenvalues(n_basis, eval_type="linear"))          # decay 1, 1/2, 1/3, ...
+
+X = np.asarray(sim_kl(8, phi, n_basis, lam, seed=1))                # (8, m)
+
+f, ax = fig()
+ax.plot(t, X.T, lw=1.2, alpha=0.85)
+ax.set(title=f"Karhunen–Loève samples ({n_basis} Fourier modes, linear eigenvalue decay)",
+       xlabel="t", ylabel="X(t)")
+print(render(f))
+```
+
+Faster eigenvalue decay concentrates variance in the first few modes and yields smoother
+curves; slower decay spreads energy into higher-frequency modes and roughens them. This is
+the same trade-off the kernel length scale controls, expressed in the spectral domain.
+
+!!! note "Kernel coverage differs by function"
+    `covariance_matrix` supports `"gaussian"` and `"exponential"`. `gaussian_process`
+    additionally supports `"matern"` and `"periodic"`. The R reference also ships
+    Brownian, linear, polynomial, white-noise, and composed (`kernel.add`/`kernel.mult`)
+    kernels; those are **not** exposed in the current Python build. For a periodic or
+    Matern process use `gaussian_process`; for custom spectra, build the covariance in
+    numpy or use `sim_kl` with your own eigenvalues.
 
 ---
 
@@ -209,3 +302,10 @@ print(f"Mean silhouette: {np.mean(sil):.3f}")
 
 !!! info "Performance"
     Generating 1000 GP samples on a 500-point grid takes roughly 50 ms. The bottleneck is the Cholesky decomposition of the $m \times m$ covariance matrix, which is $O(m^3)$.
+
+## See also
+
+- [Tolerance bands](tolerance-bands.md) and [GMM clustering](gmm-clustering.md) -- both
+  rely on the eigenstructure of $\hat C$ (FPCA scores) shown above.
+- [Seasonal analysis](seasonal-analysis.md) -- the periodic kernel is the stochastic
+  counterpart of the deterministic periodicity analysed there.

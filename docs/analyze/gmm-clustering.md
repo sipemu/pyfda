@@ -4,33 +4,18 @@ Model-based clustering treats a set of curves as samples from a *mixture* of pro
 
 Because a Gaussian mixture is defined in a finite-dimensional feature space, functional GMM first projects each curve onto a small basis (or onto its leading FPCA scores) and fits the mixture to those coefficients. `fdars` exposes this through `fdars.clustering.gmm_cluster`.
 
-```python exec="1" html="1" source="above"
-import numpy as np
-from docs_fig import fig, render
-from fdars.clustering import gmm_cluster
-
-# Three groups with clearly distinct shapes: rising, central bump, falling
-t = np.linspace(0, 1, 50)
-rng = np.random.default_rng(1)
-def grp(shape, seed):
-    r = np.random.default_rng(seed)
-    return shape(t)[None, :] + 0.05 * r.standard_normal((14, len(t)))
-X = np.vstack([
-    grp(lambda t: 3 * t, 1),
-    grp(lambda t: 3 * np.exp(-((t - 0.5) ** 2) / (2 * 0.02)), 2),
-    grp(lambda t: 3 * (1 - t), 3),
-])
-
-gm = gmm_cluster(X, t, k_range=[3], nbasis=5, seed=42)
-labels = np.asarray(gm["cluster"])
-palette = ["#3f51b5", "#e8710a", "#198754"]
-
-f, ax = fig()
-for xi, li in zip(X, labels):
-    ax.plot(t, xi, color=palette[li], lw=0.9, alpha=0.5)
-ax.set(title="Curves colored by GMM component", xlabel="t", ylabel="X(t)")
-print(render(f))
-```
+!!! danger "Known limitation of `gmm_cluster` in this build"
+    In the current build, `gmm_cluster` does **not** reliably recover cluster structure:
+    on data that is trivially separable -- for example two flat groups at $y=0$ and
+    $y=10$, or mean-shifted simulations where [`kmeans_fd`](clustering.md) achieves 100%
+    accuracy -- the hard labels it returns are close to random (best-permutation accuracy
+    around 0.35--0.50), and BIC over-splits (it selects the largest $K$ offered). The
+    conceptual material below is correct, and the BIC/ICL machinery runs, but **do not
+    rely on `gmm_cluster`'s labels for grouping**. For hard grouping use `kmeans_fd`;
+    for graded memberships use `fuzzy_cmeans_fd`; for a genuinely soft, uncertainty-aware
+    assignment, compute the responsibilities directly in feature space as shown in
+    [Soft assignments](#soft-assignments-and-their-uncertainty) below. This is a binding
+    limitation, not a limitation of model-based clustering as a method.
 
 ---
 
@@ -80,9 +65,12 @@ g2 = simulate(20, argvals, n_basis=5, seed=2) + 3.0
 fd = Fdata(np.vstack([g1, g2]), argvals=argvals)
 
 gm = gmm_cluster(fd.data, fd.argvals, k_range=[2, 3, 4], nbasis=6, seed=42)
-print("labels     :", gm["cluster"][:8])
+print("labels     :", gm["cluster"][:8])   # see the limitation note above
 print("BIC per k  :", gm["bic_values"])
 ```
+
+The call returns the dictionary documented below. Recall the limitation note: use it for
+the BIC/ICL *values* and the API surface, but validate any grouping against `kmeans_fd`.
 
 **Parameters**
 
@@ -137,13 +125,15 @@ ax.legend()
 print(render(f))
 ```
 
-!!! warning "BIC can keep decreasing"
+!!! warning "BIC over-splits here -- do not read off the minimum"
     With flexible basis projections the per-component likelihood grows quickly, and in
-    practice the criteria reported here often keep falling as $K$ increases rather than
-    showing a clear minimum. Treat the criteria as *guidance*, not an oracle: constrain
-    `k_range` with domain knowledge, inspect the coloured curves, and prefer the smallest
-    $K$ that already separates the groups you care about. Above we fix `k_range=[3]` for
-    the illustrative fit for exactly this reason.
+    this build the reported criteria keep falling as $K$ increases: on three genuinely
+    distinct groups, BIC selects the *largest* $K$ offered (e.g. $K=6$ for
+    `k_range=[2,3,4,5,6]`) rather than the true $K=3$. Do **not** take the arg-min as the
+    number of clusters. Constrain `k_range` with domain knowledge and prefer the smallest
+    $K$ that separates the groups you care about; above we fix `k_range=[3]` for exactly
+    this reason. The criteria are shown for transparency, not as a reliable selector in
+    the current binding.
 
 ---
 
@@ -198,13 +188,15 @@ print(render(f))
 
 Curves deep inside a group are coloured a saturated blue or red (responsibility near 0 or 1); the pale points along the boundary are the genuinely ambiguous curves whose posterior sits near $0.5$. A hard partition assigns those to one side and discards the fact that the assignment was a coin-flip.
 
-!!! note "The bundled `membership` is effectively hard"
-    In the current build, the `membership` matrix returned by `gmm_cluster` is close to a
-    one-hot encoding of `cluster` even when groups overlap heavily -- it does not expose
-    graded responsibilities. The plot above therefore derives the posterior directly from
-    the fitted Gaussians in FPCA-score space using `fdars.regression.fpca`, which is the
-    quantity a GMM is meant to provide. Use `gmm_cluster` for labels, BIC and ICL; compute
-    responsibilities in feature space when you need the soft assignment itself.
+!!! note "Why this figure computes responsibilities itself"
+    The figure above does **not** use `gmm_cluster`'s `membership` matrix, which is
+    unreliable in the current build (see the limitation note at the top of the page). It
+    instead derives the posterior directly from Gaussians fit in FPCA-score space via
+    `fdars.regression.fpca` -- a transparent, correct E-step -- which is exactly the
+    graded, uncertainty-aware quantity a GMM is meant to provide. This is the recommended
+    way to get soft functional assignments today: reduce to FPCA scores, then fit a
+    standard finite-dimensional mixture (e.g. `sklearn.mixture.GaussianMixture`) or, as
+    here, evaluate the responsibilities by hand.
 
 ---
 

@@ -204,6 +204,51 @@ The two dark diagonal blocks are the amplitude groups; the bright off-diagonal b
 
 ---
 
+## Choosing the number of clusters
+
+When the number of groups is unknown, sweep $k$ and plot the total within-cluster
+distance from `kmedoids_from_distances` (`total_within_distance`). A sharp drop followed
+by a plateau -- the elbow -- flags the natural number of clusters. On the two-amplitude
+example the distance falls steeply from $k=1$ to $k=2$ and then flattens, correctly
+pointing at two groups.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import elastic_self_distance_matrix, kmedoids_from_distances
+
+t = np.linspace(0, 1, 60)
+rng = np.random.default_rng(4)
+def bump(c, h, w=0.006):
+    return h * np.exp(-((t - c) ** 2) / (2 * w))
+X = []
+for h in [1.0, 2.0]:
+    for _ in range(15):
+        c = rng.uniform(0.25, 0.75)
+        X.append(bump(c, h) + 0.02 * rng.standard_normal(len(t)))
+X = np.asarray(X)
+
+D = np.asarray(elastic_self_distance_matrix(X, t))
+ks = list(range(1, 7))
+twd = [float(kmedoids_from_distances(D, k=k, seed=1)["total_within_distance"]) for k in ks]
+
+f, ax = fig(figsize=(7.0, 3.6))
+ax.plot(ks, twd, "-o", color="#3f51b5", lw=1.8)
+ax.axvline(2, color="#e8710a", ls="--", lw=1.2, label="elbow at k = 2")
+ax.set(title="Elastic k-medoids: total within-cluster distance vs. k",
+       xlabel="k", ylabel="total within-cluster distance")
+ax.legend()
+print(render(f))
+```
+
+!!! note "Elbows on elastic distances can be gentle"
+    Because alignment already collapses phase variation, the within-distance curve is
+    often smoother than for $L^2$ clustering -- the elbow is a nudge, not a cliff. Read it
+    alongside the reordered distance-matrix heatmap above and, where you have labels, a
+    purity or silhouette check on the elastic distances.
+
+---
+
 ## Related pages
 
 - [Clustering](clustering.md) -- $L^2$ k-means, fuzzy c-means, GMM and quality indices.
