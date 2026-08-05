@@ -287,7 +287,7 @@ pub fn bspline_basis<'py>(
     let av = numpy1d_to_vec(argvals);
     let m = av.len();
     let flat = fdars_core::basis::bspline_basis(&av, nknots, order);
-    let nbasis = if m > 0 { flat.len() / m } else { 0 };
+    let nbasis = flat.len().checked_div(m).unwrap_or(0);
     // flat is column-major (m x nbasis) — convert to row-major for numpy
     let row_major: Vec<Vec<f64>> = (0..m)
         .map(|i| (0..nbasis).map(|j| flat[i + j * m]).collect())
@@ -317,7 +317,7 @@ pub fn fourier_basis<'py>(
     let av = numpy1d_to_vec(argvals);
     let m = av.len();
     let flat = fdars_core::basis::fourier_basis(&av, n_basis);
-    let actual_nbasis = if m > 0 { flat.len() / m } else { 0 };
+    let actual_nbasis = flat.len().checked_div(m).unwrap_or(0);
     // flat is column-major (m x actual_nbasis) — convert to row-major for numpy
     let row_major: Vec<Vec<f64>> = (0..m)
         .map(|i| (0..actual_nbasis).map(|j| flat[i + j * m]).collect())
@@ -515,7 +515,7 @@ pub fn fourier_basis_with_period<'py>(
     let av = numpy1d_to_vec(argvals);
     let m = av.len();
     let flat = fdars_core::basis::fourier_basis_with_period(&av, n_basis, period);
-    let actual_nbasis = if m > 0 { flat.len() / m } else { 0 };
+    let actual_nbasis = flat.len().checked_div(m).unwrap_or(0);
     let row_major: Vec<Vec<f64>> = (0..m)
         .map(|i| (0..actual_nbasis).map(|j| flat[i + j * m]).collect())
         .collect();
@@ -549,7 +549,7 @@ pub fn bspline_basis_from_knots<'py>(
     let kn = numpy1d_to_vec(knots);
     let m = av.len();
     let flat = fdars_core::basis::bspline_basis_from_knots(&av, &kn, order);
-    let nbasis = if m > 0 { flat.len() / m } else { 0 };
+    let nbasis = flat.len().checked_div(m).unwrap_or(0);
     let row_major: Vec<Vec<f64>> = (0..m)
         .map(|i| (0..nbasis).map(|j| flat[i + j * m]).collect())
         .collect();
