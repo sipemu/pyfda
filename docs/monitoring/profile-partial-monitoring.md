@@ -217,3 +217,16 @@ score it only on the sub-domain where the specification is tight.
 - [Statistical Process Monitoring](spm.md) — the Phase I / Phase II fundamentals used here.
 - [Advanced Statistical Process Monitoring](advanced-spm.md) — EWMA charts, run rules,
   ARL analysis, and per-PC fault diagnosis, all of which apply unchanged on a sub-domain.
+
+!!! note "Where this differs from the R vignette"
+    The R article implements three dedicated engines that have no `fdars` Python binding
+    yet: covariate-aware **profile monitoring** (`spm.profile.phase1` / `.monitor`, built
+    on sliding-window function-on-scalar regression), **conditional-completion** partial
+    monitoring (`spm.monitor.partial` with BLUP / projection / zero-pad tails for
+    curves seen only up to some fraction of the domain), and **elastic SPM**
+    (`spm.elastic.phase1` / `.monitor`, which splits amplitude from phase variation). The
+    sub-domain slicing shown on this page reproduces the *spirit* of partial-domain
+    monitoring using only the exposed `spm_phase1` / `spm_monitor` primitives — it charts a
+    fixed critical window rather than completing an unobserved tail. Amplitude/phase
+    separation is available through the [elastic alignment](../align/elastic-alignment.md)
+    tools (SRSF alignment, Karcher mean) if you want to build an elastic chart by hand.
