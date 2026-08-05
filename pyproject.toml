@@ -6,6 +6,7 @@ build-backend = "maturin"
 name = "fdars"
 version = "0.1.0"
 description = "Python bindings for fdars – Functional Data Analysis in Rust"
+readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [
@@ -27,6 +28,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Mathematics",
 ]
 dependencies = ["numpy", "pandas"]
+
+[project.urls]
+Homepage = "https://sipemu.github.io/pyfda/"
+Documentation = "https://sipemu.github.io/pyfda/"
+Repository = "https://github.com/sipemu/pyfda"
+Issues = "https://github.com/sipemu/pyfda/issues"
 
 [project.optional-dependencies]
 dev = ["pytest", "matplotlib"]
