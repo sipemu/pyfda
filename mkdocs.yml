@@ -129,9 +129,22 @@ nav:
     - Covariance Functions: analyze/covariance-functions.md
   - Examples:
     - examples/index.md
-    - Berkeley Growth — Elastic Alignment: examples/growth-alignment.md
+    - Growth — Elastic Alignment: examples/growth-alignment.md
+    - Sonar — Mine vs Rock (TSRVF): examples/sonar-tsrvf.md
+    - Andrews Wine — Why Curves?: examples/andrews-wine-intro.md
+    - Andrews Wine — Outlier Detection: examples/andrews-wine.md
+    - Andrews Wine — Clustering: examples/andrews-wine-clustering.md
+    - Andrews Wine — Quality Control: examples/andrews-wine-qc.md
     - Tecator — Scalar-on-Function Regression: examples/tecator-regression.md
+    - Tecator — Cross-Validation: examples/cross-validation.md
+    - Tecator — Explainability Regions: examples/explainability-regions.md
+    - Phoneme — Shape Classification: examples/phoneme-shape.md
     - Canadian Weather — FPCA & Clustering: examples/canadian-weather.md
+    - Canadian Temperature — Seasonal: examples/canadian-seasonal.md
+    - Canadian Precipitation — Geographic: examples/canadian-precipitation.md
+    - Tecator — Inline Monitoring: examples/tecator-monitoring.md
+    - Monitoring — Detection Power: examples/inline-monitoring.md
+    - Penicillin — Batch Monitoring: examples/biopharma-monitoring.md
   - Reference:
     - reference/index.md
     - fdars.fdata: reference/fdata.md

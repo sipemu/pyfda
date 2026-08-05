@@ -28,11 +28,19 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
       - name: Install docs dependencies
-        run: pip install -r docs/requirements.txt maturin
+        # maturin develop needs an activated virtualenv (same pattern as ci.yml).
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r docs/requirements.txt maturin
       - name: Build and install fdars (needed for build-time figures)
-        run: maturin develop --release
+        run: |
+          source .venv/bin/activate
+          maturin develop --release
       - name: Build and deploy
         # PYTHONPATH exposes scripts/docs_fig.py to markdown-exec code blocks.
         env:
           PYTHONPATH: scripts
-        run: mkdocs gh-deploy --force
+        run: |
+          source .venv/bin/activate
+          mkdocs gh-deploy --force
