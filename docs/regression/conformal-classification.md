@@ -179,6 +179,98 @@ ax.legend()
 print(render(f))
 ```
 
+## A three-class example
+
+The two-class demo above keeps things minimal; the more common case has several classes with
+characteristic shapes. Here class 0 is sine-dominated, class 1 cosine-dominated, and class 2
+a noisy linear trend — the hardest to separate.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+
+np.random.seed(42)
+n_per, m = 40, 60
+t = np.linspace(0, 1, m)
+n = 3 * n_per
+X = np.zeros((n, m))
+for i in range(n_per):
+    X[i] = np.sin(2 * np.pi * t) + 0.4 * np.random.randn(m)
+    X[n_per + i] = np.cos(2 * np.pi * t) + 0.4 * np.random.randn(m)
+    X[2 * n_per + i] = 0.6 * (t - 0.5) + 0.2 * np.sin(3 * np.pi * t) + 0.4 * np.random.randn(m)
+labels = np.repeat([0, 1, 2], n_per)
+
+f, ax = fig()
+colors = ["#3f51b5", "#e8710a", "#2e8b57"]
+for c in range(3):
+    rows = np.where(labels == c)[0]
+    for r in rows:
+        ax.plot(t, X[r], color=colors[c], alpha=0.25, lw=0.8)
+    ax.plot([], [], color=colors[c], label=f"class {c}")
+ax.set(title="Three-class functional data", xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
+
+### Comparing base classifiers
+
+Split conformal wraps any of the FPC-based classifiers, so you can swap the base learner and
+compare. The point of conformal is that *all* of them attain valid coverage; what differs is
+how tight (small) the resulting prediction sets are.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.conformal import conformal_classif
+
+np.random.seed(42)
+n_per, m = 40, 60
+t = np.linspace(0, 1, m)
+n = 3 * n_per
+X = np.zeros((n, m))
+for i in range(n_per):
+    X[i] = np.sin(2 * np.pi * t) + 0.4 * np.random.randn(m)
+    X[n_per + i] = np.cos(2 * np.pi * t) + 0.4 * np.random.randn(m)
+    X[2 * n_per + i] = 0.6 * (t - 0.5) + 0.2 * np.sin(3 * np.pi * t) + 0.4 * np.random.randn(m)
+labels = np.repeat([0, 1, 2], n_per)
+perm = np.random.default_rng(0).permutation(n)
+X, labels = X[perm], labels[perm]
+Xtr, ytr, Xte, yte = X[:90], labels[:90], X[90:], labels[90:]
+
+clfs = ["lda", "qda", "knn"]
+cov, avg_size = [], []
+for clf in clfs:
+    r = conformal_classif(Xtr, ytr, Xte, ncomp=5, classifier=clf,
+                          cal_fraction=0.25, alpha=0.10, seed=42)
+    cov.append(r["coverage"])
+    avg_size.append(float(np.mean([len(s) for s in r["prediction_sets"]])))
+
+x = np.arange(len(clfs))
+f, ax = fig()
+ax.bar(x - 0.2, cov, width=0.4, color="#3f51b5", alpha=0.85, label="coverage")
+ax.axhline(0.9, color="#6c757d", ls="--", lw=1)
+ax2 = ax.twinx()
+ax2.bar(x + 0.2, avg_size, width=0.4, color="#e8710a", alpha=0.85, label="avg set size")
+ax.set_xticks(x)
+ax.set_xticklabels([c.upper() for c in clfs])
+ax.set(title="Conformal classification across base classifiers (90% nominal)",
+       ylabel="empirical coverage")
+ax2.set_ylabel("average set size")
+ax.legend(loc="lower left", fontsize=8)
+ax2.legend(loc="lower right", fontsize=8)
+print(render(f))
+```
+
+LDA, QDA and kNN all cover at or above the 90% target; on well-separated classes each mostly
+returns singleton sets. The classifier to prefer is the one giving the smallest sets on
+*your* data — conformal handles the coverage either way.
+
+!!! note "No scoring-rule choice in the Python binding"
+    The R package exposes a `score.type` argument (LAC vs. APS) and CV+/generic classification
+    variants. The Python `conformal_classif` currently offers only the default (LAC-style)
+    split-conformal score and no `score_type` / CV+ arguments, so those comparisons are not
+    reproduced here.
+
 !!! note "Marginal, not conditional"
     The guarantee is *marginal*: coverage holds on average over all test curves. It does not
     promise $1-\alpha$ coverage within each class or within any subgroup separately. Small
