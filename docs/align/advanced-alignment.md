@@ -94,7 +94,10 @@ Elastic depth is covered in detail, with figures, on the [Shape Analysis](shape-
 
 ## 3. Outlier detection (amplitude vs. phase)
 
-`elastic_outlier_detection` flags curves whose elastic distance to a robust reference exceeds a Tukey-style fence, and returns the amplitude and phase distance matrices so you can classify each outlier by *type* -- unusual shape, unusual timing, or both.
+`elastic_outlier_detection` returns, for every curve, its **amplitude distance** (how unusual its *shape* is) and its **phase distance** (how unusual its *timing* is) relative to a robust reference. Classifying by type means fencing each of these separately -- a plain elastic-distance fence alone will not do it.
+
+!!! warning "The elastic distance is phase-invariant"
+    `out["distances"]` (and the default `out["outlier_indices"]`) measure the **amplitude** distance, which is invariant to time-warping. A curve that is only *shifted in time* has a near-zero amplitude distance, so it slips through that fence. To catch timing outliers you must look at `out["phase_distances"]`. Below we inject one amplitude outlier (curve 3, an enlarged bump) and one phase outlier (curve 7, a time-shifted copy) and recover **both** from the amplitude-vs-phase plane.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -107,33 +110,48 @@ t = np.linspace(0, 1, m)
 base = np.exp(-((t - 0.5) ** 2) / (2 * 0.12 ** 2))
 data = np.array([rng.normal(1, 0.05) * np.interp(
     t, np.clip(t + rng.normal(0, 0.03), 0, 1), base) for _ in range(n)])
-data[3] *= 1.8                       # amplitude outlier
-data[7] = np.interp(t, np.clip(t - 0.18, 0, 1), base)  # phase outlier
+data[3] *= 1.8                                         # amplitude (shape) outlier
+data[7] = np.interp(t, np.clip(t - 0.18, 0, 1), base)  # phase (timing) outlier
 
 out = elastic_outlier_detection(data, t, alpha=0.05, use_median=True)
-idx = list(np.asarray(out["outlier_indices"], dtype=int))
-dist = np.asarray(out["distances"])
-thr = float(out["threshold"])
+amp = np.asarray(out["amplitude_distances"])   # (n,) shape distance to the reference
+pha = np.asarray(out["phase_distances"])       # (n,) timing distance to the reference
+
+def fence(x):                                  # Tukey upper fence
+    q1, q3 = np.percentile(x, [25, 75]); return q3 + 1.5 * (q3 - q1)
+fa, fp = fence(amp), fence(pha)
+amp_out = np.where(amp > fa)[0]                 # unusual shape
+pha_out = np.where(pha > fp)[0]                 # unusual timing
 
 f, ax = fig()
-mask = np.zeros(n, bool); mask[idx] = True
-ax.plot(t, data[~mask].T, color="#adb5bd", lw=0.8, alpha=0.5)
-for i in idx:
-    ax.plot(t, data[i], color="#dc3545", lw=2.0, label=f"outlier {i}")
-ax.set(title=f"Elastic outliers (threshold d={thr:.3f})",
-       xlabel="t", ylabel="f(t)")
+ax.scatter(amp, pha, s=26, color="#adb5bd", zorder=2)
+ax.axvline(fa, color="#3f51b5", ls="--", lw=1, label="amplitude fence")
+ax.axhline(fp, color="#e8710a", ls="--", lw=1, label="phase fence")
+for i in amp_out:
+    ax.scatter(amp[i], pha[i], s=70, color="#3f51b5", zorder=3)
+    ax.annotate(f"{i} · shape", (amp[i], pha[i]), (6, 4),
+                textcoords="offset points", fontsize=8, color="#3f51b5")
+for i in pha_out:
+    ax.scatter(amp[i], pha[i], s=70, color="#e8710a", zorder=3)
+    ax.annotate(f"{i} · timing", (amp[i], pha[i]), (6, -11),
+                textcoords="offset points", fontsize=8, color="#e8710a")
+ax.set(title="Outlier type: amplitude (shape) vs phase (timing)",
+       xlabel="amplitude distance", ylabel="phase distance")
 ax.legend(fontsize=8)
 print(render(f))
 
-print("outlier indices:", idx)
+print("shape (amplitude) outliers:", list(amp_out),
+      " | timing (phase) outliers:", list(pha_out))
 ```
+
+Curve 3 lands far to the right (large amplitude distance -> a **shape** outlier) while curve 7 lands high up (large phase distance -> a **timing** outlier). Neither fence alone finds both; the amplitude-vs-phase plane separates them cleanly.
 
 | Key | Description |
 |-----|-------------|
-| `outlier_indices` | Indices flagged as outliers |
-| `distances` | Elastic distance of each curve to the reference, shape `(n,)` |
-| `threshold` | Tukey fence used |
-| `amplitude_distances` / `phase_distances` | Pairwise decomposed distances, shape `(n, n)` |
+| `outlier_indices` | Curves past the **amplitude** fence (shape outliers only) |
+| `distances` | Amplitude (elastic) distance of each curve to the reference, shape `(n,)` |
+| `threshold` | Tukey fence on `distances` |
+| `amplitude_distances` / `phase_distances` | Per-curve shape / timing distance to the reference, each shape `(n,)` |
 
 ---
 
@@ -228,19 +246,39 @@ print(render(f))
 
 ## 6. Multiresolution alignment (long curves)
 
-Dynamic programming is $O(m^2)$ per pair, slow for long grids. `elastic_align_pair_multires` aligns a coarsened copy first, then refines on the full grid -- faster and more robust to local minima on long, oscillatory curves.
+Dynamic programming is $O(m^2)$ per pair, slow for long grids. `elastic_align_pair_multires` aligns a coarsened copy first, then refines on the full grid -- faster and more robust to local minima on long, oscillatory curves. Below, a curve on a 400-point grid is aligned coarse-to-fine and timed against the exact DP solver.
 
-```python
-from fdars.alignment import elastic_align_pair_multires
+```python exec="1" html="1" source="above"
+import numpy as np
+from time import perf_counter
+from docs_fig import fig, render
+from fdars.alignment import elastic_align_pair_multires, elastic_align_pair
 
-res = elastic_align_pair_multires(
-    f2, f1, t,
-    coarsen_factor=4,    # downsample by 4x for the coarse solve
-    n_refine_steps=10,   # gradient refinement steps
-    step_size=0.01,
-    lambda_=0.0,
-)
-gamma = res["gamma"]; distance = res["distance"]
+m = 400                                    # long, oscillatory grid
+t = np.linspace(0, 1, m)
+base = np.sin(2 * np.pi * 2 * t) + 0.5 * np.sin(2 * np.pi * 5 * t)
+f1 = base
+f2 = np.interp(t, np.clip(t + 0.09 * np.sin(np.pi * t), 0, 1), base)   # nonlinear phase distortion
+
+t0 = perf_counter()
+res = elastic_align_pair_multires(f2, f1, t, coarsen_factor=2,
+                                  n_refine_steps=40, step_size=0.1)
+t_mr = perf_counter() - t0
+f2_aligned = np.asarray(res["f_aligned"]); gamma = np.asarray(res["gamma"])
+
+t0 = perf_counter(); elastic_align_pair(f2, f1, t); t_dp = perf_counter() - t0
+
+f, (a1, a2) = fig(ncols=2, figsize=(9.5, 4.0))
+a1.plot(t, f1, color="#6c757d", lw=1.4, label="f1 (reference)")
+a1.plot(t, f2, color="#dc3545", lw=1.1, ls="--", alpha=0.8, label="f2 (distorted)")
+a1.plot(t, f2_aligned, color="#fd7e14", lw=1.8, label="f2 (aligned)")
+a1.set(title=f"Long curves (m={m}) aligned coarse-to-fine", xlabel="t", ylabel="f(t)")
+a1.legend(fontsize=8)
+a2.plot(t, gamma, color="#fd7e14", lw=2)
+a2.plot([0, 1], [0, 1], color="#6c757d", ls="--", lw=1)
+a2.set(title=f"Warp γ  ({t_dp / t_mr:.0f}× faster than exact DP)",
+       xlabel="t", ylabel="γ(t)", aspect="equal")
+print(render(f))
 ```
 
 | Parameter | Description |
@@ -284,17 +322,38 @@ Returns the usual `f_aligned`, `gamma`, `distance`, plus `optimal_rotation`.
 
 ## 8. Partial matching (subsequence search)
 
-When only a *portion* of a longer target matches a shorter query, full alignment is wrong. `elastic_partial_match` finds the best-aligned sub-interval of the target.
+When only a *portion* of a longer target matches a shorter query, full alignment is wrong. `elastic_partial_match` finds the best-aligned sub-interval of the target. Here a short query pattern is hidden (time-warped and buried in noise) inside a longer target, and the search recovers exactly where it sits.
 
-```python
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
 from fdars.alignment import elastic_partial_match
 
-template = data[0][:60]     # a short query
-target   = data[1]          # a longer curve to search
+# short query pattern on its own grid
+tt = np.linspace(0, 1, 80)
+template = np.exp(-((tt - 0.5) ** 2) / (2 * 0.14 ** 2)) * np.sin(2 * np.pi * 2 * tt)
 
-pm = elastic_partial_match(template, target, t[:60], t, min_span=0.2)
-print(f"Match: index {pm['start_index']}..{pm['end_index']} "
-      f"({pm['domain_fraction']:.1%} of the target), d={pm['distance']:.4f}")
+# longer, noisy target; the pattern is embedded (warped) on the sub-interval [0.45, 0.75]
+tg = np.linspace(0, 1, 300)
+rng = np.random.default_rng(0)
+target = 0.15 * rng.standard_normal(300)
+seg = (tg >= 0.45) & (tg <= 0.75); s = (tg[seg] - 0.45) / 0.30
+target[seg] += 1.2 * np.interp(np.clip(s + 0.05 * np.sin(np.pi * s), 0, 1), tt, template)
+
+pm = elastic_partial_match(template, target, tt, tg, min_span=0.25)
+i0, i1 = pm["start_index"], pm["end_index"]
+
+f, ax = fig()
+ax.plot(tg, target, color="#adb5bd", lw=1, label="target (long)")
+ax.plot(tg[i0:i1 + 1], target[i0:i1 + 1], color="#fd7e14", lw=2.4, label="matched sub-interval")
+ax.axvspan(tg[i0], tg[i1], color="#fd7e14", alpha=0.10)
+ax.axvspan(0.45, 0.75, color="#198754", alpha=0.06)     # true location (green)
+ax.set(title=f"Query found in {pm['domain_fraction']:.0%} of the target  (d={pm['distance']:.2f})",
+       xlabel="t", ylabel="f(t)")
+ax.legend(fontsize=8)
+print(render(f))
+
+print(f"matched target indices {i0}..{i1}  (t = {tg[i0]:.2f}..{tg[i1]:.2f}; planted at 0.45..0.75)")
 ```
 
 | Key | Description |
