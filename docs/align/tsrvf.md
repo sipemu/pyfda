@@ -38,6 +38,14 @@ print(render(f))
 
 ---
 
+## How it works (intuition)
+
+After elastic alignment the curve *shapes* live on a curved surface -- the quotient manifold $\mathcal{F}/\Gamma$. Ordinary statistics assumes flat, Euclidean data, so applying PCA or regression directly distorts the geometry. The TSRVF fixes this by projecting each curve onto a flat tangent plane at the mean shape -- like laying a flat map tangent to the globe at a single point. Near the point of contact the map faithfully approximates the sphere.
+
+Each curve becomes a **tangent vector** measuring its deviation from the mean shape, and these vectors live in ordinary Euclidean space. That unlocks PCA (to find the dominant modes of shape variation), regression (tangent vectors as predictors), and clustering/classification with any Euclidean method. The projection is invertible, so tangent vectors -- or PC scores, or model predictions -- can be mapped back onto the manifold to reconstruct curves.
+
+---
+
 ## Concepts
 
 ### From SRSF to a shared tangent space
@@ -62,6 +70,22 @@ The TSRVF construction fixes this in two steps:
    are the **tangent vectors** returned by the transform. They live in a single Euclidean space $T_{\mu_q}$, so their sample mean, covariance, and principal components are meaningful.
 
 Because $v_i$ are ordinary vectors, downstream analysis -- regression on scores, Gaussian modelling, hypothesis tests -- can proceed with classical multivariate tools while still respecting the elastic geometry that generated the data.
+
+### The log and exp maps on the sphere
+
+Unit SRSFs live on the Hilbert sphere $\mathbb{S}^\infty\subset L^2$, where the log map has a closed form. Writing $\tilde q_i=(q_i\circ\gamma_i)\sqrt{\dot\gamma_i}$ for the aligned SRSF, $\bar q$ for the mean SRSF, and $\theta_i=\cos^{-1}\langle\tilde q_i,\bar q\rangle_{L^2}$ for the geodesic angle between them, the tangent vector is
+
+$$
+v_i = \log_{\bar q}(\tilde q_i) = \frac{\theta_i}{\sin\theta_i}\,\big(\tilde q_i - \cos\theta_i\,\bar q\big),
+$$
+
+which is orthogonal to $\bar q$ and satisfies $\lVert v_i\rVert_{L^2}=\theta_i$, so tangent-space distances equal geodesic distances *exactly at* the mean and approximately nearby. The inverse (exponential) map reconstructs the aligned SRSF from any tangent vector $v$,
+
+$$
+\tilde q = \exp_{\bar q}(v) = \cos(\lVert v\rVert)\,\bar q + \sin(\lVert v\rVert)\,\frac{v}{\lVert v\rVert},
+$$
+
+and `srsf_inverse` then turns $\tilde q$ back into a curve (using the recovered $f_i(0)$). This exp map is exactly the reconstruction used in the [Inverse transform](#inverse-transform-reconstruction) section below.
 
 ### Log-map vs. shooting representation
 
@@ -165,10 +189,120 @@ print(render(f))
 
 The scores are ordinary coordinates: cluster them, regress a response on them, or feed them to a Gaussian model. Because they were computed after transport to $T_{\mu_q}$, distances between scores approximate elastic distances between the original curves.
 
-!!! info "Relationship to elastic FPCA"
-    `tsrvf_transform` supplies the transported representation that vertical (amplitude) FPCA operates on. If you want ready-made eigenfunctions and cumulative-variance summaries, use [`vert_fpca`](shape-analysis.md#elastic-fpca); use the raw tangent vectors here when you need full control over the downstream linear model.
-
 !!! tip "Why transport at all?"
     Averaging SRVFs without alignment reintroduces phase blur. Transport to a *common* base point is what makes the tangent vectors comparable -- it is the step that turns a curved problem into a flat one.
 
+---
+
+## Raw FPCA vs. TSRVF FPCA
+
+The payoff of transport is dimensionality. Standard FPCA on *unaligned* curves conflates amplitude and phase, so variance spreads across many components. TSRVF FPCA operates on aligned shapes, so the components capture amplitude variation alone -- and the cumulative-variance curve rises faster, needing fewer components for the same coverage.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import tsrvf_transform
+
+rng = np.random.default_rng(42)
+n, m = 24, 100
+t = np.linspace(0, 1, m)
+# amplitude + phase variation on a common shape
+data = np.zeros((n, m))
+for i in range(n):
+    amp = rng.normal(1.0, 0.2)
+    shift = rng.uniform(-0.1, 0.1)
+    data[i] = amp * np.sin(2 * np.pi * (t - shift))
+
+def cum_var(X):
+    Xc = X - X.mean(0)
+    s = np.linalg.svd(Xc, compute_uv=False)
+    return np.cumsum(s ** 2) / np.sum(s ** 2)
+
+raw = cum_var(data)                                    # FPCA on unaligned curves
+V = np.asarray(tsrvf_transform(data, t, max_iter=20, tol=1e-4)["tangent_vectors"])
+tsrvf = cum_var(V)                                     # FPCA on tangent vectors
+
+k = np.arange(1, 6)
+f, ax = fig()
+ax.plot(k, 100 * raw[:5], "o-", color="#6c757d", lw=1.8, label="Raw FPCA")
+ax.plot(k, 100 * tsrvf[:5], "o-", color="#3f51b5", lw=1.8, label="TSRVF FPCA")
+ax.set(title="Cumulative variance explained", xlabel="number of PCs",
+       ylabel="cumulative % variance", ylim=(None, 101))
+ax.legend(fontsize=9)
+print(render(f))
+
+print(f"PCs to reach 95%  -- raw: {int(np.searchsorted(raw, 0.95)) + 1}, "
+      f"TSRVF: {int(np.searchsorted(tsrvf, 0.95)) + 1}")
+```
+
+TSRVF FPCA typically needs fewer components: it has already removed phase variation, leaving lower-dimensional amplitude variation behind.
+
+---
+
+## Inverse transform (reconstruction)
+
+The transform is invertible -- aligned curves can be rebuilt from their tangent vectors via the [exponential map](#the-log-and-exp-maps-on-the-sphere). There is **no dedicated `tsrvf_inverse` binding** in the Python surface, but the reconstruction is two transparent lines: apply the exp map to get the aligned SRSF, then `srsf_inverse` (with the recovered initial value) to get the curve.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import tsrvf_transform, srsf_inverse
+
+rng = np.random.default_rng(4)
+n, m = 12, 100
+t = np.linspace(0, 1, m)
+base = np.sin(2 * np.pi * t) + 0.5 * np.sin(4 * np.pi * t)
+data = np.zeros((n, m))
+for i in range(n):
+    warp = t ** rng.uniform(0.7, 1.5)
+    data[i] = np.interp(t, (warp - warp.min()) / np.ptp(warp), base)
+
+res = tsrvf_transform(data, t, max_iter=20, tol=1e-4)
+V = np.asarray(res["tangent_vectors"])
+mu_q = np.asarray(res["mean_srsf"])
+iv = np.asarray(res["initial_values"])
+
+def exp_map(v, mu_q, t):
+    norm = np.sqrt(np.trapezoid(v ** 2, t))
+    if norm < 1e-9:
+        return mu_q.copy()
+    return np.cos(norm) * mu_q + np.sin(norm) * (v / norm)
+
+recon = np.array([srsf_inverse(exp_map(V[i], mu_q, t), t, initial_value=float(iv[i]))
+                  for i in range(n)])
+mu = np.asarray(res["mean"])
+
+f, ax = fig()
+ax.plot(t, recon.T, color="#198754", lw=1, alpha=0.5)
+ax.plot(t, mu, color="#e8710a", lw=2.4, label="Karcher mean")
+ax.set(title="Curves reconstructed from TSRVF tangent vectors",
+       xlabel="t", ylabel="f(t)")
+ax.legend(fontsize=9)
+print(render(f))
+```
+
+Reconstruction from PC scores works the same way: form a tangent vector as mean-plus-a-few-eigenvectors, exp-map it, and invert. This is what lets you *synthesize* new aligned curves from a fitted low-dimensional model.
+
+---
+
+## When to use TSRVF
+
+| Scenario | Recommended approach |
+|----------|----------------------|
+| Exploratory alignment & visualization | [`karcher_mean`](elastic-alignment.md#group-alignment-karcher-mean) |
+| PCA on aligned data | `tsrvf_transform` + SVD (or [`vert_fpca`](shape-analysis.md#elastic-fpca)) |
+| Regression with aligned predictors | `tsrvf_transform` + standard regression on scores |
+| Clustering aligned curves | `tsrvf_transform` + any Euclidean clustering |
+| Classification | TSRVF scores as features |
+
+The one-liner: TSRVF converts a nonlinear shape-analysis problem into a standard multivariate one, at the cost of a single up-front alignment step.
+
+!!! info "Relationship to elastic FPCA"
+    `tsrvf_transform` supplies the transported representation that vertical (amplitude) FPCA operates on. If you want ready-made eigenfunctions and cumulative-variance summaries, use [`vert_fpca`](shape-analysis.md#elastic-fpca); use the raw tangent vectors here when you need full control over the downstream linear model.
+
 See also [Elastic Alignment](elastic-alignment.md) for the underlying SRSF machinery and Karcher mean, and [Shape Analysis](shape-analysis.md) for the amplitude/phase decomposition built on this representation.
+
+## References
+
+- Srivastava, A., Klassen, E., Joshi, S.H., Jermyn, I.H. (2011). *Shape analysis of elastic curves in Euclidean spaces.* IEEE TPAMI 33(7):1415-1428.
+- Srivastava, A., Klassen, E. (2016). *Functional and Shape Data Analysis.* Springer. (Exp/log maps on the SRVF sphere.)

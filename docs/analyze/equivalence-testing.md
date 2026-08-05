@@ -14,13 +14,23 @@ The functional equivalence test in `fdars` implements a **Two One-Sided Tests (T
 2. Test $H_0^-: \|\mu_1 - \mu_2\|_\infty \ge \delta$ against $H_1^-: \|\mu_1 - \mu_2\|_\infty < \delta$.
 3. If $H_0^-$ is rejected at level $\alpha$, the two groups are declared **equivalent** within margin $\delta$.
 
-The null distribution of the test statistic is estimated via a Gaussian multiplier bootstrap.
+Equivalently, the test constructs a simultaneous confidence band (SCB) for the mean
+difference $\mu_1 - \mu_2$ and declares equivalence when the *entire* band sits inside
+the corridor $[-\delta, \delta]$. The null distribution of the test statistic is
+estimated via a Gaussian multiplier bootstrap.
 
 $$
 T = \sup_{t \in \mathcal{T}} \left| \bar X_1(t) - \bar X_2(t) \right|
 $$
 
 Equivalence is concluded when $T < \delta - c_\alpha$, where $c_\alpha$ is the $(1-\alpha)$ quantile from the bootstrap.
+
+!!! note "Returned fields"
+    `equivalence_test` returns `equivalent` (bool), `p_value`, and `test_statistic`
+    (the observed sup-norm $T$). The R reference additionally prints a critical value
+    and the SCB range in its summary; the Python binding exposes the decision, the
+    p-value, and the statistic. Compare $T$ against $\delta$ directly, or sweep $\delta$
+    (below) to locate the decision threshold, which is where $c_\alpha$ effectively sits.
 
 Visually, equivalence holds when the second group's mean stays inside the $\pm\delta$
 corridor drawn around the first group's mean. The left panel shows two groups that
@@ -165,20 +175,84 @@ print(f"Case 2 — Equivalent: {r2['equivalent']}  p={r2['p_value']:.4f}")
 
 ## Sensitivity to $\delta$
 
-You can sweep over a range of margins to understand how sensitive the conclusion is:
+Because $\delta$ is a modelling choice, it is worth sweeping over a range of margins to
+locate the decision threshold -- the value of $\delta$ at which the verdict flips from
+"not equivalent" to "equivalent". Plotting the decision as a step function makes the
+threshold obvious.
 
-```python
+```python exec="1" html="1" source="above"
 import numpy as np
-from fdars import Fdata
+from docs_fig import fig, render
 from fdars.simulation import simulate
 from fdars.tolerance import equivalence_test
 
-argvals = np.linspace(0, 1, 100)
-fd_a = Fdata(simulate(50, argvals, n_basis=5, seed=1), argvals=argvals)
-fd_b = Fdata(simulate(50, argvals, n_basis=5, seed=2) + 0.3, argvals=argvals)
+rng = np.random.default_rng(1)
+t = np.linspace(0, 1, 80)
+X1 = np.array([np.sin(2 * np.pi * t) + rng.normal(0, 0.3, t.size) for _ in range(30)])
+X2 = np.array([np.sin(2 * np.pi * t) + 0.3 + rng.normal(0, 0.3, t.size) for _ in range(25)])
 
-for delta in [0.2, 0.5, 1.0, 2.0, 5.0]:
-    r = equivalence_test(fd_a.data, fd_b.data, delta=delta, nb=1000, seed=42)
-    status = "equivalent" if r["equivalent"] else "not equivalent"
-    print(f"delta={delta:.1f}  T={r['test_statistic']:.3f}  p={r['p_value']:.3f}  -> {status}")
+deltas = np.arange(0.1, 1.01, 0.05)
+decided = np.array([
+    equivalence_test(X1, X2, delta=float(d), nb=400, seed=42)["equivalent"]
+    for d in deltas
+])
+
+f, ax = fig()
+ax.step(deltas, decided.astype(int), where="post", color="#3f51b5", lw=1.6)
+ax.scatter(deltas[decided], np.ones(decided.sum()), color="#198754", zorder=3,
+           label="equivalent")
+ax.scatter(deltas[~decided], np.zeros((~decided).sum()), color="#dc3545", zorder=3,
+           label="not equivalent")
+ax.set(title="Decision as a function of the equivalence margin δ",
+       xlabel="δ", ylabel="equivalence declared", yticks=[0, 1],
+       yticklabels=["No", "Yes"])
+ax.legend(loc="center right")
+print(render(f))
 ```
+
+The step from "No" to "Yes" marks the smallest margin under which these two groups are
+declared equivalent -- a compact summary of how much difference the data can tolerate.
+
+---
+
+## One-sample test
+
+`equivalence_test_one_sample` tests whether a *single* sample's mean is equivalent to a
+known reference function $\mu_0$ -- for example, checking that a new production run
+matches a fixed specification curve. The hypotheses and TOST machinery are identical;
+only the second group is replaced by the fixed target.
+
+```python exec="1" source="above"
+import numpy as np
+from fdars.tolerance import equivalence_test_one_sample
+
+rng = np.random.default_rng(42)
+t = np.linspace(0, 1, 80)
+X = np.array([np.sin(2 * np.pi * t) + rng.normal(0, 0.3, t.size) for _ in range(30)])
+
+mu0 = np.sin(2 * np.pi * t)   # reference / specification curve
+res = equivalence_test_one_sample(X, mu0, delta=0.5, alpha=0.05, nb=1000, seed=42)
+
+print(f"Equivalent to reference: {res['equivalent']}")
+print(f"Sup-norm |mean - mu0|:   {res['test_statistic']:.4f}")
+print(f"p-value:                 {res['p_value']:.4f}")
+```
+
+**Parameters** (`equivalence_test_one_sample`)
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `data` | `ndarray (n, m)` | -- | Sample of functional observations |
+| `mu0` | `ndarray (m,)` | -- | Reference / target mean function |
+| `delta` | `float` | -- | Equivalence margin ($\delta > 0$) |
+| `alpha` | `float` | `0.05` | Significance level |
+| `nb` | `int` | `1000` | Bootstrap replicates |
+| `seed` | `int` | `42` | Random seed |
+
+**Returns** the same `equivalent` / `p_value` / `test_statistic` dictionary as the
+two-sample test.
+
+## See also
+
+- [Tolerance bands](tolerance-bands.md) -- the confidence and tolerance bands that
+  underlie the SCB used here.

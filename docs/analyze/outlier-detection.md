@@ -14,22 +14,40 @@ Functional outliers come in three flavours:
 
 ## LRT-based detection
 
-A likelihood-ratio test approach that compares the likelihood of the data with and without each candidate outlier. A bootstrap procedure determines the rejection threshold.
+A likelihood-ratio-test approach: each curve is scored by its distance from a robust
+(trimmed) centre, and a bootstrap procedure builds the null distribution of the *maximum*
+such distance under an outlier-free model. Curves whose distance exceeds the resulting
+threshold are flagged. It targets **magnitude** outliers -- curves shifted up or down --
+and is less sensitive to pure shape or amplitude anomalies.
 
-```python
+```python exec="1" html="1" source="above"
 import numpy as np
-from fdars import Fdata
-from fdars.simulation import simulate
-from fdars.outliers import detect_outliers_lrt
+from docs_fig import fig, render
+from fdars.outliers import detect_outliers_lrt_with_dist
 
-argvals = np.linspace(0, 1, 100)
-fd = Fdata(simulate(50, argvals, n_basis=5, seed=1), argvals=argvals)
+# Low-noise sinusoids with one magnitude outlier (curve 0 shifted up by 3)
+rng = np.random.default_rng(1)
+t = np.linspace(0, 1, 100)
+X = np.array([np.sin(2 * np.pi * t) + rng.normal(0, 0.1, t.size) for _ in range(30)])
+X[0] = np.sin(2 * np.pi * t) + 3.0
 
-# Inject two magnitude outliers
-fd.data[0] += 8.0
-fd.data[1] -= 8.0
+res = detect_outliers_lrt_with_dist(X, alpha=0.05, n_bootstrap=300, smo=0.1, seed=1)
+null = np.asarray(res["null_distribution"])
+thr = float(res["threshold"])
+flagged = np.where(np.asarray(res["outliers"]))[0]
 
-result = detect_outliers_lrt(fd.data, alpha=0.05, n_bootstrap=200, trim=0.1, smo=0.02)
+f, (a0, a1) = fig(1, 2, figsize=(11.0, 3.8))
+for i, xi in enumerate(X):
+    a0.plot(t, xi, color="#dc3545" if i in flagged else "#6c757d",
+            lw=1.6 if i in flagged else 0.7, alpha=0.9 if i in flagged else 0.35)
+a0.set(title=f"Curves (LRT flagged: {flagged.tolist()})", xlabel="t", ylabel="X(t)")
+
+a1.hist(null, bins=25, color="#3f51b5", alpha=0.7)
+a1.axvline(thr, color="#dc3545", ls="--", lw=1.6, label=f"threshold {thr:.1f}")
+a1.set(title="Bootstrap null distribution of max distance",
+       xlabel="max distance from robust centre", ylabel="count")
+a1.legend()
+print(render(f))
 ```
 
 **Parameters**
@@ -42,18 +60,28 @@ result = detect_outliers_lrt(fd.data, alpha=0.05, n_bootstrap=200, trim=0.1, smo
 | `trim` | `float` | `0.1` | Trimming proportion for the robust mean |
 | `smo` | `float` | `0.02` | Smoothing parameter for the likelihood ratio |
 
-**Returns** a dictionary:
+`detect_outliers_lrt` returns `{"outliers": bool[n], "threshold": float}`;
+`detect_outliers_lrt_with_dist` additionally returns `null_distribution` (the bootstrap
+max-distances used to set the threshold), as plotted above.
 
-| Key | Type | Description |
-|---|---|---|
-| `outliers` | `ndarray (n,)` bool | `True` for each detected outlier |
-| `threshold` | `float` | Computed rejection threshold |
+!!! warning "The LRT can mask a lone outlier at the default smoothing"
+    Two behaviours are worth knowing before you trust a negative result:
 
-```python
-outlier_ids = np.where(result["outliers"])[0]
-print(f"Outlier indices: {outlier_ids}")
-print(f"Threshold: {result['threshold']:.4f}")
-```
+    - **Smoothing matters.** With the default `smo=0.02`, even a large single magnitude
+      outlier can go undetected; raising `smo` to about `0.1` restores detection in the
+      example above. Sweep `smo` if the LRT reports nothing.
+    - **Masking/swamping.** A single very extreme curve inflates the bootstrap null (it
+      is resampled into the reference), pushing the threshold up so far that it hides
+      itself. This is a known limitation of single-pass outlier tests; corroborate the LRT
+      with the outliergram and the magnitude--shape plot below rather than relying on it
+      alone.
+
+!!! note "Depth-based detectors are R-only for now"
+    The R reference also offers depth-based detectors (`outliers.depth.pond`,
+    `outliers.depth.trim`) that flag curves with unusually low functional depth. These have
+    **no Python binding** in the current `fdars` build. You can approximate the idea with
+    `fdars.depth` (e.g. `modified_band_1d`) plus a quantile/MAD cutoff on the depths, but
+    there is no packaged one-call equivalent yet.
 
 ---
 
@@ -184,80 +212,91 @@ print(render(f))
 
 ---
 
+## The three outlier types, in isolation
+
+To see which method responds to which anomaly, inject a *single* outlier of each type
+into an otherwise clean low-noise sinusoidal sample and show all three side by side: a
+magnitude shift (+3), a shape inversion, and a 3x amplitude scaling.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+
+t = np.linspace(0, 1, 100)
+
+def clean(seed, n=30):
+    rng = np.random.default_rng(seed)
+    return np.array([np.sin(2 * np.pi * t) + rng.normal(0, 0.1, t.size) for _ in range(n)])
+
+cases = [
+    ("Magnitude (+3 shift)", lambda X: X.__setitem__(0, np.sin(2 * np.pi * t) + 3.0)),
+    ("Shape (inverted)",     lambda X: X.__setitem__(0, -np.sin(2 * np.pi * t))),
+    ("Amplitude (3x)",       lambda X: X.__setitem__(0, 3.0 * np.sin(2 * np.pi * t))),
+]
+
+f, axes = fig(1, 3, figsize=(12, 3.4), sharex=True)
+for ax, (title, inject) in zip(axes, cases):
+    X = clean(7)
+    inject(X)
+    ax.plot(t, X[1:].T, color="#6c757d", lw=0.6, alpha=0.4)
+    ax.plot(t, X[0], color="#dc3545", lw=2.0, label="outlier")
+    ax.set(title=title, xlabel="t")
+    ax.legend(loc="upper right")
+axes[0].set_ylabel("X(t)")
+print(render(f))
+```
+
+The magnitude outlier stands off vertically (LRT territory), the shape outlier tracks the
+same level but runs anti-phase (outliergram territory), and the amplitude outlier keeps
+the same phase but oscillates harder. No single detector is best at all three, which is
+why the recommendation below is to run more than one.
+
+---
+
 ## Full example -- detect and visualize outliers
 
-```python
+Run all three detectors on the same contaminated sample and compare what each flags.
+We use a low-noise sinusoidal base (the regime where the LRT is well-behaved) with one
+magnitude, one shape, and one amplitude outlier.
+
+```python exec="1" source="above"
 import numpy as np
-from fdars import Fdata
-from fdars.simulation import simulate
 from fdars.outliers import detect_outliers_lrt, outliergram, magnitude_shape
 
-# ── 1. Generate clean data + outliers ─────────────────────────
-argvals = np.linspace(0, 1, 100)
-fd = Fdata(simulate(50, argvals, n_basis=5, seed=42), argvals=argvals)
+t = np.linspace(0, 1, 100)
+rng = np.random.default_rng(42)
+X = np.array([np.sin(2 * np.pi * t) + rng.normal(0, 0.1, t.size) for _ in range(30)])
+X[0] = np.sin(2 * np.pi * t) + 3.0     # magnitude outlier
+X[1] = -np.sin(2 * np.pi * t)          # shape outlier (inverted)
+X[2] = 3.0 * np.sin(2 * np.pi * t)     # amplitude outlier
 
-# Magnitude outlier
-fd.data[0] += 7.0
+# LRT (raise smo so a lone magnitude outlier is not masked)
+lrt = detect_outliers_lrt(X, alpha=0.05, n_bootstrap=300, smo=0.1)
+print("LRT outliers        :", np.where(lrt["outliers"])[0].tolist())
 
-# Shape outlier (reversed curve)
-fd.data[1] = -fd.data[1]
+# Outliergram (shape)
+og = outliergram(X, factor=1.5)
+print("Outliergram outliers:", np.where(np.asarray(og["outliers"]))[0].tolist())
 
-# Amplitude outlier (exaggerated)
-fd.data[2] *= 3.0
-
-# ── 2. LRT detection ─────────────────────────────────────────
-lrt = detect_outliers_lrt(fd.data, alpha=0.05, n_bootstrap=200)
-print("LRT outliers:", np.where(lrt["outliers"])[0])
-
-# ── 3. Outliergram ───────────────────────────────────────────
-og = outliergram(fd.data, factor=1.5)
-print("Outliergram outliers:", np.where(og["outliers"])[0])
-
-# ── 4. Magnitude-shape ──────────────────────────────────────
-ms = magnitude_shape(fd.data)
-print(f"Top magnitude scores: indices {np.argsort(ms['magnitude'])[-3:][::-1]}")
-print(f"Top shape scores:     indices {np.argsort(ms['shape'])[-3:][::-1]}")
-
-# ── 5. Visualize (optional) ─────────────────────────────────
-try:
-    import matplotlib.pyplot as plt
-
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-
-    # Panel 1: data with LRT outliers highlighted
-    ax = axes[0]
-    for i in range(len(fd)):
-        color = "red" if lrt["outliers"][i] else "steelblue"
-        alpha = 1.0 if lrt["outliers"][i] else 0.15
-        ax.plot(fd.argvals, fd.data[i], color=color, alpha=alpha, linewidth=0.8)
-    ax.set_title("LRT outliers")
-
-    # Panel 2: outliergram
-    ax = axes[1]
-    colors = ["red" if o else "steelblue" for o in og["outliers"]]
-    ax.scatter(og["mei"], og["mbd"], c=colors, s=20)
-    ax.set_xlabel("MEI")
-    ax.set_ylabel("MBD")
-    ax.set_title("Outliergram")
-
-    # Panel 3: magnitude vs shape
-    ax = axes[2]
-    ax.scatter(ms["magnitude"], ms["shape"], s=20, c="steelblue")
-    for idx in [0, 1, 2]:
-        ax.annotate(str(idx), (ms["magnitude"][idx], ms["shape"][idx]),
-                    fontsize=8, color="red")
-    ax.set_xlabel("Magnitude outlyingness")
-    ax.set_ylabel("Shape outlyingness")
-    ax.set_title("Magnitude-Shape plot")
-
-    plt.tight_layout()
-    plt.savefig("outlier_detection.png", dpi=150)
-    plt.show()
-except ImportError:
-    pass
+# Magnitude-shape ranking
+ms = magnitude_shape(X)
+mag, shp = np.asarray(ms["magnitude"]), np.asarray(ms["shape"])
+print("Top |magnitude| idx :", np.argsort(np.abs(mag))[-3:][::-1].tolist())
+print("Top |shape| idx     :", np.argsort(np.abs(shp))[-3:][::-1].tolist())
 ```
 
 !!! info "Which method to use?"
-    - **LRT**: best all-round choice for magnitude outliers in moderate samples.
-    - **Outliergram**: effective for shape outliers; provides an interpretable 2D plot.
-    - **Magnitude-shape**: decomposes outlyingness into two axes, useful when you need to distinguish *why* a curve is outlying.
+    - **LRT** (`detect_outliers_lrt`): magnitude outliers, but tune `smo` (≈0.1) and treat a
+      negative result cautiously (masking). Use `detect_outliers_lrt_with_dist` when you
+      want to see the bootstrap null.
+    - **Outliergram** (`outliergram`): the go-to for shape outliers; interpretable 2D plot.
+    - **Magnitude-shape** (`magnitude_shape`): decomposes outlyingness onto two axes, so you
+      can tell *why* a curve is outlying.
+    - Run at least two, and corroborate. No single functional detector catches every
+      outlier type.
+
+## See also
+
+- [Tolerance bands](tolerance-bands.md) -- a curve outside a tolerance band is, by
+  construction, an outlier relative to the fitted population.
+- `fdars.depth` -- the band-depth and epigraph-index machinery underlying the outliergram.

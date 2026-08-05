@@ -261,6 +261,112 @@ print(render(f))
 
 ---
 
+## Detrend first: trends mask seasonality
+
+A strong trend swamps the periodic component: period detection returns the series length
+(or `nan`) and seasonal strength collapses to near zero. **Detrend before analysing.** The
+current Python build has no packaged `detrend`, so we remove a linear trend by hand with a
+least-squares fit -- after which the period and strength are recovered.
+
+```python exec="1" source="above"
+import numpy as np
+from fdars.seasonal import sazed, seasonal_strength
+
+rng = np.random.default_rng(1)
+t = np.linspace(0, 20, 400)
+X = 5 + 2 * t + np.sin(2 * np.pi * t / 2.5) + rng.normal(0, 0.3, t.size)  # strong trend
+
+# Without detrending: period and strength are wrong
+p_raw = sazed(X[None, :], t)["period"]
+s_raw = seasonal_strength(X[None, :], t, period=2.5, method="variance")
+print(f"With trend   -> period={p_raw:.3f} (true 2.5), strength={s_raw:.3f}")
+
+# Manual linear detrend: subtract the least-squares line
+A = np.vstack([t, np.ones_like(t)]).T
+X_det = X - A @ np.linalg.lstsq(A, X, rcond=None)[0]
+
+p_det = sazed(X_det[None, :], t)["period"]
+s_det = seasonal_strength(X_det[None, :], t, period=2.5, method="variance")
+print(f"Detrended    -> period={p_det:.3f} (true 2.5), strength={s_det:.3f}")
+```
+
+!!! warning "No packaged detrend binding"
+    The R reference ships a `detrend()` helper (linear / polynomial / LOESS / differencing
+    / auto) and a `detrend_method` argument on many functions. Those are **not** exposed in
+    the current Python build. Detrend manually (a least-squares line as above, a polynomial
+    fit, or first differences) before calling the seasonal routines when a trend is present.
+
+---
+
+## Time-varying seasonal strength
+
+For a long record whose periodicity switches on or off, a single strength number is
+misleading. `seasonal_strength_windowed` slides a window along the series and reports the
+local strength, exposing exactly when the seasonality appears or vanishes.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.seasonal import seasonal_strength_windowed
+
+rng = np.random.default_rng(1)
+t = np.linspace(0, 40, 800)
+# Seasonal for t < 20, then pure noise
+X = np.where(t < 20,
+             np.sin(2 * np.pi * t / 2.5) + rng.normal(0, 0.2, t.size),
+             rng.normal(0, 0.5, t.size))
+
+strength = np.asarray(
+    seasonal_strength_windowed(X[None, :], t, period=2.5, window_size=10.0, method="variance"))
+
+f, (a0, a1) = fig(2, 1, figsize=(8.0, 4.6), sharex=True)
+a0.plot(t, X, color="#6c757d", lw=0.7)
+a0.axvline(20, color="#dc3545", ls="--", lw=1.4)
+a0.set(ylabel="signal", title="Seasonality stops at t = 20")
+a1.plot(t, strength, color="#3f51b5", lw=1.8)
+a1.axvline(20, color="#dc3545", ls="--", lw=1.4, label="cessation")
+a1.set(xlabel="t", ylabel="seasonal strength", ylim=(0, 1.02))
+a1.legend()
+print(render(f))
+```
+
+The strength curve stays high while the sinusoid is present and drops sharply once the
+signal becomes noise -- a direct read-out of *when* seasonality is active.
+
+---
+
+## Classifying the seasonality
+
+`classify_seasonality` combines seasonal strength with peak-timing variability to label a
+series as `StableSeasonal`, `VariableTiming`, `IntermittentSeasonal`, or `NonSeasonal`.
+
+```python exec="1" source="above"
+import numpy as np
+from fdars.seasonal import classify_seasonality
+
+rng = np.random.default_rng(0)
+t = np.linspace(0, 20, 400)
+
+signals = {
+    "clean sinusoid": np.sin(2 * np.pi * t / 2.0) + rng.normal(0, 0.05, t.size),
+    "half seasonal":  0.5 * np.sin(2 * np.pi * t / 2.0) + 0.5 * rng.normal(0, 1, t.size),
+    "pure noise":     rng.normal(0, 1, t.size),
+}
+
+for name, X in signals.items():
+    r = classify_seasonality(X[None, :], t, period=2.0)
+    print(f"{name:15s} -> {r['classification']:20s} "
+          f"strength={r['seasonal_strength']:.2f}  seasonal={r['is_seasonal']}")
+```
+
+The returned dictionary also carries `timing_variability`, `has_stable_timing`, and
+per-cycle `cycle_strengths`, so you can dig into *why* a series earned its label. For the
+raw timing analysis alone, `analyze_peak_timing` reports the mean, spread, and trend of
+peak positions across cycles; for smoothly drifting frequencies, `instantaneous_period`
+returns a Hilbert-based period at every time point (unreliable near the series ends).
+
+---
+
 ## Full example -- detect period, decompose, and measure strength
 
 ```python
@@ -295,31 +401,10 @@ print(f"Seasonal strength: {s:.3f}")
 # ── 5. Find peaks ────────────────────────────────────────────
 pk = detect_peaks(fd.data, fd.argvals, smooth_first=True, smooth_nbasis=30)
 print(f"Mean inter-peak distance: {pk['mean_period']:.2f}")
-
-# ── 6. Visualize (optional) ──────────────────────────────────
-try:
-    import matplotlib.pyplot as plt
-
-    fig, axes = plt.subplots(4, 1, figsize=(12, 8), sharex=True)
-    i = 0  # show first observation
-
-    axes[0].plot(fd.argvals, fd.data[i], linewidth=0.7)
-    axes[0].set_ylabel("Original")
-
-    axes[1].plot(fd.argvals, decomp["trend"][i])
-    axes[1].set_ylabel("Trend")
-
-    axes[2].plot(fd.argvals, decomp["seasonal"][i])
-    axes[2].set_ylabel("Seasonal")
-
-    axes[3].plot(fd.argvals, decomp["remainder"][i])
-    axes[3].set_ylabel("Remainder")
-    axes[3].set_xlabel("t")
-
-    fig.suptitle("STL Decomposition")
-    plt.tight_layout()
-    plt.savefig("seasonal_analysis.png", dpi=150)
-    plt.show()
-except ImportError:
-    pass
 ```
+
+## See also
+
+- [Covariance functions](covariance-functions.md) -- the second-order structure of a
+  functional sample, complementary to the periodic structure analysed here.
+- `fdars.basis` -- Fourier bases for smoothing periodic signals before peak detection.

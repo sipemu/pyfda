@@ -110,46 +110,60 @@ result_fcm = fuzzy_cmeans_fd(
 
 ---
 
-## Gaussian Mixture Model (GMM)
+### The fuzziness parameter $m$
 
-The GMM approach projects the functional data onto a B-spline basis, fits a multivariate Gaussian mixture in the coefficient space, and selects the best number of components via BIC.
+The fuzziness exponent controls how soft the memberships are:
 
-```python
-from fdars.clustering import gmm_cluster
+- $m \to 1^+$: memberships collapse toward hard 0/1 assignments (like k-means);
+- $m = 2$: the standard default -- soft, well-behaved memberships;
+- $m > 2$: softer, more overlapping memberships.
 
-result_gmm = gmm_cluster(
-    fd.data, fd.argvals,
-    k_range=[2, 3, 4],
-    nbasis=5,
-    max_iter=200,
-    tol=1e-6,
-    seed=42,
-)
+Sweeping $m$ shows the average maximum membership decreasing as $m$ grows -- the clusters
+become progressively fuzzier.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.clustering import fuzzy_cmeans_fd
+
+t = np.linspace(0, 1, 80)
+X = np.vstack([
+    np.asarray(simulate(20, t, n_basis=5, seed=1)),
+    np.asarray(simulate(20, t, n_basis=5, seed=2)) + 3.0,
+    np.asarray(simulate(20, t, n_basis=5, seed=3)) - 3.0,
+])
+
+ms = [1.1, 1.5, 2.0, 2.5, 3.0]
+avg_max = [
+    float(np.asarray(fuzzy_cmeans_fd(X, t, k=3, fuzziness=m, seed=42)["membership"]).max(1).mean())
+    for m in ms
+]
+
+f, ax = fig(figsize=(7.0, 3.6))
+ax.plot(ms, avg_max, "-o", color="#6f42c1", lw=1.8)
+ax.set(title="Average maximum membership vs. fuzziness m",
+       xlabel="fuzziness m", ylabel="mean of row-max membership", ylim=(0.4, 1.02))
+print(render(f))
 ```
 
-**Parameters**
+At $m = 1.1$ nearly every curve is essentially hard-assigned (mean max membership close
+to 1); by $m = 3$ the memberships are much softer.
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `data` | `ndarray (n, m)` | -- | Functional observations |
-| `argvals` | `ndarray (m,)` | -- | Evaluation grid |
-| `k_range` | `list[int]` | -- | Candidate numbers of components |
-| `nbasis` | `int` | `5` | Number of B-spline basis functions |
-| `max_iter` | `int` | `200` | Maximum EM iterations |
-| `tol` | `float` | `1e-6` | Convergence tolerance |
-| `seed` | `int` | `42` | Random seed |
+!!! tip "Membership as an outlier signal"
+    A curve with a *low* maximum membership belongs strongly to no cluster -- it sits on a
+    boundary or is an outlier. Flagging the lowest-membership decile is a cheap,
+    model-based outlier screen (see [Outlier detection](outlier-detection.md) for
+    dedicated methods).
 
-**Returns** a dictionary:
+---
 
-| Key | Shape / Type | Description |
-|---|---|---|
-| `cluster` | `(n,)` int | Cluster labels from the best model |
-| `membership` | `(n, k_best)` | Posterior membership probabilities |
-| `bic_values` | `list[(k, bic)]` | BIC for each candidate $k$ |
-| `icl_values` | `list[(k, icl)]` | ICL for each candidate $k$ |
+## Model-based clustering
 
-!!! info "BIC vs ICL"
-    BIC penalises model complexity; ICL adds an entropy penalty that favours well-separated clusters. When both agree, the choice is clear. When they disagree, ICL tends to prefer fewer, crisper clusters.
+For a *probabilistic* mixture model -- posterior membership probabilities and automatic
+selection of the number of components via BIC/ICL -- see the dedicated
+[GMM clustering](gmm-clustering.md) page (`gmm_cluster`). For clustering that first aligns
+curves to remove phase variation, see [Elastic clustering](elastic-clustering.md).
 
 ---
 
@@ -179,6 +193,12 @@ from fdars.clustering import calinski_harabasz
 ch = calinski_harabasz(dist_matrix, labels)
 print(f"Calinski-Harabasz: {ch:.1f}")
 ```
+
+!!! tip "Convenience variants that skip the distance matrix"
+    `silhouette_score_data(data, argvals, labels)` and
+    `calinski_harabasz_data(data, argvals, labels)` compute the $L^2$ distance matrix
+    internally, so you can pass the raw curves directly instead of precomputing
+    `lp_self_1d`.
 
 ---
 
@@ -246,75 +266,122 @@ ax.legend()
 print(render(f))
 ```
 
+A complementary diagnostic is the **elbow method**: plot the total within-cluster sum of
+squares (`tot_withinss`) against $k$ and look for the "elbow" where adding clusters stops
+buying much reduction in scatter. For three well-separated groups both criteria agree at
+$k = 3$.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.clustering import kmeans_fd
+
+t = np.linspace(0, 1, 80)
+X = np.vstack([
+    np.asarray(simulate(15, t, n_basis=5, seed=1)),
+    np.asarray(simulate(15, t, n_basis=5, seed=2)) + 3.0,
+    np.asarray(simulate(15, t, n_basis=5, seed=3)) - 3.0,
+])
+
+ks = list(range(1, 8))
+wss = [float(kmeans_fd(X, t, k=k, seed=42)["tot_withinss"]) for k in ks]
+
+f, ax = fig(figsize=(7.0, 3.6))
+ax.plot(ks, wss, "-o", color="#198754", lw=1.8)
+ax.axvline(3, color="#e8710a", ls="--", lw=1.2, label="elbow at k = 3")
+ax.set(title="Elbow method: total within-cluster SS vs. k",
+       xlabel="k", ylabel="tot_withinss")
+ax.legend()
+print(render(f))
+```
+
 ---
 
 ## Using different distance metrics
 
-The clustering functions use $L^2$ distance internally. To cluster with a different metric you can compute the distance matrix first, then pass the resulting labels to the quality indices.
+`kmeans_fd` uses $L^2$ distance internally. When clusters differ mainly by a *phase
+shift* (a horizontal translation), $L^2$ can be misled -- two curves that are identical
+up to a small time shift look far apart pointwise. Computing a shift-tolerant distance
+matrix (DTW, Hausdorff) and feeding the resulting labels to the quality indices lets you
+compare how well a labeling holds up under an alternative metric.
 
-```python
-from fdars.metric import dtw_self_1d, hausdorff_self_1d
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.metric import lp_self_1d, dtw_self_1d
+from fdars.clustering import silhouette_score, kmeans_fd
 
-# DTW-based distance matrix
-dist_dtw = dtw_self_1d(fd.data, p=2.0, w=10)
+rng = np.random.default_rng(456)
+t = np.linspace(0, 1, 80)
+# Two groups that differ only by a phase shift of 0.5 rad
+X = np.vstack([
+    np.array([np.sin(2 * np.pi * t) + rng.normal(0, 0.3, t.size) for _ in range(30)]),
+    np.array([np.sin(2 * np.pi * t + 0.5) + rng.normal(0, 0.3, t.size) for _ in range(30)]),
+])
+labels = np.array([0] * 30 + [1] * 30)
 
-# Hausdorff distance matrix
-dist_haus = hausdorff_self_1d(fd.data, fd.argvals)
+d_l2 = np.asarray(lp_self_1d(X, t, p=2.0))
+d_dtw = np.asarray(dtw_self_1d(X, p=2.0, w=10))
+sil_l2 = float(np.mean(np.asarray(silhouette_score(d_l2, labels))))
+sil_dtw = float(np.mean(np.asarray(silhouette_score(d_dtw, labels))))
+
+f, ax = fig(figsize=(6.5, 3.6))
+ax.bar(["L2", "DTW"], [sil_l2, sil_dtw], color=["#3f51b5", "#e8710a"], width=0.55)
+ax.set(title="Silhouette of the true labels under two metrics\n(phase-shifted groups)",
+       ylabel="mean silhouette")
+for i, v in enumerate([sil_l2, sil_dtw]):
+    ax.text(i, v, f"{v:.3f}", ha="center", va="bottom")
+print(render(f))
 ```
 
-You can then use these matrices with `silhouette_score` and `calinski_harabasz` to evaluate how well a given labeling fits under an alternative metric.
+Under DTW the two phase-shifted groups score a higher silhouette than under $L^2$,
+because DTW absorbs the timing difference. If your groups genuinely differ by *shape* and
+not by *timing*, consider the [elastic clustering](elastic-clustering.md) methods, which
+separate amplitude from phase explicitly.
 
 ---
 
-## Full example -- three-group simulation
+## Full example -- recovering three known groups
 
-```python
+With a labeled simulation we can check that k-means recovers the true partition. Cluster
+labels are arbitrary up to a permutation, so accuracy is the best match over all label
+permutations -- exactly the "confusion-matrix accuracy" used in the R reference.
+
+```python exec="1" source="above"
 import numpy as np
-from fdars import Fdata
+from itertools import permutations
 from fdars.simulation import simulate
-from fdars.clustering import kmeans_fd, fuzzy_cmeans_fd, gmm_cluster
+from fdars.clustering import kmeans_fd, fuzzy_cmeans_fd
 
-# ── Simulate three groups ─────────────────────────────────────
-argvals = np.linspace(0, 1, 100)
-g1 = simulate(30, argvals, n_basis=5, seed=10)
-g2 = simulate(30, argvals, n_basis=5, seed=20) + 4.0
-g3 = simulate(30, argvals, n_basis=5, seed=30) - 4.0
-fd = Fdata(np.vstack([g1, g2, g3]), argvals=argvals)
-true_labels = np.array([0]*30 + [1]*30 + [2]*30)
+# Three well-separated groups
+t = np.linspace(0, 1, 80)
+X = np.vstack([
+    np.asarray(simulate(30, t, n_basis=5, seed=10)),
+    np.asarray(simulate(30, t, n_basis=5, seed=20)) + 4.0,
+    np.asarray(simulate(30, t, n_basis=5, seed=30)) - 4.0,
+])
+true = np.array([0] * 30 + [1] * 30 + [2] * 30)
 
-# ── K-means ───────────────────────────────────────────────────
-km = kmeans_fd(fd.data, fd.argvals, k=3, seed=42)
+km = kmeans_fd(X, t, k=3, seed=42)
+pred = np.asarray(km["cluster"])
 print("K-means converged:", km["converged"])
 
-# ── Fuzzy C-means ─────────────────────────────────────────────
-fcm = fuzzy_cmeans_fd(fd.data, fd.argvals, k=3, seed=42)
-# Show membership entropy per observation
-entropy = -np.sum(fcm["membership"] * np.log(fcm["membership"] + 1e-12), axis=1)
+# Accuracy over the best label permutation
+acc = max(np.mean([p[c] for c in pred] == true) for p in permutations(range(3)))
+print(f"Best-match accuracy: {acc:.3f}")
+
+# Fuzzy c-means: membership entropy as an uncertainty summary
+fcm = fuzzy_cmeans_fd(X, t, k=3, seed=42)
+mem = np.asarray(fcm["membership"])
+entropy = -np.sum(mem * np.log(mem + 1e-12), axis=1)
 print(f"Mean membership entropy: {entropy.mean():.3f}")
-
-# ── GMM (auto-select k) ──────────────────────────────────────
-gm = gmm_cluster(fd.data, fd.argvals, k_range=[2, 3, 4, 5], nbasis=7, seed=42)
-print("BIC values:", gm["bic_values"])
-
-# ── Visualize cluster centers (optional) ──────────────────────
-try:
-    import matplotlib.pyplot as plt
-
-    fig, axes = plt.subplots(1, 3, figsize=(14, 4), sharey=True)
-    methods = [("K-means", km), ("Fuzzy C-means", fcm), ("GMM", gm)]
-
-    for ax, (name, res) in zip(axes, methods):
-        for i in range(3):
-            mask = res["cluster"] == i
-            ax.plot(fd.argvals, fd.data[mask].T, alpha=0.15)
-        if "centers" in res:
-            for c in res["centers"]:
-                ax.plot(fd.argvals, c, "k-", linewidth=2)
-        ax.set_title(name)
-
-    plt.tight_layout()
-    plt.savefig("clustering.png", dpi=150)
-    plt.show()
-except ImportError:
-    pass
 ```
+
+## See also
+
+- [GMM clustering](gmm-clustering.md) -- probabilistic model-based clustering with BIC/ICL
+  model selection.
+- [Elastic clustering](elastic-clustering.md) -- clustering that separates amplitude from
+  phase before grouping.
+- [Outlier detection](outlier-detection.md) -- dedicated functional outlier methods.
