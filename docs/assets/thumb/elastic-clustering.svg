@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Elastic clustering">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#6f42c1" stroke-linecap="round" fill="none" stroke-opacity=".8">
+    <path d="M30 66 C86 40 108 58 160 44" stroke-width="3"/>
+    <path d="M30 76 C82 52 112 68 160 54" stroke-width="2" stroke-opacity=".6"/>
+    <path d="M30 58 C90 32 104 50 160 36" stroke-width="2" stroke-opacity=".6"/>
+  </g>
+  <g stroke="#6f42c1" stroke-linecap="round" fill="none" stroke-opacity=".45">
+    <path d="M180 120 C232 100 256 128 298 108" stroke-width="3"/>
+    <path d="M180 130 C228 112 260 138 298 118" stroke-width="2"/>
+    <path d="M180 110 C236 90 252 118 298 98" stroke-width="2"/>
+  </g>
+  <path d="M164 78 C176 88 176 100 168 108" stroke="#6f42c1" stroke-opacity=".7" stroke-width="2" fill="none"/>
+  <path d="M162 100 L168 109 L176 104" stroke="#6f42c1" stroke-opacity=".7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

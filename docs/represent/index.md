@@ -9,38 +9,40 @@ The Represent module brings together the core tools for analyzing functional dat
 </div>
 </div>
 
-<div class="grid cards" markdown>
-
--   :material-chart-bell-curve-cumulative:{ .lg .middle } **Functional PCA**
-
-    ---
-
-    Extract the dominant modes of variation via Karhunen-Loeve decomposition. Reduce dimensionality, denoise, and build features for downstream models.
-
-    [:octicons-arrow-right-24: Functional PCA](fpca.md)
-
--   :material-sine-wave:{ .lg .middle } **Basis Representation**
-
-    ---
-
-    Project raw discrete curves onto B-spline or Fourier bases. Smooth with P-splines, select the optimal basis automatically, and convert between representations.
-
-    [:octicons-arrow-right-24: Basis Representation](basis-representation.md)
-
--   :material-layers-triple:{ .lg .middle } **Depth Functions**
-
-    ---
-
-    Rank functional observations from center to outward using 10+ depth measures. Identify the functional median, detect outliers, and build robust statistics.
-
-    [:octicons-arrow-right-24: Depth Functions](depth-functions.md)
-
--   :material-ruler:{ .lg .middle } **Distance Metrics**
-
-    ---
-
-    Compute pairwise distances between curves using $L^p$, Hausdorff, DTW, elastic, and Fourier-based metrics. Feed distance matrices into clustering, classification, and regression.
-
-    [:octicons-arrow-right-24: Distance Metrics](distance-metrics.md)
-
+<div class="fdars-gallery fdars-sec-represent">
+<a class="fdars-gallery-item" href="fpca/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/fpca.svg" alt="">
+<div class="fdars-gallery-title">Functional PCA</div>
+<div class="fdars-gallery-desc">Extract dominant modes of variation with weighted FPCA.</div>
+</a>
+<a class="fdars-gallery-item" href="elastic-fpca/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/elastic-fpca.svg" alt="">
+<div class="fdars-gallery-title">Elastic FPCA</div>
+<div class="fdars-gallery-desc">Separate amplitude and phase with horizontal, vertical, and joint FPCA.</div>
+</a>
+<a class="fdars-gallery-item" href="basis-representation/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/basis-representation.svg" alt="">
+<div class="fdars-gallery-title">Basis Representation</div>
+<div class="fdars-gallery-desc">B-spline, Fourier, and P-spline expansions with automatic selection.</div>
+</a>
+<a class="fdars-gallery-item" href="andrews-transformation/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/andrews-transformation.svg" alt="">
+<div class="fdars-gallery-title">Andrews Transformation</div>
+<div class="fdars-gallery-desc">Turn multivariate tables into curves for visual exploration.</div>
+</a>
+<a class="fdars-gallery-item" href="depth-functions/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/depth-functions.svg" alt="">
+<div class="fdars-gallery-title">Depth Functions</div>
+<div class="fdars-gallery-desc">Fraiman-Muniz, band, modal, random projection, Tukey, and spatial depth.</div>
+</a>
+<a class="fdars-gallery-item" href="streaming-depth/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/streaming-depth.svg" alt="">
+<div class="fdars-gallery-title">Streaming Depth</div>
+<div class="fdars-gallery-desc">Flag out-of-distribution curves online against a reference window.</div>
+</a>
+<a class="fdars-gallery-item" href="distance-metrics/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/distance-metrics.svg" alt="">
+<div class="fdars-gallery-title">Distance Metrics</div>
+<div class="fdars-gallery-desc">Lp, Hausdorff, DTW, Soft-DTW, Fourier, and horizontal-shift distances.</div>
+</a>
 </div>

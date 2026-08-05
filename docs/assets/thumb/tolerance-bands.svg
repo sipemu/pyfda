@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Tolerance bands">
+  <defs><linearGradient id="tb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f42c1" stop-opacity=".22"/><stop offset="1" stop-color="#6f42c1" stop-opacity=".05"/></linearGradient></defs>
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 66 C90 40 150 92 210 68 C245 54 275 78 298 62 L298 116 C275 132 245 108 210 122 C150 146 90 94 30 120 Z" fill="url(#tb)"/>
+  <path d="M30 66 C90 40 150 92 210 68 C245 54 275 78 298 62" stroke="#6f42c1" stroke-opacity=".4" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M30 120 C90 94 150 146 210 122 C245 108 275 132 298 116" stroke="#6f42c1" stroke-opacity=".4" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M30 93 C90 67 150 119 210 95 C245 81 275 105 298 89" stroke="#6f42c1" stroke-width="3" stroke-linecap="round"/>
+</svg>

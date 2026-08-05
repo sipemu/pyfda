@@ -115,10 +115,10 @@ rng = np.random.default_rng(1)
 sel = np.sort(rng.choice(V.shape[0], 30, replace=False))
 Vs = V[sel]
 
-km = karcher_mean(Vs, age, max_iter=12)
-aligned = np.asarray(km["aligned_data"])
-karcher = np.asarray(km["mean"])
-xsec_mean = Vs.mean(axis=0)                       # naive cross-sectional mean
+km = karcher_mean(Vs, age, max_iter=50)
+aligned = np.asarray(km["aligned_data"])     # curves registered to the template
+aligned_mean = aligned.mean(axis=0)          # sharpened template = mean of registered curves
+xsec_mean = Vs.mean(axis=0)                   # naive cross-sectional mean of raw curves
 
 f, (ax1, ax2) = fig(1, 2, figsize=(9.5, 3.8), sharey=True)
 ax1.plot(age, Vs.T, color="#3f51b5", lw=1, alpha=0.3)
@@ -126,22 +126,26 @@ ax1.plot(age, xsec_mean, color="#dc3545", lw=2.5, label="cross-sectional mean")
 ax1.set(title="Raw velocity + naive mean", xlabel="age", ylabel="cm/year")
 ax1.legend()
 ax2.plot(age, aligned.T, color="#198754", lw=1, alpha=0.3)
-ax2.plot(age, karcher, color="#e8710a", lw=2.5, label="Karcher (elastic) mean")
-ax2.set(title="Aligned velocity + elastic mean", xlabel="age")
+ax2.plot(age, aligned_mean, color="#e8710a", lw=2.5, label="aligned mean (template)")
+ax2.set(title="Aligned velocity + template mean", xlabel="age")
 ax2.legend()
 print(render(f))
 ```
 
-After alignment the spurts stack up, and the elastic mean (orange) keeps a
-sharp, tall peak — a faithful "template" spurt — whereas the naive
-cross-sectional mean (red) is visibly lower and wider because it averages
-misaligned peaks.
+After registration the peaks stack up, so the **mean of the aligned curves**
+(orange) is a sharp, tall template that tracks the registered sample — whereas
+the naive cross-sectional mean of the *raw* curves (red) is lower and smeared
+because it averages peaks that occur at different ages.
 
-!!! note "Convergence"
-    With only 31 (unequally spaced) age points and `max_iter=12` the Karcher
-    iteration has not fully converged (`km["converged"]` is `False` here); it
-    is capped low so the docs build stays fast. Raising `max_iter` and/or
-    smoothing the curves onto a finer grid first tightens the template further.
+!!! note "Which mean to plot"
+    `karcher_mean` also returns `km["mean"]`, the elastic (Fréchet) mean
+    reconstructed in SRSF space. On this coarse, unequally-spaced 31-point grid
+    that reconstruction does **not** converge (`km["converged"]` stays `False`
+    even at large `max_iter`) and is unreliable, so we plot the pointwise mean
+    of the registered curves `km["aligned_data"]` — the standard sharpened
+    template. Smoothing onto a finer, regular grid first makes the SRSF
+    reconstruction well-behaved. (Tracked upstream:
+    [fdars-core](https://github.com/sipemu/fdars/issues).)
 
 ## Parameters
 

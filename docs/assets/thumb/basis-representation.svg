@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Basis representation">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 150 C55 150 60 60 85 60 C110 60 115 150 140 150" stroke="#198754" stroke-opacity=".55" stroke-width="2"/>
+  <path d="M92 150 C117 150 122 48 147 48 C172 48 177 150 202 150" stroke="#198754" stroke-opacity=".55" stroke-width="2"/>
+  <path d="M154 150 C179 150 184 62 209 62 C234 62 239 150 264 150" stroke="#198754" stroke-opacity=".55" stroke-width="2"/>
+  <path d="M212 150 C232 150 236 84 256 84 C276 84 280 150 300 150" stroke="#198754" stroke-opacity=".55" stroke-width="2"/>
+  <path d="M30 128 C80 96 120 52 168 70 C214 88 252 46 298 60" stroke="#198754" stroke-width="3" stroke-linecap="round"/>
+</svg>

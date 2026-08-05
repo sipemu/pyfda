@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Andrews curves with outlier">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none" stroke-opacity=".4" stroke-width="1.8">
+    <path d="M30 96 C74 66 118 118 162 84 C206 58 250 102 298 80"/>
+    <path d="M30 100 C74 72 118 122 162 90 C206 64 250 108 298 86"/>
+    <path d="M30 92 C74 60 118 112 162 80 C206 52 250 96 298 74"/>
+    <path d="M30 104 C74 78 118 126 162 96 C206 70 250 112 298 92"/>
+  </g>
+  <path d="M30 118 C74 40 118 150 162 60 C206 132 250 44 298 128" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="162" cy="60" r="4.5" fill="#fff" stroke="#3f51b5" stroke-width="2.5"/>
+  <text x="176" y="52" fill="#3f51b5" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".8">outlier</text>
+</svg>
