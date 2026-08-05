@@ -12,7 +12,7 @@ loaded through the small helper `docs_data`.
 
 ## Alignment &amp; shape
 
-<div class="fdars-gallery" markdown>
+<div class="fdars-gallery">
 
 <a class="fdars-gallery-item" href="growth-alignment/">
 <div class="fdars-gallery-title">Growth curve alignment</div>
@@ -28,7 +28,7 @@ loaded through the small helper `docs_data`.
 
 ## Representation: Andrews curves
 
-<div class="fdars-gallery" markdown>
+<div class="fdars-gallery">
 
 <a class="fdars-gallery-item" href="andrews-wine-intro/">
 <div class="fdars-gallery-title">Andrews Wine: why curves?</div>
@@ -54,7 +54,7 @@ loaded through the small helper `docs_data`.
 
 ## Regression &amp; explainability
 
-<div class="fdars-gallery" markdown>
+<div class="fdars-gallery">
 
 <a class="fdars-gallery-item" href="tecator-regression/">
 <div class="fdars-gallery-title">Predicting fat from NIR spectra</div>
@@ -75,7 +75,7 @@ loaded through the small helper `docs_data`.
 
 ## Classification
 
-<div class="fdars-gallery" markdown>
+<div class="fdars-gallery">
 
 <a class="fdars-gallery-item" href="phoneme-shape/">
 <div class="fdars-gallery-title">Phoneme recognition</div>
@@ -86,7 +86,7 @@ loaded through the small helper `docs_data`.
 
 ## Seasonal &amp; regional analysis
 
-<div class="fdars-gallery" markdown>
+<div class="fdars-gallery">
 
 <a class="fdars-gallery-item" href="canadian-weather/">
 <div class="fdars-gallery-title">Weather curves: FPCA &amp; clustering</div>
@@ -107,7 +107,7 @@ loaded through the small helper `docs_data`.
 
 ## Process monitoring
 
-<div class="fdars-gallery" markdown>
+<div class="fdars-gallery">
 
 <a class="fdars-gallery-item" href="tecator-monitoring/">
 <div class="fdars-gallery-title">Inline spectra monitoring</div>

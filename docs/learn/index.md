@@ -21,7 +21,7 @@ Python API.
 
 ## Guides
 
-<div class="fdars-gallery" markdown>
+<div class="fdars-gallery">
 <a class="fdars-gallery-item" href="introduction/">
 <div class="fdars-gallery-title">Introduction to fdars</div>
 <div class="fdars-gallery-desc">What is functional data analysis? Understand the core concepts, learn how
