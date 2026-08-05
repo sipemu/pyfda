@@ -15,6 +15,9 @@ Each loader returns `(argvals, X, meta)`: a shared 1-D grid, an
 | `canadian_weather.csv` (+ `_precip`, `_meta`) | `load_canadian_weather()` | 35 × 365 | `CanadianWeather`, R `fda` package | GPL-2/3 |
 | `tecator.csv` | `load_tecator()` | 240 × 100 | StatLib Tecator dataset | Public domain (redistributable) |
 | `phoneme.csv` | `load_phoneme()` | 400 × 256 | ElemStatLearn phoneme data | Public / redistributable (ESL) |
+| `wine.csv` | `load_wine()` | 178 × 13 | UCI Wine dataset | CC BY 4.0 (UCI) |
+| `sonar.csv` | `load_sonar()` | 208 × 60 | UCI Connectionist Bench (Sonar) | CC BY 4.0 (UCI) |
+| _(synthetic)_ | `load_penicillin()` | 46 × 200 | Simulated in `docs_data.py` | n/a (generated) |
 
 ## Details
 
@@ -67,6 +70,33 @@ index, `X` of shape `(400, 256)`, and `meta` with `phoneme`.
 - Source: `phoneme.data` from *The Elements of Statistical Learning*
   (<https://hastie.su.domains/ElemStatLearn/>), originally the TIMIT database.
 - License: distributed with ESL for research/teaching; redistributable subset.
+
+### `wine.csv` — Wine (UCI)
+**13 chemical measurements** (alcohol, phenols, colour intensity, proline, …)
+for **178 wines** from **3 cultivars**. This is a multivariate *table*, used as
+the input to the Andrews transformation (feature vector → curve). Columns:
+`class` (1/2/3) then the 13 features. `load_wine()` returns the 13 feature names
+(not an `argvals` grid), `X` of shape `(178, 13)` (raw), and `meta` with `cultivar`.
+
+- Source: UCI ML Repository, Wine (<https://archive.ics.uci.edu/dataset/109/wine>).
+- License: CC BY 4.0 (UCI).
+
+### `sonar.csv` — Sonar (UCI Connectionist Bench)
+Sonar return **energy in 60 frequency bands** for **208 objects** — **111 mines
+(metal cylinders)** vs **97 rocks**. The 60 values form a natural spectral curve.
+Columns: `b00…b59` then `label` (`Mine`/`Rock`). `load_sonar()` returns the band
+index (1..60), `X` of shape `(208, 60)`, and `meta` with `label`.
+
+- Source: UCI ML Repository, Connectionist Bench (Sonar, Mines vs. Rocks)
+  (<https://archive.ics.uci.edu/dataset/151/connectionist+bench+sonar+mines+vs+rocks>).
+- License: CC BY 4.0 (UCI).
+
+### `load_penicillin()` — SYNTHETIC fermentation batches
+**Simulated** penicillin-concentration trajectories (no CSV; generated
+deterministically in `docs_data.py`, seed `20260805`). 40 normal + 6 faulty
+batches over a 0–400 h fermentation on a 200-point grid. Used purely to
+illustrate process monitoring; it is **not** measured data and is labelled as
+synthetic wherever it appears.
 
 ## Subsetting / substitutions
 - **Phoneme** is subset from 4509 → 400 rows (80 per class, `numpy` seed 0) to

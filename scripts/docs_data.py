@@ -131,9 +131,101 @@ def load_phoneme():
     return freq, X, meta
 
 
+def load_wine():
+    """Wine (UCI): 13 chemical measurements for 178 wines of 3 cultivars.
+
+    This is a multivariate *table*, not functional data -- it is the input to
+    the Andrews transformation (feature vector -> curve). Accordingly the first
+    return value is the list of feature names rather than an ``argvals`` grid.
+
+    Returns
+    -------
+    feature_names : list[str], length 13
+        The chemical feature names, in column order of ``X``.
+    X : np.ndarray, shape (178, 13)
+        Feature matrix, one wine per row (raw, unstandardized).
+    meta : pandas.DataFrame
+        Column ``cultivar`` (1, 2 or 3).
+    """
+    df = pd.read_csv(_path("wine.csv"))
+    feature_names = [c for c in df.columns if c != "class"]
+    X = df[feature_names].to_numpy(dtype=float)
+    meta = pd.DataFrame({"cultivar": df["class"].to_numpy(dtype=int)})
+    return feature_names, X, meta
+
+
+def load_sonar():
+    """Sonar (UCI): 60-band sonar return energies for 208 objects.
+
+    The 60 energy values across frequency bands form a natural spectral curve.
+
+    Returns
+    -------
+    band : np.ndarray, shape (60,)
+        Frequency-band index, 1..60.
+    X : np.ndarray, shape (208, 60)
+        Energy curves, one object per row (values in [0, 1]).
+    meta : pandas.DataFrame
+        Column ``label`` ("Mine" or "Rock").
+    """
+    df = pd.read_csv(_path("sonar.csv"))
+    bands = [c for c in df.columns if c != "label"]
+    X = df[bands].to_numpy(dtype=float)
+    band = np.arange(1, len(bands) + 1, dtype=float)
+    meta = df[["label"]].copy()
+    return band, X, meta
+
+
+def load_penicillin(n_normal: int = 40, n_faulty: int = 6, n_points: int = 200):
+    """SYNTHETIC penicillin-fermentation batch profiles for monitoring demos.
+
+    This dataset is *simulated* (deterministic, seeded) -- it is a stylised
+    stand-in for an industrial penicillin batch trajectory, not measured data.
+    Each curve is a batch's penicillin concentration over the fermentation, with
+    a lag, exponential growth and a stationary phase; a handful of ``faulty``
+    batches have a depressed/late trajectory to exercise process monitoring.
+
+    Returns
+    -------
+    time : np.ndarray, shape (n_points,)
+        Fermentation time in hours, 0..400.
+    X : np.ndarray, shape (n_normal + n_faulty, n_points)
+        Concentration curves, normal batches first then faulty.
+    meta : pandas.DataFrame
+        Columns ``batch`` and ``status`` ("normal"/"faulty").
+    """
+    rng = np.random.default_rng(20260805)
+    time = np.linspace(0.0, 400.0, n_points)
+
+    def _batch(k_max, t_lag, rate, noise):
+        # logistic growth after a lag, plus small multiplicative variation
+        g = k_max / (1.0 + np.exp(-rate * (time - t_lag)))
+        g *= 1.0 + noise * rng.standard_normal(n_points).cumsum() / n_points
+        return np.clip(g, 0.0, None)
+
+    rows, status = [], []
+    for _ in range(n_normal):
+        rows.append(_batch(k_max=rng.uniform(1.35, 1.55),
+                           t_lag=rng.uniform(90, 110),
+                           rate=rng.uniform(0.045, 0.055), noise=0.04))
+        status.append("normal")
+    for _ in range(n_faulty):
+        rows.append(_batch(k_max=rng.uniform(0.85, 1.05),      # depressed yield
+                           t_lag=rng.uniform(140, 175),        # late onset
+                           rate=rng.uniform(0.030, 0.042), noise=0.06))
+        status.append("faulty")
+    X = np.vstack(rows)
+    meta = pd.DataFrame({"batch": [f"B{i:02d}" for i in range(len(status))],
+                         "status": status})
+    return time, X, meta
+
+
 __all__ = [
     "load_growth",
     "load_canadian_weather",
     "load_tecator",
     "load_phoneme",
+    "load_wine",
+    "load_sonar",
+    "load_penicillin",
 ]
