@@ -74,6 +74,104 @@ The three aligners each recover a sharp two-peak mean; the constrained method ma
 
 ---
 
+## What is being compared: distances and warp metrics
+
+To compare methods *quantitatively* rather than by eye, we need the geometry underneath elastic alignment. It rests on the **square-root slope function (SRSF)**. For an absolutely continuous curve $f:[0,1]\to\mathbb{R}$,
+
+$$
+q(t) \;=\; \operatorname{sgn}\!\big(\dot f(t)\big)\,\sqrt{\,\lvert \dot f(t)\rvert\,}.
+$$
+
+The point of this transform is that the awkward, non-invariant $\mathbb{L}^2$ distance between curves becomes the well-behaved **Fisher-Rao metric**, which the SRSF turns into a plain $\mathbb{L}^2$ distance. Crucially, under a warp $\gamma$ (a boundary-preserving diffeomorphism of $[0,1]$, i.e. $\gamma(0)=0,\ \gamma(1)=1,\ \dot\gamma>0$), the SRSF transforms by the isometric group action
+
+$$
+(q\ast\gamma)(t) \;=\; q\big(\gamma(t)\big)\,\sqrt{\dot\gamma(t)} .
+$$
+
+Because the action is by isometries, $\lVert q_1\ast\gamma - q_2\ast\gamma\rVert = \lVert q_1 - q_2\rVert$, and every distance below is invariant to simultaneous rewarping.
+
+**Amplitude distance** — the residual *shape* difference after optimal time-warping. It is the Fisher-Rao distance minimized over the warping group $\Gamma$:
+
+$$
+d_a(f_1,f_2) \;=\; \min_{\gamma\in\Gamma}\; \big\lVert\, q_1 \;-\; (q_2\ast\gamma) \,\big\rVert_{\mathbb{L}^2}.
+$$
+
+This is exactly the objective elastic alignment solves by dynamic programming, so `elastic_distance` and `amplitude_distance` coincide (verify below: both return the same value).
+
+**Phase distance** — the amount of *timing* difference removed to achieve that match. Warps live on a sphere in SRSF coordinates via $\psi=\sqrt{\dot\gamma}$ with $\lVert\psi\rVert=1$, so phase difference is the geodesic (arc) distance on that sphere between the optimal warp $\gamma^\ast$ and the identity, measured through the Fisher-Rao angle:
+
+$$
+d_p(f_1,f_2) \;=\; \cos^{-1}\!\Big(\textstyle\int_0^1 \sqrt{\dot\gamma^\ast(t)}\;dt\Big).
+$$
+
+Together the pair splits total variation into *what the curve looks like* ($d_a$) and *when it happens* ($d_p$) — the amplitude-phase separation that alignment exists to produce.
+
+**Warp complexity** — how far a single warp $\gamma$ departs from doing nothing, again as a Fisher-Rao geodesic distance but now between $\gamma$ and the identity $\gamma_{\mathrm{id}}(t)=t$:
+
+$$
+c(\gamma) \;=\; d_{FR}(\gamma,\gamma_{\mathrm{id}})
+\;=\; \cos^{-1}\!\Big(\textstyle\int_0^1 \sqrt{\dot\gamma(t)}\;dt\Big)\in[0,\tfrac{\pi}{2}).
+$$
+
+Larger $c$ means more time-warping was applied; $c=0$ means the curve was already aligned.
+
+**Warp smoothness** — the *roughness* (bending energy) of a warp, penalizing kinks:
+
+$$
+s(\gamma) \;=\; \int_0^1 \big(\ddot\gamma(t)\big)^2\,dt .
+$$
+
+A smooth diffeomorphism has small $s$; a piecewise-linear landmark warp has $\ddot\gamma$ concentrated at its kinks, so its bending energy is large — the mechanistic reason landmark and elastic warps look different in the next section.
+
+The figure below computes all four quantities on the phase-varying dataset, each curve measured against the elastic Karcher mean.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import (karcher_mean, amplitude_distance, phase_distance,
+                             elastic_distance, warp_complexity, warp_smoothness)
+
+rng = np.random.default_rng(11)
+n, m = 14, 150
+t = np.linspace(0, 1, m)
+base = np.exp(-((t - 0.35) ** 2) / 0.006) + 0.8 * np.exp(-((t - 0.70) ** 2) / 0.006)
+data = np.zeros((n, m))
+for i in range(n):
+    w = t ** rng.uniform(0.7, 1.6)
+    data[i] = np.interp(t, (w - w.min()) / np.ptp(w), base)
+
+km = karcher_mean(data, t, max_iter=20)
+mu = np.asarray(km["mean"])
+gam = np.asarray(km["gammas"])
+
+amp = np.array([amplitude_distance(data[i], mu, t) for i in range(n)])
+pha = np.array([phase_distance(data[i], mu, t) for i in range(n)])
+cx = np.array([warp_complexity(gam[i], t) for i in range(n)])
+sm = np.array([warp_smoothness(gam[i], t) for i in range(n)])
+
+f, axes = fig(ncols=2, figsize=(11, 3.8))
+axes[0].scatter(amp, pha, c=cx, cmap="viridis", s=45, edgecolor="k", lw=0.4)
+axes[0].set(title="Per-curve split to the elastic mean",
+            xlabel=r"amplitude distance $d_a$", ylabel=r"phase distance $d_p$")
+cb = f.colorbar(axes[0].collections[0], ax=axes[0])
+cb.set_label("warp complexity $c(\\gamma)$", fontsize=8)
+
+axes[1].scatter(cx, sm, color="#6f42c1", s=45, edgecolor="k", lw=0.4)
+axes[1].set(title="Warp complexity vs. bending energy",
+            xlabel=r"complexity $c(\gamma)$", ylabel=r"smoothness $s(\gamma)$")
+print(render(f))
+
+# amplitude distance IS the minimized elastic distance
+d_el = np.array([elastic_distance(data[i], mu, t) for i in range(n)])
+print(f"max |amplitude_distance - elastic_distance| = {np.abs(amp - d_el).max():.2e}")
+print(f"mean phase distance d_p = {pha.mean():.4f} rad "
+      f"({np.degrees(pha.mean()):.1f} deg on the warp sphere)")
+```
+
+The left panel shows the amplitude-phase split per curve, coloured by how much warping each needed; curves needing large warps (bright) sit high on the phase axis. The right panel confirms these elastic warps are simultaneously non-trivial (positive complexity) yet smooth (modest bending energy) — the property landmark warps lack. The printout verifies $d_a$ equals the minimized elastic distance to machine precision.
+
+---
+
 ## Warping functions: the mechanism differs
 
 The warps expose the fundamental difference. Elastic produces smooth diffeomorphisms; landmark produces piecewise-linear paths kinked at the landmarks; constrained is smooth *but passes through the landmark anchors*.
@@ -129,7 +227,15 @@ The landmark warps have visible corners at the landmark times (dotted verticals)
 
 ## Quantifying alignment quality
 
-Sharper means come from lower cross-sectional variance. The **variance reduction** VR $=1-\overline{\operatorname{Var}}_{\text{aligned}}/\overline{\operatorname{Var}}_{\text{original}}$ measures how much pointwise variance each method removes. We compare all three on **two** datasets: smooth global phase shifts, and distinct independently-shifting features.
+The distances above act *per pair*; to score a whole method we aggregate. Sharper means come from lower cross-sectional variance, so the headline metric is **variance reduction**
+
+$$
+\mathrm{VR} \;=\; 1-\frac{\overline{\operatorname{Var}}_{\text{aligned}}}{\overline{\operatorname{Var}}_{\text{original}}},
+\qquad
+\overline{\operatorname{Var}} = \frac{1}{m}\sum_{j=1}^{m}\operatorname{Var}_i\!\big(f_i(t_j)\big),
+$$
+
+the fraction of mean pointwise variance each method removes ($\mathrm{VR}=1$ is perfect collapse; $\mathrm{VR}=0$ is no help). We compare all three on **two** datasets: smooth global phase shifts, and distinct independently-shifting features.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -389,3 +495,17 @@ print("variance explained (first 3 PCs):", (cum[:3] * 100).round(1))
 ---
 
 See [Elastic Alignment](elastic-alignment.md), [Advanced Elastic Alignment](advanced-alignment.md), [Landmark Registration](landmark-registration.md), and [TSRVF](tsrvf.md) for the individual methods, and [Shape Analysis](shape-analysis.md) for the amplitude/phase decomposition that alignment enables.
+
+---
+
+## References
+
+The elastic framework, SRSF transform, Fisher-Rao metric, and the amplitude/phase distances used above:
+
+- Srivastava, A. and Klassen, E. P. (2016). *Functional and Shape Data Analysis*. Springer Series in Statistics. Springer, New York. (Canonical reference for the SRSF, the Fisher-Rao metric, and the amplitude-phase geometry; see Ch. 4-8.)
+- Srivastava, A., Wu, W., Kurtek, S., Klassen, E., and Marron, J. S. (2011). *Registration of Functional Data Using Fisher-Rao Metric*. arXiv:1103.3817. (Introduces the elastic alignment objective $\min_\gamma \lVert q_1 - (q_2\ast\gamma)\rVert$ and the amplitude/phase separation.)
+- Tucker, J. D., Wu, W., and Srivastava, A. (2013). *Generative models for functional data using phase and amplitude separation*. Computational Statistics & Data Analysis, 61, 50-66. doi:10.1016/j.csda.2012.12.001. (Karcher mean under the elastic metric, variance decomposition, and the alignment-quality diagnostics.)
+- Marron, J. S., Ramsay, J. O., Sangalli, L. M., and Srivastava, A. (2015). *Functional Data Analysis of Amplitude and Phase Variation*. Statistical Science, 30(4), 468-484. doi:10.1214/15-STS524. (Survey contrasting landmark registration with metric-based elastic alignment.)
+- Kneip, A. and Gasser, T. (1992). *Statistical Tools to Analyze Data Representing a Sample of Curves*. The Annals of Statistics, 20(3), 1266-1305. (Foundational treatment of landmark registration and structural averaging.)
+
+fdars companions: `vignette("elastic-alignment")`, `vignette("landmark-registration")`, `vignette("tsrvf")`, and `vignette("distance-metrics")` in the [R package](https://sipemu.github.io/fdars-r/).

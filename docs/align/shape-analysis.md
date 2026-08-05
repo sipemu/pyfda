@@ -51,6 +51,160 @@ print(render(f))
 
 ---
 
+## The quotient geometry
+
+Shape analysis lives in a **quotient space**. Write a curve as a function $f:[0,1]\to\mathbb{R}$. The nuisance transformations form a group $\Gamma$ of orientation-preserving diffeomorphisms (warps) $\gamma:[0,1]\to[0,1]$ with $\gamma(0)=0$, $\gamma(1)=1$ and $\dot\gamma>0$. The group acts on curves by composition,
+
+$$
+(f,\gamma)\;\longmapsto\; f\circ\gamma ,
+$$
+
+and the set of all curves reachable from $f$ this way is its **orbit** $[f]=\{\,f\circ\gamma : \gamma\in\Gamma\,\}$. Two curves have the *same shape* iff they lie in the same orbit. The shape space is the quotient $\mathcal{F}/\Gamma$, and a shape distance must be a proper distance on that quotient.
+
+### Why the $\mathbb{L}^2$ metric fails
+
+The naive attempt — align by minimizing $\|f_1 - f_2\circ\gamma\|_{\mathbb{L}^2}$ over $\gamma$ — is *not* a distance on the quotient, because the $\mathbb{L}^2$ inner product is not preserved by warping:
+
+$$
+\langle f\circ\gamma,\; g\circ\gamma\rangle_{\mathbb{L}^2}
+= \int_0^1 f(\gamma(t))\,g(\gamma(t))\,dt \;\neq\; \langle f,g\rangle_{\mathbb{L}^2}.
+$$
+
+Reparameterizing both curves changes the value, so the "distance" depends on where in each orbit you happen to sit. This produces the **pinching** pathology: the optimizer buys artificially small residuals by warping mass into a thin spike. The elastic (Fisher-Rao) framework fixes this.
+
+### The square-root slope function (SRSF)
+
+Represent a curve by its **square-root slope function** (also called SRVF in the curve setting),
+
+$$
+q(t) \;=\; \operatorname{sgn}\bigl(\dot f(t)\bigr)\,\sqrt{\bigl|\dot f(t)\bigr|},
+\qquad q \in \mathbb{L}^2([0,1],\mathbb{R}),
+$$
+
+with inverse $f(t)=f(0)+\int_0^t q(s)\,|q(s)|\,ds$. The map $f\mapsto q$ trades the original curve for its (signed square-rooted) velocity. The decisive property is how the *group action transforms* in this representation. If $\tilde f = f\circ\gamma$, its SRSF is
+
+$$
+\tilde q(t) \;=\; (q\circ\gamma)(t)\,\sqrt{\dot\gamma(t)}
+\;\;=:\;\; (q,\gamma).
+$$
+
+The extra $\sqrt{\dot\gamma}$ Jacobian factor is exactly what is needed to make the action an **isometry** of $\mathbb{L}^2$:
+
+$$
+\bigl\langle (q,\gamma),\,(r,\gamma)\bigr\rangle_{\mathbb{L}^2}
+= \int_0^1 q(\gamma(t))\,r(\gamma(t))\,\dot\gamma(t)\,dt
+= \int_0^1 q(s)\,r(s)\,ds
+= \langle q,r\rangle_{\mathbb{L}^2},
+$$
+
+by the change of variables $s=\gamma(t)$. So the complicated **Fisher-Rao Riemannian metric** on curve space becomes the flat $\mathbb{L}^2$ metric on SRSF space — and warping is a norm-preserving rotation there. This is the whole point of the SRSF transform: it linearizes the elastic geometry.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import srsf_transform, reparameterize_curve
+
+t = np.linspace(0, 1, 200)
+f = np.sin(2 * np.pi * t) + 0.4 * np.sin(4 * np.pi * t)
+
+# a warp and the warped curve
+gamma = t ** 1.8
+gamma = (gamma - gamma.min()) / np.ptp(gamma)
+f_w = reparameterize_curve(f, t, gamma)
+
+q   = np.asarray(srsf_transform(f, t))
+q_w = np.asarray(srsf_transform(f_w, t))
+
+# L2 norms: preserved in SRSF space, not in curve space
+nrm = lambda a: np.sqrt(np.trapezoid(a ** 2, t))
+f_norms = (nrm(f), nrm(f_w))
+q_norms = (nrm(q), nrm(q_w))
+
+f_, (a1, a2) = fig(ncols=2, figsize=(9.8, 4.0))
+a1.plot(t, f,   color="#3f51b5", lw=2.0, label="$f$")
+a1.plot(t, f_w, color="#e8710a", lw=2.0, label=r"$f\circ\gamma$")
+a1.set(title=f"Curve space: $\\|f\\|$={f_norms[0]:.3f}, "
+             f"$\\|f\\circ\\gamma\\|$={f_norms[1]:.3f}",
+       xlabel="t", ylabel="f(t)")
+a1.legend(fontsize=9)
+
+a2.plot(t, q,   color="#3f51b5", lw=2.0, label="$q$")
+a2.plot(t, q_w, color="#e8710a", lw=2.0, label=r"$(q,\gamma)$")
+a2.set(title=f"SRSF space: $\\|q\\|$={q_norms[0]:.3f}, "
+             f"$\\|(q,\\gamma)\\|$={q_norms[1]:.3f}",
+       xlabel="t", ylabel="q(t)")
+a2.legend(fontsize=9)
+print(render(f_))
+```
+
+The two curves on the left have visibly different $\mathbb{L}^2$ norms; their SRSFs on the right have (to discretization error) the *same* norm — the $\sqrt{\dot\gamma}$ factor makes warping an isometry, which is precisely why the elastic metric behaves.
+
+### Geodesic distance in shape space
+
+On the SRSF sphere the geodesic distance between two representatives is the arc length
+
+$$
+d(q_1,q_2)=\cos^{-1}\!\Bigl(\langle q_1,q_2\rangle_{\mathbb{L}^2}\Bigr),
+$$
+
+and the **shape (elastic) distance** minimizes this over the warping orbit of one curve:
+
+$$
+d_{\mathrm{shape}}\bigl([f_1],[f_2]\bigr)
+\;=\; \inf_{\gamma\in\Gamma}\;
+d\bigl(q_1,\;(q_2,\gamma)\bigr)
+\;=\; \inf_{\gamma\in\Gamma}\;
+\cos^{-1}\!\Bigl(\bigl\langle q_1,\,(q_2\circ\gamma)\sqrt{\dot\gamma}\bigr\rangle\Bigr).
+$$
+
+Because the action is by isometries, this infimum is a genuine distance on the quotient $\mathcal{F}/\Gamma$: it is symmetric, non-negative, zero exactly when the orbits coincide, and satisfies the triangle inequality. The optimization over $\gamma$ is solved by dynamic programming. `curve_geodesic` returns the whole minimizing path, not just its endpoints.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import curve_geodesic
+
+t = np.linspace(0, 1, 120)
+f1 = np.exp(-((t - 0.35) ** 2) / 0.01)          # bump on the left
+f2 = np.exp(-((t - 0.65) ** 2) / 0.01)          # bump on the right
+
+geo = curve_geodesic(f1, f2, t, n_points=7)
+path = np.asarray(geo["curves"])                # (7, m) curves along geodesic
+s    = np.asarray(geo["parameter_values"])      # path parameter in [0, 1]
+darc = np.asarray(geo["distances"])             # cumulative arc length
+
+f_, (a1, a2) = fig(ncols=2, figsize=(9.8, 4.0))
+cmap = __import__("matplotlib").cm.viridis
+for k in range(path.shape[0]):
+    a1.plot(t, path[k], color=cmap(s[k]), lw=1.8)
+a1.plot(t, f1, color="#3f51b5", lw=2.8, label="$f_1$ (start)")
+a1.plot(t, f2, color="#e8710a", lw=2.8, label="$f_2$ (end)")
+a1.set(title="Geodesic path in shape space", xlabel="t", ylabel="f(t)")
+a1.legend(fontsize=9)
+
+a2.plot(s, darc, "o-", color="#3f51b5")
+a2.set(title="Cumulative geodesic arc length",
+       xlabel="path parameter s", ylabel="distance from start")
+print(render(f_))
+
+print(f"total shape geodesic distance: {darc[-1]:.4f}")
+```
+
+Each intermediate curve is a *shape* between the two bumps — the peak migrates continuously from left to right rather than one bump fading while the other grows (which is what a naive $\mathbb{L}^2$ straight line would do). The arc length grows roughly linearly, as expected for a constant-speed geodesic.
+
+### The Karcher mean as a shape average
+
+There is no linear "average orbit," so the **mean shape** is defined intrinsically as the Karcher (Fréchet) mean — the orbit that minimizes the sum of squared shape distances:
+
+$$
+[\mu] \;=\; \operatorname*{arg\,min}_{[f]}\;
+\sum_{i=1}^{n} d_{\mathrm{shape}}\bigl([f],[f_i]\bigr)^2 .
+$$
+
+It is computed by alternating between (i) aligning every curve's SRSF to the current mean by dynamic programming, and (ii) updating the mean to the $\mathbb{L}^2$ average of the aligned SRSFs — a gradient descent on the shape manifold. `shape_mean` and `karcher_mean` implement this; the penalty $\lambda\!\ge\!0$ regularizes the warps to prevent pinching on noisy data.
+
+---
+
 ## Shape distance (quotient space)
 
 The **shape distance** measures how different two curves are in the quotient space obtained by modding out the group of warping functions. Unlike the raw elastic distance, the shape distance factors out both amplitude scaling and phase variation, leaving only the intrinsic "shape" of the curve.
@@ -163,6 +317,55 @@ The within-group distance is smaller than the cross-group distance because the o
     - Check `shape_mean`'s `converged`; raise `max_iter` if it is `False`.
     - Use `lambda_ > 0` to prevent extreme warps on noisy or sparse data.
     - Smooth curves on a common grid before analysis, and inspect the returned `gammas` to gauge how much reparameterization was needed.
+
+### Uncertainty of the mean shape
+
+A point estimate of the mean shape is not enough — we want a **confidence band** around it. `shape_confidence_interval` bootstraps the sample: it resamples curves with replacement, recomputes the shape mean of each resample, and reports pointwise percentile bands of those bootstrap means. Because the mean is estimated *after* factoring out phase, the band reflects genuine shape (amplitude-in-quotient) uncertainty rather than being inflated by misalignment.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import shape_confidence_interval
+
+rng = np.random.default_rng(11)
+n, m = 24, 80
+t = np.linspace(0, 1, m)
+base = np.exp(-((t - 0.5) ** 2) / 0.03)         # common bump shape
+data = np.zeros((n, m))
+for i in range(n):
+    warp = np.clip(t + 0.10 * rng.standard_normal() * np.sin(np.pi * t), 0, 1)
+    data[i] = (1.0 + 0.15 * rng.standard_normal()) * np.interp(t, warp, base) \
+              + 0.03 * rng.standard_normal(m)
+
+ci = shape_confidence_interval(data, t, n_bootstrap=120, confidence_level=0.90,
+                               max_iter=12, seed=1)
+mu    = np.asarray(ci["mean"])
+lower = np.asarray(ci["lower_band"])
+upper = np.asarray(ci["upper_band"])
+
+f, ax = fig()
+ax.plot(t, data.T, color="#6c757d", lw=0.7, alpha=0.25)
+ax.fill_between(t, lower, upper, color="#e8710a", alpha=0.25,
+                label="90% bootstrap band")
+ax.plot(t, mu, color="#e8710a", lw=2.6, label="mean shape")
+ax.set(title="Mean shape with bootstrap confidence band",
+       xlabel="t", ylabel="f(t)")
+ax.legend(fontsize=9)
+print(render(f))
+
+width = float(np.trapezoid(upper - lower, t))
+print(f"mean band width (integrated): {width:.4f}")
+```
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `mean` | `ndarray (m,)` | Estimated mean shape |
+| `lower_band` | `ndarray (m,)` | Pointwise lower confidence limit |
+| `upper_band` | `ndarray (m,)` | Pointwise upper confidence limit |
+| `bootstrap_means` | `ndarray (B, m)` | The `n_bootstrap` resampled mean shapes |
+
+!!! warning "Pointwise, not simultaneous"
+    `shape_confidence_interval` returns *pointwise* percentile bands from the bootstrap distribution of the mean shape. They are not simultaneous (family-wise) bands and do not correct for multiplicity across `t`; for simultaneous coverage of an aligned mean, see the tolerance/simultaneous-band tools in `fdars.tolerance`.
 
 ---
 
@@ -396,3 +599,18 @@ print(f"Elastic median: curve {median_idx}")
 print(f"  Amp depth:  {depth['amplitude_depth'][median_idx]:.4f}")
 print(f"  Phase depth: {depth['phase_depth'][median_idx]:.4f}")
 ```
+
+---
+
+## See also
+
+- [Elastic alignment](elastic.md) — the pairwise/`karcher_mean` machinery underlying the shape mean.
+- [Amplitude & phase](amplitude-phase.md) — the separated distances that shape distance and elastic depth are built from.
+- `fdars.tolerance` — simultaneous confidence/tolerance bands for aligned means.
+
+## References
+
+1. Srivastava, A. and Klassen, E. (2016). *Functional and Shape Data Analysis*. Springer Series in Statistics. Springer, New York. — The standard reference for the SRSF/SRVF representation, the Fisher-Rao metric, and quotient-space geometry.
+2. Srivastava, A., Klassen, E., Joshi, S. H. and Jermyn, I. H. (2011). "Shape Analysis of Elastic Curves in Euclidean Spaces." *IEEE Transactions on Pattern Analysis and Machine Intelligence*, 33(7), 1415–1428. — Introduces the elastic shape metric and geodesic computation via dynamic programming.
+3. Kurtek, S., Srivastava, A., Klassen, E. and Ding, Z. (2012). "Statistical Modeling of Curves Using Shapes and Related Features." *Journal of the American Statistical Association*, 107(499), 1152–1165. — Karcher-mean estimation and statistical modeling in shape space.
+4. Tucker, J. D., Wu, W. and Srivastava, A. (2013). "Generative models for functional data using phase and amplitude separation." *Computational Statistics & Data Analysis*, 61, 50–66. — Amplitude/phase decomposition and elastic FPCA.

@@ -6,13 +6,94 @@ Many real-world functional datasets exhibit periodic patterns -- daily temperatu
 
 ![Seasonal Analysis — concept diagram](../assets/diagrams/seasonal-analysis.svg){ .fdars-diagram }
 
+## The periodogram: spectral view of a period
+
+Every period-detection method here rests on the same idea: a periodic signal concentrates its
+energy at a single frequency (and its harmonics). For a centred, uniformly-sampled series
+$x_0,\dots,x_{m-1}$ on a grid of spacing $\Delta t$, the discrete Fourier transform is
+
+$$
+X_k = \sum_{n=0}^{m-1} x_n\, e^{-2\pi i k n / m},
+\qquad k = 0,\dots,m-1 ,
+$$
+
+and the **periodogram** is its squared magnitude,
+
+$$
+I(f_k) = \frac{1}{m}\,\bigl|X_k\bigr|^2 ,
+\qquad f_k = \frac{k}{m\,\Delta t}.
+$$
+
+The frequency $\hat f = \arg\max_{f_k} I(f_k)$ that maximises spectral power gives the estimated
+period $\hat T = 1/\hat f$. `estimate_period_fft` does exactly this: it removes the mean, computes
+$I(f_k)$ with an FFT, and returns the peak. The reported `confidence` is the fraction of total
+spectral power carried by the winning peak, $I(\hat f)\big/\sum_k I(f_k)$ — a signal-to-noise
+ratio in the frequency domain.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.seasonal import estimate_period_fft
+
+rng = np.random.default_rng(3)
+t = np.linspace(0, 24, 720)
+dt = t[1] - t[0]
+# fundamental period 2.5 plus a weaker 2nd harmonic
+x = np.sin(2 * np.pi * t / 2.5) + 0.4 * np.sin(2 * np.pi * t / 1.25)
+X = x[None, :] + rng.normal(0, 0.25, (5, 720))
+
+res = estimate_period_fft(X, t)
+
+# periodogram of the (centred) sample mean, for display
+xm = X.mean(0) - X.mean()
+power = np.abs(np.fft.rfft(xm)) ** 2 / xm.size
+freqs = np.fft.rfftfreq(xm.size, d=dt)
+periods = np.divide(1.0, freqs, out=np.full_like(freqs, np.inf), where=freqs > 0)
+keep = (periods > 0.5) & (periods < 6)
+
+f, ax = fig(figsize=(7.4, 3.6))
+ax.plot(periods[keep], power[keep], color="#3f51b5", lw=1.6)
+ax.axvline(res["period"], color="#e8710a", ls="--", lw=1.5,
+           label=f"peak $\\hat T$ = {res['period']:.3f}")
+ax.axvline(2.5, color="#198754", ls=":", lw=1.4, label="true period 2.5")
+ax.set(title="Periodogram: power vs. candidate period",
+       xlabel="candidate period", ylabel="spectral power $I(f)$")
+ax.legend()
+print(render(f))
+```
+
+The dominant spike sits at the true period; the smaller companion at $1.25$ is the second
+harmonic. Naive peak-picking can be fooled by such harmonics and by spectral leakage, which is
+why the algorithms below add validation steps (autocorrelation, clustering, gradient refinement)
+on top of the raw periodogram.
+
+---
+
 ## Period detection
 
 `fdars` offers three period-detection algorithms, each with different strengths:
 
 ### SAZED
 
-SAZED (Seasonal And Zero-crossing Estimation of Periodicity via Distance) combines multiple period estimates from different signal features (zero crossings, peaks, autocorrelation) and returns a consensus period.
+SAZED (Seasonal And Zero-crossing Estimation of Periodicity via Distance) combines multiple period estimates from different signal features (zero crossings, peaks, autocorrelation) and returns a consensus period. The method is *parameter-free* by design: rather than trusting any single estimator, it forms an ensemble of periodicity cues and takes their agreement as the answer.
+
+Two of the cues have simple closed forms. If a centred signal of length $L$ (in time units)
+crosses zero $Z$ times, a pure sinusoid crosses zero twice per cycle, so
+
+$$
+\hat T_{\text{zero}} = \frac{2L}{Z}.
+$$
+
+A second cue comes from the (biased) sample **autocorrelation**
+
+$$
+\hat\rho(\tau) = \frac{\sum_{n} (x_n - \bar x)(x_{n+\tau} - \bar x)}{\sum_n (x_n - \bar x)^2},
+$$
+
+whose first prominent lag $\tau^\star>0$ estimates the period, $\hat T_{\text{acf}} = \tau^\star\,\Delta t$.
+SAZED also draws a spectral estimate from the periodogram peak above. The consensus period is the
+one to which the largest number of cues agree within the relative `tolerance`; `confidence` is that
+count divided by the number of estimators (`agreeing_components`).
 
 ```python
 import numpy as np
@@ -50,7 +131,21 @@ print(f"Agreeing comps:  {result['agreeing_components']}")
 
 ### Autoperiod
 
-Uses FFT peak detection followed by autocorrelation validation. Best for clean, well-defined periodic signals.
+Autoperiod (Vlachos, Yu & Castelli, 2005) is a two-stage estimator that pairs the frequency
+domain with the time domain to reject the spurious peaks a raw periodogram produces. Stage one
+scans the periodogram and keeps only *candidate* frequencies whose power exceeds a data-driven
+threshold — an "hint" set. Stage two validates each candidate $T_c = 1/f_c$ against the
+autocorrelation $\hat\rho(\tau)$: a genuine period sits on a **hill** (local maximum) of the ACF,
+whereas a leakage artefact does not. The surviving candidate is refined by gradient ascent on the
+ACF hill,
+
+$$
+\tau_{i+1} = \tau_i + \eta\,\frac{\mathrm{d}\hat\rho}{\mathrm{d}\tau}\Big|_{\tau_i},
+\qquad i = 1,\dots,\texttt{gradient\_steps},
+$$
+
+and the returned `fft_power` and `acf_validation` are the two evidence scores. Best for clean,
+well-defined periodic signals.
 
 ```python
 from fdars.seasonal import autoperiod
@@ -81,7 +176,14 @@ print(f"ACF validation: {result_ap['acf_validation']:.3f}")
 
 ### CFD Autoperiod
 
-A cluster-based variant of autoperiod that can detect *multiple* periodicities simultaneously.
+CFD-Autoperiod (Puech et al., 2020) extends autoperiod to signals with several concurrent
+cycles. It gathers many periodogram hints, then **clusters** the surviving candidates: periods
+within the relative `cluster_tolerance` of one another are merged, and each cluster is represented
+by its density-weighted centre. Clusters smaller than `min_cluster_size` are discarded as noise.
+Because harmonics of a true period $T$ appear near $T, T/2, T/3,\dots$, clustering collapses a
+harmonic family to one representative while genuinely distinct cycles survive as separate clusters
+— returned in `periods` with their per-cluster `confidences`. Use it when you suspect, for example,
+both a daily and a weekly rhythm in the same record.
 
 ```python
 from fdars.seasonal import cfd_autoperiod
@@ -108,6 +210,175 @@ print(f"All periods:    {result_cfd['periods']}")
 | `confidence` | `float` | Confidence for the primary period |
 | `periods` | `ndarray` | All detected periods |
 | `confidences` | `ndarray` | Confidence for each detected period |
+
+---
+
+## Lomb–Scargle periodogram
+
+The classical periodogram assumes a perfectly uniform grid. The **Lomb–Scargle** periodogram
+(Lomb, 1976; Scargle, 1982) generalises it to *unevenly sampled* data by fitting a sinusoid
+$a\cos(2\pi f t)+b\sin(2\pi f t)$ at each trial frequency by least squares. With a time offset
+$\tau$ chosen per frequency so the estimator is time-shift invariant,
+
+$$
+2\pi f\,\tau = \arctan\!\left(\frac{\sum_n \sin(4\pi f t_n)}{\sum_n \cos(4\pi f t_n)}\right),
+$$
+
+the normalised power is
+
+$$
+P_{\mathrm{LS}}(f) = \frac{1}{2}\left[
+\frac{\bigl(\sum_n x_n \cos 2\pi f (t_n-\tau)\bigr)^2}{\sum_n \cos^2 2\pi f (t_n-\tau)}
++
+\frac{\bigl(\sum_n x_n \sin 2\pi f (t_n-\tau)\bigr)^2}{\sum_n \sin^2 2\pi f (t_n-\tau)}
+\right].
+$$
+
+A tall, isolated peak in $P_{\mathrm{LS}}$ marks the dominant period. Under the null hypothesis of
+Gaussian noise, a single power value has an exponential distribution, so the **false-alarm
+probability** for the highest of $N_{\text{eff}}$ independent frequencies is approximately
+
+$$
+\mathrm{FAP} \approx 1 - \bigl(1 - e^{-P_{\max}}\bigr)^{N_{\text{eff}}} ,
+$$
+
+which `lomb_scargle_fdata` returns as `false_alarm_probability` (and `significance` $=1-\mathrm{FAP}$).
+`oversampling` controls the frequency grid density; `nyquist_factor` how far past the pseudo-Nyquist
+frequency to search.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.seasonal import lomb_scargle_fdata
+
+rng = np.random.default_rng(7)
+t = np.linspace(0, 30, 600)
+X = np.sin(2 * np.pi * t / 3.0)[None, :] + rng.normal(0, 0.4, (6, 600))
+
+ls = lomb_scargle_fdata(X, t)
+per = np.asarray(ls["periods"])
+pw = np.asarray(ls["power"])
+keep = (per > 1.0) & (per < 8.0)
+
+f, ax = fig(figsize=(7.4, 3.6))
+ax.plot(per[keep], pw[keep], color="#6f42c1", lw=1.5)
+ax.axvline(ls["peak_period"], color="#e8710a", ls="--", lw=1.5,
+           label=f"peak $T$ = {ls['peak_period']:.2f}  (FAP {ls['false_alarm_probability']:.1e})")
+ax.set(title="Lomb–Scargle periodogram",
+       xlabel="candidate period", ylabel="normalised power $P_{LS}$")
+ax.legend()
+print(render(f))
+```
+
+!!! note "Uniform grids too"
+    `fdars` samples functional data on a common grid, so Lomb–Scargle here mostly serves as a
+    robust cross-check on `estimate_period_fft` and a principled significance test (the FAP). Its
+    real advantage — gappy or irregular sampling — appears once you feed it a non-uniform
+    `argvals`.
+
+---
+
+## Matrix profile
+
+The **matrix profile** (Yeh et al., 2016) is a time-series primitive that, for every length-$w$
+window $x_{i:i+w}$ of the series, stores the *z-normalised Euclidean distance* to its nearest
+non-trivial neighbour elsewhere in the series:
+
+$$
+\mathrm{MP}[i] = \min_{\substack{j \,:\, |i-j| \ge \text{exclusion}}}
+\; d\!\left(x_{i:i+w},\, x_{j:j+w}\right),
+\qquad
+d(a,b) = \bigl\lVert \hat a - \hat b \bigr\rVert_2 ,
+$$
+
+where $\hat a = (a-\bar a)/\sigma_a$ is the z-normalisation. A window that repeats every $T$ points
+finds a near-duplicate a distance $T$ away, so the **profile-index** — the arg-min $j$ — differs
+from $i$ by a near-constant $\approx T$ across a periodic stretch. `matrix_profile_fdata` mines
+those index differences into `detected_periods` (in grid points) and a `primary_period`; low
+matrix-profile values also flag *motifs* (repeated shapes), high values flag *discords* (anomalies).
+`subsequence_length` sets $w$; `exclusion_zone` the trivial-match guard band.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.seasonal import matrix_profile_fdata
+
+rng = np.random.default_rng(11)
+t = np.linspace(0, 24, 720)
+dt = t[1] - t[0]
+X = np.sin(2 * np.pi * t / 3.0)[None, :] + rng.normal(0, 0.15, (3, 720))
+
+w = int(round(3.0 / dt))              # one period per window
+mp = matrix_profile_fdata(X, subsequence_length=w)
+prof = np.asarray(mp["profile"])
+prim_pts = mp["primary_period"]
+print(f"primary period: {prim_pts * dt:.2f} time units  (true 3.0)")
+
+f, (a0, a1) = fig(2, 1, figsize=(7.8, 4.6), sharex=False)
+a0.plot(t, X[0], color="#3f51b5", lw=0.9)
+a0.set(ylabel="signal", title="Matrix profile of a periodic curve")
+a1.plot(prof, color="#198754", lw=1.0)
+a1.set(xlabel="window index $i$", ylabel="MP[$i$]")
+print(render(f))
+```
+
+The matrix profile dips wherever a window has a close repeat (the periodic body) and spikes at
+irregularities — a robust, largely parameter-free companion to spectral period detection.
+
+---
+
+## Singular Spectrum Analysis (SSA)
+
+SSA (Golyandina, Nekrutkin & Zhigljavsky, 2001) is a non-parametric decomposition that needs no
+prior period. It embeds the series into a **trajectory matrix** of lagged windows,
+
+$$
+\mathbf{H} =
+\begin{pmatrix}
+x_1 & x_2 & \cdots & x_K \\
+x_2 & x_3 & \cdots & x_{K+1}\\
+\vdots & & \ddots & \vdots \\
+x_L & x_{L+1} & \cdots & x_N
+\end{pmatrix},
+\qquad K = N - L + 1 ,
+$$
+
+takes its singular value decomposition $\mathbf{H}=\sum_i \sqrt{\lambda_i}\,u_i v_i^{\top}$, and
+groups the rank-one terms into interpretable components before **diagonal averaging**
+(Hankelisation) turns each group back into a series. Trend components carry the largest singular
+values; an oscillation appears as a *pair* of adjacent singular values with in-quadrature
+eigenvectors. `ssa_fdata` returns `trend`, `seasonal`, and `noise` series plus the
+`singular_values` and their normalised `contributions` $\lambda_i/\sum_j \lambda_j$; `window_length`
+is $L$ and `n_components` how many leading terms to keep.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.seasonal import ssa_fdata
+
+rng = np.random.default_rng(2)
+t = np.linspace(0, 20, 600)
+X = (0.1 * t + np.sin(2 * np.pi * t / 2.5))[None, :] + rng.normal(0, 0.2, (4, 600))
+
+d = ssa_fdata(X, window_length=120, n_components=6)
+trend = np.asarray(d["trend"])
+seasonal = np.asarray(d["seasonal"])
+contrib = np.asarray(d["contributions"])
+
+f, (a0, a1) = fig(1, 2, figsize=(8.6, 3.4))
+a0.plot(t, X[0], color="#6c757d", lw=0.7, label="signal")
+a0.plot(t, trend, color="#e8710a", lw=1.8, label="SSA trend")
+a0.plot(t, seasonal, color="#198754", lw=1.2, label="SSA seasonal")
+a0.set(xlabel="t", title="SSA reconstruction")
+a0.legend(fontsize=8)
+a1.bar(np.arange(contrib.size), contrib, color="#3f51b5")
+a1.set(xlabel="component", ylabel="variance share",
+       title="Singular-value contributions")
+print(render(f))
+```
+
+The two leading components recover the trend and the oscillation; their singular-value shares show
+how much variance each explains — a scree-style diagnostic for how many components to retain.
 
 ---
 
@@ -154,7 +425,27 @@ for t, v, p in peaks["peaks"][0]:
 
 ## STL decomposition
 
-Seasonal and Trend decomposition using Loess (STL) splits each functional observation into trend, seasonal, and remainder components.
+STL (Cleveland et al., 1990) splits each observation into an **additive** sum
+
+$$
+x_n = T_n + S_n + R_n ,
+$$
+
+a *trend* $T_n$, a *seasonal* $S_n$ of the given `period`, and a *remainder* $R_n$. It is an
+iterative procedure built entirely from Loess smoothers. Each pass runs an **inner loop** that
+(i) detrends, $x_n - T_n$; (ii) Loess-smooths the detrended values *cycle-subseries by
+cycle-subseries* to update the seasonal $S_n$; (iii) low-pass filters and subtracts that to keep
+$S_n$ mean-free; and (iv) Loess-smooths the deseasonalised series $x_n - S_n$ to update $T_n$. When
+`robust=True`, an **outer loop** re-weights each point by
+
+$$
+w_n = B\!\left(\frac{|R_n|}{6\,\mathrm{median}\,|R|}\right),
+\qquad
+B(u) = (1-u^2)^2 \ \text{for } u<1,\ 0 \text{ otherwise},
+$$
+
+so large residuals (the bisquare $B$) stop distorting the fit — useful when the record contains
+spikes. `s_window` and `t_window` set the seasonal and trend Loess spans.
 
 ```python
 from fdars.seasonal import stl_decompose
@@ -214,6 +505,25 @@ print(render(f))
 ## Seasonal strength
 
 Quantify how strongly seasonal a signal is, using either a variance-based or spectral method. The returned value lies in $[0, 1]$, where 0 means no seasonality and 1 means a purely periodic signal.
+
+The **variance** method follows the STL-based strength of Wang, Smith & Hyndman (2006): after
+decomposing $x = T + S + R$, the seasonal strength compares the variance the seasonal component
+removes against the variance left in the remainder,
+
+$$
+F_S = \max\!\left(0,\ 1 - \frac{\operatorname{Var}(R)}{\operatorname{Var}(S + R)}\right).
+$$
+
+If the seasonal component explains most of the deseasonalised variance, $\operatorname{Var}(R)$ is
+small and $F_S \to 1$; if it explains nothing, $\operatorname{Var}(R)\approx\operatorname{Var}(S+R)$
+and $F_S \to 0$. The **spectral** method instead measures the share of periodogram power that
+falls in a band around the fundamental frequency $f_0 = 1/T$ and its harmonics,
+
+$$
+F_S^{\text{spec}} = \frac{\sum_{f \in \mathcal{H}} I(f)}{\sum_{f} I(f)},
+\qquad
+\mathcal{H} = \{f_0, 2f_0, 3f_0, \dots\}\ \text{(within tolerance)} .
+$$
 
 ```python
 from fdars.seasonal import seasonal_strength
@@ -404,6 +714,29 @@ print(f"Seasonal strength: {s:.3f}")
 pk = detect_peaks(fd.data, fd.argvals, smooth_first=True, smooth_nbasis=30)
 print(f"Mean inter-peak distance: {pk['mean_period']:.2f}")
 ```
+
+## References
+
+- Cleveland, R. B., Cleveland, W. S., McRae, J. E., & Terpenning, I. (1990). *STL: A
+  Seasonal-Trend Decomposition Procedure Based on Loess*. Journal of Official Statistics, 6(1),
+  3–73.
+- Golyandina, N., Nekrutkin, V., & Zhigljavsky, A. (2001). *Analysis of Time Series Structure:
+  SSA and Related Techniques*. Chapman & Hall/CRC.
+- Lomb, N. R. (1976). *Least-squares frequency analysis of unequally spaced data*. Astrophysics
+  and Space Science, 39(2), 447–462.
+- Puech, T., Boussard, M., D'Amato, A., & Millerand, G. (2020). *A fully automated periodicity
+  detection in time series*. In *Advanced Analytics and Learning on Temporal Data* (AALTD),
+  LNCS 11986, Springer, 43–54.
+- Scargle, J. D. (1982). *Studies in astronomical time series analysis. II. Statistical aspects
+  of spectral analysis of unevenly spaced data*. The Astrophysical Journal, 263, 835–853.
+- Toller, M., Santos, T., & Kern, R. (2019). *SAZED: parameter-free domain-agnostic season length
+  estimation in time series data*. Data Mining and Knowledge Discovery, 33(6), 1775–1798.
+- Vlachos, M., Yu, P., & Castelli, V. (2005). *On periodicity detection and structural periodic
+  similarity*. In Proceedings of the 2005 SIAM International Conference on Data Mining, 449–460.
+- Wang, X., Smith, K., & Hyndman, R. (2006). *Characteristic-based clustering for time series
+  data*. Data Mining and Knowledge Discovery, 13(3), 335–364.
+- Yeh, C.-C. M., et al. (2016). *Matrix profile I: All pairs similarity joins for time series*. In
+  IEEE International Conference on Data Mining (ICDM), 1317–1322.
 
 ## See also
 
