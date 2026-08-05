@@ -6,6 +6,9 @@ license = "MIT"
 rust-version = "1.83"
 description = "Python bindings for fdars-core – Functional Data Analysis in Rust"
 authors = ["Simon Mueller"]
+repository = "https://github.com/sipemu/pyfda"
+homepage = "https://sipemu.github.io/pyfda/"
+readme = "README.md"
 
 [lib]
 name = "_native"
@@ -13,5 +16,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 fdars-core = { version = "0.13.0", features = ["parallel"] }
-pyo3 = { version = "0.28", features = ["extension-module"] }
+pyo3 = { version = "0.28", features = ["extension-module", "abi3-py39"] }
 numpy = "0.28"
