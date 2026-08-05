@@ -42,6 +42,58 @@ print(render(f))
 | Derivative stability | Excellent | Excellent |
 | Basis count rule of thumb | ~1 per interior knot + order | Must be odd ($2k + 1$) |
 
+### When the basis matters: a non-periodic signal
+
+The choice really bites when the signal is *non-periodic with local features*. Consider a curve built from a polynomial trend, a narrow Gaussian bump, and a one-sided sharp edge -- exactly the kind of structure a global sinusoidal basis struggles with. Selecting the number of basis functions by GCV for each family and reconstructing the curve shows the B-spline winning by a wide margin, while the Fourier fit rings around the bump and the edge (a Gibbs phenomenon).
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.basis import basis_nbasis_cv, fdata_to_basis_1d, basis_to_fdata_1d
+
+rng = np.random.default_rng(123)
+t = np.linspace(0, 1, 120)
+
+def complex_signal(t):
+    trend = 2 * t ** 2 - t
+    bump = 0.8 * np.exp(-((t - 0.3) ** 2) / (2 * 0.05 ** 2))   # localized feature
+    sharp = 0.5 * np.sqrt(np.maximum(0.0, t - 0.7))            # sharp edge
+    return trend + bump + sharp
+
+X = np.array([complex_signal(t) + 0.15 * rng.standard_normal(t.size)
+              for _ in range(30)])
+
+# GCV-select the basis count for each family.
+cb = basis_nbasis_cv(X, t, nbasis_min=5, nbasis_max=25, basis_type="bspline")
+cf = basis_nbasis_cv(X, t, nbasis_min=5, nbasis_max=25, basis_type="fourier")
+nb, nf = int(cb["optimal_nbasis"]), int(cf["optimal_nbasis"])
+
+# Reconstruct one curve at each family's optimum.
+cbc, ab = fdata_to_basis_1d(X, t, n_basis=nb, basis_type="bspline")
+recb = np.asarray(basis_to_fdata_1d(cbc, t, n_basis=ab, basis_type="bspline"))
+cfc, af = fdata_to_basis_1d(X, t, n_basis=nf, basis_type="fourier")
+recf = np.asarray(basis_to_fdata_1d(cfc, t, n_basis=af, basis_type="fourier"))
+
+f, (a0, a1) = fig(1, 2, figsize=(11, 3.9))
+a0.plot(np.asarray(cb["nbasis_range"]), np.asarray(cb["scores"]), "o-",
+        color="#3f51b5", label=f"B-spline (min GCV {min(cb['scores']):.3f})")
+a0.plot(np.asarray(cf["nbasis_range"]), np.asarray(cf["scores"]), "s-",
+        color="#e8710a", label=f"Fourier (min GCV {min(cf['scores']):.3f})")
+a0.set(title="GCV vs basis count (lower is better)",
+       xlabel="number of basis functions", ylabel="GCV score")
+a0.legend()
+
+a1.plot(t, complex_signal(t), color="#6c757d", lw=2, ls="--", label="true signal")
+a1.plot(t, recb[0], color="#3f51b5", lw=1.8, label=f"B-spline (K={ab})")
+a1.plot(t, recf[0], color="#e8710a", lw=1.8, label=f"Fourier (K={af})")
+a1.set(title="B-spline captures the bump; Fourier rings",
+       xlabel="t", ylabel="X(t)")
+a1.legend()
+print(render(f))
+```
+
+For this signal the B-spline optimum reaches a markedly lower GCV than the Fourier optimum -- confirming the rule of thumb that local, non-periodic features call for a locally supported basis.
+
 ## Quick start: project and reconstruct
 
 ```python
@@ -190,23 +242,28 @@ print(f"Effective degrees of freedom: {result['edf']:.1f}")
 
 ### Comparing smoothing levels
 
-```python
-import matplotlib.pyplot as plt
+The penalty $\lambda$ interpolates between an unpenalized (wiggly) B-spline fit and a nearly-linear fit. Sweeping it over several orders of magnitude on a noisy sinusoid shows the effect directly, with the effective degrees of freedom shrinking as $\lambda$ grows.
 
-fig, axes = plt.subplots(1, 3, figsize=(14, 4), sharey=True)
-idx = 0  # curve to visualize
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.basis import pspline_fit_1d
 
-for ax, lam in zip(axes, [1e-6, 1e-2, 1e2]):
-    res = pspline_fit_1d(fd.data, fd.argvals, n_basis=25, lambda_=lam)
-    ax.plot(fd.argvals, fd.data[idx], ".", ms=2, alpha=0.4, label="Raw")
-    ax.plot(fd.argvals, res["fitted"][idx], "r-", lw=2,
+rng = np.random.default_rng(11)
+t = np.linspace(0, 1, 120)
+true = np.sin(2 * np.pi * t) + 0.5 * np.sin(4 * np.pi * t)
+X = np.array([true + 0.3 * rng.standard_normal(t.size) for _ in range(30)])
+
+f, axes = fig(1, 4, figsize=(14, 3.4), sharey=True)
+for ax, lam in zip(axes, [1e-4, 1e-2, 1.0, 1e2]):
+    res = pspline_fit_1d(X, t, n_basis=25, lambda_=lam, order=2)
+    ax.plot(t, X[0], ".", ms=2, alpha=0.35, color="#6c757d", label="raw")
+    ax.plot(t, np.asarray(res["fitted"])[0], color="#dc3545", lw=2,
             label=f"edf={res['edf']:.1f}")
-    ax.set_title(f"$\\lambda$ = {lam:.0e}")
+    ax.set(title=f"$\\lambda$ = {lam:.0e}", xlabel="t")
     ax.legend(fontsize=8)
-
-plt.suptitle("P-spline smoothing with different penalty strengths")
-plt.tight_layout()
-plt.show()
+axes[0].set_ylabel("X(t)")
+print(render(f))
 ```
 
 ## Automatic basis selection
@@ -299,46 +356,56 @@ plt.show()
 !!! note "GCV vs CV"
     GCV is a leave-one-out cross-validation approximation that avoids refitting. For small samples, explicit $k$-fold CV (set `criterion="cv"` in `basis_nbasis_cv`) may be more reliable.
 
-## Full workflow: noisy data to smooth representation
+## Comparing the smoothing approaches
 
-```python
+The three routes -- a fixed basis, a CV-selected basis count, and a P-spline with GCV-selected penalty -- can be run side by side. On noisy sinusoidal data, the CV-optimal basis and the P-spline both recover the underlying signal closely, while a too-small fixed basis oversmooths.
+
+```python exec="1" html="1" source="above"
 import numpy as np
-import matplotlib.pyplot as plt
-from fdars import Fdata
-from fdars.simulation import simulate
-from fdars.basis import pspline_fit_gcv, basis_nbasis_cv, fdata_to_basis_1d
+from docs_fig import fig, render
+from fdars.basis import (fdata_to_basis_1d, basis_to_fdata_1d,
+                         basis_nbasis_cv, pspline_fit_gcv)
 
-# 1. Generate noisy data
-argvals = np.linspace(0, 1, 300)
-clean = simulate(n=50, argvals=argvals, n_basis=5, seed=7)
-noisy = clean + 0.3 * np.random.randn(*clean.shape)
-fd_noisy = Fdata(noisy, argvals=argvals)
-fd_clean = Fdata(clean, argvals=argvals)
+rng = np.random.default_rng(7)
+t = np.linspace(0, 1, 150)
+true = np.sin(2 * np.pi * t) + 0.5 * np.sin(4 * np.pi * t)
+X = np.array([true + 0.3 * rng.standard_normal(t.size) for _ in range(30)])
 
-# 2. Find optimal basis count
-cv = basis_nbasis_cv(fd_noisy.data, fd_noisy.argvals, nbasis_min=5, nbasis_max=35,
-                     basis_type="bspline", criterion="gcv")
-print(f"Optimal basis count: {cv['optimal_nbasis']}")
+# 1. Fixed small Fourier basis.
+c5, n5 = fdata_to_basis_1d(X, t, n_basis=5, basis_type="fourier")
+fix = np.asarray(basis_to_fdata_1d(c5, t, n_basis=n5, basis_type="fourier"))
 
-# 3. Smooth with P-splines using optimal basis count
-smooth = pspline_fit_gcv(fd_noisy.data, fd_noisy.argvals, n_basis=cv["optimal_nbasis"])
+# 2. CV-selected Fourier basis count.
+cv = basis_nbasis_cv(X, t, nbasis_min=5, nbasis_max=21, basis_type="fourier")
+kcv = int(cv["optimal_nbasis"])
+ccv, ncv = fdata_to_basis_1d(X, t, n_basis=kcv, basis_type="fourier")
+cvfit = np.asarray(basis_to_fdata_1d(ccv, t, n_basis=ncv, basis_type="fourier"))
 
-# 4. Visualize
-fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+# 3. P-spline with GCV-selected lambda.
+ps = pspline_fit_gcv(X, t, n_basis=25, order=2)
+psfit = np.asarray(ps["fitted"])
 
-for ax, idx in zip(axes, [0, 10, 25]):
-    ax.plot(fd_noisy.argvals, fd_noisy.data[idx], ".", ms=1, alpha=0.3, color="gray", label="Noisy")
-    ax.plot(fd_clean.argvals, fd_clean.data[idx], "k-", lw=1, alpha=0.5, label="True")
-    ax.plot(fd_noisy.argvals, smooth["fitted"][idx], "r-", lw=2, label="P-spline")
-    ax.set_title(f"Curve {idx}")
-    if idx == 0:
-        ax.legend(fontsize=8)
-
-plt.suptitle(f"P-spline smoothing (n_basis={cv['optimal_nbasis']}, "
-             f"edf={smooth['edf']:.1f})")
-plt.tight_layout()
-plt.show()
+f, ax = fig()
+ax.plot(t, X[0], ".", ms=2, alpha=0.3, color="#6c757d", label="observed")
+ax.plot(t, true, color="k", lw=1.6, ls="--", label="true signal")
+ax.plot(t, fix[0], color="#0dcaf0", lw=1.6, label=f"fixed Fourier (K={n5})")
+ax.plot(t, cvfit[0], color="#198754", lw=1.6, label=f"CV Fourier (K={ncv})")
+ax.plot(t, psfit[0], color="#6f42c1", lw=1.6, label="P-spline (GCV λ)")
+ax.set(title="Fixed vs CV-selected basis vs P-spline", xlabel="t", ylabel="X(t)")
+ax.legend(fontsize=8)
+print(render(f))
 ```
+
+## Recommendations
+
+| Situation | Recommended approach |
+|-----------|----------------------|
+| Periodic data | Fourier basis with GCV-selected `n_basis` |
+| Non-periodic data with local features | B-spline basis with GCV-selected `n_basis` |
+| Heavy noise | P-splines with automatic $\lambda$ (`pspline_fit_gcv`) |
+| Fast processing | Fixed basis type and count (`fdata_to_basis_1d`) |
+| Don't know the family | `select_basis_auto_1d` (chooses type + count) |
+| Robust selection | `basis_nbasis_cv` with `criterion="cv"` and `n_folds` |
 
 ## API summary
 
@@ -355,3 +422,8 @@ plt.show()
 | `smooth_basis_gcv(data, argvals, n_basis, ...)` | Basis smoothing with GCV penalty selection |
 
 All functions are imported from `fdars.basis`.
+
+## References
+
+- Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Eilers, P.H.C. and Marx, B.D. (1996). Flexible smoothing with B-splines and penalties. *Statistical Science* 11(2), 89-121.

@@ -148,6 +148,54 @@ print(render(f))
 
 The short window's depth recovers quickly as it fills with post-shift curves; the long window stays depressed far longer because it still remembers the old regime.
 
+## Process monitoring: a depth control chart
+
+The same pattern powers a functional statistical-process-control (SPC) chart. In **phase 1** you establish a reference from an in-control process and set a control limit from a low quantile of the reference self-depth. In **phase 2** you score each incoming curve against that fixed reference and raise an alarm whenever its depth falls below the limit. Unlike a univariate control chart, this monitors the *entire curve shape* at once.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.depth import modified_band_1d
+
+rng = np.random.default_rng(42)
+t = np.linspace(0, 1, 100)
+m = t.size
+
+def in_control(k):
+    return np.sin(2 * np.pi * t) + rng.normal(0, 0.2) + 0.05 * rng.standard_normal(m)
+
+# Phase 1: reference from an in-control process; control limit = 2nd percentile.
+ref = np.array([in_control(i) for i in range(60)])
+d_ref = np.asarray(modified_band_1d(ref, ref))
+control_limit = np.quantile(d_ref, 0.02)
+
+# Phase 2: monitor 50 curves; the process mean shifts up at curve 35.
+n_new, shift_point = 50, 35
+depths = []
+for i in range(n_new):
+    x = in_control(i)
+    if i >= shift_point:
+        x = x + 0.8                                   # out-of-control shift
+    depths.append(float(np.asarray(modified_band_1d(x[None, :], ref))[0]))
+depths = np.asarray(depths)
+alarm = depths < control_limit
+
+f, ax = fig()
+ax.plot(depths, color="#6c757d", lw=0.8, zorder=1)
+ax.scatter(np.where(~alarm)[0], depths[~alarm], color="#3f51b5", s=22,
+           label="in control")
+ax.scatter(np.where(alarm)[0], depths[alarm], color="#dc3545", s=36,
+           zorder=5, label="alarm")
+ax.axhline(control_limit, ls="--", color="#dc3545", lw=1, label="control limit")
+ax.axvline(shift_point - 0.5, ls=":", color="#6c757d", lw=1, label="true shift")
+ax.set(title="Streaming-depth control chart (shift at curve 35)",
+       xlabel="curve index", ylabel="depth vs reference")
+ax.legend(fontsize=8)
+print(render(f))
+```
+
+Depth stays comfortably above the limit while the process is in control, then drops below it once the mean shifts, generating a run of alarms. The same $q_1 - 1.5\,\mathrm{IQR}$ rule from the [functional boxplot](../analyze/outlier-detection.md) can replace the fixed quantile for the control limit.
+
 ## Swapping the depth measure
 
 Any 1D depth from `fdars.depth` slots into the loop -- just replace the call. `fraiman_muniz_1d` is a common alternative that is sensitive to magnitude shifts:
@@ -171,3 +219,8 @@ For shape anomalies rather than magnitude, `random_tukey_1d` or `modal_1d` are b
 | `fraiman_muniz_1d(data, ref_data, scale)` | `fdars.depth` | Magnitude-sensitive alternative |
 | rolling window + threshold | numpy (this page) | The streaming loop itself |
 | `simulate(...)` | `fdars.simulation` | Generates the example stream |
+
+## References
+
+- Fraiman, R. and Muniz, G. (2001). Trimmed means for functional data. *Test* 10(2), 419-440.
+- López-Pintado, S. and Romo, J. (2009). On the concept of depth for functional data. *JASA* 104(486), 718-734.

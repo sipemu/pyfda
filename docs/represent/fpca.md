@@ -1,6 +1,17 @@
 # Functional PCA
 
-Functional Principal Component Analysis (FPCA) is the workhorse of functional data analysis. It decomposes a sample of curves into a mean function plus a linear combination of orthogonal eigenfunctions, providing an optimal low-rank approximation of the covariance structure.
+Functional Principal Component Analysis (FPCA) is the workhorse of functional data analysis. It extends classical PCA from vectors in $\mathbb{R}^p$ to functions in $L^2$, decomposing a sample of curves into a mean function plus a linear combination of orthogonal eigenfunctions and providing an optimal low-rank approximation of the covariance structure.
+
+## Why FPCA?
+
+Functional data pose four difficulties that ordinary multivariate methods handle poorly:
+
+- **High dimensionality** -- each curve is measured at many grid points, so a naive analysis lives in a very high-dimensional space.
+- **Infinite-dimensional nature** -- the curves are really samples of functions, not fixed-length vectors.
+- **Correlation structure** -- neighbouring grid points are strongly correlated, so treating them as independent variables wastes information.
+- **Noise** -- observations carry measurement error that a good representation should suppress.
+
+FPCA addresses all four at once by finding the **principal modes of variation**: a small set of orthogonal eigenfunctions that explain how the curves differ from their mean. A handful of scores then summarise each curve.
 
 ## The Karhunen-Loeve decomposition
 
@@ -19,7 +30,17 @@ where
 | $\xi_{ik}$ | $k$-th score for observation $i$, with $\mathrm{E}[\xi_{ik}]=0$, $\mathrm{Var}(\xi_{ik})=\lambda_k$ |
 | $\lambda_1 \ge \lambda_2 \ge \cdots$ | Eigenvalues (variance explained by each component) |
 
-In practice the sum is truncated at $K$ components, giving the best rank-$K$ approximation in $L^2$.
+The eigenfunctions and eigenvalues are exactly the eigenpairs of the covariance operator: with $C(s,t) = \mathrm{Cov}\bigl(X(s), X(t)\bigr)$,
+
+$$
+\int C(s,t)\,\phi_k(s)\,ds = \lambda_k\,\phi_k(t).
+$$
+
+Three properties follow, and they are what make the decomposition useful:
+
+- **Orthonormality** of the eigenfunctions, $\displaystyle\int \phi_j(t)\,\phi_k(t)\,dt = \delta_{jk}$.
+- **Uncorrelated scores**, $\mathrm{Cov}(\xi_j, \xi_k) = \lambda_j\,\delta_{jk}$ -- each component captures a distinct, independent mode of variation.
+- **Optimality**: truncating the sum at $K$ terms gives the best rank-$K$ approximation of the curves in $L^2$, so no other $K$-dimensional linear representation reconstructs the sample with smaller integrated squared error.
 
 The figure below decomposes a sample of curves: the mean function $\hat\mu(t)$ plus the leading eigenfunctions $\phi_k(t)$, each scaled by $2\sqrt{\lambda_k}$ to show the mode of variation it captures.
 
@@ -84,27 +105,96 @@ result = fpca(data, argvals, n_comp=3)
 | `centered` | (n, m) | Mean-centered data |
 | `weights` | (m,) | Quadrature weights used for the $L^2$ inner product |
 
-## Complete working example
+## Worked example: the Berkeley growth curves
 
-```python
+A classic use of FPCA is the [Berkeley Growth Study](../data/index.md): heights of 93 children (39 boys, 54 girls) measured at 31 ages from 1 to 18 years. Two natural sources of variation should emerge -- how *tall* a child is overall, and how *early* their growth spurt arrives. FPCA recovers exactly these as its first two components.
+
+```python exec="1" html="1" source="above"
 import numpy as np
-from fdars import Fdata
-from fdars.simulation import simulate
+from docs_fig import fig, render
+from docs_data import load_growth
 from fdars.regression import fpca
 
-# --- 1. Simulate 80 curves on a fine grid ---------------------------------
-np.random.seed(42)
-argvals = np.linspace(0, 1, 200)
-data = simulate(n=80, argvals=argvals, n_basis=5, efun_type="fourier",
-                eval_type="linear", seed=42)
-fd = Fdata(data, argvals=argvals)
+age, X, meta = load_growth()          # X: (93, 31) height curves
+res = fpca(X, age, n_comp=4)
+mean = np.asarray(res["mean"])
+rot = np.asarray(res["rotation"])
+sv = np.asarray(res["singular_values"])
+ev = sv ** 2 / (X.shape[0] - 1)
+pve = ev / ev.sum()
 
-# --- 2. Run FPCA keeping 4 components ------------------------------------
-result = fpca(fd.data, fd.argvals, n_comp=4)
+f, (a0, a1) = fig(1, 2, figsize=(11, 3.8))
+a0.plot(age, X.T, color="#3f51b5", lw=0.7, alpha=0.35)
+a0.plot(age, mean, color="#dc3545", lw=2.4, label="mean height")
+a0.set(title="93 growth curves and their mean", xlabel="age (years)",
+       ylabel="height (cm)")
+a0.legend()
 
-print("Score matrix shape:", result["scores"].shape)      # (80, 4)
-print("Eigenfunction shape:", result["rotation"].shape)    # (200, 4)
-print("Singular values:", result["singular_values"])
+# Print the variance breakdown of the first four components.
+report = "  ".join(f"PC{k+1}: {pve[k]*100:.1f}%" for k in range(4))
+a1.bar(np.arange(1, 5), pve[:4] * 100, color="#3f51b5")
+a1.set(title="Variance explained", xlabel="component",
+       ylabel="% variance", xticks=[1, 2, 3, 4])
+print(render(f))
+```
+
+The first component alone explains about 82 % of the variance and the first two about 96 %. Plotting each mode as $\hat\mu(t) \pm 2\sqrt{\lambda_k}\,\phi_k(t)$ makes their meaning concrete:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_growth
+from fdars.regression import fpca
+
+age, X, meta = load_growth()
+res = fpca(X, age, n_comp=3)
+mean = np.asarray(res["mean"])
+rot = np.asarray(res["rotation"])
+ev = np.asarray(res["singular_values"]) ** 2 / (X.shape[0] - 1)
+pve = ev / ev.sum()
+
+f, axes = fig(1, 3, figsize=(13, 3.6), sharey=True)
+for k, ax in enumerate(axes):
+    c = 2 * np.sqrt(ev[k])
+    ax.plot(age, mean, "k-", lw=1.6, label="mean")
+    ax.plot(age, mean + c * rot[:, k], color="#3f51b5", lw=1.4, label="+2 SD")
+    ax.plot(age, mean - c * rot[:, k], color="#e8710a", lw=1.4, label="-2 SD")
+    ax.set(title=f"PC{k+1} ({pve[k]*100:.1f}%)", xlabel="age (years)")
+    if k == 0:
+        ax.set_ylabel("height (cm)")
+        ax.legend(fontsize=8)
+print(render(f))
+```
+
+**PC1** shifts the whole curve up or down -- it is the *overall height* mode. **PC2** raises the curve at young ages while lowering it later (or vice versa): the *growth-timing* mode, distinguishing early from late maturers. **PC3** captures subtler shape variation around the pubertal spurt.
+
+### Score plot
+
+FPC scores place each curve as a point in $\mathbb{R}^K$. Because PC1 encodes overall height, colouring the score plot by sex confirms the interpretation: boys, who are taller on average by the end of the study, sit at higher PC1.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_growth
+from fdars.regression import fpca
+
+age, X, meta = load_growth()
+res = fpca(X, age, n_comp=4)
+scores = np.asarray(res["scores"])
+is_male = (meta["sex"] == "male").to_numpy()
+
+f, ax = fig(figsize=(6.5, 5))
+ax.scatter(scores[is_male, 0], scores[is_male, 1], s=28, color="#3f51b5",
+           alpha=0.8, label="male")
+ax.scatter(scores[~is_male, 0], scores[~is_male, 1], s=28, color="#e8710a",
+           alpha=0.8, label="female")
+ax.axhline(0, color="#6c757d", lw=0.6)
+ax.axvline(0, color="#6c757d", lw=0.6)
+ax.set(title="FPC score plot, coloured by sex",
+       xlabel="PC1 score (overall height)",
+       ylabel="PC2 score (growth timing)")
+ax.legend()
+print(render(f))
 ```
 
 ## Variance explained and scree plots
@@ -121,36 +211,7 @@ $$
 \text{PVE}(K) = \frac{\sum_{k=1}^{K} \lambda_k}{\sum_{k=1}^{K_{\max}} \lambda_k}
 $$
 
-### Scree plot example
-
-```python
-import matplotlib.pyplot as plt
-
-sv = result["singular_values"]
-eigenvalues = sv ** 2 / (fd.data.shape[0] - 1)
-pve = np.cumsum(eigenvalues) / np.sum(eigenvalues)
-
-fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-
-# Individual variance
-axes[0].bar(range(1, len(eigenvalues) + 1), eigenvalues, color="steelblue")
-axes[0].set_xlabel("Component")
-axes[0].set_ylabel("Eigenvalue")
-axes[0].set_title("Scree plot")
-
-# Cumulative PVE
-axes[1].plot(range(1, len(pve) + 1), pve, "o-", color="coral")
-axes[1].axhline(0.95, ls="--", color="gray", label="95 %")
-axes[1].set_xlabel("Number of components")
-axes[1].set_ylabel("Cumulative PVE")
-axes[1].set_title("Variance explained")
-axes[1].legend()
-
-plt.tight_layout()
-plt.show()
-```
-
-Running the same computation on a simulated sample produces the paired scree / cumulative-variance view below -- the elbow and the 95 % line are the two most common rules for choosing $K$.
+The scree plot and cumulative-PVE curve are the two most common tools for choosing $K$: look for the *elbow* where eigenvalues stop dropping sharply, or read off where the cumulative curve crosses a target such as 95 %.
 
 ```python exec="1" html="1"
 import numpy as np
@@ -177,98 +238,169 @@ a1.legend()
 print(render(f))
 ```
 
-## Visualizing eigenfunctions
-
-Each eigenfunction describes a mode of variation. Plotting $\mu(t) \pm c\,\phi_k(t)$ (where $c = 2\sqrt{\lambda_k}$) reveals how the $k$-th component deforms the mean.
-
-```python
-fig, axes = plt.subplots(1, 4, figsize=(16, 3), sharey=True)
-mean = result["mean"]
-
-for k in range(4):
-    ax = axes[k]
-    phi = result["rotation"][:, k]
-    spread = 2 * np.sqrt(eigenvalues[k])
-    ax.plot(fd.argvals, mean, "k-", label="mean")
-    ax.plot(fd.argvals, mean + spread * phi, "r--", label=f"+2 SD")
-    ax.plot(fd.argvals, mean - spread * phi, "b--", label=f"-2 SD")
-    ax.set_title(f"PC {k + 1} ({eigenvalues[k]/eigenvalues.sum()*100:.1f} %)")
-    if k == 0:
-        ax.legend(fontsize=8)
-
-plt.tight_layout()
-plt.show()
-```
-
-## Score plots
-
-FPC scores summarize each curve as a point in $\mathbb{R}^K$. Scatter plots of score pairs reveal clusters, outliers, and structure.
-
-```python
-scores = result["scores"]
-
-fig, ax = plt.subplots(figsize=(6, 5))
-ax.scatter(scores[:, 0], scores[:, 1], s=30, alpha=0.7)
-ax.set_xlabel("PC 1 score")
-ax.set_ylabel("PC 2 score")
-ax.set_title("FPC score plot")
-ax.axhline(0, color="gray", lw=0.5)
-ax.axvline(0, color="gray", lw=0.5)
-plt.tight_layout()
-plt.show()
-```
-
 ## Reconstruction and denoising
 
-A truncated reconstruction acts as a smoother -- high-frequency noise lives in the discarded components.
+A truncated reconstruction
 
-```python
-# Reconstruct from K components
-K = 3
-reconstructed = result["mean"] + result["scores"][:, :K] @ result["rotation"][:, :K].T
+$$
+\hat X_i(t) = \hat\mu(t) + \sum_{k=1}^{K} \xi_{ik}\,\phi_k(t)
+$$
 
-# Compare original vs reconstructed for one curve
-idx = 0
-plt.figure(figsize=(8, 3))
-plt.plot(fd.argvals, fd.data[idx], "gray", alpha=0.6, label="Original")
-plt.plot(fd.argvals, reconstructed[idx], "steelblue", lw=2, label=f"K={K} reconstruction")
-plt.legend()
-plt.title("FPCA denoising")
-plt.tight_layout()
-plt.show()
+acts as a smoother: high-frequency noise lives in the discarded components. On the growth data, two components already reconstruct each child's curve almost perfectly, discarding the measurement jitter.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_growth
+from fdars.regression import fpca
+
+age, X, meta = load_growth()
+res = fpca(X, age, n_comp=4)
+mean = np.asarray(res["mean"])
+rot = np.asarray(res["rotation"])
+scores = np.asarray(res["scores"])
+
+K = 2
+recon = mean + scores[:, :K] @ rot[:, :K].T          # (93, 31)
+
+f, ax = fig()
+for idx in (0, 45, 80):
+    ax.plot(age, X[idx], color="#6c757d", lw=0.9, alpha=0.6,
+            marker="o", ms=3, label="observed" if idx == 0 else None)
+    ax.plot(age, recon[idx], color="#3f51b5", lw=2,
+            label=f"K={K} reconstruction" if idx == 0 else None)
+ax.set(title="FPCA denoising: 2-component reconstruction",
+       xlabel="age (years)", ylabel="height (cm)")
+ax.legend()
+print(render(f))
 ```
 
-## Using FPCA for feature extraction
+## FPCA for dimension reduction
 
-FPC scores are the standard features for downstream supervised learning.
+Storing the scores, eigenfunctions and mean instead of the full curves is a lossless-up-to-$K$ compression. For the growth data, going from 93 curves at 31 points to 93 scores at $K=4$ plus four eigenfunctions is a large saving:
 
 ```python
-from fdars.regression import fregre_lm
+import numpy as np
+from docs_data import load_growth
+from fdars.regression import fpca
 
-# Suppose we have a scalar response
-response = np.random.randn(80)
+age, X, meta = load_growth()
+res = fpca(X, age, n_comp=4)
 
-# Option A: let fregre_lm handle PCA internally
-result_lm = fregre_lm(fd.data, response, n_comp=4)
+full = X.size                                           # 93 * 31 = 2883
+compact = (res["scores"].size                           # 93 * 4
+           + res["rotation"].size                       # 31 * 4
+           + res["mean"].size)                          # 31
+print(f"full curves:   {full} numbers")
+print(f"FPCA (K=4):    {compact} numbers")
+print(f"compression:   {100 * (1 - compact / full):.0f}%")
+```
 
-# Option B: use pre-computed scores as features in any model
+## Score plots and clustering
+
+Because the scores are a low-dimensional, decorrelated summary, ordinary multivariate tools apply directly. Clustering the growth curves in PC space, for instance, separates them into height/timing groups.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_growth
+from fdars.regression import fpca
+from fdars.clustering import kmeans_fd
+
+age, X, meta = load_growth()
+res = fpca(X, age, n_comp=4)
+scores = np.asarray(res["scores"])
+
+# Cluster the curves directly, then colour the score plot by cluster label.
+km = kmeans_fd(X, age, k=3, seed=0)
+cluster = np.asarray(km["cluster"])
+
+palette = ["#3f51b5", "#e8710a", "#198754"]
+f, ax = fig(figsize=(6.5, 5))
+for c in range(3):
+    m = cluster == c
+    ax.scatter(scores[m, 0], scores[m, 1], s=30, color=palette[c],
+               alpha=0.8, label=f"cluster {c + 1}")
+ax.set(title="k-means clusters in FPC score space",
+       xlabel="PC1 score", ylabel="PC2 score")
+ax.legend()
+print(render(f))
+```
+
+## Depth-style outlier scoring in PC space
+
+Distance from the origin in *standardized* score space is a cheap Mahalanobis-like outlyingness measure: dividing each score by $\sqrt{\lambda_k}$ puts the components on a common scale, so
+
+$$
+d_i^2 = \sum_{k=1}^{K} \frac{\xi_{ik}^2}{\lambda_k}
+$$
+
+is large only for genuinely unusual curves. Curves in the periphery of the score cloud are exactly the ones drawn faintly at the edges of the raw-curve plot.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_growth
+from fdars.regression import fpca
+
+age, X, meta = load_growth()
+res = fpca(X, age, n_comp=4)
+scores = np.asarray(res["scores"])
+ev = np.asarray(res["singular_values"]) ** 2 / (X.shape[0] - 1)
+
+d = np.sqrt(((scores ** 2) / ev).sum(axis=1))       # standardized distance
+order = np.argsort(d)
+rng = np.ptp(d) + 1e-9
+
+f, ax = fig()
+for i in order:                                      # faint = central, bold = far
+    ax.plot(age, X[i], color="#3f51b5", lw=1.0,
+            alpha=0.15 + 0.8 * (d[i] - d.min()) / rng)
+ax.plot(age, X[order[-1]], color="#dc3545", lw=2.4,
+        label="largest PC distance")
+ax.set(title="Growth curves shaded by distance from the PC centre",
+       xlabel="age (years)", ylabel="height (cm)")
+ax.legend()
+print(render(f))
+```
+
+## Using FPCA for feature extraction and regression
+
+FPC scores are the standard features for scalar-on-function regression. `fregre_lm` runs the FPCA internally, or you can feed pre-computed scores into any estimator.
+
+```python
+import numpy as np
+from fdars.regression import fpca, fregre_lm
+
+# A scalar response, here related to overall height and timing.
+response = 0.5 * X[:, -1] + np.random.default_rng(0).normal(size=X.shape[0])
+
+# Option A: let fregre_lm handle the FPCA internally.
+model = fregre_lm(X, response, n_comp=4)
+
+# Option B: use the scores as features in any downstream model.
+scores = fpca(X, age, n_comp=4)["scores"]
 from sklearn.linear_model import LinearRegression
-
-scores = fpca(fd.data, fd.argvals, n_comp=4)["scores"]
-model = LinearRegression().fit(scores, response)
-print("R^2:", model.score(scores, response))
+r2 = LinearRegression().fit(scores, response).score(scores, response)
+print("R^2 from PC scores:", r2)
 ```
 
 ## Choosing the number of components
 
-!!! tip "Model selection"
+Three rules dominate in practice:
+
+1. **Variance threshold** -- retain enough components to reach, say, 95 % cumulative PVE.
+2. **Scree-plot elbow** -- stop where the eigenvalues flatten.
+3. **Cross-validation** -- when the goal is prediction, choose $K$ by predictive error directly.
+
+!!! tip "Model selection for regression"
 
     Use `model_selection_ncomp` from `fdars.regression` to choose $K$ via GCV, AIC, or BIC when the goal is regression:
 
     ```python
     from fdars.regression import model_selection_ncomp
 
-    sel = model_selection_ncomp(fd.data, response, max_comp=10, criterion="gcv")
+    sel = model_selection_ncomp(X, response, max_comp=10, criterion="gcv")
     print("Best K:", sel["best_ncomp"])
 
     # Inspect all criteria
@@ -276,26 +408,35 @@ print("R^2:", model.score(scores, response))
         print(f"  K={ncomp}: AIC={aic:.2f}, BIC={bic:.2f}, GCV={gcv:.4f}")
     ```
 
-When the goal is pure representation (no response), a common rule is to retain enough components to explain at least 95 % of variance, or to look for an "elbow" in the scree plot.
-
 ## FPCA on smoothed data
 
-Smoothing before FPCA often improves results, especially with noisy data. Use P-splines or basis smoothing first:
+Smoothing before FPCA often improves results, especially with noisy data. Use P-splines or basis smoothing first (see [Basis Representation](basis-representation.md)):
 
 ```python
 from fdars.basis import pspline_fit_gcv
+from fdars.regression import fpca
 
-# Smooth with GCV-selected P-splines
-smooth = pspline_fit_gcv(fd.data, fd.argvals, n_basis=25)
-fd_smooth = Fdata(smooth["fitted"], argvals=fd.argvals)
-
-# Then run FPCA on the smoothed curves
-result_smooth = fpca(fd_smooth.data, fd_smooth.argvals, n_comp=4)
+# Smooth with GCV-selected P-splines, then run FPCA on the smoothed curves.
+smooth = pspline_fit_gcv(X, age, n_basis=15)
+result_smooth = fpca(np.asarray(smooth["fitted"]), age, n_comp=4)
 ```
+
+## FPCA vs classical PCA
+
+On discretized curves FPCA is mathematically equivalent to classical PCA of the data matrix -- the difference is entirely in interpretation and in the option to regularize.
+
+| Aspect | Classical PCA | Functional PCA |
+|--------|---------------|----------------|
+| Input | Vectors in $\mathbb{R}^p$ | Functions in $L^2$ |
+| Output | Loading vectors | Eigenfunction *curves* $\phi_k(t)$ |
+| Interpretation | Variable weights | Modes of variation |
+| Reconstruction | Linear combination | Functional approximation |
+| Smoothness | Not enforced | Can be regularized (smooth before/after) |
+| Inner product | Euclidean | $L^2$ with quadrature weights |
 
 !!! note "FPCA in the alignment module"
 
-    For data with significant phase variation (horizontal shifts), consider **elastic FPCA** via `vert_fpca`, `horiz_fpca`, or `joint_fpca` from `fdars.alignment`. These separate amplitude and phase variation before extracting components. See the [Elastic Alignment](../align/elastic-alignment.md) guide.
+    For data with significant phase variation (horizontal shifts), consider **elastic FPCA** via `vert_fpca`, `horiz_fpca`, or `joint_fpca` from `fdars.alignment`. These separate amplitude and phase variation before extracting components. See [Elastic FPCA](elastic-fpca.md).
 
 ## API summary
 
@@ -303,6 +444,13 @@ result_smooth = fpca(fd_smooth.data, fd_smooth.argvals, n_comp=4)
 |----------|--------|---------|
 | `fpca(data, argvals, n_comp)` | `fdars.regression` | Standard FPCA |
 | `model_selection_ncomp(data, response, ...)` | `fdars.regression` | Cross-validated component selection |
+| `fregre_lm(data, response, n_comp)` | `fdars.regression` | Principal-component regression |
 | `vert_fpca(data, argvals, n_comp, ...)` | `fdars.alignment` | Amplitude FPCA (elastic) |
 | `horiz_fpca(data, argvals, n_comp, ...)` | `fdars.alignment` | Phase FPCA (elastic) |
 | `joint_fpca(data, argvals, n_comp, ...)` | `fdars.alignment` | Joint amplitude-phase FPCA |
+
+## References
+
+- Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Ramsay, J.O. and Silverman, B.W. (2002). *Applied Functional Data Analysis*. Springer.
+- Yao, F., Müller, H.G., and Wang, J.L. (2005). Functional Data Analysis for Sparse Longitudinal Data. *JASA* 100(470), 577-590.
