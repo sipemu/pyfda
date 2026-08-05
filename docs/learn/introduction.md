@@ -416,18 +416,20 @@ curve on how far it departs from the sample in level and in shape) flag it:
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
-from fdars import Fdata
-from fdars.simulation import simulate
 from fdars.outliers import magnitude_shape
 
+rng = np.random.default_rng(3)
 t = np.linspace(0, 1, 100)
-X = np.asarray(simulate(n=25, argvals=t, n_basis=6, seed=3))
-X_out = np.vstack([X, X[0] + 3.0])          # append one magnitude outlier
+X = np.array([
+    np.sin(2 * np.pi * t + rng.uniform(0, np.pi)) + rng.normal(0, 0.1, 100)
+    for _ in range(25)
+])
+X_out = np.vstack([X, X[0] + 3.0])           # append one magnitude outlier
 
 ms = magnitude_shape(X_out)
-mag = np.asarray(ms["magnitude"])
-shp = np.asarray(ms["shape"])
-score = np.hypot(mag, shp)                    # combined MS distance
+mag = np.abs(np.asarray(ms["magnitude"]))     # magnitude outlyingness
+shp = np.abs(np.asarray(ms["shape"]))         # shape outlyingness
+score = np.hypot(mag, shp)                     # combined MS distance
 flagged = int(np.argmax(score))
 print(f"# Flagged curve index {flagged} of {len(score) - 1} (the appended outlier)")
 

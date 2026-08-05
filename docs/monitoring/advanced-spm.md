@@ -325,6 +325,15 @@ rather than merely *that* it moved.
 - [Profile and Partial-Domain Monitoring](profile-partial-monitoring.md) — restricting
   the analysis to a sub-interval of the domain to catch localised faults.
 
+!!! note "Not yet exposed in Python"
+    The R vignette also demonstrates CUSUM (`spm.cusum`), MEWMA / adaptive MEWMA
+    (`spm.mewma`, `spm.amewma`), iterative outlier-cleaned Phase I
+    (`spm.phase1.iterative`), and bootstrap / KDE robust control limits
+    (`spm.limit.robust`). These do not yet have dedicated `fdars` Python bindings. The
+    EWMA, run-rule, ARL, and contribution tools shown above cover the most common of these
+    needs; CUSUM and (adaptive) MEWMA charts would have to be assembled by hand from the
+    projected scores until bindings land.
+
 !!! info "Everything runs in Rust"
     Contributions, run rules, and the Monte-Carlo ARL simulations are all implemented in
     the compiled core; the projection step (`(Xc * w) @ loadings`) is the only piece done
