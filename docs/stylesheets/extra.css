@@ -197,6 +197,7 @@
 .fdars-sec-regression { --fdars-accent: #dc3545; --fdars-accent-tint: #dc35450d; }
 .fdars-sec-monitoring { --fdars-accent: #6610f2; --fdars-accent-tint: #6610f20d; }
 .fdars-sec-analyze    { --fdars-accent: #6f42c1; --fdars-accent-tint: #6f42c10d; }
+.fdars-sec-examples   { --fdars-accent: #3f51b5; --fdars-accent-tint: #3f51b50d; }
 
 /* ===== Polish material "grid cards" on section pages ===== */
 .md-typeset .grid.cards > ul > li {

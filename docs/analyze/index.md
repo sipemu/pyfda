@@ -9,54 +9,45 @@ The Analyze module collects the tools you reach for once your curves are represe
 </div>
 </div>
 
-<div class="grid cards" markdown>
-
--   :material-chart-bell-curve:{ .lg .middle } **Tolerance Bands**
-
-    ---
-
-    Construct simultaneous tolerance bands (FPCA bootstrap, conformal prediction, Degras SCB) and test functional equivalence between two groups.
-
-    [:octicons-arrow-right-24: Tolerance Bands](tolerance-bands.md)
-
--   :material-scatter-plot:{ .lg .middle } **Clustering**
-
-    ---
-
-    Partition functional observations with k-means, fuzzy c-means, and Gaussian mixture models. Assess cluster quality with silhouette and Calinski-Harabasz indices.
-
-    [:octicons-arrow-right-24: Clustering](clustering.md)
-
--   :material-alert-circle-outline:{ .lg .middle } **Outlier Detection**
-
-    ---
-
-    Identify magnitude, shape, and amplitude outliers via LRT tests, the outliergram, and magnitude-shape outlyingness plots.
-
-    [:octicons-arrow-right-24: Outlier Detection](outlier-detection.md)
-
--   :material-sine-wave:{ .lg .middle } **Seasonal Analysis**
-
-    ---
-
-    Detect periods with SAZED, autoperiod, and CFD-autoperiod. Decompose curves with STL, find peaks, and measure seasonal strength.
-
-    [:octicons-arrow-right-24: Seasonal Analysis](seasonal-analysis.md)
-
--   :material-approximately-equal:{ .lg .middle } **Equivalence Testing**
-
-    ---
-
-    Determine whether two groups of curves are practically equivalent within a tolerance margin using functional TOST.
-
-    [:octicons-arrow-right-24: Equivalence Testing](equivalence-testing.md)
-
--   :material-grid:{ .lg .middle } **Covariance Functions**
-
-    ---
-
-    Build covariance matrices from Gaussian, exponential, Matern, and periodic kernels. Generate Gaussian process samples for simulation studies.
-
-    [:octicons-arrow-right-24: Covariance Functions](covariance-functions.md)
-
+<div class="fdars-gallery fdars-sec-analyze">
+<a class="fdars-gallery-item" href="tolerance-bands/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/tolerance-bands.svg" alt="">
+<div class="fdars-gallery-title">Tolerance Bands</div>
+<div class="fdars-gallery-desc">FPCA-based tolerance bands, conformal bands, and Degras SCBs.</div>
+</a>
+<a class="fdars-gallery-item" href="clustering/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/clustering.svg" alt="">
+<div class="fdars-gallery-title">Clustering</div>
+<div class="fdars-gallery-desc">K-means, fuzzy c-means, and GMM clustering for functional data.</div>
+</a>
+<a class="fdars-gallery-item" href="gmm-clustering/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/gmm-clustering.svg" alt="">
+<div class="fdars-gallery-title">GMM Clustering</div>
+<div class="fdars-gallery-desc">Model-based clustering with Gaussian mixtures and soft assignments.</div>
+</a>
+<a class="fdars-gallery-item" href="elastic-clustering/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/elastic-clustering.svg" alt="">
+<div class="fdars-gallery-title">Elastic Clustering</div>
+<div class="fdars-gallery-desc">Cluster by amplitude/phase-invariant elastic distance.</div>
+</a>
+<a class="fdars-gallery-item" href="outlier-detection/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/outlier-detection.svg" alt="">
+<div class="fdars-gallery-title">Outlier Detection</div>
+<div class="fdars-gallery-desc">LRT, outliergram, and magnitude-shape anomaly detection.</div>
+</a>
+<a class="fdars-gallery-item" href="seasonal-analysis/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/seasonal-analysis.svg" alt="">
+<div class="fdars-gallery-title">Seasonal Analysis</div>
+<div class="fdars-gallery-desc">SAZED, autoperiod, STL, and peak detection for periodic data.</div>
+</a>
+<a class="fdars-gallery-item" href="equivalence-testing/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/equivalence-testing.svg" alt="">
+<div class="fdars-gallery-title">Equivalence Testing</div>
+<div class="fdars-gallery-desc">TOST-based equivalence tests for functional means.</div>
+</a>
+<a class="fdars-gallery-item" href="covariance-functions/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/covariance-functions.svg" alt="">
+<div class="fdars-gallery-title">Covariance Functions</div>
+<div class="fdars-gallery-desc">Gaussian, exponential, Matern, and periodic covariance kernels.</div>
+</a>
 </div>

@@ -9,22 +9,35 @@ Functional observations often exhibit two fundamentally different sources of var
 </div>
 </div>
 
-<div class="grid cards" markdown>
-
--   :material-swap-horizontal:{ .lg .middle } **Elastic Alignment**
-
-    ---
-
-    Pairwise and group alignment via the SRSF transform, Karcher mean, and elastic distances. Separate amplitude from phase, compute warping functions, and build elastic distance matrices.
-
-    [:octicons-arrow-right-24: Elastic Alignment](elastic-alignment.md)
-
--   :material-shape:{ .lg .middle } **Shape Analysis**
-
-    ---
-
-    Quotient-space shape distances, elastic depth measures, and elastic FPCA. Decompose functional data into amplitude and phase principal components for downstream modeling.
-
-    [:octicons-arrow-right-24: Shape Analysis](shape-analysis.md)
-
+<div class="fdars-gallery fdars-sec-align">
+<a class="fdars-gallery-item" href="elastic-alignment/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/elastic-alignment.svg" alt="">
+<div class="fdars-gallery-title">Elastic Alignment</div>
+<div class="fdars-gallery-desc">SRSF registration, Karcher mean, and amplitude/phase separation.</div>
+</a>
+<a class="fdars-gallery-item" href="advanced-alignment/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/advanced-alignment.svg" alt="">
+<div class="fdars-gallery-title">Advanced Elastic Alignment</div>
+<div class="fdars-gallery-desc">Closed, constrained, penalized, and multi-resolution alignment.</div>
+</a>
+<a class="fdars-gallery-item" href="landmark-registration/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/landmark-registration.svg" alt="">
+<div class="fdars-gallery-title">Landmark Registration</div>
+<div class="fdars-gallery-desc">Align curves by matching landmark locations with monotone warps.</div>
+</a>
+<a class="fdars-gallery-item" href="tsrvf/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/tsrvf.svg" alt="">
+<div class="fdars-gallery-title">TSRVF</div>
+<div class="fdars-gallery-desc">Linearized elastic analysis in a transported tangent space.</div>
+</a>
+<a class="fdars-gallery-item" href="alignment-comparison/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/alignment-comparison.svg" alt="">
+<div class="fdars-gallery-title">Comparing Methods</div>
+<div class="fdars-gallery-desc">No alignment vs elastic vs landmark, side by side.</div>
+</a>
+<a class="fdars-gallery-item" href="shape-analysis/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/shape-analysis.svg" alt="">
+<div class="fdars-gallery-title">Shape Analysis</div>
+<div class="fdars-gallery-desc">Shape-preserving registration and geodesic computations.</div>
+</a>
 </div>

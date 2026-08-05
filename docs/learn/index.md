@@ -21,30 +21,46 @@ Python API.
 
 ## Guides
 
-<div class="fdars-gallery">
+<div class="fdars-gallery fdars-sec-learn">
 <a class="fdars-gallery-item" href="introduction/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/introduction.svg" alt="">
 <div class="fdars-gallery-title">Introduction to fdars</div>
 <div class="fdars-gallery-desc">What is functional data analysis? Understand the core concepts, learn how
 fdars represents curves as NumPy arrays, and run your first end-to-end
 analysis.</div>
 </a>
+<a class="fdars-gallery-item" href="custom-plotting/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/custom-plotting.svg" alt="">
+<div class="fdars-gallery-title">Custom Plotting</div>
+<div class="fdars-gallery-desc">Visualize Fdata with matplotlib: curve families, colouring by metadata,
+mean bands, and highlighting the functional median.</div>
+</a>
 <a class="fdars-gallery-item" href="simulation/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/simulation.svg" alt="">
 <div class="fdars-gallery-title">Simulation Toolbox</div>
 <div class="fdars-gallery-desc">Generate realistic synthetic curves with Karhunen-Loeve expansions
 (Fourier, polynomial, Wiener eigenfunctions) and Gaussian processes
 (Gaussian, exponential, Matern, periodic kernels).</div>
 </a>
 <a class="fdars-gallery-item" href="smoothing/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/smoothing.svg" alt="">
 <div class="fdars-gallery-title">Smoothing</div>
 <div class="fdars-gallery-desc">Remove noise while preserving structure. Covers Nadaraya-Watson,
 local polynomial regression, k-NN smoothing, bandwidth selection via
 cross-validation, and basis smoothing with P-splines.</div>
 </a>
 <a class="fdars-gallery-item" href="derivatives/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/derivatives.svg" alt="">
 <div class="fdars-gallery-title">Working with Derivatives</div>
 <div class="fdars-gallery-desc">Compute first, second, and higher-order derivatives for 1D and 2D
 functional data. Learn how to combine differentiation with smoothing
 for stable estimates.</div>
+</a>
+<a class="fdars-gallery-item" href="irregular-sampling/">
+<img class="fdars-gallery-thumb" src="../assets/thumb/irregular-sampling.svg" alt="">
+<div class="fdars-gallery-title">Irregular Sampling</div>
+<div class="fdars-gallery-desc">Work with sparse, unevenly-sampled curves by smoothing each onto a shared
+grid before analysis.</div>
 </a>
 </div>
 
