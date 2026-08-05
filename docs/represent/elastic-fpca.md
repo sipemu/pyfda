@@ -43,7 +43,13 @@ $$
 q(t) = \operatorname{sign}\bigl(\dot f(t)\bigr)\sqrt{\lvert \dot f(t)\rvert}.
 $$
 
-The SRSF turns the awkward, non-Euclidean geometry of warping into a plain $L^2$ geometry on the unit Hilbert sphere, so that the Fisher--Rao distance between curves becomes an ordinary $L^2$ distance between their SRSFs. `fdars` exposes this transform directly:
+The SRSF turns the awkward, non-Euclidean geometry of warping into a plain $L^2$ geometry on the unit Hilbert sphere. The Fisher--Rao distance between two curves, which is invariant to how we parameterize time, then reduces to an $L^2$ distance between SRSFs *after optimal alignment*:
+
+$$
+d_{\mathrm{FR}}(f_1, f_2) = \inf_{\gamma \in \Gamma}\, \bigl\lVert q_1 - (q_2 \circ \gamma)\sqrt{\dot\gamma}\,\bigr\rVert_2,
+$$
+
+where $\Gamma$ is the group of orientation-preserving warps $\gamma:[0,1]\to[0,1]$ and $(q_2\circ\gamma)\sqrt{\dot\gamma}$ is the SRSF of the warped curve $f_2\circ\gamma$. `fdars` exposes the transform and the resulting elastic mean directly:
 
 ```python
 from fdars.alignment import srsf_transform, karcher_mean
@@ -89,6 +95,33 @@ a1.plot(t, aligned.T, color="#198754", lw=1, alpha=0.4)
 a1.plot(t, mean, color="#dc3545", lw=2.4, label="Karcher mean")
 a1.set(title="Aligned (amplitude only)", xlabel="t", ylabel="X(t)")
 a1.legend()
+print(render(f))
+```
+
+The **warping functions** $\gamma_i$ returned in `gammas` are the phase part -- one monotone map per curve describing how its time axis was stretched to reach the template. A warp bowing above the diagonal advances the peak, one below it delays the peak; the spread of the warps around the identity is the amount of phase variation in the sample.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import karcher_mean
+
+t = np.linspace(0, 1, 100)
+rng = np.random.default_rng(3)
+X = np.asarray([
+    (1.0 + 0.25 * rng.standard_normal()) *
+    np.exp(-((t - (0.5 + 0.12 * rng.standard_normal())) ** 2) / 0.01)
+    for _ in range(25)
+])
+
+km = karcher_mean(X, t)
+gammas = np.asarray(km["gammas"])
+
+f, ax = fig()
+ax.plot(t, gammas.T, color="#6f42c1", lw=1, alpha=0.5)
+ax.plot([0, 1], [0, 1], color="#dc3545", lw=1.6, ls="--", label="identity (no warp)")
+ax.set(title="Warping functions $\\gamma_i$ (phase information)",
+       xlabel="t", ylabel=r"$\gamma(t)$")
+ax.legend()
 print(render(f))
 ```
 
@@ -201,7 +234,7 @@ print(render(f))
 
 ### Joint FPCA
 
-`joint_fpca` stacks the amplitude and phase representations and finds components that capture **coupled** amplitude-phase variation -- useful when taller peaks also tend to arrive earlier, for instance. A scalar `balance_c` weights phase relative to amplitude before the joint SVD.
+`joint_fpca` concatenates the amplitude (SRSF) and phase (shooting-vector) representations into a single vector per curve, then runs one PCA on the stack. Its components capture **coupled** amplitude-phase variation -- useful when, say, taller peaks also tend to arrive earlier. A scalar `balance_c` rescales the phase block relative to the amplitude block before the joint SVD, so that neither dominates purely because of its units.
 
 | Key | Shape | Description |
 |-----|-------|-------------|
@@ -211,6 +244,45 @@ print(render(f))
 | `vert_component` | (n_comp, m+1) | Amplitude part of each joint mode |
 | `horiz_component` | (n_comp, m) | Phase part of each joint mode |
 | `balance_c` | scalar | Amplitude/phase balancing constant |
+
+Each joint component splits into an amplitude part and a phase part; comparing their energies shows how much of that mode is "what varies" versus "when it varies". For the bump sample, amplitude dominates, so the joint cumulative-variance curve tracks the amplitude-only one closely.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import joint_fpca
+
+t = np.linspace(0, 1, 100)
+rng = np.random.default_rng(3)
+X = np.asarray([
+    (1.0 + 0.25 * rng.standard_normal()) *
+    np.exp(-((t - (0.5 + 0.12 * rng.standard_normal())) ** 2) / 0.01)
+    for _ in range(25)
+])
+
+joint = joint_fpca(X, t, n_comp=3)
+cumvar = np.asarray(joint["cumulative_variance"])
+vert = np.asarray(joint["vert_component"])       # (n_comp, m+1) amplitude parts
+horiz = np.asarray(joint["horiz_component"])     # (n_comp, m)   phase parts
+
+# Energy of the amplitude vs phase part within each joint mode.
+c = float(joint["balance_c"])
+amp_energy = (vert ** 2).sum(axis=1)
+phase_energy = (c ** 2) * (horiz ** 2).sum(axis=1)
+frac_phase = phase_energy / (amp_energy + phase_energy)
+
+f, (a0, a1) = fig(1, 2, figsize=(10, 3.8))
+ks = np.arange(1, len(cumvar) + 1)
+a0.plot(ks, cumvar, "o-", color="#6f42c1")
+a0.set(title="Joint FPCA cumulative variance", xlabel="component",
+       ylabel="cumulative variance", ylim=(0, 1.02), xticks=ks)
+a1.bar(ks - 0.15, 1 - frac_phase, width=0.3, color="#198754", label="amplitude")
+a1.bar(ks + 0.15, frac_phase, width=0.3, color="#6f42c1", label="phase")
+a1.set(title="Amplitude / phase balance per mode", xlabel="component",
+       ylabel="energy fraction", xticks=ks)
+a1.legend()
+print(render(f))
+```
 
 ## Contrast with ordinary FPCA
 
@@ -255,6 +327,23 @@ print(render(f))
 
 !!! tip "Related tools"
     The alignment itself, distances, and boxplots live alongside these routines in `fdars.alignment`: see `karcher_mean`, `amplitude_distance`, `phase_distance`, and `phase_boxplot`. For the standard (amplitude-only) decomposition, see [Functional PCA](fpca.md).
+
+## Which variant, and when
+
+| Variant | Use it when you want to understand... | Typical questions |
+|---------|----------------------------------------|-------------------|
+| `vert_fpca` | pure **shape** variation, timing removed | How do the aligned curves differ in height/shape? |
+| `horiz_fpca` | pure **timing** variation | How much, and in what pattern, does the feature drift in time? |
+| `joint_fpca` | **coupled** amplitude-phase variation | Do taller peaks tend to arrive earlier? What is the amplitude/phase balance? |
+
+Concrete examples: for **growth curves**, vertical FPCA describes differences in final height and spurt magnitude, while horizontal FPCA describes differences in the *timing* of the pubertal spurt. For **gait or movement** data, vertical captures the movement pattern and horizontal the stride timing. For **weather** curves, vertical captures the shape of the seasonal temperature cycle and horizontal the seasonal shift between stations.
+
+## References
+
+- Srivastava, A., Wu, W., Kurtek, S., Klassen, E. and Marron, J.S. (2011). Registration of functional data using Fisher-Rao metric. *arXiv:1103.3817*.
+- Tucker, J.D., Wu, W. and Srivastava, A. (2013). Generative models for functional data using phase and amplitude separation. *Computational Statistics & Data Analysis* 61, 50-66.
+- Srivastava, A. and Klassen, E.P. (2016). *Functional and Shape Data Analysis*. Springer.
+- Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
 
 ## API summary
 

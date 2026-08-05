@@ -216,6 +216,31 @@ D_sdtw = soft_dtw_self_1d(data, gamma=1.0)
 
     The divergence is defined as $\tilde{d}_{\gamma}(X, Y) = d_{\gamma}(X, Y) - \frac{1}{2}\bigl[d_{\gamma}(X, X) + d_{\gamma}(Y, Y)\bigr]$ and is non-negative with zero diagonal.
 
+### Effect of the smoothing parameter $\gamma$
+
+The parameter $\gamma$ trades sharpness for smoothness: small $\gamma$ approaches hard DTW (a single best warping path), large $\gamma$ averages over many paths. Sweeping it for a fixed curve pair shows the divergence changing smoothly with $\gamma$ on a log scale.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.metric import soft_dtw_div_self_1d
+
+t = np.linspace(0, 1, 80)
+base = np.asarray(simulate(n=1, argvals=t, n_basis=4, efun_type="fourier", seed=5))[0]
+pair = np.vstack([base, np.roll(base, 8)])         # a curve and a shifted copy
+
+gammas = np.array([0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0])
+div = np.array([float(np.asarray(soft_dtw_div_self_1d(pair, gamma=g))[0, 1])
+                for g in gammas])
+
+f, ax = fig()
+ax.plot(gammas, div, "o-", color="#3f51b5")
+ax.set(title="Soft-DTW divergence vs smoothing parameter $\\gamma$",
+       xlabel="$\\gamma$ (log scale)", ylabel="divergence", xscale="log")
+print(render(f))
+```
+
 ---
 
 ## Fourier coefficient distance
@@ -321,6 +346,78 @@ D_cross   = elastic_cross_distance_matrix(train_data, test_data, argvals)
 
 !!! note "Performance"
     Elastic distance matrices require $O(n^2)$ pairwise alignments, each involving a dynamic programming step. For large datasets, consider using a subset or the Sakoe-Chiba-constrained DTW as a faster alternative.
+
+### Amplitude and phase capture orthogonal variation
+
+Amplitude and phase distances describe complementary aspects of dissimilarity: two curves can have the *same shape* but *different timing* (small amplitude, large phase) or *different shapes* at *matched timing* (large amplitude, small phase). Plotting the pairwise amplitude distance against the pairwise phase distance for a sample -- half of which is time-shifted -- shows the two axes are only weakly related.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.alignment import (amplitude_self_distance_matrix,
+                             phase_self_distance_matrix)
+
+rng = np.random.default_rng(0)
+t = np.linspace(0, 1, 80)
+X = np.asarray(simulate(n=20, argvals=t, n_basis=3, seed=1))
+for i in range(10, 20):                            # time-shift half the sample
+    X[i] = np.roll(X[i], int(rng.integers(-8, 8)))
+
+Damp = np.asarray(amplitude_self_distance_matrix(X, t))
+Dph = np.asarray(phase_self_distance_matrix(X, t))
+iu = np.triu_indices(X.shape[0], k=1)
+amp, phase = Damp[iu], Dph[iu]
+
+f, ax = fig(figsize=(6, 5))
+ax.scatter(amp, phase, s=18, color="#3f51b5", alpha=0.6)
+ax.axvline(amp.mean(), ls="--", color="#6c757d", lw=1)
+ax.axhline(phase.mean(), ls="--", color="#6c757d", lw=1)
+ax.set(title="Amplitude vs phase pairwise distances",
+       xlabel="amplitude distance", ylabel="phase distance")
+print(render(f))
+```
+
+---
+
+## Which metrics see phase? A correlation view
+
+Metrics that ignore time warping (L2, L1, Hausdorff) rank pairs very differently from ones that absorb it (DTW). Computing several distance matrices on a phase-varying sample and correlating their off-diagonal entries makes the split visible: L2 and L1 agree almost perfectly, DTW correlates moderately with them, and Hausdorff -- caring about worst-case pointwise mismatch -- sits apart.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.metric import lp_self_1d, dtw_self_1d, hausdorff_self_1d
+
+rng = np.random.default_rng(0)
+t = np.linspace(0, 1, 80)
+X = np.asarray(simulate(n=24, argvals=t, n_basis=3, seed=1))
+for i in range(12, 24):
+    X[i] = np.roll(X[i], int(rng.integers(-8, 8)))
+
+iu = np.triu_indices(X.shape[0], k=1)
+mats = {
+    "L2": np.asarray(lp_self_1d(X, t, p=2.0))[iu],
+    "L1": np.asarray(lp_self_1d(X, t, p=1.0))[iu],
+    "DTW": np.asarray(dtw_self_1d(X, p=2.0, w=10))[iu],
+    "Hausdorff": np.asarray(hausdorff_self_1d(X, t))[iu],
+}
+names = list(mats)
+C = np.corrcoef(np.vstack([mats[n] for n in names]))
+
+f, ax = fig(figsize=(5, 4.5))
+im = ax.imshow(C, cmap="viridis", vmin=0, vmax=1)
+ax.set(xticks=range(len(names)), yticks=range(len(names)),
+       xticklabels=names, yticklabels=names,
+       title="Correlation of pairwise distances")
+for i in range(len(names)):
+    for j in range(len(names)):
+        ax.text(j, i, f"{C[i, j]:.2f}", ha="center", va="center",
+                color="white" if C[i, j] < 0.7 else "black", fontsize=9)
+f.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+print(render(f))
+```
 
 ---
 
@@ -456,3 +553,18 @@ reg = fregre_np(D, response, h=0.0)  # h=0 -> automatic bandwidth
 | `phase_distance(c1, c2, argvals, lambda_)` | `lambda_=0.0` | Phase component only |
 | `elastic_self_distance_matrix(data, argvals, lambda_)` | `lambda_=0.0` | Full elastic distance matrix |
 | `elastic_cross_distance_matrix(d1, d2, argvals, lambda_)` | `lambda_=0.0` | Cross elastic distance matrix |
+| `amplitude_self_distance_matrix(data, argvals, lambda_)` | `lambda_=0.0` | Amplitude distance matrix |
+| `phase_self_distance_matrix(data, argvals, lambda_)` | `lambda_=0.0` | Phase distance matrix |
+| `shape_distance(c1, c2, argvals, lambda_)` | `lambda_=0.0` | Shape distance (reparameterization-invariant) |
+| `shape_self_distance_matrix(data, argvals, quotient, lambda_)` | `quotient="reparameterization"` | Shape distance matrix |
+
+!!! note "Binding differences vs the R reference"
+    The Python `fdars.metric` does not expose the R vignette's Kullback-Leibler distance or the PCA / derivative / basis / FFT *semimetrics*; the closest available pieces are `fourier_self_1d` (a truncated-coefficient distance) and building a basis/PCA distance yourself from [basis coefficients](basis-representation.md) or [FPC scores](fpca.md). Unlike the R page, the Python `shape_self_distance_matrix` returns the same value for `quotient="reparameterization"` and `quotient="scale"` on the examples tested, so scale is not factored out here -- use it as a reparameterization-invariant shape distance only.
+
+## References
+
+- Berndt, D.J. and Clifford, J. (1994). Using Dynamic Time Warping to find patterns in time series. *KDD Workshop*, 359-370.
+- Cuturi, M. and Blondel, M. (2017). Soft-DTW: a differentiable loss function for time-series. *ICML 34*, 894-903.
+- Ferraty, F. and Vieu, P. (2006). *Nonparametric Functional Data Analysis*. Springer.
+- Sakoe, H. and Chiba, S. (1978). Dynamic programming algorithm optimization for spoken word recognition. *IEEE TASSP* 26(1), 43-49.
+- Srivastava, A. and Klassen, E. (2016). *Functional and Shape Data Analysis*. Springer.

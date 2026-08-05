@@ -262,6 +262,86 @@ For 2D data, `data` and `ref_data` are still 2D NumPy arrays of shape `(n, m)`, 
     - **Skewed distributions**: Random Tukey depth handles asymmetry better.
     - **Speed priority**: Fraiman-Muniz and MBD scale well with $n$.
 
+## How the measures respond to magnitude vs shape outliers
+
+A useful stress test is a clean sample of curves with two deliberately planted anomalies: a **magnitude** outlier (the same shape, shifted vertically) and a **shape** outlier (a different frequency at the same level). A good depth assigns low values to both. The panel below runs seven measures on such a sample and marks the two outliers -- every method flags the magnitude outlier hard, while the pointwise measures (FM, MEI) are comparatively lenient on the shape outlier and the derivative/projection-aware ones separate it better.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from matplotlib.patches import Patch
+from docs_fig import fig, render
+from fdars.depth import (fraiman_muniz_1d, modified_band_1d, band_1d,
+                         modified_epigraph_index_1d, random_projection_1d,
+                         random_tukey_1d, modal_1d)
+
+rng = np.random.default_rng(1)
+t = np.linspace(0, 1, 100)
+n = 30
+X = np.array([np.sin(2 * np.pi * t) + rng.normal(0, 0.2)
+              + 0.05 * rng.standard_normal(t.size) for _ in range(n)])
+X[-2] = np.sin(2 * np.pi * t) + 2.5      # magnitude outlier
+X[-1] = np.cos(4 * np.pi * t)            # shape outlier
+
+methods = {
+    "FM": np.asarray(fraiman_muniz_1d(X, X)),
+    "MBD": np.asarray(modified_band_1d(X, X)),
+    "BD": np.asarray(band_1d(X, X)),
+    "MEI": np.asarray(modified_epigraph_index_1d(X, X)),
+    "RP": np.asarray(random_projection_1d(X, X, n_proj=50)),
+    "RT": np.asarray(random_tukey_1d(X, X, n_proj=50)),
+    "modal": np.asarray(modal_1d(X, X, h=1.0)),
+}
+
+types = ["normal"] * n
+types[-2], types[-1] = "magnitude", "shape"
+color = {"normal": "#3f51b5", "magnitude": "#dc3545", "shape": "#e8710a"}
+
+f, axes = fig(2, 4, figsize=(13, 5.5))
+axes = axes.ravel()
+for ax, (name, dep) in zip(axes, methods.items()):
+    ax.bar(np.arange(n), dep, color=[color[c] for c in types], width=0.9)
+    ax.set(title=name, xticks=[])
+    ax.set_ylabel("depth", fontsize=8)
+axes[-1].axis("off")
+axes[-1].legend(handles=[Patch(color=color[k], label=k)
+    for k in ("normal", "magnitude", "shape")], loc="center")
+print(render(f))
+```
+
+## Depth-weighted robust mean
+
+Because depth down-weights peripheral curves, using it as a weight vector yields a mean that resists outliers -- the functional analogue of a weighted average that discounts extreme observations. Compare a plain mean, pulled upward by a magnitude outlier, against a depth-weighted mean:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.depth import modified_band_1d
+
+rng = np.random.default_rng(4)
+t = np.linspace(0, 1, 120)
+n = 40
+X = np.array([np.sin(2 * np.pi * t) + rng.normal(0, 0.2)
+              + 0.05 * rng.standard_normal(t.size) for _ in range(n)])
+X[0] = np.sin(2 * np.pi * t) + 3.0        # one big magnitude outlier
+
+dep = np.asarray(modified_band_1d(X, X))
+w = dep / dep.sum()
+
+simple_mean = X.mean(axis=0)
+weighted_mean = np.average(X, axis=0, weights=w)
+
+f, ax = fig()
+ax.plot(t, X.T, color="#6c757d", lw=0.6, alpha=0.3)
+ax.plot(t, np.sin(2 * np.pi * t), color="#198754", lw=1.6, ls="--",
+        label="true signal")
+ax.plot(t, simple_mean, color="k", lw=2, label="simple mean")
+ax.plot(t, weighted_mean, color="#3f51b5", lw=2, label="depth-weighted mean")
+ax.set(title="A single outlier lifts the plain mean; depth weighting resists it",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
+
 ## Complete example: functional median and depth-based ordering
 
 ```python
@@ -359,3 +439,10 @@ robust_mean = np.average(fd.data, axis=0, weights=weights)
 | `kernel_functional_spatial_1d(data, ref_data, argvals, h)` | `argvals`, `h=1.0` | Kernelized spatial depth |
 
 All `_1d` variants have `_2d` counterparts for surface data, imported from the same `fdars.depth` module.
+
+## References
+
+- Fraiman, R. and Muniz, G. (2001). Trimmed means for functional data. *Test* 10(2), 419-440.
+- López-Pintado, S. and Romo, J. (2009). On the concept of depth for functional data. *JASA* 104(486), 718-734.
+- Cuevas, A., Febrero, M. and Fraiman, R. (2007). Robust estimation and classification for functional data via projection-based depth notions. *Computational Statistics* 22, 481-496.
+- Chakraborty, A. and Chaudhuri, P. (2014). The spatial distribution in infinite dimensional spaces and related quantiles and depths. *Annals of Statistics* 42(3), 1203-1231.

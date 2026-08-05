@@ -2,8 +2,8 @@
 
 An **Andrews transformation** maps each row of a multivariate data table -- a plain feature vector $x = (x_1, x_2, \ldots, x_p)$ -- to a smooth periodic curve. Introduced by David Andrews in 1972 as a way to *visualize* high-dimensional data, it turns out to be a bridge into functional data analysis: once every observation is a curve, the whole `fdars` toolbox (depth, distances, clustering, outlier detection) applies to ordinary tabular data. This page shows the transform explicitly in numpy, then analyzes the resulting curves with real `fdars` functions.
 
-!!! warning "No `andrews` binding in fdars"
-    There is **no** Andrews-curve function in `fdars`. The transform is a handful of lines of numpy, shown in full below. `fdars` enters only *after* the transform, once the curves are wrapped in `Fdata`.
+!!! warning "No `andrews` binding in the Python `fdars`"
+    The R package ships a dedicated `andrews_transform()`, but the **Python** `fdars` has **no** Andrews-curve function. The transform is a handful of lines of numpy, shown in full below. `fdars` enters only *after* the transform, once the curves are wrapped in `Fdata`.
 
 ## The transform
 
@@ -17,7 +17,15 @@ $$
 
 Each observation becomes one curve $f_x(t)$. The construction has two properties that make it useful rather than arbitrary:
 
-- **Distance preservation.** By Parseval's theorem, the $L^2$ distance between two Andrews curves is proportional to the Euclidean distance between their feature vectors: $\int_{-\pi}^{\pi} \bigl(f_x(t) - f_y(t)\bigr)^2\,dt = \pi\,\lVert x - y\rVert^2$. Curves that look similar correspond to observations that *are* similar.
+- **Distance preservation.** By Parseval's theorem the $L^2$ distance between two Andrews curves is proportional to the Euclidean distance between their feature vectors:
+
+    $$
+    \int_{-\pi}^{\pi} \bigl(f_x(t) - f_y(t)\bigr)^2\,dt = \pi\,\lVert x - y\rVert_2^2
+    \quad\Longrightarrow\quad
+    \lVert f_x - f_y\rVert_{L^2} = \sqrt{\pi}\,\lVert x - y\rVert_2 .
+    $$
+
+    Curves that look similar correspond to observations that *are* similar, and every distance-based method (depth, clustering) is interpretable back in the original feature space up to the constant $\sqrt{\pi}$.
 - **Mean preservation.** The Andrews curve of the sample mean equals the mean of the Andrews curves, so a "central" curve is a central observation.
 
 Here is the entire transform in numpy -- there is no hidden machinery:
@@ -174,12 +182,77 @@ print(render(f))
 
 The bold curves are the cluster centroids in curve space; each corresponds to one group centroid in the original 4-dimensional table. Because the transform is linear, the centroid curve is exactly the Andrews curve of the feature-space centroid.
 
-!!! note "Ordering matters"
-    Andrews curves are not invariant to the *order* of the features: $x_1$ (the constant term) and the low harmonics ($x_2, x_3$) dominate the curve's shape, while high-index features contribute fast wiggles that are easy to overlook. Put the most informative variables first, and standardize columns beforehand so no single feature swamps the rest.
+!!! note "Ordering matters for *plots*, not for *analysis*"
+    Andrews curves are not invariant to the *order* of the features: $x_1$ (the constant term) and the low harmonics ($x_2, x_3$) dominate the curve's shape, while high-index features contribute fast wiggles that are easy to overlook. Put the most informative variables first (rank them by, e.g., variance or an ANOVA $F$-statistic), and standardize columns beforehand so no single feature swamps the rest. Crucially, because the transform preserves distances *exactly*, reordering changes only the picture -- any distance-based result (clustering assignments, depth ranks) is identical whatever the column order.
 
-## Why route through functional data analysis?
+## Verifying distance preservation on a real table
 
-For a table you could of course cluster the rows directly. The Andrews route is worthwhile when you want the *functional* machinery: robust functional depth for outlier detection, functional boxplots, band depth, or the alignment tools -- all of which have no direct multivariate analogue but become available once the table is a set of curves. The transform is cheap, exact, and (up to the choice of feature order) loses no information for $p$ features when the series is kept to $\lceil p/2\rceil$ harmonics.
+The $\sqrt{\pi}$ relationship is not a heuristic -- it holds to machine precision. Here it is checked on the [Wine dataset](../data/index.md) (178 wines, 13 standardized chemical features): every pairwise Andrews $L^2$ distance, computed with `lp_self_1d`, equals exactly $\sqrt{\pi}$ times the Euclidean distance between the underlying feature vectors.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_wine
+from fdars.metric import lp_self_1d
+
+names, X_raw, meta = load_wine()
+X = (X_raw - X_raw.mean(0)) / X_raw.std(0)      # standardize columns
+
+def andrews_curves(features, t):
+    features = np.asarray(features, float)
+    n, p = features.shape
+    out = np.full((n, t.size), features[:, [0]] / np.sqrt(2.0))
+    for j in range(1, p):
+        harmonic = (j + 1) // 2
+        term = np.sin if j % 2 == 1 else np.cos
+        out = out + features[:, [j]] * term(harmonic * t)
+    return out
+
+t = np.linspace(-np.pi, np.pi, 200)
+curves = andrews_curves(X, t)
+
+D_andrews = np.asarray(lp_self_1d(curves, t, p=2.0))     # functional L2 distances
+diff = X[:, None, :] - X[None, :, :]
+D_euclid = np.sqrt((diff ** 2).sum(-1))                 # Euclidean distances
+
+iu = np.triu_indices(X.shape[0], k=1)
+da, de = D_andrews[iu], D_euclid[iu]
+nz = de > 1e-10
+ratio = da[nz] / de[nz]
+
+f, ax = fig(figsize=(5.5, 5.5))
+ax.scatter(de[nz], da[nz], s=4, alpha=0.12, color="#3f51b5")
+xs = np.array([0.0, de[nz].max()])
+ax.plot(xs, np.sqrt(np.pi) * xs, color="#dc3545", lw=1.8,
+        label=r"slope $\sqrt{\pi}\approx$" + f"{np.sqrt(np.pi):.4f}")
+ax.set(title=f"Andrews $L^2$ vs Euclidean (mean ratio {ratio.mean():.4f})",
+       xlabel="Euclidean distance (standardized features)",
+       ylabel="Andrews $L^2$ distance")
+ax.legend()
+print(render(f))
+```
+
+Every point falls on the red line: the transform is an isometry up to $\sqrt{\pi}$.
+
+## When does routing through FDA add value?
+
+Because the transform is an isometry, PCA and k-means on Andrews curves return *numerically identical* answers to `prcomp`/`kmeans` on the standardized table. If your analysis stops there, the plain multivariate tools are simpler and give the same result. The Andrews route earns its keep when you want the parts of the functional toolbox that have **no tabular analogue**:
+
+- **Functional depth and boxplots** rank observations by centrality and classify outliers by *type* -- magnitude (shifted up or down) versus shape (a different pattern) -- via the [outliergram](../analyze/outlier-detection.md) and magnitude-shape plot, monitoring all $p$ variables in a single chart.
+- **Tolerance and confidence bands** define nonparametric regions over the whole feature set at once.
+- **Smoothing as regularization**: projecting the curves onto a modest [basis](basis-representation.md) or a P-spline damps the high-frequency Fourier terms -- which correspond to the least important, last-ordered variables -- while preserving the dominant structure.
+- **A unified pipeline**: depth, outlier detection, clustering, and FPCA all operate on the same `Fdata` object with consistent distance semantics, so methods feed into one another.
+
+!!! tip "Best practices"
+    1. **Standardize** the columns before transforming, or large-scale variables dominate.
+    2. **Order variables by importance** (variance or ANOVA $F$) so the informative ones map to the visually dominant low harmonics -- this affects only the picture.
+    3. **Use $m \ge 200$ grid points** to avoid numerical artifacts from the high harmonics.
+    4. **Best for small-to-moderate $p$.** With many features the high-order terms oscillate fast and carry little visual signal; reduce dimension first if needed.
+
+## References
+
+- Andrews, D.F. (1972). Plots of high-dimensional data. *Biometrics* 28(1), 125-136.
+- Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
 
 ## API summary
 
