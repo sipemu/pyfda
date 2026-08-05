@@ -1,62 +1,63 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional SPM: chart new curves against an in-control model">
-  <style>
-    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
-    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
-    .lab{font:700 13px system-ui,sans-serif}
-    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
-    .mono{font:600 12px ui-monospace,monospace}
-  </style>
-  <text class="ttl" x="360" y="26" text-anchor="middle">Statistical Process Monitoring: Charting Functional Data</text>
-  <text class="sub" x="360" y="46" text-anchor="middle">Learn in-control variation, then flag curves that depart from it</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
 
-  <!-- Panel 1: Phase I reference sample -->
-  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
-  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Phase I Reference</text>
-  <text class="sm" x="122" y="112" text-anchor="middle">In-control "good" curves</text>
-  <g transform="translate(44,120)">
-    <line x1="0" y1="118" x2="156" y2="118" stroke="#adb5bd" stroke-width="1.2"/>
-    <path d="M0 70 C40 44 80 92 120 60 C138 48 150 66 156 58" stroke="#6c757d" stroke-opacity=".45" stroke-width="1.4"/>
-    <path d="M0 84 C40 58 80 104 120 74 C138 60 150 82 156 72" stroke="#6c757d" stroke-opacity=".45" stroke-width="1.4"/>
-    <path d="M0 78 C40 50 80 98 120 66 C138 52 150 74 156 64" stroke="#6c757d" stroke-opacity=".45" stroke-width="1.4"/>
-    <path d="M0 90 C40 66 80 110 120 82 C138 68 150 88 156 80" stroke="#6c757d" stroke-opacity=".45" stroke-width="1.4"/>
-  </g>
+  <!-- Title -->
+  <text x="360" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">The fdars Toolkit</text>
+  <text x="360" y="54" text-anchor="middle" font-size="14" fill="#888">Functional Data Analysis in R, powered by Rust</text>
 
-  <!-- Arrow 1 -->
-  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
-  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+  <!-- ===== Top: Input ===== -->
+  <rect x="250" y="74" width="220" height="56" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="360" y="98" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Raw Observations</text>
+  <text x="360" y="118" text-anchor="middle" font-size="12" fill="#888">curves, spectra, time series, surfaces</text>
 
-  <!-- Panel 2: method -->
-  <rect x="272" y="70" width="176" height="188" rx="12" fill="#f0ebfe" stroke="#6610f2" stroke-width="1.5"/>
-  <text class="mono" x="360" y="98" text-anchor="middle" fill="#6610f2">spm_monitor()</text>
-  <text class="sm" x="360" y="118" text-anchor="middle">FPCA in-control model</text>
-  <g transform="translate(292,132)">
-    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#d3c2f9"/>
-    <text class="sm" x="12" y="16">spm_phase1 · limits</text>
-    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#d3c2f9"/>
-    <text class="sm" x="12" y="48">T² statistic</text>
-    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#d3c2f9"/>
-    <text class="sm" x="12" y="80">SPE / Q residual</text>
-  </g>
+  <!-- Arrow down -->
+  <line x1="360" y1="130" x2="360" y2="150" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
 
-  <!-- Arrow 2 -->
-  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
-  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+  <!-- ===== fdata object ===== -->
+  <rect x="220" y="150" width="280" height="40" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="360" y="175" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">fdata(X, argvals, id, metadata)</text>
 
-  <!-- Panel 3: control chart -->
-  <rect x="500" y="70" width="196" height="188" rx="12" fill="#f0ebfe" stroke="#6610f2" stroke-width="1.5"/>
-  <text class="lab" x="598" y="94" text-anchor="middle" fill="#6610f2">Control Chart</text>
-  <g transform="translate(520,110)">
-    <line x1="0" y1="128" x2="156" y2="128" stroke="#adb5bd" stroke-width="1.2"/>
-    <line x1="0" y1="128" x2="0" y2="8" stroke="#adb5bd" stroke-width="1.2"/>
-    <line x1="0" y1="44" x2="156" y2="44" stroke="#dc3545" stroke-width="1.4" stroke-dasharray="4 3"/>
-    <text class="sm" x="156" y="40" text-anchor="end" fill="#dc3545">UCL</text>
-    <polyline points="8,108 26,96 44,112 62,100 80,104 98,90 116,72 134,52 150,22" fill="none" stroke="#6610f2" stroke-width="1.8"/>
-    <circle cx="8" cy="108" r="2.4" fill="#6610f2"/>
-    <circle cx="44" cy="112" r="2.4" fill="#6610f2"/>
-    <circle cx="80" cy="104" r="2.4" fill="#6610f2"/>
-    <circle cx="116" cy="72" r="2.4" fill="#6610f2"/>
-    <circle cx="150" cy="22" r="5" fill="#dc3545"/>
-    <text class="sm" x="150" y="16" text-anchor="middle" fill="#dc3545">alarm</text>
-  </g>
-  <text class="sm" x="598" y="250" text-anchor="middle" fill="#6c757d">out-of-control crossing</text>
+  <!-- Arrow fan out -->
+  <line x1="260" y1="190" x2="110" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
+  <line x1="360" y1="190" x2="360" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
+  <line x1="460" y1="190" x2="610" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
+
+  <!-- ===== Column 1: Explore ===== -->
+  <rect x="16" y="220" width="200" height="140" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="116" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Explore</text>
+  <text x="36" y="266" font-size="12" fill="#555">depth()  &#x2014; centrality ranking</text>
+  <text x="36" y="286" font-size="12" fill="#555">metric.lp() &#x2014; distances</text>
+  <text x="36" y="306" font-size="12" fill="#555">metric.DTW() &#x2014; warping</text>
+  <text x="36" y="326" font-size="12" fill="#555">outliers() &#x2014; anomalies</text>
+  <text x="36" y="346" font-size="12" fill="#555">autoplot() &#x2014; visualization</text>
+
+  <!-- ===== Column 2: Transform ===== -->
+  <rect x="232" y="220" width="256" height="140" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="360" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Transform</text>
+  <text x="252" y="266" font-size="12" fill="#555">smooth() &#x2014; remove noise</text>
+  <text x="252" y="286" font-size="12" fill="#555">fdata2basis() &#x2014; basis expansion</text>
+  <text x="252" y="306" font-size="12" fill="#555">fdata2pc() &#x2014; FPCA scores</text>
+  <text x="252" y="326" font-size="12" fill="#555">deriv() &#x2014; derivatives</text>
+  <text x="252" y="346" font-size="12" fill="#555">elastic.align() &#x2014; alignment</text>
+
+  <!-- ===== Column 3: Model ===== -->
+  <rect x="504" y="220" width="200" height="140" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="604" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Model</text>
+  <text x="524" y="266" font-size="12" fill="#555">fregre.pc() &#x2014; regression</text>
+  <text x="524" y="286" font-size="12" fill="#555">fregre.lm() &#x2014; linear model</text>
+  <text x="524" y="306" font-size="12" fill="#555">fregre.np() &#x2014; nonparametric</text>
+  <text x="524" y="326" font-size="12" fill="#555">cluster.kmeans() &#x2014; clustering</text>
+  <text x="524" y="346" font-size="12" fill="#555">fclassif() &#x2014; classification</text>
+
+  <!-- ===== Bottom: Rust backend ===== -->
+  <line x1="16" y1="382" x2="704" y2="382" stroke="#eee" stroke-width="1.5"/>
+
+  <rect x="80" y="400" width="560" height="64" rx="8" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.5"/>
+  <text x="360" y="424" text-anchor="middle" font-size="15" font-weight="bold" fill="#D55E00">Rust Backend (extendr)</text>
+  <text x="360" y="448" text-anchor="middle" font-size="13" fill="#555">10&#x2013;200x speedups  &#x2022;  nalgebra linear algebra  &#x2022;  rayon parallelism  &#x2022;  zero-copy R &#x2194; Rust</text>
+
+  <defs>
+    <marker id="arrIntro" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
 </svg>

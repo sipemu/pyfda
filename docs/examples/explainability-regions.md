@@ -13,9 +13,19 @@ arbitrary channels.
 This page fits an FPC linear model on the second-derivative spectra and then puts
 it under the `fdars.explain` microscope: the coefficient curve with
 **statistically significant regions** shaded, a **pointwise importance** profile,
-an additive **decomposition** of the coefficient function, and a **partial
-dependence** curve. Every wavelength verdict is read off a real binding, not
-asserted.
+a gradient **saliency map**, a sliding-window **domain importance** scan, an
+additive **decomposition** of the coefficient function, and a **partial
+dependence** curve. Five explanation methods, five independent readings of the
+same model — the reassuring outcome is that they all point at the same chemistry.
+Every wavelength verdict is read off a real binding, not asserted.
+
+!!! note "Reading against a ground truth"
+    The [R companion to this page](https://sipemu.github.io/fdars-r/) validates
+    the explainers on *synthetic* data with a known coefficient function, where
+    the true predictive regions are planted by construction. We take the harder,
+    more honest route: real Tecator spectra, where the "ground truth" is the
+    known **930 nm C–H fat absorption**. If the explainers converge there, they
+    have rediscovered chemistry rather than fitting noise.
 
 ## The model and its coefficient curve
 
@@ -155,6 +165,99 @@ with everything else contributing little. The importance peak and the significan
 $\beta$ region agree, which is the reassuring outcome: two different explanation
 methods point at the same chemistry.
 
+## Saliency: per-sample sensitivity
+
+Pointwise importance summarises the model over the whole dataset. **Saliency**
+asks a local question: for each individual spectrum, how sensitive is its
+prediction to a nudge at each wavelength? `functional_saliency` returns a full
+`saliency_map` of shape `(n_samples, m)` plus its `mean_absolute_saliency` across
+samples. For a *linear* functional model the per-sample gradient is just
+$\beta(\lambda)$ at every observation, so the mean absolute saliency reduces to
+$|\beta(\lambda)|$ — a useful sanity check that the binding does what the math
+says, and a template for the nonlinear case where saliency genuinely varies from
+curve to curve.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_tecator
+from fdars.fdata import deriv_1d
+from fdars.explain import functional_saliency, significant_regions
+from fdars.regression import bootstrap_ci_fregre_lm
+
+wl, X, meta = load_tecator()
+fat = meta["fat"].to_numpy()
+D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
+
+sal = functional_saliency(D2, fat, ncomp=5)
+smap = np.asarray(sal["saliency_map"])           # (n, m)
+mas = np.asarray(sal["mean_absolute_saliency"])  # (m,)
+ci = bootstrap_ci_fregre_lm(D2, fat, n_comp=5, n_boot=200, alpha=0.05, seed=1)
+regions = significant_regions(np.asarray(ci["lower"]), np.asarray(ci["upper"]))
+
+f, ax = fig()
+for row in smap[::20]:                            # a few individual saliency curves
+    ax.plot(wl, np.abs(row), color="#adb5bd", lw=0.6, alpha=0.6)
+ax.plot(wl, mas, color="#0d6efd", lw=2.2, label="mean |saliency|")
+for s, e, _ in regions:
+    ax.axvspan(wl[s], wl[e], color="#3f51b5", alpha=0.10)
+ax.set(title="Saliency map: sensitivity per wavelength",
+       xlabel="wavelength (nm)", ylabel="|saliency|")
+ax.legend()
+print(render(f))
+```
+
+The bold mean-absolute-saliency curve peaks inside the same significant band, and
+the faint per-sample curves cluster tightly around it — as they must for a linear
+model, where every spectrum shares the coefficient function as its gradient. This
+is a third explanation method landing on 930 nm; when you later fit a nonlinear
+model, the spread of those grey curves is where individual-sample behaviour would
+start to diverge.
+
+## Domain importance: a sliding-window scan
+
+`domain_selection` slides a window of width `window_width` across the domain,
+accumulates the squared-$\beta$ importance inside it, and reports contiguous
+`intervals` that clear a `threshold` fraction of the total. Where significant
+regions test $\beta$ against zero, domain selection asks a blunter question —
+*which stretch of the spectrum carries most of the predictive mass?* — and
+returns explicit interval endpoints.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_tecator
+from fdars.fdata import deriv_1d
+from fdars.explain import domain_selection
+
+wl, X, meta = load_tecator()
+fat = meta["fat"].to_numpy()
+D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
+
+dom = domain_selection(D2, fat, ncomp=5, window_width=5, threshold=0.1)
+imp = np.asarray(dom["pointwise_importance"])
+intervals = np.asarray(dom["intervals"])          # rows: (start_idx, end_idx, importance)
+
+f, ax = fig()
+ax.plot(wl, imp, color="#2e8b57", lw=2)
+ax.fill_between(wl, 0, imp, color="#2e8b57", alpha=0.15)
+for s, e, w in intervals:
+    ax.axvspan(wl[int(s)], wl[int(e)], color="#2e8b57", alpha=0.18)
+    ax.text((wl[int(s)] + wl[int(e)]) / 2, imp.max() * 0.9,
+            f"{wl[int(s)]:.0f}–{wl[int(e)]:.0f} nm", ha="center", fontsize=8)
+ax.set(title=f"Domain importance (window width {dom['window_width']})",
+       xlabel="wavelength (nm)", ylabel="windowed importance")
+print(render(f))
+```
+
+The scan flags a single dominant interval straddling the fat absorption band —
+broader than the sharp significant-region core, because a sliding window
+deliberately smears importance over its width. That trade-off is the point:
+domain selection answers "*roughly where should I look?*" with a robust contiguous
+window, while significant regions answer "*exactly which channels are provably
+nonzero?*" The two agree on the location and disagree only on how tightly to draw
+the boundary — which is exactly the complementary information you want.
+
 ## Decomposing the coefficient function
 
 Why does $\beta(\lambda)$ have the shape it does? `beta_decomposition` splits it
@@ -233,6 +336,59 @@ its whole range — the dominant mode of spectral shape maps almost linearly ont
 fat content, which is why a linear functional model does so well on this dataset
 in the first place.
 
+## Validation summary: do the explainers agree?
+
+The acid test of an explanation toolkit is **consistency**: four methods, built on
+different principles, should converge on the same wavelengths if the signal is
+real. We stack the coefficient curve, pointwise importance, mean absolute
+saliency, and domain importance on a shared axis, with the significant-region
+bands overlaid, so agreement (or its absence) is read at a glance.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_tecator
+from fdars.fdata import deriv_1d
+from fdars.regression import fregre_lm, bootstrap_ci_fregre_lm
+from fdars.explain import (pointwise_importance, functional_saliency,
+                           domain_selection, significant_regions)
+
+wl, X, meta = load_tecator()
+fat = meta["fat"].to_numpy()
+D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
+
+beta = np.asarray(fregre_lm(D2, fat, n_comp=5)["beta_t"])
+imp = np.asarray(pointwise_importance(D2, fat, ncomp=5)["importance_normalized"])
+mas = np.asarray(functional_saliency(D2, fat, ncomp=5)["mean_absolute_saliency"])
+dom = np.asarray(domain_selection(D2, fat, ncomp=5,
+                                  window_width=5, threshold=0.1)["pointwise_importance"])
+ci = bootstrap_ci_fregre_lm(D2, fat, n_comp=5, n_boot=200, alpha=0.05, seed=1)
+regions = significant_regions(np.asarray(ci["lower"]), np.asarray(ci["upper"]))
+
+panels = [(beta, r"$\beta(\lambda)$", "#3f51b5"),
+          (imp, "pointwise imp.", "#e8710a"),
+          (mas, "mean |saliency|", "#0d6efd"),
+          (dom, "domain imp.", "#2e8b57")]
+f, axes = fig(nrows=4, figsize=(7.5, 6.6), sharex=True)
+for ax, (y, label, c) in zip(axes, panels):
+    ax.plot(wl, y, color=c, lw=1.8)
+    ax.set_ylabel(label, fontsize=9)
+    for s, e, _ in regions:                       # significant band on every panel
+        ax.axvspan(wl[s], wl[e], color="#6c757d", alpha=0.12)
+axes[0].axhline(0, color="#6c757d", lw=0.8)
+axes[0].set_title("Four explainers over the significant regions (grey bands)")
+axes[-1].set_xlabel("wavelength (nm)")
+print(render(f))
+```
+
+Every panel lights up over the same grey significant bands around **930 nm**. The
+coefficient curve swings there, importance peaks there, saliency peaks there, and
+the domain scan brackets it — four methods, one verdict. That convergence is what
+makes the explanation *trustworthy*: no single method is doing the heavy lifting,
+and none contradicts the known chemistry. When explainers disagree, it is a
+signal to distrust the model; here they agree, so we can read the 930 nm story
+with confidence.
+
 ## Parameters
 
 | Function | Key parameters | Description |
@@ -242,6 +398,8 @@ in the first place.
 | `significant_regions(lower, upper)` | `lower`, `upper` | Regions where the CI excludes zero → `(start, end, direction)` |
 | `significant_regions_from_se(beta_t, beta_se, z_alpha)` | `z_alpha` | Same, from a curve and its standard error |
 | `pointwise_importance(data, response, ncomp)` | `ncomp` | `importance`, `importance_normalized`, `component_importance` |
+| `functional_saliency(data, response, ncomp)` | `ncomp` | `saliency_map` (n×m), `mean_absolute_saliency` |
+| `domain_selection(data, response, ncomp, window_width, threshold)` | `window_width`, `threshold` | `pointwise_importance`, `intervals` (start, end, importance) |
 | `beta_decomposition(data, response, ncomp)` | `ncomp` | `components` (rows sum to $\beta$), `variance_proportion` |
 | `functional_pdp(data, response, ncomp, component, n_grid)` | `component`, `n_grid` | `grid_values`, `pdp_curve` for one FPC score |
 

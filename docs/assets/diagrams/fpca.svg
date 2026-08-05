@@ -30,11 +30,11 @@
   <text class="sm" x="360" y="118" text-anchor="middle">Karhunen-Loeve</text>
   <g transform="translate(292,132)">
     <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
-    <text class="sm" x="12" y="16">mean $\hat\mu(t)$</text>
+    <text class="sm" x="12" y="16">mean μ̂(t)</text>
     <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
-    <text class="sm" x="12" y="48">eigenfunctions $\phi_k$</text>
+    <text class="sm" x="12" y="48">eigenfunctions φₖ</text>
     <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
-    <text class="sm" x="12" y="80">scores $\xi_{ik}$</text>
+    <text class="sm" x="12" y="80">scores ξᵢₖ</text>
   </g>
 
   <!-- Arrow 2 -->
@@ -50,7 +50,7 @@
     <path d="M0 40 C20 12 40 20 76 8" stroke="#198754" stroke-width="1.8"/>
     <path d="M0 40 C20 62 40 56 76 66" stroke="#fd7e14" stroke-width="1.8"/>
     <path d="M0 40 C20 34 40 36 76 34" stroke="#6c757d" stroke-width="1.4" stroke-dasharray="3 2"/>
-    <text class="sm" x="0" y="62" font-size="9">$\hat\mu\pm2\sqrt{\lambda_k}\phi_k$</text>
+    <text class="sm" x="0" y="62" font-size="9">μ̂ ± 2√λₖ · φₖ</text>
   </g>
   <!-- bottom: score scatter -->
   <g transform="translate(608,150)">
