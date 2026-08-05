@@ -1,8 +1,11 @@
 //! Elastic alignment and shape analysis for functional data.
 
 use crate::convert::*;
-use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
+use numpy::{
+    AllowTypeChange, PyArray1, PyArray2, PyArrayLike1, PyReadonlyArray1, PyReadonlyArray2,
+};
 use pyo3::prelude::*;
+use std::collections::HashMap;
 
 /// Pairwise elastic alignment of two curves.
 ///
@@ -858,15 +861,15 @@ pub fn elastic_align_pair_constrained<'py>(
     f1: PyReadonlyArray1<'py, f64>,
     f2: PyReadonlyArray1<'py, f64>,
     argvals: PyReadonlyArray1<'py, f64>,
-    landmark_targets: PyReadonlyArray1<'py, f64>,
-    landmark_sources: PyReadonlyArray1<'py, f64>,
+    landmark_targets: PyArrayLike1<'py, f64, AllowTypeChange>,
+    landmark_sources: PyArrayLike1<'py, f64, AllowTypeChange>,
     lambda_: f64,
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let c1 = numpy1d_to_vec(f1);
     let c2 = numpy1d_to_vec(f2);
     let av = numpy1d_to_vec(argvals);
-    let lt = numpy1d_to_vec(landmark_targets);
-    let ls = numpy1d_to_vec(landmark_sources);
+    let lt = landmark_targets.as_array().to_vec();
+    let ls = landmark_sources.as_array().to_vec();
     let pairs: Vec<(f64, f64)> = lt.into_iter().zip(ls).collect();
     let result =
         fdars_core::alignment::elastic_align_pair_constrained(&c1, &c2, &av, &pairs, lambda_);
@@ -931,7 +934,8 @@ pub fn hierarchical_from_distances<'py>(
     ))?;
 
     let dict = pyo3::types::PyDict::new(py);
-    // merges: list of (i, j, distance) tuples
+    // merges: list of (i, j, distance) tuples (back-compat; uses core's index-reuse
+    // convention where the merged cluster is referenced by the lower original index).
     let merges_list = pyo3::types::PyList::empty(py);
     for (i, j, d) in &result.merges {
         let tuple = pyo3::types::PyTuple::new(py, [*i as f64, *j as f64, *d]).unwrap();
@@ -939,6 +943,30 @@ pub fn hierarchical_from_distances<'py>(
     }
     dict.set_item("merges", merges_list)?;
     dict.set_item("n", result.n)?;
+
+    // linkage: SciPy-format (n-1) x 4 linkage matrix suitable for
+    // scipy.cluster.hierarchy.dendrogram. Core's `merges` reuse original indices
+    // for newly-formed clusters (the merged cluster is stored at `min_i`, the lower
+    // of the two merged indices). Remap those reused indices to SciPy ids: original
+    // leaves keep ids 0..n, and the cluster formed at merge step k gets id `n + k`.
+    let n = result.n;
+    // current_id[orig] = the current linkage id of the cluster that original leaf
+    // `orig` currently belongs to (identity at first).
+    let mut current_id: HashMap<usize, usize> = (0..n).map(|i| (i, i)).collect();
+    // size[id] = number of original leaves in the cluster with the given linkage id.
+    let mut size: HashMap<usize, usize> = (0..n).map(|i| (i, 1usize)).collect();
+    let mut linkage_rows: Vec<Vec<f64>> = Vec::with_capacity(n.saturating_sub(1));
+    for (k, (i, j, d)) in result.merges.iter().enumerate() {
+        let a = current_id[i];
+        let b = current_id[j];
+        let new_id = n + k;
+        let size_new = size[&a] + size[&b];
+        linkage_rows.push(vec![a as f64, b as f64, *d, size_new as f64]);
+        // Core reuses `min_i` (== *i, the lower index) for the merged cluster.
+        current_id.insert(*i, new_id);
+        size.insert(new_id, size_new);
+    }
+    dict.set_item("linkage", PyArray2::from_vec2(py, &linkage_rows).unwrap())?;
     Ok(dict)
 }
 
@@ -1238,7 +1266,7 @@ pub fn lambda_cv<'py>(
     py: Python<'py>,
     data: PyReadonlyArray2<'py, f64>,
     argvals: PyReadonlyArray1<'py, f64>,
-    lambdas: Option<PyReadonlyArray1<'py, f64>>,
+    lambdas: Option<PyArrayLike1<'py, f64, AllowTypeChange>>,
     n_folds: usize,
     max_iter: usize,
     tol: f64,
@@ -1247,7 +1275,7 @@ pub fn lambda_cv<'py>(
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
     let lams = match lambdas {
-        Some(arr) => numpy1d_to_vec(arr),
+        Some(arr) => arr.as_array().to_vec(),
         None => vec![0.0, 0.01, 0.1, 1.0, 10.0],
     };
     let config = fdars_core::alignment::LambdaCvConfig {

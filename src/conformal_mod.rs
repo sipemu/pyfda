@@ -1,7 +1,7 @@
 //! Conformal prediction methods.
 
 use crate::convert::*;
-use numpy::{PyReadonlyArray1, PyReadonlyArray2};
+use numpy::{AllowTypeChange, PyArrayLike1, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::*;
 
 /// Conformal regression prediction intervals.
@@ -372,7 +372,7 @@ pub fn conformal_elastic_pcr<'py>(
 pub fn conformal_logistic<'py>(
     py: Python<'py>,
     data: PyReadonlyArray2<'py, f64>,
-    response: PyReadonlyArray1<'py, f64>,
+    response: PyArrayLike1<'py, f64, AllowTypeChange>,
     test_data: PyReadonlyArray2<'py, f64>,
     ncomp: usize,
     max_iter: usize,
@@ -382,7 +382,7 @@ pub fn conformal_logistic<'py>(
     seed: u64,
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let resp = numpy1d_to_vec(response);
+    let resp = response.as_array().to_vec();
     let tmat = numpy2d_to_fdmatrix(test_data)?;
     let result = to_pyresult(fdars_core::conformal::conformal_logistic(
         &mat,
@@ -440,7 +440,7 @@ pub fn conformal_logistic<'py>(
 pub fn conformal_elastic_logistic<'py>(
     py: Python<'py>,
     data: PyReadonlyArray2<'py, f64>,
-    labels: PyReadonlyArray1<'py, i64>,
+    labels: PyArrayLike1<'py, i64, AllowTypeChange>,
     test_data: PyReadonlyArray2<'py, f64>,
     argvals: PyReadonlyArray1<'py, f64>,
     lambda: f64,
@@ -449,7 +449,7 @@ pub fn conformal_elastic_logistic<'py>(
     seed: u64,
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let lab: Vec<i8> = numpy1d_to_vec_i8(labels);
+    let lab: Vec<i8> = labels.as_array().iter().map(|&x| x as i8).collect();
     let tmat = numpy2d_to_fdmatrix(test_data)?;
     let av = numpy1d_to_vec(argvals);
     let result = to_pyresult(fdars_core::conformal::conformal_elastic_logistic(
@@ -473,11 +473,6 @@ pub fn conformal_elastic_logistic<'py>(
     dict.set_item("prediction_sets", sets)?;
     dict.set_item("coverage", result.coverage)?;
     Ok(dict)
-}
-
-/// Convert numpy 1D i64 array to Vec<i8>.
-fn numpy1d_to_vec_i8(arr: PyReadonlyArray1<'_, i64>) -> Vec<i8> {
-    arr.as_array().iter().map(|&x| x as i8).collect()
 }
 
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {

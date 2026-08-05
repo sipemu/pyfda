@@ -132,11 +132,23 @@ pub fn scb_mean_degras<'py>(
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
+    // bandwidth <= 0.0 => auto: pick a Silverman-style rule-of-thumb
+    // bandwidth over the argvals span. The core requires bandwidth > 0.
+    let bw = if bandwidth > 0.0 {
+        bandwidth
+    } else {
+        let (n, _m) = mat.shape();
+        let span = match (av.first(), av.last()) {
+            (Some(first), Some(last)) => last - first,
+            _ => 1.0,
+        };
+        0.9 * span * (n as f64).powf(-1.0 / 5.0)
+    };
     // Use Gaussian multiplier distribution by default
     let result = to_pyresult(fdars_core::tolerance::scb_mean_degras(
         &mat,
         &av,
-        bandwidth,
+        bw,
         nb,
         confidence,
         fdars_core::tolerance::MultiplierDistribution::Gaussian,
