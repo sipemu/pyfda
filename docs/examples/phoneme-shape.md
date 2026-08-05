@@ -1,19 +1,25 @@
-# Phoneme recognition: shape-based sound classification
+# Phoneme spectra: shape distance and when elastic methods help
 
-**Dataset:** Phoneme — 400 log-periodograms (256 frequencies each) of spoken
-sounds, 80 examples of each of five phonemes: **aa** (as in *dark*), **ao** (as
-in *water*), **dcl** (the *d* closure), **iy** (as in *she*), and **sh** (as in
-*she*). The label is the phoneme; the curve is the sound's frequency spectrum.
+**Dataset:** Phoneme — log-periodograms (256 frequency points each) of spoken
+sounds, five phoneme classes: **aa** (as in *dark*), **ao** (as in *water*),
+**dcl** (the *d* closure), **iy** (as in *she*), and **sh** (as in *she*). The
+curve is the sound's frequency spectrum; the label is the phoneme.
 
-Each observation is a spectrum — energy across 256 frequency bins. The
-information that distinguishes an *iy* from an *sh* lives in the **shape** of the
-spectrum (where the energy concentrates), not in any single frequency. That makes
-this a textbook **functional classification** problem: the periodograms are
-noisy, so we first smooth them into clean curves, then classify by shape and
-measure honest cross-validated accuracy. All 400 curves are used — no
-subsampling.
+Speakers producing the same phoneme place their spectral peaks at slightly
+different frequencies — a form of **phase variation**. Elastic (shape) analysis
+is built exactly for this: it compares curves *modulo reparameterisation* of the
+x-axis, so two spectra with the same shape but shifted peaks count as similar.
+This case study asks a sharper question than "does shape analysis work?" — it
+asks *when it should be used at all*. We diagnose the phase content, compare shape
+distance against ordinary $L^2$ distance, and let the two drive clustering
+head-to-head. The result is a cautionary one: on spectral data, **standard $L^2$
+methods win**, and `fdars` tells us why *before* we cluster.
 
-## Raw periodograms are noisy
+Distance and clustering scale quadratically, so we work with a balanced subset of
+**10 curves per class** (50 total); the shape-mean and phase diagnostics use the
+full per-class pools.
+
+## Log-periodogram spectra
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -22,199 +28,284 @@ from docs_data import load_phoneme
 
 freq, X, meta = load_phoneme()
 ph = meta["phoneme"].to_numpy()
-
-f, ax = fig()
-for cls, c in zip(["iy", "sh"], ["#3f51b5", "#e8710a"]):
-    ax.plot(freq, X[ph == cls][:6].T, color=c, lw=0.7, alpha=0.5)
-    ax.plot([], [], color=c, label=cls)
-ax.set(title="Raw log-periodograms (6 curves each) — noisy",
-       xlabel="frequency bin", ylabel="log-periodogram")
-ax.legend()
-print(render(f))
-```
-
-The raw curves are jagged: adjacent frequency bins jitter wildly even though the
-underlying spectral envelope is smooth. Feeding these directly to a classifier
-wastes effort modelling noise. The functional-data move is to **smooth** first —
-treat each periodogram as a rough sample of an underlying smooth spectral curve.
-
-## Smoothing with a penalised spline
-
-We fit each curve with a penalised B-spline
-(`fdars.basis.pspline_fit_1d`), which trades data fidelity against a roughness
-penalty `lambda_`. The returned `fitted` array is the smoothed curve matrix.
-
-```python exec="1" html="1" source="above"
-import numpy as np
-from docs_fig import fig, render
-from docs_data import load_phoneme
-from fdars.basis import pspline_fit_1d
-
-freq, X, meta = load_phoneme()
-ph = meta["phoneme"].to_numpy()
-Xs = np.asarray(pspline_fit_1d(X, freq, n_basis=20, lambda_=1.0)["fitted"])
-
-i = np.where(ph == "sh")[0][0]
-f, ax = fig()
-ax.plot(freq, X[i], color="#adb5bd", lw=0.9, label="raw")
-ax.plot(freq, Xs[i], color="#dc3545", lw=2.4, label="P-spline smooth")
-ax.set(title="One 'sh' periodogram: raw vs smoothed",
-       xlabel="frequency bin", ylabel="log-periodogram")
-ax.legend()
-print(render(f))
-```
-
-The penalised spline keeps the broad spectral envelope — the peaks and valleys
-that identify the phoneme — while discarding bin-to-bin noise. Every curve from
-here on is a smoothed spectrum.
-
-## Class-mean spectra
-
-The five phonemes have visibly different spectral **shapes** — this is what makes
-shape-based classification work.
-
-```python exec="1" html="1" source="above"
-import numpy as np
-from docs_fig import fig, render
-from docs_data import load_phoneme
-from fdars.basis import pspline_fit_1d
-
-freq, X, meta = load_phoneme()
-ph = meta["phoneme"].to_numpy()
-Xs = np.asarray(pspline_fit_1d(X, freq, n_basis=20, lambda_=1.0)["fitted"])
-
+classes = sorted(set(ph))
 palette = {"aa": "#3f51b5", "ao": "#e8710a", "dcl": "#198754",
            "iy": "#dc3545", "sh": "#6f42c1"}
+
+f, axes = fig(ncols=5, figsize=(9.5, 2.8), sharey=True)
+for ax, cls in zip(axes, classes):
+    ax.plot(freq, X[ph == cls][:20].T, color=palette[cls], lw=0.4, alpha=0.5)
+    ax.set_title(cls, color=palette[cls])
+    ax.set_xlabel("freq bin")
+axes[0].set_ylabel("log-periodogram")
+f.suptitle("Log-periodogram spectra by phoneme class", y=1.05)
+print(render(f))
+```
+
+The vowels **aa** and **ao** carry broad low-frequency energy; the fricative
+**sh** pushes energy into the high bins; **dcl** and **iy** sit in between. What
+distinguishes the classes is *where the spectral peaks lie* — a fact that will
+matter enormously when we decide whether warping the frequency axis helps or
+hurts.
+
+## Is there phase variation to exploit?
+
+Before reaching for elastic tools, quantify how much of a class's variation is
+*phase* (peak-position shifts) rather than *amplitude* (height differences).
+`alignment_quality` aligns the curves to their Karcher mean and decomposes total
+variance into amplitude and phase parts; `phase_amplitude_ratio` is the phase
+fraction.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_phoneme
+from fdars.alignment import alignment_quality
+
+freq, X, meta = load_phoneme()
+freq = np.ascontiguousarray(freq, dtype=np.float64)
+ph = meta["phoneme"].to_numpy()
+classes = sorted(set(ph))
+
+ratios = []
+for cls in classes:
+    pool = np.ascontiguousarray(X[ph == cls][:30], dtype=np.float64)
+    aq = alignment_quality(pool, freq, max_iter=15)
+    ratios.append(100 * aq["phase_amplitude_ratio"])
+
+f, ax = fig(figsize=(6.0, 3.8))
+bars = ax.bar(classes, ratios, color=[
+    "#3f51b5", "#e8710a", "#198754", "#dc3545", "#6f42c1"], width=0.6)
+ax.axhline(5, color="#6c757d", ls="--", lw=1, label="5% (L2 preferred below)")
+ax.axhline(15, color="#dc3545", ls=":", lw=1, label="15% (elastic likely helps)")
+for b, r in zip(bars, ratios):
+    ax.text(b.get_x() + b.get_width() / 2, r + 0.4, f"{r:.0f}%", ha="center")
+ax.set(title="Phase fraction of variance, per phoneme",
+       ylabel="phase / total variance (%)")
+ax.legend(fontsize=8)
+print(render(f))
+```
+
+The rule of thumb: below ~5% phase, standard $L^2$ methods are preferred; above
+~15%, elastic alignment likely pays off; in between, test both. Some classes
+here clear the 15% line — there *is* real peak-position variation within a
+phoneme. That is the case *for* trying shape analysis. But a per-class ratio can
+mislead, because the real task pools *all five classes together*, where the story
+changes.
+
+## Shape distance vs $L^2$ distance
+
+Two distance matrices, two views of the same 50 curves.
+`shape_self_distance_matrix` measures elastic (Fisher–Rao) shape distance —
+frequency axis free to warp; `lp_self_1d` measures ordinary $L^2$ distance —
+frequency axis fixed. A good distance for classification should be **small within
+a class and large between classes**: a block-diagonal heatmap.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_phoneme
+from fdars.alignment import shape_self_distance_matrix
+from fdars.metric import lp_self_1d
+
+freq, X, meta = load_phoneme()
+freq = np.ascontiguousarray(freq, dtype=np.float64)
+ph = meta["phoneme"].to_numpy()
+classes = sorted(set(ph))
+idx = np.concatenate([np.where(ph == c)[0][:10] for c in classes])
+Xs = np.ascontiguousarray(X[idx], dtype=np.float64)
+
+D_shape = np.asarray(shape_self_distance_matrix(Xs, freq))
+D_l2 = np.asarray(lp_self_1d(Xs, freq, p=2.0))
+bounds = np.arange(10, 50, 10) - 0.5
+
+f, axes = fig(ncols=2, figsize=(8.4, 4.0))
+for ax, D, name in [(axes[0], D_l2, "L2 distance"),
+                    (axes[1], D_shape, "shape (elastic) distance")]:
+    ax.imshow(D, cmap="plasma", aspect="equal")
+    for b in bounds:
+        ax.axhline(b, color="white", lw=0.4, ls="--")
+        ax.axvline(b, color="white", lw=0.4, ls="--")
+    ax.set(title=name, xlabel="curve index", ylabel="curve index")
+f.suptitle("Dashed lines mark class blocks (10 curves each)", y=1.02)
+print(render(f))
+```
+
+The **$L^2$** heatmap has a clean block-diagonal structure — dark (small
+distance) squares along the diagonal, brighter off-diagonal — meaning same-class
+spectra really are $L^2$-close. The **shape** heatmap is muddier: by warping the
+frequency axis to match shapes, elastic distance *collapses distinctions that the
+phoneme label depends on*. Two different phonemes can be warped into similar
+shapes, so their shape distance shrinks. This is the first sign that elastic
+alignment is throwing away the signal.
+
+## Shape means
+
+The `shape_mean` (elastic Karcher mean) of each class is its canonical spectral
+profile, computed without letting peak-position jitter blur the average.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_phoneme
+from fdars.alignment import shape_mean
+
+freq, X, meta = load_phoneme()
+freq = np.ascontiguousarray(freq, dtype=np.float64)
+ph = meta["phoneme"].to_numpy()
+classes = sorted(set(ph))
+palette = {"aa": "#3f51b5", "ao": "#e8710a", "dcl": "#198754",
+           "iy": "#dc3545", "sh": "#6f42c1"}
+
 f, ax = fig()
-for cls, c in palette.items():
-    ax.plot(freq, Xs[ph == cls].mean(0), color=c, lw=2.4, label=cls)
-ax.set(title="Mean spectrum per phoneme",
+for cls in classes:
+    pool = np.ascontiguousarray(X[ph == cls][:20], dtype=np.float64)
+    mean = np.asarray(shape_mean(pool, freq, max_iter=15)["mean"])
+    ax.plot(freq, mean, color=palette[cls], lw=2.4, label=cls)
+ax.set(title="Elastic (shape) mean spectrum per phoneme",
        xlabel="frequency bin", ylabel="log-periodogram")
 ax.legend(ncol=3)
 print(render(f))
 ```
 
-The nasal-closure **dcl** sits low across the board; **iy** and **sh** carry
-energy into the high bins where the vowels **aa** and **ao** have dropped off.
-The two back vowels **aa** and **ao** are the closest pair — and, as the
-confusion matrix below confirms, the ones the classifier most often mixes up.
+The five shape means are visibly distinct — sharp, canonical profiles that a
+plain pointwise average would smear. As spectra they clearly occupy different
+frequency regions, which is precisely why we might *hope* shape clustering works.
+The next section tests that hope directly.
 
-## Classifying by shape
+## MDS: what each distance "sees"
 
-`fdars.classification` offers several functional classifiers. Each first
-projects the smoothed curves onto their leading functional principal components
-(`ncomp`), then classifies in that low-dimensional score space. We evaluate them
-honestly with `fclassif_cv` (5-fold cross-validation), which reports an
-`error_rate` rather than the optimistic resubstitution accuracy.
+Classical multidimensional scaling embeds each distance matrix in 2-D so we can
+*look* at how well it separates the classes. We compute it with plain NumPy from
+the distance matrices (no external library needed).
 
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_phoneme
-from fdars.basis import pspline_fit_1d
-from fdars.classification import fclassif_cv
+from fdars.alignment import shape_self_distance_matrix
+from fdars.metric import lp_self_1d
 
 freq, X, meta = load_phoneme()
+freq = np.ascontiguousarray(freq, dtype=np.float64)
 ph = meta["phoneme"].to_numpy()
 classes = sorted(set(ph))
-y = np.array([classes.index(p) for p in ph], dtype=np.int64)
-Xs = np.asarray(pspline_fit_1d(X, freq, n_basis=20, lambda_=1.0)["fitted"])
+idx = np.concatenate([np.where(ph == c)[0][:10] for c in classes])
+Xs = np.ascontiguousarray(X[idx], dtype=np.float64)
+cls_sub = ph[idx]
 
-methods = ["lda", "qda", "knn"]
-acc = [1.0 - float(fclassif_cv(Xs, freq, y, method=m, ncomp=8, nfold=5)["error_rate"])
-       for m in methods]
+def cmds(D, k=2):                                # classical MDS
+    n = D.shape[0]
+    J = np.eye(n) - np.ones((n, n)) / n
+    B = -0.5 * J @ (D ** 2) @ J
+    w, V = np.linalg.eigh(B)
+    o = np.argsort(w)[::-1][:k]
+    return V[:, o] * np.sqrt(np.maximum(w[o], 0))
 
-f, ax = fig()
-ax.bar(methods, acc, color=["#3f51b5", "#e8710a", "#198754"], width=0.6)
-for i, a in enumerate(acc):
-    ax.text(i, a + 0.005, f"{a:.0%}", ha="center", fontsize=11)
-ax.axhline(0.2, color="#6c757d", ls="--", lw=1, label="chance (5 classes)")
-ax.set(title="5-fold CV accuracy by classifier (ncomp=8)",
-       xlabel="method", ylabel="accuracy", ylim=(0, 1))
-ax.legend()
+D_shape = np.asarray(shape_self_distance_matrix(Xs, freq))
+D_l2 = np.asarray(lp_self_1d(Xs, freq, p=2.0))
+palette = {"aa": "#3f51b5", "ao": "#e8710a", "dcl": "#198754",
+           "iy": "#dc3545", "sh": "#6f42c1"}
+
+f, axes = fig(ncols=2, figsize=(8.4, 4.0))
+for ax, D, name in [(axes[0], D_l2, "MDS: L2 distance"),
+                    (axes[1], D_shape, "MDS: shape distance")]:
+    Y = cmds(D)
+    for cls in classes:
+        m = cls_sub == cls
+        ax.scatter(Y[m, 0], Y[m, 1], color=palette[cls], s=34, alpha=0.85,
+                   edgecolor="white", label=cls)
+    ax.set(title=name, xlabel="MDS 1", ylabel="MDS 2")
+axes[1].legend(fontsize=8, ncol=2)
 print(render(f))
 ```
 
-All three classifiers land near **90%** on a five-way problem where chance is
-20% — the smoothed spectral shape is highly discriminative. **LDA** (linear
-discriminant analysis on 8 FPCA scores) edges out the others: with only eight
-numbers per curve it separates the five phonemes almost perfectly.
+Under **$L^2$** the classes form recognisable clusters; under **shape** distance
+the classes overlap far more, several colours bleeding together. The embedding
+confirms the heatmap: frequency warping removes the very peak-position
+information that separates phonemes.
 
-## Where do the errors go?
+## Clustering head-to-head
 
-A confusion matrix shows *which* phonemes get mixed up. We build it from
-out-of-fold predictions so it reflects genuine generalisation, not memorisation.
+Now the decisive test. We cluster the 50 curves with **k-medoids on each distance
+matrix** — elastic shape distance versus $L^2$ — and score each partition by
+**purity** (the fraction of curves that land in a cluster dominated by their true
+class). Since there are no elastic-k-means or standard-k-means bindings that take
+a precomputed distance, `kmedoids_from_distances` gives both methods a fair,
+identical clustering engine — the *only* thing that differs is the distance.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_phoneme
-from fdars.basis import pspline_fit_1d
-from fdars.classification import fclassif_lda
+from fdars.alignment import (shape_self_distance_matrix,
+                             kmedoids_from_distances, hierarchical_cut)
+from fdars.metric import lp_self_1d
 
 freq, X, meta = load_phoneme()
+freq = np.ascontiguousarray(freq, dtype=np.float64)
 ph = meta["phoneme"].to_numpy()
 classes = sorted(set(ph))
-y = np.array([classes.index(p) for p in ph], dtype=np.int64)
-Xs = np.asarray(pspline_fit_1d(X, freq, n_basis=20, lambda_=1.0)["fitted"])
+idx = np.concatenate([np.where(ph == c)[0][:10] for c in classes])
+Xs = np.ascontiguousarray(X[idx], dtype=np.float64)
+cls_sub = ph[idx]
 
-# out-of-fold predictions: train LDA on 4 folds, predict the 5th
-rng = np.random.default_rng(0)
-idx = rng.permutation(len(y))
-pred = np.empty_like(y)
-for fold in range(5):
-    te = idx[fold::5]
-    tr = np.setdiff1d(idx, te)
-    # fit on train, then classify train+test together and read test rows
-    both = np.vstack([Xs[tr], Xs[te]])
-    res = fclassif_lda(both, np.concatenate([y[tr], y[te]]), ncomp=8)
-    pred[te] = np.asarray(res["predicted"])[len(tr):]
+D_shape = np.asarray(shape_self_distance_matrix(Xs, freq))
+D_l2 = np.asarray(lp_self_1d(Xs, freq, p=2.0))
 
-K = len(classes)
-cm = np.zeros((K, K), int)
-for t_, p_ in zip(y, pred):
-    cm[t_, p_] += 1
+def purity(labels):
+    labels = np.asarray(labels)
+    return sum(np.unique(cls_sub[labels == c], return_counts=True)[1].max()
+               for c in np.unique(labels)) / len(cls_sub)
 
-f, ax = fig(figsize=(5.2, 4.4))
-im = ax.imshow(cm, cmap="Blues", aspect="auto")
-ax.set_xticks(range(K)); ax.set_xticklabels(classes)
-ax.set_yticks(range(K)); ax.set_yticklabels(classes)
-for i in range(K):
-    for j in range(K):
-        ax.text(j, i, cm[i, j], ha="center", va="center",
-                color="#222" if cm[i, j] < cm.max() * 0.6 else "white")
-ax.set(title="Confusion matrix (out-of-fold LDA)",
-       xlabel="predicted", ylabel="true phoneme")
-ax.grid(False)
+pur_l2 = purity(kmedoids_from_distances(D_l2, k=5, seed=42)["labels"])
+pur_shape = purity(kmedoids_from_distances(D_shape, k=5, seed=42)["labels"])
+pur_hier = purity(hierarchical_cut(D_shape, k=5, linkage="complete"))
+
+names = ["k-medoids (L2)", "k-medoids (elastic)", "hierarchical (elastic)"]
+vals = [pur_l2, pur_shape, pur_hier]
+f, ax = fig(figsize=(6.4, 3.8))
+bars = ax.barh(range(3), vals, color=["#3f51b5", "#e8710a", "#dc3545"])
+ax.set_yticks(range(3)); ax.set_yticklabels(names)
+for b, v in zip(bars, vals):
+    ax.text(v + 0.01, b.get_y() + b.get_height() / 2, f"{v:.0%}", va="center")
+ax.set(title="Cluster purity: L2 beats elastic on spectral data",
+       xlabel="purity", xlim=(0, 1.05))
 print(render(f))
 ```
 
-The diagonal dominates — most predictions are correct. The largest off-diagonal
-cell is the **aa ↔ ao** confusion the class-mean plot foreshadowed: two back
-vowels with nearly parallel spectra. Everything else (**dcl**, **iy**, **sh**) is
-recognised almost flawlessly.
+The verdict is stark and reproducible: **$L^2$ k-medoids reaches ~84% purity**,
+while **elastic clustering languishes near ~35%** — worse than some naive
+baselines. Hierarchical clustering on the shape distances does no better. The
+diagnostic at the top of the page predicted this: once all five classes are
+pooled, the phase fraction is small, and elastic alignment spends its freedom
+*erasing* the discriminative peak positions.
 
-!!! note "Smoothing is not cosmetic"
-    Smoothing before classification is not just for prettier plots. The FPCA step
-    inside each classifier is sensitive to high-frequency noise; smoothing
-    concentrates the leading components on the spectral *envelope*, which is where
-    the phoneme identity lives. Try lowering `n_basis` or raising `lambda_` to see
-    accuracy trade off against how much detail survives.
+!!! note "Elastic methods are not universally better"
+    Fisher–Rao / SRSF alignment warps the **independent variable**. That is
+    exactly right when the x-axis is *time* and phase is a nuisance (gait cycles,
+    ECG beats, growth curves). It is exactly wrong when the x-axis is *frequency*
+    and the peak *positions carry the meaning* — as in these spectra. The
+    `phase_amplitude_ratio` from `alignment_quality` is the switch: high phase
+    fraction ⇒ reach for elastic tools; low phase fraction ⇒ stay with $L^2$.
 
 ## Parameters
 
 | Function | Key parameters | Description |
 |----------|----------------|-------------|
-| `pspline_fit_1d(data, argvals, n_basis, lambda_, order)` | `n_basis`, `lambda_` | Penalised-spline smoothing; `fitted` is the smoothed matrix |
-| `fclassif_cv(data, argvals, labels, method, ncomp, nfold)` | `method`, `ncomp`, `nfold` | Cross-validated `error_rate` for `lda`/`qda`/`knn` |
-| `fclassif_lda(data, labels, ncomp)` | `ncomp` | LDA on `ncomp` FPCA scores; returns `predicted`, `accuracy` |
-| `fclassif_knn(data, labels, ncomp, k)` | `k` | k-NN in FPCA score space |
+| `alignment_quality(data, argvals, max_iter)` | `max_iter` | Amplitude/phase variance split; `phase_amplitude_ratio`, `mean_variance_reduction` |
+| `shape_self_distance_matrix(data, argvals, quotient)` | `quotient` | Pairwise elastic (Fisher–Rao) shape distances |
+| `lp_self_1d(data, argvals, p)` | `p` | Pairwise $L^p$ distances (`p=2` ⇒ $L^2$) |
+| `shape_mean(data, argvals, max_iter, tol)` | `max_iter` | Elastic Karcher mean; `mean`, `aligned_data`, `gammas` |
+| `kmedoids_from_distances(dist_mat, k, seed)` | `k`, `seed` | k-medoids on a precomputed distance matrix; `labels` |
+| `hierarchical_cut(dist_mat, k, linkage)` | `k`, `linkage` | Agglomerative clustering cut into `k` groups |
 
 ## See also
 
-- [Classification](../regression/classification.md) for LDA/QDA/k-NN and
-  depth-based classifiers in general.
-- [Basis smoothing](../represent/basis-representation.md) for penalised splines
-  and choosing `n_basis`/`lambda_`.
-- [Cross-validation](../regression/cross-validation.md) for honest model
-  assessment.
+- [Alignment and elastic distances](../analyze/alignment.md) — Karcher means,
+  SRSF, and when phase variation *is* the signal.
+- [Classification](../regression/classification.md) — supervised LDA/QDA/k-NN on
+  these same spectra, where the frequency axis stays fixed.
+- [Clustering functional data](../analyze/clustering.md) — k-means, fuzzy
+  c-means, and GMM in function space.
+</content>

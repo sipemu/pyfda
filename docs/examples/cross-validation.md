@@ -154,6 +154,89 @@ print(render(f))
 The folds intermix along the diagonal — no single fold is an outlier, so the
 honest $R^2$ is a trustworthy summary rather than an artefact of one lucky split.
 
+## Per-fold stability
+
+A single OOF $R^2$ hides whether the model is *equally* good on every split. The
+most direct stability check is a boxplot of the residuals within each fold: if
+one fold's box sits off zero or is far wider than the others, the summary error
+is being propped up (or dragged down) by a lucky partition rather than reflecting
+genuine generalisation.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_tecator
+from fdars.fdata import deriv_1d
+from fdars.regression import fregre_cv
+
+wl, X, meta = load_tecator()
+fat = meta["fat"].to_numpy()
+D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
+
+cv = fregre_cv(D2, fat, k_min=1, k_max=12, n_folds=5)
+oof = np.asarray(cv["oof_predictions"])
+fold = np.asarray(cv["fold_assignments"])
+resid = fat - oof
+by_fold = [resid[fold == k] for k in np.unique(fold)]
+
+f, ax = fig()
+ax.axhline(0, color="#dc3545", ls="--", lw=1)
+bp = ax.boxplot(by_fold, patch_artist=True,
+                tick_labels=[f"fold {k}" for k in np.unique(fold)])
+for box in bp["boxes"]:
+    box.set(facecolor="#cfe0ff", alpha=0.8)
+ax.set(title="Out-of-fold residuals by fold",
+       xlabel="held-out fold", ylabel="residual (measured − OOF)")
+print(render(f))
+```
+
+The boxes straddle zero with comparable spreads — no fold is systematically
+biased, so the cross-validated error is a stable estimate, not the product of one
+fortunate split.
+
+## Stratified folds keep each split representative
+
+Random fold assignment can, by chance, load the high-fat samples into a couple of
+folds and starve the others — a real risk here because the Tecator fat
+distribution is right-skewed. **Stratified** folds instead spread the response
+evenly across folds, so every fold sees a similar range of fat. `fdars` does not
+expose a fold builder, so we stratify transparently: sort by fat and deal samples
+round-robin into folds.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_tecator
+
+wl, X, meta = load_tecator()
+fat = meta["fat"].to_numpy()
+n = len(fat)
+
+def stratified_folds(y, k, seed=1):
+    folds = np.empty(len(y), dtype=int)
+    for i, idx in enumerate(np.argsort(y)):   # round-robin along sorted y
+        folds[idx] = i % k
+    return folds
+
+fs = stratified_folds(fat, 5)
+fr = np.random.default_rng(1).integers(0, 5, n)
+
+f, (aL, aR) = fig(ncols=2, figsize=(9.4, 3.7))
+for ax, folds, ttl in [(aL, fs, "Stratified"), (aR, fr, "Random")]:
+    groups = [fat[folds == k] for k in range(5)]
+    ax.boxplot(groups, patch_artist=True,
+               tick_labels=[str(k) for k in range(5)])
+    spread = np.ptp([g.mean() for g in groups])
+    ax.set(title=f"{ttl}  (fold-mean spread {spread:.1f}%)",
+           xlabel="fold", ylabel="fat (%)")
+print(render(f))
+```
+
+The random folds' means scatter over several percent of fat; the stratified
+folds are nearly identical. When the response is skewed, stratifying removes a
+source of noise from the CV estimate — each fold is a fair miniature of the whole
+dataset.
+
 ## Comparing three models honestly
 
 FPC-LM is only one option. Functional **PLS** (`fregre_pls`) chooses components

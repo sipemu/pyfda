@@ -6,226 +6,405 @@ content.
 
 A meat processor wants to run its near-infrared (NIR) spectrometer *inline*:
 every sample that comes off the line is scanned, and the operator needs an
-automatic flag whenever a spectrum drifts away from the on-spec product. Because
-each measurement is a whole absorbance **curve**, this is a
-[functional statistical-process-monitoring](../monitoring/spm.md) problem — we
-learn the in-control curve distribution from a reference batch (Phase I), then
-project every incoming curve onto that model and watch two control statistics
-(Phase II).
+automatic flag whenever a spectrum drifts away from on-spec product. Because each
+measurement is a whole absorbance **curve**, this is a
+[functional statistical-process-monitoring](../monitoring/spm.md) problem. We
+treat samples with **fat below 25 %** as in-specification (normal production),
+learn their curve distribution in Phase I, then monitor the out-of-spec
+(high-fat) samples in Phase II — using several detection strategies (Shewhart,
+run rules, an EWMA chart) and finally a diagnostic decomposition that points back
+to the spectral region responsible.
 
-Here we treat samples in a tight fat band (5–15 %) as the **on-spec reference**
-product and ask whether the FPCA control chart flags spectra that fall outside
-that band — without ever being told the fat value.
+The two groups overlap heavily in raw spectral space, but subtle shape
+differences — particularly in the 930–1000 nm fat-absorption region —
+distinguish them, and the monitor learns those differences from in-spec data
+alone.
 
-## The reference product and the incoming stream
+## The data
 
-A standard NIR preprocessing step removes the dominant baseline shift by
-differentiating twice: a constant or linear offset vanishes under
-$d^2/d\lambda^2$, exposing the fat-absorption curvature the monitor should react
-to. We do this with `fdars.fdata.deriv_1d` and work on the second-derivative
-spectra throughout.
+We work on the **raw absorbance** spectra (as the R reference does), splitting on
+fat content: `fat < 25 %` is in-spec, the rest out-of-spec.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_tecator
-from fdars.fdata import deriv_1d
 
 wl, X, meta = load_tecator()
 fat = meta["fat"].to_numpy()
-D2 = np.asarray(deriv_1d(X, wl, nderiv=2))       # baseline-corrected spectra
+in_spec = fat < 25
 
-onspec = (fat >= 5) & (fat <= 15)                # the reference quality band
 f, ax = fig()
-ax.plot(wl, D2[onspec].T, color="#3f51b5", lw=0.6, alpha=0.35)
-ax.plot(wl, D2[fat > 25].T, color="#dc3545", lw=0.7, alpha=0.5)
-ax.plot([], [], color="#3f51b5", label="on-spec (fat 5–15 %)")
-ax.plot([], [], color="#dc3545", label="off-spec (fat > 25 %)")
-ax.set(title="Second-derivative spectra: on-spec band vs high-fat samples",
-       xlabel="wavelength (nm)", ylabel="$d^2A/d\\lambda^2$")
-ax.legend(loc="upper right")
+ax.plot(wl, X[in_spec].T, color="#3f51b5", lw=0.4, alpha=0.35)
+ax.plot(wl, X[~in_spec].T, color="#e8710a", lw=0.4, alpha=0.5)
+ax.plot([], [], color="#3f51b5", label=f"in-spec, fat < 25 % ({int(in_spec.sum())})")
+ax.plot([], [], color="#e8710a", label=f"out-of-spec ({int((~in_spec).sum())})")
+ax.axvspan(930, 1000, color="#dc3545", alpha=0.06)
+ax.set(title="Tecator NIR absorbance spectra",
+       xlabel="wavelength (nm)", ylabel="absorbance")
+ax.legend(loc="upper left")
 print(render(f))
 ```
 
-The high-fat spectra (red) fan away from the on-spec band (indigo) around the
-930–970 nm fat-absorption region. A monitor built on the on-spec curves should
-register that departure as an out-of-control signal.
+The out-of-spec spectra (orange) sit slightly higher, especially in the shaded
+930–1000 nm fat band, but the overlap with the in-spec cloud is substantial —
+which is exactly why a shape-aware control chart earns its keep.
 
-## Phase I — learning the on-spec model
+## Phase I — calibration and component selection
 
-We take 70 randomly chosen on-spec spectra as the Phase I reference and fit an
-FPCA control model with `spm_phase1` (4 components, per-chart $\alpha = 0.01$).
-The remaining on-spec spectra become the in-control part of the monitoring
-stream; a set of clearly off-spec, high-fat spectra (> 25 %) are interleaved as
-the faults to catch.
+Phase I builds an FPCA control chart from in-spec samples only. We first fit a
+generous model to get the eigenvalue spectrum, then let
+`fdars.spm.select_ncomp` pick the number of components by the cumulative-variance
+rule (≥ 90 %), and refit the chart at $\alpha = 0.01$.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
+from docs_fig import fig, render, plt
 from docs_data import load_tecator
-from fdars.fdata import deriv_1d
-from fdars.spm import spm_phase1
+from fdars.spm import spm_phase1, select_ncomp
 
 wl, X, meta = load_tecator()
 fat = meta["fat"].to_numpy()
-D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
+wl = np.ascontiguousarray(wl, dtype=np.float64)
+in_spec = fat < 25
+Xtr = np.ascontiguousarray(X[in_spec], dtype=np.float64)
 
-rng = np.random.default_rng(0)
-ref_idx = np.where((fat >= 5) & (fat <= 15))[0]
-rng.shuffle(ref_idx)
-phase1_idx = ref_idx[:70]                         # reference sample
+prelim = spm_phase1(Xtr, wl, ncomp=10, alpha=0.01)
+eig = np.asarray(prelim["eigenvalues"])
+cum = np.cumsum(eig) / eig.sum()
+ncomp = int(select_ncomp(np.ascontiguousarray(eig),
+                         method="cumulative_variance", threshold=0.90))
 
-p1 = spm_phase1(D2[phase1_idx], wl, ncomp=4, alpha=0.01)
-print(f"T2  limit: {p1['t2_limit']:.3f}")
-print(f"SPE limit: {p1['spe_limit']:.5f}")
+pcs = np.arange(1, len(eig) + 1)
+f, (a1, a2) = plt.subplots(1, 2, figsize=(9.0, 3.6))
+a1.bar(pcs, eig, color="#3f51b5", width=0.6)
+a1.axvline(ncomp + 0.5, color="#e8710a", ls="--")
+a1.set(title="Scree plot", xlabel="component", ylabel="eigenvalue", yscale="log")
+a2.plot(pcs, cum, "o-", color="#3f51b5")
+a2.axhline(0.90, color="#e8710a", ls="--")
+a2.axvline(ncomp + 0.5, color="#e8710a", ls="--", alpha=0.5)
+a2.set(title="Cumulative variance", xlabel="component",
+       ylabel="variance explained", ylim=(0, 1.02))
+f.suptitle(f"Component selection: variance-90 % rule picks {ncomp} PC", y=1.02)
+print(render(f))
 ```
 
-`spm_phase1` returns the estimated mean function, the FPCA loadings, the
-integration `weights`, the `eigenvalues`, and the two control limits `t2_limit`
-and `spe_limit`. The Hotelling $T^2$ statistic watches for shifts *inside* the
-retained FPC subspace; the SPE (Q) statistic watches the reconstruction
-residual — structure the on-spec model cannot represent. Monitoring both covers
-the two ways a spectrum can go off-spec.
+PC1 alone explains almost all the variance in the raw spectra, so the rule
+selects a **single component**. That is characteristic of NIR data: one dominant
+mode (broadly, an overall absorbance level/tilt) carries the bulk of the between-
+sample variation, with the fat signal riding on it.
 
-## Phase II — the control chart
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_tecator
+from fdars.spm import spm_phase1, select_ncomp
 
-`spm_monitor` projects each incoming spectrum onto the Phase I model and returns
-its $T^2$ and SPE values together with boolean alarm flags. We flag a spectrum
-out-of-control if *either* statistic exceeds its limit.
+wl, X, meta = load_tecator()
+fat = meta["fat"].to_numpy()
+wl = np.ascontiguousarray(wl, dtype=np.float64)
+in_spec = fat < 25
+Xtr = np.ascontiguousarray(X[in_spec], dtype=np.float64)
+
+eig = np.asarray(spm_phase1(Xtr, wl, ncomp=10, alpha=0.01)["eigenvalues"])
+ncomp = int(select_ncomp(np.ascontiguousarray(eig),
+                         method="cumulative_variance", threshold=0.90))
+chart = spm_phase1(Xtr, wl, ncomp=ncomp, alpha=0.01)
+p1t2 = np.asarray(chart["t2"])
+
+obs = np.arange(1, len(p1t2) + 1)
+f, ax = fig()
+ax.vlines(obs, 0, p1t2, color="#c7cbe0", lw=0.8)
+ax.scatter(obs, p1t2, s=14, color="#3f51b5", zorder=3)
+ax.axhline(chart["t2_limit"], color="#e8710a", ls="--", lw=1.3, label="T² UCL")
+ax.set(title=f"Phase I control chart ({int(in_spec.sum())} in-spec samples, "
+             f"ncomp = {ncomp})",
+       xlabel="training sample", ylabel="Hotelling $T^2$")
+ax.legend(loc="upper right")
+print(f"T2 limit : {chart['t2_limit']:.3f}")
+print(f"SPE limit: {chart['spe_limit']:.3f}")
+print(render(f))
+```
+
+Almost every in-spec training point sits below its UCL, confirming a clean
+calibration set. The Phase I chart returns the mean function, FPCA `loadings`,
+integration `weights`, `eigenvalues`, and the two limits `t2_limit`/`spe_limit`.
+
+## Phase II — monitoring the out-of-spec stream
+
+`spm_monitor` projects each out-of-spec spectrum onto the Phase I model and
+returns its Hotelling $T^2$ and SPE (Q) statistics with alarm flags. $T^2$
+watches for shifts *inside* the retained FPC subspace; SPE watches the
+reconstruction residual — structure the one-component model cannot represent.
 
 ```python exec="1" html="1"
 import numpy as np
 from docs_fig import fig, render, plt
 from docs_data import load_tecator
-from fdars.fdata import deriv_1d
-from fdars.spm import spm_phase1, spm_monitor
+from fdars.spm import spm_phase1, spm_monitor, select_ncomp
 
 wl, X, meta = load_tecator()
 fat = meta["fat"].to_numpy()
-D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
+wl = np.ascontiguousarray(wl, dtype=np.float64)
+in_spec = fat < 25
+Xtr = np.ascontiguousarray(X[in_spec], dtype=np.float64)
+Xte = np.ascontiguousarray(X[~in_spec], dtype=np.float64)
 
-rng = np.random.default_rng(0)
-ref_idx = np.where((fat >= 5) & (fat <= 15))[0]
-rng.shuffle(ref_idx)
-phase1_idx, onspec_mon = ref_idx[:70], ref_idx[70:]
-offspec = np.where(fat > 25)[0]
+eig = np.asarray(spm_phase1(Xtr, wl, ncomp=10, alpha=0.01)["eigenvalues"])
+ncomp = int(select_ncomp(np.ascontiguousarray(eig),
+                         method="cumulative_variance", threshold=0.90))
+chart = spm_phase1(Xtr, wl, ncomp=ncomp, alpha=0.01)
+mon = spm_monitor(mean=chart["mean"], loadings=chart["loadings"],
+                  weights=chart["weights"], eigenvalues=chart["eigenvalues"],
+                  t2_limit=chart["t2_limit"], spe_limit=chart["spe_limit"],
+                  new_data=Xte, argvals=wl)
 
-stream = np.concatenate([onspec_mon, rng.choice(offspec, 12, replace=False)])
-rng.shuffle(stream)
+t2, spe = np.asarray(mon["t2"]), np.asarray(mon["spe"])
+t2a, spea = np.asarray(mon["t2_alarm"]), np.asarray(mon["spe_alarm"])
+obs = np.arange(1, len(t2) + 1)
 
-p1 = spm_phase1(D2[phase1_idx], wl, ncomp=4, alpha=0.01)
-p2 = spm_monitor(
-    mean=p1["mean"], loadings=p1["loadings"], weights=p1["weights"],
-    eigenvalues=p1["eigenvalues"], t2_limit=p1["t2_limit"],
-    spe_limit=p1["spe_limit"], new_data=D2[stream], argvals=wl,
-)
-
-obs = np.arange(1, len(stream) + 1)
-t2, spe = np.asarray(p2["t2"]), np.asarray(p2["spe"])
-t2_alarm, spe_alarm = np.asarray(p2["t2_alarm"]), np.asarray(p2["spe_alarm"])
-alarm = t2_alarm | spe_alarm
-
-f, (ax1, ax2) = plt.subplots(2, 1, figsize=(7.6, 5.2), sharex=True)
+f, (ax1, ax2) = plt.subplots(2, 1, figsize=(7.8, 5.2), sharex=True)
 for ax, stat, al, lim, name in [
-    (ax1, t2,  t2_alarm,  p1["t2_limit"],  "Hotelling $T^2$"),
-    (ax2, spe, spe_alarm, p1["spe_limit"], "SPE (Q)"),
+    (ax1, t2, t2a, chart["t2_limit"], "Hotelling $T^2$"),
+    (ax2, spe, spea, chart["spe_limit"], "SPE (Q)"),
 ]:
-    ax.vlines(obs, 0, stat, color="#c7cbe0", lw=1)
-    ax.scatter(obs[~al], stat[~al], s=22, color="#3f51b5", zorder=3, label="in-control")
-    ax.scatter(obs[al],  stat[al],  s=34, color="#dc3545", zorder=3, label="out-of-control")
-    ax.axhline(lim, color="#e8710a", ls="--", lw=1.3, label="control limit")
+    ax.plot(obs, stat, color="#3f51b5", lw=0.8)
+    ax.scatter(obs[al], stat[al], s=20, color="#dc3545", zorder=3)
+    ax.axhline(lim, color="#e8710a", ls="--", lw=1.2)
     ax.set_ylabel(name)
-    ax.set_ylim(bottom=0)
-ax1.legend(loc="upper left", ncol=3, fontsize=8)
-ax2.set_xlabel("sample index (arrival order)")
-f.suptitle("Inline monitoring of the Tecator stream", y=0.98)
+ax2.set_xlabel("out-of-spec observation")
+f.suptitle("Phase II monitoring of the out-of-spec stream", y=0.99)
+n_either = int((t2a | spea).sum())
+print(f"T2 alarms : {int(t2a.sum())} of {len(t2)}")
+print(f"SPE alarms: {int(spea.sum())} of {len(t2)}")
+print(f"either    : {n_either} of {len(t2)}")
 print(render(f))
-
-# summary against the (held-out) fat labels
-truth = fat[stream] > 25
-det = int((alarm & truth).sum())
-fa = int((alarm & ~truth).sum())
-print(f"off-spec detected: {det}/{int(truth.sum())} | "
-      f"false alarms on on-spec: {fa}/{int((~truth).sum())}")
 ```
 
-Every off-spec high-fat spectrum crosses at least one limit, and only a handful
-of on-spec samples false-alarm — consistent with running two charts each at
-$\alpha = 0.01$. The chart never sees the fat value; it reacts purely to the
-shape of the second-derivative curve relative to the on-spec model.
+A share of the out-of-spec spectra breach a control limit purely on their shape —
+the chart never sees the fat value. Which statistic fires depends on how the
+fault manifests: a departure *along* the dominant mode inflates $T^2$, while
+structure *orthogonal* to it inflates SPE.
 
-## Localizing the fault: per-PC contributions
+!!! note "In-spec threshold is illustrative"
+    The 25 % fat cutoff is a stand-in for a real quality band. Tecator ships fat
+    labels so we can define "in-spec" and check the monitor against a known
+    truth; on a live line the labels are unavailable and the chart's whole job is
+    to reproduce that judgement from the spectrum alone.
 
-When a sample alarms, the operator wants to know *why*. Because
-$T^2 = \sum_k \xi_k^2/\lambda_k$ is a sum over principal components, each term is
-an interpretable **contribution**. `t2_pc_contributions` returns the per-PC
-breakdown and `t2_pc_significance` flags which components are individually
-significant. `spm_monitor` returns statistics but not the raw scores, so we
-reproduce them by projecting the centered curves onto the loadings —
-`(Xc * weights) @ loadings` — exactly as the monitor does internally.
+## Western Electric and Nelson run rules
+
+A single UCL crossing is the crudest alarm. **Run rules** catch subtler
+non-random patterns — sustained one-sided runs, near-limit clustering,
+oscillation — that also signal an out-of-control process.
+`fdars.spm.western_electric_rules` and `nelson_rules` scan a statistic against a
+center and sigma (here estimated from the Phase I $T^2$ values) and return the
+list of violated patterns.
 
 ```python exec="1" html="1"
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_tecator
-from fdars.fdata import deriv_1d
-from fdars.spm import spm_phase1, t2_pc_contributions, t2_pc_significance
+from fdars.spm import (spm_phase1, spm_monitor, select_ncomp,
+                       western_electric_rules, nelson_rules)
 
 wl, X, meta = load_tecator()
 fat = meta["fat"].to_numpy()
-D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
+wl = np.ascontiguousarray(wl, dtype=np.float64)
+in_spec = fat < 25
+Xtr = np.ascontiguousarray(X[in_spec], dtype=np.float64)
+Xte = np.ascontiguousarray(X[~in_spec], dtype=np.float64)
 
-rng = np.random.default_rng(0)
-ref_idx = np.where((fat >= 5) & (fat <= 15))[0]
-rng.shuffle(ref_idx)
-phase1_idx, onspec_mon = ref_idx[:70], ref_idx[70:]
-offspec = np.where(fat > 25)[0]
-stream = np.concatenate([onspec_mon, rng.choice(offspec, 12, replace=False)])
-rng.shuffle(stream)
+eig = np.asarray(spm_phase1(Xtr, wl, ncomp=10, alpha=0.01)["eigenvalues"])
+ncomp = int(select_ncomp(np.ascontiguousarray(eig),
+                         method="cumulative_variance", threshold=0.90))
+chart = spm_phase1(Xtr, wl, ncomp=ncomp, alpha=0.01)
+mon = spm_monitor(mean=chart["mean"], loadings=chart["loadings"],
+                  weights=chart["weights"], eigenvalues=chart["eigenvalues"],
+                  t2_limit=chart["t2_limit"], spe_limit=chart["spe_limit"],
+                  new_data=Xte, argvals=wl)
+t2 = np.ascontiguousarray(np.asarray(mon["t2"]))
+p1t2 = np.asarray(chart["t2"])
+center, sigma = float(p1t2.mean()), float(p1t2.std(ddof=1))
 
-p1 = spm_phase1(D2[phase1_idx], wl, ncomp=4, alpha=0.01)
-scores = ((D2[stream] - np.asarray(p1["mean"])) * np.asarray(p1["weights"])) @ np.asarray(p1["loadings"])
-ev = np.asarray(p1["eigenvalues"])
+we = western_electric_rules(t2, center, sigma)
+nel = nelson_rules(t2, center, sigma)
 
-contrib = np.asarray(t2_pc_contributions(scores, ev))       # (n, ncomp)
-sig = np.asarray(t2_pc_significance(contrib, alpha=0.05))    # 0/1 flags
+def flagged_obs(viol):
+    s = set()
+    for d in viol:
+        s.update(d["indices"])
+    return s
 
-worst = int(np.argmax(contrib.sum(axis=1)))
-c = contrib[worst]
-flags = sig[worst].astype(bool)
-pcs = np.arange(1, len(c) + 1)
+we_obs, nel_obs = flagged_obs(we), flagged_obs(nel)
+print(f"Western Electric: {len(we)} violations, {len(we_obs)}/{len(t2)} obs flagged")
+print(f"Nelson         : {len(nel)} violations, {len(nel_obs)}/{len(t2)} obs flagged")
 
+# which rule types fired, and how often
+from collections import Counter
+we_counts = Counter(d["rule"] for d in we)
+nel_counts = Counter(d["rule"] for d in nel)
+rules = sorted(set(we_counts) | set(nel_counts))
+x = np.arange(len(rules)); w = 0.4
 f, ax = fig()
-ax.bar(pcs, c, color=["#dc3545" if fl else "#3f51b5" for fl in flags])
-ax.set(title=f"$T^2$ contribution breakdown (most extreme sample, fat = {fat[stream][worst]:.1f} %)",
-       xlabel="principal component", ylabel="contribution $\\xi_k^2/\\lambda_k$")
-ax.set_xticks(pcs)
-ax.text(0.97, 0.95, f"total $T^2$ = {c.sum():.0f}", transform=ax.transAxes,
-        ha="right", va="top", fontsize=9,
-        bbox=dict(boxstyle="round", fc="#f4f4fb", ec="#c7cbe0"))
+ax.bar(x - w / 2, [we_counts.get(r, 0) for r in rules], w,
+       color="#3f51b5", label="Western Electric")
+ax.bar(x + w / 2, [nel_counts.get(r, 0) for r in rules], w,
+       color="#e8710a", label="Nelson")
+ax.set_xticks(x); ax.set_xticklabels(rules, rotation=0)
+ax.set(title="Run-rule violations on the Phase II $T^2$ sequence",
+       xlabel="rule", ylabel="number of violations")
+ax.legend()
 print(render(f))
 ```
 
-The contribution plot pins most of the $T^2$ mass on a single dominant
-component — the mode of variation that carries the fat signal. Red bars mark
-components flagged as significant, telling the operator *which* aspect of the
-spectrum moved, not merely *that* it moved.
+The run rules fire far more often than plain UCL crossings, dominated by
+sustained one-sided runs (WE4) — the signature of a **persistent shift** in the
+process mean rather than isolated spikes. Nelson's larger rule set adds
+oscillation and 2-sigma patterns, so it flags strictly more of the sequence.
 
-!!! note "This is a stand-in for a real quality band"
-    Tecator ships fat labels, so we can define "on-spec" by fat and check the
-    monitor against a known truth. In a live line the labels are unavailable —
-    the point of the control chart is exactly to reproduce that judgement from
-    the spectrum alone. The 5–15 % band and the 25 % off-spec cutoff here are
-    illustrative choices, not a process specification.
+## An EWMA chart for sustained small shifts
+
+The R reference compares a CUSUM and an MEWMA chart here. `fdars`'s Python
+binding does not expose CUSUM or a packaged MEWMA, but it does provide
+`fdars.spm.ewma_scores`, which exponentially smooths the FPC-score vectors. We
+build the MEWMA statistic transparently on top of it: an EWMA of the scores,
+scored by a Hotelling-type quadratic form with the standard MEWMA variance factor
+$\lambda/(2-\lambda)$. Small $\lambda$ means long memory — high sensitivity to a
+persistent moderate shift, at the cost of slower response ($\lambda = 1$ recovers
+the Shewhart chart).
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_tecator
+from fdars.spm import (spm_phase1, select_ncomp, ewma_scores, t2_control_limit)
+
+wl, X, meta = load_tecator()
+fat = meta["fat"].to_numpy()
+wl = np.ascontiguousarray(wl, dtype=np.float64)
+in_spec = fat < 25
+Xtr = np.ascontiguousarray(X[in_spec], dtype=np.float64)
+Xte = np.ascontiguousarray(X[~in_spec], dtype=np.float64)
+
+eig = np.asarray(spm_phase1(Xtr, wl, ncomp=10, alpha=0.01)["eigenvalues"])
+ncomp = int(select_ncomp(np.ascontiguousarray(eig),
+                         method="cumulative_variance", threshold=0.90))
+chart = spm_phase1(Xtr, wl, ncomp=ncomp, alpha=0.01)
+ev = np.asarray(chart["eigenvalues"])
+
+# reproduce the FPC scores the monitor uses: (Xc * weights) @ loadings
+scores = ((Xte - np.asarray(chart["mean"])) * np.asarray(chart["weights"])) \
+    @ np.asarray(chart["loadings"])
+scores = np.ascontiguousarray(scores)
+
+lam = 0.2
+z = np.asarray(ewma_scores(scores, lam))
+factor = lam / (2 - lam)
+mewma = (z ** 2 / (factor * ev)).sum(axis=1)        # Hotelling-type on EWMA scores
+ucl = t2_control_limit(ncomp, 0.01)["ucl"]
+
+obs = np.arange(1, len(mewma) + 1)
+alarm = mewma > ucl
+f, ax = fig()
+ax.plot(obs, mewma, color="#3f51b5", lw=1.0)
+ax.scatter(obs[alarm], mewma[alarm], s=20, color="#dc3545", zorder=3)
+ax.axhline(ucl, color="#e8710a", ls="--", lw=1.3, label="UCL")
+ax.set(title=f"EWMA control chart on FPC scores (λ = {lam})",
+       xlabel="out-of-spec observation", ylabel="MEWMA-type statistic")
+ax.legend(loc="upper left")
+print(f"EWMA alarms: {int(alarm.sum())} of {len(mewma)}")
+print(render(f))
+```
+
+Because the out-of-spec spectra sustain a real shift, the smoothed statistic
+climbs and stays above the UCL once it accumulates enough evidence — catching a
+persistent departure that individual $T^2$ points may not flag on their own.
+
+!!! note "Binding gap vs. the R reference"
+    R's `spm.cusum`, `spm.mewma`, and bootstrap-robust limits (`spm.limit.robust`)
+    have **no direct Python binding** in this build. The EWMA chart above is
+    assembled transparently from `ewma_scores` rather than called as a packaged
+    routine, and this page omits the CUSUM and bootstrap-limit sections of the R
+    vignette rather than fake them.
+
+## Fault diagnosis: per-PC contributions
+
+When a sample alarms, the operator wants to know *why*. Because
+$T^2 = \sum_k \xi_k^2/\lambda_k$ is a sum over principal components, each term is
+an interpretable **contribution**. `t2_pc_contributions` returns the per-PC
+breakdown for every monitored sample; we show the worst sample as a bar and the
+whole stream as a heatmap.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render, plt
+from docs_data import load_tecator
+from fdars.spm import spm_phase1, select_ncomp, t2_pc_contributions
+
+wl, X, meta = load_tecator()
+fat = meta["fat"].to_numpy()
+wl = np.ascontiguousarray(wl, dtype=np.float64)
+in_spec = fat < 25
+Xtr = np.ascontiguousarray(X[in_spec], dtype=np.float64)
+Xte = np.ascontiguousarray(X[~in_spec], dtype=np.float64)
+
+eig = np.asarray(spm_phase1(Xtr, wl, ncomp=10, alpha=0.01)["eigenvalues"])
+# retain a few PCs here so the diagnosis has something to decompose
+ncomp = max(3, int(select_ncomp(np.ascontiguousarray(eig),
+                                method="cumulative_variance", threshold=0.90)))
+chart = spm_phase1(Xtr, wl, ncomp=ncomp, alpha=0.01)
+ev = np.asarray(chart["eigenvalues"])
+scores = np.ascontiguousarray(
+    ((Xte - np.asarray(chart["mean"])) * np.asarray(chart["weights"]))
+    @ np.asarray(chart["loadings"]))
+contrib = np.asarray(t2_pc_contributions(scores, ev))     # (n, ncomp)
+
+worst = int(np.argmax(contrib.sum(axis=1)))
+pcs = np.arange(1, ncomp + 1)
+f, (a1, a2) = plt.subplots(1, 2, figsize=(9.2, 3.8),
+                           gridspec_kw={"width_ratios": [1, 1.5]})
+a1.bar(pcs, contrib[worst], color="#3f51b5", width=0.6)
+a1.set(title=f"worst sample (fat = {fat[~in_spec][worst]:.0f} %)",
+       xlabel="principal component", ylabel=r"contribution $\xi_k^2/\lambda_k$")
+a1.set_xticks(pcs)
+im = a2.imshow(contrib.T, aspect="auto", origin="lower", cmap="Oranges",
+               extent=[1, len(contrib), 0.5, ncomp + 0.5])
+a2.set(title="contribution heatmap (all out-of-spec obs)",
+       xlabel="observation", ylabel="principal component")
+a2.set_yticks(pcs)
+f.colorbar(im, ax=a2, label=r"$T^2$ contribution")
+print(render(f))
+```
+
+The dominant component carries most of the $T^2$ mass — the mode that tracks the
+fat signal. The heatmap shows which observations load heaviest on it, and since
+each eigenfunction is a weighted combination of wavelengths, a high PC1
+contribution points the engineer back toward the 930–1000 nm fat-absorption
+region for root-cause work.
+
+## Conclusion
+
+- **Phase I** learned the in-spec spectral variation and set control limits, with
+  `select_ncomp` reducing NIR spectra to a single dominant component.
+- **Shewhart $T^2$/SPE** flagged out-of-spec spectra from shape alone.
+- **Run rules** exposed a persistent one-sided shift beyond the isolated UCL
+  crossings.
+- An **EWMA chart** on the FPC scores accumulated evidence of that sustained
+  shift.
+- **Per-PC contributions** translated alarms back toward the fat-absorption
+  wavelengths for diagnosis.
 
 ## Parameters
 
 | Function | Key parameters | Description |
 |----------|----------------|-------------|
-| `deriv_1d(data, argvals, nderiv)` | `nderiv` | Derivative order (2 removes a linear baseline) |
 | `spm_phase1(data, argvals, ncomp, alpha)` | `ncomp`, `alpha` | Fit the in-control FPCA model and control limits |
+| `select_ncomp(eigenvalues, method, threshold)` | `method`, `threshold` | Choose the number of components (e.g. cumulative-variance ≥ 0.90) |
 | `spm_monitor(mean, loadings, weights, eigenvalues, t2_limit, spe_limit, new_data, argvals)` | `new_data` | Project and flag incoming curves |
+| `western_electric_rules(values, center, sigma)` / `nelson_rules(...)` | `center`, `sigma` | Run-rule violations on a statistic sequence |
+| `ewma_scores(scores, lambda_)` | `lambda_` | Exponentially smooth FPC-score vectors (basis for an EWMA chart) |
 | `t2_pc_contributions(scores, eigenvalues)` | — | Per-PC breakdown of $T^2$ |
-| `t2_pc_significance(contributions, alpha)` | `alpha` | Bonferroni-flag significant components |
 
 ## See also
 

@@ -43,7 +43,7 @@
   <text class="mono" x="360" y="150" text-anchor="middle" fill="#198754" font-size="11">x1/&#8730;2 + x2 sin t</text>
   <text class="mono" x="360" y="170" text-anchor="middle" fill="#198754" font-size="11">+ x3 cos t + ...</text>
   <text class="sm" x="360" y="200" text-anchor="middle" font-size="10">Fourier series in t</text>
-  <text class="sm" x="360" y="216" text-anchor="middle" font-size="10">$t\in[-\pi,\pi]$</text>
+  <text class="sm" x="360" y="216" text-anchor="middle" font-size="10">t ∈ [−π, π]</text>
 
   <!-- Arrow 2 -->
   <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
@@ -58,6 +58,6 @@
     <path d="M0 40 C40 8 60 96 82 60 C110 18 140 84 164 44" stroke="#198754" stroke-width="1.8"/>
     <path d="M0 72 C40 46 60 30 82 66 C110 96 140 40 164 70" stroke="#fd7e14" stroke-width="1.8"/>
     <path d="M0 56 C40 84 60 24 82 52 C110 72 140 62 164 56" stroke="#0d6efd" stroke-width="1.8"/>
-    <text class="sm" x="82" y="132" text-anchor="middle" font-size="9">$-\pi \quad\quad 0 \quad\quad \pi$</text>
+    <text class="sm" x="82" y="132" text-anchor="middle" font-size="9">−π      0      π</text>
   </g>
 </svg>

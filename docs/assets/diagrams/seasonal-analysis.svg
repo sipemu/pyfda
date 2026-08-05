@@ -1,59 +1,81 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Seasonal analysis: decompose a periodic curve into trend, seasonal and remainder">
-  <style>
-    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
-    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
-    .lab{font:700 13px system-ui,sans-serif}
-    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
-    .mono{font:600 12px ui-monospace,monospace}
-  </style>
-  <text class="ttl" x="360" y="26" text-anchor="middle">Seasonal Analysis: Splitting a Periodic Signal</text>
-  <text class="sub" x="360" y="46" text-anchor="middle">Decompose into trend, a repeating season, and the remainder</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
 
-  <!-- Panel 1: periodic curve -->
-  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
-  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Periodic Curve</text>
-  <g transform="translate(44,124)">
-    <line x1="0" y1="100" x2="156" y2="100" stroke="#adb5bd" stroke-width="1.2"/>
-    <path d="M0 86 C10 40 20 40 30 86 C40 132 50 132 60 86
-             C70 34 80 34 90 80 C100 126 110 126 120 74
-             C130 26 140 26 150 68 L156 66" stroke="#6c757d" stroke-width="1.6" fill="none"/>
-  </g>
+  <!-- Title -->
+  <text x="360" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">Seasonal Analysis of Functional Data</text>
+  <text x="360" y="54" text-anchor="middle" font-size="14" fill="#888">A complete toolkit for periodic signals: detect, decompose, measure, monitor</text>
 
-  <!-- Arrow 1 -->
-  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
-  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+  <!-- ===== Top: Input signal ===== -->
+  <rect x="220" y="74" width="280" height="56" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
+  <text x="360" y="96" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Seasonal Signal x(t)</text>
+  <text x="360" y="118" text-anchor="middle" font-size="12" fill="#888">periodic, noisy, possibly non-stationary</text>
 
-  <!-- Panel 2: method -->
-  <rect x="272" y="70" width="176" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
-  <text class="mono" x="360" y="98" text-anchor="middle" fill="#6f42c1">stl_decompose()</text>
-  <text class="sm" x="360" y="118" text-anchor="middle">Loess-based split</text>
-  <g transform="translate(292,132)">
-    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
-    <text class="sm" x="12" y="16">Detect period (SAZED)</text>
-    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
-    <text class="sm" x="12" y="48">Trend + seasonal fit</text>
-    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
-    <text class="sm" x="12" y="80">Strength of seasonality</text>
-  </g>
+  <!-- Arrow fan -->
+  <line x1="260" y1="130" x2="120" y2="158" stroke="#555" stroke-width="1.2" marker-end="url(#arrSAO)"/>
+  <line x1="360" y1="130" x2="360" y2="158" stroke="#555" stroke-width="1.2" marker-end="url(#arrSAO)"/>
+  <line x1="460" y1="130" x2="600" y2="158" stroke="#555" stroke-width="1.2" marker-end="url(#arrSAO)"/>
 
-  <!-- Arrow 2 -->
-  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
-  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+  <!-- ===== Row 1: Three main tasks ===== -->
 
-  <!-- Panel 3: decomposition stack -->
-  <rect x="500" y="70" width="196" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
-  <text class="lab" x="598" y="90" text-anchor="middle" fill="#6f42c1">Decomposition</text>
-  <g transform="translate(516,100)">
-    <text class="sm" x="0" y="8" fill="#6c757d">trend</text>
-    <path d="M0 20 C40 16 80 8 120 4 C140 2 155 1 164 1" stroke="#6f42c1" stroke-width="1.8" fill="none"/>
-    <line x1="0" y1="34" x2="164" y2="34" stroke="#e9ecef" stroke-width="1"/>
-    <text class="sm" x="0" y="52" fill="#6c757d">seasonal</text>
-    <path d="M0 64 C8 50 16 50 24 64 C32 78 40 78 48 64 C56 50 64 50 72 64
-             C80 78 88 78 96 64 C104 50 112 50 120 64 C128 78 136 78 144 64
-             C152 50 160 50 164 62" stroke="#6f42c1" stroke-width="1.6" fill="none"/>
-    <line x1="0" y1="82" x2="164" y2="82" stroke="#e9ecef" stroke-width="1"/>
-    <text class="sm" x="0" y="100" fill="#6c757d">remainder</text>
-    <path d="M0 112 L14 108 L28 116 L42 110 L56 118 L70 109 L84 115 L98 111 L112 117 L126 110 L140 114 L154 111 L164 113"
-          stroke="#adb5bd" stroke-width="1.3" fill="none"/>
-  </g>
+  <!-- 1. Period Estimation -->
+  <rect x="16" y="162" width="220" height="110" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="126" y="186" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">1. Estimate Period</text>
+  <text x="36" y="208" font-size="12" fill="#555">FFT: frequency domain peak</text>
+  <text x="36" y="226" font-size="12" fill="#555">ACF: autocorrelation peak</text>
+  <text x="36" y="244" font-size="12" fill="#555">SAZED: ensemble of 6 methods</text>
+  <text x="36" y="262" font-size="12" fill="#555">autoperiod: automatic selection</text>
+
+  <!-- 2. Decompose -->
+  <rect x="250" y="162" width="220" height="110" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
+  <text x="360" y="186" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">2. Decompose</text>
+  <text x="270" y="208" font-size="12" fill="#555">STL: trend + season + residual</text>
+  <text x="270" y="226" font-size="12" fill="#555">SSA: data-adaptive components</text>
+  <text x="270" y="244" font-size="12" fill="#555">Detrend: remove trend</text>
+  <text x="270" y="262" font-size="12" fill="#555">Amplitude modulation</text>
+
+  <!-- 3. Detect Features -->
+  <rect x="484" y="162" width="220" height="110" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text x="594" y="186" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">3. Detect Features</text>
+  <text x="504" y="208" font-size="12" fill="#555">Peaks: local maxima + timing</text>
+  <text x="504" y="226" font-size="12" fill="#555">Multiple periods: concurrent</text>
+  <text x="504" y="244" font-size="12" fill="#555">Changes: when season shifts</text>
+  <text x="504" y="262" font-size="12" fill="#555">Varying period: instantaneous</text>
+
+  <!-- ===== Row 2: Measurement + Advanced ===== -->
+  <line x1="16" y1="292" x2="704" y2="292" stroke="#eee" stroke-width="1.5"/>
+
+  <!-- 4. Measure Strength -->
+  <rect x="16" y="310" width="220" height="90" rx="8" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.5"/>
+  <text x="126" y="334" text-anchor="middle" font-size="14" font-weight="bold" fill="#7B2D8E">4. Measure Strength</text>
+  <text x="36" y="356" font-size="12" fill="#555">Variance ratio: Var(season)/Var(x)</text>
+  <text x="36" y="374" font-size="12" fill="#555">Spectral: peak power fraction</text>
+  <text x="36" y="392" font-size="12" fill="#555">Wavelet / windowed: localized</text>
+
+  <!-- 5. Advanced Methods -->
+  <rect x="250" y="310" width="220" height="90" rx="8" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.5"/>
+  <text x="360" y="334" text-anchor="middle" font-size="14" font-weight="bold" fill="#D55E00">5. Advanced</text>
+  <text x="270" y="356" font-size="12" fill="#555">Matrix profile: motif discovery</text>
+  <text x="270" y="374" font-size="12" fill="#555">Lomb-Scargle: irregular grids</text>
+  <text x="270" y="392" font-size="12" fill="#555">Short series: only 3&#x2013;5 cycles</text>
+
+  <!-- 6. Multi-curve -->
+  <rect x="484" y="310" width="220" height="90" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="594" y="334" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">6. Multiple Curves</text>
+  <text x="504" y="356" font-size="12" fill="#555">Apply to fdata objects</text>
+  <text x="504" y="374" font-size="12" fill="#555">Compare periods across</text>
+  <text x="504" y="392" font-size="12" fill="#555">samples of curves</text>
+
+  <!-- ===== Bottom: Key functions ===== -->
+  <line x1="16" y1="418" x2="704" y2="418" stroke="#eee" stroke-width="1.5"/>
+  <text x="360" y="444" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Key Functions</text>
+
+  <text x="36" y="468" font-size="12" fill="#4A90D9">seasonal.estimate.period.fft()</text>
+  <text x="250" y="468" font-size="12" fill="#E6A020">seasonal.stl()</text>
+  <text x="380" y="468" font-size="12" fill="#2E8B57">seasonal.detect.peaks()</text>
+  <text x="560" y="468" font-size="12" fill="#7B2D8E">seasonal.strength.*()</text>
+
+  <defs>
+    <marker id="arrSAO" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    </marker>
+  </defs>
 </svg>
