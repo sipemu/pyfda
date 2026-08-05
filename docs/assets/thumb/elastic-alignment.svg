@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Elastic alignment">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 128 C70 118 96 52 122 52 C148 52 168 124 210 128 C245 132 275 120 298 116" stroke="#fd7e14" stroke-opacity=".4" stroke-width="2"/>
+  <path d="M30 128 C86 122 120 116 168 60 C182 44 200 44 214 60 C252 106 275 122 298 116" stroke="#fd7e14" stroke-opacity=".4" stroke-width="2"/>
+  <path d="M122 40 C150 30 162 30 190 40" stroke="#fd7e14" stroke-opacity=".7" stroke-width="1.6"/>
+  <path d="M186 34 L192 41 L184 44 Z" fill="#fd7e14" fill-opacity=".7"/>
+  <path d="M30 128 C74 120 108 60 156 60 C204 60 240 120 298 116" stroke="#fd7e14" stroke-width="3" stroke-linecap="round"/>
+</svg>

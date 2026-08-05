@@ -83,20 +83,24 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="fdars-section-heading fdars-learn">Learn</div>
 <p class="fdars-section-desc">Tutorials and guides to get started with functional data analysis in Python.</p>
 
-<div class="fdars-gallery">
+<div class="fdars-gallery fdars-sec-learn">
 <a class="fdars-gallery-item" href="learn/introduction/">
+<img class="fdars-gallery-thumb" src="assets/thumb/introduction.svg" alt="">
 <div class="fdars-gallery-title">Introduction to fdars</div>
 <div class="fdars-gallery-desc">What is FDA? Core concepts, data layout, and your first analysis with fdars.</div>
 </a>
 <a class="fdars-gallery-item" href="learn/simulation/">
+<img class="fdars-gallery-thumb" src="assets/thumb/simulation.svg" alt="">
 <div class="fdars-gallery-title">Simulation Toolbox</div>
 <div class="fdars-gallery-desc">Generate synthetic curves with Karhunen-Loeve expansions and Gaussian processes.</div>
 </a>
 <a class="fdars-gallery-item" href="learn/smoothing/">
+<img class="fdars-gallery-thumb" src="assets/thumb/smoothing.svg" alt="">
 <div class="fdars-gallery-title">Smoothing</div>
 <div class="fdars-gallery-desc">Nadaraya-Watson, local polynomial, k-NN, and basis smoothing with automatic bandwidth selection.</div>
 </a>
 <a class="fdars-gallery-item" href="learn/derivatives/">
+<img class="fdars-gallery-thumb" src="assets/thumb/derivatives.svg" alt="">
 <div class="fdars-gallery-title">Working with Derivatives</div>
 <div class="fdars-gallery-desc">Compute first, second, and higher-order derivatives of functional data.</div>
 </a>
@@ -133,12 +137,14 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="fdars-section-heading fdars-align">Align</div>
 <p class="fdars-section-desc">Curve registration and elastic alignment methods.</p>
 
-<div class="fdars-gallery">
+<div class="fdars-gallery fdars-sec-align">
 <a class="fdars-gallery-item" href="align/elastic-alignment/">
+<img class="fdars-gallery-thumb" src="assets/thumb/elastic-alignment.svg" alt="">
 <div class="fdars-gallery-title">Elastic Alignment</div>
 <div class="fdars-gallery-desc">SRSF-based alignment, Karcher mean, and elastic FPCA.</div>
 </a>
 <a class="fdars-gallery-item" href="align/shape-analysis/">
+<img class="fdars-gallery-thumb" src="assets/thumb/shape-analysis.svg" alt="">
 <div class="fdars-gallery-title">Shape Analysis</div>
 <div class="fdars-gallery-desc">Shape-preserving registration and geodesic computations.</div>
 </a>
@@ -148,32 +154,39 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="fdars-section-heading fdars-regression">Regression</div>
 <p class="fdars-section-desc">Functional regression, classification, and prediction.</p>
 
-<div class="fdars-gallery">
+<div class="fdars-gallery fdars-sec-regression">
 <a class="fdars-gallery-item" href="regression/scalar-on-function/">
+<img class="fdars-gallery-thumb" src="assets/thumb/scalar-on-function.svg" alt="">
 <div class="fdars-gallery-title">Scalar-on-Function</div>
 <div class="fdars-gallery-desc">FPC linear, PLS, and nonparametric regression with a scalar response.</div>
 </a>
 <a class="fdars-gallery-item" href="regression/function-on-scalar/">
+<img class="fdars-gallery-thumb" src="assets/thumb/function-on-scalar.svg" alt="">
 <div class="fdars-gallery-title">Function-on-Scalar</div>
 <div class="fdars-gallery-desc">FOSR and FANOVA for predicting functional responses.</div>
 </a>
 <a class="fdars-gallery-item" href="regression/classification/">
+<img class="fdars-gallery-thumb" src="assets/thumb/classification.svg" alt="">
 <div class="fdars-gallery-title">Classification</div>
 <div class="fdars-gallery-desc">LDA, QDA, k-NN, and kernel classifiers with cross-validation.</div>
 </a>
 <a class="fdars-gallery-item" href="regression/elastic-regression/">
+<img class="fdars-gallery-thumb" src="assets/thumb/elastic-regression.svg" alt="">
 <div class="fdars-gallery-title">Elastic Regression</div>
 <div class="fdars-gallery-desc">Regression models in the SRSF space for phase-invariant prediction.</div>
 </a>
 <a class="fdars-gallery-item" href="regression/explainability/">
+<img class="fdars-gallery-thumb" src="assets/thumb/explainability.svg" alt="">
 <div class="fdars-gallery-title">Explainability</div>
 <div class="fdars-gallery-desc">SHAP, PDP, permutation importance, and significant region detection.</div>
 </a>
 <a class="fdars-gallery-item" href="regression/conformal-prediction/">
+<img class="fdars-gallery-thumb" src="assets/thumb/conformal-prediction.svg" alt="">
 <div class="fdars-gallery-title">Conformal Prediction</div>
 <div class="fdars-gallery-desc">Distribution-free prediction intervals with split conformal and jackknife+.</div>
 </a>
 <a class="fdars-gallery-item" href="regression/robust-regression/">
+<img class="fdars-gallery-thumb" src="assets/thumb/robust-regression.svg" alt="">
 <div class="fdars-gallery-title">Robust Regression</div>
 <div class="fdars-gallery-desc">Depth-weighted and trimmed regression resistant to outliers.</div>
 </a>
@@ -183,8 +196,9 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="fdars-section-heading fdars-monitoring">Monitoring</div>
 <p class="fdars-section-desc">Statistical process monitoring for functional profiles.</p>
 
-<div class="fdars-gallery">
+<div class="fdars-gallery fdars-sec-monitoring">
 <a class="fdars-gallery-item" href="monitoring/spm/">
+<img class="fdars-gallery-thumb" src="assets/thumb/process-monitoring.svg" alt="">
 <div class="fdars-gallery-title">Process Monitoring</div>
 <div class="fdars-gallery-desc">Phase I/II control charts, EWMA, CUSUM for functional quality profiles.</div>
 </a>
@@ -194,28 +208,34 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="fdars-section-heading fdars-analyze">Analyze</div>
 <p class="fdars-section-desc">Clustering, outlier detection, tolerance bands, and seasonal decomposition.</p>
 
-<div class="fdars-gallery">
+<div class="fdars-gallery fdars-sec-analyze">
 <a class="fdars-gallery-item" href="analyze/clustering/">
+<img class="fdars-gallery-thumb" src="assets/thumb/clustering.svg" alt="">
 <div class="fdars-gallery-title">Clustering</div>
 <div class="fdars-gallery-desc">K-means, fuzzy c-means, and GMM clustering for functional data.</div>
 </a>
 <a class="fdars-gallery-item" href="analyze/outlier-detection/">
+<img class="fdars-gallery-thumb" src="assets/thumb/outlier-detection.svg" alt="">
 <div class="fdars-gallery-title">Outlier Detection</div>
 <div class="fdars-gallery-desc">LRT, outliergram, and magnitude-shape methods for anomaly detection.</div>
 </a>
 <a class="fdars-gallery-item" href="analyze/tolerance-bands/">
+<img class="fdars-gallery-thumb" src="assets/thumb/tolerance-bands.svg" alt="">
 <div class="fdars-gallery-title">Tolerance Bands</div>
 <div class="fdars-gallery-desc">FPCA-based tolerance bands, conformal bands, and Degras SCBs.</div>
 </a>
 <a class="fdars-gallery-item" href="analyze/seasonal-analysis/">
+<img class="fdars-gallery-thumb" src="assets/thumb/seasonal-analysis.svg" alt="">
 <div class="fdars-gallery-title">Seasonal Analysis</div>
 <div class="fdars-gallery-desc">SAZED, autoperiod, STL, and peak detection for periodic functional data.</div>
 </a>
 <a class="fdars-gallery-item" href="analyze/equivalence-testing/">
+<img class="fdars-gallery-thumb" src="assets/thumb/equivalence-testing.svg" alt="">
 <div class="fdars-gallery-title">Equivalence Testing</div>
 <div class="fdars-gallery-desc">TOST-based equivalence tests for functional means.</div>
 </a>
 <a class="fdars-gallery-item" href="analyze/covariance-functions/">
+<img class="fdars-gallery-thumb" src="assets/thumb/covariance-functions.svg" alt="">
 <div class="fdars-gallery-title">Covariance Functions</div>
 <div class="fdars-gallery-desc">Gaussian, exponential, Matern, and periodic covariance kernels.</div>
 </a>
