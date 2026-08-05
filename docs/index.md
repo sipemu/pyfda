@@ -1,5 +1,7 @@
 ---
 title: fdars - Functional Data Analysis for Python
+hide:
+  - toc
 ---
 
 <div class="fdars-hero" markdown>
@@ -104,20 +106,24 @@ See the [Fdata reference](reference/fdata.md) and
 <div class="fdars-section-heading fdars-represent">Represent</div>
 <p class="fdars-section-desc">Basis expansions, dimensionality reduction, depth, and distances for functional data.</p>
 
-<div class="fdars-gallery">
+<div class="fdars-gallery fdars-sec-represent">
 <a class="fdars-gallery-item" href="represent/fpca/">
+<img class="fdars-gallery-thumb" src="assets/thumb/fpca.svg" alt="">
 <div class="fdars-gallery-title">Functional PCA</div>
 <div class="fdars-gallery-desc">Extract dominant modes of variation with weighted FPCA.</div>
 </a>
 <a class="fdars-gallery-item" href="represent/basis-representation/">
+<img class="fdars-gallery-thumb" src="assets/thumb/basis-representation.svg" alt="">
 <div class="fdars-gallery-title">Basis Representation</div>
 <div class="fdars-gallery-desc">B-spline, Fourier, and P-spline basis expansions with automatic selection.</div>
 </a>
 <a class="fdars-gallery-item" href="represent/depth-functions/">
+<img class="fdars-gallery-thumb" src="assets/thumb/depth-functions.svg" alt="">
 <div class="fdars-gallery-title">Depth Functions</div>
 <div class="fdars-gallery-desc">Fraiman-Muniz, band, modal, random projection, Tukey, and spatial depth.</div>
 </a>
 <a class="fdars-gallery-item" href="represent/distance-metrics/">
+<img class="fdars-gallery-thumb" src="assets/thumb/distance-metrics.svg" alt="">
 <div class="fdars-gallery-title">Distance Metrics</div>
 <div class="fdars-gallery-desc">Lp, Hausdorff, DTW, Soft-DTW, Fourier, and horizontal-shift distances.</div>
 </a>
