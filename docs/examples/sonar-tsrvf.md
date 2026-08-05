@@ -19,6 +19,8 @@ standardized spectra under an identical cross-validated classifier. The honest
 answer turns out to be **no**: on sonar, elastic alignment *removes*
 discriminative signal.
 
+![Sonar: Mine vs Rock — when does elastic alignment help? — validation framework](../assets/diagrams/ex-sonar-tsrvf.svg){ .fdars-diagram }
+
 ## The two classes
 
 We standardize each frequency band to unit variance first — a fixed physical
