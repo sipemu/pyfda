@@ -23,7 +23,7 @@
   <!-- ===== Right top: K-Means ===== -->
   <rect x="264" y="80" width="220" height="120" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
   <text x="374" y="104" text-anchor="middle" font-size="15" font-weight="bold" fill="#2C5F8A">K-Means</text>
-  <text x="284" y="126" font-size="12" fill="#555">cluster.kmeans(fd, ncl)</text>
+  <text x="284" y="126" font-size="12" fill="#555">kmeans_fd(fd, ncl)</text>
   <text x="284" y="146" font-size="12" fill="#555">Hard assignment: each curve</text>
   <text x="284" y="164" font-size="12" fill="#555">belongs to exactly one cluster</text>
   <text x="284" y="186" font-size="12" fill="#555">L2, L1, DTW, elastic metrics</text>
@@ -31,7 +31,7 @@
   <!-- ===== Right bottom: Fuzzy C-Means ===== -->
   <rect x="264" y="220" width="220" height="120" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
   <text x="374" y="244" text-anchor="middle" font-size="15" font-weight="bold" fill="#B37700">Fuzzy C-Means</text>
-  <text x="284" y="266" font-size="12" fill="#555">cluster.fcm(fd, ncl, m)</text>
+  <text x="284" y="266" font-size="12" fill="#555">fuzzy_cmeans_fd(fd, ncl, m)</text>
   <text x="284" y="286" font-size="12" fill="#555">Soft assignment: membership</text>
   <text x="284" y="304" font-size="12" fill="#555">degrees &#x03C4;&#x1D62;&#x2096; &#x2208; [0, 1]</text>
   <text x="284" y="326" font-size="12" fill="#555">Fuzziness parameter m</text>

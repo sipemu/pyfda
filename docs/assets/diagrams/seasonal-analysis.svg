@@ -68,10 +68,10 @@
   <line x1="16" y1="418" x2="704" y2="418" stroke="#eee" stroke-width="1.5"/>
   <text x="360" y="444" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Key Functions</text>
 
-  <text x="36" y="468" font-size="12" fill="#4A90D9">seasonal.estimate.period.fft()</text>
-  <text x="250" y="468" font-size="12" fill="#E6A020">seasonal.stl()</text>
-  <text x="380" y="468" font-size="12" fill="#2E8B57">seasonal.detect.peaks()</text>
-  <text x="560" y="468" font-size="12" fill="#7B2D8E">seasonal.strength.*()</text>
+  <text x="36" y="468" font-size="12" fill="#4A90D9">estimate_period_fft()</text>
+  <text x="250" y="468" font-size="12" fill="#E6A020">stl_decompose()</text>
+  <text x="380" y="468" font-size="12" fill="#2E8B57">detect_peaks()</text>
+  <text x="560" y="468" font-size="12" fill="#7B2D8E">seasonal_strength.*()</text>
 
   <defs>
     <marker id="arrSAO" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">

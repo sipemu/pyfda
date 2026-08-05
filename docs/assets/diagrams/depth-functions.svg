@@ -31,7 +31,7 @@
 
   <!-- ===== Middle: depth() unified interface ===== -->
   <rect x="276" y="80" width="180" height="200" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="2"/>
-  <text x="366" y="108" text-anchor="middle" font-size="16" font-weight="bold" fill="#2C5F8A">depth(fd, method)</text>
+  <text x="366" y="108" text-anchor="middle" font-size="16" font-weight="bold" fill="#2C5F8A">fd.depth(method)</text>
   <text x="366" y="130" text-anchor="middle" font-size="13" fill="#555">Unified interface</text>
 
   <!-- Method list -->
@@ -81,21 +81,21 @@
   <rect x="24" y="356" width="130" height="72" rx="6" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.2"/>
   <text x="89" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#D55E00">Outlier Detection</text>
   <text x="89" y="398" text-anchor="middle" font-size="11" fill="#555">outliergram()</text>
-  <text x="89" y="414" text-anchor="middle" font-size="11" fill="#555">magnitudeshape()</text>
+  <text x="89" y="414" text-anchor="middle" font-size="11" fill="#555">magnitude_shape()</text>
 
   <rect x="170" y="356" width="130" height="72" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.2"/>
   <text x="235" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#7B2D8E">Functional Boxplot</text>
-  <text x="235" y="398" text-anchor="middle" font-size="11" fill="#555">boxplot(fd)</text>
+  <text x="235" y="398" text-anchor="middle" font-size="11" fill="#555">functional boxplot</text>
   <text x="235" y="414" text-anchor="middle" font-size="11" fill="#555">50% central region</text>
 
   <rect x="316" y="356" width="130" height="72" rx="6" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.2"/>
   <text x="381" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#2E8B57">Robust Statistics</text>
-  <text x="381" y="398" text-anchor="middle" font-size="11" fill="#555">median(fd)</text>
-  <text x="381" y="414" text-anchor="middle" font-size="11" fill="#555">trimmed(fd)</text>
+  <text x="381" y="398" text-anchor="middle" font-size="11" fill="#555">geometric_median(fd)</text>
+  <text x="381" y="414" text-anchor="middle" font-size="11" fill="#555">trimmed mean</text>
 
   <rect x="462" y="356" width="130" height="72" rx="6" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.2"/>
   <text x="527" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#B37700">Tolerance Bands</text>
-  <text x="527" y="398" text-anchor="middle" font-size="11" fill="#555">tolerance.band()</text>
+  <text x="527" y="398" text-anchor="middle" font-size="11" fill="#555">fpca_tolerance_band()</text>
   <text x="527" y="414" text-anchor="middle" font-size="11" fill="#555">central region</text>
 
   <rect x="608" y="356" width="96" height="72" rx="6" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.2"/>

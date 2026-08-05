@@ -14,7 +14,7 @@
 
   <!-- ===== fdata object ===== -->
   <rect x="220" y="150" width="280" height="40" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
-  <text x="360" y="175" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">fdata(X, argvals, id, metadata)</text>
+  <text x="360" y="175" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Fdata(X, argvals, id, metadata)</text>
 
   <!-- Arrow fan out -->
   <line x1="260" y1="190" x2="110" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
@@ -25,8 +25,8 @@
   <rect x="16" y="220" width="200" height="140" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
   <text x="116" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Explore</text>
   <text x="36" y="266" font-size="12" fill="#555">depth()  &#x2014; centrality ranking</text>
-  <text x="36" y="286" font-size="12" fill="#555">metric.lp() &#x2014; distances</text>
-  <text x="36" y="306" font-size="12" fill="#555">metric.DTW() &#x2014; warping</text>
+  <text x="36" y="286" font-size="12" fill="#555">lp_self_1d() &#x2014; distances</text>
+  <text x="36" y="306" font-size="12" fill="#555">dtw_self_1d() &#x2014; warping</text>
   <text x="36" y="326" font-size="12" fill="#555">outliers() &#x2014; anomalies</text>
   <text x="36" y="346" font-size="12" fill="#555">autoplot() &#x2014; visualization</text>
 
@@ -34,18 +34,18 @@
   <rect x="232" y="220" width="256" height="140" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
   <text x="360" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Transform</text>
   <text x="252" y="266" font-size="12" fill="#555">smooth() &#x2014; remove noise</text>
-  <text x="252" y="286" font-size="12" fill="#555">fdata2basis() &#x2014; basis expansion</text>
-  <text x="252" y="306" font-size="12" fill="#555">fdata2pc() &#x2014; FPCA scores</text>
+  <text x="252" y="286" font-size="12" fill="#555">fdata_to_basis_1d() &#x2014; basis expansion</text>
+  <text x="252" y="306" font-size="12" fill="#555">fpca() &#x2014; FPCA scores</text>
   <text x="252" y="326" font-size="12" fill="#555">deriv() &#x2014; derivatives</text>
-  <text x="252" y="346" font-size="12" fill="#555">elastic.align() &#x2014; alignment</text>
+  <text x="252" y="346" font-size="12" fill="#555">elastic_align_pair() &#x2014; alignment</text>
 
   <!-- ===== Column 3: Model ===== -->
   <rect x="504" y="220" width="200" height="140" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
   <text x="604" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Model</text>
-  <text x="524" y="266" font-size="12" fill="#555">fregre.pc() &#x2014; regression</text>
-  <text x="524" y="286" font-size="12" fill="#555">fregre.lm() &#x2014; linear model</text>
-  <text x="524" y="306" font-size="12" fill="#555">fregre.np() &#x2014; nonparametric</text>
-  <text x="524" y="326" font-size="12" fill="#555">cluster.kmeans() &#x2014; clustering</text>
+  <text x="524" y="266" font-size="12" fill="#555">fregre_pls() &#x2014; regression</text>
+  <text x="524" y="286" font-size="12" fill="#555">fregre_lm() &#x2014; linear model</text>
+  <text x="524" y="306" font-size="12" fill="#555">fregre_np() &#x2014; nonparametric</text>
+  <text x="524" y="326" font-size="12" fill="#555">kmeans_fd() &#x2014; clustering</text>
   <text x="524" y="346" font-size="12" fill="#555">fclassif() &#x2014; classification</text>
 
   <!-- ===== Bottom: Rust backend ===== -->
