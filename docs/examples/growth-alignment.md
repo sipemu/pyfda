@@ -298,10 +298,13 @@ ax2.legend()
 print(render(f))
 ```
 
-Girls' warps (orange) sit **above** the diagonal in the spurt region and boys'
-(blue) below: to reach the shared reference spurt, a girl's earlier calendar age
-must be stretched forward, a boy's later age compressed back. The two mean warps
-peel cleanly apart — a population-level picture of girls maturing ahead of boys.
+Boys' warps (blue) sit **above** the diagonal in the spurt region and girls'
+(orange) below. Reading the axes — a point at a given *reference age* maps to the
+child's *own age* — a below-diagonal warp means the child reaches the shared
+reference spurt at a *younger* calendar age. So the girls' curves dipping below
+say girls hit the spurt **earlier**, while the boys' rising above say they hit it
+**later**. The two mean warps peel cleanly apart — a population-level picture of
+girls maturing ahead of boys.
 
 ## Testing the timing difference
 
