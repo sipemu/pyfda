@@ -12,6 +12,8 @@ All of the examples below build on a single Phase I model. The setup — 120 in-
 Phase I curves, then a Phase II stream of 30 in-control curves followed by a slow upward
 drift — is reused throughout; each figure block below re-creates it for reproducibility.
 
+![Advanced Statistical Process Monitoring — concept diagram](../assets/diagrams/advanced-spm.svg){ .fdars-diagram }
+
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render

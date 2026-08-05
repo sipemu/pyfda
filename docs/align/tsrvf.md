@@ -4,6 +4,9 @@ Elastic alignment lives on a curved manifold: the space of functions modulo warp
 
 The figure below shows a phase-varying sample, its SRSF representation (where the elastic metric becomes the $L^2$ metric), and the mean SRSF recovered by the TSRVF procedure.
 
+
+![TSRVF: Linearized Elastic Analysis — concept diagram](../assets/diagrams/tsrvf.svg){ .fdars-diagram }
+
 ```python exec="1" html="1"
 import numpy as np
 from docs_fig import fig, render

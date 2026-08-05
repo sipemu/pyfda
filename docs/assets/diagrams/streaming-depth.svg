@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Streaming depth: score each new curve against a rolling window">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Streaming Depth: Scoring Against a Rolling Window</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Each new curve's depth versus the recent past; a drop flags an anomaly</text>
+
+  <!-- Panel 1: window + new curve -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Window + New</text>
+  <text class="sm" x="122" y="112" text-anchor="middle">reference vs arrival</text>
+  <g transform="translate(44,120)">
+    <line x1="0" y1="110" x2="156" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 60 C40 30 80 78 120 46 C138 32 150 54 156 46" stroke="#6c757d" stroke-opacity=".35" stroke-width="1.5"/>
+    <path d="M0 70 C40 42 80 88 120 58 C138 44 150 66 156 56" stroke="#6c757d" stroke-opacity=".35" stroke-width="1.5"/>
+    <path d="M0 52 C40 22 80 70 120 38 C138 24 150 46 156 38" stroke="#6c757d" stroke-opacity=".35" stroke-width="1.5"/>
+    <path d="M0 96 C40 100 80 24 120 96 C138 106 150 60 156 92" stroke="#dc3545" stroke-width="2.6" stroke-linecap="round"/>
+    <text class="sm" x="0" y="128" font-size="9" fill="#6c757d">grey = window</text>
+    <text class="sm" x="96" y="128" font-size="9" fill="#dc3545">new</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#eafaf1" stroke="#198754" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#198754" font-size="10.5">modified_band_1d</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">data vs ref_data</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
+    <text class="sm" x="12" y="16">new = data</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
+    <text class="sm" x="12" y="48">window = ref_data</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
+    <text class="sm" x="12" y="80">roll window forward</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: output -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#eafaf1" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#198754">Depth Over Time</text>
+  <g transform="translate(520,110)">
+    <line x1="0" y1="118" x2="156" y2="118" stroke="#adb5bd" stroke-width="1"/>
+    <line x1="0" y1="10" x2="0" y2="118" stroke="#adb5bd" stroke-width="1"/>
+    <!-- threshold -->
+    <line x1="0" y1="96" x2="156" y2="96" stroke="#6c757d" stroke-width="1" stroke-dasharray="3 2"/>
+    <text class="sm" x="120" y="92" font-size="8" fill="#6c757d">alarm</text>
+    <!-- depth series: high, then spike down -->
+    <path d="M4 40 L20 46 L36 38 L52 50 L68 44 L84 42 L100 52 L116 108 L132 60 L148 48"
+          stroke="#198754" stroke-width="2" fill="none"/>
+    <circle cx="116" cy="108" r="4" fill="#dc3545"/>
+    <text class="sm" x="98" y="126" font-size="9" fill="#dc3545">drift</text>
+    <text class="sm" x="0" y="10" font-size="9" text-anchor="start">depth</text>
+  </g>
+</svg>

@@ -1,5 +1,8 @@
 # Elastic Alignment
 
+
+![Elastic Alignment — concept diagram](../assets/diagrams/elastic-alignment.svg){ .fdars-diagram }
+
 ## The problem: amplitude vs. phase variability
 
 Imagine recording the heartbeat signal of several patients. Every heartbeat has the same features -- a P wave, a QRS complex, a T wave -- but the *timing* of those features differs from patient to patient. Average the raw signals and the peaks blur out, because they do not line up. Two distinct sources of variation are at work whenever curves share a domain:

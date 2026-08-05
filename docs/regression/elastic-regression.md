@@ -23,7 +23,10 @@ y_i = \alpha + \int_0^1 \tilde X_i(t)\,\beta(t)\,dt + \varepsilon_i,
 \qquad \tilde X_i = X_i \circ \gamma_i .
 $$
 
+
 ---
+
+![Elastic Regression — concept diagram](../assets/diagrams/elastic-regression.svg){ .fdars-diagram }
 
 ## When alignment actually matters
 

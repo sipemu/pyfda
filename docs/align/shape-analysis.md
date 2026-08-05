@@ -4,6 +4,7 @@ Two curves can look different point-by-point yet share the same *shape* -- when 
 
 `fdars` provides tools for shape representatives and distances (this quotient geometry), for the **shape mean** (a Karcher mean in quotient space), and -- going beyond the quotient basics -- for elastic depth and elastic FPCA that decompose variability into amplitude and phase components.
 
+
 | Function | Role |
 |----------|------|
 | `shape_distance` | Elastic distance between curves modulo warping |
@@ -12,6 +13,8 @@ Two curves can look different point-by-point yet share the same *shape* -- when 
 | `reparameterize_curve` | Apply a warp $\gamma$ to a curve (move within an orbit) |
 
 A sample of curves that share a common *shape* but differ in amplitude and timing (left) collapses onto a single sharp template once the warping is factored out. The elastic **mean shape** -- the Karcher mean under the Fisher-Rao metric (right, orange) -- recovers that template, whereas the naive cross-sectional mean (right, dashed) is flattened by the phase spread.
+
+![Shape Analysis — concept diagram](../assets/diagrams/shape-analysis.svg){ .fdars-diagram }
 
 ```python exec="1" html="1"
 import numpy as np

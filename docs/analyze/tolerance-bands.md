@@ -24,6 +24,8 @@ band for the mean:
 
 ---
 
+![Tolerance Bands — concept diagram](../assets/diagrams/tolerance-bands.svg){ .fdars-diagram }
+
 ## How it works (intuition)
 
 Imagine a stack of daily temperature curves, one per year. A tolerance band should be

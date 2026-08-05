@@ -12,6 +12,8 @@ Functional outliers come in three flavours:
 
 ---
 
+![Outlier Detection — concept diagram](../assets/diagrams/outlier-detection.svg){ .fdars-diagram }
+
 ## LRT-based detection
 
 A likelihood-ratio-test approach: each curve is scored by its distance from a robust

@@ -9,6 +9,7 @@ Standard FPC regression (`fregre_lm`) uses ordinary least squares, which is sens
 | **L1 regression** | $\lvert r \rvert$ | 50% | Median regression; completely ignores outlier magnitude |
 | **Huber M-estimation** | Quadratic near 0, linear in tails | Depends on $k$ | Smooth compromise between L2 and L1 |
 
+
 ### Which method should I use?
 
 1. Start with **OLS** (`fregre_lm`) — it is the most efficient estimator when the data are
@@ -17,6 +18,8 @@ Standard FPC regression (`fregre_lm`) uses ordinary least squares, which is sens
    efficiency on clean Gaussian data, so it costs almost nothing to hedge.
 3. For **severe** contamination (more than ~10-15%), switch to **L1**, which trades a little
    clean-data efficiency for maximum outlier resistance.
+
+![Robust Regression — concept diagram](../assets/diagrams/robust-regression.svg){ .fdars-diagram }
 
 ## Setup: clean vs. contaminated spectra
 

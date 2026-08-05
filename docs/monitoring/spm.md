@@ -28,6 +28,8 @@ model for drift-sensitive charts, fault diagnosis, and localised monitoring.
 
 ---
 
+![Statistical Process Monitoring — concept diagram](../assets/diagrams/spm.svg){ .fdars-diagram }
+
 ## Concepts
 
 ### FPCA-based monitoring

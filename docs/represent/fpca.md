@@ -2,6 +2,9 @@
 
 Functional Principal Component Analysis (FPCA) is the workhorse of functional data analysis. It extends classical PCA from vectors in $\mathbb{R}^p$ to functions in $L^2$, decomposing a sample of curves into a mean function plus a linear combination of orthogonal eigenfunctions and providing an optimal low-rank approximation of the covariance structure.
 
+
+![Functional PCA — concept diagram](../assets/diagrams/fpca.svg){ .fdars-diagram }
+
 ## Why FPCA?
 
 Functional data pose four difficulties that ordinary multivariate methods handle poorly:

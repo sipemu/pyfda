@@ -8,7 +8,10 @@ This guide introduces **Functional Data Analysis (FDA)** and shows you how to
 use fdars's Python API to perform common tasks. By the end, you will understand
 the data layout, core operations, and the breadth of functionality available.
 
+
 ---
+
+![Introduction to fdars — concept diagram](../assets/diagrams/introduction.svg){ .fdars-diagram }
 
 ## What Is Functional Data Analysis?
 

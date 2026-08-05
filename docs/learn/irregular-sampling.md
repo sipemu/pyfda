@@ -10,6 +10,7 @@ studies measure children at whatever ages they happened to visit the clinic;
 sensors drop samples; longitudinal records are sparse and misaligned. Each curve
 then lives on its **own** grid, and the neat matrix disappears.
 
+
 Irregular sampling shows up almost everywhere functional data does:
 
 | Domain | Why the grid is irregular |
@@ -34,6 +35,8 @@ expansion, then proceed as usual.
     reconstruct each curve as a smooth function, evaluate all reconstructions on
     one shared grid, and hand the resulting rectangle to `Fdata`. Everything
     below builds that bridge explicitly in NumPy.
+
+![Working with Irregular / Sparsely Sampled Functional Data — concept diagram](../assets/diagrams/irregular-sampling.svg){ .fdars-diagram }
 
 ```python exec="1" html="1"
 import numpy as np

@@ -2,6 +2,9 @@
 
 Representing functional data in a finite basis -- B-splines, Fourier, or P-splines -- converts a discrete set of evaluations into a compact coefficient vector. This enables smoothing, differentiation, integration, and dimensionality reduction, all while preserving the continuous nature of the underlying functions.
 
+
+![Basis Representation — concept diagram](../assets/diagrams/basis-representation.svg){ .fdars-diagram }
+
 ## When to use basis representations
 
 - **Smoothing noisy data** -- P-spline penalties remove high-frequency noise while preserving shape.

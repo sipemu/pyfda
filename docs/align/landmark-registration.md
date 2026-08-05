@@ -4,10 +4,13 @@ Landmark registration is the oldest and most transparent way to remove phase var
 
 It is the natural choice for curves with identifiable, meaningful features: the P/QRS/T waves of an ECG, the peak force of a gait cycle, an absorbance band in a spectrum. Where elastic alignment optimizes the whole curve automatically under the Fisher-Rao metric, landmark registration anchors the warp at a few feature times and interpolates linearly between them.
 
+
 !!! warning "Implemented in numpy on this page (no binding)"
     `fdars` has no landmark-registration binding. The warp here is a plain **piecewise-linear monotone interpolation** built with `numpy.interp`, applied to an `Fdata` object; landmark detection uses `scipy.signal.find_peaks` for its prominence semantics. Everything shown runs, but the registration itself is numpy/scipy, not a library call. For an elastic aligner that can *pin* landmarks inside a Fisher-Rao fit, see [`elastic_align_pair_constrained`](advanced-alignment.md#landmark-constrained).
 
 The figure below shows a two-peak sample whose peaks drift in time (left), and the same curves after each peak has been warped onto the sample-mean peak location (right). The cross-sectional mean sharpens because the phase spread is gone.
+
+![Landmark Registration — concept diagram](../assets/diagrams/landmark-registration.svg){ .fdars-diagram }
 
 ```python exec="1" html="1"
 import numpy as np

@@ -19,6 +19,8 @@ Because a Gaussian mixture is defined in a finite-dimensional feature space, fun
 
 ---
 
+![Model-Based Clustering with Gaussian Mixtures — concept diagram](../assets/diagrams/gmm-clustering.svg){ .fdars-diagram }
+
 ## Concepts
 
 Let $c_i \in \mathbb{R}^p$ be the basis (or FPCA) coefficients of curve $i$. A $K$-component Gaussian mixture models their density as

@@ -20,6 +20,9 @@ Classification exploits differences in the class-mean curves. Below, two classes
 are separated by a phase difference (a sine vs. a cosine); the bold curves are
 the per-class mean functions the classifiers learn to distinguish.
 
+
+![Classification — concept diagram](../assets/diagrams/classification.svg){ .fdars-diagram }
+
 ```python exec="1" html="1"
 import numpy as np
 from docs_fig import fig, render

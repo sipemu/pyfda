@@ -7,6 +7,7 @@ and classification-specific diagnostics. All of them operate in the FPC-**score*
 the model actually regresses on, which makes them exact for FPC-based models and cheap to
 compute.
 
+
 | Family | Question | Functions |
 |--------|----------|-----------|
 | Score-level global | Which components drive predictions, and how? | `functional_pdp`, `fpc_ale`, `sobol_indices`, `friedman_h_statistic`, `beta_decomposition` |
@@ -17,6 +18,8 @@ compute.
 Two model types are supported throughout: the linear FPC model (`fregre_lm`) and the
 functional logistic model (`functional_logistic`). Both project curves onto FPC scores and
 regress on them.
+
+![Model Explainability — concept diagram](../assets/diagrams/explainability.svg){ .fdars-diagram }
 
 ## Setup
 

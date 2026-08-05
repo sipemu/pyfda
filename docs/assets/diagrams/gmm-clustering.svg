@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="GMM clustering: soft posterior assignments over FPCA scores">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Model-Based Clustering: Soft Assignments from a Mixture</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Fit a Gaussian mixture to FPCA scores for posterior memberships</text>
+
+  <!-- Panel 1: FPCA scores scatter -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">FPCA Scores</text>
+  <g transform="translate(44,108)">
+    <line x1="0" y1="126" x2="156" y2="126" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="126" x2="0" y2="6" stroke="#adb5bd" stroke-width="1.2"/>
+    <g fill="#6c757d" fill-opacity=".7">
+      <circle cx="34" cy="42" r="3.5"/><circle cx="46" cy="32" r="3.5"/><circle cx="28" cy="54" r="3.5"/>
+      <circle cx="52" cy="50" r="3.5"/><circle cx="40" cy="60" r="3.5"/>
+      <circle cx="104" cy="92" r="3.5"/><circle cx="118" cy="82" r="3.5"/><circle cx="96" cy="102" r="3.5"/>
+      <circle cx="122" cy="100" r="3.5"/><circle cx="110" cy="110" r="3.5"/>
+    </g>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#6f42c1">gmm_cluster()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">EM over components</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="16">Σ πₖ N(c | μₖ, Σₖ)</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="48">Responsibilities</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="80">BIC / ICL → K</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: soft assignments -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#6f42c1">Soft Memberships</text>
+  <g transform="translate(520,108)">
+    <line x1="0" y1="126" x2="156" y2="126" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="126" x2="0" y2="6" stroke="#adb5bd" stroke-width="1.2"/>
+    <ellipse cx="40" cy="50" rx="30" ry="24" fill="#6f42c1" fill-opacity=".12" stroke="#6f42c1" stroke-opacity=".4"/>
+    <ellipse cx="112" cy="96" rx="30" ry="24" fill="#e8710a" fill-opacity=".12" stroke="#e8710a" stroke-opacity=".4"/>
+    <circle cx="34" cy="42" r="3.5" fill="#6f42c1"/><circle cx="46" cy="32" r="3.5" fill="#6f42c1"/>
+    <circle cx="28" cy="54" r="3.5" fill="#6f42c1"/><circle cx="40" cy="60" r="3.5" fill="#6f42c1"/>
+    <circle cx="104" cy="92" r="3.5" fill="#e8710a"/><circle cx="118" cy="82" r="3.5" fill="#e8710a"/>
+    <circle cx="96" cy="102" r="3.5" fill="#e8710a"/><circle cx="122" cy="100" r="3.5" fill="#e8710a"/>
+    <circle cx="72" cy="72" r="3.5" fill="#6c757d"/>
+    <text class="sm" x="80" y="70" fill="#6c757d">p ≈ ½</text>
+  </g>
+  <text class="sm" x="598" y="252" text-anchor="middle" fill="#6c757d">graded, uncertainty-aware</text>
+</svg>

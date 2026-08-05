@@ -13,8 +13,11 @@ depth, drawing mean±sd envelopes, and highlighting the functional median. This
 guide collects those recipes and mirrors the ggplot2 walkthrough from the R
 package, translating each aesthetic mapping into matplotlib.
 
+
 Every curve family reduces to one call -- `ax.plot(argvals, data.T)` plots each
 row as its own line:
+
+![Custom Plotting — concept diagram](../assets/diagrams/custom-plotting.svg){ .fdars-diagram }
 
 ```python exec="1" html="1" source="above"
 import numpy as np

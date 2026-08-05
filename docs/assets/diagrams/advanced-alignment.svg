@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Advanced alignment: penalized and constrained elastic registration">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Advanced Alignment: Penalized &amp; Constrained Warps</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Tune warp smoothness with &#955;; the fit balances fidelity and regularity</text>
+
+  <!-- Panel 1: raw curves -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Phase-Varying Sample</text>
+  <g transform="translate(44,116)">
+    <line x1="0" y1="110" x2="156" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 108 C34 108 46 30 66 30 C86 30 96 108 156 108" stroke="#495057" stroke-opacity=".32" stroke-width="1.6"/>
+    <path d="M0 108 C48 108 60 46 80 46 C100 46 110 108 156 108" stroke="#495057" stroke-opacity=".32" stroke-width="1.6"/>
+    <path d="M0 108 C24 108 38 22 58 22 C78 22 88 108 156 108" stroke="#495057" stroke-opacity=".32" stroke-width="1.6"/>
+    <path d="M0 108 C40 108 54 38 74 38 C94 38 104 108 156 108" stroke="#495057" stroke-opacity=".32" stroke-width="1.6"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#fd7e14">align(&#955;, ...)</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Regularized elastic fit</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="16">robust_karcher_mean</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="48">constrained warp</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="80">select &#955; penalty</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: aligned + chosen lambda -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#fd7e14">Aligned + Chosen &#955;</text>
+  <g transform="translate(516,110)">
+    <line x1="0" y1="86" x2="164" y2="86" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 84 C36 84 50 20 82 20 C114 20 128 84 164 84" stroke="#fd7e14" stroke-opacity=".38" stroke-width="1.4"/>
+    <path d="M0 84 C36 84 50 24 82 24 C114 24 128 84 164 84" stroke="#fd7e14" stroke-opacity=".38" stroke-width="1.4"/>
+    <path d="M0 84 C36 84 50 22 82 22 C114 22 128 84 164 84" stroke="#fd7e14" stroke-width="2.8" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(540,214)">
+    <text class="sm" x="0" y="10">&#955;:</text>
+    <rect x="22" y="0" width="14" height="12" rx="2" fill="#fd7e14" fill-opacity=".25"/>
+    <rect x="40" y="0" width="14" height="12" rx="2" fill="#fd7e14" fill-opacity=".55"/>
+    <rect x="58" y="0" width="14" height="12" rx="2" fill="#fd7e14"/>
+    <rect x="76" y="0" width="14" height="12" rx="2" fill="#fd7e14" fill-opacity=".55"/>
+    <rect x="94" y="0" width="14" height="12" rx="2" fill="#fd7e14" fill-opacity=".25"/>
+    <path d="M65 -4 v-6" stroke="#fd7e14" stroke-width="1.5"/>
+    <text class="sm" x="118" y="10" fill="#fd7e14">best</text>
+  </g>
+</svg>

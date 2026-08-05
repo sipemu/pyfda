@@ -1,3 +1,12 @@
+/* ===== Article concept diagrams (hand-authored SVG, R-style) ===== */
+.fdars-diagram {
+  display: block;
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  margin: 1.5rem auto 2rem;
+}
+
 /* ===== Build-time figures (inline SVG from markdown-exec) ===== */
 .fdars-figure {
   margin: 1.2rem 0;

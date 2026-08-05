@@ -8,6 +8,8 @@ the global statistic and slips past the limit. The remedy is simple and powerful
 to slice the argument grid and rerun the ordinary `fdars.spm` Phase I / Phase II workflow
 on a partial domain, and quantifies the sensitivity gain.
 
+![Profile and Partial-Domain Monitoring — concept diagram](../assets/diagrams/profile-partial-monitoring.svg){ .fdars-diagram }
+
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render

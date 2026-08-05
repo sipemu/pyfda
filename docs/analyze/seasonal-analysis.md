@@ -4,6 +4,8 @@ Many real-world functional datasets exhibit periodic patterns -- daily temperatu
 
 ---
 
+![Seasonal Analysis — concept diagram](../assets/diagrams/seasonal-analysis.svg){ .fdars-diagram }
+
 ## Period detection
 
 `fdars` offers three period-detection algorithms, each with different strengths:

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Seasonal analysis: decompose a periodic curve into trend, seasonal and remainder">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Seasonal Analysis: Splitting a Periodic Signal</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Decompose into trend, a repeating season, and the remainder</text>
+
+  <!-- Panel 1: periodic curve -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Periodic Curve</text>
+  <g transform="translate(44,124)">
+    <line x1="0" y1="100" x2="156" y2="100" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 86 C10 40 20 40 30 86 C40 132 50 132 60 86
+             C70 34 80 34 90 80 C100 126 110 126 120 74
+             C130 26 140 26 150 68 L156 66" stroke="#6c757d" stroke-width="1.6" fill="none"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#6f42c1">stl_decompose()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Loess-based split</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="16">Detect period (SAZED)</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="48">Trend + seasonal fit</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="80">Strength of seasonality</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: decomposition stack -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="lab" x="598" y="90" text-anchor="middle" fill="#6f42c1">Decomposition</text>
+  <g transform="translate(516,100)">
+    <text class="sm" x="0" y="8" fill="#6c757d">trend</text>
+    <path d="M0 20 C40 16 80 8 120 4 C140 2 155 1 164 1" stroke="#6f42c1" stroke-width="1.8" fill="none"/>
+    <line x1="0" y1="34" x2="164" y2="34" stroke="#e9ecef" stroke-width="1"/>
+    <text class="sm" x="0" y="52" fill="#6c757d">seasonal</text>
+    <path d="M0 64 C8 50 16 50 24 64 C32 78 40 78 48 64 C56 50 64 50 72 64
+             C80 78 88 78 96 64 C104 50 112 50 120 64 C128 78 136 78 144 64
+             C152 50 160 50 164 62" stroke="#6f42c1" stroke-width="1.6" fill="none"/>
+    <line x1="0" y1="82" x2="164" y2="82" stroke="#e9ecef" stroke-width="1"/>
+    <text class="sm" x="0" y="100" fill="#6c757d">remainder</text>
+    <path d="M0 112 L14 108 L28 116 L42 110 L56 118 L70 109 L84 115 L98 111 L112 117 L126 110 L140 114 L154 111 L164 113"
+          stroke="#adb5bd" stroke-width="1.3" fill="none"/>
+  </g>
+</svg>

@@ -13,6 +13,9 @@ decision boundary, the set contains several labels, honestly flagging the ambigu
 split-conformal recipe and expose the finite-sample **coverage guarantee**
 $\mathbb{P}(y \in \hat C(x)) \ge 1 - \alpha$.
 
+
+![Conformal Prediction for Classification — concept diagram](../assets/diagrams/conformal-classification.svg){ .fdars-diagram }
+
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
