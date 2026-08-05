@@ -126,36 +126,40 @@ The margin $\delta$ is the maximum allowable pointwise difference between the tw
 
 ## Example -- equivalent vs. non-equivalent groups
 
-```python
+```python exec="1" source="above"
 import numpy as np
 from fdars import Fdata
 from fdars.simulation import simulate
 from fdars.tolerance import equivalence_test
 
 argvals = np.linspace(0, 1, 100)
-delta = 1.0
+delta = 2.0
 
 # ── Case 1: Similar groups (should be equivalent) ────────────
-fd_a = Fdata(simulate(40, argvals, n_basis=5, seed=10), argvals=argvals)
-fd_b = Fdata(simulate(40, argvals, n_basis=5, seed=20) + 0.1, argvals=argvals)
+fd_a = Fdata(np.asarray(simulate(40, argvals, n_basis=5, seed=10)), argvals=argvals)
+fd_b = Fdata(np.asarray(simulate(40, argvals, n_basis=5, seed=20)) + 0.1, argvals=argvals)
 
 r1 = equivalence_test(fd_a.data, fd_b.data, delta=delta, alpha=0.05, nb=2000, seed=42)
 print(f"Case 1 — Equivalent: {r1['equivalent']}  p={r1['p_value']:.4f}")
 
 # ── Case 2: Different groups (should NOT be equivalent) ──────
-fd_c = Fdata(simulate(40, argvals, n_basis=5, seed=10), argvals=argvals)
-fd_d = Fdata(simulate(40, argvals, n_basis=5, seed=20) + 5.0, argvals=argvals)  # large shift
+fd_c = Fdata(np.asarray(simulate(40, argvals, n_basis=5, seed=10)), argvals=argvals)
+fd_d = Fdata(np.asarray(simulate(40, argvals, n_basis=5, seed=20)) + 5.0, argvals=argvals)  # large shift
 
 r2 = equivalence_test(fd_c.data, fd_d.data, delta=delta, alpha=0.05, nb=2000, seed=42)
 print(f"Case 2 — Equivalent: {r2['equivalent']}  p={r2['p_value']:.4f}")
 ```
 
-Expected output:
-
-```
-Case 1 — Equivalent: True   p=0.00..
-Case 2 — Equivalent: False  p=1.00..
-```
+!!! warning "Choosing $\delta$ relative to sampling uncertainty"
+    Equivalence requires the entire $(1-\alpha)$ simultaneous confidence band for
+    $\mu_1 - \mu_2$ to sit inside the $\pm\delta$ corridor — and that band has a
+    half-width of roughly $c_\alpha \cdot \mathrm{SE}$, driven by the sample size,
+    **not** by the raw mean difference. So two samples from the *same* distribution
+    are **not** automatically equivalent: if $\delta$ is smaller than the band
+    half-width, the verdict is (correctly) `False`. Here the groups differ by only
+    $0.1$, yet $\delta$ must clear the band's reach — `delta = 1.0` returns `False`,
+    while `delta = 2.0` returns `True`. Always choose $\delta$ from a
+    practically-meaningful tolerance and sanity-check it against the band width.
 
 ---
 
