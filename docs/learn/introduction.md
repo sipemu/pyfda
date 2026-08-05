@@ -12,21 +12,23 @@ the data layout, core operations, and the breadth of functionality available.
 
 ## What Is Functional Data Analysis?
 
-In classical statistics every observation is a number or a vector.
-In **functional data analysis** every observation is an *entire function* --
-a curve, a spectrum, a trajectory, or a surface measured over a continuum.
+**Functional Data Analysis (FDA)** is the branch of statistics that deals with
+data where each observation is an *entire function* -- a curve, a spectrum, a
+trajectory, or a surface measured over a continuum -- rather than a single number
+or a fixed-length vector.
 
 Examples of functional data appear everywhere:
 
 - **Spectroscopy** -- absorbance spectra measured at hundreds of wavelengths
 - **Growth curves** -- height-over-age profiles for a cohort of children
-- **Finance** -- intraday price trajectories
+- **Finance** -- intraday price trajectories throughout the trading day
 - **Environmental science** -- daily temperature profiles across weather stations
 - **Manufacturing** -- quality profiles recorded along a production line
 
-The key insight of FDA is that these are not just high-dimensional vectors; they
-have a *smoothness structure* that can be exploited for better estimation,
-prediction, and interpretation.
+In FDA we treat each curve as a *single observation* and develop methods to
+analyze collections of such curves. The key insight is that these are not just
+high-dimensional vectors; they have a *smoothness structure* that can be
+exploited for better estimation, prediction, and interpretation.
 
 !!! note "Infinite-dimensional observations"
     Mathematically, each observation lives in a function space such as
@@ -49,6 +51,13 @@ through [PyO3](https://pyo3.rs).  This gives you:
   full control.
 - **Broad coverage** -- depth, distance, smoothing, basis representation, FPCA,
   regression, clustering, alignment, outlier detection, monitoring, and more.
+- **2D support** -- many methods extend from curves to *surfaces*, with dedicated
+  `*_2d` variants throughout the depth, distance, and derivative modules.
+
+Because the numerics run in Rust, computationally intensive operations such as
+depth functions and distance matrices are typically **10-200x faster** than the
+equivalent pure-Python (or pure-R) implementation, without giving up the
+convenience of a NumPy-based front end.
 
 ### Installation
 
@@ -68,54 +77,63 @@ The central object in fdars is **`Fdata`** -- a functional data container that
 bundles observation data, evaluation grid, identifiers, and per-observation
 metadata.  It mirrors the R package's `fdata` S3 class.
 
+Create functional data from a matrix where **rows are observations (curves)** and
+**columns are evaluation points**. Here we generate 20 curves observed at 100
+points on $[0, 1]$ as sine waves with random phase and a little measurement noise
+-- the same running example used throughout this guide:
+
 ```python
 import numpy as np
 import pandas as pd
 from fdars import Fdata
 
-# 50 curves observed at 200 equally spaced points on [0, 1]
-n_obs = 50
-n_points = 200
+# 20 curves evaluated at 100 points on [0, 1]
+rng = np.random.default_rng(42)
+n_obs, n_points = 20, 100
 argvals = np.linspace(0, 1, n_points)
 
-# Create sine curves with random phase shifts
-rng = np.random.default_rng(0)
-phases = rng.uniform(0, 2 * np.pi, size=n_obs)
-X = np.array([np.sin(2 * np.pi * argvals + phi) for phi in phases])
+# Sine waves with random phase and noise
+X = np.array([
+    np.sin(2 * np.pi * argvals + rng.uniform(0, np.pi)) + rng.normal(0, 0.1, n_points)
+    for _ in range(n_obs)
+])
 
 # Wrap in an Fdata object
 fd = Fdata(X, argvals=argvals)
 print(fd)
-# Fdata (1D)  –  50 obs × 200 points  –  range [0.0, 1.0]
+# Fdata (1D)  –  20 obs × 100 points  –  range [0.0, 1.0]
 ```
 
-#### With Identifiers and Metadata
+#### Adding Identifiers and Metadata
 
-You can attach identifiers and a `pandas.DataFrame` of per-observation
-covariates:
+You can attach identifiers and a `pandas.DataFrame` of per-observation covariates
+(a `group` factor, `age`, a scalar `response`, ...):
 
 ```python
 meta = pd.DataFrame({
-    "group": ["control"] * 25 + ["treatment"] * 25,
+    "group": ["control"] * 10 + ["treatment"] * 10,
     "age": rng.integers(20, 60, size=n_obs),
+    "response": rng.normal(size=n_obs),
 })
-fd = Fdata(
+fd_meta = Fdata(
     X, argvals=argvals,
-    id=[f"patient_{i}" for i in range(n_obs)],
+    id=[f"patient_{i}" for i in range(1, n_obs + 1)],
     metadata=meta,
 )
-print(fd)
-# Fdata (1D)  –  50 obs × 200 points  –  range [0.0, 1.0]  –  metadata: group, age
+print(fd_meta)
+# Fdata (1D)  –  20 obs × 100 points  –  range [0.0, 1.0]  –  metadata: group, age, response
 
-# Access metadata columns directly
-fd.metadata["group"].value_counts()
+# Access ids and metadata directly
+print(fd_meta.id[:5])          # ['patient_1', ..., 'patient_5']
+fd_meta.metadata.head()
 ```
 
-Metadata is preserved when subsetting:
+Metadata is preserved when subsetting -- both the ids and the covariate rows are
+carried along:
 
 ```python
-fd_sub = fd[0:10]
-print(fd_sub.id[:3])               # ['patient_0', 'patient_1', 'patient_2']
+fd_sub = fd_meta[0:5]
+print(fd_sub.id)                    # ['patient_1', ..., 'patient_5']
 print(fd_sub.metadata["group"][:3]) # 'control', 'control', 'control'
 ```
 
@@ -136,62 +154,92 @@ data = simulate(n=50, argvals=argvals, n_basis=5, seed=42)
 
 fd = Fdata(data, argvals=argvals)
 print(fd)  # Fdata (1D)  –  50 obs × 100 points  –  range [0.0, 1.0]
-
-# All examples below use this fd object
 ```
 
-See the [Simulation Toolbox](simulation.md) guide for details on eigenfunction
-types, eigenvalue decays, and Gaussian process generation.
+### Visualizing Functional Data
 
-A functional sample is a *family of curves* rather than a cloud of points. Here
-are 30 such curves together with their pointwise mean -- the kind of object every
-fdars method operates on:
+A functional sample is a *family of curves* rather than a cloud of points.
+Plotting the whole ensemble at once -- here the 20 sine curves from above
+together with their pointwise mean -- is the first thing you do with any dataset,
+and the kind of object every fdars method operates on:
 
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
 from fdars import Fdata
-from fdars.simulation import simulate
 
+rng = np.random.default_rng(42)
 t = np.linspace(0, 1, 100)
-fd = Fdata(np.asarray(simulate(n=30, argvals=t, n_basis=6, seed=42)), argvals=t)
+X = np.array([
+    np.sin(2 * np.pi * t + rng.uniform(0, np.pi)) + rng.normal(0, 0.1, 100)
+    for _ in range(20)
+])
+fd = Fdata(X, argvals=t)
 mu = np.asarray(fd.mean())
 
 f, ax = fig()
-ax.plot(t, np.asarray(fd.data).T, color="#3f51b5", lw=1, alpha=0.35)
+ax.plot(t, np.asarray(fd.data).T, color="#3f51b5", lw=1, alpha=0.5)
 ax.plot(t, mu, color="#e8710a", lw=2.6, label="pointwise mean")
-ax.set(title="A functional sample: 30 curves and their mean",
+ax.set(title="20 phase-shifted sine curves and their mean",
        xlabel="t", ylabel="X(t)")
 ax.legend()
 print(render(f))
 ```
 
+### Basic Operations
+
+A handful of operations are so common they form the vocabulary of every FDA
+workflow: the **mean function**, **centering**, and the **pointwise variance**.
+The mean and centering are Rust-backed `Fdata` methods; there is no dedicated
+variance binding, so we compute it directly in NumPy over the grid:
+
+```python
+# Mean function -- one value per grid point
+mean_curve = fd.mean()
+
+# Center the data (subtract the mean function from every curve)
+fd_centered = fd.center()
+
+# Pointwise (functional) variance across the sample
+variance = np.asarray(fd.data).var(axis=0)   # shape (n_points,)
+```
+
+!!! note "No `var()` binding"
+    Unlike R's `var(fd)`, fdars does not expose a functional-variance function,
+    so the example above computes the pointwise variance with NumPy. For the full
+    covariance *surface* $\operatorname{Cov}(s, t)$, see
+    `fdars.simulation.covariance_matrix` and the [FPCA](../represent/fpca.md) guide.
+
+### Subsetting
+
+Indexing an `Fdata` selects **curves** (rows). To restrict the **evaluation
+grid** (columns) to a sub-interval, build a boolean mask over `argvals` and slice
+the underlying array:
+
+```python
+# First 5 curves
+fd_first5 = fd[0:5]
+print(fd_first5.shape)            # (5, 100)
+
+# Restrict the domain to t in [0.25, 0.75]
+mask = (fd.argvals >= 0.25) & (fd.argvals <= 0.75)
+fd_range = Fdata(np.asarray(fd.data)[:, mask], argvals=fd.argvals[mask])
+print(fd_range.shape)             # (20, 50)
+```
+
 ---
 
-## Core Operations
+## Norms and Normalization
 
 `Fdata` methods delegate to the Rust backend. They return either numpy arrays
 (for scalar results) or new `Fdata` objects (for transformed functional data),
 preserving metadata.
 
-### Pointwise Mean
+### Centering, Visually
 
-```python
-mu = fd.mean()
-print(mu.shape)  # (100,) -- one value per grid point
-```
-
-### Centering
-
-```python
-fd_centered = fd.center()
-print(fd_centered.shape)  # (50, 100) -- same shape, mean subtracted
-print(fd_centered.id[:3])  # metadata preserved
-```
-
-After centering, the mean is numerically zero at every grid point. Centering
-removes the common level so that subsequent analyses focus on *variation around
-the mean*:
+We met `fd.center()` above. Because centering only subtracts the common mean, it
+leaves the *shape variation* between curves untouched -- exactly what most
+downstream analyses (FPCA, depth, clustering) care about. Side by side:
 
 ```python exec="1" html="1"
 import numpy as np
@@ -223,7 +271,7 @@ $$
 
 ```python
 l2_norms = fd.norm(p=2.0)
-print(l2_norms.shape)  # (50,) -- one norm per curve
+print(l2_norms.shape)  # (30,) -- one norm per curve
 print(f"Mean L2 norm: {l2_norms.mean():.4f}")
 ```
 
@@ -246,13 +294,16 @@ Available methods: `"center"`, `"autoscale"`, `"pareto"`, `"range"`,
 
 ### Depth
 
-Depth measures quantify how "central" a curve is within a sample. Deeper curves
-are more typical; shallow curves are potential outliers.
+Depth measures quantify how "central" a curve is within a sample. Higher depth
+indicates a more *typical* curve; shallow curves are potential outliers. The
+deepest curve is a natural notion of a **functional median** -- a robust center
+that, unlike the pointwise mean, is itself one of the observed curves.
 
 ```python
-# Via Fdata convenience method
-fm_depth = fd.depth("fraiman_muniz")
-print(f"Most central curve index: {np.argmax(fm_depth)}")
+# Via Fdata convenience method -- Fraiman-Muniz depth
+fm_depth = np.asarray(fd.depth("fraiman_muniz"))
+median_idx = int(np.argmax(fm_depth))
+print(f"Median (deepest) curve index: {median_idx}")
 
 # Or via low-level functions
 from fdars.depth import modified_band_1d
@@ -279,18 +330,48 @@ print(dist_dtw.shape)  # (50, 50)
 See also: `hausdorff`, `soft_dtw`, `fourier`, `hshift`, and cross-distance
 variants.
 
-### Regression and FPCA
+### Regression
+
+A common task is to **predict a scalar response from a functional predictor** --
+regressing a number $y_i$ on each whole curve $x_i(t)$. Because a curve has far
+more grid points than we have observations, fdars regresses on a low-dimensional
+summary of the curves. `fregre_pls` fits a functional partial-least-squares model
+and reports the in-sample $R^2$:
+
+```python
+from fdars.regression import fregre_pls
+
+# Scalar response driven by the mean level of each curve, plus noise
+y = np.asarray(fd.data).mean(axis=1) + np.random.default_rng(1).normal(0, 0.1, fd.n_obs())
+
+fit = fregre_pls(fd.data, fd.argvals, y, n_comp=3)
+print(f"R-squared: {fit['r_squared']:.4f}")
+```
+
+Related fits: `fregre_lm`, `fregre_np` (nonparametric kernel), `fregre_pls`,
+`fregre_huber`/`fregre_l1` (robust), and `functional_logistic` for binary
+responses. See the [Scalar-on-Function Regression](../regression/scalar-on-function.md)
+guide for the full menu.
+
+### FPCA
+
+Functional principal component analysis reduces each curve to a handful of
+scores, capturing the dominant modes of variation:
 
 ```python
 from fdars.regression import fpca
 
 result = fpca(fd.data, fd.argvals, n_comp=3)
-scores = result["scores"]        # (50, 3)
+scores = result["scores"]        # (50, 3) -- one row per curve
 rotation = result["rotation"]    # (100, 3) -- eigenfunctions
-print(f"Variance explained by PC1: singular_value = {result['singular_values'][0]:.4f}")
+print(f"Leading singular value: {result['singular_values'][0]:.4f}")
 ```
 
 ### Clustering
+
+Group curves into clusters by shape. `kmeans_fd` runs functional $k$-means and
+returns the label vector, the cluster centers, and the total within-cluster sum
+of squares:
 
 ```python
 from fdars.clustering import kmeans_fd
@@ -300,15 +381,68 @@ print(f"Cluster labels: {clusters['cluster']}")
 print(f"Total within-cluster SS: {clusters['tot_withinss']:.4f}")
 ```
 
+Coloring the curves by their assigned cluster shows how $k$-means partitions the
+sample; the cluster centers (bold) summarize each group:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.clustering import kmeans_fd
+
+t = np.linspace(0, 1, 100)
+fd = Fdata(np.asarray(simulate(n=45, argvals=t, n_basis=6, seed=7)), argvals=t)
+km = kmeans_fd(fd.data, fd.argvals, k=3, seed=0)
+labels = np.asarray(km["cluster"])
+centers = np.asarray(km["centers"])
+
+colors = ["#3f51b5", "#e8710a", "#198754"]
+f, ax = fig()
+for k in range(3):
+    ax.plot(t, np.asarray(fd.data)[labels == k].T, color=colors[k], lw=1, alpha=0.35)
+    ax.plot(t, centers[k], color=colors[k], lw=3.0)
+ax.set(title="Functional k-means: curves colored by cluster",
+       xlabel="t", ylabel="X(t)")
+print(render(f))
+```
+
 ### Outlier Detection
 
-```python
-from fdars.outliers import outliergram
+Identify atypical curves. Here we take a clean sample, add a single curve shifted
+far above the rest, and let the **magnitude-shape** method (which scores each
+curve on how far it departs from the sample in level and in shape) flag it:
 
-og = outliergram(fd.data)
-n_outliers = og["outliers"].sum()
-print(f"Detected {n_outliers} outlier(s)")
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.outliers import magnitude_shape
+
+t = np.linspace(0, 1, 100)
+X = np.asarray(simulate(n=25, argvals=t, n_basis=6, seed=3))
+X_out = np.vstack([X, X[0] + 3.0])          # append one magnitude outlier
+
+ms = magnitude_shape(X_out)
+mag = np.asarray(ms["magnitude"])
+shp = np.asarray(ms["shape"])
+score = np.hypot(mag, shp)                    # combined MS distance
+flagged = int(np.argmax(score))
+print(f"# Flagged curve index {flagged} of {len(score) - 1} (the appended outlier)")
+
+f, ax = fig()
+ax.plot(t, X_out[:-1].T, color="#3f51b5", lw=1, alpha=0.4)
+ax.plot(t, X_out[flagged], color="#d81b60", lw=2.6, label="detected outlier")
+ax.set(title="Outlier detection via magnitude-shape depth",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
 ```
+
+`outliergram` (shape outliers via MEI/MBD) and `detect_outliers_lrt` (a
+likelihood-ratio test) provide complementary rules; see the
+[Outlier Detection](../analyze/outlier-detection.md) guide.
 
 ### Smoothing
 
@@ -361,3 +495,15 @@ performance characteristics:
   centrality measures.
 - [Clustering](../analyze/clustering.md) -- group curves by shape.
 - [FPCA](../represent/fpca.md) -- dimensionality reduction for curves.
+
+---
+
+## References
+
+- Ramsay, J. O. & Silverman, B. W. (2005). *Functional Data Analysis* (2nd ed.).
+  Springer.
+- Ferraty, F. & Vieu, P. (2006). *Nonparametric Functional Data Analysis: Theory
+  and Practice*. Springer.
+- Febrero-Bande, M. & Oviedo de la Fuente, M. (2012). Statistical Computing in
+  Functional Data Analysis: The R Package `fda.usc`. *Journal of Statistical
+  Software*, 51(4), 1--28.

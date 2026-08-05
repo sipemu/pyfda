@@ -2,65 +2,128 @@
 title: Smoothing
 ---
 
-# Smoothing
+# Smoothing Functional Data
 
-Real-world curves are almost always corrupted by noise. Smoothing recovers the
-underlying signal while respecting the functional nature of the data. fdars
-provides two families of smoothers:
+## Why Smooth Functional Data?
 
-1. **Nonparametric kernel smoothers** (`fdars.smoothing`) -- Nadaraya-Watson,
-   local linear, local polynomial, and k-NN.
-2. **Basis smoothers** (`fdars.basis`) -- project noisy curves onto a smooth
-   basis (B-spline or Fourier) with a roughness penalty.
+Real-world functional measurements almost always carry noise -- from instrument
+limitations, random sampling variation, and digitization. Smoothing turns noisy
+discrete samples into a smooth functional representation, which matters for
+several reasons:
 
-This guide covers both, including automatic bandwidth and penalty selection.
+- **Derivatives** amplify noise severely; a smooth curve is a prerequisite for
+  differentiation (see [Working with Derivatives](derivatives.md)).
+- **Curve comparisons** (distances, alignment, depth) are meaningful only once
+  the wiggle of measurement error is removed.
+- **Visualization and inference** both rely on the underlying signal, not the
+  noise on top of it.
+
+fdars offers several complementary approaches. This guide walks through kernel
+smoothers, k-nearest-neighbor smoothing, basis expansion, and penalized-basis
+(P-spline) smoothing -- with automatic bandwidth and penalty selection -- using
+a real dataset throughout.
 
 ---
 
-## Setup: Noisy Curves
+## Available Smoothing Methods
 
-We start by simulating a clean signal and adding Gaussian noise:
+| Method | Function(s) | Approach | Key parameter |
+|--------|-------------|----------|---------------|
+| Nadaraya-Watson | `nadaraya_watson` | Kernel-weighted local average | bandwidth $h$ |
+| Local linear | `local_linear` | Local linear regression | bandwidth $h$ |
+| Local polynomial | `local_polynomial` | Local degree-$p$ regression | bandwidth $h$, degree |
+| k-NN | `knn_smoother` | Average of $k$ nearest points | neighbors $k$ |
+| Basis expansion | `fdata_to_basis_1d` | Project onto B-spline/Fourier basis | basis count $K$ |
+| Penalized basis (fixed) | `pspline_fit_1d` | Many basis functions + roughness penalty | penalty $\lambda$ |
+| Penalized basis (auto) | `pspline_fit_gcv`, `smooth_basis_gcv` | Penalized basis with GCV selection | data-driven $\lambda$ |
+
+The first four live in `fdars.smoothing`; the basis methods live in
+`fdars.basis`.
+
+---
+
+## Loading Real Data: The Berkeley Growth Study
+
+The Berkeley Growth Study tracked the heights of 54 girls and 39 boys from age 1
+to 18. It is the canonical functional-data teaching example. fdars ships it via
+`docs_data.load_growth`; we take the girls' curves to match the classic
+analysis.
 
 ```python
 import numpy as np
 from fdars import Fdata
-from fdars.simulation import simulate
+from docs_data import load_growth
 
-# Clean signal
-argvals = np.linspace(0, 1, 200)
-clean = simulate(n=1, argvals=argvals, n_basis=5, seed=42)
-fd_clean = Fdata(clean, argvals=argvals)
+age, X, meta = load_growth()          # age (31,), X (93, 31), meta with 'sex'
+girls = X[(meta["sex"] == "female").values]   # (54, 31)
+fd_raw = Fdata(girls, argvals=age)
+print(fd_raw)   # Fdata (1D)  -  54 obs x 31 points  -  range [1.0, 18.0]
+```
 
-# Add noise
+The heights are measured carefully, so the raw curves already look smooth. To
+demonstrate smoothing we add synthetic measurement noise (2 cm) to simulate a
+less precise instrument:
+
+```python
 rng = np.random.default_rng(0)
-noise = rng.normal(0, 0.3, size=clean.shape)
-fd_noisy = fd_clean + noise
+heights_noisy = girls + rng.normal(0, 2.0, size=girls.shape)
+fd_noisy = Fdata(heights_noisy, argvals=age)
+```
 
-# Extract single curve for 1D smoothing
-x = fd_noisy.argvals
-y = fd_noisy.data[0]
-y_true = fd_clean.data[0]
+The panels below show five sample curves before and after adding noise -- the
+same underlying growth pattern, now buried in jitter:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_growth
+
+age, X, meta = load_growth()
+girls = X[(meta["sex"] == "female").values]
+noisy = girls + np.random.default_rng(0).normal(0, 2.0, size=girls.shape)
+
+f, axes = fig(1, 2, figsize=(9.5, 4.0), sharey=True)
+for ax, data, title in [(axes[0], girls, "Original"),
+                        (axes[1], noisy, "With noise (SD = 2 cm)")]:
+    for i in range(5):
+        ax.plot(age, data[i], lw=1.6)
+    ax.set(title=title, xlabel="Age (years)")
+axes[0].set_ylabel("Height (cm)")
+print(render(f))
 ```
 
 ---
 
-## Nadaraya-Watson Kernel Smoother
+## Kernel Smoothers
 
-The Nadaraya-Watson estimator computes a locally weighted average:
+Kernel smoothing estimates the value at each point by a *weighted average* of
+nearby observations. A kernel function assigns the weights, and a bandwidth $h$
+controls the size of the neighborhood. A smaller $h$ produces a wigglier fit
+that chases noise; a larger $h$ over-smooths and flattens real features. This is
+the classic bias-variance trade-off.
+
+### Nadaraya-Watson
+
+The Nadaraya-Watson estimator is a locally weighted average:
 
 $$
 \hat{m}(t) = \frac{\sum_{i=1}^{n} K_h(t - x_i)\, y_i}{\sum_{i=1}^{n} K_h(t - x_i)}
 $$
 
-where $K_h$ is a kernel function with bandwidth $h$.
+where $K_h(u) = K(u/h)$ is a kernel with bandwidth $h$.
 
 ```python
 from fdars.smoothing import nadaraya_watson
 
-y_hat = nadaraya_watson(x, y, x, bandwidth=0.05, kernel="gaussian")
+y = fd_noisy.data[0]
+y_nw = nadaraya_watson(age, y, age, bandwidth=1.5, kernel="gaussian")
 ```
 
-### Available Kernels
+The first three arguments are the observed grid `x`, the observed values `y`,
+and the evaluation grid `x_new` (here the same grid); the smoother returns the
+fitted values at `x_new`.
+
+#### Available kernels
 
 | Kernel | `kernel=` | Shape |
 |--------|-----------|-------|
@@ -69,347 +132,517 @@ y_hat = nadaraya_watson(x, y, x, bandwidth=0.05, kernel="gaussian")
 | Tricube | `"tricube"` | $K(u) = \frac{70}{81}(1 - |u|^3)^3_+$ |
 
 ```python
-y_gauss = nadaraya_watson(x, y, x, bandwidth=0.05, kernel="gaussian")
-y_epan  = nadaraya_watson(x, y, x, bandwidth=0.05, kernel="epanechnikov")
-y_tri   = nadaraya_watson(x, y, x, bandwidth=0.05, kernel="tricube")
+y_gauss = nadaraya_watson(age, y, age, bandwidth=1.5, kernel="gaussian")
+y_epan  = nadaraya_watson(age, y, age, bandwidth=1.5, kernel="epanechnikov")
+y_tri   = nadaraya_watson(age, y, age, bandwidth=1.5, kernel="tricube")
 ```
 
 !!! tip "Kernel choice"
-    In practice, the bandwidth matters far more than the kernel shape. The
-    Gaussian kernel is a safe default. Epanechnikov is theoretically optimal in
-    terms of MSE efficiency.
+    In practice, the bandwidth matters far more than the kernel shape. Gaussian
+    is a safe default; Epanechnikov is theoretically MSE-optimal.
 
-The Nadaraya-Watson smoother recovers the underlying signal by averaging away the
-noise. The bandwidth $h$ trades bias against variance -- too small and the fit
-chases the noise, too large and it flattens real features:
+### Local linear regression
 
-```python exec="1" html="1"
+The Nadaraya-Watson estimator can suffer from **boundary bias**: near the edges
+of the domain, the neighborhood is one-sided, so a flat local average is pulled
+toward the interior. **Local linear regression** fits a weighted least-squares
+*line* at each evaluation point, which automatically corrects this:
+
+$$
+\hat{m}(t) = \hat\beta_0(t), \qquad
+(\hat\beta_0, \hat\beta_1) = \arg\min_{\beta_0,\beta_1}
+\sum_{i=1}^n K_h(t - x_i)\bigl(y_i - \beta_0 - \beta_1 (x_i - t)\bigr)^2 .
+$$
+
+```python
+from fdars.smoothing import local_linear
+
+y_ll = local_linear(age, y, age, bandwidth=1.5, kernel="gaussian")
+```
+
+The interface is identical to `nadaraya_watson`. The comparison below overlays
+both kernel fits on one noisy growth curve against the clean original -- notice
+how local linear tracks the growth spurt and the endpoints a little better:
+
+```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
-from fdars.simulation import simulate
-from fdars.smoothing import nadaraya_watson
+from docs_data import load_growth
+from fdars.smoothing import nadaraya_watson, local_linear
 
-t = np.linspace(0, 1, 200)
-clean = np.asarray(simulate(n=1, argvals=t, n_basis=5, seed=42))[0]
-y = clean + np.random.default_rng(0).normal(0, 0.3, size=t.shape)
+age, X, meta = load_growth()
+girls = X[(meta["sex"] == "female").values]
+noisy = girls + np.random.default_rng(0).normal(0, 2.0, size=girls.shape)
+
+idx, h = 0, 1.5
+y = noisy[idx]
+nw = np.asarray(nadaraya_watson(age, y, age, bandwidth=h))
+ll = np.asarray(local_linear(age, y, age, bandwidth=h))
 
 f, ax = fig()
-ax.scatter(t, y, s=9, color="#6c757d", alpha=0.5, label="noisy data")
-ax.plot(t, clean, color="#198754", lw=2.2, label="true signal")
-for h, col in [(0.01, "#dc3545"), (0.05, "#3f51b5")]:
-    yh = np.asarray(nadaraya_watson(t, y, t, bandwidth=h, kernel="gaussian"))
-    ax.plot(t, yh, color=col, lw=2.0, label=f"NW (h={h})")
-ax.set(title="Nadaraya-Watson smoothing of a noisy curve",
-       xlabel="t", ylabel="y")
+ax.scatter(age, y, s=16, color="#6c757d", alpha=0.7, label="noisy data")
+ax.plot(age, nw, color="#3f51b5", lw=2.0, label="Nadaraya-Watson")
+ax.plot(age, ll, color="#198754", lw=2.0, label="local linear")
+ax.plot(age, girls[idx], color="#dc3545", lw=1.8, ls="--", label="original")
+ax.set(title="Kernel smoother comparison (h = 1.5)",
+       xlabel="Age (years)", ylabel="Height (cm)")
+ax.legend()
+print(render(f))
+```
+
+### Local polynomial regression
+
+Local linear is the degree-1 case of **local polynomial** regression. Degree 0
+recovers Nadaraya-Watson; higher degrees add flexibility and are useful for
+estimating derivatives:
+
+```python
+from fdars.smoothing import local_polynomial
+
+y_d0 = local_polynomial(age, y, age, bandwidth=1.5, degree=0)  # = Nadaraya-Watson
+y_d1 = local_polynomial(age, y, age, bandwidth=1.5, degree=1)  # = local linear
+y_d2 = local_polynomial(age, y, age, bandwidth=1.5, degree=2)  # local quadratic
+y_d3 = local_polynomial(age, y, age, bandwidth=1.5, degree=3)  # local cubic
+```
+
+!!! warning "Higher degrees need wider bandwidths"
+    Increasing `degree` amplifies noise. Compensate with a larger bandwidth or
+    select one by cross-validation.
+
+### Applying a smoother matrix to a whole sample
+
+Because the kernel weights depend only on the grid and the bandwidth -- not on
+the $y$ values -- the Nadaraya-Watson smoother is a **linear operator**: a fixed
+matrix $S$ with $\hat{\mathbf y} = S\,\mathbf y$. `smoothing_matrix_nw` builds
+that matrix once so you can smooth every curve in a sample with a single
+matrix multiply:
+
+```python
+from fdars.smoothing import smoothing_matrix_nw
+
+S = np.asarray(smoothing_matrix_nw(age, bandwidth=1.5))   # (31, 31)
+fd_kernel = Fdata(fd_noisy.data @ S.T, argvals=age)        # smooth all 54 curves
+```
+
+This is exactly the workflow the R package exposes as `S.NW(tt, h)` followed by
+`S %*% curve`.
+
+---
+
+## Bandwidth Selection via Cross-Validation
+
+Choosing $h$ is the most important decision in kernel smoothing. Rather than
+guess, `optim_bandwidth` searches a grid and minimizes either leave-one-out
+cross-validation (CV) or generalized cross-validation (GCV).
+
+### Generalized cross-validation (default)
+
+```python
+from fdars.smoothing import optim_bandwidth
+
+result = optim_bandwidth(age, y, criterion="gcv", kernel="gaussian")
+print(f"Optimal bandwidth: {result['h_opt']:.4f}")
+print(f"GCV score:         {result['value']:.6f}")
+
+y_opt = nadaraya_watson(age, y, age, bandwidth=result["h_opt"])
+```
+
+`optim_bandwidth` returns a dict with `h_opt` (the selected bandwidth),
+`criterion`, and `value` (the criterion at the optimum).
+
+### Leave-one-out cross-validation
+
+```python
+result_cv = optim_bandwidth(age, y, criterion="cv", kernel="gaussian")
+print(f"Optimal bandwidth (CV): {result_cv['h_opt']:.4f}")
+```
+
+### Controlling the search grid
+
+```python
+result_fine = optim_bandwidth(
+    age, y,
+    criterion="gcv", kernel="gaussian",
+    n_grid=100,   # finer grid
+    h_min=0.5,    # lower bound (data on a 1-18 year scale)
+    h_max=5.0,    # upper bound
+)
+```
+
+If you only need the score at a *given* bandwidth (e.g. to draw the CV curve
+yourself), `gcv_smoother` and `cv_smoother` return that scalar directly:
+
+```python
+from fdars.smoothing import gcv_smoother, cv_smoother
+
+score_gcv = gcv_smoother(age, y, bandwidth=1.5)
+score_cv  = cv_smoother(age, y, bandwidth=1.5)
+```
+
+!!! info "GCV vs CV"
+    GCV is an algebraic approximation to leave-one-out CV that avoids refitting
+    the model $n$ times. It is faster and usually gives similar results.
+
+The figure below plots the GCV curve over a grid of bandwidths and marks the
+minimum -- the classic U-shape of the bias-variance trade-off:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_growth
+from fdars.smoothing import gcv_smoother, optim_bandwidth
+
+age, X, meta = load_growth()
+girls = X[(meta["sex"] == "female").values]
+noisy = girls + np.random.default_rng(0).normal(0, 2.0, size=girls.shape)
+y = noisy[0]
+
+hs = np.linspace(0.4, 5.0, 40)
+scores = np.array([gcv_smoother(age, y, bandwidth=h) for h in hs])
+opt = optim_bandwidth(age, y, criterion="gcv", h_min=0.4, h_max=5.0, n_grid=80)
+
+f, ax = fig()
+ax.plot(hs, scores, color="#3f51b5", lw=2.0)
+ax.axvline(opt["h_opt"], color="#dc3545", ls="--",
+           label=f"h_opt = {opt['h_opt']:.2f}")
+ax.set(title="GCV as a function of bandwidth",
+       xlabel="bandwidth h", ylabel="GCV score")
 ax.legend()
 print(render(f))
 ```
 
 ---
 
-## Local Linear Regression
+## k-Nearest-Neighbors Smoother
 
-The Nadaraya-Watson estimator can suffer from boundary bias. **Local linear
-regression** fits a weighted least-squares line at each point, which
-automatically corrects for boundary effects.
-
-```python
-from fdars.smoothing import local_linear
-
-y_ll = local_linear(x, y, x, bandwidth=0.05, kernel="gaussian")
-```
-
-The interface is identical to `nadaraya_watson` -- same kernel options, same
-bandwidth parameter.
-
-!!! info "When to prefer local linear"
-    If your data has curvature near the domain boundaries (e.g., $t = 0$ or
-    $t = 1$), local linear will usually give better fits than Nadaraya-Watson.
-
----
-
-## Local Polynomial Regression
-
-Generalize local linear to higher polynomial degrees:
-
-```python
-from fdars.smoothing import local_polynomial
-
-# Degree 0 = Nadaraya-Watson
-y_d0 = local_polynomial(x, y, x, bandwidth=0.05, degree=0)
-
-# Degree 1 = local linear
-y_d1 = local_polynomial(x, y, x, bandwidth=0.05, degree=1)
-
-# Degree 2 = local quadratic (useful for estimating derivatives)
-y_d2 = local_polynomial(x, y, x, bandwidth=0.05, degree=2)
-
-# Degree 3 = local cubic
-y_d3 = local_polynomial(x, y, x, bandwidth=0.05, degree=3)
-```
-
-!!! warning "Higher degrees need wider bandwidths"
-    Increasing `degree` adds flexibility, which can amplify noise. Compensate by
-    using a slightly larger bandwidth or selecting it via cross-validation.
-
----
-
-## k-Nearest Neighbors Smoother
-
-Instead of a global bandwidth, the k-NN smoother adapts locally by averaging the
-`k` nearest observations to each evaluation point:
+Instead of a fixed bandwidth in the units of $t$, the k-NN smoother averages the
+`k` observations nearest each evaluation point. The effective bandwidth then
+*adapts* to the local density -- growing where data is sparse and shrinking
+where it is dense, which suits the unequal age spacing of the growth data:
 
 ```python
 from fdars.smoothing import knn_smoother
 
-y_knn = knn_smoother(x, y, x, k=15)
+y_knn = knn_smoother(age, y, age, k=7)
 ```
-
-The effective bandwidth grows in sparse regions and shrinks in dense regions.
 
 !!! tip "Choosing k"
-    Typical values are $k \in [5, 30]$ for $n \approx 200$. Larger `k` produces
-    smoother curves; smaller `k` follows local features more closely.
+    Larger `k` produces smoother curves; smaller `k` follows local features more
+    closely. With only 31 points here, `k` in the single digits is reasonable.
+
+`knn_gcv` picks `k` for you by generalized cross-validation, returning the
+optimal `k` and the CV error for every candidate:
+
+```python
+from fdars.smoothing import knn_gcv
+
+sel = knn_gcv(age, y, max_k=20)
+print(f"Optimal k: {sel['optimal_k']}")   # dict with 'optimal_k', 'cv_errors'
+```
 
 ---
 
-## Bandwidth Selection via Cross-Validation
+## Basis Expansion
 
-Choosing the bandwidth $h$ is the most important decision in kernel smoothing.
-fdars automates this with `optim_bandwidth`, which searches over a grid and
-minimizes either cross-validation (CV) or generalized cross-validation (GCV).
-
-### Generalized Cross-Validation (default)
-
-```python
-from fdars.smoothing import optim_bandwidth
-
-result = optim_bandwidth(x, y, criterion="gcv", kernel="gaussian")
-print(f"Optimal bandwidth: {result['h_opt']:.4f}")
-print(f"GCV score:         {result['value']:.6f}")
-
-# Now smooth with the optimal bandwidth
-y_opt = nadaraya_watson(x, y, x, bandwidth=result["h_opt"])
-```
-
-### Leave-One-Out Cross-Validation
+A basis expansion represents each curve as a linear combination of $K$ smooth
+basis functions, $x(t) \approx \sum_{k=1}^K c_k \phi_k(t)$. Choosing $K$ smaller
+than the number of sampling points achieves smoothing *and* dimensionality
+reduction in one step -- projecting the noisy data onto a lower-dimensional
+smooth subspace.
 
 ```python
-result_cv = optim_bandwidth(x, y, criterion="cv", kernel="gaussian")
-print(f"Optimal bandwidth (CV): {result_cv['h_opt']:.4f}")
-```
+from fdars.basis import fdata_to_basis_1d, basis_to_fdata_1d
 
-### Controlling the Search Grid
-
-```python
-result_fine = optim_bandwidth(
-    x, y,
-    criterion="gcv",
-    kernel="gaussian",
-    n_grid=100,       # finer search grid
-    h_min=0.01,       # lower bound
-    h_max=0.5,        # upper bound
+coefs = fdata_to_basis_1d(fd_noisy.data, age, n_basis=12, basis_type="bspline")
+fd_basis = Fdata(
+    basis_to_fdata_1d(coefs, age, n_basis=12, basis_type="bspline"),
+    argvals=age,
 )
 ```
 
-!!! info "GCV vs CV"
-    GCV is an algebraic approximation to leave-one-out CV that avoids
-    refitting the model $n$ times. It is faster and usually gives similar
-    results.
+### Automatic basis selection
 
----
-
-## Basis Smoothing
-
-An alternative to kernel methods is to represent each curve as a linear
-combination of smooth basis functions and add a roughness penalty to prevent
-overfitting. This is often called **penalized regression splines** or
-**P-spline** smoothing.
-
-### Smooth Basis with GCV
-
-`smooth_basis_gcv` fits a basis expansion and automatically selects the
-smoothing penalty $\lambda$ by GCV:
+`basis_nbasis_cv` chooses $K$ by cross-validation over a range of candidates
+(mirroring R's `fdata2basis_cv`), supporting GCV (default), CV, AIC, and BIC:
 
 ```python
-from fdars.basis import smooth_basis_gcv
+from fdars.basis import basis_nbasis_cv
 
-# Smooth all curves in a dataset at once
-result = smooth_basis_gcv(
-    fd_noisy.data,       # (n_obs, n_points) array
-    fd_noisy.argvals,
-    n_basis=20,          # number of B-spline basis functions
-    basis_type="bspline",
-    lfd_order=2,         # penalize second derivative (curvature)
+cv_basis = basis_nbasis_cv(
+    fd_noisy.data, age,
+    nbasis_min=5, nbasis_max=20,
+    basis_type="bspline", criterion="gcv",
 )
-
-fitted = result["fitted"]        # (n_obs, n_points) smoothed curves
-coeffs = result["coefficients"]  # (n_obs, n_basis) basis coefficients
-fd_fitted = Fdata(fitted, argvals=fd_noisy.argvals)
-print(f"Effective df: {result['edf']:.2f}")
-print(f"GCV score:    {result['gcv']:.6f}")
+print(f"Optimal nbasis: {cv_basis['optimal_nbasis']}")
+# keys: 'optimal_nbasis', 'scores', 'nbasis_range', 'criterion'
 ```
 
 !!! tip "Choosing `n_basis`"
-    For B-splines, a rule of thumb is `n_basis ~ n_points / 5` to `n_points / 4`.
-    The penalty $\lambda$ will prevent overfitting even with many basis functions.
+    A rule of thumb for B-splines is `n_basis ~ n_points / 5` to `n_points / 4`.
+    A roughness penalty (next section) prevents overfitting even with many basis
+    functions, so you rarely need to tune $K$ precisely once you penalize.
 
-### Fourier Basis
+---
 
-For periodic data, use a Fourier basis:
+## Penalized Basis (P-spline) Smoothing
 
-```python
-result_fourier = smooth_basis_gcv(
-    fd_noisy.data, fd_noisy.argvals,
-    n_basis=15,
-    basis_type="fourier",
-    lfd_order=2,
-)
-fd_fourier = Fdata(result_fourier["fitted"], argvals=fd_noisy.argvals)
-```
+Penalized-basis smoothing uses *many* basis functions but adds a **roughness
+penalty** so the fit cannot overfit. It minimizes
 
-### P-Spline Fit with Known Penalty
+$$
+\lVert \mathbf y - \Phi \mathbf c \rVert^2 + \lambda\, \mathbf c^\top D^\top D\, \mathbf c ,
+$$
 
-If you already know a good $\lambda$, skip the GCV search:
+where $\Phi$ holds the basis functions evaluated on the grid, $D$ is a
+difference matrix of a chosen `order` (2 penalizes curvature), and $\lambda$
+tunes the fit-vs-smoothness balance. This is the P-spline of Eilers & Marx.
+
+### Fixed penalty with `pspline_fit_1d`
+
+When you already know a good $\lambda$, fit directly:
 
 ```python
 from fdars.basis import pspline_fit_1d
 
 result_ps = pspline_fit_1d(
-    fd_noisy.data, fd_noisy.argvals,
-    n_basis=20,
-    lambda_=0.01,       # fixed smoothing parameter
-    order=2,            # second-order difference penalty
+    fd_noisy.data, age,
+    n_basis=25, lambda_=1.0, order=2,
 )
-
+print(f"EDF: {result_ps['edf']:.2f}")
 print(f"RSS: {result_ps['rss']:.4f}")
-print(f"AIC: {result_ps['aic']:.2f}")
-print(f"BIC: {result_ps['bic']:.2f}")
+print(f"AIC: {result_ps['aic']:.2f}   BIC: {result_ps['bic']:.2f}")
 ```
 
-### P-Spline Fit with GCV-Selected Penalty
+The **effective degrees of freedom** (EDF) quantify how much the penalty has
+shrunk the 25 basis functions -- a small EDF means heavy smoothing.
+
+### Automatic penalty via GCV
+
+Selecting $\lambda$ automatically is the recommended default. GCV chooses it by
+minimizing
+
+$$
+\mathrm{GCV}(\lambda) = \frac{\mathrm{RSS}/n}{(1 - \mathrm{edf}/n)^2}.
+$$
+
+Two functions do this. `pspline_fit_gcv` returns fitted curves plus EDF and
+information criteria:
 
 ```python
 from fdars.basis import pspline_fit_gcv
 
-result_auto = pspline_fit_gcv(fd_noisy.data, fd_noisy.argvals, n_basis=20, order=2)
-print(f"Selected lambda -> GCV = {result_auto['gcv']:.6f}")
-print(f"Effective df: {result_auto['edf']:.2f}")
+result_auto = pspline_fit_gcv(fd_noisy.data, age, n_basis=25, order=2)
+print(f"EDF: {result_auto['edf']:.2f}")
+print(f"GCV: {result_auto['gcv']:.6f}")
+print(f"AIC: {result_auto['aic']:.2f}   BIC: {result_auto['bic']:.2f}")
 ```
 
----
+!!! note "Selected $\lambda$ not returned"
+    `pspline_fit_gcv` reports the fit quality (EDF, GCV, AIC, BIC) but does not
+    currently expose the chosen $\lambda$ itself. If you need the value, search
+    a grid yourself with `pspline_fit_1d` and pick the minimum-GCV fit.
 
-## Comparing Smoothers
-
-Here is a complete example comparing several smoothing methods on the same
-noisy signal:
+`smooth_basis_gcv` is the higher-level entry point (R's `smooth.basis.gcv`),
+supporting B-spline and Fourier bases and returning coefficients too:
 
 ```python
-import numpy as np
-from fdars import Fdata
-from fdars.simulation import simulate
-from fdars.smoothing import nadaraya_watson, local_linear, knn_smoother, optim_bandwidth
 from fdars.basis import smooth_basis_gcv
 
-# Generate data
-argvals = np.linspace(0, 1, 200)
-clean = simulate(n=1, argvals=argvals, n_basis=5, seed=42)
-fd_clean = Fdata(clean, argvals=argvals)
-
-rng = np.random.default_rng(7)
-fd_noisy = fd_clean + rng.normal(0, 0.25, size=clean.shape)
-x, y, y_true = fd_noisy.argvals, fd_noisy.data[0], fd_clean.data[0]
-
-# 1. Nadaraya-Watson with GCV bandwidth
-bw = optim_bandwidth(x, y)
-y_nw = nadaraya_watson(x, y, x, bandwidth=bw["h_opt"])
-
-# 2. Local linear with the same bandwidth
-y_ll = local_linear(x, y, x, bandwidth=bw["h_opt"])
-
-# 3. k-NN smoother
-y_knn = knn_smoother(x, y, x, k=20)
-
-# 4. B-spline smoothing
-result_bs = smooth_basis_gcv(fd_noisy.data, fd_noisy.argvals, n_basis=25)
-y_bs = result_bs["fitted"][0]
-
-# Compare MSEs
-for name, y_hat in [("NW", y_nw), ("LocLin", y_ll), ("k-NN", y_knn), ("B-spline", y_bs)]:
-    mse = np.mean((y_hat - y_true) ** 2)
-    print(f"{name:8s}  MSE = {mse:.6f}")
+result_gcv = smooth_basis_gcv(
+    fd_noisy.data, age,
+    n_basis=25, basis_type="bspline", lfd_order=2,
+)
+fitted = result_gcv["fitted"]          # (54, 31) smoothed curves
+coeffs = result_gcv["coefficients"]    # (54, 25) basis coefficients
+print(f"EDF: {result_gcv['edf']:.2f}   GCV: {result_gcv['gcv']:.6f}")
 ```
 
-All four smoothers track the underlying signal closely, differing mostly in how
-they behave near the boundaries and in noisy regions:
+On these girls' growth curves GCV settles on roughly 8 effective degrees of
+freedom with a GCV score near 5.7 -- closely matching the R reference
+implementation.
 
-```python exec="1" html="1"
+### The effect of the penalty $\lambda$
+
+Sweeping $\lambda$ makes the bias-variance trade-off visible. A tiny $\lambda$
+under-smooths (tracks noise); a huge $\lambda$ over-smooths (loses the growth
+spurt); the GCV-selected value sits in between:
+
+```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
-from fdars import Fdata
-from fdars.simulation import simulate
-from fdars.smoothing import nadaraya_watson, local_linear, knn_smoother, optim_bandwidth
+from docs_data import load_growth
+from fdars.basis import pspline_fit_1d, pspline_fit_gcv
+
+age, X, meta = load_growth()
+girls = X[(meta["sex"] == "female").values]
+noisy = girls + np.random.default_rng(0).normal(0, 2.0, size=girls.shape)
+idx = 0
+
+fits = [
+    ("lambda = 0.001", np.asarray(pspline_fit_1d(noisy, age, 20, 1e-3, 2)["fitted"])[idx]),
+    ("Optimal (GCV)",  np.asarray(pspline_fit_gcv(noisy, age, 20, 2)["fitted"])[idx]),
+    ("lambda = 1e5",   np.asarray(pspline_fit_1d(noisy, age, 20, 1e5, 2)["fitted"])[idx]),
+]
+
+f, axes = fig(1, 3, figsize=(10.5, 3.6), sharey=True)
+for ax, (title, fit) in zip(axes, fits):
+    ax.scatter(age, noisy[idx], s=12, color="#6c757d", alpha=0.6)
+    ax.plot(age, fit, color="#3f51b5", lw=2.0)
+    ax.set(title=title, xlabel="Age (years)")
+axes[0].set_ylabel("Height (cm)")
+print(render(f))
+```
+
+### Fourier basis for periodic data
+
+For periodic or seasonal data, a Fourier basis is more natural and parsimonious
+than B-splines. Here we build ten synthetic periodic curves and smooth them with
+`smooth_basis_gcv(..., basis_type="fourier")`:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
 from fdars.basis import smooth_basis_gcv
 
-t = np.linspace(0, 1, 200)
-clean = np.asarray(simulate(n=1, argvals=t, n_basis=5, seed=42))
-fd_clean = Fdata(clean, argvals=t)
-fd_noisy = fd_clean + np.random.default_rng(7).normal(0, 0.25, size=clean.shape)
-x, y, y_true = fd_noisy.argvals, np.asarray(fd_noisy.data)[0], np.asarray(fd_clean.data)[0]
+rng = np.random.default_rng(1)
+t = np.linspace(0, 1, 31)
+clean = np.sin(2 * np.pi * t) + 0.3 * np.cos(4 * np.pi * t)
+periodic = clean + rng.normal(0, 0.25, size=(10, t.size))
 
-bw = optim_bandwidth(x, y)
-curves = {
-    "Nadaraya-Watson": np.asarray(nadaraya_watson(x, y, x, bandwidth=bw["h_opt"])),
-    "Local linear": np.asarray(local_linear(x, y, x, bandwidth=bw["h_opt"])),
-    "k-NN": np.asarray(knn_smoother(x, y, x, k=20)),
-    "B-spline": np.asarray(smooth_basis_gcv(fd_noisy.data, x, n_basis=25)["fitted"])[0],
-}
+res = smooth_basis_gcv(periodic, t, n_basis=13, basis_type="fourier")
+fitted = np.asarray(res["fitted"])
 
 f, ax = fig()
-ax.scatter(x, y, s=8, color="#6c757d", alpha=0.4, label="noisy data")
-ax.plot(x, y_true, color="#000000", lw=2.4, alpha=0.55, label="true signal")
-for name, yh in curves.items():
-    ax.plot(x, yh, lw=1.8, label=name)
-ax.set(title="Four smoothers on the same noisy curve", xlabel="t", ylabel="y")
-ax.legend(ncol=2)
+ax.scatter(np.tile(t, 3), periodic[:3].ravel(), s=12, color="#6c757d",
+           alpha=0.5, label="noisy data")
+ax.plot(t, clean, color="#dc3545", lw=1.8, ls="--", label="true signal")
+for i in range(3):
+    ax.plot(t, fitted[i], lw=1.8)
+ax.set(title=f"Fourier smoothing (GCV = {res['gcv']:.4f})", xlabel="t", ylabel="y")
+ax.legend()
 print(render(f))
 ```
 
 ---
 
-## Smoothing Multivariate Functional Data
+## Comparing All Methods
 
-All basis smoothers accept a full `(n_obs, n_points)` matrix and smooth every
-curve simultaneously:
+Bringing the families together on the same noisy growth curve shows that,
+appropriately tuned, they largely agree in the interior and differ mainly at the
+boundaries and in noisy stretches:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_growth
+from fdars.smoothing import local_linear, knn_smoother, optim_bandwidth
+from fdars.basis import smooth_basis_gcv, pspline_fit_gcv
+
+age, X, meta = load_growth()
+girls = X[(meta["sex"] == "female").values]
+noisy = girls + np.random.default_rng(0).normal(0, 2.0, size=girls.shape)
+idx = 2
+y = noisy[idx]
+
+bw = optim_bandwidth(age, y, criterion="gcv")
+curves = {
+    "local linear": np.asarray(local_linear(age, y, age, bandwidth=bw["h_opt"])),
+    "k-NN (k=7)":   np.asarray(knn_smoother(age, y, age, k=7)),
+    "P-spline":     np.asarray(pspline_fit_gcv(noisy, age, 20, 2)["fitted"])[idx],
+    "penalized (GCV)": np.asarray(smooth_basis_gcv(noisy, age, 25)["fitted"])[idx],
+}
+
+f, ax = fig()
+ax.scatter(age, y, s=16, color="#6c757d", alpha=0.6, label="noisy data")
+ax.plot(age, girls[idx], color="#000000", lw=2.2, alpha=0.55, label="original")
+for name, yh in curves.items():
+    ax.plot(age, yh, lw=1.8, label=name)
+ax.set(title="Smoothing method comparison", xlabel="Age (years)",
+       ylabel="Height (cm)")
+ax.legend(ncol=2)
+print(render(f))
+```
+
+We can also quantify agreement with the clean signal via mean squared error:
 
 ```python
-# Simulate and corrupt 50 curves
-data_clean = simulate(n=50, argvals=argvals, n_basis=5, seed=99)
-fd_clean_50 = Fdata(data_clean, argvals=argvals)
-fd_noisy_50 = fd_clean_50 + rng.normal(0, 0.2, size=data_clean.shape)
+import numpy as np
+from fdars.smoothing import nadaraya_watson, local_linear, knn_smoother, optim_bandwidth
+from fdars.basis import smooth_basis_gcv
 
-# Smooth all 50 curves in one call
-result = smooth_basis_gcv(fd_noisy_50.data, fd_noisy_50.argvals, n_basis=20)
-fd_smooth_50 = Fdata(result["fitted"], argvals=fd_noisy_50.argvals)
-print(fd_smooth_50)  # Fdata (1D)  –  50 obs × 200 points  –  range [0.0, 1.0]
+idx = 2
+y, y_true = fd_noisy.data[idx], fd_raw.data[idx]
+bw = optim_bandwidth(age, y)
 
-# Check reconstruction quality
-mse_per_curve = np.mean((fd_smooth_50.data - fd_clean_50.data) ** 2, axis=1)
-print(f"Mean MSE across curves: {mse_per_curve.mean():.6f}")
+fits = {
+    "NW":       nadaraya_watson(age, y, age, bandwidth=bw["h_opt"]),
+    "LocLin":   local_linear(age, y, age, bandwidth=bw["h_opt"]),
+    "k-NN":     knn_smoother(age, y, age, k=7),
+    "P-spline": smooth_basis_gcv(fd_noisy.data, age, n_basis=25)["fitted"][idx],
+}
+for name, y_hat in fits.items():
+    mse = np.mean((np.asarray(y_hat) - y_true) ** 2)
+    print(f"{name:8s}  MSE = {mse:.4f}")
 ```
 
 ---
 
-## Summary
+## Mean and Variability
 
-| Method | Module | Strengths |
-|--------|--------|-----------|
-| Nadaraya-Watson | `fdars.smoothing` | Simple, nonparametric, automatic bandwidth via GCV |
+Once the sample is smoothed, its **mean curve** and **pointwise variability**
+become interpretable. Here we smooth all 54 girls with a penalized basis, then
+draw the mean growth trajectory with a $\pm 2$ SD band:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_growth
+from fdars.basis import pspline_fit_gcv
+
+age, X, meta = load_growth()
+girls = X[(meta["sex"] == "female").values]
+noisy = girls + np.random.default_rng(0).normal(0, 2.0, size=girls.shape)
+
+fitted = np.asarray(pspline_fit_gcv(noisy, age, 20, 2)["fitted"])
+mean_curve = fitted.mean(axis=0)
+sd_curve = fitted.std(axis=0, ddof=1)
+
+f, ax = fig()
+ax.fill_between(age, mean_curve - 2 * sd_curve, mean_curve + 2 * sd_curve,
+                color="#3f51b5", alpha=0.18, label="mean +/- 2 SD")
+ax.plot(age, mean_curve, color="#3f51b5", lw=2.4, label="mean")
+ax.set(title="Mean growth curve with variability band",
+       xlabel="Age (years)", ylabel="Height (cm)")
+ax.legend()
+print(render(f))
+```
+
+Variability is widest through the pubertal growth spurt and narrows in late
+adolescence as the girls approach their adult heights.
+
+---
+
+## Summary: When to Use Each Method
+
+| Method | Module | Best for |
+|--------|--------|----------|
+| Nadaraya-Watson | `fdars.smoothing` | Simple nonparametric averaging; automatic bandwidth via GCV |
 | Local linear | `fdars.smoothing` | Corrects boundary bias |
-| Local polynomial | `fdars.smoothing` | Flexible, can estimate derivatives |
-| k-NN | `fdars.smoothing` | Adapts to local density |
-| B-spline / P-spline | `fdars.basis` | Smooth all curves at once, automatic penalty |
-| Fourier basis | `fdars.basis` | Natural for periodic data |
+| Local polynomial | `fdars.smoothing` | Flexible; can estimate derivatives |
+| k-NN | `fdars.smoothing` | Adapts to local density / irregular sampling |
+| Basis expansion | `fdars.basis` | Dimensionality reduction |
+| P-spline / penalized basis | `fdars.basis` | General purpose, automatic penalty; smooths all curves at once |
+| Fourier basis | `fdars.basis` | Periodic / seasonal data |
+
+**Rules of thumb:**
+
+1. Start with `smooth_basis_gcv` -- automatic $\lambda$ selection via GCV works
+   well in most cases.
+2. Use `pspline_fit_gcv` for fast P-spline smoothing with GCV.
+3. Use basis expansion (`fdata_to_basis_1d`) when dimensionality reduction is
+   the goal.
+4. Use kernel or k-NN smoothers for irregular sampling or adaptive smoothing.
+5. Use a Fourier basis for periodic data.
 
 ---
 
@@ -417,7 +650,17 @@ print(f"Mean MSE across curves: {mse_per_curve.mean():.6f}")
 
 - [Working with Derivatives](derivatives.md) -- smooth first, then
   differentiate.
-- [Basis Representation](../represent/basis-representation.md) -- deeper look
-  at B-spline and Fourier basis expansions.
+- [Basis Representation](../represent/basis-representation.md) -- deeper look at
+  B-spline and Fourier basis expansions.
 - [Simulation Toolbox](simulation.md) -- generate data to test your smoothing
   pipeline.
+
+---
+
+## References
+
+- Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*. Springer.
+- Eilers, P.H.C. and Marx, B.D. (1996). Flexible Smoothing with B-splines and
+  Penalties. *Statistical Science*, 11(2), 89-121.
+- Fan, J. and Gijbels, I. (1996). *Local Polynomial Modelling and Its
+  Applications*. Chapman and Hall.
