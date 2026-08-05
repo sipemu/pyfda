@@ -22,6 +22,40 @@ $$
 
 Equivalence is concluded when $T < \delta - c_\alpha$, where $c_\alpha$ is the $(1-\alpha)$ quantile from the bootstrap.
 
+Visually, equivalence holds when the second group's mean stays inside the $\pm\delta$
+corridor drawn around the first group's mean. The left panel shows two groups that
+remain within the margin; the right panel shows a shifted group that escapes it.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.tolerance import equivalence_test
+
+t = np.linspace(0, 1, 100)
+delta = 1.5
+base = np.asarray(simulate(40, t, n_basis=5, seed=10))
+
+cases = [
+    ("Equivalent", np.asarray(simulate(40, t, n_basis=5, seed=20)) + 0.3),
+    ("Not equivalent", np.asarray(simulate(40, t, n_basis=5, seed=20)) + 5.0),
+]
+
+f, axes = fig(1, 2, figsize=(11.0, 3.8), sharey=True)
+m_a = base.mean(0)
+for ax, (name, other) in zip(axes, cases):
+    m_b = other.mean(0)
+    res = equivalence_test(base, other, delta=delta, nb=500, seed=42)
+    ax.fill_between(t, m_a - delta, m_a + delta, color="#3f51b5", alpha=0.15,
+                    label=f"mean A ± δ ({delta})")
+    ax.plot(t, m_a, color="#3f51b5", lw=2.0, label="mean A")
+    ax.plot(t, m_b, color="#e8710a", lw=2.0, label="mean B")
+    ax.set(title=f"{name}  (T = {res['test_statistic']:.2f})", xlabel="t")
+axes[0].set_ylabel("X(t)")
+axes[0].legend(loc="lower left")
+print(render(f))
+```
+
 ---
 
 ## Usage

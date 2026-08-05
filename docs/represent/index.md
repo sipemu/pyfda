@@ -1,8 +1,13 @@
 # Represent
 
+<div class="fdars-section-hero fdars-sec-represent" markdown>
+<img src="../assets/cards/represent.svg" alt="Represent illustration: a curve decomposed into basis components and coefficients">
+<div class="fdars-section-hero__text" markdown>
 **Decompose, transform, rank, and measure functional data.**
 
 The Represent module brings together the core tools for analyzing functional data beyond simple summary statistics. Whether you need to extract the dominant modes of variation, project curves onto a finite basis, rank observations by their centrality, or quantify how different two functional samples are, this section has you covered.
+</div>
+</div>
 
 <div class="grid cards" markdown>
 

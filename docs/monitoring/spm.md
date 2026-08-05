@@ -20,6 +20,33 @@ Each curve $x_i(t)$ is centered by subtracting the mean $\hat\mu(t)$ and project
 
 Control limits for both are estimated from the Phase I data so that the in-control false-alarm rate is approximately $\alpha$.
 
+The figure below shows a Phase I reference sample (grey) together with a Phase II stream that contains two kinds of injected faults: a set of **amplitude-inflated** curves (which shift the $T^2$ statistic inside the FPC subspace) and a set of **oscillatory** curves carrying high-frequency structure the model cannot reconstruct (which inflates the SPE residual).
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+
+argvals = np.linspace(0, 1, 80)
+ic  = np.asarray(simulate(120, argvals, n_basis=6, seed=7))       # Phase I baseline
+ok  = np.asarray(simulate(24,  argvals, n_basis=6, seed=21))      # in-control Phase II
+amp = np.asarray(simulate(3,   argvals, n_basis=6, seed=33)) * 3.0            # amplitude fault
+osc = np.asarray(simulate(3,   argvals, n_basis=6, seed=41)) + 3.5 * np.sin(15 * argvals)  # oscillatory fault
+
+f, ax = fig()
+ax.plot(argvals, ic.T, color="#6c757d", lw=0.6, alpha=0.35)
+ax.plot(argvals, ok.T, color="#3f51b5", lw=0.8, alpha=0.55)
+ax.plot(argvals, amp.T, color="#e8710a", lw=1.6, label="amplitude fault")
+ax.plot(argvals, osc.T, color="#dc3545", lw=1.6, label="oscillatory fault")
+# de-duplicate legend labels
+h, l = ax.get_legend_handles_labels()
+seen = dict(zip(l, h))
+ax.legend(seen.values(), seen.keys(), loc="upper right")
+ax.set(title="Phase I baseline (grey) and Phase II stream with injected faults",
+       xlabel="t", ylabel="x(t)")
+print(render(f))
+```
+
 ---
 
 ## Phase I -- estimating the baseline
@@ -177,6 +204,56 @@ try:
     plt.show()
 except ImportError:
     pass
+```
+
+### Control charts
+
+Running the workflow above on the two-fault Phase II stream produces the pair of control charts below. Each point is one observation; points below the upper control limit (dashed) are in-control (indigo), those above are flagged (red). The $T^2$ chart catches the amplitude faults, while the SPE chart catches the oscillatory faults the FPC subspace cannot reconstruct -- together they cover both failure modes.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render, plt
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.spm import spm_phase1, spm_monitor
+
+argvals = np.linspace(0, 1, 80)
+
+# Phase I baseline
+fd_ic = Fdata(simulate(120, argvals, n_basis=6, seed=7), argvals=argvals)
+p1 = spm_phase1(fd_ic.data, fd_ic.argvals, ncomp=4, alpha=0.01)
+
+# Phase II: 24 in-control + 3 amplitude + 3 oscillatory faults
+ok  = np.asarray(simulate(24, argvals, n_basis=6, seed=21))
+amp = np.asarray(simulate(3,  argvals, n_basis=6, seed=33)) * 3.0
+osc = np.asarray(simulate(3,  argvals, n_basis=6, seed=41)) + 3.5 * np.sin(15 * argvals)
+fd_new = Fdata(np.vstack([ok, amp, osc]), argvals=argvals)
+
+p2 = spm_monitor(
+    mean=p1["mean"], loadings=p1["loadings"], weights=p1["weights"],
+    eigenvalues=p1["eigenvalues"], t2_limit=p1["t2_limit"],
+    spe_limit=p1["spe_limit"], new_data=fd_new.data, argvals=fd_new.argvals,
+)
+
+obs = np.arange(1, len(fd_new) + 1)
+t2, spe = np.asarray(p2["t2"]), np.asarray(p2["spe"])
+t2_alarm, spe_alarm = np.asarray(p2["t2_alarm"]), np.asarray(p2["spe_alarm"])
+
+f, (ax1, ax2) = plt.subplots(2, 1, figsize=(7.5, 5.2), sharex=True)
+for ax, stat, alarm, lim, name in [
+    (ax1, t2,  t2_alarm,  p1["t2_limit"],  "Hotelling $T^2$"),
+    (ax2, spe, spe_alarm, p1["spe_limit"], "SPE (Q)"),
+]:
+    ax.vlines(obs, 0, stat, color="#c7cbe0", lw=1)
+    ax.scatter(obs[~alarm], stat[~alarm], s=22, color="#3f51b5", zorder=3, label="in-control")
+    ax.scatter(obs[alarm],  stat[alarm],  s=34, color="#dc3545", zorder=3, label="out-of-control")
+    ax.axhline(lim, color="#e8710a", ls="--", lw=1.3, label="control limit")
+    ax.set_ylabel(name)
+    ax.set_ylim(bottom=0)
+ax1.legend(loc="upper left", ncol=3)
+ax2.set_xlabel("observation index")
+f.suptitle("FPCA-based control charts (Phase II)", y=0.98)
+print(render(f))
 ```
 
 !!! info "Performance note"

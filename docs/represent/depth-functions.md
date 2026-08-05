@@ -2,6 +2,29 @@
 
 Depth functions generalize the notion of quantiles and ranks to functional data. A depth measure assigns each curve a real number indicating how "central" it is relative to a reference sample. The deepest curve is the **functional median** -- a robust location estimator. Curves with low depth are potential outliers.
 
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.depth import modified_band_1d
+
+t = np.linspace(0, 1, 120)
+X = np.asarray(simulate(n=30, argvals=t, n_basis=6, efun_type="fourier", seed=1))
+depth = np.asarray(modified_band_1d(X, X))        # self-depth of each curve
+order = np.argsort(depth)
+rng = np.ptp(depth) + 1e-9
+
+f, ax = fig()
+for i in order:                                    # faint = shallow, bold = deep
+    ax.plot(t, X[i], color="#3f51b5", lw=1.2,
+            alpha=0.15 + 0.75 * (depth[i] - depth.min()) / rng)
+ax.plot(t, X[order[-1]], color="#e8710a", lw=2.6, label="functional median")
+ax.set(title="30 curves shaded by modified band depth",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
+
 ## Concepts
 
 Given a sample of curves $X_1(t), \ldots, X_n(t)$, a functional depth $D(X_i \mid X_1, \ldots, X_n) \in [0, 1]$ satisfies:

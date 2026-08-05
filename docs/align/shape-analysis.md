@@ -2,6 +2,41 @@
 
 Shape analysis studies the *geometry* of functional data after removing nuisance transformations (translation, scaling, reparameterization). `fdars` provides tools for shape distances, elastic depth measures, and elastic FPCA that decomposes variability into amplitude and phase components.
 
+A sample of curves that share a common *shape* but differ in amplitude and timing (left) collapses onto a single sharp template once the warping is factored out. The elastic **mean shape** -- the Karcher mean under the Fisher-Rao metric (right, orange) -- recovers that template, whereas the naive cross-sectional mean (right, dashed) is flattened by the phase spread.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.alignment import karcher_mean
+
+rng = np.random.default_rng(7)
+n, m = 18, 120
+t = np.linspace(0, 1, m)
+base = np.sin(2 * np.pi * t)          # common underlying shape
+
+data = np.zeros((n, m))
+for i in range(n):
+    amp = 1.0 + 0.25 * rng.standard_normal()                 # amplitude variation
+    warp = np.clip(t + 0.13 * rng.standard_normal() * np.sin(np.pi * t), 0, 1)
+    data[i] = amp * np.interp(t, warp, base)                  # phase variation
+
+fd = Fdata(data, argvals=t)
+km = karcher_mean(fd.data, fd.argvals, lambda_=0.0, max_iter=20, tol=1e-4)
+mean_shape = np.asarray(km["mean"])
+
+f, (a1, a2) = fig(ncols=2, figsize=(9.5, 4.0))
+a1.plot(t, data.T, color="#3f51b5", lw=1, alpha=0.5)
+a1.set(title="Sample of curves (shared shape)", xlabel="t", ylabel="f(t)")
+
+a2.plot(t, data.T, color="#6c757d", lw=0.8, alpha=0.25)
+a2.plot(t, data.mean(0), color="#dc3545", lw=2.0, ls="--", label="cross-sec. mean")
+a2.plot(t, mean_shape, color="#e8710a", lw=2.6, label="elastic mean shape")
+a2.set(title="Mean shape vs. cross-sectional mean", xlabel="t")
+a2.legend(fontsize=8)
+print(render(f))
+```
+
 ---
 
 ## Shape distance (quotient space)
@@ -84,6 +119,40 @@ print(f"Most outlying:  curve {outlier_idx}")
 
 !!! tip "Diagnostic plots"
     Plot amplitude depth vs. phase depth in a scatter plot. Curves far from the cluster center in either dimension are outlying in that specific source of variability.
+
+Shading each curve by its combined elastic depth turns the sample into a visual centre-outward ordering: the deepest curve (the elastic median, orange) sits at the heart of the band, while shallow curves fade toward the edges.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.alignment import elastic_depth
+
+rng = np.random.default_rng(3)
+n, m = 25, 120
+t = np.linspace(0, 1, m)
+base = np.sin(2 * np.pi * t)
+data = np.zeros((n, m))
+for i in range(n):
+    warp = np.clip(t + 0.12 * rng.standard_normal() * np.sin(np.pi * t), 0, 1)
+    data[i] = (1.0 + 0.3 * rng.standard_normal()) * np.interp(t, warp, base)
+
+fd = Fdata(data, argvals=t)
+res = elastic_depth(fd.data, fd.argvals, lambda_=0.0)
+depth = np.asarray(res["combined_depth"])
+order = np.argsort(depth)                          # shallow -> deep
+rng_d = np.ptp(depth) + 1e-9
+
+f, ax = fig()
+for i in order:
+    ax.plot(t, data[i], color="#3f51b5", lw=1.2,
+            alpha=0.15 + 0.75 * (depth[i] - depth.min()) / rng_d)
+ax.plot(t, data[order[-1]], color="#e8710a", lw=2.6, label="elastic median")
+ax.set(title="Curves shaded by combined elastic depth",
+       xlabel="t", ylabel="f(t)")
+ax.legend()
+print(render(f))
+```
 
 ---
 

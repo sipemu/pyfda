@@ -92,6 +92,29 @@ fd_d3 = fd.deriv(nderiv=3)
     derivatives can become meaningless. **Always smooth first** (see the section
     below).
 
+A curve and its first two derivatives tell a layered story: zeros of the first
+derivative mark the extrema of the curve, and zeros of the second derivative mark
+its inflection points.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.simulation import simulate
+
+t = np.linspace(0, 1, 200)
+fd = Fdata(np.asarray(simulate(n=1, argvals=t, n_basis=5, seed=3)), argvals=t)
+x0 = np.asarray(fd.data)[0]
+d1 = np.asarray(fd.deriv().data)[0]
+d2 = np.asarray(fd.deriv(nderiv=2).data)[0]
+
+f, (a1, a2, a3) = fig(3, 1, figsize=(7.5, 6.5), sharex=True)
+a1.plot(t, x0, color="#3f51b5", lw=2); a1.set(ylabel="x(t)", title="A curve and its derivatives")
+a2.plot(t, d1, color="#e8710a", lw=2); a2.axhline(0, color="#6c757d", lw=0.8); a2.set(ylabel="x'(t)")
+a3.plot(t, d2, color="#198754", lw=2); a3.axhline(0, color="#6c757d", lw=0.8); a3.set(ylabel="x''(t)", xlabel="t")
+print(render(f))
+```
+
 ### Comparing Derivative Orders
 
 ```python
@@ -207,6 +230,39 @@ fd_d1_noisy  = fd_noisy.deriv()
 # Compare noise levels
 print(f"Std of d1(noisy):   {fd_d1_noisy.data.std():.2f}")
 print(f"Std of d1(smooth):  {fd_d1_smooth.data.std():.2f}")
+```
+
+Differentiating the raw noisy curve produces a wildly oscillating result;
+smoothing first yields a derivative that reflects the true dynamics:
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.smoothing import nadaraya_watson, optim_bandwidth
+
+t = np.linspace(0, 1, 200)
+clean = np.asarray(simulate(n=1, argvals=t, n_basis=5, seed=42))
+fd_clean = Fdata(clean, argvals=t)
+fd_noisy = fd_clean + np.random.default_rng(0).normal(0, 0.3, size=clean.shape)
+
+y = np.asarray(fd_noisy.data)[0]
+bw = optim_bandwidth(t, y)
+y_sm = np.asarray(nadaraya_watson(t, y, t, bandwidth=bw["h_opt"]))
+fd_sm = Fdata(y_sm[None, :], argvals=t)
+
+d1_noisy = np.asarray(fd_noisy.deriv().data)[0]
+d1_smooth = np.asarray(fd_sm.deriv().data)[0]
+d1_true = np.asarray(fd_clean.deriv().data)[0]
+
+f, ax = fig()
+ax.plot(t, d1_noisy, color="#dc3545", lw=1, alpha=0.7, label="d/dt of raw noisy curve")
+ax.plot(t, d1_smooth, color="#3f51b5", lw=2.2, label="d/dt of smoothed curve")
+ax.plot(t, d1_true, color="#198754", lw=2.0, ls="--", label="true derivative")
+ax.set(title="Smooth before differentiating", xlabel="t", ylabel="x'(t)")
+ax.legend()
+print(render(f))
 ```
 
 ### Basis Smoothing + Derivative

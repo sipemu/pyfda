@@ -36,6 +36,10 @@ theme:
 
 plugins:
   - search
+  - markdown-exec
+
+hooks:
+  - docs/hooks.py
 
 extra_css:
   - stylesheets/extra.css
@@ -72,18 +76,27 @@ nav:
   - Learn:
     - learn/index.md
     - Introduction: learn/introduction.md
+    - Custom Plotting: learn/custom-plotting.md
     - Simulation: learn/simulation.md
     - Smoothing: learn/smoothing.md
     - Derivatives: learn/derivatives.md
+    - Irregular Sampling: learn/irregular-sampling.md
   - Represent:
     - represent/index.md
     - Functional PCA: represent/fpca.md
+    - Elastic FPCA: represent/elastic-fpca.md
     - Basis Representation: represent/basis-representation.md
+    - Andrews Transformation: represent/andrews-transformation.md
     - Depth Functions: represent/depth-functions.md
+    - Streaming Depth: represent/streaming-depth.md
     - Distance Metrics: represent/distance-metrics.md
   - Align:
     - align/index.md
     - Elastic Alignment: align/elastic-alignment.md
+    - Advanced Elastic Alignment: align/advanced-alignment.md
+    - Landmark Registration: align/landmark-registration.md
+    - TSRVF: align/tsrvf.md
+    - Comparing Methods: align/alignment-comparison.md
     - Shape Analysis: align/shape-analysis.md
   - Regression:
     - regression/index.md
@@ -91,20 +104,34 @@ nav:
     - Function-on-Scalar: regression/function-on-scalar.md
     - Classification: regression/classification.md
     - Elastic Regression: regression/elastic-regression.md
+    - Scalar-on-Shape: regression/scalar-on-shape.md
+    - Cross-Validation: regression/cross-validation.md
+    - Regression Diagnostics: regression/regression-diagnostics.md
+    - Uncertainty Quantification: regression/uncertainty-quantification.md
     - Explainability: regression/explainability.md
     - Conformal Prediction: regression/conformal-prediction.md
+    - Conformal Classification: regression/conformal-classification.md
     - Robust Regression: regression/robust-regression.md
   - Monitoring:
     - monitoring/index.md
     - Process Monitoring: monitoring/spm.md
+    - Advanced SPM: monitoring/advanced-spm.md
+    - Profile & Partial-Domain Monitoring: monitoring/profile-partial-monitoring.md
   - Analyze:
     - analyze/index.md
     - Tolerance Bands: analyze/tolerance-bands.md
     - Clustering: analyze/clustering.md
+    - GMM Clustering: analyze/gmm-clustering.md
+    - Elastic Clustering: analyze/elastic-clustering.md
     - Outlier Detection: analyze/outlier-detection.md
     - Seasonal Analysis: analyze/seasonal-analysis.md
     - Equivalence Testing: analyze/equivalence-testing.md
     - Covariance Functions: analyze/covariance-functions.md
+  - Examples:
+    - examples/index.md
+    - Berkeley Growth — Elastic Alignment: examples/growth-alignment.md
+    - Tecator — Scalar-on-Function Regression: examples/tecator-regression.md
+    - Canadian Weather — FPCA & Clustering: examples/canadian-weather.md
   - Reference:
     - reference/index.md
     - fdars.fdata: reference/fdata.md

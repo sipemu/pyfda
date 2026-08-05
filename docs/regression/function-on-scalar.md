@@ -58,6 +58,37 @@ print(f"Beta shape: {beta_hat.shape}")
 !!! tip "Roughness penalty"
     Set `lambda_=0.0` for ordinary least squares at each time point. Set `lambda_` to a positive value for a fixed penalty, or use a negative value (e.g., `lambda_=-1.0`) to trigger automatic GCV-based smoothing parameter selection.
 
+The estimated coefficient functions $\hat\beta_j(t)$ (solid) track the true effects (dashed) closely, one curve per scalar predictor:
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.regression import fosr
+
+np.random.seed(0)
+n, m, p = 40, 81, 3
+t = np.linspace(0, 1, m)
+predictors = np.random.randn(n, p)
+
+beta_true = np.zeros((p, m))
+beta_true[0] = np.sin(2 * np.pi * t)
+beta_true[1] = 0.5 * np.cos(4 * np.pi * t)
+beta_true[2] = t * (1 - t)
+
+Y = predictors @ beta_true + 0.2 * np.random.randn(n, m)
+beta = np.asarray(fosr(Y, predictors, lambda_=-1.0)["beta"])
+
+f, ax = fig()
+colors = ["#3f51b5", "#e8710a", "#198754"]
+for j in range(p):
+    ax.plot(t, beta_true[j], color=colors[j], lw=1.2, ls="--", alpha=0.6)
+    ax.plot(t, beta[j], color=colors[j], lw=2, label=fr"$\hat\beta_{{{j+1}}}(t)$")
+ax.set(title="Estimated coefficient functions (dashed = truth)",
+       xlabel="t", ylabel=r"$\beta_j(t)$")
+ax.legend(ncol=3)
+print(render(f))
+```
+
 ### Interpreting coefficient functions
 
 Each $\hat{\beta}_j(t)$ describes the effect of predictor $j$ on the response at time $t$:

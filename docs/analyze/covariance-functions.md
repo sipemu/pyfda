@@ -46,6 +46,28 @@ print(f"Symmetric: {np.allclose(cov_gauss, cov_gauss.T)}")  # True
 
 **Returns** an `ndarray` of shape `(m, m)`.
 
+The Gaussian and exponential kernels have very different off-diagonal decay, which is
+visible as broader vs. sharper structure around the diagonal of the covariance surface.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import covariance_matrix
+
+t = np.linspace(0, 1, 100)
+kernels = ["gaussian", "exponential"]
+
+f, axes = fig(1, 2, figsize=(9.5, 4.0))
+for ax, kern in zip(axes, kernels):
+    cov = np.asarray(covariance_matrix(t, kernel=kern, length_scale=0.15, variance=1.0))
+    im = ax.imshow(cov, origin="lower", extent=(0, 1, 0, 1),
+                   cmap="viridis", aspect="equal")
+    ax.grid(False)
+    ax.set(title=f"{kern.title()} kernel  C(s, t)", xlabel="s", ylabel="t")
+    f.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+print(render(f))
+```
+
 !!! tip "Effect of length scale"
     A small $\ell$ produces rapidly varying (wiggly) functions; a large $\ell$ produces smooth, slowly varying functions. Try values from 0.05 to 0.5 on $[0,1]$ to build intuition.
 
@@ -90,6 +112,29 @@ fd_per = Fdata(gaussian_process(50, argvals, kernel="periodic", length_scale=0.1
 ---
 
 ## Comparing kernel shapes
+
+Sample paths reveal each kernel's character: the Gaussian kernel gives infinitely
+smooth curves, the exponential kernel rough (non-differentiable) ones, the Matern kernel
+sits in between, and the periodic kernel produces repeating structure.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import gaussian_process
+
+t = np.linspace(0, 1, 200)
+kernels = ["gaussian", "exponential", "matern", "periodic"]
+
+f, axes = fig(2, 2, figsize=(9.5, 5.6), sharex=True)
+for ax, kern in zip(axes.ravel(), kernels):
+    paths = np.asarray(gaussian_process(6, t, kernel=kern,
+                                        length_scale=0.15, seed=42))
+    ax.plot(t, paths.T, lw=1.0, alpha=0.85)
+    ax.set_title(f"{kern.title()} kernel")
+for ax in axes[-1]:
+    ax.set_xlabel("t")
+print(render(f))
+```
 
 The following script visualizes the covariance structure and sample paths for each kernel side by side.
 

@@ -1,8 +1,13 @@
 # Regression
 
+<div class="fdars-section-hero fdars-sec-regression" markdown>
+<img src="../assets/cards/regression.svg" alt="Regression illustration: scattered observations with a fitted functional coefficient and prediction band">
+<div class="fdars-section-hero__text" markdown>
 **Predict, classify, and explain with functional predictors and responses.**
 
 The Regression module covers the full spectrum of supervised learning with functional data -- from classical scalar-on-function models to elastic regression, classification, conformal prediction, and model explainability.
+</div>
+</div>
 
 <div class="grid cards" markdown>
 

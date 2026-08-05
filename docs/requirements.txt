@@ -1,0 +1,9 @@
+# Dependencies for building the documentation site.
+# The docs execute live `fdars` code at build time (markdown-exec) to generate
+# figures, so the compiled `fdars` package must also be installed separately
+# (via `maturin develop` / a built wheel) before running `mkdocs build`.
+mkdocs-material>=9.5
+markdown-exec>=1.8
+matplotlib>=3.7
+numpy
+pandas

@@ -82,6 +82,37 @@ result_og = outliergram(fd.data, factor=1.5)
 | `mbd` | `(n,)` | Modified Band Depth |
 | `outliers` | `(n,)` bool | Outlier flags |
 
+The left panel shows the raw curves with a few injected anomalies; the right panel is
+the outliergram itself, where flagged curves sit far from the central parabola.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.outliers import outliergram
+
+t = np.linspace(0, 1, 100)
+X = np.asarray(simulate(40, t, n_basis=5, seed=42))
+X[0] += 6.0        # magnitude outlier
+X[1] = -X[1]       # shape outlier (reversed)
+X[2] *= 2.5        # amplitude outlier
+
+og = outliergram(X, factor=1.5)
+mei, mbd, flag = (np.asarray(og[k]) for k in ("mei", "mbd", "outliers"))
+
+f, (a0, a1) = fig(1, 2, figsize=(11.0, 3.8))
+for i, xi in enumerate(X):
+    a0.plot(t, xi, color="#dc3545" if flag[i] else "#6c757d",
+            lw=1.4 if flag[i] else 0.7, alpha=0.9 if flag[i] else 0.35)
+a0.set(title="Curves (outliers in red)", xlabel="t", ylabel="X(t)")
+
+a1.scatter(mei[~flag], mbd[~flag], s=22, color="#3f51b5", label="normal")
+a1.scatter(mei[flag], mbd[flag], s=55, color="#dc3545", label="outlier")
+a1.set(title="Outliergram (MEI vs MBD)", xlabel="MEI", ylabel="MBD")
+a1.legend()
+print(render(f))
+```
+
 !!! tip "Choosing the factor"
     A factor of 1.5 (the default) mirrors the classic boxplot rule. Increase it to 2.0 or 3.0 if you want to be more conservative and only flag extreme shape departures.
 
@@ -119,6 +150,36 @@ mag_outliers = result_ms["magnitude"] > mag_threshold
 shape_outliers = result_ms["shape"] > shape_threshold
 print(f"Magnitude outliers: {np.where(mag_outliers)[0]}")
 print(f"Shape outliers:     {np.where(shape_outliers)[0]}")
+```
+
+The magnitude-shape plot spreads outlyingness across two axes, so magnitude anomalies
+separate horizontally and shape anomalies vertically.
+
+```python exec="1" html="1"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.outliers import magnitude_shape
+
+t = np.linspace(0, 1, 100)
+X = np.asarray(simulate(40, t, n_basis=5, seed=42))
+X[0] += 7.0        # magnitude outlier
+X[1] = -X[1]       # shape outlier
+
+ms = magnitude_shape(X)
+mag, shp = np.asarray(ms["magnitude"]), np.asarray(ms["shape"])
+flag = (mag > np.percentile(mag, 95)) | (shp > np.percentile(shp, 95))
+
+f, ax = fig(figsize=(6.6, 4.2))
+ax.scatter(mag[~flag], shp[~flag], s=26, color="#3f51b5", label="normal")
+ax.scatter(mag[flag], shp[flag], s=60, color="#dc3545", label="flagged")
+for i in (0, 1):
+    ax.annotate(f"curve {i}", (mag[i], shp[i]), fontsize=9,
+                color="#dc3545", xytext=(6, 4), textcoords="offset points")
+ax.set(title="Magnitude-shape outlyingness",
+       xlabel="magnitude outlyingness", ylabel="shape outlyingness")
+ax.legend()
+print(render(f))
 ```
 
 ---
