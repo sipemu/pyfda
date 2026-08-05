@@ -21,6 +21,9 @@ scores** (linear). This page builds both pipelines on a seeded example.
     with, and often better than, naïve FPC regression on phase-variable data, but
     the margins depend on the problem.
 
+
+![Scalar-on-Shape Regression — concept diagram](../assets/diagrams/scalar-on-shape.svg){ .fdars-diagram }
+
 ```python exec="1" html="1" source="above"
 import numpy as np
 from scipy.stats import beta as beta_dist

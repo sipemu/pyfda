@@ -19,6 +19,9 @@ response curve at every point $t$. Typical questions it answers:
 (`fosr_fpc`), prediction (`predict_fosr`), and a permutation ANOVA test
 (`fanova`).
 
+
+![Function-on-Scalar Regression — concept diagram](../assets/diagrams/function-on-scalar.svg){ .fdars-diagram }
+
 ## Penalised estimation
 
 Fitting the model by ordinary least squares *independently at each $t$* recovers

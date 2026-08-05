@@ -6,6 +6,8 @@ This is critical in manufacturing (batch-to-batch consistency), bioequivalence s
 
 ---
 
+![Equivalence Testing — concept diagram](../assets/diagrams/equivalence-testing.svg){ .fdars-diagram }
+
 ## The TOST framework
 
 The functional equivalence test in `fdars` implements a **Two One-Sided Tests (TOST)** procedure adapted for functional data:

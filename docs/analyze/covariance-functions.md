@@ -4,6 +4,8 @@ Covariance functions (kernels) describe the correlation structure of a stochasti
 
 ---
 
+![Covariance Functions — concept diagram](../assets/diagrams/covariance-functions.svg){ .fdars-diagram }
+
 ## Available kernels
 
 | Kernel | Formula | Character |

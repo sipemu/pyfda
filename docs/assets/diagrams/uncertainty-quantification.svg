@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Uncertainty quantification: confidence bands on the coefficient function">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Uncertainty Quantification: Bands on β(t)</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Attach error bars to the coefficient function by resampling</text>
+
+  <!-- Panel 1: fitted model -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Fitted Model</text>
+  <g transform="translate(44,116)">
+    <line x1="0" y1="110" x2="156" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="55" x2="156" y2="55" stroke="#adb5bd" stroke-dasharray="3 3" stroke-width="1"/>
+    <path d="M0 55 C30 4 60 4 78 55 C96 106 126 106 156 55" stroke="#495057" stroke-width="2.4" fill="none"/>
+    <text class="sm" x="52" y="6">β̂(t)</text>
+    <text class="sm" x="40" y="130">point estimate</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#dc3545">bootstrap_ci()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Resample &amp; refit B times</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="16">Pointwise band</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="48">Simultaneous band</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="80">Prediction intervals</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: confidence band -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">Confidence Band</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">95% band around β(t)</text>
+  <g transform="translate(524,124)">
+    <line x1="0" y1="55" x2="150" y2="55" stroke="#adb5bd" stroke-dasharray="3 3" stroke-width="1"/>
+    <path d="M0 40 C28 -6 58 -6 75 42 L75 68 C58 22 28 22 0 68 Z" fill="#dc3545" fill-opacity=".16"/>
+    <path d="M75 42 C92 90 122 90 150 42 L150 68 C122 116 92 116 75 68 Z" fill="#dc3545" fill-opacity=".16"/>
+    <path d="M0 54 C28 8 58 8 75 55 C92 102 122 102 150 55" stroke="#dc3545" stroke-width="2.4" fill="none"/>
+    <text class="sm" x="44" y="118">β(t) ± band</text>
+  </g>
+</svg>

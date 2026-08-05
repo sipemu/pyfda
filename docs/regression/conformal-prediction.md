@@ -8,7 +8,10 @@ $$
 
 `fdars` implements split conformal methods for functional regression and classification.
 
+
 ---
+
+![Conformal Prediction — concept diagram](../assets/diagrams/conformal-prediction.svg){ .fdars-diagram }
 
 ## How split conformal works
 

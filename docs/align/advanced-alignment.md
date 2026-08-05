@@ -2,7 +2,10 @@
 
 The baseline [`karcher_mean`](elastic-alignment.md#group-alignment-karcher-mean) and [`elastic_align_pair`](elastic-alignment.md#pairwise-alignment) cover the common case: a smooth warp minimizing the elastic distance with a single smoothness knob, `lambda_`. Real problems ask for more -- robust estimation under outliers, uncertainty quantification, specialized geometries (closed curves, partial matches), cross-population transfer, generative models, and automatic regularization selection. `fdars` provides a family of advanced aligners for exactly these cases. Every one operates on the elastic manifold through the SRSF representation $q(t)=\operatorname{sign}(\dot f(t))\sqrt{|\dot f(t)|}$, which turns the Fisher-Rao metric into the $L^2$ metric on the Hilbert sphere.
 
+
 We build a working sample once and reuse it throughout.
+
+![Advanced Elastic Alignment — concept diagram](../assets/diagrams/advanced-alignment.svg){ .fdars-diagram }
 
 ```python exec="1" html="1"
 import numpy as np

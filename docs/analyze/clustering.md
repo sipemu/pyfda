@@ -4,6 +4,8 @@ Partition a set of functional observations into homogeneous groups. `fdars` prov
 
 ---
 
+![Clustering — concept diagram](../assets/diagrams/clustering.svg){ .fdars-diagram }
+
 ## K-means for functional data
 
 The functional k-means algorithm minimises the total within-cluster $L^2$ distance, iterating between assignment and centroid update until convergence.

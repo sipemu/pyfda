@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Elastic FPCA: separating amplitude and phase variation">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Elastic FPCA: Splitting Amplitude from Phase</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Separate misaligned features before extracting principal components</text>
+
+  <!-- Panel 1: warped curves -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Warped Curves</text>
+  <text class="sm" x="122" y="112" text-anchor="middle">peaks shifted in time</text>
+  <g transform="translate(44,118)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 118 C36 112 48 40 62 112 C80 118 156 118 156 118" stroke="#198754" stroke-opacity=".3" stroke-width="1.6"/>
+    <path d="M0 118 C56 114 72 34 88 112 C104 118 156 118 156 118" stroke="#198754" stroke-opacity=".3" stroke-width="1.6"/>
+    <path d="M0 118 C76 114 92 52 108 112 C124 118 156 118 156 118" stroke="#198754" stroke-opacity=".3" stroke-width="1.6"/>
+    <path d="M0 118 C46 112 60 26 74 110 C90 118 156 118 156 118" stroke="#198754" stroke-opacity=".3" stroke-width="1.6"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#eafaf1" stroke="#198754" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#198754">*_fpca(X, t)</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">square-root-slope</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
+    <text class="mono" x="12" y="16" fill="#198754" font-size="11">vert_fpca</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
+    <text class="mono" x="12" y="48" fill="#198754" font-size="11">horiz_fpca</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
+    <text class="mono" x="12" y="80" fill="#198754" font-size="11">joint_fpca</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: output -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#eafaf1" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#198754">Amplitude + Phase</text>
+  <!-- amplitude modes -->
+  <g transform="translate(516,106)">
+    <text class="sm" x="0" y="0" font-size="9">amplitude modes</text>
+    <line x1="0" y1="46" x2="76" y2="46" stroke="#adb5bd" stroke-width="1"/>
+    <path d="M0 46 C24 46 30 14 38 46 C46 46 76 46 76 46" stroke="#198754" stroke-width="1.8"/>
+    <path d="M0 46 C24 46 30 26 38 46 C46 46 76 46 76 46" stroke="#198754" stroke-opacity=".5" stroke-width="1.4"/>
+  </g>
+  <!-- phase warping -->
+  <g transform="translate(608,158)">
+    <text class="sm" x="0" y="0" font-size="9">phase (warps)</text>
+    <line x1="0" y1="52" x2="66" y2="52" stroke="#adb5bd" stroke-width="1"/>
+    <line x1="0" y1="6" x2="0" y2="52" stroke="#adb5bd" stroke-width="1"/>
+    <path d="M0 52 C22 44 44 40 66 6" stroke="#fd7e14" stroke-width="1.6"/>
+    <path d="M0 52 L66 6" stroke="#6c757d" stroke-width="1" stroke-dasharray="3 2"/>
+    <path d="M0 52 C30 30 40 24 66 6" stroke="#fd7e14" stroke-opacity=".5" stroke-width="1.4"/>
+  </g>
+</svg>

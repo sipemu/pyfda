@@ -2,6 +2,9 @@
 
 Depth functions generalize the notion of quantiles and ranks to functional data. A depth measure assigns each curve a real number indicating how "central" it is relative to a reference sample. The deepest curve is the **functional median** -- a robust location estimator. Curves with low depth are potential outliers.
 
+
+![Depth Functions — concept diagram](../assets/diagrams/depth-functions.svg){ .fdars-diagram }
+
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render

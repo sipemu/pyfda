@@ -2,8 +2,11 @@
 
 An **Andrews transformation** maps each row of a multivariate data table -- a plain feature vector $x = (x_1, x_2, \ldots, x_p)$ -- to a smooth periodic curve. Introduced by David Andrews in 1972 as a way to *visualize* high-dimensional data, it turns out to be a bridge into functional data analysis: once every observation is a curve, the whole `fdars` toolbox (depth, distances, clustering, outlier detection) applies to ordinary tabular data. This page shows the transform explicitly in numpy, then analyzes the resulting curves with real `fdars` functions.
 
+
 !!! warning "No `andrews` binding in the Python `fdars`"
     The R package ships a dedicated `andrews_transform()`, but the **Python** `fdars` has **no** Andrews-curve function. The transform is a handful of lines of numpy, shown in full below. `fdars` enters only *after* the transform, once the curves are wrapped in `Fdata`.
+
+![Andrews Transformation: From Tables to Curves — concept diagram](../assets/diagrams/andrews-transformation.svg){ .fdars-diagram }
 
 ## The transform
 

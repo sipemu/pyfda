@@ -4,6 +4,9 @@ title: Smoothing
 
 # Smoothing Functional Data
 
+
+![Smoothing Functional Data — concept diagram](../assets/diagrams/smoothing.svg){ .fdars-diagram }
+
 ## Why Smooth Functional Data?
 
 Real-world functional measurements almost always carry noise -- from instrument

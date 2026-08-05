@@ -4,6 +4,8 @@ Two curves can have the *same shape* yet look far apart under the ordinary $L^2$
 
 Elastic clustering removes phase before comparing curves. It measures dissimilarity with an **amplitude (elastic) distance** -- a metric on the Fisher--Rao geometry of curves that is invariant to monotone time-warping -- and then clusters the resulting distance matrix. `fdars.alignment` provides the elastic distance matrices and distance-based clusterers needed for this pipeline.
 
+![Elastic Clustering — concept diagram](../assets/diagrams/elastic-clustering.svg){ .fdars-diagram }
+
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render

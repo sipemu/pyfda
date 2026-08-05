@@ -13,6 +13,9 @@ producing both pointwise and simultaneous bands. **Analytic prediction intervals
 to bracket new responses. Neither requires distributional assumptions beyond the model
 itself — for *distribution-free* guarantees, see [conformal prediction](conformal-prediction.md).
 
+
+![Uncertainty Quantification — concept diagram](../assets/diagrams/uncertainty-quantification.svg){ .fdars-diagram }
+
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render

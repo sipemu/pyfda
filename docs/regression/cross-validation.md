@@ -11,6 +11,9 @@ a principled way to select $k$.
 and `fclassif_cv` for functional classification — that do the fold splitting, refitting,
 and out-of-fold scoring for you across a grid of component counts.
 
+
+![Cross-Validation for Functional Data — concept diagram](../assets/diagrams/cross-validation.svg){ .fdars-diagram }
+
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render

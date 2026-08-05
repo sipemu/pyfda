@@ -2,6 +2,9 @@
 
 Ordinary [Functional PCA](fpca.md) assumes that curves differ only in *amplitude* -- their height at each fixed time $t$. Real curves often also differ in *phase*: the same feature (a peak, a crossing) occurs at different times in different observations. When amplitude and phase variation are entangled, ordinary FPCA wastes components describing the misalignment and the leading eigenfunctions become hard to interpret. **Elastic FPCA** first separates the two sources of variation using the square-root-slope framework, then runs PCA in the amplitude space, the phase (warping) space, or jointly.
 
+
+![Elastic FPCA — concept diagram](../assets/diagrams/elastic-fpca.svg){ .fdars-diagram }
+
 ```python exec="1" html="1"
 import numpy as np
 from docs_fig import fig, render

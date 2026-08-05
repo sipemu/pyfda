@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Outlier detection: flag magnitude and shape outliers in a curve bundle">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Outlier Detection: Flagging Atypical Curves</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Separate magnitude, shape and amplitude anomalies from the bulk</text>
+
+  <!-- Panel 1: curve bundle with outliers -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Curve Bundle</text>
+  <g transform="translate(44,116)">
+    <line x1="0" y1="118" x2="156" y2="118" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 72 C40 48 80 90 120 60 C138 48 150 66 156 58" stroke="#6c757d" stroke-opacity=".4" stroke-width="1.3"/>
+    <path d="M0 78 C40 54 80 96 120 66 C138 54 150 72 156 64" stroke="#6c757d" stroke-opacity=".4" stroke-width="1.3"/>
+    <path d="M0 84 C40 60 80 102 120 72 C138 60 150 78 156 70" stroke="#6c757d" stroke-opacity=".4" stroke-width="1.3"/>
+    <path d="M0 30 C40 18 80 40 120 26 C138 20 150 30 156 24" stroke="#6c757d" stroke-opacity=".4" stroke-width="1.3"/>
+    <path d="M0 82 C40 100 80 40 120 96 C138 62 150 90 156 70" stroke="#6c757d" stroke-opacity=".4" stroke-width="1.3"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#6f42c1">magnitude_shape()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Score vs null threshold</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="16">LRT (magnitude)</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="48">MS-plot (shape)</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="80">outliergram</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: flagged outliers -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#6f42c1">Flagged Outliers</text>
+  <g transform="translate(520,116)">
+    <line x1="0" y1="118" x2="156" y2="118" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 72 C40 48 80 90 120 60 C138 48 150 66 156 58" stroke="#6f42c1" stroke-opacity=".28" stroke-width="1.3"/>
+    <path d="M0 78 C40 54 80 96 120 66 C138 54 150 72 156 64" stroke="#6f42c1" stroke-opacity=".28" stroke-width="1.3"/>
+    <path d="M0 84 C40 60 80 102 120 72 C138 60 150 78 156 70" stroke="#6f42c1" stroke-opacity=".28" stroke-width="1.3"/>
+    <path d="M0 30 C40 18 80 40 120 26 C138 20 150 30 156 24" stroke="#dc3545" stroke-width="2.4"/>
+    <path d="M0 82 C40 100 80 40 120 96 C138 62 150 90 156 70" stroke="#dc3545" stroke-width="2.4"/>
+    <text class="sm" x="128" y="18" fill="#dc3545">magnitude</text>
+  </g>
+  <text class="sm" x="598" y="252" text-anchor="middle" fill="#6c757d">red = flagged</text>
+</svg>

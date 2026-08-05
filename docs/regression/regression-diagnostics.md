@@ -13,6 +13,7 @@ are the model assumptions valid, are any observations unduly influential, and ho
 are the results? `fdars.explain` provides a diagnostic toolkit adapted to FPC-based
 scalar-on-function models to answer them.
 
+
 | Diagnostic | Function | Question |
 |------------|----------|----------|
 | Leverage & Cook's distance | `influence_diagnostics` | How influential is each observation? |
@@ -28,6 +29,8 @@ The influence, DFBETAS/DFFITS and PRESS diagnostics rely on the hat matrix, whic
 defined for the linear FPC model. VIF, importance, depth and stability are more general and
 apply to any model built on FPC scores; stability is *model-free* because it refits the
 whole FPCA-plus-regression pipeline on each resample.
+
+![Regression Diagnostics — concept diagram](../assets/diagrams/regression-diagnostics.svg){ .fdars-diagram }
 
 ```python exec="1" html="1" source="above"
 import numpy as np

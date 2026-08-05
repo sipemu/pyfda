@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Elastic clustering: remove phase, then cluster on amplitude distance">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Elastic Clustering: Group by Shape, Not by Phase</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">A warp-invariant distance so time shifts stop masking true shape</text>
+
+  <!-- Panel 1: phase-shifted bumps -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Phase-Shifted Curves</text>
+  <g transform="translate(44,116)">
+    <line x1="0" y1="118" x2="156" y2="118" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 116 L30 116 Q42 40 54 116 L156 116" stroke="#6c757d" stroke-opacity=".55" stroke-width="1.4" fill="none"/>
+    <path d="M0 116 L66 116 Q78 44 90 116 L156 116" stroke="#6c757d" stroke-opacity=".55" stroke-width="1.4" fill="none"/>
+    <path d="M0 116 L104 116 Q116 42 128 116 L156 116" stroke="#6c757d" stroke-opacity=".55" stroke-width="1.4" fill="none"/>
+    <text class="sm" x="78" y="14" text-anchor="middle" fill="#6c757d">same shape, shifted</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#6f42c1">elastic_distance()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Fisher–Rao geometry</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="16">Warp away phase</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="48">Amplitude distance D</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="80">hierarchical_cut(D)</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: aligned clusters -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#6f42c1">Phase-Invariant Clusters</text>
+  <g transform="translate(520,116)">
+    <line x1="0" y1="118" x2="156" y2="118" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 116 L60 116 Q78 46 96 116 L156 116" stroke="#6f42c1" stroke-width="1.5" fill="none"/>
+    <path d="M0 116 L64 116 Q78 50 92 116 L156 116" stroke="#6f42c1" stroke-width="1.5" fill="none"/>
+    <path d="M0 116 L58 116 Q78 42 98 116 L156 116" stroke="#6f42c1" stroke-width="2.2" fill="none"/>
+    <path d="M0 116 L62 116 Q78 76 94 116 L156 116" stroke="#e8710a" stroke-width="1.5" fill="none"/>
+    <path d="M0 116 L66 116 Q78 80 90 116 L156 116" stroke="#e8710a" stroke-width="2.2" fill="none"/>
+  </g>
+  <text class="sm" x="598" y="252" text-anchor="middle" fill="#6c757d">clustered by amplitude</text>
+</svg>

@@ -21,6 +21,9 @@ Both live in the `fdars.simulation` module and return a 2D NumPy array of shape
 Wrapping the result in an `Fdata` object bundles the data with its evaluation
 grid and unlocks convenience methods for depth, distances, derivatives, and more.
 
+
+![Simulation Toolbox — concept diagram](../assets/diagrams/simulation.svg){ .fdars-diagram }
+
 ```python
 import numpy as np
 from fdars import Fdata

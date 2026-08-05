@@ -2,8 +2,11 @@
 
 Functional [depth](depth-functions.md) is a batch computation: you hand it a fixed sample and it scores every curve against that sample. But many applications produce curves *over time* -- sensor traces, daily load profiles, per-request latency curves -- and you want to know, as each new curve arrives, whether it looks like the recent past or has drifted out of distribution. This page describes a **streaming pattern** built on the existing batch depth primitives: keep a rolling *reference window* of recent curves, and score each incoming curve's depth against that window. A sudden drop in depth flags an anomaly.
 
+
 !!! warning "No streaming binding in fdars"
     `fdars` has **no** streaming-specific depth function. Every depth routine in `fdars.depth` is batch. What follows is a **usage pattern** implemented in numpy on top of those batch primitives -- specifically by calling `modified_band_1d(new_batch, reference_window)`, which is exactly what the `data` / `ref_data` split is designed for.
+
+![Streaming Depth Computation — concept diagram](../assets/diagrams/streaming-depth.svg){ .fdars-diagram }
 
 ## The key idea: `data` vs `ref_data`
 

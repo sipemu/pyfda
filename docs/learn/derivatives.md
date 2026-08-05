@@ -15,6 +15,9 @@ The `Fdata` class provides a `deriv()` convenience method for both 1D and 2D
 functional data (the low-level functions `deriv_1d` and `deriv_2d` are still
 available in `fdars.fdata`).
 
+
+![Working with Derivatives — concept diagram](../assets/diagrams/derivatives.svg){ .fdars-diagram }
+
 ```python
 import numpy as np
 from fdars import Fdata

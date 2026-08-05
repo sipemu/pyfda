@@ -2,6 +2,9 @@
 
 Distance (and dissimilarity) measures between curves are fundamental building blocks for clustering, classification, nonparametric regression, and outlier detection. fdars provides a comprehensive set of metrics -- from classical $L^p$ norms to elastic distances that factor out time warping.
 
+
+![Distance Metrics — concept diagram](../assets/diagrams/distance-metrics.svg){ .fdars-diagram }
+
 ## Self vs cross distances
 
 Every metric comes in two flavors:

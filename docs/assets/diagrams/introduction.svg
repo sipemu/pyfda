@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="From raw measurements to a functional-data object">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">From Raw Measurements to a Functional-Data Object</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Each curve becomes a single observation on a shared grid</text>
+
+  <!-- Panel 1: raw points -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Raw Points</text>
+  <text class="sm" x="122" y="112" text-anchor="middle">measurements over a continuum</text>
+  <g transform="translate(44,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="0" x2="0" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <g fill="#6c757d">
+      <circle cx="10" cy="86" r="2.6"/><circle cx="34" cy="60" r="2.6"/><circle cx="58" cy="72" r="2.6"/>
+      <circle cx="82" cy="40" r="2.6"/><circle cx="106" cy="54" r="2.6"/><circle cx="130" cy="30" r="2.6"/><circle cx="150" cy="44" r="2.6"/>
+    </g>
+    <g fill="#adb5bd">
+      <circle cx="10" cy="102" r="2.6"/><circle cx="34" cy="90" r="2.6"/><circle cx="58" cy="98" r="2.6"/>
+      <circle cx="82" cy="80" r="2.6"/><circle cx="106" cy="88" r="2.6"/><circle cx="130" cy="70" r="2.6"/><circle cx="150" cy="82" r="2.6"/>
+    </g>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#0d6efd">Fdata(X, argvals)</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Bundle data with its grid</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="16">X: (n_obs, n_points)</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="48">argvals: shared grid</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="80">depth · dist · deriv</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: curve object -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#0d6efd">Fdata Object</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">a family of curves</text>
+  <g transform="translate(520,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 86 C40 44 80 96 120 40 C138 30 150 50 156 44" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.8"/>
+    <path d="M0 96 C40 58 80 76 120 54 C138 46 150 66 156 58" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.8"/>
+    <path d="M0 78 C40 52 80 88 120 48 C138 36 150 58 156 50" stroke="#0d6efd" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="82" cy="72" r="3.5" fill="#fff" stroke="#0d6efd" stroke-width="2"/>
+  </g>
+  <text class="sm" x="598" y="250" text-anchor="middle" fill="#6c757d">one object · many operations</text>
+</svg>

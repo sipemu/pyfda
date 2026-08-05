@@ -11,6 +11,9 @@ This page runs the first three on the same datasets, quantifies what they do to 
 
 The headline result: on phase-varying data all three collapse the phase spread and sharpen the mean, while the naive cross-sectional mean stays flattened.
 
+
+![Comparing Alignment Methods — concept diagram](../assets/diagrams/alignment-comparison.svg){ .fdars-diagram }
+
 ```python exec="1" html="1"
 import numpy as np
 from scipy.signal import find_peaks

@@ -12,6 +12,9 @@ The coefficient function $\beta(t)$ is the object of interest: it reveals *which
 regions* of the predictor curve drive the response. `fdars` provides several
 complementary estimators for this model.
 
+
+![Scalar-on-Function Regression — concept diagram](../assets/diagrams/scalar-on-function.svg){ .fdars-diagram }
+
 ## The estimation challenge
 
 Estimating $\beta(t)$ directly is **ill-posed**. Discretising the predictor on
