@@ -604,8 +604,8 @@ print(f"  Phase depth: {depth['phase_depth'][median_idx]:.4f}")
 
 ## See also
 
-- [Elastic alignment](elastic.md) — the pairwise/`karcher_mean` machinery underlying the shape mean.
-- [Amplitude & phase](amplitude-phase.md) — the separated distances that shape distance and elastic depth are built from.
+- [Elastic alignment](elastic-alignment.md) — the pairwise/`karcher_mean` machinery underlying the shape mean.
+- [Amplitude & phase](alignment-comparison.md) — the separated distances that shape distance and elastic depth are built from.
 - `fdars.tolerance` — simultaneous confidence/tolerance bands for aligned means.
 
 ## References

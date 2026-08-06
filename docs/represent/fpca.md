@@ -110,7 +110,7 @@ result = fpca(data, argvals, n_comp=3)
 
 ## Worked example: the Berkeley growth curves
 
-A classic use of FPCA is the [Berkeley Growth Study](../data/index.md): heights of 93 children (39 boys, 54 girls) measured at 31 ages from 1 to 18 years. Two natural sources of variation should emerge -- how *tall* a child is overall, and how *early* their growth spurt arrives. FPCA recovers exactly these as its first two components.
+A classic use of FPCA is the [Berkeley Growth Study](../examples/growth-alignment.md): heights of 93 children (39 boys, 54 girls) measured at 31 ages from 1 to 18 years. Two natural sources of variation should emerge -- how *tall* a child is overall, and how *early* their growth spurt arrives. FPCA recovers exactly these as its first two components.
 
 ```python exec="1" html="1" source="above"
 import numpy as np

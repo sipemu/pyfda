@@ -328,7 +328,7 @@ and stays dark.
 Having localised the fault to the window $[0.26, 0.38]$, we now ask *why* those curves
 alarmed. `spm_monitor` returns only the aggregate $T^2$; to open it up we reconstruct the
 FPCA scores by projecting the centred, sub-domain data onto the loadings (the exact
-identity noted [above](#these-formulas-are-exact-not-approximations)) and feed them to
+identity noted above) and feed them to
 `t2_pc_contributions`. The contribution $c_k=\xi_k^2/\lambda_k$ localises the alarm to a
 mode of variation the same way the scan localised it to a region of the domain.
 

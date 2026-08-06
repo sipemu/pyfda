@@ -190,7 +190,7 @@ The bold curves are the cluster centroids in curve space; each corresponds to on
 
 ## Verifying distance preservation on a real table
 
-The $\sqrt{\pi}$ relationship is not a heuristic -- it holds to machine precision. Here it is checked on the [Wine dataset](../data/index.md) (178 wines, 13 standardized chemical features): every pairwise Andrews $L^2$ distance, computed with `lp_self_1d`, equals exactly $\sqrt{\pi}$ times the Euclidean distance between the underlying feature vectors.
+The $\sqrt{\pi}$ relationship is not a heuristic -- it holds to machine precision. Here it is checked on the [Wine dataset](../examples/andrews-wine-intro.md) (178 wines, 13 standardized chemical features): every pairwise Andrews $L^2$ distance, computed with `lp_self_1d`, equals exactly $\sqrt{\pi}$ times the Euclidean distance between the underlying feature vectors.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
