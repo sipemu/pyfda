@@ -387,3 +387,9 @@ print(f"Mean membership entropy: {entropy.mean():.3f}")
 - [Elastic clustering](elastic-clustering.md) -- clustering that separates amplitude from
   phase before grouping.
 - [Outlier detection](outlier-detection.md) -- dedicated functional outlier methods.
+
+## References
+
+- Jacques, J., Preda, C. (2014). *Functional data clustering: a survey.* Advances in Data Analysis and Classification, 8(3), 231–255.
+- Abraham, C., Cornillon, P.A., Matzner-Løber, E., Molinari, N. (2003). *Unsupervised curve clustering using B-splines.* Scandinavian Journal of Statistics, 30(3), 581–595.
+- Bezdek, J.C. (1981). *Pattern Recognition with Fuzzy Objective Function Algorithms.* Plenum Press.

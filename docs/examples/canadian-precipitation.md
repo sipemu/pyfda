@@ -481,3 +481,9 @@ they capture the dominant geographic signal.
 - [Canadian temperature: annual cycle](canadian-seasonal.md) — period detection
   and STL on the seasonal signal.
 - [Functional PCA](../represent/fpca.md) for the decomposition in depth.
+
+## References
+
+- Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Ramsay, J.O., Hooker, G., Graves, S. (2009). *Functional Data Analysis with R and MATLAB.* Springer.
+- Reiss, P.T., Huang, L., Mennes, M. (2010). *Fast function-on-scalar regression with penalized basis expansions.* International Journal of Biostatistics 6(1):Article 28.

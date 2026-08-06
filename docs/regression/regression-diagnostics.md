@@ -570,3 +570,11 @@ those crossings the coefficient function is estimated consistently across resamp
   of PRESS.
 - [Uncertainty quantification](uncertainty-quantification.md) — confidence bands on the
   coefficient function once influential points are handled.
+
+## References
+
+- Cook, R. D. (1977). *Detection of influential observations in linear regression.* Technometrics, 19(1), 15–18.
+- Belsley, D. A., Kuh, E., & Welsch, R. E. (1980). *Regression Diagnostics: Identifying Influential Data and Sources of Collinearity.* Wiley.
+- Rousseeuw, P. J., & Hubert, M. (1999). *Regression depth.* Journal of the American Statistical Association, 94(446), 388–402.
+- Breiman, L. (2001). *Random forests.* Machine Learning, 45(1), 5–32.
+- Ramsay, J. O., & Silverman, B. W. (2005). *Functional Data Analysis* (2nd ed.). Springer.

@@ -414,3 +414,9 @@ region for root-cause work.
   EWMA charts, run rules, ARL, and fault diagnosis in depth.
 - [Predicting fat from NIR spectra](tecator-regression.md) — the same dataset
   as a scalar-on-function regression problem.
+
+## References
+
+- Borggaard, C., Thodberg, H.H. (1992). *Optimal minimal neural interpretation of spectra.* Analytical Chemistry 64(5):545-551.
+- Colosimo, B.M., Pacella, M. (2010). *A comparison study of control charts for functional data.* Quality and Reliability Engineering International 26(4):327-342.
+- Kourti, T., MacGregor, J.F. (1996). *Multivariate SPC methods for process and product monitoring.* Journal of Quality Technology 28(4):409-428.

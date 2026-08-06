@@ -305,3 +305,9 @@ print(render(f))
 - [Scalar-on-function regression](scalar-on-function.md) — amplitude-based predictors.
 - [Elastic regression](elastic-regression.md) — joint alignment + regression.
 - [Cross-validation](cross-validation.md) — choosing the number of shape components honestly.
+
+## References
+
+- Srivastava, A., Klassen, E., Joshi, S. H., & Jermyn, I. H. (2011). *Shape analysis of elastic curves in Euclidean spaces.* IEEE Transactions on Pattern Analysis and Machine Intelligence, 33(7), 1415–1428.
+- Tucker, J. D., Wu, W., & Srivastava, A. (2013). *Generative models for functional data using phase and amplitude separation.* Computational Statistics & Data Analysis, 61, 50–66.
+- Srivastava, A., & Klassen, E. P. (2016). *Functional and Shape Data Analysis.* Springer.

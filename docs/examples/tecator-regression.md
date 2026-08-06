@@ -394,3 +394,10 @@ the *classification*.
   spectra before differentiating.
 </content>
 </invoke>
+
+## References
+
+- Borggaard, C., Thodberg, H.H. (1992). *Optimal minimal neural interpretation of spectra.* Analytical Chemistry 64(5):545-551.
+- Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Febrero-Bande, M., Oviedo de la Fuente, M. (2012). *Statistical computing in functional data analysis: the R package fda.usc.* Journal of Statistical Software 51(4):1-28.
+- Preda, C., Saporta, G., Leveder, C. (2007). *PLS classification of functional data.* Computational Statistics 22(2):223-235.

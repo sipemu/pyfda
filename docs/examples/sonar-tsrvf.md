@@ -342,3 +342,10 @@ not help; it actively hurts.
   removal is the whole point.
 - [Classification](../regression/classification.md) for the functional
   classifiers used here.
+
+## References
+
+- Gorman, R.P., Sejnowski, T.J. (1988). *Analysis of hidden units in a layered network trained to classify sonar targets.* Neural Networks 1(1):75-89.
+- Dua, D., Graff, C. (2019). *UCI Machine Learning Repository.* University of California, Irvine.
+- Srivastava, A., Klassen, E.P. (2016). *Functional and Shape Data Analysis.* Springer.
+- Kurtek, S., Srivastava, A., Klassen, E., Ding, Z. (2012). *Statistical modeling of curves using shapes and related features.* JASA 107(499):1152-1165.

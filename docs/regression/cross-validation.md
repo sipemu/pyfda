@@ -318,3 +318,10 @@ print(render(f))
   cousin of CV.
 - [Conformal prediction](conformal-prediction.md) — turning honest error into finite-sample
   coverage guarantees.
+
+## References
+
+- Stone, M. (1974). *Cross-validatory choice and assessment of statistical predictions.* Journal of the Royal Statistical Society: Series B, 36(2), 111–133.
+- Allen, D. M. (1974). *The relationship between variable selection and data augmentation and a method for prediction.* Technometrics, 16(1), 125–127.
+- Ramsay, J. O., & Silverman, B. W. (2005). *Functional Data Analysis* (2nd ed.). Springer.
+- Ferraty, F., & Vieu, P. (2006). *Nonparametric Functional Data Analysis.* Springer.

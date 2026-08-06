@@ -546,6 +546,19 @@ A short preprocessing checklist before regridding:
 
 ---
 
+## References
+
+- Ramsay, J. O. & Silverman, B. W. (2005). *Functional Data Analysis* (2nd ed.).
+  Springer. (Ch. 4--5, representing and smoothing curves from discrete
+  observations.)
+- Yao, F., Müller, H.-G. & Wang, J.-L. (2005). Functional Data Analysis for
+  Sparse Longitudinal Data. *Journal of the American Statistical Association*,
+  100(470), 577--590.
+- James, G. M., Hastie, T. J. & Sugar, C. A. (2000). Principal Component Models
+  for Sparse Functional Data. *Biometrika*, 87(3), 587--602.
+- Ferraty, F. & Vieu, P. (2006). *Nonparametric Functional Data Analysis: Theory
+  and Practice.* Springer.
+
 ## Next Steps
 
 - [Smoothing](smoothing.md) -- the full menu of kernel and basis smoothers, and

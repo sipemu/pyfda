@@ -309,3 +309,9 @@ print(fd.n_obs(), "wines on", fd.n_points(), "points")
   proofs.
 - [Functional depth](../represent/depth-functions.md) — the centrality measures
   used on the next page.
+
+## References
+
+- Andrews, D.F. (1972). *Plots of high-dimensional data.* Biometrics 28(1):125-136.
+- Aeberhard, S., Coomans, D., de Vel, O. (1994). *Comparative analysis of statistical pattern recognition methods in high dimensional settings.* Pattern Recognition 27(8):1065-1077.
+- Dua, D., Graff, C. (2019). *UCI Machine Learning Repository.* University of California, Irvine.

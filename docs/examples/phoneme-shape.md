@@ -309,3 +309,9 @@ pooled, the phase fraction is small, and elastic alignment spends its freedom
 - [Clustering functional data](../analyze/clustering.md) — k-means, fuzzy
   c-means, and GMM in function space.
 </content>
+
+## References
+
+- Hastie, T., Buja, A., Tibshirani, R. (1995). *Penalized discriminant analysis.* Annals of Statistics 23(1):73-102.
+- Ferraty, F., Vieu, P. (2003). *Curves discrimination: a nonparametric functional approach.* Computational Statistics & Data Analysis 44(1-2):161-173.
+- Srivastava, A., Klassen, E.P. (2016). *Functional and Shape Data Analysis.* Springer.

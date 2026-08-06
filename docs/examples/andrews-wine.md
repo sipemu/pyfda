@@ -433,3 +433,10 @@ which monitors one cultivar against another with control charts.
 - [Functional depth](../represent/depth-functions.md) — the depth measures used here.
 - [Andrews Wine intro](andrews-wine-intro.md) — the transform and class structure.
 - [Clustering & variable importance](andrews-wine-clustering.md) — recovering the cultivars.
+
+## References
+
+- Andrews, D.F. (1972). *Plots of high-dimensional data.* Biometrics 28(1):125-136.
+- Lopez-Pintado, S., Romo, J. (2009). *On the concept of depth for functional data.* JASA 104(486):718-734.
+- Arribas-Gil, A., Romo, J. (2014). *Shape outlier detection and visualization for functional data: the outliergram.* Biostatistics 15(4):603-619.
+- Dai, W., Genton, M.G. (2018). *Multivariate functional data visualization and outlier detection.* JCGS 27(4):923-934.

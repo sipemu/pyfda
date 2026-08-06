@@ -654,3 +654,10 @@ print(render(f))
 - [Uncertainty quantification](uncertainty-quantification.md) — bootstrap standard errors for
   honest significant regions.
 - [Scalar-on-function regression](scalar-on-function.md) — the model being explained.
+
+## References
+
+- Apley, D. W., & Zhu, J. (2020). *Visualizing the effects of predictor variables in black box supervised learning models.* Journal of the Royal Statistical Society: Series B, 82(4), 1059–1086.
+- Goldstein, A., Kapelner, A., Bleich, J., & Pitkin, E. (2015). *Peeking inside the black box: Visualizing statistical learning with plots of individual conditional expectation.* Journal of Computational and Graphical Statistics, 24(1), 44–65.
+- Lundberg, S. M., & Lee, S.-I. (2017). *A unified approach to interpreting model predictions.* Advances in Neural Information Processing Systems, 30.
+- Ribeiro, M. T., Singh, S., & Guestrin, C. (2016). *"Why should I trust you?": Explaining the predictions of any classifier.* Proceedings of KDD 2016.

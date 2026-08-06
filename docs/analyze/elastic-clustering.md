@@ -256,3 +256,9 @@ print(render(f))
 - [Clustering](clustering.md) -- $L^2$ k-means, fuzzy c-means, GMM and quality indices.
 - [Model-based clustering](gmm-clustering.md) -- soft assignments via Gaussian mixtures.
 - `fdars.alignment` -- elastic alignment, Karcher means and the SRVF machinery behind these distances.
+
+## References
+
+- Srivastava, A., Klassen, E. (2016). *Functional and Shape Data Analysis.* Springer.
+- Tucker, J.D., Wu, W., Srivastava, A. (2013). *Generative Models for Functional Data Using Phase and Amplitude Separation.* Computational Statistics & Data Analysis, 61, 50–66.
+- Kurtek, S., Srivastava, A., Klassen, E., Ding, Z. (2012). *Statistical Modeling of Curves Using Shapes and Related Features.* Journal of the American Statistical Association, 107(499), 1152–1165.

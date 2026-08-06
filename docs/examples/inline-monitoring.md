@@ -389,3 +389,9 @@ The experiment answers three deployment questions:
   charts, run rules, and model-based ARL estimation.
 - [Biopharmaceutical Batch Monitoring](biopharma-monitoring.md) — the same
   workflow applied to labelled fermentation batches.
+
+## References
+
+- Colosimo, B.M., Pacella, M. (2010). *A comparison study of control charts for functional data.* Quality and Reliability Engineering International 26(4):327-342.
+- Lucas, J.M., Saccucci, M.S. (1990). *Exponentially weighted moving average control schemes: properties and enhancements.* Technometrics 32(1):1-12.
+- Woodall, W.H. (2007). *Current research on profile monitoring.* Production 17(3):420-425.

@@ -447,3 +447,16 @@ for alpha in [0.05, 0.10, 0.20]:
     print(f"alpha={alpha:.2f} | LM: cov={cov_lm:.0%} width={width_lm:.3f} | "
           f"NP: cov={cov_np:.0%} width={width_np:.3f}")
 ```
+
+## See also
+
+- [Uncertainty quantification](uncertainty-quantification.md) — bootstrap/analytic bands; contrast with the finite-sample guarantee here.
+- [Conformal classification](conformal-classification.md) — the same split-conformal machinery for label sets.
+- [Cross-validation](cross-validation.md) — honest error estimation feeding the nonconformity scores.
+
+## References
+
+- Vovk, V., Gammerman, A., & Shafer, G. (2005). *Algorithmic Learning in a Random World.* Springer.
+- Barber, R. F., Candès, E. J., Ramdas, A., & Tibshirani, R. J. (2021). *Predictive inference with the jackknife+.* Annals of Statistics, 49(1), 486–507.
+- Romano, Y., Patterson, E., & Candès, E. (2019). *Conformalized quantile regression.* Advances in Neural Information Processing Systems, 32.
+- Lei, J., G'Sell, M., Rinaldo, A., Tibshirani, R. J., & Wasserman, L. (2018). *Distribution-free predictive inference for regression.* Journal of the American Statistical Association, 113(523), 1094–1111.

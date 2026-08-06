@@ -341,3 +341,4 @@ See [Comparing Alignment Methods](alignment-comparison.md) for a head-to-head on
 
 - Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer. (Landmark registration by linear interpolation.)
 - Kneip, A., Gasser, T. (1992). *Statistical tools to analyze data representing a sample of curves.* Annals of Statistics 20(3):1266-1305.
+- Gasser, T., Kneip, A. (1995). *Searching for structure in curve samples.* Journal of the American Statistical Association 90(432):1179-1188.

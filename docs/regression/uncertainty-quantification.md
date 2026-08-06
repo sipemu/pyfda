@@ -325,3 +325,10 @@ model leans on to fit itself, and the ones a train/test split would penalize.
   trusting a band.
 - [Scalar-on-function regression](scalar-on-function.md) — the underlying model being
   quantified.
+
+## References
+
+- Efron, B., & Tibshirani, R. J. (1993). *An Introduction to the Bootstrap.* Chapman & Hall.
+- Ramsay, J. O., & Silverman, B. W. (2005). *Functional Data Analysis* (2nd ed.). Springer.
+- Cardot, H., Ferraty, F., & Sarda, P. (2003). *Spline estimators for the functional linear model.* Statistica Sinica, 13(3), 571–591.
+- Horváth, L., & Kokoszka, P. (2012). *Inference for Functional Data with Applications.* Springer.

@@ -411,3 +411,9 @@ with confidence.
   *which* model to explain in the first place.
 - [Scalar-on-function regression](../regression/scalar-on-function.md) for the
   underlying functional linear model.
+
+## References
+
+- Borggaard, C., Thodberg, H.H. (1992). *Optimal minimal neural interpretation of spectra.* Analytical Chemistry 64(5):545-551.
+- James, G.M., Wang, J., Zhu, J. (2009). *Functional linear regression that's interpretable.* Annals of Statistics 37(5A):2083-2108.
+- Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.

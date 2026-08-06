@@ -389,3 +389,10 @@ sampling noise.
   data where phase removal *hurts* instead.
 - [FPCA & clustering of weather curves](canadian-weather.md) — the same
   amplitude/phase distinction applied to temperature.
+
+## References
+
+- Tuddenham, R.D., Snyder, M.M. (1954). *Physical growth of California boys and girls from birth to age 18.* University of California Publications in Child Development 1:183-364.
+- Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Srivastava, A., Klassen, E.P. (2016). *Functional and Shape Data Analysis.* Springer.
+- Tucker, J.D., Wu, W., Srivastava, A. (2013). *Generative models for functional data using phase and amplitude separation.* Computational Statistics & Data Analysis 61:50-66.

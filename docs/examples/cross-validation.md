@@ -346,3 +346,10 @@ The dict from `fregre_cv` contains `optimal_k`, `min_cv_error`, `k_values`,
   once a model is chosen, *which wavelengths* drive its predictions.
 - [Scalar-on-function regression](../regression/scalar-on-function.md) for the
   functional linear model in general.
+
+## References
+
+- Stone, M. (1974). *Cross-validatory choice and assessment of statistical predictions.* JRSS B 36(2):111-147.
+- Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Febrero-Bande, M., Oviedo de la Fuente, M. (2012). *Statistical computing in functional data analysis: fda.usc.* JSS 51(4):1-28.
+- Borggaard, C., Thodberg, H.H. (1992). *Optimal minimal neural interpretation of spectra.* Analytical Chemistry 64(5):545-551.
