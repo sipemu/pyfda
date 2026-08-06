@@ -37,8 +37,17 @@ jobs:
         run: |
           source .venv/bin/activate
           maturin develop --release
-      - name: Build and deploy
+      - name: Build and gate on figure errors
         # PYTHONPATH exposes scripts/docs_fig.py to markdown-exec code blocks.
+        # Build once, then FAIL if any figure block silently errored (markdown-exec
+        # renders a traceback in place without failing the build).
+        env:
+          PYTHONPATH: scripts
+        run: |
+          source .venv/bin/activate
+          mkdocs build --strict
+          python scripts/check_docs_figures.py site
+      - name: Deploy
         env:
           PYTHONPATH: scripts
         run: |
