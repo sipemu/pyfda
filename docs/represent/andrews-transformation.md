@@ -254,8 +254,10 @@ Because the transform is an isometry, PCA and k-means on Andrews curves return *
 
 ## References
 
-- Andrews, D.F. (1972). Plots of high-dimensional data. *Biometrics* 28(1), 125-136.
-- Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Andrews, D.F. (1972). *Plots of high-dimensional data.* Biometrics 28(1), 125-136.
+- Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Wegman, E.J. (1990). *Hyperdimensional data analysis using parallel coordinates.* Journal of the American Statistical Association 85(411), 664-675.
+- López-Pintado, S., Romo, J. (2009). *On the concept of depth for functional data.* Journal of the American Statistical Association 104(486), 718-734.
 
 ## API summary
 

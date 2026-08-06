@@ -365,3 +365,13 @@ changing the Phase I model:
     MEWMA/AMEWMA, iterative Phase I cleaning, and multivariate FPCA -- do not yet have a
     dedicated Python binding; the pages here show how to reproduce the most common of
     those (EWMA, run rules, partial-domain charts) directly from the exposed primitives.
+
+---
+
+## References
+
+- Colosimo, B. M., & Pacella, M. (2010). *A comparison study of control charts for statistical monitoring of functional data.* International Journal of Production Research, 48(6), 1575–1601.
+- Hotelling, H. (1947). *Multivariate quality control, illustrated by the air testing of sample bombsights.* In C. Eisenhart, M. W. Hastay, & W. A. Wallis (Eds.), Techniques of Statistical Analysis (pp. 111–184). McGraw-Hill.
+- Jackson, J. E., & Mudholkar, G. S. (1979). *Control procedures for residuals associated with principal component analysis.* Technometrics, 21(3), 341–349.
+- Ramsay, J. O., & Silverman, B. W. (2005). *Functional Data Analysis* (2nd ed.). Springer.
+- Grasso, M., Colosimo, B. M., & Pacella, M. (2014). *Profile monitoring via sensor fusion: the use of PCA methods for multi-channel data.* International Journal of Production Research, 52(20), 6110–6135.

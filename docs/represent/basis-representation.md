@@ -428,5 +428,7 @@ All functions are imported from `fdars.basis`.
 
 ## References
 
-- Ramsay, J.O. and Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
-- Eilers, P.H.C. and Marx, B.D. (1996). Flexible smoothing with B-splines and penalties. *Statistical Science* 11(2), 89-121.
+- Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Eilers, P.H.C., Marx, B.D. (1996). *Flexible smoothing with B-splines and penalties.* Statistical Science 11(2), 89-121.
+- de Boor, C. (1978). *A Practical Guide to Splines.* Springer.
+- Craven, P., Wahba, G. (1979). *Smoothing noisy data with spline functions: estimating the correct degree of smoothing by the method of generalized cross-validation.* Numerische Mathematik 31(4), 377-403.

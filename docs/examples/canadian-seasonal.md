@@ -440,3 +440,9 @@ verdict above. Any apparent slope is weather noise, not a systematic shift.
   second weather variable.
 </content>
 </invoke>
+
+## References
+
+- Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Cleveland, R.B., Cleveland, W.S., McRae, J.E., Terpenning, I. (1990). *STL: a seasonal-trend decomposition procedure based on loess.* Journal of Official Statistics 6(1):3-73.
+- Golyandina, N., Nekrutkin, V., Zhigljavsky, A. (2001). *Analysis of Time Series Structure: SSA and Related Techniques.* Chapman & Hall/CRC.

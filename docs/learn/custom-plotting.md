@@ -782,6 +782,17 @@ page is a variation on that spine.
 
 ---
 
+## References
+
+- Ramsay, J. O. & Silverman, B. W. (2005). *Functional Data Analysis* (2nd ed.).
+  Springer. (Ch. 1, plotting and displaying functional data samples.)
+- Sun, Y. & Genton, M. G. (2011). Functional Boxplots. *Journal of Computational
+  and Graphical Statistics*, 20(2), 316--334.
+- López-Pintado, S. & Romo, J. (2009). On the Concept of Depth for Functional
+  Data. *Journal of the American Statistical Association*, 104(486), 718--734.
+- Arribas-Gil, A. & Romo, J. (2014). Shape Outlier Detection and Visualization
+  for Functional Data: The Outliergram. *Biostatistics*, 15(4), 603--619.
+
 ## Next Steps
 
 - [Depth Functions](../represent/depth-functions.md) -- the depth measures that

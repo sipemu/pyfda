@@ -443,3 +443,10 @@ low-dimensional footprint of the same structure k-means exploited.
 - [Outlier detection](andrews-wine.md) — flagging atypical wines.
 - [Clustering](../analyze/clustering.md) — the general functional-clustering article.
 </content>
+
+## References
+
+- Andrews, D.F. (1972). *Plots of high-dimensional data.* Biometrics 28(1):125-136.
+- Jacques, J., Preda, C. (2014). *Functional data clustering: a survey.* Advances in Data Analysis and Classification 8(3):231-255.
+- Bezdek, J.C. (1981). *Pattern Recognition with Fuzzy Objective Function Algorithms.* Plenum Press.
+- Aeberhard, S., Coomans, D., de Vel, O. (1994). *Comparative analysis of statistical pattern recognition methods.* Pattern Recognition 27(8):1065-1077.

@@ -258,3 +258,9 @@ two-sample test.
 
 - [Tolerance bands](tolerance-bands.md) -- the confidence and tolerance bands that
   underlie the SCB used here.
+
+## References
+
+- Dette, H., Kokot, K. (2021). *Detecting relevant differences in the covariance operators of functional time series.* Biometrika, 108(4), 895–913.
+- Wellek, S. (2010). *Testing Statistical Hypotheses of Equivalence and Noninferiority*, 2nd ed. Chapman & Hall/CRC.
+- Degras, D.A. (2011). *Simultaneous confidence bands for nonparametric regression with functional data.* Statistica Sinica, 21(4), 1735–1765.

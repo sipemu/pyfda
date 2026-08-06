@@ -696,6 +696,20 @@ print(render(f))
 | `add_error_pointwise()`         | i.i.d. Gaussian measurement noise                   |
 | `add_error_curve()`             | curve-level (constant) offset per curve             |
 
+## References
+
+- Ramsay, J. O. & Silverman, B. W. (2005). *Functional Data Analysis* (2nd ed.).
+  Springer. (Ch. 8--9, the Karhunen--Loève expansion and functional principal
+  components.)
+- Rasmussen, C. E. & Williams, C. K. I. (2006). *Gaussian Processes for Machine
+  Learning.* MIT Press.
+- Karhunen, K. (1947). Über lineare Methoden in der Wahrscheinlichkeitsrechnung.
+  *Annales Academiae Scientiarum Fennicae, Series A. I. Mathematica-Physica*, 37,
+  1--79.
+- Hall, P., Müller, H.-G. & Wang, J.-L. (2006). Properties of Principal Component
+  Methods for Functional and Longitudinal Data Analysis. *The Annals of
+  Statistics*, 34(3), 1493--1517.
+
 ## Next Steps
 
 - [Introduction to fdars](introduction.md) -- if you haven't read it yet.

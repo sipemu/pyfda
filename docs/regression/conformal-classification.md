@@ -292,3 +292,9 @@ returns singleton sets. The classifier to prefer is the one giving the smallest 
 - [Uncertainty quantification](uncertainty-quantification.md) — bootstrap and analytic
   intervals; contrast with the distribution-free guarantee here.
 - [Cross-validation](cross-validation.md) — tune the base classifier before wrapping it.
+
+## References
+
+- Vovk, V., Gammerman, A., & Shafer, G. (2005). *Algorithmic Learning in a Random World.* Springer.
+- Sadinle, M., Lei, J., & Wasserman, L. (2019). *Least ambiguous set-valued classifiers with bounded error levels.* Journal of the American Statistical Association, 114(525), 223–234.
+- Romano, Y., Sesia, M., & Candès, E. J. (2020). *Classification with valid and adaptive coverage.* Advances in Neural Information Processing Systems, 33.

@@ -309,3 +309,4 @@ See also [Elastic Alignment](elastic-alignment.md) for the underlying SRSF machi
 
 - Srivastava, A., Klassen, E., Joshi, S.H., Jermyn, I.H. (2011). *Shape analysis of elastic curves in Euclidean spaces.* IEEE TPAMI 33(7):1415-1428.
 - Srivastava, A., Klassen, E. (2016). *Functional and Shape Data Analysis.* Springer. (Exp/log maps on the SRVF sphere.)
+- Kurtek, S., Srivastava, A., Klassen, E., Ding, Z. (2012). *Statistical modeling of curves using shapes and related features.* Journal of the American Statistical Association 107(499):1152-1165.

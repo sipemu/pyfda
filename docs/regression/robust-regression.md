@@ -408,3 +408,16 @@ print(render(f))
 
 !!! warning
     Robust methods protect against outliers in the **response** $y_i$. They do not guard against leverage points (outlying $x_i(t)$). For high-leverage outliers, consider depth-based trimming before fitting.
+
+## See also
+
+- [Scalar-on-function regression](scalar-on-function.md) — the OLS baseline these methods harden.
+- [Regression diagnostics](regression-diagnostics.md) — locate the influential points before down-weighting them.
+- [Outlier detection](../analyze/outlier-detection.md) — depth-based screening for leverage points.
+
+## References
+
+- Huber, P. J. (1964). *Robust estimation of a location parameter.* Annals of Mathematical Statistics, 35(1), 73–101.
+- Huber, P. J., & Ronchetti, E. M. (2009). *Robust Statistics* (2nd ed.). Wiley.
+- Maronna, R. A., Martin, R. D., Yohai, V. J., & Salibián-Barrera, M. (2019). *Robust Statistics: Theory and Methods* (2nd ed.). Wiley.
+- Cardot, H., Crambes, C., & Sarda, P. (2005). *Quantile regression when the covariates are functions.* Journal of Nonparametric Statistics, 17(7), 841–856.

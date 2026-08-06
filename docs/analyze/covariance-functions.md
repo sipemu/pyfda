@@ -311,3 +311,9 @@ print(f"Mean silhouette: {np.mean(sil):.3f}")
   rely on the eigenstructure of $\hat C$ (FPCA scores) shown above.
 - [Seasonal analysis](seasonal-analysis.md) -- the periodic kernel is the stochastic
   counterpart of the deterministic periodicity analysed there.
+
+## References
+
+- Rasmussen, C.E., Williams, C.K.I. (2006). *Gaussian Processes for Machine Learning.* MIT Press.
+- Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Yao, F., Müller, H.G., Wang, J.L. (2005). *Functional data analysis for sparse longitudinal data.* Journal of the American Statistical Association, 100(470), 577–590.

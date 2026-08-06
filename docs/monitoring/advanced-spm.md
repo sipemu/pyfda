@@ -341,3 +341,14 @@ rather than merely *that* it moved.
     the compiled core; the projection step (`(Xc * w) @ loadings`) is the only piece done
     in NumPy on this page, and it reproduces `spm_monitor`'s internal $T^2$ to machine
     precision.
+
+---
+
+## References
+
+- Roberts, S. W. (1959). *Control chart tests based on geometric moving averages.* Technometrics, 1(3), 239–250.
+- Lucas, J. M., & Saccucci, M. S. (1990). *Exponentially weighted moving average control schemes: properties and enhancements.* Technometrics, 32(1), 1–29.
+- Nelson, L. S. (1984). *The Shewhart control chart — tests for special causes.* Journal of Quality Technology, 16(4), 237–239.
+- Western Electric Company. (1956). *Statistical Quality Control Handbook.* Western Electric Co., Indianapolis.
+- Colosimo, B. M., & Pacella, M. (2010). *A comparison study of control charts for statistical monitoring of functional data.* International Journal of Production Research, 48(6), 1575–1601.
+- Kourti, T., & MacGregor, J. F. (1996). *Multivariate SPC methods for process and product monitoring.* Journal of Quality Technology, 28(4), 409–428.

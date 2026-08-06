@@ -445,3 +445,9 @@ control windows.
   EWMA charts for slow drifts, run rules, and ARL analysis.
 - [Inline Quality Monitoring](inline-monitoring.md) — detection power and
   false-alarm trade-offs, with precision/recall/F1 over fault severity.
+
+## References
+
+- Birol, G., Undey, C., Cinar, A. (2002). *A modular simulation package for fed-batch fermentation: penicillin production.* Computers & Chemical Engineering 26(11):1553-1565.
+- Nomikos, P., MacGregor, J.F. (1995). *Multivariate SPC charts for monitoring batch processes.* Technometrics 37(1):41-59.
+- Colosimo, B.M., Pacella, M. (2010). *A comparison study of control charts for functional data.* Quality and Reliability Engineering International 26(4):327-342.

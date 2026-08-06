@@ -566,6 +566,20 @@ Key takeaways:
 
 ---
 
+## References
+
+- Ramsay, J. O. & Silverman, B. W. (2005). *Functional Data Analysis* (2nd ed.).
+  Springer. (Ch. 5, Smoothing Functional Data; Ch. 19, Principal Differential
+  Analysis.)
+- Ramsay, J. O. (1996). Principal Differential Analysis: Data Reduction by
+  Differential Operators. *Journal of the Royal Statistical Society, Series B*,
+  58(3), 495--508.
+- Tuddenham, R. D. & Snyder, M. M. (1954). Physical Growth of California Boys and
+  Girls from Birth to Eighteen Years. *University of California Publications in
+  Child Development*, 1(2), 183--364.
+- Fan, J. & Gijbels, I. (1996). *Local Polynomial Modelling and Its Applications.*
+  Chapman & Hall.
+
 ## Next Steps
 
 - [Smoothing](smoothing.md) -- choose the right smoother before differentiating.

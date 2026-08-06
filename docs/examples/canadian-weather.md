@@ -370,3 +370,9 @@ regions hardest to tell apart statistically are the ones it confuses.
 - [Scalar-on-function regression](../regression/scalar-on-function.md) for the
   complementary direction (curve predictors, scalar response).
 </content>
+
+## References
+
+- Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
+- Ramsay, J.O., Hooker, G., Graves, S. (2009). *Functional Data Analysis with R and MATLAB.* Springer.
+- Febrero-Bande, M., Oviedo de la Fuente, M. (2012). *Statistical computing in functional data analysis: fda.usc.* JSS 51(4):1-28.

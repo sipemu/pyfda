@@ -505,3 +505,9 @@ into a specific, checkable list of measurements.
   [statistical process monitoring](../monitoring/spm.md) for the general
   monitoring tools.
 </content>
+
+## References
+
+- Andrews, D.F. (1972). *Plots of high-dimensional data.* Biometrics 28(1):125-136.
+- Sun, Y., Genton, M.G. (2011). *Functional boxplots.* JCGS 20(2):316-334.
+- Colosimo, B.M., Pacella, M. (2010). *A comparison study of control charts for statistical monitoring of functional data.* Quality and Reliability Engineering International 26(4):327-342.
