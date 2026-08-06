@@ -27,7 +27,7 @@ y_i = \alpha + \int_0^1 X_i(t)\,\beta(t)\,dt + \varepsilon_i ,
 \qquad \varepsilon_i \sim \mathcal N(0, \sigma^2).
 $$
 
-This is what [`fregre_lm`](functional-regression.md) fits (via an FPCA basis
+This is what [`fregre_lm`](scalar-on-function.md) fits (via an FPCA basis
 truncation). It is optimal only when the $X_i$ are already **registered** —
 i.e. corresponding features occur at the same $t$ across curves.
 

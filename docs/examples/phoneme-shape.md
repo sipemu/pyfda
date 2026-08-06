@@ -302,7 +302,7 @@ pooled, the phase fraction is small, and elastic alignment spends its freedom
 
 ## See also
 
-- [Alignment and elastic distances](../analyze/alignment.md) — Karcher means,
+- [Alignment and elastic distances](../align/elastic-alignment.md) — Karcher means,
   SRSF, and when phase variation *is* the signal.
 - [Classification](../regression/classification.md) — supervised LDA/QDA/k-NN on
   these same spectra, where the frequency axis stays fixed.

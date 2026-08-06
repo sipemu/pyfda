@@ -59,7 +59,7 @@ Because every prediction is genuinely out-of-sample, $\text{CV}(k)$ is an (appro
 unbiased estimate of test error. Selecting $\hat k = \arg\min_k \text{CV}(k)$ is **model
 selection**: we search the grid of component counts and keep the one with the lowest honest
 error. This is the resampling counterpart to the information criteria in
-[`model_selection_ncomp`](scalar-on-function.md#4-model-selection) (GCV/AIC/BIC), which
+[`model_selection_ncomp`](scalar-on-function.md#5-model-selection-by-information-criteria) (GCV/AIC/BIC), which
 approximate the same quantity analytically without refitting.
 
 The choice of $K$ (the number of *folds*, not components) is itself a
