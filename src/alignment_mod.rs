@@ -1988,7 +1988,95 @@ pub fn landmark_detect_and_register<'py>(
     landmark_result_to_dict(py, &result)
 }
 
+// ─── Elastic changepoint ────────────────────────────────────────────────────
+
+/// Detect a distributional changepoint in a sequence of curves (elastic).
+///
+/// Matches R `elastic.changepoint`. A CUSUM test in amplitude space, phase
+/// space, or elastic-FPCA space, with a Monte-Carlo p-value.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Ordered curves, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// kind : str, optional
+///     ``amplitude``, ``phase``, or ``fpca`` (default ``amplitude``).
+/// lam : float, optional
+///     Elastic alignment penalty (default 0.0).
+/// max_iter : int, optional
+///     Karcher-mean iterations (default 30).
+/// n_mc : int, optional
+///     Monte-Carlo replicates for the p-value (default 200).
+/// seed : int, optional
+///     RNG seed (default 42).
+/// ncomp : int, optional
+///     Components for the ``fpca`` variant (default 5).
+/// pca_method : str, optional
+///     ``vertical``, ``horizontal``, or ``joint`` for the ``fpca`` variant
+///     (default ``joint``).
+///
+/// Returns
+/// -------
+/// dict
+///     ``changepoint`` (index), ``test_statistic``, ``p_value``, ``cusum_values``.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, kind="amplitude", lam=0.0, max_iter=30, n_mc=200, seed=42, ncomp=5, pca_method="joint"))]
+#[allow(clippy::too_many_arguments)]
+pub fn elastic_changepoint<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    kind: &str,
+    lam: f64,
+    max_iter: usize,
+    n_mc: usize,
+    seed: u64,
+    ncomp: usize,
+    pca_method: &str,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = match kind.to_ascii_lowercase().as_str() {
+        "amplitude" | "amp" => to_pyresult(fdars_core::elastic_changepoint::elastic_amp_changepoint(
+            &mat, &av, lam, max_iter, n_mc, seed,
+        ))?,
+        "phase" | "ph" => to_pyresult(fdars_core::elastic_changepoint::elastic_ph_changepoint(
+            &mat, &av, lam, max_iter, n_mc, seed,
+        ))?,
+        "fpca" => {
+            use fdars_core::elastic_changepoint::FpcaChangepointMethod::*;
+            let pm = match pca_method.to_ascii_lowercase().as_str() {
+                "vertical" | "vert" => Vertical,
+                "horizontal" | "horiz" => Horizontal,
+                "joint" => Joint,
+                other => {
+                    return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                        "unknown pca_method '{other}' (expected vertical/horizontal/joint)"
+                    )))
+                }
+            };
+            to_pyresult(fdars_core::elastic_changepoint::elastic_fpca_changepoint(
+                &mat, &av, pm, ncomp, lam, max_iter, n_mc, seed,
+            ))?
+        }
+        other => {
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "unknown changepoint kind '{other}' (expected amplitude/phase/fpca)"
+            )))
+        }
+    };
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("changepoint", result.changepoint)?;
+    dict.set_item("test_statistic", result.test_statistic)?;
+    dict.set_item("p_value", result.p_value)?;
+    dict.set_item("cusum_values", vec_to_numpy1d(py, result.cusum_values))?;
+    Ok(dict)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(elastic_changepoint, m)?)?;
     m.add_function(wrap_pyfunction!(detect_landmarks, m)?)?;
     m.add_function(wrap_pyfunction!(landmark_register, m)?)?;
     m.add_function(wrap_pyfunction!(landmark_detect_and_register, m)?)?;
