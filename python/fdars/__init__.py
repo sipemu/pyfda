@@ -58,8 +58,13 @@ for _name in _submodule_names:
     setattr(_sys.modules[__name__], _name, _submod)
 
 # Pure-Python convenience layers (built on top of the native modules).
-from fdars import datasets, results  # noqa: E402
+from fdars import datasets, results, metrics, covariance  # noqa: E402
 from fdars import plot  # noqa: E402  (matplotlib imported lazily inside plot.*)
+from fdars import _augment as _augment  # noqa: E402
+
+# Inject pure-Python orchestration helpers (e.g. clustering.cluster_optim) into
+# the native submodule namespaces so they are reachable at the R-style path.
+_augment.install()
 
 __all__ = [
     "Fdata",
@@ -67,6 +72,8 @@ __all__ = [
     "datasets",
     "results",
     "plot",
+    "metrics",
+    "covariance",
 ]
 
 # Clean up namespace
