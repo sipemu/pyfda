@@ -10,6 +10,41 @@ Baseline: Python 264 fns / 16 modules · R 315 exports / 36 source files · core
 
 ---
 
+## PROGRESS (branch feat/r-parity-phase1)
+
+**Phase 4 — ergonomics: DONE.** fdars.datasets (6 datasets in wheel), fdars.plot
+(8 matplotlib plotters, optional extra), fdars.results (result objects with
+.predict/.summary), Fdata methods (concat/int_simpson/2-D norm/scale_minmax/to_pc/to_basis),
+submodules exposed as attributes.
+
+**Phase 1 — bindings landed (batches A–G):**
+- A: depth.random_projection_deriv_1d, metric.int_simpson, metric.inprod,
+  explain.andrews_transform/andrews_loadings
+- B: seasonal.estimate_period_acf, seasonal.detect_multiple_periods
+- C: alignment.detect_landmarks / landmark_register / landmark_detect_and_register
+- D: regression.fregre_np_cv, regression.fregre_np_mixed
+- E: spm.spm_cusum, spm.spm_ewma, spm.t2_limit_robust, spm.spe_limit_robust
+- F: alignment.elastic_changepoint (amplitude/phase/fpca)
+- G (pure-Python): fdars.metrics (pred.*), fdars.covariance (8 kernels + compose +
+  make_gaussian_process + r_brownian/r_bridge/r_ou), clustering.cluster_optim/cluster_init
+Each batch numerically validated; all 61 existing tests still pass.
+
+**Remaining (Phase 2 subsystems + Phase 3 — not yet done):**
+- irregular functional data (fdars.irreg over irreg_fdata/) — L
+- functional mixed models (famm.rs) — L
+- 2D FOSR (function_on_scalar_2d.rs) — L
+- SPM: MEWMA, AMEWMA, iterative Phase-I, partial/FRCC/profile/elastic monitoring,
+  mfpca (need multi-matrix / chart-state design) — L
+- scalar_on_shape (config struct + chained predict) — M
+- fdars.tests module (flm.test, fmean.test, group.test/distance, fmm.test.fixed) — M
+- generic/CV conformal wrappers (jackknife+, cv-conformal, generic) — M
+- misc: fregre.pc/basis variants, elastic.attribution, fdata.bootstrap, depth-outlier
+  pond/trim/boxplot (pure-Python) — S/M
+
+---
+
+---
+
 ## Phase 1 — Quick-win bindings (core exists, thin PyO3 wrappers) — effort S
 
 Bind functions whose Rust core already exists; each is a `#[pyfunction]` + re-export.
