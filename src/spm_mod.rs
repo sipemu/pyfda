@@ -614,7 +614,241 @@ pub fn nelson_rules<'py>(
     Ok(list)
 }
 
+fn parse_control_limit_method(s: &str) -> PyResult<fdars_core::spm::ControlLimitMethod> {
+    use fdars_core::spm::ControlLimitMethod::*;
+    match s.to_ascii_lowercase().as_str() {
+        "parametric" => Ok(Parametric),
+        "empirical" => Ok(Empirical),
+        other => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "unknown control-limit method '{other}' (expected parametric or empirical)"
+        ))),
+    }
+}
+
+/// Functional CUSUM control chart (fit Phase I + monitor).
+///
+/// Matches R `spm.cusum`. Fits an FPCA-based Phase-I chart on `train_data`, then
+/// runs a CUSUM monitor on `sequential_data`.
+///
+/// Parameters
+/// ----------
+/// train_data : numpy.ndarray
+///     In-control training curves, shape (n_train, m).
+/// sequential_data : numpy.ndarray
+///     Curves to monitor, shape (n_seq, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// ncomp : int, optional
+///     Number of principal components (default 5).
+/// alpha : float, optional
+///     Significance level (default 0.05).
+/// k : float, optional
+///     CUSUM reference/allowance value (default 0.5).
+/// h : float, optional
+///     CUSUM decision interval (default 5.0).
+/// multivariate : bool, optional
+///     Use the multivariate MCUSUM statistic (default False).
+///
+/// Returns
+/// -------
+/// dict
+///     ``cusum_statistic``, ``ucl``, ``alarm``, ``scores``, ``spe``,
+///     ``spe_limit``, ``spe_alarm`` (plus ``cusum_plus``/``cusum_minus`` for the
+///     univariate chart).
+#[pyfunction]
+#[pyo3(signature = (train_data, sequential_data, argvals, ncomp=5, alpha=0.05, k=0.5, h=5.0, multivariate=false))]
+#[allow(clippy::too_many_arguments)]
+pub fn spm_cusum<'py>(
+    py: Python<'py>,
+    train_data: PyReadonlyArray2<'py, f64>,
+    sequential_data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    ncomp: usize,
+    alpha: f64,
+    k: f64,
+    h: f64,
+    multivariate: bool,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let train = numpy2d_to_fdmatrix(train_data)?;
+    let seq = numpy2d_to_fdmatrix(sequential_data)?;
+    let av = numpy1d_to_vec(argvals);
+    let sc = fdars_core::spm::SpmConfig {
+        ncomp,
+        alpha,
+        ..Default::default()
+    };
+    let chart = to_pyresult(fdars_core::spm::spm_phase1(&train, &av, &sc))?;
+    let cc = fdars_core::spm::CusumConfig {
+        k,
+        h,
+        ncomp,
+        alpha,
+        multivariate,
+        ..Default::default()
+    };
+    let res = to_pyresult(fdars_core::spm::spm_cusum_monitor(&chart, &seq, &av, &cc))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("cusum_statistic", vec_to_numpy1d(py, res.cusum_statistic))?;
+    dict.set_item("ucl", res.ucl)?;
+    dict.set_item("alarm", bool_vec_to_numpy1d(py, res.alarm))?;
+    dict.set_item("scores", fdmatrix_to_numpy2d(py, &res.scores))?;
+    dict.set_item("spe", vec_to_numpy1d(py, res.spe))?;
+    dict.set_item("spe_limit", res.spe_limit)?;
+    dict.set_item("spe_alarm", bool_vec_to_numpy1d(py, res.spe_alarm))?;
+    match res.cusum_plus {
+        Some(m) => dict.set_item("cusum_plus", fdmatrix_to_numpy2d(py, &m))?,
+        None => dict.set_item("cusum_plus", py.None())?,
+    }
+    match res.cusum_minus {
+        Some(m) => dict.set_item("cusum_minus", fdmatrix_to_numpy2d(py, &m))?,
+        None => dict.set_item("cusum_minus", py.None())?,
+    }
+    Ok(dict)
+}
+
+/// Functional EWMA control chart (fit Phase I + monitor).
+///
+/// Matches R `spm.ewma`. Fits an FPCA-based Phase-I chart on `train_data`, then
+/// runs an EWMA monitor (T^2 and SPE) on `sequential_data`.
+///
+/// Parameters
+/// ----------
+/// train_data : numpy.ndarray
+///     In-control training curves, shape (n_train, m).
+/// sequential_data : numpy.ndarray
+///     Curves to monitor, shape (n_seq, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// ncomp : int, optional
+///     Number of principal components (default 5).
+/// alpha : float, optional
+///     Significance level (default 0.05).
+/// lam : float, optional
+///     EWMA smoothing parameter in (0, 1] (default 0.2).
+///
+/// Returns
+/// -------
+/// dict
+///     ``smoothed_scores``, ``t2``, ``spe``, ``t2_limit``, ``spe_limit``,
+///     ``t2_alarm``, ``spe_alarm``.
+#[pyfunction]
+#[pyo3(signature = (train_data, sequential_data, argvals, ncomp=5, alpha=0.05, lam=0.2))]
+pub fn spm_ewma<'py>(
+    py: Python<'py>,
+    train_data: PyReadonlyArray2<'py, f64>,
+    sequential_data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    ncomp: usize,
+    alpha: f64,
+    lam: f64,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let train = numpy2d_to_fdmatrix(train_data)?;
+    let seq = numpy2d_to_fdmatrix(sequential_data)?;
+    let av = numpy1d_to_vec(argvals);
+    let sc = fdars_core::spm::SpmConfig {
+        ncomp,
+        alpha,
+        ..Default::default()
+    };
+    let chart = to_pyresult(fdars_core::spm::spm_phase1(&train, &av, &sc))?;
+    let ec = fdars_core::spm::EwmaConfig {
+        lambda: lam,
+        ncomp,
+        alpha,
+        ..Default::default()
+    };
+    let res = to_pyresult(fdars_core::spm::spm_ewma_monitor(&chart, &seq, &av, &ec))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("smoothed_scores", fdmatrix_to_numpy2d(py, &res.smoothed_scores))?;
+    dict.set_item("t2", vec_to_numpy1d(py, res.t2))?;
+    dict.set_item("spe", vec_to_numpy1d(py, res.spe))?;
+    dict.set_item("t2_limit", res.t2_limit)?;
+    dict.set_item("spe_limit", res.spe_limit)?;
+    dict.set_item("t2_alarm", bool_vec_to_numpy1d(py, res.t2_alarm))?;
+    dict.set_item("spe_alarm", bool_vec_to_numpy1d(py, res.spe_alarm))?;
+    Ok(dict)
+}
+
+/// Robust Hotelling T^2 control limit.
+///
+/// Matches R `spm.limit.robust` (T^2). Estimates the upper control limit from
+/// in-control T^2 values using a parametric or empirical method.
+///
+/// Parameters
+/// ----------
+/// t2_values : numpy.ndarray
+///     In-control T^2 statistics.
+/// ncomp : int
+///     Number of principal components used for the T^2 statistic.
+/// alpha : float, optional
+///     Significance level (default 0.05).
+/// method : str, optional
+///     ``parametric`` or ``empirical`` (default ``empirical``).
+///
+/// Returns
+/// -------
+/// dict
+///     ``ucl``, ``alpha``, ``description``.
+#[pyfunction]
+#[pyo3(signature = (t2_values, ncomp, alpha=0.05, method="empirical"))]
+pub fn t2_limit_robust<'py>(
+    py: Python<'py>,
+    t2_values: PyReadonlyArray1<'py, f64>,
+    ncomp: usize,
+    alpha: f64,
+    method: &str,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let vals = numpy1d_to_vec(t2_values);
+    let m = parse_control_limit_method(method)?;
+    let cl = to_pyresult(fdars_core::spm::t2_limit_robust(&vals, ncomp, alpha, &m))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("ucl", cl.ucl)?;
+    dict.set_item("alpha", cl.alpha)?;
+    dict.set_item("description", cl.description)?;
+    Ok(dict)
+}
+
+/// Robust SPE (squared prediction error) control limit.
+///
+/// Matches R `spm.limit.robust` (SPE). Estimates the SPE upper control limit
+/// from in-control SPE values using a parametric or empirical method.
+///
+/// Parameters
+/// ----------
+/// spe_values : numpy.ndarray
+///     In-control SPE statistics.
+/// alpha : float, optional
+///     Significance level (default 0.05).
+/// method : str, optional
+///     ``parametric`` or ``empirical`` (default ``empirical``).
+///
+/// Returns
+/// -------
+/// dict
+///     ``ucl``, ``alpha``, ``description``.
+#[pyfunction]
+#[pyo3(signature = (spe_values, alpha=0.05, method="empirical"))]
+pub fn spe_limit_robust<'py>(
+    py: Python<'py>,
+    spe_values: PyReadonlyArray1<'py, f64>,
+    alpha: f64,
+    method: &str,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let vals = numpy1d_to_vec(spe_values);
+    let m = parse_control_limit_method(method)?;
+    let cl = to_pyresult(fdars_core::spm::spe_limit_robust(&vals, alpha, &m))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("ucl", cl.ucl)?;
+    dict.set_item("alpha", cl.alpha)?;
+    dict.set_item("description", cl.description)?;
+    Ok(dict)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(spm_cusum, m)?)?;
+    m.add_function(wrap_pyfunction!(spm_ewma, m)?)?;
+    m.add_function(wrap_pyfunction!(t2_limit_robust, m)?)?;
+    m.add_function(wrap_pyfunction!(spe_limit_robust, m)?)?;
     m.add_function(wrap_pyfunction!(spm_phase1, m)?)?;
     m.add_function(wrap_pyfunction!(spm_monitor, m)?)?;
     m.add_function(wrap_pyfunction!(hotelling_t2, m)?)?;
