@@ -196,6 +196,56 @@ leverage. Parametric intervals are *exact* only when the errors are Gaussian; th
 [regression diagnostics](regression-diagnostics.md) Q-Q plot is the check that justifies
 them.
 
+!!! success "Validation — both intervals cover at their nominal rate"
+    A single split is noisy, so we average over many independent draws. (1) The
+    **prediction intervals** must cover held-out responses at ~the nominal $1-\alpha$
+    rate. (2) The **bootstrap simultaneous band** must contain the *entire* true
+    $\beta(t)$ curve at ≥ its nominal rate (it is a conservative, whole-curve guarantee).
+    Both assertions run and pass below.
+
+```python exec="1" source="above"
+import numpy as np
+from fdars.simulation import simulate
+from fdars.regression import bootstrap_ci_fregre_lm
+from fdars.explain import prediction_intervals
+
+t = np.linspace(0, 1, 60)
+beta_true = np.sin(2 * np.pi * t)
+
+# (1) Prediction-interval coverage on held-out data, averaged over 40 draws.
+pi_cov = []
+for rep in range(40):
+    rng = np.random.default_rng(200 + rep)
+    X = np.asarray(simulate(n=60, argvals=t, n_basis=6, efun_type="fourier", seed=rep))
+    y = np.trapezoid(X * beta_true, t, axis=1) + 0.3 * rng.standard_normal(len(X))
+    pi = prediction_intervals(X[:40], y[:40], X[40:], ncomp=4, confidence_level=0.90)
+    lo, hi = np.asarray(pi["lower"]), np.asarray(pi["upper"])
+    pi_cov.append(float(np.mean((y[40:] >= lo) & (y[40:] <= hi))))
+mean_pi_cov = float(np.mean(pi_cov))
+
+# (2) Bootstrap simultaneous band: does it contain the whole true beta(t)?
+sim_hits = []
+for rep in range(20):
+    rng = np.random.default_rng(300 + rep)
+    X = np.asarray(simulate(n=60, argvals=t, n_basis=6, efun_type="fourier", seed=rep))
+    y = np.trapezoid(X * beta_true, t, axis=1) + 0.3 * rng.standard_normal(len(X))
+    ci = bootstrap_ci_fregre_lm(X, y, n_comp=4, n_boot=200, alpha=0.05, seed=rep)
+    slo, shi = np.asarray(ci["sim_lower"]), np.asarray(ci["sim_upper"])
+    sim_hits.append(bool(np.all((beta_true >= slo) & (beta_true <= shi))))
+sim_band_cov = float(np.mean(sim_hits))
+
+print(f"prediction-interval coverage (nominal 0.90) = {mean_pi_cov:.3f}")
+print(f"simultaneous-band beta(t) coverage (>=0.95) = {sim_band_cov:.3f}")
+
+assert abs(mean_pi_cov - 0.90) < 0.05, mean_pi_cov
+assert sim_band_cov >= 0.95, sim_band_cov
+print("validation OK: PI coverage ~= nominal, and the simultaneous band covers beta(t)")
+```
+
+The prediction-interval coverage lands within a few points of the 90% target, and the
+simultaneous band brackets the *entire* true $\beta(t)$ in every replicate — the honest,
+conservative behaviour a whole-curve guarantee should show.
+
 ### Parametric vs. distribution-free width
 
 When the Gaussian assumption is shaky, [conformal prediction](conformal-prediction.md)

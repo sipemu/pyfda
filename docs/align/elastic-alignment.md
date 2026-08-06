@@ -58,6 +58,42 @@ print(render(f))
 !!! info "Fisher-Rao framework"
     All alignment in `fdars` is performed under the **elastic (Fisher-Rao) metric**, the unique Riemannian metric on the function space that is invariant to simultaneous reparameterization. This guarantees the alignment is *proper*: the distance between two functions does not depend on how either is parameterized.
 
+!!! success "Numerical validation"
+    Two ground-truth properties of the elastic machinery, asserted below:
+
+    1. **Alignment removes variance.** After Karcher-mean alignment of a phase-varying sample, the mean pointwise variance must drop, so the variance reduction $\text{VR}=1-\overline{\operatorname{Var}}(\tilde f)/\overline{\operatorname{Var}}(f)$ is strictly positive.
+    2. **Amplitude = elastic distance.** For the residual after optimal alignment, `amplitude_distance` is *by definition* the elastic distance; the two must agree to machine precision.
+
+    ```python exec="1"
+    import numpy as np
+    from fdars.alignment import (
+        karcher_mean, amplitude_distance, elastic_distance,
+    )
+
+    rng = np.random.default_rng(1)
+    n, m = 15, 120
+    t = np.linspace(0, 1, m)
+    base = np.exp(-((t - 0.4) ** 2) / 0.01) + 0.7 * np.exp(-((t - 0.75) ** 2) / 0.006)
+    data = np.zeros((n, m))
+    for i in range(n):
+        warp = t ** rng.uniform(0.7, 1.6)
+        warp = (warp - warp.min()) / np.ptp(warp)
+        data[i] = 3.0 * rng.uniform(0.6, 1.0) * np.interp(t, warp, base)
+
+    aligned = np.asarray(karcher_mean(data, t, lambda_=0.0, max_iter=20, tol=1e-4)["aligned_data"])
+    vr = 1.0 - np.var(aligned, axis=0).mean() / np.var(data, axis=0).mean()
+    assert vr > 0.0, vr
+    print(f"variance reduction after alignment: {vr:.3f}  (> 0 required)")
+
+    # amplitude_distance IS the elastic distance -> agree to machine precision
+    f1 = np.sin(2 * np.pi * t)
+    f2 = np.sin(2 * np.pi * (t - 0.1))
+    d_amp = amplitude_distance(f1, f2, t)
+    d_el = elastic_distance(f1, f2, t)
+    assert abs(d_amp - d_el) < 1e-10, (d_amp, d_el)
+    print(f"amplitude vs elastic distance: {d_amp:.6f} vs {d_el:.6f}  (|diff| = {abs(d_amp - d_el):.2e})")
+    ```
+
 ---
 
 ## How it works (intuition)

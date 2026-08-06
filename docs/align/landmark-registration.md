@@ -278,6 +278,51 @@ a2.set(title=f"Registered to targets {target.round(3)}", xlabel="t")
 print(render(f))
 ```
 
+!!! success "Numerical validation: the warp is exact at the landmarks"
+    The whole point of landmark registration is that each warp *pins* the landmarks: by construction $\gamma_i(\tau_j^\*) = \tau_{i,j}$, so evaluating the piecewise-linear warp at a target time returns the source landmark time exactly. Because the targets are the interpolation knots, `numpy.interp` reproduces them to machine precision -- there is no optimization error, unlike elastic alignment. We assert this directly, then confirm the registered curves' peaks land on the common targets to within one grid step.
+
+    ```python exec="1"
+    import numpy as np
+    from scipy.signal import find_peaks
+
+    rng = np.random.default_rng(5)
+    n, m = 12, 200
+    t = np.linspace(0, 1, m)
+    data = np.zeros((n, m))
+    for i in range(n):
+        p1, p2 = rng.uniform(0.2, 0.4), rng.uniform(0.6, 0.8)
+        data[i] = np.exp(-100 * (t - p1) ** 2) + np.exp(-100 * (t - p2) ** 2)
+
+    def top_peaks(y, k, mp=0.3):
+        idx, props = find_peaks(y, prominence=mp)
+        order = np.argsort(props["prominences"])[::-1][:k]
+        return np.sort(t[idx[order]])
+
+    L = np.array([top_peaks(row, 2) for row in data])   # (n, 2) source landmark times
+    target = L.mean(0)                                   # common targets
+
+    # (1) exactness: gamma_i(target_j) == source landmark_ij  (knots reproduced exactly)
+    max_lm_err = 0.0
+    for i in range(n):
+        knots_tgt = np.concatenate(([0.0], target, [1.0]))
+        knots_src = np.concatenate(([0.0], L[i], [1.0]))
+        gamma_at_targets = np.interp(target, knots_tgt, knots_src)  # evaluated at knots
+        max_lm_err = max(max_lm_err, np.max(np.abs(gamma_at_targets - L[i])))
+    assert max_lm_err < 1e-12, max_lm_err
+    print(f"warp exactness  max|gamma(target)-source|: {max_lm_err:.2e}  (< 1e-12 required)")
+
+    # (2) after registering, the peaks sit on the common targets (within one grid step)
+    def register(y, src):
+        src_time = np.interp(t, np.concatenate(([0.0], target, [1.0])),
+                             np.concatenate(([0.0], src, [1.0])))
+        return np.interp(src_time, t, y)
+
+    reg_peaks = np.array([top_peaks(register(data[i], L[i]), 2) for i in range(n)])
+    peak_err = np.max(np.abs(reg_peaks - target))
+    assert peak_err <= t[1] - t[0], (peak_err, t[1] - t[0])
+    print(f"registered peaks vs targets: {peak_err:.4f}  (grid step = {t[1] - t[0]:.4f})")
+    ```
+
 ---
 
 ## Landmark warps as phase

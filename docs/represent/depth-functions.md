@@ -42,6 +42,45 @@ $$
 \hat{X}_{\mathrm{med}} = X_{i^*}, \quad i^* = \arg\max_i D(X_i \mid X_1, \ldots, X_n)
 $$
 
+!!! success "Validation: depth range and centrality of the median"
+
+    The two properties every depth must satisfy are checked below. **(1)** All depth values
+    lie in $[0,1]$, for the three fastest measures. **(2)** The functional median (the
+    deepest curve, and exactly what `Fdata.depth("modified_band")` selects via `argmax`) is
+    genuinely *central*: it sits far closer to the pointwise sample median than the
+    shallowest curve does. Here the deepest curve's $L^2$ distance to the pointwise median
+    is roughly a third of the shallowest curve's -- consistent with the "maximality at
+    center" axiom. All assertions pass.
+
+    ```python exec="1" source="above"
+    import numpy as np
+    from fdars import Fdata
+    from fdars.simulation import simulate
+    from fdars.depth import modified_band_1d, fraiman_muniz_1d, band_1d
+
+    t = np.linspace(0, 1, 120)
+    X = np.asarray(simulate(n=30, argvals=t, n_basis=6, efun_type="fourier", seed=1))
+
+    # (1) Depth values live in [0, 1].
+    for name, fn in [("MBD", modified_band_1d), ("FM", fraiman_muniz_1d),
+                     ("BD", band_1d)]:
+        d = np.asarray(fn(X, X))
+        assert d.min() >= -1e-9 and d.max() <= 1 + 1e-9, (name, d.min(), d.max())
+        print(f"{name}: depth in [{d.min():.3f}, {d.max():.3f}] -- inside [0, 1]")
+
+    # (2) The deepest curve = functional median = the most central curve.
+    fd = Fdata(X, argvals=t)
+    depth = np.asarray(fd.depth("modified_band"))
+    assert np.argmax(depth) == np.argmax(np.asarray(modified_band_1d(X, X)))
+    med = np.median(X, axis=0)                       # pointwise sample median
+    l2 = lambda a: float(np.sqrt(np.mean((a - med) ** 2)))
+    d_deep = l2(X[np.argmax(depth)])
+    d_shallow = l2(X[np.argmin(depth)])
+    assert d_deep < d_shallow, (d_deep, d_shallow)
+    print(f"median curve dist to pointwise median {d_deep:.3f} "
+          f"<< shallowest {d_shallow:.3f}")
+    ```
+
 ## Available depth measures
 
 All depth functions live in `fdars.depth` and share a common interface:

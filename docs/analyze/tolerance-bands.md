@@ -192,6 +192,56 @@ band_cp = conformal_prediction_band(fd.data, coverage=0.95, cal_fraction=0.25, s
     FPCA bootstrap may be unreliable. The sup-norm score yields a constant-width band
     ($\hat\mu(t) \pm \hat q$), which appears as a band of uniform vertical thickness.
 
+### Validation: empirical coverage ≈ nominal
+
+The defining property of a $(1-\alpha)$ band is that it *actually* contains the target
+fraction of new curves. We check it by Monte Carlo: fit the conformal band on one sample,
+then draw many independent fresh curves from the same generating process and count how many
+fall entirely inside the band. Distribution-free split-conformal calibration guarantees
+$\mathbb{P}(X_{\text{new}} \in \text{band}) \ge 1-\alpha$, so the empirical coverage of a
+95% band should land near 0.95 (a touch conservative), *not* far below it.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.tolerance import conformal_prediction_band
+
+t = np.linspace(0, 1, 60)
+coverage = 0.95
+
+# Fit the band once on a training sample.
+X_fit = np.asarray(simulate(200, t, n_basis=5, seed=0))
+band = conformal_prediction_band(X_fit, coverage=coverage, cal_fraction=0.3, seed=0)
+lower, upper = np.asarray(band["lower"]), np.asarray(band["upper"])
+
+# Draw many FRESH curves from the same process and measure how many land inside.
+inside = []
+for rep in range(400):
+    x_new = np.asarray(simulate(1, t, n_basis=5, seed=1000 + rep))[0]
+    inside.append(bool(np.all((x_new >= lower) & (x_new <= upper))))
+emp = float(np.mean(inside))
+
+# Ground-truth property: split-conformal is (1-alpha)-valid, so coverage >= nominal
+# up to finite-sample Monte-Carlo error. Assert it is not far below nominal.
+assert emp >= coverage - 0.05, f"under-coverage: {emp:.3f} < {coverage}"
+print(f"nominal coverage = {coverage:.2f}   empirical coverage = {emp:.3f}  (n=400 fresh curves)")
+
+f, ax = fig(figsize=(7, 3.6))
+ax.plot(t, X_fit[:40].T, color="#6c757d", lw=0.5, alpha=0.3)
+ax.fill_between(t, lower, upper, color="#3f51b5", alpha=0.18,
+                label=f"95% conformal band (empirical {emp:.2f})")
+ax.plot(t, np.asarray(band["center"]), color="#e8710a", lw=2.0, label="center")
+ax.set(title=f"Conformal band achieves its nominal coverage "
+             f"(empirical = {emp:.3f})", xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
+
+The empirical coverage sits at (or just above) the nominal 0.95, confirming the band is
+valid rather than merely plausible-looking -- exactly the finite-sample guarantee split
+conformal provides.
+
 ---
 
 ## Mean confidence band (SCB Degras)

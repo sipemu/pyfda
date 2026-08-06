@@ -139,6 +139,37 @@ print(render(f_))
 
 The two curves on the left have visibly different $\mathbb{L}^2$ norms; their SRSFs on the right have (to discretization error) the *same* norm — the $\sqrt{\dot\gamma}$ factor makes warping an isometry, which is precisely why the elastic metric behaves.
 
+!!! success "Numerical validation: the SRSF map is an $\mathbb{L}^2$ isometry"
+    The defining property is stronger than norm preservation: warping *both* curves by a common $\gamma$ leaves the $\mathbb{L}^2$ **distance** between their SRSFs unchanged,
+    $\|q_1 - q_2\|_{\mathbb{L}^2} = \|(q_1,\gamma) - (q_2,\gamma)\|_{\mathbb{L}^2}$.
+    Below we take two curves, apply the *same* warp to both, and confirm the SRSF distance is invariant. The residual is pure discretization error (it shrinks as the grid refines), so we assert a relative tolerance.
+
+    ```python exec="1"
+    import numpy as np
+    from fdars.alignment import srsf_transform, reparameterize_curve
+
+    t = np.linspace(0, 1, 200)
+    f1 = np.sin(2 * np.pi * t) + 0.4 * np.sin(4 * np.pi * t)
+    f2 = np.exp(-((t - 0.5) ** 2) / 0.05) + 0.3 * np.cos(2 * np.pi * t)
+
+    gamma = t ** 1.8
+    gamma = (gamma - gamma.min()) / np.ptp(gamma)   # a common monotone warp
+
+    l2 = lambda a: np.sqrt(np.trapezoid(a ** 2, t))
+    q1 = np.asarray(srsf_transform(f1, t))
+    q2 = np.asarray(srsf_transform(f2, t))
+    q1w = np.asarray(srsf_transform(reparameterize_curve(f1, t, gamma), t))
+    q2w = np.asarray(srsf_transform(reparameterize_curve(f2, t, gamma), t))
+
+    d_before = l2(q1 - q2)
+    d_after = l2(q1w - q2w)
+    rel = abs(d_before - d_after) / d_before
+    assert rel < 1e-2, rel      # isometry holds up to discretization
+    print(f"SRSF distance  before warp: {d_before:.6f}")
+    print(f"SRSF distance  after  warp: {d_after:.6f}")
+    print(f"relative deviation (isometry error): {rel:.2e}")
+    ```
+
 ### Geodesic distance in shape space
 
 On the SRSF sphere the geodesic distance between two representatives is the arc length

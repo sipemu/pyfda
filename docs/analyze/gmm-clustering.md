@@ -297,6 +297,20 @@ def responsibilities(Z, lab, K=2):
 for _ in range(15):                      # a few EM iterations
     r = responsibilities(Z, lab); lab = r.argmax(1)
 
+# Validation of the TRANSPARENT E-step (not gmm_cluster, which is unreliable here).
+# 1. Ground-truth property: each row of the responsibility matrix is a proper
+#    probability distribution over the K components -> sums to 1 exactly.
+row_sums = r.sum(axis=1)
+assert np.allclose(row_sums, 1.0, atol=1e-10), row_sums
+assert np.all((r >= -1e-12) & (r <= 1 + 1e-12)), "responsibilities out of [0,1]"
+# 2. Behavioural property: because the two amplitude groups OVERLAP, the E-step must
+#    report genuine ambiguity -- at least one curve near the 0.5 boundary -- rather
+#    than collapsing to a hard 0/1 partition.
+frac_ambiguous = float(np.mean((r[:, 0] > 0.15) & (r[:, 0] < 0.85)))
+assert frac_ambiguous > 0.0, "no graded assignments: E-step collapsed to hard labels"
+print(f"responsibility rows sum to 1: max |sum-1| = {np.max(np.abs(row_sums - 1)):.2e}")
+print(f"fraction of curves with graded (ambiguous) posterior = {frac_ambiguous:.2f}")
+
 f, ax = fig(figsize=(6.4, 4.2))
 sc = ax.scatter(Z[:, 0], Z[:, 1], c=r[:, 0], cmap="coolwarm",
                 s=55, edgecolor="k", linewidth=0.4, vmin=0, vmax=1)
@@ -307,6 +321,14 @@ print(render(f))
 ```
 
 Curves deep inside a group are coloured a saturated blue or red (responsibility near 0 or 1); the pale points along the boundary are the genuinely ambiguous curves whose posterior sits near $0.5$. A hard partition assigns those to one side and discards the fact that the assignment was a coin-flip.
+
+The two asserts in the block above validate this *transparent* E-step -- the quantity we
+actually recommend -- rather than the broken binding: every responsibility row is a proper
+distribution (sums to $1$ to $10^{-10}$), and on these deliberately overlapping groups the
+posterior is genuinely graded (a nonzero fraction of curves sit near $0.5$) rather than
+collapsing to a hard $0/1$ split. This is a checked property of the numpy responsibilities;
+it deliberately does **not** claim `gmm_cluster` recovers the grouping, which (per the
+top-of-page note) it does not.
 
 !!! note "Why this figure computes responsibilities itself"
     The figure above does **not** use `gmm_cluster`'s `membership` matrix, which is

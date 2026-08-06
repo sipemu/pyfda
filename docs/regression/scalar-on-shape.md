@@ -286,6 +286,54 @@ ax.legend(fontsize=8)
 print(render(f))
 ```
 
+!!! success "Validation — shape-PC regression beats naïve FPC on phase-warped data"
+    On data where the response depends only on shape (phase is pure nuisance), removing
+    phase before regressing must help. The checks below assert that the shape-PC $R^2$
+    (6 components) exceeds the **best** naïve FPC $R^2$ across the whole component sweep,
+    and beats naïve FPC at the *matched* 6-component budget by a wide margin. Both pass.
+
+```python exec="1" source="above"
+import numpy as np
+from scipy.stats import beta as beta_dist
+from fdars.alignment import shape_mean
+from fdars.regression import fregre_lm
+
+def make_shape_data(seed, n=60, m=60):
+    rng = np.random.default_rng(seed)
+    t = np.linspace(0, 1, m)
+    X = np.zeros((n, m)); y = np.zeros(n)
+    for i in range(n):
+        amp = rng.normal(0, 1)
+        base = amp * np.sin(2 * np.pi * t) + 0.4 * np.sin(4 * np.pi * t)
+        a, b = rng.uniform(0.3, 3.0, size=2)
+        gamma = beta_dist.cdf(t, a, b)
+        X[i] = np.interp(gamma, t, base) + 0.05 * rng.standard_normal(m)
+        y[i] = 2 * amp + rng.normal(0, 0.3)
+    return t, X, y
+
+t, X, y = make_shape_data(3)
+
+naive = {k: fregre_lm(X, y, n_comp=k)["r_squared"] for k in [2, 4, 6, 8, 10]}
+aligned = np.asarray(shape_mean(X, t)["aligned_data"])
+shape_pc = fregre_lm(aligned, y, n_comp=6)["r_squared"]
+
+best_naive = max(naive.values())
+print(f"best naïve FPC R²        = {best_naive:.3f}  (over k in {list(naive)})")
+print(f"naïve FPC R² at k=6      = {naive[6]:.3f}")
+print(f"shape-PC R² (6 comps)    = {shape_pc:.3f}")
+
+# (1) shape-PC beats the best naïve fit anywhere on the sweep.
+assert shape_pc > best_naive, (shape_pc, best_naive)
+# (2) at a matched 6-component budget the margin is large.
+assert shape_pc - naive[6] > 0.10, (shape_pc, naive[6])
+print("validation OK: shape-PC R² > best naïve FPC, and >> naïve at matched ncomp")
+```
+
+Removing phase pays off: with only six shape components the shape-PC model reaches an
+$R^2$ above every naïve FPC fit — including the 10-component one — and beats the
+matched six-component naïve model by more than 0.10, because the naïve basis wastes
+components describing the phase nuisance instead of the shape signal.
+
 !!! tip "Which pipeline?"
     Use the **distance-based** route (`fregre_np`) when the shape–response
     relationship is nonlinear or you already have a shape distance matrix from

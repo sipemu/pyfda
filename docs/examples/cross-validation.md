@@ -70,6 +70,50 @@ components the model is memorising noise, and its honest accuracy gets worse eve
 as the in-sample number keeps improving. The shaded gap between the two is the
 optimism you pay for by trusting the in-sample fit.
 
+!!! success "Validation — optimism is non-negative, and CV picks a sane $k$"
+    The whole page rests on one inequality that must hold by construction: a
+    model's **out-of-fold error can never be smaller than its in-sample error**
+    for the same complexity — the gap *is* the optimism. We assert
+    $\text{MSE}_{\text{OOF}} \ge \text{MSE}_{\text{in}}$ at a fixed component
+    count. We also assert `fregre_cv` returns an `optimal_k` inside the searched
+    range $[1, 12]$ (not a degenerate 0 or an out-of-range index).
+
+    ```python exec="1" source="above"
+    import numpy as np
+    from docs_data import load_tecator
+    from fdars.fdata import deriv_1d
+    from fdars.regression import fregre_lm, predict_fregre_lm, fregre_cv
+
+    wl, X, meta = load_tecator()
+    fat = meta["fat"].to_numpy()
+    D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
+    n = len(fat)
+    rng = np.random.default_rng(0)
+    folds = rng.integers(0, 5, n)
+    mse = lambda y, p: float(np.mean((y - p) ** 2))
+
+    # (1) OOF error >= in-sample error at fixed complexity (the optimism gap)
+    nc = 20
+    ins = np.asarray(fregre_lm(D2, fat, n_comp=nc)["fitted_values"])
+    oof = np.empty(n)
+    for k in range(5):
+        te = folds == k
+        oof[te] = np.asarray(predict_fregre_lm(D2[~te], fat[~te], D2[te], n_comp=nc))
+    e_in, e_oof = mse(fat, ins), mse(fat, oof)
+    assert e_oof >= e_in, (e_oof, e_in)
+
+    # (2) fregre_cv selects a component count inside the searched range
+    kbest = int(fregre_cv(D2, fat, k_min=1, k_max=12, n_folds=5)["optimal_k"])
+    assert 1 <= kbest <= 12, kbest
+    print(f"in-sample MSE {e_in:.3f}  <=  OOF MSE {e_oof:.3f}  "
+          f"(optimism {e_oof - e_in:.3f})")
+    print(f"fregre_cv optimal_k = {kbest}  (in [1, 12])")
+    ```
+
+    Both hold: the honest error exceeds the in-sample error by the optimism gap,
+    and the cross-validated component count is a sane value inside the search
+    grid — the machinery is measuring generalisation, not memorisation.
+
 ## Choosing the number of components
 
 Rather than eyeball the elbow, `fregre_cv` runs the fold rotation internally and

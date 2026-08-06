@@ -286,6 +286,50 @@ print(render(f))
 
 Reconstruction from PC scores works the same way: form a tangent vector as mean-plus-a-few-eigenvectors, exp-map it, and invert. This is what lets you *synthesize* new aligned curves from a fitted low-dimensional model.
 
+!!! success "Numerical validation: tangent geometry and reconstruction"
+    Two properties the TSRVF construction must satisfy, asserted below on the pure-phase sample above (all curves are warps of one shape, so after alignment they collapse onto the common Karcher mean):
+
+    1. **Tangent vectors lie in $T_{\mu_q}$.** By construction $v_i = \log_{\mu_q}(\tilde q_i)$ is orthogonal to the base point $\mu_q$, i.e. $\langle v_i, \mu_q\rangle_{\mathbb{L}^2}=0$. This is the exact property that makes linear statistics on the $v_i$ valid, and it holds to machine precision.
+    2. **Reconstruction recovers the shape.** Mapping each $v_i$ back through the exp map and `srsf_inverse` reproduces the aligned curve; since the sample is pure phase, every reconstruction lands on the common shape (the Karcher mean) to within a small fraction of the signal amplitude.
+
+    ```python exec="1"
+    import numpy as np
+    from fdars.alignment import tsrvf_transform, srsf_inverse
+
+    rng = np.random.default_rng(4)
+    n, m = 12, 100
+    t = np.linspace(0, 1, m)
+    base = np.sin(2 * np.pi * t) + 0.5 * np.sin(4 * np.pi * t)
+    data = np.zeros((n, m))
+    for i in range(n):
+        warp = t ** rng.uniform(0.7, 1.5)
+        data[i] = np.interp(t, (warp - warp.min()) / np.ptp(warp), base)
+
+    res = tsrvf_transform(data, t, max_iter=20, tol=1e-4)
+    V = np.asarray(res["tangent_vectors"])
+    mu_q = np.asarray(res["mean_srsf"])
+    mu = np.asarray(res["mean"])
+    iv = np.asarray(res["initial_values"])
+
+    # (1) tangent vectors are orthogonal to the base point mu_q
+    ortho = max(abs(np.trapezoid(V[i] * mu_q, t)) for i in range(n))
+    assert ortho < 1e-10, ortho
+    print(f"max |<v_i, mu_q>| (tangency): {ortho:.2e}  (< 1e-10 required)")
+
+    # (2) exp map + srsf_inverse reconstructs the common shape
+    def exp_map(v, mu_q, t):
+        norm = np.sqrt(np.trapezoid(v ** 2, t))
+        if norm < 1e-9:
+            return mu_q.copy()
+        return np.cos(norm) * mu_q + np.sin(norm) * (v / norm)
+
+    recon = np.array([srsf_inverse(exp_map(V[i], mu_q, t), t, initial_value=float(iv[i]))
+                      for i in range(n)])
+    rel_err = np.max(np.abs(recon - mu)) / np.ptp(base)
+    assert rel_err < 0.1, rel_err
+    print(f"max reconstruction error vs shape / amplitude: {rel_err:.3f}  (< 0.1 required)")
+    ```
+
 ---
 
 ## When to use TSRVF

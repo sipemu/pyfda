@@ -212,6 +212,51 @@ for method in ["lda", "qda", "knn"]:
 | `fold_errors` | `ndarray (nfold,)` | Error rate for each fold |
 | `best_ncomp` | `int` | Optimal number of components |
 
+!!! success "Validation — CV accuracy beats chance, and out-of-sample ≥ in-sample error"
+    Two ground-truth checks on a fresh two-class problem: (1) the cross-validated
+    accuracy must clear the $1/K$ chance rate by a clear margin, and (2) the honest
+    out-of-sample (CV) error must be **at least** the optimistic resubstitution error —
+    a property that always holds in expectation. Both assertions run below and pass.
+
+```python exec="1" source="above"
+import numpy as np
+from fdars.classification import fclassif_lda, fclassif_cv
+
+np.random.seed(11)
+n, m = 120, 101
+t = np.linspace(0, 1, m)
+raw = np.zeros((n, m))
+labels = np.zeros(n, dtype=np.int64)
+for i in range(n):
+    if i < n // 2:
+        raw[i] = np.sin(2 * np.pi * t) + 0.3 * np.random.randn(m)
+    else:
+        raw[i] = np.cos(2 * np.pi * t) + 0.3 * np.random.randn(m)
+        labels[i] = 1
+
+n_classes = 2
+chance = 1.0 / n_classes                       # 0.5 for a balanced 2-class problem
+
+cv = fclassif_cv(raw, t, labels, method="lda", ncomp=5, nfold=5)
+cv_accuracy = 1.0 - cv["error_rate"]
+insample_error = 1.0 - fclassif_lda(raw, labels, ncomp=cv["best_ncomp"])["accuracy"]
+
+print(f"chance accuracy      = {chance:.2f}")
+print(f"CV accuracy          = {cv_accuracy:.3f}")
+print(f"in-sample error      = {insample_error:.3f}")
+print(f"CV (out-of-sample)   = {cv['error_rate']:.3f}")
+
+# (1) CV accuracy clears chance by a solid margin.
+assert cv_accuracy > chance + 0.20, cv_accuracy
+# (2) Honest CV error is not optimistic relative to resubstitution.
+assert cv["error_rate"] >= insample_error - 1e-9, (cv["error_rate"], insample_error)
+print("validation OK: CV accuracy > chance, and OOF error >= in-sample error")
+```
+
+The separable two-class signal drives CV accuracy well above 0.5, and the
+cross-validated error never dips below the resubstitution error — the expected
+ordering between optimistic and honest estimates.
+
 ### Choosing the number of components
 
 Early FPC components capture the dominant modes of between-class variation and

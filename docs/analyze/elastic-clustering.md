@@ -98,16 +98,27 @@ l2 = np.asarray(kmeans_fd(X, t, k=2, seed=42)["cluster"])
 def purity(lab):
     return sum(np.bincount(true[lab == c]).max() for c in np.unique(lab)) / len(true)
 
+p_el, p_l2 = purity(el), purity(l2)
+
+# Validation (ground-truth labels are known by construction):
+#   * elastic clustering, being phase-invariant, must recover the amplitude groups
+#     essentially perfectly here -> purity ~ 1.0;
+#   * L2 k-means, fooled by phase, must do markedly worse.
+assert p_el >= 0.95, f"elastic purity unexpectedly low: {p_el:.3f}"
+assert p_el > p_l2 + 0.2, f"elastic ({p_el:.3f}) did not clearly beat L2 ({p_l2:.3f})"
+print(f"elastic purity = {p_el:.3f}   L2 k-means purity = {p_l2:.3f}   "
+      f"(elastic beats L2 by {p_el - p_l2:.3f})")
+
 f, ax = fig(figsize=(6.6, 3.6))
-ax.bar(["elastic\nhierarchical", "L2 k-means"], [purity(el), purity(l2)],
+ax.bar(["elastic\nhierarchical", "L2 k-means"], [p_el, p_l2],
        color=["#198754", "#dc3545"], width=0.55)
 ax.set(title="Cluster purity vs. the true amplitude groups", ylabel="purity", ylim=(0, 1.05))
-for i, v in enumerate([purity(el), purity(l2)]):
+for i, v in enumerate([p_el, p_l2]):
     ax.text(i, v + 0.02, f"{v:.2f}", ha="center", fontweight="bold")
 print(render(f))
 ```
 
-Elastic clustering recovers the amplitude groups almost perfectly, while $L^2$ k-means -- distracted by phase -- lands close to a coin flip.
+Elastic clustering recovers the amplitude groups almost perfectly (asserted purity $\ge 0.95$), while $L^2$ k-means -- distracted by phase -- lands close to a coin flip. The two asserts above make this a checked claim: the elastic partition matches the known amplitude labels and beats $L^2$ by a wide margin, not merely by eye.
 
 ---
 

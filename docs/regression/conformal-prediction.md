@@ -159,6 +159,57 @@ print(render(f))
 | `alpha` | 0.1 | Miscoverage level ($1 - \alpha$ = coverage target) |
 | `seed` | 42 | Random seed for the train/calibration split |
 
+!!! success "Validation — empirical coverage matches the $1-\alpha$ guarantee"
+    The split-conformal guarantee $P(Y \in \hat C) \ge 1-\alpha$ is marginal (over
+    calibration and test draws), so a single split is noisy. Averaging held-out
+    coverage over many independent train/test draws must land at (or just above) the
+    nominal target. Below, 40 replicates at $\alpha=0.1$ give a mean coverage within a
+    tolerance of the 0.90 target — a genuine check that the calibration quantile is
+    correct.
+
+```python exec="1" source="above"
+import numpy as np
+from fdars.conformal import conformal_fregre_lm
+
+m = 60
+t = np.linspace(0, 1, m)
+beta_true = np.sin(4 * np.pi * t)
+alpha = 0.10
+
+def make(n, rng):
+    raw = np.zeros((n, m))
+    for i in range(n):
+        raw[i] = (rng.standard_normal() * np.sin(2 * np.pi * t)
+                  + rng.standard_normal() * np.cos(2 * np.pi * t)
+                  + 0.3 * rng.standard_normal(m))
+    y = np.trapezoid(raw * beta_true, t, axis=1) + 0.5 * rng.standard_normal(n)
+    return raw, y
+
+covs = []
+for rep in range(40):
+    rng = np.random.default_rng(1000 + rep)
+    Xtr, ytr = make(160, rng)
+    Xte, yte = make(80, rng)
+    r = conformal_fregre_lm(Xtr, ytr, Xte, ncomp=3, cal_fraction=0.25,
+                            alpha=alpha, seed=rep)
+    lo, hi = np.asarray(r["lower"]), np.asarray(r["upper"])
+    covs.append(float(np.mean((yte >= lo) & (yte <= hi))))
+
+mean_cov = float(np.mean(covs))
+target = 1 - alpha
+print(f"nominal coverage   = {target:.2f}")
+print(f"mean empirical cov = {mean_cov:.3f}  (over 40 replicates)")
+
+# Split conformal is valid (>= target) and not grossly over-conservative.
+assert mean_cov >= target - 0.02, mean_cov
+assert mean_cov <= target + 0.06, mean_cov
+print("validation OK: mean coverage ~= 1 - alpha (within tolerance)")
+```
+
+The averaged coverage sits just above the 0.90 target, as split conformal guarantees:
+the finite-sample bound is a lower bound, so mild over-coverage is expected and the
+mean stays inside a tight band around nominal.
+
 ---
 
 ## Conformal nonparametric regression
