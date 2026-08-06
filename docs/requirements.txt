@@ -7,3 +7,6 @@ markdown-exec>=1.8
 matplotlib>=3.7
 numpy
 pandas
+# used by some build-time figure blocks (scipy.signal/stats, sklearn.linear_model)
+scipy>=1.10
+scikit-learn>=1.3
