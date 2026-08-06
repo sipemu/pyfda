@@ -5,17 +5,21 @@ Landmark registration is the oldest and most transparent way to remove phase var
 It is the natural choice for curves with identifiable, meaningful features: the P/QRS/T waves of an ECG, the peak force of a gait cycle, an absorbance band in a spectrum. Where elastic alignment optimizes the whole curve automatically under the Fisher-Rao metric, landmark registration anchors the warp at a few feature times and interpolates linearly between them.
 
 
-!!! warning "Implemented in numpy on this page (no binding)"
-    `fdars` has no landmark-registration binding. The warp here is a plain **piecewise-linear monotone interpolation** built with `numpy.interp`, applied to an `Fdata` object; landmark detection uses `scipy.signal.find_peaks` for its prominence semantics. Everything shown runs, but the registration itself is numpy/scipy, not a library call. For an elastic aligner that can *pin* landmarks inside a Fisher-Rao fit, see [`elastic_align_pair_constrained`](advanced-alignment.md#landmark-constrained).
+Detection, matching, target-averaging, and warping are all handled by the native
+`alignment.landmark_detect_and_register`: pass the curves and the feature `kind`, and it
+returns the registered curves, the warping functions, the detected landmarks per curve,
+and the common target positions. For an elastic aligner that can instead *pin* landmarks
+inside a Fisher-Rao fit, see
+[`elastic_align_pair_constrained`](advanced-alignment.md#landmark-constrained).
 
-The figure below shows a two-peak sample whose peaks drift in time (left), and the same curves after each peak has been warped onto the sample-mean peak location (right). The cross-sectional mean sharpens because the phase spread is gone.
+The figure below shows a two-peak sample whose peaks drift in time (left), and the same curves after each peak has been warped onto the common target location (right). The cross-sectional mean sharpens because the phase spread is gone.
 
 ![Landmark Registration — concept diagram](../assets/diagrams/landmark-registration.svg){ .fdars-diagram }
 
 ```python exec="1" html="1"
 import numpy as np
 from docs_fig import fig, render
-from fdars import Fdata
+from fdars import alignment
 
 rng = np.random.default_rng(3)
 n, m = 12, 150
@@ -29,24 +33,12 @@ for i in range(n):
     warp = (warp - warp.min()) / np.ptp(warp)
     data[i] = np.interp(t, warp, base)
 
-def landmarks(y):
-    """Two highest interior local maxima, sorted by time."""
-    interior = np.where((y[1:-1] > y[:-2]) & (y[1:-1] > y[2:]))[0] + 1
-    top = interior[np.argsort(y[interior])[::-1]][:2]
-    return np.sort(t[top])
-
-L = np.array([landmarks(data[i]) for i in range(n)])   # (n, 2)
-target = L.mean(0)                                       # common peak times
-
-def register(y, src_lm):
-    """Piecewise-linear monotone warp mapping src_lm -> target."""
-    knots_tgt = np.concatenate(([0.0], target, [1.0]))
-    knots_src = np.concatenate(([0.0], src_lm, [1.0]))
-    src_time = np.interp(t, knots_tgt, knots_src)   # target time -> source time
-    return np.interp(src_time, t, y)
-
-registered = np.array([register(data[i], L[i]) for i in range(n)])
-fd_reg = Fdata(registered, argvals=t)
+# Detect the two peaks per curve and register them to a common target — one call.
+res = alignment.landmark_detect_and_register(
+    data, t, kind="peak", min_prominence=0.1, expected_count=2
+)
+registered = res["registered"]        # (n, m) aligned curves
+target = res["target_landmarks"]      # common peak times
 
 f, (a1, a2) = fig(ncols=2, figsize=(9.5, 4.0))
 a1.plot(t, data.T, color="#3f51b5", lw=1, alpha=0.5)
@@ -56,8 +48,8 @@ for x in target:
 a1.set(title="Unregistered (peaks drift)", xlabel="t", ylabel="f(t)")
 a1.legend(fontsize=8)
 
-a2.plot(t, np.asarray(fd_reg.data).T, color="#198754", lw=1, alpha=0.5)
-a2.plot(t, np.asarray(fd_reg.data).mean(0), color="#e8710a", lw=2.4, label="mean")
+a2.plot(t, registered.T, color="#198754", lw=1, alpha=0.5)
+a2.plot(t, registered.mean(0), color="#e8710a", lw=2.4, label="mean")
 for x in target:
     a2.axvline(x, color="#6c757d", ls=":", lw=1)
 a2.set(title="Landmark-registered", xlabel="t")
