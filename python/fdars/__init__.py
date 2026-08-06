@@ -53,6 +53,21 @@ _submodule_names = (
 for _name in _submodule_names:
     _submod = getattr(_native, _name)
     _sys.modules[f"{__name__}.{_name}"] = _submod
+    # Also expose as a package attribute so `import fdars; fdars.depth.<fn>` works
+    # (not only `from fdars import depth`).
+    setattr(_sys.modules[__name__], _name, _submod)
+
+# Pure-Python convenience layers (built on top of the native modules).
+from fdars import datasets, results  # noqa: E402
+from fdars import plot  # noqa: E402  (matplotlib imported lazily inside plot.*)
+
+__all__ = [
+    "Fdata",
+    *(_submodule_names),
+    "datasets",
+    "results",
+    "plot",
+]
 
 # Clean up namespace
 del _name, _submod, _submodule_names

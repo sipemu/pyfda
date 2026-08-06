@@ -1,7 +1,7 @@
 //! Distance metrics for functional data.
 
 use crate::convert::*;
-use numpy::{PyArray2, PyReadonlyArray1, PyReadonlyArray2};
+use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::*;
 
 /// Lp distance matrix (self) for 1D functional data.
@@ -408,7 +408,81 @@ pub fn hshift_cross_1d<'py>(
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
+/// Simpson's-rule integral of each curve.
+///
+/// Matches R `int.simpson`. Returns one integral per row of `data`.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Curves, shape (n, m).
+/// argvals : numpy.ndarray, optional
+///     Evaluation grid, length m. Defaults to a uniform [0, 1] grid.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Integrals, length n.
+#[pyfunction]
+#[pyo3(signature = (data, argvals=None))]
+pub fn int_simpson<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: Option<PyReadonlyArray1<'py, f64>>,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    let d = numpy2d_to_fdmatrix(data)?;
+    let av = default_grid(argvals, d.ncols());
+    let result: Vec<f64> = (0..d.nrows())
+        .map(|i| fdars_core::utility::integrate_simpson(&d.row(i), &av))
+        .collect();
+    Ok(vec_to_numpy1d(py, result))
+}
+
+/// Inner product between two functional data sets (Simpson-integrated).
+///
+/// Matches R `inprod.fdata`. Returns the Gram matrix of inner products between
+/// every row of `data1` and every row of `data2`.
+///
+/// Parameters
+/// ----------
+/// data1 : numpy.ndarray
+///     Curves, shape (n1, m).
+/// data2 : numpy.ndarray
+///     Curves, shape (n2, m).
+/// argvals : numpy.ndarray, optional
+///     Evaluation grid, length m. Defaults to a uniform [0, 1] grid.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Inner-product matrix, shape (n1, n2).
+#[pyfunction]
+#[pyo3(signature = (data1, data2, argvals=None))]
+pub fn inprod<'py>(
+    py: Python<'py>,
+    data1: PyReadonlyArray2<'py, f64>,
+    data2: PyReadonlyArray2<'py, f64>,
+    argvals: Option<PyReadonlyArray1<'py, f64>>,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let a = numpy2d_to_fdmatrix(data1)?;
+    let b = numpy2d_to_fdmatrix(data2)?;
+    let av = default_grid(argvals, a.ncols());
+    let (n1, n2) = (a.nrows(), b.nrows());
+    // Build column-major (element (i, j) at index i + j * n1) for FdMatrix.
+    let mut col_major = vec![0.0; n1 * n2];
+    for j in 0..n2 {
+        let rj = b.row(j);
+        for i in 0..n1 {
+            col_major[i + j * n1] = fdars_core::utility::inner_product(&a.row(i), &rj, &av);
+        }
+    }
+    let out = fdars_core::FdMatrix::from_column_major(col_major, n1, n2).map_err(to_pyerr)?;
+    Ok(fdmatrix_to_numpy2d(py, &out))
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(int_simpson, m)?)?;
+    m.add_function(wrap_pyfunction!(inprod, m)?)?;
     m.add_function(wrap_pyfunction!(lp_self_1d, m)?)?;
     m.add_function(wrap_pyfunction!(lp_cross_1d, m)?)?;
     m.add_function(wrap_pyfunction!(lp_self_2d, m)?)?;

@@ -5,6 +5,23 @@ use fdars_core::FdarError;
 use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::*;
 
+/// Resolve an optional argvals array to a concrete grid.
+///
+/// Returns the supplied argvals, or a uniform [0, 1] grid of length `m` when
+/// `None` (matching the convention used across the core depth/metric routines).
+pub fn default_grid(argvals: Option<PyReadonlyArray1<'_, f64>>, m: usize) -> Vec<f64> {
+    match argvals {
+        Some(a) => numpy1d_to_vec(a),
+        None => {
+            if m <= 1 {
+                vec![0.0; m]
+            } else {
+                (0..m).map(|i| i as f64 / (m - 1) as f64).collect()
+            }
+        }
+    }
+}
+
 /// Convert a numpy 2D array (row-major) to FdMatrix (column-major).
 ///
 /// NumPy shape: (n_obs, n_points) in C order (row-major).

@@ -1,0 +1,36 @@
+"station","province","region","lat","lon"
+"St. Johns","Newfoundland","Atlantic",47.34,-52.43
+"Halifax","Nova Scotia","Atlantic",44.39,-63.36
+"Sydney","Nova Scotia","Atlantic",46.09,-60.11
+"Yarmouth","Nova Scotia","Atlantic",43.5,-66.07
+"Charlottvl","Ontario","Atlantic",42.48,-80.25
+"Fredericton","New Brunswick","Atlantic",45.58,-66.39
+"Scheffervll","Quebec","Atlantic",54.47,-64.49
+"Arvida","Quebec","Atlantic",48.26,-71.11
+"Bagottville","Quebec","Atlantic",48.21,-70.53
+"Quebec","Quebec","Atlantic",46.49,-71.13
+"Sherbrooke","Quebec","Atlantic",45.24,-71.54
+"Montreal","Quebec","Atlantic",45.31,-73.34
+"Ottawa","Ontario","Atlantic",45.25,-75.22
+"Toronto","Ontario","Atlantic",43.38,-79.23
+"London","Ontario","Atlantic",42.59,-81.14
+"Thunder Bay","Ontario","Continental",48.24,-89
+"Winnipeg","Manitoba","Continental",49.53,-97.09
+"The Pas","Manitoba","Continental",53.5,-101.15
+"Churchill","Manitoba","Continental",58.46,-94.1
+"Regina","Saskatchewan","Continental",50.25,-104.39
+"Pr. Albert","Saskatchewan","Continental",53.12,-104.46
+"Uranium City","Saskatchewan","Continental",59.34,-108.36
+"Edmonton","Alberta","Continental",53.33,-113.28
+"Calgary","Alberta","Continental",51.03,-114.05
+"Kamloops","British Colombia","Pacific",50.4,-120.2
+"Vancouver","British Colombia","Pacific",49.16,-123.07
+"Victoria","British Colombia","Pacific",48.25,-123.22
+"Pr. George","British Colombia","Pacific",53.88381,-122.67396
+"Pr. Rupert","British Colombia","Pacific",54.19,-130.19
+"Whitehorse","Yukon","Continental",60.43,-135.03
+"Dawson","Yukon","Continental",64.04,-139.25
+"Yellowknife","Northwest Territories","Continental",62.27,-114.21
+"Iqaluit","Nunavut","Arctic",63.44,-68.28
+"Inuvik","Northwest Territories","Arctic",68.25,-133.3
+"Resolute","Nunavut","Arctic",74.41,-94.54

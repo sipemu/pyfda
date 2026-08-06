@@ -346,8 +346,62 @@ pub fn kernel_functional_spatial_2d<'py>(
     Ok(vec_to_numpy1d(py, result))
 }
 
+/// Random-projection depth using curves and their derivatives (RPD).
+///
+/// Projects both the curves and their `n_deriv`-order derivatives onto random
+/// directions and combines the resulting univariate depths. Matches R
+/// `depth(method = "RPD")` / `depth.RPD`.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data to score, shape (n, m).
+/// ref_data : numpy.ndarray
+///     Reference sample, shape (n_ref, m).
+/// argvals : numpy.ndarray, optional
+///     Evaluation grid, length m. Defaults to a uniform [0, 1] grid.
+/// n_proj : int, optional
+///     Number of random projections (default 50).
+/// n_deriv : int, optional
+///     Derivative order to include (default 1).
+/// seed : int, optional
+///     Seed for reproducible projections.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Depth values, length n.
+#[pyfunction]
+#[pyo3(signature = (data, ref_data, argvals=None, n_proj=50, n_deriv=1, seed=None))]
+pub fn random_projection_deriv_1d<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    ref_data: PyReadonlyArray2<'py, f64>,
+    argvals: Option<PyReadonlyArray1<'py, f64>>,
+    n_proj: usize,
+    n_deriv: usize,
+    seed: Option<u64>,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    let d = numpy2d_to_fdmatrix(data)?;
+    let r = numpy2d_to_fdmatrix(ref_data)?;
+    let m = d.ncols();
+    let av = match argvals {
+        Some(a) => numpy1d_to_vec(a),
+        None => {
+            if m <= 1 {
+                vec![0.0; m]
+            } else {
+                (0..m).map(|i| i as f64 / (m - 1) as f64).collect()
+            }
+        }
+    };
+    let result = fdars_core::depth::rpd_depth_1d_seeded(&d, &r, &av, n_proj, n_deriv, seed);
+    Ok(vec_to_numpy1d(py, result))
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fraiman_muniz_1d, m)?)?;
+    m.add_function(wrap_pyfunction!(random_projection_deriv_1d, m)?)?;
     m.add_function(wrap_pyfunction!(fraiman_muniz_2d, m)?)?;
     m.add_function(wrap_pyfunction!(modal_1d, m)?)?;
     m.add_function(wrap_pyfunction!(modal_2d, m)?)?;
