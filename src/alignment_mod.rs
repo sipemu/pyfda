@@ -1803,7 +1803,195 @@ pub fn warp_inverse_error(
     Ok(fdars_core::alignment::warp_inverse_error(&w, &inv, &av))
 }
 
+// ─── Landmark registration ──────────────────────────────────────────────────
+
+fn parse_landmark_kind(s: &str) -> PyResult<fdars_core::landmark::LandmarkKind> {
+    use fdars_core::landmark::LandmarkKind::*;
+    match s.to_ascii_lowercase().as_str() {
+        "peak" | "peaks" | "max" => Ok(Peak),
+        "valley" | "valleys" | "min" => Ok(Valley),
+        "zero_crossing" | "zerocrossing" | "zero" => Ok(ZeroCrossing),
+        "inflection" => Ok(Inflection),
+        "custom" => Ok(Custom),
+        other => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "unknown landmark kind '{other}' (expected peak/valley/zero_crossing/inflection/custom)"
+        ))),
+    }
+}
+
+fn landmark_kind_str(k: fdars_core::landmark::LandmarkKind) -> &'static str {
+    use fdars_core::landmark::LandmarkKind::*;
+    match k {
+        Peak => "peak",
+        Valley => "valley",
+        ZeroCrossing => "zero_crossing",
+        Inflection => "inflection",
+        Custom => "custom",
+        _ => "unknown",
+    }
+}
+
+fn landmark_to_dict<'py>(
+    py: Python<'py>,
+    lm: &fdars_core::landmark::Landmark,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let d = pyo3::types::PyDict::new(py);
+    d.set_item("position", lm.position)?;
+    d.set_item("kind", landmark_kind_str(lm.kind))?;
+    d.set_item("value", lm.value)?;
+    d.set_item("prominence", lm.prominence)?;
+    Ok(d)
+}
+
+/// Detect landmarks (peaks, valleys, zero-crossings, inflections) in a curve.
+///
+/// Matches R `detect.landmarks`. Returns one dict per detected feature.
+///
+/// Parameters
+/// ----------
+/// curve : numpy.ndarray
+///     A single curve, length m.
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// kind : str, optional
+///     One of ``peak``, ``valley``, ``zero_crossing``, ``inflection``, ``custom``
+///     (default ``peak``).
+/// min_prominence : float, optional
+///     Minimum prominence for a peak/valley to be kept (default 0.0).
+///
+/// Returns
+/// -------
+/// list of dict
+///     Each with ``position``, ``kind``, ``value``, ``prominence``.
+#[pyfunction]
+#[pyo3(signature = (curve, argvals, kind="peak", min_prominence=0.0))]
+pub fn detect_landmarks<'py>(
+    py: Python<'py>,
+    curve: PyReadonlyArray1<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    kind: &str,
+    min_prominence: f64,
+) -> PyResult<Bound<'py, pyo3::types::PyList>> {
+    let c = numpy1d_to_vec(curve);
+    let av = numpy1d_to_vec(argvals);
+    let k = parse_landmark_kind(kind)?;
+    let landmarks = fdars_core::landmark::detect_landmarks(&c, &av, k, min_prominence);
+    let list = pyo3::types::PyList::empty(py);
+    for lm in &landmarks {
+        list.append(landmark_to_dict(py, lm)?)?;
+    }
+    Ok(list)
+}
+
+fn landmark_result_to_dict<'py>(
+    py: Python<'py>,
+    result: &fdars_core::landmark::LandmarkResult,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("registered", fdmatrix_to_numpy2d(py, &result.registered))?;
+    dict.set_item("gammas", fdmatrix_to_numpy2d(py, &result.gammas))?;
+    let per_curve = pyo3::types::PyList::empty(py);
+    for curve_lms in &result.landmarks {
+        let inner = pyo3::types::PyList::empty(py);
+        for lm in curve_lms {
+            inner.append(landmark_to_dict(py, lm)?)?;
+        }
+        per_curve.append(inner)?;
+    }
+    dict.set_item("landmarks", per_curve)?;
+    dict.set_item(
+        "target_landmarks",
+        vec_to_numpy1d(py, result.target_landmarks.clone()),
+    )?;
+    Ok(dict)
+}
+
+/// Register curves to common landmark positions.
+///
+/// Matches R `landmark.register`. Warps each curve so its landmarks align to a
+/// shared target (the per-landmark mean position if `target` is omitted).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Curves, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// landmarks : list of sequence of float
+///     Landmark positions for each curve (one list per row of `data`).
+/// target : numpy.ndarray, optional
+///     Common target landmark positions. Defaults to the per-landmark mean.
+///
+/// Returns
+/// -------
+/// dict
+///     ``registered`` (n, m), ``gammas`` (n, m), ``landmarks`` (nested list),
+///     ``target_landmarks`` (length L).
+#[pyfunction]
+#[pyo3(signature = (data, argvals, landmarks, target=None))]
+pub fn landmark_register<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    landmarks: Vec<Vec<f64>>,
+    target: Option<Vec<f64>>,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result =
+        fdars_core::landmark::landmark_register(&mat, &av, &landmarks, target.as_deref());
+    landmark_result_to_dict(py, &result)
+}
+
+/// Detect landmarks and register in one call.
+///
+/// Matches R `landmark.register` with auto-detected landmarks. Detects `kind`
+/// features per curve then warps them to a common target.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Curves, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// kind : str, optional
+///     Landmark kind to detect (default ``peak``).
+/// min_prominence : float, optional
+///     Minimum prominence (default 0.0).
+/// expected_count : int, optional
+///     Expected number of landmarks per curve (0 = keep all detected).
+///
+/// Returns
+/// -------
+/// dict
+///     ``registered``, ``gammas``, ``landmarks``, ``target_landmarks``.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, kind="peak", min_prominence=0.0, expected_count=0))]
+pub fn landmark_detect_and_register<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    kind: &str,
+    min_prominence: f64,
+    expected_count: usize,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let k = parse_landmark_kind(kind)?;
+    let result = fdars_core::landmark::detect_and_register(
+        &mat,
+        &av,
+        k,
+        min_prominence,
+        expected_count,
+    );
+    landmark_result_to_dict(py, &result)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(detect_landmarks, m)?)?;
+    m.add_function(wrap_pyfunction!(landmark_register, m)?)?;
+    m.add_function(wrap_pyfunction!(landmark_detect_and_register, m)?)?;
     m.add_function(wrap_pyfunction!(elastic_align_pair, m)?)?;
     m.add_function(wrap_pyfunction!(karcher_mean, m)?)?;
     m.add_function(wrap_pyfunction!(karcher_median, m)?)?;
