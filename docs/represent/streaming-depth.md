@@ -120,6 +120,58 @@ print(render(f))
 
 The depth trace hovers in a normal band, then collapses during the injected burst; the low-quantile threshold catches every anomalous arrival while the window stays uncontaminated.
 
+!!! success "Validation: the monitor detects the injected shift"
+
+    The burst at steps 30-33 is ground truth: those four curves were deliberately shifted
+    by `+4.0`, so a working detector *must* flag them. The block below re-runs the streaming
+    loop and asserts two things. **(1) Detection** -- every injected step is flagged
+    (detection rate on the known anomalies is 1.0). **(2) Separation** -- the depth of
+    *every* injected curve falls below the median depth of the in-distribution arrivals,
+    so the drop is not a threshold artefact but a genuine collapse in centrality. Both
+    assertions pass.
+
+    ```python exec="1" source="above"
+    import numpy as np
+    from fdars.simulation import simulate
+    from fdars.depth import modified_band_1d
+
+    t = np.linspace(0, 1, 80)
+
+    def new_curve(seed, shift=0.0):
+        return np.asarray(
+            simulate(n=1, argvals=t, n_basis=5, efun_type="fourier", seed=seed)) + shift
+
+    window = np.asarray(
+        simulate(n=25, argvals=t, n_basis=5, efun_type="fourier", seed=1))
+    MAX_WINDOW = 25
+    injected = list(range(30, 34))          # the known anomaly steps (shift = +4.0)
+
+    depths, flags = [], []
+    for step in range(60):
+        shift = 4.0 if 30 <= step < 34 else 0.0
+        x = new_curve(200 + step, shift)
+        d = float(np.asarray(modified_band_1d(x, window))[0])
+        depths.append(d)
+        thr = np.quantile(np.asarray(modified_band_1d(window, window)), 0.05)
+        is_anom = d < thr
+        flags.append(is_anom)
+        if not is_anom:
+            window = np.vstack([window, x])[-MAX_WINDOW:]
+    depths, flags = np.asarray(depths), np.asarray(flags)
+
+    # (1) Every injected anomaly is flagged.
+    detection_rate = flags[injected].mean()
+    assert detection_rate == 1.0, detection_rate
+    print(f"detection rate on injected burst: {detection_rate:.2f} (all {len(injected)} flagged)")
+
+    # (2) Injected depths collapse below the median in-distribution depth.
+    normal = [i for i in range(60) if i not in injected]
+    median_normal = np.median(depths[normal])
+    assert (depths[injected] < median_normal).all(), depths[injected]
+    print(f"max injected depth {depths[injected].max():.3f} < "
+          f"median normal depth {median_normal:.3f}")
+    ```
+
 ## Choosing the threshold
 
 Two simple, robust rules work well:

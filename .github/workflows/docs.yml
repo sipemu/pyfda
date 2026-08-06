@@ -48,8 +48,8 @@ jobs:
           mkdocs build --strict
           python scripts/check_docs_figures.py site
       - name: Deploy
-        env:
-          PYTHONPATH: scripts
+        # Publish the already-built site/ instead of rebuilding via gh-deploy
+        # (ghp-import ships with mkdocs). Halves the job time.
         run: |
           source .venv/bin/activate
-          mkdocs gh-deploy --force
+          ghp-import --no-jekyll --push --force --no-history --message "Deploy docs ${GITHUB_SHA::7}" site

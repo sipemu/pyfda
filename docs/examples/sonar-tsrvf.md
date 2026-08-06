@@ -312,6 +312,52 @@ tangent vectors over **20**, the latter barely above the majority baseline.
 Derivatives land in between but still below raw. Warping the frequency axis does
 not help; it actively hurts.
 
+!!! success "Validation — the honest negative result, asserted"
+    The claim of this page is a *negative* one, and negative claims are the
+    easiest to fudge — so we assert it outright. Under an identical 10-fold
+    cross-validated classifier, the **TSRVF (elastic amplitude) accuracy must not
+    exceed the raw standardized-spectra accuracy**; if elastic alignment helped,
+    this assertion would fail and the page's thesis would be wrong. We also anchor
+    the raw number near the literature (~85%) and confirm it clears the majority
+    baseline.
+
+    ```python exec="1" source="above"
+    import numpy as np, warnings
+    warnings.filterwarnings("ignore")
+    from docs_data import load_sonar
+    from fdars.alignment import tsrvf_transform
+    from fdars.classification import fclassif_cv
+
+    band, X, meta = load_sonar()
+    y = (meta["label"].to_numpy() == "Mine").astype(int)
+    Xz = (X - X.mean(0)) / X.std(0)
+    t = np.linspace(0.0, 1.0, X.shape[1])
+    tv = np.asarray(tsrvf_transform(Xz, t, max_iter=15)["tangent_vectors"])
+
+    def best_cv_acc(fd):
+        tt = np.linspace(0.0, 1.0, fd.shape[1])
+        best = 0.0
+        for meth in ("lda", "knn"):
+            for nc in (5, 8, 10):
+                cv = fclassif_cv(fd, tt, y, method=meth, ncomp=nc, nfold=10)
+                best = max(best, 1.0 - cv["error_rate"])
+        return best
+
+    raw = best_cv_acc(Xz)         # L2 on raw standardized spectra
+    elastic = best_cv_acc(tv)     # TSRVF amplitude (elastic)
+    baseline = max(y.mean(), 1 - y.mean())
+
+    assert elastic <= raw, (elastic, raw)          # elastic does NOT help
+    assert raw > baseline and raw > 0.80, raw      # raw is competitive (~85%)
+    print(f"raw (L2) accuracy   = {raw:.3f}")
+    print(f"TSRVF (elastic) acc = {elastic:.3f}   (<= raw: {elastic <= raw})")
+    print(f"majority baseline   = {baseline:.3f}")
+    ```
+
+    The assertion passes: elastic alignment is strictly no better — here markedly
+    worse — than plain $L^2$ on the fixed-grid sonar spectra. This is the honest,
+    reproducible negative result the page set out to establish, not a hedge.
+
 !!! note "Why elastic alignment loses here"
     Elastic methods pay off when the *same feature* appears at a **shifted or
     stretched location** across curves — misaligned peaks in growth-velocity

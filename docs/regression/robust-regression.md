@@ -133,15 +133,26 @@ beta_true = 2.0 * np.sin(np.pi * t) - 1.5 * np.sin(3 * np.pi * t)
 def corr(b):
     return abs(np.corrcoef(beta_true, np.asarray(b))[0, 1])
 
+c = {}
 for name, fn, kw in [("OLS", fregre_lm, {}), ("L1", fregre_l1, {}),
                      ("Huber", fregre_huber, {"huber_k": 1.345})]:
     fit = fn(raw, y_contam, n_comp=5, **kw)
-    print(f"{name:6s} corr(beta_hat, beta_true) = {corr(fit['beta_t']):.3f}")
+    c[name] = corr(fit["beta_t"])
+    print(f"{name:6s} corr(beta_hat, beta_true) = {c[name]:.3f}")
+
+# Validation: robust fits stay faithful to the true beta under 15% contamination,
+# while OLS is dragged off by the outliers.
+assert c["L1"] > 0.9 and c["Huber"] > 0.9, c        # robust methods recover beta(t)
+assert c["OLS"] < 0.6, c                            # OLS collapses under contamination
+assert min(c["L1"], c["Huber"]) - c["OLS"] > 0.3, c # clear robustness gap
+print("validation OK: L1/Huber corr > 0.9 while OLS collapses (< 0.6)")
 ```
 
 The printed correlations tell the story: OLS's estimate barely resembles the truth, while L1
 and Huber recover it almost intact. (The clean-data fit reaches $R^2 \approx 0.98$ for all
-three; the gap only opens once the outliers are added.)
+three; the gap only opens once the outliers are added.) The assertions make this quantitative:
+the two robust fits stay above a 0.9 correlation with the true $\beta(t)$ while OLS drops
+below 0.6.
 
 ---
 

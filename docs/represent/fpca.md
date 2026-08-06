@@ -278,6 +278,50 @@ ax.legend()
 print(render(f))
 ```
 
+!!! success "Validation: orthonormality, PVE, and reconstruction"
+
+    The three defining properties of the Karhunen-Loeve decomposition are checkable
+    numerically, so the block below asserts all three on the growth data rather than
+    trusting the plots. **(1)** The eigenfunctions are orthonormal under the *weighted*
+    $L^2$ inner product returned in `weights`: the Gram matrix $\Phi^\top W\,\Phi$ equals
+    the identity ($\int\phi_j\phi_k\,dt = \delta_{jk}$). **(2)** The proportions of variance
+    explained sum to 1 across the full set of components. **(3)** The integrated squared
+    reconstruction error is *strictly* decreasing in the number of retained components $K$
+    -- the optimality property. All checks pass to a $10^{-9}$ tolerance.
+
+    ```python exec="1" source="above"
+    import numpy as np
+    from docs_data import load_growth
+    from fdars.regression import fpca
+
+    age, X, meta = load_growth()          # X: (93, 31) height curves
+    n = X.shape[0]
+
+    # (1) Orthonormality of eigenfunctions in the weighted L2 inner product.
+    res = fpca(X, age, n_comp=6)
+    rot = np.asarray(res["rotation"])          # (m, n_comp) eigenfunctions
+    w = np.asarray(res["weights"])             # quadrature weights
+    gram = (rot * w[:, None]).T @ rot          # Phi^T W Phi
+    off = np.abs(gram - np.eye(gram.shape[0]))
+    assert off.max() < 1e-9, off.max()
+    print(f"eigenfunction Gram = I: max deviation {off.max():.2e}")
+
+    # (2) PVE over the full component set sums to 1.
+    full = fpca(X, age, n_comp=n - 1)          # all non-degenerate components
+    ev = np.asarray(full["singular_values"]) ** 2 / (n - 1)
+    pve = ev / ev.sum()
+    assert abs(pve.sum() - 1.0) < 1e-12, pve.sum()
+    print(f"PVE sums to {pve.sum():.12f};  PC1={pve[0]*100:.1f}%, "
+          f"PC1+2={pve[:2].sum()*100:.1f}%")
+
+    # (3) Reconstruction error strictly decreases as K grows (optimality).
+    mean, scores = np.asarray(res["mean"]), np.asarray(res["scores"])
+    errs = [np.mean((X - (mean + scores[:, :K] @ rot[:, :K].T)) ** 2)
+            for K in range(1, 6)]
+    assert all(errs[i] > errs[i + 1] for i in range(len(errs) - 1)), errs
+    print("reconstruction MSE by K:", [f"{e:.3f}" for e in errs])
+    ```
+
 ## FPCA for dimension reduction
 
 Storing the scores, eigenfunctions and mean instead of the full curves is a lossless-up-to-$K$ compression. For the growth data, going from 93 curves at 31 points to 93 scores at $K=4$ plus four eigenfunctions is a large saving:

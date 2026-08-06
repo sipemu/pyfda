@@ -101,6 +101,55 @@ a1.legend()
 print(render(f))
 ```
 
+!!! success "Validation: alignment reduces amplitude variance; warps are valid; distances agree"
+
+    Three properties that alignment *must* satisfy are asserted below. **(1)** Warping
+    the curves onto the template collapses the cross-sectional (pointwise) variance: the
+    integrated pointwise variance of the aligned curves is strictly smaller than that of
+    the originals, because the horizontal spread has been removed. **(2)** Every warping
+    function $\gamma_i$ is a valid element of the warping group $\Gamma$ -- monotone
+    non-decreasing with $\gamma(0)=0$, $\gamma(1)=1$, and range in $[0,1]$. **(3)** The
+    Fisher-Rao **amplitude distance** equals the **elastic distance** to machine precision,
+    since after optimal alignment they are the same $L^2$ SRSF distance. All checks pass.
+
+    ```python exec="1" source="above"
+    import numpy as np
+    from fdars.alignment import karcher_mean, amplitude_distance, elastic_distance
+
+    t = np.linspace(0, 1, 100)
+    rng = np.random.default_rng(3)
+    X = np.asarray([
+        (1.0 + 0.25 * rng.standard_normal()) *
+        np.exp(-((t - (0.5 + 0.12 * rng.standard_normal())) ** 2) / 0.01)
+        for _ in range(25)
+    ])
+
+    km = karcher_mean(X, t)
+    aligned = np.asarray(km["aligned_data"])
+    gammas = np.asarray(km["gammas"])
+
+    # (1) Alignment reduces the integrated cross-sectional variance.
+    var_orig = X.var(axis=0).mean()
+    var_aligned = aligned.var(axis=0).mean()
+    assert var_aligned < var_orig, (var_aligned, var_orig)
+    print(f"cross-sectional variance: {var_orig:.4f} -> {var_aligned:.4f} "
+          f"({100 * (1 - var_aligned / var_orig):.0f}% reduction)")
+
+    # (2) Warps live in the warping group Gamma: monotone, range [0,1], fixed ends.
+    assert (np.diff(gammas, axis=1) >= -1e-9).all()               # monotone
+    assert gammas.min() >= -1e-9 and gammas.max() <= 1 + 1e-9      # range [0,1]
+    assert np.abs(gammas[:, 0]).max() < 1e-9                       # gamma(0) = 0
+    assert np.abs(gammas[:, -1] - 1).max() < 1e-9                  # gamma(1) = 1
+    print("all 25 warps monotone, range [0,1], gamma(0)=0, gamma(1)=1")
+
+    # (3) amplitude_distance == elastic_distance (same post-alignment L2 distance).
+    ad = float(amplitude_distance(X[0], X[1], t))
+    ed = float(elastic_distance(X[0], X[1], t))
+    assert abs(ad - ed) < 1e-10, (ad, ed)
+    print(f"amplitude_distance {ad:.6f} == elastic_distance {ed:.6f} "
+          f"(|diff| = {abs(ad - ed):.1e})")
+    ```
+
 The **warping functions** $\gamma_i$ returned in `gammas` are the phase part -- one monotone map per curve describing how its time axis was stretched to reach the template. A warp bowing above the diagonal advances the peak, one below it delays the peak; the spread of the warps around the identity is the amount of phase variation in the sample.
 
 ```python exec="1" html="1" source="above"

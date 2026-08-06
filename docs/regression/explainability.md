@@ -251,6 +251,54 @@ print(render(f))
 | `coefficients` | `ndarray (K,)` | Regression coefficients $c_k$ |
 | `variance_proportion` | `ndarray (K,)` | Share of $\hat\beta$ variance per FPC |
 
+!!! success "Validation — the decomposition is exact and the importance localizes the signal"
+    Two ground-truth checks. (1) **Exactness:** the FPC contributions must sum *exactly*
+    to the fitted $\hat\beta(t) = \sum_k c_k\phi_k(t)$, and the variance shares must sum to
+    1 — an algebraic identity, not an approximation. (2) **Localization:** the
+    domain-level `pointwise_importance` must peak inside the true signal region near
+    $t=0.7$. Both run and pass below.
+
+```python exec="1" source="above"
+import numpy as np
+from fdars.regression import fregre_lm
+from fdars.explain import beta_decomposition, pointwise_importance
+
+np.random.seed(42)
+n, m = 60, 80
+t = np.linspace(0, 1, m)
+raw = np.zeros((n, m))
+for i in range(n):
+    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
+              + 0.1 * np.random.randn(m))
+beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+             - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
+y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
+
+fit = fregre_lm(raw, y, n_comp=5)
+beta_hat = np.asarray(fit["beta_t"])
+dec = beta_decomposition(raw, y, ncomp=5)
+
+# (1) Exact additive identity: sum_k c_k phi_k(t) == beta_hat(t), shares sum to 1.
+recon = np.sum([np.asarray(c) for c in dec["components"]], axis=0)
+max_diff = float(np.max(np.abs(recon - beta_hat)))
+share_sum = float(np.sum(np.asarray(dec["variance_proportion"])))
+print(f"max|sum(components) - beta_hat| = {max_diff:.2e}")
+print(f"sum(variance_proportion)        = {share_sum:.6f}")
+assert max_diff < 1e-9, max_diff
+assert abs(share_sum - 1.0) < 1e-6, share_sum
+
+# (2) Localization: pointwise importance peaks in the true signal region near t=0.7.
+imp = np.asarray(pointwise_importance(raw, y, ncomp=5)["importance"])
+t_peak = float(t[np.argmax(imp)])
+print(f"pointwise-importance peak at t  = {t_peak:.2f}")
+assert abs(t_peak - 0.7) < 0.06, t_peak
+print("validation OK: decomposition exact (diff < 1e-9) and importance localizes the signal")
+```
+
+The reconstruction error is at machine precision and the variance shares sum to one —
+the decomposition is exact by construction — while the pointwise importance peaks within
+$0.06$ of the true signal region at $t=0.7$, recovering *where* the predictor matters.
+
 ## Domain-level global explanations
 
 Score-level views tell you *which components* matter; domain-level views map that back onto
@@ -297,9 +345,11 @@ print(render(f))
 ### Saliency maps — `functional_saliency`
 
 Saliency is the sensitivity of each prediction to a small perturbation of the curve at $t$,
-$s_i(t) = \partial\hat y_i / \partial X_i(t)$. In the linear model this equals
-$\hat\beta(t)$ for *every* observation, so the mean-absolute saliency is a direct estimate of
-$|\hat\beta(t)|$ — another route to the same important regions.
+$s_i(t) = \partial\hat y_i / \partial X_i(t)$. In an *exact* linear model this would equal
+$\hat\beta(t)$ for every observation. In practice `functional_saliency` operates in the
+FPC-score space, so its map highlights the same **important regions** as $\hat\beta(t)$ but is
+**not** numerically equal to $|\hat\beta(t)|$ — for the exact coefficient use
+`beta_decomposition` (whose additive identity is validated below).
 
 ```python exec="1" html="1" source="above"
 import numpy as np

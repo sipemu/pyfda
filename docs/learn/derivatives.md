@@ -432,6 +432,24 @@ fd = Fdata(f_vals[None, :], argvals=t)
 d_est = np.asarray(fd.deriv().data)[0]
 err = np.max(np.abs(d_est - f_true))
 
+# Validation against a KNOWN ground truth: (sin)' = cos exactly.
+# 1. The central-difference estimate must match cos to a few parts in a thousand
+#    on this 50-point grid (interior error is O(h^2)).
+interior = slice(1, -1)                   # endpoints use one-sided stencils
+err_interior = np.max(np.abs(d_est[interior] - f_true[interior]))
+assert err_interior < 1e-2, f"derivative off ground truth: {err_interior:.4f}"
+
+# 2. O(h^2) accuracy: halving the grid spacing must cut the interior error by ~4x.
+def interior_err(m):
+    tt = np.linspace(0, 2 * np.pi, m)
+    de = np.asarray(Fdata(np.sin(tt)[None, :], argvals=tt).deriv().data)[0]
+    return np.max(np.abs(de[1:-1] - np.cos(tt)[1:-1]))
+e_coarse, e_fine = interior_err(40), interior_err(80)   # h -> h/2 (approx)
+ratio = e_coarse / e_fine
+assert ratio > 3.0, f"error did not shrink ~4x under grid refinement (ratio {ratio:.2f})"
+print(f"max interior error = {err_interior:.5f}  (ground truth: (sin)'=cos)")
+print(f"error ratio coarse/fine = {ratio:.2f}  (expected ~4 for O(h^2))")
+
 g, ax = fig(figsize=(7, 3.8))
 ax.plot(t, f_true, color="black", lw=2, label="true $\\cos t$")
 ax.plot(t, d_est, color="#D55E00", lw=1.6, ls="--", label="deriv() [central diff]")
@@ -440,6 +458,10 @@ ax.set(title=f"Central-difference derivative (max error = {err:.4f})",
 ax.legend()
 print(render(g))
 ```
+
+The two asserts turn the O($h^2$) claim into a checked fact: the estimate matches the
+analytic $\cos t$ to a few parts in a thousand on the interior, and halving the grid spacing
+shrinks that error by roughly $4\times$ -- the signature of second-order accuracy.
 
 !!! note "No 5-point gradient binding yet"
     The R package additionally offers `fdata.gradient()`, a 5-point-stencil

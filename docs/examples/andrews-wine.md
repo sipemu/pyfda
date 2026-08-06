@@ -204,6 +204,60 @@ the same two curves that sat lowest on the depth ranking and furthest out on the
 magnitude–shape plot: three different detectors agreeing on the same handful of
 atypical bottles.
 
+!!! success "Validation — the flagged pair and the Parseval identity"
+    Two ground-truth checks anchor this page. **(1)** The outliergram must flag
+    *exactly* wines 69 and 95 — the pair named in the prose. **(2)** The Andrews
+    transform is a Parseval isometry: on $t \in [-\pi, \pi]$ the $L^2$ distance
+    between two wine curves equals $\sqrt{\pi}$ times the Euclidean distance
+    between the standardized rows, so a curve central among curves *is* a wine
+    central among rows. We assert the ratio equals $\sqrt{\pi}$ to $10^{-6}$
+    (evaluated on a fine grid where the 13-harmonic curves are fully resolved).
+
+    ```python exec="1" source="above"
+    import numpy as np
+    from docs_data import load_wine
+    from fdars.outliers import outliergram
+
+    def andrews_curves(features, t):
+        features = np.asarray(features, float)
+        n, p = features.shape
+        out = np.full((n, t.size), features[:, [0]] / np.sqrt(2.0))
+        for j in range(1, p):
+            harmonic = (j + 1) // 2
+            term = np.sin if j % 2 == 1 else np.cos
+            out = out + features[:, [j]] * term(harmonic * t)
+        return out
+
+    names, X, meta = load_wine()
+    Xz = (X - X.mean(0)) / X.std(0)
+
+    # (1) outliergram flags exactly the pair the prose names
+    t = np.linspace(-np.pi, np.pi, 160)
+    curves = andrews_curves(Xz, t)
+    flagged = np.where(np.asarray(outliergram(curves)["outliers"], dtype=bool))[0]
+    assert flagged.tolist() == [69, 95], flagged.tolist()
+
+    # (2) Parseval: L2 curve distance == sqrt(pi) * Euclidean row distance
+    tf = np.linspace(-np.pi, np.pi, 4000)          # fine grid -> exact isometry
+    cf = andrews_curves(Xz, tf)
+    rng = np.random.default_rng(0)
+    ratios = []
+    for _ in range(500):
+        i, j = rng.integers(0, len(cf), 2)
+        if i == j:
+            continue
+        l2 = np.sqrt(np.trapezoid((cf[i] - cf[j]) ** 2, tf))
+        ratios.append(l2 / np.linalg.norm(Xz[i] - Xz[j]))
+    ratios = np.array(ratios)
+    assert np.allclose(ratios, np.sqrt(np.pi), atol=1e-6), (ratios.min(), ratios.max())
+    print(f"outliergram flags {flagged.tolist()}  (expected [69, 95])")
+    print(f"L2/Euclidean ratio = {ratios.mean():.9f}  vs  sqrt(pi) = {np.sqrt(np.pi):.9f}")
+    ```
+
+    Both assertions pass: the detector reproduces the named pair, and the
+    distance identity holds to machine precision — confirming the functional
+    outlier verdict transfers back to the original 13-D rows without distortion.
+
 ## A likelihood-ratio test for outliers
 
 `detect_outliers_lrt` takes a more formal, hypothesis-testing route: it
