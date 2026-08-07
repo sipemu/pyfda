@@ -26,7 +26,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 Each section requirement means: every diagram in that section conforms to `STYLE_SPEC.md`, is method-accurate on the rendered page, has any legacy-outlier SVG migrated to the standard viewBox/style/palette, and closes that section's approved coverage gaps. Reviewed on the built site before the next section starts.
 
-- [ ] **DIA-01**: `learn/` diagrams conform and are accurate (introduction, smoothing — fix the noisy/smoothed coordinate reuse bug, derivatives, irregular-sampling, simulation, custom-plotting)
+- [x] **DIA-01**: `learn/` diagrams conform and are accurate (introduction, smoothing — fix the noisy/smoothed coordinate reuse bug, derivatives, irregular-sampling, simulation, custom-plotting)
 - [ ] **DIA-02**: `represent/` diagrams conform and are accurate (basis-representation — remove R-era `extendr`/`autoplot` content, FPCA, andrews-transformation, distance-metrics, elastic-fpca)
 - [ ] **DIA-03**: `align/` diagrams conform and are accurate (elastic-alignment phase-vs-amplitude split, landmark-registration, tsrvf, shape-analysis, alignment-comparison, advanced-alignment)
 - [ ] **DIA-04**: `analyze/` diagrams conform and are accurate (clustering, depth-functions, outlier-detection, tolerance-bands, covariance-functions, seasonal-analysis, equivalence-testing, gmm-clustering, elastic-clustering — migrate legacy outliers)
@@ -78,7 +78,7 @@ Explicitly excluded to prevent scope creep.
 | AUD-01 | Phase 2 | Complete |
 | AUD-02 | Phase 2 | Complete |
 | AUD-03 | Phase 2 | Complete |
-| DIA-01 | Phase 3 | Pending |
+| DIA-01 | Phase 3 | Complete |
 | DIA-02 | Phase 4 | Pending |
 | DIA-03 | Phase 5 | Pending |
 | DIA-04 | Phase 6 | Pending |

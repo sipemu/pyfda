@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 3
-current_phase_name: learn/ Diagrams
+current_phase: 03
+current_phase_name: learn-diagrams
 status: executing
-stopped_at: Completed 02-03-PLAN.md — full audit complete (§2 R-era report, §3 reference-API sweep + ranked list)
-last_updated: "2026-08-07T21:33:20.083Z"
+stopped_at: Completed 03-01-PLAN.md — DIA-01 smoothing ghost redrawn, SVGO gate + build verified
+last_updated: "2026-08-07T22:02:58.101Z"
 last_activity: 2026-08-07
-last_activity_desc: Phase 02 complete, transitioned to Phase 3
+last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-07)
 
 **Core value:** Every diagram faithfully depicts what the method actually does; every example runs against the current API
-**Current focus:** Phase 02 — audit
+**Current focus:** Phase 03 — learn-diagrams
 
 ## Current Position
 
-Phase: 3 — learn/ Diagrams
-Plan: Not started
+Phase: 03 (learn-diagrams) — EXECUTING
+Plan: 2 of 2
 Status: Ready to execute
-Last activity: 2026-08-07 — Phase 02 complete, transitioned to Phase 3
+Last activity: 2026-08-07 — Phase 03 execution started
 
-Progress: [██████████] 100%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [██████████] 100%
 | Phase 02-audit P01 | 45min | 2 tasks | 1 files |
 | Phase 02 P02 | 11 | 3 tasks | 1 files |
 | Phase 02 P03 | 488 | 3 tasks | 1 files |
+| Phase 03-learn-diagrams P01 | 20min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ Recent decisions affecting current work:
 - [Phase ?]: All R-era LOFEFOVERs are confined to spm.svg (4 lines, lines 5/31/55/56). All other R package references across prose are PROSE-OK intentional notes.
 - [Phase ?]: basis-representation.svg preliminary R-era finding was NOT confirmed — the SVG uses current Python API names. No R-era content present.
 - [Phase ?]: Smoothing module has zero worked examples across all 17 example pages — added as EX-0006 (P1 priority), highest-urgency new-example gap.
+- [Phase ?]: GAP-0001: Panel 3 ghost underlay redrawn as genuinely-distinct noisy path (not removed) to preserve pedagogical before/after contrast
+- [Phase ?]: New Panel 3 ghost coordinate string: M0 96 L8 78 L16 106 L24 74 L32 98 L40 66 L48 88 L56 56 L64 82 L72 52 L80 76 L88 50 L96 72 L104 44 L112 66 L120 46 L128 64 L136 48 L144 56 L152 52 L156 64
 
 ### Pending Todos
 
@@ -114,6 +117,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-07T20:58:51.300Z
-Stopped at: Completed 02-03-PLAN.md — full audit complete (§2 R-era report, §3 reference-API sweep + ranked list)
+Last session: 2026-08-07T22:02:58.078Z
+Stopped at: Completed 03-01-PLAN.md — DIA-01 smoothing ghost redrawn, SVGO gate + build verified
 Resume file: None

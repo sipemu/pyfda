@@ -93,11 +93,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Every learn/ page that warrants a diagram (introduction, smoothing, derivatives, irregular-sampling, simulation, custom-plotting) has an accurate, non-generic diagram visible on the built site
   4. All legacy-outlier learn/ diagrams (off-spec fonts, viewBox, or palette) have been migrated to the STYLE_SPEC.md standard
 
-**Plans**: 2 plans
+**Plans**: 1/2 plans executed
 
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — TRACER: fix smoothing.svg GAP-0001 ghost bug, prove SVGO gate + built-site render (DIA-01)
+- [x] 03-01-PLAN.md — TRACER: fix smoothing.svg GAP-0001 ghost bug, prove SVGO gate + built-site render (DIA-01)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -202,7 +202,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete    | 2026-08-07 |
 | 2. Audit | 3/3 | Complete    | 2026-08-07 |
-| 3. learn/ Diagrams | 0/2 | Not started | - |
+| 3. learn/ Diagrams | 1/2 | In Progress|  |
 | 4. represent/ Diagrams | 0/TBD | Not started | - |
 | 5. align/ Diagrams | 0/TBD | Not started | - |
 | 6. analyze/ Diagrams | 0/TBD | Not started | - |
