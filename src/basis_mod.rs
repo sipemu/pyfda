@@ -417,7 +417,11 @@ pub fn smooth_basis_gcv<'py>(
 /// dict
 ///     Dictionary with keys: optimal_nbasis, scores, nbasis_range, criterion
 #[pyfunction]
-#[pyo3(signature = (data, argvals, nbasis_min=4, nbasis_max=20, basis_type="bspline", criterion="gcv", n_folds=5, lambda_=1.0))]
+// `lambda_` defaults to 0.0: selecting the basis *dimension* (nbasis) must NOT apply a
+// roughness penalty. A positive lambda saturates the effective df, flattens the
+// GCV/AIC/BIC curve, and makes the criterion always pick the largest nbasis
+// (sipemu/fdars#37). Use `pspline_fit_gcv` for penalised smoothing at a fixed nbasis.
+#[pyo3(signature = (data, argvals, nbasis_min=4, nbasis_max=20, basis_type="bspline", criterion="gcv", n_folds=5, lambda_=0.0))]
 pub fn basis_nbasis_cv<'py>(
     py: Python<'py>,
     data: PyReadonlyArray2<'py, f64>,
