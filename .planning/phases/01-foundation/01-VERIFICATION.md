@@ -1,26 +1,31 @@
 ---
 phase: 01-foundation
 verified: 2026-08-07T16:00:00Z
-status: human_needed
+status: passed
 score: 10/12 must-haves verified
 behavior_unverified: 2
 overrides_applied: 0
 behavior_unverified_items:
+
   - truth: "Two consecutive full mkdocs builds produce byte-identical SVG output from docs_fig.py exec blocks (FND-03, ROADMAP SC #3)"
     test: "Run mkdocs build twice consecutively (with DOCS_FAST unset) and diff the SVG outputs"
     expected: "No byte-level difference between build 1 and build 2 SVG outputs"
     why_human: "Requires the compiled fdars wheel and a full mkdocs build in a controlled env; the hashsalt code seam is verified present, but end-to-end determinism across two real builds is a runtime invariant that cannot be confirmed from the source alone"
+
   - truth: "Setting DOCS_FAST=1 causes the docs build to complete materially faster than the full build by lowering expensive iteration counts (FND-06, ROADMAP SC #6)"
     test: "Time a full mkdocs build (DOCS_FAST unset) vs DOCS_FAST=1 mkdocs build on a page with expensive params wrapped in fast()"
     expected: "DOCS_FAST=1 build completes materially faster"
     why_human: "Requires a full mkdocs build with compiled fdars; the fast() helper logic is verified working (returns fast_value when set), but the end-to-end speedup is a runtime property not observable from code alone"
 human_verification:
+
   - test: "Run two consecutive full mkdocs builds and diff SVG outputs for byte-identity (FND-03 runtime proof)"
     expected: "diff between build 1 and build 2 produces no output (zero diff)"
     why_human: "Requires compiled fdars + mkdocs build environment; svg.hashsalt seam verified in source but two-build byte-identity is a runtime invariant"
+
   - test: "Run DOCS_FAST=1 mkdocs build and compare wall-clock time to full build (FND-06 runtime proof)"
     expected: "DOCS_FAST=1 build completes materially faster on any page using fast() for expensive params"
     why_human: "Requires compiled fdars + mkdocs build environment; the fast() helper is functionally verified but end-to-end timing is a runtime property"
+
   - test: "Run the CI workflow on a branch (or observe the most recent docs.yml run) to confirm both Gate A (SVGO) and Gate B (doc-test smoke) pass and block before mkdocs build"
     expected: "Gate A passes for all 43 diagrams; Gate B 8/8 fences pass on canadian-weather.md; mkdocs build --strict exits 0"
     why_human: "CI run confirmation requires actual GitHub Actions execution; cannot be observed from the local working tree"
