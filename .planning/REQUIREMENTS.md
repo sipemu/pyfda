@@ -67,35 +67,33 @@ Explicitly excluded to prevent scope creep.
 
 ## Traceability
 
-Populated during roadmap creation (each requirement maps to exactly one phase).
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FND-01 | TBD | Pending |
-| FND-02 | TBD | Pending |
-| FND-03 | TBD | Pending |
-| FND-04 | TBD | Pending |
-| FND-05 | TBD | Pending |
-| FND-06 | TBD | Pending |
-| AUD-01 | TBD | Pending |
-| AUD-02 | TBD | Pending |
-| AUD-03 | TBD | Pending |
-| DIA-01 | TBD | Pending |
-| DIA-02 | TBD | Pending |
-| DIA-03 | TBD | Pending |
-| DIA-04 | TBD | Pending |
-| DIA-05 | TBD | Pending |
-| DIA-06 | TBD | Pending |
-| EX-01 | TBD | Pending |
-| EX-02 | TBD | Pending |
-| EX-03 | TBD | Pending |
-| EX-04 | TBD | Pending |
+| FND-01 | Phase 1 | Pending |
+| FND-02 | Phase 1 | Pending |
+| FND-03 | Phase 1 | Pending |
+| FND-04 | Phase 1 | Pending |
+| FND-05 | Phase 1 | Pending |
+| FND-06 | Phase 1 | Pending |
+| AUD-01 | Phase 2 | Pending |
+| AUD-02 | Phase 2 | Pending |
+| AUD-03 | Phase 2 | Pending |
+| DIA-01 | Phase 3 | Pending |
+| DIA-02 | Phase 4 | Pending |
+| DIA-03 | Phase 5 | Pending |
+| DIA-04 | Phase 6 | Pending |
+| DIA-05 | Phase 7 | Pending |
+| DIA-06 | Phase 8 | Pending |
+| EX-01 | Phase 9 | Pending |
+| EX-02 | Phase 9 | Pending |
+| EX-03 | Phase 9 | Pending |
+| EX-04 | Phase 9 | Pending |
 
 **Coverage:**
 - v1 requirements: 19 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 19 ⚠️ (resolved at roadmap creation)
+- Mapped to phases: 19
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-08-07*
-*Last updated: 2026-08-07 after initial definition*
+*Last updated: 2026-08-07 after roadmap creation (all 19 requirements mapped)*
