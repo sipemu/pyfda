@@ -45,7 +45,7 @@
   <text class="sm" x="598" y="112" text-anchor="middle">noise removed, signal kept</text>
   <g transform="translate(520,124)">
     <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
-    <path d="M0 96 L8 78 L16 106 L24 74 L32 98 L40 66 L48 88 L56 56 L64 82 L72 52 L80 76 L88 50 L96 72 L104 44 L112 66 L120 46 L128 64 L136 48 L144 56 L152 52 L156 64" stroke="#0d6efd" stroke-opacity=".2" stroke-width="1"/>
+    <path d="M0 96 L8 71 L16 89 L24 61 L32 80 L40 53 L48 72 L56 47 L64 65 L72 41 L80 59 L88 36 L96 55 L104 32 L112 51 L120 29 L128 50 L136 31 L144 53 L152 38 L156 60" stroke="#0d6efd" stroke-opacity=".2" stroke-width="1"/>
     <path d="M0 86 C40 62 80 44 120 38 C138 36 150 44 156 50" stroke="#0d6efd" stroke-width="3" stroke-linecap="round"/>
   </g>
   <text class="sm" x="598" y="250" text-anchor="middle" fill="#6c757d">ready for derivatives &amp; distances</text>
