@@ -40,10 +40,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. `pytest --co -q` discovers example code fences via `pytest-markdown-docs`, and a `conftest.py` globals hook exposes `np`, `plt`, and `fdars` to fence execution
   6. Setting `DOCS_FAST=1` causes the docs build to reduce expensive iteration counts (e.g. `max_iter`, `nb`) so a local verification completes materially faster than the full build
 
-**Plans**: 4 plans
+**Plans**: 1/4 plans executed
 **Wave 1**
 
-- [ ] 01-01-PLAN.md — TRACER: STYLE_SPEC.md + svgo.config.mjs + SVGO lint gate proven end-to-end through CI (FND-01, FND-02)
+- [x] 01-01-PLAN.md — TRACER: STYLE_SPEC.md + svgo.config.mjs + SVGO lint gate proven end-to-end through CI (FND-01, FND-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -180,7 +180,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/4 | Not started | - |
+| 1. Foundation | 1/4 | In Progress|  |
 | 2. Audit | 0/TBD | Not started | - |
 | 3. learn/ Diagrams | 0/TBD | Not started | - |
 | 4. represent/ Diagrams | 0/TBD | Not started | - |
