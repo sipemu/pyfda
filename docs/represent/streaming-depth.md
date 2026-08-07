@@ -94,9 +94,11 @@ for step in range(60):
     d = float(np.asarray(modified_band_1d(x, window))[0])
     depths.append(d)
 
-    # 2. threshold = low quantile of the window's own self-depth
+    # 2. threshold = boxplot rule on the window's own self-depth
+    #    (q1 - 1.5*IQR), the same rule the functional boxplot uses.
     self_depth = np.asarray(modified_band_1d(window, window))
-    threshold = np.quantile(self_depth, 0.05)
+    q1, q3 = np.quantile(self_depth, [0.25, 0.75])
+    threshold = q1 - 1.5 * (q3 - q1)
     is_anomaly = d < threshold
     flags.append(is_anomaly)
 
@@ -118,7 +120,7 @@ ax.legend()
 print(render(f))
 ```
 
-The depth trace hovers in a normal band, then collapses during the injected burst; the low-quantile threshold catches every anomalous arrival while the window stays uncontaminated.
+The depth trace hovers in a normal band, then collapses during the injected burst; the boxplot threshold catches every anomalous arrival. It also fires on a handful of ordinary curves -- an unavoidable false-alarm rate, since the simulated stream itself has real depth variation -- but those isolated flags are easy to distinguish from the sustained collapse during the burst, and because flagged curves are withheld the window stays uncontaminated.
 
 !!! success "Validation: the monitor detects the injected shift"
 
@@ -176,8 +178,8 @@ The depth trace hovers in a normal band, then collapses during the injected burs
 
 Two simple, robust rules work well:
 
-- **Quantile of window self-depth** (used above): compute `modified_band_1d(window, window)` and flag any new curve below, say, the 5th percentile. This adapts automatically as the window's spread changes.
-- **Depth boxplot rule**: with $q_1$ and $\mathrm{IQR}$ the first quartile and interquartile range of the window's self-depth, flag curves below $q_1 - 1.5\,\mathrm{IQR}$ -- the same rule the [functional boxplot](../analyze/outlier-detection.md) uses.
+- **Depth boxplot rule** (used above): with $q_1$ and $\mathrm{IQR}$ the first quartile and interquartile range of the window's self-depth, flag curves below $q_1 - 1.5\,\mathrm{IQR}$ -- the same rule the [functional boxplot](../analyze/outlier-detection.md) uses. This adapts automatically as the window's spread changes.
+- **Quantile of window self-depth**: compute `modified_band_1d(window, window)` and flag any new curve below, say, the 5th percentile. Simpler, but a fixed low quantile flags a constant fraction of ordinary curves regardless of spread, so it tends to raise more false alarms than the boxplot rule.
 
 $$
 \text{flag if} \quad D(x \mid W) < q_{1} - 1.5\,\mathrm{IQR}\bigl(D(W \mid W)\bigr)

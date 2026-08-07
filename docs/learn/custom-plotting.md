@@ -491,17 +491,29 @@ for i in range(value.shape[0]):
     ax.plot(value[i], velocity[i], color=palette[g], lw=1.2, alpha=0.7,
             label=g if g not in seen else None)
     seen.add(g)
+    # start marker at t = 0 for every trajectory
+    ax.plot(value[i, 0], velocity[i, 0], "o", color=palette[g], ms=3)
+
+# Direction-of-travel arrow: annotate one representative curve near its
+# start so the reader can see which way time flows around the loop.
+j = 40
+ax.annotate("", xy=(value[0, j + 1], velocity[0, j + 1]),
+            xytext=(value[0, j], velocity[0, j]),
+            arrowprops=dict(arrowstyle="-|>", color="#333333", lw=1.4))
 ax.set(title="Phase-plane view: value vs. velocity",
        xlabel="X(t)", ylabel="X'(t)")
-ax.set_aspect("equal", adjustable="datalim")
+# NB: no set_aspect("equal") -- the velocity range is several times the value
+# range, so forcing equal scales would collapse every loop into a thin sliver.
+# Let each axis autoscale independently so the loop structure stays visible.
 ax.legend()
 print(render(f))
 ```
 
 !!! note "Argvals disappear on the axes"
     In a phase-plane plot `t` is no longer an axis -- it is the *parameter*
-    tracing each loop. Time is implicit in the direction of travel, so add
-    arrows or a start marker if the direction matters. See
+    tracing each loop. Time is implicit in the direction of travel, so we add a
+    start marker at $t = 0$ and a direction arrow to show which way each loop is
+    traced. See
     [Working with Derivatives](derivatives.md) for more on velocity/acceleration
     curves.
 

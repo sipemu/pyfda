@@ -134,11 +134,14 @@ print(render(f))
 ```
 
 Both matrices are sorted so the first block is one class and the second the
-other. Under $L^2$ the two diagonal blocks are visibly darker (within-class pairs
-are closer) than the off-diagonal blocks — the class structure is *in* the
-geometry. Under the elastic distance that block contrast is much fainter: warping
-the frequency axis lets a Rock spectrum bend into a Mine-like shape, washing out
-the between-class gap.
+other. The block structure is **subtle rather than dramatic** — this is a hard,
+heavily overlapping problem — but it is measurably present under $L^2$: the mean
+between-class distance runs about **3.6% above** the mean within-class distance
+(between/within ≈ 1.036), so same-class pairs are, on average, the closer ones.
+Under the elastic distance that already-small gap nearly vanishes
+(between/within ≈ 1.011, ~1.1%): warping the frequency axis lets a Rock spectrum
+bend into a Mine-like shape, eroding what little between-class separation the
+geometry carried.
 
 ## Derivatives: a second "obvious" idea that also fails
 

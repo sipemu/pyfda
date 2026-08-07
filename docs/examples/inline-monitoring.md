@@ -160,9 +160,15 @@ print(f"Shewhart FPR: {shew.mean()*100:.1f}%  |  EWMA FPR: {ea.mean()*100:.1f}% 
 print(render(f))
 ```
 
-Both charts false-alarm at a low rate, close to the nominal 1 % — the chart is
-well-calibrated in-control. The EWMA statistic is smoother (it averages the
-scores over time), so its handful of false alarms tend to cluster.
+Both charts false-alarm at a low rate — here about **4–6%** (Shewhart ≈ 5.5%,
+EWMA ≈ 4.5%), several times the nominal $\alpha = 1\%$. That gap is expected: the
+limits are estimated from only 200 Phase I curves, so the empirical FPR sits
+*above* the nominal target in finite samples (the chart is under-, not
+over-calibrated), and the FPCA limits are approximate rather than exact. The rate
+is still low enough to be operationally usable; tightening it toward 1% would take
+a larger calibration set or bootstrap-corrected limits. The EWMA statistic is
+smoother (it averages the scores over time), so its handful of false alarms tend
+to cluster.
 
 ## Fault injection along the first eigenfunction
 
@@ -349,8 +355,11 @@ The experiment answers three deployment questions:
 
 1. **Minimum detectable fault.** Below roughly 1 σ the shift is masked by natural
    variation; neither chart is reliable there without accepting more false alarms.
-2. **False-alarm budget.** Both charts hold near the nominal 1 % in-control, so a
-   target in-control run length translates directly into a choice of $\alpha$.
+2. **False-alarm budget.** In-control the charts run a few points above the
+   nominal 1 % (here ~4–6 %) because the limits are estimated from a finite Phase I
+   sample; a target in-control run length translates into a choice of $\alpha$
+   only after that finite-sample inflation is accounted for (e.g. with a larger
+   calibration set or bootstrap-corrected limits).
 3. **Which chart.** A **Shewhart** chart reacts fastest to sudden large shifts
    (equipment failure); an **EWMA/CUSUM-style** chart wins on gradual degradation
    (drift, fouling) by accumulating evidence. Running both covers both regimes.

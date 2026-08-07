@@ -171,7 +171,7 @@ from fdars.simulation import simulate
 from fdars.metric import lp_self_1d, dtw_self_1d
 
 t = np.linspace(0, 1, 120)
-base = np.asarray(simulate(n=1, argvals=t, n_basis=4, efun_type="fourier", seed=5))[0]
+base = np.asarray(simulate(n=1, argvals=t, n_basis=4, efun_type="fourier", seed=33))[0]
 pair = np.vstack([base, np.roll(base, 12)])          # curve + shifted copy
 
 d_l2 = float(np.asarray(lp_self_1d(pair, t, p=2.0))[0, 1])
@@ -385,7 +385,7 @@ print(render(f))
 
 ## Which metrics see phase? A correlation view
 
-Metrics that ignore time warping (L2, L1, Hausdorff) rank pairs very differently from ones that absorb it (DTW). Computing several distance matrices on a phase-varying sample and correlating their off-diagonal entries makes the split visible: L2 and L1 agree almost perfectly, DTW correlates moderately with them, and Hausdorff -- caring about worst-case pointwise mismatch -- sits apart.
+Metrics that ignore time warping (L2, L1, Hausdorff) rank pairs somewhat differently from ones that absorb it (DTW). Computing several distance matrices on a phase-varying sample and correlating their off-diagonal entries makes the structure visible: L2 and L1 agree almost perfectly, DTW correlates highly with them (it still tracks amplitude, only discounting phase), and Hausdorff -- caring about worst-case pointwise mismatch -- sits furthest apart.
 
 ```python exec="1" html="1" source="above"
 import numpy as np

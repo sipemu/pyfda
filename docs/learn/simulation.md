@@ -360,13 +360,13 @@ from fdars.simulation import simulate, add_error_curve
 
 t = np.linspace(0, 1, 100)
 clean = np.asarray(simulate(n=10, argvals=t, n_basis=5, seed=42))
-shifted = np.asarray(add_error_curve(clean, sd=0.5, seed=123))
+shifted = np.asarray(add_error_curve(clean, sd=2.5, seed=123))
 
 f, (a1, a2) = fig(1, 2, figsize=(9.0, 3.6), sharex=True, sharey=True)
 a1.plot(t, clean.T, lw=1.0, alpha=0.8)
 a1.set(title="clean", xlabel="t", ylabel="X(t)")
 a2.plot(t, shifted.T, lw=1.0, alpha=0.8)
-a2.set(title="curve-level offset (sd=0.5)", xlabel="t")
+a2.set(title="curve-level offset (sd=2.5)", xlabel="t")
 print(render(f))
 ```
 
@@ -613,12 +613,17 @@ from fdars.clustering import kmeans_fd
 t = np.linspace(0, 1, 100)
 n_per = 30
 
-# 1. Two groups differing only in the mean function
+# 1. Two groups differing only in the mean function. We use exponential
+#    eigenvalue decay so the within-group KL variability stays modest relative
+#    to the between-group mean gap -- otherwise the groups overlap too much for
+#    unsupervised clustering to recover them.
 mean1 = lambda t: np.sin(2 * np.pi * t)                              # noqa: E731
-mean2 = lambda t: np.sin(2 * np.pi * t) + 0.5 * np.cos(4 * np.pi * t)  # noqa: E731
+mean2 = lambda t: np.sin(2 * np.pi * t) + 2.0 * np.cos(4 * np.pi * t)  # noqa: E731
 
-g1 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5, seed=1)) + mean1(t)
-g2 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5, seed=2)) + mean2(t)
+g1 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5,
+                         eval_type="exponential", seed=1)) + mean1(t)
+g2 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5,
+                         eval_type="exponential", seed=2)) + mean2(t)
 
 # 2. Add measurement noise
 g1 = np.asarray(add_error_pointwise(g1, sd=0.2, seed=11))
@@ -650,9 +655,11 @@ from fdars.clustering import kmeans_fd
 t = np.linspace(0, 1, 100)
 n_per = 30
 mean1 = lambda t: np.sin(2 * np.pi * t)                              # noqa: E731
-mean2 = lambda t: np.sin(2 * np.pi * t) + 0.5 * np.cos(4 * np.pi * t)  # noqa: E731
-g1 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5, seed=1)) + mean1(t)
-g2 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5, seed=2)) + mean2(t)
+mean2 = lambda t: np.sin(2 * np.pi * t) + 2.0 * np.cos(4 * np.pi * t)  # noqa: E731
+g1 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5,
+                         eval_type="exponential", seed=1)) + mean1(t)
+g2 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5,
+                         eval_type="exponential", seed=2)) + mean2(t)
 g1 = np.asarray(add_error_pointwise(g1, sd=0.2, seed=11))
 g2 = np.asarray(add_error_pointwise(g2, sd=0.2, seed=22))
 
@@ -717,5 +724,3 @@ print(render(f))
 - [Working with Derivatives](derivatives.md) -- differentiate your curves.
 - [Covariance Functions](../analyze/covariance-functions.md) -- deeper look at
   kernel functions.
-</content>
-</invoke>

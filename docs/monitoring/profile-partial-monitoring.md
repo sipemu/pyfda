@@ -434,7 +434,7 @@ from fdars.spm import spm_phase1, spm_monitor, spe_control_limit
 argvals = np.linspace(0, 1, 120)
 ic  = np.asarray(simulate(80, argvals, n_basis=6, seed=7))
 new = np.asarray(simulate(12, argvals, n_basis=6, seed=21))
-new[8:] += np.sin(30 * argvals) * 0.4          # obs 8..11: shape outside the model
+new[8:] += np.sin(80 * argvals) * 0.4          # obs 8..11: high-freq shape outside the model
 
 idx  = np.where((argvals >= 0.26) & (argvals <= 0.38))[0]
 a    = np.ascontiguousarray(argvals[idx])

@@ -211,6 +211,59 @@ print(f"All periods:    {result_cfd['periods']}")
 | `periods` | `ndarray` | All detected periods |
 | `confidences` | `ndarray` | Confidence for each detected period |
 
+### Multiple periods by residual peeling
+
+When several *independent* cycles coexist — say a fast and a slow rhythm — a single
+peak is not enough. `detect_multiple_periods` (the R `detect.periods`) extracts them
+one at a time: it finds the strongest sinusoid, **subtracts** its fitted contribution,
+and repeats on the residual, so a strong cycle cannot mask a weaker co-existing one. It
+returns a list of dicts, each with the extracted `period`, its `confidence`
+(peak-to-mean spectral power), `strength` (variance explained), `amplitude`, `phase`,
+and the `iteration` at which it was peeled off. Thresholds `min_confidence` and
+`min_strength` stop the peeling once the residual is noise.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.seasonal import detect_multiple_periods
+
+rng = np.random.default_rng(3)
+t = np.linspace(0, 48, 960)
+# two genuinely distinct cycles (4 and 9 -- not harmonics of each other)
+signal = np.sin(2 * np.pi * t / 4.0) + 0.7 * np.sin(2 * np.pi * t / 9.0)
+X = signal[None, :] + rng.normal(0, 0.25, (6, 960))
+
+found = detect_multiple_periods(X, t, max_periods=2, min_confidence=3.0, min_strength=0.15)
+for r in found:
+    print(f"iter {r['iteration']}: period={r['period']:.2f}  "
+          f"strength={r['strength']:.2f}  amplitude={r['amplitude']:.2f}")
+
+# periodogram of the sample mean, with the peeled periods marked
+xm = X.mean(0) - X.mean()
+dt = t[1] - t[0]
+power = np.abs(np.fft.rfft(xm)) ** 2 / xm.size
+freqs = np.fft.rfftfreq(xm.size, d=dt)
+per = np.divide(1.0, freqs, out=np.full_like(freqs, np.inf), where=freqs > 0)
+keep = (per > 2.0) & (per < 16.0)
+
+f, ax = fig(figsize=(7.4, 3.6))
+ax.plot(per[keep], power[keep], color="#3f51b5", lw=1.6)
+for i, r in enumerate(found):
+    ax.axvline(r["period"], color="#e8710a", ls="--", lw=1.5,
+               label=f"peeled #{r['iteration']}: T={r['period']:.2f}")
+for pt, c in ((4.0, "#198754"), (9.0, "#198754")):
+    ax.axvline(pt, color=c, ls=":", lw=1.2)
+ax.set(title="detect_multiple_periods: residual peeling recovers both cycles",
+       xlabel="candidate period", ylabel="spectral power $I(f)$")
+ax.legend()
+print(render(f))
+```
+
+The two dashed lines sit on (or, for the longer period, within one FFT bin of) the two
+dotted true periods (4 and 9): the first pass peels the dominant period-4 cycle, and the
+second recovers the weaker period-9 one from the residual — a cycle that a single-peak
+detector, dominated by the period-4 spike, would have missed.
+
 ---
 
 ## Lomb–Scargle periodogram
@@ -306,7 +359,9 @@ from fdars.seasonal import matrix_profile_fdata
 rng = np.random.default_rng(11)
 t = np.linspace(0, 24, 720)
 dt = t[1] - t[0]
-X = np.sin(2 * np.pi * t / 3.0)[None, :] + rng.normal(0, 0.15, (3, 720))
+x = np.sin(2 * np.pi * t / 3.0) + rng.normal(0, 0.08, 720)
+x[360:400] += 2.5                    # inject a discord (a bump that breaks the cycle)
+X = x[None, :]
 
 w = int(round(3.0 / dt))              # one period per window
 mp = matrix_profile_fdata(X, subsequence_length=w)
@@ -316,14 +371,22 @@ print(f"primary period: {prim_pts * dt:.2f} time units  (true 3.0)")
 
 f, (a0, a1) = fig(2, 1, figsize=(7.8, 4.6), sharex=False)
 a0.plot(t, X[0], color="#3f51b5", lw=0.9)
-a0.set(ylabel="signal", title="Matrix profile of a periodic curve")
+a0.axvspan(t[360], t[399], color="#dc3545", alpha=0.15)
+a0.set(ylabel="signal", title="Matrix profile of a periodic curve with one discord")
 a1.plot(prof, color="#198754", lw=1.0)
+a1.axvline(int(np.argmax(prof)), color="#dc3545", ls="--", lw=1.4,
+           label=f"discord at window {int(np.argmax(prof))}")
 a1.set(xlabel="window index $i$", ylabel="MP[$i$]")
+a1.legend()
 print(render(f))
 ```
 
-The matrix profile dips wherever a window has a close repeat (the periodic body) and spikes at
-irregularities — a robust, largely parameter-free companion to spectral period detection.
+The matrix profile stays low across the periodic body — every window there has a close
+repeat one period away — and spikes sharply at the injected discord (shaded), where no
+window elsewhere matches. That tall spike, well above the periodic baseline, is exactly
+how the matrix profile localises anomalies, while the recovered `primary_period` confirms
+the underlying cycle. It is a robust, largely parameter-free companion to spectral period
+detection.
 
 ---
 
@@ -358,7 +421,10 @@ from fdars.seasonal import ssa_fdata
 
 rng = np.random.default_rng(2)
 t = np.linspace(0, 20, 600)
-X = (0.1 * t + np.sin(2 * np.pi * t / 2.5))[None, :] + rng.normal(0, 0.2, (4, 600))
+# A linear trend plus a fast oscillation (period 0.4). Keeping the period short
+# relative to the SSA window lets the auto-grouping cleanly separate the smooth
+# ramp (trend) from the oscillatory pair (seasonal).
+X = (0.1 * t + np.sin(2 * np.pi * t / 0.4))[None, :] + rng.normal(0, 0.15, (4, 600))
 
 d = ssa_fdata(X, window_length=120, n_components=6)
 trend = np.asarray(d["trend"])

@@ -516,10 +516,14 @@ axes[0, 0].legend(fontsize=8)
 print(render(f))
 ```
 
-At very small $\lambda$ the derivative chases the noise; by $\lambda = 10$ it has
-converged to a clean, biologically plausible velocity curve. In practice, let
-`smooth_basis_gcv` pick the penalty and nudge it up if the derivative still looks
-rough.
+At very small $\lambda$ the derivative chases the noise; by $\lambda = 1$ the
+velocity estimate is clean yet still tracks the reference's pubertal peak near
+age 10. Push the penalty too far, however, and it *over-smooths*: at
+$\lambda = 10$ the spurt has been flattened away entirely, leaving a monotone
+decline that no longer matches the biology. The sweet spot for a derivative
+therefore sits between under- and over-smoothing -- here around $\lambda = 1$.
+In practice, let `smooth_basis_gcv` pick the penalty and nudge it up only if the
+derivative still looks rough.
 
 ---
 

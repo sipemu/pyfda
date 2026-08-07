@@ -117,7 +117,7 @@ f, ax = fig()
 ax.vlines(obs, 0, p1t2, color="#c7cbe0", lw=0.8)
 ax.scatter(obs, p1t2, s=14, color="#3f51b5", zorder=3)
 ax.axhline(chart["t2_limit"], color="#e8710a", ls="--", lw=1.3, label="T² UCL")
-ax.set(title=f"Phase I control chart ({int(in_spec.sum())} in-spec samples, "
+ax.set(title=f"Phase I control chart ({len(p1t2)} in-spec samples, "
              f"ncomp = {ncomp})",
        xlabel="training sample", ylabel="Hotelling $T^2$")
 ax.legend(loc="upper right")
@@ -259,9 +259,10 @@ print(render(f))
 ```
 
 The run rules fire far more often than plain UCL crossings, dominated by
-sustained one-sided runs (WE4) — the signature of a **persistent shift** in the
-process mean rather than isolated spikes. Nelson's larger rule set adds
-oscillation and 2-sigma patterns, so it flags strictly more of the sequence.
+single points beyond 3σ (WE1) — the signature of **large individual excursions**
+rather than a slow drift. The sustained-run (WE4) and 2-of-3-beyond-2σ (WE2)
+rules add a handful more, and Nelson's larger rule set contributes an
+oscillation pattern (Nelson5), so it flags strictly more of the sequence.
 
 ## An EWMA chart for sustained small shifts
 
@@ -317,9 +318,13 @@ print(f"EWMA alarms: {int(alarm.sum())} of {len(mewma)}")
 print(render(f))
 ```
 
-Because the out-of-spec spectra sustain a real shift, the smoothed statistic
-climbs and stays above the UCL once it accumulates enough evidence — catching a
-persistent departure that individual $T^2$ points may not flag on their own.
+The out-of-spec stream is not a single clean shift but a mixture of severities,
+so the smoothed statistic is spiky rather than monotone: it surges well above the
+UCL where consecutive high-fat spectra reinforce each other (the peak near
+observation 16), then relaxes back toward zero over the calmer stretches
+(observations ~22–28 and ~62–68). Even so, the EWMA spends most of the run above
+the limit and flags roughly half the stream — catching clustered departures that
+individual $T^2$ points may not flag on their own.
 
 !!! note "Binding gap vs. the R reference"
     R's `spm.cusum`, `spm.mewma`, and bootstrap-robust limits (`spm.limit.robust`)
@@ -377,21 +382,24 @@ f.colorbar(im, ax=a2, label=r"$T^2$ contribution")
 print(render(f))
 ```
 
-The dominant component carries most of the $T^2$ mass — the mode that tracks the
-fat signal. The heatmap shows which observations load heaviest on it, and since
-each eigenfunction is a weighted combination of wavelengths, a high PC1
-contribution points the engineer back toward the 930–1000 nm fat-absorption
-region for root-cause work.
+For the worst sample the $T^2$ mass is carried by the **higher-order shape modes,
+not PC1**: PC3 dominates (≈ 40), PC2 is next (≈ 26), and the leading absorbance-
+level mode PC1 contributes barely 2. That makes sense — PC1 captures the overall
+absorbance level that in-spec and out-of-spec spectra largely share, whereas the
+fault lives in the subtler PC2/PC3 shape modes. The heatmap confirms the pattern
+across the stream (PC3 is the darkest row overall), and since each eigenfunction
+is a weighted combination of wavelengths, a high PC2/PC3 contribution points the
+engineer back toward the 930–1000 nm fat-absorption region for root-cause work.
 
 ## Conclusion
 
 - **Phase I** learned the in-spec spectral variation and set control limits, with
   `select_ncomp` reducing NIR spectra to a single dominant component.
 - **Shewhart $T^2$/SPE** flagged out-of-spec spectra from shape alone.
-- **Run rules** exposed a persistent one-sided shift beyond the isolated UCL
-  crossings.
-- An **EWMA chart** on the FPC scores accumulated evidence of that sustained
-  shift.
+- **Run rules** caught extra excursions (mostly single points beyond 3σ) beyond
+  the isolated UCL crossings.
+- An **EWMA chart** on the FPC scores accumulated evidence over clustered
+  departures, spiking above the UCL and relaxing over calmer stretches.
 - **Per-PC contributions** translated alarms back toward the fat-absorption
   wavelengths for diagnosis.
 

@@ -129,9 +129,9 @@ print(render(f))
 ```
 
 Most wines cluster in a dense blob; the flagged points sit far out on the
-**shape** axis, meaning their curves bend differently from the crowd rather than
-merely sitting high or low. The colours show these extreme wines are not
-confined to one cultivar.
+**magnitude** axis (with one shape extreme, wine 81), meaning they mostly sit
+unusually high or low overall while one bends differently from the crowd. The
+colours show these extreme wines are not confined to one cultivar.
 
 ## The outliergram: a built-in decision rule
 

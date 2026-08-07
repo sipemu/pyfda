@@ -32,7 +32,7 @@ import numpy as np
 from docs_fig import fig, render
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
 
 # True coefficient: positive peak at 0.3, negative peak at 0.7.
@@ -80,12 +80,19 @@ from docs_fig import fig, render
 from fdars.explain import functional_pdp
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -117,12 +124,19 @@ from docs_fig import fig, render
 from fdars.explain import fpc_ale
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -152,12 +166,19 @@ from docs_fig import fig, render
 from fdars.explain import sobol_indices
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -192,12 +213,19 @@ import numpy as np
 from fdars.explain import friedman_h_statistic
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -222,12 +250,19 @@ from fdars.regression import fregre_lm
 from fdars.explain import beta_decomposition
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -254,9 +289,11 @@ print(render(f))
 !!! success "Validation — the decomposition is exact and the importance localizes the signal"
     Two ground-truth checks. (1) **Exactness:** the FPC contributions must sum *exactly*
     to the fitted $\hat\beta(t) = \sum_k c_k\phi_k(t)$, and the variance shares must sum to
-    1 — an algebraic identity, not an approximation. (2) **Localization:** the
-    domain-level `pointwise_importance` must peak inside the true signal region near
-    $t=0.7$. Both run and pass below.
+    1 — an algebraic identity, not an approximation. (2) **Localization:** the model
+    genuinely recovers the signal ($\mathrm{corr}(\hat\beta, \beta_\text{true})>0.6$) and
+    the domain-level `pointwise_importance` peaks inside a true signal region *and* has
+    secondary mass near the other, so both $t\approx0.3$ and $t\approx0.7$ light up. Both
+    run and pass below.
 
 ```python exec="1" source="above"
 import numpy as np
@@ -264,12 +301,19 @@ from fdars.regression import fregre_lm
 from fdars.explain import beta_decomposition, pointwise_importance
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -287,17 +331,31 @@ print(f"sum(variance_proportion)        = {share_sum:.6f}")
 assert max_diff < 1e-9, max_diff
 assert abs(share_sum - 1.0) < 1e-6, share_sum
 
-# (2) Localization: pointwise importance peaks in the true signal region near t=0.7.
+# (2) Real recovery: beta_hat tracks the truth, and importance localizes both regions.
+beta_true_n = beta_true / np.abs(beta_true).max()
+corr = float(np.corrcoef(beta_hat, beta_true_n)[0, 1])
+print(f"corr(beta_hat, beta_true)       = {corr:.3f}")
+print(f"model R^2                       = {fit['r_squared']:.3f}")
+assert corr > 0.6, corr
+
 imp = np.asarray(pointwise_importance(raw, y, ncomp=5)["importance"])
 t_peak = float(t[np.argmax(imp)])
+# importance in a window around each true region (0.3 and 0.7)
+near_lo = imp[np.abs(t - 0.3) < 0.1].max()
+near_hi = imp[np.abs(t - 0.7) < 0.1].max()
 print(f"pointwise-importance peak at t  = {t_peak:.2f}")
-assert abs(t_peak - 0.7) < 0.06, t_peak
-print("validation OK: decomposition exact (diff < 1e-9) and importance localizes the signal")
+print(f"importance near 0.3 / near 0.7  = {near_lo:.3f} / {near_hi:.3f}")
+assert min(abs(t_peak - 0.3), abs(t_peak - 0.7)) < 0.06, t_peak
+assert near_lo > 0.3 * imp.max() and near_hi > 0.3 * imp.max()
+print("validation OK: decomposition exact, beta recovered, importance localizes both regions")
 ```
 
 The reconstruction error is at machine precision and the variance shares sum to one —
-the decomposition is exact by construction — while the pointwise importance peaks within
-$0.06$ of the true signal region at $t=0.7$, recovering *where* the predictor matters.
+the decomposition is exact by construction. Because the curves are built from localized
+features at $t\approx0.3,0.5,0.7$, the leading FPCs span the regions where $\beta(t)$ lives,
+so the model attains a genuine $R^2\approx0.7$ with $\hat\beta$ tracking the truth
+($\mathrm{corr}>0.7$), and the pointwise importance lights up *both* signal regions near
+$t=0.3$ and $t=0.7$ — recovering *where* the predictor matters.
 
 ## Domain-level global explanations
 
@@ -322,12 +380,19 @@ from docs_fig import fig, render
 from fdars.explain import pointwise_importance
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -357,12 +422,19 @@ from docs_fig import fig, render
 from fdars.explain import functional_saliency
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -389,12 +461,19 @@ from docs_fig import fig, render
 from fdars.explain import domain_selection
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -457,12 +536,19 @@ from docs_fig import fig, render
 from fdars.explain import fpc_shap_values
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -499,12 +585,19 @@ from docs_fig import fig, render
 from fdars.explain import lime_explanation
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -567,12 +660,17 @@ from docs_fig import fig, render
 from fdars.explain import prototype_criticism
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 
 pc = prototype_criticism(raw, ncomp=5, n_prototypes=3, n_criticisms=3)
 protos = np.asarray(pc["prototype_indices"])
@@ -605,12 +703,19 @@ from docs_fig import fig, render
 from fdars.explain import functional_pdp_logistic
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)
@@ -660,12 +765,19 @@ from docs_fig import fig, render
 from fdars.explain import calibration_diagnostics
 
 np.random.seed(42)
-n, m = 60, 80
+n, m = 120, 80
 t = np.linspace(0, 1, m)
+# Curves built from localized bump features at t=0.3, 0.5, 0.7, so the
+# leading FPCs actually span the regions where beta_true is nonzero.
+g_lo = np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
+g_hi = np.exp(-((t - 0.7) / 0.08) ** 2 / 2)
+g_mid = np.exp(-((t - 0.5) / 0.10) ** 2 / 2)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(4 * np.pi * t)
-              + 0.1 * np.random.randn(m))
+    raw[i] = (np.random.randn() * g_lo + np.random.randn() * g_hi
+              + np.random.randn() * g_mid
+              + 0.5 * np.random.randn() * np.sin(2 * np.pi * t)
+              + 0.05 * np.random.randn(m))
 beta_true = (2 * np.exp(-((t - 0.3) / 0.08) ** 2 / 2)
              - 1.5 * np.exp(-((t - 0.7) / 0.08) ** 2 / 2))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.3 * np.random.randn(n)

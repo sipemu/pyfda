@@ -218,8 +218,8 @@ from fdars.metric import lp_self_1d
 # Three-group data
 argvals = np.linspace(0, 1, 100)
 g1 = simulate(25, argvals, n_basis=5, seed=1)
-g2 = simulate(25, argvals, n_basis=5, seed=2) + 3.0
-g3 = simulate(25, argvals, n_basis=5, seed=3) - 3.0
+g2 = simulate(25, argvals, n_basis=5, seed=2) + 8.0
+g3 = simulate(25, argvals, n_basis=5, seed=3) + 16.0
 fd = Fdata(np.vstack([g1, g2, g3]), argvals=argvals)
 
 dist = lp_self_1d(fd.data, fd.argvals, p=2.0)
@@ -244,9 +244,11 @@ from fdars.clustering import kmeans_fd, silhouette_score
 from fdars.metric import lp_self_1d
 
 t = np.linspace(0, 1, 100)
+# Three well-separated groups: level 0, +8, +16 (gaps wide enough that no
+# two-way split beats the three-way one).
 g1 = np.asarray(simulate(15, t, n_basis=5, seed=1))
-g2 = np.asarray(simulate(15, t, n_basis=5, seed=2)) + 3.0
-g3 = np.asarray(simulate(15, t, n_basis=5, seed=3)) - 3.0
+g2 = np.asarray(simulate(15, t, n_basis=5, seed=2)) + 8.0
+g3 = np.asarray(simulate(15, t, n_basis=5, seed=3)) + 16.0
 X = np.vstack([g1, g2, g3])
 dist = np.asarray(lp_self_1d(X, t, p=2.0))
 
@@ -282,8 +284,8 @@ from fdars.clustering import kmeans_fd
 t = np.linspace(0, 1, 80)
 X = np.vstack([
     np.asarray(simulate(15, t, n_basis=5, seed=1)),
-    np.asarray(simulate(15, t, n_basis=5, seed=2)) + 3.0,
-    np.asarray(simulate(15, t, n_basis=5, seed=3)) - 3.0,
+    np.asarray(simulate(15, t, n_basis=5, seed=2)) + 8.0,
+    np.asarray(simulate(15, t, n_basis=5, seed=3)) + 16.0,
 ])
 
 ks = list(range(1, 8))

@@ -255,8 +255,9 @@ and splits their total elastic distance into an **amplitude** part
 ($d_a$, shape difference in the SRVF domain) and a **phase** part
 ($d_p$, cost of the warp). Measuring each curve against the Karcher mean shows
 how the two kinds of variation are distributed across the sample: here phase is
-large and roughly constant (every curve is heavily warped), while amplitude
-tracks $\lvert\delta_i\rvert$.
+large and roughly constant (every curve is heavily warped), while the amplitude
+distances carry what little of $\lvert\delta_i\rvert$ survives the template and
+noise (a weak proxy — the regression below extracts it far more cleanly).
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -290,14 +291,18 @@ a0.scatter(d_phase, d_amp, s=30, c="#3f51b5", alpha=0.8)
 a0.set(title="Phase vs. amplitude distance to the mean",
        xlabel=r"phase distance $d_p$", ylabel=r"amplitude distance $d_a$")
 a1.scatter(np.abs(delta), d_amp, s=30, c="#198754", alpha=0.8)
-a1.set(title=r"Amplitude distance tracks $|\delta_i|$",
+a1.set(title=r"Amplitude distance vs. $|\delta_i|$",
        xlabel=r"$|\delta_i|$ (true amplitude signal)", ylabel=r"amplitude distance $d_a$")
 print(render(f))
 ```
 
-The right panel confirms the design: the amplitude distance recovered by the
-elastic decomposition is monotone in the true amplitude perturbation, so a
-regression that operates on *amplitude* has direct access to the signal.
+The right panel is a caution, not a victory lap: with only a 20% amplitude
+perturbation riding on a shared template plus noise, the raw amplitude *distance
+to the mean* is a **weak, scattered** proxy for $|\delta_i|$ — a curve's distance
+to the Karcher mean mixes its own $\delta_i$ with template and noise. The point of
+the elastic pipeline is not that this scatter is tight, but that a regression fit
+in the aligned/SRVF domain (below) recovers the $\delta_i$ signal far more
+directly than one fit on the raw, phase-corrupted curves.
 
 ---
 

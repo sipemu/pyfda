@@ -24,11 +24,12 @@ t = np.linspace(0, 1, 200)
 X = np.asarray(simulate(n=1, argvals=t, n_basis=8, efun_type="fourier", seed=3))
 
 f, ax = fig()
-ax.plot(t, X[0], color="#6c757d", lw=1.0, alpha=0.6, label="target curve")
 for nb in (4, 8, 20):
     c, actual = fdata_to_basis_1d(X, t, n_basis=nb, basis_type="bspline")
     rec = np.asarray(basis_to_fdata_1d(c, t, n_basis=actual, basis_type="bspline"))
     ax.plot(t, rec[0], lw=1.8, label=f"n_basis = {actual}")
+ax.plot(t, X[0], color="k", lw=2.4, ls=":", alpha=0.9, zorder=5,
+        label="target curve")
 ax.set(title="B-spline reconstruction at increasing basis size",
        xlabel="t", ylabel="X(t)")
 ax.legend()
@@ -47,7 +48,7 @@ print(render(f))
 
 ### When the basis matters: a non-periodic signal
 
-The choice really bites when the signal is *non-periodic with local features*. Consider a curve built from a polynomial trend, a narrow Gaussian bump, and a one-sided sharp edge -- exactly the kind of structure a global sinusoidal basis struggles with. Selecting the number of basis functions by GCV for each family and reconstructing the curve shows the B-spline winning by a wide margin, while the Fourier fit rings around the bump and the edge (a Gibbs phenomenon).
+The choice really bites when the signal is *non-periodic with local features*. Consider a curve built from a polynomial trend, a narrow Gaussian bump, and a one-sided sharp edge -- exactly the kind of structure a global sinusoidal basis struggles with. Selecting the number of basis functions by GCV for each family and reconstructing the smooth signal (here the sample mean of a noisy ensemble) shows the B-spline winning by a wide margin, while the Fourier fit rings around the bump and the edge (a Gibbs phenomenon).
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -63,18 +64,22 @@ def complex_signal(t):
     sharp = 0.5 * np.sqrt(np.maximum(0.0, t - 0.7))            # sharp edge
     return trend + bump + sharp
 
-X = np.array([complex_signal(t) + 0.15 * rng.standard_normal(t.size)
+true = complex_signal(t)
+X = np.array([true + 0.15 * rng.standard_normal(t.size)
               for _ in range(30)])
 
-# GCV-select the basis count for each family.
+# GCV-select the basis count for each family (over the noisy ensemble).
 cb = basis_nbasis_cv(X, t, nbasis_min=5, nbasis_max=25, basis_type="bspline")
 cf = basis_nbasis_cv(X, t, nbasis_min=5, nbasis_max=25, basis_type="fourier")
 nb, nf = int(cb["optimal_nbasis"]), int(cf["optimal_nbasis"])
 
-# Reconstruct one curve at each family's optimum.
-cbc, ab = fdata_to_basis_1d(X, t, n_basis=nb, basis_type="bspline")
+# Reconstruct the smooth sample mean at each family's optimum. Projecting the
+# smooth target (rather than a single noisy realization) isolates the basis's
+# approximation error from the observation noise.
+mean = X.mean(axis=0, keepdims=True)
+cbc, ab = fdata_to_basis_1d(mean, t, n_basis=nb, basis_type="bspline")
 recb = np.asarray(basis_to_fdata_1d(cbc, t, n_basis=ab, basis_type="bspline"))
-cfc, af = fdata_to_basis_1d(X, t, n_basis=nf, basis_type="fourier")
+cfc, af = fdata_to_basis_1d(mean, t, n_basis=nf, basis_type="fourier")
 recf = np.asarray(basis_to_fdata_1d(cfc, t, n_basis=af, basis_type="fourier"))
 
 f, (a0, a1) = fig(1, 2, figsize=(11, 3.9))
@@ -86,7 +91,7 @@ a0.set(title="GCV vs basis count (lower is better)",
        xlabel="number of basis functions", ylabel="GCV score")
 a0.legend()
 
-a1.plot(t, complex_signal(t), color="#6c757d", lw=2, ls="--", label="true signal")
+a1.plot(t, true, color="#6c757d", lw=2, ls="--", label="true signal")
 a1.plot(t, recb[0], color="#3f51b5", lw=1.8, label=f"B-spline (K={ab})")
 a1.plot(t, recf[0], color="#e8710a", lw=1.8, label=f"Fourier (K={af})")
 a1.set(title="B-spline captures the bump; Fourier rings",
@@ -95,7 +100,10 @@ a1.legend()
 print(render(f))
 ```
 
-For this signal the B-spline optimum reaches a markedly lower GCV than the Fourier optimum -- confirming the rule of thumb that local, non-periodic features call for a locally supported basis.
+For this signal the B-spline optimum reaches a markedly lower GCV than the Fourier optimum, and its reconstruction tracks the bump and the edge closely while the Fourier fit oscillates around them -- confirming the rule of thumb that local, non-periodic features call for a locally supported basis. (The Fourier oscillation around the bump and edge is the expected Gibbs phenomenon for a global sinusoidal basis on non-periodic data, not a numerical defect.)
+
+!!! warning "B-spline least-squares fit is unreliable on rough data"
+    The examples on this page project **smooth** targets (a simulated smooth curve, the sample mean) onto the B-spline basis, where `fdata_to_basis_1d` / `basis_to_fdata_1d` behave well. On **rough or noisy real data** the current B-spline least-squares fit is not a true least-squares solution: its reconstruction can be worse than a constant fit and can *deteriorate* as `n_basis` grows, rather than improving. This also makes `basis_nbasis_cv` unreliable for B-splines -- it tends to return the largest candidate `n_basis` regardless of the data. This is a confirmed core bug, tracked as [sipemu/fdars#33](https://github.com/sipemu/fdars/issues/33). Until it is fixed, prefer **P-splines** (`pspline_fit_gcv`, shown below) for smoothing rough curves, and treat B-spline round-trips as reliable only on smooth targets.
 
 ## Quick start: project and reconstruct
 
@@ -361,7 +369,7 @@ plt.show()
 
 ## Comparing the smoothing approaches
 
-The three routes -- a fixed basis, a CV-selected basis count, and a P-spline with GCV-selected penalty -- can be run side by side. On noisy sinusoidal data, the CV-optimal basis and the P-spline both recover the underlying signal closely, while a too-small fixed basis oversmooths.
+The three routes -- a fixed basis, a CV-selected basis count, and a P-spline with GCV-selected penalty -- can be run side by side. On noisy sinusoidal data, the CV-optimal basis and the P-spline both recover the underlying signal closely, while a too-small fixed basis oversmooths. The two plain-basis routes reconstruct the smooth sample mean (isolating approximation error from noise), while the P-spline denoises a single raw curve directly.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -373,26 +381,27 @@ rng = np.random.default_rng(7)
 t = np.linspace(0, 1, 150)
 true = np.sin(2 * np.pi * t) + 0.5 * np.sin(4 * np.pi * t)
 X = np.array([true + 0.3 * rng.standard_normal(t.size) for _ in range(30)])
+mean = X.mean(axis=0, keepdims=True)   # smooth target for the plain-basis routes
 
-# 1. Fixed small Fourier basis.
-c5, n5 = fdata_to_basis_1d(X, t, n_basis=5, basis_type="fourier")
-fix = np.asarray(basis_to_fdata_1d(c5, t, n_basis=n5, basis_type="fourier"))
+# 1. Fixed small B-spline basis -- reconstructing the smooth mean.
+c5, n5 = fdata_to_basis_1d(mean, t, n_basis=5, basis_type="bspline")
+fix = np.asarray(basis_to_fdata_1d(c5, t, n_basis=n5, basis_type="bspline"))
 
-# 2. CV-selected Fourier basis count.
-cv = basis_nbasis_cv(X, t, nbasis_min=5, nbasis_max=21, basis_type="fourier")
+# 2. CV-selected B-spline basis count.
+cv = basis_nbasis_cv(X, t, nbasis_min=5, nbasis_max=21, basis_type="bspline")
 kcv = int(cv["optimal_nbasis"])
-ccv, ncv = fdata_to_basis_1d(X, t, n_basis=kcv, basis_type="fourier")
-cvfit = np.asarray(basis_to_fdata_1d(ccv, t, n_basis=ncv, basis_type="fourier"))
+ccv, ncv = fdata_to_basis_1d(mean, t, n_basis=kcv, basis_type="bspline")
+cvfit = np.asarray(basis_to_fdata_1d(ccv, t, n_basis=ncv, basis_type="bspline"))
 
-# 3. P-spline with GCV-selected lambda.
-ps = pspline_fit_gcv(X, t, n_basis=25, order=2)
+# 3. P-spline with GCV-selected lambda -- denoising a single raw curve.
+ps = pspline_fit_gcv(X[:1], t, n_basis=25, order=2)
 psfit = np.asarray(ps["fitted"])
 
 f, ax = fig()
 ax.plot(t, X[0], ".", ms=2, alpha=0.3, color="#6c757d", label="observed")
 ax.plot(t, true, color="k", lw=1.6, ls="--", label="true signal")
-ax.plot(t, fix[0], color="#0dcaf0", lw=1.6, label=f"fixed Fourier (K={n5})")
-ax.plot(t, cvfit[0], color="#198754", lw=1.6, label=f"CV Fourier (K={ncv})")
+ax.plot(t, fix[0], color="#0dcaf0", lw=1.8, label=f"fixed B-spline (K={n5})")
+ax.plot(t, cvfit[0], color="#198754", lw=1.6, label=f"CV B-spline (K={ncv})")
 ax.plot(t, psfit[0], color="#6f42c1", lw=1.6, label="P-spline (GCV λ)")
 ax.set(title="Fixed vs CV-selected basis vs P-spline", xlabel="t", ylabel="X(t)")
 ax.legend(fontsize=8)

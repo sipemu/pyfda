@@ -45,7 +45,7 @@ from docs_fig import fig, render
 from fdars.regression import fregre_lm, fregre_pls
 
 np.random.seed(1)
-n, m = 40, 81
+n, m = 80, 81
 t = np.linspace(0, 1, m)
 beta_true = np.sin(4 * np.pi * t)
 
@@ -57,8 +57,10 @@ for i in range(n):
               + 0.3 * np.random.randn(m))
 y = np.trapezoid(raw * beta_true, t, axis=1) + 0.5 * np.random.randn(n)
 
-lm = fregre_lm(raw, y, n_comp=4)
-pls = fregre_pls(raw, t, y, n_comp=4)
+# FPC needs the third mode (sin 4pi t) to see the signal; PLS reaches it in
+# two supervised components. Both track the true beta at these counts.
+lm = fregre_lm(raw, y, n_comp=3)
+pls = fregre_pls(raw, t, y, n_comp=2)
 
 f, ax = fig()
 ax.plot(t, beta_true, color="#6c757d", lw=2, ls="--", label=r"true $\beta(t)$")
@@ -196,6 +198,13 @@ print(f"Beta shape:    {np.asarray(result['beta_t']).shape}")
     eigenvalues. FPC regression may miss these because FPCA is unsupervised —
     it picks the directions of largest *variance*, not largest *covariance with
     $y$*.
+
+!!! warning "Keep the PLS component count small"
+    `fregre_pls` reaches the predictive signal in very few supervised components.
+    Asking for more than the data support can make the reconstructed
+    $\hat\beta(t)$ oscillate wildly even when the fitted $R^2$ looks fine, so
+    always pick `n_comp` by cross-validation (Section 4) and prefer the smallest
+    count that captures the signal — two components suffice in the example above.
 
 ---
 
@@ -410,7 +419,7 @@ for i in range(n):
 fd = Fdata(raw, argvals=t)
 y = np.trapezoid(fd.data * beta_true, fd.argvals, axis=1) + 0.5 * np.random.randn(n)
 
-lm = fregre_lm(fd.data, y, n_comp=5)
+lm = fregre_lm(fd.data, y, n_comp=3)   # the signal lives in the first 3 modes; more over-fits
 fitted = np.asarray(lm["fitted_values"])
 resid = np.asarray(lm["residuals"])
 

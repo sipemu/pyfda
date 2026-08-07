@@ -206,20 +206,32 @@ import numpy as np
 from matplotlib.patches import Ellipse
 from docs_fig import fig, render
 from fdars.regression import fpca
-from fdars.clustering import kmeans_fd
 
-rng = np.random.default_rng(42)
+rng = np.random.default_rng(7)
 t = np.linspace(0, 1, 60)
-npg = 18
-X = np.vstack([
-    np.sin(2 * np.pi * t)[None, :] + 0.15 * rng.standard_normal((npg, len(t))),
-    np.cos(2 * np.pi * t)[None, :] + 0.15 * rng.standard_normal((npg, len(t))),
-    (2 * t - 1)[None, :] + 0.15 * rng.standard_normal((npg, len(t))),
-])
+npg = 35
+phi1, phi2 = np.sin(2 * np.pi * t), np.cos(2 * np.pi * t)
+
+# Three overlapping groups whose within-group spread runs along *different*
+# tilted directions in (phi1, phi2) coefficient space -- so each group's score
+# cloud is elongated and rotated by a different angle. That is exactly what a
+# full covariance can follow and a diagonal one cannot.
+specs = [((0.0, 0.0), (0.9, 0.5)),    # (mean coefs), (spread direction)
+         ((1.0, 0.6), (0.3, 0.9)),
+         ((0.5, -0.7), (0.8, -0.5))]
+curves, true_lab = [], []
+for gi, ((m1, m2), (d1, d2)) in enumerate(specs):
+    s = rng.normal(0, 0.6, npg)       # spread along the tilted direction
+    w = rng.normal(0, 0.12, npg)      # small orthogonal spread
+    c1, c2 = m1 + s * d1 - w * d2, m2 + s * d2 + w * d1
+    curves.append(c1[:, None] * phi1[None, :] + c2[:, None] * phi2[None, :]
+                  + 0.04 * rng.standard_normal((npg, len(t))))
+    true_lab += [gi] * npg
+X = np.vstack(curves)
 cols = ["#3f51b5", "#e8710a", "#2e7d32"]
 
 Z = np.asarray(fpca(X, t, n_comp=2)["scores"])
-lab = np.asarray(kmeans_fd(X, t, k=3, seed=42)["cluster"]).astype(int)
+lab = np.asarray(true_lab)
 
 def ellipse_params(cov):                 # 1-sigma width/height/angle
     vals, vecs = np.linalg.eigh(cov)
@@ -246,7 +258,7 @@ for ax, kind in zip(axes, ["full", "diagonal"]):
 print(render(f))
 ```
 
-Constraining $\Sigma_k$ to be diagonal removes $K\cdot d(d-1)/2$ parameters (here $3\times 1 = 3$), shrinking the BIC penalty at the cost of ignoring any tilt in the score cloud. On well-separated groups both fits assign the same hard labels; the difference matters at the boundaries and in the BIC bookkeeping.
+Constraining $\Sigma_k$ to be diagonal removes $K\cdot d(d-1)/2$ parameters (here $3\times 1 = 3$), shrinking the BIC penalty at the cost of ignoring any tilt in the score cloud. The contrast is plain above: each group's scores here spread along a *different* rotated direction, so the full-covariance ellipses tilt to hug their clouds while the diagonal ellipses stay axis-aligned and inflate to cover the same points. On these overlapping, correlated groups that mismatch shows up both in the boundary responsibilities and in the BIC bookkeeping.
 
 !!! note "Covariance type is not a `gmm_cluster` argument"
     The Python `gmm_cluster` binding does **not** expose a `cov.type` argument (the R

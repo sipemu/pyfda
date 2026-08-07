@@ -358,13 +358,15 @@ changing the Phase I model:
 !!! note "Method coverage in `fdars` Python"
     The Rust core exposes the core two-phase workflow (`spm_phase1`, `spm_monitor`),
     the individual chart statistics (`hotelling_t2`, `t2_control_limit`,
-    `spe_control_limit`, `ewma_scores`), the run-rule and contribution diagnostics
+    `spe_control_limit`, `ewma_scores`), one-call EWMA and CUSUM charts (`spm_ewma`,
+    `spm_cusum`), distribution-free robust limits (`t2_limit_robust`, `spe_limit_robust`),
+    the run-rule and contribution diagnostics
     (`nelson_rules`, `western_electric_rules`, `t2_pc_contributions`,
     `t2_pc_significance`), and the Monte-Carlo ARL estimators (`arl0_t2`, `arl1_t2`,
-    `arl0_spe`, `arl0_ewma_t2`). Some techniques shown in the R vignettes -- CUSUM,
-    MEWMA/AMEWMA, iterative Phase I cleaning, and multivariate FPCA -- do not yet have a
-    dedicated Python binding; the pages here show how to reproduce the most common of
-    those (EWMA, run rules, partial-domain charts) directly from the exposed primitives.
+    `arl0_spe`, `arl0_ewma_t2`). A few techniques shown in the R vignettes -- MEWMA/AMEWMA,
+    iterative Phase I cleaning, and multivariate FPCA -- do not yet have a dedicated Python
+    binding; the pages here show how to reproduce the most common of the rest (EWMA, CUSUM,
+    run rules, partial-domain charts) directly from the exposed primitives.
 
 ---
 

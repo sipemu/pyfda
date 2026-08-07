@@ -306,9 +306,12 @@ print(render(f))
 !!! note "No packaged repeated / nested CV harness in Python"
     The R reference bundles repeated CV, nested CV, and stratified folds into one
     `cv.fdata()` function. `fdars` for Python exposes the tuned cross-validators
-    (`fregre_cv`, `fclassif_cv`) plus the `predict_*` functions; the repeated- and
+    (`fregre_cv`, `fclassif_cv`, and `fregre_np_cv` for nonparametric-regression
+    bandwidth selection) plus the `predict_*` functions; the repeated- and
     shared-fold patterns above show how to assemble the rest transparently in a few
-    lines of numpy.
+    lines of numpy. For the kernel method in particular, `fregre_np_cv(X, y, argvals,
+    n_folds=...)` packages the bandwidth cross-validation that `np_predict` above does
+    by hand — returning the optimal `h`, the per-bandwidth CV curve, and its SE.
 
 ## Related pages
 

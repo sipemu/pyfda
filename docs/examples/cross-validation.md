@@ -132,7 +132,7 @@ wl, X, meta = load_tecator()
 fat = meta["fat"].to_numpy()
 D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
 
-cv = fregre_cv(D2, fat, k_min=1, k_max=12, n_folds=5)
+cv = fregre_cv(D2, fat, k_min=1, k_max=25, n_folds=5)
 kk = np.asarray(cv["k_values"])
 err = np.asarray(cv["cv_errors"])
 kbest = int(cv["optimal_k"])
@@ -148,9 +148,14 @@ ax.legend()
 print(render(f))
 ```
 
-The CV error drops steeply, flattens into an elbow, and `fregre_cv` marks the
-component count that minimises it. Everything to the right of the elbow buys
-negligible honest accuracy at the cost of a more complex model.
+The CV error drops steeply through the first dozen or so components, then bends
+into a long, shallow decline before bottoming out and ticking back up — so the
+minimum is a genuine interior optimum, not an artefact of stopping the search too
+early. `fregre_cv` marks the component count that minimises the curve. The visual
+*elbow* — where each extra component stops buying much — sits around a dozen
+components; past it the curve keeps inching down to its flat minimum, so anything
+from the elbow onward is a defensible choice, trading a little honest accuracy for
+a simpler model.
 
 !!! note "`fregre_cv` returns the OOF predictions for free"
     Besides `optimal_k`, `min_cv_error`, `k_values` and `cv_errors`, the returned
@@ -345,12 +350,12 @@ ax.set(title="Honest (out-of-fold) $R^2$ by model",
 print(render(f))
 ```
 
-On these second-derivative spectra all three models clear an OOF $R^2$ of 0.93,
-but they are not tied: the nonparametric neighbour model edges ahead, PLS follows
-closely, and the FPC linear model — which spends its components on the largest
-spectral variance rather than the fat signal — trails slightly. Because every
-number here is out-of-fold, the ranking reflects predictive ability, not fitting
-capacity.
+On these second-derivative spectra all three models clear an OOF $R^2$ of 0.95.
+The nonparametric neighbour model edges clearly ahead (~0.978), while **PLS and
+the FPC linear model are effectively tied** (~0.956 apiece) — the linear methods
+extract the same predictive signal here, and neither has an edge over the other.
+Because every number is out-of-fold, this ranking reflects predictive ability,
+not fitting capacity.
 
 !!! warning "PLS component count on collinear spectra"
     `fregre_pls` factorises a covariance matrix with a Cholesky decomposition.

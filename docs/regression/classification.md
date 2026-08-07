@@ -269,20 +269,28 @@ from docs_fig import fig, render
 from fdars.classification import fclassif_cv
 
 np.random.seed(4)
-n, m = 120, 101
+n, m = 36, 101
 t = np.linspace(0, 1, m)
+s1, c1 = np.sin(2 * np.pi * t), np.cos(2 * np.pi * t)
+s2, c2 = np.sin(4 * np.pi * t), np.cos(4 * np.pi * t)
+s3 = np.sin(6 * np.pi * t)
 raw = np.zeros((n, m))
 labels = np.zeros(n, dtype=np.int64)
 for i in range(n):
-    if i < n // 2:
-        raw[i] = np.sin(2 * np.pi * t) + 0.35 * np.random.randn(m)
-    else:
-        raw[i] = np.sin(2 * np.pi * t) + 0.5 * np.cos(2 * np.pi * t) \
-                 + 0.35 * np.random.randn(m)
-        labels[i] = 1
+    c = i % 2
+    labels[i] = c
+    # The class signal lives in the first two FPC directions but OVERLAPS the
+    # within-class spread there (so it is not trivially separable); modes 3+ are
+    # pure within-class noise. With a small sample, including those later
+    # components degrades the pooled-covariance estimate and hurts LDA.
+    mu = (0.8 * s1 + 0.6 * c1) if c else 0.0 * s1
+    raw[i] = mu + 0.5 * np.random.randn() * s1 + 0.5 * np.random.randn() * c1
+    raw[i] += (0.3 * np.random.randn() * s2 + 0.25 * np.random.randn() * c2
+               + 0.2 * np.random.randn() * s3)
+    raw[i] += 0.15 * np.random.randn(m)
 
 ks = range(1, 8)
-errs = [fclassif_cv(raw, t, labels, method="lda", ncomp=k, nfold=10)["error_rate"]
+errs = [fclassif_cv(raw, t, labels, method="lda", ncomp=k, nfold=6)["error_rate"]
         for k in ks]
 
 f, ax = fig()

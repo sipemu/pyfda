@@ -143,8 +143,9 @@ ax.legend()
 print(render(f))
 ```
 
-Restricting to the pubertal window sharply raises the phase share (the
-phase/amplitude ratio roughly doubles). Away from the confounding infant spike,
+Restricting to the pubertal window raises the phase share substantially (the
+phase/amplitude ratio rises from about 0.57 to 0.82). Away from the confounding
+infant spike,
 the dominant source of spread across children really is *when* the spurt
 happens — precisely the situation elastic alignment is designed for.
 

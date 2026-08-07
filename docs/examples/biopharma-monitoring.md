@@ -297,12 +297,17 @@ which a batch alarms is its **time-to-detection**.
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_penicillin
-from fdars.spm import spm_phase1, spm_monitor
+from fdars.spm import spm_phase1, spm_monitor, select_ncomp
 
 t, X, meta = load_penicillin()
 t = np.ascontiguousarray(t)
 status = meta["status"].to_numpy()
 normal, faulty = status == "normal", status == "faulty"
+
+eig = np.asarray(spm_phase1(np.ascontiguousarray(X[normal]), t, ncomp=8,
+                            alpha=0.01)["eigenvalues"])
+ncomp = int(select_ncomp(np.ascontiguousarray(eig),
+                         method="cumulative_variance", threshold=0.90))
 
 rng = np.random.default_rng(1)
 nidx = np.where(normal)[0]; rng.shuffle(nidx)
@@ -315,7 +320,8 @@ checkpoints = np.arange(20, 201, 20)
 first_alarm = np.full(len(X), -1.0)
 for k in checkpoints:
     tw = np.ascontiguousarray(t[:k]); Xw = np.ascontiguousarray(X[:, :k])
-    p1 = spm_phase1(np.ascontiguousarray(Xw[phase1_idx]), tw, ncomp=4, alpha=0.01)
+    p1 = spm_phase1(np.ascontiguousarray(Xw[phase1_idx]), tw, ncomp=ncomp,
+                    alpha=0.01)
     p2 = spm_monitor(mean=p1["mean"], loadings=p1["loadings"], weights=p1["weights"],
                      eigenvalues=p1["eigenvalues"], t2_limit=p1["t2_limit"],
                      spe_limit=p1["spe_limit"],

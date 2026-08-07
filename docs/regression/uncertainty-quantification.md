@@ -285,7 +285,10 @@ print(render(f))
 
 The conformal widths collapse to a single value; the parametric widths spread out with
 leverage. Which you prefer depends on whether you trust the Gaussian model (parametric,
-tighter on average) or want a finite-sample guarantee (conformal, assumption-free).
+leverage-adaptive) or want a finite-sample guarantee (conformal, assumption-free). Here the
+conformal band is actually the tighter of the two on average — the parametric formula inflates
+its width to hedge against the Gaussian tails — so the distribution-free option costs nothing
+in width on this data.
 
 ## Model assessment: leave-one-out CV — `loo_cv_press`
 

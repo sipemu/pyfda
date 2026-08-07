@@ -240,9 +240,14 @@ print(render(f))
 
 Does removing phase actually help? We compare the two shape pipelines against
 plain `fregre_lm` on the *unaligned* curves, sweeping its component count. On this
-phase-warped data the shape-PC route matches or beats naïve FPC regression while
-using an interpretable low-rank shape representation; the distance-based route is
-a nonparametric alternative that makes no linearity assumption.
+phase-warped data the shape-PC route is the clear winner: it beats naïve FPC
+regression at every component budget while using an interpretable low-rank shape
+representation. The distance-based shape-NP route is weaker here — its single
+kernel-regression $R^2$ (≈0.60) is overtaken by naïve FPC once you allow it four or
+more components, so on *this* problem it underperforms both the naïve linear fit and
+shape-PC. It remains worth trying when the shape–response relationship is genuinely
+nonlinear (where the linear routes would stumble), but it is not a co-equal
+alternative on smoothly-varying data like this.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -335,11 +340,14 @@ matched six-component naïve model by more than 0.10, because the naïve basis w
 components describing the phase nuisance instead of the shape signal.
 
 !!! tip "Which pipeline?"
-    Use the **distance-based** route (`fregre_np`) when the shape–response
-    relationship is nonlinear or you already have a shape distance matrix from
-    another analysis. Use the **shape-PC** route (`fpca` + `fregre_lm`) when you
-    want an interpretable linear coefficient function and the response varies
-    smoothly with a few dominant shape modes.
+    Reach for the **shape-PC** route (`fpca` + `fregre_lm`) by default when you want
+    an interpretable linear coefficient function and the response varies smoothly
+    with a few dominant shape modes — it is the strongest performer on the example
+    above. Keep the **distance-based** route (`fregre_np`) for the case it is built
+    for: a genuinely *nonlinear* shape–response relationship (or when you already
+    have a shape distance matrix), where the linear routes would break down. On
+    smooth, near-linear data like this example it trails naïve FPC, so do not treat
+    it as a drop-in equal of shape-PC.
 
 !!! note "Amplitude vs. phase"
     Scalar-on-shape regression discards phase by construction. If the *timing* of

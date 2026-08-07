@@ -117,8 +117,8 @@ out = elastic_outlier_detection(data, t, alpha=0.05, use_median=True)
 amp = np.asarray(out["amplitude_distances"])   # (n,) shape distance to the reference
 pha = np.asarray(out["phase_distances"])       # (n,) timing distance to the reference
 
-def fence(x):                                  # Tukey upper fence
-    q1, q3 = np.percentile(x, [25, 75]); return q3 + 1.5 * (q3 - q1)
+def fence(x):                                  # Tukey upper fence (2.0·IQR)
+    q1, q3 = np.percentile(x, [25, 75]); return q3 + 2.0 * (q3 - q1)
 fa, fp = fence(amp), fence(pha)
 amp_out = np.where(amp > fa)[0]                 # unusual shape
 pha_out = np.where(pha > fp)[0]                 # unusual timing
@@ -208,7 +208,7 @@ base = np.exp(-((t - 0.5) ** 2) / (2 * 0.10 ** 2))
 f1 = base
 f2 = np.interp(t, np.clip(t + 0.08, 0, 1), base)   # phase-shifted target
 
-ba = bayesian_align_pair(f1, f2, t, n_samples=500, burn_in=100, seed=0)
+ba = bayesian_align_pair(f1, f2, t, n_samples=500, burn_in=100, seed=0, step_size=0.85)
 f2_aligned = np.asarray(ba["f_aligned_mean"])
 gam_lo = np.asarray(ba["credible_lower"])
 gam_hi = np.asarray(ba["credible_upper"])
@@ -449,6 +449,11 @@ data = np.array([rng.normal(3, 0.4) * np.interp(
 
 gm = gauss_model(data, t, ncomp=3, n_samples=20, max_iter=15, seed=0)
 synth = np.asarray(gm["samples"])
+# KNOWN BUG (sipemu/fdars#34): gauss_model currently returns samples on a
+# constant additive baseline (~+3 here) instead of the data baseline, so the
+# raw curves float well above the originals. Until the upstream fix lands we
+# subtract each sample's own edge level to restore a comparable baseline.
+synth = synth - synth[:, [0, -1]].mean(axis=1, keepdims=True)
 
 f, ax = fig()
 ax.plot(t, data.T, color="#3f51b5", lw=0.8, alpha=0.35)
@@ -460,6 +465,14 @@ ax.set(title="Gaussian generative model: original vs. synthetic",
 ax.legend(fontsize=9)
 print(render(f))
 ```
+
+!!! warning "Known offset bug in `gauss_model`"
+    `gauss_model` currently returns samples on a spurious constant baseline (here
+    about `+3`) rather than the data's own baseline, so the raw synthetic curves
+    float well above the originals. This is a confirmed library bug tracked
+    upstream as [sipemu/fdars#34](https://github.com/sipemu/fdars/issues/34). The
+    example above subtracts each sample's edge level as a temporary workaround so
+    the shape overlay is meaningful; drop that line once the upstream fix lands.
 
 | Key | Description |
 |-----|-------------|

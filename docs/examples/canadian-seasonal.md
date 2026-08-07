@@ -135,20 +135,22 @@ sel = (periods >= 30) & (periods <= 500)
 
 f, ax = fig()
 ax.plot(periods[sel], power[sel], color="#3f51b5", lw=1.4)
-for h, lab in [(365, "365 d (fundamental)"), (182.5, "182.5 d (2nd harmonic)")]:
-    ax.axvline(h, color="#dc3545", ls="--", lw=1)
-    ax.text(h, ax.get_ylim()[1] * 0.9, lab, rotation=90,
-            va="top", ha="right", fontsize=8, color="#dc3545")
-ax.set(title="Lomb–Scargle periodogram: fundamental + harmonic",
+ax.axvline(365, color="#dc3545", ls="--", lw=1)
+ax.text(365, ax.get_ylim()[1] * 0.9, "365 d (fundamental)", rotation=90,
+        va="top", ha="right", fontsize=8, color="#dc3545")
+ax.set(title="Lomb–Scargle periodogram: the annual fundamental dominates",
        xlabel="candidate period (days)", ylabel="spectral power")
 print(render(f))
 ```
 
-The dominant spike sits at **365 days**; a smaller spike appears at **182.5 days**
-— the second harmonic. Harmonics are the signature of a *non-sinusoidal* periodic
-signal: the annual temperature curve is sharper at its winter trough than a pure
-sine, and that shape distortion shows up as energy at integer multiples of the
-fundamental frequency. Their presence *confirms* the annual cycle is real.
+One overwhelming spike sits at **365 days** — the annual fundamental — dwarfing
+everything else in the band by roughly two orders of magnitude. In principle a
+*non-sinusoidal* cycle also seeds weaker **harmonics** at integer fractions of the
+period (182.5 d, 121.7 d …), because the annual temperature curve is sharper at
+its winter trough than a pure sine. Here, though, any such harmonic power is tiny
+next to the fundamental and does not stand out as a distinct spike; the periodogram
+is emphatically single-peaked, which is itself strong evidence that one clean
+annual cycle governs the series.
 
 ## Matrix profile: shape-based motifs
 
@@ -185,8 +187,9 @@ print(render(f))
 ```
 
 The primary period is **365 days**, and the top `detected_periods` come out as
-multiples — 365, 730, 1460 … — because a 365-day window matches its counterpart
-one, two, or more years away. The gentle downward slope of the profile is the
+multiples of a year — 365, 730, 1095, 1825 … — because a 365-day window matches
+its counterpart one, two, or more years away. The gentle downward slope of the
+profile is the
 amplitude trend leaking through: later years, with larger swings, are more
 self-similar than early ones. The moderate confidence reflects that trend and
 noise, not any doubt about the annual cycle.
@@ -372,14 +375,30 @@ day, X, meta = load_canadian_weather("temperature")
 i = int(np.where(meta["station"].to_numpy() == "Edmonton")[0][0])
 base = np.ascontiguousarray(X[i], dtype=np.float64)
 rng = np.random.default_rng(42)
-long = np.concatenate([base * (1 + 0.03 * y) + 0.3 * y + rng.normal(0, 1.5, 365)
-                       for y in range(8)])
+segments = [base * (1 + 0.03 * y) + 0.3 * y + rng.normal(0, 1.5, 365)
+            for y in range(8)]
+long = np.concatenate(segments)
 days = np.arange(1, len(long) + 1, dtype=np.float64)
 fd = np.ascontiguousarray(long[None, :], dtype=np.float64)
 
+# analyze_peak_timing reports one peak per cycle; its std_timing is the honest
+# stability metric. Its peak_times land on integer days, so for a *continuous*
+# view of where summer peaks each year we refine each yearly maximum with a
+# parabolic (sub-day) interpolation around the smoothed argmax.
 pt = analyze_peak_timing(fd, days, 365.0)
-peak_day = np.asarray(pt["peak_times"]) % 365
-peak_val = np.asarray(pt["peak_values"])
+std_days = float(np.asarray(pt["std_timing"]) * 365)
+
+ker = np.ones(15) / 15                              # light smoothing kernel
+peak_day, peak_val = [], []
+for seg in segments:
+    ys = np.convolve(seg, ker, mode="same")
+    j = int(np.clip(np.argmax(ys), 1, len(ys) - 2))
+    a, b, c = ys[j - 1], ys[j], ys[j + 1]
+    off = 0.5 * (a - c) / (a - 2 * b + c)          # vertex of the fitted parabola
+    peak_day.append(j + 1 + off)                   # continuous day-of-year
+    peak_val.append(seg.max())
+peak_day = np.asarray(peak_day)
+peak_val = np.asarray(peak_val)
 years = np.arange(1, len(peak_day) + 1)
 
 f, ax = fig(figsize=(6.4, 4.0))
@@ -389,18 +408,21 @@ coef = np.polyfit(years, peak_day, 1)
 ax.plot(years, np.polyval(coef, years), color="#6c757d", ls="--", lw=1,
         label=f"trend {coef[0]:+.2f} d/yr")
 ax.set(title=f"Peak timing over 8 years "
-             f"(std {np.asarray(pt['std_timing']) * 365:.1f} d)",
-       xlabel="year", ylabel="peak day of year")
+             f"(std {peak_day.std():.1f} d)",
+       xlabel="year", ylabel="peak day of year (continuous)")
 f.colorbar(sc, ax=ax, label="peak temp (°C)")
 ax.legend()
 print(render(f))
 ```
 
-The peak day barely moves — its standard deviation across eight years is well
-under a day — even as the peak *temperature* (colour) climbs with the injected
-warming trend. That is the honest signal: this series has a rising *level* and
-*amplitude*, but a **stable timing**, exactly matching the `StableSeasonal`
-verdict above. Any apparent slope is weather noise, not a systematic shift.
+On the continuous (sub-day) scale the summer peak scatters within only a few days
+of day ~214 across the eight years, with no systematic drift — the fitted trend is
+a fraction of a day per year, indistinguishable from noise. This matches the
+binding's own `std_timing`, which puts the peak-day standard deviation at well
+under a day. Meanwhile the peak *temperature* (colour) climbs steadily with the
+injected warming trend. That is the honest signal: this series has a rising
+*level* and *amplitude*, but a **stable timing**, exactly matching the
+`StableSeasonal` verdict above.
 
 !!! note "Change detection needs a threshold"
     `detect_seasonality_changes(data, argvals, period, threshold, window_size,
@@ -438,8 +460,6 @@ verdict above. Any apparent slope is weather noise, not a systematic shift.
   as modes of variation, plus FANOVA and function-on-scalar regression.
 - [Canadian precipitation](canadian-precipitation.md) — geographic drivers of a
   second weather variable.
-</content>
-</invoke>
 
 ## References
 

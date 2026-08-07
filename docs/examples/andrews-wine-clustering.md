@@ -498,7 +498,6 @@ low-dimensional footprint of the same structure k-means exploited.
 - [Andrews Wine: quality control](andrews-wine-qc.md) — the supervised QC view.
 - [Outlier detection](andrews-wine.md) — flagging atypical wines.
 - [Clustering](../analyze/clustering.md) — the general functional-clustering article.
-</content>
 
 ## References
 

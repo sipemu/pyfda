@@ -345,7 +345,7 @@ and reports the in-sample $R^2$:
 from fdars.regression import fregre_pls
 
 # Scalar response driven by the mean level of each curve, plus noise
-y = np.asarray(fd.data).mean(axis=1) + np.random.default_rng(1).normal(0, 0.1, fd.n_obs())
+y = np.asarray(fd.data).mean(axis=1) + np.random.default_rng(1).normal(0, 0.1, fd.n_obs)
 
 fit = fregre_pls(fd.data, fd.argvals, y, n_comp=3)
 print(f"R-squared: {fit['r_squared']:.4f}")

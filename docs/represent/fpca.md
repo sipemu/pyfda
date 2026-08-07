@@ -173,7 +173,7 @@ print(render(f))
 
 ### Score plot
 
-FPC scores place each curve as a point in $\mathbb{R}^K$. Because PC1 encodes overall height, colouring the score plot by sex confirms the interpretation: boys, who are taller on average by the end of the study, sit at higher PC1.
+FPC scores place each curve as a point in $\mathbb{R}^K$. Because PC1 encodes overall height, colouring the score plot by sex confirms the interpretation: boys, who are taller on average by the end of the study, sit at higher PC1. In fact the cleanest separation here is *vertical*: PC2 (growth timing) splits the sexes almost completely -- girls sit above the axis and boys below it, a roughly 1.6 SD gap in mean PC2 score -- reflecting girls' earlier growth spurt, while the PC1 (height) distributions still overlap substantially at this age range.
 
 ```python exec="1" html="1" source="above"
 import numpy as np

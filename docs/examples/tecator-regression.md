@@ -134,11 +134,13 @@ for ax, (name, pred) in zip(axes, methods.items()):
 print(render(f))
 ```
 
-All three clear an honest $R^2$ of about 0.94–0.97 on the held-out samples — NIR
+All three clear an honest $R^2$ of about 0.94–0.98 on the held-out samples — NIR
 really can stand in for wet chemistry. On these second-derivative spectra the
-nonparametric neighbour model and the FPC linear model are strongest; PLS with a
-modest component count follows closely. The [cross-validation
-page](cross-validation.md) puts this comparison on a fully out-of-fold footing.
+nonparametric neighbour model is clearly strongest ($R^2 \approx 0.98$); the two
+linear models trail it and sit almost on top of each other, with PLS ($0.949$)
+just edging out the FPC linear model ($0.945$) despite using far fewer
+components. The [cross-validation page](cross-validation.md) puts this comparison
+on a fully out-of-fold footing.
 
 ## Functional PLS and the coefficient curve
 
@@ -231,10 +233,13 @@ ax.set(title="FPC-LM $\\hat\\beta(\\lambda)$ with 95% band (orange = significant
 print(render(f))
 ```
 
-The band is tight around the 925–950 nm C–H overtone band and the shaded
-significant regions concentrate there — exactly the chemistry we expected to
-drive fat prediction — while the flat, band-straddling stretches outside it
-contribute no reliable signal.
+The significant regions are **diffuse rather than concentrated**: the 95% band
+excludes zero in six separate stretches spread across the whole range — roughly
+850–886, 901–913, 927–947, and 971–1036 nm — not just at the 925–950 nm C–H
+overtone band. That band does carry the sharpest, deepest feature (the strong
+negative lobe near 935 nm), but on the second-derivative representation the
+model draws reliable signal from several wavelength windows, and only the
+narrow gaps between the shaded bands straddle zero.
 
 ## Model diagnostics: are the residuals well behaved?
 
@@ -348,10 +353,19 @@ aR.set(title=f"Confusion matrix — accuracy {acc*100:.1f}%")
 print(render(f))
 ```
 
-Functional logistic regression separates high- from low-fat meat with high
-in-sample accuracy, and its coefficient curve again emphasises the 925–950 nm
-band — the same chemistry that drives the *continuous* fat prediction now drives
-the *classification*.
+Functional logistic regression separates high- from low-fat meat with **100%
+in-sample accuracy** here, and its coefficient curve again emphasises the
+900–965 nm region (a deep negative lobe near 930 nm flanked by positive peaks) —
+the same chemistry that drives the *continuous* fat prediction now drives the
+*classification*.
+
+!!! warning "In-sample only"
+    This confusion matrix is fit **and** evaluated on all 240 samples — it
+    reports resubstitution accuracy, not generalisation. With 5 FPC components on
+    240 curves the model easily achieves a perfect in-sample fit; a held-out or
+    cross-validated split (as in the regression comparison above) would give a
+    lower, more honest number. Treat the 100% as a sanity check that the classes
+    are separable in this feature space, not as an out-of-sample error rate.
 
 !!! tip "A nonparametric alternative for regression"
     `fregre_np` regresses on a **distance matrix** rather than a coefficient
@@ -392,8 +406,6 @@ the *classification*.
   functional linear model in general.
 - [Basis representation](../represent/basis-representation.md) for smoothing
   spectra before differentiating.
-</content>
-</invoke>
 
 ## References
 

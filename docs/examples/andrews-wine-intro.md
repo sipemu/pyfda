@@ -140,10 +140,14 @@ ax.legend()
 print(render(f))
 ```
 
-The three cultivars are already visible as three distinct bundles — especially
-around $t = 0$, where the low harmonics stack up. No model has been fitted; this
-is just the transform plus colour. That visual separation is exactly the signal
-the later pages exploit with real `fdars` depth and clustering.
+The three cultivars are tinted differently, but at the level of individual curves
+the bundles **overlap heavily** — no clean visual separation emerges from this
+tangle of 178 curves. The class structure only becomes obvious once we average
+within each cultivar (the [mean-curve figure](#the-mean-curve-per-cultivar)
+below): those per-cultivar signatures peel apart cleanly. No model has been
+fitted; this is just the transform plus colour, and that latent separation is
+exactly the signal the later pages exploit with real `fdars` depth and
+clustering.
 
 ## Proving the bridge: distance is preserved exactly
 

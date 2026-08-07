@@ -260,13 +260,53 @@ Faster eigenvalue decay concentrates variance in the first few modes and yields 
 curves; slower decay spreads energy into higher-frequency modes and roughens them. This is
 the same trade-off the kernel length scale controls, expressed in the spectral domain.
 
-!!! note "Kernel coverage differs by function"
-    `covariance_matrix` supports `"gaussian"` and `"exponential"`. `gaussian_process`
-    additionally supports `"matern"` and `"periodic"`. The R reference also ships
-    Brownian, linear, polynomial, white-noise, and composed (`kernel.add`/`kernel.mult`)
-    kernels; those are **not** exposed in the current Python build. For a periodic or
-    Matern process use `gaussian_process`; for custom spectra, build the covariance in
-    numpy or use `sim_kl` with your own eigenvalues.
+!!! note "Kernel coverage"
+    `covariance_matrix` supports the string kernels `"gaussian"` and `"exponential"`,
+    and `gaussian_process` additionally accepts `"matern"` and `"periodic"`. For the
+    full R kernel library -- including Brownian, linear, polynomial and white-noise
+    kernels, plus composition -- use the `fdars.covariance` module. It exposes
+    `kernel_gaussian`, `kernel_exponential`, `kernel_matern`, `kernel_periodic`,
+    `kernel_brownian`, `kernel_linear`, `kernel_polynomial` and `kernel_whitenoise`
+    as callable kernels, the combinators `kernel_add` / `kernel_mult`, and
+    `make_gaussian_process` to draw samples from any of them (matching the R
+    `kernel.add`/`kernel.mult` API).
+
+The callable kernels let you compose spectra directly rather than reaching for
+`sim_kl`. Here a Matern process (`nu=1.5`) is drawn on its own, and a composite
+kernel -- a smooth Matern trend **plus** a periodic component via `kernel_add` --
+is sampled through `make_gaussian_process`:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.covariance import (
+    kernel_matern, kernel_periodic, kernel_add, make_gaussian_process,
+)
+
+t = np.linspace(0, 1, 200)
+
+# A plain Matern(nu=1.5) process.
+k_matern = kernel_matern(lengthscale=0.15, nu=1.5)
+X_matern = np.asarray(make_gaussian_process(t, k_matern, n=6, seed=1))
+
+# Compose: smooth Matern trend + periodic seasonal wiggle.
+k_composite = kernel_add(
+    kernel_matern(lengthscale=0.40, nu=2.5),
+    kernel_periodic(lengthscale=0.5, period=0.2, variance=0.3),
+)
+X_composite = np.asarray(make_gaussian_process(t, k_composite, n=6, seed=2))
+
+f, (ax1, ax2) = fig(ncols=2)
+ax1.plot(t, X_matern.T, lw=1.2, alpha=0.85)
+ax1.set(title="Matern (nu=1.5)", xlabel="t", ylabel="X(t)")
+ax2.plot(t, X_composite.T, lw=1.2, alpha=0.85)
+ax2.set(title="kernel_add(Matern, periodic)", xlabel="t")
+print(render(f))
+```
+
+The left panel shows the once-differentiable roughness typical of `nu=1.5`; the
+right panel keeps that smooth trend but overlays a period-0.2 oscillation, the
+additive kernel showing through as a repeating ripple on each realisation.
 
 ---
 

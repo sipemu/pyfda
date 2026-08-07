@@ -87,11 +87,11 @@ print(render(f))
 ```
 
 The rule of thumb: below ~5% phase, standard $L^2$ methods are preferred; above
-~15%, elastic alignment likely pays off; in between, test both. Some classes
-here clear the 15% line — there *is* real peak-position variation within a
-phoneme. That is the case *for* trying shape analysis. But a per-class ratio can
-mislead, because the real task pools *all five classes together*, where the story
-changes.
+~15%, elastic alignment likely pays off; in between, test both. Every class here
+clears the 15% line — the phase fractions run from 16% (iy) to 28% (aa, sh) — so
+there *is* real peak-position variation within a phoneme, and taken at face value
+this whole panel argues *for* shape analysis. But a per-class ratio can mislead,
+because the real task pools *all five classes together*, where the story changes.
 
 ## Shape distance vs $L^2$ distance
 
@@ -275,11 +275,13 @@ print(render(f))
 ```
 
 The verdict is stark and reproducible: **$L^2$ k-medoids reaches ~84% purity**,
-while **elastic clustering languishes near ~35%** — worse than some naive
-baselines. Hierarchical clustering on the shape distances does no better. The
-diagnostic at the top of the page predicted this: once all five classes are
-pooled, the phase fraction is small, and elastic alignment spends its freedom
-*erasing* the discriminative peak positions.
+while **elastic k-medoids languishes near ~38%** — worse than some naive
+baselines. Switching to hierarchical (complete-linkage) clustering on the same
+shape distances lands in between at ~48%: better than elastic k-medoids but still
+far below $L^2$. Neither shape-based partition comes close. The diagnostic at the
+top of the page predicted this: once all five classes are pooled, the
+*discriminative* variation is amplitude, not phase, and elastic alignment spends
+its freedom *erasing* the peak positions that separate phonemes.
 
 !!! note "Elastic methods are not universally better"
     Fisher–Rao / SRSF alignment warps the **independent variable**. That is
@@ -308,7 +310,6 @@ pooled, the phase fraction is small, and elastic alignment spends its freedom
   these same spectra, where the frequency axis stays fixed.
 - [Clustering functional data](../analyze/clustering.md) — k-means, fuzzy
   c-means, and GMM in function space.
-</content>
 
 ## References
 

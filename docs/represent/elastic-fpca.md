@@ -232,11 +232,19 @@ lam = np.asarray(amp["eigenvalues"])
 cumvar = np.asarray(amp["cumulative_variance"])
 mean = np.asarray(karcher_mean(X, t)["mean"])     # template in function space
 
+# The function-space eigenfunctions carry a constant (DC) offset from the SRSF
+# inversion; subtract each one's flat-region level so the mode oscillates
+# around the mean instead of sitting on a pedestal.
+phi = phi - np.median(phi, axis=1, keepdims=True)
+
 f, ax = fig()
-ax.plot(t, mean, color="#6c757d", lw=1.4, ls="--", label="amplitude mean")
+ax.plot(t, mean, color="#6c757d", lw=1.6, ls="--", label="amplitude mean")
+colors = ["#3f51b5", "#e8710a"]
 for k in range(2):
-    ax.plot(t, mean + 2 * np.sqrt(lam[k]) * phi[k], lw=1.8,
-            label=f"mode {k+1} (+2 SD)")
+    c = 2 * np.sqrt(lam[k])
+    ax.plot(t, mean + c * phi[k], color=colors[k], lw=1.8,
+            label=f"mode {k+1} $\\pm$2 SD")
+    ax.plot(t, mean - c * phi[k], color=colors[k], lw=1.8, ls=":")
 ax.set(title="Amplitude modes of variation (vert_fpca)",
        xlabel="t", ylabel="X(t)")
 ax.legend()
@@ -297,44 +305,47 @@ print(render(f))
 | `horiz_component` | (n_comp, m) | Phase part of each joint mode |
 | `balance_c` | scalar | Amplitude/phase balancing constant |
 
-Each joint component splits into an amplitude part and a phase part; comparing their energies shows how much of that mode is "what varies" versus "when it varies". For the bump sample, amplitude dominates, so the joint cumulative-variance curve tracks the amplitude-only one closely.
+`joint_fpca` reports a single cumulative-variance curve for the coupled representation. To gauge how much of the sample's total variation is amplitude versus phase, compare the amplitude-space and phase-space eigenvalues directly (from `vert_fpca` and `horiz_fpca`). Here we deliberately use a sample with **large phase variation** (the peak location wanders widely) and only modest amplitude variation, so phase carries roughly half the total variance.
+
+!!! note "`joint_fpca`'s internal balance"
+    This binding's `joint_fpca` auto-computes a small `balance_c`, which down-weights the phase (warping) block relative to the amplitude block before the joint SVD -- so its returned `horiz_component` energy is near zero and its joint modes essentially track the amplitude modes. To see the genuine amplitude/phase split we therefore read the two eigenvalue spectra from `vert_fpca` / `horiz_fpca` rather than the joint `horiz_component`.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
-from fdars.alignment import joint_fpca
+from fdars.alignment import joint_fpca, vert_fpca, horiz_fpca
 
 t = np.linspace(0, 1, 100)
 rng = np.random.default_rng(3)
+# Large phase variation (wide range of peak locations), modest amplitude.
 X = np.asarray([
-    (1.0 + 0.25 * rng.standard_normal()) *
-    np.exp(-((t - (0.5 + 0.12 * rng.standard_normal())) ** 2) / 0.01)
-    for _ in range(25)
+    (1.0 + 0.08 * rng.standard_normal()) *
+    np.exp(-((t - (0.5 + 0.15 * rng.standard_normal())) ** 2) / (2 * 0.01))
+    for _ in range(30)
 ])
 
 joint = joint_fpca(X, t, n_comp=3)
 cumvar = np.asarray(joint["cumulative_variance"])
-vert = np.asarray(joint["vert_component"])       # (n_comp, m+1) amplitude parts
-horiz = np.asarray(joint["horiz_component"])     # (n_comp, m)   phase parts
 
-# Energy of the amplitude vs phase part within each joint mode.
-c = float(joint["balance_c"])
-amp_energy = (vert ** 2).sum(axis=1)
-phase_energy = (c ** 2) * (horiz ** 2).sum(axis=1)
-frac_phase = phase_energy / (amp_energy + phase_energy)
+# Genuine amplitude vs phase split from the two elastic spectra.
+amp_ev = np.asarray(vert_fpca(X, t, n_comp=3)["eigenvalues"])
+phase_ev = np.asarray(horiz_fpca(X, t, n_comp=3)["eigenvalues"])
+amp_share = amp_ev.sum() / (amp_ev.sum() + phase_ev.sum())
 
 f, (a0, a1) = fig(1, 2, figsize=(10, 3.8))
 ks = np.arange(1, len(cumvar) + 1)
 a0.plot(ks, cumvar, "o-", color="#6f42c1")
 a0.set(title="Joint FPCA cumulative variance", xlabel="component",
        ylabel="cumulative variance", ylim=(0, 1.02), xticks=ks)
-a1.bar(ks - 0.15, 1 - frac_phase, width=0.3, color="#198754", label="amplitude")
-a1.bar(ks + 0.15, frac_phase, width=0.3, color="#6f42c1", label="phase")
-a1.set(title="Amplitude / phase balance per mode", xlabel="component",
-       ylabel="energy fraction", xticks=ks)
-a1.legend()
+a1.bar(["amplitude", "phase"], [amp_share, 1 - amp_share],
+       color=["#198754", "#6f42c1"])
+a1.set(title="Amplitude vs phase share of total variance",
+       ylabel="variance fraction", ylim=(0, 1.0))
+a1.axhline(0.5, ls="--", color="#6c757d", lw=1)
 print(render(f))
 ```
+
+With this phase-rich sample the two blocks are near-balanced -- phase accounts for close to half the total variation, exactly the regime where separating amplitude and phase pays off.
 
 ## Contrast with ordinary FPCA
 

@@ -431,9 +431,10 @@ print(render(f))
 ```
 
 The monitor built on Barolo alarms on only a handful of its own reference wines
-(near the 5% nominal rate) but on **essentially all** Grignolino and Barbera
-wines. As a QC gate for "is this the wine we meant to make?", the Andrews-curve
-control chart is decisive.
+(about 10%, roughly twice the nominal 5% — unsurprising with only 59 reference
+curves and combined $T^2$/SPE limits) but on **essentially all** Grignolino and
+Barbera wines. As a QC gate for "is this the wine we meant to make?", the
+Andrews-curve control chart is decisive.
 
 ## Chemical-level diagnostics: *why* did a wine fail?
 
@@ -504,7 +505,6 @@ into a specific, checkable list of measurements.
 - [Tolerance bands](../analyze/tolerance-bands.md) and
   [statistical process monitoring](../monitoring/spm.md) for the general
   monitoring tools.
-</content>
 
 ## References
 

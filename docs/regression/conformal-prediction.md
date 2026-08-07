@@ -116,7 +116,7 @@ import numpy as np
 from docs_fig import fig, render
 from fdars.conformal import conformal_fregre_lm
 
-np.random.seed(42)
+np.random.seed(2)
 n_train, n_test, m = 120, 30, 81
 t = np.linspace(0, 1, m)
 beta_true = np.sin(4 * np.pi * t)
@@ -132,7 +132,7 @@ def make(n):
 
 Xtr, ytr = make(n_train)
 Xte, yte = make(n_test)
-res = conformal_fregre_lm(Xtr, ytr, Xte, ncomp=3, cal_fraction=0.25, alpha=0.1, seed=42)
+res = conformal_fregre_lm(Xtr, ytr, Xte, ncomp=3, cal_fraction=0.25, alpha=0.1, seed=2)
 lo, hi = np.asarray(res["lower"]), np.asarray(res["upper"])
 pr = np.asarray(res["predictions"])
 
@@ -246,9 +246,9 @@ print(f"Mean interval width:   {np.mean(result['upper'] - result['lower']):.4f}"
 ## Linear vs. nonparametric width
 
 Conformal coverage is guaranteed *regardless of the base model* — but the base model
-determines how *tight* the intervals are. A well-specified linear model usually gives the
-narrowest intervals; the flexible nonparametric model pays for its flexibility with wider,
-noisier calibration residuals. The following simulation mimics near-infrared spectra with a
+determines how *tight* the intervals are. Whichever model best captures the
+predictor-response relationship produces the smallest calibration residuals and hence the
+narrowest intervals. The following simulation mimics near-infrared spectra with a
 localized absorption peak near $t=0.4$ whose height drives the response, then compares the two
 base models at the same 90% level.
 
@@ -293,13 +293,16 @@ ax.boxplot([w_lm, w_np],
            tick_labels=[f"linear\n(cov {c_lm*100:.0f}%)", f"nonparametric\n(cov {c_np*100:.0f}%)"])
 ax.set(title="Conformal interval width by base model (90% nominal)",
        ylabel="interval width")
+ax.set_ylim(0, max(w_lm.max(), w_np.max()) * 1.1)
 print(render(f))
 ```
 
-Both models cover at or above the 90% target, but the linear base model — which matches the
-data-generating process — produces the tighter intervals. When you suspect a nonlinear
-predictor-response relationship, the nonparametric base is the safer choice despite the wider
-bands.
+Both models cover at or above the 90% target, and here the two are nearly tied on width —
+the nonparametric base is fractionally tighter. Because the peak-height signal is a mildly
+nonlinear feature, the flexible kernel model tracks it slightly better and pays no width
+penalty. When the predictor-response relationship is genuinely linear the ranking typically
+reverses; the practical lesson is to compare widths directly rather than assume one base
+model always wins.
 
 ---
 
