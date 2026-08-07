@@ -26,7 +26,7 @@ import sys as _sys
 from fdars import _native
 from fdars.fdata_class import Fdata
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 # Register submodules at expected paths so both access patterns work:
 #   from fdars.depth import fraiman_muniz_1d
