@@ -96,7 +96,12 @@ def render(figure=None) -> str:
     """
     figure = figure or plt.gcf()
     buf = StringIO()
-    figure.savefig(buf, format="svg", bbox_inches="tight")
+    # metadata={"Date": None} suppresses matplotlib's default <dc:date> wall-clock
+    # stamp in the SVG metadata; without it, two consecutive builds embed different
+    # timestamps and are never byte-identical (FND-03). Paired with svg.hashsalt
+    # (deterministic element IDs), this makes docs_fig.py output reproducible across
+    # builds. (Per-block RNG seeding of stochastic figures is handled per section.)
+    figure.savefig(buf, format="svg", bbox_inches="tight", metadata={"Date": None})
     plt.close(figure)
     svg = buf.getvalue()
     # Strip the XML/doctype preamble so the <svg> embeds cleanly as HTML.
