@@ -20,6 +20,7 @@ The documentation — diagrams first, examples second — must make functional d
 - ✓ Build-time inline figures via `markdown-exec` + `scripts/docs_fig.py` (`PYTHONPATH=scripts`) — existing
 - ✓ 17 narrative example pages in `docs/examples/*.md` backed by datasets in `docs/data/` — existing
 - ✓ Released at v0.2.0 with R-parity phase 1 complete — existing
+- ✓ Documentation tooling foundation — `STYLE_SPEC.md`, SVGO check-only lint gate in CI (idempotence, all 43 diagrams), build determinism (`svg.hashsalt` + `<dc:date>` suppression — verified byte-identical across builds for deterministic content), `pymdownx.snippets` dataset includes, `pytest-markdown-docs` doc-test harness (one-page CI gate), and the `DOCS_FAST` helper — Phase 1
 
 ### Active
 
@@ -90,4 +91,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-07 after initialization*
+*Last updated: 2026-08-07 after Phase 1*
