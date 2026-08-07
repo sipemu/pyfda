@@ -64,6 +64,10 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+  # FND-04: shared dataset-loading preambles in docs/includes/
+  - pymdownx.snippets:
+      base_path:
+        - docs
 
 extra_javascript:
   - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js
