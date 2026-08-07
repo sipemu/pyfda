@@ -54,6 +54,13 @@ plt.rcParams.update(
         "legend.frameon": False,
         "legend.fontsize": 9.5,
         "figure.autolayout": True,
+        # FND-03: deterministic SVG element IDs across builds.
+        # Without this, matplotlib uses uuid4() → IDs differ every run →
+        # byte-for-byte comparison of two consecutive builds always fails.
+        # Note: hashsalt fixes IDs only; stochastic exec blocks must also
+        # seed their own RNG (rng = np.random.default_rng(42)). Per-block
+        # seed auditing is a phases-3–8 concern (RESEARCH Pitfall 3).
+        "svg.hashsalt": "fdars-docs",
     }
 )
 
