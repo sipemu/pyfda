@@ -18,9 +18,9 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### Audit (scope derivation)
 
-- [ ] **AUD-01**: A nav + reference-API audit produces a page→diagram map that classifies every diagram as accurate, inconsistent, or missing
-- [ ] **AUD-02**: The audit greps for and flags all R-era content (`extendr`, `autoplot`, R-specific identifiers) across diagrams and prose
-- [ ] **AUD-03**: The audit produces a ranked, user-selectable list of diagram coverage gaps and candidate new worked examples
+- [x] **AUD-01**: A nav + reference-API audit produces a page→diagram map that classifies every diagram as accurate, inconsistent, or missing
+- [x] **AUD-02**: The audit greps for and flags all R-era content (`extendr`, `autoplot`, R-specific identifiers) across diagrams and prose
+- [x] **AUD-03**: The audit produces a ranked, user-selectable list of diagram coverage gaps and candidate new worked examples
 
 ### Diagram sweeps (per section — priority)
 
@@ -75,9 +75,9 @@ Explicitly excluded to prevent scope creep.
 | FND-04 | Phase 1 | Complete |
 | FND-05 | Phase 1 | Complete |
 | FND-06 | Phase 1 | Complete |
-| AUD-01 | Phase 2 | Pending |
-| AUD-02 | Phase 2 | Pending |
-| AUD-03 | Phase 2 | Pending |
+| AUD-01 | Phase 2 | Complete |
+| AUD-02 | Phase 2 | Complete |
+| AUD-03 | Phase 2 | Complete |
 | DIA-01 | Phase 3 | Pending |
 | DIA-02 | Phase 4 | Pending |
 | DIA-03 | Phase 5 | Pending |
