@@ -24,8 +24,12 @@ npx svgo@3.3.4 --config svgo.config.mjs --quiet --input <file.svg> --output -
 converts `.ttl`/`.sub`/`.lab`/`.sm`/`.mono` CSS classes into inline `style=` attributes,
 corrupting the canonical class-based structure (Pitfall 1).
 
-The gate is **check-only**: it diffs stdout against the source file. A zero diff means the
-diagram is conforming. The gate **never rewrites** a committed hand-authored SVG (D-02).
+The gate is **check-only** and uses an **idempotence check**, not a direct diff against the
+source: svgo's XML serialiser always normalises whitespace and attribute ordering, so a direct
+diff against a hand-formatted SVG always shows cosmetic differences. The gate instead confirms
+`svgo(svgo(svg)) == svgo(svg)` — a zero diff on the second pass means the diagram is conforming
+(no further semantic transformation is applied). The gate **never rewrites** a committed
+hand-authored SVG (D-02). See "SVGO Gate Coverage" below for details.
 
 ---
 
