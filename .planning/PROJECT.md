@@ -21,6 +21,7 @@ The documentation — diagrams first, examples second — must make functional d
 - ✓ 17 narrative example pages in `docs/examples/*.md` backed by datasets in `docs/data/` — existing
 - ✓ Released at v0.2.0 with R-parity phase 1 complete — existing
 - ✓ Documentation tooling foundation — `STYLE_SPEC.md`, SVGO check-only lint gate in CI (idempotence, all 43 diagrams), build determinism (`svg.hashsalt` + `<dc:date>` suppression — verified byte-identical across builds for deterministic content), `pymdownx.snippets` dataset includes, `pytest-markdown-docs` doc-test harness (one-page CI gate), and the `DOCS_FAST` helper — Phase 1
+- ✓ Nav + reference-API audit — `02-AUDIT.md` maps all 42 method-section pages on style/accuracy axes (D-02 rollup), a full R-era grep report (4 leftovers, all in `spm.svg`), and a ranked GAP-0001..0011 / EX-0001..0008 list with a user Selection column gating Phase 3 — Phase 2
 
 ### Active
 
@@ -39,7 +40,7 @@ The documentation — diagrams first, examples second — must make functional d
 - [ ] Add new worked examples covering under-documented capabilities
 
 **Foundation:**
-- [ ] Nav + reference-API audit that proposes the concrete list of diagram coverage gaps and new-example candidates
+- [x] Nav + reference-API audit that proposes the concrete list of diagram coverage gaps and new-example candidates — validated in Phase 2 (`02-AUDIT.md`)
 
 ### Out of Scope
 
@@ -70,7 +71,7 @@ The documentation — diagrams first, examples second — must make functional d
 | Formalize a shared SVG style spec before rollout | Consistency across ~50 diagrams needs one standard | — Pending |
 | Full sweep of all diagrams + all example pages | User wants the whole doc set brought to one bar | — Pending |
 | Review per doc section via the built site | User validates accuracy/style in batches before rollout continues | — Pending |
-| Derive coverage/new-example list from nav + reference-API audit | Systematic gap detection over guesswork | — Pending |
+| Derive coverage/new-example list from nav + reference-API audit | Systematic gap detection over guesswork | ✓ Done — `02-AUDIT.md` (Phase 2): ranked GAP/EX list + Selection gate |
 | Diagrams prioritized over examples | User's stated priority order | — Pending |
 
 ## Evolution
@@ -91,4 +92,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-07 after Phase 1*
+*Last updated: 2026-08-07 after Phase 2*
