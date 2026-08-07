@@ -11,10 +11,10 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 - [x] **FND-01**: A written SVG style spec at `docs/assets/diagrams/STYLE_SPEC.md` codifies the palette, typography classes (`.ttl` `.sub` `.lab` `.sm` `.mono`), stroke weights, the fixed viewBox width (720) and the allowed heights, and a canonical copy-paste `<style>` block
 - [x] **FND-02**: An SVGO config (`svgo.config.mjs`) losslessly lints/optimizes diagrams while preserving the `<style>` block, IDs, `<desc>`, `viewBox`, and `role`/`aria-label` accessibility attributes
-- [ ] **FND-03**: Built figures are deterministic — `docs_fig.py` sets `svg.hashsalt` and stochastic example blocks seed their RNG — so two consecutive builds produce byte-identical SVG output
+- [x] **FND-03**: Built figures are deterministic — `docs_fig.py` sets `svg.hashsalt` and stochastic example blocks seed their RNG — so two consecutive builds produce byte-identical SVG output
 - [ ] **FND-04**: `pymdownx.snippets` is enabled and shared dataset-loading preambles are factored into `docs/includes/`, removing duplicated CSV-loading blocks across example pages
 - [ ] **FND-05**: Example code fences are runnable as tests via `pytest-markdown-docs` with a `conftest.py` globals hook exposing `np`, `plt`, and `fdars`
-- [ ] **FND-06**: A fast docs-build path (`DOCS_FAST`) lowers expensive iteration counts so authors can verify pages locally without slow full rebuilds
+- [x] **FND-06**: A fast docs-build path (`DOCS_FAST`) lowers expensive iteration counts so authors can verify pages locally without slow full rebuilds
 
 ### Audit (scope derivation)
 
@@ -71,10 +71,10 @@ Explicitly excluded to prevent scope creep.
 |-------------|-------|--------|
 | FND-01 | Phase 1 | Complete |
 | FND-02 | Phase 1 | Complete |
-| FND-03 | Phase 1 | Pending |
+| FND-03 | Phase 1 | Complete |
 | FND-04 | Phase 1 | Pending |
 | FND-05 | Phase 1 | Pending |
-| FND-06 | Phase 1 | Pending |
+| FND-06 | Phase 1 | Complete |
 | AUD-01 | Phase 2 | Pending |
 | AUD-02 | Phase 2 | Pending |
 | AUD-03 | Phase 2 | Pending |
