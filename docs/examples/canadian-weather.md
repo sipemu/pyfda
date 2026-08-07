@@ -17,11 +17,7 @@ shape alone.
 ## Temperature curves by region
 
 ```python exec="1" html="1" source="above"
-import numpy as np
-from docs_fig import fig, render
-from docs_data import load_canadian_weather
-
-day, X, meta = load_canadian_weather("temperature")
+--8<-- "includes/load-canadian-weather.md"
 region = meta["region"].to_numpy()
 colors = {"Atlantic": "#3f51b5", "Continental": "#e8710a",
           "Pacific": "#198754", "Arctic": "#dc3545"}
