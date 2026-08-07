@@ -13,7 +13,7 @@ This milestone brings the `fdars` MkDocs site's ~43 hand-authored SVG diagrams a
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Establish SVG style spec, SVGO linter, deterministic builds, snippets, pytest-markdown-docs, and DOCS_FAST gate
+- [x] **Phase 1: Foundation** - Establish SVG style spec, SVGO linter, deterministic builds, snippets, pytest-markdown-docs, and DOCS_FAST gate (completed 2026-08-07)
 - [ ] **Phase 2: Audit** - Nav + reference-API audit that produces the diagram coverage map and ranked gap list
 - [ ] **Phase 3: learn/ Diagrams** - Sweep learn/ section: conform, fix coordinate bug, and close coverage gaps
 - [ ] **Phase 4: represent/ Diagrams** - Sweep represent/ section: remove R-era content, conform, close gaps
@@ -180,7 +180,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 4/4 | In Progress|  |
+| 1. Foundation | 4/4 | Complete    | 2026-08-07 |
 | 2. Audit | 0/TBD | Not started | - |
 | 3. learn/ Diagrams | 0/TBD | Not started | - |
 | 4. represent/ Diagrams | 0/TBD | Not started | - |
