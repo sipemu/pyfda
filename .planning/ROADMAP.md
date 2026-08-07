@@ -36,7 +36,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Dataset-loading preambles are factored into `docs/includes/` snippets and `pymdownx.snippets` is enabled in `mkdocs.yml`, so example pages no longer repeat the CSV-loading block inline
   5. `pytest --co -q` discovers example code fences via `pytest-markdown-docs`, and a `conftest.py` globals hook exposes `np`, `plt`, and `fdars` to fence execution
   6. Setting `DOCS_FAST=1` causes the docs build to reduce expensive iteration counts (e.g. `max_iter`, `nb`) so a local verification completes materially faster than the full build
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 01-01-PLAN.md — TRACER: STYLE_SPEC.md + svgo.config.mjs + SVGO lint gate proven end-to-end through CI (FND-01, FND-02)
+- [ ] 01-02-PLAN.md — svg.hashsalt determinism + DOCS_FAST fast() helper in docs_fig.py (FND-03, FND-06)
+- [ ] 01-03-PLAN.md — pymdownx.snippets + docs/includes/ dataset preambles (FND-04)
+- [ ] 01-04-PLAN.md — pytest-markdown-docs conftest harness + one-page CI doc-test gate (FND-05)
 
 ### Phase 2: Audit
 **Goal**: An evidence-based, user-selectable list of diagram coverage gaps and new-example candidates is produced from a systematic nav + API sweep
@@ -140,7 +144,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
+| 1. Foundation | 0/4 | Not started | - |
 | 2. Audit | 0/TBD | Not started | - |
 | 3. learn/ Diagrams | 0/TBD | Not started | - |
 | 4. represent/ Diagrams | 0/TBD | Not started | - |
