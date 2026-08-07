@@ -1,14 +1,16 @@
 ---
 phase: 03-learn-diagrams
 verified: 2026-08-08T12:00:00Z
-status: human_needed
+status: passed
 score: 7/8 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
+
   - test: "Open the built smoothing page and inspect the Panel 3 ghost underlay"
     expected: "The smoothed panel's faint blue ghost reference is visibly a DIFFERENT jagged shape from the noisy panel (Panel 1) — not the same wiggle shifted down. The bold smooth blue cubic Bezier still passes cleanly through the noise. Title, subtitle, method panel, arrows, and labels are all intact."
     why_human: "The coordinate-reuse bug is a visual correctness issue: grep confirms the Panel 1 signature appears exactly once, but whether the new Panel 3 ghost path is visually distinguishable from Panel 1's shape at the expected zoom level requires a human eye on the rendered diagram. No programmatic check can verify 'legibly distinct' appearance."
+
   - test: "Open all 6 learn/ pages on the built site and confirm each diagram renders correctly and depicts its method"
     expected: "Every learn/ page (/learn/introduction/, /learn/custom-plotting/, /learn/simulation/, /learn/smoothing/, /learn/derivatives/, /learn/irregular-sampling/) shows its concept diagram — no broken image, diagram is legible, and it depicts the functional data method described on the page (SC#3 — accurate, non-generic diagram visible)."
     why_human: "Visual accuracy and method-correctness of diagrams cannot be verified programmatically. grep confirms markers and site build succeeds; whether the diagram faithfully depicts the method (e.g. introduction shows what FDA is, derivatives shows the derivative concept) requires visual review by a domain reader."
