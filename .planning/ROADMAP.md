@@ -66,7 +66,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The audit document contains a grep report that flags all R-era content (`extendr`, `autoplot`, R-specific identifiers) found in diagrams and prose, with file locations
   3. The audit produces a ranked list of diagram coverage gaps and new-example candidates that the user can select from before Phase 3 begins
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 
 **Wave 1**
 
@@ -78,7 +78,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 02-03-PLAN.md — full-scope R-era grep report + reference-API sweep + ranked user-selectable GAP/EX list (AUD-02, AUD-03)
+- [x] 02-03-PLAN.md — full-scope R-era grep report + reference-API sweep + ranked user-selectable GAP/EX list (AUD-02, AUD-03)
 
 ### Phase 3: learn/ Diagrams
 
@@ -193,7 +193,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete    | 2026-08-07 |
-| 2. Audit | 2/3 | In Progress|  |
+| 2. Audit | 3/3 | In Progress|  |
 | 3. learn/ Diagrams | 0/TBD | Not started | - |
 | 4. represent/ Diagrams | 0/TBD | Not started | - |
 | 5. align/ Diagrams | 0/TBD | Not started | - |
