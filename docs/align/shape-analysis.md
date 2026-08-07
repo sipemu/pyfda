@@ -49,6 +49,8 @@ a2.legend(fontsize=8)
 print(render(f))
 ```
 
+The dashed red cross-sectional mean is a washed-out compromise -- it averages heights at fixed times across curves that peak at different times. The solid orange elastic mean shape instead recovers a crisp representative that actually resembles the individual curves, because it averages after removing phase. That contrast is the motivation for shape-space statistics.
+
 ---
 
 ## The quotient geometry
@@ -169,6 +171,8 @@ The two curves on the left have visibly different $\mathbb{L}^2$ norms; their SR
     print(f"SRSF distance  after  warp: {d_after:.6f}")
     print(f"relative deviation (isometry error): {rel:.2e}")
     ```
+
+The two printed SRSF distances -- before and after applying the *same* warp to both curves -- agree to well under a percent, so warping is an isometry up to discretization. This is the property that makes shape distances well defined: reparameterizing both curves together leaves their separation unchanged.
 
 ### Geodesic distance in shape space
 
@@ -392,6 +396,8 @@ width = float(np.trapezoid(upper - lower, t))
 print(f"mean band width (integrated): {width:.4f}")
 ```
 
+The orange band traces where the mean shape is precisely pinned (narrow) versus uncertain (wide), and because it is built from bootstrap resamples *of aligned shapes* it measures amplitude uncertainty rather than residual phase jitter. The integrated width printed below gives a single scalar for how tightly the sample determines the mean.
+
 | Key | Type | Description |
 |-----|------|-------------|
 | `mean` | `ndarray (m,)` | Estimated mean shape |
@@ -488,6 +494,8 @@ ax.set(title="Curves shaded by combined elastic depth",
 ax.legend()
 print(render(f))
 ```
+
+Opacity encodes elastic depth: the darkest curve (highlighted orange) is the elastic median -- the most central shape -- while the faint outer curves are the shallowest, least typical members. Because depth is computed in the elastic space, a curve is "deep" when its *shape* is central, independent of whether its peaks arrived early or late.
 
 ---
 

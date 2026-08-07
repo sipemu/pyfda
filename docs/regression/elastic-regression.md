@@ -425,6 +425,12 @@ a1.legend(fontsize=8)
 print(render(f))
 ```
 
+The left panel shows the recovered coefficient function on the *aligned* time axis, where the
+signal is concentrated and no longer smeared by phase noise. The right panel reveals the
+estimated warping functions bending away from the diagonal identity — each curve's departure
+from the dashed line is exactly the time-warp the model removed before regressing, which is why
+elastic regression can find structure that a phase-blind linear fit misses.
+
 !!! info "Comparison with standard regression"
     Elastic regression outperforms `fregre_lm` when the predictors carry
     substantial phase variability. If curves are already well aligned, the two
@@ -615,6 +621,12 @@ for i, v in enumerate(r2s):
 ax.set(title="R² by alignment strategy", ylabel=r"$R^2$", ylim=(0, 1))
 print(render(f))
 ```
+
+The bars rise from left to right: the phase-blind `fregre_lm` explains the least variance,
+pre-aligning with the Karcher mean recovers a large chunk, and joint elastic regression edges
+out even the two-step approach. The gap between the red and green bars is the concrete payoff of
+warping the predictors — separating amplitude from phase turns a hard problem into a nearly
+linear one.
 
 ---
 

@@ -263,6 +263,61 @@ Barbera (cultivar 3) runs low. The shaded envelopes are the full within-class
 range — Grignolino (cultivar 2, the largest and most heterogeneous class) has
 the widest band.
 
+## A functional boxplot per cultivar
+
+The mean-and-range view above is not robust: a single wild bottle stretches the
+envelope. The **functional boxplot** replaces it with the depth-based median
+curve and the central 50% region — the band swept out by the deepest half of the
+curves. We rank each cultivar's curves by modified band depth, draw the deepest
+as the median, and shade between the pointwise min and max of the top 50%.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_wine
+from fdars.depth import modified_band_1d
+
+def andrews_curves(features, t):
+    features = np.asarray(features, float)
+    n, p = features.shape
+    out = np.full((n, t.size), features[:, [0]] / np.sqrt(2.0))
+    for j in range(1, p):
+        harmonic = (j + 1) // 2
+        term = np.sin if j % 2 == 1 else np.cos
+        out = out + features[:, [j]] * term(harmonic * t)
+    return out
+
+names, X, meta = load_wine()
+cultivar = meta["cultivar"].to_numpy()
+Xz = (X - X.mean(0)) / X.std(0)
+t = np.linspace(-np.pi, np.pi, 160)
+curves = andrews_curves(Xz, t)
+
+palette = {1: "#8B0000", 2: "#DAA520", 3: "#2E8B57"}
+labels = {1: "Barolo", 2: "Grignolino", 3: "Barbera"}
+f, axes = fig(ncols=3, figsize=(11.0, 3.4), sharey=True)
+for ax, c in zip(axes, (1, 2, 3)):
+    band = curves[cultivar == c]
+    depth = np.asarray(modified_band_1d(band, band))
+    order = np.argsort(depth)[::-1]              # deepest first
+    central = band[order[: max(1, len(band) // 2)]]   # deepest 50%
+    lo, hi = central.min(0), central.max(0)
+    ax.fill_between(t, lo, hi, color=palette[c], alpha=0.30, label="central 50%")
+    ax.plot(t, band[order[0]], color=palette[c], lw=2.4, label="median")
+    ax.plot(t, band[order[-1]], color="#333", lw=1.0, ls=":", label="shallowest")
+    ax.set(title=labels[c], xlabel="t")
+axes[0].set(ylabel=r"$f_x(t)$")
+axes[0].legend(fontsize=8)
+print(render(f))
+```
+
+Each panel is a functional boxplot: the solid line is the depth median, the shade
+is the central 50% envelope, and the dotted line is the least-central curve in the
+class. Grignolino's central band is visibly the widest — its typical wines vary
+more from one another — while Barolo's is tight, matching its role as the most
+homogeneous cultivar. The dotted shallow curves preview the outlier-detection
+page: these are the bottles that ride the edge of their class.
+
 ## Wrapping the curves in `Fdata`
 
 From here the wines are functional data. Bundle the curves into an `fdars.Fdata`

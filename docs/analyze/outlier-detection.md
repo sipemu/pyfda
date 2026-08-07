@@ -267,6 +267,10 @@ a1.legend()
 print(render(f))
 ```
 
+The red curves in the left panel are exactly the points the outliergram isolates on the
+right: shape outliers fall away from the parabolic MEI--MBD band that the bulk of the
+sample traces out, so a departure in the scatter plot corresponds to an atypical curve.
+
 !!! tip "Choosing the factor"
     A factor of 1.5 (the default) mirrors the classic boxplot rule. Increase it to 2.0 or 3.0 if you want to be more conservative and only flag extreme shape departures.
 
@@ -369,6 +373,11 @@ ax.legend()
 print(render(f))
 ```
 
+The two axes separate two failure modes: points far to the right are *magnitude* outliers
+(shifted up or down as a whole), while points high up the vertical axis are *shape*
+outliers (atypical curvature at a normal level), and a curve extreme on either axis is
+flagged.
+
 ---
 
 ## The three outlier types, in isolation
@@ -444,6 +453,11 @@ print("Top |magnitude| idx :", np.argsort(np.abs(mag))[-3:][::-1].tolist())
 print("Top |shape| idx     :", np.argsort(np.abs(shp))[-3:][::-1].tolist())
 ```
 
+The three detectors flag overlapping but distinct index sets: LRT and the magnitude ranking
+converge on the level-shifted curve, while the outliergram and the shape ranking pick out
+the curvature anomaly -- confirming that no single method dominates and that they are best
+read together.
+
 !!! info "Which method to use?"
     - **LRT** (`detect_outliers_lrt`): magnitude outliers, but tune `smo` (≈0.1) and treat a
       negative result cautiously (masking). Use `detect_outliers_lrt_with_dist` when you
@@ -505,6 +519,11 @@ ax.set(title="Per-curve outlierness by method (curves 0-2 are the injected outli
 ax.legend(fontsize=8)
 print(render(f))
 ```
+
+The grouped bars over the shaded region (curves 0--2) show each method spiking on the
+anomaly it is designed to catch: the magnitude score peaks on curve 0, the outliergram
+score on the shape-inverted curve 1, and the MS shape score on the amplitude-scaled curve
+2 -- a compact confirmation that the three diagnostics are complementary.
 
 ## See also
 

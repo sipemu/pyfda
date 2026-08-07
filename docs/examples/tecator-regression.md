@@ -190,10 +190,22 @@ known C–H overtone absorption band of fat.
 Which of those wiggles are *real*? We can attach a pointwise confidence band to
 the coefficient curve. `fdars` has no direct standard-error binding for
 `fregre_pls`, so we build one transparently from the FPCA route the R reference
-uses: fit an OLS of fat on the leading FPC scores (`fdars.regression.fpca`),
-propagate the coefficient covariance through the loadings
-$\operatorname{cov}(\beta) = V\,\operatorname{cov}(\gamma)\,V^\top$, and mark the
-**significant regions** where the 95% band excludes zero with
+uses. Expanding $\beta$ in the leading FPC loadings $V=[\phi_1,\dots,\phi_K]$
+turns the functional fit into an OLS of fat on the FPC scores $\gamma$, so the
+coefficient curve and its pointwise standard error follow by propagating the
+OLS covariance through the loadings:
+
+$$
+\hat\beta(\lambda) = \sum_{k=1}^{K}\hat\gamma_k\,\phi_k(\lambda) = V\hat\gamma,
+\qquad
+\operatorname{cov}(\hat\beta) = V\,\operatorname{cov}(\hat\gamma)\,V^\top,
+\qquad
+\operatorname{se}(\hat\beta(\lambda)) =
+   \sqrt{\bigl[\operatorname{cov}(\hat\beta)\bigr]_{\lambda\lambda}} .
+$$
+
+A wavelength is flagged **significant** where the 95% band excludes zero,
+$|\hat\beta(\lambda)| > 1.96\,\operatorname{se}(\hat\beta(\lambda))$, via
 `fdars.explain.significant_regions_from_se`.
 
 ```python exec="1" html="1" source="above"

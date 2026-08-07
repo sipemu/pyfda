@@ -76,17 +76,17 @@ import numpy as np
 from docs_fig import fig, render
 from fdars.regression import fregre_lm
 
-np.random.seed(1)
+rng = np.random.default_rng(1)
 n, m = 40, 81
 t = np.linspace(0, 1, m)
 beta_true = np.sin(4 * np.pi * t)
 raw = np.zeros((n, m))
 for i in range(n):
-    raw[i] = (np.random.randn() * np.sin(2 * np.pi * t)
-              + np.random.randn() * np.cos(2 * np.pi * t)
-              + np.random.randn() * np.sin(4 * np.pi * t)
-              + 0.3 * np.random.randn(m))
-y = np.trapezoid(raw * beta_true, t, axis=1) + 0.5 * np.random.randn(n)
+    raw[i] = (rng.standard_normal() * np.sin(2 * np.pi * t)
+              + rng.standard_normal() * np.cos(2 * np.pi * t)
+              + rng.standard_normal() * np.sin(4 * np.pi * t)
+              + 0.3 * rng.standard_normal(m))
+y = np.trapezoid(raw * beta_true, t, axis=1) + 0.5 * rng.standard_normal(n)
 
 lm = fregre_lm(raw, y, n_comp=4)
 yhat = np.asarray(lm["fitted_values"])
@@ -99,6 +99,11 @@ ax.set(title=f"Predicted vs actual (R² = {lm['r_squared']:.2f})",
        xlabel="observed y", ylabel="predicted y")
 print(render(f))
 ```
+
+The points cluster tightly along the dashed identity line, so the four-component FPC fit
+recovers most of the response variance — the reported $R^2$ quantifies exactly how much. Scatter
+about the diagonal is the irreducible noise we injected, a reminder that a scalar-on-function
+model can only explain the part of $y$ that is linearly encoded in the curve shape.
 
 ---
 
@@ -307,6 +312,11 @@ ax.legend()
 print(render(f))
 ```
 
+The CV curve drops sharply as the first few components enter, then flattens and eventually
+rises — the classic bias-variance U-shape. The orange line marks the $K$ that minimizes
+held-out error, and choosing it avoids both underfitting (too few components) and the variance
+inflation that comes from padding the model with noise-dominated eigenfunctions.
+
 ---
 
 ## 5. Model selection by information criteria
@@ -434,6 +444,12 @@ a1.set(title="Coefficient recovery", xlabel="t", ylabel=r"$\beta(t)$")
 a1.legend()
 print(render(f))
 ```
+
+The left panel shows residuals scattered in a structureless band around zero, with no funnel or
+curvature — the linear FPC model is well-specified and its errors are homoscedastic. The right
+panel confirms the estimated coefficient function (blue) tracks the true $\beta(t)$ (dashed)
+closely, so the fitted model is not just predictive but also recovers the interpretable
+weight profile that generated the data.
 
 ---
 

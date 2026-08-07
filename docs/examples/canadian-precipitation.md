@@ -92,9 +92,19 @@ formally.
 Daily precipitation is noisy even after averaging over 30+ years. Before fitting
 any regression we fit each curve with a **penalised B-spline** (P-spline) on 40
 basis functions, which removes high-frequency day-to-day fluctuation while
-preserving the seasonal signal. `fdars.basis.pspline_fit_1d` fits the penalised
+preserving the seasonal signal. For a curve with B-spline coefficients $c$ the
+smoother minimizes a penalized least-squares criterion,
+
+$$
+\min_{c}\ \bigl\lVert y - Bc \bigr\rVert^2 \;+\; \lambda \int \bigl(m''(t)\bigr)^2\,dt,
+\qquad m(t) = \sum_k c_k\,B_k(t),
+$$
+
+where $B$ is the B-spline design matrix and the second-derivative penalty
+enforces smoothness. `fdars.basis.pspline_fit_1d` fits the penalised
 coefficients and returns the smoothed curves directly in its `fitted` field; the
-roughness penalty `lambda_` controls how aggressively the daily noise is damped.
+roughness penalty `lambda_` ($\lambda$ above) controls how aggressively the daily
+noise is damped.
 
 !!! note "Why not `fdata_to_basis_1d` here?"
     We use the penalised-spline smoother rather than the plain B-spline basis

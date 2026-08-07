@@ -98,7 +98,19 @@ because the real task pools *all five classes together*, where the story changes
 Two distance matrices, two views of the same 50 curves.
 `shape_self_distance_matrix` measures elastic (Fisher–Rao) shape distance —
 frequency axis free to warp; `lp_self_1d` measures ordinary $L^2$ distance —
-frequency axis fixed. A good distance for classification should be **small within
+frequency axis fixed. In the square-root velocity representation $q =
+\operatorname{sign}(\dot f)\sqrt{|\dot f|}$, the Fisher–Rao shape distance
+minimises the $L^2$ gap over all reparameterisations $\gamma$ of the axis, while
+$L^2$ compares the curves point by point on the fixed grid:
+
+$$
+d_{\text{shape}}(f, g) = \min_{\gamma\in\Gamma}
+   \bigl\lVert q_f - (q_g\!\circ\!\gamma)\sqrt{\dot\gamma}\bigr\rVert_2,
+\qquad
+d_{L^2}(f, g) = \Bigl(\int_\Lambda (f-g)^2\,d\lambda\Bigr)^{1/2} .
+$$
+
+A good distance for classification should be **small within
 a class and large between classes**: a block-diagonal heatmap.
 
 ```python exec="1" html="1" source="above"
@@ -229,10 +241,19 @@ information that separates phonemes.
 
 Now the decisive test. We cluster the 50 curves with **k-medoids on each distance
 matrix** — elastic shape distance versus $L^2$ — and score each partition by
-**purity** (the fraction of curves that land in a cluster dominated by their true
-class). Since there are no elastic-k-means or standard-k-means bindings that take
-a precomputed distance, `kmedoids_from_distances` gives both methods a fair,
-identical clustering engine — the *only* thing that differs is the distance.
+**purity**: assigning each cluster its majority true class and counting the
+curves that agree, normalised by the total,
+
+$$
+\text{purity} = \frac{1}{n}\sum_{c\in\mathcal{C}}
+   \max_{j}\,\bigl\lvert \{\, i : \text{cluster}(i)=c,\; y_i = j \,\}\bigr\rvert ,
+$$
+
+where the sum runs over clusters $c$ and the max over true classes $j$; purity
+$1$ means every cluster is pure. Since there are no elastic-k-means or
+standard-k-means bindings that take a precomputed distance,
+`kmedoids_from_distances` gives both methods a fair, identical clustering engine
+— the *only* thing that differs is the distance.
 
 ```python exec="1" html="1" source="above"
 import numpy as np

@@ -46,10 +46,19 @@ keep that in mind, because the analyses below quantify it.
 ## Functional ANOVA: do the regions differ?
 
 `fanova` tests the null hypothesis that all four regions share one mean
-temperature curve. It computes a pointwise F-statistic $F(t)$, aggregates it to a
-global statistic, and calibrates a **p-value by permutation** — reshuffling the
-region labels `n_perm` times and asking how often the shuffled data produce as
-extreme a statistic. The group codes are integer-encoded region labels.
+temperature curve. It computes a pointwise F-statistic — at each day $t$, the
+ratio of between-region to within-region variance,
+
+$$
+F(t) = \frac{\sum_{g=1}^{G} n_g\,\bigl(\bar Y_g(t) - \bar Y(t)\bigr)^2 \big/ (G-1)}
+            {\sum_{g=1}^{G} \sum_{i \in g} \bigl(Y_i(t) - \bar Y_g(t)\bigr)^2 \big/ (n-G)},
+$$
+
+with $\bar Y_g$ the region-$g$ mean curve and $\bar Y$ the grand mean — aggregates
+it to a global statistic, and calibrates a **p-value by permutation** —
+reshuffling the region labels `n_perm` times and asking how often the shuffled
+data produce as extreme a statistic. The group codes are integer-encoded region
+labels.
 
 ```python exec="1" html="1" source="above"
 import numpy as np

@@ -311,12 +311,25 @@ grape.
 ## Statistical process control: $T^2$ and SPE charts
 
 A tolerance band flags pointwise excursions; SPC instead reduces each curve to a
-few functional-PCA scores and monitors two summary statistics:
+few functional-PCA scores $\xi_1, \dots, \xi_A$ and monitors two summary
+statistics:
 
 - **Hotelling $T^2$** — how far the in-model scores are from the reference
-  centre (a deviation *within* the principal-component subspace).
+  centre (a deviation *within* the principal-component subspace), the sum of
+  squared scores standardized by their reference variances $\lambda_a$:
+
+$$
+T^2 = \sum_{a=1}^{A} \frac{\xi_a^2}{\lambda_a}.
+$$
+
 - **SPE** (squared prediction error, or $Q$) — how much of the curve lies
-  *outside* that subspace (a new kind of variation the reference never showed).
+  *outside* that subspace (a new kind of variation the reference never showed),
+  the residual energy after projecting onto the retained eigenfunctions
+  $\phi_a$:
+
+$$
+\mathrm{SPE} = \Bigl\lVert\, f - \bar f - \sum_{a=1}^{A} \xi_a\,\phi_a \,\Bigr\rVert_{L^2}^2 .
+$$
 
 `spm_phase1` calibrates the model and both control limits on the reference batch;
 `spm_monitor` then scores new wines against those fixed limits.

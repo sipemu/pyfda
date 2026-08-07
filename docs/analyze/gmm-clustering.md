@@ -111,6 +111,10 @@ ax.legend()
 print(render(f))
 ```
 
+The three groups -- a sine, a cosine, and a linear ramp -- are visually well separated at
+this noise level, so they make a clean testbed for checking that the mixture model recovers
+the planted structure and its component means.
+
 ---
 
 ## Clustering with `gmm_cluster`
@@ -186,6 +190,10 @@ ax.set(title="Information criteria vs. number of components",
 ax.legend()
 print(render(f))
 ```
+
+Both criteria keep decreasing as $K$ grows rather than dipping at the true $K = 3$, a
+symptom of the flexible basis projection inflating the likelihood -- read the next warning
+before trusting the arg-min.
 
 !!! warning "BIC over-splits here -- do not read off the minimum"
     With flexible basis projections the per-component likelihood grows quickly, and in
@@ -384,6 +392,10 @@ ax.set(title="Membership matrix (sorted curves)",
 ax.set_yticks(range(M.shape[1]))
 print(render(f))
 ```
+
+Each column is one curve's posterior over the three components: bright single-cell columns
+mark near-certain assignments, while columns with colour smeared across rows are the
+ambiguous curves the model cannot confidently place.
 
 !!! danger "Read this as an illustration of the *matrix*, not a validated grouping"
     Recall the top-of-page limitation: in this build the hard labels behind `membership`

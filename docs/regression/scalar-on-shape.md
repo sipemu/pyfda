@@ -44,7 +44,7 @@ def make_shape_data(seed, n=60, m=60):
         y[i] = 2 * amp + rng.normal(0, 0.3)                # response from shape
     return t, X, y
 
-t, X, y = make_shape_data(3)
+t, X, y = make_shape_data(seed=3)
 sm = shape_mean(X, t)
 mean = np.asarray(sm["mean"])
 aligned = np.asarray(sm["aligned_data"])
@@ -58,6 +58,10 @@ a1.set(title="After alignment to the shape mean", xlabel="t", ylabel="X(t)")
 a1.legend()
 print(render(f))
 ```
+
+The raw panel is a tangle of peaks at different $t$-locations — pure phase noise —
+while the aligned panel collapses them onto a common shape around the orange mean,
+exposing the amplitude variation that actually drives the response.
 
 ## Concepts
 
@@ -110,7 +114,7 @@ def make_shape_data(seed, n=60, m=60):
         y[i] = 2 * amp + rng.normal(0, 0.3)
     return t, X, y
 
-t, X, y = make_shape_data(3)
+t, X, y = make_shape_data(seed=3)
 ```
 
 ## Pipeline 1 — distance-based shape regression
@@ -135,6 +139,47 @@ print(f"selected bandwidth: {np_fit['h_func']:.3f}")
 |----------|-----------|---------|
 | `shape_self_distance_matrix` | `(data, argvals, quotient="reparameterization", lambda_=0.0)` | `ndarray (n, n)` |
 | `fregre_np` | `(dist_matrix, response, h=0.0)` | dict: `fitted_values`, `residuals`, `h_func`, `r_squared` |
+
+The kernel regressor sees only this distance matrix, so it is worth looking at.
+Sorting rows and columns by the response $y$ reveals whether shape-similar curves
+(small distances, dark cells) also share similar responses — the structure the
+kernel exploits:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from scipy.stats import beta as beta_dist
+from docs_fig import fig, render
+from fdars.alignment import shape_self_distance_matrix
+
+def make_shape_data(seed, n=60, m=60):
+    rng = np.random.default_rng(seed)
+    t = np.linspace(0, 1, m)
+    X = np.zeros((n, m)); y = np.zeros(n)
+    for i in range(n):
+        amp = rng.normal(0, 1)
+        base = amp * np.sin(2 * np.pi * t) + 0.4 * np.sin(4 * np.pi * t)
+        a, b = rng.uniform(0.3, 3.0, size=2)
+        gamma = beta_dist.cdf(t, a, b)
+        X[i] = np.interp(gamma, t, base) + 0.05 * rng.standard_normal(m)
+        y[i] = 2 * amp + rng.normal(0, 0.3)
+    return t, X, y
+
+t, X, y = make_shape_data(seed=3)
+D = np.asarray(shape_self_distance_matrix(X, t))
+order = np.argsort(y)                     # sort by response
+Ds = D[np.ix_(order, order)]
+
+f, ax = fig()
+im = ax.imshow(Ds, cmap="viridis", origin="lower")
+ax.set(title="Shape-distance matrix (rows/cols sorted by y)",
+       xlabel="curve (by y rank)", ylabel="curve (by y rank)")
+f.colorbar(im, ax=ax, label="shape distance")
+print(render(f))
+```
+
+The dark block along the diagonal shows that curves with similar responses are also
+close in shape distance — a checkerboard would instead signal that shape carries no
+response information, and the kernel regressor would then fail.
 
 ## Pipeline 2 — shape-PC linear regression
 
@@ -178,7 +223,7 @@ def make_shape_data(seed, n=60, m=60):
         y[i] = 2 * amp + rng.normal(0, 0.3)
     return t, X, y
 
-t, X, y = make_shape_data(3)
+t, X, y = make_shape_data(seed=3)
 sm = shape_mean(X, t)
 aligned = np.asarray(sm["aligned_data"])
 mean = np.asarray(sm["mean"])
@@ -219,7 +264,7 @@ def make_shape_data(seed, n=60, m=60):
         y[i] = 2 * amp + rng.normal(0, 0.3)
     return t, X, y
 
-t, X, y = make_shape_data(3)
+t, X, y = make_shape_data(seed=3)
 aligned = np.asarray(shape_mean(X, t)["aligned_data"])
 lm_fit = fregre_lm(aligned, y, n_comp=6)
 yhat = np.asarray(lm_fit["fitted_values"])
@@ -235,6 +280,10 @@ ax.set(title=f"Shape-PC fit (R² = {lm_fit['r_squared']:.2f}; shape-NP R² = {np
        xlabel="observed y", ylabel="predicted y")
 print(render(f))
 ```
+
+The shape-PC points cluster tightly along the 1:1 line, so its predictions track
+the response almost one-to-one; the distance-based shape-NP model (title) lands a
+markedly lower $R^2$, foreshadowing the head-to-head comparison below.
 
 ## Comparison with naïve FPC regression
 
@@ -269,7 +318,7 @@ def make_shape_data(seed, n=60, m=60):
         y[i] = 2 * amp + rng.normal(0, 0.3)
     return t, X, y
 
-t, X, y = make_shape_data(3)
+t, X, y = make_shape_data(seed=3)
 
 ks = [2, 4, 6, 8, 10]
 naive = [fregre_lm(X, y, n_comp=k)["r_squared"] for k in ks]
@@ -290,6 +339,11 @@ ax.set(title="Shape regression vs naïve FPC regression",
 ax.legend(fontsize=8)
 print(render(f))
 ```
+
+The green shape-PC line sits above the entire blue naïve-FPC curve — even at ten
+components — confirming that phase removal, not raw model capacity, is what unlocks
+the signal; the orange shape-NP line trails once naïve FPC is given enough
+components, marking it as the weaker choice on this smoothly-varying data.
 
 !!! success "Validation — shape-PC regression beats naïve FPC on phase-warped data"
     On data where the response depends only on shape (phase is pure nuisance), removing
@@ -316,7 +370,7 @@ def make_shape_data(seed, n=60, m=60):
         y[i] = 2 * amp + rng.normal(0, 0.3)
     return t, X, y
 
-t, X, y = make_shape_data(3)
+t, X, y = make_shape_data(seed=3)
 
 naive = {k: fregre_lm(X, y, n_comp=k)["r_squared"] for k in [2, 4, 6, 8, 10]}
 aligned = np.asarray(shape_mean(X, t)["aligned_data"])

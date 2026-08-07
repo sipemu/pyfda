@@ -27,6 +27,8 @@ ax.set(title="Bumps varying in amplitude (height) and phase (location)",
 print(render(f))
 ```
 
+Each bump differs in both its peak height (amplitude) and the horizontal position of its peak (phase). Because the peaks are scattered along the time axis, a pointwise method like ordinary FPCA cannot line them up and would spend components describing the horizontal drift.
+
 ## Concepts: amplitude and phase
 
 Write each observed curve as a warped version of an underlying *template*:
@@ -100,6 +102,8 @@ a1.set(title="Aligned (amplitude only)", xlabel="t", ylabel="X(t)")
 a1.legend()
 print(render(f))
 ```
+
+In the right panel every bump peaks at the same location as the Karcher mean (red): the horizontal scatter of the left panel has been absorbed into the warping functions, leaving only vertical (amplitude) spread. This is exactly the separation elastic FPCA exploits.
 
 !!! success "Validation: alignment reduces amplitude variance; warps are valid; distances agree"
 
@@ -177,6 +181,8 @@ ax.legend()
 print(render(f))
 ```
 
+The warps fan out around the diagonal identity (red dashed): curves whose $\gamma$ bows above the diagonal had their peak advanced during alignment, those below had it delayed. The width of this fan is the amount of phase variation in the sample.
+
 ## The three elastic FPCA variants
 
 Once amplitude and phase are separated, `fdars.alignment` provides three PCA routines. They share a signature and each return a `dict`.
@@ -251,6 +257,8 @@ ax.legend()
 print(render(f))
 ```
 
+Both modes keep the peak fixed in time and vary only its height and width -- exactly what "amplitude with phase removed" should look like. Mode 1 mainly raises or lowers the whole bump, while mode 2 adjusts its sharpness, and neither shifts the peak sideways.
+
 ### Horizontal (phase) FPCA
 
 `horiz_fpca` runs PCA on the **warping functions** -- the phase. Because warping functions live on a curved space (the space of monotone maps), the PCA operates on their *shooting vectors* in the tangent space at the identity warp. Its dict adds phase-specific keys:
@@ -291,6 +299,8 @@ ax.set(title="Phase (warping) eigen-directions (horiz_fpca)",
 ax.legend()
 print(render(f))
 ```
+
+The leading phase direction departs most from the identity warp, describing the dominant pattern of peak timing across the sample; the higher directions add progressively finer timing adjustments. Together they parameterise *when* the feature occurs, independently of its height.
 
 ### Joint FPCA
 
@@ -384,6 +394,8 @@ ax.set(title="Cumulative variance: ordinary vs elastic amplitude FPCA",
 ax.legend()
 print(render(f))
 ```
+
+The green amplitude-FPCA curve rises far more steeply than the blue ordinary-FPCA curve, reaching the 95 % line in fewer components. Ordinary FPCA wastes components encoding the horizontal misalignment, whereas aligning first concentrates almost all amplitude variance into the first mode.
 
 !!! note "When to reach for elastic FPCA"
     If a functional boxplot or a plot of the raw curves shows features (peaks, zero-crossings) drifting horizontally between observations, ordinary FPCA will mix that phase variation into its amplitude components. Separating the two with `vert_fpca` / `horiz_fpca` yields interpretable, low-dimensional summaries of *what* varies (amplitude) and *when* it varies (phase).

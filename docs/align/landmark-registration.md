@@ -57,6 +57,8 @@ a2.legend(fontsize=8)
 print(render(f))
 ```
 
+On the left the two peaks arrive at different times across curves, so the red cross-sectional mean is flattened and smeared -- an artefact of phase, not shape. On the right, once every peak is warped onto its common target (dotted lines), the curves overlap and the mean recovers the true two-peak amplitude. That sharpening of the mean is the whole payoff of removing phase variation.
+
 ---
 
 ## How it works (intuition)
@@ -151,6 +153,8 @@ for thr in (0.0, 0.2, 0.5):
     npk = len(detect_peaks(data[0], thr)[0])
     print(f"curve 0, min_prominence={thr}: {npk} peaks")
 ```
+
+Only the one dominant peak per curve is flagged (red triangles); the small sinusoidal ripple never clears the `prom > 0.5` bar. The printed counts make the mechanism explicit: at `min_prominence=0.0` every local maximum survives, but raising the threshold to `0.5` collapses each curve down to its single salient landmark -- exactly the pruning registration needs.
 
 | Landmark kind | numpy / scipy detector |
 |---------------|------------------------|
@@ -270,6 +274,8 @@ a2.set(title=f"Registered to targets {target.round(3)}", xlabel="t")
 print(render(f))
 ```
 
+Both peaks are pinned simultaneously: on the left each of the two bumps wanders within its own band, while on the right every curve's first and second peak sit squarely on the two dotted targets. Note that the inter-peak region is stretched or compressed independently on each side of the anchors -- a direct consequence of the piecewise-linear warp.
+
 !!! success "Numerical validation: the warp is exact at the landmarks"
     The whole point of landmark registration is that each warp *pins* the landmarks: by construction $\gamma_i(\tau_j^\*) = \tau_{i,j}$, so evaluating the piecewise-linear warp at a target time returns the source landmark time exactly. Because the targets are the interpolation knots, `numpy.interp` reproduces them to machine precision -- there is no optimization error, unlike elastic alignment. We assert this directly, then confirm the registered curves' peaks land on the common targets to within one grid step.
 
@@ -315,6 +321,8 @@ print(render(f))
     print(f"registered peaks vs targets: {peak_err:.4f}  (grid step = {t[1] - t[0]:.4f})")
     ```
 
+Both checks pass: the warp reproduces its knots to $\sim10^{-16}$ (pure interpolation, no solver), and every registered peak lands within a single grid step of its target. This is the defining contrast with elastic alignment -- there is no optimization residual to converge, only interpolation error bounded by the sampling grid.
+
 ---
 
 ## Landmark warps as phase
@@ -357,6 +365,63 @@ print(render(f))
 ```
 
 The warps kink at the landmark times (dotted verticals) -- the signature of piecewise-linear registration. Between landmarks each warp is a straight segment, so timing is distorted uniformly within every inter-landmark interval.
+
+---
+
+## Quantifying the phase removal
+
+The visual "sharpening of the mean" has a numerical counterpart: registration collapses the cross-sectional variance $\operatorname{Var}_i f_i(t)$ at each $t$, because at a fixed time the curves now share the same phase. Plotting the pointwise variance before and after registration turns the qualitative claim into a measured one -- the shaded area between the two curves is the phase variance removed.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from scipy.signal import find_peaks
+from docs_fig import fig, render
+
+rng = np.random.default_rng(5)
+n, m = 24, 200
+t = np.linspace(0, 1, m)
+data = np.zeros((n, m))
+for i in range(n):
+    p1, p2 = rng.uniform(0.2, 0.4), rng.uniform(0.6, 0.8)
+    data[i] = np.exp(-100 * (t - p1) ** 2) + np.exp(-100 * (t - p2) ** 2)
+
+def top_peaks(y, k, mp=0.3):
+    idx, props = find_peaks(y, prominence=mp)
+    order = np.argsort(props["prominences"])[::-1][:k]
+    return np.sort(t[idx[order]])
+
+L = np.array([top_peaks(row, 2) for row in data])
+target = L.mean(0)
+
+def register(y, src):
+    src_time = np.interp(t, np.concatenate(([0.0], target, [1.0])),
+                         np.concatenate(([0.0], src, [1.0])))
+    return np.interp(src_time, t, y)
+
+reg = np.array([register(data[i], L[i]) for i in range(n)])
+
+var_before = data.var(0)
+var_after = reg.var(0)
+
+f, ax = fig()
+ax.plot(t, var_before, color="#dc3545", lw=2.0, label="before (unregistered)")
+ax.plot(t, var_after, color="#198754", lw=2.0, label="after (registered)")
+ax.fill_between(t, var_after, var_before, where=var_before >= var_after,
+                color="#dc3545", alpha=0.12)
+for x in target:
+    ax.axvline(x, color="#adb5bd", ls=":", lw=0.9)
+ax.set(title="Pointwise cross-sectional variance", xlabel="t",
+       ylabel=r"$\mathrm{Var}_i\, f_i(t)$")
+ax.legend(fontsize=9)
+print(render(f))
+
+tot_before = np.trapezoid(var_before, t)
+tot_after = np.trapezoid(var_after, t)
+print(f"integrated variance  before: {tot_before:.4f}  after: {tot_after:.4f}  "
+      f"({100 * (1 - tot_after / tot_before):.0f}% removed)")
+```
+
+The variance before registration peaks near the drifting landmark locations -- precisely where phase misalignment is largest -- and collapses toward zero after each peak is pinned. The integrated-variance line quantifies the reduction: for this pure-phase sample almost all cross-sectional variance is phase, and registration removes the bulk of it.
 
 ---
 

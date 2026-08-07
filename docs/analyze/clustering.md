@@ -8,7 +8,15 @@ Partition a set of functional observations into homogeneous groups. `fdars` prov
 
 ## K-means for functional data
 
-The functional k-means algorithm minimises the total within-cluster $L^2$ distance, iterating between assignment and centroid update until convergence.
+The functional k-means algorithm minimises the total within-cluster $L^2$ distance,
+iterating between assignment and centroid update until convergence. Writing $c_k$ for the
+$k$-th centroid curve and $C_k$ for the observations assigned to it, the objective is
+
+$$
+J_{\text{kmeans}} = \sum_{k=1}^{K} \sum_{i \in C_k} \int_{\mathcal{T}} \bigl(X_i(t) - c_k(t)\bigr)^2 \, dt,
+$$
+
+with the centroid update setting each $c_k$ to the mean curve of its cluster.
 
 ```python
 import numpy as np
@@ -77,7 +85,15 @@ print(render(f))
 
 ## Fuzzy C-means
 
-Fuzzy c-means assigns each observation a *membership degree* for every cluster rather than a hard label, controlled by the fuzziness parameter $m$ (default 2).
+Fuzzy c-means assigns each observation a *membership degree* $u_{ik} \in [0, 1]$ for every
+cluster rather than a hard label, controlled by the fuzziness parameter $m$ (default 2). It
+minimises the weighted within-cluster objective
+
+$$
+J_{\text{fcm}} = \sum_{i=1}^{n} \sum_{k=1}^{K} u_{ik}^{\,m} \, \bigl\| X_i - c_k \bigr\|_{L^2}^2, \qquad \sum_{k=1}^{K} u_{ik} = 1,
+$$
+
+so larger $m$ flattens the memberships toward the uniform value $1/K$ and softens the partition.
 
 ```python
 from fdars.clustering import fuzzy_cmeans_fd
@@ -300,6 +316,10 @@ ax.legend()
 print(render(f))
 ```
 
+The within-cluster scatter drops steeply from $k = 1$ to $k = 3$ and then flattens, so the
+curve bends sharply at $k = 3$ -- the elbow -- agreeing with the silhouette peak and
+correctly recovering the three planted groups.
+
 ---
 
 ## Using different distance metrics
@@ -381,6 +401,11 @@ mem = np.asarray(fcm["membership"])
 entropy = -np.sum(mem * np.log(mem + 1e-12), axis=1)
 print(f"Mean membership entropy: {entropy.mean():.3f}")
 ```
+
+K-means recovers the three well-separated groups at essentially perfect best-match
+accuracy, and the low mean membership entropy from fuzzy c-means confirms the same: with
+clearly separated clusters almost every curve is assigned near-deterministically to a
+single group.
 
 ## See also
 

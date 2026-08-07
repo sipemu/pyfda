@@ -111,7 +111,20 @@ has a trend, detrending-based detectors are the safer choice.
 
 A single "period" number hides the full frequency content. `lomb_scargle_fdata`
 computes the Lomb–Scargle periodogram — power against candidate period — which
-exposes not just the fundamental cycle but its **harmonics**.
+exposes not just the fundamental cycle but its **harmonics**. At angular
+frequency $\omega = 2\pi/P$ it fits a sinusoid by least squares and reports the
+explained power,
+
+$$
+P(\omega) = \frac{1}{2}\!\left[
+\frac{\bigl(\sum_i y_i \cos\omega(t_i-\tau)\bigr)^2}{\sum_i \cos^2\omega(t_i-\tau)}
++
+\frac{\bigl(\sum_i y_i \sin\omega(t_i-\tau)\bigr)^2}{\sum_i \sin^2\omega(t_i-\tau)}
+\right],
+$$
+
+where the phase offset $\tau$ is chosen to make the estimator exact for
+unevenly-spaced samples. A peak at candidate period $P$ marks a dominant cycle.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -277,8 +290,18 @@ as twins. Component 1 alone would be a trend; the tied pair *is* the annual cycl
 ## Seasonal strength and classification
 
 `seasonal_strength` scores, on a 0–1 scale, what fraction of a curve's variation
-the seasonal cycle explains (the variance measure of Wang, Smith & Hyndman). We
-also let `classify_seasonality` render an overall verdict.
+the seasonal cycle explains (the variance measure of Wang, Smith & Hyndman).
+After an STL-type decomposition into seasonal $S_t$ and remainder $R_t$ parts,
+the strength is one minus the ratio of residual to seasonal-plus-residual
+variance,
+
+$$
+F_S = \max\!\left(0,\ 1 - \frac{\operatorname{Var}(R_t)}{\operatorname{Var}(S_t + R_t)}\right),
+$$
+
+so $F_S \to 1$ when the seasonal signal dwarfs the residual noise and $F_S \to 0$
+when it is negligible. We also let `classify_seasonality` render an overall
+verdict.
 
 ```python exec="1" html="1" source="above"
 import numpy as np

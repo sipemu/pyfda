@@ -62,6 +62,23 @@ total variation into an **amplitude** part (differences in shape at fixed
 warped position) and a **phase** part (differences removable by warping the
 axis). A high phase share is the green light for elastic methods.
 
+Alignment works in the square-root velocity (SRVF) representation: a curve $f$
+with derivative $\dot f$ is mapped to $q(t) = \operatorname{sign}(\dot f)\,
+\sqrt{|\dot f|}$, in which warping acts by isometry. Aligning the $\{q_i\}$ to a
+Karcher mean $\mu$ via warps $\gamma_i$ splits the total variance into an
+amplitude part (shape residuals in the aligned frame) and a phase part (the
+warps themselves), whose ratio is the elasticity diagnostic:
+
+$$
+\underbrace{\tfrac{1}{n}\sum_i \lVert q_i - \mu\rVert^2}_{\text{total}}
+\;\longrightarrow\;
+\sigma^2_{\text{amp}}
+   = \tfrac{1}{n}\sum_i \lVert (q_i \!\circ\! \gamma_i)\sqrt{\dot\gamma_i}
+     - \mu\rVert^2,
+\qquad
+r_{\text{phase}} = \frac{\sigma^2_{\text{phase}}}{\sigma^2_{\text{amp}}} .
+$$
+
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
@@ -108,7 +125,23 @@ geometry:
 - **Elastic distance** — `fdars.alignment.elastic_self_distance_matrix` — the
   amplitude (shape) distance after optimally warping the frequency axis, i.e. the
   TSRVF geodesic distance. Two curves are close if one can be *reparameterised*
-  into the other.
+  into the other:
+
+$$
+d_{\text{elastic}}(x_i, x_j) =
+   \min_{\gamma \in \Gamma}
+   \bigl\lVert q_i - (q_j \!\circ\! \gamma)\sqrt{\dot\gamma} \bigr\rVert ,
+$$
+
+where $\Gamma$ is the set of increasing warps of the axis. A geometry separates
+the classes when same-class pairs are closer than cross-class pairs; we measure
+that with the ratio of mean between-class to mean within-class distance,
+
+$$
+\rho = \frac{\operatorname{mean}\{d_{ij} : y_i \neq y_j\}}
+            {\operatorname{mean}\{d_{ij} : y_i = y_j\}} ,
+\qquad \rho > 1 \text{ means the geometry carries class signal.}
+$$
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -315,51 +348,52 @@ tangent vectors over **20**, the latter barely above the majority baseline.
 Derivatives land in between but still below raw. Warping the frequency axis does
 not help; it actively hurts.
 
-!!! success "Validation — the honest negative result, asserted"
-    The claim of this page is a *negative* one, and negative claims are the
-    easiest to fudge — so we assert it outright. Under an identical 10-fold
-    cross-validated classifier, the **TSRVF (elastic amplitude) accuracy must not
-    exceed the raw standardized-spectra accuracy**; if elastic alignment helped,
-    this assertion would fail and the page's thesis would be wrong. We also anchor
-    the raw number near the literature (~85%) and confirm it clears the majority
-    baseline.
+### Validation — the honest negative result, asserted
 
-    ```python exec="1" source="above"
-    import numpy as np, warnings
-    warnings.filterwarnings("ignore")
-    from docs_data import load_sonar
-    from fdars.alignment import tsrvf_transform
-    from fdars.classification import fclassif_cv
+The claim of this page is a *negative* one, and negative claims are the
+easiest to fudge — so we assert it outright. Under an identical 10-fold
+cross-validated classifier, the **TSRVF (elastic amplitude) accuracy must not
+exceed the raw standardized-spectra accuracy**; if elastic alignment helped,
+this assertion would fail and the page's thesis would be wrong. We also anchor
+the raw number near the literature (~85%) and confirm it clears the majority
+baseline.
 
-    band, X, meta = load_sonar()
-    y = (meta["label"].to_numpy() == "Mine").astype(int)
-    Xz = (X - X.mean(0)) / X.std(0)
-    t = np.linspace(0.0, 1.0, X.shape[1])
-    tv = np.asarray(tsrvf_transform(Xz, t, max_iter=15)["tangent_vectors"])
+```python exec="1" source="above"
+import numpy as np, warnings
+warnings.filterwarnings("ignore")
+from docs_data import load_sonar
+from fdars.alignment import tsrvf_transform
+from fdars.classification import fclassif_cv
 
-    def best_cv_acc(fd):
-        tt = np.linspace(0.0, 1.0, fd.shape[1])
-        best = 0.0
-        for meth in ("lda", "knn"):
-            for nc in (5, 8, 10):
-                cv = fclassif_cv(fd, tt, y, method=meth, ncomp=nc, nfold=10)
-                best = max(best, 1.0 - cv["error_rate"])
-        return best
+band, X, meta = load_sonar()
+y = (meta["label"].to_numpy() == "Mine").astype(int)
+Xz = (X - X.mean(0)) / X.std(0)
+t = np.linspace(0.0, 1.0, X.shape[1])
+tv = np.asarray(tsrvf_transform(Xz, t, max_iter=15)["tangent_vectors"])
 
-    raw = best_cv_acc(Xz)         # L2 on raw standardized spectra
-    elastic = best_cv_acc(tv)     # TSRVF amplitude (elastic)
-    baseline = max(y.mean(), 1 - y.mean())
+def best_cv_acc(fd):
+    tt = np.linspace(0.0, 1.0, fd.shape[1])
+    best = 0.0
+    for meth in ("lda", "knn"):
+        for nc in (5, 8, 10):
+            cv = fclassif_cv(fd, tt, y, method=meth, ncomp=nc, nfold=10)
+            best = max(best, 1.0 - cv["error_rate"])
+    return best
 
-    assert elastic <= raw, (elastic, raw)          # elastic does NOT help
-    assert raw > baseline and raw > 0.80, raw      # raw is competitive (~85%)
-    print(f"raw (L2) accuracy   = {raw:.3f}")
-    print(f"TSRVF (elastic) acc = {elastic:.3f}   (<= raw: {elastic <= raw})")
-    print(f"majority baseline   = {baseline:.3f}")
-    ```
+raw = best_cv_acc(Xz)         # L2 on raw standardized spectra
+elastic = best_cv_acc(tv)     # TSRVF amplitude (elastic)
+baseline = max(y.mean(), 1 - y.mean())
 
-    The assertion passes: elastic alignment is strictly no better — here markedly
-    worse — than plain $L^2$ on the fixed-grid sonar spectra. This is the honest,
-    reproducible negative result the page set out to establish, not a hedge.
+assert elastic <= raw, (elastic, raw)          # elastic does NOT help
+assert raw > baseline and raw > 0.80, raw      # raw is competitive (~85%)
+print(f"raw (L2) accuracy   = {raw:.3f}")
+print(f"TSRVF (elastic) acc = {elastic:.3f}   (<= raw: {elastic <= raw})")
+print(f"majority baseline   = {baseline:.3f}")
+```
+
+The assertion passes: elastic alignment is strictly no better — here markedly
+worse — than plain $L^2$ on the fixed-grid sonar spectra. This is the honest,
+reproducible negative result the page set out to establish, not a hedge.
 
 !!! note "Why elastic alignment loses here"
     Elastic methods pay off when the *same feature* appears at a **shifted or

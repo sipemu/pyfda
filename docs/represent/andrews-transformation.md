@@ -237,6 +237,52 @@ print(render(f))
 
 Every point falls on the red line: the transform is an isometry up to $\sqrt{\pi}$.
 
+## FPCA on Andrews curves recovers the classes
+
+Because the transform is an isometry, running [functional PCA](fpca.md) on the Wine Andrews curves is equivalent to PCA on the standardized table -- but it comes for free from the same `Fdata` pipeline. The score plot below colours each wine by its (unused) cultivar label to check that the leading functional principal components separate the three known groups.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_wine
+from fdars.regression import fpca
+
+names, X_raw, meta = load_wine()
+X = (X_raw - X_raw.mean(0)) / X_raw.std(0)      # standardize columns
+
+def andrews_curves(features, t):
+    features = np.asarray(features, float)
+    n, p = features.shape
+    out = np.full((n, t.size), features[:, [0]] / np.sqrt(2.0))
+    for j in range(1, p):
+        harmonic = (j + 1) // 2
+        term = np.sin if j % 2 == 1 else np.cos
+        out = out + features[:, [j]] * term(harmonic * t)
+    return out
+
+t = np.linspace(-np.pi, np.pi, 200)
+curves = andrews_curves(X, t)
+
+res = fpca(curves, t, n_comp=3)
+scores = np.asarray(res["scores"])
+ev = np.asarray(res["singular_values"]) ** 2 / (curves.shape[0] - 1)
+pve = ev / ev.sum()
+cultivar = meta["cultivar"].to_numpy()
+
+palette = ["#3f51b5", "#e8710a", "#198754"]
+f, ax = fig(figsize=(6.2, 5))
+for c in (1, 2, 3):
+    m = cultivar == c
+    ax.scatter(scores[m, 0], scores[m, 1], s=26, color=palette[c - 1],
+               alpha=0.8, label=f"cultivar {c}")
+ax.set(title="FPCA of Wine Andrews curves, coloured by cultivar",
+       xlabel=f"PC1 ({pve[0]*100:.0f}%)", ylabel=f"PC2 ({pve[1]*100:.0f}%)")
+ax.legend()
+print(render(f))
+```
+
+The three cultivars fall into visibly distinct regions of the PC1-PC2 plane, even though the labels were never used to fit the components. This confirms the "unified pipeline" claim: the same depth, distance, and FPCA machinery that operates on genuine curves also extracts the class structure of an ordinary feature table once it is routed through the Andrews transform.
+
 ## When does routing through FDA add value?
 
 Because the transform is an isometry, PCA and k-means on Andrews curves return *numerically identical* answers to `prcomp`/`kmeans` on the standardized table. If your analysis stops there, the plain multivariate tools are simpler and give the same result. The Andrews route earns its keep when you want the parts of the functional toolbox that have **no tabular analogue**:

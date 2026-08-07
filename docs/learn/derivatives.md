@@ -104,6 +104,12 @@ f.suptitle("Effect of noise on derivative estimation")
 print(render(f))
 ```
 
+The clean velocity (left) is a smooth curve you could read a growth spurt off;
+the noisy velocity (right) swings violently between large positive and negative
+values that have nothing to do with real growth. A 1 cm perturbation in height
+has become tens of cm/year of spurious velocity -- the high-pass nature of
+differentiation in action.
+
 ---
 
 ## Solution: Smooth Before Differentiating
@@ -234,6 +240,11 @@ ax.legend()
 print(render(f))
 ```
 
+The histogram peaks near the red mean around 11.4 years but spreads across
+roughly 9.5 to 14 years -- the derivative has turned each smooth height curve into
+a single interpretable number (age at peak velocity), and its spread quantifies
+genuine variation in developmental timing across children.
+
 ### Early vs Median vs Late Developers
 
 Contrasting an early, a median, and a late developer shows how developmental
@@ -273,6 +284,12 @@ a1.legend(); a2.legend()
 print(render(f))
 ```
 
+The three height curves (left) are nearly indistinguishable in their adult
+plateau, yet the velocity curves (right) show their peaks sliding several years
+apart along the age axis. This is the payoff of differentiation: a feature
+invisible in the raw curves -- developmental *timing* -- becomes the dominant,
+easily-read signal in the derivative.
+
 ---
 
 ## Derivative-Based Distances
@@ -281,10 +298,19 @@ Two children may reach similar final heights yet grow very differently. Comparin
 the **shapes of their velocity or acceleration curves** often captures growth
 *dynamics* better than comparing raw heights.
 
-R exposes this through `semimetric.deriv(fd, nderiv=r)`. fdars has no single
-function with that name, but the same quantity is obtained directly: differentiate
-first, then take an $L^2$ distance on the derivative curves with `lp_self_1d`
-(or, equivalently, `Fdata.distance(method="lp")` on the derivative `Fdata`).
+Formally, the **derivative semimetric** of order $r$ is the $L^2$ distance between
+the $r$-th derivatives of the two curves,
+
+$$
+d_r(x_i, x_j) = \left( \int \bigl(x_i^{(r)}(t) - x_j^{(r)}(t)\bigr)^2 \, dt \right)^{1/2},
+$$
+
+so $r = 0$ is the ordinary $L^2$ distance on heights, $r = 1$ compares velocities,
+and $r = 2$ compares accelerations. R exposes this through
+`semimetric.deriv(fd, nderiv=r)`. fdars has no single function with that name, but
+the same quantity is obtained directly: differentiate first, then take an $L^2$
+distance on the derivative curves with `lp_self_1d` (or, equivalently,
+`Fdata.distance(method="lp")` on the derivative `Fdata`).
 
 ```python
 from fdars.metric import lp_self_1d
@@ -415,9 +441,18 @@ or plotting.
 
 ## Accuracy of the Derivative
 
-`deriv()` uses **central finite differences**, which are second-order accurate --
-error $O(h^2)$ in the grid spacing $h$. On a smooth analytic function it recovers
-the true derivative to a few parts in a thousand:
+`deriv()` uses **central finite differences**. On the interior of a uniform grid
+the first derivative at $t_j$ is estimated from the two neighbouring samples,
+
+$$
+\hat{x}'(t_j) = \frac{x(t_{j+1}) - x(t_{j-1})}{t_{j+1} - t_{j-1}}
+= x'(t_j) + O(h^2),
+$$
+
+which is **second-order accurate** -- the leading error term scales as the square
+of the grid spacing $h$, so halving $h$ cuts the error by roughly four. On a
+smooth analytic function it recovers the true derivative to a few parts in a
+thousand:
 
 ```python exec="1" html="1" source="above"
 import numpy as np

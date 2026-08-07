@@ -101,8 +101,19 @@ the FPCA control chart below both sensitive and interpretable.
 
 We fit the FPCA control model on 30 randomly chosen normal batches with
 `spm_phase1` (component count from the variance-90 % rule, $\alpha = 0.01$),
-holding out the remaining normal batches to check false-alarm behaviour. The
-Phase I model gives a mean trajectory and a control envelope.
+holding out the remaining normal batches to check false-alarm behaviour. Each
+batch trajectory $x(t)$ is reduced to $A$ functional-PCA scores $\xi_a$, and two
+statistics with $\alpha$-level control limits summarize it — Hotelling's $T^2$
+inside the model subspace and the squared prediction error outside it:
+
+$$
+T^2 = \sum_{a=1}^{A} \frac{\xi_a^2}{\lambda_a},
+\qquad
+\mathrm{SPE} = \Bigl\lVert\, x - \bar x - \sum_{a=1}^{A} \xi_a\,\phi_a \,\Bigr\rVert_{L^2}^2 ,
+$$
+
+where $\lambda_a$ and $\phi_a$ are the reference eigenvalues and eigenfunctions.
+The Phase I model gives a mean trajectory and a control envelope.
 
 ```python exec="1" html="1"
 import numpy as np
@@ -149,9 +160,18 @@ it — a functional deviation the control chart is built to quantify.
 
 With the Phase I model fixed, we monitor the faulty batches with two charts: the
 **Shewhart** $T^2$/SPE chart (`spm_monitor`) and an **EWMA** chart on the FPC
-scores (`ewma_scores`, scored with the MEWMA variance factor
-$\lambda/(2-\lambda)$). A batch is out-of-control if a statistic crosses its
-limit.
+scores (`ewma_scores`). The EWMA smooths the score vector $\xi_i$ across the
+batch sequence,
+
+$$
+z_i = \lambda\,\xi_i + (1-\lambda)\,z_{i-1},
+\qquad
+\mathrm{Cov}(z_i) \to \frac{\lambda}{2-\lambda}\,\Sigma_\xi ,
+$$
+
+so the monitored MEWMA statistic $z_i^\top \bigl(\tfrac{\lambda}{2-\lambda}\Sigma_\xi\bigr)^{-1} z_i$
+carries the variance factor $\lambda/(2-\lambda)$. A batch is out-of-control if a
+statistic crosses its limit.
 
 ```python exec="1" html="1"
 import numpy as np

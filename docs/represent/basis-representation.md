@@ -12,6 +12,18 @@ Representing functional data in a finite basis -- B-splines, Fourier, or P-splin
 - **Derivative computation** -- analytic derivatives come for free from the basis expansion.
 - **Regularization** -- roughness penalties in the basis domain prevent overfitting in regression.
 
+A basis representation writes each curve as a finite linear combination of $K$ fixed basis functions $\phi_j$,
+
+$$
+X(t) \;\approx\; \sum_{j=1}^{K} c_j\,\phi_j(t),
+$$
+
+so the entire curve is compressed into the coefficient vector $\mathbf c = (c_1, \ldots, c_K)$. For discretized data observed at grid points with design matrix $B_{ij} = \phi_j(t_i)$, the unpenalized coefficients are the ordinary least-squares solution
+
+$$
+\hat{\mathbf c} \;=\; \arg\min_{\mathbf c}\, \lVert \mathbf y - B\mathbf c \rVert^2 \;=\; (B^\top B)^{-1} B^\top \mathbf y .
+$$
+
 The core trade-off is resolution versus compression: too few basis functions oversmooth and miss features, too many reproduce noise. The figure below projects one curve onto B-spline bases of increasing size and reconstructs it -- the fit sharpens as the basis grows.
 
 ```python exec="1" html="1" source="above"
@@ -35,6 +47,8 @@ ax.set(title="B-spline reconstruction at increasing basis size",
 ax.legend()
 print(render(f))
 ```
+
+With only 4 basis functions the reconstruction is a smooth caricature that misses the finer wiggles of the target (black dotted); by 20 it is visually indistinguishable from the target. This illustrates the resolution-versus-compression trade-off: more coefficients buy fidelity at the cost of a larger representation.
 
 ## B-spline vs Fourier basis
 
@@ -202,6 +216,8 @@ a1.set(title="Fourier basis (7 global functions)",
 print(render(f))
 ```
 
+Each B-spline (left) is a localized bump that is non-zero only over a short sub-interval, so changing one coefficient perturbs the fit locally. The Fourier functions (right) are global sinusoids of increasing frequency spanning the whole domain, so each coefficient affects the fit everywhere -- which is why B-splines suit local features and Fourier suits periodic signals.
+
 !!! info "Fourier n_basis"
     `n_basis` should be odd. If an even value is given, it will be adjusted to the next odd number so the basis contains matched sine-cosine pairs plus the constant function.
 
@@ -276,6 +292,8 @@ for ax, lam in zip(axes, [1e-4, 1e-2, 1.0, 1e2]):
 axes[0].set_ylabel("X(t)")
 print(render(f))
 ```
+
+As $\lambda$ increases from left to right the fitted curve (red) goes from interpolating the noise to an almost straight line, and the effective degrees of freedom in each legend fall accordingly. The middle panels ($\lambda \approx 10^{-2}$) strike the balance -- tracking the true sinusoid without chasing the scatter.
 
 ## Automatic basis selection
 
@@ -407,6 +425,8 @@ ax.set(title="Fixed vs CV-selected basis vs P-spline", xlabel="t", ylabel="X(t)"
 ax.legend(fontsize=8)
 print(render(f))
 ```
+
+The CV-selected B-spline (green) and the GCV P-spline (purple) both hug the dashed true signal, whereas the small fixed basis (cyan) visibly oversmooths and misses the second harmonic. This is the practical payoff of letting a criterion choose the complexity rather than fixing it too low.
 
 ## Recommendations
 

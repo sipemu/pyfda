@@ -95,6 +95,11 @@ axes[0].set_ylabel("Height (cm)")
 print(render(f))
 ```
 
+The left panel is smooth enough to read a growth trajectory off directly; the
+right panel scrambles that signal with 2 cm jitter, so features like the pubertal
+spurt are no longer obvious by eye. Everything below is about recovering the left
+panel from the right.
+
 ---
 
 ## Kernel Smoothers
@@ -192,6 +197,11 @@ ax.set(title="Kernel smoother comparison (h = 1.5)",
 ax.legend()
 print(render(f))
 ```
+
+Both fits sit close to the dashed clean curve in the interior, but local linear
+hugs the original more faithfully at the two endpoints and through the steep
+growth spurt, where Nadaraya-Watson's one-sided averaging drags the estimate
+toward the neighbouring interior values.
 
 ### Local polynomial regression
 
@@ -313,6 +323,11 @@ ax.set(title="GCV as a function of bandwidth",
 ax.legend()
 print(render(f))
 ```
+
+The curve falls steeply, bottoms out at the marked `h_opt`, then rises again --
+the signature bias-variance U. To the left of the minimum the fit chases noise
+(high variance); to the right it over-smooths (high bias). Reading the minimum
+off this curve is exactly what `optim_bandwidth` automates.
 
 ---
 
@@ -496,6 +511,12 @@ axes[0].set_ylabel("Height (cm)")
 print(render(f))
 ```
 
+The tiny penalty (left) leaves the fit interpolating the noise point-to-point;
+the huge penalty (right) has flattened the curve toward a straight line, erasing
+the pubertal spurt entirely. Only the GCV-selected middle panel keeps the spurt
+while suppressing the jitter -- confirming that automatic $\lambda$ selection
+lands in the sweet spot without manual tuning.
+
 ### Fourier basis for periodic data
 
 For periodic or seasonal data, a Fourier basis is more natural and parsimonious
@@ -525,6 +546,11 @@ ax.set(title=f"Fourier smoothing (GCV = {res['gcv']:.4f})", xlabel="t", ylabel="
 ax.legend()
 print(render(f))
 ```
+
+The Fourier fits recover the dashed true signal almost exactly with only 13 basis
+functions, because sines and cosines are the natural building blocks of a periodic
+curve -- a B-spline basis would need far more functions to match the same period
+faithfully.
 
 ---
 

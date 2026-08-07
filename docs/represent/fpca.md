@@ -77,6 +77,8 @@ a1.legend()
 print(render(f))
 ```
 
+The mean (red) traces the average sine-like shape; each mode curve departs from it by a smooth wiggle whose amplitude is set by $\sqrt{\lambda_k}$. The first mode carries the largest share of the variance and departs most from the mean, while higher modes add progressively finer, lower-energy oscillations.
+
 ## Quick start
 
 FPCA lives in the **regression** module because principal component scores are the primary features for scalar-on-function regression.
@@ -200,6 +202,8 @@ ax.legend()
 print(render(f))
 ```
 
+Boys and girls separate cleanly along PC2 rather than PC1: the vertical spread reflects growth timing, whereas the horizontal (overall-height) axis still overlaps at these ages. A curve high on PC2 belongs to an early maturer, and one low on PC2 to a late maturer.
+
 ## Variance explained and scree plots
 
 The singular values returned by `fpca` relate to the eigenvalues (variance per component) by
@@ -241,6 +245,8 @@ a1.legend()
 print(render(f))
 ```
 
+The eigenvalues drop steeply after the first one or two components and then flatten into a long low tail, so the scree plot's elbow sits at $K=2$. The cumulative curve confirms this: it crosses the 95 % line within the first few components, meaning almost all sample variability is captured by a handful of modes.
+
 ## Reconstruction and denoising
 
 A truncated reconstruction
@@ -278,6 +284,8 @@ ax.legend()
 print(render(f))
 ```
 
+The two-component reconstructions (blue) pass smoothly through the observed points (grey) for all three children, tracking the overall level and the pubertal bend while ignoring the small measurement jitter between adjacent ages. This is FPCA acting as a denoiser: the noise lives in the discarded higher components.
+
 !!! success "Validation: orthonormality, PVE, and reconstruction"
 
     The three defining properties of the Karhunen-Loeve decomposition are checkable
@@ -289,38 +297,42 @@ print(render(f))
     reconstruction error is *strictly* decreasing in the number of retained components $K$
     -- the optimality property. All checks pass to a $10^{-9}$ tolerance.
 
-    ```python exec="1" source="above"
-    import numpy as np
-    from docs_data import load_growth
-    from fdars.regression import fpca
+```python exec="1" source="above"
+import numpy as np
+from docs_data import load_growth
+from fdars.regression import fpca
 
-    age, X, meta = load_growth()          # X: (93, 31) height curves
-    n = X.shape[0]
+age, X, meta = load_growth()          # X: (93, 31) height curves
+n = X.shape[0]
 
-    # (1) Orthonormality of eigenfunctions in the weighted L2 inner product.
-    res = fpca(X, age, n_comp=6)
-    rot = np.asarray(res["rotation"])          # (m, n_comp) eigenfunctions
-    w = np.asarray(res["weights"])             # quadrature weights
-    gram = (rot * w[:, None]).T @ rot          # Phi^T W Phi
-    off = np.abs(gram - np.eye(gram.shape[0]))
-    assert off.max() < 1e-9, off.max()
-    print(f"eigenfunction Gram = I: max deviation {off.max():.2e}")
+# (1) Orthonormality of eigenfunctions in the weighted L2 inner product.
+res = fpca(X, age, n_comp=6)
+rot = np.asarray(res["rotation"])          # (m, n_comp) eigenfunctions
+w = np.asarray(res["weights"])             # quadrature weights
+gram = (rot * w[:, None]).T @ rot          # Phi^T W Phi
+off = np.abs(gram - np.eye(gram.shape[0]))
+assert off.max() < 1e-9, off.max()
+print(f"eigenfunction Gram = I: max deviation {off.max():.2e}")
 
-    # (2) PVE over the full component set sums to 1.
-    full = fpca(X, age, n_comp=n - 1)          # all non-degenerate components
-    ev = np.asarray(full["singular_values"]) ** 2 / (n - 1)
-    pve = ev / ev.sum()
-    assert abs(pve.sum() - 1.0) < 1e-12, pve.sum()
-    print(f"PVE sums to {pve.sum():.12f};  PC1={pve[0]*100:.1f}%, "
-          f"PC1+2={pve[:2].sum()*100:.1f}%")
+# (2) PVE over the full component set sums to 1.
+full = fpca(X, age, n_comp=n - 1)          # all non-degenerate components
+ev = np.asarray(full["singular_values"]) ** 2 / (n - 1)
+pve = ev / ev.sum()
+assert abs(pve.sum() - 1.0) < 1e-12, pve.sum()
+print(f"PVE sums to {pve.sum():.12f};  PC1={pve[0]*100:.1f}%, "
+      f"PC1+2={pve[:2].sum()*100:.1f}%")
 
-    # (3) Reconstruction error strictly decreases as K grows (optimality).
-    mean, scores = np.asarray(res["mean"]), np.asarray(res["scores"])
-    errs = [np.mean((X - (mean + scores[:, :K] @ rot[:, :K].T)) ** 2)
-            for K in range(1, 6)]
-    assert all(errs[i] > errs[i + 1] for i in range(len(errs) - 1)), errs
-    print("reconstruction MSE by K:", [f"{e:.3f}" for e in errs])
-    ```
+# (3) Reconstruction error strictly decreases as K grows (optimality).
+mean, scores = np.asarray(res["mean"]), np.asarray(res["scores"])
+errs = [np.mean((X - (mean + scores[:, :K] @ rot[:, :K].T)) ** 2)
+        for K in range(1, 6)]
+assert all(errs[i] > errs[i + 1] for i in range(len(errs) - 1)), errs
+print("reconstruction MSE by K:", [f"{e:.3f}" for e in errs])
+```
+
+All three printouts confirm the theory numerically: the Gram matrix equals the identity to machine precision, the PVE vector sums to one, and the reconstruction MSE falls monotonically as components are added.
+
+    All three printouts confirm the theory numerically: the Gram matrix equals the identity to machine precision, the PVE vector sums to one, and the reconstruction MSE falls monotonically as components are added.
 
 ## FPCA for dimension reduction
 
@@ -374,6 +386,8 @@ ax.legend()
 print(render(f))
 ```
 
+The three k-means clusters occupy distinct regions of the PC1-PC2 plane, confirming that the low-dimensional score summary preserves enough structure for ordinary multivariate clustering. The separation runs mainly along PC1 and PC2, i.e. the height and growth-timing modes are what distinguish the groups.
+
 ## Depth-style outlier scoring in PC space
 
 Distance from the origin in *standardized* score space is a cheap Mahalanobis-like outlyingness measure: dividing each score by $\sqrt{\lambda_k}$ puts the components on a common scale, so
@@ -410,6 +424,8 @@ ax.set(title="Growth curves shaded by distance from the PC centre",
 ax.legend()
 print(render(f))
 ```
+
+The most opaque curves -- those with the largest standardized PC distance, highlighted in red -- sit at the extremes of the height/timing envelope, while the faint central curves are the most typical. The Mahalanobis-style score thus flags exactly the peripheral growth trajectories as candidate outliers.
 
 ## Using FPCA for feature extraction and regression
 

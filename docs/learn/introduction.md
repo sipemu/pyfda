@@ -80,6 +80,20 @@ The central object in fdars is **`Fdata`** -- a functional data container that
 bundles observation data, evaluation grid, identifiers, and per-observation
 metadata.  It mirrors the R package's `fdata` S3 class.
 
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `data` | `ndarray (n, m)` | Observations — one curve per row, one grid point per column |
+| `argvals` | `ndarray (m,)` | Evaluation grid (defaults to a uniform $[0, 1]$ grid) |
+| `id` | `list[str]`, optional | Per-observation identifiers |
+| `names` | `list[str]`, optional | Names for the argvals dimension(s) |
+| `metadata` | `dict` / `DataFrame`, optional | Per-observation covariates aligned to the rows |
+
+| Attribute / method | Returns | Description |
+|--------------------|---------|-------------|
+| `n_obs`, `n_points` | `int` | Number of curves and grid points |
+| `mean()` | `ndarray (m,)` | Pointwise cross-sectional mean |
+| `center()`, `norm()`, `deriv()` | `Fdata` / `ndarray` | Centering, $L^p$ norm, and numerical derivative |
+
 Create functional data from a matrix where **rows are observations (curves)** and
 **columns are evaluation points**. Here we generate 20 curves observed at 100
 points on $[0, 1]$ as sine waves with random phase and a little measurement noise
@@ -189,10 +203,23 @@ ax.legend()
 print(render(f))
 ```
 
+Each thin blue line is one observation -- a whole curve, not a point -- and the
+bold orange line is the pointwise mean. Because the curves differ only in phase,
+their mean has smaller amplitude than any individual curve: averaging misaligned
+peaks and troughs partially cancels them, a first hint of why *alignment* matters
+in FDA.
+
 ### Basic Operations
 
 A handful of operations are so common they form the vocabulary of every FDA
 workflow: the **mean function**, **centering**, and the **pointwise variance**.
+The mean function is evaluated pointwise across the sample,
+
+$$
+\bar{X}(t) = \frac{1}{n} \sum_{i=1}^{n} X_i(t),
+$$
+
+and centering subtracts it from every curve, $\tilde{X}_i(t) = X_i(t) - \bar{X}(t)$.
 The mean and centering are Rust-backed `Fdata` methods; there is no dedicated
 variance binding, so we compute it directly in NumPy over the grid:
 
@@ -263,6 +290,11 @@ a2.axhline(0.0, color="#e8710a", lw=2.4)
 a2.set(title="Centered curves", xlabel="t")
 print(render(f))
 ```
+
+Centering slides the whole family down so it fluctuates around zero (right), but
+the *shape* variation between curves is untouched -- the spread at each $t$ is
+identical in both panels. This is exactly what downstream methods like FPCA and
+depth care about, which is why they operate on centered data.
 
 ### Norms
 
@@ -410,6 +442,11 @@ ax.set(title="Functional k-means: curves colored by cluster",
 print(render(f))
 ```
 
+The three colours partition the sample into groups of similarly-shaped curves,
+and each bold cluster center summarizes its group's typical trajectory. Curves
+sharing a colour rise and fall together, showing that $k$-means has organized the
+sample by *shape* rather than by any single value.
+
 ### Outlier Detection
 
 Identify atypical curves. Here we take a clean sample, add a single curve shifted
@@ -451,20 +488,37 @@ likelihood-ratio test) provide complementary rules; see the
 
 ### Smoothing
 
-```python
+Kernel smoothing recovers the underlying signal from noisy samples. Below we take
+one curve, corrupt it with measurement noise, let `optim_bandwidth` pick the
+bandwidth by GCV, and reconstruct it with the Nadaraya-Watson estimator:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
 from fdars.smoothing import nadaraya_watson, optim_bandwidth
 
-# Pick one noisy curve
-x = fd.argvals
-y = fd.data[0] + np.random.default_rng(0).normal(0, 0.1, size=len(x))
+t = np.linspace(0, 1, 100)
+clean = np.asarray(simulate(n=1, argvals=t, n_basis=5, seed=11))[0]
+y = clean + np.random.default_rng(0).normal(0, 0.25, size=t.size)
 
-# Find optimal bandwidth via GCV
-bw = optim_bandwidth(x, y)
-print(f"Optimal bandwidth: {bw['h_opt']:.4f}")
+bw = optim_bandwidth(t, y)["h_opt"]                 # GCV-chosen bandwidth
+y_hat = np.asarray(nadaraya_watson(t, y, t, bandwidth=bw))
 
-# Smooth with Nadaraya-Watson
-y_hat = nadaraya_watson(x, y, x, bandwidth=bw["h_opt"])
+f, ax = fig()
+ax.scatter(t, y, s=14, color="#6c757d", alpha=0.6, label="noisy observations")
+ax.plot(t, clean, color="#198754", lw=2.0, ls="--", label="true signal")
+ax.plot(t, y_hat, color="#3f51b5", lw=2.4, label=f"NW smooth (h={bw:.3f})")
+ax.set(title="Nadaraya-Watson smoothing with a GCV-chosen bandwidth",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
 ```
+
+The blue smooth threads through the grey noise and lands close to the dashed true
+signal, with none of the point-to-point jitter of the raw observations. The
+bandwidth was not guessed -- `optim_bandwidth` selected it by generalized
+cross-validation, trading fit against smoothness automatically.
 
 ---
 

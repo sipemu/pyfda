@@ -59,12 +59,29 @@ $$
 q(t) = \operatorname{sign}\!\big(f'(t)\big)\,\sqrt{\lvert f'(t)\rvert},
 $$
 
-and defines the distance between $f$ and $g$ as the smallest
-$L^2$ distance between their SRSFs achievable over all warpings $\gamma$. The
+and defines the amplitude distance between $f$ and $g$ as the smallest
+$L^2$ distance between their SRSFs achievable over all warpings $\gamma$,
+
+$$
+d_{\text{amp}}(f, g) = \min_{\gamma\in\Gamma}
+   \bigl\lVert q_f - (q_g\!\circ\!\gamma)\sqrt{\dot\gamma} \bigr\rVert_2 ,
+$$
+
+where $\Gamma$ is the group of increasing bijections of the time axis. The
 optimal $\gamma$ is the **phase** (timing) difference; the residual SRSF
-distance is the **amplitude** difference. `fdars` exposes this through
-`elastic_align_pair` (pairwise), `karcher_mean` (a template + all warpings) and
-`alignment_quality` (the phase/amplitude variance split).
+distance is the **amplitude** difference. Aligning the whole sample to a Karcher
+mean $\mu$ then splits the total variance into an amplitude and a phase part,
+whose ratio is the diagnostic reported by `alignment_quality`:
+
+$$
+r_{\text{phase}} =
+   \frac{\sigma^2_{\text{phase}}}{\sigma^2_{\text{amp}}}, \qquad
+\sigma^2_{\text{amp}} = \tfrac{1}{n}\sum_i d_{\text{amp}}(f_i,\mu)^2 .
+$$
+
+`fdars` exposes this through `elastic_align_pair` (pairwise), `karcher_mean`
+(a template + all warpings) and `alignment_quality` (the phase/amplitude
+variance split).
 
 ## Aligning a single pair
 

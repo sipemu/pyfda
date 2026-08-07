@@ -280,6 +280,12 @@ ax.legend(ncol=2, fontsize=8)
 print(render(f))
 ```
 
+The black curve is the full estimated coefficient function, and the coloured curves show how
+each principal component adds up to it. Because the leading FPCs span the bump regions where the
+true signal lives, the first two or three contributions already reproduce the shape of
+$\hat\beta(t)$ — a visual audit of *which modes of variation* the model is actually using to
+form its predictions.
+
 | Return key | Type | Description |
 |------------|------|-------------|
 | `components` | `list[ndarray (m,)]` | Each FPC's contribution $c_k\phi_k(t)$ |
@@ -407,6 +413,11 @@ ax.set(title="Pointwise importance", xlabel="t", ylabel="importance")
 print(render(f))
 ```
 
+The importance curve peaks over the same domain regions where the true coefficient function is
+nonzero, near $t=0.3$ and $t=0.7$. Flat, near-zero importance elsewhere tells us those parts of
+the curve are effectively ignored by the model — a directly actionable map of *where along the
+domain* the predictor matters.
+
 ### Saliency maps — `functional_saliency`
 
 Saliency is the sensitivity of each prediction to a small perturbation of the curve at $t$,
@@ -449,6 +460,12 @@ ax.set(title="Mean absolute saliency", xlabel="t", ylabel="|saliency|")
 print(render(f))
 ```
 
+The mean-absolute-saliency profile echoes the pointwise-importance map but is derived from
+prediction sensitivities rather than variance: it lights up where perturbing the curve most
+changes the output. That the two independent explanations agree on the $t=0.3$ and $t=0.7$
+regions is reassuring — it means the model's local sensitivity is genuinely concentrated on the
+signal-bearing domain, not an artefact of one method.
+
 ### Domain importance — `domain_selection`
 
 Domain selection slides a window along $t$ and aggregates $|\hat\beta|$ within it, smoothing
@@ -489,6 +506,11 @@ ax.set(title=f"Domain importance (window = {dom['window_width']})",
        xlabel="t", ylabel="importance")
 print(render(f))
 ```
+
+Smoothing the pointwise scores over a sliding window turns the spiky importance signal into
+contiguous *regions*, which is what a domain expert actually wants to act on. The retained bumps
+sit over the same signal-bearing intervals as before, but the windowed view suppresses isolated
+single-point spikes so the selected domain is robust to pixel-level noise.
 
 !!! note "`threshold=0.0` is rejected"
     `domain_selection` requires a strictly positive `threshold`; passing `0.0` raises a
@@ -616,6 +638,11 @@ ax.set(title=f"LIME attributions for obs 0 (local R² = {lime['local_r_squared']
 print(render(f))
 ```
 
+Each bar is one component's signed contribution to this single prediction: blue pushes the
+prediction up, orange pulls it down. The near-perfect local $R^2$ in the title confirms the
+linear surrogate reproduces the model almost exactly around observation 0, so these attributions
+are a faithful per-observation breakdown rather than a rough approximation.
+
 ### Counterfactuals — `counterfactual_regression`
 
 A counterfactual asks: what is the *smallest* change to this observation's scores that would
@@ -687,6 +714,11 @@ ax.set(title="Prototypes vs. criticisms", xlabel="t", ylabel="X(t)")
 ax.legend()
 print(render(f))
 ```
+
+The blue prototype curves show the dataset's typical shapes — smooth combinations of the bump
+features that dominate the sample — while the orange criticisms pick out the atypical curves the
+prototypes fail to represent. Together they summarize the data with a handful of representative
+examples plus the edge cases, a far more honest picture than a single mean curve would give.
 
 ## Classification explainability
 
@@ -794,6 +826,11 @@ ax.set(title=f"Reliability curve (Brier = {cal['brier_score']:.3f})",
 ax.legend(fontsize=8)
 print(render(f))
 ```
+
+The model's reliability points (blue) hug the dashed diagonal, so predicted probabilities line
+up with observed frequencies — a well-calibrated classifier whose stated confidence can be taken
+at face value. Deviations above the diagonal would signal under-confidence and points below it
+over-confidence; the low Brier score in the title summarizes this closeness in a single number.
 
 ## Notes and limitations
 

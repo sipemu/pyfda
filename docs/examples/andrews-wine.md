@@ -9,9 +9,19 @@ A wine is a *multivariate* outlier if its combination of 13 measurements is
 atypical — not necessarily extreme in any single column, but unusual as a whole.
 Detecting that directly in 13-D is awkward. Once each wine is an Andrews curve,
 though, "atypical row" becomes "atypical curve", and `fdars` offers several
-robust functional outlier detectors. Because the Andrews transform preserves
-$L^2$ distances (Parseval), a curve that is central among the curves corresponds
-to a wine that is central among the rows. This page runs functional **depth**,
+robust functional outlier detectors. Each standardized row
+$x = (x_1, \dots, x_p)$ becomes the Andrews curve
+
+$$
+f_x(t) = \frac{x_1}{\sqrt{2}} + x_2\sin t + x_3\cos t + x_4\sin 2t + x_5\cos 2t + \cdots,
+\qquad t \in [-\pi, \pi].
+$$
+
+Because the sine/cosine basis is orthogonal on $[-\pi,\pi]$, Parseval's identity
+gives $\lVert f_x - f_y\rVert_{L^2}^2 = \pi\,\lVert x - y\rVert_2^2$, so the
+transform preserves $L^2$ distances up to the constant $\sqrt{\pi}$: a curve that
+is central among the curves corresponds to a wine that is central among the rows.
+This page runs functional **depth**,
 **magnitude–shape** analysis, the **outliergram**, and a **likelihood-ratio**
 test on the wine curves, cross-checks what they flag, digs into the individual
 flagged bottles, and finally pits the whole functional pipeline against a
@@ -28,7 +38,18 @@ classical **Mahalanobis** baseline.
 Functional **depth** scores each curve by how central it is within the sample —
 high depth is typical, low depth is outlying. We use `modified_band_1d` from
 [`fdars.depth`](../represent/depth-functions.md), which computes the modified
-band depth of every curve against the whole set.
+band depth of every curve against the whole set. For a sample of $n$ curves it
+averages, over all $\binom{n}{2}$ pairs, the fraction of the domain on which
+curve $f_x$ lies *between* the pair:
+
+$$
+\mathrm{MBD}(f_x) = \binom{n}{2}^{-1} \sum_{i<j}
+\frac{\lambda\bigl\{ t : \min(f_i,f_j)(t) \le f_x(t) \le \max(f_i,f_j)(t) \bigr\}}
+     {\lambda([-\pi,\pi])},
+$$
+
+where $\lambda$ is Lebesgue measure. A curve threaded through the middle of many
+bands scores near $1$; an edge curve scores near $0$.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -190,6 +211,11 @@ print("outliergram flags wines:", flagged.tolist(),
       "— cultivars:", [int(cultivar[i]) for i in flagged])
 ```
 
+The left panel shows the flagged curves falling **below** the parabolic band the
+outliergram fits between epigraph index and band depth; the right panel redraws
+those same wines in red against the faded crowd, confirming they weave rather
+than merely shift.
+
 !!! danger "`outliergram(...)["outliers"]` is a boolean mask, not indices"
     The key returns a length-$n$ **boolean array** (one flag per curve), so it
     must be converted with `np.where(mask)[0]` before it can index into `mei`,
@@ -204,59 +230,60 @@ the same two curves that sat lowest on the depth ranking and furthest out on the
 magnitude–shape plot: three different detectors agreeing on the same handful of
 atypical bottles.
 
-!!! success "Validation — the flagged pair and the Parseval identity"
-    Two ground-truth checks anchor this page. **(1)** The outliergram must flag
-    *exactly* wines 69 and 95 — the pair named in the prose. **(2)** The Andrews
-    transform is a Parseval isometry: on $t \in [-\pi, \pi]$ the $L^2$ distance
-    between two wine curves equals $\sqrt{\pi}$ times the Euclidean distance
-    between the standardized rows, so a curve central among curves *is* a wine
-    central among rows. We assert the ratio equals $\sqrt{\pi}$ to $10^{-6}$
-    (evaluated on a fine grid where the 13-harmonic curves are fully resolved).
+### Validation — the flagged pair and the Parseval identity
 
-    ```python exec="1" source="above"
-    import numpy as np
-    from docs_data import load_wine
-    from fdars.outliers import outliergram
+Two ground-truth checks anchor this page. **(1)** The outliergram must flag
+*exactly* wines 69 and 95 — the pair named in the prose. **(2)** The Andrews
+transform is a Parseval isometry: on $t \in [-\pi, \pi]$ the $L^2$ distance
+between two wine curves equals $\sqrt{\pi}$ times the Euclidean distance
+between the standardized rows, so a curve central among curves *is* a wine
+central among rows. We assert the ratio equals $\sqrt{\pi}$ to $10^{-6}$
+(evaluated on a fine grid where the 13-harmonic curves are fully resolved).
 
-    def andrews_curves(features, t):
-        features = np.asarray(features, float)
-        n, p = features.shape
-        out = np.full((n, t.size), features[:, [0]] / np.sqrt(2.0))
-        for j in range(1, p):
-            harmonic = (j + 1) // 2
-            term = np.sin if j % 2 == 1 else np.cos
-            out = out + features[:, [j]] * term(harmonic * t)
-        return out
+```python exec="1" source="above"
+import numpy as np
+from docs_data import load_wine
+from fdars.outliers import outliergram
 
-    names, X, meta = load_wine()
-    Xz = (X - X.mean(0)) / X.std(0)
+def andrews_curves(features, t):
+    features = np.asarray(features, float)
+    n, p = features.shape
+    out = np.full((n, t.size), features[:, [0]] / np.sqrt(2.0))
+    for j in range(1, p):
+        harmonic = (j + 1) // 2
+        term = np.sin if j % 2 == 1 else np.cos
+        out = out + features[:, [j]] * term(harmonic * t)
+    return out
 
-    # (1) outliergram flags exactly the pair the prose names
-    t = np.linspace(-np.pi, np.pi, 160)
-    curves = andrews_curves(Xz, t)
-    flagged = np.where(np.asarray(outliergram(curves)["outliers"], dtype=bool))[0]
-    assert flagged.tolist() == [69, 95], flagged.tolist()
+names, X, meta = load_wine()
+Xz = (X - X.mean(0)) / X.std(0)
 
-    # (2) Parseval: L2 curve distance == sqrt(pi) * Euclidean row distance
-    tf = np.linspace(-np.pi, np.pi, 4000)          # fine grid -> exact isometry
-    cf = andrews_curves(Xz, tf)
-    rng = np.random.default_rng(0)
-    ratios = []
-    for _ in range(500):
-        i, j = rng.integers(0, len(cf), 2)
-        if i == j:
-            continue
-        l2 = np.sqrt(np.trapezoid((cf[i] - cf[j]) ** 2, tf))
-        ratios.append(l2 / np.linalg.norm(Xz[i] - Xz[j]))
-    ratios = np.array(ratios)
-    assert np.allclose(ratios, np.sqrt(np.pi), atol=1e-6), (ratios.min(), ratios.max())
-    print(f"outliergram flags {flagged.tolist()}  (expected [69, 95])")
-    print(f"L2/Euclidean ratio = {ratios.mean():.9f}  vs  sqrt(pi) = {np.sqrt(np.pi):.9f}")
-    ```
+# (1) outliergram flags exactly the pair the prose names
+t = np.linspace(-np.pi, np.pi, 160)
+curves = andrews_curves(Xz, t)
+flagged = np.where(np.asarray(outliergram(curves)["outliers"], dtype=bool))[0]
+assert flagged.tolist() == [69, 95], flagged.tolist()
 
-    Both assertions pass: the detector reproduces the named pair, and the
-    distance identity holds to machine precision — confirming the functional
-    outlier verdict transfers back to the original 13-D rows without distortion.
+# (2) Parseval: L2 curve distance == sqrt(pi) * Euclidean row distance
+tf = np.linspace(-np.pi, np.pi, 4000)          # fine grid -> exact isometry
+cf = andrews_curves(Xz, tf)
+rng = np.random.default_rng(0)
+ratios = []
+for _ in range(500):
+    i, j = rng.integers(0, len(cf), 2)
+    if i == j:
+        continue
+    l2 = np.sqrt(np.trapezoid((cf[i] - cf[j]) ** 2, tf))
+    ratios.append(l2 / np.linalg.norm(Xz[i] - Xz[j]))
+ratios = np.array(ratios)
+assert np.allclose(ratios, np.sqrt(np.pi), atol=1e-6), (ratios.min(), ratios.max())
+print(f"outliergram flags {flagged.tolist()}  (expected [69, 95])")
+print(f"L2/Euclidean ratio = {ratios.mean():.9f}  vs  sqrt(pi) = {np.sqrt(np.pi):.9f}")
+```
+
+Both assertions pass: the detector reproduces the named pair, and the
+distance identity holds to machine precision — confirming the functional
+outlier verdict transfers back to the original 13-D rows without distortion.
 
 ## A likelihood-ratio test for outliers
 
@@ -300,6 +327,10 @@ title = (f"LRT flags {n_flag} wines (threshold {res['threshold']:.2f})"
 ax.set(title=title, xlabel="t", ylabel=r"$f_x(t)$")
 print(render(f))
 ```
+
+The plot stays uniformly grey: **no** curve crosses the bootstrapped threshold,
+so the strictest of our four detectors declines to flag anything on this clean,
+standardized data set.
 
 !!! note "A conservative test on a clean data set"
     On these curves `detect_outliers_lrt` flags **no** wines at $\alpha = 0.05$:

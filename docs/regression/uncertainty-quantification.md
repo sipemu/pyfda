@@ -159,6 +159,11 @@ ax.legend(fontsize=8)
 print(render(f))
 ```
 
+Nearly every orange observed value falls inside its blue 95% interval, the visual signature of
+valid coverage on held-out curves. The intervals are roughly constant in width here because the
+simulated noise is homoscedastic; in real data the bars would widen for predictions made far
+from the training curves, flagging where the model is least sure.
+
 ### Coverage and width
 
 Two numbers summarize a prediction interval: does it *cover* the truth at the nominal rate,

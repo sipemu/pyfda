@@ -182,6 +182,11 @@ ax.legend()
 print(render(f))
 ```
 
+At the stricter $\alpha=0.1$ level more curves land in size-2 sets (the classifier
+hedges to keep its coverage promise), whereas relaxing to $\alpha=0.3$ pushes most
+curves into decisive singletons — a direct visual of the coverage-informativeness
+dial at work.
+
 ## A three-class example
 
 The two-class demo above keeps things minimal; the more common case has several classes with
@@ -216,6 +221,11 @@ ax.set(title="Three-class functional data (classes 1 & 2 overlap)", xlabel="t", 
 ax.legend()
 print(render(f))
 ```
+
+Class 0 (blue) stands apart as a high-amplitude sine, but the two cosine classes
+(orange and green) are almost indistinguishable by eye — only class 2's faint
+linear drift separates them, which is exactly the ambiguity conformal sets will
+expose as size-2 predictions below.
 
 ### Comparing base classifiers
 
@@ -273,6 +283,52 @@ curves admit both cosine labels, while the distinct sine class stays at singleto
 QDA and LDA return the smallest average sets and kNN the largest — the classifier to prefer
 is the one giving the smallest sets on *your* data, since conformal guarantees the coverage
 either way.
+
+### Where the ambiguity lives
+
+Marginal coverage says nothing about *which* curves get large sets. Projecting the
+test curves onto their first two FPC scores and marking each by its conformal
+set size shows the geometry directly — the ambiguous multi-label sets should
+concentrate on the class-1/class-2 boundary, not scatter at random:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.regression import fpca
+from fdars.conformal import conformal_classif
+
+np.random.seed(42)
+n_per, m = 120, 60
+t = np.linspace(0, 1, m)
+n = 3 * n_per
+X = np.zeros((n, m))
+for i in range(n_per):
+    X[i] = 1.4 * np.sin(2 * np.pi * t) + 0.5 * np.random.randn(m)
+    X[n_per + i] = 0.8 * np.cos(2 * np.pi * t) + 0.7 * np.random.randn(m)
+    X[2 * n_per + i] = 0.8 * np.cos(2 * np.pi * t) + 0.4 * (t - 0.5) + 0.7 * np.random.randn(m)
+labels = np.repeat([0, 1, 2], n_per)
+perm = np.random.default_rng(0).permutation(n)
+X, labels = X[perm], labels[perm]
+Xtr, ytr, Xte = X[:-150], labels[:-150], X[-150:]
+
+r = conformal_classif(Xtr, ytr, Xte, ncomp=5, classifier="lda",
+                      cal_fraction=0.3, alpha=0.10, seed=42)
+sizes = np.array([len(s) for s in r["prediction_sets"]])
+
+scores = np.asarray(fpca(Xte, t, n_comp=2)["scores"])
+f, ax = fig()
+sc = ax.scatter(scores[:, 0], scores[:, 1], c=sizes, cmap="viridis",
+                s=36, alpha=0.9)
+ax.set(title="Test curves in FPC space, coloured by conformal set size",
+       xlabel="FPC-1 score", ylabel="FPC-2 score")
+f.colorbar(sc, ax=ax, label="prediction-set size", ticks=[1, 2, 3])
+print(render(f))
+```
+
+The size-1 (dark) points sit in the well-separated regions, while the larger sets
+cluster along the interface between the two cosine classes — conformal prediction
+localises its uncertainty exactly where the classes genuinely overlap, rather than
+spreading it uniformly.
 
 !!! note "No scoring-rule choice in the Python binding"
     The R package exposes a `score.type` argument (LAC vs. APS) and CV+/generic classification

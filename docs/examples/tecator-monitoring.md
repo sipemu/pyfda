@@ -133,9 +133,21 @@ integration `weights`, `eigenvalues`, and the two limits `t2_limit`/`spe_limit`.
 ## Phase II — monitoring the out-of-spec stream
 
 `spm_monitor` projects each out-of-spec spectrum onto the Phase I model and
-returns its Hotelling $T^2$ and SPE (Q) statistics with alarm flags. $T^2$
-watches for shifts *inside* the retained FPC subspace; SPE watches the
-reconstruction residual — structure the one-component model cannot represent.
+returns its Hotelling $T^2$ and SPE (Q) statistics with alarm flags. Writing
+$\xi_k = \langle x-\mu,\,\phi_k\rangle$ for the score of a centred spectrum on
+the $k$-th eigenfunction, $T^2$ watches for shifts *inside* the retained FPC
+subspace while SPE watches the reconstruction residual *outside* it:
+
+$$
+T^2 = \sum_{k=1}^{K}\frac{\xi_k^2}{\lambda_k},
+\qquad
+\text{SPE} = \Bigl\lVert (x-\mu) - \sum_{k=1}^{K}\xi_k\,\phi_k \Bigr\rVert^2 .
+$$
+
+A sample alarms when either statistic exceeds its Phase I control limit,
+$T^2 > \text{UCL}_{T^2}$ or $\text{SPE} > \text{UCL}_{\text{SPE}}$; $T^2$ catches
+faults *along* the retained modes, SPE catches structure the $K$-component model
+cannot represent.
 
 ```python exec="1" html="1"
 import numpy as np
@@ -335,11 +347,20 @@ individual $T^2$ points may not flag on their own.
 
 ## Fault diagnosis: per-PC contributions
 
-When a sample alarms, the operator wants to know *why*. Because
-$T^2 = \sum_k \xi_k^2/\lambda_k$ is a sum over principal components, each term is
-an interpretable **contribution**. `t2_pc_contributions` returns the per-PC
-breakdown for every monitored sample; we show the worst sample as a bar and the
-whole stream as a heatmap.
+When a sample alarms, the operator wants to know *why*. Because $T^2$ is a sum
+over principal components, each term is an interpretable **contribution** $c_k$
+whose share of the total isolates the mode responsible:
+
+$$
+T^2 = \sum_{k=1}^{K} c_k,
+\qquad
+c_k = \frac{\xi_k^2}{\lambda_k},
+\qquad
+\text{share}_k = \frac{c_k}{\sum_{j=1}^{K} c_j} .
+$$
+
+`t2_pc_contributions` returns the per-PC breakdown $c_k$ for every monitored
+sample; we show the worst sample as a bar and the whole stream as a heatmap.
 
 ```python exec="1" html="1"
 import numpy as np

@@ -323,6 +323,10 @@ ax.legend()
 print(render(f))
 ```
 
+The periodogram shows a single dominant spike at the peak period, and its very small
+false-alarm probability marks that peak as a genuine cycle rather than a noise artefact --
+a principled significance test to accompany the visual peak.
+
 !!! note "Uniform grids too"
     `fdars` samples functional data on a common grid, so Lomb–Scargle here mostly serves as a
     robust cross-check on `estimate_period_fft` and a principled significance test (the FAP). Its
@@ -637,6 +641,10 @@ ax.legend()
 print(render(f))
 ```
 
+Seasonal strength peaks sharply at the true period of 2.0 and decays for mismatched
+candidates, so scanning the period axis and taking the arg-max is itself a viable
+period-detection strategy that doubles as a confidence diagnostic.
+
 ---
 
 ## Detrend first: trends mask seasonality
@@ -667,6 +675,11 @@ p_det = sazed(X_det[None, :], t)["period"]
 s_det = seasonal_strength(X_det[None, :], t, period=2.5, method="variance")
 print(f"Detrended    -> period={p_det:.3f} (true 2.5), strength={s_det:.3f}")
 ```
+
+With the trend in place the period estimate is badly off and the strength near zero; after
+the manual linear detrend both snap back to the true period of 2.5 with a clearly non-zero
+strength -- a direct demonstration that trend removal is a prerequisite, not an optional
+polish.
 
 !!! warning "No packaged detrend binding"
     The R reference ships a `detrend()` helper (linear / polynomial / LOESS / differencing

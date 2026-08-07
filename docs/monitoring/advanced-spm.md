@@ -41,6 +41,8 @@ ax.set(title="Phase I baseline (grey), in-control Phase II (indigo), drifting st
 print(render(f))
 ```
 
+The in-control Phase II curves (indigo) are indistinguishable from the baseline cloud, while the drifting stream (orange) fans upward as the ramp accumulates. Crucially the *early* drift curves still sit inside the baseline envelope -- the shift only becomes obvious late -- which is exactly the situation where a memoryless chart lags and the EWMA and run-rule tools below earn their keep.
+
 ---
 
 ## Concepts
@@ -127,6 +129,40 @@ a1 = arl1_t2(ev, ucl, shift=np.array([2.0, 0.0, 0.0, 0.0]),
 print(f"ARL0 (mean run to a false alarm): {a0['arl']:.1f}")
 print(f"ARL1 (delay for a 2-sigma shift on PC1): {a1['arl']:.1f}")
 ```
+
+The gap between the two numbers is the whole point: the chart runs for on the order of a hundred observations between false alarms, yet catches a two-sigma shift on the leading component within a handful. That ratio -- large ARL$_0$, small ARL$_1$ -- is the quantitative definition of a well-tuned chart.
+
+Sweeping the shift magnitude traces the chart's **operating characteristic** -- ARL$_1$ as a function of fault size -- which is the single most useful summary of a chart's sensitivity:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.spm import spm_phase1, arl0_t2, arl1_t2
+
+argvals = np.linspace(0, 1, 80)
+p1 = spm_phase1(np.asarray(simulate(120, argvals, n_basis=6, seed=7)),
+                argvals, ncomp=4, alpha=0.01)
+ev, ucl = np.asarray(p1["eigenvalues"]), float(p1["t2_limit"])
+
+a0 = arl0_t2(ev, ucl, n_simulations=3000, seed=1)["arl"]
+deltas = np.linspace(0.0, 3.0, 9)
+arls = [arl1_t2(ev, ucl, np.array([d * np.sqrt(ev[0]), 0.0, 0.0, 0.0]),
+                n_simulations=3000, seed=1)["arl"] for d in deltas]
+
+f, ax = fig()
+ax.plot(deltas, arls, "o-", color="#3f51b5", label="ARL$_1$ (shift on PC1)")
+ax.axhline(a0, color="#dc3545", ls="--", lw=1, label=f"in-control ARL$_0 \\approx$ {a0:.0f}")
+ax.set(xlabel="mean shift along PC1 (× standard deviation)", ylabel="average run length",
+       yscale="log", title="Operating characteristic of the $T^2$ chart")
+ax.legend()
+print(render(f))
+```
+
+At zero shift the simulated ARL lands near $1/\alpha = 100$, confirming the limit hits its
+design false-alarm rate; beyond about a one-sigma shift the detection delay collapses toward
+a single observation. The flat, slow-detection shoulder at small shifts is the region the
+EWMA and run-rule charts below are built to shrink.
 
 !!! note "Interpreting the pair"
     A useful design targets a fixed $\mathrm{ARL}_0$ (say 200) by tuning `alpha`, then
@@ -253,6 +289,52 @@ for v in we:
     print(f"  {v['rule']:>4}  at indices {v['indices']}")
 print(f"Nelson rules fired: {sorted({v['rule'] for v in ns})}")
 ```
+
+The rules fire on the drift block even before any single point makes a dramatic limit crossing: a run of consecutive points above the centre line trips the zone and trend rules first. That is the value of run rules -- they convert a *pattern* of mildly elevated points into an alarm, buying detection time on gradual faults.
+
+Plotting the $T^2$ stream over the classic Western-Electric zones (each band one $\sigma$ wide) makes the flagged pattern legible at a glance:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.spm import spm_phase1, hotelling_t2, nelson_rules
+
+argvals = np.linspace(0, 1, 80)
+p1 = spm_phase1(np.asarray(simulate(120, argvals, n_basis=6, seed=7)),
+                argvals, ncomp=4, alpha=0.01)
+ok = np.asarray(simulate(30, argvals, n_basis=6, seed=21))
+drift = np.asarray(simulate(20, argvals, n_basis=6, seed=33))
+drift = drift + np.linspace(0, 5.0, 20)[:, None]
+new = np.vstack([ok, drift])
+scores = ((new - np.asarray(p1["mean"])) * np.asarray(p1["weights"])) @ np.asarray(p1["loadings"])
+ev = np.asarray(p1["eigenvalues"])
+
+t2 = np.asarray(hotelling_t2(scores, ev))
+center = float(np.median(np.asarray(p1["t2"])))
+sigma = float(np.std(np.asarray(p1["t2"])))
+ns = nelson_rules(t2, center, sigma)
+flagged = sorted({i for v in ns for i in v["indices"]})
+mask = np.zeros(len(new), bool); mask[flagged] = True
+obs = np.arange(1, len(new) + 1)
+
+f, ax = fig()
+for z, col in [(1, "#eef0f8"), (2, "#e0e3f2"), (3, "#d0d5ec")]:
+    ax.axhspan(center + (z - 1) * sigma, center + z * sigma, color=col, zorder=0)
+ax.axhline(center, color="#6c757d", lw=1, label="centre line")
+ax.plot(obs, t2, "-", color="#c7cbe0", lw=0.8, zorder=1)
+ax.scatter(obs[~mask], t2[~mask], s=20, color="#3f51b5", zorder=2, label="no rule fired")
+ax.scatter(obs[mask], t2[mask], s=36, color="#dc3545", zorder=3, label="rule violation")
+ax.set(xlabel="observation index", ylabel="$T^2$",
+       title="Nelson run rules flag the drift as a sustained pattern")
+ax.legend(loc="upper left", fontsize=8)
+print(render(f))
+```
+
+The red points cluster in the drift block, where a lengthening run of consecutive above-centre
+values trips the trend and zone rules well before the raw statistic would have crossed a
+hard limit -- the run-rule layer detects the drift as an emerging *pattern* rather than
+waiting for a single decisive spike.
 
 | Parameter | Type | Description |
 |---|---|---|

@@ -147,6 +147,8 @@ print(f"full domain : {argvals.size} points")
 print(f"sub-domain  : {idx.size} points on [{lo}, {hi}]")
 ```
 
+The boolean `mask` collapses the 120-point grid to just the handful of samples inside `[0.68, 0.88]`. Everything downstream -- the reference curves, the stream, and `argvals` itself -- is sliced with this *same* index set, so the Phase I model sees only the critical window and spends none of its variance budget on the quiet regions outside it.
+
 !!! note "Slicing must stay contiguous and aligned"
     Slice `argvals` and every data matrix with the **same** index set, and pass
     C-contiguous arrays (`np.ascontiguousarray`) to the Rust functions. The reference and
@@ -249,6 +251,8 @@ ax1.legend(loc="upper left", fontsize=7)
 f.suptitle("Same fault, two monitoring domains", y=1.02)
 print(render(f))
 ```
+
+The two panels tell the whole story of partial-domain monitoring. On the full domain (left) the localised fault is diluted by the in-control behaviour everywhere else, so its $T^2$ barely clears -- or misses -- the limit. Restricting the chart to `[0.68, 0.88]` (right) concentrates all of the model's sensitivity on the affected window, and the same faulty observations now stand out sharply above the limit. Focusing the domain is what turns a marginal signal into a decisive alarm.
 
 !!! tip "Where do the sub-domain bounds come from?"
     Domain knowledge (a known critical region — a curing window, a specific frequency

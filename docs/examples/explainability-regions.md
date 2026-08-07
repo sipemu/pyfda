@@ -32,9 +32,24 @@ Every wavelength verdict is read off a real binding, not asserted.
 We work on the second derivative of each spectrum (a standard NIR baseline
 correction — see [the regression walkthrough](tecator-regression.md)) and fit
 `fregre_lm` with five FPC components. The model exposes `beta_t`, the estimated
-coefficient function $\beta(\lambda)$: the response is $\hat y = \alpha + \int
-\beta(\lambda)\,x(\lambda)\,d\lambda$, so the shape of $\beta$ says where the
-spectrum is being weighted.
+coefficient function $\beta(\lambda)$. The functional linear model predicts fat
+by integrating the spectrum against that coefficient function,
+
+$$
+\hat y = \alpha + \int_\Lambda \beta(\lambda)\,x(\lambda)\,d\lambda ,
+$$
+
+so the shape of $\beta$ says where the spectrum is being weighted. FPC
+regression makes this estimable by expanding $\beta$ in the leading $K$
+functional principal components $\{\phi_k\}$, turning the ill-posed integral fit
+into an ordinary regression of the response on the FPC scores
+$c_{ik}=\langle x_i,\phi_k\rangle$:
+
+$$
+\beta(\lambda) = \sum_{k=1}^{K} b_k\,\phi_k(\lambda),
+\qquad
+\hat y_i = \alpha + \sum_{k=1}^{K} b_k\,c_{ik} .
+$$
 
 ```python exec="1" html="1" source="above"
 import numpy as np

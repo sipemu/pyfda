@@ -170,6 +170,11 @@ ax.set(title="Studentized residual vs. leverage",
 print(render(f))
 ```
 
+Most points sit in the central band between the dotted $\pm 2$ lines, marking a well-behaved
+bulk of observations. The red point flagged at high studentized residual is the outlier we
+injected at index 5 — reading residual against leverage separates a mere large residual (a
+vertical outlier) from a genuinely influential point that also sits far out in predictor space.
+
 ## Leave-one-out PRESS — `loo_cv_press`
 
 The **PRESS** statistic sums the squared leave-one-out residuals, and `loo_r_squared`

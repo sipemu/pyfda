@@ -95,7 +95,30 @@ subspace without chasing noise.
 ## False-positive check
 
 A well-calibrated chart should false-alarm at roughly the nominal $\alpha$ on
-genuinely in-control data. We generate 200 fresh in-control curves (same process,
+genuinely in-control data. Projecting a centred curve onto the $K$ retained FPC
+loadings gives a score vector $z$ with in-control variances $\lambda_k$; the
+Shewhart chart combines a **Hotelling $T^2$** on those scores with a **squared
+prediction error (SPE)** on the residual outside the subspace:
+
+$$
+T^2 = \sum_{k=1}^{K} \frac{z_k^2}{\lambda_k},
+\qquad
+\text{SPE} = \bigl\lVert (x-\mu) - \textstyle\sum_{k=1}^{K} z_k\,\phi_k
+             \bigr\rVert^2 .
+$$
+
+The **EWMA** chart instead smooths the score vector recursively and monitors the
+smoothed vector against a MEWMA statistic that rescales each variance by the
+steady-state factor $\lambda/(2-\lambda)$:
+
+$$
+w_j = \lambda\,z_j + (1-\lambda)\,w_{j-1},
+\qquad
+Q = \sum_{k=1}^{K}
+      \frac{w_{jk}^2}{\bigl(\tfrac{\lambda}{2-\lambda}\bigr)\lambda_k} .
+$$
+
+We generate 200 fresh in-control curves (same process,
 new seed) and monitor them with two charts: the **Shewhart** $T^2$/SPE chart, and
 an **EWMA** chart built on the FPC scores (`ewma_scores`, scored with the MEWMA
 variance factor $\lambda/(2-\lambda)$).
