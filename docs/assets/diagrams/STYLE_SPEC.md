@@ -164,8 +164,33 @@ targeted for migration in later phases.
 
 ## SVGO Gate Coverage
 
-See [Task 3 findings below](#svgo-gate-coverage-all-43-diagrams) — this section is populated
-after the full corpus run in Phase 1, Plan 1, Task 3.
+**Gate approach:** Idempotence check — not a direct diff against the hand-authored source.
+svgo's XML serialiser always normalises whitespace and attribute ordering regardless of plugin
+settings; a direct diff against the formatted source always shows cosmetic differences.
+The idempotence check (svgo(svgo(svg)) == svgo(svg)) proves no further semantic transformation
+is applied after the first pass.
+
+**Full-corpus result (Phase 1, Plan 1, Task 3 — verified 2026-08-07):**
+
+All **43 of 43** diagrams in `docs/assets/diagrams/` pass the idempotence gate under
+`svgo.config.mjs`. No exclusion list is required.
+
+**Excluded diagrams:** none.
+
+**Verified preserved constructs on all 43 diagrams:**
+- `<style>` block with five CSS classes (`.ttl .sub .lab .sm .mono`)
+- `role="img"` and `aria-label` (where present; 34 of 43 have these)
+- `viewBox` attribute
+- Element IDs
+- `<desc>` elements (where present)
+
+**Known non-conformances (not gate failures, migration targets):**
+- 8 diagrams have no `<style>` block (use inline `font-size` attributes) — pass gate (no
+  CSS to inline or mangle)
+- 4 diagrams have non-720 viewBox widths — pass gate (viewBox is preserved, not enforced)
+- 9 diagrams missing `role="img"` — pass gate (not enforced by the svgo gate, per D-03)
+
+These are tracked as migration targets for diagram-sweep phases 3–8.
 
 ---
 
