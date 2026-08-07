@@ -759,7 +759,10 @@ pub fn spm_ewma<'py>(
     };
     let res = to_pyresult(fdars_core::spm::spm_ewma_monitor(&chart, &seq, &av, &ec))?;
     let dict = pyo3::types::PyDict::new(py);
-    dict.set_item("smoothed_scores", fdmatrix_to_numpy2d(py, &res.smoothed_scores))?;
+    dict.set_item(
+        "smoothed_scores",
+        fdmatrix_to_numpy2d(py, &res.smoothed_scores),
+    )?;
     dict.set_item("t2", vec_to_numpy1d(py, res.t2))?;
     dict.set_item("spe", vec_to_numpy1d(py, res.spe))?;
     dict.set_item("t2_limit", res.t2_limit)?;

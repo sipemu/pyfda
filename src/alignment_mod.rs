@@ -1938,8 +1938,7 @@ pub fn landmark_register<'py>(
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result =
-        fdars_core::landmark::landmark_register(&mat, &av, &landmarks, target.as_deref());
+    let result = fdars_core::landmark::landmark_register(&mat, &av, &landmarks, target.as_deref());
     landmark_result_to_dict(py, &result)
 }
 
@@ -1978,13 +1977,8 @@ pub fn landmark_detect_and_register<'py>(
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
     let k = parse_landmark_kind(kind)?;
-    let result = fdars_core::landmark::detect_and_register(
-        &mat,
-        &av,
-        k,
-        min_prominence,
-        expected_count,
-    );
+    let result =
+        fdars_core::landmark::detect_and_register(&mat, &av, k, min_prominence, expected_count);
     landmark_result_to_dict(py, &result)
 }
 
@@ -2039,9 +2033,11 @@ pub fn elastic_changepoint<'py>(
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
     let result = match kind.to_ascii_lowercase().as_str() {
-        "amplitude" | "amp" => to_pyresult(fdars_core::elastic_changepoint::elastic_amp_changepoint(
-            &mat, &av, lam, max_iter, n_mc, seed,
-        ))?,
+        "amplitude" | "amp" => {
+            to_pyresult(fdars_core::elastic_changepoint::elastic_amp_changepoint(
+                &mat, &av, lam, max_iter, n_mc, seed,
+            ))?
+        }
         "phase" | "ph" => to_pyresult(fdars_core::elastic_changepoint::elastic_ph_changepoint(
             &mat, &av, lam, max_iter, n_mc, seed,
         ))?,

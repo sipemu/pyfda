@@ -20,32 +20,26 @@ then smooth, align, decompose, and model them at native speed.
 </div>
 <div class="fdars-hero__pills">
 <span>17 modules</span>
-<span>R-parity API</span>
 <span>abi3 wheels</span>
 <span>NumPy-native</span>
 </div>
 </div>
-<img class="fdars-hero__art" src="assets/cards/hero.svg" alt="A family of functional data curves with a highlighted mean and confidence band">
 </div>
 
 <div class="fdars-features" markdown>
 <div class="fdars-feature" markdown>
-<div class="fdars-feature__icon">:material-lightning-bolt:</div>
 <div class="fdars-feature__title">Native speed</div>
 <p class="fdars-feature__desc">Every method crosses into compiled Rust via PyO3 — no Python loop over your curves, with parallelism where it counts.</p>
 </div>
 <div class="fdars-feature" markdown>
-<div class="fdars-feature__icon">:material-view-grid-plus:</div>
 <div class="fdars-feature__title">A full toolbox</div>
 <p class="fdars-feature__desc">FPCA, elastic alignment, functional regression, depth, clustering, process monitoring, conformal — 17 modules.</p>
 </div>
 <div class="fdars-feature" markdown>
-<div class="fdars-feature__icon">:material-sync:</div>
-<div class="fdars-feature__title">R parity</div>
-<p class="fdars-feature__desc">Mirrors the <a href="https://github.com/sipemu/fdars">fdars R package</a> API on the same <code>fdars-core</code> engine.</p>
+<div class="fdars-feature__title">Built on Rust</div>
+<p class="fdars-feature__desc">Powered by the <code>fdars-core</code> engine that also drives the <a href="https://github.com/sipemu/fdars">fdars R package</a>.</p>
 </div>
 <div class="fdars-feature" markdown>
-<div class="fdars-feature__icon">:material-matrix:</div>
 <div class="fdars-feature__title">NumPy-native</div>
 <p class="fdars-feature__desc">Plain <code>ndarray</code> in, <code>ndarray</code> out. Pre-built wheels for Linux, macOS &amp; Windows; NumPy is the only runtime dependency.</p>
 </div>
