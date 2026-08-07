@@ -60,6 +60,21 @@ jobs:
             fi
           done
           [ $FAILED -eq 0 ] || { echo "SVGO lint failed — fix diagrams above"; exit 1; }
+      - name: Doc-test smoke (canadian-weather.md)
+        # FND-05 / D-11: the doc-test gate blocks on the SINGLE smoke-test page
+        # only. The gated page set GROWS PAGE-BY-PAGE in Phase 9 as each example
+        # is fixed against the current API — do NOT gate docs/examples/ wholesale
+        # (that would pull Phase 9's example-fixing work forward and redden CI).
+        #
+        # --markdown-docs-syntax=superfences is required so `exec="1"` fences are
+        # recognised as Python (else silently skipped). conftest.py injects
+        # np/plt/fdars and expands pymdownx.snippets `--8<--` includes (D-04).
+        env:
+          PYTHONPATH: scripts
+        run: |
+          source .venv/bin/activate
+          pytest --markdown-docs --markdown-docs-syntax=superfences \
+            docs/examples/canadian-weather.md -v
       - name: Build and gate on figure errors
         # PYTHONPATH exposes scripts/docs_fig.py to markdown-exec code blocks.
         # Build once, then FAIL if any figure block silently errored (markdown-exec
