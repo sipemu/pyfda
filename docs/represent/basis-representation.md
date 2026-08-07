@@ -116,8 +116,8 @@ print(render(f))
 
 For this signal the B-spline optimum reaches a markedly lower GCV than the Fourier optimum, and its reconstruction tracks the bump and the edge closely while the Fourier fit oscillates around them -- confirming the rule of thumb that local, non-periodic features call for a locally supported basis. (The Fourier oscillation around the bump and edge is the expected Gibbs phenomenon for a global sinusoidal basis on non-periodic data, not a numerical defect.)
 
-!!! warning "B-spline least-squares fit is unreliable on rough data"
-    The examples on this page project **smooth** targets (a simulated smooth curve, the sample mean) onto the B-spline basis, where `fdata_to_basis_1d` / `basis_to_fdata_1d` behave well. On **rough or noisy real data** the current B-spline least-squares fit is not a true least-squares solution: its reconstruction can be worse than a constant fit and can *deteriorate* as `n_basis` grows, rather than improving. This also makes `basis_nbasis_cv` unreliable for B-splines -- it tends to return the largest candidate `n_basis` regardless of the data. This is a confirmed core bug, tracked as [sipemu/fdars#33](https://github.com/sipemu/fdars/issues/33). Until it is fixed, prefer **P-splines** (`pspline_fit_gcv`, shown below) for smoothing rough curves, and treat B-spline round-trips as reliable only on smooth targets.
+!!! note "Choosing `n_basis` for B-splines"
+    As of `fdars-core` 0.14.0 the B-spline least-squares fit (`fdata_to_basis_1d` / `basis_to_fdata_1d`) is a proper projection on rough as well as smooth data — its reconstruction beats a constant fit and improves monotonically as `n_basis` grows. One rough edge remains: `basis_nbasis_cv`'s GCV score plateaus rather than penalising complexity, so for B-splines it tends to return the **largest** candidate `n_basis` regardless of the data (tracked as [sipemu/fdars#37](https://github.com/sipemu/fdars/issues/37)). Pick `n_basis` from the GCV *curve* (its elbow) rather than the reported optimum, or use **P-splines** (`pspline_fit_gcv`, below), whose roughness penalty selects smoothness directly.
 
 ## Quick start: project and reconstruct
 

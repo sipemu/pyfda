@@ -459,11 +459,6 @@ data = np.array([rng.normal(3, 0.4) * np.interp(
 
 gm = gauss_model(data, t, ncomp=3, n_samples=20, max_iter=15, seed=0)
 synth = np.asarray(gm["samples"])
-# KNOWN BUG (sipemu/fdars#34): gauss_model currently returns samples on a
-# constant additive baseline (~+3 here) instead of the data baseline, so the
-# raw curves float well above the originals. Until the upstream fix lands we
-# subtract each sample's own edge level to restore a comparable baseline.
-synth = synth - synth[:, [0, -1]].mean(axis=1, keepdims=True)
 
 f, ax = fig()
 ax.plot(t, data.T, color="#3f51b5", lw=0.8, alpha=0.35)
@@ -476,15 +471,7 @@ ax.legend(fontsize=9)
 print(render(f))
 ```
 
-After the baseline correction, the orange synthetic curves occupy the same amplitude-and-timing envelope as the blue originals -- the generative model has learned the joint distribution of shape and phase rather than memorizing individual curves. This is the payoff of the amplitude/phase separation: sampling the two score distributions produces plausible *new* curves for augmentation or simulation.
-
-!!! warning "Known offset bug in `gauss_model`"
-    `gauss_model` currently returns samples on a spurious constant baseline (here
-    about `+3`) rather than the data's own baseline, so the raw synthetic curves
-    float well above the originals. This is a confirmed library bug tracked
-    upstream as [sipemu/fdars#34](https://github.com/sipemu/fdars/issues/34). The
-    example above subtracts each sample's edge level as a temporary workaround so
-    the shape overlay is meaningful; drop that line once the upstream fix lands.
+The orange synthetic curves occupy the same amplitude-and-timing envelope as the blue originals -- the generative model has learned the joint distribution of shape and phase rather than memorizing individual curves. This is the payoff of the amplitude/phase separation: sampling the two score distributions produces plausible *new* curves for augmentation or simulation.
 
 | Key | Description |
 |-----|-------------|

@@ -106,12 +106,13 @@ coefficients and returns the smoothed curves directly in its `fitted` field; the
 roughness penalty `lambda_` ($\lambda$ above) controls how aggressively the daily
 noise is damped.
 
-!!! note "Why not `fdata_to_basis_1d` here?"
-    We use the penalised-spline smoother rather than the plain B-spline basis
-    projection (`fdata_to_basis_1d`/`basis_to_fdata_1d`) because that path is
-    currently unreliable on rough data — see
-    [sipemu/fdars#33](https://github.com/sipemu/fdars/issues/33). The P-spline
-    penalty gives a stable, non-negative-respecting fit on daily precipitation.
+!!! note "Why P-splines rather than a fixed basis?"
+    We use the penalised-spline smoother (`pspline_fit_1d`) rather than a plain
+    fixed-count B-spline projection (`fdata_to_basis_1d`/`basis_to_fdata_1d`)
+    because the roughness penalty `lambda_` controls smoothness *directly* — a
+    single continuous knob — instead of forcing us to choose an exact number of
+    basis functions. On noisy daily precipitation that gives a stable,
+    non-negative-respecting fit without hunting for the right `n_basis`.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
