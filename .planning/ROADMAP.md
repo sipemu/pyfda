@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Establish SVG style spec, SVGO linter, deterministic builds, snippets, pytest-markdown-docs, and DOCS_FAST gate (completed 2026-08-07)
 - [x] **Phase 2: Audit** - Nav + reference-API audit that produces the diagram coverage map and ranked gap list (completed 2026-08-07)
-- [ ] **Phase 3: learn/ Diagrams** - Sweep learn/ section: conform, fix coordinate bug, and close coverage gaps
+- [x] **Phase 3: learn/ Diagrams** - Sweep learn/ section: conform, fix coordinate bug, and close coverage gaps (completed 2026-08-08)
 - [ ] **Phase 4: represent/ Diagrams** - Sweep represent/ section: remove R-era content, conform, close gaps
 - [ ] **Phase 5: align/ Diagrams** - Sweep align/ section: conform, fix phase-vs-amplitude split, close gaps
 - [ ] **Phase 6: analyze/ Diagrams** - Sweep analyze/ section: migrate legacy outliers, conform, close gaps
@@ -202,7 +202,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete    | 2026-08-07 |
 | 2. Audit | 3/3 | Complete    | 2026-08-07 |
-| 3. learn/ Diagrams | 2/2 | In Progress|  |
+| 3. learn/ Diagrams | 2/2 | Complete    | 2026-08-08 |
 | 4. represent/ Diagrams | 0/TBD | Not started | - |
 | 5. align/ Diagrams | 0/TBD | Not started | - |
 | 6. analyze/ Diagrams | 0/TBD | Not started | - |
