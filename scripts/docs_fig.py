@@ -15,9 +15,23 @@ Usage inside a docs code block::
     ...
     print(render(f))
     ```
+
+Use ``fast(full, fast_value)`` to lower expensive iteration counts in local
+builds without touching the published/committed output::
+
+    res  = fanova(X, grp, n_perm=fast(500, 50))
+    out  = karcher_mean(data, t, max_iter=fast(20, 5))
+    band = fpca_tolerance_band(ref, nb=fast(800, 100))
+
+Set the environment variable ``DOCS_FAST=1`` (or any non-empty value) before
+running ``mkdocs build`` to activate fast mode.  Fast mode is **speed-only**:
+figures may look rougher and MUST NOT be committed as publishable output.
+The full build (``DOCS_FAST`` unset) is the source of truth and the only mode
+where the byte-identical determinism guarantee (FND-03) holds.
 """
 from __future__ import annotations
 
+import os as _os
 from io import StringIO
 
 import matplotlib
@@ -90,3 +104,23 @@ def render(figure=None) -> str:
     if start != -1:
         svg = svg[start:]
     return f'<div class="fdars-figure">{svg}</div>'
+
+
+def fast(full, fast_value):
+    """Return ``fast_value`` if ``DOCS_FAST`` is set, else ``full``.
+
+    Central helper for lowering expensive iteration counts in local builds
+    without scattering ``os.environ`` checks across individual exec blocks
+    (FND-06, D-08).  Call it at any parameter that is expensive to compute::
+
+        res  = fanova(X, grp, n_perm=fast(500, 50))
+        out  = karcher_mean(data, t, max_iter=fast(20, 5))
+        band = fpca_tolerance_band(ref, nb=fast(800, 100))
+        ls   = lomb_scargle_fdata(fd, oversampling=fast(4, 2))
+
+    Fast mode is **speed-only** (D-07): figures may look rougher and MUST NOT
+    be committed as publishable output.  The full build (``DOCS_FAST`` unset)
+    is the only source of truth and the only mode where the byte-identical
+    determinism guarantee (FND-03) holds.
+    """
+    return fast_value if _os.environ.get("DOCS_FAST") else full
