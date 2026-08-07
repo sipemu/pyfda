@@ -2210,7 +2210,75 @@ pub fn anchor_explanation_logistic<'py>(
     Ok(dict)
 }
 
+/// Andrews-curve transform of functional/multivariate data.
+///
+/// Maps each observation (a row of `data`, treated as a coefficient vector) to a
+/// smooth Andrews curve on `n_grid` points over [-pi, pi]. Matches R
+/// `andrews_transform`.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Observations, shape (n, p).
+/// n_grid : int, optional
+///     Number of grid points for the curves (default 100).
+///
+/// Returns
+/// -------
+/// dict
+///     ``curves`` (n, n_grid), ``argvals`` (n_grid,), ``n_vars`` (int).
+#[pyfunction]
+#[pyo3(signature = (data, n_grid=100))]
+pub fn andrews_transform<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    n_grid: usize,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let d = numpy2d_to_fdmatrix(data)?;
+    let result = to_pyresult(fdars_core::andrews::andrews_transform(&d, n_grid))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("curves", fdmatrix_to_numpy2d(py, &result.curves))?;
+    dict.set_item("argvals", vec_to_numpy1d(py, result.argvals))?;
+    dict.set_item("n_vars", result.n_vars)?;
+    Ok(dict)
+}
+
+/// Andrews-curve loadings for a rotation/loading matrix.
+///
+/// Projects FPCA (or other) loading vectors into Andrews-curve space so component
+/// contributions can be read off directly. Matches R `andrews_loadings`.
+///
+/// Parameters
+/// ----------
+/// rotation : numpy.ndarray
+///     Loading/rotation matrix, shape (n_components, p).
+/// n_grid : int, optional
+///     Number of grid points (default 100).
+///
+/// Returns
+/// -------
+/// dict
+///     ``loadings`` one Andrews curve per original variable, shape (p, n_grid);
+///     ``argvals`` (n_grid,); ``n_vars`` the number of components.
+#[pyfunction]
+#[pyo3(signature = (rotation, n_grid=100))]
+pub fn andrews_loadings<'py>(
+    py: Python<'py>,
+    rotation: PyReadonlyArray2<'py, f64>,
+    n_grid: usize,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let r = numpy2d_to_fdmatrix(rotation)?;
+    let result = to_pyresult(fdars_core::andrews::andrews_loadings(&r, n_grid))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("loadings", fdmatrix_to_numpy2d(py, &result.loadings))?;
+    dict.set_item("argvals", vec_to_numpy1d(py, result.argvals))?;
+    dict.set_item("n_vars", result.n_vars)?;
+    Ok(dict)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(andrews_transform, m)?)?;
+    m.add_function(wrap_pyfunction!(andrews_loadings, m)?)?;
     m.add_function(wrap_pyfunction!(fpc_permutation_importance, m)?)?;
     m.add_function(wrap_pyfunction!(functional_pdp, m)?)?;
     m.add_function(wrap_pyfunction!(fpc_shap_values, m)?)?;

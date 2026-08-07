@@ -117,8 +117,8 @@ out = elastic_outlier_detection(data, t, alpha=0.05, use_median=True)
 amp = np.asarray(out["amplitude_distances"])   # (n,) shape distance to the reference
 pha = np.asarray(out["phase_distances"])       # (n,) timing distance to the reference
 
-def fence(x):                                  # Tukey upper fence
-    q1, q3 = np.percentile(x, [25, 75]); return q3 + 1.5 * (q3 - q1)
+def fence(x):                                  # Tukey upper fence (2.0·IQR)
+    q1, q3 = np.percentile(x, [25, 75]); return q3 + 2.0 * (q3 - q1)
 fa, fp = fence(amp), fence(pha)
 amp_out = np.where(amp > fa)[0]                 # unusual shape
 pha_out = np.where(pha > fp)[0]                 # unusual timing
@@ -186,6 +186,8 @@ ax.legend(fontsize=9)
 print(render(f))
 ```
 
+The shaded band is the pointwise 95% bootstrap envelope around the Karcher mean: where it is narrow the mean shape is well determined, and where it fans out the sample disagrees about amplitude. Because the resampling happens *after* alignment, the band reflects shape uncertainty rather than leftover phase spread.
+
 | Key | Description |
 |-----|-------------|
 | `mean` | The Karcher mean the band is centered on |
@@ -208,7 +210,7 @@ base = np.exp(-((t - 0.5) ** 2) / (2 * 0.10 ** 2))
 f1 = base
 f2 = np.interp(t, np.clip(t + 0.08, 0, 1), base)   # phase-shifted target
 
-ba = bayesian_align_pair(f1, f2, t, n_samples=500, burn_in=100, seed=0)
+ba = bayesian_align_pair(f1, f2, t, n_samples=500, burn_in=100, seed=0, step_size=0.85)
 f2_aligned = np.asarray(ba["f_aligned_mean"])
 gam_lo = np.asarray(ba["credible_lower"])
 gam_hi = np.asarray(ba["credible_upper"])
@@ -230,6 +232,8 @@ a2.set(title="Posterior over the warp", xlabel="t",
 a2.legend(fontsize=8)
 print(render(f))
 ```
+
+The left panel shows the aligned `f2` tracking the reference, while the right panel replaces the single point-estimate warp with a full posterior: the purple band is the 95% credible region around the posterior-mean $\gamma$. Where the band hugs the diagonal the timing is confidently identity; where it widens the data are ambiguous about how much to warp -- uncertainty a point estimate simply cannot express.
 
 | Key | Description |
 |-----|-------------|
@@ -280,6 +284,8 @@ a2.set(title=f"Warp γ  ({t_dp / t_mr:.0f}× faster than exact DP)",
        xlabel="t", ylabel="γ(t)", aspect="equal")
 print(render(f))
 ```
+
+The coarse-to-fine result (orange) recovers the same aligned curve and warp as the exact DP solver but at a fraction of the cost -- the title reports the measured speedup. On a 400-point grid the multiresolution path avoids the full $O(m^2)$ cost while the S-shaped warp still captures the planted nonlinear phase distortion.
 
 | Parameter | Description |
 |-----------|-------------|
@@ -356,6 +362,8 @@ print(render(f))
 print(f"matched target indices {i0}..{i1}  (t = {tg[i0]:.2f}..{tg[i1]:.2f}; planted at 0.45..0.75)")
 ```
 
+The orange sub-interval that the search selects overlaps the green planted region almost exactly, and the printed indices confirm it recovers the buried pattern despite the noise and time-warping. Crucially the match spans only a fraction of the target (see `domain_fraction`), which is what distinguishes partial matching from forcing a full-length alignment.
+
 | Key | Description |
 |-----|-------------|
 | `start_index` / `end_index` | Best-matching sub-interval of the target |
@@ -422,6 +430,8 @@ ax.legend(fontsize=9)
 print(render(f))
 ```
 
+The viridis-graded intermediates morph $f_1$ into $f_2$ along the shortest elastic path, so the peak *migrates* smoothly rather than one bump fading while a second grows. That is the elastic geodesic doing its job: it blends amplitude in SRSF space and phase on the warping group simultaneously, unlike a naive pointwise average that would just cross-dissolve the two shapes.
+
 | Key | Description |
 |-----|-------------|
 | `curves` | Interpolated curves, shape `(n_points, m)` |
@@ -460,6 +470,8 @@ ax.set(title="Gaussian generative model: original vs. synthetic",
 ax.legend(fontsize=9)
 print(render(f))
 ```
+
+The orange synthetic curves occupy the same amplitude-and-timing envelope as the blue originals -- the generative model has learned the joint distribution of shape and phase rather than memorizing individual curves. This is the payoff of the amplitude/phase separation: sampling the two score distributions produces plausible *new* curves for augmentation or simulation.
 
 | Key | Description |
 |-----|-------------|
@@ -523,6 +535,8 @@ ax.set(title="Cross-validated warp regularization", xlabel="$\\lambda$",
 ax.legend(fontsize=9)
 print(render(f))
 ```
+
+The CV curve dips to a minimum at the selected $\lambda$ (orange line): too little regularization overfits the warps to noise, too much stiffens them toward the identity and leaves curves misaligned. The valley is the sweet spot that generalizes best across the held-out folds.
 
 | Key | Description |
 |-----|-------------|

@@ -34,7 +34,8 @@ def check(path: str) -> dict:
     # deterministic: uses a real dataset, seeds its RNG, or draws no randomness at all
     uses_rng = bool(re.search(r"np\.random|default_rng|rand", t))
     real = bool(re.search(r"load_(growth|canadian_weather|tecator|phoneme|wine|sonar|penicillin)", t))
-    seeded = real or (not uses_rng) or bool(re.search(r"default_rng\(\d|seed\s*=\s*\d", t))
+    seeded = real or (not uses_rng) or bool(
+        re.search(r"default_rng\(\d|seed\s*=\s*\d|np\.random\.seed\(\d", t))
     # every figure block should have a nearby interpretive sentence (prose within 3 lines after the fence)
     interp = True
     for mobj in re.finditer(r'```python exec="1".*?```', t, re.S):

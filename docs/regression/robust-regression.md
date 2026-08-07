@@ -405,6 +405,54 @@ f.suptitle("Observed vs. predicted on clean points (trained on contaminated data
 print(render(f))
 ```
 
+The OLS panel is visibly tilted and offset — its predictions on clean points are
+biased by the outliers it chased during fitting — whereas the L1 and Huber clouds
+hug the 1:1 line, confirming that down-weighting the tails preserves accuracy where
+it matters.
+
+## The loss and weight functions side by side
+
+The whole story reduces to *how each method scores a residual*. Plotting the
+three loss functions $\rho(r)$ and their IRLS weight functions $w(r)=\psi(r)/r$
+over a common residual axis makes the trade-off concrete:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+
+r = np.linspace(-6, 6, 400)
+k = 1.345
+loss_ols = 0.5 * r ** 2
+loss_l1 = np.abs(r)
+loss_hub = np.where(np.abs(r) <= k, 0.5 * r ** 2, k * np.abs(r) - 0.5 * k ** 2)
+
+eps = 1e-6
+w_ols = np.ones_like(r)
+w_l1 = 1.0 / np.maximum(np.abs(r), eps)
+w_hub = np.minimum(1.0, k / np.maximum(np.abs(r), eps))
+
+f, (a0, a1) = fig(ncols=2, figsize=(11, 3.8))
+a0.plot(r, loss_ols, color="#dc3545", lw=2, label="OLS  ½r²")
+a0.plot(r, loss_l1, color="#3f51b5", lw=2, label="L1  |r|")
+a0.plot(r, loss_hub, color="#198754", lw=2, label=fr"Huber  (k={k})")
+a0.axvspan(-k, k, color="#198754", alpha=0.08)
+a0.set(title="Loss functions ρ(r)", xlabel="residual r", ylabel="ρ(r)", ylim=(0, 12))
+a0.legend()
+
+a1.plot(r, w_ols, color="#dc3545", lw=2, label="OLS")
+a1.plot(r, w_l1, color="#3f51b5", lw=2, label="L1")
+a1.plot(r, w_hub, color="#198754", lw=2, label="Huber")
+a1.axvspan(-k, k, color="#198754", alpha=0.08)
+a1.set(title="IRLS weights w(r)", xlabel="residual r", ylabel="w(r)", ylim=(0, 1.1))
+a1.legend()
+print(render(f))
+```
+
+OLS grows quadratically forever and weights every point equally, so a single large
+residual dominates the fit; Huber switches to a linear tail outside the shaded band
+$|r|\le k$ and caps its weight there; L1 is linear everywhere and its weight decays
+like $1/|r|$, the most aggressive down-weighting of the three.
+
 ---
 
 ## When to use robust methods

@@ -55,6 +55,8 @@ a2.legend(fontsize=8)
 print(render(f))
 ```
 
+On the left the peaks arrive at different times, so the red cross-sectional mean is blunted and shifted -- it does not look like any single curve. On the right the Fisher-Rao alignment warps every curve onto the common Karcher mean, and the orange mean now reproduces the true peaked shape. This side-by-side is the canonical illustration of amplitude/phase separation.
+
 !!! info "Fisher-Rao framework"
     All alignment in `fdars` is performed under the **elastic (Fisher-Rao) metric**, the unique Riemannian metric on the function space that is invariant to simultaneous reparameterization. This guarantees the alignment is *proper*: the distance between two functions does not depend on how either is parameterized.
 
@@ -93,6 +95,8 @@ print(render(f))
     assert abs(d_amp - d_el) < 1e-10, (d_amp, d_el)
     print(f"amplitude vs elastic distance: {d_amp:.6f} vs {d_el:.6f}  (|diff| = {abs(d_amp - d_el):.2e})")
     ```
+
+Both assertions pass: the variance reduction is strictly positive (alignment genuinely removed phase spread), and `amplitude_distance` reproduces `elastic_distance` to machine precision -- confirming they are the same quantity by construction, not merely close.
 
 ---
 
@@ -160,6 +164,8 @@ a2.plot(t, np.asarray(q), color="#6f42c1", lw=1.8)
 a2.set(title="SRSF representation $q$", xlabel="t", ylabel="q(t)")
 print(render(f2))
 ```
+
+The right panel is the curve's SRSF: it emphasizes the *slopes* of $f$, crossing zero exactly where $f$ has an extremum. The tiny printed round-trip error confirms the transform is losslessly invertible once $f(0)$ is supplied, which is what lets us do all the geometry in SRSF space and map back.
 
 !!! note
     The SRSF drops $f(0)$. Pass `initial_value` to `srsf_inverse` to recover the original function exactly (the round-trip error above is at the level of numerical integration).
@@ -295,6 +301,8 @@ ax.set(title="Cross-sectional vs. Karcher mean (shifted bumps)",
 ax.legend(fontsize=9)
 print(render(f))
 ```
+
+The blue cross-sectional mean is shorter and wider than any real bump -- averaging shifted peaks pointwise smears them out. The red Karcher mean instead keeps the true peak height and width, because it averages *shapes* after warping rather than heights at fixed times. This height loss is the single clearest symptom of ignoring phase.
 
 ### Karcher median (robust central shape)
 
@@ -501,6 +509,8 @@ print(f"mean variance reduction : {float(q['mean_variance_reduction']):.4f}")
 print(f"phase / amplitude ratio : {float(q['phase_amplitude_ratio']):.4f}")
 print(f"mean warp complexity    : {float(q['mean_warp_complexity']):.4f}")
 ```
+
+The shaded gap between the dashed (before) and solid (after) curves is the variance alignment removed, and it is largest exactly where the curves were most out of phase. The printed variance-reduction and phase/amplitude numbers put a single figure on that gap -- a compact summary of how much of the spread was timing.
 
 | `alignment_quality` key | Meaning |
 |-------------------------|---------|
@@ -731,6 +741,8 @@ print(render(f))
 print(f"mean geodesic distance of warps from identity: "
       f"{np.asarray(ws['geodesic_distances']).mean():.4f}")
 ```
+
+Both panels summarize the *warps themselves* -- the phase variation -- against the diagonal identity. The left band shows the spread of individual $\gamma_i$ around their mean, while the right phase boxplot flags warps whose timing deviates enough to count as outliers. Warps that hug the diagonal barely reparameterize their curve; those that bow away carry large phase shifts, and the printed mean geodesic distance measures that on average.
 
 | `warp_statistics` key | Description |
 |-----------------------|-------------|

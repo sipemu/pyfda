@@ -39,6 +39,8 @@ a2.legend(fontsize=8)
 print(render(f))
 ```
 
+On the left the raw curves are spread by phase; on the right their SRSFs (thin purple) still differ by warping, but the orange mean SRSF $\mu_q$ recovered by the TSRVF procedure is a clean, un-blurred central shape. That $\mu_q$ is the base point every curve gets transported to -- the origin of the tangent space in which linear statistics become valid.
+
 ---
 
 ## How it works (intuition)
@@ -195,6 +197,54 @@ The scores are ordinary coordinates: cluster them, regress a response on them, o
 !!! tip "Why transport at all?"
     Averaging SRVFs without alignment reintroduces phase blur. Transport to a *common* base point is what makes the tangent vectors comparable -- it is the step that turns a curved problem into a flat one.
 
+### Visualizing the first mode of variation
+
+Because the tangent space is linear and the exp map is invertible, the leading elastic PC can be turned back into curves: walk along $\mu_q \pm c\,\mathrm{PC}_1$ in the tangent space, exp-map each point onto the SRSF sphere, and invert with `srsf_inverse`. The result is a family of curves that shows, in the original data domain, exactly what shape variation PC1 encodes.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import tsrvf_transform, srsf_inverse
+
+rng = np.random.default_rng(11)
+n, m = 24, 120
+t = np.linspace(0, 1, m)
+base = np.sin(2 * np.pi * t) + 0.5 * np.sin(4 * np.pi * t)
+data = np.zeros((n, m))
+for i in range(n):
+    warp = t ** rng.uniform(0.6, 1.6)
+    warp = (warp - warp.min()) / np.ptp(warp)
+    data[i] = (1.0 + 0.25 * rng.standard_normal()) * np.interp(t, warp, base)
+
+res = tsrvf_transform(data, t, max_iter=20, tol=1e-4)
+V = np.asarray(res["tangent_vectors"])
+mu_q = np.asarray(res["mean_srsf"])
+iv = float(np.asarray(res["initial_values"]).mean())
+
+Vc = V - V.mean(0)
+_, S, Wt = np.linalg.svd(Vc, full_matrices=False)
+pc1 = Wt[0]
+sd1 = S[0] / np.sqrt(len(V))          # score std along PC1
+
+def exp_map(v, mu_q, t):
+    norm = np.sqrt(np.trapezoid(v ** 2, t))
+    if norm < 1e-9:
+        return mu_q.copy()
+    return np.cos(norm) * mu_q + np.sin(norm) * (v / norm)
+
+f, ax = fig()
+for c, col in [(-1.5, "#3f51b5"), (0.0, "#e8710a"), (1.5, "#198754")]:
+    q = exp_map(c * sd1 * pc1, mu_q, t)
+    curve = srsf_inverse(q, t, initial_value=iv)
+    lab = r"$\mu$" if c == 0 else fr"$\mu {'+' if c > 0 else '-'} {abs(c)}\sigma\,\mathrm{{PC}}_1$"
+    ax.plot(t, curve, color=col, lw=2.2 if c == 0 else 1.6, label=lab)
+ax.set(title="First elastic mode of variation", xlabel="t", ylabel="f(t)")
+ax.legend(fontsize=8)
+print(render(f))
+```
+
+The three curves are $\mu$ and $\mu \pm 1.5\sigma$ along PC1, all reconstructed through the exp map. They differ mainly in amplitude here -- the dominant shape mode in this sample -- with phase already absorbed by the alignment step. Sweeping the coefficient $c$ traces a geodesic on the SRSF sphere, so this is a genuine shape interpolation rather than a naive pointwise average.
+
 ---
 
 ## Raw FPCA vs. TSRVF FPCA
@@ -329,6 +379,8 @@ Reconstruction from PC scores works the same way: form a tangent vector as mean-
     assert rel_err < 0.1, rel_err
     print(f"max reconstruction error vs shape / amplitude: {rel_err:.3f}  (< 0.1 required)")
     ```
+
+Both invariants hold: the tangent vectors are orthogonal to $\mu_q$ to machine precision (confirming they genuinely live in $T_{\mu_q}$), and the exp-map reconstruction lands on the common Karcher mean to within a small fraction of the amplitude. Together these certify that the log/exp round-trip is faithful, so PC scores computed on the $v_i$ can be safely mapped back to curves.
 
 ---
 

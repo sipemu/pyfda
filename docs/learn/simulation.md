@@ -182,6 +182,11 @@ for ax in axes[-1]:
 print(render(f))
 ```
 
+The imprint of each basis is unmistakable: `fourier` produces smooth oscillations,
+`poly` broad low-order trends, `poly_high` more localized wiggles, and `wiener`
+the rough, drifting paths of Brownian motion. Match the basis to the qualitative
+shape you expect in your real data.
+
 ---
 
 ### Eigenvalue Decay Patterns
@@ -249,6 +254,12 @@ a2.set(title="exponential decay (smoother)", xlabel="t")
 print(render(f))
 ```
 
+With the basis and seed held fixed, only the eigenvalue decay differs, yet the
+curves look completely different: linear decay keeps the high-frequency modes
+alive (left, rough), while exponential decay starves them of variance (right,
+smooth). Decay is therefore your main lever for the effective smoothness of a
+simulated sample.
+
 ---
 
 ### Combining Options and `n_basis`
@@ -307,6 +318,11 @@ ax.legend()
 print(render(f))
 ```
 
+The whole sample now fluctuates around the red mean function rather than around
+zero: the KL variability rides on top of $\mu(t)$ additively, so the shape of the
+ensemble is unchanged and only its centre has moved. This is why adding the mean
+afterwards is exactly equivalent to a built-in `mean=` argument.
+
 ---
 
 ## Adding Measurement Error
@@ -348,6 +364,11 @@ for ax in axes[:, 0]:
 print(render(f))
 ```
 
+As `sd` climbs from the clean panel to 0.5, the smooth underlying signal is
+progressively drowned out point-by-point: at `sd=0.5` the curves are barely
+distinguishable from noise. This panel calibrates how much pointwise error your
+downstream method must tolerate.
+
 ### Curve-Level Noise
 
 Here every curve is shifted by its own constant; the shapes are untouched but
@@ -360,15 +381,20 @@ from fdars.simulation import simulate, add_error_curve
 
 t = np.linspace(0, 1, 100)
 clean = np.asarray(simulate(n=10, argvals=t, n_basis=5, seed=42))
-shifted = np.asarray(add_error_curve(clean, sd=0.5, seed=123))
+shifted = np.asarray(add_error_curve(clean, sd=2.5, seed=123))
 
 f, (a1, a2) = fig(1, 2, figsize=(9.0, 3.6), sharex=True, sharey=True)
 a1.plot(t, clean.T, lw=1.0, alpha=0.8)
 a1.set(title="clean", xlabel="t", ylabel="X(t)")
 a2.plot(t, shifted.T, lw=1.0, alpha=0.8)
-a2.set(title="curve-level offset (sd=0.5)", xlabel="t")
+a2.set(title="curve-level offset (sd=2.5)", xlabel="t")
 print(render(f))
 ```
+
+Unlike pointwise noise, the curve-level offset leaves every individual shape
+intact and simply spreads the family vertically -- each curve is rigidly shifted
+by its own constant. This is the right model for a per-subject bias (a mis-zeroed
+sensor, say) rather than tick-by-tick jitter.
 
 ---
 
@@ -400,6 +426,11 @@ ax.set(title="Sparsified functional data (10-29 points per curve)",
        xlabel="t", ylabel="X(t)")
 print(render(f))
 ```
+
+Each curve now lives on its own irregular grid with a different number of
+retained points, so the sample is no longer a rectangular matrix. Recovering a
+common grid from data like this is exactly the problem the
+[irregular-sampling guide](irregular-sampling.md) solves.
 
 !!! warning "Multivariate simulation"
     The R `simMultiFunData()` for jointly simulating several correlated
@@ -492,6 +523,11 @@ for ax in axes[-1]:
 print(render(f))
 ```
 
+The four kernels sample four textures: the Gaussian kernel gives glassy-smooth
+paths, the exponential (Ornstein-Uhlenbeck) kernel gives visibly jagged ones, the
+Matern sits between them, and the periodic kernel repeats its pattern along the
+domain. Pick the kernel whose roughness matches the physics you are modelling.
+
 ---
 
 ### Controlling Smoothness with `length_scale`
@@ -517,6 +553,11 @@ a2.plot(t, smooth.T, color="#198754", lw=1.2, alpha=0.8)
 a2.set(title="length_scale = 0.5 (smooth)", xlabel="t")
 print(render(f))
 ```
+
+At $\ell = 0.05$ the correlation dies within a twentieth of the domain, so
+neighbouring points are nearly independent and the paths are wiggly; at
+$\ell = 0.5$ points half the domain apart still co-vary, giving slow, gentle
+curves. The length scale is thus the GP's direct knob for horizontal smoothness.
 
 ### Controlling Amplitude with `variance`
 
@@ -593,6 +634,12 @@ a2.set(title="GP simulation (exponential kernel)", xlabel="t")
 print(render(f))
 ```
 
+Both routes produce the same qualitative object -- non-differentiable,
+random-walk-like paths -- from opposite parameterizations: the KL side specifies
+Wiener eigenfunctions and eigenvalues, the GP side an Ornstein-Uhlenbeck kernel.
+When you have a target covariance, reach for the GP; when you have a target FPCA
+structure, reach for KL.
+
 ---
 
 ## Complete Recipe: A Two-Group Power Analysis
@@ -613,12 +660,17 @@ from fdars.clustering import kmeans_fd
 t = np.linspace(0, 1, 100)
 n_per = 30
 
-# 1. Two groups differing only in the mean function
+# 1. Two groups differing only in the mean function. We use exponential
+#    eigenvalue decay so the within-group KL variability stays modest relative
+#    to the between-group mean gap -- otherwise the groups overlap too much for
+#    unsupervised clustering to recover them.
 mean1 = lambda t: np.sin(2 * np.pi * t)                              # noqa: E731
-mean2 = lambda t: np.sin(2 * np.pi * t) + 0.5 * np.cos(4 * np.pi * t)  # noqa: E731
+mean2 = lambda t: np.sin(2 * np.pi * t) + 2.0 * np.cos(4 * np.pi * t)  # noqa: E731
 
-g1 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5, seed=1)) + mean1(t)
-g2 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5, seed=2)) + mean2(t)
+g1 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5,
+                         eval_type="exponential", seed=1)) + mean1(t)
+g2 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5,
+                         eval_type="exponential", seed=2)) + mean2(t)
 
 # 2. Add measurement noise
 g1 = np.asarray(add_error_pointwise(g1, sd=0.2, seed=11))
@@ -650,9 +702,11 @@ from fdars.clustering import kmeans_fd
 t = np.linspace(0, 1, 100)
 n_per = 30
 mean1 = lambda t: np.sin(2 * np.pi * t)                              # noqa: E731
-mean2 = lambda t: np.sin(2 * np.pi * t) + 0.5 * np.cos(4 * np.pi * t)  # noqa: E731
-g1 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5, seed=1)) + mean1(t)
-g2 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5, seed=2)) + mean2(t)
+mean2 = lambda t: np.sin(2 * np.pi * t) + 2.0 * np.cos(4 * np.pi * t)  # noqa: E731
+g1 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5,
+                         eval_type="exponential", seed=1)) + mean1(t)
+g2 = np.asarray(simulate(n=n_per, argvals=t, n_basis=5,
+                         eval_type="exponential", seed=2)) + mean2(t)
 g1 = np.asarray(add_error_pointwise(g1, sd=0.2, seed=11))
 g2 = np.asarray(add_error_pointwise(g2, sd=0.2, seed=22))
 
@@ -680,6 +734,13 @@ ax.axis("off")
 ax.text(0.02, 0.95, "\n".join(lines), va="top", family="monospace", fontsize=11)
 print(render(f))
 ```
+
+The high cluster agreement confirms the payoff of simulating with a known ground
+truth: because we built the two groups with a deliberate mean gap and modest
+within-group variance, unsupervised $k$-means recovers the true labels almost
+perfectly, and the depth-based median falls in the expected group. This is the
+skeleton of a power analysis -- shrink the mean gap or raise the noise until the
+agreement drops, and you have mapped the method's detection limit.
 
 ---
 
@@ -717,5 +778,3 @@ print(render(f))
 - [Working with Derivatives](derivatives.md) -- differentiate your curves.
 - [Covariance Functions](../analyze/covariance-functions.md) -- deeper look at
   kernel functions.
-</content>
-</invoke>

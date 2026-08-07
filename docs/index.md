@@ -6,34 +6,44 @@ hide:
 
 <div class="fdars-hero" markdown>
 <div class="fdars-hero__text" markdown>
+<div class="fdars-hero__eyebrow">Functional data analysis · Rust-powered</div>
 <h1 class="fdars-hero__title">fdars</h1>
 <p class="fdars-hero__tagline">
-High-performance functional data analysis for Python &mdash; treat entire
-curves, spectra, and trajectories as single observations, powered by a Rust backend.
+Treat entire curves, spectra, and trajectories as single observations &mdash;
+then smooth, align, decompose, and model them at native speed.
 </p>
+<div class="fdars-hero__install">pip install fdars</div>
 <div class="fdars-hero__cta" markdown>
 [Get started](learn/introduction.md){ .md-button .md-button--primary }
-[Fdata reference](reference/fdata.md){ .md-button }
-[View on GitHub](https://github.com/sipemu/pyfda){ .md-button }
+[Quick example](#quick-example){ .md-button }
+[GitHub](https://github.com/sipemu/pyfda){ .md-button }
+</div>
+<div class="fdars-hero__pills">
+<span>17 modules</span>
+<span>abi3 wheels</span>
+<span>NumPy-native</span>
 </div>
 </div>
-<img class="fdars-hero__art" src="assets/cards/hero.svg" alt="A family of functional data curves with a highlighted mean and confidence band">
 </div>
 
-<p style="text-align:center;">
-<img src="https://img.shields.io/pypi/v/fdars" alt="PyPI">
-&nbsp;<img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT">
-&nbsp;<img src="https://github.com/sipemu/pyfda/actions/workflows/ci.yml/badge.svg" alt="CI">
-&nbsp;<img src="https://img.shields.io/badge/python-3.9%2B-blue.svg" alt="Python 3.9+">
-</p>
-
-**fdars** is a high-performance Python toolkit for functional data analysis powered
-by a Rust backend. Treat entire curves, spectra, and trajectories as single
-observations -- then smooth, align, decompose, and analyze them.
-
-Built on [fdars-core](https://github.com/sipemu/fdars), the same engine that
-drives the [fdars R package](https://github.com/sipemu/fdars), fdars gives you
-native-speed computation with a familiar NumPy interface.
+<div class="fdars-features" markdown>
+<div class="fdars-feature" markdown>
+<div class="fdars-feature__title">Native speed</div>
+<p class="fdars-feature__desc">Every method crosses into compiled Rust via PyO3 — no Python loop over your curves, with parallelism where it counts.</p>
+</div>
+<div class="fdars-feature" markdown>
+<div class="fdars-feature__title">A full toolbox</div>
+<p class="fdars-feature__desc">FPCA, elastic alignment, functional regression, depth, clustering, process monitoring, conformal — 17 modules.</p>
+</div>
+<div class="fdars-feature" markdown>
+<div class="fdars-feature__title">Built on Rust</div>
+<p class="fdars-feature__desc">Powered by the <code>fdars-core</code> engine that also drives the <a href="https://github.com/sipemu/fdars">fdars R package</a>.</p>
+</div>
+<div class="fdars-feature" markdown>
+<div class="fdars-feature__title">NumPy-native</div>
+<p class="fdars-feature__desc">Plain <code>ndarray</code> in, <code>ndarray</code> out. Pre-built wheels for Linux, macOS &amp; Windows; NumPy is the only runtime dependency.</p>
+</div>
+</div>
 
 ---
 

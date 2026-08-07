@@ -351,6 +351,8 @@ print(f"mean warp complexity    : {float(q['mean_warp_complexity']):.4f}")
 print(f"mean geodesic dist warps: {np.asarray(ws['geodesic_distances']).mean():.4f}")
 ```
 
+The bar chart splits the total variation into an amplitude part (genuine shape differences) and a phase part (timing), and here the phase bar dominates -- the printed phase/amplitude ratio confirms most of the spread was timing that alignment could remove. The variance-reduction and warp-complexity numbers quantify how much was removed and how hard the warps had to work to do it.
+
 | `alignment_quality` key | Meaning |
 |-------------------------|---------|
 | `mean_variance_reduction` | Fraction of pointwise variance removed (the VR metric) |
@@ -423,6 +425,8 @@ axes[2].set(title="C: noisy -> smooth first", xlabel="t")
 axes[2].legend(fontsize=8)
 print(render(f))
 ```
+
+Each panel isolates a regime where the method choice matters, and the sharpened orange means show the fix working in every case:
 
 - **A -- elastic excels on smooth warping.** Broad overlapping oscillations have no clear anchors, so landmark detection has nothing to grab; the Fisher-Rao metric captures the continuous phase change naturally.
 - **B -- elastic copes with a variable feature count.** Half the curves have one peak, half have two. Elastic makes no template assumption; a landmark method with a fixed `expected_count=2` would force a spurious second peak onto the single-peak curves.

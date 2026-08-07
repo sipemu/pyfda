@@ -147,11 +147,24 @@ f.colorbar(sc, ax=ax, label="fold")
 print(render(f))
 ```
 
+Each point is coloured by the fold that predicted it, so no point was used to fit
+the model that scored it; the cloud hugging the 45-degree line at a healthy OOF
+$R^2$ confirms the model generalises rather than merely memorising the training set.
+
 ## Classification: `fclassif_cv`
 
-For classifiers, the analogue is the cross-validated **misclassification rate**.
-`fclassif_cv` sweeps the number of components internally and reports the best count along
-with the per-fold error.
+For classifiers, the analogue is the cross-validated **misclassification rate**. With the
+same fold structure but a 0/1 loss instead of squared error, the cross-validation
+objective becomes
+
+$$
+\text{CV}_{\text{err}}(k) = \frac{1}{n}\sum_{i=1}^{n}
+   \mathbb{1}\!\big[\hat g_i^{(-j(i))} \ne g_i\big],
+$$
+
+the fraction of out-of-fold predictions $\hat g_i^{(-j(i))}$ whose label disagrees with the
+truth $g_i$. `fclassif_cv` sweeps the number of components internally and reports the best
+count along with the per-fold error.
 
 ```python
 import numpy as np
@@ -303,12 +316,69 @@ f.colorbar(sc, ax=ax, label="prediction SD")
 print(render(f))
 ```
 
+The error bars and colour both encode each observation's spread across the 15
+repetitions: most points are pinned down tightly, but a handful of high-SD points
+(brighter, longer bars) are the fragile ones whose prediction flips with the shuffle
+— exactly the observations to scrutinise before trusting the model on them.
+
+To compare fold splits directly, plotting the per-fold CV error across many repeated
+splits reveals how much of the reported error is genuine signal versus split-to-split
+noise:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from numpy.random import default_rng
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.regression import predict_fregre_lm
+
+np.random.seed(0)
+t = np.linspace(0, 1, 60)
+X = np.asarray(simulate(n=60, argvals=t, n_basis=6, efun_type="fourier", seed=1))
+beta_true = np.sin(2 * np.pi * t)
+y = np.trapezoid(X * beta_true, t, axis=1) + 0.3 * np.random.randn(len(X))
+
+n_rep, n_folds = 30, 5
+fold_mse = np.zeros((n_rep, n_folds))
+for r in range(n_rep):
+    folds = np.array_split(default_rng(r).permutation(len(y)), n_folds)
+    for j, fold in enumerate(folds):
+        tr = np.setdiff1d(np.arange(len(y)), fold)
+        pred = predict_fregre_lm(X[tr], y[tr], X[fold], n_comp=4)
+        fold_mse[r, j] = np.mean((y[fold] - pred) ** 2)
+
+overall = fold_mse.mean(1)                       # per-repetition CV estimate
+
+f, ax = fig()
+ax.boxplot(fold_mse.T, positions=np.arange(n_rep), widths=0.6,
+           showfliers=False, patch_artist=True,
+           boxprops=dict(facecolor="#cfd8ff", edgecolor="#3f51b5"),
+           medianprops=dict(color="#e8710a"))
+ax.plot(np.arange(n_rep), overall, "o", color="#e8710a", ms=4,
+        label="per-split CV mean")
+ax.axhline(overall.mean(), color="#198754", ls="--", lw=1.5,
+           label=f"grand mean = {overall.mean():.3f}")
+ax.set(title="Per-fold CV error across 30 repeated 5-fold splits",
+       xlabel="repetition", ylabel="fold MSE")
+ax.set_xticks([])
+ax.legend(fontsize=8)
+print(render(f))
+```
+
+Within each repetition the folds scatter widely (the boxes), yet the per-split means
+(orange) hover close to the green grand mean — a concrete demonstration that a single
+5-fold estimate carries real sampling noise, and that averaging over repetitions is
+what makes the CV error a stable model-selection criterion.
+
 !!! note "No packaged repeated / nested CV harness in Python"
     The R reference bundles repeated CV, nested CV, and stratified folds into one
     `cv.fdata()` function. `fdars` for Python exposes the tuned cross-validators
-    (`fregre_cv`, `fclassif_cv`) plus the `predict_*` functions; the repeated- and
+    (`fregre_cv`, `fclassif_cv`, and `fregre_np_cv` for nonparametric-regression
+    bandwidth selection) plus the `predict_*` functions; the repeated- and
     shared-fold patterns above show how to assemble the rest transparently in a few
-    lines of numpy.
+    lines of numpy. For the kernel method in particular, `fregre_np_cv(X, y, argvals,
+    n_folds=...)` packages the bandwidth cross-validation that `np_predict` above does
+    by hand — returning the optimal `h`, the per-bandwidth CV curve, and its SE.
 
 ## Related pages
 

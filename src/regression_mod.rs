@@ -859,7 +859,124 @@ pub fn predict_fosr<'py>(
     Ok(fdmatrix_to_numpy2d(py, &predicted).into_any())
 }
 
+/// Cross-validated bandwidth selection for nonparametric functional regression.
+///
+/// Matches R `fregre.np.cv`. Runs k-fold CV over a grid of bandwidths (built
+/// automatically if `h_range` is omitted) and reports the optimum.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Functional predictors, shape (n, m).
+/// response : numpy.ndarray
+///     Scalar response, length n.
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// n_folds : int, optional
+///     Number of CV folds (default 5).
+/// h_range : numpy.ndarray, optional
+///     Candidate bandwidths. Auto-selected when omitted.
+/// scalar_covariates : numpy.ndarray, optional
+///     Additional scalar covariates, shape (n, q).
+///
+/// Returns
+/// -------
+/// dict
+///     ``optimal_h``, ``cv_errors``, ``cv_se``, ``h_values``, ``min_cv_error``.
+#[pyfunction]
+#[pyo3(signature = (data, response, argvals, n_folds=5, h_range=None, scalar_covariates=None))]
+pub fn fregre_np_cv<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    response: PyReadonlyArray1<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    n_folds: usize,
+    h_range: Option<PyReadonlyArray1<'py, f64>>,
+    scalar_covariates: Option<PyReadonlyArray2<'py, f64>>,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let y = numpy1d_to_vec(response);
+    let av = numpy1d_to_vec(argvals);
+    let h_vec = h_range.map(numpy1d_to_vec);
+    let sc = scalar_covariates.map(numpy2d_to_fdmatrix).transpose()?;
+    let result = to_pyresult(fdars_core::scalar_on_function::fregre_np_cv(
+        &mat,
+        &y,
+        &av,
+        n_folds,
+        h_vec.as_deref(),
+        sc.as_ref(),
+    ))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("optimal_h", result.optimal_h)?;
+    dict.set_item("cv_errors", vec_to_numpy1d(py, result.cv_errors))?;
+    dict.set_item("cv_se", vec_to_numpy1d(py, result.cv_se))?;
+    dict.set_item("h_values", vec_to_numpy1d(py, result.h_values))?;
+    dict.set_item("min_cv_error", result.min_cv_error)?;
+    Ok(dict)
+}
+
+/// Nonparametric functional regression mixing functional and scalar predictors.
+///
+/// Matches R `fregre.np.mixed`. Kernel regression with separate bandwidths for
+/// the functional-distance kernel and the scalar-covariate kernel.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Functional predictors, shape (n, m).
+/// response : numpy.ndarray
+///     Scalar response, length n.
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// h_func : float
+///     Bandwidth for the functional-distance kernel.
+/// h_scalar : float, optional
+///     Bandwidth for the scalar-covariate kernel (default 1.0).
+/// scalar_covariates : numpy.ndarray, optional
+///     Additional scalar covariates, shape (n, q).
+///
+/// Returns
+/// -------
+/// dict
+///     ``fitted_values``, ``residuals``, ``r_squared``, ``h_func``,
+///     ``h_scalar``, ``cv_error``.
+#[pyfunction]
+#[pyo3(signature = (data, response, argvals, h_func, h_scalar=1.0, scalar_covariates=None))]
+pub fn fregre_np_mixed<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    response: PyReadonlyArray1<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    h_func: f64,
+    h_scalar: f64,
+    scalar_covariates: Option<PyReadonlyArray2<'py, f64>>,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let y = numpy1d_to_vec(response);
+    let av = numpy1d_to_vec(argvals);
+    let sc = scalar_covariates.map(numpy2d_to_fdmatrix).transpose()?;
+    let result = to_pyresult(fdars_core::scalar_on_function::fregre_np_mixed(
+        &mat,
+        &y,
+        &av,
+        sc.as_ref(),
+        h_func,
+        h_scalar,
+    ))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("fitted_values", vec_to_numpy1d(py, result.fitted_values))?;
+    dict.set_item("residuals", vec_to_numpy1d(py, result.residuals))?;
+    dict.set_item("r_squared", result.r_squared)?;
+    dict.set_item("h_func", result.h_func)?;
+    dict.set_item("h_scalar", result.h_scalar)?;
+    dict.set_item("cv_error", result.cv_error)?;
+    Ok(dict)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(fregre_np_cv, m)?)?;
+    m.add_function(wrap_pyfunction!(fregre_np_mixed, m)?)?;
     m.add_function(wrap_pyfunction!(fpca, m)?)?;
     m.add_function(wrap_pyfunction!(fpls, m)?)?;
     m.add_function(wrap_pyfunction!(fregre_lm, m)?)?;

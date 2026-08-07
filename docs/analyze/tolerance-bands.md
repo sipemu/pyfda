@@ -107,6 +107,10 @@ ax.legend()
 print(render(f))
 ```
 
+The grey curves scatter symmetrically around the orange sample mean with a roughly constant
+spread across the domain -- a clean, trend-free sample that lets the band constructions
+below be compared on width alone rather than on any lurking mean structure.
+
 ---
 
 ## FPCA bootstrap band

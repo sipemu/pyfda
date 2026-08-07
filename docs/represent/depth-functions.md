@@ -28,6 +28,8 @@ ax.legend()
 print(render(f))
 ```
 
+The opacity encodes depth: the boldest curve (orange) is the deepest one, the functional median, and it threads through the middle of the bundle. The faint curves at the top and bottom edges have the lowest depth -- they are the peripheral, potentially outlying trajectories.
+
 ## Concepts
 
 Given a sample of curves $X_1(t), \ldots, X_n(t)$, a functional depth $D(X_i \mid X_1, \ldots, X_n) \in [0, 1]$ satisfies:
@@ -52,34 +54,36 @@ $$
     is roughly a third of the shallowest curve's -- consistent with the "maximality at
     center" axiom. All assertions pass.
 
-    ```python exec="1" source="above"
-    import numpy as np
-    from fdars import Fdata
-    from fdars.simulation import simulate
-    from fdars.depth import modified_band_1d, fraiman_muniz_1d, band_1d
+```python exec="1" source="above"
+import numpy as np
+from fdars import Fdata
+from fdars.simulation import simulate
+from fdars.depth import modified_band_1d, fraiman_muniz_1d, band_1d
 
-    t = np.linspace(0, 1, 120)
-    X = np.asarray(simulate(n=30, argvals=t, n_basis=6, efun_type="fourier", seed=1))
+t = np.linspace(0, 1, 120)
+X = np.asarray(simulate(n=30, argvals=t, n_basis=6, efun_type="fourier", seed=1))
 
-    # (1) Depth values live in [0, 1].
-    for name, fn in [("MBD", modified_band_1d), ("FM", fraiman_muniz_1d),
-                     ("BD", band_1d)]:
-        d = np.asarray(fn(X, X))
-        assert d.min() >= -1e-9 and d.max() <= 1 + 1e-9, (name, d.min(), d.max())
-        print(f"{name}: depth in [{d.min():.3f}, {d.max():.3f}] -- inside [0, 1]")
+# (1) Depth values live in [0, 1].
+for name, fn in [("MBD", modified_band_1d), ("FM", fraiman_muniz_1d),
+                 ("BD", band_1d)]:
+    d = np.asarray(fn(X, X))
+    assert d.min() >= -1e-9 and d.max() <= 1 + 1e-9, (name, d.min(), d.max())
+    print(f"{name}: depth in [{d.min():.3f}, {d.max():.3f}] -- inside [0, 1]")
 
-    # (2) The deepest curve = functional median = the most central curve.
-    fd = Fdata(X, argvals=t)
-    depth = np.asarray(fd.depth("modified_band"))
-    assert np.argmax(depth) == np.argmax(np.asarray(modified_band_1d(X, X)))
-    med = np.median(X, axis=0)                       # pointwise sample median
-    l2 = lambda a: float(np.sqrt(np.mean((a - med) ** 2)))
-    d_deep = l2(X[np.argmax(depth)])
-    d_shallow = l2(X[np.argmin(depth)])
-    assert d_deep < d_shallow, (d_deep, d_shallow)
-    print(f"median curve dist to pointwise median {d_deep:.3f} "
-          f"<< shallowest {d_shallow:.3f}")
-    ```
+# (2) The deepest curve = functional median = the most central curve.
+fd = Fdata(X, argvals=t)
+depth = np.asarray(fd.depth("modified_band"))
+assert np.argmax(depth) == np.argmax(np.asarray(modified_band_1d(X, X)))
+med = np.median(X, axis=0)                       # pointwise sample median
+l2 = lambda a: float(np.sqrt(np.mean((a - med) ** 2)))
+d_deep = l2(X[np.argmax(depth)])
+d_shallow = l2(X[np.argmin(depth)])
+assert d_deep < d_shallow, (d_deep, d_shallow)
+print(f"median curve dist to pointwise median {d_deep:.3f} "
+      f"<< shallowest {d_shallow:.3f}")
+```
+
+The printout shows all three measures return values inside $[0,1]$, and the deepest curve lands several times closer to the pointwise median than the shallowest -- concrete confirmation of the maximality-at-center property.
 
 ## Available depth measures
 
@@ -350,6 +354,8 @@ axes[-1].legend(handles=[Patch(color=color[k], label=k)
 print(render(f))
 ```
 
+Across all seven panels the red bar (magnitude outlier) is driven to near-zero depth -- every measure catches a vertical shift easily. The orange bar (shape outlier) is where they differ: the pointwise measures FM and MEI leave it only mildly shallow, while the projection- and band-based measures (RP, RT, BD) push it much lower, confirming that shape anomalies need projection- or band-aware depths.
+
 ## Depth-weighted robust mean
 
 Because depth down-weights peripheral curves, using it as a weight vector yields a mean that resists outliers -- the functional analogue of a weighted average that discounts extreme observations. Compare a plain mean, pulled upward by a magnitude outlier, against a depth-weighted mean:
@@ -384,60 +390,73 @@ ax.legend()
 print(render(f))
 ```
 
+The plain black mean is visibly lifted off the true green signal by the single magnitude outlier, whereas the depth-weighted blue mean stays glued to the truth. Because the outlier receives near-zero depth, it contributes almost nothing to the weighted average.
+
 ## Complete example: functional median and depth-based ordering
 
-```python
+Three depth measures on one contaminated sample give three depth *orderings*. Colouring every curve by its depth (bright = deep) and dashing the two shallowest shows that all three agree on the injected outliers, but the exact ranking of the merely-peripheral curves differs between measures.
+
+```python exec="1" html="1" source="above"
 import numpy as np
 import matplotlib.pyplot as plt
+from docs_fig import fig, render
 from fdars import Fdata
 from fdars.simulation import simulate
 
-# --- 1. Simulate data with an outlier ------------------------------------
 argvals = np.linspace(0, 1, 150)
-data = simulate(n=50, argvals=argvals, n_basis=5, seed=42)
-
-# Inject 2 magnitude outliers
-data[0] += 3.0
-data[1] -= 2.5
+data = np.asarray(simulate(n=50, argvals=argvals, n_basis=5, seed=42))
+data[0] += 3.0                                   # magnitude outlier up
+data[1] -= 2.5                                   # magnitude outlier down
 fd = Fdata(data, argvals=argvals)
 
-# --- 2. Compute three different depths ------------------------------------
-depths_mbd = fd.depth("modified_band")
-depths_fm  = fd.depth("fraiman_muniz")
-depths_rt  = fd.depth("random_tukey")
+depths_mbd = np.asarray(fd.depth("modified_band"))
+depths_fm = np.asarray(fd.depth("fraiman_muniz"))
+depths_rt = np.asarray(fd.depth("random_tukey"))
 
-# --- 3. Functional median (deepest curve) ---------------------------------
-median_idx = np.argmax(depths_mbd)
-print(f"Functional median is curve {median_idx}")
-
-# --- 4. Visualize depth ranking ------------------------------------------
-fig, axes = plt.subplots(1, 3, figsize=(16, 5))
-
-for ax, depths, name in zip(axes,
-                             [depths_mbd, depths_fm, depths_rt],
-                             ["MBD", "Fraiman-Muniz", "Random Tukey"]):
-    order = np.argsort(depths)  # low depth first (outliers)
-
-    # Plot all curves, colored by depth
+f, axes = fig(1, 3, figsize=(13, 4))
+for ax, depths, name in zip(axes, [depths_mbd, depths_fm, depths_rt],
+                            ["MBD", "Fraiman-Muniz", "Random Tukey"]):
+    order = np.argsort(depths)                    # low depth first (outliers)
     for i in order:
         c = plt.cm.viridis(depths[i] / depths.max())
-        ax.plot(fd.argvals, fd.data[i], color=c, alpha=0.5, lw=0.8)
-
-    # Highlight median
-    med = np.argmax(depths)
-    ax.plot(fd.argvals, fd.data[med], "r-", lw=2.5, label=f"Median (#{med})")
-
-    # Highlight two outliers
+        ax.plot(argvals, data[i], color=c, alpha=0.5, lw=0.8)
+    med = int(np.argmax(depths))
+    ax.plot(argvals, data[med], "r-", lw=2.5, label=f"median (#{med})")
     for out_idx in order[:2]:
-        ax.plot(fd.argvals, fd.data[out_idx], "k--", lw=1.5, alpha=0.7)
-
-    ax.set_title(name)
+        ax.plot(argvals, data[out_idx], "k--", lw=1.5, alpha=0.7)
+    ax.set(title=name, xlabel="t")
     ax.legend(fontsize=8)
-
-plt.suptitle("Depth-based ordering (bright = deep, dark = outlying)")
-plt.tight_layout()
-plt.show()
+print(render(f))
 ```
+
+All three measures pick the same red median curve in the centre of the bundle and dash the same two injected outliers, so the deepest and shallowest curves are robust to the choice of depth. The colour gradient of the intermediate curves differs slightly, reflecting how each measure trades off magnitude against shape.
+
+## Modal depth and the bandwidth `h`
+
+Modal depth is the one measure with a free tuning knob, the kernel bandwidth $h$. Sweeping $h$ shows its effect directly: a small bandwidth makes the depth ranking sharp and local (only near-identical curves count as deep), while a large bandwidth flattens the ranking until almost every curve looks equally central.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.depth import modal_1d
+
+t = np.linspace(0, 1, 100)
+X = np.asarray(simulate(n=40, argvals=t, n_basis=6, efun_type="fourier", seed=3))
+X[0] += 2.5                                       # a clear outlier
+
+f, ax = fig(figsize=(7, 4))
+for h in (0.25, 0.5, 1.0, 2.0):
+    d = np.asarray(modal_1d(X, X, h=h))
+    d = d / d.max()                               # normalize to compare shapes
+    ax.plot(np.sort(d)[::-1], lw=1.8, label=f"h = {h}")
+ax.set(title="Sorted modal depth for increasing bandwidth h",
+       xlabel="rank (deep -> shallow)", ylabel="depth (normalized)")
+ax.legend()
+print(render(f))
+```
+
+Small bandwidths give a steep curve -- depth falls off quickly from the mode, so only a few curves score high and the outlier is sharply isolated. As $h$ grows the curve flattens toward a constant, the classic under-resolved regime where every curve looks equally deep and outliers stop standing out.
 
 ## Depth for outlier detection
 

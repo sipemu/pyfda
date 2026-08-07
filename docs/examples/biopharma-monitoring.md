@@ -101,8 +101,19 @@ the FPCA control chart below both sensitive and interpretable.
 
 We fit the FPCA control model on 30 randomly chosen normal batches with
 `spm_phase1` (component count from the variance-90 % rule, $\alpha = 0.01$),
-holding out the remaining normal batches to check false-alarm behaviour. The
-Phase I model gives a mean trajectory and a control envelope.
+holding out the remaining normal batches to check false-alarm behaviour. Each
+batch trajectory $x(t)$ is reduced to $A$ functional-PCA scores $\xi_a$, and two
+statistics with $\alpha$-level control limits summarize it — Hotelling's $T^2$
+inside the model subspace and the squared prediction error outside it:
+
+$$
+T^2 = \sum_{a=1}^{A} \frac{\xi_a^2}{\lambda_a},
+\qquad
+\mathrm{SPE} = \Bigl\lVert\, x - \bar x - \sum_{a=1}^{A} \xi_a\,\phi_a \,\Bigr\rVert_{L^2}^2 ,
+$$
+
+where $\lambda_a$ and $\phi_a$ are the reference eigenvalues and eigenfunctions.
+The Phase I model gives a mean trajectory and a control envelope.
 
 ```python exec="1" html="1"
 import numpy as np
@@ -149,9 +160,18 @@ it — a functional deviation the control chart is built to quantify.
 
 With the Phase I model fixed, we monitor the faulty batches with two charts: the
 **Shewhart** $T^2$/SPE chart (`spm_monitor`) and an **EWMA** chart on the FPC
-scores (`ewma_scores`, scored with the MEWMA variance factor
-$\lambda/(2-\lambda)$). A batch is out-of-control if a statistic crosses its
-limit.
+scores (`ewma_scores`). The EWMA smooths the score vector $\xi_i$ across the
+batch sequence,
+
+$$
+z_i = \lambda\,\xi_i + (1-\lambda)\,z_{i-1},
+\qquad
+\mathrm{Cov}(z_i) \to \frac{\lambda}{2-\lambda}\,\Sigma_\xi ,
+$$
+
+so the monitored MEWMA statistic $z_i^\top \bigl(\tfrac{\lambda}{2-\lambda}\Sigma_\xi\bigr)^{-1} z_i$
+carries the variance factor $\lambda/(2-\lambda)$. A batch is out-of-control if a
+statistic crosses its limit.
 
 ```python exec="1" html="1"
 import numpy as np
@@ -297,12 +317,17 @@ which a batch alarms is its **time-to-detection**.
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_penicillin
-from fdars.spm import spm_phase1, spm_monitor
+from fdars.spm import spm_phase1, spm_monitor, select_ncomp
 
 t, X, meta = load_penicillin()
 t = np.ascontiguousarray(t)
 status = meta["status"].to_numpy()
 normal, faulty = status == "normal", status == "faulty"
+
+eig = np.asarray(spm_phase1(np.ascontiguousarray(X[normal]), t, ncomp=8,
+                            alpha=0.01)["eigenvalues"])
+ncomp = int(select_ncomp(np.ascontiguousarray(eig),
+                         method="cumulative_variance", threshold=0.90))
 
 rng = np.random.default_rng(1)
 nidx = np.where(normal)[0]; rng.shuffle(nidx)
@@ -315,7 +340,8 @@ checkpoints = np.arange(20, 201, 20)
 first_alarm = np.full(len(X), -1.0)
 for k in checkpoints:
     tw = np.ascontiguousarray(t[:k]); Xw = np.ascontiguousarray(X[:, :k])
-    p1 = spm_phase1(np.ascontiguousarray(Xw[phase1_idx]), tw, ncomp=4, alpha=0.01)
+    p1 = spm_phase1(np.ascontiguousarray(Xw[phase1_idx]), tw, ncomp=ncomp,
+                    alpha=0.01)
     p2 = spm_monitor(mean=p1["mean"], loadings=p1["loadings"], weights=p1["weights"],
                      eigenvalues=p1["eigenvalues"], t2_limit=p1["t2_limit"],
                      spe_limit=p1["spe_limit"],

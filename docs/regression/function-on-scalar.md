@@ -133,6 +133,10 @@ ax.legend(ncol=3)
 print(render(f))
 ```
 
+Each estimated curve hugs its dashed truth: the sinusoid, the higher-frequency
+cosine, and the parabolic bump are all recovered, confirming that the ridge
+penalty smooths without flattening the genuine signal.
+
 ### Interpreting coefficient functions
 
 Each $\hat{\beta}_j(t)$ describes the effect of predictor $j$ on the response at
@@ -205,6 +209,10 @@ ax.fill_between(t, 0, r2t, color="#3f51b5", alpha=0.15)
 ax.set(title=r"Pointwise $R^2(t)$", xlabel="t", ylabel=r"$R^2(t)$", ylim=(0, 1))
 print(render(f))
 ```
+
+The curve is high on the left, where the second predictor's effect lives, and
+sags toward the right, where only the sinusoid contributes and noise dominates —
+a direct map of *where* the scalar predictors earn their keep.
 
 ---
 
@@ -327,6 +335,10 @@ a1.set(title=f"Pointwise F(t)   (p = {res['p_value']:.3f})",
 print(render(f))
 ```
 
+The three group means fan apart most strongly near the middle and right of the
+domain, and the $F(t)$ trace peaks in exactly those regions — the permutation
+$p$-value confirms the separation is far beyond chance.
+
 ---
 
 ## Diagnostics: pointwise residual variance
@@ -360,6 +372,10 @@ ax.plot(t, rv, color="#3f51b5", lw=2)
 ax.set(title="Pointwise residual variance", xlabel="t", ylabel="Var(residual)")
 print(render(f))
 ```
+
+Residual variance is flat and small over the first half of the domain but climbs
+sharply past $t=0.5$, exactly matching the heteroscedastic noise we injected — a
+clear signal that a constant-variance assumption would be violated there.
 
 ---
 
@@ -402,6 +418,43 @@ if fanova_result["p_value"] < 0.05:
 else:
     print("No significant treatment effect.")
 ```
+
+The estimated treatment-effect curve $\hat\beta_1(t)$ should localise the bump we
+built into the simulation. Plotting it against the truth confirms both its shape
+and its timing:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.regression import fosr
+
+np.random.seed(77)
+n, m = 90, 121
+t = np.linspace(0, 1, m)
+treatment = np.array([0] * 45 + [1] * 45, dtype=np.int64)
+predictors = treatment.reshape(-1, 1).astype(np.float64)
+effect = 2.0 * np.exp(-((t - 0.5) ** 2) / 0.02)
+
+raw = np.zeros((n, m))
+for i in range(n):
+    baseline = np.sin(2 * np.pi * t) + 0.5 * np.random.randn() * np.cos(np.pi * t)
+    raw[i] = baseline + treatment[i] * effect + 0.4 * np.random.randn(m)
+
+beta_hat = np.asarray(fosr(raw, predictors, lambda_=0.1)["beta"])[0]
+
+f, ax = fig()
+ax.plot(t, effect, color="#6c757d", lw=1.5, ls="--", label="true effect")
+ax.plot(t, beta_hat, color="#e8710a", lw=2, label=r"$\hat\beta_1(t)$")
+ax.axvline(t[np.argmax(beta_hat)], color="#3f51b5", ls=":", lw=1.2,
+           label=f"peak at t = {t[np.argmax(beta_hat)]:.2f}")
+ax.set(title="Recovered treatment-effect curve", xlabel="t", ylabel="effect")
+ax.legend()
+print(render(f))
+```
+
+The recovered curve peaks near $t=0.5$ and tapers to zero elsewhere, matching the
+localized Gaussian effect that was injected — the estimator correctly isolates
+both *how large* and *when* the treatment acts.
 
 ---
 

@@ -32,9 +32,24 @@ Every wavelength verdict is read off a real binding, not asserted.
 We work on the second derivative of each spectrum (a standard NIR baseline
 correction — see [the regression walkthrough](tecator-regression.md)) and fit
 `fregre_lm` with five FPC components. The model exposes `beta_t`, the estimated
-coefficient function $\beta(\lambda)$: the response is $\hat y = \alpha + \int
-\beta(\lambda)\,x(\lambda)\,d\lambda$, so the shape of $\beta$ says where the
-spectrum is being weighted.
+coefficient function $\beta(\lambda)$. The functional linear model predicts fat
+by integrating the spectrum against that coefficient function,
+
+$$
+\hat y = \alpha + \int_\Lambda \beta(\lambda)\,x(\lambda)\,d\lambda ,
+$$
+
+so the shape of $\beta$ says where the spectrum is being weighted. FPC
+regression makes this estimable by expanding $\beta$ in the leading $K$
+functional principal components $\{\phi_k\}$, turning the ill-posed integral fit
+into an ordinary regression of the response on the FPC scores
+$c_{ik}=\langle x_i,\phi_k\rangle$:
+
+$$
+\beta(\lambda) = \sum_{k=1}^{K} b_k\,\phi_k(\lambda),
+\qquad
+\hat y_i = \alpha + \sum_{k=1}^{K} b_k\,c_{ik} .
+$$
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -110,9 +125,11 @@ print(render(f))
 The shaded bands are exactly the wavelengths where the bootstrap CI excludes
 zero. The strongest, widest band sits right across the **930 nm fat absorption
 region** — the model has rediscovered the chemistry unaided — with a matching
-sign flip just beyond it, the signature of a second-derivative peak. Channels far
-from the absorption bands are left unshaded: the CI there straddles zero, so the
-model (correctly) makes no claim about them.
+sign flip just beyond it, the signature of a second-derivative peak. A weaker
+secondary band also survives near **~1045 nm**, at the red edge of the range,
+consistent with a further C–H combination feature. Most channels between and
+beyond these bands are left unshaded: the CI there straddles zero, so the model
+(correctly) makes no claim about them.
 
 !!! note "Two routes to the same regions"
     `significant_regions(lower, upper)` works straight from CI bounds;

@@ -170,6 +170,11 @@ ax.set(title="Studentized residual vs. leverage",
 print(render(f))
 ```
 
+Most points sit in the central band between the dotted $\pm 2$ lines, marking a well-behaved
+bulk of observations. The red point flagged at high studentized residual is the outlier we
+injected at index 5 — reading residual against leverage separates a mere large residual (a
+vertical outlier) from a genuinely influential point that also sits far out in predictor space.
+
 ## Leave-one-out PRESS — `loo_cv_press`
 
 The **PRESS** statistic sums the squared leave-one-out residuals, and `loo_r_squared`
@@ -548,9 +553,10 @@ ax.set(title=f"Coefficient of variation of beta(t) (mean CV = {cv.mean():.2f})",
 print(render(f))
 ```
 
-The CV spikes exactly where $\beta(t)$ crosses zero — the denominator shrinks there, so a
-high CV is an artifact of near-zero coefficients rather than genuine instability. Away from
-those crossings the coefficient function is estimated consistently across resamples.
+The CV spikes near where $\beta(t) = \sin(2\pi t)$ crosses zero (around $t\approx 0$, $0.5$
+and $1$) — the denominator shrinks in those neighborhoods, so a high CV there is largely an
+artifact of near-zero coefficients rather than genuine instability. Away from those crossings
+the coefficient function is estimated consistently across resamples.
 
 !!! note "Flagging is not deleting"
     A flagged point is a point to *investigate*, not automatically remove. High influence may

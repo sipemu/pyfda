@@ -49,6 +49,8 @@ a2.legend(fontsize=8)
 print(render(f))
 ```
 
+The dashed red cross-sectional mean is a washed-out compromise -- it averages heights at fixed times across curves that peak at different times. The solid orange elastic mean shape instead recovers a crisp representative that actually resembles the individual curves, because it averages after removing phase. That contrast is the motivation for shape-space statistics.
+
 ---
 
 ## The quotient geometry
@@ -170,6 +172,8 @@ The two curves on the left have visibly different $\mathbb{L}^2$ norms; their SR
     print(f"relative deviation (isometry error): {rel:.2e}")
     ```
 
+The two printed SRSF distances -- before and after applying the *same* warp to both curves -- agree to well under a percent, so warping is an isometry up to discretization. This is the property that makes shape distances well defined: reparameterizing both curves together leaves their separation unchanged.
+
 ### Geodesic distance in shape space
 
 On the SRSF sphere the geodesic distance between two representatives is the arc length
@@ -196,8 +200,9 @@ from docs_fig import fig, render
 from fdars.alignment import curve_geodesic
 
 t = np.linspace(0, 1, 120)
-f1 = np.exp(-((t - 0.35) ** 2) / 0.01)          # bump on the left
-f2 = np.exp(-((t - 0.65) ** 2) / 0.01)          # bump on the right
+f1 = np.exp(-((t - 0.5) ** 2) / 0.01)           # one bump (unimodal)
+f2 = (np.exp(-((t - 0.3) ** 2) / 0.008)
+      + np.exp(-((t - 0.7) ** 2) / 0.008))       # two bumps (bimodal, a different shape)
 
 geo = curve_geodesic(f1, f2, t, n_points=7)
 path = np.asarray(geo["curves"])                # (7, m) curves along geodesic
@@ -221,7 +226,7 @@ print(render(f_))
 print(f"total shape geodesic distance: {darc[-1]:.4f}")
 ```
 
-Each intermediate curve is a *shape* between the two bumps — the peak migrates continuously from left to right rather than one bump fading while the other grows (which is what a naive $\mathbb{L}^2$ straight line would do). The arc length grows roughly linearly, as expected for a constant-speed geodesic.
+The right panel is the cleanest diagnostic: the cumulative arc length grows **linearly** in the path parameter, the signature of a constant-speed geodesic connecting the unimodal and bimodal shapes. In curve space (left) the path deforms the single bump toward the two-bump end; because the geodesic lives in the reparameterization quotient, the reconstructed intermediates stay close to the start shape until the second bump emerges near the far end, so the linear arc-length growth is the more reliable evidence of the geodesic than any single intermediate curve.
 
 ### The Karcher mean as a shape average
 
@@ -285,7 +290,7 @@ f_warped = reparameterize_curve(f, t, gamma)   # same orbit, different parameter
 
 ### A two-group worked example
 
-The shape distance really earns its keep on curves that differ *only* in phase within a group. Below, two groups of bump curves (a left bump vs. a right bump) have their peak positions jitter within each group. Shape distance factors out that jitter, so within-group distances are small and cross-group distances are large -- and the distance matrix shows a clean block structure that ordinary hierarchical clustering separates perfectly.
+The shape distance really earns its keep when groups differ in *shape* but each group also carries nuisance phase variation. Below, one group is **unimodal** (a single bump) and the other is **bimodal** (two bumps); within each group the peak positions jitter. Shape distance factors out that within-group jitter but preserves the unimodal-vs-bimodal difference, so within-group distances are small and cross-group distances are large -- and the distance matrix shows a clean block structure that ordinary hierarchical clustering separates perfectly. (Note: two curves that differ only in bump *position* -- e.g. a left bump vs. a right bump -- are the *same* shape under the reparameterization quotient, so they would **not** form separable groups; the groups must differ in genuine shape.)
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -296,10 +301,13 @@ rng = np.random.default_rng(42)
 n, m = 30, 50
 t = np.linspace(0, 1, m)
 X = np.zeros((n, m))
-for i in range(15):                       # left-bump group
-    X[i] = np.exp(-((t - (0.3 + rng.normal(0, 0.05))) ** 2) / 0.02) + rng.normal(0, 0.05, m)
-for i in range(15, 30):                   # right-bump group
-    X[i] = np.exp(-((t - (0.7 + rng.normal(0, 0.05))) ** 2) / 0.02) + rng.normal(0, 0.05, m)
+for i in range(15):                       # unimodal group (one bump, jittered position)
+    c = 0.5 + rng.normal(0, 0.05)
+    X[i] = np.exp(-((t - c) ** 2) / 0.02) + rng.normal(0, 0.03, m)
+for i in range(15, 30):                   # bimodal group (two bumps -> different shape)
+    c = rng.normal(0, 0.05)
+    X[i] = (np.exp(-((t - (0.3 + c)) ** 2) / 0.01)
+            + np.exp(-((t - (0.7 + c)) ** 2) / 0.01)) + rng.normal(0, 0.03, m)
 
 # within-group vs cross-group shape distance
 d_same = shape_distance(X[0], X[5], t)["distance"]
@@ -315,8 +323,8 @@ D = np.asarray(shape_self_distance_matrix(X, t, quotient="reparameterization"))
 f, (a1, a2) = fig(ncols=2, figsize=(9.8, 4.0))
 a1.plot(t, X[:15].T, color="#3f51b5", lw=0.7, alpha=0.3)
 a1.plot(t, X[15:].T, color="#e8710a", lw=0.7, alpha=0.3)
-a1.plot(t, mu_left, color="#3f51b5", lw=2.6, label="left shape mean")
-a1.plot(t, mu_right, color="#e8710a", lw=2.6, label="right shape mean")
+a1.plot(t, mu_left, color="#3f51b5", lw=2.6, label="unimodal shape mean")
+a1.plot(t, mu_right, color="#e8710a", lw=2.6, label="bimodal shape mean")
 a1.set(title="Two shape groups + Karcher shape means", xlabel="t", ylabel="f(t)")
 a1.legend(fontsize=8)
 
@@ -339,7 +347,7 @@ acc = max((labels == group + 1).mean(), (labels == 2 - group).mean())
 print(f"2-cluster agreement with true groups: {acc:.0%}")
 ```
 
-The within-group distance is smaller than the cross-group distance because the only within-group difference -- peak location -- is exactly the phase variation the quotient factors out. The distance matrix's two dark diagonal blocks confirm it, and complete-linkage clustering recovers the groups.
+The within-group distance is small because the only within-group difference -- peak position -- is exactly the phase variation the quotient factors out, while the cross-group distance stays large because unimodal and bimodal are genuinely different shapes. The distance matrix's two dark diagonal blocks confirm it, and complete-linkage clustering recovers the groups.
 
 `shape_mean` returns the same keys as `karcher_mean` (`mean`, `mean_srsf`, `aligned_data`, `gammas`, `n_iter`, `converged`); pass `quotient=` to choose which nuisance to factor out.
 
@@ -387,6 +395,8 @@ print(render(f))
 width = float(np.trapezoid(upper - lower, t))
 print(f"mean band width (integrated): {width:.4f}")
 ```
+
+The orange band traces where the mean shape is precisely pinned (narrow) versus uncertain (wide), and because it is built from bootstrap resamples *of aligned shapes* it measures amplitude uncertainty rather than residual phase jitter. The integrated width printed below gives a single scalar for how tightly the sample determines the mean.
 
 | Key | Type | Description |
 |-----|------|-------------|
@@ -484,6 +494,8 @@ ax.set(title="Curves shaded by combined elastic depth",
 ax.legend()
 print(render(f))
 ```
+
+Opacity encodes elastic depth: the darkest curve (highlighted orange) is the elastic median -- the most central shape -- while the faint outer curves are the shallowest, least typical members. Because depth is computed in the elastic space, a curve is "deep" when its *shape* is central, independent of whether its peaks arrived early or late.
 
 ---
 

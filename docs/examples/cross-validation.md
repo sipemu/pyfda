@@ -17,6 +17,27 @@ sample, from which a single honest error estimate falls out. This page uses the
 Tecator spectra to predict **fat** and compares three functional regressions on
 that honest footing.
 
+Let $\kappa(i)\in\{1,\dots,K\}$ be the fold holding sample $i$, and let
+$\hat f^{(-\kappa(i))}$ denote the model trained on every fold *except*
+$\kappa(i)$. The out-of-fold prediction for sample $i$ is that held-out model
+evaluated on curve $x_i$, and the honest error is their mean square:
+
+$$
+\hat y_i^{\text{OOF}} = \hat f^{(-\kappa(i))}(x_i),
+\qquad
+\text{MSE}_{\text{OOF}} = \frac{1}{n}\sum_{i=1}^{n}
+   \bigl(y_i - \hat y_i^{\text{OOF}}\bigr)^2 .
+$$
+
+The corresponding honest coefficient of determination compares that error to the
+variance of the response, so $R^2_{\text{OOF}} = 1$ is perfect prediction and
+$R^2_{\text{OOF}} = 0$ matches the constant mean:
+
+$$
+R^2_{\text{OOF}} = 1 - \frac{\sum_{i}(y_i - \hat y_i^{\text{OOF}})^2}
+                              {\sum_{i}(y_i - \bar y)^2} .
+$$
+
 ## The optimism of the in-sample fit
 
 We start with the FPC linear model (`fregre_lm`): project each spectrum onto its
@@ -70,49 +91,51 @@ components the model is memorising noise, and its honest accuracy gets worse eve
 as the in-sample number keeps improving. The shaded gap between the two is the
 optimism you pay for by trusting the in-sample fit.
 
-!!! success "Validation — optimism is non-negative, and CV picks a sane $k$"
-    The whole page rests on one inequality that must hold by construction: a
-    model's **out-of-fold error can never be smaller than its in-sample error**
-    for the same complexity — the gap *is* the optimism. We assert
-    $\text{MSE}_{\text{OOF}} \ge \text{MSE}_{\text{in}}$ at a fixed component
-    count. We also assert `fregre_cv` returns an `optimal_k` inside the searched
-    range $[1, 12]$ (not a degenerate 0 or an out-of-range index).
+### Validation — optimism is non-negative, and CV picks a sane $k$
 
-    ```python exec="1" source="above"
-    import numpy as np
-    from docs_data import load_tecator
-    from fdars.fdata import deriv_1d
-    from fdars.regression import fregre_lm, predict_fregre_lm, fregre_cv
+The whole page rests on one inequality that must hold by construction: a
+model's **out-of-fold error can never be smaller than its in-sample error**
+for the same complexity — the gap *is* the optimism, $\text{opt} =
+\text{MSE}_{\text{OOF}} - \text{MSE}_{\text{in}} \ge 0$. We assert
+$\text{MSE}_{\text{OOF}} \ge \text{MSE}_{\text{in}}$ at a fixed component
+count. We also assert `fregre_cv` returns an `optimal_k` inside the searched
+range $[1, 12]$ (not a degenerate 0 or an out-of-range index).
 
-    wl, X, meta = load_tecator()
-    fat = meta["fat"].to_numpy()
-    D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
-    n = len(fat)
-    rng = np.random.default_rng(0)
-    folds = rng.integers(0, 5, n)
-    mse = lambda y, p: float(np.mean((y - p) ** 2))
+```python exec="1" source="above"
+import numpy as np
+from docs_data import load_tecator
+from fdars.fdata import deriv_1d
+from fdars.regression import fregre_lm, predict_fregre_lm, fregre_cv
 
-    # (1) OOF error >= in-sample error at fixed complexity (the optimism gap)
-    nc = 20
-    ins = np.asarray(fregre_lm(D2, fat, n_comp=nc)["fitted_values"])
-    oof = np.empty(n)
-    for k in range(5):
-        te = folds == k
-        oof[te] = np.asarray(predict_fregre_lm(D2[~te], fat[~te], D2[te], n_comp=nc))
-    e_in, e_oof = mse(fat, ins), mse(fat, oof)
-    assert e_oof >= e_in, (e_oof, e_in)
+wl, X, meta = load_tecator()
+fat = meta["fat"].to_numpy()
+D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
+n = len(fat)
+rng = np.random.default_rng(0)
+folds = rng.integers(0, 5, n)
+mse = lambda y, p: float(np.mean((y - p) ** 2))
 
-    # (2) fregre_cv selects a component count inside the searched range
-    kbest = int(fregre_cv(D2, fat, k_min=1, k_max=12, n_folds=5)["optimal_k"])
-    assert 1 <= kbest <= 12, kbest
-    print(f"in-sample MSE {e_in:.3f}  <=  OOF MSE {e_oof:.3f}  "
-          f"(optimism {e_oof - e_in:.3f})")
-    print(f"fregre_cv optimal_k = {kbest}  (in [1, 12])")
-    ```
+# (1) OOF error >= in-sample error at fixed complexity (the optimism gap)
+nc = 20
+ins = np.asarray(fregre_lm(D2, fat, n_comp=nc)["fitted_values"])
+oof = np.empty(n)
+for k in range(5):
+    te = folds == k
+    oof[te] = np.asarray(predict_fregre_lm(D2[~te], fat[~te], D2[te], n_comp=nc))
+e_in, e_oof = mse(fat, ins), mse(fat, oof)
+assert e_oof >= e_in, (e_oof, e_in)
 
-    Both hold: the honest error exceeds the in-sample error by the optimism gap,
-    and the cross-validated component count is a sane value inside the search
-    grid — the machinery is measuring generalisation, not memorisation.
+# (2) fregre_cv selects a component count inside the searched range
+kbest = int(fregre_cv(D2, fat, k_min=1, k_max=12, n_folds=5)["optimal_k"])
+assert 1 <= kbest <= 12, kbest
+print(f"in-sample MSE {e_in:.3f}  <=  OOF MSE {e_oof:.3f}  "
+      f"(optimism {e_oof - e_in:.3f})")
+print(f"fregre_cv optimal_k = {kbest}  (in [1, 12])")
+```
+
+Both hold: the honest error exceeds the in-sample error by the optimism gap,
+and the cross-validated component count is a sane value inside the search
+grid — the machinery is measuring generalisation, not memorisation.
 
 ## Choosing the number of components
 
@@ -132,7 +155,7 @@ wl, X, meta = load_tecator()
 fat = meta["fat"].to_numpy()
 D2 = np.asarray(deriv_1d(X, wl, nderiv=2))
 
-cv = fregre_cv(D2, fat, k_min=1, k_max=12, n_folds=5)
+cv = fregre_cv(D2, fat, k_min=1, k_max=25, n_folds=5)
 kk = np.asarray(cv["k_values"])
 err = np.asarray(cv["cv_errors"])
 kbest = int(cv["optimal_k"])
@@ -148,9 +171,14 @@ ax.legend()
 print(render(f))
 ```
 
-The CV error drops steeply, flattens into an elbow, and `fregre_cv` marks the
-component count that minimises it. Everything to the right of the elbow buys
-negligible honest accuracy at the cost of a more complex model.
+The CV error drops steeply through the first dozen or so components, then bends
+into a long, shallow decline before bottoming out and ticking back up — so the
+minimum is a genuine interior optimum, not an artefact of stopping the search too
+early. `fregre_cv` marks the component count that minimises the curve. The visual
+*elbow* — where each extra component stops buying much — sits around a dozen
+components; past it the curve keeps inching down to its flat minimum, so anything
+from the elbow onward is a defensible choice, trading a little honest accuracy for
+a simpler model.
 
 !!! note "`fregre_cv` returns the OOF predictions for free"
     Besides `optimal_k`, `min_cv_error`, `k_values` and `cv_errors`, the returned
@@ -345,12 +373,12 @@ ax.set(title="Honest (out-of-fold) $R^2$ by model",
 print(render(f))
 ```
 
-On these second-derivative spectra all three models clear an OOF $R^2$ of 0.93,
-but they are not tied: the nonparametric neighbour model edges ahead, PLS follows
-closely, and the FPC linear model — which spends its components on the largest
-spectral variance rather than the fat signal — trails slightly. Because every
-number here is out-of-fold, the ranking reflects predictive ability, not fitting
-capacity.
+On these second-derivative spectra all three models clear an OOF $R^2$ of 0.95.
+The nonparametric neighbour model edges clearly ahead (~0.978), while **PLS and
+the FPC linear model are effectively tied** (~0.956 apiece) — the linear methods
+extract the same predictive signal here, and neither has an edge over the other.
+Because every number is out-of-fold, this ranking reflects predictive ability,
+not fitting capacity.
 
 !!! warning "PLS component count on collinear spectra"
     `fregre_pls` factorises a covariance matrix with a Cholesky decomposition.

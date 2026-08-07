@@ -8,7 +8,15 @@ Partition a set of functional observations into homogeneous groups. `fdars` prov
 
 ## K-means for functional data
 
-The functional k-means algorithm minimises the total within-cluster $L^2$ distance, iterating between assignment and centroid update until convergence.
+The functional k-means algorithm minimises the total within-cluster $L^2$ distance,
+iterating between assignment and centroid update until convergence. Writing $c_k$ for the
+$k$-th centroid curve and $C_k$ for the observations assigned to it, the objective is
+
+$$
+J_{\text{kmeans}} = \sum_{k=1}^{K} \sum_{i \in C_k} \int_{\mathcal{T}} \bigl(X_i(t) - c_k(t)\bigr)^2 \, dt,
+$$
+
+with the centroid update setting each $c_k$ to the mean curve of its cluster.
 
 ```python
 import numpy as np
@@ -77,7 +85,15 @@ print(render(f))
 
 ## Fuzzy C-means
 
-Fuzzy c-means assigns each observation a *membership degree* for every cluster rather than a hard label, controlled by the fuzziness parameter $m$ (default 2).
+Fuzzy c-means assigns each observation a *membership degree* $u_{ik} \in [0, 1]$ for every
+cluster rather than a hard label, controlled by the fuzziness parameter $m$ (default 2). It
+minimises the weighted within-cluster objective
+
+$$
+J_{\text{fcm}} = \sum_{i=1}^{n} \sum_{k=1}^{K} u_{ik}^{\,m} \, \bigl\| X_i - c_k \bigr\|_{L^2}^2, \qquad \sum_{k=1}^{K} u_{ik} = 1,
+$$
+
+so larger $m$ flattens the memberships toward the uniform value $1/K$ and softens the partition.
 
 ```python
 from fdars.clustering import fuzzy_cmeans_fd
@@ -218,8 +234,8 @@ from fdars.metric import lp_self_1d
 # Three-group data
 argvals = np.linspace(0, 1, 100)
 g1 = simulate(25, argvals, n_basis=5, seed=1)
-g2 = simulate(25, argvals, n_basis=5, seed=2) + 3.0
-g3 = simulate(25, argvals, n_basis=5, seed=3) - 3.0
+g2 = simulate(25, argvals, n_basis=5, seed=2) + 8.0
+g3 = simulate(25, argvals, n_basis=5, seed=3) + 16.0
 fd = Fdata(np.vstack([g1, g2, g3]), argvals=argvals)
 
 dist = lp_self_1d(fd.data, fd.argvals, p=2.0)
@@ -244,9 +260,11 @@ from fdars.clustering import kmeans_fd, silhouette_score
 from fdars.metric import lp_self_1d
 
 t = np.linspace(0, 1, 100)
+# Three well-separated groups: level 0, +8, +16 (gaps wide enough that no
+# two-way split beats the three-way one).
 g1 = np.asarray(simulate(15, t, n_basis=5, seed=1))
-g2 = np.asarray(simulate(15, t, n_basis=5, seed=2)) + 3.0
-g3 = np.asarray(simulate(15, t, n_basis=5, seed=3)) - 3.0
+g2 = np.asarray(simulate(15, t, n_basis=5, seed=2)) + 8.0
+g3 = np.asarray(simulate(15, t, n_basis=5, seed=3)) + 16.0
 X = np.vstack([g1, g2, g3])
 dist = np.asarray(lp_self_1d(X, t, p=2.0))
 
@@ -282,8 +300,8 @@ from fdars.clustering import kmeans_fd
 t = np.linspace(0, 1, 80)
 X = np.vstack([
     np.asarray(simulate(15, t, n_basis=5, seed=1)),
-    np.asarray(simulate(15, t, n_basis=5, seed=2)) + 3.0,
-    np.asarray(simulate(15, t, n_basis=5, seed=3)) - 3.0,
+    np.asarray(simulate(15, t, n_basis=5, seed=2)) + 8.0,
+    np.asarray(simulate(15, t, n_basis=5, seed=3)) + 16.0,
 ])
 
 ks = list(range(1, 8))
@@ -297,6 +315,10 @@ ax.set(title="Elbow method: total within-cluster SS vs. k",
 ax.legend()
 print(render(f))
 ```
+
+The within-cluster scatter drops steeply from $k = 1$ to $k = 3$ and then flattens, so the
+curve bends sharply at $k = 3$ -- the elbow -- agreeing with the silhouette peak and
+correctly recovering the three planted groups.
 
 ---
 
@@ -379,6 +401,11 @@ mem = np.asarray(fcm["membership"])
 entropy = -np.sum(mem * np.log(mem + 1e-12), axis=1)
 print(f"Mean membership entropy: {entropy.mean():.3f}")
 ```
+
+K-means recovers the three well-separated groups at essentially perfect best-match
+accuracy, and the low mean membership entropy from fuzzy c-means confirms the same: with
+clearly separated clusters almost every curve is assigned near-deterministically to a
+single group.
 
 ## See also
 

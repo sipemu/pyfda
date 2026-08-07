@@ -84,45 +84,65 @@ print(render(f))
 The regional signatures are clear: the **Pacific** wet-winter/dry-summer cycle
 driven by frontal systems, the **Continental** summer convective hump, the
 **Atlantic** near-uniform year with a slight autumn lift, and the uniformly low
-**Arctic**. Faulty by eye, these differences are what the FANOVA below tests
+**Arctic**. Clear by eye, these differences are what the FANOVA below tests
 formally.
 
 ## Smoothing
 
 Daily precipitation is noisy even after averaging over 30+ years. Before fitting
-any regression we expand each curve on a **B-spline basis** with 40 functions,
-which removes high-frequency day-to-day fluctuation while preserving the seasonal
-signal. `fdars.basis.fdata_to_basis_1d` fits the basis coefficients and
-`basis_to_fdata_1d` evaluates the smoothed curves back on the daily grid.
+any regression we fit each curve with a **penalised B-spline** (P-spline) on 40
+basis functions, which removes high-frequency day-to-day fluctuation while
+preserving the seasonal signal. For a curve with B-spline coefficients $c$ the
+smoother minimizes a penalized least-squares criterion,
+
+$$
+\min_{c}\ \bigl\lVert y - Bc \bigr\rVert^2 \;+\; \lambda \int \bigl(m''(t)\bigr)^2\,dt,
+\qquad m(t) = \sum_k c_k\,B_k(t),
+$$
+
+where $B$ is the B-spline design matrix and the second-derivative penalty
+enforces smoothness. `fdars.basis.pspline_fit_1d` fits the penalised
+coefficients and returns the smoothed curves directly in its `fitted` field; the
+roughness penalty `lambda_` ($\lambda$ above) controls how aggressively the daily
+noise is damped.
+
+!!! note "Why P-splines rather than a fixed basis?"
+    We use the penalised-spline smoother (`pspline_fit_1d`) rather than a plain
+    fixed-count B-spline projection (`fdata_to_basis_1d`/`basis_to_fdata_1d`)
+    because the roughness penalty `lambda_` controls smoothness *directly* — a
+    single continuous knob — instead of forcing us to choose an exact number of
+    basis functions. On noisy daily precipitation that gives a stable,
+    non-negative-respecting fit without hunting for the right `n_basis`.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_canadian_weather
-from fdars.basis import fdata_to_basis_1d, basis_to_fdata_1d
+from fdars.basis import pspline_fit_1d
 
 day, X, meta = load_canadian_weather("precipitation")
 X = np.ascontiguousarray(np.log1p(X), dtype=np.float64)
 day = np.ascontiguousarray(day, dtype=np.float64)
 station = meta["station"].to_numpy()
 
-coefs, nb = fdata_to_basis_1d(X, day, n_basis=40, basis_type="bspline")
-coefs = np.ascontiguousarray(np.asarray(coefs), dtype=np.float64)
-Xs = np.asarray(basis_to_fdata_1d(coefs, day, n_basis=40, basis_type="bspline"))
+Xs = np.ascontiguousarray(
+    np.asarray(pspline_fit_1d(X, day, n_basis=40, lambda_=10.0)["fitted"]),
+    dtype=np.float64)
 
 i = int(np.where(station == "Vancouver")[0][0]) if "Vancouver" in station else 0
 f, ax = fig()
 ax.plot(day, X[i], color="#adb5bd", lw=0.6, label="raw")
-ax.plot(day, Xs[i], color="#3f51b5", lw=1.8, label="B-spline smoothed (40)")
-ax.set(title=f"{station[i]}: raw vs. B-spline smoothed precipitation",
+ax.plot(day, Xs[i], color="#3f51b5", lw=1.8, label="P-spline smoothed (40)")
+ax.set(title=f"{station[i]}: raw vs. P-spline smoothed precipitation",
        xlabel="day of year", ylabel="log1p(precipitation, mm)")
 ax.set_xticks([1, 91, 182, 274]); ax.set_xticklabels(["Jan", "Apr", "Jul", "Oct"])
 ax.legend()
 print(render(f))
 ```
 
-The smoothed curve captures the winter-peak seasonality without the daily noise.
-All subsequent analyses use these smoothed curves `Xs`.
+The smoothed curve captures the winter-peak seasonality without the daily noise,
+and stays non-negative like the underlying `log1p` precipitation. All subsequent
+analyses use these smoothed curves `Xs`.
 
 ## FOSR: latitude and longitude effects
 
@@ -143,7 +163,7 @@ year each geographic variable matters most. `fdars.regression.fosr` takes the
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_canadian_weather
-from fdars.basis import fdata_to_basis_1d, basis_to_fdata_1d
+from fdars.basis import pspline_fit_1d
 from fdars.regression import fosr
 
 day, X, meta = load_canadian_weather("precipitation")
@@ -151,10 +171,8 @@ X = np.ascontiguousarray(np.log1p(X), dtype=np.float64)
 day = np.ascontiguousarray(day, dtype=np.float64)
 lat = meta["lat"].to_numpy(); lon = meta["lon"].to_numpy()
 
-coefs, nb = fdata_to_basis_1d(X, day, n_basis=40, basis_type="bspline")
 Xs = np.ascontiguousarray(
-    np.asarray(basis_to_fdata_1d(np.ascontiguousarray(np.asarray(coefs)),
-                                 day, n_basis=40, basis_type="bspline")),
+    np.asarray(pspline_fit_1d(X, day, n_basis=40, lambda_=10.0)["fitted"]),
     dtype=np.float64)
 
 predictors = np.ascontiguousarray(np.column_stack([lat, lon]), dtype=np.float64)
@@ -172,12 +190,13 @@ ax.legend()
 print(render(f))
 ```
 
-The **latitude** coefficient $\hat\beta_{\text{lat}}(t)$ is generally negative —
-higher-latitude stations receive less rain — and fairly flat across the year.
-The **longitude** coefficient $\hat\beta_{\text{lon}}(t)$ is the more dynamic
-one: strongly positive in the winter months (more westerly stations get much
-more Pacific rain), fading in summer when continental convection dominates
-regardless of east–west position.
+The **latitude** coefficient $\hat\beta_{\text{lat}}(t)$ swings across the year:
+clearly negative in winter — higher-latitude stations are drier when the wet
+weather is coastal and southern — but rising to positive in mid-summer, when
+interior/northern convection lifts high-latitude rainfall. The **longitude**
+coefficient $\hat\beta_{\text{lon}}(t)$ is near zero in deep winter and positive
+through spring, summer, and autumn (peaking around August), when the east–west
+position separates the drier interior from the wetter coasts.
 
 ### Pointwise R²
 
@@ -191,7 +210,7 @@ $R^2(t) = 1 - \mathrm{SS}_{\text{res}}(t)/\mathrm{SS}_{\text{tot}}(t)$ (clipped 
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_canadian_weather
-from fdars.basis import fdata_to_basis_1d, basis_to_fdata_1d
+from fdars.basis import pspline_fit_1d
 from fdars.regression import fosr
 
 day, X, meta = load_canadian_weather("precipitation")
@@ -199,10 +218,8 @@ X = np.ascontiguousarray(np.log1p(X), dtype=np.float64)
 day = np.ascontiguousarray(day, dtype=np.float64)
 lat = meta["lat"].to_numpy(); lon = meta["lon"].to_numpy()
 
-coefs, nb = fdata_to_basis_1d(X, day, n_basis=40, basis_type="bspline")
 Xs = np.ascontiguousarray(
-    np.asarray(basis_to_fdata_1d(np.ascontiguousarray(np.asarray(coefs)),
-                                 day, n_basis=40, basis_type="bspline")),
+    np.asarray(pspline_fit_1d(X, day, n_basis=40, lambda_=10.0)["fitted"]),
     dtype=np.float64)
 predictors = np.ascontiguousarray(np.column_stack([lat, lon]), dtype=np.float64)
 fit = fosr(Xs, predictors, lambda_=1.0)
@@ -221,9 +238,10 @@ ax.set_xticks([1, 91, 182, 274]); ax.set_xticklabels(["Jan", "Apr", "Jul", "Oct"
 print(render(f))
 ```
 
-Explanatory power peaks in the winter months, when the Pacific moisture gradient
-creates a strong east–west contrast that longitude captures well, and dips in
-summer when convective rain is more uniform geographically.
+Explanatory power peaks in spring (around April, R² ≈ 0.23), when the coastal
+moisture gradient creates a strong contrast that latitude and longitude capture
+well, and collapses to near zero in mid-summer, when convective rain is more
+uniform geographically and geography explains little of the day-to-day pattern.
 
 ## FOSR with an FPC basis
 
@@ -238,7 +256,7 @@ pointwise `r_squared_t` for free.
 import numpy as np
 from docs_fig import fig, render, plt
 from docs_data import load_canadian_weather
-from fdars.basis import fdata_to_basis_1d, basis_to_fdata_1d
+from fdars.basis import pspline_fit_1d
 from fdars.regression import fosr, fosr_fpc
 
 day, X, meta = load_canadian_weather("precipitation")
@@ -246,10 +264,8 @@ X = np.ascontiguousarray(np.log1p(X), dtype=np.float64)
 day = np.ascontiguousarray(day, dtype=np.float64)
 lat = meta["lat"].to_numpy(); lon = meta["lon"].to_numpy()
 
-coefs, nb = fdata_to_basis_1d(X, day, n_basis=40, basis_type="bspline")
 Xs = np.ascontiguousarray(
-    np.asarray(basis_to_fdata_1d(np.ascontiguousarray(np.asarray(coefs)),
-                                 day, n_basis=40, basis_type="bspline")),
+    np.asarray(pspline_fit_1d(X, day, n_basis=40, lambda_=10.0)["fitted"]),
     dtype=np.float64)
 predictors = np.ascontiguousarray(np.column_stack([lat, lon]), dtype=np.float64)
 
@@ -270,7 +286,7 @@ f.suptitle(f"Penalised (R² = {fit['r_squared']:.3f}) vs "
 print(render(f))
 ```
 
-The FPC-based fit reaches a much higher overall R² here (≈0.58 vs ≈0.14 for the
+The FPC-based fit reaches a much higher overall R² here (≈0.47 vs ≈0.12 for the
 penalised fit at λ=1) because the response variation is concentrated in a few
 principal components that the 5-component model captures almost entirely. As the
 [lambda-sensitivity](#model-comparison-and-lambda-sensitivity) section shows,
@@ -290,7 +306,7 @@ and a permutation `p_value`. Group labels are passed as **integer codes**.
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_canadian_weather
-from fdars.basis import fdata_to_basis_1d, basis_to_fdata_1d
+from fdars.basis import pspline_fit_1d
 from fdars.regression import fanova
 
 day, X, meta = load_canadian_weather("precipitation")
@@ -298,10 +314,8 @@ X = np.ascontiguousarray(np.log1p(X), dtype=np.float64)
 day = np.ascontiguousarray(day, dtype=np.float64)
 region = meta["region"].to_numpy()
 
-coefs, nb = fdata_to_basis_1d(X, day, n_basis=40, basis_type="bspline")
 Xs = np.ascontiguousarray(
-    np.asarray(basis_to_fdata_1d(np.ascontiguousarray(np.asarray(coefs)),
-                                 day, n_basis=40, basis_type="bspline")),
+    np.asarray(pspline_fit_1d(X, day, n_basis=40, lambda_=10.0)["fitted"]),
     dtype=np.float64)
 
 labels, codes = np.unique(region, return_inverse=True)
@@ -339,7 +353,7 @@ curves of real stations near that latitude for context.
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_canadian_weather
-from fdars.basis import fdata_to_basis_1d, basis_to_fdata_1d
+from fdars.basis import pspline_fit_1d
 from fdars.regression import predict_fosr
 
 day, X, meta = load_canadian_weather("precipitation")
@@ -348,10 +362,8 @@ day = np.ascontiguousarray(day, dtype=np.float64)
 lat = meta["lat"].to_numpy(); lon = meta["lon"].to_numpy()
 station = meta["station"].to_numpy()
 
-coefs, nb = fdata_to_basis_1d(X, day, n_basis=40, basis_type="bspline")
 Xs = np.ascontiguousarray(
-    np.asarray(basis_to_fdata_1d(np.ascontiguousarray(np.asarray(coefs)),
-                                 day, n_basis=40, basis_type="bspline")),
+    np.asarray(pspline_fit_1d(X, day, n_basis=40, lambda_=10.0)["fitted"]),
     dtype=np.float64)
 predictors = np.ascontiguousarray(np.column_stack([lat, lon]), dtype=np.float64)
 
@@ -385,7 +397,7 @@ sweeping λ.
 import numpy as np
 from docs_fig import fig, render
 from docs_data import load_canadian_weather
-from fdars.basis import fdata_to_basis_1d, basis_to_fdata_1d
+from fdars.basis import pspline_fit_1d
 from fdars.regression import fosr
 
 day, X, meta = load_canadian_weather("precipitation")
@@ -393,10 +405,8 @@ X = np.ascontiguousarray(np.log1p(X), dtype=np.float64)
 day = np.ascontiguousarray(day, dtype=np.float64)
 lat = meta["lat"].to_numpy(); lon = meta["lon"].to_numpy()
 
-coefs, nb = fdata_to_basis_1d(X, day, n_basis=40, basis_type="bspline")
 Xs = np.ascontiguousarray(
-    np.asarray(basis_to_fdata_1d(np.ascontiguousarray(np.asarray(coefs)),
-                                 day, n_basis=40, basis_type="bspline")),
+    np.asarray(pspline_fit_1d(X, day, n_basis=40, lambda_=10.0)["fitted"]),
     dtype=np.float64)
 Zlat = np.ascontiguousarray(lat.reshape(-1, 1), dtype=np.float64)
 Zlon = np.ascontiguousarray(lon.reshape(-1, 1), dtype=np.float64)
@@ -440,14 +450,15 @@ them all at the same, well-chosen λ.
 
 ## Conclusion
 
-- **Latitude dominates** the raw picture (higher-latitude stations are drier),
-  but **longitude** carries a strong, *seasonal* west-to-east moisture gradient
-  that is largest in winter.
+- **Latitude** has a *seasonal* sign flip (higher-latitude stations are drier in
+  winter but relatively wetter at the mid-summer convective peak), and
+  **longitude** carries a west-to-east moisture gradient that is largest in the
+  warmer half of the year.
 - The joint model's apparent underperformance at λ=1 is a penalty-strength
   artefact; at small λ, latitude and longitude together beat either alone.
 - **Functional ANOVA** confirms highly significant regional differences, with
   Pacific the most distinctive region.
-- B-spline smoothing removes daily noise while preserving seasonal structure; the
+- P-spline smoothing removes daily noise while preserving seasonal structure; the
   FPC-based FOSR variant offers a smoother, lower-variance alternative.
 
 With only 35 stations and 2 predictors the models are necessarily limited, but
@@ -467,8 +478,7 @@ they capture the dominant geographic signal.
 
 | Function | Key parameters | Description |
 |----------|----------------|-------------|
-| `fdata_to_basis_1d(data, argvals, n_basis, basis_type)` | `n_basis` | Fit basis coefficients; returns `(coefficients, n_basis)` |
-| `basis_to_fdata_1d(coefficients, argvals, n_basis, basis_type)` | — | Evaluate smoothed curves on the grid |
+| `pspline_fit_1d(data, argvals, n_basis, lambda_, order)` | `n_basis`, `lambda_` | Penalised B-spline smooth; returns `fitted`, `coefficients`, `edf`, `gcv`, … |
 | `fosr(response, predictors, lambda_)` | `lambda_` | Function-on-scalar regression; returns `fitted`, `beta`, `residuals`, `r_squared` |
 | `fosr_fpc(data, predictors, n_comp)` | `n_comp` | FPC-basis FOSR; returns `beta`, `intercept`, `r_squared`, `r_squared_t` |
 | `predict_fosr(response, predictors, new_predictors, lambda_)` | `new_predictors` | Fitted response curves for new predictor rows |

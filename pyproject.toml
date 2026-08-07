@@ -36,9 +36,14 @@ Repository = "https://github.com/sipemu/pyfda"
 Issues = "https://github.com/sipemu/pyfda/issues"
 
 [project.optional-dependencies]
-dev = ["pytest", "matplotlib"]
+plot = ["matplotlib>=3.6"]
+dev = ["pytest", "matplotlib>=3.6"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
 module-name = "fdars._native"
+# Ship the vendored example CSVs (fdars.datasets) inside the wheel. Globs are
+# matched relative to the project root (where the on-disk files live under
+# python-source), so the source path is python/fdars/data/*.csv.
+include = ["python/fdars/data/*.csv"]

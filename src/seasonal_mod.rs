@@ -673,7 +673,107 @@ pub fn seasonal_strength_windowed<'py>(
     Ok(vec_to_numpy1d(py, result))
 }
 
+/// Estimate the dominant seasonal period via autocorrelation (ACF).
+///
+/// Complements :func:`estimate_period_fft` with the ACF-based estimate. Matches
+/// the ACF path of R `estimate.period`.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// max_lag : int, optional
+///     Maximum ACF lag to search. Defaults to m // 2.
+///
+/// Returns
+/// -------
+/// dict
+///     ``period``, ``frequency``, ``power``, ``confidence``.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, max_lag=None))]
+pub fn estimate_period_acf<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    max_lag: Option<usize>,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let (n, m) = (mat.nrows(), mat.ncols());
+    let av = numpy1d_to_vec(argvals);
+    let lag = max_lag.unwrap_or(m / 2);
+    let result = fdars_core::seasonal::estimate_period_acf(mat.as_slice(), n, m, &av, lag);
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("period", result.period)?;
+    dict.set_item("frequency", result.frequency)?;
+    dict.set_item("power", result.power)?;
+    dict.set_item("confidence", result.confidence)?;
+    Ok(dict)
+}
+
+/// Detect multiple seasonal periods by iterative residual peeling.
+///
+/// Matches R `detect.periods`. Returns up to `max_periods` periods that pass the
+/// confidence and strength thresholds, in order of extraction.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// max_periods : int, optional
+///     Maximum number of periods to extract (default 3).
+/// min_confidence : float, optional
+///     Minimum peak-to-mean power ratio to accept a period (default 1.5).
+/// min_strength : float, optional
+///     Minimum seasonal strength (variance explained) to accept (default 0.1).
+///
+/// Returns
+/// -------
+/// list of dict
+///     Each with ``period``, ``confidence``, ``strength``, ``amplitude``,
+///     ``phase``, ``iteration``.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, max_periods=3, min_confidence=1.5, min_strength=0.1))]
+pub fn detect_multiple_periods<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    max_periods: usize,
+    min_confidence: f64,
+    min_strength: f64,
+) -> PyResult<Bound<'py, pyo3::types::PyList>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let (n, m) = (mat.nrows(), mat.ncols());
+    let av = numpy1d_to_vec(argvals);
+    let detected = fdars_core::seasonal::detect_multiple_periods(
+        mat.as_slice(),
+        n,
+        m,
+        &av,
+        max_periods,
+        min_confidence,
+        min_strength,
+    );
+    let list = pyo3::types::PyList::empty(py);
+    for d in detected {
+        let dict = pyo3::types::PyDict::new(py);
+        dict.set_item("period", d.period)?;
+        dict.set_item("confidence", d.confidence)?;
+        dict.set_item("strength", d.strength)?;
+        dict.set_item("amplitude", d.amplitude)?;
+        dict.set_item("phase", d.phase)?;
+        dict.set_item("iteration", d.iteration)?;
+        list.append(dict)?;
+    }
+    Ok(list)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(estimate_period_acf, m)?)?;
+    m.add_function(wrap_pyfunction!(detect_multiple_periods, m)?)?;
     m.add_function(wrap_pyfunction!(sazed, m)?)?;
     m.add_function(wrap_pyfunction!(autoperiod, m)?)?;
     m.add_function(wrap_pyfunction!(cfd_autoperiod, m)?)?;

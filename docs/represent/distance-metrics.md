@@ -45,6 +45,8 @@ for ax, (name, D) in zip(axes, mats):
 print(render(f))
 ```
 
+The $L^2$ and Hausdorff panels show a bright block for the shifted half of the sample -- these metrics read a time shift as a large distance. The DTW panel is comparatively uniform: by warping the time axis it collapses those same shifted pairs back toward the bulk, and the Fourier panel sits in between.
+
 ## $L^p$ distances
 
 The most common functional distances, defined as
@@ -171,7 +173,7 @@ from fdars.simulation import simulate
 from fdars.metric import lp_self_1d, dtw_self_1d
 
 t = np.linspace(0, 1, 120)
-base = np.asarray(simulate(n=1, argvals=t, n_basis=4, efun_type="fourier", seed=5))[0]
+base = np.asarray(simulate(n=1, argvals=t, n_basis=4, efun_type="fourier", seed=33))[0]
 pair = np.vstack([base, np.roll(base, 12)])          # curve + shifted copy
 
 d_l2 = float(np.asarray(lp_self_1d(pair, t, p=2.0))[0, 1])
@@ -185,6 +187,8 @@ ax.set(title=f"$L^2$ = {d_l2:.3f}   vs   DTW = {d_dtw:.3f}",
 ax.legend()
 print(render(f))
 ```
+
+The two curves are identical up to a horizontal shift, yet the title shows the $L^2$ distance is several times larger than the DTW distance. $L^2$ penalises the vertical mismatch created by the misaligned peaks, while DTW first re-aligns the time axis and so reports the small residual difference that remains.
 
 ---
 
@@ -243,6 +247,8 @@ ax.set(title="Soft-DTW divergence vs smoothing parameter $\\gamma$",
        xlabel="$\\gamma$ (log scale)", ylabel="divergence", xscale="log")
 print(render(f))
 ```
+
+The divergence varies smoothly and monotonically as $\gamma$ sweeps across three orders of magnitude: at small $\gamma$ it tends to the hard-DTW value (a single best path), and it decreases as $\gamma$ grows and the soft-minimum averages over an increasingly wide set of warping paths.
 
 ---
 
@@ -381,11 +387,13 @@ ax.set(title="Amplitude vs phase pairwise distances",
 print(render(f))
 ```
 
+The point cloud has no clear diagonal trend: pairs with large phase distance are spread across the whole range of amplitude distance and vice versa. This confirms the two coordinates are nearly orthogonal -- amplitude captures shape difference, phase captures timing difference, and they carry largely independent information.
+
 ---
 
 ## Which metrics see phase? A correlation view
 
-Metrics that ignore time warping (L2, L1, Hausdorff) rank pairs very differently from ones that absorb it (DTW). Computing several distance matrices on a phase-varying sample and correlating their off-diagonal entries makes the split visible: L2 and L1 agree almost perfectly, DTW correlates moderately with them, and Hausdorff -- caring about worst-case pointwise mismatch -- sits apart.
+Metrics that ignore time warping (L2, L1, Hausdorff) rank pairs somewhat differently from ones that absorb it (DTW). Computing several distance matrices on a phase-varying sample and correlating their off-diagonal entries makes the structure visible: L2 and L1 agree almost perfectly, DTW correlates highly with them (it still tracks amplitude, only discounting phase), and Hausdorff -- caring about worst-case pointwise mismatch -- sits furthest apart.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -421,6 +429,8 @@ for i in range(len(names)):
 f.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
 print(render(f))
 ```
+
+The heatmap confirms the narrative: the L2-L1 cell is near 1.0 (they rank pairs almost identically), DTW correlates strongly with both because it still tracks amplitude, and the Hausdorff row/column shows the lowest correlations -- its worst-case pointwise view of dissimilarity is the odd one out.
 
 ---
 

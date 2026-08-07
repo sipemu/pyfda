@@ -95,7 +95,30 @@ subspace without chasing noise.
 ## False-positive check
 
 A well-calibrated chart should false-alarm at roughly the nominal $\alpha$ on
-genuinely in-control data. We generate 200 fresh in-control curves (same process,
+genuinely in-control data. Projecting a centred curve onto the $K$ retained FPC
+loadings gives a score vector $z$ with in-control variances $\lambda_k$; the
+Shewhart chart combines a **Hotelling $T^2$** on those scores with a **squared
+prediction error (SPE)** on the residual outside the subspace:
+
+$$
+T^2 = \sum_{k=1}^{K} \frac{z_k^2}{\lambda_k},
+\qquad
+\text{SPE} = \bigl\lVert (x-\mu) - \textstyle\sum_{k=1}^{K} z_k\,\phi_k
+             \bigr\rVert^2 .
+$$
+
+The **EWMA** chart instead smooths the score vector recursively and monitors the
+smoothed vector against a MEWMA statistic that rescales each variance by the
+steady-state factor $\lambda/(2-\lambda)$:
+
+$$
+w_j = \lambda\,z_j + (1-\lambda)\,w_{j-1},
+\qquad
+Q = \sum_{k=1}^{K}
+      \frac{w_{jk}^2}{\bigl(\tfrac{\lambda}{2-\lambda}\bigr)\lambda_k} .
+$$
+
+We generate 200 fresh in-control curves (same process,
 new seed) and monitor them with two charts: the **Shewhart** $T^2$/SPE chart, and
 an **EWMA** chart built on the FPC scores (`ewma_scores`, scored with the MEWMA
 variance factor $\lambda/(2-\lambda)$).
@@ -160,9 +183,15 @@ print(f"Shewhart FPR: {shew.mean()*100:.1f}%  |  EWMA FPR: {ea.mean()*100:.1f}% 
 print(render(f))
 ```
 
-Both charts false-alarm at a low rate, close to the nominal 1 % — the chart is
-well-calibrated in-control. The EWMA statistic is smoother (it averages the
-scores over time), so its handful of false alarms tend to cluster.
+Both charts false-alarm at a low rate — here about **4–6%** (Shewhart ≈ 5.5%,
+EWMA ≈ 4.5%), several times the nominal $\alpha = 1\%$. That gap is expected: the
+limits are estimated from only 200 Phase I curves, so the empirical FPR sits
+*above* the nominal target in finite samples (the chart is under-, not
+over-calibrated), and the FPCA limits are approximate rather than exact. The rate
+is still low enough to be operationally usable; tightening it toward 1% would take
+a larger calibration set or bootstrap-corrected limits. The EWMA statistic is
+smoother (it averages the scores over time), so its handful of false alarms tend
+to cluster.
 
 ## Fault injection along the first eigenfunction
 
@@ -349,8 +378,11 @@ The experiment answers three deployment questions:
 
 1. **Minimum detectable fault.** Below roughly 1 σ the shift is masked by natural
    variation; neither chart is reliable there without accepting more false alarms.
-2. **False-alarm budget.** Both charts hold near the nominal 1 % in-control, so a
-   target in-control run length translates directly into a choice of $\alpha$.
+2. **False-alarm budget.** In-control the charts run a few points above the
+   nominal 1 % (here ~4–6 %) because the limits are estimated from a finite Phase I
+   sample; a target in-control run length translates into a choice of $\alpha$
+   only after that finite-sample inflation is accounted for (e.g. with a larger
+   calibration set or bootstrap-corrected limits).
 3. **Which chart.** A **Shewhart** chart reacts fastest to sudden large shifts
    (equipment failure); an **EWMA/CUSUM-style** chart wins on gradual degradation
    (drift, fouling) by accumulating evidence. Running both covers both regimes.

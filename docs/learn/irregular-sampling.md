@@ -58,6 +58,11 @@ ax.set(title="Four curves, four different sparse grids",
 print(render(f))
 ```
 
+Each coloured curve is sampled at a different number of points, at different
+locations along the domain. There is no shared column to stack these into a
+matrix, which is precisely why the tidy `(n_obs, n_points)` layout breaks down and
+every pointwise operation below needs a common grid first.
+
 ---
 
 ## Why pointwise operations need a common grid
@@ -196,6 +201,12 @@ ax.legend()
 print(render(f))
 ```
 
+Both smoothers recover the green true signal well through the interior where
+observations are dense, and the fitted values now live on the 200-point common
+grid rather than the 22 scattered observations. The two fits diverge mainly near
+the domain edges, where the sparse one-sided neighbourhood makes reconstruction
+hardest.
+
 !!! info "Local linear near the boundaries"
     On sparse grids the ends of the domain are the weakest spot -- few points to
     average. `local_linear` corrects the boundary bias that `nadaraya_watson`
@@ -242,6 +253,11 @@ ax.legend()
 print(render(f))
 ```
 
+All 20 curves -- each originally on its own ragged grid -- now share the same
+120-point axis, so they stack into a rectangle and the pointwise mean (orange) is
+well-defined again. The regridding loop has rebuilt exactly the tidy structure
+`Fdata` needs, and the full functional toolbox is back in play.
+
 !!! tip "Choose the common grid deliberately"
     A common grid finer than your typical per-curve sampling wastes nothing, but
     do not extrapolate blindly with a kernel smoother: keep the grid inside the
@@ -264,6 +280,18 @@ coefficients on the common grid*. The two-step pair is:
 - `basis_to_fdata_1d(coefficients, common, n_basis, basis_type)` evaluates that
   expansion on **any** grid -- here the shared one.
 
+Concretely, with basis functions $\phi_1, \dots, \phi_K$ the fit solves an
+ordinary least-squares problem *on the observed grid* $t^{(i)}_1, \dots,
+t^{(i)}_{m_i}$,
+
+$$
+\hat{c}_i = \arg\min_{c \in \mathbb{R}^K}
+\sum_{l=1}^{m_i} \Bigl( y_{il} - \sum_{k=1}^{K} c_k\, \phi_k\bigl(t^{(i)}_l\bigr) \Bigr)^2 ,
+\qquad
+\hat{x}_i(t) = \sum_{k=1}^{K} \hat{c}_{ik}\, \phi_k(t),
+$$
+
+and the *same* coefficients $\hat{c}_i$ are then evaluated on the common grid.
 This is the direct analogue of R's `fdata2basis()` / `basis2fdata()`, and it is
 the recommended approach for genuinely sparse data: least squares on the
 observed points needs no interpolation and handles varying observation densities
@@ -502,6 +530,12 @@ ax.set(title="Pairwise $L^2$ distances (5 regridded curves)",
 f.colorbar(im, ax=ax, shrink=0.8)
 print(render(f))
 ```
+
+The matrix is symmetric with a zero diagonal (each curve is at distance 0 from
+itself), and the off-diagonal magnitudes rank how dissimilar the regridded curves
+are -- the raw material any clustering or nearest-neighbour classifier consumes.
+That such a matrix is computable at all is the whole point of regridding: the
+distance is only defined once every curve shares one grid.
 
 ---
 

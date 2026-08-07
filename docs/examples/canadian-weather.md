@@ -46,10 +46,19 @@ keep that in mind, because the analyses below quantify it.
 ## Functional ANOVA: do the regions differ?
 
 `fanova` tests the null hypothesis that all four regions share one mean
-temperature curve. It computes a pointwise F-statistic $F(t)$, aggregates it to a
-global statistic, and calibrates a **p-value by permutation** — reshuffling the
-region labels `n_perm` times and asking how often the shuffled data produce as
-extreme a statistic. The group codes are integer-encoded region labels.
+temperature curve. It computes a pointwise F-statistic — at each day $t$, the
+ratio of between-region to within-region variance,
+
+$$
+F(t) = \frac{\sum_{g=1}^{G} n_g\,\bigl(\bar Y_g(t) - \bar Y(t)\bigr)^2 \big/ (G-1)}
+            {\sum_{g=1}^{G} \sum_{i \in g} \bigl(Y_i(t) - \bar Y_g(t)\bigr)^2 \big/ (n-G)},
+$$
+
+with $\bar Y_g$ the region-$g$ mean curve and $\bar Y$ the grand mean — aggregates
+it to a global statistic, and calibrates a **p-value by permutation** —
+reshuffling the region labels `n_perm` times and asking how often the shuffled
+data produce as extreme a statistic. The group codes are integer-encoded region
+labels.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -243,11 +252,17 @@ ax.legend(fontsize=8)
 print(render(f))
 ```
 
-The three predicted curves order themselves by latitude exactly as physical
-intuition demands: the Montreal-like station is warmest and mildest, the Yukon
-coordinate is coldest with the deepest winter trough, and all three share the
-summer-peaked shape the coefficient functions encode. FOSR has effectively
-learned a *map* from geography to seasonal climate.
+The three predicted curves order by latitude **in winter** exactly as physical
+intuition demands: the Montreal-like station stays mildest through the cold months
+while the Yukon coordinate plunges to the deepest winter trough. The **summer**
+ranking, though, is not a simple warmest→coldest-by-latitude ordering — at the
+July peak the curves nearly converge, and the higher-latitude coordinates actually
+edge *above* the Montreal-like one (the shorter, more continental northern summer
+warms hard and briefly). What latitude really controls is the **amplitude**: the
+further north, the deeper the winter trough and the larger the annual swing, while
+the summer peak barely moves. All three share the summer-peaked shape the
+coefficient functions encode, so FOSR has effectively learned a *map* from
+geography to seasonal climate — one dominated by winter, not summer, contrasts.
 
 ## Precipitation: same tools, weaker geography
 
@@ -285,9 +300,12 @@ ax.legend(ncol=2)
 print(render(f))
 ```
 
-Precipitation regions differ significantly too (FANOVA F ≈ **14**, p ≈ 0.002),
-and the **Pacific** curve stands apart with its wet-winter, dry-summer signature.
-But geography explains far less of precipitation than of temperature: the FOSR
+Precipitation regions differ significantly too (FANOVA F ≈ **14**, p ≈ 0.002).
+The **Atlantic** curve sits highest — wettest year-round — while the **Pacific**
+curve is the one with a distinct *seasonal shape*: it is the only region that is
+clearly wetter in winter than in summer, the maritime wet-winter/dry-summer
+signature. The regional gaps here are modest, though, and geography explains far
+less of precipitation than of temperature: the FOSR
 $R^2$ is only about **0.25** versus 0.47. Rainfall is governed by local terrain
 and storm tracks that latitude and longitude capture poorly — a genuine
 scientific finding, not a modelling artefact.
@@ -369,7 +387,6 @@ regions hardest to tell apart statistically are the ones it confuses.
   FPC-FOSR and the classifier.
 - [Scalar-on-function regression](../regression/scalar-on-function.md) for the
   complementary direction (curve predictors, scalar response).
-</content>
 
 ## References
 

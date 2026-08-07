@@ -22,9 +22,18 @@ functional cluster-validity scores.
 
 ## Functional k-means recovers the cultivars
 
-`kmeans_fd` clusters curves under the $L^2$ metric. We ask for $k=3$ clusters —
-matching the (withheld) number of cultivars — and cross-tabulate the result
-against the true labels. The bold curves are the cluster **centroids**: unlike a
+`kmeans_fd` clusters curves under the $L^2$ metric. It minimizes the
+within-cluster sum of squared functional distances,
+
+$$
+J = \sum_{k=1}^{K} \sum_{f_i \in C_k} \lVert f_i - \bar f_k \rVert_{L^2}^2,
+\qquad
+\lVert f_i - \bar f_k \rVert_{L^2}^2 = \int_{-\pi}^{\pi}\bigl(f_i(t) - \bar f_k(t)\bigr)^2\,dt,
+$$
+
+where $\bar f_k$ is the centroid curve of cluster $C_k$. We ask for $k=3$
+clusters — matching the (withheld) number of cultivars — and cross-tabulate the
+result against the true labels. The bold curves are the cluster **centroids**: unlike a
 plain k-means center (13 opaque numbers), each is itself an Andrews curve you can
 read as a typical chemical fingerprint.
 
@@ -199,8 +208,17 @@ rather than trusting a hard label.
 
 Visual and cluster separation is suggestive; a **permutation test** makes it
 formal. `fanova` computes a pointwise functional $F$-statistic across the three
-cultivar groups and calibrates its global summary by permuting the labels, giving
-a $p$-value with no distributional assumptions. The `f_statistic_t` it returns is
+cultivar groups: at each $t$ it forms the usual between- over within-group
+variance ratio,
+
+$$
+F(t) = \frac{\sum_{g=1}^{G} n_g\,\bigl(\bar f_g(t) - \bar f(t)\bigr)^2 \big/ (G-1)}
+            {\sum_{g=1}^{G} \sum_{i \in g} \bigl(f_i(t) - \bar f_g(t)\bigr)^2 \big/ (n-G)},
+$$
+
+with $\bar f_g$ the group-$g$ mean curve and $\bar f$ the grand mean curve. The
+global summary $\int F(t)\,dt$ is calibrated by permuting the labels, giving a
+$p$-value with no distributional assumptions. The `f_statistic_t` it returns is
 itself a curve — the between-group signal *as a function of $t$* — which we plot
 alongside the three mean curves.
 
@@ -425,61 +443,62 @@ The first two components carry about 70% of the functional variance, and in that
 plane the cultivars form three tight, largely non-overlapping clouds — the
 low-dimensional footprint of the same structure k-means exploited.
 
-!!! success "Validation — FPCA variance and cluster accuracy"
-    Two numbers this page rests on are checked directly. **(1)** The FPCA
-    variance decomposition of the wine curves reproduces the reference values
-    **45.2 / 24.0 / 13.9 %** for the first three components (asserted to
-    $\pm 0.3$ percentage points). **(2)** Functional k-means, told *nothing*
-    about the labels, recovers the three cultivars far above the chance rate — we
-    assert its best-matching accuracy exceeds the majority-class baseline
-    ($\approx 0.40$) by a wide margin and lands near the **0.95** quoted above.
+### Validation — FPCA variance and cluster accuracy
 
-    ```python exec="1" source="above"
-    import numpy as np
-    from itertools import permutations
-    from docs_data import load_wine
-    from fdars.clustering import kmeans_fd
-    from fdars.regression import fpca
+Two numbers this page rests on are checked directly. **(1)** The FPCA
+variance decomposition of the wine curves reproduces the reference values
+**45.2 / 24.0 / 13.9 %** for the first three components (asserted to
+$\pm 0.3$ percentage points). **(2)** Functional k-means, told *nothing*
+about the labels, recovers the three cultivars far above the chance rate — we
+assert its best-matching accuracy exceeds the majority-class baseline
+($\approx 0.40$) by a wide margin and lands near the **0.95** quoted above.
 
-    def andrews_curves(features, t):
-        features = np.asarray(features, float)
-        n, p = features.shape
-        out = np.full((n, t.size), features[:, [0]] / np.sqrt(2.0))
-        for j in range(1, p):
-            harmonic = (j + 1) // 2
-            term = np.sin if j % 2 == 1 else np.cos
-            out = out + features[:, [j]] * term(harmonic * t)
-        return out
+```python exec="1" source="above"
+import numpy as np
+from itertools import permutations
+from docs_data import load_wine
+from fdars.clustering import kmeans_fd
+from fdars.regression import fpca
 
-    names, X, meta = load_wine()
-    cultivar = meta["cultivar"].to_numpy()
-    Xz = (X - X.mean(0)) / X.std(0)
-    t = np.linspace(-np.pi, np.pi, 160)
-    curves = andrews_curves(Xz, t)
+def andrews_curves(features, t):
+    features = np.asarray(features, float)
+    n, p = features.shape
+    out = np.full((n, t.size), features[:, [0]] / np.sqrt(2.0))
+    for j in range(1, p):
+        harmonic = (j + 1) // 2
+        term = np.sin if j % 2 == 1 else np.cos
+        out = out + features[:, [j]] * term(harmonic * t)
+    return out
 
-    # (1) FPCA variance percentages match the reference 45.2 / 24.0 / 13.9
-    sv = np.asarray(fpca(curves, t, n_comp=5)["singular_values"])
-    ve = sv ** 2 / np.sum(sv ** 2) * 100
-    ref = np.array([45.2, 24.0, 13.9])
-    assert np.allclose(ve[:3], ref, atol=0.3), ve[:3]
+names, X, meta = load_wine()
+cultivar = meta["cultivar"].to_numpy()
+Xz = (X - X.mean(0)) / X.std(0)
+t = np.linspace(-np.pi, np.pi, 160)
+curves = andrews_curves(Xz, t)
 
-    # (2) k-means recovers cultivars well above the chance (majority) rate
-    cluster = np.asarray(kmeans_fd(curves, t, k=3, seed=42)["cluster"])
-    tab = np.zeros((3, 3), dtype=int)
-    for cl in range(3):
-        for ci, cv in enumerate((1, 2, 3)):
-            tab[cl, ci] = np.sum((cluster == cl) & (cultivar == cv))
-    acc = max(sum(tab[cl, p[cl]] for cl in range(3))
-              for p in permutations(range(3))) / cluster.size
-    chance = np.bincount(cultivar).max() / cultivar.size   # majority baseline
-    assert acc > 0.90 and acc > chance + 0.3, (acc, chance)
-    print(f"FPCA variance %: {np.round(ve[:3], 1)}  (ref 45.2/24.0/13.9)")
-    print(f"k-means accuracy {acc:.3f}  vs chance {chance:.3f}")
-    ```
+# (1) FPCA variance percentages match the reference 45.2 / 24.0 / 13.9
+sv = np.asarray(fpca(curves, t, n_comp=5)["singular_values"])
+ve = sv ** 2 / np.sum(sv ** 2) * 100
+ref = np.array([45.2, 24.0, 13.9])
+assert np.allclose(ve[:3], ref, atol=0.3), ve[:3]
 
-    Both pass: the variance percentages land within a few tenths of a point of
-    the R reference, and the unsupervised clustering beats the majority baseline
-    by more than 50 points — the class structure really is carried by the curves.
+# (2) k-means recovers cultivars well above the chance (majority) rate
+cluster = np.asarray(kmeans_fd(curves, t, k=3, seed=42)["cluster"])
+tab = np.zeros((3, 3), dtype=int)
+for cl in range(3):
+    for ci, cv in enumerate((1, 2, 3)):
+        tab[cl, ci] = np.sum((cluster == cl) & (cultivar == cv))
+acc = max(sum(tab[cl, p[cl]] for cl in range(3))
+          for p in permutations(range(3))) / cluster.size
+chance = np.bincount(cultivar).max() / cultivar.size   # majority baseline
+assert acc > 0.90 and acc > chance + 0.3, (acc, chance)
+print(f"FPCA variance %: {np.round(ve[:3], 1)}  (ref 45.2/24.0/13.9)")
+print(f"k-means accuracy {acc:.3f}  vs chance {chance:.3f}")
+```
+
+Both pass: the variance percentages land within a few tenths of a point of
+the R reference, and the unsupervised clustering beats the majority baseline
+by more than 50 points — the class structure really is carried by the curves.
 
 ## Summary
 
@@ -498,7 +517,6 @@ low-dimensional footprint of the same structure k-means exploited.
 - [Andrews Wine: quality control](andrews-wine-qc.md) — the supervised QC view.
 - [Outlier detection](andrews-wine.md) — flagging atypical wines.
 - [Clustering](../analyze/clustering.md) — the general functional-clustering article.
-</content>
 
 ## References
 

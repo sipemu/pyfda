@@ -254,6 +254,54 @@ ax.legend()
 print(render(f))
 ```
 
+The total within-cluster distance drops sharply from $k = 1$ to $k = 2$ and then flattens,
+so the elbow lands at $k = 2$ -- exactly the two amplitude groups built into the data,
+recovered without any knowledge of the peak locations.
+
+## Reading off the medoid prototypes
+
+Because k-medoids picks *actual* curves as centres, the `medoid_indices` it returns are
+representative exemplars you can plot directly. For the two-amplitude example the two
+medoids should be a low-peak curve and a high-peak curve -- the archetypes of each group,
+regardless of where their peaks happen to fall.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import elastic_self_distance_matrix, kmedoids_from_distances
+
+t = np.linspace(0, 1, 60)
+rng = np.random.default_rng(4)
+def bump(c, h, w=0.006):
+    return h * np.exp(-((t - c) ** 2) / (2 * w))
+X = []
+for h in [1.0, 2.0]:
+    for _ in range(15):
+        c = rng.uniform(0.25, 0.75)
+        X.append(bump(c, h) + 0.02 * rng.standard_normal(len(t)))
+X = np.asarray(X)
+
+D = np.asarray(elastic_self_distance_matrix(X, t))
+km = kmedoids_from_distances(D, k=2, seed=1)
+labels = np.asarray(km["labels"])
+medoids = np.asarray(km["medoid_indices"])
+palette = ["#3f51b5", "#e8710a"]
+
+f, ax = fig()
+for xi, li in zip(X, labels):
+    ax.plot(t, xi, color=palette[li], lw=0.7, alpha=0.25)
+for k, mi in enumerate(medoids):
+    ax.plot(t, X[mi], color=palette[k], lw=2.8, label=f"medoid of cluster {k}")
+ax.set(title="K-medoids prototypes (bold) over their clusters",
+       xlabel="t", ylabel="X(t)")
+ax.legend()
+print(render(f))
+```
+
+The two bold medoid curves capture the essential contrast -- one low peak, one high peak --
+while their differing peak positions confirm that k-medoids selected exemplars on
+*amplitude*, treating the phase of each prototype as incidental.
+
 !!! note "Elbows on elastic distances can be gentle"
     Because alignment already collapses phase variation, the within-distance curve is
     often smoother than for $L^2$ clustering -- the elbow is a nudge, not a cliff. Read it

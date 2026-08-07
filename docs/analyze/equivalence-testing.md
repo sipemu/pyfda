@@ -25,7 +25,13 @@ $$
 T = \sup_{t \in \mathcal{T}} \left| \bar X_1(t) - \bar X_2(t) \right|
 $$
 
-Equivalence is concluded when $T < \delta - c_\alpha$, where $c_\alpha$ is the $(1-\alpha)$ quantile from the bootstrap.
+Equivalence is concluded when the whole simultaneous confidence band lies inside the corridor, i.e.
+
+$$
+\sup_{t \in \mathcal{T}} \bigl| \bar X_1(t) - \bar X_2(t) \bigr| + c_\alpha\,\hat\sigma(t) \;<\; \delta,
+$$
+
+where $c_\alpha$ is the $(1-\alpha)$ quantile of the bootstrap null distribution and $\hat\sigma(t)$ the pointwise standard error; equivalently $T < \delta - c_\alpha\hat\sigma$.
 
 !!! note "Returned fields"
     `equivalence_test` returns `equivalent` (bool), `p_value`, and `test_statistic`
@@ -67,6 +73,11 @@ axes[0].set_ylabel("X(t)")
 axes[0].legend(loc="lower left")
 print(render(f))
 ```
+
+In the left panel mean B stays comfortably inside the shaded $\pm\delta$ corridor around
+mean A, so the sup-norm $T$ is small and equivalence is plausible; in the right panel the
+5-unit shift pushes mean B far outside the corridor, driving $T$ well past $\delta$ and
+ruling equivalence out.
 
 ---
 
@@ -162,6 +173,11 @@ r2 = equivalence_test(fd_c.data, fd_d.data, delta=delta, alpha=0.05, nb=2000, se
 print(f"Case 2 — Equivalent: {r2['equivalent']}  p={r2['p_value']:.4f}")
 ```
 
+Case 1's near-identical means sit well inside the margin and are declared equivalent with
+a small p-value, whereas Case 2's 5-unit shift blows past $\delta = 2$ and is correctly
+declared **not** equivalent -- the test cleanly separates a practically-irrelevant offset
+from a meaningful one.
+
 !!! warning "Choosing $\delta$ relative to sampling uncertainty"
     Equivalence requires the entire $(1-\alpha)$ simultaneous confidence band for
     $\mu_1 - \mu_2$ to sit inside the $\pm\delta$ corridor — and that band has a
@@ -217,6 +233,88 @@ declared equivalent -- a compact summary of how much difference the data can tol
 
 ---
 
+## How the verdict tracks the true shift
+
+Fixing $\delta$ and instead sweeping the *actual* vertical offset between the two groups
+shows the test doing its job: the observed sup-norm statistic $T$ should rise roughly
+linearly with the shift, and equivalence should hold only while $T$ stays below the
+margin.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+from fdars.tolerance import equivalence_test
+
+t = np.linspace(0, 1, 80)
+delta = 1.0
+base = np.asarray(simulate(40, t, n_basis=5, seed=10))
+other0 = np.asarray(simulate(40, t, n_basis=5, seed=20))
+
+shifts = np.linspace(0.0, 2.5, 14)
+stats, decided = [], []
+for s in shifts:
+    r = equivalence_test(base, other0 + s, delta=delta, nb=400, seed=42)
+    stats.append(r["test_statistic"])
+    decided.append(r["equivalent"])
+stats = np.asarray(stats); decided = np.asarray(decided)
+
+f, ax = fig(figsize=(7.4, 3.8))
+ax.plot(shifts, stats, "-o", color="#3f51b5", lw=1.6, ms=4, label="sup-norm T")
+ax.axhline(delta, color="#dc3545", ls="--", lw=1.4, label=f"margin δ = {delta}")
+ax.scatter(shifts[decided], stats[decided], color="#198754", zorder=4, s=55,
+           label="declared equivalent")
+ax.set(title="Test statistic vs. true group shift", xlabel="applied shift", ylabel="T")
+ax.legend(loc="upper left")
+print(render(f))
+```
+
+The statistic climbs almost linearly with the imposed shift, and the green markers -- the
+runs declared equivalent -- sit exactly where $T$ dips below the dashed margin, confirming
+the decision rule behaves monotonically in the underlying difference.
+
+---
+
+## The band that drives the decision
+
+Equivalence is ultimately a statement about the simultaneous confidence band for the mean
+difference $\mu_1 - \mu_2$: the verdict is `True` only when that entire band nests inside
+the $\pm\delta$ corridor. Plotting the mean difference with a bootstrap-style band against
+the corridor makes the geometry of the decision explicit.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.simulation import simulate
+
+t = np.linspace(0, 1, 100)
+delta = 1.0
+rng = np.random.default_rng(3)
+A = np.asarray(simulate(40, t, n_basis=5, seed=10))
+B = np.asarray(simulate(40, t, n_basis=5, seed=20)) + 0.35
+
+diff = A.mean(0) - B.mean(0)
+se = np.sqrt(A.var(0, ddof=1) / A.shape[0] + B.var(0, ddof=1) / B.shape[0])
+band = 2.5 * se                                   # simultaneous-style half-width
+
+f, ax = fig(figsize=(7.4, 3.8))
+ax.axhspan(-delta, delta, color="#198754", alpha=0.12, label=f"±δ corridor ({delta})")
+ax.fill_between(t, diff - band, diff + band, color="#3f51b5", alpha=0.25,
+                label="confidence band")
+ax.plot(t, diff, color="#3f51b5", lw=2.0, label="mean difference")
+ax.axhline(0, color="0.5", lw=0.8)
+ax.set(title="Mean difference and its band vs. the ±δ corridor", xlabel="t",
+       ylabel="μ₁(t) − μ₂(t)")
+ax.legend(loc="upper right", fontsize=8)
+print(render(f))
+```
+
+Here the shaded band stays inside the green corridor across the whole domain, so the
+sup-norm never reaches $\delta$ and equivalence is declared; a band that poked above
+$+\delta$ or below $-\delta$ at *any* $t$ would flip the verdict to non-equivalent.
+
+---
+
 ## One-sample test
 
 `equivalence_test_one_sample` tests whether a *single* sample's mean is equivalent to a
@@ -253,6 +351,44 @@ print(f"p-value:                 {res['p_value']:.4f}")
 
 **Returns** the same `equivalent` / `p_value` / `test_statistic` dictionary as the
 two-sample test.
+
+Visually, the one-sample test asks whether the sample mean stays within the $\pm\delta$
+corridor drawn around the fixed reference curve $\mu_0$. The panel below overlays the
+sample mean on the specification and shades the corridor, so the sup-norm statistic is
+simply the largest vertical gap between the two lines.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.tolerance import equivalence_test_one_sample
+
+t = np.linspace(0, 1, 80)
+delta = 0.5
+rng = np.random.default_rng(42)
+X = np.array([np.sin(2 * np.pi * t) + rng.normal(0, 0.3, t.size) for _ in range(30)])
+mu0 = np.sin(2 * np.pi * t)
+res = equivalence_test_one_sample(X, mu0, delta=delta, alpha=0.05, nb=1000, seed=42)
+
+xbar = X.mean(0)
+gap = np.abs(xbar - mu0)
+i_max = int(gap.argmax())
+
+f, ax = fig(figsize=(7.4, 3.8))
+ax.fill_between(t, mu0 - delta, mu0 + delta, color="#198754", alpha=0.12,
+                label=f"μ₀ ± δ ({delta})")
+ax.plot(t, mu0, color="#198754", lw=2.0, label="reference μ₀")
+ax.plot(t, xbar, color="#e8710a", lw=2.0, label="sample mean")
+ax.vlines(t[i_max], min(xbar[i_max], mu0[i_max]), max(xbar[i_max], mu0[i_max]),
+          color="#dc3545", lw=2.2, label=f"sup-norm T = {res['test_statistic']:.2f}")
+ax.set(title=f"One-sample equivalence to μ₀ (equivalent={res['equivalent']})",
+       xlabel="t", ylabel="X(t)")
+ax.legend(loc="upper right", fontsize=8)
+print(render(f))
+```
+
+The sample mean hugs the reference and the red segment -- the point of maximum
+deviation, i.e. the statistic $T$ -- stays well inside the corridor, so the run is
+declared equivalent to specification.
 
 ## See also
 

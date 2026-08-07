@@ -22,8 +22,61 @@ from fdars import _native
 # Helpers
 # ---------------------------------------------------------------------------
 
+# numpy>=2.0 renamed ``trapz`` to ``trapezoid``; support both.
+_trapz = getattr(np, "trapezoid", None) or np.trapz
+
+
 def _default_ids(n: int) -> List[str]:
     return [f"obs_{i + 1}" for i in range(n)]
+
+
+def _argvals_equal(a, b) -> bool:
+    """Check that two argval specifications describe the same grid."""
+    if isinstance(a, tuple) != isinstance(b, tuple):
+        return False
+    if isinstance(a, tuple):
+        return all(_argvals_equal(x, y) for x, y in zip(a, b))
+    a = np.asarray(a)
+    b = np.asarray(b)
+    return a.shape == b.shape and np.allclose(a, b)
+
+
+def _simpson(y: np.ndarray, x: np.ndarray) -> np.ndarray:
+    """Simpson's-rule integral of each row of ``y`` over grid ``x``.
+
+    Works on possibly non-uniform grids; falls back to the trapezoidal rule
+    for fewer than three points.  ``y`` has shape ``(n, m)``, ``x`` length ``m``.
+    """
+    x = np.asarray(x, dtype=np.float64)
+    y = np.atleast_2d(np.asarray(y, dtype=np.float64))
+    m = x.shape[0]
+    if m < 3:
+        return _trapz(y, x, axis=1)
+
+    total = np.zeros(y.shape[0], dtype=np.float64)
+    # composite Simpson over consecutive triples; handle leftover interval
+    i = 0
+    while i + 2 < m:
+        x0, x1, x2 = x[i], x[i + 1], x[i + 2]
+        h1 = x1 - x0
+        h2 = x2 - x1
+        f0, f1, f2 = y[:, i], y[:, i + 1], y[:, i + 2]
+        h = h1 + h2
+        if h1 > 0 and h2 > 0:
+            term = (h / 6.0) * (
+                f0 * (2.0 - h2 / h1)
+                + f1 * (h * h) / (h1 * h2)
+                + f2 * (2.0 - h1 / h2)
+            )
+        else:
+            term = 0.5 * (h1 * (f0 + f1) + h2 * (f1 + f2))
+        total += term
+        i += 2
+    # if an even number of intervals was consumed, one interval remains
+    if i + 1 < m:
+        h = x[i + 1] - x[i]
+        total += 0.5 * h * (y[:, i] + y[:, i + 1])
+    return total
 
 
 def _to_dataframe(metadata, n: int, ids: List[str]):
@@ -440,11 +493,26 @@ class Fdata:
         Returns
         -------
         numpy.ndarray
-            1-D array of norms, one per observation.
+            1-D array of norms, one per observation.  For 2-D data the norm is
+            the double integral of ``|X(s, t)|^p`` (trapezoidal rule) raised to
+            ``1/p`` (or the pointwise max for ``p = inf``).
         """
         if self.fdata2d:
-            raise NotImplementedError("norm not yet implemented for 2-D fdata")
+            return self._norm_2d(p)
         return _native.fdata.norm_lp_1d(self.data, self.argvals, p)
+
+    def _norm_2d(self, p: float) -> np.ndarray:
+        """Lp norm of each surface via 2-D trapezoidal integration."""
+        s, t = self.argvals
+        m1, m2 = self.dims
+        surfaces = self.data.reshape(self.n_obs, m1, m2)
+        if np.isinf(p):
+            return np.abs(surfaces).reshape(self.n_obs, -1).max(axis=1)
+        powered = np.abs(surfaces) ** p
+        # integrate over t (last axis) then over s
+        inner = _trapz(powered, t, axis=2)
+        integral = _trapz(inner, s, axis=1)
+        return integral ** (1.0 / p)
 
     def normalize(self, method: str = "center") -> "Fdata":
         """Normalize functional data.
@@ -538,6 +606,222 @@ class Fdata:
             return fn(self.data, self.argvals, **kwargs)
         fn = getattr(_native.metric, method + "_cross" + suffix)
         return fn(self.data, other.data, self.argvals, **kwargs)
+
+    # ---- integration --------------------------------------------------------
+
+    def int_simpson(self) -> np.ndarray:
+        """Integrate each curve over its domain using Simpson's rule.
+
+        Falls back to the trapezoidal rule when there are fewer than three
+        points.  For 2-D surfaces a double Simpson integration is used.
+
+        Returns
+        -------
+        numpy.ndarray
+            1-D array of definite integrals, one per observation.
+
+        Notes
+        -----
+        There is currently no native ``int_simpson`` / ``inprod`` binding in
+        ``fdars.fdata`` or ``fdars.metric``; this uses a NumPy implementation.
+        """
+        if self.fdata2d:
+            s, t = self.argvals
+            m1, m2 = self.dims
+            surfaces = self.data.reshape(self.n_obs, m1, m2)
+            inner = np.array([_simpson(surfaces[:, i, :], t) for i in range(m1)])
+            # inner: shape (m1, n_obs) -> integrate over s
+            return _simpson(inner.T, s)
+        return _simpson(self.data, self.argvals)
+
+    # ---- combining ----------------------------------------------------------
+
+    def concat(self, other: "Fdata") -> "Fdata":
+        """Row-bind another :class:`Fdata` onto this one (append observations).
+
+        Both objects must share a compatible evaluation grid (same argvals) and
+        dimensionality.  Metadata is concatenated when present on both.
+
+        Parameters
+        ----------
+        other : Fdata
+            Functional data with matching argvals.
+
+        Returns
+        -------
+        Fdata
+            Combined object with ``self.n_obs + other.n_obs`` observations.
+        """
+        return Fdata.stack([self, other])
+
+    @classmethod
+    def stack(cls, items: Sequence["Fdata"]) -> "Fdata":
+        """Row-bind a sequence of :class:`Fdata` objects into one.
+
+        Parameters
+        ----------
+        items : sequence of Fdata
+            Objects to combine.  All must share the same (argval-compatible)
+            grid and dimensionality.
+
+        Returns
+        -------
+        Fdata
+            Combined object.
+        """
+        items = list(items)
+        if not items:
+            raise ValueError("stack() requires at least one Fdata")
+        first = items[0]
+        for obj in items:
+            if not isinstance(obj, Fdata):
+                raise TypeError("all items must be Fdata instances")
+            if obj.fdata2d != first.fdata2d:
+                raise ValueError("cannot stack 1-D and 2-D fdata together")
+            if obj.data.shape[1] != first.data.shape[1]:
+                raise ValueError(
+                    "argvals grids differ: cannot row-bind "
+                    f"({obj.data.shape[1]} vs {first.data.shape[1]} columns)"
+                )
+            if not _argvals_equal(obj.argvals, first.argvals):
+                raise ValueError("argvals are not compatible across objects")
+
+        new_data = np.vstack([obj.data for obj in items])
+        new_id: List[str] = []
+        for obj in items:
+            new_id.extend(obj.id)
+        # de-duplicate ids so downstream logic stays well-defined
+        seen: Dict[str, int] = {}
+        deduped: List[str] = []
+        for ident in new_id:
+            if ident in seen:
+                seen[ident] += 1
+                deduped.append(f"{ident}_{seen[ident]}")
+            else:
+                seen[ident] = 0
+                deduped.append(ident)
+        new_id = deduped
+
+        new_meta = None
+        if _HAS_PANDAS and all(obj.metadata is not None for obj in items):
+            new_meta = pd.concat(
+                [obj.metadata for obj in items], ignore_index=True
+            )
+
+        return cls(
+            data=new_data,
+            argvals=first.argvals,
+            rangeval=first.rangeval,
+            names=first.names.copy(),
+            id=new_id,
+            metadata=new_meta,
+        )
+
+    # ---- scaling ------------------------------------------------------------
+
+    def scale_minmax(self, lo: float = 0.0, hi: float = 1.0) -> "Fdata":
+        """Rescale every curve to the range ``[lo, hi]`` (per observation).
+
+        Each observation is independently mapped so its own min becomes ``lo``
+        and its own max becomes ``hi``.  Flat curves (constant) are mapped to
+        ``lo``.
+
+        Parameters
+        ----------
+        lo, hi : float
+            Target range bounds (default 0 and 1).
+
+        Returns
+        -------
+        Fdata
+            Rescaled functional data object.
+        """
+        if hi <= lo:
+            raise ValueError("hi must be strictly greater than lo")
+        row_min = self.data.min(axis=1, keepdims=True)
+        row_max = self.data.max(axis=1, keepdims=True)
+        span = row_max - row_min
+        span_safe = np.where(span == 0, 1.0, span)
+        unit = (self.data - row_min) / span_safe
+        unit = np.where(span == 0, 0.0, unit)
+        scaled = lo + unit * (hi - lo)
+        return Fdata(
+            data=scaled,
+            argvals=self.argvals,
+            rangeval=self.rangeval,
+            names=self.names.copy(),
+            id=self.id.copy(),
+            metadata=self.metadata,
+        )
+
+    # ---- representation convenience -----------------------------------------
+
+    def to_basis(self, n_basis: int, basis_type: str = "bspline"):
+        """Project onto a B-spline or Fourier basis (1-D only).
+
+        Parameters
+        ----------
+        n_basis : int
+            Number of basis functions.
+        basis_type : str
+            ``"bspline"`` (default) or ``"fourier"``.
+
+        Returns
+        -------
+        dict
+            ``{"coefficients": (n, n_basis), "n_basis": int,
+            "basis_type": str, "argvals": grid}``.  Reconstruct with
+            :meth:`from_basis`.
+        """
+        if self.fdata2d:
+            raise NotImplementedError("to_basis is only supported for 1-D fdata")
+        coefs, actual = _native.basis.fdata_to_basis_1d(
+            self.data, self.argvals, n_basis, basis_type
+        )
+        return {
+            "coefficients": np.asarray(coefs),
+            "n_basis": int(actual),
+            "basis_type": basis_type,
+            "argvals": self.argvals,
+        }
+
+    def from_basis(self, basis_repr: Dict[str, Any]) -> "Fdata":
+        """Reconstruct an :class:`Fdata` from a :meth:`to_basis` result."""
+        recon = _native.basis.basis_to_fdata_1d(
+            np.asarray(basis_repr["coefficients"], dtype=np.float64),
+            np.asarray(basis_repr.get("argvals", self.argvals), dtype=np.float64),
+            int(basis_repr["n_basis"]),
+            basis_repr.get("basis_type", "bspline"),
+        )
+        return Fdata(
+            data=recon,
+            argvals=basis_repr.get("argvals", self.argvals),
+            rangeval=self.rangeval,
+            names=self.names.copy(),
+            id=self.id.copy(),
+            metadata=self.metadata,
+        )
+
+    def to_pc(self, n_comp: int = 3):
+        """Functional PCA representation of the curves (1-D only).
+
+        Thin wrapper over :func:`fdars.regression.fpca`.  Wrap the returned
+        dict with :class:`fdars.results.FPCAResult` for a richer interface.
+
+        Parameters
+        ----------
+        n_comp : int
+            Number of principal components (default 3).
+
+        Returns
+        -------
+        dict
+            FPCA result (``scores``, ``rotation``, ``singular_values``,
+            ``mean``, ``centered``, ``weights``).
+        """
+        if self.fdata2d:
+            raise NotImplementedError("to_pc is only supported for 1-D fdata")
+        return _native.regression.fpca(self.data, self.argvals, int(n_comp))
 
     # ---- copy ---------------------------------------------------------------
 

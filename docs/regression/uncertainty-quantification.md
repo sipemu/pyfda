@@ -159,6 +159,11 @@ ax.legend(fontsize=8)
 print(render(f))
 ```
 
+Nearly every orange observed value falls inside its blue 95% interval, the visual signature of
+valid coverage on held-out curves. The intervals are roughly constant in width here because the
+simulated noise is homoscedastic; in real data the bars would widen for predictions made far
+from the training curves, flagging where the model is least sure.
+
 ### Coverage and width
 
 Two numbers summarize a prediction interval: does it *cover* the truth at the nominal rate,
@@ -285,7 +290,10 @@ print(render(f))
 
 The conformal widths collapse to a single value; the parametric widths spread out with
 leverage. Which you prefer depends on whether you trust the Gaussian model (parametric,
-tighter on average) or want a finite-sample guarantee (conformal, assumption-free).
+leverage-adaptive) or want a finite-sample guarantee (conformal, assumption-free). Here the
+conformal band is actually the tighter of the two on average — the parametric formula inflates
+its width to hedge against the Gaussian tails — so the distribution-free option costs nothing
+in width on this data.
 
 ## Model assessment: leave-one-out CV — `loo_cv_press`
 
