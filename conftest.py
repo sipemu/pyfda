@@ -75,35 +75,50 @@ def _snippet_expand_rule(state):
             token.content = _expand_snippet_includes(token.content)
 
 
-def pytest_markdown_docs_globals():
-    """Return globals injected into every markdown code fence during testing.
+try:
+    import pytest_markdown_docs as _pytest_markdown_docs  # noqa: F401
 
-    Imports are deferred to here (see module-header note): only the doc-fence
-    test path needs matplotlib/numpy/fdars, and only that CI job installs the
-    ``plot`` extra. ``matplotlib.use("Agg")`` MUST precede the pyplot import --
-    CI has no display, so the non-interactive backend must be selected before
-    pyplot binds a backend (same ordering as ``scripts/docs_fig.py``).
-    """
-    import matplotlib
-
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
-    import numpy as np
-    import fdars
-
-    return {"np": np, "plt": plt, "fdars": fdars}
+    _HAS_MARKDOWN_DOCS = True
+except ImportError:
+    # The unit-test CI job (``pytest tests/``) installs no docs extras, so the
+    # pytest-markdown-docs plugin is absent. Its hook implementations below MUST
+    # NOT be defined in that case, or pytest aborts collection with
+    # ``PluginValidationError: unknown hook 'pytest_markdown_docs_globals'``.
+    # Guarding the defs keeps unit tests dependency-clean; the doc-fence job
+    # installs the plugin and picks up both hooks.
+    _HAS_MARKDOWN_DOCS = False
 
 
-def pytest_markdown_docs_markdown_it():
-    """Return a MarkdownIt parser that expands pymdownx.snippets includes.
+if _HAS_MARKDOWN_DOCS:
 
-    Without this, a fence using ``--8<-- "includes/..."`` (FND-04) would fail
-    under pytest-markdown-docs, which does not run MkDocs' build-time snippet
-    preprocessor. The added core rule expands those includes in-place (D-04).
-    """
-    from markdown_it import MarkdownIt
+    def pytest_markdown_docs_globals():
+        """Return globals injected into every markdown code fence during testing.
 
-    md = MarkdownIt("commonmark")
-    md.core.ruler.push("fdars_snippet_expand", _snippet_expand_rule)
-    return md
+        Imports are deferred to here (see module-header note): only the doc-fence
+        test path needs matplotlib/numpy/fdars, and only that CI job installs the
+        ``plot`` extra. ``matplotlib.use("Agg")`` MUST precede the pyplot import
+        -- CI has no display, so the non-interactive backend must be selected
+        before pyplot binds a backend (same ordering as ``scripts/docs_fig.py``).
+        """
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        import numpy as np
+        import fdars
+
+        return {"np": np, "plt": plt, "fdars": fdars}
+
+    def pytest_markdown_docs_markdown_it():
+        """Return a MarkdownIt parser that expands pymdownx.snippets includes.
+
+        Without this, a fence using ``--8<-- "includes/..."`` (FND-04) would fail
+        under pytest-markdown-docs, which does not run MkDocs' build-time snippet
+        preprocessor. The added core rule expands those includes in-place (D-04).
+        """
+        from markdown_it import MarkdownIt
+
+        md = MarkdownIt("commonmark")
+        md.core.ruler.push("fdars_snippet_expand", _snippet_expand_rule)
+        return md
