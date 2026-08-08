@@ -35,10 +35,10 @@ Each section requirement means: every diagram in that section conforms to `STYLE
 
 ### Example sweeps (secondary)
 
-- [ ] **EX-01**: Every `docs/examples/*.md` runs correctly against the current `fdars` API — `pytest-markdown-docs` passes, `check_docs_figures.py` is clean, and value/dict-key assertions guard against silent output drift
-- [ ] **EX-02**: Example narratives follow Problem → Data → Method → Interpretation with genuine interpretation, not just code
-- [ ] **EX-03**: Example output figures are improved for clarity (styling, captions, Code/Output tabs) and cross-linked to the API reference
-- [ ] **EX-04**: Five new worked examples cover under-documented capabilities: conformal coverage guarantee, function-on-scalar regression, outlier-detection workflow, tolerance-bands vs conformal comparison, and functional depth centrality ordering
+- [x] **EX-01**: Every `docs/examples/*.md` runs correctly against the current `fdars` API — `pytest-markdown-docs` passes, `check_docs_figures.py` is clean, and value/dict-key assertions guard against silent output drift
+- [x] **EX-02**: Example narratives follow Problem → Data → Method → Interpretation with genuine interpretation, not just code
+- [x] **EX-03**: Example output figures are improved for clarity (styling, captions, Code/Output tabs) and cross-linked to the API reference
+- [x] **EX-04**: Five new worked examples cover under-documented capabilities: conformal coverage guarantee, function-on-scalar regression, outlier-detection workflow, tolerance-bands vs conformal comparison, and functional depth centrality ordering
 
 ## v2 Requirements
 
@@ -84,10 +84,10 @@ Explicitly excluded to prevent scope creep.
 | DIA-04 | Phase 6 | Complete |
 | DIA-05 | Phase 7 | Complete |
 | DIA-06 | Phase 8 | Complete |
-| EX-01 | Phase 9 | Pending |
-| EX-02 | Phase 9 | Pending |
-| EX-03 | Phase 9 | Pending |
-| EX-04 | Phase 9 | Pending |
+| EX-01 | Phase 9 | Complete |
+| EX-02 | Phase 9 | Complete |
+| EX-03 | Phase 9 | Complete |
+| EX-04 | Phase 9 | Complete |
 
 **Coverage:**
 
