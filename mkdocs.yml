@@ -145,6 +145,7 @@ nav:
     - Andrews Wine — Clustering: examples/andrews-wine-clustering.md
     - Andrews Wine — Quality Control: examples/andrews-wine-qc.md
     - Tecator — Scalar-on-Function Regression: examples/tecator-regression.md
+    - Canadian Weather — Function-on-Scalar: examples/canadian-function-on-scalar.md
     - Tecator — Cross-Validation: examples/cross-validation.md
     - Tecator — Conformal Coverage: examples/tecator-conformal-coverage.md
     - Tolerance Bands vs Conformal: examples/tolerance-vs-conformal.md
