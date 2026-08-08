@@ -32,13 +32,13 @@ D-04 harness decision (recorded 2026-08-07):
 import pathlib
 import re
 
-import matplotlib
-
-matplotlib.use("Agg")  # non-interactive backend; must precede the pyplot import
-import matplotlib.pyplot as plt  # noqa: E402
-
-import numpy as np  # noqa: E402
-import fdars  # noqa: E402
+# NOTE: matplotlib/numpy/fdars are imported lazily inside
+# ``pytest_markdown_docs_globals()`` (below), NOT at module level. The unit-test
+# CI job runs ``pytest tests/`` without the optional ``plot`` extra (matplotlib),
+# and pytest loads this rootdir conftest for every run; a module-level
+# ``import matplotlib`` would abort collection with ModuleNotFoundError before any
+# test runs. Deferring the imports keeps ``pytest tests/`` dependency-clean while
+# the doc-fence job (which installs matplotlib) still gets ``plt`` via the hook.
 
 # Snippet base directory -- mirrors mkdocs.yml `pymdownx.snippets: base_path: [docs]`.
 _SNIPPET_BASE = pathlib.Path(__file__).parent / "docs"
@@ -76,7 +76,22 @@ def _snippet_expand_rule(state):
 
 
 def pytest_markdown_docs_globals():
-    """Return globals injected into every markdown code fence during testing."""
+    """Return globals injected into every markdown code fence during testing.
+
+    Imports are deferred to here (see module-header note): only the doc-fence
+    test path needs matplotlib/numpy/fdars, and only that CI job installs the
+    ``plot`` extra. ``matplotlib.use("Agg")`` MUST precede the pyplot import --
+    CI has no display, so the non-interactive backend must be selected before
+    pyplot binds a backend (same ordering as ``scripts/docs_fig.py``).
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    import numpy as np
+    import fdars
+
     return {"np": np, "plt": plt, "fdars": fdars}
 
 
