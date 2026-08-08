@@ -27,7 +27,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 Each section requirement means: every diagram in that section conforms to `STYLE_SPEC.md`, is method-accurate on the rendered page, has any legacy-outlier SVG migrated to the standard viewBox/style/palette, and closes that section's approved coverage gaps. Reviewed on the built site before the next section starts.
 
 - [x] **DIA-01**: `learn/` diagrams conform and are accurate (introduction, smoothing — fix the noisy/smoothed coordinate reuse bug, derivatives, irregular-sampling, simulation, custom-plotting)
-- [ ] **DIA-02**: `represent/` diagrams conform and are accurate (basis-representation — remove R-era `extendr`/`autoplot` content, FPCA, andrews-transformation, distance-metrics, elastic-fpca)
+- [x] **DIA-02**: `represent/` diagrams conform and are accurate (basis-representation — remove R-era `extendr`/`autoplot` content, FPCA, andrews-transformation, distance-metrics, elastic-fpca)
 - [ ] **DIA-03**: `align/` diagrams conform and are accurate (elastic-alignment phase-vs-amplitude split, landmark-registration, tsrvf, shape-analysis, alignment-comparison, advanced-alignment)
 - [ ] **DIA-04**: `analyze/` diagrams conform and are accurate (clustering, depth-functions, outlier-detection, tolerance-bands, covariance-functions, seasonal-analysis, equivalence-testing, gmm-clustering, elastic-clustering — migrate legacy outliers)
 - [ ] **DIA-05**: `regression/` diagrams conform and are accurate (scalar-on-function β(t) coefficient curve, function-on-scalar, robust-regression, conformal-prediction — redraw as a functional band ŷ(t) ± q(t), conformal-classification, classification, regression-diagnostics, cross-validation)
@@ -79,7 +79,7 @@ Explicitly excluded to prevent scope creep.
 | AUD-02 | Phase 2 | Complete |
 | AUD-03 | Phase 2 | Complete |
 | DIA-01 | Phase 3 | Complete |
-| DIA-02 | Phase 4 | Pending |
+| DIA-02 | Phase 4 | Complete |
 | DIA-03 | Phase 5 | Pending |
 | DIA-04 | Phase 6 | Pending |
 | DIA-05 | Phase 7 | Pending |

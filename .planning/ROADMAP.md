@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Establish SVG style spec, SVGO linter, deterministic builds, snippets, pytest-markdown-docs, and DOCS_FAST gate (completed 2026-08-07)
 - [x] **Phase 2: Audit** - Nav + reference-API audit that produces the diagram coverage map and ranked gap list (completed 2026-08-07)
 - [x] **Phase 3: learn/ Diagrams** - Sweep learn/ section: conform, fix coordinate bug, and close coverage gaps (completed 2026-08-08)
-- [ ] **Phase 4: represent/ Diagrams** - Sweep represent/ section: remove R-era content, conform, close gaps
+- [x] **Phase 4: represent/ Diagrams** - Sweep represent/ section: remove R-era content, conform, close gaps (completed 2026-08-08)
 - [ ] **Phase 5: align/ Diagrams** - Sweep align/ section: conform, fix phase-vs-amplitude split, close gaps
 - [ ] **Phase 6: analyze/ Diagrams** - Sweep analyze/ section: migrate legacy outliers, conform, close gaps
 - [ ] **Phase 7: regression/ Diagrams** - Sweep regression/ section: redraw conformal band, conform, close gaps
@@ -117,8 +117,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. All legacy-outlier represent/ diagrams have been migrated to the STYLE_SPEC.md standard
 
 **Plans**: 2 plans
-- [ ] 04-01-PLAN.md — Migrate depth-functions.svg (GAP-0002) to STYLE_SPEC (tracer: restyle → SVGO gate → build → review)
-- [ ] 04-02-PLAN.md — Section-wide verification of all 7 represent/ diagrams (SVGO, STYLE_SPEC markers, R-era grep, build) + COVERAGE.md
+
+- [x] 04-01-PLAN.md — Migrate depth-functions.svg (GAP-0002) to STYLE_SPEC (tracer: restyle → SVGO gate → build → review)
+- [x] 04-02-PLAN.md — Section-wide verification of all 7 represent/ diagrams (SVGO, STYLE_SPEC markers, R-era grep, build) + COVERAGE.md
 
 ### Phase 5: align/ Diagrams
 
@@ -205,7 +206,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. Foundation | 4/4 | Complete    | 2026-08-07 |
 | 2. Audit | 3/3 | Complete    | 2026-08-07 |
 | 3. learn/ Diagrams | 2/2 | Complete    | 2026-08-08 |
-| 4. represent/ Diagrams | 0/TBD | Not started | - |
+| 4. represent/ Diagrams | 2/2 | Complete    | 2026-08-08 |
 | 5. align/ Diagrams | 0/TBD | Not started | - |
 | 6. analyze/ Diagrams | 0/TBD | Not started | - |
 | 7. regression/ Diagrams | 0/TBD | Not started | - |
