@@ -130,7 +130,7 @@ are the honest way to quantify uncertainty for a black-box functional regressor.
 ## See also
 
 - [Conformal prediction — concept](../regression/conformal-prediction.md) — the split-conformal recipe and the classification variant
-- [Tolerance bands vs conformal](tecator-tolerance-vs-conformal.md) — two routes to coverage, compared
+- [Tolerance bands vs conformal](tolerance-vs-conformal.md) — two routes to coverage, compared
 - [Scalar-on-function regression](tecator-regression.md) — the underlying `fregre_lm` model
 
 ## References
