@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Audit** - Nav + reference-API audit that produces the diagram coverage map and ranked gap list (completed 2026-08-07)
 - [x] **Phase 3: learn/ Diagrams** - Sweep learn/ section: conform, fix coordinate bug, and close coverage gaps (completed 2026-08-08)
 - [x] **Phase 4: represent/ Diagrams** - Sweep represent/ section: remove R-era content, conform, close gaps (completed 2026-08-08)
-- [ ] **Phase 5: align/ Diagrams** - Sweep align/ section: conform, fix phase-vs-amplitude split, close gaps
+- [x] **Phase 5: align/ Diagrams** - Sweep align/ section: conform, fix phase-vs-amplitude split, close gaps (completed 2026-08-08)
 - [ ] **Phase 6: analyze/ Diagrams** - Sweep analyze/ section: migrate legacy outliers, conform, close gaps
 - [ ] **Phase 7: regression/ Diagrams** - Sweep regression/ section: redraw conformal band, conform, close gaps
 - [ ] **Phase 8: monitoring/ Diagrams** - Sweep monitoring/ section: remove R-era content, redraw control limits, close gaps
@@ -207,7 +207,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 2. Audit | 3/3 | Complete    | 2026-08-07 |
 | 3. learn/ Diagrams | 2/2 | Complete    | 2026-08-08 |
 | 4. represent/ Diagrams | 2/2 | Complete    | 2026-08-08 |
-| 5. align/ Diagrams | 0/TBD | Not started | - |
+| 5. align/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 6. analyze/ Diagrams | 0/TBD | Not started | - |
 | 7. regression/ Diagrams | 0/TBD | Not started | - |
 | 8. monitoring/ Diagrams | 0/TBD | Not started | - |
