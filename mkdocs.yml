@@ -148,6 +148,7 @@ nav:
     - Tecator — Explainability Regions: examples/explainability-regions.md
     - Phoneme — Shape Classification: examples/phoneme-shape.md
     - Canadian Weather — FPCA & Clustering: examples/canadian-weather.md
+    - Canadian Weather — Depth Centrality: examples/canadian-depth-centrality.md
     - Canadian Temperature — Seasonal: examples/canadian-seasonal.md
     - Canadian Precipitation — Geographic: examples/canadian-precipitation.md
     - Tecator — Inline Monitoring: examples/tecator-monitoring.md
