@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Outlier detection">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#6f42c1" stroke-linecap="round" fill="none" stroke-opacity=".4" stroke-width="2">
+    <path d="M30 100 C90 74 150 108 210 88 C245 74 275 96 298 84"/>
+    <path d="M30 108 C90 82 150 116 210 96 C245 82 275 104 298 92"/>
+    <path d="M30 92 C90 66 150 100 210 80 C245 66 275 88 298 76"/>
+    <path d="M30 114 C90 90 150 122 210 102 C245 90 275 110 298 100"/>
+  </g>
+  <path d="M30 104 C90 78 150 112 210 92 C245 78 275 100 298 88" stroke="#6f42c1" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 96 C90 118 150 40 210 50 C245 54 275 36 298 30" stroke="#6f42c1" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 6"/>
+  <circle cx="298" cy="30" r="4" fill="#fff" stroke="#6f42c1" stroke-width="2.5"/>
+  <text x="216" y="46" fill="#6f42c1" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">outlier</text>
+</svg>

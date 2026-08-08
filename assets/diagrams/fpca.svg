@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional PCA: mean plus modes of variation">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Functional PCA: Mean + Modes of Variation</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Decompose curves into a mean function plus orthogonal eigenfunctions</text>
+
+  <!-- Panel 1: curve sample -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Curve Sample</text>
+  <g transform="translate(44,110)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 84 C40 46 80 100 120 64 C138 48 150 72 156 62" stroke="#198754" stroke-opacity=".25" stroke-width="1.6"/>
+    <path d="M0 96 C40 62 80 112 120 78 C138 62 150 84 156 74" stroke="#198754" stroke-opacity=".25" stroke-width="1.6"/>
+    <path d="M0 72 C40 34 80 88 120 52 C138 36 150 60 156 50" stroke="#198754" stroke-opacity=".25" stroke-width="1.6"/>
+    <path d="M0 108 C40 78 80 42 120 90 C138 112 150 66 156 84" stroke="#198754" stroke-opacity=".25" stroke-width="1.6"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#eafaf1" stroke="#198754" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#198754">fpca(X, t, n_comp)</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Karhunen-Loeve</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
+    <text class="sm" x="12" y="16">mean μ̂(t)</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
+    <text class="sm" x="12" y="48">eigenfunctions φₖ</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#bfe6d0"/>
+    <text class="sm" x="12" y="80">scores ξᵢₖ</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: output -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#eafaf1" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#198754">Modes + Scores</text>
+  <!-- top: mean +/- mode -->
+  <g transform="translate(516,106)">
+    <line x1="0" y1="40" x2="76" y2="40" stroke="#adb5bd" stroke-width="1"/>
+    <path d="M0 40 C20 12 40 20 76 8" stroke="#198754" stroke-width="1.8"/>
+    <path d="M0 40 C20 62 40 56 76 66" stroke="#fd7e14" stroke-width="1.8"/>
+    <path d="M0 40 C20 34 40 36 76 34" stroke="#6c757d" stroke-width="1.4" stroke-dasharray="3 2"/>
+    <text class="sm" x="0" y="62" font-size="9">μ̂ ± 2√λₖ · φₖ</text>
+  </g>
+  <!-- bottom: score scatter -->
+  <g transform="translate(608,150)">
+    <line x1="0" y1="60" x2="72" y2="60" stroke="#adb5bd" stroke-width="1"/>
+    <line x1="0" y1="8" x2="0" y2="60" stroke="#adb5bd" stroke-width="1"/>
+    <circle cx="16" cy="46" r="2.6" fill="#198754"/><circle cx="30" cy="34" r="2.6" fill="#198754"/>
+    <circle cx="24" cy="52" r="2.6" fill="#198754"/><circle cx="44" cy="26" r="2.6" fill="#fd7e14"/>
+    <circle cx="52" cy="20" r="2.6" fill="#fd7e14"/><circle cx="38" cy="40" r="2.6" fill="#198754"/>
+    <circle cx="58" cy="14" r="2.6" fill="#fd7e14"/>
+    <text class="sm" x="8" y="74" font-size="9">score scatter</text>
+  </g>
+</svg>

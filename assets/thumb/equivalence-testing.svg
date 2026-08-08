@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Equivalence testing">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 60 C90 34 150 86 210 62 C245 48 275 72 298 56 L298 108 C275 124 245 100 210 114 C150 138 90 86 30 112 Z" fill="#6f42c1" fill-opacity=".14"/>
+  <path d="M30 60 C90 34 150 86 210 62 C245 48 275 72 298 56" stroke="#6f42c1" stroke-opacity=".4" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M30 112 C90 86 150 138 210 114 C245 100 275 124 298 108" stroke="#6f42c1" stroke-opacity=".4" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M30 80 C90 54 150 106 210 82 C245 68 275 92 298 76" stroke="#6f42c1" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 92 C90 66 150 118 210 94 C245 80 275 104 298 88" stroke="#6f42c1" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+  <text x="248" y="52" fill="#6f42c1" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">±δ</text>
+</svg>

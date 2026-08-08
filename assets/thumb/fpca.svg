@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Functional PCA">
+  <defs><linearGradient id="fp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#198754" stop-opacity=".18"/><stop offset="1" stop-color="#198754" stop-opacity="0"/></linearGradient></defs>
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 96 C90 40 150 128 210 74 C245 44 275 84 298 66" stroke="#198754" stroke-opacity=".28" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M30 116 C90 78 150 150 210 104 C245 78 275 118 298 100" stroke="#198754" stroke-opacity=".28" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M30 106 C90 58 150 138 210 88 C245 60 275 100 298 82 L298 150 L30 150 Z" fill="url(#fp)"/>
+  <path d="M30 106 C90 58 150 138 210 88 C245 60 275 100 298 82" stroke="#198754" stroke-width="3" stroke-linecap="round"/>
+  <text x="214" y="60" fill="#198754" font-family="system-ui,sans-serif" font-size="13" font-weight="700" opacity=".8">PC1</text>
+</svg>

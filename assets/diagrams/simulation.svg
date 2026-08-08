@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Simulating functional data from Karhunen-Loeve parameters">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Simulation: Synthetic Curves with Known Ground Truth</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Combine basis eigenfunctions with a prescribed variance profile</text>
+
+  <!-- Panel 1: KL params -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">KL Parameters</text>
+  <text class="sm" x="122" y="112" text-anchor="middle">eigenfunctions &amp; variances</text>
+  <g transform="translate(44,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 60 C52 60 104 60 156 60" stroke="#6c757d" stroke-width="1.6"/>
+    <path d="M0 60 C39 12 117 108 156 60" stroke="#adb5bd" stroke-width="1.6"/>
+    <path d="M0 60 C26 20 52 100 78 60 C104 20 130 100 156 60" stroke="#adb5bd" stroke-width="1.6" stroke-opacity=".7"/>
+    <text class="sm" x="118" y="52" fill="#495057">φ₁ φ₂ φ₃</text>
+    <g fill="#6c757d">
+      <rect x="0" y="92" width="16" height="22" rx="2"/><rect x="24" y="102" width="16" height="12" rx="2"/><rect x="48" y="107" width="16" height="7" rx="2"/>
+    </g>
+    <text class="sm" x="0" y="127">λ (decay)</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#0d6efd">simulate(...)</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">draw random scores</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="16">n_basis · efun_type</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="48">KL expansion</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="80">gaussian_process</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: sampled curves -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#0d6efd">Sampled Curves</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">(n, m) random draws</text>
+  <g transform="translate(520,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 84 C40 40 80 104 120 52 C138 36 150 62 156 54" stroke="#0d6efd" stroke-opacity=".55" stroke-width="1.6"/>
+    <path d="M0 72 C40 96 80 44 120 82 C138 98 150 60 156 74" stroke="#0d6efd" stroke-opacity=".55" stroke-width="1.6"/>
+    <path d="M0 100 C40 62 80 86 120 96 C138 82 150 104 156 90" stroke="#0d6efd" stroke-opacity=".55" stroke-width="1.6"/>
+    <path d="M0 58 C40 88 80 66 120 40 C138 30 150 54 156 44" stroke="#0d6efd" stroke-opacity=".55" stroke-width="1.6"/>
+    <path d="M0 108 C40 78 80 112 120 70 C138 58 150 92 156 78" stroke="#0d6efd" stroke-opacity=".55" stroke-width="1.6"/>
+  </g>
+  <text class="sm" x="598" y="250" text-anchor="middle" fill="#6c757d">known mean · modes · noise</text>
+</svg>

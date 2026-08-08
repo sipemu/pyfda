@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Distance metrics">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 78 C90 40 150 104 210 66 C245 44 275 72 298 58" stroke="#198754" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 122 C90 92 150 148 210 116 C245 96 275 124 298 110" stroke="#198754" stroke-opacity=".5" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 0"/>
+  <g stroke="#198754" stroke-opacity=".7" stroke-width="1.5">
+    <line x1="120" y1="86" x2="120" y2="128"/><line x1="170" y1="82" x2="170" y2="124"/><line x1="250" y1="62" x2="250" y2="118"/>
+  </g>
+  <text x="196" y="150" fill="#198754" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">d(f,g)</text>
+</svg>

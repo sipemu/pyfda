@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Covariance functions">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <g fill="#6f42c1">
+    <rect x="115" y="34" width="22" height="22" fill-opacity=".95"/><rect x="139" y="34" width="22" height="22" fill-opacity=".6"/><rect x="163" y="34" width="22" height="22" fill-opacity=".38"/><rect x="187" y="34" width="22" height="22" fill-opacity=".22"/><rect x="211" y="34" width="22" height="22" fill-opacity=".12"/>
+    <rect x="115" y="58" width="22" height="22" fill-opacity=".6"/><rect x="139" y="58" width="22" height="22" fill-opacity=".95"/><rect x="163" y="58" width="22" height="22" fill-opacity=".6"/><rect x="187" y="58" width="22" height="22" fill-opacity=".38"/><rect x="211" y="58" width="22" height="22" fill-opacity=".22"/>
+    <rect x="115" y="82" width="22" height="22" fill-opacity=".38"/><rect x="139" y="82" width="22" height="22" fill-opacity=".6"/><rect x="163" y="82" width="22" height="22" fill-opacity=".95"/><rect x="187" y="82" width="22" height="22" fill-opacity=".6"/><rect x="211" y="82" width="22" height="22" fill-opacity=".38"/>
+    <rect x="115" y="106" width="22" height="22" fill-opacity=".22"/><rect x="139" y="106" width="22" height="22" fill-opacity=".38"/><rect x="163" y="106" width="22" height="22" fill-opacity=".6"/><rect x="187" y="106" width="22" height="22" fill-opacity=".95"/><rect x="211" y="106" width="22" height="22" fill-opacity=".6"/>
+    <rect x="115" y="130" width="22" height="22" fill-opacity=".12"/><rect x="139" y="130" width="22" height="22" fill-opacity=".22"/><rect x="163" y="130" width="22" height="22" fill-opacity=".38"/><rect x="187" y="130" width="22" height="22" fill-opacity=".6"/><rect x="211" y="130" width="22" height="22" fill-opacity=".95"/>
+  </g>
+</svg>

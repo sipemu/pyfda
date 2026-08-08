@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Cross-validation: split data into K folds, score out of fold, and pick the best number of components">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Cross-Validation for Functional Data</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Score models on held-out folds to pick the number of components k</text>
+
+  <!-- Panel 1: K data folds -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">K Data Folds</text>
+  <g transform="translate(44,110)">
+    <!-- fold 1: test at slot 0 -->
+    <g transform="translate(0,0)">
+      <rect x="0" y="0" width="24" height="18" rx="3" fill="#dc3545" fill-opacity=".75"/>
+      <rect x="27" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="54" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="81" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="108" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+    </g>
+    <g transform="translate(0,28)">
+      <rect x="0" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="27" y="0" width="24" height="18" rx="3" fill="#dc3545" fill-opacity=".75"/>
+      <rect x="54" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="81" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="108" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+    </g>
+    <g transform="translate(0,56)">
+      <rect x="0" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="27" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="54" y="0" width="24" height="18" rx="3" fill="#dc3545" fill-opacity=".75"/>
+      <rect x="81" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="108" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+    </g>
+    <g transform="translate(0,84)">
+      <rect x="0" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="27" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="54" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+      <rect x="81" y="0" width="24" height="18" rx="3" fill="#dc3545" fill-opacity=".75"/>
+      <rect x="108" y="0" width="24" height="18" rx="3" fill="#adb5bd" fill-opacity=".45"/>
+    </g>
+    <text class="sm" x="0" y="116"><tspan fill="#dc3545">■</tspan> held-out  <tspan fill="#adb5bd">■</tspan> train</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#dc3545">fregre_cv(X, y)</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Refit &amp; score each k</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="16">split into n_folds</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="48">out-of-fold MSE</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="80">fclassif_cv for labels</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: error-vs-k curve -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">CV Error vs. k</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">U-shape picks optimal k</text>
+  <g transform="translate(524,122)">
+    <line x1="0" y1="112" x2="150" y2="112" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="112" x2="0" y2="4" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M8 20 C34 74 52 96 74 98 C100 100 124 66 148 24" stroke="#dc3545" stroke-width="2.4" fill="none"/>
+    <circle cx="8" cy="20" r="3" fill="#dc3545"/>
+    <circle cx="44" cy="84" r="3" fill="#dc3545"/>
+    <circle cx="74" cy="98" r="3.6" fill="#fff" stroke="#dc3545" stroke-width="2.4"/>
+    <circle cx="112" cy="70" r="3" fill="#dc3545"/>
+    <circle cx="148" cy="24" r="3" fill="#dc3545"/>
+    <line x1="74" y1="98" x2="74" y2="112" stroke="#dc3545" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <text class="sm" x="74" y="128" text-anchor="middle" fill="#dc3545">optimal k</text>
+    <text class="sm" x="150" y="112" text-anchor="end" dy="14">k →</text>
+  </g>
+</svg>
