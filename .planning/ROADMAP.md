@@ -116,7 +116,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Every represent/ page that warrants a diagram (basis-representation, FPCA, andrews-transformation, distance-metrics, elastic-fpca) has an accurate diagram visible on the built site
   4. All legacy-outlier represent/ diagrams have been migrated to the STYLE_SPEC.md standard
 
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 04-01-PLAN.md — Migrate depth-functions.svg (GAP-0002) to STYLE_SPEC (tracer: restyle → SVGO gate → build → review)
+- [ ] 04-02-PLAN.md — Section-wide verification of all 7 represent/ diagrams (SVGO, STYLE_SPEC markers, R-era grep, build) + COVERAGE.md
 
 ### Phase 5: align/ Diagrams
 
