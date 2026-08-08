@@ -8,6 +8,21 @@ pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-da
 
 The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
 
+## Current Milestone: v2.0 — Grounded AI analysis advisor for fdars
+
+**Goal:** Given a computed `fdars` result, an AI advisor (1) interprets it in domain terms, (2) recommends concrete next actions — parameter adjustments or alternative methods — and (3) explains *why*, all grounded in fdars-computed diagnostics. The LLM verbalizes and reasons over computed numbers; it never fabricates them.
+
+**Target features:**
+- **Core:** deterministic diagnostics builder (fdars-computed, offline) + grounded LLM advisor (interpret → recommend → explain-why) with a structured `recommendation / rationale / expected_effect / evidence` schema
+- **Task families:** interpretation, parameter guidance (`lambda_`, `n_basis`, bandwidth, `n_comp`, cluster `k`, depth method…), and method guidance (e.g. linear→elastic FPCA, sparse→pre-smooth, density→transform) — cluster-difference description is one interpretation task
+- **Surfaces:** Python API (recommend-only) + Tool/MCP and Agent Skill (agentic: model re-runs fdars via tools and compares before/after)
+
+**Grounding invariant:** every recommendation cites computed diagnostics and states an expected effect.
+
+**Design source of truth:** `.planning/design/llm-cluster-narration.md`
+
+> The v1.0 Documentation Overhaul milestone shipped (Phases 1–9 complete). Its requirements below are retained as historical/validated context.
+
 ## Requirements
 
 ### Validated
@@ -92,4 +107,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-07 after Phase 2*
+*Last updated: 2026-08-09 — started milestone v2.0 (Grounded AI analysis advisor)*
