@@ -141,6 +141,7 @@ nav:
     - Sonar — Mine vs Rock (TSRVF): examples/sonar-tsrvf.md
     - Andrews Wine — Why Curves?: examples/andrews-wine-intro.md
     - Andrews Wine — Outlier Detection: examples/andrews-wine.md
+    - Functional Outlier Workflow: examples/functional-outlier-workflow.md
     - Andrews Wine — Clustering: examples/andrews-wine-clustering.md
     - Andrews Wine — Quality Control: examples/andrews-wine-qc.md
     - Tecator — Scalar-on-Function Regression: examples/tecator-regression.md
