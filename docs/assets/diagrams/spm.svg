@@ -1,63 +1,79 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
-
-  <!-- Title -->
-  <text x="360" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">The fdars Toolkit</text>
-  <text x="360" y="54" text-anchor="middle" font-size="14" fill="#888">Functional Data Analysis in R, powered by Rust</text>
-
-  <!-- ===== Top: Input ===== -->
-  <rect x="250" y="74" width="220" height="56" rx="8" fill="#F8F8F8" stroke="#888" stroke-width="1.5"/>
-  <text x="360" y="98" text-anchor="middle" font-size="15" font-weight="bold" fill="#555">Raw Observations</text>
-  <text x="360" y="118" text-anchor="middle" font-size="12" fill="#888">curves, spectra, time series, surfaces</text>
-
-  <!-- Arrow down -->
-  <line x1="360" y1="130" x2="360" y2="150" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
-
-  <!-- ===== fdata object ===== -->
-  <rect x="220" y="150" width="280" height="40" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
-  <text x="360" y="175" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Fdata(X, argvals, id, metadata)</text>
-
-  <!-- Arrow fan out -->
-  <line x1="260" y1="190" x2="110" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
-  <line x1="360" y1="190" x2="360" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
-  <line x1="460" y1="190" x2="610" y2="220" stroke="#555" stroke-width="1.2" marker-end="url(#arrIntro)"/>
-
-  <!-- ===== Column 1: Explore ===== -->
-  <rect x="16" y="220" width="200" height="140" rx="8" fill="#E8F0FE" stroke="#4A90D9" stroke-width="1.5"/>
-  <text x="116" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C5F8A">Explore</text>
-  <text x="36" y="266" font-size="12" fill="#555">depth()  &#x2014; centrality ranking</text>
-  <text x="36" y="286" font-size="12" fill="#555">lp_self_1d() &#x2014; distances</text>
-  <text x="36" y="306" font-size="12" fill="#555">dtw_self_1d() &#x2014; warping</text>
-  <text x="36" y="326" font-size="12" fill="#555">outliers() &#x2014; anomalies</text>
-  <text x="36" y="346" font-size="12" fill="#555">autoplot() &#x2014; visualization</text>
-
-  <!-- ===== Column 2: Transform ===== -->
-  <rect x="232" y="220" width="256" height="140" rx="8" fill="#FFF3E0" stroke="#E6A020" stroke-width="1.5"/>
-  <text x="360" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#B37700">Transform</text>
-  <text x="252" y="266" font-size="12" fill="#555">smooth() &#x2014; remove noise</text>
-  <text x="252" y="286" font-size="12" fill="#555">fdata_to_basis_1d() &#x2014; basis expansion</text>
-  <text x="252" y="306" font-size="12" fill="#555">fpca() &#x2014; FPCA scores</text>
-  <text x="252" y="326" font-size="12" fill="#555">deriv() &#x2014; derivatives</text>
-  <text x="252" y="346" font-size="12" fill="#555">elastic_align_pair() &#x2014; alignment</text>
-
-  <!-- ===== Column 3: Model ===== -->
-  <rect x="504" y="220" width="200" height="140" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
-  <text x="604" y="244" text-anchor="middle" font-size="14" font-weight="bold" fill="#2E8B57">Model</text>
-  <text x="524" y="266" font-size="12" fill="#555">fregre_pls() &#x2014; regression</text>
-  <text x="524" y="286" font-size="12" fill="#555">fregre_lm() &#x2014; linear model</text>
-  <text x="524" y="306" font-size="12" fill="#555">fregre_np() &#x2014; nonparametric</text>
-  <text x="524" y="326" font-size="12" fill="#555">kmeans_fd() &#x2014; clustering</text>
-  <text x="524" y="346" font-size="12" fill="#555">fclassif() &#x2014; classification</text>
-
-  <!-- ===== Bottom: Rust backend ===== -->
-  <line x1="16" y1="382" x2="704" y2="382" stroke="#eee" stroke-width="1.5"/>
-
-  <rect x="80" y="400" width="560" height="64" rx="8" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.5"/>
-  <text x="360" y="424" text-anchor="middle" font-size="15" font-weight="bold" fill="#D55E00">Rust Backend (extendr)</text>
-  <text x="360" y="448" text-anchor="middle" font-size="13" fill="#555">10&#x2013;200x speedups  &#x2022;  nalgebra linear algebra  &#x2022;  rayon parallelism  &#x2022;  zero-copy R &#x2194; Rust</text>
-
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Statistical Process Monitoring: learn an in-control FPCA model in Phase I, then chart Hotelling T-squared and SPE against control limits in Phase II">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
   <defs>
-    <marker id="arrIntro" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <path d="M0,0 L10,3.5 L0,7" fill="#555"/>
+    <marker id="arrSPM" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#adb5bd"/>
     </marker>
   </defs>
+
+  <text class="ttl" x="360" y="26" text-anchor="middle">Functional Statistical Process Monitoring</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Learn in-control variation with FPCA, then flag curves that depart from it</text>
+
+  <!-- ===== Panel 1: Phase I baseline ===== -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#eef4fd" stroke="#4A90D9" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#2C5F8A">Phase I — Baseline</text>
+  <text class="mono" x="122" y="112" text-anchor="middle" fill="#2C5F8A" font-size="11">spm_phase1()</text>
+  <g transform="translate(44,124)">
+    <line x1="0" y1="110" x2="156" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 82 C40 54 80 96 120 60 C138 46 150 70 156 62" stroke="#6c757d" stroke-opacity=".35" stroke-width="1.4"/>
+    <path d="M0 90 C40 62 80 104 120 70 C138 56 150 80 156 72" stroke="#6c757d" stroke-opacity=".35" stroke-width="1.4"/>
+    <path d="M0 74 C40 46 80 88 120 52 C138 38 150 62 156 54" stroke="#6c757d" stroke-opacity=".35" stroke-width="1.4"/>
+    <path d="M0 98 C40 70 80 112 120 78 C138 64 150 88 156 80" stroke="#6c757d" stroke-opacity=".3" stroke-width="1.4"/>
+    <path d="M0 86 C40 58 80 100 120 66 C138 52 150 76 156 68" stroke="#2C5F8A" stroke-width="2.4" stroke-linecap="round"/>
+  </g>
+  <text class="sm" x="122" y="250" text-anchor="middle">in-control model: &#956;&#770;(t) + K PCs</text>
+
+  <line x1="220" y1="164" x2="256" y2="164" stroke="#adb5bd" stroke-width="1.4" marker-end="url(#arrSPM)"/>
+
+  <!-- ===== Panel 2: two statistics ===== -->
+  <rect x="262" y="70" width="196" height="188" rx="12" fill="#fff8ec" stroke="#E6A020" stroke-width="1.5"/>
+  <text class="lab" x="360" y="94" text-anchor="middle" fill="#B37700">Two Statistics</text>
+
+  <rect x="278" y="106" width="164" height="60" rx="8" fill="#fff" stroke="#f0d6a6" stroke-width="1"/>
+  <text class="lab" x="360" y="126" text-anchor="middle" fill="#B37700" font-size="12">Hotelling T&#178;</text>
+  <text class="mono" x="360" y="144" text-anchor="middle" fill="#495057" font-size="11">&#931; &#958;&#8342;&#178; / &#955;&#8342;</text>
+  <text class="sm" x="360" y="160" text-anchor="middle">shift inside FPC subspace</text>
+
+  <rect x="278" y="172" width="164" height="60" rx="8" fill="#fff" stroke="#f0d6a6" stroke-width="1"/>
+  <text class="lab" x="360" y="192" text-anchor="middle" fill="#B37700" font-size="12">SPE (Q)</text>
+  <text class="mono" x="360" y="210" text-anchor="middle" fill="#495057" font-size="11">&#8747; x&#771;(t)&#178; dt</text>
+  <text class="sm" x="360" y="226" text-anchor="middle">residual outside the model</text>
+
+  <text class="sm" x="360" y="250" text-anchor="middle">control limits set at rate &#945;</text>
+
+  <line x1="458" y1="164" x2="494" y2="164" stroke="#adb5bd" stroke-width="1.4" marker-end="url(#arrSPM)"/>
+
+  <!-- ===== Panel 3: Phase II control chart ===== -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#eef7f0" stroke="#2E8B57" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#2E8B57">Phase II — Monitor</text>
+  <text class="mono" x="598" y="112" text-anchor="middle" fill="#2E8B57" font-size="11">spm_monitor()</text>
+  <g transform="translate(520,124)">
+    <!-- axes -->
+    <line x1="0" y1="0" x2="0" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="110" x2="156" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <!-- UCL -->
+    <line x1="0" y1="34" x2="156" y2="34" stroke="#D55E00" stroke-width="1.3" stroke-dasharray="5 3"/>
+    <text class="sm" x="156" y="30" text-anchor="end" fill="#D55E00">UCL</text>
+    <!-- statistic trajectory -->
+    <polyline points="10,88 28,76 46,90 64,70 82,82 100,64 118,74 136,18 154,58" stroke="#adb5bd" stroke-width="1.2" fill="none"/>
+    <!-- in-control points -->
+    <circle cx="10" cy="88" r="3.2" fill="#2E8B57"/>
+    <circle cx="28" cy="76" r="3.2" fill="#2E8B57"/>
+    <circle cx="46" cy="90" r="3.2" fill="#2E8B57"/>
+    <circle cx="64" cy="70" r="3.2" fill="#2E8B57"/>
+    <circle cx="82" cy="82" r="3.2" fill="#2E8B57"/>
+    <circle cx="100" cy="64" r="3.2" fill="#2E8B57"/>
+    <circle cx="118" cy="74" r="3.2" fill="#2E8B57"/>
+    <circle cx="154" cy="58" r="3.2" fill="#2E8B57"/>
+    <!-- out-of-control alarm -->
+    <circle cx="136" cy="18" r="4.2" fill="#D55E00"/>
+    <text class="sm" x="132" y="12" text-anchor="end" fill="#D55E00">alarm</text>
+  </g>
+  <text class="sm" x="598" y="250" text-anchor="middle">T&#178; / SPE vs control limit</text>
 </svg>

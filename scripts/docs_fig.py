@@ -15,9 +15,23 @@ Usage inside a docs code block::
     ...
     print(render(f))
     ```
+
+Use ``fast(full, fast_value)`` to lower expensive iteration counts in local
+builds without touching the published/committed output::
+
+    res  = fanova(X, grp, n_perm=fast(500, 50))
+    out  = karcher_mean(data, t, max_iter=fast(20, 5))
+    band = fpca_tolerance_band(ref, nb=fast(800, 100))
+
+Set the environment variable ``DOCS_FAST=1`` (or any non-empty value) before
+running ``mkdocs build`` to activate fast mode.  Fast mode is **speed-only**:
+figures may look rougher and MUST NOT be committed as publishable output.
+The full build (``DOCS_FAST`` unset) is the source of truth and the only mode
+where the byte-identical determinism guarantee (FND-03) holds.
 """
 from __future__ import annotations
 
+import os as _os
 from io import StringIO
 
 import matplotlib
@@ -54,6 +68,13 @@ plt.rcParams.update(
         "legend.frameon": False,
         "legend.fontsize": 9.5,
         "figure.autolayout": True,
+        # FND-03: deterministic SVG element IDs across builds.
+        # Without this, matplotlib uses uuid4() → IDs differ every run →
+        # byte-for-byte comparison of two consecutive builds always fails.
+        # Note: hashsalt fixes IDs only; stochastic exec blocks must also
+        # seed their own RNG (rng = np.random.default_rng(42)). Per-block
+        # seed auditing is a phases-3–8 concern (RESEARCH Pitfall 3).
+        "svg.hashsalt": "fdars-docs",
     }
 )
 
@@ -75,7 +96,12 @@ def render(figure=None) -> str:
     """
     figure = figure or plt.gcf()
     buf = StringIO()
-    figure.savefig(buf, format="svg", bbox_inches="tight")
+    # metadata={"Date": None} suppresses matplotlib's default <dc:date> wall-clock
+    # stamp in the SVG metadata; without it, two consecutive builds embed different
+    # timestamps and are never byte-identical (FND-03). Paired with svg.hashsalt
+    # (deterministic element IDs), this makes docs_fig.py output reproducible across
+    # builds. (Per-block RNG seeding of stochastic figures is handled per section.)
+    figure.savefig(buf, format="svg", bbox_inches="tight", metadata={"Date": None})
     plt.close(figure)
     svg = buf.getvalue()
     # Strip the XML/doctype preamble so the <svg> embeds cleanly as HTML.
@@ -83,3 +109,23 @@ def render(figure=None) -> str:
     if start != -1:
         svg = svg[start:]
     return f'<div class="fdars-figure">{svg}</div>'
+
+
+def fast(full, fast_value):
+    """Return ``fast_value`` if ``DOCS_FAST`` is set, else ``full``.
+
+    Central helper for lowering expensive iteration counts in local builds
+    without scattering ``os.environ`` checks across individual exec blocks
+    (FND-06, D-08).  Call it at any parameter that is expensive to compute::
+
+        res  = fanova(X, grp, n_perm=fast(500, 50))
+        out  = karcher_mean(data, t, max_iter=fast(20, 5))
+        band = fpca_tolerance_band(ref, nb=fast(800, 100))
+        ls   = lomb_scargle_fdata(fd, oversampling=fast(4, 2))
+
+    Fast mode is **speed-only** (D-07): figures may look rougher and MUST NOT
+    be committed as publishable output.  The full build (``DOCS_FAST`` unset)
+    is the only source of truth and the only mode where the byte-identical
+    determinism guarantee (FND-03) holds.
+    """
+    return fast_value if _os.environ.get("DOCS_FAST") else full

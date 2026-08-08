@@ -5,10 +5,13 @@ import pytest
 
 
 def test_import():
-    """Verify the package can be imported."""
+    """Verify the package can be imported and exposes a semver __version__."""
+    import re
     import fdars
     assert hasattr(fdars, "__version__")
-    assert fdars.__version__ == "0.1.0"
+    # Don't pin an exact version — that breaks on every release bump (it had
+    # drifted from 0.1.0 to 0.2.0). Just require a semver-shaped string.
+    assert re.match(r"^\d+\.\d+\.\d+", fdars.__version__), fdars.__version__
 
 
 def test_submodules():

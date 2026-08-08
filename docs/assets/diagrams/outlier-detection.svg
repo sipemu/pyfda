@@ -1,13 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 350" fill="none" font-family="'Segoe UI', system-ui, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Three Types of Functional Outliers">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Content centred on the 720x300 canvas (source was 600x350) -->
+  <g transform="translate(60,3)">
 
   <!-- Title -->
-  <text x="300" y="22" text-anchor="middle" font-size="17.5" font-weight="bold" fill="#333">Three Types of Functional Outliers</text>
-  <text x="300" y="40" text-anchor="middle" font-size="12.5" fill="#888">Atypical curves detected by depth and likelihood methods</text>
+  <text class="ttl" x="300" y="22" text-anchor="middle" font-size="17.5" style="fill:#333">Three Types of Functional Outliers</text>
+  <text class="sub" x="300" y="40" text-anchor="middle" font-size="12.5" style="fill:#888">Atypical curves detected by depth and likelihood methods</text>
 
   <!-- ===== TYPE 1: Magnitude ===== -->
   <rect x="14" y="54" width="180" height="150" rx="6" fill="#FFE8E8" stroke="#D55E00" stroke-width="1.2"/>
-  <text x="104" y="72" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#D55E00">Magnitude Outlier</text>
-  <text x="104" y="86" text-anchor="middle" font-size="10" fill="#888">shifted up or down</text>
+  <text class="lab" x="104" y="72" text-anchor="middle" font-size="12.5" style="fill:#D55E00">Magnitude Outlier</text>
+  <text class="sm" x="104" y="86" text-anchor="middle" font-size="10" style="fill:#888">shifted up or down</text>
 
   <!-- Normal curves (grey) -->
   <path d="M28 156 Q52 132 76 140 Q100 148 124 134 Q148 120 172 138 Q184 146 186 142" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
@@ -20,14 +30,14 @@
 
   <!-- Shift arrow -->
   <line x1="46" y1="154" x2="46" y2="124" stroke="#D55E00" stroke-width="1" stroke-dasharray="3,2"/>
-  <text x="54" y="140" font-size="10" fill="#D55E00">&#8593; shift</text>
+  <text class="sm" x="54" y="140" font-size="10" style="fill:#D55E00">&#8593; shift</text>
 
-  <text x="104" y="194" text-anchor="middle" font-size="10" fill="#555">Same shape, different level</text>
+  <text class="sm" x="104" y="194" text-anchor="middle" font-size="10" style="fill:#555">Same shape, different level</text>
 
   <!-- ===== TYPE 2: Shape ===== -->
   <rect x="210" y="54" width="180" height="150" rx="6" fill="#E0E8FF" stroke="#4A90D9" stroke-width="1.2"/>
-  <text x="300" y="72" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#2C5F8A">Shape Outlier</text>
-  <text x="300" y="86" text-anchor="middle" font-size="10" fill="#888">different pattern</text>
+  <text class="lab" x="300" y="72" text-anchor="middle" font-size="12.5" style="fill:#2C5F8A">Shape Outlier</text>
+  <text class="sm" x="300" y="86" text-anchor="middle" font-size="10" style="fill:#888">different pattern</text>
 
   <!-- Normal curves (grey) -->
   <path d="M224 156 Q248 132 272 140 Q296 148 320 134 Q344 120 368 138 Q380 146 382 142" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
@@ -38,12 +48,12 @@
   <!-- Outlier: inverted shape -->
   <path d="M224 140 Q248 164 272 156 Q296 148 320 162 Q344 176 368 158 Q380 150 382 154" stroke="#4A90D9" stroke-width="2" fill="none"/>
 
-  <text x="300" y="194" text-anchor="middle" font-size="10" fill="#555">Inverted or different form</text>
+  <text class="sm" x="300" y="194" text-anchor="middle" font-size="10" style="fill:#555">Inverted or different form</text>
 
   <!-- ===== TYPE 3: Amplitude ===== -->
   <rect x="406" y="54" width="180" height="150" rx="6" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="1.2"/>
-  <text x="496" y="72" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#7B2D8E">Amplitude Outlier</text>
-  <text x="496" y="86" text-anchor="middle" font-size="10" fill="#888">exaggerated scale</text>
+  <text class="lab" x="496" y="72" text-anchor="middle" font-size="12.5" style="fill:#7B2D8E">Amplitude Outlier</text>
+  <text class="sm" x="496" y="86" text-anchor="middle" font-size="10" style="fill:#888">exaggerated scale</text>
 
   <!-- Normal curves (grey) -->
   <path d="M420 156 Q444 142 468 146 Q492 152 516 142 Q540 132 564 144 Q576 150 578 148" stroke="#999" stroke-width="1" fill="none" opacity="0.3"/>
@@ -56,21 +66,23 @@
 
   <!-- Scale annotation -->
   <line x1="540" y1="68" x2="540" y2="130" stroke="#7B2D8E" stroke-width="1" stroke-dasharray="3,2"/>
-  <text x="548" y="100" font-size="10" fill="#7B2D8E">3&#215;</text>
+  <text class="sm" x="548" y="100" font-size="10" style="fill:#7B2D8E">3&#215;</text>
 
-  <text x="496" y="194" text-anchor="middle" font-size="10" fill="#555">Same shape, larger swings</text>
+  <text class="sm" x="496" y="194" text-anchor="middle" font-size="10" style="fill:#555">Same shape, larger swings</text>
 
   <!-- ===== BOTTOM: Detection methods ===== -->
   <line x1="10" y1="218" x2="590" y2="218" stroke="#eee" stroke-width="1"/>
 
-  <text x="300" y="238" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#555">Detection Methods</text>
+  <text class="lab" x="300" y="238" text-anchor="middle" font-size="12.5" style="fill:#555">Detection Methods</text>
 
   <rect x="20" y="248" width="170" height="24" rx="4" fill="#FFF3E0" stroke="#E6A020" stroke-width="0.8"/>
-  <text x="105" y="264" text-anchor="middle" font-size="10" fill="#B37700" font-weight="bold">depth() &#8594; low depth = outlier</text>
+  <text class="lab" x="105" y="264" text-anchor="middle" font-size="10" style="fill:#B37700">depth() &#8594; low depth = outlier</text>
 
   <rect x="215" y="248" width="170" height="24" rx="4" fill="#F0FAF0" stroke="#2E8B57" stroke-width="0.8"/>
-  <text x="300" y="264" text-anchor="middle" font-size="10" fill="#2E8B57" font-weight="bold">detect_outliers_lrt() &#8594; likelihood test</text>
+  <text class="lab" x="300" y="264" text-anchor="middle" font-size="10" style="fill:#2E8B57">detect_outliers_lrt() &#8594; likelihood test</text>
 
   <rect x="410" y="248" width="170" height="24" rx="4" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="0.8"/>
-  <text x="495" y="264" text-anchor="middle" font-size="10" fill="#7B2D8E" font-weight="bold">conformal_prediction_band() &#8594; dist-free</text>
+  <text class="lab" x="495" y="264" text-anchor="middle" font-size="10" style="fill:#7B2D8E">conformal_prediction_band() &#8594; dist-free</text>
+
+  </g>
 </svg>

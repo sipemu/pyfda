@@ -37,6 +37,44 @@ jobs:
         run: |
           source .venv/bin/activate
           maturin develop --release
+      - name: Lint SVG diagrams (SVGO)
+        # FND-02 / D-02 / D-10: check-only gate, blocks on ALL diagrams.
+        # Pinned to svgo@3.3.4 (NOT latest — v4 has a different CLI/config API).
+        # The gate NEVER rewrites committed hand-authored SVGs: svgo runs in stdout
+        # mode (--output -) only.
+        #
+        # Idempotence check, not a source-vs-output diff: svgo@3.3.4's XML serialiser
+        # always normalises whitespace and attribute ordering regardless of plugin
+        # settings, so a direct diff against the hand-formatted source always shows
+        # cosmetic differences. Instead we run svgo twice and diff pass 2 against
+        # pass 1 — a nonzero diff means the config would still transform the diagram
+        # after the first pass (structural nonconformance).
+        run: |
+          FAILED=0
+          for svg in docs/assets/diagrams/*.svg; do
+            first=$(npx svgo@3.3.4 --config svgo.config.mjs --quiet --input "$svg" --output -)
+            second=$(printf '%s' "$first" | npx svgo@3.3.4 --config svgo.config.mjs --quiet --input - --output -)
+            if ! diff <(printf '%s' "$first") <(printf '%s' "$second") >/dev/null; then
+              echo "SVGO: $svg is not stable under svgo.config.mjs (would be transformed)"
+              FAILED=1
+            fi
+          done
+          [ $FAILED -eq 0 ] || { echo "SVGO lint failed — fix diagrams above"; exit 1; }
+      - name: Doc-test smoke (canadian-weather.md)
+        # FND-05 / D-11: the doc-test gate blocks on the SINGLE smoke-test page
+        # only. The gated page set GROWS PAGE-BY-PAGE in Phase 9 as each example
+        # is fixed against the current API — do NOT gate docs/examples/ wholesale
+        # (that would pull Phase 9's example-fixing work forward and redden CI).
+        #
+        # --markdown-docs-syntax=superfences is required so `exec="1"` fences are
+        # recognised as Python (else silently skipped). conftest.py injects
+        # np/plt/fdars and expands pymdownx.snippets `--8<--` includes (D-04).
+        env:
+          PYTHONPATH: scripts
+        run: |
+          source .venv/bin/activate
+          pytest --markdown-docs --markdown-docs-syntax=superfences \
+            docs/examples/canadian-weather.md -v
       - name: Build and gate on figure errors
         # PYTHONPATH exposes scripts/docs_fig.py to markdown-exec code blocks.
         # Build once, then FAIL if any figure block silently errored (markdown-exec

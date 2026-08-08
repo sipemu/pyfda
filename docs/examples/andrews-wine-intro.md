@@ -323,7 +323,7 @@ page: these are the bottles that ride the edge of their class.
 From here the wines are functional data. Bundle the curves into an `fdars.Fdata`
 object and every method of the class becomes available.
 
-```python
+```{.python notest}
 import numpy as np
 from fdars import Fdata
 from docs_data import load_wine
