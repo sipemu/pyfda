@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Elastic alignment: separating amplitude from phase variation">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Elastic alignment: removing phase variation by warping curves to a common template to recover a sharp mean">
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -6,7 +6,7 @@
     .sm{font:400 11px system-ui,sans-serif;fill:#495057}
     .mono{font:600 12px ui-monospace,monospace}
   </style>
-  <text class="ttl" x="360" y="26" text-anchor="middle">Elastic Alignment: Separating Amplitude from Phase</text>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Elastic Alignment: Removing Phase to Recover a Sharp Mean</text>
   <text class="sub" x="360" y="46" text-anchor="middle">Warp curves to a common template; the mean recovers a sharp profile</text>
 
   <!-- Panel 1: misaligned peaks -->
@@ -58,5 +58,5 @@
     <path d="M0 56 C18 46 30 30 40 16 C46 8 52 4 56 0" stroke="#fd7e14" stroke-width="2"/>
     <path d="M0 56 C22 52 34 34 44 20 C50 12 54 4 56 0" stroke="#fd7e14" stroke-opacity=".5" stroke-width="1.6"/>
   </g>
-  <text class="sm" x="652" y="192" text-anchor="middle" fill="#6c757d">&#947;(t)</text>
+  <text class="sm" x="652" y="192" text-anchor="middle" fill="#6c757d">phase &#947;(t)</text>
 </svg>
