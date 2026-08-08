@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: represent/ Diagrams** - Sweep represent/ section: remove R-era content, conform, close gaps (completed 2026-08-08)
 - [x] **Phase 5: align/ Diagrams** - Sweep align/ section: conform, fix phase-vs-amplitude split, close gaps (completed 2026-08-08)
 - [x] **Phase 6: analyze/ Diagrams** - Sweep analyze/ section: migrate legacy outliers, conform, close gaps (completed 2026-08-08)
-- [ ] **Phase 7: regression/ Diagrams** - Sweep regression/ section: redraw conformal band, conform, close gaps
+- [x] **Phase 7: regression/ Diagrams** - Sweep regression/ section: redraw conformal band, conform, close gaps (completed 2026-08-08)
 - [ ] **Phase 8: monitoring/ Diagrams** - Sweep monitoring/ section: remove R-era content, redraw control limits, close gaps
 - [ ] **Phase 9: Examples Sweep** - All example pages correct against current API, enriched narrative, improved figures, five new examples
 
@@ -209,6 +209,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. represent/ Diagrams | 2/2 | Complete    | 2026-08-08 |
 | 5. align/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 6. analyze/ Diagrams | 1/0 | Complete    | 2026-08-08 |
-| 7. regression/ Diagrams | 0/TBD | Not started | - |
+| 7. regression/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 8. monitoring/ Diagrams | 0/TBD | Not started | - |
 | 9. Examples Sweep | 0/TBD | Not started | - |

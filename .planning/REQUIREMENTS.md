@@ -30,7 +30,7 @@ Each section requirement means: every diagram in that section conforms to `STYLE
 - [x] **DIA-02**: `represent/` diagrams conform and are accurate (basis-representation — remove R-era `extendr`/`autoplot` content, FPCA, andrews-transformation, distance-metrics, elastic-fpca)
 - [x] **DIA-03**: `align/` diagrams conform and are accurate (elastic-alignment phase-vs-amplitude split, landmark-registration, tsrvf, shape-analysis, alignment-comparison, advanced-alignment)
 - [x] **DIA-04**: `analyze/` diagrams conform and are accurate (clustering, depth-functions, outlier-detection, tolerance-bands, covariance-functions, seasonal-analysis, equivalence-testing, gmm-clustering, elastic-clustering — migrate legacy outliers)
-- [ ] **DIA-05**: `regression/` diagrams conform and are accurate (scalar-on-function β(t) coefficient curve, function-on-scalar, robust-regression, conformal-prediction — verified scalar-response/per-observation interval, NOT a functional band; audit GAP-0004 disproven, no redraw, conformal-classification, classification, regression-diagnostics, cross-validation)
+- [x] **DIA-05**: `regression/` diagrams conform and are accurate (scalar-on-function β(t) coefficient curve, function-on-scalar, robust-regression, conformal-prediction — verified scalar-response/per-observation interval, NOT a functional band; audit GAP-0004 disproven, no redraw, conformal-classification, classification, regression-diagnostics, cross-validation)
 - [ ] **DIA-06**: `monitoring/` diagrams conform and are accurate (spm — remove R-era content, redraw Phase I/II control limits; advanced-spm; profile-partial-monitoring)
 
 ### Example sweeps (secondary)
@@ -82,7 +82,7 @@ Explicitly excluded to prevent scope creep.
 | DIA-02 | Phase 4 | Complete |
 | DIA-03 | Phase 5 | Complete |
 | DIA-04 | Phase 6 | Complete |
-| DIA-05 | Phase 7 | Pending |
+| DIA-05 | Phase 7 | Complete |
 | DIA-06 | Phase 8 | Pending |
 | EX-01 | Phase 9 | Pending |
 | EX-02 | Phase 9 | Pending |
