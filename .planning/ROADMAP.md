@@ -159,7 +159,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Success Criteria** (what must be TRUE):
 
   1. All regression/ SVG diagrams pass SVGO lint with zero errors
-  2. `conformal-prediction.svg` depicts a time-varying band `ŷ(t) ± q(t)` (not a scalar constant interval) — verified on the built site against `fdars` conformal functional regression behavior
+  2. `conformal-prediction.svg` accurately depicts the conformal prediction interval for `fdars.conformal` regression — **CORRECTED (Phase 7):** live verification shows `conformal_fregre_lm`/`_np` are scalar-on-function (scalar response, per-observation interval `[ŷ − q, ŷ + q]`), NOT functional. The scalar-interval depiction is method-accurate; the original "time-varying band ŷ(t)±q(t)" premise (audit GAP-0004) was a false positive — no redraw. See 07-VERIFICATION.md.
   3. The scalar-on-function regression diagram shows the β(t) coefficient curve as the key visual element — verified on the built site
   4. Every regression/ page that warrants a diagram (scalar-on-function, function-on-scalar, robust-regression, conformal-prediction, conformal-classification, classification, regression-diagnostics, cross-validation) has an accurate diagram visible on the built site
 

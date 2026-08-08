@@ -30,7 +30,7 @@ Each section requirement means: every diagram in that section conforms to `STYLE
 - [x] **DIA-02**: `represent/` diagrams conform and are accurate (basis-representation — remove R-era `extendr`/`autoplot` content, FPCA, andrews-transformation, distance-metrics, elastic-fpca)
 - [x] **DIA-03**: `align/` diagrams conform and are accurate (elastic-alignment phase-vs-amplitude split, landmark-registration, tsrvf, shape-analysis, alignment-comparison, advanced-alignment)
 - [x] **DIA-04**: `analyze/` diagrams conform and are accurate (clustering, depth-functions, outlier-detection, tolerance-bands, covariance-functions, seasonal-analysis, equivalence-testing, gmm-clustering, elastic-clustering — migrate legacy outliers)
-- [ ] **DIA-05**: `regression/` diagrams conform and are accurate (scalar-on-function β(t) coefficient curve, function-on-scalar, robust-regression, conformal-prediction — redraw as a functional band ŷ(t) ± q(t), conformal-classification, classification, regression-diagnostics, cross-validation)
+- [ ] **DIA-05**: `regression/` diagrams conform and are accurate (scalar-on-function β(t) coefficient curve, function-on-scalar, robust-regression, conformal-prediction — verified scalar-response/per-observation interval, NOT a functional band; audit GAP-0004 disproven, no redraw, conformal-classification, classification, regression-diagnostics, cross-validation)
 - [ ] **DIA-06**: `monitoring/` diagrams conform and are accurate (spm — remove R-era content, redraw Phase I/II control limits; advanced-spm; profile-partial-monitoring)
 
 ### Example sweeps (secondary)
