@@ -79,8 +79,9 @@ async def test_tracer_list_and_call_build_diagnostics(canadian_weather):
 
     async with Client(mcp) as client:
         # ---- list_tools ----
+        # mcp 2.0.0 returns a ListToolsResult whose `.tools` holds the Tool list.
         tools_response = await client.list_tools()
-        tool_names = [t.name for t in tools_response]
+        tool_names = [t.name for t in tools_response.tools]
         assert "fdars_build_diagnostics" in tool_names, (
             f"fdars_build_diagnostics not in {tool_names}"
         )
