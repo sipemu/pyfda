@@ -21,6 +21,8 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth:** `.planning/design/llm-cluster-narration.md`
 
+**Progress:** Phase 10 (Advisor Core Primitive) complete — `python/fdars/advisor.py` holds the deterministic offline `build_diagnostics` engine (alignment/fpca/basis/smoothing/clustering), the grounded `advise()` (Anthropic structured outputs) across the interpretation/parameter/method task families, and the `describe_cluster_differences` specialization. Next: Phase 11 (Python API Surface) — public registration + `[advisor]` extra + offline/stubbed tests.
+
 > The v1.0 Documentation Overhaul milestone shipped (Phases 1–9 complete). Its requirements below are retained as historical/validated context.
 
 ## Requirements
@@ -107,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-09 — started milestone v2.0 (Grounded AI analysis advisor)*
+*Last updated: 2026-08-09 — Phase 10 (Advisor Core Primitive) complete*
