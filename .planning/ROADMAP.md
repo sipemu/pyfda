@@ -215,12 +215,25 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `advise(diagnostics, task, domain_context)` returns a schema-validated `Advice` (interpretation + recommendations + caveats) via `client.messages.parse(model="claude-opus-4-8", ...)`, and every `Recommendation` carries `action`, `kind` (`parameter`|`method`|`none`), `rationale`, `expected_effect`, and non-empty `evidence` that cites diagnostic values
   4. The advisor performs all three task families against real diagnostics: interpretation (what a result means in domain terms), parameter guidance (`lambda_`, `n_basis`, bandwidth, `n_comp`, cluster `k`, depth method), and method guidance (e.g. linear FPCA + phase variation → elastic FPCA; sparse/irregular → pre-smooth; density/constrained → transform)
   5. `describe_cluster_differences` is provided as a specialization built on the diagnostics builder and returns grounded cluster-difference interpretation
-**Plans**: TBD
+**Plans**: 3 plans
+
+**Wave 1**
+
+- [ ] 10-01-PLAN.md — TRACER: advisor.py schema (Advice/Recommendation) + build_diagnostics(alignment) + advise via messages.parse, end-to-end; records anthropic version-floor decision (CORE-02, CORE-03, CORE-04, ADVISE-01)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 10-02-PLAN.md — build_diagnostics fpca/basis/smoothing/clustering branches + parameter & method task families (CORE-01, ADVISE-02, ADVISE-03)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 10-03-PLAN.md — describe_cluster_differences specialization on build_diagnostics + full offline surface validation (CORE-05)
+
 **Notes**:
 
   - Grounding invariant is enforced by the Pydantic schema *and* the system prompt: reason only from provided diagnostics; every `evidence` item cites a value; omit unsupported claims. The LLM never fabricates numbers.
   - Method-accuracy: validate interpretations/recommendations against known datasets in `docs/data/` (canadian weather, growth, phoneme, tecator, sonar, wine).
-  - OPEN DECISION (surfaced, not resolved here): `anthropic` SDK version floor — pick a current version supporting `messages.parse` + `claude-opus-4-8`. Pin the floor when the extra is declared.
+  - RESOLVED (Phase 10 planning): `anthropic` SDK version floor set to `>=0.72.0` (supports `messages.parse` + `output_format` + `claude-opus-4-8`), recorded in `advisor.py` as `ADVISOR_ANTHROPIC_MIN_VERSION`. The `[advisor]` extra that pins this floor is declared/tested in Phase 11 per the phase split.
 
 ### Phase 11: Python API Surface
 
@@ -286,7 +299,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. regression/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 8. monitoring/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 9. Examples Sweep | 1/0 | Complete    | 2026-08-08 |
-| 10. Advisor Core Primitive | 0/0 | Not started | - |
+| 10. Advisor Core Primitive | 0/3 | Planned | - |
 | 11. Python API Surface | 0/0 | Not started | - |
 | 12. Tool / MCP Surface | 0/0 | Not started | - |
 | 13. Agent Skill Surface | 0/0 | Not started | - |
