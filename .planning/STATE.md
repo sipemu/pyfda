@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Grounded AI analysis advisor
-current_phase: 11
-current_phase_name: python-api-surface
-status: executing
+current_phase: 12
+current_phase_name: Tool / MCP Surface
+status: planning
 stopped_at: Completed 11-03-PLAN.md — examples/advisor_recipe.py recipe script created (PYAPI-03)
-last_updated: "2026-08-09T19:45:56.986Z"
+last_updated: "2026-08-09T19:57:07.241Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 10 execution started
 progress:
@@ -28,16 +28,16 @@ See: .planning/PROJECT.md (updated 2026-08-07)
 
 ## Current Position
 
-Phase: 11 (python-api-surface) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-08-09 — Phase 11 execution started
+Phase: 12 — Tool / MCP Surface
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-09 — Phase 11 complete, transitioned to Phase 12
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 19
+- Total plans completed: 22
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -55,6 +55,7 @@ Last activity: 2026-08-09 — Phase 11 execution started
 | 8 | 1 | - | - |
 | 9 | 1 | - | - |
 | 10 | 3 | - | - |
+| 11 | 3 | - | - |
 
 **Recent Trend:**
 
