@@ -528,6 +528,31 @@ def _build_smoothing_diagnostics(raw: dict, **kwargs) -> dict:
     """
     diag: dict = {"method": "smoothing"}
 
+    # Branch A-prime: single-fit pspline_fit_gcv result (no lambda sweep).
+    # pspline_fit_gcv returns scalar keys ('gcv', 'edf', 'rss', 'aic', 'bic')
+    # rather than a GCV curve — map to optimal_* scalars directly.
+    if "gcv" in raw and "edf" in raw and "lambda_values" not in raw:
+        diag["lambda_values"] = None
+        diag["gcv_curve"] = None
+        diag["edf"] = None
+        diag["gcv_aic_approx"] = None
+        diag["gcv_bic_approx"] = None
+        diag["optimal_lambda"] = None
+        diag["optimal_gcv"] = float(raw["gcv"])
+        diag["optimal_edf"] = float(raw["edf"])
+        # aic and bic from the fit are already scalar (store under gcv_aic_approx)
+        if "aic" in raw and raw["aic"] is not None:
+            try:
+                diag["gcv_aic_approx"] = float(raw["aic"])
+            except (TypeError, ValueError):
+                pass
+        if "bic" in raw and raw["bic"] is not None:
+            try:
+                diag["gcv_bic_approx"] = float(raw["bic"])
+            except (TypeError, ValueError):
+                pass
+        return diag
+
     # Branch A: pre-computed smoothing GCV curve supplied in the result dict.
     if "lambda_values" in raw and "gcv" in raw:
         lambda_values = [float(v) for v in raw["lambda_values"]]

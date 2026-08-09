@@ -154,10 +154,14 @@ def compare_run(
     after_result = run_method(dataset_id, method, **params_after)
     after_result_id = registry.store_result(after_result)
 
-    # Build diagnostics for before and after
-    # Pass argvals so Branch B (smoothing/basis) can re-run the GCV sweep if needed
-    before_diag = build_diagnostics(before_result, method, argvals=argvals)
-    after_diag = build_diagnostics(after_result, method, argvals=argvals)
+    # Build diagnostics for before and after.
+    # Pass data + argvals via kwargs so Branch B (smoothing/basis) can re-run
+    # the GCV sweep when the stored result lacks lambda_values/n_basis_values.
+    # build_diagnostics(raw, "smoothing", **kwargs) forwards kwargs to
+    # _build_smoothing_diagnostics which checks kwargs.get("data") and
+    # kwargs.get("argvals") for the Branch B re-run path.
+    before_diag = build_diagnostics(before_result, method, argvals=argvals, data=data)
+    after_diag = build_diagnostics(after_result, method, argvals=argvals, data=data)
 
     # Compute delta: after - before for every finite scalar numeric key present in both
     delta: dict = {}

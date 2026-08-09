@@ -14,6 +14,12 @@ Usage (in-process test)::
     async with Client(mcp) as client:
         tools = await client.list_tools()
         result = await client.call_tool("fdars_build_diagnostics", {...})
+
+Tools exposed (Plan 12-01/02/03):
+
+- ``fdars_build_diagnostics`` — deterministic offline diagnostics (TOOL-01/02)
+- ``fdars_run_method`` — run any of five fdars methods; returns result handle (TOOL-01)
+- ``fdars_compare_run`` — re-run with new params; return before/after delta (TOOL-03)
 """
 
 from __future__ import annotations
@@ -223,6 +229,126 @@ def fdars_run_method(
 
     # Return only the handle + method — never arrays (by-reference invariant)
     return {"result_id": result_id, "method": method.lower()}
+
+
+# ---------------------------------------------------------------------------
+# Tool: fdars_compare_run (TOOL-03)
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def fdars_compare_run(
+    dataset_id: str,
+    method: str,
+    before_result_id: str,
+    lambda_: float | None = None,
+    n_basis: int | None = None,
+    n_comp: int | None = None,
+    k: int | None = None,
+    seed: int | None = None,
+) -> dict:
+    """Re-run an fdars method with new parameters and return an observable before/after delta.
+
+    This is the TOOL-03 agentic re-run/compare tool.  It fetches the before
+    result from the handle registry, re-runs the fdars method with the
+    specified after-parameters, builds diagnostics for both runs, and returns
+    a dict containing the full diagnostics and a scalar numeric delta.
+
+    The compute path is **fully deterministic** — fdars computes every number;
+    the model only orchestrates.  No ``ANTHROPIC_API_KEY`` is required; no
+    network connection is made.
+
+    Parameters
+    ----------
+    dataset_id : str
+        Opaque handle ID for the dataset (data + argvals) stored in the
+        handle registry.  Pre-populate via ``registry.store_dataset``.
+    method : str
+        One of ``'alignment'``, ``'fpca'``, ``'basis'``, ``'smoothing'``,
+        ``'clustering'``.  Raises :exc:`ValueError` on unknown method
+        (T-12-02 — validated at the tool boundary and again in the runner).
+    before_result_id : str
+        Handle ID for the prior run result (from ``fdars_run_method`` or
+        ``fdars_build_diagnostics``).  Raises :exc:`KeyError` if not found
+        in the registry (T-12-01: fail closed).
+    lambda_ : float, optional
+        After-run warp penalty for ``alignment`` or smoothing regularisation
+        for ``smoothing``.  Ignored for ``fpca``, ``basis``, ``clustering``.
+    n_basis : int, optional
+        After-run number of B-spline basis functions for ``smoothing``.
+        Default ``15``.  Ignored for other methods.
+    n_comp : int, optional
+        After-run number of FPCA components for ``fpca``.  Default ``3``.
+        Ignored for other methods.
+    k : int, optional
+        After-run number of clusters for ``clustering``.  Default ``3``.
+        Ignored for other methods.
+    seed : int, optional
+        After-run RNG seed for ``clustering``.  Default ``42``.
+        Ignored for other methods.
+
+    Returns
+    -------
+    dict
+        Plain-Python, JSON-serialisable dict with keys:
+
+        ``before_result_id`` : str
+            The handle ID of the before result (same as input).
+        ``after_result_id`` : str
+            The handle ID of the newly stored after result.
+        ``before`` : dict
+            Full diagnostics dict (``advisor.build_diagnostics``) for the
+            before run.
+        ``after`` : dict
+            Full diagnostics dict for the after run.
+        ``delta`` : dict
+            Scalar numeric difference per key: ``after[key] - before[key]``.
+            Only keys where both values are finite ``float`` or ``int``
+            (not bool) are included (TOOL-03 observable delta).
+
+    Raises
+    ------
+    ValueError
+        If ``method`` is not in the supported set (T-12-02).
+    KeyError
+        If ``dataset_id`` or ``before_result_id`` is unknown in the registry
+        (T-12-01).
+
+    Notes
+    -----
+    After-params are **flattened** as top-level typed arguments (NOT a nested
+    ``params_after: dict``) so the MCP schema is fully specified from type
+    hints (Pitfall 6).  Non-``None`` args are assembled into ``params_after``
+    inside the handler before delegating to ``_compare.compare_run``.
+
+    Tool handlers are **synchronous** (``def``, not ``async def``) because
+    fdars methods are synchronous Rust calls (Pitfall 2).
+    """
+    # V5: validate method at tool boundary before delegating (T-12-02; fail fast)
+    method_lc = method.lower()
+    if method_lc not in _SUPPORTED_METHODS:
+        raise ValueError(
+            f"fdars_compare_run: unsupported method {method!r}. "
+            f"Supported: {sorted(_SUPPORTED_METHODS)!r}."
+        )
+
+    # Assemble params_after from non-None typed args (Pitfall 6: flat schema)
+    params_after: dict = {}
+    if lambda_ is not None:
+        params_after["lambda_"] = lambda_
+    if n_basis is not None:
+        params_after["n_basis"] = n_basis
+    if n_comp is not None:
+        params_after["n_comp"] = n_comp
+    if k is not None:
+        params_after["k"] = k
+    if seed is not None:
+        params_after["seed"] = seed
+
+    from fdars.mcp._compare import compare_run
+
+    # Delegate to _compare — no inline delta logic here (Single Responsibility)
+    return compare_run(dataset_id, method_lc, before_result_id, params_after)
 
 
 # ---------------------------------------------------------------------------
