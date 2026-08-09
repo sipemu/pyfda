@@ -38,6 +38,7 @@ Issues = "https://github.com/sipemu/pyfda/issues"
 [project.optional-dependencies]
 plot = ["matplotlib>=3.6"]
 dev = ["pytest", "matplotlib>=3.6"]
+advisor = ["anthropic>=0.72.0", "pydantic>=2.0"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
