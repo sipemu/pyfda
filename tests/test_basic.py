@@ -22,6 +22,7 @@ def test_submodules():
         seasonal, spm, classification, tolerance,
         conformal, simulation, explain,
     )
+    from fdars import advisor
 
 
 class TestFdata:
