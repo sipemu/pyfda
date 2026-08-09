@@ -12,14 +12,14 @@ the LLM reasons over fdars-computed numbers and never fabricates them. Each maps
 ### Core primitive
 
 - [x] **CORE-01**: `build_diagnostics(result, method, …)` returns a deterministic, offline diagnostics report for a given fdars method, with no LLM/network dependency
-- [ ] **CORE-02**: `advise(diagnostics, task, domain_context)` returns a schema-validated `Advice` (interpretation + recommendations + caveats) via Claude structured outputs (`claude-opus-4-8`)
-- [ ] **CORE-03**: Every recommendation carries `action`, `kind` (`parameter`|`method`|`none`), `rationale`, `expected_effect`, and `evidence` citing diagnostic values — the grounding invariant enforced by schema + system prompt
-- [ ] **CORE-04**: `anthropic` is an optional dependency behind the `[advisor]` extra; `build_diagnostics` works with it uninstalled; a missing dependency raises a clear `ImportError` with an install hint
+- [x] **CORE-02**: `advise(diagnostics, task, domain_context)` returns a schema-validated `Advice` (interpretation + recommendations + caveats) via Claude structured outputs (`claude-opus-4-8`)
+- [x] **CORE-03**: Every recommendation carries `action`, `kind` (`parameter`|`method`|`none`), `rationale`, `expected_effect`, and `evidence` citing diagnostic values — the grounding invariant enforced by schema + system prompt
+- [x] **CORE-04**: `anthropic` is an optional dependency behind the `[advisor]` extra; `build_diagnostics` works with it uninstalled; a missing dependency raises a clear `ImportError` with an install hint
 - [x] **CORE-05**: `describe_cluster_differences` is provided as a specialization built on the diagnostics builder
 
 ### Advisor tasks
 
-- [ ] **ADVISE-01**: Interpretation — the advisor explains what a computed result means in domain terms
+- [x] **ADVISE-01**: Interpretation — the advisor explains what a computed result means in domain terms
 - [x] **ADVISE-02**: Parameter guidance — the advisor recommends adjustments (`lambda_`, `n_basis`, bandwidth, `n_comp`, cluster `k`, depth method) grounded in diagnostics (GCV curve, variance explained, warp penalty, cluster separation)
 - [x] **ADVISE-03**: Method guidance — the advisor flags poor-fit methods and suggests alternatives (linear FPCA + phase variation → elastic FPCA; sparse/irregular → pre-smooth; density/constrained → transform)
 
@@ -136,11 +136,11 @@ Explicitly excluded to prevent scope creep.
 | EX-03 | Phase 9 | Complete |
 | EX-04 | Phase 9 | Complete |
 | CORE-01 | Phase 10 | Complete |
-| CORE-02 | Phase 10 | Pending |
-| CORE-03 | Phase 10 | Pending |
-| CORE-04 | Phase 10 | Pending |
+| CORE-02 | Phase 10 | Complete |
+| CORE-03 | Phase 10 | Complete |
+| CORE-04 | Phase 10 | Complete |
 | CORE-05 | Phase 10 | Complete |
-| ADVISE-01 | Phase 10 | Pending |
+| ADVISE-01 | Phase 10 | Complete |
 | ADVISE-02 | Phase 10 | Complete |
 | ADVISE-03 | Phase 10 | Complete |
 | PYAPI-01 | Phase 11 | Pending |
