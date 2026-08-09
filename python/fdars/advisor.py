@@ -172,7 +172,13 @@ except ImportError:
             return self.__dict__ == other.__dict__
 
 
-__all__ = ["build_diagnostics", "advise", "Advice", "Recommendation"]
+__all__ = [
+    "build_diagnostics",
+    "advise",
+    "describe_cluster_differences",
+    "Advice",
+    "Recommendation",
+]
 
 
 # ---------------------------------------------------------------------------
@@ -903,6 +909,124 @@ def advise(
     )
 
     return response.parsed_output
+
+
+# ---------------------------------------------------------------------------
+# Cluster-difference specialization (CORE-05)
+# ---------------------------------------------------------------------------
+
+def describe_cluster_differences(
+    result,
+    *,
+    argvals=None,
+    domain_context: str = "",
+    model: str = "claude-opus-4-8",
+    run_llm: bool = True,
+    **kwargs,
+):
+    """Interpret cluster differences from an fdars clustering result.
+
+    This function is a **specialization** built on top of
+    :func:`build_diagnostics` (clustering branch) and :func:`advise`.  It does
+    not reimplement the diagnostics; it calls
+    ``build_diagnostics(result, method="clustering", argvals=argvals, **kwargs)``
+    to produce the deterministic, offline cluster feature report, then
+    optionally interprets that report via the Claude API.
+
+    **Stage 1 — offline cluster feature report** (no LLM, no network):
+
+    Calls :func:`build_diagnostics` with ``method="clustering"`` to compute:
+
+    - Per-cluster Karcher means (``cluster_means``)
+    - Cluster sizes (``cluster_sizes``)
+    - Pairwise amplitude/phase distance between cluster means
+      (``pairwise_amplitude_distance``, ``pairwise_phase_distance``) when
+      ``argvals`` is provided
+    - Scalar separation summaries (``mean_amplitude_separation``,
+      ``mean_phase_separation``)
+
+    **Stage 2 — grounded LLM interpretation** (requires anthropic, optional):
+
+    When ``run_llm=True``, passes the cluster feature report to
+    :func:`advise` with ``task="interpretation"`` and returns a
+    schema-validated :class:`Advice` object.  The LLM reasons only over the
+    computed diagnostics and cites specific values in each recommendation.
+
+    Parameters
+    ----------
+    result : dict or clustering result wrapper
+        Native fdars clustering result dict (e.g. from
+        ``fdars.clustering.kmeans``) with keys ``centers``, ``cluster``,
+        and ``k``.  A wrapper whose ``.raw`` attribute is the underlying
+        dict is also accepted (unwrapped by :func:`build_diagnostics`).
+    argvals : array_like, optional
+        Shared evaluation grid, shape ``(m,)``.  Required for pairwise
+        amplitude/phase distance computation between cluster means.  When
+        absent, distance keys in the feature report are ``None``.
+    domain_context : str, optional
+        Free-text description of the problem domain or analysis goal.
+        Passed to :func:`advise` to help ground the interpretation.
+    model : str, optional
+        Claude model identifier.  Default ``"claude-opus-4-8"``.
+    run_llm : bool, optional
+        When ``True`` (default), call :func:`advise` and return an
+        :class:`Advice` object.  When ``False``, return the raw clustering
+        diagnostics dict (the Stage 1 feature report) without any LLM or
+        network call — fully offline and exercisable in CI without an API key.
+    **kwargs
+        Forwarded to :func:`build_diagnostics` (reserved for future
+        per-method options).
+
+    Returns
+    -------
+    Advice
+        Schema-validated advice when ``run_llm=True``.  Includes a
+        plain-language ``interpretation`` of the cluster differences,
+        grounded ``recommendations``, and ``caveats``.
+    dict
+        Raw clustering diagnostics dict (``{"method": "clustering", ...}``)
+        when ``run_llm=False``.  Offline path — no anthropic import or
+        network call.
+
+    Raises
+    ------
+    ImportError
+        When ``run_llm=True`` and the ``anthropic`` package is not installed.
+        The error message names ``pip install fdars[advisor]``.
+
+    Notes
+    -----
+    This is the design's "cluster-difference feature report" specialization.
+    It follows the Stage 1 (deterministic builder) + Stage 2 (grounded LLM
+    interpretation) pattern that all later specialization surfaces share.
+    The grounding invariant applies: every ``Recommendation`` must cite a
+    specific diagnostic value present in the feature report.
+
+    Examples
+    --------
+    Offline path — inspect the feature report without an API call:
+
+    >>> result = {"centers": [[0.0, 1.0, 0.0], [0.0, -1.0, 0.0]],
+    ...           "cluster": [0, 0, 1, 1], "k": 2}
+    >>> diag = describe_cluster_differences(
+    ...     result, argvals=[0.0, 0.5, 1.0], run_llm=False
+    ... )
+    >>> diag["method"]
+    'clustering'
+    >>> diag["k"]
+    2
+    """
+    diagnostics = build_diagnostics(
+        result, method="clustering", argvals=argvals, **kwargs
+    )
+    if not run_llm:
+        return diagnostics
+    return advise(
+        diagnostics,
+        task="interpretation",
+        domain_context=domain_context,
+        model=model,
+    )
 
 
 # ---------------------------------------------------------------------------
