@@ -5,16 +5,16 @@ milestone_name: Grounded AI analysis advisor
 current_phase: 12
 current_phase_name: tool-mcp-surface
 status: executing
-stopped_at: Completed 12-02-PLAN.md — fdars_run_method tool + run_stdio + full five-method test coverage
-last_updated: "2026-08-09T21:15:30Z"
+stopped_at: Completed 12-03-PLAN.md — fdars_compare_run compare loop + mcp_recipe.py
+last_updated: "2026-08-09T21:26:49.754Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 12 plan 02 execution completed
 progress:
   total_phases: 13
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 8
-  percent: 17
+  completed_plans: 9
+  percent: 23
 ---
 
 # Project State
@@ -82,6 +82,7 @@ Last activity: 2026-08-09 — Phase 12 Plan 02 completed
 | Phase 11 P03 | 3min | 2 tasks | 1 files |
 | Phase 12 P01 | 5min | 2 tasks | 5 files |
 | Phase 12 P02 | 4min | 3 tasks | 3 files |
+| Phase 12 P03 | 7min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -133,6 +134,8 @@ Recent decisions affecting current work:
 - [Phase ?]: [12-01] synchronous def MCP tool handlers work with async Client(mcp); mcp subpackage guarded to Python 3.10+, not registered in fdars.__init__
 - [Phase ?]: [12-02] smoothing runner = pspline_fit_gcv; stored result lacks lambda_values; build_diagnostics smoothing Branch B re-runs with data+argvals (correct for with_argvals=True)
 - [Phase ?]: [12-02] run_stdio() standalone transport wiring; tool handlers are transport-agnostic; if __name__=='__main__' guard in server.py
+- [Phase ?]: [12-03] fdars_compare_run flattens after-params as top-level typed args; no nested params_after: dict in MCP schema (Pitfall 6)
+- [Phase ?]: [12-03] Branch A-prime added to _build_smoothing_diagnostics: pspline_fit_gcv single-fit scalars (gcv/edf) -> optimal_gcv/optimal_edf; enables non-empty delta for smoothing compare loop
 
 ### Pending Todos
 
@@ -156,6 +159,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-09T21:15:30Z
-Stopped at: Completed 12-02-PLAN.md — fdars_run_method + run_stdio + five-method tests
+Last session: 2026-08-09T21:26:49.744Z
+Stopped at: Completed 12-03-PLAN.md — fdars_compare_run compare loop + mcp_recipe.py
 Resume file: None

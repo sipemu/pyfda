@@ -33,7 +33,7 @@ the LLM reasons over fdars-computed numbers and never fabricates them. Each maps
 
 - [x] **TOOL-01**: Coarse-grained tool definitions (`fdars_build_diagnostics`, `fdars_run_method`) with strict schemas
 - [x] **TOOL-02**: An MCP server exposes those tools (transport per open decision)
-- [ ] **TOOL-03**: An agentic re-run/compare loop applies a suggested parameter, re-runs the method, and compares before/after diagnostics
+- [x] **TOOL-03**: An agentic re-run/compare loop applies a suggested parameter, re-runs the method, and compares before/after diagnostics
 
 ### Agent Skill surface (agentic)
 
@@ -148,7 +148,7 @@ Explicitly excluded to prevent scope creep.
 | PYAPI-03 | Phase 11 | Complete |
 | TOOL-01 | Phase 12 | Complete |
 | TOOL-02 | Phase 12 | Complete |
-| TOOL-03 | Phase 12 | Pending |
+| TOOL-03 | Phase 12 | Complete |
 | SKILL-01 | Phase 13 | Pending |
 | SKILL-02 | Phase 13 | Pending |
 
