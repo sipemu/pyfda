@@ -913,7 +913,14 @@ def advise(
         messages=[{"role": "user", "content": user_content}],
     )
 
-    return response.parsed_output
+    parsed = response.parsed_output
+    if parsed is None:
+        raise ValueError(
+            "advise: the Anthropic API did not return a parseable Advice object. "
+            "The model may have responded with only a thinking block or a refusal. "
+            f"Raw response stop_reason: {response.stop_reason!r}"
+        )
+    return parsed
 
 
 # ---------------------------------------------------------------------------
