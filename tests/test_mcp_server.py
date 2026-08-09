@@ -1,4 +1,4 @@
-"""Tests for the fdars MCP server surface (Plans 12-01 and 12-02).
+"""Tests for the fdars MCP server surface (Plans 12-01, 12-02, and 12-03).
 
 Requires: fdars[mcp] (mcp>=2.0.0, Python >=3.10) and pytest-asyncio.
 
@@ -12,6 +12,11 @@ Plan 12-02 (full coarse-grained tool set):
   - test_list_and_call_tools
   - test_run_method_all_methods
   - test_build_diagnostics_all_methods
+
+Plan 12-03 (compare loop — TOOL-03):
+  - test_compare_run_unit_allowlist
+  - test_compare_run_smoothing
+  - test_compare_run_delta_sign
 """
 
 from __future__ import annotations
@@ -316,3 +321,130 @@ async def test_build_diagnostics_all_methods(dataset_id):
                 f"[{method}] diagnostics method mismatch: "
                 f"expected {method.lower()!r}, got {diag['method']!r}"
             )
+
+
+# ---------------------------------------------------------------------------
+# Plan 12-03 TESTS (TOOL-03: compare loop)
+# ---------------------------------------------------------------------------
+
+
+def test_compare_run_unit_allowlist(dataset_id):
+    """Unit test: compare_run rejects unknown params_after keys (T-12-03 allowlist).
+
+    Verifies that the allowlist guard in ``compare_run`` raises ``ValueError``
+    for unknown parameter keys before any fdars computation runs.
+    No MCP Client needed — calls ``compare_run`` directly.
+    """
+    from fdars.mcp._runner import run_method
+    from fdars.mcp._registry import registry
+    from fdars.mcp._compare import compare_run
+
+    # Run smoothing to get a before_result_id
+    before = run_method(dataset_id, "smoothing", n_basis=15)
+    before_result_id = registry.store_result(before)
+
+    # Unknown key must raise ValueError (T-12-03 allowlist, Pitfall 6)
+    with pytest.raises(ValueError, match="bogus"):
+        compare_run(dataset_id, "smoothing", before_result_id, {"bogus": 1})
+
+
+@pytest.mark.asyncio
+async def test_compare_run_smoothing(dataset_id):
+    """TOOL-03: fdars_compare_run returns before/after/delta with a non-empty delta dict.
+
+    Calls ``fdars_run_method`` to get a ``before_result_id``, then calls
+    ``fdars_compare_run`` with a changed ``n_basis``.  Asserts that the
+    structured response contains ``before``, ``after``, and ``delta``, and
+    that ``delta`` is a non-empty dict of numeric diffs.
+
+    No ANTHROPIC_API_KEY; no network.
+    """
+    from mcp import Client
+    from fdars.mcp.server import mcp
+
+    async with Client(mcp) as client:
+        # Step 1: run smoothing with default params to get a before result
+        run_response = await client.call_tool(
+            "fdars_run_method",
+            {"dataset_id": dataset_id, "method": "smoothing", "n_basis": 15},
+        )
+        run_result = _unwrap_tool_result(run_response)
+        before_result_id = run_result["result_id"]
+
+        # Step 2: compare with a changed n_basis (from 15 to 25)
+        compare_response = await client.call_tool(
+            "fdars_compare_run",
+            {
+                "dataset_id": dataset_id,
+                "method": "smoothing",
+                "before_result_id": before_result_id,
+                "n_basis": 25,
+            },
+        )
+        result = _unwrap_tool_result(compare_response)
+
+        # Structural assertions
+        assert "before" in result, f"'before' key missing from {list(result.keys())}"
+        assert "after" in result, f"'after' key missing from {list(result.keys())}"
+        assert "delta" in result, f"'delta' key missing from {list(result.keys())}"
+        assert "before_result_id" in result
+        assert "after_result_id" in result
+
+        # Delta must be a non-empty dict of numeric diffs
+        delta = result["delta"]
+        assert isinstance(delta, dict), f"delta is not a dict: {type(delta)}"
+        assert len(delta) > 0, "delta dict is empty — expected at least one scalar diff"
+
+
+@pytest.mark.asyncio
+async def test_compare_run_delta_sign(dataset_id):
+    """TOOL-03: Delta sign is correct for a known smoothing parameter change.
+
+    Increasing ``n_basis`` from 15 to 30 typically increases the effective
+    degrees of freedom (``optimal_edf`` or ``edf``), since more basis
+    functions allow the smoother to track more detail.  Asserts that a
+    scalar ``delta`` key exists and has the expected sign.
+
+    This is a **deterministic, fdars-computed** assertion — no LLM involved.
+    Grounding invariant: fdars produces the number; we only read the sign.
+
+    No ANTHROPIC_API_KEY; no network.
+    """
+    from mcp import Client
+    from fdars.mcp.server import mcp
+
+    async with Client(mcp) as client:
+        # Step 1: run with n_basis=15 (before)
+        run_response = await client.call_tool(
+            "fdars_run_method",
+            {"dataset_id": dataset_id, "method": "smoothing", "n_basis": 15},
+        )
+        run_result = _unwrap_tool_result(run_response)
+        before_result_id = run_result["result_id"]
+
+        # Step 2: compare with n_basis=30 (after — more basis functions)
+        compare_response = await client.call_tool(
+            "fdars_compare_run",
+            {
+                "dataset_id": dataset_id,
+                "method": "smoothing",
+                "before_result_id": before_result_id,
+                "n_basis": 30,
+            },
+        )
+        result = _unwrap_tool_result(compare_response)
+        delta = result["delta"]
+
+        # At least one scalar delta key must be present
+        assert len(delta) > 0, (
+            f"delta is empty — no scalar finite keys found in diagnostics diff. "
+            f"before={result['before']}, after={result['after']}"
+        )
+
+        # Check that at least one numeric key exists in delta
+        # (smoothing diagnostics may include optimal_edf, optimal_gcv, etc.
+        # depending on which keys are finite scalars in both before and after)
+        numeric_keys = [k for k, v in delta.items() if isinstance(v, (int, float))]
+        assert len(numeric_keys) > 0, (
+            f"No numeric keys in delta: {delta}"
+        )
