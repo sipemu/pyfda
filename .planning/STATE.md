@@ -5,16 +5,16 @@ milestone_name: Grounded AI analysis advisor
 current_phase: 12
 current_phase_name: tool-mcp-surface
 status: executing
-stopped_at: Completed 12-01-PLAN.md — MCP tracer surface (fdars_build_diagnostics) end-to-end
-last_updated: "2026-08-09T21:08:27.704Z"
+stopped_at: Completed 12-02-PLAN.md — fdars_run_method tool + run_stdio + full five-method test coverage
+last_updated: "2026-08-09T21:15:30Z"
 last_activity: 2026-08-09
-last_activity_desc: Phase 10 execution started
+last_activity_desc: Phase 12 plan 02 execution completed
 progress:
   total_phases: 13
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
-  percent: 15
+  completed_plans: 8
+  percent: 17
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-08-07)
 ## Current Position
 
 Phase: 12 (tool-mcp-surface) — EXECUTING
-Plan: 2 of 3
-Status: Ready to execute
-Last activity: 2026-08-09 — Phase 12 execution started
+Plan: 3 of 3
+Status: Ready to execute Plan 03 (compare loop)
+Last activity: 2026-08-09 — Phase 12 Plan 02 completed
 
 ## Performance Metrics
 
@@ -81,6 +81,7 @@ Last activity: 2026-08-09 — Phase 12 execution started
 | Phase 11 P01 | 2min | 3 tasks | 4 files |
 | Phase 11 P03 | 3min | 2 tasks | 1 files |
 | Phase 12 P01 | 5min | 2 tasks | 5 files |
+| Phase 12 P02 | 4min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,8 @@ Recent decisions affecting current work:
 - [Phase ?]: [12-01] MCP list_tools() returns ListToolsResult — iterate .tools not the result (mcp 2.0.0)
 - [Phase ?]: [12-01] MCP call_tool structured_content is None for dict-returning def handlers; content[0].text JSON fallback is the unwrap path
 - [Phase ?]: [12-01] synchronous def MCP tool handlers work with async Client(mcp); mcp subpackage guarded to Python 3.10+, not registered in fdars.__init__
+- [Phase ?]: [12-02] smoothing runner = pspline_fit_gcv; stored result lacks lambda_values; build_diagnostics smoothing Branch B re-runs with data+argvals (correct for with_argvals=True)
+- [Phase ?]: [12-02] run_stdio() standalone transport wiring; tool handlers are transport-agnostic; if __name__=='__main__' guard in server.py
 
 ### Pending Todos
 
@@ -153,6 +156,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-09T21:08:27.694Z
-Stopped at: Completed 12-01-PLAN.md — MCP tracer surface (fdars_build_diagnostics) end-to-end
+Last session: 2026-08-09T21:15:30Z
+Stopped at: Completed 12-02-PLAN.md — fdars_run_method + run_stdio + five-method tests
 Resume file: None
