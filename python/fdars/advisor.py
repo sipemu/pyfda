@@ -378,7 +378,6 @@ def _build_fpca_diagnostics(raw: dict) -> dict:
         else:
             evr = np.zeros_like(eigenvalues)
 
-        cumulative = float(np.cumsum(evr)[-1]) if n_comp > 0 else 0.0
         cum_list = [float(v) for v in np.cumsum(evr)]
 
         diag["n_components"] = n_comp
