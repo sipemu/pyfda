@@ -462,10 +462,13 @@ def _build_basis_diagnostics(raw: dict, **kwargs) -> dict:
             edf_values[min_gcv_idx] if edf_values is not None else None
         )
 
-        # AIC / BIC approximation from GCV + edf when edf is available.
-        # AIC  ≈ n * log(GCV) + 2 * edf
-        # BIC  ≈ n * log(GCV) + log(n) * edf
-        # These require n_obs; use edf as a proxy when n_obs is absent.
+        # GCV-based AIC/BIC approximation from GCV + edf when edf is available.
+        # These approximate AIC/BIC using log(GCV) rather than log(RSS/n); they
+        # are labelled gcv_aic_approx/gcv_bic_approx to make the approximation
+        # explicit (standard AIC/BIC use log(RSS/n), which differs from log(GCV)
+        # by a (1 - edf/n)^2 denominator factor).
+        # AIC_approx  ≈ n * log(GCV) + 2 * edf
+        # BIC_approx  ≈ n * log(GCV) + log(n) * edf
         n_obs_raw = raw.get("n_obs")
         aic_values = None
         bic_values = None
@@ -483,8 +486,8 @@ def _build_basis_diagnostics(raw: dict, **kwargs) -> dict:
         diag["n_basis_values"] = n_basis_values
         diag["gcv_curve"] = gcv_values
         diag["edf"] = edf_values
-        diag["aic"] = aic_values
-        diag["bic"] = bic_values
+        diag["gcv_aic_approx"] = aic_values
+        diag["gcv_bic_approx"] = bic_values
         diag["optimal_n_basis"] = optimal_n_basis
         diag["optimal_gcv"] = optimal_gcv
         diag["optimal_edf"] = optimal_edf
@@ -506,8 +509,8 @@ def _build_basis_diagnostics(raw: dict, **kwargs) -> dict:
     diag["n_basis_values"] = None
     diag["gcv_curve"] = None
     diag["edf"] = None
-    diag["aic"] = None
-    diag["bic"] = None
+    diag["gcv_aic_approx"] = None
+    diag["gcv_bic_approx"] = None
     diag["optimal_n_basis"] = None
     diag["optimal_gcv"] = None
     diag["optimal_edf"] = None
@@ -568,8 +571,8 @@ def _build_smoothing_diagnostics(raw: dict, **kwargs) -> dict:
         diag["lambda_values"] = lambda_values
         diag["gcv_curve"] = gcv_values
         diag["edf"] = edf_values
-        diag["aic"] = aic_values
-        diag["bic"] = bic_values
+        diag["gcv_aic_approx"] = aic_values
+        diag["gcv_bic_approx"] = bic_values
         diag["optimal_lambda"] = optimal_lambda
         diag["optimal_gcv"] = optimal_gcv
         diag["optimal_edf"] = optimal_edf
@@ -590,8 +593,8 @@ def _build_smoothing_diagnostics(raw: dict, **kwargs) -> dict:
     diag["lambda_values"] = None
     diag["gcv_curve"] = None
     diag["edf"] = None
-    diag["aic"] = None
-    diag["bic"] = None
+    diag["gcv_aic_approx"] = None
+    diag["gcv_bic_approx"] = None
     diag["optimal_lambda"] = None
     diag["optimal_gcv"] = None
     diag["optimal_edf"] = None
