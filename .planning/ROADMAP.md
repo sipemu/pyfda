@@ -215,11 +215,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `advise(diagnostics, task, domain_context)` returns a schema-validated `Advice` (interpretation + recommendations + caveats) via `client.messages.parse(model="claude-opus-4-8", ...)`, and every `Recommendation` carries `action`, `kind` (`parameter`|`method`|`none`), `rationale`, `expected_effect`, and non-empty `evidence` that cites diagnostic values
   4. The advisor performs all three task families against real diagnostics: interpretation (what a result means in domain terms), parameter guidance (`lambda_`, `n_basis`, bandwidth, `n_comp`, cluster `k`, depth method), and method guidance (e.g. linear FPCA + phase variation → elastic FPCA; sparse/irregular → pre-smooth; density/constrained → transform)
   5. `describe_cluster_differences` is provided as a specialization built on the diagnostics builder and returns grounded cluster-difference interpretation
-**Plans**: 3 plans
+
+**Plans**: 1/3 plans executed
 
 **Wave 1**
 
-- [ ] 10-01-PLAN.md — TRACER: advisor.py schema (Advice/Recommendation) + build_diagnostics(alignment) + advise via messages.parse, end-to-end; records anthropic version-floor decision (CORE-02, CORE-03, CORE-04, ADVISE-01)
+- [x] 10-01-PLAN.md — TRACER: advisor.py schema (Advice/Recommendation) + build_diagnostics(alignment) + advise via messages.parse, end-to-end; records anthropic version-floor decision (CORE-02, CORE-03, CORE-04, ADVISE-01)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -247,6 +248,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Offline unit tests exercise `build_diagnostics` against `docs/data/` datasets and pass in CI with no network access
   4. The `advise` LLM call is covered by a stubbed / env-gated integration test that is skipped (not failed) when `ANTHROPIC_API_KEY` is absent, so CI stays network-free
   5. An `examples/` recipe page demonstrates the advisor end-to-end against a real dataset (build diagnostics → get advice → read recommendations)
+
 **Plans**: TBD
 **Notes**:
 
@@ -263,6 +265,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. An MCP server exposes those tools and a client can list and invoke them successfully
   3. An agentic re-run/compare loop applies a suggested parameter, re-runs the method, and returns a before/after diagnostics comparison — the delta is observable
   4. The compute path stays deterministic (fdars does the numbers; the model only orchestrates) and recommendations still cite diagnostics per the grounding invariant
+
 **Plans**: TBD
 **Notes**:
 
@@ -278,6 +281,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. A `SKILL.md` + accompanying script package the full interpret→recommend→re-run→compare loop and reference the Phase 12 tools
   2. The skill's execution environment (how `fdars` is made available at run time) is documented clearly enough that the skill actually runs end-to-end
   3. A recorded/dry-run walkthrough shows the skill producing grounded advice and a before/after comparison against a real dataset
+
 **Plans**: TBD
 **Notes**:
 
@@ -299,7 +303,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. regression/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 8. monitoring/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 9. Examples Sweep | 1/0 | Complete    | 2026-08-08 |
-| 10. Advisor Core Primitive | 0/3 | Planned | - |
+| 10. Advisor Core Primitive | 1/3 | In Progress|  |
 | 11. Python API Surface | 0/0 | Not started | - |
 | 12. Tool / MCP Surface | 0/0 | Not started | - |
 | 13. Agent Skill Surface | 0/0 | Not started | - |
