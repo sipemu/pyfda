@@ -753,6 +753,29 @@ def _require_anthropic():
 
 
 # ---------------------------------------------------------------------------
+# Pydantic import guard
+# ---------------------------------------------------------------------------
+
+def _require_pydantic():
+    """Import and return the ``pydantic`` module, or raise a clear ImportError.
+
+    Raises
+    ------
+    ImportError
+        When the ``pydantic`` package is not installed.  The error message
+        contains ``pip install fdars[advisor]`` so users know how to fix it.
+    """
+    try:
+        import pydantic  # noqa: PLC0415
+        return pydantic
+    except ImportError as exc:
+        raise ImportError(
+            "The fdars advisor requires pydantic for structured output. "
+            "Install it with: pip install fdars[advisor]"
+        ) from exc
+
+
+# ---------------------------------------------------------------------------
 # System prompt
 # ---------------------------------------------------------------------------
 
@@ -926,6 +949,7 @@ def advise(
         When the ``anthropic`` package is not installed.
     """
     anthropic = _require_anthropic()
+    _require_pydantic()
     client = anthropic.Anthropic()
 
     system = _system_prompt(task)
