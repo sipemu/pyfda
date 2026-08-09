@@ -27,7 +27,7 @@ the LLM reasons over fdars-computed numbers and never fabricates them. Each maps
 
 - [x] **PYAPI-01**: The advisor is exposed via the `fdars` public API (module registered, `__all__`), returning structured advice for the user to apply
 - [x] **PYAPI-02**: `build_diagnostics` has offline unit tests against `docs/data/`; the LLM call is covered by a stubbed / env-gated integration test (no network in CI)
-- [ ] **PYAPI-03**: An `examples/` recipe page demonstrates the advisor end-to-end against a real dataset
+- [x] **PYAPI-03**: An `examples/` recipe page demonstrates the advisor end-to-end against a real dataset
 
 ### Tool / MCP surface (agentic)
 
@@ -145,7 +145,7 @@ Explicitly excluded to prevent scope creep.
 | ADVISE-03 | Phase 10 | Complete |
 | PYAPI-01 | Phase 11 | Complete |
 | PYAPI-02 | Phase 11 | Complete |
-| PYAPI-03 | Phase 11 | Pending |
+| PYAPI-03 | Phase 11 | Complete |
 | TOOL-01 | Phase 12 | Pending |
 | TOOL-02 | Phase 12 | Pending |
 | TOOL-03 | Phase 12 | Pending |
