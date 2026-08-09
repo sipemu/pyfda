@@ -21,7 +21,7 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth:** `.planning/design/llm-cluster-narration.md`
 
-**Progress:** Phase 10 (Advisor Core Primitive) complete — `python/fdars/advisor.py` holds the deterministic offline `build_diagnostics` engine (alignment/fpca/basis/smoothing/clustering), the grounded `advise()` (Anthropic structured outputs) across the interpretation/parameter/method task families, and the `describe_cluster_differences` specialization. Next: Phase 11 (Python API Surface) — public registration + `[advisor]` extra + offline/stubbed tests.
+**Progress:** Phase 11 (Python API Surface) complete — the advisor is now a first-class part of the public `fdars` package: `fdars.advisor` is registered in `python/fdars/__init__.py` (import + `sys.modules` + `__all__`), the `[advisor]` optional-dependency extra (`anthropic>=0.72.0`, `pydantic>=2.0`) is declared in `pyproject.toml`, `tests/test_advisor.py` covers offline `build_diagnostics` against real datasets plus an env-gated `advise` integration test that skips cleanly without `ANTHROPIC_API_KEY`, and `examples/advisor_recipe.py` is a runnable end-to-end recipe that degrades gracefully offline. Suite: 104 passed, 1 skipped. Next: Phase 12 (Tool / MCP Surface) — coarse-grained tools + MCP server + agentic re-run/compare loop.
 
 > The v1.0 Documentation Overhaul milestone shipped (Phases 1–9 complete). Its requirements below are retained as historical/validated context.
 
@@ -109,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-09 — Phase 10 (Advisor Core Primitive) complete*
+*Last updated: 2026-08-09 — Phase 11 (Python API Surface) complete*
