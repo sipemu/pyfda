@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Grounded AI analysis advisor
 current_phase: 11
-current_phase_name: Python API Surface
+current_phase_name: python-api-surface
 status: executing
-stopped_at: Completed 10-03-PLAN.md — describe_cluster_differences specialization + Phase 10 surface complete
-last_updated: "2026-08-09T19:29:30.101Z"
+stopped_at: Completed 11-01-PLAN.md — advisor wired into public fdars API + [advisor] extra declared
+last_updated: "2026-08-09T19:35:30.930Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 10 execution started
 progress:
   total_phases: 13
   completed_phases: 1
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 4
   percent: 8
 ---
 
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-07)
 
 **Core value:** Every recommendation cites fdars-computed diagnostics and states an expected effect; the LLM reasons over computed numbers and never fabricates them
-**Current focus:** Phase 10 — advisor-core-primitive
+**Current focus:** Phase 11 — python-api-surface
 
 ## Current Position
 
-Phase: 11 — Python API Surface
-Plan: Not started
+Phase: 11 (python-api-surface) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-08-09 — Phase 10 complete, transitioned to Phase 11
+Last activity: 2026-08-09 — Phase 11 execution started
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Last activity: 2026-08-09 — Phase 10 complete, transitioned to Phase 11
 | Phase 03 P02 | 8min | 4 tasks | 1 files |
 | Phase 10 P02 | 3min | 3 tasks | 1 files |
 | Phase 10 P03 | 2 | 2 tasks | 1 files |
+| Phase 11 P01 | 2min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,8 @@ Recent decisions affecting current work:
 - [Phase ?]: ADVISE-02 realised: parameter task clause names lambda_/n_basis/bandwidth/n_comp/cluster k/depth method, requires kind=parameter with cited evidence
 - [Phase ?]: ADVISE-03 realised: method task clause encodes poor-fit -> alternative mappings (elastic FPCA, pre-smooth, unconstrained transform), requires kind=method with cited evidence
 - [Phase ?]: describe_cluster_differences is a thin specialization on build_diagnostics(method='clustering') + advise; run_llm=False offline escape hatch returns raw diagnostics dict
+- [Phase ?]: advisor wired via plain Python import + sys.modules injection (not in _submodule_names — pure-Python, not native Rust submodule)
+- [Phase ?]: pydantic>=2.0 included in [advisor] extra alongside anthropic>=0.72.0 (anthropic SDK does not auto-install pydantic)
 
 ### Pending Todos
 
@@ -143,6 +146,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-09T18:44:47.377Z
-Stopped at: Completed 10-03-PLAN.md — describe_cluster_differences specialization + Phase 10 surface complete
+Last session: 2026-08-09T19:35:30.920Z
+Stopped at: Completed 11-01-PLAN.md — advisor wired into public fdars API + [advisor] extra declared
 Resume file: None
