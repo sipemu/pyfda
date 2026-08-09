@@ -135,13 +135,28 @@ Explicitly excluded to prevent scope creep.
 | EX-02 | Phase 9 | Complete |
 | EX-03 | Phase 9 | Complete |
 | EX-04 | Phase 9 | Complete |
+| CORE-01 | Phase 10 | Pending |
+| CORE-02 | Phase 10 | Pending |
+| CORE-03 | Phase 10 | Pending |
+| CORE-04 | Phase 10 | Pending |
+| CORE-05 | Phase 10 | Pending |
+| ADVISE-01 | Phase 10 | Pending |
+| ADVISE-02 | Phase 10 | Pending |
+| ADVISE-03 | Phase 10 | Pending |
+| PYAPI-01 | Phase 11 | Pending |
+| PYAPI-02 | Phase 11 | Pending |
+| PYAPI-03 | Phase 11 | Pending |
+| TOOL-01 | Phase 12 | Pending |
+| TOOL-02 | Phase 12 | Pending |
+| TOOL-03 | Phase 12 | Pending |
+| SKILL-01 | Phase 13 | Pending |
+| SKILL-02 | Phase 13 | Pending |
 
 **Coverage:**
 
-- v1 requirements: 19 total
-- Mapped to phases: 19
-- Unmapped: 0 ✓
+- v1 requirements: 19 total → mapped to phases: 19 → unmapped: 0 ✓
+- v2.0 requirements: 16 total → mapped to phases: 16 (Phases 10–13) → unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-08-07*
-*Last updated: 2026-08-07 after roadmap creation (all 19 requirements mapped)*
+*Last updated: 2026-08-09 after v2.0 roadmap creation (16 v2.0 requirements mapped to Phases 10–13; 19 v1 requirements retained)*

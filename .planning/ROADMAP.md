@@ -23,6 +23,13 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 8: monitoring/ Diagrams** - Sweep monitoring/ section: remove R-era content, redraw control limits, close gaps (completed 2026-08-08)
 - [x] **Phase 9: Examples Sweep** - All example pages correct against current API, enriched narrative, improved figures, five new examples (completed 2026-08-08)
 
+### Milestone v2.0 — Grounded AI analysis advisor
+
+- [ ] **Phase 10: Advisor Core Primitive** - Deterministic offline `build_diagnostics` + grounded `advise` (Claude structured outputs) + cluster-difference specialization + `[advisor]` optional-dependency plumbing
+- [ ] **Phase 11: Python API Surface** - Register the recommend-only advisor on the public `fdars` API with offline + stubbed tests and an `examples/` recipe page
+- [ ] **Phase 12: Tool / MCP Surface** - Coarse-grained tools + MCP server + agentic re-run/compare loop
+- [ ] **Phase 13: Agent Skill Surface** - `SKILL.md` + script packaging the interpret→recommend→re-run→compare workflow with a documented execution environment
+
 ## Phase Details
 
 ### Phase 1: Foundation
@@ -196,10 +203,77 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Plans**: TBD
 
+### Phase 10: Advisor Core Primitive
+
+**Goal**: A single deterministic diagnostics engine plus a grounded LLM advisor exists in `python/fdars/advisor.py` — the shared core every downstream surface builds on
+**Depends on**: Phase 9 (v1.0 milestone complete)
+**Requirements**: CORE-01, CORE-02, CORE-03, CORE-04, CORE-05, ADVISE-01, ADVISE-02, ADVISE-03
+**Success Criteria** (what must be TRUE):
+
+  1. `build_diagnostics(result, method, ...)` returns a deterministic per-method diagnostics report (alignment, FPCA, basis/smoothing, clustering) computed only from fdars + numpy, with no LLM or network call — two runs on the same input yield identical output
+  2. With `anthropic` uninstalled, `build_diagnostics` still runs; calling `advise` raises a clear `ImportError` naming the `pip install fdars[advisor]` install hint
+  3. `advise(diagnostics, task, domain_context)` returns a schema-validated `Advice` (interpretation + recommendations + caveats) via `client.messages.parse(model="claude-opus-4-8", ...)`, and every `Recommendation` carries `action`, `kind` (`parameter`|`method`|`none`), `rationale`, `expected_effect`, and non-empty `evidence` that cites diagnostic values
+  4. The advisor performs all three task families against real diagnostics: interpretation (what a result means in domain terms), parameter guidance (`lambda_`, `n_basis`, bandwidth, `n_comp`, cluster `k`, depth method), and method guidance (e.g. linear FPCA + phase variation → elastic FPCA; sparse/irregular → pre-smooth; density/constrained → transform)
+  5. `describe_cluster_differences` is provided as a specialization built on the diagnostics builder and returns grounded cluster-difference interpretation
+**Plans**: TBD
+**Notes**:
+
+  - Grounding invariant is enforced by the Pydantic schema *and* the system prompt: reason only from provided diagnostics; every `evidence` item cites a value; omit unsupported claims. The LLM never fabricates numbers.
+  - Method-accuracy: validate interpretations/recommendations against known datasets in `docs/data/` (canadian weather, growth, phoneme, tecator, sonar, wine).
+  - OPEN DECISION (surfaced, not resolved here): `anthropic` SDK version floor — pick a current version supporting `messages.parse` + `claude-opus-4-8`. Pin the floor when the extra is declared.
+
+### Phase 11: Python API Surface
+
+**Goal**: The recommend-only advisor is a first-class, tested part of the public `fdars` package with a runnable end-to-end recipe
+**Depends on**: Phase 10
+**Requirements**: PYAPI-01, PYAPI-02, PYAPI-03
+**Success Criteria** (what must be TRUE):
+
+  1. `build_diagnostics`, `advise`, and `describe_cluster_differences` are reachable from the public `fdars` API (module registered via the existing pure-Python injection, listed in `__all__`) and return structured advice the user can inspect and apply
+  2. `pip install fdars[advisor]` installs `anthropic`; the extra is declared in `pyproject.toml`
+  3. Offline unit tests exercise `build_diagnostics` against `docs/data/` datasets and pass in CI with no network access
+  4. The `advise` LLM call is covered by a stubbed / env-gated integration test that is skipped (not failed) when `ANTHROPIC_API_KEY` is absent, so CI stays network-free
+  5. An `examples/` recipe page demonstrates the advisor end-to-end against a real dataset (build diagnostics → get advice → read recommendations)
+**Plans**: TBD
+**Notes**:
+
+  - Surface is recommend-only: no autonomous re-run loop here — the user applies advice manually. Agentic tuning arrives in Phase 12.
+
+### Phase 12: Tool / MCP Surface
+
+**Goal**: An agent can re-run fdars via tools and compare before/after diagnostics through an MCP server
+**Depends on**: Phase 11
+**Requirements**: TOOL-01, TOOL-02, TOOL-03
+**Success Criteria** (what must be TRUE):
+
+  1. Coarse-grained tool definitions `fdars_build_diagnostics` and `fdars_run_method` exist with strict input/output schemas and pass data by reference
+  2. An MCP server exposes those tools and a client can list and invoke them successfully
+  3. An agentic re-run/compare loop applies a suggested parameter, re-runs the method, and returns a before/after diagnostics comparison — the delta is observable
+  4. The compute path stays deterministic (fdars does the numbers; the model only orchestrates) and recommendations still cite diagnostics per the grounding invariant
+**Plans**: TBD
+**Notes**:
+
+  - OPEN DECISION (surfaced, not resolved here): MCP transport — stdio (local) vs HTTP/SSE (hosted), or both. Choose when planning this phase.
+
+### Phase 13: Agent Skill Surface
+
+**Goal**: The interpret→recommend→re-run→compare workflow is packaged as a runnable Anthropic Agent Skill
+**Depends on**: Phase 12
+**Requirements**: SKILL-01, SKILL-02
+**Success Criteria** (what must be TRUE):
+
+  1. A `SKILL.md` + accompanying script package the full interpret→recommend→re-run→compare loop and reference the Phase 12 tools
+  2. The skill's execution environment (how `fdars` is made available at run time) is documented clearly enough that the skill actually runs end-to-end
+  3. A recorded/dry-run walkthrough shows the skill producing grounded advice and a before/after comparison against a real dataset
+**Plans**: TBD
+**Notes**:
+
+  - OPEN DECISION (surfaced, not resolved here): skill execution target — Managed Agents env with `allow_package_managers` (recommended) vs bundled wheel vs Messages-API code-execution container (no internet). Decide when planning this phase.
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -212,3 +286,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. regression/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 8. monitoring/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 9. Examples Sweep | 1/0 | Complete    | 2026-08-08 |
+| 10. Advisor Core Primitive | 0/0 | Not started | - |
+| 11. Python API Surface | 0/0 | Not started | - |
+| 12. Tool / MCP Surface | 0/0 | Not started | - |
+| 13. Agent Skill Surface | 0/0 | Not started | - |

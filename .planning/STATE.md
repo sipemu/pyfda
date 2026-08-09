@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Grounded AI analysis advisor for fdars
-status: planning
-last_updated: "2026-08-08T22:48:27.254Z"
+status: roadmapped
+last_updated: "2026-08-09T00:00:00.000Z"
 last_activity: 2026-08-09
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,15 +19,15 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-08-07)
 
-**Core value:** Every diagram faithfully depicts what the method actually does; every example runs against the current API
-**Current focus:** Phase 03 — learn-diagrams
+**Core value:** Every recommendation cites fdars-computed diagnostics and states an expected effect; the LLM reasons over computed numbers and never fabricates them
+**Current focus:** Phase 10 — Advisor Core Primitive (v2.0 roadmap created, ready to plan)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Phase 10 — Advisor Core Primitive (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-08-09 — Milestone v2.0 started
+Status: Roadmapped — v2.0 phases 10–13 mapped, awaiting phase planning
+Last activity: 2026-08-09 — v2.0 roadmap created (Phases 10–13, 16 requirements mapped)
 
 ## Performance Metrics
 
@@ -83,6 +83,11 @@ Recent decisions affecting current work:
 - Init: Diagrams prioritized over examples (user priority order)
 - Init: Review gate per doc section on built site before moving to next section
 - Init: Derive coverage/new-example list from nav + reference-API audit (evidence-based scope)
+- [v2.0 roadmap]: Phase numbering CONTINUES from v1.0 (starts at Phase 10; v1.0 ended at Phase 9)
+- [v2.0 roadmap]: One deterministic core (`build_diagnostics`, fdars-computed, offline) shared by all three surfaces; the LLM only interprets/reasons over computed numbers
+- [v2.0 roadmap]: Grounding invariant enforced by Pydantic schema + system prompt on every surface (evidence cites diagnostic values; no fabricated numbers)
+- [v2.0 roadmap]: `anthropic` is an optional `[advisor]` extra; `build_diagnostics` works offline with no network in CI; the LLM integration test is stubbed / env-gated
+- [v2.0 roadmap]: Split by surface — Python API is recommend-only; Tool/MCP and Agent Skill are agentic (re-run fdars + compare before/after)
 - [Phase ?]: SVGO gate uses idempotence check (svgo pass 2 == pass 1), not diff-vs-source, because svgo's serialiser always normalises whitespace
 - [Phase ?]: All 43 diagrams pass the SVGO gate; no exclusion list required
 - [Phase ?]: svg.hashsalt='fdars-docs' set at module-import time in docs_fig.py to ensure byte-identical SVG IDs across full builds (FND-03)
@@ -110,6 +115,10 @@ Recent decisions affecting current work:
 None yet.
 
 ### Blockers/Concerns
+
+- OPEN DECISION (Phase 13): skill execution target — Managed Agents env with `allow_package_managers` (recommended) vs bundled wheel vs Messages-API code-execution container
+- OPEN DECISION (Phase 12): MCP transport — stdio (local) vs HTTP/SSE (hosted), or both
+- OPEN DECISION (Phase 10/11): `anthropic` SDK version floor — a current version supporting `messages.parse` + `claude-opus-4-8`
 
 - Research flag: regression/ and monitoring/ sweeps need method-semantic verification against `fdars-core` behavior before diagrams can be drawn correctly (β(t), conformal functional bands, SPM Phase I/II)
 - Research flag: smoke-test `pytest-markdown-docs` multi-block state on one narrative page in Phase 1 before committing to it as the CI pattern
