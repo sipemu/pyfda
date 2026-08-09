@@ -299,18 +299,21 @@ def _build_alignment_diagnostics(raw: dict, *, argvals=None) -> dict:
                 amp = float(_alignment.amplitude_distance(curve, mean_arr, av_arr, 0.0))
                 phase = float(_alignment.phase_distance(curve, mean_arr, av_arr, 0.0))
             except Exception:
-                amp = float("nan")
-                phase = float("nan")
+                amp = None
+                phase = None
             amp_dists.append(amp)
             phase_dists.append(phase)
+
+        amp_finite = [v for v in amp_dists if v is not None]
+        phase_finite = [v for v in phase_dists if v is not None]
 
         diag["n_obs"] = int(aligned_arr.shape[0])
         diag["amplitude_distances"] = amp_dists
         diag["phase_distances"] = phase_dists
-        diag["amplitude_mean"] = float(np.nanmean(amp_dists))
-        diag["amplitude_max"] = float(np.nanmax(amp_dists))
-        diag["phase_mean"] = float(np.nanmean(phase_dists))
-        diag["phase_max"] = float(np.nanmax(phase_dists))
+        diag["amplitude_mean"] = float(np.mean(amp_finite)) if amp_finite else None
+        diag["amplitude_max"] = float(np.max(amp_finite)) if amp_finite else None
+        diag["phase_mean"] = float(np.mean(phase_finite)) if phase_finite else None
+        diag["phase_max"] = float(np.max(phase_finite)) if phase_finite else None
     elif aligned_raw is not None:
         aligned_arr = np.asarray(aligned_raw, dtype=float)
         diag["n_obs"] = int(aligned_arr.shape[0])
@@ -642,8 +645,8 @@ def _build_clustering_diagnostics(raw: dict, *, argvals=None, **kwargs) -> dict:
                                 )
                             )
                         except Exception:
-                            amp = float("nan")
-                            phase = float("nan")
+                            amp = None
+                            phase = None
                         amp_row.append(amp)
                         phase_row.append(phase)
                 amp_matrix.append(amp_row)
@@ -665,11 +668,13 @@ def _build_clustering_diagnostics(raw: dict, *, argvals=None, **kwargs) -> dict:
                 for j in range(k)
                 if i != j
             ]
+            off_diag_amp_finite = [v for v in off_diag_amp if v is not None]
+            off_diag_phase_finite = [v for v in off_diag_phase if v is not None]
             diag["mean_amplitude_separation"] = (
-                float(np.nanmean(off_diag_amp)) if off_diag_amp else None
+                float(np.mean(off_diag_amp_finite)) if off_diag_amp_finite else None
             )
             diag["mean_phase_separation"] = (
-                float(np.nanmean(off_diag_phase)) if off_diag_phase else None
+                float(np.mean(off_diag_phase_finite)) if off_diag_phase_finite else None
             )
         else:
             diag["pairwise_amplitude_distance"] = None
