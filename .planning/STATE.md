@@ -5,15 +5,15 @@ milestone_name: Grounded AI analysis advisor
 current_phase: 10
 current_phase_name: advisor-core-primitive
 status: executing
-stopped_at: Completed 03-02-PLAN.md — all 6 learn/ diagrams verified, COVERAGE.md authored
-last_updated: "2026-08-09T18:14:29.591Z"
+stopped_at: Completed 10-02-PLAN.md — FPCA/basis/smoothing/clustering diagnostics + parameter/method task families
+last_updated: "2026-08-09T18:34:53.855Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 10 execution started
 progress:
   total_phases: 13
   completed_phases: 0
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 2
   percent: 0
 ---
 
@@ -29,8 +29,8 @@ See: .planning/PROJECT.md (updated 2026-08-07)
 ## Current Position
 
 Phase: 10 (advisor-core-primitive) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 10
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-08-09 — Phase 10 execution started
 
 ## Performance Metrics
@@ -74,6 +74,7 @@ Last activity: 2026-08-09 — Phase 10 execution started
 | Phase 02 P03 | 488 | 3 tasks | 1 files |
 | Phase 03-learn-diagrams P01 | 20min | 3 tasks | 1 files |
 | Phase 03 P02 | 8min | 4 tasks | 1 files |
+| Phase 10 P02 | 3min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,9 @@ Recent decisions affecting current work:
 - [Phase ?]: All 6 learn/ diagrams proven idempotent under svgo@3.3.4 + svgo.config.mjs
 - [Phase ?]: All 6 learn/ diagrams carry full STYLE_SPEC marker set — zero legacy outliers in learn/
 - [Phase ?]: COVERAGE.md authored: no external API integration for phase 03
+- [Phase ?]: CORE-01 complete: all five build_diagnostics method branches (alignment, fpca, basis, smoothing, clustering) offline and deterministic
+- [Phase ?]: ADVISE-02 realised: parameter task clause names lambda_/n_basis/bandwidth/n_comp/cluster k/depth method, requires kind=parameter with cited evidence
+- [Phase ?]: ADVISE-03 realised: method task clause encodes poor-fit -> alternative mappings (elastic FPCA, pre-smooth, unconstrained transform), requires kind=method with cited evidence
 
 ### Pending Todos
 
@@ -136,6 +140,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-07T22:13:14.406Z
-Stopped at: Completed 03-02-PLAN.md — all 6 learn/ diagrams verified, COVERAGE.md authored
+Last session: 2026-08-09T18:34:53.846Z
+Stopped at: Completed 10-02-PLAN.md — FPCA/basis/smoothing/clustering diagnostics + parameter/method task families
 Resume file: None
