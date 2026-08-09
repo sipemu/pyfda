@@ -198,9 +198,8 @@ def build_diagnostics(
     result : dict or AlignmentResult
         Native fdars output dict (or a ``fdars.results`` wrapper whose ``.raw``
         attribute is the underlying dict).
-    method : {"alignment"}
-        The fdars method that produced ``result``.  Additional methods will be
-        added in Phase 10-02 (fpca, basis, smoothing, clustering).
+    method : {"alignment", "fpca", "basis", "smoothing", "clustering"}
+        The fdars method that produced ``result``.
     argvals : array_like, optional
         Shared evaluation grid, shape ``(m,)``.  Used for amplitude/phase
         distance computations when ``aligned_data`` is present.
@@ -218,14 +217,12 @@ def build_diagnostics(
     ValueError
         If ``method`` is not in the currently supported set.
     """
-    _supported = {"alignment"}
+    _supported = {"alignment", "fpca", "basis", "smoothing", "clustering"}
     method_lc = method.lower()
     if method_lc not in _supported:
         raise ValueError(
             f"build_diagnostics: unsupported method {method!r}. "
-            f"Supported: {sorted(_supported)!r}. "
-            "Additional methods (fpca, basis, smoothing, clustering) "
-            "will be added in Phase 10-02."
+            f"Supported: {sorted(_supported)!r}."
         )
 
     # Unwrap result wrappers (e.g. fdars.results.AlignmentResult).
@@ -236,7 +233,19 @@ def build_diagnostics(
     if method_lc == "alignment":
         return _build_alignment_diagnostics(raw, argvals=argvals)
 
-    # Unreachable given the check above, but kept for future branches.
+    if method_lc == "fpca":
+        return _build_fpca_diagnostics(raw)
+
+    if method_lc == "basis":
+        return _build_basis_diagnostics(raw, **kwargs)
+
+    if method_lc == "smoothing":
+        return _build_smoothing_diagnostics(raw, **kwargs)
+
+    if method_lc == "clustering":
+        return _build_clustering_diagnostics(raw, argvals=argvals, **kwargs)
+
+    # Unreachable given the check above, but kept for safety.
     raise ValueError(f"Unhandled method: {method!r}")
 
 
@@ -325,6 +334,355 @@ def _build_alignment_diagnostics(raw: dict, *, argvals=None) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# FPCA diagnostics branch
+# ---------------------------------------------------------------------------
+
+def _build_fpca_diagnostics(raw: dict) -> dict:
+    """Compute FPCA-specific diagnostics from an fpca-style result dict.
+
+    Accepts the raw dict from ``fdars.regression.fpca`` (keys ``scores``,
+    ``singular_values``, ``rotation``, ``mean``) or from an
+    ``fdars.results.FPCAResult`` (already unwrapped by the caller).
+
+    Computes per-component eigenvalues, explained-variance ratio, cumulative
+    variance explained, component count, and a deterministic phase-leakage
+    indicator.  All values are cast to plain Python types for byte-identical
+    repeats across runs.
+    """
+    diag: dict = {"method": "fpca"}
+
+    sv_raw = raw.get("singular_values")
+    scores_raw = raw.get("scores")
+
+    if sv_raw is not None and scores_raw is not None:
+        sv = np.asarray(sv_raw, dtype=float)
+        scores = np.asarray(scores_raw, dtype=float)
+        n_obs = int(scores.shape[0])
+        n_comp = int(sv.shape[0])
+        denom = max(n_obs - 1, 1)
+
+        # Eigenvalues = singular_values^2 / (n-1), matching FPCAResult.explained_variance
+        eigenvalues = (sv ** 2) / denom
+        total_var = float(eigenvalues.sum())
+        if total_var > 0.0:
+            evr = eigenvalues / total_var
+        else:
+            evr = np.zeros_like(eigenvalues)
+
+        cumulative = float(np.cumsum(evr)[-1]) if n_comp > 0 else 0.0
+        cum_list = [float(v) for v in np.cumsum(evr)]
+
+        diag["n_components"] = n_comp
+        diag["n_obs"] = n_obs
+        diag["eigenvalues"] = [float(v) for v in eigenvalues]
+        diag["explained_variance_ratio"] = [float(v) for v in evr]
+        diag["cumulative_variance_explained"] = cum_list
+        diag["total_variance"] = total_var
+
+        # Phase-leakage indicator: a deterministic scalar that signals when a
+        # linear/vertical FPCA is absorbing phase variation.  The indicator is
+        # based on the proportion of variance concentrated in higher components
+        # relative to the leading component.  A high value (>= 0.5) suggests
+        # that later components carry a disproportionate share of variance,
+        # which may reflect phase variation leaking into the amplitude
+        # decomposition rather than being handled by elastic alignment.
+        # Guard: with only one component the indicator is 0.0 (no higher comps).
+        if n_comp > 1:
+            leading_var = float(evr[0])
+            remaining_var = float(evr[1:].sum())
+            # Fraction of total variance NOT explained by the first component.
+            phase_leakage_indicator = float(remaining_var)
+        else:
+            phase_leakage_indicator = 0.0
+        diag["phase_leakage_indicator"] = phase_leakage_indicator
+
+        # Flag when leakage looks substantial (> 50 % of variance in higher comps).
+        diag["phase_leakage_flagged"] = bool(phase_leakage_indicator > 0.5)
+    else:
+        diag["n_components"] = None
+        diag["n_obs"] = None
+        diag["eigenvalues"] = None
+        diag["explained_variance_ratio"] = None
+        diag["cumulative_variance_explained"] = None
+        diag["total_variance"] = None
+        diag["phase_leakage_indicator"] = None
+        diag["phase_leakage_flagged"] = None
+
+    return diag
+
+
+# ---------------------------------------------------------------------------
+# Basis / smoothing diagnostics branches
+# ---------------------------------------------------------------------------
+
+def _build_basis_diagnostics(raw: dict, **kwargs) -> dict:
+    """Compute basis-selection diagnostics from an n_basis GCV-curve result.
+
+    Accepts either an already-computed result dict with keys
+    ``n_basis_values``, ``gcv``, ``edf`` (pass-through, offline) or, when
+    raw data + argvals are provided via kwargs, calls
+    ``fdars.basis.basis_nbasis_cv`` deterministically.
+
+    All values are cast to plain Python types.
+    """
+    diag: dict = {"method": "basis"}
+
+    # Branch A: pre-computed GCV curve supplied directly in the result dict.
+    if "n_basis_values" in raw and "gcv" in raw:
+        n_basis_values = [int(v) for v in raw["n_basis_values"]]
+        gcv_values = [float(v) for v in raw["gcv"]]
+        edf_values = (
+            [float(v) for v in raw["edf"]] if "edf" in raw else None
+        )
+
+        # Optimal: index of minimum GCV value.
+        min_gcv_idx = int(np.argmin(gcv_values))
+        optimal_n_basis = n_basis_values[min_gcv_idx]
+        optimal_gcv = gcv_values[min_gcv_idx]
+        optimal_edf = (
+            edf_values[min_gcv_idx] if edf_values is not None else None
+        )
+
+        # AIC / BIC approximation from GCV + edf when edf is available.
+        # AIC  ≈ n * log(GCV) + 2 * edf
+        # BIC  ≈ n * log(GCV) + log(n) * edf
+        # These require n_obs; use edf as a proxy when n_obs is absent.
+        n_obs_raw = raw.get("n_obs")
+        aic_values = None
+        bic_values = None
+        if edf_values is not None and n_obs_raw is not None:
+            n_obs = float(n_obs_raw)
+            aic_values = [
+                float(n_obs * np.log(max(g, 1e-300)) + 2.0 * e)
+                for g, e in zip(gcv_values, edf_values)
+            ]
+            bic_values = [
+                float(n_obs * np.log(max(g, 1e-300)) + np.log(n_obs) * e)
+                for g, e in zip(gcv_values, edf_values)
+            ]
+
+        diag["n_basis_values"] = n_basis_values
+        diag["gcv_curve"] = gcv_values
+        diag["edf"] = edf_values
+        diag["aic"] = aic_values
+        diag["bic"] = bic_values
+        diag["optimal_n_basis"] = optimal_n_basis
+        diag["optimal_gcv"] = optimal_gcv
+        diag["optimal_edf"] = optimal_edf
+        return diag
+
+    # Branch B: raw data provided via kwargs — call fdars.basis.basis_nbasis_cv.
+    data_raw = kwargs.get("data")
+    argvals_raw = kwargs.get("argvals")
+    if data_raw is not None and argvals_raw is not None:
+        from fdars import basis as _basis  # noqa: PLC0415
+
+        data_arr = np.asarray(data_raw, dtype=float)
+        av_arr = np.asarray(argvals_raw, dtype=float)
+        # basis_nbasis_cv returns a dict with gcv, n_basis_values, etc.
+        cv_result = _basis.basis_nbasis_cv(data_arr, av_arr)
+        return _build_basis_diagnostics(cv_result)
+
+    # Fallback: no usable inputs.
+    diag["n_basis_values"] = None
+    diag["gcv_curve"] = None
+    diag["edf"] = None
+    diag["aic"] = None
+    diag["bic"] = None
+    diag["optimal_n_basis"] = None
+    diag["optimal_gcv"] = None
+    diag["optimal_edf"] = None
+    return diag
+
+
+def _build_smoothing_diagnostics(raw: dict, **kwargs) -> dict:
+    """Compute smoothing diagnostics from a lambda_ GCV-curve result.
+
+    Accepts either an already-computed result dict with keys
+    ``lambda_values``, ``gcv``, ``edf`` (pass-through, offline) or raw
+    data + argvals via kwargs for a live ``fdars.basis.smooth_basis_gcv``
+    or ``fdars.basis.pspline_fit_gcv`` call.
+
+    All values are cast to plain Python types.
+    """
+    diag: dict = {"method": "smoothing"}
+
+    # Branch A: pre-computed smoothing GCV curve supplied in the result dict.
+    if "lambda_values" in raw and "gcv" in raw:
+        lambda_values = [float(v) for v in raw["lambda_values"]]
+        gcv_values = [float(v) for v in raw["gcv"]]
+        edf_values = (
+            [float(v) for v in raw["edf"]] if "edf" in raw else None
+        )
+
+        min_gcv_idx = int(np.argmin(gcv_values))
+        optimal_lambda = lambda_values[min_gcv_idx]
+        optimal_gcv = gcv_values[min_gcv_idx]
+        optimal_edf = (
+            edf_values[min_gcv_idx] if edf_values is not None else None
+        )
+
+        n_obs_raw = raw.get("n_obs")
+        aic_values = None
+        bic_values = None
+        if edf_values is not None and n_obs_raw is not None:
+            n_obs = float(n_obs_raw)
+            aic_values = [
+                float(n_obs * np.log(max(g, 1e-300)) + 2.0 * e)
+                for g, e in zip(gcv_values, edf_values)
+            ]
+            bic_values = [
+                float(n_obs * np.log(max(g, 1e-300)) + np.log(n_obs) * e)
+                for g, e in zip(gcv_values, edf_values)
+            ]
+
+        diag["lambda_values"] = lambda_values
+        diag["gcv_curve"] = gcv_values
+        diag["edf"] = edf_values
+        diag["aic"] = aic_values
+        diag["bic"] = bic_values
+        diag["optimal_lambda"] = optimal_lambda
+        diag["optimal_gcv"] = optimal_gcv
+        diag["optimal_edf"] = optimal_edf
+        return diag
+
+    # Branch B: raw data via kwargs — call fdars.basis.pspline_fit_gcv.
+    data_raw = kwargs.get("data")
+    argvals_raw = kwargs.get("argvals")
+    if data_raw is not None and argvals_raw is not None:
+        from fdars import basis as _basis  # noqa: PLC0415
+
+        data_arr = np.asarray(data_raw, dtype=float)
+        av_arr = np.asarray(argvals_raw, dtype=float)
+        gcv_result = _basis.pspline_fit_gcv(data_arr, av_arr)
+        return _build_smoothing_diagnostics(gcv_result)
+
+    # Fallback: no usable inputs.
+    diag["lambda_values"] = None
+    diag["gcv_curve"] = None
+    diag["edf"] = None
+    diag["aic"] = None
+    diag["bic"] = None
+    diag["optimal_lambda"] = None
+    diag["optimal_gcv"] = None
+    diag["optimal_edf"] = None
+    return diag
+
+
+# ---------------------------------------------------------------------------
+# Clustering diagnostics branch
+# ---------------------------------------------------------------------------
+
+def _build_clustering_diagnostics(raw: dict, *, argvals=None, **kwargs) -> dict:
+    """Compute clustering diagnostics from a clustering result dict.
+
+    Accepts a result dict with keys ``centers`` (cluster mean curves, shape
+    ``(k, m)``), ``cluster`` (per-observation cluster labels), and ``k``.
+    Optionally computes pairwise amplitude/phase distance between cluster
+    means when ``argvals`` is provided.
+
+    All values are cast to plain Python types.
+    """
+    diag: dict = {"method": "clustering"}
+
+    centers_raw = raw.get("centers")
+    labels_raw = raw.get("cluster")
+    k_raw = raw.get("k")
+
+    if centers_raw is not None:
+        centers = np.asarray(centers_raw, dtype=float)
+        k = int(k_raw) if k_raw is not None else int(centers.shape[0])
+        diag["k"] = k
+
+        # Per-cluster means as plain lists.
+        diag["cluster_means"] = [[float(v) for v in row] for row in centers]
+
+        # Cluster sizes from label array (when present).
+        if labels_raw is not None:
+            labels = np.asarray(labels_raw, dtype=int)
+            cluster_sizes = []
+            for ki in range(k):
+                cluster_sizes.append(int(np.sum(labels == ki)))
+            diag["cluster_sizes"] = cluster_sizes
+        else:
+            diag["cluster_sizes"] = None
+
+        # Pairwise amplitude/phase separation between cluster means.
+        # Requires argvals for distance computations.
+        if argvals is not None and k > 1:
+            av_arr = np.asarray(argvals, dtype=float)
+
+            from fdars import alignment as _alignment  # noqa: PLC0415
+
+            amp_matrix: list = []
+            phase_matrix: list = []
+            for i in range(k):
+                amp_row: list = []
+                phase_row: list = []
+                for j in range(k):
+                    if i == j:
+                        amp_row.append(0.0)
+                        phase_row.append(0.0)
+                    else:
+                        try:
+                            amp = float(
+                                _alignment.amplitude_distance(
+                                    centers[i], centers[j], av_arr, 0.0
+                                )
+                            )
+                            phase = float(
+                                _alignment.phase_distance(
+                                    centers[i], centers[j], av_arr, 0.0
+                                )
+                            )
+                        except Exception:
+                            amp = float("nan")
+                            phase = float("nan")
+                        amp_row.append(amp)
+                        phase_row.append(phase)
+                amp_matrix.append(amp_row)
+                phase_matrix.append(phase_row)
+
+            diag["pairwise_amplitude_distance"] = amp_matrix
+            diag["pairwise_phase_distance"] = phase_matrix
+
+            # Scalar summaries: mean off-diagonal distance.
+            off_diag_amp = [
+                amp_matrix[i][j]
+                for i in range(k)
+                for j in range(k)
+                if i != j
+            ]
+            off_diag_phase = [
+                phase_matrix[i][j]
+                for i in range(k)
+                for j in range(k)
+                if i != j
+            ]
+            diag["mean_amplitude_separation"] = (
+                float(np.nanmean(off_diag_amp)) if off_diag_amp else None
+            )
+            diag["mean_phase_separation"] = (
+                float(np.nanmean(off_diag_phase)) if off_diag_phase else None
+            )
+        else:
+            diag["pairwise_amplitude_distance"] = None
+            diag["pairwise_phase_distance"] = None
+            diag["mean_amplitude_separation"] = None
+            diag["mean_phase_separation"] = None
+    else:
+        diag["k"] = None
+        diag["cluster_means"] = None
+        diag["cluster_sizes"] = None
+        diag["pairwise_amplitude_distance"] = None
+        diag["pairwise_phase_distance"] = None
+        diag["mean_amplitude_separation"] = None
+        diag["mean_phase_separation"] = None
+
+    return diag
+
+
+# ---------------------------------------------------------------------------
 # Anthropic import guard
 # ---------------------------------------------------------------------------
 
@@ -363,9 +721,8 @@ def _system_prompt(task: str) -> str:
     Parameters
     ----------
     task : str
-        Task family identifier (case-insensitive).  Currently supported:
-        ``"interpretation"``.  Additional task clauses (``"parameter"``,
-        ``"method"``) will be added in Phase 10-02.
+        Task family identifier (case-insensitive).  Supported:
+        ``"interpretation"``, ``"parameter"``, ``"method"``.
 
     Returns
     -------
@@ -406,12 +763,11 @@ def _system_prompt(task: str) -> str:
     )
 
     # -- Task-family clause -------------------------------------------------
-    _supported_tasks = {"interpretation"}
+    _supported_tasks = {"interpretation", "parameter", "method"}
     if task_lc not in _supported_tasks:
         raise ValueError(
             f"_system_prompt: unsupported task {task!r}. "
-            f"Supported: {sorted(_supported_tasks)!r}. "
-            "Additional task clauses (parameter, method) will be added in Phase 10-02."
+            f"Supported: {sorted(_supported_tasks)!r}."
         )
 
     if task_lc == "interpretation":
@@ -425,6 +781,59 @@ def _system_prompt(task: str) -> str:
             "method change is clearly warranted by the diagnostics. "
             "When kind is 'none', set action to a concise interpretation summary "
             "rather than a blank string."
+        )
+
+    elif task_lc == "parameter":
+        # ADVISE-02: parameter guidance grounded in diagnostics.
+        task_clause = (
+            "Task: parameter.\n"
+            "Recommend concrete parameter adjustments for the fdars method. "
+            "The parameters you may recommend adjusting are: "
+            "lambda_ (warp penalty / smoothing regularisation), "
+            "n_basis (number of basis functions), "
+            "bandwidth (kernel smoother bandwidth), "
+            "n_comp (number of FPCA components), "
+            "cluster k (number of clusters), "
+            "depth method (which functional depth measure to use). "
+            "For each recommendation: "
+            "set kind='parameter'; "
+            "state a concrete action with a target value or direction "
+            "(e.g. 'increase lambda_ from the current value toward 1.0', "
+            "'reduce n_basis to the value at the GCV minimum'); "
+            "tie the rationale to a specific diagnostic value "
+            "(e.g. the GCV curve minimum, the cumulative variance explained, "
+            "the warp penalty, the cluster separation); "
+            "state the expected_effect in terms of the next run's diagnostics. "
+            "Evidence must cite the specific diagnostic value(s) that motivate "
+            "the recommendation — do not cite values absent from the input. "
+            "Only recommend changes that are clearly supported by the diagnostics."
+        )
+
+    elif task_lc == "method":
+        # ADVISE-03: method guidance — flag poor-fit methods, suggest alternatives.
+        task_clause = (
+            "Task: method.\n"
+            "Identify when the chosen fdars method is a poor fit for the data "
+            "and recommend an alternative. Use the following mappings:\n"
+            "- Linear/vertical FPCA + substantial phase variation "
+            "(high phase_leakage_indicator or variance concentrated in higher "
+            "components) -> recommend elastic FPCA (amplitude/phase decomposition) "
+            "to separate amplitude and phase variation before decomposition.\n"
+            "- Sparse or irregularly sampled data (irregular argvals spacing, "
+            "few observations per curve) -> recommend pre-smoothing to a common "
+            "grid before any group-level analysis.\n"
+            "- Density-valued, compositional, or strictly positive/constrained data "
+            "-> recommend transforming to an unconstrained space "
+            "(e.g. log-ratio, Bayes-Hilbert) before applying standard FDA methods.\n"
+            "For each recommendation: "
+            "set kind='method'; "
+            "name the current method and why it is a poor fit; "
+            "name the alternative method and what it addresses; "
+            "state the expected_effect (what should improve in subsequent analysis). "
+            "Evidence must cite the specific diagnostic value(s) that flag the "
+            "poor-fit signal (e.g. phase_leakage_indicator value, "
+            "cumulative variance pattern, cluster separation). "
+            "Only flag a method mismatch when the diagnostics clearly support it."
         )
 
     return base + "\n" + task_clause
