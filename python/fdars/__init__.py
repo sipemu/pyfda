@@ -61,10 +61,15 @@ for _name in _submodule_names:
 from fdars import datasets, results, metrics, covariance  # noqa: E402
 from fdars import plot  # noqa: E402  (matplotlib imported lazily inside plot.*)
 from fdars import _augment as _augment  # noqa: E402
+from fdars import advisor  # noqa: E402  (anthropic imported lazily inside advisor.*)
 
 # Inject pure-Python orchestration helpers (e.g. clustering.cluster_optim) into
 # the native submodule namespaces so they are reachable at the R-style path.
 _augment.install()
+
+# Register advisor in sys.modules so `from fdars.advisor import build_diagnostics`
+# resolves via the package namespace (same pattern as native submodule loop above).
+_sys.modules["fdars.advisor"] = advisor
 
 __all__ = [
     "Fdata",
@@ -74,6 +79,7 @@ __all__ = [
     "plot",
     "metrics",
     "covariance",
+    "advisor",
 ]
 
 # Clean up namespace
