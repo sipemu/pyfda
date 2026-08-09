@@ -249,10 +249,21 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. The `advise` LLM call is covered by a stubbed / env-gated integration test that is skipped (not failed) when `ANTHROPIC_API_KEY` is absent, so CI stays network-free
   5. An `examples/` recipe page demonstrates the advisor end-to-end against a real dataset (build diagnostics → get advice → read recommendations)
 
-**Plans**: TBD
+**Plans**: 3 plans
 **Notes**:
 
   - Surface is recommend-only: no autonomous re-run loop here — the user applies advice manually. Agentic tuning arrives in Phase 12.
+
+**Plans**: 3 plans
+
+**Wave 1**
+
+- [ ] 11-01-PLAN.md — TRACER: wire fdars.advisor into public API (__init__.py injection + __all__) + [advisor] pyproject extra + extend test_submodules + first offline test (PYAPI-01, PYAPI-02)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 11-02-PLAN.md — full offline build_diagnostics tests over docs/data/ + ImportError guard + determinism + env-gated advise integration test (PYAPI-02)
+- [ ] 11-03-PLAN.md — examples/advisor_recipe.py end-to-end recipe (load → cluster → build_diagnostics → guarded advise) (PYAPI-03)
 
 ### Phase 12: Tool / MCP Surface
 
