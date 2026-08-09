@@ -27,7 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 10: Advisor Core Primitive** - Deterministic offline `build_diagnostics` + grounded `advise` (Claude structured outputs) + cluster-difference specialization + `[advisor]` optional-dependency plumbing (completed 2026-08-09)
 - [x] **Phase 11: Python API Surface** - Register the recommend-only advisor on the public `fdars` API with offline + stubbed tests and an `examples/` recipe page (completed 2026-08-09)
-- [ ] **Phase 12: Tool / MCP Surface** - Coarse-grained tools + MCP server + agentic re-run/compare loop
+- [x] **Phase 12: Tool / MCP Surface** - Coarse-grained tools + MCP server + agentic re-run/compare loop (completed 2026-08-09)
 - [ ] **Phase 13: Agent Skill Surface** - `SKILL.md` + script packaging the interpret→recommend→re-run→compare workflow with a documented execution environment
 
 ## Phase Details
@@ -330,5 +330,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 9. Examples Sweep | 1/0 | Complete    | 2026-08-08 |
 | 10. Advisor Core Primitive | 3/3 | Complete    | 2026-08-09 |
 | 11. Python API Surface | 3/3 | Complete    | 2026-08-09 |
-| 12. Tool / MCP Surface | 3/3 | In Progress|  |
+| 12. Tool / MCP Surface | 3/3 | Complete    | 2026-08-09 |
 | 13. Agent Skill Surface | 0/0 | Not started | - |

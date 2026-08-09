@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Grounded AI analysis advisor
-current_phase: 12
-current_phase_name: tool-mcp-surface
-status: executing
+current_phase: 13
+current_phase_name: Agent Skill Surface
+status: planning
 stopped_at: Completed 12-03-PLAN.md — fdars_compare_run compare loop + mcp_recipe.py
-last_updated: "2026-08-09T21:26:49.754Z"
+last_updated: "2026-08-09T21:37:58.739Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 12 plan 02 execution completed
 progress:
@@ -28,16 +28,16 @@ See: .planning/PROJECT.md (updated 2026-08-07)
 
 ## Current Position
 
-Phase: 12 (tool-mcp-surface) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute Plan 03 (compare loop)
-Last activity: 2026-08-09 — Phase 12 Plan 02 completed
+Phase: 13 — Agent Skill Surface
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-09 — Phase 12 complete, transitioned to Phase 13
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 22
+- Total plans completed: 25
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -56,6 +56,7 @@ Last activity: 2026-08-09 — Phase 12 Plan 02 completed
 | 9 | 1 | - | - |
 | 10 | 3 | - | - |
 | 11 | 3 | - | - |
+| 12 | 3 | - | - |
 
 **Recent Trend:**
 
