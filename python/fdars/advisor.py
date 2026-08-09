@@ -445,6 +445,16 @@ def _build_basis_diagnostics(raw: dict, **kwargs) -> dict:
         )
 
         # Optimal: index of minimum GCV value.
+        if not gcv_values:
+            diag["n_basis_values"] = n_basis_values
+            diag["gcv_curve"] = gcv_values
+            diag["edf"] = edf_values
+            diag["gcv_aic_approx"] = None
+            diag["gcv_bic_approx"] = None
+            diag["optimal_n_basis"] = None
+            diag["optimal_gcv"] = None
+            diag["optimal_edf"] = None
+            return diag
         min_gcv_idx = int(np.argmin(gcv_values))
         optimal_n_basis = n_basis_values[min_gcv_idx]
         optimal_gcv = gcv_values[min_gcv_idx]
@@ -524,6 +534,16 @@ def _build_smoothing_diagnostics(raw: dict, **kwargs) -> dict:
             [float(v) for v in raw["edf"]] if "edf" in raw else None
         )
 
+        if not gcv_values:
+            diag["lambda_values"] = lambda_values
+            diag["gcv_curve"] = gcv_values
+            diag["edf"] = edf_values
+            diag["gcv_aic_approx"] = None
+            diag["gcv_bic_approx"] = None
+            diag["optimal_lambda"] = None
+            diag["optimal_gcv"] = None
+            diag["optimal_edf"] = None
+            return diag
         min_gcv_idx = int(np.argmin(gcv_values))
         optimal_lambda = lambda_values[min_gcv_idx]
         optimal_gcv = gcv_values[min_gcv_idx]
