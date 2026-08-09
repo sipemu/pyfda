@@ -277,11 +277,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. An agentic re-run/compare loop applies a suggested parameter, re-runs the method, and returns a before/after diagnostics comparison — the delta is observable
   4. The compute path stays deterministic (fdars does the numbers; the model only orchestrates) and recommendations still cite diagnostics per the grounding invariant
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 
 **Wave 1**
 
-- [ ] 12-01-PLAN.md — TRACER: [mcp] extra + HandleRegistry + minimal MCPServer with fdars_build_diagnostics, in-process Client lists+invokes end-to-end (TOOL-01, TOOL-02)
+- [x] 12-01-PLAN.md — TRACER: [mcp] extra + HandleRegistry + minimal MCPServer with fdars_build_diagnostics, in-process Client lists+invokes end-to-end (TOOL-01, TOOL-02)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -330,5 +330,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 9. Examples Sweep | 1/0 | Complete    | 2026-08-08 |
 | 10. Advisor Core Primitive | 3/3 | Complete    | 2026-08-09 |
 | 11. Python API Surface | 3/3 | Complete    | 2026-08-09 |
-| 12. Tool / MCP Surface | 0/3 | Planned | - |
+| 12. Tool / MCP Surface | 1/3 | In Progress|  |
 | 13. Agent Skill Surface | 0/0 | Not started | - |

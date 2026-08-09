@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Grounded AI analysis advisor
 current_phase: 12
-current_phase_name: Tool / MCP Surface
+current_phase_name: tool-mcp-surface
 status: executing
-stopped_at: Completed 11-03-PLAN.md — examples/advisor_recipe.py recipe script created (PYAPI-03)
-last_updated: "2026-08-09T20:57:10.779Z"
+stopped_at: Completed 12-01-PLAN.md — MCP tracer surface (fdars_build_diagnostics) end-to-end
+last_updated: "2026-08-09T21:08:27.704Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 10 execution started
 progress:
   total_phases: 13
   completed_phases: 2
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 7
   percent: 15
 ---
 
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-07)
 
 **Core value:** Every recommendation cites fdars-computed diagnostics and states an expected effect; the LLM reasons over computed numbers and never fabricates them
-**Current focus:** Phase 11 — python-api-surface
+**Current focus:** Phase 12 — tool-mcp-surface
 
 ## Current Position
 
-Phase: 12 — Tool / MCP Surface
-Plan: Not started
+Phase: 12 (tool-mcp-surface) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-08-09 — Phase 11 complete, transitioned to Phase 12
+Last activity: 2026-08-09 — Phase 12 execution started
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Last activity: 2026-08-09 — Phase 11 complete, transitioned to Phase 12
 | Phase 10 P03 | 2 | 2 tasks | 1 files |
 | Phase 11 P01 | 2min | 3 tasks | 4 files |
 | Phase 11 P03 | 3min | 2 tasks | 1 files |
+| Phase 12 P01 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,9 @@ Recent decisions affecting current work:
 - [Phase ?]: advisor wired via plain Python import + sys.modules injection (not in _submodule_names — pure-Python, not native Rust submodule)
 - [Phase ?]: pydantic>=2.0 included in [advisor] extra alongside anthropic>=0.72.0 (anthropic SDK does not auto-install pydantic)
 - [Phase ?]: Task 1 and Task 2 implemented atomically in one commit: offline body + LLM guard authored in single pass; kmeans_fd used directly per Pitfall 6; recipe placed in examples/ not docs/examples/ per Pitfall 5 prohibition
+- [Phase ?]: [12-01] MCP list_tools() returns ListToolsResult — iterate .tools not the result (mcp 2.0.0)
+- [Phase ?]: [12-01] MCP call_tool structured_content is None for dict-returning def handlers; content[0].text JSON fallback is the unwrap path
+- [Phase ?]: [12-01] synchronous def MCP tool handlers work with async Client(mcp); mcp subpackage guarded to Python 3.10+, not registered in fdars.__init__
 
 ### Pending Todos
 
@@ -149,6 +153,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-09T19:45:56.977Z
-Stopped at: Completed 11-03-PLAN.md — examples/advisor_recipe.py recipe script created (PYAPI-03)
+Last session: 2026-08-09T21:08:27.694Z
+Stopped at: Completed 12-01-PLAN.md — MCP tracer surface (fdars_build_diagnostics) end-to-end
 Resume file: None
