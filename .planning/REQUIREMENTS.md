@@ -3,7 +3,54 @@
 **Defined:** 2026-08-07
 **Core Value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
 
+## v2.0 Requirements — Grounded AI analysis advisor
+
+**Current milestone.** Design source of truth: `.planning/design/llm-cluster-narration.md`.
+Grounding invariant: every recommendation cites computed diagnostics and states an expected effect;
+the LLM reasons over fdars-computed numbers and never fabricates them. Each maps to exactly one phase.
+
+### Core primitive
+
+- [ ] **CORE-01**: `build_diagnostics(result, method, …)` returns a deterministic, offline diagnostics report for a given fdars method, with no LLM/network dependency
+- [ ] **CORE-02**: `advise(diagnostics, task, domain_context)` returns a schema-validated `Advice` (interpretation + recommendations + caveats) via Claude structured outputs (`claude-opus-4-8`)
+- [ ] **CORE-03**: Every recommendation carries `action`, `kind` (`parameter`|`method`|`none`), `rationale`, `expected_effect`, and `evidence` citing diagnostic values — the grounding invariant enforced by schema + system prompt
+- [ ] **CORE-04**: `anthropic` is an optional dependency behind the `[advisor]` extra; `build_diagnostics` works with it uninstalled; a missing dependency raises a clear `ImportError` with an install hint
+- [ ] **CORE-05**: `describe_cluster_differences` is provided as a specialization built on the diagnostics builder
+
+### Advisor tasks
+
+- [ ] **ADVISE-01**: Interpretation — the advisor explains what a computed result means in domain terms
+- [ ] **ADVISE-02**: Parameter guidance — the advisor recommends adjustments (`lambda_`, `n_basis`, bandwidth, `n_comp`, cluster `k`, depth method) grounded in diagnostics (GCV curve, variance explained, warp penalty, cluster separation)
+- [ ] **ADVISE-03**: Method guidance — the advisor flags poor-fit methods and suggests alternatives (linear FPCA + phase variation → elastic FPCA; sparse/irregular → pre-smooth; density/constrained → transform)
+
+### Python API surface (recommend-only)
+
+- [ ] **PYAPI-01**: The advisor is exposed via the `fdars` public API (module registered, `__all__`), returning structured advice for the user to apply
+- [ ] **PYAPI-02**: `build_diagnostics` has offline unit tests against `docs/data/`; the LLM call is covered by a stubbed / env-gated integration test (no network in CI)
+- [ ] **PYAPI-03**: An `examples/` recipe page demonstrates the advisor end-to-end against a real dataset
+
+### Tool / MCP surface (agentic)
+
+- [ ] **TOOL-01**: Coarse-grained tool definitions (`fdars_build_diagnostics`, `fdars_run_method`) with strict schemas
+- [ ] **TOOL-02**: An MCP server exposes those tools (transport per open decision)
+- [ ] **TOOL-03**: An agentic re-run/compare loop applies a suggested parameter, re-runs the method, and compares before/after diagnostics
+
+### Agent Skill surface (agentic)
+
+- [ ] **SKILL-01**: A `SKILL.md` + script packages the interpret→recommend→re-run→compare workflow
+- [ ] **SKILL-02**: The skill's execution environment (fdars availability) is documented so the skill actually runs
+
+### Out of scope (v2.0)
+
+- HTTP/REST service surface — deferred (not requested this milestone)
+- Fine-tuning or non-Anthropic model providers — advisor targets Claude (`claude-opus-4-8`)
+- Autonomous changes to user data or files — the advisor recommends/compares; it does not mutate source data
+
+---
+
 ## v1 Requirements
+
+**Shipped (v1.0 Documentation Overhaul — Phases 1–9 complete).** Retained for traceability.
 
 Requirements for this milestone. Each maps to exactly one roadmap phase.
 
