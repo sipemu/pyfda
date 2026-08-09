@@ -15,7 +15,7 @@ the LLM reasons over fdars-computed numbers and never fabricates them. Each maps
 - [ ] **CORE-02**: `advise(diagnostics, task, domain_context)` returns a schema-validated `Advice` (interpretation + recommendations + caveats) via Claude structured outputs (`claude-opus-4-8`)
 - [ ] **CORE-03**: Every recommendation carries `action`, `kind` (`parameter`|`method`|`none`), `rationale`, `expected_effect`, and `evidence` citing diagnostic values — the grounding invariant enforced by schema + system prompt
 - [ ] **CORE-04**: `anthropic` is an optional dependency behind the `[advisor]` extra; `build_diagnostics` works with it uninstalled; a missing dependency raises a clear `ImportError` with an install hint
-- [ ] **CORE-05**: `describe_cluster_differences` is provided as a specialization built on the diagnostics builder
+- [x] **CORE-05**: `describe_cluster_differences` is provided as a specialization built on the diagnostics builder
 
 ### Advisor tasks
 
@@ -139,7 +139,7 @@ Explicitly excluded to prevent scope creep.
 | CORE-02 | Phase 10 | Pending |
 | CORE-03 | Phase 10 | Pending |
 | CORE-04 | Phase 10 | Pending |
-| CORE-05 | Phase 10 | Pending |
+| CORE-05 | Phase 10 | Complete |
 | ADVISE-01 | Phase 10 | Pending |
 | ADVISE-02 | Phase 10 | Complete |
 | ADVISE-03 | Phase 10 | Complete |

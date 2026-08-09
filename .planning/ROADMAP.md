@@ -216,7 +216,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. The advisor performs all three task families against real diagnostics: interpretation (what a result means in domain terms), parameter guidance (`lambda_`, `n_basis`, bandwidth, `n_comp`, cluster `k`, depth method), and method guidance (e.g. linear FPCA + phase variation → elastic FPCA; sparse/irregular → pre-smooth; density/constrained → transform)
   5. `describe_cluster_differences` is provided as a specialization built on the diagnostics builder and returns grounded cluster-difference interpretation
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 
 **Wave 1**
 
@@ -228,7 +228,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 10-03-PLAN.md — describe_cluster_differences specialization on build_diagnostics + full offline surface validation (CORE-05)
+- [x] 10-03-PLAN.md — describe_cluster_differences specialization on build_diagnostics + full offline surface validation (CORE-05)
 
 **Notes**:
 
@@ -303,7 +303,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. regression/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 8. monitoring/ Diagrams | 1/0 | Complete    | 2026-08-08 |
 | 9. Examples Sweep | 1/0 | Complete    | 2026-08-08 |
-| 10. Advisor Core Primitive | 2/3 | In Progress|  |
+| 10. Advisor Core Primitive | 3/3 | In Progress|  |
 | 11. Python API Surface | 0/0 | Not started | - |
 | 12. Tool / MCP Surface | 0/0 | Not started | - |
 | 13. Agent Skill Surface | 0/0 | Not started | - |
