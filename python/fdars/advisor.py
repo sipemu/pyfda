@@ -730,13 +730,26 @@ def _require_anthropic():
     """
     try:
         import anthropic  # noqa: PLC0415
-        return anthropic
     except ImportError as exc:
         raise ImportError(
             "The fdars advisor requires the anthropic SDK. "
             f"Install it with: pip install fdars[advisor]\n"
             f"Requires: anthropic>={ADVISOR_ANTHROPIC_MIN_VERSION}"
         ) from exc
+
+    installed = tuple(
+        int(x) for x in anthropic.__version__.split(".")[:3]
+    )
+    floor = tuple(
+        int(x) for x in ADVISOR_ANTHROPIC_MIN_VERSION.split(".")[:3]
+    )
+    if installed < floor:
+        raise ImportError(
+            f"fdars advisor requires anthropic>={ADVISOR_ANTHROPIC_MIN_VERSION}; "
+            f"found {anthropic.__version__}. "
+            f"Run: pip install 'anthropic>={ADVISOR_ANTHROPIC_MIN_VERSION}'"
+        )
+    return anthropic
 
 
 # ---------------------------------------------------------------------------
