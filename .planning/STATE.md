@@ -24,7 +24,7 @@ current_phase_name: agent-skill-surface
 See: .planning/PROJECT.md (updated 2026-08-10)
 
 **Core value:** Every recommendation cites fdars-computed diagnostics and states an expected effect; the LLM reasons over computed numbers and never fabricates them
-**Current focus:** Milestone v2.0 complete — ready to archive via `/gsd-complete-milestone v2.0`
+**Current focus:** Milestone v2.0 shipped & archived — planning next milestone (`/gsd-new-milestone`)
 
 ## Current Position
 
