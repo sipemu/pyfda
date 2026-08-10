@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Grounded AI analysis advisor
 current_phase: 13
-current_phase_name: Agent Skill Surface
-status: planning
-stopped_at: Completed 12-03-PLAN.md — fdars_compare_run compare loop + mcp_recipe.py
-last_updated: "2026-08-09T21:37:58.739Z"
-last_activity: 2026-08-09
-last_activity_desc: Phase 12 plan 02 execution completed
+current_phase_name: agent-skill-surface
+status: executing
+stopped_at: "Completed 13-01-PLAN.md — fdars-advisor skill tracer: SKILL.md + walkthrough + test_skill.py"
+last_updated: "2026-08-10T19:47:04.317Z"
+last_activity: 2026-08-10
+last_activity_desc: Phase 13 execution started
 progress:
   total_phases: 13
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 11
+  completed_plans: 10
   percent: 23
 ---
 
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-07)
 
 **Core value:** Every recommendation cites fdars-computed diagnostics and states an expected effect; the LLM reasons over computed numbers and never fabricates them
-**Current focus:** Phase 12 — tool-mcp-surface
+**Current focus:** Phase 13 — agent-skill-surface
 
 ## Current Position
 
-Phase: 13 — Agent Skill Surface
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-09 — Phase 12 complete, transitioned to Phase 13
+Phase: 13 (agent-skill-surface) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-08-10 — Phase 13 execution started
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Last activity: 2026-08-09 — Phase 12 complete, transitioned to Phase 13
 | Phase 12 P01 | 5min | 2 tasks | 5 files |
 | Phase 12 P02 | 4min | 3 tasks | 3 files |
 | Phase 12 P03 | 7min | 3 tasks | 5 files |
+| Phase 13 P01 | 4min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -137,6 +138,9 @@ Recent decisions affecting current work:
 - [Phase ?]: [12-02] run_stdio() standalone transport wiring; tool handlers are transport-agnostic; if __name__=='__main__' guard in server.py
 - [Phase ?]: [12-03] fdars_compare_run flattens after-params as top-level typed args; no nested params_after: dict in MCP schema (Pitfall 6)
 - [Phase ?]: [12-03] Branch A-prime added to _build_smoothing_diagnostics: pspline_fit_gcv single-fit scalars (gcv/edf) -> optimal_gcv/optimal_edf; enables non-empty delta for smoothing compare loop
+- [Phase ?]: Delta header grep literal: 'Delta (' -- matches script output 'Delta (after - before) [N scalar keys]:'
+- [Phase ?]: test_walkthrough_py39_exit0 uses re.MULTILINE to match actual import statements, not comments containing the module path
+- [Phase ?]: Plan 02 expansion tests included in test_skill.py during Plan 01 scaffold so all 6 tests collect from the start
 
 ### Pending Todos
 
@@ -160,6 +164,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-09T21:26:49.744Z
-Stopped at: Completed 12-03-PLAN.md — fdars_compare_run compare loop + mcp_recipe.py
+Last session: 2026-08-10T19:47:04.293Z
+Stopped at: Completed 13-01-PLAN.md — fdars-advisor skill tracer: SKILL.md + walkthrough + test_skill.py
 Resume file: None

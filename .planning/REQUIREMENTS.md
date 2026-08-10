@@ -37,8 +37,8 @@ the LLM reasons over fdars-computed numbers and never fabricates them. Each maps
 
 ### Agent Skill surface (agentic)
 
-- [ ] **SKILL-01**: A `SKILL.md` + script packages the interpret→recommend→re-run→compare workflow
-- [ ] **SKILL-02**: The skill's execution environment (fdars availability) is documented so the skill actually runs
+- [x] **SKILL-01**: A `SKILL.md` + script packages the interpret→recommend→re-run→compare workflow
+- [x] **SKILL-02**: The skill's execution environment (fdars availability) is documented so the skill actually runs
 
 ### Out of scope (v2.0)
 
@@ -149,8 +149,8 @@ Explicitly excluded to prevent scope creep.
 | TOOL-01 | Phase 12 | Complete |
 | TOOL-02 | Phase 12 | Complete |
 | TOOL-03 | Phase 12 | Complete |
-| SKILL-01 | Phase 13 | Pending |
-| SKILL-02 | Phase 13 | Pending |
+| SKILL-01 | Phase 13 | Complete |
+| SKILL-02 | Phase 13 | Complete |
 
 **Coverage:**
 
