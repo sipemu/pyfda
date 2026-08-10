@@ -198,12 +198,12 @@ def test_walkthrough_py39_exit0():
     """
     assert SCRIPT_PATH.exists(), f"Walkthrough script not found at {SCRIPT_PATH}"
     source = SCRIPT_PATH.read_text()
-    # The version guard must appear BEFORE any fdars.mcp import line
-    guard_match = re.search(r"sys\.version_info\s*<\s*\(3,\s*10\)", source)
-    assert guard_match, "Version guard 'sys.version_info < (3, 10)' not found in script"
-    # Guard must appear before the first 'from fdars.mcp' import
-    mcp_import_match = re.search(r"from fdars\.mcp", source)
-    assert mcp_import_match, "'from fdars.mcp' import not found in script"
+    # The version guard must appear BEFORE any fdars.mcp import statement
+    guard_match = re.search(r"^if sys\.version_info\s*<\s*\(3,\s*10\)", source, re.MULTILINE)
+    assert guard_match, "Version guard 'if sys.version_info < (3, 10)' not found in script"
+    # Match only actual import statements (at start of line), not comments mentioning the module
+    mcp_import_match = re.search(r"^from fdars\.mcp", source, re.MULTILINE)
+    assert mcp_import_match, "'from fdars.mcp' import statement not found in script"
     assert guard_match.start() < mcp_import_match.start(), (
         "Version guard appears AFTER 'from fdars.mcp' import — "
         "this will raise ImportError on Python 3.9 (Pitfall 4)"
