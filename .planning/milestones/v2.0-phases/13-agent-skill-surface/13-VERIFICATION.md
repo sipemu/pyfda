@@ -1,11 +1,12 @@
 ---
 phase: 13-agent-skill-surface
 verified: 2026-08-10T12:00:00Z
-status: human_needed
+status: passed
 score: 3/3 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
+
   - test: "Run the walkthrough with a valid ANTHROPIC_API_KEY set and inspect the printed output"
     expected: "advise() is called; interpretation + recommendations are printed with non-empty evidence items citing fdars-computed diagnostics values (gcv, edf, etc.); the delta block still appears after the advice section; script exits 0"
     why_human: "The LLM call path is env-gated and not exercised offline. The grounding invariant (every recommendation cites a diagnostics value) depends on Pydantic schema enforcement plus LLM compliance — neither can be verified without a real API key. WR-02 in the code review also flags that advisor.py may call a non-existent SDK surface (client.messages.parse / thinking={'type': 'adaptive'}) which would produce a runtime AttributeError only when the key is present."
@@ -123,6 +124,7 @@ ANTHROPIC_API_KEY=sk-... python .claude/skills/fdars-advisor/scripts/fdars_advis
 ```
 
 **Expected:**
+
 - Step 4 prints `Calling advise() for grounded parameter recommendations...` (not the `[offline]` notice)
 - `advice.interpretation` is a non-empty string about the smoothing result
 - At least one recommendation is printed with an `evidence` item that contains a number present in the diagnostics (e.g., references to gcv_aic_approx, optimal_edf, edf values that appear in Step 3 output)

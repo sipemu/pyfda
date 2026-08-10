@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Grounded AI analysis advisor
-current_phase: 13
-status: completed
-stopped_at: "Completed 13-02-PLAN.md — fdars-advisor skill expansion: walkthrough advise() step + SKILL.md body + expansion tests"
-last_updated: "2026-08-10T20:58:38.621Z"
+status: Awaiting next milestone
+stopped_at: Phase 13 complete and verified (human UAT passed); milestone v2.0 100% complete, ready to archive
+last_updated: "2026-08-10T21:24:13.235Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 13 execution started
 progress:
   total_phases: 13
-  completed_phases: 13
+  completed_phases: 4
   total_plans: 11
   completed_plans: 11
-  percent: 100
+  percent: 31
+current_phase: 13
 current_phase_name: agent-skill-surface
 ---
 
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-08-10)
 
 ## Current Position
 
-Phase: 13
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-08-10 — Phase 13 complete
+Phase: Milestone v2.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-10 — Milestone v2.0 completed and archived
 
 ## Performance Metrics
 
@@ -152,6 +152,7 @@ None yet.
 ### Blockers/Concerns
 
 None open — all milestone v2.0 decisions resolved:
+
 - RESOLVED (Phase 13): skill execution target = Managed Agents env with `allow_package_managers`; git-URL install documented as authoritative until `[mcp]`/`[advisor]` extras ship on PyPI
 - RESOLVED (Phase 12): MCP transport = stdio only; HTTP/SSE deferred to a future milestone
 - RESOLVED (Phase 10/11): `anthropic` SDK version floor = `>=0.72.0` (`ADVISOR_ANTHROPIC_MIN_VERSION`)
@@ -162,9 +163,14 @@ None open — all milestone v2.0 decisions resolved:
 |----------|------|--------|-------------|
 | Accessibility | A11Y-01: Long-form `<title>`/`<desc>` + aria-labelledby for complex diagrams | v2 | Init |
 | Examples | EX2-01: Editorial consolidation (sonar-tsrvf vs phoneme-shape; Andrews-wine series) | v2 | Init |
+| context | Phase 12 12-CONTEXT.md: 3 research questions (MCP SDK/version, tool JSON-schema design, by-reference data passing) | resolved during Phase 12 execution (mcp 2.0.0 stdio, HandleRegistry, network-free tests); phase shipped verified | v2.0 close (2026-08-10) |
 
 ## Session Continuity
 
 Last session: 2026-08-10
 Stopped at: Phase 13 complete and verified (human UAT passed); milestone v2.0 100% complete, ready to archive
 Resume file: None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
