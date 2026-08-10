@@ -1,26 +1,20 @@
 ---
-status: testing
+status: complete
 phase: 13-agent-skill-surface
 source: [13-VERIFICATION.md]
 started: 2026-08-10T12:00:00Z
-updated: 2026-08-10T12:00:00Z
+updated: 2026-08-10T22:10:00Z
 ---
 
 ## Current Test
 
-number: 1
-name: Run the walkthrough with a valid ANTHROPIC_API_KEY set and inspect the printed output
-expected: |
-  advise() is called; interpretation + recommendations are printed with non-empty
-  evidence items citing fdars-computed diagnostics values (gcv, edf, etc.); the delta
-  block still appears after the advice section; script exits 0.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
 ### 1. Run the walkthrough with a valid ANTHROPIC_API_KEY set and inspect the printed output
 expected: advise() is called; interpretation + recommendations are printed with non-empty evidence items citing fdars-computed diagnostics values (gcv, edf, etc.); the delta block still appears after the advice section; script exits 0.
-result: [pending]
+result: pass
 
 notes: |
   How to run:
@@ -39,9 +33,9 @@ notes: |
 ## Summary
 
 total: 1
-passed: 0
+passed: 1
 issues: 0
-pending: 1
+pending: 0
 skipped: 0
 blocked: 0
 
