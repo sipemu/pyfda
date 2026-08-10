@@ -307,10 +307,19 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The skill's execution environment (how `fdars` is made available at run time) is documented clearly enough that the skill actually runs end-to-end
   3. A recorded/dry-run walkthrough shows the skill producing grounded advice and a before/after comparison against a real dataset
 
-**Plans**: TBD
+**Plans**: 2 plans
 **Notes**:
 
-  - OPEN DECISION (surfaced, not resolved here): skill execution target — Managed Agents env with `allow_package_managers` (recommended) vs bundled wheel vs Messages-API code-execution container (no internet). Decide when planning this phase.
+  - RESOLVED (Phase 13 planning): skill execution target = **Managed Agents env with `allow_package_managers`** (CONTEXT D3). At run time `fdars` is pip-installed; SKILL.md documents the **git-URL install** (`pip install "fdars @ git+https://github.com/sipemu/pyfda" mcp>=2.0.0 anthropic>=0.72.0 pydantic>=2.0`) as the authoritative path because the `[mcp]`/`[advisor]` extras are not yet on PyPI 0.2.0 (RESEARCH Pitfall 3), with `pip install "fdars[mcp,advisor]"` as the future path once 0.3.0 ships.
+  - Skill lives at `.claude/skills/fdars-advisor/` (dir name == frontmatter `name`); script calls `fdars.mcp` helpers directly (no stdio/async); the offline delta is the deterministic ground truth, `advise()` is env-gated on `ANTHROPIC_API_KEY`.
+
+**Wave 1**
+
+- [ ] 13-01-PLAN.md — TRACER: tests/test_skill.py scaffold + offline walkthrough script + first-cut SKILL.md, proven end-to-end (SKILL-01, SKILL-02)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 13-02-PLAN.md — env-gated advise() grounded-advice step + full SKILL.md body + name==dir/compatibility/py3.9 edge tests (SKILL-01, SKILL-02)
 
 ## Progress
 
@@ -331,4 +340,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 10. Advisor Core Primitive | 3/3 | Complete    | 2026-08-09 |
 | 11. Python API Surface | 3/3 | Complete    | 2026-08-09 |
 | 12. Tool / MCP Surface | 3/3 | Complete    | 2026-08-09 |
-| 13. Agent Skill Surface | 0/0 | Not started | - |
+| 13. Agent Skill Surface | 0/2 | Planned | - |
