@@ -3,41 +3,41 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Grounded AI analysis advisor
 current_phase: 13
-current_phase_name: agent-skill-surface
-status: verifying
+status: completed
 stopped_at: "Completed 13-02-PLAN.md — fdars-advisor skill expansion: walkthrough advise() step + SKILL.md body + expansion tests"
-last_updated: "2026-08-10T19:51:07.997Z"
+last_updated: "2026-08-10T20:58:38.621Z"
 last_activity: 2026-08-10
 last_activity_desc: Phase 13 execution started
 progress:
   total_phases: 13
-  completed_phases: 4
+  completed_phases: 13
   total_plans: 11
   completed_plans: 11
-  percent: 31
+  percent: 100
+current_phase_name: agent-skill-surface
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-07)
+See: .planning/PROJECT.md (updated 2026-08-10)
 
 **Core value:** Every recommendation cites fdars-computed diagnostics and states an expected effect; the LLM reasons over computed numbers and never fabricates them
-**Current focus:** Phase 13 — agent-skill-surface
+**Current focus:** Milestone v2.0 complete — ready to archive via `/gsd-complete-milestone v2.0`
 
 ## Current Position
 
-Phase: 13 (agent-skill-surface) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-08-10 — Phase 13 execution started
+Phase: 13
+Plan: Not started
+Status: All phases complete
+Last activity: 2026-08-10 — Phase 13 complete
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 25
+- Total plans completed: 27
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -57,6 +57,7 @@ Last activity: 2026-08-10 — Phase 13 execution started
 | 10 | 3 | - | - |
 | 11 | 3 | - | - |
 | 12 | 3 | - | - |
+| 13 | 2 | - | - |
 
 **Recent Trend:**
 
@@ -150,12 +151,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- OPEN DECISION (Phase 13): skill execution target — Managed Agents env with `allow_package_managers` (recommended) vs bundled wheel vs Messages-API code-execution container
-- OPEN DECISION (Phase 12): MCP transport — stdio (local) vs HTTP/SSE (hosted), or both
-- OPEN DECISION (Phase 10/11): `anthropic` SDK version floor — a current version supporting `messages.parse` + `claude-opus-4-8`
-
-- Research flag: regression/ and monitoring/ sweeps need method-semantic verification against `fdars-core` behavior before diagrams can be drawn correctly (β(t), conformal functional bands, SPM Phase I/II)
-- Research flag: smoke-test `pytest-markdown-docs` multi-block state on one narrative page in Phase 1 before committing to it as the CI pattern
+None open — all milestone v2.0 decisions resolved:
+- RESOLVED (Phase 13): skill execution target = Managed Agents env with `allow_package_managers`; git-URL install documented as authoritative until `[mcp]`/`[advisor]` extras ship on PyPI
+- RESOLVED (Phase 12): MCP transport = stdio only; HTTP/SSE deferred to a future milestone
+- RESOLVED (Phase 10/11): `anthropic` SDK version floor = `>=0.72.0` (`ADVISOR_ANTHROPIC_MIN_VERSION`)
 
 ## Deferred Items
 
@@ -166,6 +165,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-10T19:51:07.987Z
-Stopped at: Completed 13-02-PLAN.md — fdars-advisor skill expansion: walkthrough advise() step + SKILL.md body + expansion tests
+Last session: 2026-08-10
+Stopped at: Phase 13 complete and verified (human UAT passed); milestone v2.0 100% complete, ready to archive
 Resume file: None

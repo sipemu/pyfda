@@ -21,7 +21,7 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth:** `.planning/design/llm-cluster-narration.md`
 
-**Progress:** Phase 11 (Python API Surface) complete — the advisor is now a first-class part of the public `fdars` package: `fdars.advisor` is registered in `python/fdars/__init__.py` (import + `sys.modules` + `__all__`), the `[advisor]` optional-dependency extra (`anthropic>=0.72.0`, `pydantic>=2.0`) is declared in `pyproject.toml`, `tests/test_advisor.py` covers offline `build_diagnostics` against real datasets plus an env-gated `advise` integration test that skips cleanly without `ANTHROPIC_API_KEY`, and `examples/advisor_recipe.py` is a runnable end-to-end recipe that degrades gracefully offline. Suite: 104 passed, 1 skipped. Next: Phase 12 (Tool / MCP Surface) — coarse-grained tools + MCP server + agentic re-run/compare loop.
+**Progress:** 🎉 Milestone v2.0 complete — all four surfaces shipped. Phase 13 (Agent Skill Surface) closes the milestone: the interpret→recommend→re-run→compare workflow is now packaged as an Anthropic Agent Skill at `.claude/skills/fdars-advisor/` (spec-valid `SKILL.md` + offline walkthrough script + env-gated `advise()` step, 6 skill tests green). Human UAT (2026-08-10) confirmed the real-key LLM path produces grounded advice citing fdars-computed diagnostics. The advisor now spans Core (Phase 10), Python API (Phase 11), Tool/MCP (Phase 12), and Agent Skill (Phase 13). Next: `/gsd-complete-milestone v2.0` to archive.
 
 > The v1.0 Documentation Overhaul milestone shipped (Phases 1–9 complete). Its requirements below are retained as historical/validated context.
 
@@ -40,6 +40,7 @@ The documentation — diagrams first, examples second — must make functional d
 - ✓ Documentation tooling foundation — `STYLE_SPEC.md`, SVGO check-only lint gate in CI (idempotence, all 43 diagrams), build determinism (`svg.hashsalt` + `<dc:date>` suppression — verified byte-identical across builds for deterministic content), `pymdownx.snippets` dataset includes, `pytest-markdown-docs` doc-test harness (one-page CI gate), and the `DOCS_FAST` helper — Phase 1
 - ✓ Nav + reference-API audit — `02-AUDIT.md` maps all 42 method-section pages on style/accuracy axes (D-02 rollup), a full R-era grep report (4 leftovers, all in `spm.svg`), and a ranked GAP-0001..0011 / EX-0001..0008 list with a user Selection column gating Phase 3 — Phase 2
 - ✓ Tool / MCP surface (TOOL-01, TOOL-02, TOOL-03) — `fdars.mcp` subpackage (optional `[mcp]` extra, Python 3.10+): `HandleRegistry` (by-reference handles, fail-closed), `MCPServer("fdars-advisor")` exposing `fdars_build_diagnostics`, `fdars_run_method` (5-method dispatch), and `fdars_compare_run` (observable before/after delta) over a transport-agnostic handler layer with a stdio entry point; grounding invariant preserved (fdars does the numbers, no LLM in the compute path). Verified 4/4 must-haves, 111 tests pass — Phase 12
+- ✓ Agent Skill surface (SKILL-01, SKILL-02) — `.claude/skills/fdars-advisor/` packages the interpret→recommend→re-run→compare loop as an Anthropic Agent Skill: spec-valid `SKILL.md` (git-URL install documented as the authoritative execution environment) + an offline walkthrough script (Canadian Weather → smoothing → deterministic before/after delta) with an env-gated `advise()` grounded-advice step, driven by `tests/test_skill.py` (6 tests). Human UAT (2026-08-10) confirmed the LLM path produces grounded advice citing diagnostics values with a real key — Phase 13
 
 ### Active
 
@@ -110,4 +111,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-09 — Phase 12 (Tool / MCP Surface) complete*
+*Last updated: 2026-08-10 — Phase 13 (Agent Skill Surface) complete; milestone v2.0 100% complete*
