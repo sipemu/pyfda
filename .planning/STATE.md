@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Grounded AI analysis advisor
-status: Awaiting next milestone
-stopped_at: Phase 13 complete and verified (human UAT passed); milestone v2.0 100% complete, ready to archive
-last_updated: "2026-08-10T21:24:13.235Z"
-last_activity: 2026-08-10
-last_activity_desc: Phase 13 execution started
+milestone: v2.1
+milestone_name: Document the AI Advisor
+status: planning
+last_updated: "2026-08-10T22:16:52.472Z"
+last_activity: 2026-08-11
 progress:
-  total_phases: 13
-  completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
-  percent: 31
-current_phase: 13
-current_phase_name: agent-skill-surface
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-08-10)
 
 ## Current Position
 
-Phase: Milestone v2.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-10 — Milestone v2.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-08-11 — Milestone v2.1 started
 
 ## Performance Metrics
 

@@ -18,9 +18,19 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Next Milestone Goals
+## Current Milestone: v2.1 Document the AI Advisor
 
-_Not yet defined. Run `/gsd-new-milestone` to scope the next version (questioning → research → requirements → roadmap). Candidate directions carried forward from the deferred backlog: diagram accessibility (A11Y-01) and examples editorial consolidation (EX2-01); an HTTP/SSE MCP transport was explicitly deferred from v2.0._
+**Goal:** Give the published MkDocs site first-class, method-accurate coverage of the v2.0 grounded AI advisor — closing the gap where the feature shipped but its user-facing docs did not.
+
+**Target features:**
+- New top-level nav section for the advisor on the docs site.
+- Concept + grounding-invariant overview page (what it is, the fdars-computes / LLM-interprets guarantee, when to use it).
+- Python API page — `build_diagnostics` / `advise` / `describe_cluster_differences` with a runnable worked example.
+- Tool / MCP server page — tools, stdio setup, the re-run/compare loop.
+- Agent Skill page — install + the interpret→recommend→re-run→compare walkthrough.
+- New hand-authored inline SVG diagrams to STYLE_SPEC standard (e.g. grounding invariant, the advisor loop).
+
+**Key context:** Documentation-only milestone — no advisor code changes unless the docs expose a genuine bug. Must stay method-accurate against the shipped v2.0 code (`python/fdars/advisor.py`, `python/fdars/mcp/`, `.claude/skills/fdars-advisor/`) and use existing datasets in `docs/data/`. Deferred backlog carried forward: diagram accessibility (A11Y-01), examples editorial consolidation (EX2-01), HTTP/SSE MCP transport (deferred from v2.0).
 
 ## Requirements
 
@@ -56,9 +66,14 @@ _Not yet defined. Run `/gsd-new-milestone` to scope the next version (questionin
 
 ### Active
 
-<!-- Next milestone not yet scoped. Run /gsd-new-milestone to define requirements. -->
+<!-- v2.1 — Document the AI Advisor. Requirements defined in REQUIREMENTS.md, mapped to roadmap phases. -->
 
-_None active — v2.0 shipped. Next requirements defined via `/gsd-new-milestone`._
+- [ ] Advisor concept + grounding-invariant overview page on the docs site
+- [ ] Python API advisor page with a runnable worked example
+- [ ] Tool / MCP server page (tools, stdio setup, re-run/compare loop)
+- [ ] Agent Skill page (install + interpret→recommend→re-run→compare walkthrough)
+- [ ] New hand-authored inline SVG diagram(s) for the advisor, to STYLE_SPEC standard
+- [ ] New top-level "AI Advisor" nav section wired into `mkdocs.yml`
 
 ### Out of Scope
 
@@ -114,4 +129,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-10 after v2.0 milestone (Grounded AI analysis advisor — Phases 10–13 shipped)*
+*Last updated: 2026-08-11 after starting milestone v2.1 (Document the AI Advisor)*
