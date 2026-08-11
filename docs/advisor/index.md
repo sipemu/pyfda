@@ -53,7 +53,7 @@ produce the offline diagnostics report, then call `advise` (or
 `interpretation`, `recommendations`, and `caveats`. The Python API returns
 `Advice` and stops — it does not re-run fdars or compute a before/after delta.
 
-See [Python API](python-api.md) for worked examples. *(coming soon — Phase 15)*
+See [Python API](python-api.md) for worked examples.
 
 ### MCP Server
 
@@ -70,7 +70,7 @@ The MCP server exposes the advisor as three composable tools over stdio:
 The MCP surface supports the full agentic loop: interpret → recommend → re-run →
 compare → interpret again.
 
-See [MCP Server](mcp.md) for the tool reference. *(coming soon — Phase 16)*
+See [MCP Server](mcp.md) for the tool reference.
 
 ### Agent Skill
 
@@ -79,7 +79,7 @@ re-run → compare walkthrough as a reusable Claude skill. It orchestrates the M
 tools automatically and produces a before/after delta block alongside the grounded
 recommendations. Install via git URL until the `[mcp,advisor]` extras ship to PyPI.
 
-See [Agent Skill](agent-skill.md) for the walkthrough. *(coming soon — Phase 17)*
+See [Agent Skill](agent-skill.md) for the walkthrough.
 
 ## When to Use the Advisor
 

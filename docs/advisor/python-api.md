@@ -178,8 +178,7 @@ recommended parameters or compute a before/after delta of diagnostic values —
 that is the MCP server and Agent Skill surface.
 
 For the full interpret → recommend → re-run → compare agentic loop, see
-[MCP Server](mcp.md) *(coming in Phase 16)* and [Agent Skill](agent-skill.md)
-*(coming in Phase 17)*.
+[MCP Server](mcp.md) and [Agent Skill](agent-skill.md).
 
 ---
 

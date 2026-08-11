@@ -14,7 +14,7 @@ parameters and observe a deterministic, fdars-computed before/after delta —
 without any fabricated numbers ever crossing the tool boundary.
 
 See the [overview](index.md) for the grounding invariant and the three-surface
-architecture. The [Agent Skill](agent-skill.md) page *(coming in Phase 17)*
+architecture. The [Agent Skill](agent-skill.md) page
 documents the packaged skill that orchestrates these tools automatically.
 
 ---
@@ -335,4 +335,4 @@ the full **interpret → recommend → re-run → compare** loop described in th
 
 - [Python API](python-api.md) — the recommend-only surface (`build_diagnostics` + `advise`)
 - [Overview](index.md) — grounding invariant and three-surface architecture
-- [Agent Skill](agent-skill.md) — *(coming in Phase 17)* — the packaged skill that orchestrates these tools automatically
+- [Agent Skill](agent-skill.md) — the packaged skill that orchestrates these tools automatically
