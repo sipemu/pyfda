@@ -40,8 +40,8 @@ in `docs/data/`.
 
 ### Nav & Build Integration
 
-- [ ] **NAVDOC-01**: New top-level "AI Advisor" section wired into `mkdocs.yml` nav, containing the pages above
-- [ ] **NAVDOC-02**: All new pages build cleanly and every executable code fence runs against the current API in the docs build
+- [x] **NAVDOC-01**: New top-level "AI Advisor" section wired into `mkdocs.yml` nav, containing the pages above
+- [x] **NAVDOC-02**: All new pages build cleanly and every executable code fence runs against the current API in the docs build
 
 ## v2 Requirements
 
@@ -90,8 +90,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MCPDOC-03 | Phase 16 | Complete |
 | SKILLDOC-01 | Phase 17 | Complete |
 | SKILLDOC-02 | Phase 17 | Complete |
-| NAVDOC-01 | Phase 18 | Pending |
-| NAVDOC-02 | Phase 18 | Pending |
+| NAVDOC-01 | Phase 18 | Complete |
+| NAVDOC-02 | Phase 18 | Complete |
 
 **Coverage:**
 
