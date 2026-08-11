@@ -154,19 +154,19 @@ the system prompt.
 
 | Field | Type |
 |---|---|
-| `action` | `str` |
-| `kind` | `Literal["parameter", "method", "none"]` |
-| `rationale` | `str` |
-| `expected_effect` | `str` |
-| `evidence` | `list[str]` |
+| action | str |
+| kind | Literal["parameter", "method", "none"] |
+| rationale | str |
+| expected_effect | str |
+| evidence | list[str] |
 
 ### `Advice`
 
 | Field | Type |
 |---|---|
-| `interpretation` | `str` |
-| `recommendations` | `list[Recommendation]` |
-| `caveats` | `list[str]` |
+| interpretation | str |
+| recommendations | list[Recommendation] |
+| caveats | list[str] |
 
 ---
 
