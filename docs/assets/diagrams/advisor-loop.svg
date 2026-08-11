@@ -60,16 +60,14 @@
 
   <!-- Python API exit box (below recommend) -->
   <rect x="624" y="88" width="80" height="64" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
-  <text class="lab" x="664" y="110" text-anchor="middle" fill="#495057">Python API</text>
-  <text class="sm" x="664" y="126" text-anchor="middle">recommend-only</text>
-  <text class="sm" x="664" y="140" text-anchor="middle">stops after</text>
-  <text class="mono" x="664" y="145" text-anchor="middle" fill="#1a1a2e"> </text>
+  <text class="lab" x="664" y="112" text-anchor="middle" fill="#495057">Python API</text>
+  <text class="sm" x="664" y="128" text-anchor="middle">recommend-only</text>
 
   <!-- Arrow from recommend node to Python API exit box (exits loop, goes right) -->
   <path d="M230 96 Q230 68 510 68 Q624 68 624 120" stroke="#6c757d" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#arrgrey)"/>
 
   <!-- Python API Advice label inside exit box -->
-  <text class="mono" x="664" y="142" text-anchor="middle" fill="#1a1a2e">Advice</text>
+  <text class="mono" x="664" y="144" text-anchor="middle" fill="#1a1a2e">Advice</text>
 
   <!-- Python API annotation label outside box -->
   <text class="sm" x="664" y="170" text-anchor="middle" fill="#6c757d">returns Advice,</text>
