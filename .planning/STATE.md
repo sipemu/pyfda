@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Document the AI Advisor
-current_phase: 16
-current_phase_name: tool-mcp-server-page
-status: verifying
+current_phase: 17
+current_phase_name: Agent Skill Page
+status: planning
 stopped_at: Phase 16 Plan 01 complete (Tasks 1-2 done; docs build succeeded; Task 3 human-verify checkpoint pending)
-last_updated: "2026-08-11T18:50:35.392Z"
+last_updated: "2026-08-11T18:52:18.329Z"
 last_activity: 2026-08-11
 last_activity_desc: Phase 14 execution started
 progress:
@@ -28,16 +28,16 @@ See: .planning/PROJECT.md (updated 2026-08-11)
 
 ## Current Position
 
-Phase: 16 (tool-mcp-server-page) — EXECUTING
-Plan: 1 of 1
-Status: Phase complete — ready for verification
-Last activity: 2026-08-11 — Phase 16 execution started
+Phase: 17 — Agent Skill Page
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-11 — Phase 16 complete, transitioned to Phase 17
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 29
+- Total plans completed: 30
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -60,6 +60,7 @@ Last activity: 2026-08-11 — Phase 16 execution started
 | 13 | 2 | - | - |
 | 14 | 1 | - | - |
 | 15 | 1 | - | - |
+| 16 | 1 | - | - |
 
 **Recent Trend:**
 

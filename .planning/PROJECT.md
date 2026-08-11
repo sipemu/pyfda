@@ -71,7 +71,7 @@ The documentation — diagrams first, examples second — must make functional d
 - [x] Advisor concept + grounding-invariant overview page on the docs site — Phase 14 (CONCEPT-01/02/03)
 - [x] New hand-authored inline SVG diagram(s) for the advisor, to STYLE_SPEC standard — Phase 14 (ADVDIA-01/02: grounding-invariant + advisor-loop)
 - [x] Python API advisor page with a runnable worked example — Phase 15 (PYDOC-01/02/03)
-- [ ] Tool / MCP server page (tools, stdio setup, re-run/compare loop)
+- [x] Tool / MCP server page (tools, stdio setup, re-run/compare loop) — Phase 16 (MCPDOC-01/02/03)
 - [ ] Agent Skill page (install + interpret→recommend→re-run→compare walkthrough)
 - [ ] New top-level "AI Advisor" nav section wired into `mkdocs.yml`
 
@@ -129,4 +129,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-11 after Phase 15 (Python API Page — recommend-only surface + offline worked example shipped)*
+*Last updated: 2026-08-11 after Phase 16 (Tool / MCP Server Page — 3 tools, handle model, stdio, compare loop shipped)*

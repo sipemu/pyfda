@@ -24,9 +24,9 @@ in `docs/data/`.
 
 ### Tool / MCP Server
 
-- [ ] **MCPDOC-01**: Reader can follow an MCP server page listing the three tools (`fdars_build_diagnostics`, `fdars_run_method`, `fdars_compare_run`) and their roles
-- [ ] **MCPDOC-02**: Page documents stdio setup (`run_stdio`) and the by-reference handle model (arrays stay in the registry)
-- [ ] **MCPDOC-03**: Page walks the agentic re-run / compare before-after loop with a concrete example
+- [x] **MCPDOC-01**: Reader can follow an MCP server page listing the three tools (`fdars_build_diagnostics`, `fdars_run_method`, `fdars_compare_run`) and their roles
+- [x] **MCPDOC-02**: Page documents stdio setup (`run_stdio`) and the by-reference handle model (arrays stay in the registry)
+- [x] **MCPDOC-03**: Page walks the agentic re-run / compare before-after loop with a concrete example
 
 ### Agent Skill
 
@@ -85,9 +85,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PYDOC-01 | Phase 15 | Complete |
 | PYDOC-02 | Phase 15 | Complete |
 | PYDOC-03 | Phase 15 | Complete |
-| MCPDOC-01 | Phase 16 | Pending |
-| MCPDOC-02 | Phase 16 | Pending |
-| MCPDOC-03 | Phase 16 | Pending |
+| MCPDOC-01 | Phase 16 | Complete |
+| MCPDOC-02 | Phase 16 | Complete |
+| MCPDOC-03 | Phase 16 | Complete |
 | SKILLDOC-01 | Phase 17 | Pending |
 | SKILLDOC-02 | Phase 17 | Pending |
 | NAVDOC-01 | Phase 18 | Pending |

@@ -43,7 +43,7 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
 
 - [x] **Phase 14: Advisor Concept & Diagrams** - Overview page (what it is, three surfaces, when to use, grounding invariant, install extras) plus both new inline SVG diagrams (completed 2026-08-11)
 - [x] **Phase 15: Python API Page** - `build_diagnostics` / `advise` / `describe_cluster_differences` with a runnable offline worked example and the `Advice` schema (completed 2026-08-11)
-- [ ] **Phase 16: Tool / MCP Server Page** - the three tools, stdio setup, by-reference handle model, and the re-run/compare before-after loop
+- [x] **Phase 16: Tool / MCP Server Page** - the three tools, stdio setup, by-reference handle model, and the re-run/compare before-after loop (completed 2026-08-11)
 - [ ] **Phase 17: Agent Skill Page** - git-URL install, the interpret→recommend→re-run→compare walkthrough, and execution-environment requirements
 - [ ] **Phase 18: Nav & Build Integration** - wire the "AI Advisor" section into `mkdocs.yml` and verify the whole section builds cleanly with all fences executing
 
@@ -98,7 +98,7 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
 
 **Plans**: 1 plan
 
-- [ ] 16-01-PLAN.md — MCP page: three-tool reference + by-reference HandleRegistry model + stdio (run_stdio) setup + concrete re-run/compare before/after loop (illustrative, non-executed fences)
+- [x] 16-01-PLAN.md — MCP page: three-tool reference + by-reference HandleRegistry model + stdio (run_stdio) setup + concrete re-run/compare before/after loop (illustrative, non-executed fences)
 
 ### Phase 17: Agent Skill Page
 
@@ -133,7 +133,7 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
 |-------|----------------|--------|-----------|
 | 14. Advisor Concept & Diagrams | 1/1 | Complete    | 2026-08-11 |
 | 15. Python API Page | 1/1 | Complete    | 2026-08-11 |
-| 16. Tool / MCP Server Page | 0/? | Not started | - |
+| 16. Tool / MCP Server Page | 1/1 | Complete    | 2026-08-11 |
 | 17. Agent Skill Page | 0/? | Not started | - |
 | 18. Nav & Build Integration | 0/? | Not started | - |
 
