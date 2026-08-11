@@ -101,11 +101,17 @@ from fdars.mcp._runner import run_method
 before_result = run_method(dataset_id, "smoothing", n_basis=15)
 before_result_id = registry.store_result(before_result)
 # before_result_id is e.g. "r-a1b2c3d4"
+
+# The raw result dict includes scalar GCV and EDF values:
+print(f"GCV (before): {before_result.get('gcv', 'n/a'):.6f}")
+print(f"EDF (before): {before_result.get('edf', 'n/a'):.4f}")
 ```
 
 `run_method` maps `"smoothing"` to `fdars.basis.pspline_fit_gcv` and stores the raw result
-(fitted curves, EDF, GCV value, AIC, BIC) in the registry. Only the opaque handle crosses
-the tool boundary — arrays stay in-process.
+(fitted curves, GCV value, EDF, AIC, BIC) in the registry. Only the opaque handle crosses
+the tool boundary — arrays stay in-process. The scalar `gcv` and `edf` keys from `before_result`
+are the inputs `build_diagnostics` uses to compute the `gcv_aic_approx`, `gcv_bic_approx`,
+`optimal_gcv`, and `optimal_edf` diagnostic keys in Step 3.
 
 ### Step 3 — Build offline diagnostics
 
