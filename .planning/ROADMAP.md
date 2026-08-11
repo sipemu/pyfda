@@ -111,7 +111,9 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
   2. The page documents the skill's execution-environment / compatibility requirements (Python 3.10+, package-manager access)
   3. The page builds cleanly and any executable code fence runs against the current API
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 17-01-PLAN.md — Agent Skill page: git-URL + future install, Python 3.10+/API-key compatibility, and the interpret→recommend→re-run→compare walkthrough (illustrative, non-executed fences)
 
 ### Phase 18: Nav & Build Integration
 
@@ -134,7 +136,7 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
 | 14. Advisor Concept & Diagrams | 1/1 | Complete    | 2026-08-11 |
 | 15. Python API Page | 1/1 | Complete    | 2026-08-11 |
 | 16. Tool / MCP Server Page | 1/1 | Complete    | 2026-08-11 |
-| 17. Agent Skill Page | 0/? | Not started | - |
+| 17. Agent Skill Page | 0/1 | Not started | - |
 | 18. Nav & Build Integration | 0/? | Not started | - |
 
 ---
