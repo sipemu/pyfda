@@ -19,9 +19,21 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Next Milestone Goals
+## Current Milestone: v3.0 Provider-Agnostic Advisor, Full-Library Coverage
 
-_v2.1 shipped 2026-08-11 (Document the AI Advisor — Phases 14–18). Not yet scoped. Run `/gsd-new-milestone` to define the next version. Candidate directions carried forward from the deferred backlog: diagram accessibility (A11Y-01), examples editorial consolidation (EX2-01), and an HTTP/SSE MCP transport (deferred from v2.0)._
+**Goal:** Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-compatible, Google Gemini, and local models via Ollama) through a custom `Provider` protocol, and give every fdars analysis aspect its own advisor (diagnostics + grounded task families) like clustering has today — with the grounding invariant preserved on every backend.
+
+**Target features:**
+- Custom `Provider` protocol + per-backend adapters: `anthropic` (keep first-class), `openai` (+ `base_url` for OpenAI-compatible: vLLM/LM Studio/LocalAI), `gemini`, `ollama` (local, no API key).
+- Provider selection & config: choose provider+model via params/env, key handling, `base_url` for local/compatible endpoints, offline-capable local path.
+- Grounding across providers: native structured outputs/tool-use where available (Anthropic, OpenAI); JSON-schema validate-and-retry/repair fallback for weaker/local models. fdars still computes every number; the LLM only interprets and cites.
+- Refactor existing advisors (clustering, smoothing, FPCA, alignment, basis) onto the provider layer.
+- New per-aspect advisors — `build_diagnostics` + grounded task families — for represent/basis, smoothing, alignment, depth/outliers, classification, regression/FPCA, and monitoring/SPM (control charts, tolerance, conformal, seasonal).
+- Surface updates: extend the Tool/MCP server + Agent Skill to expose new aspect advisors and provider selection.
+- Packaging: per-provider optional extras (`[openai]`, `[gemini]`, `[ollama]`) alongside `[advisor]`.
+- Tests & docs: offline determinism per aspect, adapter tests with mocks, env-gated live integration; update the AI Advisor docs section (provider setup + per-aspect pages).
+
+**Key context:** Crosses from docs into feature/code + packaging + CI work (`python/fdars/advisor`, `python/fdars/mcp`, `pyproject.toml` extras). Custom protocol only — no LiteLLM/pydantic-ai dependency. The grounding invariant is the hard constraint on every provider, including offline local. Large scope: all aspects in one milestone — the roadmap phases them.
 
 ## Requirements
 
@@ -64,9 +76,9 @@ _v2.1 shipped 2026-08-11 (Document the AI Advisor — Phases 14–18). Not yet s
 
 ### Active
 
-<!-- v2.1 shipped. Next milestone not yet scoped. Run /gsd-new-milestone to define requirements. -->
+<!-- v3.0 in progress — provider-agnostic advisor + full-library advisor coverage. Requirements defined in REQUIREMENTS.md. -->
 
-_None active — v2.1 shipped. Next requirements defined via `/gsd-new-milestone`._
+_v3.0 in progress — see `## Current Milestone: v3.0` above and `REQUIREMENTS.md` for scoped REQ-IDs (provider abstraction, grounding-across-providers, per-aspect advisors, surface/packaging/docs updates)._
 
 ### Out of Scope
 
@@ -125,4 +137,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-11 after v2.1 milestone (Document the AI Advisor — Phases 14–18 shipped, 15/15 requirements)*
+*Last updated: 2026-08-12 — started v3.0 milestone (Provider-Agnostic Advisor, Full-Library Coverage)*
