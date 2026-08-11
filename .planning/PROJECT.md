@@ -73,7 +73,7 @@ The documentation — diagrams first, examples second — must make functional d
 - [x] Python API advisor page with a runnable worked example — Phase 15 (PYDOC-01/02/03)
 - [x] Tool / MCP server page (tools, stdio setup, re-run/compare loop) — Phase 16 (MCPDOC-01/02/03)
 - [x] Agent Skill page (install + interpret→recommend→re-run→compare walkthrough) — Phase 17 (SKILLDOC-01/02)
-- [ ] New top-level "AI Advisor" nav section wired into `mkdocs.yml`
+- [x] New top-level "AI Advisor" nav section wired into `mkdocs.yml` — Phase 18 (NAVDOC-01/02; full --strict build green)
 
 ### Out of Scope
 
@@ -129,4 +129,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-11 after Phase 17 (Agent Skill Page — git-URL install + interpret→recommend→re-run→compare walkthrough shipped)*
+*Last updated: 2026-08-11 after Phase 18 (Nav & Build Integration — AI Advisor section wired into nav; milestone v2.1 complete, 15/15 requirements)*

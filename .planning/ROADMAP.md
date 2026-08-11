@@ -45,7 +45,7 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
 - [x] **Phase 15: Python API Page** - `build_diagnostics` / `advise` / `describe_cluster_differences` with a runnable offline worked example and the `Advice` schema (completed 2026-08-11)
 - [x] **Phase 16: Tool / MCP Server Page** - the three tools, stdio setup, by-reference handle model, and the re-run/compare before-after loop (completed 2026-08-11)
 - [x] **Phase 17: Agent Skill Page** - git-URL install, the interpret→recommend→re-run→compare walkthrough, and execution-environment requirements (completed 2026-08-11)
-- [ ] **Phase 18: Nav & Build Integration** - wire the "AI Advisor" section into `mkdocs.yml` and verify the whole section builds cleanly with all fences executing
+- [x] **Phase 18: Nav & Build Integration** - wire the "AI Advisor" section into `mkdocs.yml` and verify the whole section builds cleanly with all fences executing (completed 2026-08-11)
 
 ## Phase Details
 
@@ -128,7 +128,7 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
 
 **Plans**: 1 plan
 
-- [ ] 18-01-PLAN.md — Wire the "AI Advisor" nav section into mkdocs.yml (after Analyze, before Examples) and run the full-build gate (build exit 0, four pages rendered, FDARS_FENCE_OK fence executes, both advisor SVGs SVGO-idempotent, no broken internal links)
+- [x] 18-01-PLAN.md — Wire the "AI Advisor" nav section into mkdocs.yml (after Analyze, before Examples) and run the full-build gate (build exit 0, four pages rendered, FDARS_FENCE_OK fence executes, both advisor SVGs SVGO-idempotent, no broken internal links)
 
 **UI hint**: yes
 
@@ -140,7 +140,7 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
 | 15. Python API Page | 1/1 | Complete    | 2026-08-11 |
 | 16. Tool / MCP Server Page | 1/1 | Complete    | 2026-08-11 |
 | 17. Agent Skill Page | 1/1 | Complete    | 2026-08-11 |
-| 18. Nav & Build Integration | 0/1 | Not started | - |
+| 18. Nav & Build Integration | 1/1 | Complete    | 2026-08-11 |
 
 ---
 
