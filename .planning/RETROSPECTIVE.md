@@ -39,6 +39,40 @@
 
 ---
 
+## Milestone: v2.1 — Document the AI Advisor
+
+**Shipped:** 2026-08-11
+**Phases:** 5 (14–18) | **Plans:** 5 | **Tasks:** ~16 | **Commits:** 37
+
+### What Was Built
+A new top-level "AI Advisor" docs-site section documenting the shipped v2.0 advisor: a concept/grounding-invariant overview with two hand-authored inline SVG diagrams (grounding invariant, advisor loop), per-surface pages (Python API with an offline worked example that executes in the docs build; Tool/MCP with the 3 tools + by-reference handle model + re-run/compare loop; Agent Skill with git-URL install + walkthrough), all wired into `mkdocs.yml` nav and passing a `mkdocs build --strict` gate.
+
+### What Worked
+- **Run entirely autonomously via `/gsd-autonomous`** — full discuss→plan→plan-check→execute→verify→transition per phase, then audit→complete→cleanup, with the orchestrator self-serving the per-page human-review gates (reading the built page + source, rendering diagrams) rather than pausing.
+- **Source-of-truth grounding** — every page planned/executed with `read_first` pointed at `advisor.py`/`mcp/server.py`/`SKILL.md`; the plan-checker caught a weak "text-present ≠ executed" verify on Phase 15 and forced an execution-sentinel (`FDARS_FENCE_OK`) gate.
+- **Pre-scouting the next phase while a background agent ran** kept the pipeline moving with no idle wall-clock.
+- **Offline-build discipline** — only the Python API page carries an executed fence; MCP/Skill fences are illustrative, so the build never needs the `[mcp]`/`[advisor]` extras, Python 3.10+, or an API key.
+
+### What Was Inefficient
+- The full markdown-exec build is slow (~7 min), so build-based verifies dominated phase wall-clock and repeatedly exceeded a 2-minute shell timeout (had to background them).
+- Sibling pages forward-linked not-yet-authored pages with "coming in Phase N" annotations; those went stale once all pages existed — caught only by the milestone integration checker, then fixed inline (7 edits).
+
+### Patterns Established
+- **Execution-sentinel doc-test:** prove a docs fence actually executed by printing a unique marker and grepping the *built HTML*, not the source.
+- **Illustrative-vs-executed fence split** to keep an optional-dependency feature documented without making the build depend on it.
+- **Orchestrator-self-served review gates** for autonomous doc runs: automated accuracy greps + rendered-diagram inspection + source spot-checks stand in for the human gate, fixing defects inline.
+
+### Key Lessons
+- A diagram label-overlap (advisor-loop Python-API box) and 7 stale cross-refs both slipped past automated gates but were caught by visual/integration review — objective build gates don't replace a semantic once-over.
+- The `--strict` build validates links but not stale "coming soon" prose; a dedicated integration pass is worth it at milestone close.
+
+### Cost Observations
+- Model mix: planners/roadmapper opus; executors/verifier/integration sonnet; plan-checkers haiku.
+- Sessions: 1 (single autonomous run).
+- Notable: background subagents + next-phase pre-scouting overlapped planning with execution, so orchestrator context stayed lean across all 5 phases.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -47,6 +81,7 @@
 |-----------|----------|--------|------------|
 | v1.0 — Documentation Overhaul | ~2 | 1–9 | Section-by-section sweeps with per-section review gates; style/determinism/doc-test guardrails established first |
 | v2.0 — Grounded AI analysis advisor | ~2 | 10–13 | Tracer-first per phase; one deterministic core fanned out to four surfaces; offline-by-default + env-gated LLM tests |
+| v2.1 — Document the AI Advisor | 1 | 14–18 | Fully autonomous run (discuss→…→cleanup); orchestrator self-served per-page review gates; execution-sentinel doc-tests; illustrative-vs-executed fence split |
 
 ### Cumulative Quality
 
