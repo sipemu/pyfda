@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Document the AI Advisor
 current_phase: 17
-current_phase_name: Agent Skill Page
-status: planning
-stopped_at: Phase 16 Plan 01 complete (Tasks 1-2 done; docs build succeeded; Task 3 human-verify checkpoint pending)
-last_updated: "2026-08-11T18:52:18.329Z"
+current_phase_name: agent-skill-page
+status: verifying
+stopped_at: "Completed 17-01-PLAN.md (at checkpoint:human-verify Task 3)"
+last_updated: "2026-08-11T19:09:32.649Z"
 last_activity: 2026-08-11
 last_activity_desc: Phase 14 execution started
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
-  percent: 60
+  completed_phases: 4
+  total_plans: 4
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-11)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method does, every example runs against the current API
-**Current focus:** Phase 16 — tool-mcp-server-page
+**Current focus:** Phase 17 — agent-skill-page
 
 ## Current Position
 
-Phase: 17 — Agent Skill Page
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-11 — Phase 16 complete, transitioned to Phase 17
+Phase: 17 (agent-skill-page) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-08-11 — Phase 17 execution started
 
 ## Performance Metrics
 
@@ -93,6 +93,7 @@ Last activity: 2026-08-11 — Phase 16 complete, transitioned to Phase 17
 | Phase 14 P01 | 4min | 4 tasks | 3 files |
 | Phase 15 P01 | 13min | 2 tasks | 1 files |
 | Phase 16 P01 | 8min | 2 tasks | 1 files |
+| Phase 17-agent-skill-page P01 | 8m | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Schema table rows use plain text field names (no backtick wrapping) to match exec grep patterns in acceptance criteria
 - [Phase ?]: MCP fences illustrative-only (no exec="1"): docs build does not require [mcp] extra or Python 3.10+
 - [Phase ?]: Page written as complete document in tracer task — both Task 1 (skeleton+tools) and Task 2 (handle model, stdio, compare loop) content in single authoring pass
+- [Phase ?]: Wrote agent-skill.md with verbatim git-URL install from SKILL.md, 5-step walkthrough mirroring fdars_advisor_walkthrough.py, and zero exec= fences — docs build passes without Python 3.10+, extras, or API key
 
 ### Pending Todos
 
@@ -138,8 +140,8 @@ None open.
 
 ## Session Continuity
 
-Last session: 2026-08-11T18:50:35.381Z
-Stopped at: Phase 16 Plan 01 complete (Tasks 1-2 done; docs build succeeded; Task 3 human-verify checkpoint pending)
+Last session: 2026-08-11T19:09:32.450Z
+Stopped at: Completed 17-01-PLAN.md (at checkpoint:human-verify Task 3)
 Resume file: None
 
 ## Operator Next Steps

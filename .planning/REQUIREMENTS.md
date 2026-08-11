@@ -30,8 +30,8 @@ in `docs/data/`.
 
 ### Agent Skill
 
-- [ ] **SKILLDOC-01**: Reader can follow an Agent Skill page covering git-URL install and the interpret→recommend→re-run→compare walkthrough
-- [ ] **SKILLDOC-02**: Page documents the skill's execution environment / compatibility requirements (Python 3.10+, package-manager access)
+- [x] **SKILLDOC-01**: Reader can follow an Agent Skill page covering git-URL install and the interpret→recommend→re-run→compare walkthrough
+- [x] **SKILLDOC-02**: Page documents the skill's execution environment / compatibility requirements (Python 3.10+, package-manager access)
 
 ### Diagrams
 
@@ -88,8 +88,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MCPDOC-01 | Phase 16 | Complete |
 | MCPDOC-02 | Phase 16 | Complete |
 | MCPDOC-03 | Phase 16 | Complete |
-| SKILLDOC-01 | Phase 17 | Pending |
-| SKILLDOC-02 | Phase 17 | Pending |
+| SKILLDOC-01 | Phase 17 | Complete |
+| SKILLDOC-02 | Phase 17 | Complete |
 | NAVDOC-01 | Phase 18 | Pending |
 | NAVDOC-02 | Phase 18 | Pending |
 
