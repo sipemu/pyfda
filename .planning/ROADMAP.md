@@ -96,7 +96,9 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
   3. The page walks the agentic re-run / compare before-after loop with a concrete example matching the shipped `_runner.py` / `_compare.py` behavior
   4. The page builds cleanly and any executable code fence runs against the current API
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 16-01-PLAN.md — MCP page: three-tool reference + by-reference HandleRegistry model + stdio (run_stdio) setup + concrete re-run/compare before/after loop (illustrative, non-executed fences)
 
 ### Phase 17: Agent Skill Page
 
