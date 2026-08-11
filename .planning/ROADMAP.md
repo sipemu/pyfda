@@ -80,7 +80,9 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
   3. The page documents the recommend-only nature and the `Advice` schema fields (`action` / `kind` / `rationale` / `expected_effect` / `evidence`)
   4. The page builds cleanly and every executable code fence runs against the current API
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 15-01-PLAN.md — Python API page: offline `build_diagnostics` worked example + `advise`/`describe_cluster_differences` reference + `Advice`/`Recommendation` schema tables
 
 ### Phase 16: Tool / MCP Server Page
 
@@ -128,7 +130,7 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 14. Advisor Concept & Diagrams | 1/1 | Complete    | 2026-08-11 |
-| 15. Python API Page | 0/? | Not started | - |
+| 15. Python API Page | 0/1 | Planned | - |
 | 16. Tool / MCP Server Page | 0/? | Not started | - |
 | 17. Agent Skill Page | 0/? | Not started | - |
 | 18. Nav & Build Integration | 0/? | Not started | - |
