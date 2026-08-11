@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Document the AI Advisor
 current_phase: 15
-current_phase_name: Python API Page
-status: planning
-stopped_at: Phase 14 Plan 01 complete (Tasks 1-4 done; Task 5 human-verify checkpoint pending)
-last_updated: "2026-08-11T18:03:53.532Z"
+current_phase_name: python-api-page
+status: executing
+stopped_at: Phase 15 Plan 01 complete (Tasks 1-2 done; Task 3 human-verify checkpoint pending)
+last_updated: "2026-08-11T18:33:58.809Z"
 last_activity: 2026-08-11
 last_activity_desc: Phase 14 execution started
 progress:
   total_phases: 5
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
-  percent: 20
+  completed_phases: 2
+  total_plans: 2
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-11)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method does, every example runs against the current API
-**Current focus:** Phase 14 — advisor-concept-diagrams
+**Current focus:** Phase 15 — python-api-page
 
 ## Current Position
 
-Phase: 15 — Python API Page
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-11 — Phase 14 complete, transitioned to Phase 15
+Phase: 15 (python-api-page) — EXECUTING
+Plan: 1 of 1
+Status: Executing Phase 15
+Last activity: 2026-08-11 — Phase 15 execution started
 
 ## Performance Metrics
 
@@ -89,6 +89,7 @@ Last activity: 2026-08-11 — Phase 14 complete, transitioned to Phase 15
 | Phase 13 P01 | 4min | 3 tasks | 3 files |
 | Phase 13 P02 | 2min | 3 tasks | 0 files |
 | Phase 14 P01 | 4min | 4 tasks | 3 files |
+| Phase 15 P01 | 13min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,7 @@ Recent decisions affecting current work:
 - [v2.0]: skill execution target = Managed Agents env; git-URL install documented as authoritative until `[mcp]`/`[advisor]` extras ship on PyPI
 - [Phase ?]: Two-lane metaphor for grounding-invariant diagram (fdars computes / LLM cites) with explicit cites arrow into Advice.evidence
 - [Phase ?]: Overview page stays conceptual/diagram-led; no runnable code fence; first worked example deferred to Phase 15
+- [Phase ?]: Schema table rows use plain text field names (no backtick wrapping) to match exec grep patterns in acceptance criteria
 
 ### Pending Todos
 
@@ -131,8 +133,8 @@ None open.
 
 ## Session Continuity
 
-Last session: 2026-08-11T17:56:12.215Z
-Stopped at: Phase 14 Plan 01 complete (Tasks 1-4 done; Task 5 human-verify checkpoint pending)
+Last session: 2026-08-11T18:33:58.801Z
+Stopped at: Phase 15 Plan 01 complete (Tasks 1-2 done; Task 3 human-verify checkpoint pending)
 Resume file: None
 
 ## Operator Next Steps

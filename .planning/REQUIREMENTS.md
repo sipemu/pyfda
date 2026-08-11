@@ -18,9 +18,9 @@ in `docs/data/`.
 
 ### Python API
 
-- [ ] **PYDOC-01**: Reader can follow a Python API page covering `build_diagnostics`, `advise`, and `describe_cluster_differences` (signatures, arguments, returns)
-- [ ] **PYDOC-02**: Page includes a worked example that runs in the docs build — offline `build_diagnostics` against a `docs/data/` dataset
-- [ ] **PYDOC-03**: Page documents the recommend-only nature and the `Advice` schema fields (`action` / `kind` / `rationale` / `expected_effect` / `evidence`)
+- [x] **PYDOC-01**: Reader can follow a Python API page covering `build_diagnostics`, `advise`, and `describe_cluster_differences` (signatures, arguments, returns)
+- [x] **PYDOC-02**: Page includes a worked example that runs in the docs build — offline `build_diagnostics` against a `docs/data/` dataset
+- [x] **PYDOC-03**: Page documents the recommend-only nature and the `Advice` schema fields (`action` / `kind` / `rationale` / `expected_effect` / `evidence`)
 
 ### Tool / MCP Server
 
@@ -82,9 +82,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONCEPT-03 | Phase 14 | Complete |
 | ADVDIA-01 | Phase 14 | Complete |
 | ADVDIA-02 | Phase 14 | Complete |
-| PYDOC-01 | Phase 15 | Pending |
-| PYDOC-02 | Phase 15 | Pending |
-| PYDOC-03 | Phase 15 | Pending |
+| PYDOC-01 | Phase 15 | Complete |
+| PYDOC-02 | Phase 15 | Complete |
+| PYDOC-03 | Phase 15 | Complete |
 | MCPDOC-01 | Phase 16 | Pending |
 | MCPDOC-02 | Phase 16 | Pending |
 | MCPDOC-03 | Phase 16 | Pending |
