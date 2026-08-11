@@ -59,7 +59,8 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
   3. The page documents the `[advisor]` and `[mcp]` install extras and the offline-core vs. env-gated LLM (`ANTHROPIC_API_KEY`) boundary
   4. A new inline SVG diagram of the grounding invariant renders on the page and passes the SVGO idempotence + determinism CI gate to `STYLE_SPEC` standard
   5. A new inline SVG diagram of the advisor loop (interpret→recommend→re-run→compare) renders on the page and passes the same gate
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 14-01-PLAN.md — Overview page + grounding-invariant & advisor-loop SVGs (SVGO-gated)
 **UI hint**: yes
 
 ### Phase 15: Python API Page
@@ -109,7 +110,7 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 14. Advisor Concept & Diagrams | 0/? | Not started | - |
+| 14. Advisor Concept & Diagrams | 0/1 | Not started | - |
 | 15. Python API Page | 0/? | Not started | - |
 | 16. Tool / MCP Server Page | 0/? | Not started | - |
 | 17. Agent Skill Page | 0/? | Not started | - |
