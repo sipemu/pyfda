@@ -77,27 +77,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONCEPT-01 | TBD | Pending |
-| CONCEPT-02 | TBD | Pending |
-| CONCEPT-03 | TBD | Pending |
-| PYDOC-01 | TBD | Pending |
-| PYDOC-02 | TBD | Pending |
-| PYDOC-03 | TBD | Pending |
-| MCPDOC-01 | TBD | Pending |
-| MCPDOC-02 | TBD | Pending |
-| MCPDOC-03 | TBD | Pending |
-| SKILLDOC-01 | TBD | Pending |
-| SKILLDOC-02 | TBD | Pending |
-| ADVDIA-01 | TBD | Pending |
-| ADVDIA-02 | TBD | Pending |
-| NAVDOC-01 | TBD | Pending |
-| NAVDOC-02 | TBD | Pending |
+| CONCEPT-01 | Phase 14 | Pending |
+| CONCEPT-02 | Phase 14 | Pending |
+| CONCEPT-03 | Phase 14 | Pending |
+| ADVDIA-01 | Phase 14 | Pending |
+| ADVDIA-02 | Phase 14 | Pending |
+| PYDOC-01 | Phase 15 | Pending |
+| PYDOC-02 | Phase 15 | Pending |
+| PYDOC-03 | Phase 15 | Pending |
+| MCPDOC-01 | Phase 16 | Pending |
+| MCPDOC-02 | Phase 16 | Pending |
+| MCPDOC-03 | Phase 16 | Pending |
+| SKILLDOC-01 | Phase 17 | Pending |
+| SKILLDOC-02 | Phase 17 | Pending |
+| NAVDOC-01 | Phase 18 | Pending |
+| NAVDOC-02 | Phase 18 | Pending |
 
 **Coverage:**
 - v1 requirements: 15 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 15 ⚠️
+- Mapped to phases: 15 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-08-11*
-*Last updated: 2026-08-11 after initial definition*
+*Last updated: 2026-08-11 after roadmap creation (Phases 14–18)*

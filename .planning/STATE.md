@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Document the AI Advisor
 status: planning
-last_updated: "2026-08-10T22:16:52.472Z"
+last_updated: "2026-08-11T00:00:00.000Z"
 last_activity: 2026-08-11
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,17 +17,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-10)
+See: .planning/PROJECT.md (updated 2026-08-11)
 
-**Core value:** Every recommendation cites fdars-computed diagnostics and states an expected effect; the LLM reasons over computed numbers and never fabricates them
-**Current focus:** Milestone v2.0 shipped & archived — planning next milestone (`/gsd-new-milestone`)
+**Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method does, every example runs against the current API
+**Current focus:** Milestone v2.1 (Document the AI Advisor) roadmapped — Phases 14–18 defined; ready to plan Phase 14
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 14 — Advisor Concept & Diagrams (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-08-11 — Milestone v2.1 started
+Status: Roadmap complete, awaiting Phase 14 planning
+Last activity: 2026-08-11 — Roadmap created for v2.1 (Phases 14–18)
 
 ## Performance Metrics
 
@@ -91,55 +91,19 @@ Last activity: 2026-08-11 — Milestone v2.1 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
+- [v2.1 roadmap]: Phase numbering CONTINUES from v2.0 (starts at Phase 14; v2.0 ended at Phase 13)
+- [v2.1 roadmap]: Documentation-only milestone — no advisor code changes unless the docs expose a genuine binding bug
+- [v2.1 roadmap]: Phasing follows the per-section review-gate process — concept+diagrams first (Phase 14), then one phase per surface (Python API / MCP / Agent Skill), then nav+build integration
+- [v2.1 roadmap]: Concept overview page and both new SVG diagrams live in one phase (Phase 14) — diagrams illustrate the concept and share a review gate
+- [v2.1 roadmap]: New top-level "AI Advisor" nav section; all pages must build cleanly with executable fences running against the current API
 - Init: Keep diagrams as hand-authored inline SVG (no programmatic generation)
 - Init: Formalize shared SVG style spec before any diagram sweep
-- Init: Diagrams prioritized over examples (user priority order)
 - Init: Review gate per doc section on built site before moving to next section
-- Init: Derive coverage/new-example list from nav + reference-API audit (evidence-based scope)
-- [v2.0 roadmap]: Phase numbering CONTINUES from v1.0 (starts at Phase 10; v1.0 ended at Phase 9)
 - [v2.0 roadmap]: One deterministic core (`build_diagnostics`, fdars-computed, offline) shared by all three surfaces; the LLM only interprets/reasons over computed numbers
 - [v2.0 roadmap]: Grounding invariant enforced by Pydantic schema + system prompt on every surface (evidence cites diagnostic values; no fabricated numbers)
 - [v2.0 roadmap]: `anthropic` is an optional `[advisor]` extra; `build_diagnostics` works offline with no network in CI; the LLM integration test is stubbed / env-gated
-- [v2.0 roadmap]: Split by surface — Python API is recommend-only; Tool/MCP and Agent Skill are agentic (re-run fdars + compare before/after)
-- [Phase ?]: SVGO gate uses idempotence check (svgo pass 2 == pass 1), not diff-vs-source, because svgo's serialiser always normalises whitespace
-- [Phase ?]: All 43 diagrams pass the SVGO gate; no exclusion list required
-- [Phase ?]: svg.hashsalt='fdars-docs' set at module-import time in docs_fig.py to ensure byte-identical SVG IDs across full builds (FND-03)
-- [Phase ?]: fast(full, fast_value) is the single DOCS_FAST switch in docs_fig.py; fast mode is speed-only and NOT the determinism source of truth (FND-06, D-07, D-08)
-- [Phase ?]: Snippet files contain only plain Python lines (no HTML comments) — comments cause SyntaxError when substituted into exec fences by pymdownx.snippets
-- [Phase ?]: [Phase 01]: pytest-markdown-docs LOCKED IN as doc-test harness (D-04); cross-fence-state risk did not materialise
-- [Phase ?]: [Phase 01]: FND-04 snippets (--8<--) expanded for pytest-markdown-docs via conftest pytest_markdown_docs_markdown_it() hook — no example .md edited (Phase 9's domain)
-- [Phase ?]: [02-01] Two-axis audit method locked: style axis (grep-checkable STYLE_SPEC markers) independent of accuracy axis (expert inspection); D-02 rollup derives from both
-- [Phase ?]: [02-01] smoothing.svg confirmed as redraw (not restyle): Panel 3 ghost polyline reuses Panel 1 noisy coordinates verbatim from L8 onward (file:line evidence)
-- [Phase ?]: [02-01] custom-plotting.md R-first framing flagged for Phase 3 editorial review — ggplot2 mentions intentional but page structure warrants Python-first reframing
-- [Phase ?]: basis-representation.svg R-era finding not confirmed: SVG uses current Python API throughout
-- [Phase ?]: spm.svg confirmed R-era artifact: extendr/autoplot/'in R' text, wrong method — requires full redraw (GAP-0003)
-- [Phase ?]: conformal-prediction.svg scalar-not-band finding confirmed: output shows scalar interval not time-varying band ŷ(t)±q(t) (GAP-0004)
-- [Phase ?]: All R-era LOFEFOVERs are confined to spm.svg (4 lines, lines 5/31/55/56). All other R package references across prose are PROSE-OK intentional notes.
-- [Phase ?]: basis-representation.svg preliminary R-era finding was NOT confirmed — the SVG uses current Python API names. No R-era content present.
-- [Phase ?]: Smoothing module has zero worked examples across all 17 example pages — added as EX-0006 (P1 priority), highest-urgency new-example gap.
-- [Phase ?]: GAP-0001: Panel 3 ghost underlay redrawn as genuinely-distinct noisy path (not removed) to preserve pedagogical before/after contrast
-- [Phase ?]: New Panel 3 ghost coordinate string: M0 96 L8 78 L16 106 L24 74 L32 98 L40 66 L48 88 L56 56 L64 82 L72 52 L80 76 L88 50 L96 72 L104 44 L112 66 L120 46 L128 64 L136 48 L144 56 L152 52 L156 64
-- [Phase ?]: All 6 learn/ diagrams proven idempotent under svgo@3.3.4 + svgo.config.mjs
-- [Phase ?]: All 6 learn/ diagrams carry full STYLE_SPEC marker set — zero legacy outliers in learn/
-- [Phase ?]: COVERAGE.md authored: no external API integration for phase 03
-- [Phase ?]: CORE-01 complete: all five build_diagnostics method branches (alignment, fpca, basis, smoothing, clustering) offline and deterministic
-- [Phase ?]: ADVISE-02 realised: parameter task clause names lambda_/n_basis/bandwidth/n_comp/cluster k/depth method, requires kind=parameter with cited evidence
-- [Phase ?]: ADVISE-03 realised: method task clause encodes poor-fit -> alternative mappings (elastic FPCA, pre-smooth, unconstrained transform), requires kind=method with cited evidence
-- [Phase ?]: describe_cluster_differences is a thin specialization on build_diagnostics(method='clustering') + advise; run_llm=False offline escape hatch returns raw diagnostics dict
-- [Phase ?]: advisor wired via plain Python import + sys.modules injection (not in _submodule_names — pure-Python, not native Rust submodule)
-- [Phase ?]: pydantic>=2.0 included in [advisor] extra alongside anthropic>=0.72.0 (anthropic SDK does not auto-install pydantic)
-- [Phase ?]: Task 1 and Task 2 implemented atomically in one commit: offline body + LLM guard authored in single pass; kmeans_fd used directly per Pitfall 6; recipe placed in examples/ not docs/examples/ per Pitfall 5 prohibition
-- [Phase ?]: [12-01] MCP list_tools() returns ListToolsResult — iterate .tools not the result (mcp 2.0.0)
-- [Phase ?]: [12-01] MCP call_tool structured_content is None for dict-returning def handlers; content[0].text JSON fallback is the unwrap path
-- [Phase ?]: [12-01] synchronous def MCP tool handlers work with async Client(mcp); mcp subpackage guarded to Python 3.10+, not registered in fdars.__init__
-- [Phase ?]: [12-02] smoothing runner = pspline_fit_gcv; stored result lacks lambda_values; build_diagnostics smoothing Branch B re-runs with data+argvals (correct for with_argvals=True)
-- [Phase ?]: [12-02] run_stdio() standalone transport wiring; tool handlers are transport-agnostic; if __name__=='__main__' guard in server.py
-- [Phase ?]: [12-03] fdars_compare_run flattens after-params as top-level typed args; no nested params_after: dict in MCP schema (Pitfall 6)
-- [Phase ?]: [12-03] Branch A-prime added to _build_smoothing_diagnostics: pspline_fit_gcv single-fit scalars (gcv/edf) -> optimal_gcv/optimal_edf; enables non-empty delta for smoothing compare loop
-- [Phase ?]: Delta header grep literal: 'Delta (' -- matches script output 'Delta (after - before) [N scalar keys]:'
-- [Phase ?]: test_walkthrough_py39_exit0 uses re.MULTILINE to match actual import statements, not comments containing the module path
-- [Phase ?]: Plan 02 expansion tests included in test_skill.py during Plan 01 scaffold so all 6 tests collect from the start
-- [Phase ?]: Plan 01 pre-built all Plan 02 deliverables — env-gated advise() step, SKILL.md Grounded Advice + Grounding Invariant, and 3 expansion tests — verified green on first wave-2 run
+- [v2.0]: MCP transport = stdio only; HTTP/SSE deferred to a future milestone
+- [v2.0]: skill execution target = Managed Agents env; git-URL install documented as authoritative until `[mcp]`/`[advisor]` extras ship on PyPI
 
 ### Pending Todos
 
@@ -147,11 +111,7 @@ None yet.
 
 ### Blockers/Concerns
 
-None open — all milestone v2.0 decisions resolved:
-
-- RESOLVED (Phase 13): skill execution target = Managed Agents env with `allow_package_managers`; git-URL install documented as authoritative until `[mcp]`/`[advisor]` extras ship on PyPI
-- RESOLVED (Phase 12): MCP transport = stdio only; HTTP/SSE deferred to a future milestone
-- RESOLVED (Phase 10/11): `anthropic` SDK version floor = `>=0.72.0` (`ADVISOR_ANTHROPIC_MIN_VERSION`)
+None open.
 
 ## Deferred Items
 
@@ -159,14 +119,14 @@ None open — all milestone v2.0 decisions resolved:
 |----------|------|--------|-------------|
 | Accessibility | A11Y-01: Long-form `<title>`/`<desc>` + aria-labelledby for complex diagrams | v2 | Init |
 | Examples | EX2-01: Editorial consolidation (sonar-tsrvf vs phoneme-shape; Andrews-wine series) | v2 | Init |
-| context | Phase 12 12-CONTEXT.md: 3 research questions (MCP SDK/version, tool JSON-schema design, by-reference data passing) | resolved during Phase 12 execution (mcp 2.0.0 stdio, HandleRegistry, network-free tests); phase shipped verified | v2.0 close (2026-08-10) |
+| Transport | HTTP-01: HTTP/SSE MCP transport for the fdars-advisor server (stdio shipped in v2.0) | v2 | v2.0 close |
 
 ## Session Continuity
 
-Last session: 2026-08-10
-Stopped at: Phase 13 complete and verified (human UAT passed); milestone v2.0 100% complete, ready to archive
+Last session: 2026-08-11
+Stopped at: Roadmap created for milestone v2.1 (Phases 14–18); all 15 v1 requirements mapped
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Plan Phase 14 with /gsd-plan-phase 14
