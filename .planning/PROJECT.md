@@ -68,11 +68,11 @@ The documentation — diagrams first, examples second — must make functional d
 
 <!-- v2.1 — Document the AI Advisor. Requirements defined in REQUIREMENTS.md, mapped to roadmap phases. -->
 
-- [ ] Advisor concept + grounding-invariant overview page on the docs site
+- [x] Advisor concept + grounding-invariant overview page on the docs site — Phase 14 (CONCEPT-01/02/03)
+- [x] New hand-authored inline SVG diagram(s) for the advisor, to STYLE_SPEC standard — Phase 14 (ADVDIA-01/02: grounding-invariant + advisor-loop)
 - [ ] Python API advisor page with a runnable worked example
 - [ ] Tool / MCP server page (tools, stdio setup, re-run/compare loop)
 - [ ] Agent Skill page (install + interpret→recommend→re-run→compare walkthrough)
-- [ ] New hand-authored inline SVG diagram(s) for the advisor, to STYLE_SPEC standard
 - [ ] New top-level "AI Advisor" nav section wired into `mkdocs.yml`
 
 ### Out of Scope
@@ -129,4 +129,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-11 after starting milestone v2.1 (Document the AI Advisor)*
+*Last updated: 2026-08-11 after Phase 14 (Advisor Concept & Diagrams — overview page + two SVG diagrams shipped)*
