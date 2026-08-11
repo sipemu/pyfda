@@ -13,24 +13,15 @@ The documentation — diagrams first, examples second — must make functional d
 **Shipped milestones:**
 - ✅ **v1.0 — Documentation Overhaul** (Phases 1–9): shared SVG `STYLE_SPEC.md` + SVGO/determinism CI guardrails, a nav+reference-API audit that derived the gap/example scope, six section diagram sweeps (learn/represent/align/analyze/regression/monitoring — all method-accurate and R-era-free), and an examples sweep (all pages run against the current API, plus five new worked examples).
 - ✅ **v2.0 — Grounded AI analysis advisor** (Phases 10–13): a deterministic, offline `build_diagnostics` core + grounded `advise()` (Claude structured outputs, `claude-opus-4-8`) exposed across four surfaces — Python API (recommend-only), Tool/MCP (agentic re-run/compare over stdio), and an Anthropic Agent Skill. The grounding invariant holds throughout: fdars computes every number, the LLM only interprets and cites diagnostic values. Human UAT (2026-08-10) confirmed the real-key path produces grounded advice.
+- ✅ **v2.1 — Document the AI Advisor** (Phases 14–18): a new top-level "AI Advisor" docs-site section — a concept/grounding-invariant overview with two hand-authored inline SVG diagrams (grounding invariant, advisor loop), plus per-surface pages for the Python API (recommend-only, with an offline worked example that executes in the docs build), the Tool/MCP server (3 tools, by-reference handle model, stdio, re-run/compare loop), and the Agent Skill (git-URL install + interpret→recommend→re-run→compare walkthrough) — all wired into nav and passing a `mkdocs build --strict` gate. Method-accurate against the shipped v2.0 code; diagrams pass the SVGO/determinism gate.
 
 **Grounding invariant (v2.0):** every recommendation cites computed diagnostics and states an expected effect; the LLM never fabricates numbers.
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v2.1 Document the AI Advisor
+## Next Milestone Goals
 
-**Goal:** Give the published MkDocs site first-class, method-accurate coverage of the v2.0 grounded AI advisor — closing the gap where the feature shipped but its user-facing docs did not.
-
-**Target features:**
-- New top-level nav section for the advisor on the docs site.
-- Concept + grounding-invariant overview page (what it is, the fdars-computes / LLM-interprets guarantee, when to use it).
-- Python API page — `build_diagnostics` / `advise` / `describe_cluster_differences` with a runnable worked example.
-- Tool / MCP server page — tools, stdio setup, the re-run/compare loop.
-- Agent Skill page — install + the interpret→recommend→re-run→compare walkthrough.
-- New hand-authored inline SVG diagrams to STYLE_SPEC standard (e.g. grounding invariant, the advisor loop).
-
-**Key context:** Documentation-only milestone — no advisor code changes unless the docs expose a genuine bug. Must stay method-accurate against the shipped v2.0 code (`python/fdars/advisor.py`, `python/fdars/mcp/`, `.claude/skills/fdars-advisor/`) and use existing datasets in `docs/data/`. Deferred backlog carried forward: diagram accessibility (A11Y-01), examples editorial consolidation (EX2-01), HTTP/SSE MCP transport (deferred from v2.0).
+_v2.1 shipped 2026-08-11 (Document the AI Advisor — Phases 14–18). Not yet scoped. Run `/gsd-new-milestone` to define the next version. Candidate directions carried forward from the deferred backlog: diagram accessibility (A11Y-01), examples editorial consolidation (EX2-01), and an HTTP/SSE MCP transport (deferred from v2.0)._
 
 ## Requirements
 
@@ -64,16 +55,18 @@ The documentation — diagrams first, examples second — must make functional d
 - ✓ Examples sweep — every page runs against the current API, richer narratives, improved figures, five new worked examples (EX-01..04) — v1.0
 - ✓ All diagrams remain hand-authored inline SVG (no programmatic generation) — v1.0
 
+**v2.1 — Document the AI Advisor (Phases 14–18):**
+- ✓ AI Advisor overview page + grounding-invariant & advisor-loop SVGs (CONCEPT-01/02/03, ADVDIA-01/02) — v2.1
+- ✓ Python API page — recommend-only surface + offline worked example that runs in the docs build (PYDOC-01/02/03) — v2.1
+- ✓ Tool / MCP server page — 3 tools, by-reference handle model, stdio, re-run/compare loop (MCPDOC-01/02/03) — v2.1
+- ✓ Agent Skill page — git-URL install + interpret→recommend→re-run→compare walkthrough (SKILLDOC-01/02) — v2.1
+- ✓ "AI Advisor" nav section wired into `mkdocs.yml`; full `mkdocs build --strict` green (NAVDOC-01/02) — v2.1
+
 ### Active
 
-<!-- v2.1 — Document the AI Advisor. Requirements defined in REQUIREMENTS.md, mapped to roadmap phases. -->
+<!-- v2.1 shipped. Next milestone not yet scoped. Run /gsd-new-milestone to define requirements. -->
 
-- [x] Advisor concept + grounding-invariant overview page on the docs site — Phase 14 (CONCEPT-01/02/03)
-- [x] New hand-authored inline SVG diagram(s) for the advisor, to STYLE_SPEC standard — Phase 14 (ADVDIA-01/02: grounding-invariant + advisor-loop)
-- [x] Python API advisor page with a runnable worked example — Phase 15 (PYDOC-01/02/03)
-- [x] Tool / MCP server page (tools, stdio setup, re-run/compare loop) — Phase 16 (MCPDOC-01/02/03)
-- [x] Agent Skill page (install + interpret→recommend→re-run→compare walkthrough) — Phase 17 (SKILLDOC-01/02)
-- [x] New top-level "AI Advisor" nav section wired into `mkdocs.yml` — Phase 18 (NAVDOC-01/02; full --strict build green)
+_None active — v2.1 shipped. Next requirements defined via `/gsd-new-milestone`._
 
 ### Out of Scope
 
@@ -110,6 +103,9 @@ The documentation — diagrams first, examples second — must make functional d
 | Grounding invariant enforced by Pydantic schema + system prompt | Evidence must cite diagnostic values; no fabricated numbers | ✓ Good — `Advice` schema + human UAT confirmed (v2.0) |
 | `anthropic`/`mcp` as optional extras; core works offline | Keep CI network-free; LLM tests env-gated | ✓ Good — offline tests pass, integration skips without key (v2.0) |
 | MCP transport = stdio only; HTTP/SSE deferred | Matches local/CI usage; keep tool layer transport-agnostic | ✓ Good — stdio shipped; HTTP deferred to a future milestone (v2.0) |
+| Advisor docs live in a new top-level "AI Advisor" nav section | The v2.0 feature shipped without user-facing docs; a dedicated section makes it discoverable | ✓ Good — section + 4 pages wired, `--strict` build green (v2.1) |
+| Only the Python API page carries an executed offline fence; MCP/Skill fences illustrative | The docs build must not depend on the `[mcp]`/`[advisor]` extras, Python 3.10+, or an API key | ✓ Good — build stays offline; fence execution proven via `FDARS_FENCE_OK` sentinel (v2.1) |
+| Per-page human review gate on the built site, self-served during the autonomous run | User authorized a fully-autonomous run; orchestrator self-reviewed each page against source + rendered diagrams | ✓ Good — caught a diagram label-overlap and 7 stale cross-refs, fixed inline (v2.1) |
 
 ## Evolution
 
@@ -129,4 +125,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-11 after Phase 18 (Nav & Build Integration — AI Advisor section wired into nav; milestone v2.1 complete, 15/15 requirements)*
+*Last updated: 2026-08-11 after v2.1 milestone (Document the AI Advisor — Phases 14–18 shipped, 15/15 requirements)*

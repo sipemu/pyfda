@@ -2,10 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Document the AI Advisor
-current_phase: 18
-status: completed
+status: Awaiting next milestone
 stopped_at: Completed 18-01-PLAN.md
-last_updated: "2026-08-11T19:39:42.141Z"
+last_updated: "2026-08-11T19:54:14.945Z"
 last_activity: 2026-08-11
 last_activity_desc: Phase 14 execution started
 progress:
@@ -14,6 +13,7 @@ progress:
   total_plans: 5
   completed_plans: 5
   percent: 100
+current_phase: 18
 current_phase_name: nav-build-integration
 ---
 
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-08-11)
 
 ## Current Position
 
-Phase: 18
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-08-11 — Phase 18 complete
+Phase: Milestone v2.1 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-11 — Milestone v2.1 completed and archived
 
 ## Performance Metrics
 
@@ -150,4 +150,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Plan Phase 14 with /gsd-plan-phase 14
+- Start the next milestone with /gsd-new-milestone

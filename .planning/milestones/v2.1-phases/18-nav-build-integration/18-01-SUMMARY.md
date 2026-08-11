@@ -141,5 +141,20 @@ None. Both builds (fast and strict) completed without errors on the first run. N
 - Next step: `/gsd-complete-milestone` to archive the v2.1 milestone
 
 ---
+## Self-Check: PASSED
+
+All files confirmed on disk:
+- `.planning/phases/18-nav-build-integration/18-01-SUMMARY.md` — FOUND
+- `mkdocs.yml` — FOUND (with AI Advisor section)
+- `site/advisor/index.html` — FOUND
+- `site/advisor/python-api/index.html` — FOUND
+- `site/advisor/mcp/index.html` — FOUND
+- `site/advisor/agent-skill/index.html` — FOUND
+
+Commits confirmed:
+- `5f3d2af` feat(18-01): wire AI Advisor nav section into mkdocs.yml — FOUND
+- `fc3e12d` docs(18-01): complete nav-build-integration plan — FOUND
+
+---
 *Phase: 18-nav-build-integration*
 *Completed: 2026-08-11*

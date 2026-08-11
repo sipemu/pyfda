@@ -1,5 +1,16 @@
 # Milestones
 
+## v2.1 Document the AI Advisor (Shipped: 2026-08-11)
+
+**Phases completed:** 5 phases, 5 plans, 7 tasks
+
+**Key accomplishments:**
+
+- Two STYLE_SPEC-conformant inline SVGs (grounding invariant two-lane + advisor loop with Python API exit branch) and a complete AI Advisor overview page method-accurate against `advisor.py`, `mcp/server.py`, and `SKILL.md`.
+- AI Advisor nav section wired into mkdocs.yml and proven build-clean: strict build exits 0, all four advisor pages render, FDARS_FENCE_OK confirmed, both SVGs pass SVGO idempotence
+
+---
+
 ## v2.0 Grounded AI analysis advisor (Shipped: 2026-08-10)
 
 **Phases completed:** 4 phases, 11 plans, 14 tasks
