@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Document the AI Advisor
 current_phase: 16
-current_phase_name: Tool / MCP Server Page
-status: planning
-stopped_at: Phase 15 Plan 01 complete (Tasks 1-2 done; Task 3 human-verify checkpoint pending)
-last_updated: "2026-08-11T18:36:09.181Z"
+current_phase_name: tool-mcp-server-page
+status: verifying
+stopped_at: Phase 16 Plan 01 complete (Tasks 1-2 done; docs build succeeded; Task 3 human-verify checkpoint pending)
+last_updated: "2026-08-11T18:50:35.392Z"
 last_activity: 2026-08-11
 last_activity_desc: Phase 14 execution started
 progress:
   total_phases: 5
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
-  percent: 40
+  completed_phases: 3
+  total_plans: 3
+  completed_plans: 3
+  percent: 60
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-11)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method does, every example runs against the current API
-**Current focus:** Phase 15 — python-api-page
+**Current focus:** Phase 16 — tool-mcp-server-page
 
 ## Current Position
 
-Phase: 16 — Tool / MCP Server Page
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-11 — Phase 15 complete, transitioned to Phase 16
+Phase: 16 (tool-mcp-server-page) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-08-11 — Phase 16 execution started
 
 ## Performance Metrics
 
@@ -91,6 +91,7 @@ Last activity: 2026-08-11 — Phase 15 complete, transitioned to Phase 16
 | Phase 13 P02 | 2min | 3 tasks | 0 files |
 | Phase 14 P01 | 4min | 4 tasks | 3 files |
 | Phase 15 P01 | 13min | 2 tasks | 1 files |
+| Phase 16 P01 | 8min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Two-lane metaphor for grounding-invariant diagram (fdars computes / LLM cites) with explicit cites arrow into Advice.evidence
 - [Phase ?]: Overview page stays conceptual/diagram-led; no runnable code fence; first worked example deferred to Phase 15
 - [Phase ?]: Schema table rows use plain text field names (no backtick wrapping) to match exec grep patterns in acceptance criteria
+- [Phase ?]: MCP fences illustrative-only (no exec="1"): docs build does not require [mcp] extra or Python 3.10+
+- [Phase ?]: Page written as complete document in tracer task — both Task 1 (skeleton+tools) and Task 2 (handle model, stdio, compare loop) content in single authoring pass
 
 ### Pending Todos
 
@@ -134,8 +137,8 @@ None open.
 
 ## Session Continuity
 
-Last session: 2026-08-11T18:33:58.801Z
-Stopped at: Phase 15 Plan 01 complete (Tasks 1-2 done; Task 3 human-verify checkpoint pending)
+Last session: 2026-08-11T18:50:35.381Z
+Stopped at: Phase 16 Plan 01 complete (Tasks 1-2 done; docs build succeeded; Task 3 human-verify checkpoint pending)
 Resume file: None
 
 ## Operator Next Steps
