@@ -12,9 +12,19 @@ fdars computes every number. The LLM only interprets and cites those values — 
 
 ![Grounding invariant: fdars computes numbers, the LLM only cites them](../assets/diagrams/advisor-grounding-invariant.svg){ .fdars-diagram }
 
-The invariant is enforced in two ways: the `Recommendation.evidence` field is
-required by the Pydantic schema (the LLM cannot omit it), and the system prompt
-instructs the model to cite only diagnostic values present in the input.
+**fdars computes every number via `build_diagnostics` — offline and deterministic.**
+**The LLM in `advise` only interprets and cites those diagnostic values in each**
+**`Recommendation`'s `evidence` field. It never fabricates numbers.**
+
+The invariant is enforced at two levels:
+
+- **Schema:** `Recommendation.evidence` is a required `list[str]` field in the
+  Pydantic model. The LLM cannot omit it; every recommendation must cite specific
+  values present in the diagnostics dict.
+- **System prompt:** the grounding prompt instructs the model to include at least
+  one evidence item per recommendation, to omit any claim not supported by a
+  provided value, and to never estimate or assume numerical results not explicitly
+  given in the diagnostics.
 
 ## What the Advisor Does
 
