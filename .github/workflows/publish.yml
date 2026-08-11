@@ -3,7 +3,10 @@ name: Publish to PyPI
 on:
   push:
     tags:
-      - "v*"
+      # Only full semver release tags (e.g. v0.2.0) trigger a PyPI publish.
+      # Milestone tags like v2.0 / v2.1 must NOT match, or they attempt to
+      # re-upload the current package version and fail with "File already exists".
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 permissions:
   contents: read
@@ -94,3 +97,6 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           attestations: false
+          # Don't hard-fail if a wheel was already uploaded (e.g. re-run of a
+          # partially-completed publish job).
+          skip-existing: true
