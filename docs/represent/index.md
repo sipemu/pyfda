@@ -46,3 +46,13 @@ The Represent module brings together the core tools for analyzing functional dat
 <div class="fdars-gallery-desc">Lp, Hausdorff, DTW, Soft-DTW, Fourier, and horizontal-shift distances.</div>
 </a>
 </div>
+
+!!! info "Scope & limitations"
+
+    The Represent tools assume **real-valued functions sampled on a single shared grid**. Keep these boundaries in mind:
+
+    - **FPCA and basis representation are linear.** They fit the best linear subspace of $L^2$ and assume the data lies near it. Strong nonlinear or phase (warping) variation is captured poorly — use [Elastic FPCA](elastic-fpca.md) (align first, then separate amplitude and phase) instead.
+    - **Basis systems are B-spline and Fourier only** (with optional P-spline penalization); there are no density-specific bases.
+    - **Constrained-range or density data is not supported.** Data that must stay nonnegative, integrate to 1, or remain bounded/monotone can be pushed out of its valid range by linear FPCA and means — transform to an unconstrained space (e.g. CLR or log-quantile-density) first.
+    - **Sparse or irregular per-curve sampling is not supported.** Pre-smooth each curve onto the common grid first.
+    - **Manifold-valued data is out of scope.**

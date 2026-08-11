@@ -41,3 +41,12 @@ Functional observations often exhibit two fundamentally different sources of var
 <div class="fdars-gallery-desc">Shape-preserving registration and geodesic computations.</div>
 </a>
 </div>
+
+!!! info "Scope & limitations"
+
+    fdars alignment operates on **real-valued curves sampled on a single shared grid** (`argvals`) common to every observation — the `Fdata` constructor and `stack` enforce this. Keep these boundaries in mind:
+
+    - **Sparse or irregular per-curve sampling is not supported.** Pre-smooth each curve onto the shared grid first. The one exception is `elastic_partial_match`, which accepts two mismatched grids but is strictly pairwise.
+    - **The elastic machinery is 1-D (SRSF / Fisher–Rao).** For ordinary real-valued curves in Euclidean space, TSRVF collapses to SRVF. Genuinely *manifold-valued* trajectories (sphere, SPD/covariance-over-time, shapes, rotations) are **not supported** — there are no exp/log maps, geodesic mean, or PGA.
+    - **Constrained-range or density-valued curves are not supported.** Transform them to an unconstrained space before aligning.
+    - **Supported beyond the basics:** closed/periodic curves (`elastic_align_pair_closed`, `karcher_mean_closed`) and landmark-constrained alignment (`elastic_align_pair_constrained`).

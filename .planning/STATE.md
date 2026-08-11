@@ -1,44 +1,43 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-current_phase: 9
-status: completed
-stopped_at: Completed 03-02-PLAN.md — all 6 learn/ diagrams verified, COVERAGE.md authored
-last_updated: "2026-08-08T18:48:02.927Z"
-last_activity: 2026-08-08
-last_activity_desc: Phase 9 complete
+milestone: v2.1
+milestone_name: Document the AI Advisor
+status: Awaiting next milestone
+stopped_at: Completed 18-01-PLAN.md
+last_updated: "2026-08-11T19:54:14.945Z"
+last_activity: 2026-08-11
+last_activity_desc: Phase 14 execution started
 progress:
-  total_phases: 9
-  completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
-current_phase_name: Examples Sweep
+  total_phases: 5
+  completed_phases: 5
+  total_plans: 5
+  completed_plans: 5
+  percent: 100
+current_phase: 18
+current_phase_name: nav-build-integration
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-07)
+See: .planning/PROJECT.md (updated 2026-08-11)
 
-**Core value:** Every diagram faithfully depicts what the method actually does; every example runs against the current API
-**Current focus:** Phase 03 — learn-diagrams
+**Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method does, every example runs against the current API
+**Current focus:** Phase 18 — nav-build-integration
 
 ## Current Position
 
-Phase: 9
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-08-08 — Phase 9 complete
-
-Progress: [██████████] 100%
+Phase: Milestone v2.1 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-11 — Milestone v2.1 completed and archived
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 16
+- Total plans completed: 32
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -55,6 +54,15 @@ Progress: [██████████] 100%
 | 7 | 1 | - | - |
 | 8 | 1 | - | - |
 | 9 | 1 | - | - |
+| 10 | 3 | - | - |
+| 11 | 3 | - | - |
+| 12 | 3 | - | - |
+| 13 | 2 | - | - |
+| 14 | 1 | - | - |
+| 15 | 1 | - | - |
+| 16 | 1 | - | - |
+| 17 | 1 | - | - |
+| 18 | 1 | - | - |
 
 **Recent Trend:**
 
@@ -75,6 +83,20 @@ Progress: [██████████] 100%
 | Phase 02 P03 | 488 | 3 tasks | 1 files |
 | Phase 03-learn-diagrams P01 | 20min | 3 tasks | 1 files |
 | Phase 03 P02 | 8min | 4 tasks | 1 files |
+| Phase 10 P02 | 3min | 3 tasks | 1 files |
+| Phase 10 P03 | 2 | 2 tasks | 1 files |
+| Phase 11 P01 | 2min | 3 tasks | 4 files |
+| Phase 11 P03 | 3min | 2 tasks | 1 files |
+| Phase 12 P01 | 5min | 2 tasks | 5 files |
+| Phase 12 P02 | 4min | 3 tasks | 3 files |
+| Phase 12 P03 | 7min | 3 tasks | 5 files |
+| Phase 13 P01 | 4min | 3 tasks | 3 files |
+| Phase 13 P02 | 2min | 3 tasks | 0 files |
+| Phase 14 P01 | 4min | 4 tasks | 3 files |
+| Phase 15 P01 | 13min | 2 tasks | 1 files |
+| Phase 16 P01 | 8min | 2 tasks | 1 files |
+| Phase 17-agent-skill-page P01 | 8m | 2 tasks | 1 files |
+| Phase 18 P01 | 14min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -83,32 +105,26 @@ Progress: [██████████] 100%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
+- [v2.1 roadmap]: Phase numbering CONTINUES from v2.0 (starts at Phase 14; v2.0 ended at Phase 13)
+- [v2.1 roadmap]: Documentation-only milestone — no advisor code changes unless the docs expose a genuine binding bug
+- [v2.1 roadmap]: Phasing follows the per-section review-gate process — concept+diagrams first (Phase 14), then one phase per surface (Python API / MCP / Agent Skill), then nav+build integration
+- [v2.1 roadmap]: Concept overview page and both new SVG diagrams live in one phase (Phase 14) — diagrams illustrate the concept and share a review gate
+- [v2.1 roadmap]: New top-level "AI Advisor" nav section; all pages must build cleanly with executable fences running against the current API
 - Init: Keep diagrams as hand-authored inline SVG (no programmatic generation)
 - Init: Formalize shared SVG style spec before any diagram sweep
-- Init: Diagrams prioritized over examples (user priority order)
 - Init: Review gate per doc section on built site before moving to next section
-- Init: Derive coverage/new-example list from nav + reference-API audit (evidence-based scope)
-- [Phase ?]: SVGO gate uses idempotence check (svgo pass 2 == pass 1), not diff-vs-source, because svgo's serialiser always normalises whitespace
-- [Phase ?]: All 43 diagrams pass the SVGO gate; no exclusion list required
-- [Phase ?]: svg.hashsalt='fdars-docs' set at module-import time in docs_fig.py to ensure byte-identical SVG IDs across full builds (FND-03)
-- [Phase ?]: fast(full, fast_value) is the single DOCS_FAST switch in docs_fig.py; fast mode is speed-only and NOT the determinism source of truth (FND-06, D-07, D-08)
-- [Phase ?]: Snippet files contain only plain Python lines (no HTML comments) — comments cause SyntaxError when substituted into exec fences by pymdownx.snippets
-- [Phase ?]: [Phase 01]: pytest-markdown-docs LOCKED IN as doc-test harness (D-04); cross-fence-state risk did not materialise
-- [Phase ?]: [Phase 01]: FND-04 snippets (--8<--) expanded for pytest-markdown-docs via conftest pytest_markdown_docs_markdown_it() hook — no example .md edited (Phase 9's domain)
-- [Phase ?]: [02-01] Two-axis audit method locked: style axis (grep-checkable STYLE_SPEC markers) independent of accuracy axis (expert inspection); D-02 rollup derives from both
-- [Phase ?]: [02-01] smoothing.svg confirmed as redraw (not restyle): Panel 3 ghost polyline reuses Panel 1 noisy coordinates verbatim from L8 onward (file:line evidence)
-- [Phase ?]: [02-01] custom-plotting.md R-first framing flagged for Phase 3 editorial review — ggplot2 mentions intentional but page structure warrants Python-first reframing
-- [Phase ?]: basis-representation.svg R-era finding not confirmed: SVG uses current Python API throughout
-- [Phase ?]: spm.svg confirmed R-era artifact: extendr/autoplot/'in R' text, wrong method — requires full redraw (GAP-0003)
-- [Phase ?]: conformal-prediction.svg scalar-not-band finding confirmed: output shows scalar interval not time-varying band ŷ(t)±q(t) (GAP-0004)
-- [Phase ?]: All R-era LOFEFOVERs are confined to spm.svg (4 lines, lines 5/31/55/56). All other R package references across prose are PROSE-OK intentional notes.
-- [Phase ?]: basis-representation.svg preliminary R-era finding was NOT confirmed — the SVG uses current Python API names. No R-era content present.
-- [Phase ?]: Smoothing module has zero worked examples across all 17 example pages — added as EX-0006 (P1 priority), highest-urgency new-example gap.
-- [Phase ?]: GAP-0001: Panel 3 ghost underlay redrawn as genuinely-distinct noisy path (not removed) to preserve pedagogical before/after contrast
-- [Phase ?]: New Panel 3 ghost coordinate string: M0 96 L8 78 L16 106 L24 74 L32 98 L40 66 L48 88 L56 56 L64 82 L72 52 L80 76 L88 50 L96 72 L104 44 L112 66 L120 46 L128 64 L136 48 L144 56 L152 52 L156 64
-- [Phase ?]: All 6 learn/ diagrams proven idempotent under svgo@3.3.4 + svgo.config.mjs
-- [Phase ?]: All 6 learn/ diagrams carry full STYLE_SPEC marker set — zero legacy outliers in learn/
-- [Phase ?]: COVERAGE.md authored: no external API integration for phase 03
+- [v2.0 roadmap]: One deterministic core (`build_diagnostics`, fdars-computed, offline) shared by all three surfaces; the LLM only interprets/reasons over computed numbers
+- [v2.0 roadmap]: Grounding invariant enforced by Pydantic schema + system prompt on every surface (evidence cites diagnostic values; no fabricated numbers)
+- [v2.0 roadmap]: `anthropic` is an optional `[advisor]` extra; `build_diagnostics` works offline with no network in CI; the LLM integration test is stubbed / env-gated
+- [v2.0]: MCP transport = stdio only; HTTP/SSE deferred to a future milestone
+- [v2.0]: skill execution target = Managed Agents env; git-URL install documented as authoritative until `[mcp]`/`[advisor]` extras ship on PyPI
+- [Phase ?]: Two-lane metaphor for grounding-invariant diagram (fdars computes / LLM cites) with explicit cites arrow into Advice.evidence
+- [Phase ?]: Overview page stays conceptual/diagram-led; no runnable code fence; first worked example deferred to Phase 15
+- [Phase ?]: Schema table rows use plain text field names (no backtick wrapping) to match exec grep patterns in acceptance criteria
+- [Phase ?]: MCP fences illustrative-only (no exec="1"): docs build does not require [mcp] extra or Python 3.10+
+- [Phase ?]: Page written as complete document in tracer task — both Task 1 (skeleton+tools) and Task 2 (handle model, stdio, compare loop) content in single authoring pass
+- [Phase ?]: Wrote agent-skill.md with verbatim git-URL install from SKILL.md, 5-step walkthrough mirroring fdars_advisor_walkthrough.py, and zero exec= fences — docs build passes without Python 3.10+, extras, or API key
+- [Phase ?]: AI Advisor nav section placed after Analyze and before Examples in mkdocs.yml, matching the Analyze idiom; advisor/index.md maps to site/advisor/index.html (MkDocs standard)
 
 ### Pending Todos
 
@@ -116,8 +132,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- Research flag: regression/ and monitoring/ sweeps need method-semantic verification against `fdars-core` behavior before diagrams can be drawn correctly (β(t), conformal functional bands, SPM Phase I/II)
-- Research flag: smoke-test `pytest-markdown-docs` multi-block state on one narrative page in Phase 1 before committing to it as the CI pattern
+None open.
 
 ## Deferred Items
 
@@ -125,9 +140,14 @@ None yet.
 |----------|------|--------|-------------|
 | Accessibility | A11Y-01: Long-form `<title>`/`<desc>` + aria-labelledby for complex diagrams | v2 | Init |
 | Examples | EX2-01: Editorial consolidation (sonar-tsrvf vs phoneme-shape; Andrews-wine series) | v2 | Init |
+| Transport | HTTP-01: HTTP/SSE MCP transport for the fdars-advisor server (stdio shipped in v2.0) | v2 | v2.0 close |
 
 ## Session Continuity
 
-Last session: 2026-08-07T22:13:14.406Z
-Stopped at: Completed 03-02-PLAN.md — all 6 learn/ diagrams verified, COVERAGE.md authored
+Last session: 2026-08-11T19:38:18.762Z
+Stopped at: Completed 18-01-PLAN.md
 Resume file: None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

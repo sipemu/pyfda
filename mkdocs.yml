@@ -135,6 +135,11 @@ nav:
     - Seasonal Analysis: analyze/seasonal-analysis.md
     - Equivalence Testing: analyze/equivalence-testing.md
     - Covariance Functions: analyze/covariance-functions.md
+  - AI Advisor:
+    - advisor/index.md
+    - Python API: advisor/python-api.md
+    - MCP Server: advisor/mcp.md
+    - Agent Skill: advisor/agent-skill.md
   - Examples:
     - examples/index.md
     - Growth — Elastic Alignment: examples/growth-alignment.md
