@@ -1,178 +1,195 @@
 # Feature Research
 
-**Domain:** Documentation set for a scientific/statistical Python library (fdars — functional data analysis)
-**Researched:** 2026-08-07
-**Confidence:** MEDIUM (web survey of comparable libraries; cross-checked against existing fdars docs and codebase)
+**Domain:** Provider-agnostic fdars AI advisor + full-library advisor coverage
+**Researched:** 2026-08-12
+**Confidence:** HIGH
+
+> Scope: v3.0 new features only. Existing v2.0 features (build_diagnostics core,
+> advise(), clustering/smoothing/FPCA/alignment/basis advisors, MCP surface, Agent
+> Skill) are already shipped. This document covers (A) provider-agnostic layer and
+> (B) per-aspect advisors for the remaining fdars analysis aspects.
 
 ---
 
-## Scope note
-
-The "features" here are **documentation features** — components, patterns, and content types that belong in a best-in-class doc set for a scientific Python library at the level of scikit-learn, statsmodels, or scikit-fda. The three categories map directly to the fdars documentation overhaul deliverables: SVG concept diagrams and worked example pages.
-
----
-
-## Feature Landscape
+## Part A — Provider-Agnostic Advisor Layer
 
 ### Table Stakes (Users Expect These)
 
-Missing any of these makes the doc set feel incomplete or untrustworthy compared to peer libraries.
-
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| One concept diagram per method page | Every page in scikit-learn's user guide, scikit-fda's examples, and statsmodels has at least one figure explaining the method — textual-only pages feel like stubs | LOW per diagram, HIGH cumulative | fdars already has ~50 SVGs; the gap is accuracy and coverage completeness |
-| Diagram accurately depicts the method | A diagram that shows the wrong geometry or wrong data flow undermines trust in the whole site; scikit-learn treats inaccurate figures as bugs | MEDIUM (requires domain review) | Highest-priority table-stake for this milestone per PROJECT.md |
-| Shared visual style across all diagrams | Peer libraries have consistent palette, font, and layout — inconsistency signals unmaintained docs | MEDIUM (style spec + rollout) | fdars has an informal baseline; formalizing it is the first milestone task |
-| Problem → Data → Method → Interpretation narrative in examples | The gold-standard worked-example structure used by statsmodels, GPyTorch tutorials, and scikit-fda examples — users learn by following a complete story, not isolated code snippets | MEDIUM per example | fdars already follows this pattern (e.g., tecator-regression.md, growth-alignment.md); needs consistent application across all 17 pages |
-| Executable, reproducible example code | Examples must run against the current API and produce shown output — broken examples are the most common complaint in scientific library docs | MEDIUM (CI or manual sweep) | fdars uses markdown-exec for build-time execution; main risk is API drift |
-| Cross-links from example pages to API reference | Every function or class used in an example should link to its API reference page — scikit-learn and scikit-fda both do this systematically | LOW per link, MEDIUM to audit all 17 pages | `docs/reference/` exists; cross-links are inconsistently applied |
-| Cross-links from concept pages to worked examples | Concept pages (e.g., `fpca.md`) should link to the relevant worked example — guides discovery and reinforces understanding | LOW | Currently inconsistent |
-| Inline figures with captions | Figures need a descriptive caption explaining what is shown, not just a filename — scikit-fda always captions figures | LOW per figure | Some fdars example figures lack captions |
-| Meaningful axis labels and titles on all figures | Unlabeled axes are a recurring quality complaint in scientific docs; makes figures uninterpretable in isolation | LOW per figure | Check all `markdown-exec` outputs |
+| `Provider` protocol + `AnthropicProvider` refactor | Existing code is tightly coupled to `anthropic` SDK; any provider work requires this first | MEDIUM | Keep `anthropic` first-class; refactor `advise()` to call `provider.complete(messages, schema)` instead of `client.messages.parse`. Existing tests must not regress. |
+| `OpenAIProvider` (openai package, `base_url` param) | OpenAI is the most common secondary LLM target; `base_url` covers vLLM, LM Studio, LocalAI — the same adapter handles all three | MEDIUM | Structured outputs via `response_format={"type":"json_schema",...}` (openai >=1.40). Fall through to JSON-mode + validate/retry if model doesn't support native structured outputs. |
+| `OllamaProvider` (local, no API key) | Offline/local-first path — the grounding invariant must hold even when there is no network | MEDIUM | `base_url` defaults to `http://localhost:11434`; uses Ollama's OpenAI-compatible `/v1/chat/completions`; no key required. Reuse OpenAI adapter with `api_key="ollama"` sentinel or a thin wrapper. |
+| Provider + model selection via params first, env vars as fallback | Users expect `advise(provider="openai", model="gpt-4o")` to work; env vars (`FDARS_ADVISOR_PROVIDER`, `FDARS_ADVISOR_MODEL`, `FDARS_ADVISOR_BASE_URL`) as default resolution | LOW | Document resolution order: explicit param > env var > built-in default. Default provider = `anthropic` when `ANTHROPIC_API_KEY` present; else `ollama` (offline-capable). |
+| Per-provider API key env vars | Each provider has its own key var (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`); Ollama needs none | LOW | Key vars are standard in the ecosystem. The `[advisor]`, `[openai]`, `[gemini]`, `[ollama]` extras declare only the package dependency, not the key. |
+| Validate-and-retry / repair contract for JSON-schema output | Local and weaker models often emit malformed JSON or miss required fields; without repair the grounding invariant breaks silently | MEDIUM | Up to 2 retries: first retry appends the validation error to the prompt; second retry escalates to a minimal repair prompt. Raise `ValueError` after exhausting retries rather than returning partial output. |
+| Per-provider optional extras in `pyproject.toml` | Users expect `pip install fdars[openai]` to install the right SDK | LOW | `[openai]` -> `openai>=1.40`; `[gemini]` -> `google-generativeai>=0.8` or `google-genai>=1.0`; `[ollama]` -> no extra package (uses `openai` or `requests`); `[advisor]` keeps `anthropic>=0.72`. |
+| Refactor existing advisors onto provider layer | Smoothing, FPCA, alignment, basis advisors (already shipped) must route through the new `Provider` protocol without breaking offline paths | MEDIUM | `build_diagnostics` is unaffected (offline, no provider). Only `advise()` changes. Offline CI tests remain: mock provider returns fixed `Advice`. |
 
 ### Differentiators (Competitive Advantage)
 
-Features that elevate fdars docs above the scikit-fda / statsmodels baseline.
-
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Diagrams that show before/after transformations, not just static states | Registration/alignment and smoothing both involve a transformation — showing the before state, the transformation (warp), and the after state in one diagram teaches the concept instantly; scikit-fda and most FDA docs do not do this systematically | MEDIUM per diagram | Elastic alignment, landmark registration, and smoothing diagrams are natural candidates |
-| Phase-vs-amplitude split diagram (registration context) | The single most abstract concept in FDA is that variation decomposes into phase (timing) and amplitude (magnitude) — a diagram showing two example curves with the same amplitude but different phase, and the warping function that aligns them, resolves the confusion that causes most beginner errors | MEDIUM | One high-quality diagram here is worth more than five generic ones |
-| Eigenfunction ± score diagram for FPCA | The standard FPCA visualization (mean ± weighted eigenfunction) shows what each PC *means* for real curves — this is the textbook visual that scikit-fda's FPCA example produces as a figure but fdars docs have as a static SVG; making the static SVG faithfully represent this pattern raises it to reference quality | MEDIUM | fpca.svg needs to show concrete mean ± φ effect, not an abstract ellipse |
-| Coefficient surface β(t) diagram for scalar-on-function regression | The estimated coefficient function is non-obvious to a new user — a diagram showing the spectral domain (x-axis), the coefficient curve above zero where frequency matters more for prediction, and its relationship to the raw spectra makes the regression interpretable | MEDIUM | scalar-on-function.md and the Tecator example both need this |
-| Dataset-matched diagrams | Diagrams that use the actual fdars built-in datasets (Canadian weather, Tecator spectra, Berkeley growth, phoneme) as their illustrative substrate — so the diagram matches what users will see in the worked examples | HIGH per diagram (need to design from data) | Differentiates from generic statistical textbook diagrams |
-| Depth / functional boxplot diagram showing centrality ordering | A diagram showing several curves ordered by depth score, with the most central highlighted and the outliers flagged, teaches functional depth in one glance in a way that no formula can | MEDIUM | depth-functions.svg is a candidate; needs concrete curve geometry |
-| SPM Phase I / Phase II workflow diagram | Control-chart monitoring workflow (Phase I: estimate baseline, compute UCL/LCL; Phase II: test new observations) — almost no Python library docs draw this cleanly; a single diagram makes the spm.md page instantly usable by engineers unfamiliar with FDA-specific monitoring | MEDIUM | spm.svg exists; check whether it shows the Phase I/II distinction |
-| Conformal prediction band diagram | Showing a functional prediction set (upper and lower bounding curves) around a test curve, versus a classical regression confidence interval, communicates the coverage guarantee visually | MEDIUM | conformal-prediction.svg exists; check accuracy |
-| Elastic vs landmark registration side-by-side comparison diagram | Showing two alignment strategies on the same dataset resolves a common "which to use?" question without forcing users to read two separate pages | HIGH | alignment-comparison.svg exists; check whether it actually shows both strategies on shared data |
-| Worked example using a domain the target user recognizes (pharma/food/climate) | fdars already has Tecator (food NIR), biopharma-monitoring, Canadian weather — extending to SPM for inline process data or growth for pediatrics is differentiating because most FDA libraries only use the canonical Berkeley/Canadian examples | MEDIUM per new example | biopharma-monitoring.md and inline-monitoring.md are differentiators; needs strong narrative |
+| `GeminiProvider` (Google Generative AI) | Gemini 1.5/2.0 models have strong structured-output support and are attractive for users already in GCP | MEDIUM | Use `google-generativeai` SDK's `generation_config=GenerationConfig(response_schema=..., response_mime_type="application/json")`. Schema must be translated from Pydantic to Gemini schema format (dict conversion, not native Pydantic). |
+| Offline-first default (Ollama path, no key needed) | Distinguishes fdars from tools that silently require a cloud key; users can get grounded advice in air-gapped environments | LOW | When no key env vars are set and no provider param given, resolve to `ollama` with a clear error if Ollama is not running. Document the offline path prominently. |
+| Native structured outputs vs JSON-mode vs prompt-only — transparent capability detection | Users should not need to know which path is taken; the grounding contract is the same on all paths | MEDIUM | Provider adapter exposes `supports_native_structured_output() -> bool`; `advise()` picks the right call path. Log the chosen path at DEBUG level only; do not expose it in `Advice`. |
 
-### Anti-Features (Deliberately Do NOT Build)
+### Anti-Features (Commonly Requested, Often Problematic)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Generic "logo-style" SVG diagrams (shapes + brand colors, no data) | Looks polished at a glance; fast to author | Adds ink without adding information — a diagram of coloured ellipses labelled "input" → "FPCA" → "scores" teaches nothing that the text does not already say; the data/ink ratio is near zero | Replace with a diagram that shows concrete curve geometry: actual curves going in, actual PC scores coming out |
-| Over-long worked examples (>500 lines of rendered markdown) | Comprehensiveness feels thorough | Users stop reading; the worked example becomes a reference dump rather than a teaching tool; harder to keep API-current | Split into a short primary example (full narrative) and one or two shorter follow-on examples for advanced topics; the Andrews wine series is already well-structured this way |
-| Duplicating API reference content in concept pages | Feels complete | Creates maintenance burden — when the API changes, both the reference and the concept page need updating; common source of staleness | Concept pages explain the why and the intuition; link to API reference for parameter details rather than repeating them |
-| Decorative color variation across SVGs for visual interest rather than semantic distinction | Makes the diagram gallery look varied | Colors carry meaning in scientific diagrams — different colors for groups, states, or categories; using colors only for aesthetics trains users to ignore color, which then fails when color IS semantically needed | Establish palette conventions (e.g., blue = observed, orange = estimated, red = outlier) and apply them consistently across all diagrams |
-| Auto-generated gallery thumbnails without context | Modern documentation practice; low effort | Without a clear problem statement per example, gallery thumbnails are opaque — users cannot identify which example is relevant without clicking every one | Each example should have a one-sentence problem statement in the index visible without clicking through |
-| Interactive widgets (plotly, bokeh, ipywidgets) | Impressive demos; scikit-learn some widgets | Adds a JS dependency to a static MkDocs site; breaks the build-time execution model; increases maintenance surface significantly; fdars PROJECT.md explicitly keeps diagrams as hand-authored SVG | Keep figures as static matplotlib output (SVG or PNG) embedded by markdown-exec; reserve interactivity for external notebooks/examples/ directory |
-| Dark-mode SVG variants | Professional look; Material theme supports dark mode | PROJECT.md explicitly excludes dark-mode rework; maintaining two SVG variants per diagram doubles authoring cost | Note the gap; address in a future milestone; for now ensure base SVGs have sufficient contrast for both modes |
+| LiteLLM / pydantic-ai as unified provider abstraction | "One dependency handles all providers" | Adds a heavy transitive dependency with its own versioning churn; loses control over the validate-and-retry contract; pydantic-ai's agent model is not aligned with fdars's grounding-invariant pattern | Custom `Provider` protocol (3 methods) + thin per-SDK adapters. Each adapter is ~50 lines. Total code is smaller than LiteLLM's surface area. |
+| Streaming responses | "Faster UX for long outputs" | `Advice` is a structured Pydantic object — streaming JSON schema output requires buffering the entire stream before validation anyway; there is no incremental `Advice` to surface | Return the full `Advice` synchronously. If latency is a concern, the offline `build_diagnostics` is instant; the LLM call is the only network hop. |
+| Allowing LLM to generate diagnostic numbers | "Richer interpretation" | Violates the grounding invariant — the core hard constraint of the entire advisor system. A hallucinated GCV value or R-squared is worse than no value. | fdars computes every number; the LLM interprets values that are explicitly present in `diagnostics`. Evidence must cite a value from the dict. |
+| Auto-selecting the cheapest available model | "Cost optimization" | Users need reproducible advice; model auto-switching makes advice non-reproducible and breaks offline tests | Explicit model param + env var default. Document model cost/capability tradeoffs in docs. |
+| HTTP/SSE transport for MCP server | "Remote access" | Deferred in v2.0 for good reason — stdio covers all local/CI usage; HTTP adds auth surface | Keep stdio. HTTP deferred to a future milestone. |
+
+---
+
+## Part B — Per-Aspect Advisor Coverage
+
+Each fdars analysis aspect below needs: (1) a `build_diagnostics` branch (offline, deterministic, fdars-computed values only) and (2) grounded task families for `advise()` (interpretation / parameter / method). The existing code already ships clustering, smoothing, FPCA, alignment, and basis. The following covers the remaining aspects.
+
+### Table Stakes (Users Expect These)
+
+#### depth / outliers
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| `build_diagnostics(result, "depth")` | Depth is the most common exploratory FDA step; users need interpretation of depth score distributions | MEDIUM | Inputs: depth scores array (n,), method name (fraiman_muniz/modal/random_projection/band/rpd), ref_data shape. Compute: `n_obs`, `depth_min`, `depth_max`, `depth_mean`, `depth_median`, `depth_q10`, `depth_q90`, depth histogram bucket counts (10 buckets, plain list). No fdars call needed — pure NumPy over the score array. |
+| `build_diagnostics(result, "outliers")` | Outlier detection produces flags + thresholds; users need to understand what fraction is flagged and why | MEDIUM | Inputs: dict with `outliers` (bool array), `threshold` (scalar), optional `magnitude`/`shape` arrays (from `magnitude_shape`), optional `mei`/`mbd` (from `outliergram`). Compute: `n_obs`, `n_outliers`, `outlier_fraction`, `threshold`, `method` (lrt/magnitude_shape/outliergram inferred from keys present), `has_magnitude_shape` flag, `magnitude_range`/`shape_range` when present. |
+| Interpretation task family for depth | "What does this depth distribution tell me about the dataset?" | LOW | System prompt extension: low bottom decile = heavy-tailed depth (many peripheral curves); bimodal depth = two functional groups. Cite `depth_q10`, `depth_mean`. |
+| Parameter guidance for outlier detection | "Is my threshold/alpha too aggressive?" | LOW | Cite `outlier_fraction`: if > 20% flagged, suggest increasing alpha or trimming; if 0 flagged, suggest decreasing alpha. |
+| Method guidance for depth | "When should I switch from Fraiman-Muniz to RPD?" | LOW | If data is derivative-rich (inferred from user context), recommend RPD (`random_projection_deriv_1d`); if data is 2D, check method variant. |
+
+#### regression / FPCA regression
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| `build_diagnostics(result, "regression")` | Regression is a primary analysis output; users need R-squared, residual stats, and component count guidance | MEDIUM | Inputs: dict with `fitted_values`, `residuals`, `r_squared`, optional `beta_t` (m,), optional `coefficients`. Compute: `n_obs`, `r_squared`, `residual_mean`, `residual_std`, `residual_max_abs`, `residual_skew` (via NumPy), `beta_t_range` (min/max of beta_t when present), `method` (lm/pls/l1/huber/np/fosr inferred from keys). |
+| `build_diagnostics(result, "regression_cv")` | `fregre_cv` and `model_selection_ncomp` return CV curves; users need to interpret optimal_k and the error landscape | MEDIUM | Inputs: dict with `optimal_k`, `cv_errors` (list), `k_values` (list), optional `min_cv_error`. Compute: `optimal_k`, `min_cv_error`, `cv_curve` (list), `k_values` (list), `cv_curve_range` (min/max), `elbow_present` (bool: True if the curve has a local minimum that is not at the boundary). |
+| Interpretation task family for regression | "What does R-squared=0.71 with these residuals mean?" | LOW | Cite `r_squared`, `residual_std`. Flag high residual skew as sign of outliers or nonlinearity. |
+| Parameter guidance for regression | "Should I increase n_comp?" | MEDIUM | Needs CV result: cite `optimal_k` from `fregre_cv`. If `optimal_k` is at `k_max` boundary, recommend increasing `k_max`. |
+| Method guidance for regression | "Switch from lm to robust?" | LOW | Cite `residual_skew` and `residual_max_abs`: high skew or extreme residuals recommend `fregre_l1` or `fregre_huber`. |
+
+#### monitoring / SPM
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| `build_diagnostics(result, "spm")` | SPM Phase I produces T2/SPE statistics and control limits; users need to interpret alarm rates and limit calibration | HIGH | Inputs: dict with `t2` (n,), `spe` (n,), `t2_limit`, `spe_limit`, optional `eigenvalues`, optional `ncomp`. Compute: `n_obs`, `ncomp`, `t2_limit`, `spe_limit`, `t2_max`, `t2_mean`, `t2_exceedance_rate` (fraction above limit in Phase I — should be ~alpha), `spe_max`, `spe_mean`, `spe_exceedance_rate`, `eigenvalues` (list, cast), `variance_explained_cumulative` (list from eigenvalues, same logic as FPCA branch), `spe_kurtosis_excess` (from `spe_moment_match_diagnostic` when eigenvalues present — already a native fdars call returning `excess_kurtosis`). |
+| Interpretation task family for SPM | "Is my Phase I calibration reasonable?" | MEDIUM | Cite `t2_exceedance_rate` vs alpha: if >> alpha, Phase I data may contain outliers or too few in-control samples. Cite `spe_kurtosis_excess` from `spe_moment_match_diagnostic`. |
+| Parameter guidance for SPM | "Should I use more components?" | MEDIUM | Cite `variance_explained_cumulative`: if <90% at `ncomp`, recommend increasing. If `t2_exceedance_rate` >> alpha, recommend robust limit (`t2_limit_robust`). |
+| Method guidance for SPM | "When to use CUSUM/EWMA over T2?" | LOW | If user context mentions sequential/streaming data, recommend `spm_cusum` or `spm_ewma` over `spm_phase1`+`spm_monitor`. Cite the chart type from keys present (`cusum_statistic` for CUSUM path, `smoothed_scores` for EWMA path). |
+
+### Differentiators (Competitive Advantage)
+
+#### represent / basis (new aspect advisor)
+
+Note: `build_diagnostics(result, "basis")` already ships in v2.0. What is missing for the represent aspect is a dedicated advisor for the `Fdata` representation itself — grid density, range coverage, and component count choice before any analysis.
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| `build_diagnostics(result, "represent")` | Represent is the first step in every FDA workflow; catching grid/range problems early prevents downstream errors | MEDIUM | Inputs: Fdata-like object or dict with `data` (n, m), `argvals` (m,), optional `rangeval`. Compute: `n_obs`, `n_points`, `argvals_min`, `argvals_max`, `argvals_spacing_mean`, `argvals_spacing_std`, `is_uniform_grid` (bool: spacing_std / spacing_mean < 0.01), `data_range_min`, `data_range_max`, `data_range_mean`. No fdars call needed — pure NumPy. |
+| Interpretation task for represent | "Is my functional data grid adequate?" | LOW | Cite `n_points`, `is_uniform_grid`. Flag sparse grids (n_points < 20) as requiring pre-smoothing before group analysis. |
+| Parameter guidance for represent | "How many basis functions / FPCA components does this grid support?" | LOW | Cite `n_points`: recommend `n_basis` <= n_points/3 as a rule of thumb; recommend `n_comp` <= min(n_obs-1, n_points//5). |
+
+#### classification
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| `build_diagnostics(result, "classification")` | Classification outputs accuracy + predictions; advisor can guide method and ncomp choice | MEDIUM | Inputs: dict with `accuracy` (float), `predicted` (array), optional `error_rate` (from `fclassif_cv`), optional `fold_errors` (from CV), optional `best_ncomp`. Compute: `n_obs`, `accuracy`, `error_rate` (= 1 - accuracy), `n_classes` (inferred from unique labels when labels passed via kwargs; else `None`), `cv_error_rate` (from `error_rate` key when from CV), `fold_error_std` (std of `fold_errors` when present), `best_ncomp` (pass-through). |
+| Interpretation task for classification | "Is 87% accuracy good for this problem?" | LOW | Cite `accuracy`, `error_rate`. Flag high `fold_error_std` as instability. |
+| Parameter guidance for classification | "Should I increase ncomp for LDA/QDA?" | LOW | Cite `best_ncomp` from CV. If `best_ncomp` is at the boundary, recommend expanding search range. |
+| Method guidance for classification | "Switch from LDA to DD-classifier?" | LOW | Flag when `accuracy` is low with LDA/QDA (cite value): recommend DD-classifier (`fclassif_dd`) for heavy-tailed or non-Gaussian functional distributions. Recommend kernel classifier when sample sizes are small. |
+
+### Anti-Features (Commonly Requested, Often Problematic)
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| LLM-computed diagnostic summaries | "The model can compute mean/std itself from raw data" | Breaks the grounding invariant — any number the model produces is unverifiable and may be fabricated. The invariant requires fdars to compute every number | `build_diagnostics` computes all statistics deterministically from fdars/NumPy; `advise()` only interprets values present in that dict |
+| Unified "auto-detect aspect" from result keys | "Convenience: just pass any result dict" | Key collisions across aspects (e.g., `r_squared` appears in regression and SPM-adjacent methods; `edf` appears in smoothing and basis); auto-detection would be unreliable and would make the API opaque | Require explicit `method=` parameter in `build_diagnostics`. The cost is one extra parameter; the benefit is deterministic routing and clear error messages. |
+| Cross-aspect advice ("Given my smoothing and my clustering...") | "Holistic workflow advice" | Requires combining diagnostics from multiple aspects into one LLM call; the schema becomes unbounded; evidence citation becomes ambiguous | Users compose advisors: run `build_diagnostics` + `advise()` per aspect, read each `Advice`, then decide. The MCP tool loop already supports iterative re-run. |
+| Streaming partial advice | "See recommendations as they arrive" | The validate-and-retry contract requires the full response before schema validation; a partial JSON object fails validation | Return full `Advice` synchronously. The offline `build_diagnostics` phase completes instantly; the LLM phase is the only latency. |
+| ARL simulation as a `build_diagnostics` input path | "Include ARL0 in the SPM advisor" | `arl0_t2` is stochastic (seed-dependent) — including it in `build_diagnostics` would break the determinism guarantee | ARL is a design-time concern; users run `arl0_t2` separately. The SPM advisor uses only deterministic Phase I outputs (T2, SPE, limits, eigenvalues). |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Shared SVG style spec
-    └──required for──> Diagram accuracy sweep (cannot audit 50 diagrams to one bar without a spec)
-                           └──required for──> Diagram coverage gap fill (new diagrams must match the style)
+Provider protocol (custom)
+    required by -> AnthropicProvider refactor
+    required by -> OpenAIProvider (+ base_url for OpenAI-compatible)
+    required by -> GeminiProvider
+    required by -> OllamaProvider
+    required by -> all per-aspect advise() calls
 
-API correctness check
-    └──required for──> Example narrative enrichment (cannot rewrite the why/interpretation text
-                       around code that is broken)
-                           └──enables──> New worked examples (validates patterns before adding pages)
+validate-and-retry contract
+    required by -> JSON-mode path (OpenAI, Ollama, Gemini fallback)
+    enhances -> grounding invariant (prevents silent schema violations)
 
-Cross-link audit (API ref ↔ concept ↔ examples)
-    └──enhances──> Both diagram pages and example pages (all benefit, but neither requires it)
+build_diagnostics per aspect (offline, deterministic)
+    required by -> advise() per aspect (grounded LLM call)
+    required by -> MCP tool fdars_build_diagnostics (extended to new aspects)
+    independent of -> Provider protocol (no network, no LLM)
+
+Existing: build_diagnostics(clustering/smoothing/fpca/alignment/basis) [shipped v2.0]
+    refactored onto -> Provider protocol (advise() side only)
+
+New: build_diagnostics(depth/outliers/regression/regression_cv/spm/represent/classification)
+    follows same pattern as -> existing branches
+
+pyproject.toml extras ([openai], [gemini], [ollama])
+    required by -> respective provider adapters
+    independent of -> [advisor] extra (Anthropic)
+
+MCP runner run_method
+    needs extension for new aspects -> new method names in _SUPPORTED_METHODS
+    requires -> new fdars function mappings per aspect
+
+Agent Skill (fdars-advisor)
+    benefits from -> new aspect advisors (no code change; skill docs update)
+    benefits from -> provider selection (env var FDARS_ADVISOR_PROVIDER)
 ```
 
 ### Dependency Notes
 
-- **Style spec required before diagram accuracy sweep:** Reviewing all 50 SVGs without a standard to measure against produces inconsistent corrections. The spec is the shared ruler.
-- **API correctness before narrative enrichment:** If `markdown-exec` blocks are silently broken, the narrative built around them becomes fiction. Run/verify all examples first.
-- **Coverage gap fill depends on style spec + accuracy sweep:** New diagrams should be authored in the finalized style, not the pre-spec baseline, to avoid a third pass.
-
----
-
-## Diagram Coverage Analysis by FDA Method Area
-
-This maps which FDA topics most need clear visual explanation and whether the existing diagram is likely sufficient or needs rework.
-
-| FDA Topic | Visual Explanation Need | Existing SVG | Assessment |
-|-----------|------------------------|--------------|------------|
-| **Smoothing / basis representation** | HIGH — abstract idea of approximating a noisy discrete signal as a smooth function | `smoothing.svg`, `basis-representation.svg` | Likely needs rework: must show raw noisy observations + smooth fit overlaid, with basis expansion inset |
-| **FPCA (functional PCA)** | HIGH — eigenfunction concept is non-obvious; ± component effect visualization is canonical | `fpca.svg` | Likely needs rework: must show mean ± φ effect on concrete curves, not abstract ellipse |
-| **Elastic registration / alignment** | VERY HIGH — phase vs amplitude split is the most abstract FDA concept; before/after warp is essential | `elastic-alignment.svg`, `alignment-comparison.svg` | Priority rework targets; must show actual misaligned curves + warping function + aligned result |
-| **Landmark registration** | HIGH — shows discrete landmarks being matched; different from elastic | `landmark-registration.svg` | Check whether landmarks are visually distinct from the elastic alignment diagram |
-| **TSRVF / shape analysis** | HIGH — Fisher-Rao metric and SRVF transformation are opaque without a diagram showing the transform | `tsrvf.svg`, `shape-analysis.svg` | High risk of inaccuracy; these are among the most mathematically complex |
-| **Functional regression (scalar-on-function)** | HIGH — coefficient function β(t) is the key output; most users do not know how to read it | `scalar-on-function.svg` | Must show: functional predictor curves + scalar response + β(t) with annotation |
-| **Functional regression (function-on-scalar)** | MEDIUM — regression coefficient functions are slightly more intuitive than scalar-on-function | `function-on-scalar.svg` | Check that it shows the fitted curve family, not just an abstract arrow |
-| **Elastic regression** | MEDIUM — builds on elastic alignment; the regression in shape space is abstract | `elastic-regression.svg` | Likely needs alignment-aware representation showing pre-aligned inputs |
-| **Depth functions / outlier detection** | HIGH — centrality ordering of curves is non-obvious; functional boxplot is the canonical visual | `depth-functions.svg`, `outlier-detection.svg` | Must show actual curves ordered by depth, most central vs extreme, analogous to a box plot |
-| **Functional clustering** | MEDIUM — shows groups of curves; similar to classical clustering but in function space | `clustering.svg`, `elastic-clustering.svg`, `gmm-clustering.svg` | Three separate SVGs — check for redundancy and whether they are differentiated clearly |
-| **SPM / monitoring** | HIGH — Phase I / Phase II workflow and control chart components (CL, UCL, LCL) are engineering concepts that need a process diagram | `spm.svg`, `advanced-spm.svg`, `profile-partial-monitoring.svg` | Must show the Phase I training → Phase II monitoring two-stage workflow |
-| **Conformal prediction** | HIGH — prediction bands (as functional objects) are conceptually different from scalar CIs; needs a diagram of the band geometry | `conformal-prediction.svg`, `conformal-classification.svg` | Check whether diagram shows a functional prediction band vs a scalar CI; often confused |
-| **Tolerance bands** | MEDIUM — similar to conformal; the band wraps all future curves with some coverage guarantee | `tolerance-bands.svg` | Check distinction from conformal is clear in the diagram |
-| **Equivalence testing** | MEDIUM — needs a diagram showing null hypothesis (curves are equivalent within δ) vs alternative | `equivalence-testing.svg` | Lower coverage risk than the alignment/regression topics |
-| **Covariance functions** | MEDIUM — covariance surface C(s,t) is a 2D function over the domain; a heatmap-style illustration | `covariance-functions.svg` | Likely needs to show the covariance surface as a grid or contour |
-| **Andrews transformation** | LOW — mostly a visualization technique; the transformation is mechanical | `andrews-transformation.svg` | Lower priority |
-| **Seasonal analysis** | LOW — familiar time series concept adapted to functions; the diagram augments but is not essential | `seasonal-analysis.svg` | Lower priority |
-
----
-
-## Worked Example Coverage Analysis
-
-Existing 17 examples mapped against method coverage gaps.
-
-| Existing Example | Method Covered | Narrative Quality | Gap |
-|-----------------|----------------|-------------------|-----|
-| `growth-alignment.md` | Elastic alignment, FPCA before/after | Strong (problem-data-method-interpretation) | Check warping function interpretation section |
-| `tecator-regression.md` | Scalar-on-function regression | Strong | Check β(t) interpretation section |
-| `canadian-weather.md` | Overview / introduction | Strong | — |
-| `canadian-precipitation.md` | Precipitation depth / functional boxplot | Check | Depth interpretation |
-| `canadian-seasonal.md` | Seasonal decomposition | Check | — |
-| `phoneme-shape.md` | Shape analysis / TSRVF | Check | High complexity; interpretation risk |
-| `sonar-tsrvf.md` | TSRVF on sonar data | Check | Duplicate of phoneme? Needs distinct narrative |
-| `andrews-wine.md` | Andrews transformation | Check | — |
-| `andrews-wine-clustering.md` | Clustering | Check | — |
-| `andrews-wine-intro.md` | Introduction via wine | Check | Possibly redundant with canadian-weather intro |
-| `andrews-wine-qc.md` | Quality control / outliers | Check | — |
-| `biopharma-monitoring.md` | SPM in pharma context | Strong domain relevance | Check Phase I/II workflow explicitness |
-| `inline-monitoring.md` | Online/streaming monitoring | Check | Explain streaming depth concept |
-| `cross-validation.md` | CV for functional models | Check | Needs interpretation of CV scores |
-| `explainability-regions.md` | Model explainability | Check | Interpretation of influence regions |
-| `tecator-monitoring.md` | SPM on NIR spectra | Check | — |
-
-**Under-documented capabilities (candidates for new worked examples):**
-
-| Capability | Rationale | Suggested Dataset |
-|------------|-----------|-------------------|
-| Functional clustering (GMM) | GMM clustering page exists but no dedicated worked example with interpretation of cluster means | Andrews wine or simulation |
-| Conformal prediction coverage guarantee | Conformal page exists; no example that walks through the coverage guarantee empirically | Tecator or Canadian weather |
-| Tolerance bands (vs conformal) | Tolerance bands and conformal bands are easily confused; a worked comparison example resolves this | Canadian weather |
-| Outlier detection workflow | `outlier-detection.md` concept page exists; no worked example that shows the full detection → investigation workflow | Simulation or phoneme |
-| Function-on-scalar regression with interpretation | Only scalar-on-function has a worked example (Tecator); function-on-scalar (e.g., predict growth curves from sex/age group) is under-represented | Berkeley growth |
+- **Provider protocol required before all provider adapters:** The `Provider` protocol (a Python `Protocol` class with `complete(messages, schema) -> Advice`) must be defined before any adapter can be written. All per-aspect `advise()` refactoring blocks on this.
+- **validate-and-retry required by non-Anthropic providers:** Anthropic's `client.messages.parse` handles schema enforcement natively. OpenAI structured outputs are reliable for `gpt-4o` but not guaranteed for all models. Ollama and Gemini fallback paths always need the retry contract.
+- **`build_diagnostics` branches are independent:** Each new branch (depth, outliers, regression, spm, represent, classification) can be developed and tested offline without any provider work. This means provider work and new-aspect `build_diagnostics` work can be parallelized.
+- **MCP runner extension blocks on new `build_diagnostics` branches:** `run_method` maps method names to fdars functions. New method names (`"depth"`, `"classification"`, etc.) cannot be added to `_SUPPORTED_METHODS` until the corresponding `build_diagnostics` branch exists and the fdars function signature is confirmed.
 
 ---
 
 ## MVP Definition
 
-The milestone scope from PROJECT.md is a full sweep, not a selective one. Within that, priority ordering:
+### Launch With (v3.0)
 
-### Phase 1 — Foundation (do first, everything depends on it)
+- [x] `Provider` protocol + `AnthropicProvider` refactor — required to unblock all other provider work
+- [x] `OpenAIProvider` with `base_url` — covers OpenAI + all OpenAI-compatible local endpoints; highest user demand after Anthropic
+- [x] `OllamaProvider` — local/offline path; no API key; validates the grounding invariant on constrained models
+- [x] validate-and-retry contract — required for all non-Anthropic providers to maintain grounding
+- [x] per-provider optional extras (`[openai]`, `[gemini]`, `[ollama]`) — packaging correctness
+- [x] `build_diagnostics` + task families for depth/outliers — most commonly used after clustering
+- [x] `build_diagnostics` + task families for regression/regression_cv — primary analysis output
+- [x] `build_diagnostics` + task families for monitoring/SPM — highest diagnostic complexity, highest user value
+- [x] `build_diagnostics` for represent — first-step advisor, low complexity, high onboarding value
+- [x] `build_diagnostics` + task families for classification — completes full-library coverage
+- [x] `GeminiProvider` — third major cloud provider; completes the cloud triad
+- [x] MCP runner extension to new aspects — required to expose new advisors via Tool surface
+- [x] Refactor existing advisors (clustering/smoothing/FPCA/alignment/basis) onto provider layer
 
-- [ ] SVG style spec — defines the ruler for all subsequent diagram work
-- [ ] API correctness sweep — verifies all `markdown-exec` blocks produce valid output
-- [ ] Nav + reference-API audit — systematic list of diagram gaps and new-example candidates
+### Add After Validation (v3.x)
 
-### Phase 2 — Diagram accuracy and coverage (primary deliverable)
+- [ ] HTTP/SSE transport for MCP — when remote/multi-user access is requested
+- [ ] ARL-aware SPM advisor — when users request run-length design guidance (stochastic, separate from `build_diagnostics`)
+- [ ] Cross-aspect compound diagnostics — if users request workflow-level advice (needs schema design first)
 
-- [ ] Rework highest-risk diagrams: elastic-alignment, fpca, basis-representation, scalar-on-function, depth-functions, spm, conformal-prediction (see Diagram Coverage Analysis above)
-- [ ] Close verified coverage gaps identified in the audit
-- [ ] Apply shared style spec to all existing diagrams
+### Future Consideration (v4+)
 
-### Phase 3 — Example narrative and coverage (secondary deliverable)
-
-- [ ] Audit and enrich interpretation sections in existing 17 examples
-- [ ] Add new worked examples for the identified under-documented capabilities
-- [ ] Verify cross-links from examples to API reference and concept pages
-
-### Defer (v2+)
-
-- [ ] Dark-mode SVG variants — excluded from this milestone
-- [ ] Interactive figures (plotly/bokeh) — excluded from this milestone
-- [ ] Full Diataxis restructure of nav — would require content reorganization beyond scope
+- [ ] Async `advise()` — if long-running LLM calls block interactive usage
+- [ ] Fine-tuned domain-specific model support — if users run private FDA-expert models
+- [ ] Multi-turn conversation mode — if agentic workflows need persistent context across re-runs
 
 ---
 
@@ -180,56 +197,63 @@ The milestone scope from PROJECT.md is a full sweep, not a selective one. Within
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| SVG style spec | HIGH — enables all other diagram work | LOW | P1 |
-| Rework elastic-alignment diagram (before/after warp) | HIGH — most-queried FDA concept | MEDIUM | P1 |
-| Rework FPCA diagram (mean ± eigenfunction) | HIGH — canonical FDA visualization | MEDIUM | P1 |
-| Rework scalar-on-function diagram (β(t) annotated) | HIGH — regression interpretation | MEDIUM | P1 |
-| Rework depth-functions / outlier diagram | HIGH — centrality is non-obvious | MEDIUM | P1 |
-| Rework SPM diagram (Phase I/II workflow) | HIGH — engineers need the workflow | MEDIUM | P1 |
-| Fix broken example code (API correctness) | HIGH — broken examples destroy trust | LOW–MEDIUM | P1 |
-| Rework basis-representation diagram | HIGH — conceptual foundation | MEDIUM | P1 |
-| Add interpretation prose to existing examples | MEDIUM — improves but not critical to usability | MEDIUM | P2 |
-| Rework TSRVF / shape-analysis diagrams | MEDIUM — complex, risk of inaccuracy | HIGH | P2 |
-| Cross-link audit (example ↔ API ↔ concept) | MEDIUM — improves discoverability | LOW | P2 |
-| New worked example: conformal prediction coverage | MEDIUM — differentiates | MEDIUM | P2 |
-| New worked example: function-on-scalar regression | MEDIUM — coverage gap | MEDIUM | P2 |
-| New worked example: outlier detection workflow | MEDIUM — coverage gap | MEDIUM | P2 |
-| Rework covariance-functions diagram | LOW — niche use | MEDIUM | P3 |
-| New worked example: GMM clustering | LOW — already 3 clustering examples | MEDIUM | P3 |
-| Andrews / seasonal diagram refinements | LOW — lower complexity topics | LOW | P3 |
+| Provider protocol + AnthropicProvider refactor | HIGH | MEDIUM | P1 |
+| OpenAIProvider (+ base_url) | HIGH | MEDIUM | P1 |
+| OllamaProvider (offline-capable) | HIGH | LOW | P1 |
+| validate-and-retry contract | HIGH | MEDIUM | P1 |
+| build_diagnostics: depth + outliers | HIGH | MEDIUM | P1 |
+| build_diagnostics: regression + regression_cv | HIGH | MEDIUM | P1 |
+| build_diagnostics: SPM / monitoring | HIGH | HIGH | P1 |
+| build_diagnostics: represent | MEDIUM | LOW | P1 |
+| build_diagnostics: classification | MEDIUM | MEDIUM | P1 |
+| GeminiProvider | MEDIUM | MEDIUM | P2 |
+| MCP runner extension (new aspects) | MEDIUM | LOW | P2 |
+| per-provider pyproject.toml extras | HIGH | LOW | P1 |
+| Refactor existing advisors onto provider layer | HIGH | MEDIUM | P1 |
+
+**Priority key:**
+- P1: Must have for v3.0 — grounding invariant + full-library coverage depend on it
+- P2: Should have in v3.0, can be last phase if time-constrained
+- P3: Defer to v3.x
 
 ---
 
-## Competitor Feature Analysis
+## Per-Aspect Diagnostics Reference
 
-| Doc Feature | scikit-learn | scikit-fda | statsmodels | fdars current | fdars target |
-|-------------|-------------|------------|-------------|---------------|--------------|
-| Concept diagram per method page | Yes (most pages) | Inline plots via sphinx-gallery | Some | Yes (~50 SVGs) | Yes, all pages, accurate |
-| Shared visual style | Yes (matplotlib defaults) | sphinx-gallery auto-style | Inconsistent | Informal baseline | Formalized spec |
-| Problem → Data → Method → Interpretation narrative | Partial (user guide focused on method) | Yes (examples) | Yes (notebooks) | Yes (best examples) | Consistent across all 17 |
-| Executable examples at build time | sphinx-gallery | sphinx-gallery | nbconvert | markdown-exec | markdown-exec (existing) |
-| Cross-links concept ↔ API ↔ examples | Dense and bidirectional | Moderate | Partial | Sparse | Systematic |
-| Dataset-specific diagram (vs generic) | Rarely | Yes (uses real datasets) | Rarely | Rarely | Target for top-priority diagrams |
-| Phase I/II SPM workflow diagram | N/A (no SPM) | No | Partial (time series) | Partial | Explicit Phase I/II diagram |
-| Conformal prediction visual | No | No | No | Yes (SVG exists) | Check accuracy; differentiator |
-| Functional boxplot / depth diagram | No | Yes (sphinx-gallery plot) | No | Partial | Full centrality ordering diagram |
+This table is the canonical grounding reference for roadmap planning. Each row
+defines what `build_diagnostics` must compute (no LLM, no network) and what task
+families `advise()` must cover. Complexity is relative to the existing clustering
+branch (which sets the HIGH bar).
+
+| Aspect | `build_diagnostics` key outputs | Task families | Complexity | Depends on existing code |
+|--------|--------------------------------|---------------|------------|--------------------------|
+| **represent** | n_obs, n_points, argvals_min/max, spacing_mean/std, is_uniform_grid, data_range_min/max/mean | interpretation, parameter | LOW | Pure NumPy only; no fdars call needed |
+| **smoothing** | lambda_values, gcv_curve, edf, optimal_lambda, optimal_gcv, optimal_edf, gcv_aic/bic_approx | interpretation, parameter, method | MEDIUM | Already shipped (v2.0) — `_build_smoothing_diagnostics` |
+| **basis** | n_basis_values, gcv_curve, edf, optimal_n_basis, optimal_gcv, optimal_edf, gcv_aic/bic_approx | interpretation, parameter, method | MEDIUM | Already shipped (v2.0) — `_build_basis_diagnostics` |
+| **alignment** | n_obs, mean_min/max/avg, amplitude_mean/max, phase_mean/max, converged, n_iter | interpretation, parameter, method | MEDIUM | Already shipped (v2.0) — `_build_alignment_diagnostics` |
+| **fpca** | n_components, eigenvalues, explained_variance_ratio, cumulative_variance_explained, phase_leakage_indicator | interpretation, parameter, method | MEDIUM | Already shipped (v2.0) — `_build_fpca_diagnostics` |
+| **clustering** | k, cluster_means, cluster_sizes, pairwise_amplitude/phase_distance, mean_amplitude/phase_separation | interpretation, parameter, method | HIGH | Already shipped (v2.0) — `_build_clustering_diagnostics` |
+| **depth** | n_obs, depth_min/max/mean/median/q10/q90, depth_histogram (10 buckets), method | interpretation, parameter, method | LOW | Pure NumPy over score array; `fdars.depth.*` called by user before advisor |
+| **outliers** | n_obs, n_outliers, outlier_fraction, threshold, method, has_magnitude_shape, magnitude_range, shape_range | interpretation, parameter | LOW | Pure NumPy over result dict keys; reads what `detect_outliers_lrt` / `outliergram` / `magnitude_shape` returned |
+| **classification** | n_obs, accuracy, error_rate, n_classes, cv_error_rate, fold_error_std, best_ncomp | interpretation, parameter, method | LOW | Pure NumPy; reads what `fclassif_*` / `fclassif_cv` returned |
+| **regression** | n_obs, r_squared, residual_mean/std/max_abs/skew, beta_t_range, method | interpretation, parameter, method | MEDIUM | Pure NumPy over result dict; reads what `fregre_lm`/`fregre_pls`/etc. returned |
+| **regression_cv** | optimal_k, min_cv_error, cv_curve, k_values, cv_curve_range, elbow_present | interpretation, parameter | MEDIUM | Pure NumPy; reads `fregre_cv` / `model_selection_ncomp` result |
+| **spm** | n_obs, ncomp, t2_limit, spe_limit, t2_max/mean, t2_exceedance_rate, spe_max/mean, spe_exceedance_rate, variance_explained_cumulative, spe_kurtosis_excess | interpretation, parameter, method | HIGH | Reads `spm_phase1` result; calls `spe_moment_match_diagnostic` (existing fdars function) for kurtosis |
 
 ---
 
 ## Sources
 
-- [scikit-fda examples index](https://fda.readthedocs.io/en/latest/auto_examples/index.html) — MEDIUM confidence (web)
-- [scikit-fda FPCA example](https://fda.readthedocs.io/en/stable/auto_examples/plot_fpca.html) — MEDIUM confidence (web)
-- [scikit-learn user guide](https://scikit-learn.org/stable/user_guide.html) — MEDIUM confidence (web)
-- [Scientific Python Development Guide — documentation](https://learn.scientific-python.org/development/guides/docs/) — MEDIUM confidence (web)
-- [Diátaxis framework](https://diataxis.fr/) — MEDIUM confidence (web)
-- [statsmodels examples](https://www.statsmodels.org/stable/examples/index.html) — MEDIUM confidence (web)
-- [Sphinx-Gallery structuring guide](https://sphinx-gallery.github.io/stable/syntax.html) — MEDIUM confidence (web)
-- [GPyTorch regression tutorial](https://docs.gpytorch.ai/en/stable/examples/01_Exact_GPs/Simple_GP_Regression.html) — MEDIUM confidence (web)
-- Research into elastic FDA (Fisher-Rao metric, SRVF framework) from arxiv.org/pdf/1103.3817 — MEDIUM confidence (web)
-- Existing fdars docs survey (`docs/examples/`, `docs/represent/`, `docs/assets/diagrams/`) — HIGH confidence (direct inspection)
+- Codebase: `/home/simonm/projects/rust/pyfda/python/fdars/advisor.py` (existing build_diagnostics branches, schema, grounding invariant, advise() implementation)
+- Codebase: `/home/simonm/projects/rust/pyfda/python/fdars/mcp/_runner.py` (existing method dispatch, _SUPPORTED_METHODS)
+- Codebase: `/home/simonm/projects/rust/pyfda/python/fdars/mcp/_registry.py` (HandleRegistry pattern)
+- Codebase: `/home/simonm/projects/rust/pyfda/src/depth_mod.rs` (depth methods: fraiman_muniz, modal, random_projection, band, modified_band, rpd, functional_spatial)
+- Codebase: `/home/simonm/projects/rust/pyfda/src/regression_mod.rs` (fpca, fregre_lm, fregre_pls, fregre_np, fregre_l1, fregre_huber, fregre_cv, model_selection_ncomp, fosr, fanova)
+- Codebase: `/home/simonm/projects/rust/pyfda/src/outliers_mod.rs` (detect_outliers_lrt, outliergram, magnitude_shape)
+- Codebase: `/home/simonm/projects/rust/pyfda/src/spm_mod.rs` (spm_phase1, spm_monitor, spe_moment_match_diagnostic, t2_pc_contributions, spm_cusum, spm_ewma, t2_limit_robust, spe_limit_robust)
+- Codebase: `/home/simonm/projects/rust/pyfda/src/classification_mod.rs` (fclassif_lda, fclassif_qda, fclassif_knn, fclassif_kernel, fclassif_cv, fclassif_dd)
+- Codebase: `/home/simonm/projects/rust/pyfda/.planning/PROJECT.md` (v3.0 milestone scope, grounding invariant, key decisions)
 
 ---
-
-*Feature research for: fdars documentation overhaul (diagrams + examples)*
-*Researched: 2026-08-07*
+*Feature research for: fdars v3.0 — provider-agnostic AI advisor + full-library coverage*
+*Researched: 2026-08-12*

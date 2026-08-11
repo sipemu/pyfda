@@ -1,8 +1,8 @@
 # Architecture Research
 
-**Domain:** Documentation design system — hand-authored SVG diagrams + build-time reproducible figure pipeline (fdars / pyfda MkDocs site)
-**Researched:** 2026-08-07
-**Confidence:** HIGH (derived from direct codebase analysis; confirmed against web sources)
+**Domain:** Provider-agnostic LLM advisor layer + per-aspect advisor coverage (fdars v3.0)
+**Researched:** 2026-08-12
+**Confidence:** HIGH (derived from direct codebase analysis of advisor.py, mcp/server.py, mcp/_runner.py, mcp/_compare.py, mcp/_registry.py, __init__.py, .claude/skills/fdars-advisor/SKILL.md)
 
 ---
 
@@ -11,536 +11,504 @@
 ### System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        AUTHORING LAYER                                  │
-│                                                                         │
-│  ┌──────────────────────────┐   ┌─────────────────────────────────┐    │
-│  │  SVG Design System       │   │  Figure Pipeline                │    │
-│  │  (hand-authored)         │   │  (build-time execution)         │    │
-│  │                          │   │                                 │    │
-│  │  style-spec.md           │   │  scripts/docs_fig.py  ←─ rcP   │    │
-│  │      ↓ (copy block)      │   │  scripts/docs_data.py ←─ CSV   │    │
-│  │  diagrams/*.svg          │   │      ↑ imported via PYTHONPATH  │    │
-│  │  (43 files, inline SVG)  │   │  docs/**/*.md (exec blocks)     │    │
-│  └──────────────────────────┘   └─────────────────────────────────┘    │
-└───────────────────┬─────────────────────────────┬───────────────────────┘
-                    │                             │
-                    ▼                             ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        BUILD LAYER                                      │
-│                                                                         │
-│  MkDocs Material (mkdocs build --strict)                                │
-│    ├── markdown-exec plugin  →  exec blocks  →  inline SVG figures      │
-│    ├── docs/hooks.py         →  PYTHONPATH fallback for mkdocs serve    │
-│    └── docs/**/*.md          →  SVG <img> references (../assets/...)   │
-│                                                                         │
-│  Post-build gate:                                                       │
-│    scripts/check_docs_figures.py site/   →  exits 1 if any traceback   │
-└───────────────────┬─────────────────────────────────────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        OUTPUT LAYER                                     │
-│                                                                         │
-│  site/  (HTML, inline SVGs, embedded matplotlib SVG figures)            │
-│    Deployed: GitHub Pages (https://sipemu.github.io/pyfda/)             │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CONSUMER SURFACES                                 │
+│                                                                             │
+│  ┌──────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  │
+│  │  Python API       │  │  MCP / Tool Server   │  │  Agent Skill         │  │
+│  │  fdars.advisor    │  │  fdars.mcp.server    │  │  .claude/skills/     │  │
+│  │  advise()         │  │  fdars_build_diag    │  │  fdars-advisor/      │  │
+│  │  build_diag_*()   │  │  fdars_run_method    │  │  SKILL.md            │  │
+│  │  (public API)     │  │  fdars_compare_run   │  │  (orchestration)     │  │
+│  └────────┬─────────┘  └──────────┬───────────┘  └──────────┬───────────┘  │
+└───────────┼─────────────────────────┼──────────────────────────┼─────────────┘
+            │                         │                          │
+            ▼                         ▼                          ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           ADVISOR CORE  (python/fdars/advisor/)             │
+│                                                                             │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │  Schema layer (Advice, Recommendation — Pydantic / fallback stubs)   │  │
+│  │  _system_prompt(task, aspect)   grounding invariant + FDA primer      │  │
+│  │  advise(diagnostics, *, task, domain_context, provider=…) → Advice   │  │
+│  └────────────────────────────────────┬─────────────────────────────────┘  │
+│                                       │                                     │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                  PROVIDER LAYER  (advisor/providers/)                │  │
+│  │                                                                      │  │
+│  │  Provider (Protocol)                                                 │  │
+│  │  ┌─────────────────┐  ┌──────────────────┐  ┌────────────────────┐  │  │
+│  │  │ AnthropicAdapter│  │ OpenAIAdapter     │  │ GeminiAdapter      │  │  │
+│  │  │ (structured out)│  │ (structured out   │  │ (structured out /  │  │  │
+│  │  │  parse() path)  │  │  / json fallback) │  │  json fallback)    │  │  │
+│  │  └─────────────────┘  └──────────────────┘  └────────────────────┘  │  │
+│  │  ┌─────────────────┐  ┌──────────────────────────────────────────┐  │  │
+│  │  │ OllamaAdapter   │  │ ValidateAndRetry wrapper (all adapters)  │  │  │
+│  │  │ (json fallback) │  │ schema-validate → repair-prompt → retry  │  │  │
+│  │  └─────────────────┘  └──────────────────────────────────────────┘  │  │
+│  │  resolve_provider(config/env) → Provider                            │  │
+│  └────────────────────────────────────┬─────────────────────────────────┘  │
+│                                       │                                     │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                  DIAGNOSTICS LAYER  (advisor/aspects/)               │  │
+│  │                                                                      │  │
+│  │  build_diagnostics(result, method, **kw) → dict  ← UNCHANGED API    │  │
+│  │  (dispatcher; routes to per-aspect builder below)                   │  │
+│  │                                                                      │  │
+│  │  Aspects:                                                            │  │
+│  │  ┌───────────────┐ ┌──────────────┐ ┌────────────────────────────┐  │  │
+│  │  │ represent/    │ │ smoothing/   │ │ alignment/                  │  │  │
+│  │  │ basis         │ │ pspline/gcv  │ │ karcher/srsf                │  │  │
+│  │  └───────────────┘ └──────────────┘ └────────────────────────────┘  │  │
+│  │  ┌───────────────┐ ┌──────────────┐ ┌────────────────────────────┐  │  │
+│  │  │ depth/        │ │ regression/  │ │ monitoring/                 │  │  │
+│  │  │ outliers      │ │ fpca/fosr    │ │ spm/tolerance/conformal     │  │  │
+│  │  └───────────────┘ └──────────────┘ └────────────────────────────┘  │  │
+│  │  ┌───────────────┐                                                   │  │
+│  │  │ classification│                                                   │  │
+│  │  └───────────────┘                                                   │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+            │
+            ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    COMPUTE LAYER  (unchanged)                                │
+│  fdars-core (Rust) ← PyO3 bindings ← fdars native submodules               │
+│  fdars computes all numbers; advisor layer only interprets                  │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Component Boundaries
+### Component Responsibilities
 
-| Component | Responsibility | Lives In | Changes By |
-|-----------|---------------|----------|------------|
-| Style spec | Single source of truth for palette, typography, spacing, viewBox | `.planning/research/style-spec.md` (or `docs/assets/diagrams/STYLE.md`) | Edited once; applied globally |
-| Canonical `<style>` block | The verbatim CSS class definitions to paste into every SVG | Part of style spec | Updated spec triggers sweep of all diagrams |
-| Individual SVG diagrams | Concept visualisation of one FDA method; hand-authored | `docs/assets/diagrams/*.svg` | Per-diagram authoring sweeps (section-by-section) |
-| Card / thumb SVGs | Section index hero images (not method diagrams) | `docs/assets/cards/*.svg`, `docs/assets/thumb/*.svg` | Treated separately; lower accuracy requirement |
-| `docs_fig.py` | Matplotlib style, `fig()` factory, `render()` → inline SVG string | `scripts/docs_fig.py` | Only when style or render behavior changes |
-| `docs_data.py` | Canonical dataset loaders (`load_*` functions) for build-time use | `scripts/docs_data.py` | Only when adding new datasets |
-| Example pages | Narrative + exec blocks that call `docs_fig` / `docs_data` | `docs/examples/*.md`, `docs/**/*.md` | Section-by-section example sweep |
-| Build gate | Detects silent exec-block tracebacks after `mkdocs build` | `scripts/check_docs_figures.py` | Maintained alongside pipeline |
-| Scorecard | Mechanical A+ criteria check per page | `scripts/a_plus_scorecard.py` | Maintained alongside quality bar |
+| Component | Responsibility | File (new/modified) |
+|-----------|---------------|---------------------|
+| `Provider` protocol | Defines `complete_structured(schema, messages) -> dict` + capability flags | NEW `advisor/providers/_protocol.py` |
+| `AnthropicAdapter` | Wraps existing `client.messages.parse()` path; moves inline call out of `advise()` | NEW `advisor/providers/anthropic.py` (REFACTORS existing code in `advisor.py`) |
+| `OpenAIAdapter` | `client.chat.completions.parse()` for structured output; json fallback | NEW `advisor/providers/openai.py` |
+| `GeminiAdapter` | Gemini structured output or json-mode + schema injection | NEW `advisor/providers/gemini.py` |
+| `OllamaAdapter` | Local http `/api/chat` JSON mode; no API key | NEW `advisor/providers/ollama.py` |
+| `ValidateAndRetry` | Schema-validates provider output; repair-prompt retry loop; wraps all adapters | NEW `advisor/providers/_validate.py` |
+| `resolve_provider()` | Factory: reads config/env → returns instantiated Provider | NEW `advisor/providers/_factory.py` |
+| `advise()` | Grounded call; refactored to accept `provider=` instead of inline Anthropic | MODIFIED `advisor/__init__.py` (was `advisor.py`) |
+| `_system_prompt()` | Grounding prompt; gains aspect-awareness for new aspects | MODIFIED `advisor/__init__.py` |
+| `Advice` / `Recommendation` | Pydantic schema; unchanged surface; centralized here | STAYS in `advisor/__init__.py` |
+| `build_diagnostics()` | Dispatcher; gains new aspect method strings | MODIFIED `advisor/__init__.py` |
+| `_build_*_diagnostics()` | Per-aspect builders; existing 5 stay; 2+ new aspects added | NEW/MODIFIED in `advisor/aspects/` |
+| `mcp/server.py` | `_SUPPORTED_METHODS` set extended; `provider` param added to tool signatures | MODIFIED |
+| `mcp/_runner.py` | `run_method()` dispatch extended to new aspects | MODIFIED |
+| `mcp/_compare.py` | `_ALLOWED_PARAMS` extended; no structural change | MODIFIED |
+| `.claude/skills/fdars-advisor/SKILL.md` | `description` extended to cover new aspects + provider selection | MODIFIED |
 
 ---
 
-## Diagram Design System
-
-### The De-Facto Baseline (what already exists)
-
-35 of 43 diagrams already share a consistent pattern:
-
-```xml
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none"
-     role="img" aria-label="[description]">
-  <style>
-    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
-    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
-    .lab{font:700 13px system-ui,sans-serif}
-    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
-    .mono{font:600 12px ui-monospace,monospace}
-  </style>
-  <!-- Title + subtitle -->
-  <text class="ttl" x="360" y="26" text-anchor="middle">...</text>
-  <text class="sub" x="360" y="46" text-anchor="middle">...</text>
-  <!-- Three-panel layout: input | method box | output -->
-  ...
-</svg>
-```
-
-The 8–9 outlier diagrams use `font-family='Segoe UI, system-ui, sans-serif'` as an SVG attribute instead of the `<style>` block, have non-standard viewBox sizes (480, 520, 400, 250 height), and use ad-hoc fill colors rather than the Bootstrap-ish palette. These are the diagrams that need the most work.
-
-### Design Tokens — Canonical Spec
-
-The style spec formalizes what is already implicitly the standard.
-
-**viewBox Convention**
-- Standard: `viewBox="0 0 720 300"` — wide landscape, fits content column
-- Tall variant (for multi-row content): `viewBox="0 0 720 420"` — use sparingly; prefer 300
-- Never use pixel `width`/`height` attributes alongside `viewBox` (breaks responsive scaling)
-
-**Typography Classes (canonical `<style>` block)**
-
-| Class | Role | Spec |
-|-------|------|------|
-| `.ttl` | Diagram title | `font:700 17px system-ui,-apple-system,sans-serif; fill:#1a1a2e` |
-| `.sub` | Subtitle / caption | `font:400 12px system-ui,sans-serif; fill:#6c757d` |
-| `.lab` | Panel header label | `font:700 13px system-ui,sans-serif` (fill varies by panel accent) |
-| `.sm`  | Small annotation | `font:400 11px system-ui,sans-serif; fill:#495057` |
-| `.mono` | API function name | `font:600 12px ui-monospace,monospace` (fill matches accent) |
-
-**Palette — Structural Colours** (used for backgrounds, borders, axes, arrows)
-
-| Token | Hex | Role |
-|-------|-----|------|
-| `text-dark` | `#1a1a2e` | Title text |
-| `text-body` | `#495057` | Body annotations |
-| `text-muted` | `#6c757d` | Subtitles, secondary labels |
-| `border-muted` | `#ced4da` | Panel borders (neutral panels) |
-| `stroke-axis` | `#adb5bd` | Axis lines, arrows, grid |
-| `bg-neutral` | `#f8f9fa` | Input/raw-data panel background |
-| `bg-white` | `#ffffff` | Inner item cards |
-
-**Palette — Semantic Accent Colours** (used for method/output panels and curve strokes)
-
-| Token | Hex | Role | Usage example |
-|-------|-----|------|---------------|
-| `accent-blue` | `#0d6efd` | Primary method accent | Fdata, smoothing, basis |
-| `accent-blue-tint` | `#eaf1ff` | Tinted panel background | Blue-accent panel bg |
-| `accent-blue-border` | `#b6d0ff` | Inner card border | Inside blue panels |
-| `accent-green` | `#198754` | Basis, reconstruction | Basis representation |
-| `accent-green-tint` | `#eafaf1` | Green panel bg | Basis panel |
-| `accent-orange` | `#fd7e14` | Alignment, warping | Elastic alignment, SRSF |
-| `accent-orange-tint` | `#fff4ea` | Orange panel bg | Alignment panels |
-| `accent-red` | `#dc3545` | Outliers, anomalies | Outlier detection |
-| `accent-purple` | `#6f42c1` | Classification, FPCA | FPCA components |
-| `accent-indigo` | `#3f51b5` | Primary curve color | Same as docs_fig primary |
-
-**Stroke Weights**
-
-| Context | Weight |
-|---------|--------|
-| Panel border | `1.5` |
-| Axis line | `1.2` |
-| Secondary / background curves | `1.6–1.8` |
-| Primary / highlighted curve | `2.4–2.8` |
-| Mean / reference line | `2.4–2.6` |
-| Arrow shaft | `2.0` |
-
-**Standard Three-Panel Layout** (the dominant pattern)
+## Recommended Project Structure
 
 ```
-x=24   x=220  x=272  x=448  x=500  x=696
-  [  Input panel  ] → [  Method box  ] → [  Output panel  ]
-  y=70                                              y=258
-```
-- Panels: `rx="12"` rounded corners
-- Arrow: simple `<path d="M... h34"> + arrowhead polygon` at neutral stroke `#adb5bd`
-- Title at `y=26` (`.ttl`), subtitle at `y=46` (`.sub`)
-- Panel header at `y=94` (`.lab`), sub-caption at `y=112` (`.sm`)
+python/fdars/
+├── advisor/                      # NEW: package replaces advisor.py
+│   ├── __init__.py               # Re-exports build_diagnostics, advise, describe_cluster_differences,
+│   │                             # Advice, Recommendation — public API unchanged
+│   ├── _schema.py                # Advice + Recommendation pydantic models + fallback stubs
+│   │                             # (moved out of __init__ for clarity)
+│   ├── _prompts.py               # _system_prompt(task, aspect) — grounding prompt
+│   │                             # gains aspect-specific FDA primer extensions
+│   │
+│   ├── providers/                # NEW: Provider protocol + per-backend adapters
+│   │   ├── __init__.py           # exports: Provider, resolve_provider, AnthropicAdapter, …
+│   │   ├── _protocol.py          # Provider Protocol (runtime_checkable) + CapabilityFlags
+│   │   ├── _validate.py          # ValidateAndRetry wrapper: schema-validate → repair-prompt → retry
+│   │   ├── _factory.py           # resolve_provider(provider=, model=, api_key=, base_url=, **kw)
+│   │   ├── anthropic.py          # AnthropicAdapter — wraps messages.parse(); native structured output
+│   │   ├── openai.py             # OpenAIAdapter — chat.completions.parse() + json fallback
+│   │   ├── gemini.py             # GeminiAdapter — structured output or json-mode
+│   │   └── ollama.py             # OllamaAdapter — local /api/chat; no API key; json-mode only
+│   │
+│   └── aspects/                  # NEW: per-aspect diagnostic builders
+│       ├── __init__.py           # exports: build_diagnostics_<aspect> for each aspect
+│       ├── _base.py              # shared helpers: _to_float_list, _safe_float, etc.
+│       ├── smoothing.py          # _build_smoothing_diagnostics (moved from advisor.py)
+│       ├── basis.py              # _build_basis_diagnostics (moved from advisor.py)
+│       ├── alignment.py          # _build_alignment_diagnostics (moved from advisor.py)
+│       ├── fpca.py               # _build_fpca_diagnostics (moved from advisor.py)
+│       ├── clustering.py         # _build_clustering_diagnostics (moved from advisor.py)
+│       ├── depth.py              # NEW: depth + outlier diagnostics
+│       ├── regression.py         # NEW: FOSR, FANOVA, PLS, robust regression diagnostics
+│       ├── monitoring.py         # NEW: SPM / tolerance / conformal / seasonal diagnostics
+│       └── classification.py     # NEW: LDA, QDA, k-NN classification diagnostics
+│
+├── mcp/
+│   ├── __init__.py               # unchanged
+│   ├── _registry.py              # unchanged
+│   ├── _runner.py                # extended: new aspect methods added to dispatch
+│   ├── _compare.py               # extended: _ALLOWED_PARAMS gains new aspect params
+│   └── server.py                 # extended: _SUPPORTED_METHODS set expanded;
+│                                 #   fdars_build_diagnostics + fdars_run_method gain
+│                                 #   optional `provider` param (str, passed to resolve_provider)
+│
+└── __init__.py                   # unchanged: advisor already registered via sys.modules injection
+                                  #   advisor/ package __init__ re-exports same public names
 
-### Reusable SVG Snippet Patterns
-
-These four shapes repeat across diagrams. Authoring consistency means copying these exactly rather than redrawing.
-
-**1. Horizontal arrow (between panels)**
-```xml
-<path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
-<path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
-```
-
-**2. Neutral input panel shell**
-```xml
-<rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
-<text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Panel Title</text>
-<text class="sm"  x="122" y="112" text-anchor="middle">Short description</text>
-```
-
-**3. Blue accent method/output panel shell**
-```xml
-<rect x="272" y="70" width="176" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
-<text class="mono" x="360" y="98" text-anchor="middle" fill="#0d6efd">function_name()</text>
-<text class="sm"   x="360" y="118" text-anchor="middle">sub-description</text>
-```
-
-**4. Axis pair (mini plot background)**
-```xml
-<line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
-<line x1="0" y1="0"   x2="0"   y2="120" stroke="#adb5bd" stroke-width="1.2"/>
-```
-
-### File Naming Convention
-
-| Pattern | When to use |
-|---------|-------------|
-| `{topic}.svg` | Single-concept diagrams (`smoothing.svg`, `fpca.svg`) |
-| `{qualifier}-{topic}.svg` | Method variants (`elastic-alignment.svg`, `advanced-spm.svg`) |
-| `{topic1}-{topic2}.svg` | Comparison/compound diagrams (`alignment-comparison.svg`) |
-| `ex-{dataset}-{topic}.svg` | Example-specific diagrams (`ex-sonar-tsrvf.svg`) |
-
-All names: kebab-case, no version suffixes. File corresponds 1-to-1 with the doc page that references it.
-
-### Method-Accuracy Review Protocol
-
-Each diagram must be reviewed against the method it depicts — not just for style. The review gate per section asks:
-
-1. Does the input panel show what the method actually takes? (data type, structure)
-2. Does the middle panel name the actual fdars API function and its key parameters?
-3. Does the output panel show what the method actually produces? (output type, key property)
-4. Are any mathematical symbols or arrow directions correct?
-5. Does the diagram show the typical/default case rather than an edge case?
-
-Review is done on the built site (rendered HTML), not the raw SVG, because viewBox scaling and font rendering differ in the browser.
-
----
-
-## Figure / Example Pipeline
-
-### Build-Time Execution Architecture
-
-```
-Makefile: export PYTHONPATH := scripts
-           mkdocs build --strict
-               │
-               ▼
-        markdown-exec plugin
-        (per-page, per-block)
-               │
-   ┌───────────┴────────────┐
-   │  ```python exec="1"    │
-   │  html="1"              │
-   │  source="above"        │
-   │  ...                   │
-   │  print(render(f))      │
-   │  ```                   │
-   └───────────┬────────────┘
-               │ captured stdout
-               ▼
-      inline SVG <div class="fdars-figure">
-      embedded in page HTML
-               │
-               ▼
-        site/*.html
-               │
-               ▼
-  scripts/check_docs_figures.py site/
-  → exits 1 if Traceback / ModuleNotFoundError / exec-error in HTML
+.claude/skills/fdars-advisor/
+├── SKILL.md                      # description + compatibility updated; walkthrough unchanged
+└── scripts/
+    └── fdars_advisor_walkthrough.py  # unchanged (uses public API only)
 ```
 
-### The `scripts/` Layer
+### Structure Rationale
 
-Two scripts provide everything exec blocks need:
-
-**`docs_fig.py`** — Style and render
-- Sets `plt.rcParams` at module import time (runs once per build, module cached by Python)
-- `fig(nrows, ncols, **kwargs)` → thin `plt.subplots` wrapper using the themed defaults
-- `render(figure)` → strips XML preamble, returns `<div class="fdars-figure"><svg ...></svg></div>`
-- The FDARS_COLORS list matches the indigo-primary MkDocs Material theme and the SVG diagram accent palette
-
-**`docs_data.py`** — Deterministic datasets
-- All loaders: `(argvals, X, meta)` tuple — consistent contract for all datasets
-- Paths resolved relative to the script file (`../docs/data/`), works at build time and interactively
-- `load_penicillin()` is the only synthetic dataset; it is seeded (`default_rng(20260805)`) — deterministic
-- Real datasets (growth, canadian_weather, tecator, phoneme, wine, sonar) ship in `python/fdars/data/` (bundled with wheel) AND `docs/data/` (for docs build)
-
-### Determinism Requirements for Exec Blocks
-
-Every exec block must be deterministic so the built site does not change across runs without a code change:
-
-| Source of randomness | Mitigation |
-|---------------------|-----------|
-| Simulated data | Use `np.random.default_rng(<fixed_seed>)` |
-| Stochastic algorithms | Seed via `rng=` parameter or `np.random.seed()` |
-| Real datasets | Inherently deterministic; always use `docs_data.load_*()` |
-| Floating-point path ordering | Stable sort, fixed numpy seed |
-
-The A+ scorecard checks for this: `seeded = real or (not uses_rng) or seed_pattern_present`.
-
-### Matplotlib Style: What Is Established
-
-The `docs_fig.py` rcParams block is already the canonical style. Key decisions already made:
-
-- `figure.figsize = (7.5, 4.0)` — fits the content column width
-- `savefig.transparent = True` — SVG figures have transparent background; page bg shows through
-- `axes.spines.top/right = False` — clean minimal frame
-- `axes.grid = True, grid.alpha = 0.22` — subtle grid
-- `font.size = 11, axes.titlesize = 12.5, axes.titleweight = "600"` — legible, matches site typography
-- `legend.frameon = False` — inline style matches diagram aesthetic
-
-What is NOT yet established (gaps that matter for the example sweep):
-- No `axes.labelsize` / `xtick.labelsize` / `ytick.labelsize` set explicitly — they inherit `font.size=11` which is fine but should be confirmed consistent
-- No `figure.titlesize` — suptitle has no explicit size token
-- Multi-panel (`nrows>1`) figures are not demonstrated in `docs_fig.py` — the `fig()` wrapper passes `**kwargs` to `plt.subplots`, so it works, but `figsize` needs to be overridden per-call for tall figures
-
----
-
-## Data / Asset Flow
-
-```
-docs/data/*.csv          ─────────────────────────────────────────────►
-python/fdars/data/*.csv  ──── docs_data.load_*() ──► exec blocks ──► figures ──► site/*.html
-
-docs/assets/diagrams/*.svg ──(img reference in .md)──► site/*.html
-
-scripts/docs_fig.py  ──► rcParams at import  ──► fig()/render() ──► exec blocks
-scripts/docs_data.py ──► load_*() ──────────────────► exec blocks
-
-Style spec (doc) ──► (author copies <style> block) ──► diagrams/*.svg
-```
-
-Key constraint: datasets live in BOTH `docs/data/` (for build-time) and `python/fdars/data/` (bundled in wheel). When a new dataset is added it goes in both places. `docs_data.py` loads from `docs/data/` via relative path.
-
----
-
-## Recommended Project Structure (Documentation System)
-
-```
-docs/
-├── assets/
-│   ├── diagrams/         # Hand-authored concept SVGs (one per page)
-│   │   ├── STYLE.md      # ← NEW: canonical style spec / token reference
-│   │   └── *.svg         # 43 existing diagrams
-│   ├── cards/            # Section hero SVGs (8 files, lower accuracy req)
-│   └── thumb/            # Thumbnail variants
-├── stylesheets/
-│   └── extra.css         # .fdars-diagram and .fdars-figure CSS rules
-
-scripts/
-├── docs_fig.py           # matplotlib theme + render(); NEVER import-side-effects outside rcParams
-├── docs_data.py          # dataset loaders; all return (argvals, X, meta)
-├── check_docs_figures.py # post-build gate: catches silent exec tracebacks
-└── a_plus_scorecard.py   # per-page A+ quality gate
-
-.planning/research/
-└── STYLE_SPEC.md         # ← alternative location for style spec (pre-authoring artifact)
-```
-
-The single most important new file is `docs/assets/diagrams/STYLE.md` (or equivalent). It is the style spec that every diagram author (including AI-assisted authoring) copies from. It must contain the verbatim canonical `<style>` block, the palette table, the viewBox convention, and the panel layout measurements.
+- **`advisor/` package (not `advisor.py`):** Splitting into a package is required because the provider layer and aspect layer each need their own submodules, and Python's import system requires a directory for subpackages. The public API (`build_diagnostics`, `advise`, `Advice`, `Recommendation`) is re-exported from `advisor/__init__.py` — callers see no change.
+- **`advisor/providers/`:** All LLM-backend code lives here and is isolated from the diagnostic computation. This keeps the offline determinism test (`build_diagnostics`) free of any LLM import. No provider code is imported at module level in `advisor/__init__.py`; it is imported lazily inside `advise()` exactly as the anthropic import is today.
+- **`advisor/aspects/`:** Each aspect's `_build_*_diagnostics` function moves into a dedicated file. The dispatcher in `advisor/__init__.py` grows the aspect name to module routing. This structure makes it straightforward to add a new aspect without touching existing aspect files. Shared utility functions (`_safe_float`, `_to_float_list`) live in `_base.py` and are imported by each aspect module.
+- **`_schema.py` and `_prompts.py`:** Separating schema and prompt from the dispatch logic keeps `advisor/__init__.py` readable. Pydantic models stay in `_schema.py`; the grounding prompt system (with FDA primer extensions per aspect) lives in `_prompts.py`.
 
 ---
 
 ## Architectural Patterns
 
-### Pattern 1: Style Spec First, Then Sweep
+### Pattern 1: Provider Protocol with Capability Flags
 
-**What:** Write the style spec document before touching any diagram. The spec is the authority; each diagram is a client of the spec.
+**What:** Define `Provider` as a `typing.Protocol` with a single required method `complete_structured(schema: type, messages: list[dict]) -> dict`. Additionally, each adapter exposes a `CapabilityFlags` named tuple with `native_structured_output: bool` so the `ValidateAndRetry` wrapper knows whether to trust the raw output or always run schema validation.
 
-**When to use:** At the start of the milestone, before any section sweep begins.
+**When to use:** Every LLM backend is accessed through this protocol. The `advise()` function accepts a `Provider` instance (or a string resolved by `resolve_provider()`). No `advise()` code path directly imports `anthropic`, `openai`, `google.generativeai`, or `ollama` — those imports live exclusively in their adapter files.
 
-**Trade-offs:** Adds one upfront step but prevents the "gradual divergence" problem where fixing diagrams introduces new inconsistency. Without the spec, fixing 10 diagrams in a sweep still leaves them inconsistent with each other.
+**Concrete protocol surface:**
 
-**Concrete form for this project:** The spec should be a markdown file that contains:
-1. The verbatim `<style>` block to copy-paste into every SVG
-2. Palette table (token name → hex → role)
-3. Stroke weight table
-4. viewBox convention + layout measurements
-5. The four reusable snippet patterns (arrow, neutral panel, accent panel, axis pair)
-6. The naming convention rules
+```python
+# advisor/providers/_protocol.py
+from typing import Protocol, runtime_checkable
 
-### Pattern 2: Three-Panel Structure as the Default
+@runtime_checkable
+class Provider(Protocol):
+    name: str          # e.g. "anthropic", "openai", "gemini", "ollama"
+    model: str         # e.g. "claude-opus-4-8", "gpt-4o", "gemini-2.0-flash"
 
-**What:** Every concept diagram defaults to `[input] → [method] → [output]`. Deviate only when the concept genuinely requires it.
+    def complete_structured(
+        self,
+        schema: type,          # Pydantic model class (Advice)
+        messages: list[dict],  # [{"role": "user", "content": "..."}]
+        system: str,           # system prompt
+    ) -> dict:
+        """Return a dict conforming to schema's JSON schema. Raises on failure."""
+        ...
 
-**When to use:** For all method-explanation diagrams. For comparison diagrams, use a 2-row or 2-column grid.
-
-**Trade-offs:** Forces consistency and makes diagrams scannable as a set. The cost is slight visual monotony, which is outweighed by the clarity benefit for technical documentation.
-
-**Application here:** When correcting diagrams that currently use idiosyncratic layouts (covariance-functions, clustering, depth-functions), bring them to the three-panel structure unless there is a strong reason not to.
-
-### Pattern 3: exec Block Self-Containment with Shared Imports
-
-**What:** Each exec block imports `from docs_fig import fig, render` and `from docs_data import load_*` at the top of the block. The block is otherwise fully self-contained and runnable as a script.
-
-**When to use:** In every exec block in the example sweep.
-
-**Trade-offs:** Slight repetition of imports, but makes each block independently runnable/debuggable without MkDocs context. Never use page-level shared state between exec blocks (markdown-exec does not guarantee ordering).
-
-**Key example:**
-```python exec="1" html="1" source="above"
-import numpy as np
-from docs_fig import fig, render
-from docs_data import load_growth
-
-age, X, meta = load_growth()
-f, ax = fig()
-ax.plot(age, X.T, alpha=0.2, color="#3f51b5", lw=1)
-ax.set(title="Growth curves", xlabel="age (years)", ylabel="height (cm)")
-print(render(f))
+    @property
+    def supports_native_structured_output(self) -> bool:
+        """True if the backend handles schema enforcement natively."""
+        ...
 ```
 
-### Pattern 4: Section-by-Section Gate
+**Trade-offs:** A Protocol (not ABC) lets adapters be duck-typed, which simplifies testing via simple mock objects. The `system` argument is passed explicitly rather than embedded in `messages` because Anthropic's API treats system as a top-level field while OpenAI/Ollama embed it in messages — the adapter handles this translation.
 
-**What:** Complete a section's diagrams, review on the built site, get human sign-off, then move to the next section.
+### Pattern 2: ValidateAndRetry Wrapper (Grounding Preservation Across Backends)
 
-**When to use:** Throughout the milestone, for both diagram sweeps and example sweeps.
+**What:** A wrapper class that takes any `Provider` and adds schema validation + repair retry on top. After a `complete_structured()` call, it attempts `Advice.model_validate(raw_dict)`. On failure it sends a repair prompt (`"The previous output did not conform to schema. Errors: {errors}. Re-output only the valid JSON."`) and retries once. If the second attempt also fails it raises `ValueError` with the full error.
 
-**Trade-offs:** Slower throughput than doing all diagrams then all reviews, but avoids compounding errors across sections and ensures method accuracy is validated before moving forward.
+**When to use:** Wrap every adapter at construction time via `ValidateAndRetry(adapter, max_retries=1)`. Adapters with `supports_native_structured_output = True` (Anthropic, OpenAI with `strict=True`) still route through the wrapper but the first pass is unlikely to fail — the wrapper is a safety net, not the primary path.
 
-**Build order implication:** Establish the style spec (and build it into the first diagrams) before starting the first section, so the review of the first section also validates the spec itself.
+**Why this design (not per-adapter retry):** Centralizing retry logic in one place means the grounding invariant is enforced identically for every backend. Local models (Ollama) and Gemini (when falling back to json-mode) benefit most, but even Claude benefits from a uniform failure mode.
+
+**Key constraint:** The repair prompt must NOT inject new numbers or diagnostic values. It only describes schema errors. The grounding invariant (fdars computes every number) is preserved because the repair prompt re-sends the original user message (which contains the diagnostics dict) alongside the error description.
+
+### Pattern 3: Per-Aspect Diagnostic Builder with Shared Dispatcher
+
+**What:** Every aspect exposes a `build_diagnostics_<aspect>(raw: dict, **kwargs) -> dict` function. The top-level `build_diagnostics(result, method, **kwargs)` dispatcher maps method strings to aspect modules. Aspect functions are imported lazily inside the dispatcher to avoid import overhead when building diagnostics for a different aspect.
+
+**When to use:** When adding a new aspect (e.g., `depth`, `monitoring`), write a new `advisor/aspects/depth.py` with a `build_diagnostics_depth(raw, **kwargs) -> dict` function, add the method string to the dispatcher's lookup dict, and add the string to `_SUPPORTED_METHODS` in `mcp/server.py` and `mcp/_runner.py`.
+
+**Shared utilities via `_base.py`:** Functions like `_safe_float(v) -> float | None` and `_to_float_list(arr) -> list[float]` are used by every aspect builder. They already exist inline in the current `advisor.py` private functions. Moving them to `_base.py` eliminates duplication across the 9 aspect files.
+
+**Grounding machinery stays centralized:** The `Advice` schema, `_system_prompt()`, and the `advise()` call are NOT duplicated per aspect. Per-aspect advisors are achieved purely by:
+1. A per-aspect `build_diagnostics_<aspect>()` function that computes the right diagnostic keys.
+2. `_system_prompt(task, aspect)` gains an `aspect` argument that appends an aspect-specific FDA primer clause to the base prompt (e.g., for `depth`, it explains Fraiman-Muniz depth, modal depth, and outlier flagging). The base grounding invariant text is unchanged.
+3. The caller passes the right `method` string; `build_diagnostics` and `_system_prompt` do the rest.
+
+### Pattern 4: Provider Resolution via Config / Environment
+
+**What:** `resolve_provider(provider=None, model=None, api_key=None, base_url=None, **kw) -> Provider` reads provider identity from (in priority order): explicit `provider=` argument, `FDARS_PROVIDER` env var, fallback to `"anthropic"` (preserving current behavior). Model defaults per provider: `anthropic` → `claude-opus-4-8`, `openai` → `gpt-4o`, `gemini` → `gemini-2.0-flash`, `ollama` → `llama3.2`.
+
+**API key resolution per adapter:**
+- `anthropic`: `api_key` arg → `ANTHROPIC_API_KEY` env
+- `openai`: `api_key` arg → `OPENAI_API_KEY` env; `base_url` arg → `OPENAI_BASE_URL` env (enables vLLM/LM Studio/LocalAI compatibility)
+- `gemini`: `api_key` arg → `GEMINI_API_KEY` or `GOOGLE_API_KEY` env
+- `ollama`: no API key; `base_url` arg → `OLLAMA_BASE_URL` env (default `http://localhost:11434`)
+
+**Import isolation:** Each adapter file is only imported inside `resolve_provider()` after the provider is identified. Importing `fdars.advisor` with no extras installed is still side-effect-free (same as today). The `[advisor]` extra remains for Anthropic; `[openai]`, `[gemini]`, `[ollama]` are new extras each installing only the required SDK.
+
+### Pattern 5: MCP Tool Layer — Provider as Optional String Param
+
+**What:** The existing MCP tools (`fdars_build_diagnostics`, `fdars_run_method`, `fdars_compare_run`) gain an optional `provider: str | None = None` parameter. When non-None, the tool calls `resolve_provider(provider)` and passes the resolved `Provider` to `advise()`. When None (default), behavior is identical to today — `advise()` uses its own default resolution (Anthropic).
+
+**Note:** `fdars_build_diagnostics` is offline and does NOT call `advise()` — it has no `provider` parameter. Only `fdars_run_method` and `fdars_compare_run` would optionally accept `provider` if those tools are extended to return advice alongside the result handle. If the decision is to keep the MCP tools purely computational (no LLM in the tool boundary), then `provider` selection belongs only in the Python API surface, and the MCP tools remain provider-agnostic. Recommend keeping the MCP tools LLM-free for now (same as today), with a `fdars_advise` tool added in a later phase if needed. This keeps the change surface minimal.
+
+---
+
+## Data Flow
+
+### advise() Call Path (v3.0)
+
+```
+User calls advise(diagnostics, task="interpretation", aspect="clustering",
+                  domain_context="...", provider="anthropic")
+    │
+    ▼
+resolve_provider("anthropic") → AnthropicAdapter(model="claude-opus-4-8")
+    │
+    ▼
+ValidateAndRetry(adapter)
+    │
+    ▼
+_system_prompt(task="interpretation", aspect="clustering")
+  → base grounding invariant text
+  + FDA primer (common)
+  + aspect-specific clause (clustering: k-means, amplitude/phase separation, ...)
+  + task-family clause (interpretation: explain what result means)
+    │
+    ▼
+provider.complete_structured(
+    schema=Advice,
+    messages=[{"role": "user", "content": "Domain context: ...\nDiagnostics: {...}"}],
+    system=<prompt>,
+)
+    │
+    ├── Anthropic: client.messages.parse(output_format=Advice, ...)
+    │   → raw Advice object returned directly (native structured output)
+    │
+    ├── OpenAI: client.chat.completions.parse(response_format=Advice, ...)
+    │   → raw Advice object
+    │
+    ├── Gemini: client.generate_content(..., generation_config={response_schema: ...})
+    │   → json string → json.loads → dict
+    │
+    └── Ollama: POST /api/chat (format=json, schema injected in prompt)
+        → json string → json.loads → dict
+    │
+    ▼
+ValidateAndRetry.validate(raw) → Advice.model_validate(raw)
+    ├── success → return Advice
+    └── failure → send repair prompt, retry once → Advice or raise ValueError
+    │
+    ▼
+return Advice  ← same schema as v2.0; callers unchanged
+```
+
+### build_diagnostics() Call Path (v3.0)
+
+```
+build_diagnostics(result, method="depth", argvals=av, ...)
+    │
+    ▼
+method_lc = "depth"
+_supported = {"alignment", "fpca", "basis", "smoothing", "clustering",
+              "depth", "regression", "monitoring", "classification"}
+    │
+    ▼
+lazy import: from advisor.aspects.depth import build_diagnostics_depth
+    │
+    ▼
+build_diagnostics_depth(raw, argvals=av) → dict  (offline, deterministic)
+    │
+    ▼
+return dict  ← JSON-serialisable, no numpy scalars
+```
+
+### MCP Tool Call Path (unchanged for offline tools)
+
+```
+fdars_build_diagnostics(dataset_id, method="depth")
+    │
+    ├── registry.get_dataset(dataset_id) → data, argvals
+    ├── build_diagnostics(result, "depth", argvals=argvals)
+    └── return diagnostics dict   ← no LLM, no provider, offline
+```
+
+---
+
+## Component Boundaries — New vs Modified
+
+### New Components
+
+| Component | File | What It Does |
+|-----------|------|-------------|
+| `Provider` protocol | `advisor/providers/_protocol.py` | Runtime-checkable protocol; all adapters satisfy it |
+| `AnthropicAdapter` | `advisor/providers/anthropic.py` | Lifts inline anthropic call from `advise()`; `supports_native_structured_output = True` |
+| `OpenAIAdapter` | `advisor/providers/openai.py` | `openai` SDK; `base_url` support for vLLM/LM Studio; `supports_native_structured_output = True` when `strict=True` |
+| `GeminiAdapter` | `advisor/providers/gemini.py` | `google-genai` SDK; structured output where supported, json-mode fallback |
+| `OllamaAdapter` | `advisor/providers/ollama.py` | Local `requests.post` to `/api/chat`; json-mode; `supports_native_structured_output = False` |
+| `ValidateAndRetry` | `advisor/providers/_validate.py` | Schema-validate + repair-prompt retry; wraps any Provider |
+| `resolve_provider()` | `advisor/providers/_factory.py` | Config/env factory returning a `ValidateAndRetry`-wrapped adapter |
+| `_base.py` (aspects) | `advisor/aspects/_base.py` | Shared `_safe_float`, `_to_float_list`, `_safe_int` helpers |
+| `depth.py` (aspect) | `advisor/aspects/depth.py` | Depth + outlier diagnostics: FM depth scores, outlier flags, median depth, trimmed mean |
+| `regression.py` (aspect) | `advisor/aspects/regression.py` | FPCA scores variance, FOSR coefficient norms, PLS component count, prediction residuals |
+| `monitoring.py` (aspect) | `advisor/aspects/monitoring.py` | Control chart statistics (UCL/LCL, in-control rate), tolerance coverage, conformal efficiency |
+| `classification.py` (aspect) | `advisor/aspects/classification.py` | CV accuracy, class separation, confusion matrix diagonal summary |
+
+### Modified Components
+
+| Component | File | What Changes |
+|-----------|------|-------------|
+| `advisor.py` → `advisor/__init__.py` | `python/fdars/advisor/__init__.py` | Becomes package init; re-exports same public names; `advise()` gains `provider=` param; `build_diagnostics()` dispatcher gains new aspect strings |
+| `_system_prompt()` → `advisor/_prompts.py` | `advisor/_prompts.py` | Gains `aspect` parameter; aspect-specific FDA primer clauses added per new aspect; base invariant text unchanged |
+| Aspect builders | `advisor/aspects/{smoothing,basis,alignment,fpca,clustering}.py` | Moved verbatim from `advisor.py`; no logic changes |
+| `Advice`, `Recommendation` | `advisor/_schema.py` | Moved from `advisor.py`; schema unchanged |
+| `mcp/server.py` | `python/fdars/mcp/server.py` | `_SUPPORTED_METHODS` extended; no structural change |
+| `mcp/_runner.py` | `python/fdars/mcp/_runner.py` | `run_method()` dispatch extended to new aspect methods |
+| `mcp/_compare.py` | `python/fdars/mcp/_compare.py` | `_ALLOWED_PARAMS` extended for new aspect params |
+| `SKILL.md` | `.claude/skills/fdars-advisor/SKILL.md` | Description covers new aspects + provider selection; compatibility adds new extras |
+| `__init__.py` | `python/fdars/__init__.py` | No change — `advisor` is already registered via `sys.modules["fdars.advisor"] = advisor` |
+
+---
+
+## Dependency-Ordered Build Sequence
+
+This is the critical output for the roadmapper. Each phase depends on the prior.
+
+**Phase A — Provider Protocol + Anthropic Adapter Refactor** (foundation, no new features)
+
+Dependencies: none beyond existing `advisor.py`.
+
+1. Create `advisor/` package directory with `__init__.py` that re-exports existing public names.
+2. Move `Advice` + `Recommendation` pydantic models + fallback stubs to `advisor/_schema.py`.
+3. Move `_system_prompt()` to `advisor/_prompts.py`.
+4. Create `advisor/providers/_protocol.py` — `Provider` Protocol + `supports_native_structured_output` property.
+5. Create `advisor/providers/anthropic.py` — `AnthropicAdapter` wrapping the existing `client.messages.parse()` call extracted from `advise()`.
+6. Create `advisor/providers/_validate.py` — `ValidateAndRetry` wrapper.
+7. Create `advisor/providers/_factory.py` — `resolve_provider()` returning `ValidateAndRetry(AnthropicAdapter(...))`.
+8. Refactor `advise()` in `advisor/__init__.py` to accept `provider: str | Provider | None = None` and call `resolve_provider()`. Default path must be byte-identical to today: `provider=None` → Anthropic adapter → same Claude call.
+9. Move existing 5 aspect builders to `advisor/aspects/` verbatim; update dispatcher in `__init__.py`.
+10. Tests: all existing advisor tests pass unchanged (offline + env-gated integration). Add adapter-level unit tests with mocks. Add `ValidateAndRetry` repair-path test.
+
+**Phase B — Additional Provider Adapters** (depends on Phase A)
+
+Dependencies: Provider Protocol + ValidateAndRetry must exist.
+
+1. `advisor/providers/openai.py` — OpenAIAdapter with `base_url` support. Mock tests + env-gated real call.
+2. `advisor/providers/gemini.py` — GeminiAdapter. Mock tests + env-gated real call.
+3. `advisor/providers/ollama.py` — OllamaAdapter (local; uses `requests`). Mock-server test.
+4. Extend `_factory.py` to route `"openai"`, `"gemini"`, `"ollama"` strings.
+5. Extend `pyproject.toml` optional extras: `[openai]`, `[gemini]`, `[ollama]`.
+6. Extend `FDARS_PROVIDER` env var handling in `_factory.py`.
+
+**Phase C — Per-Aspect Diagnostics** (depends on Phase A; parallel to Phase B)
+
+Dependencies: `advisor/aspects/` directory and `_base.py` must exist (from Phase A step 9).
+
+1. `advisor/aspects/_base.py` — shared helpers extracted from existing aspect builders.
+2. `advisor/aspects/depth.py` — depth + outlier diagnostics. Offline determinism test.
+3. `advisor/aspects/regression.py` — FOSR / PLS / robust regression diagnostics. Offline test.
+4. `advisor/aspects/monitoring.py` — SPM / tolerance / conformal diagnostics. Offline test.
+5. `advisor/aspects/classification.py` — classification diagnostics. Offline test.
+6. Extend `build_diagnostics()` dispatcher in `advisor/__init__.py` with new aspect method strings.
+7. Extend `_system_prompt()` in `_prompts.py` with per-aspect FDA primer clauses.
+8. Extend `mcp/server.py`, `mcp/_runner.py`, `mcp/_compare.py` with new aspect support.
+
+**Phase D — Surface Updates + Packaging** (depends on B + C)
+
+Dependencies: All adapters and all aspect builders complete.
+
+1. Update `SKILL.md` description + compatibility block.
+2. Finalize `pyproject.toml` extras matrix.
+3. Update CI to env-gate per-provider integration tests.
+
+**Phase E — Documentation** (depends on D)
+
+Dependencies: Shipped code; existing AI Advisor docs section exists (v2.1).
+
+1. Provider setup page (new): how to configure each provider via env vars / params.
+2. Per-aspect advisor pages (one per new aspect, matching the existing clustering/smoothing/fpca pages structure established in v2.1).
+3. Update overview page to reference provider selection.
 
 ---
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Fixing Diagrams Without the Style Spec
+### Anti-Pattern 1: Importing Provider SDKs at Module Level in `advisor/__init__.py`
 
-**What people do:** Open a diagram that looks wrong, fix the specific accuracy issue, move on.
+**What people do:** Add `import anthropic; import openai` at the top of the advisor module to have them ready.
 
-**Why it's wrong:** The diagram may be method-accurate after the fix but still inconsistent in font, palette, or viewBox with the 35 diagrams that use the `<style>` block pattern. Each individual fix adds inconsistency because there is no single standard to fix to.
+**Why it's wrong:** Breaks the offline guarantee. `import fdars.advisor` must succeed with zero extras installed. The grounding invariant requires that `build_diagnostics` be callable without any LLM SDK.
 
-**Do this instead:** Write the spec first. Fix diagrams against the spec. Every touched diagram gets the canonical `<style>` block, correct viewBox, and standard layout.
+**Do this instead:** All SDK imports stay inside the adapter files. The adapter file is only imported inside `resolve_provider()`, which is only called from `advise()`. `advise()` is only called by the user explicitly. The offline path (`build_diagnostics` only) never touches adapter files.
 
-### Anti-Pattern 2: exec Blocks that Import fdars Without Checking the API
+### Anti-Pattern 2: Duplicating the Grounding System Prompt Per Aspect
 
-**What people do:** Copy a code pattern from an old example, update it to use the "current" API from memory.
+**What people do:** Create `advise_clustering()`, `advise_depth()`, `advise_regression()` functions each with their own inline system prompt.
 
-**Why it's wrong:** The fdars API has evolved (the lambda_ default fix, the recon fix are recent examples). Examples silently produce wrong output or raise errors that ship as tracebacks via markdown-exec's silent failure mode.
+**Why it's wrong:** The grounding invariant text ("reason only from diagnostics provided", "every evidence item must cite a specific value") must be byte-identical across all aspects. Duplicating it risks drift — a future edit to one copy misses the others, weakening grounding.
 
-**Do this instead:** Before writing an exec block for a method, check the reference page and the actual Python module (`python/fdars/*.py`, `src/*_mod.rs`) for the current signature. Run the block interactively (`PYTHONPATH=scripts python -c "..."`) before adding it to the docs.
+**Do this instead:** `_system_prompt(task, aspect)` is the single function that builds all prompts. It always starts with the invariant base. It appends a common FDA primer. It then appends an aspect-specific clause (a few lines describing the relevant FDA concepts for that aspect). `advise()` calls `_system_prompt(task, aspect)` and that is the only call site.
 
-### Anti-Pattern 3: Committing Figures as PNG/Static Images
+### Anti-Pattern 3: Putting LLM Logic in the MCP Tool Handlers
 
-**What people do:** Generate a figure once, screenshot it, commit the PNG.
+**What people do:** Call `advise()` inside `fdars_build_diagnostics` or `fdars_run_method`.
 
-**Why it's wrong:** The figure becomes stale the moment the API or dataset changes. The whole point of markdown-exec is that figures are always in sync with the code.
+**Why it's wrong:** MCP tools are supposed to be deterministic and callable without an API key. Embedding `advise()` in a tool handler breaks the offline guarantee and the by-reference invariant (the tool must not make network calls during normal MCP dispatch).
 
-**Do this instead:** All data-driven figures must go through the exec block / `render()` pipeline. The only committed visual assets are hand-authored SVG diagrams.
+**Do this instead:** MCP tools remain compute-only. If an agentic flow wants grounded advice, it calls `build_diagnostics` (via MCP tool), then calls `advise()` directly (via Python API) with the returned diagnostics dict. The Skill orchestrates this two-step flow, not the tools.
 
-### Anti-Pattern 4: Diagrams That Depict Aspirational Rather Than Actual Behavior
+### Anti-Pattern 4: Embedding Schema JSON in the Repair Prompt
 
-**What people do:** Draw a diagram showing three clearly separated clusters with perfect centroids, or a smooth FPCA decomposition with orthogonal components that look ideal.
+**What people do:** When the repair prompt describes schema errors, they include the full JSON Schema specification of `Advice` in the message to "help" the model fix its output.
 
-**Why it's wrong:** Users run the actual method on real data and the output does not match the diagram, eroding trust.
+**Why it's wrong:** The schema JSON contains no diagnostic values, so including it is harmless from a grounding perspective — but it bloats the context and trains the model to focus on schema rather than the actual diagnostic evidence. The repair prompt should only describe the structural error, not re-introduce the schema.
 
-**Do this instead:** Diagrams should show the *concept* but use realistic-looking curves (slightly irregular, overlapping) and caption them with method names, not idealized results. The worked examples show actual output; the diagrams show the idea.
+**Do this instead:** The repair prompt is minimal: `"Your previous response did not conform to the required JSON structure. Errors: {validation_errors}. Return only a valid JSON object matching the schema."` The original user message (which contains the diagnostics) is retained in the conversation history, so the model can re-read the values it needs for evidence.
 
-### Anti-Pattern 5: Non-Deterministic exec Blocks
+### Anti-Pattern 5: Flat `advisor.py` with All Aspects Inlined
 
-**What people do:** Use `np.random.randn()` without a seed, trusting that the result will be "representative."
+**What people do:** Add `_build_depth_diagnostics`, `_build_regression_diagnostics`, etc. directly into the existing `advisor.py`, growing it to 2000+ lines.
 
-**Why it's wrong:** Every build produces different output. The figure caption may reference specific numbers that change. CI comparison is impossible.
+**Why it's wrong:** Seven new aspect builders added to one file makes the file unnavigable, makes test isolation difficult, and creates a merge-conflict hotspot for parallel development. The 5 existing builders already occupy ~500 lines of the 1161-line `advisor.py`.
 
-**Do this instead:** All random data uses `rng = np.random.default_rng(<fixed_seed>)`. All real data goes through `docs_data.load_*()`. The A+ scorecard checks this mechanically.
-
----
-
-## Build Order for the Milestone
-
-The ordering constraint is: style spec must precede all diagram work; `docs_fig` / `docs_data` must be stable before example sweeps begin. Section sweeps can then proceed serially with human review gates between them.
-
-```
-Phase 1: FOUNDATION
-  ├── Write docs/assets/diagrams/STYLE.md (style spec + token table + snippet patterns)
-  ├── Audit which 8-9 diagrams deviate from the standard (viewBox, font-family, palette)
-  └── No diagram edits yet — just spec + audit list
-
-Phase 2: learn/ SECTION
-  ├── Apply spec to all learn/ diagrams (6 pages × ~1 diagram each)
-  ├── Correct any method accuracy issues
-  ├── Verify example exec blocks run against current API
-  └── Review gate: mkdocs build --strict → human site review
-
-Phase 3: represent/ SECTION
-  ├── Apply spec to represent/ diagrams (7 pages)
-  ├── depth-functions.svg and streaming-depth.svg are likely complexity cases
-  └── Review gate
-
-Phase 4: align/ SECTION
-  ├── Apply spec to align/ diagrams (6 pages)
-  ├── elastic-alignment, advanced-alignment, tsrvf are method-accuracy-critical
-  └── Review gate
-
-Phase 5: analyze/ SECTION
-  ├── Apply spec to analyze/ diagrams (8 pages)
-  ├── clustering.svg, gmm-clustering.svg, depth-functions adjacent diagrams need format migration
-  └── Review gate
-
-Phase 6: regression/ SECTION
-  ├── Apply spec to regression/ diagrams (12 pages — largest section)
-  ├── Most likely to need deeper research: elastic-regression, conformal-prediction
-  └── Review gate
-
-Phase 7: monitoring/ SECTION
-  ├── Apply spec to monitoring/ diagrams (3 pages)
-  ├── spm.svg uses non-standard viewBox 720×480 — needs migration
-  └── Review gate
-
-Phase 8: examples/ SWEEP
-  ├── Verify all 17 example pages run against current fdars API
-  ├── Richer narrative pass (why/interpretation)
-  ├── Improved figure styling (consistent use of docs_fig, consistent colors)
-  ├── Add new examples for under-documented capabilities
-  └── Review gate: scorecard must pass (a_plus_scorecard.py --gate)
-```
-
-**Foundation must exist before Phase 2 begins.** All section phases can be reviewed one at a time. The examples sweep is last because it depends on the API being verified correct (example blocks may expose binding issues), and because the diagrams serve as concept anchors that the examples reference.
+**Do this instead:** The refactor to `advisor/aspects/` in Phase A is a prerequisite for Phase C. One file per aspect, one test file per aspect. The public `build_diagnostics()` dispatcher remains the single entry point.
 
 ---
 
 ## Integration Points
 
-### SVG Diagrams ↔ Markdown Pages
+### advisor/ ↔ mcp/ Boundary
 
-Diagrams are referenced as:
-```markdown
-![Description — concept diagram](../assets/diagrams/name.svg){ .fdars-diagram }
-```
-The `.fdars-diagram` CSS class (in `docs/stylesheets/extra.css`) controls max-width, display, and margin. The alt text is the primary accessibility text — it should match the SVG `aria-label`.
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| `mcp/server.py` → `advisor` | Direct import of `build_diagnostics`; no `advise()` call in tools | Tools stay LLM-free; grounding is enforced by keeping compute and interpretation separate |
+| `mcp/_runner.py` → `fdars.*` | Direct import of fdars submodule functions | Dispatcher extended but pattern unchanged |
+| `mcp/_compare.py` → `advisor` | Direct import of `build_diagnostics` | No change to pattern |
+| `advisor/providers/` ↔ LLM SDKs | Each adapter file imports its SDK at module load | Import failures are caught in `resolve_provider()`; missing extra → `ImportError` with install hint |
 
-### exec Blocks ↔ Build Pipeline
+### advisor/ ↔ Python public API
 
-exec blocks run in the process that executes `mkdocs build`. `PYTHONPATH=scripts` is set by the Makefile. `docs/hooks.py` provides a fallback for `mkdocs serve`. There is no caching of exec block results across builds — full rebuild re-executes all blocks. For the current ~50-page scope this is acceptable (typical build: 60–120s with all figures).
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| `fdars/__init__.py` → `advisor/` | `import fdars.advisor` + `sys.modules["fdars.advisor"] = advisor` | No change — advisor package `__init__` re-exports same names; `sys.modules` injection works identically |
+| User code → `fdars.advisor.advise()` | Direct call; gains optional `provider=` param | Default (`provider=None`) is Anthropic — backward compatible |
+| User code → `fdars.advisor.build_diagnostics()` | Direct call; gains new `method` strings | Existing method strings unchanged; new strings added |
 
-### docs_data.py ↔ docs/data/ vs python/fdars/data/
+### SKILL.md ↔ Provider Layer
 
-`docs_data.py` loads from `docs/data/` (path relative to the script). The same CSVs also ship in the wheel from `python/fdars/data/`. If a new dataset is added for an example, it goes in `docs/data/` (for the docs build) and optionally in `python/fdars/data/` (if it should ship with the wheel). The `load_penicillin()` synthetic generator does not need a CSV file.
+The walkthrough script in `.claude/skills/fdars-advisor/scripts/` uses the Python API only. It gains a `--provider` CLI flag that passes through to `advise()`. No structural change to the skill orchestration — the interpret→recommend→re-run→compare loop is provider-agnostic by construction (it only calls `build_diagnostics` and `advise`).
 
 ---
 
 ## Scaling Considerations
 
-The documentation system does not scale to "users" — it scales to the number of pages and diagrams being maintained. At the current scope (~50 diagrams, ~50 exec-block pages):
+This is a library, not a networked service. "Scaling" here means adding more aspects and providers without degrading correctness or testability.
 
-| Concern | Current (50 pages) | If 150 pages |
-|---------|-------------------|--------------|
-| Full build time | 60–120s (acceptable) | 3–6 min (painful for iteration) |
-| Diagram consistency | Style spec + manual copy | Same — spec still works |
-| exec block maintenance | Per-page API check | Consider a centralized smoke-test that imports all example modules |
-| Dataset coverage | 7 loaders sufficient | May need additional loaders in docs_data.py |
-
-No architectural change is needed within this milestone's scope. The check_docs_figures.py post-build gate and the a_plus_scorecard.py are the correct quality mechanisms at this scale.
+| Concern | With 5 aspects (today) | With 9 aspects (v3.0) | With 4 providers |
+|---------|----------------------|----------------------|-----------------|
+| Offline test coverage | 5 determinism tests | 9 determinism tests (one per aspect) | 4 mock adapter tests + per-provider env-gated |
+| Import overhead at `import fdars` | Negligible (no SDK imports) | Negligible (aspects lazy-imported) | Negligible (adapters lazy-imported) |
+| System prompt length | ~1KB per task | ~1.5KB per task (aspect clause adds ~200 chars) | Same — provider does not affect prompt |
+| Maintenance | One 1161-line file | 9 focused files + package init | 4 adapter files, each ~100 lines |
 
 ---
 
 ## Sources
 
-- Direct codebase analysis: `scripts/docs_fig.py`, `scripts/docs_data.py`, `scripts/check_docs_figures.py`, `scripts/a_plus_scorecard.py`, `Makefile`, `mkdocs.yml`, `docs/hooks.py` (HIGH confidence — primary source)
-- Direct inspection of all 43 SVG files in `docs/assets/diagrams/` (HIGH confidence)
-- [Customizing Matplotlib with style sheets and rcParams](https://matplotlib.org/stable/users/explain/customizing.html) — rcParams documentation (MEDIUM confidence)
-- [Markdown Exec usage and gallery](https://pawamoy.github.io/markdown-exec/usage/) — exec block mechanics (MEDIUM confidence)
-- [Reproducible Reports with MkDocs](https://timvink.nl/reproducible-reports-with-mkdocs/) — build-time execution patterns (LOW confidence)
-- [CSS custom properties / design tokens](https://penpot.app/blog/the-developers-guide-to-design-tokens-and-css-variables/) — SVG styling patterns (LOW confidence)
+- Direct codebase analysis: `python/fdars/advisor.py` (1161 lines), `python/fdars/mcp/server.py`, `mcp/_runner.py`, `mcp/_compare.py`, `mcp/_registry.py`, `python/fdars/__init__.py`, `.claude/skills/fdars-advisor/SKILL.md` (HIGH confidence — primary source)
+- `python/fdars/__init__.py` — registration pattern for `sys.modules` injection of `advisor` confirms the package refactor is drop-in compatible (HIGH confidence)
+- `advisor.py` lines 940–1007 — existing inline Anthropic call in `advise()` confirms exactly what AnthropicAdapter must encapsulate (HIGH confidence)
+- `.planning/PROJECT.md` — v3.0 requirements (provider list, grounding invariant, per-aspect advisor scope) (HIGH confidence)
 
 ---
 
-*Architecture research for: fdars documentation design system (SVG diagrams + figure pipeline)*
-*Researched: 2026-08-07*
+*Architecture research for: fdars v3.0 provider-agnostic advisor + full-library advisor coverage*
+*Researched: 2026-08-12*

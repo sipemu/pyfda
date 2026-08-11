@@ -1,136 +1,249 @@
-# Project Research Summary
+# Research Summary: fdars v3.0 — Provider-Agnostic AI Advisor + Full-Library Coverage
 
-**Project:** pyfda — Documentation Overhaul (SVG diagrams + example pages)
-**Domain:** Technical/scientific library documentation — hand-authored SVG concept diagrams + reproducible code-driven worked examples (MkDocs Material)
-**Researched:** 2026-08-07
-**Confidence:** MEDIUM (stack/features MEDIUM from web + inspection; architecture/pitfalls HIGH from direct source analysis of all 43 SVGs, scripts, Makefile, mkdocs.yml)
+**Project:** fdars v3.0 (functional data analysis library with AI advisor system)  
+**Domain:** Multi-provider LLM advisor layer with per-aspect (depth, regression, monitoring, classification) diagnostic builders  
+**Researched:** 2026-08-12  
+**Confidence:** HIGH (direct codebase analysis + verified against official provider SDK docs)
+
+---
 
 ## Executive Summary
 
-pyfda's `fdars` documentation is already a mature MkDocs Material site with a working figure pipeline (`markdown-exec` + `scripts/docs_fig.py`), ~43 hand-authored inline SVG diagrams, and 17 worked-example pages. The overhaul is therefore **not** a rebuild — it is a consistency-and-accuracy pass over an existing, largely sound foundation. Research strongly converges on a single conclusion: **35 of 43 diagrams already share a de-facto baseline** (`viewBox="0 0 720 300"`, an inline `<style>` block with five CSS classes (`.ttl`, `.sub`, `.lab`, `.sm`, `.mono`), `role="img"` + `aria-label`), so the highest-leverage first move is to *formalize that baseline into a written style spec plus a machine linter* before touching any diagram.
+fdars v3.0 transforms the single-provider (Anthropic-only) AI advisor into a provider-agnostic system with full-library coverage across seven analysis aspects (represent, clustering, smoothing, FPCA, alignment, basis, depth, outliers, regression, monitoring, classification). The research surfaces a **critical prerequisite**: the existing advisor is tightly coupled to Anthropic's SDK. Any provider work requires refactoring it into an extensible `Provider` protocol first — this is not optional scaffolding but the single blocking dependency for every downstream feature.
 
-The recommended approach is additive tooling on top of the current stack: SVGO 3.3.4 (configured to preserve the `<style>` block and accessibility attributes) as a consistency linter; a one-line `svg.hashsalt` fix in `docs_fig.py` for deterministic figure output; `pymdownx.snippets` to de-duplicate dataset-loading preambles; and `pytest-markdown-docs` to test example code fences. Diagrams stay hand-authored inline SVG per project decision — Mermaid/D2/Inkscape are explicitly rejected.
+The recommended approach is a **dependency-ordered three-phase sequence**: (A) Provider protocol + Anthropic refactor (foundation, no new features), (B) per-provider adapters (OpenAI, Gemini, Ollama — parallel to Phase A), (C) per-aspect diagnostic builders (depth, regression, monitoring, classification — parallelizable with B). The grounding invariant — "fdars computes every number; the LLM only interprets" — is the hard constraint that must be enforced identically across all providers. This requires **centralized validation** (`_check_grounding` function) and a **unified retry contract** (max 2 retries with diagnostics re-included on repair) built into the base `Provider` layer **before any adapter is written**.
 
-The two dominant risks are **diagram inaccuracy** and **example rot**, and research found concrete, already-present instances of both. Two SVGs (`spm.svg`, `basis-representation.svg`) still contain R-era content (`extendr` branding, `autoplot()`, R function names); `smoothing.svg` has a coordinate bug where the "smoothed" panel reuses the noisy path; and `conformal-prediction.svg` depicts a scalar `ŷ ± const` interval when `fdars` conformal functional regression produces a time-varying band `ŷ(t) ± q(t)`. On the examples side, the existing `check_docs_figures.py` catches hard exceptions but misses silent wrong-output from changed API defaults (exactly the `lambda_=1.0→0.0` class of bug from issue #37). These findings directly shape phase ordering: audit + guardrails first, then accuracy sweeps, then examples.
+Key risk: Schema feature incompatibility across providers (OpenAI requires nullable unions; Gemini rejects `additionalProperties`; Ollama's constrained decoding silently fails if `think=True` is set simultaneously). This is avoidable only by writing schema-portability tests for all four providers during Phase A, not retroactively.
+
+---
 
 ## Key Findings
 
 ### Recommended Stack
 
-All additive to the existing MkDocs Material 9.7.7 / markdown-exec 1.12.3 / KaTeX foundation (no framework changes). See `research/STACK.md`.
+Four LLM provider SDKs plus the existing Anthropic dependency. The stack research prioritizes **minimum version pins** and **Python 3.9 floor compatibility** — a hard constraint from the project's MSRV.
 
-**Core technologies:**
-- **SVGO 3.3.4** (not 4.x): lossless SVG lint/optimize — configured with `inlineStyles/mergeStyles/minifyStyles/cleanupIds/removeDesc/removeViewBox: false` to preserve the hand-authored `<style>` block, IDs, and accessibility. v4 changed the plugin API (June 2026) and is avoided.
-- **`svg.hashsalt` rcParam** in `docs_fig.py` (`mpl.rcParams["svg.hashsalt"]="fdars-docs"`): makes matplotlib SVG clip-path IDs deterministic so built output diffs are meaningful and CI is stable — a one-line, high-value fix.
-- **pytest-markdown-docs 0.9.2**: runs `.md` python fences as tests with `continuation` (shared-state multi-block examples) + globals injection via `conftest.py`. Complements (does not replace) `check_docs_figures.py`, which still covers `exec="1"` blocks.
-- **pymdownx.snippets** (add to `mkdocs.yml`): factor the repeated 8–10 line dataset-loading preamble into `docs/includes/` to cut duplication across the Canadian-weather / Tecator / Andrews example families.
-- **STYLE_SPEC.md** (`docs/assets/diagrams/`): the shared token layer as a written doc with a copy-paste `<style>` block — because external CSS cannot pierce the SVG boundary when diagrams are referenced as `<img src>`.
+**Core provider dependencies:**
+- **`anthropic>=0.72.0`** — Anthropic (first-class, already shipping in v2.0; keep for backward compatibility)
+- **`openai>=1.30.0,<2.0`** — OpenAI + all OpenAI-compatible endpoints (vLLM, LM Studio, LocalAI); 1.x supports Python 3.9, 2.x requires 3.10+
+- **`google-genai>=1.0.0,<3.0`** — Google Gemini (replacement for deprecated `google-generativeai`); requires Python 3.10+ (creates a runtime guard for 3.9)
+- **`ollama>=0.5.0`** — Local Ollama (no API key, no network); most permissive Python floor (3.8+)
+- **`pydantic>=2.0`** — Required by every provider for `.model_json_schema()` and `model_validate_json()` — not added to base dependencies (offline `build_diagnostics` must importable without pydantic)
+
+**NOT adding:** LiteLLM, pydantic-ai, LangChain, instructor, json-repair (per PROJECT.md explicit rejections; custom Protocol + thin adapters cover all needs).
+
+**Installation model (extras):**
+```
+[advisor]           = anthropic>=0.72.0 + pydantic>=2.0
+[openai]            = openai>=1.30.0,<2.0 + pydantic>=2.0
+[gemini]            = google-genai>=1.0.0,<3.0 + pydantic>=2.0 (Python 3.10+ enforced at runtime)
+[ollama]            = ollama>=0.5.0 + pydantic>=2.0
+[all-providers]     = fdars[advisor] + fdars[openai] + fdars[gemini] + fdars[ollama]
+```
+
+The base `fdars` package is importable without any provider extra. The offline `build_diagnostics` works with zero extras installed.
+
+---
 
 ### Expected Features
 
-From `research/FEATURES.md`. A diagram *teaches* (not decorates) when it shows a transformation, a concrete before/after, or spatial relationships prose can't encode.
+**Must have (table stakes — P1):**
+- `Provider` protocol + `AnthropicProvider` refactor (blocking all provider work; existing tests must not regress)
+- `OpenAIProvider` with `base_url` parameter (covers OpenAI + all OpenAI-compatible local endpoints; highest demand after Anthropic)
+- `OllamaProvider` (local/offline path, no API key; validates grounding invariant on constrained models)
+- Validate-and-retry contract + centralized `_check_grounding` guard (required by all non-Anthropic providers to maintain grounding)
+- `build_diagnostics` branches for depth, outliers, regression, regression_cv, spm, represent, classification
+- Per-provider optional extras in `pyproject.toml` (`[openai]`, `[gemini]`, `[ollama]`)
+- Refactor existing advisors onto provider layer without breaking offline paths
+- MCP runner extension to new aspects
 
-**Must have (table stakes):**
-- Problem → Data → Method → Interpretation structure on every worked example (best pages already follow it; risk is inconsistency across the other 15)
-- Accurate concept diagrams for the FDA methods that genuinely need them
-- Every example reproducible and runnable against the current API, cross-linked to the API reference
+**Should have (competitive — P2):**
+- `GeminiProvider` (third major cloud provider; completes the triad with Anthropic + OpenAI)
+- Per-provider logging (DEBUG level only)
+- Extensive per-provider integration tests with recorded-response fixtures (offline)
 
-**Should have (differentiators):**
-- Clear visual explanations for the seven methods that most need them: **elastic alignment (phase vs amplitude split), FPCA (eigenfunction effect), basis representation (weighted sum of bases), scalar-on-function regression (coefficient curve β(t)), depth/outlier detection (centrality ordering), SPM monitoring (Phase I/II), conformal prediction (functional band vs scalar CI)**
-- Five new worked examples for under-documented capabilities: conformal coverage guarantee, function-on-scalar regression, outlier-detection workflow, tolerance-bands vs conformal comparison, functional depth centrality
+**Defer (v3.x+):**
+- HTTP/SSE transport for MCP (remote access; deferred per v2.0 decision)
+- ARL-aware SPM advisor (stochastic design; separate from deterministic `build_diagnostics`)
+- Cross-aspect compound diagnostics ("given my smoothing and clustering, what should I do?")
 
-**Defer / anti-features:**
-- Logo-style abstract SVGs (shapes, no data), over-long "reference-dump" examples, interactive widgets (plotly/bokeh), dark-mode SVG variants — all out of scope or maintenance debt
+---
 
 ### Architecture Approach
 
-From `research/ARCHITECTURE.md`. The design system already exists implicitly; the work is to make it explicit and enforce it. The figure pipeline (`docs_fig.py` rcParams, `docs_data.py` 7 loaders with a `(argvals, X, meta)` contract, post-build `check_docs_figures.py`) is production-quality as-is.
+Convert the single-provider monolith (`advisor.py`, 1161 lines) into a package with three subpackages: `providers/` (protocol + 4 adapters), `aspects/` (9 per-aspect builders), and schema/prompt helpers. Key components:
 
-**Major components:**
-1. **Style spec (tokens)** — `STYLE_SPEC.md` + canonical `<style>` block; the shared ruler every diagram is measured against
-2. **Individual diagrams** — 43 hand-authored SVGs; 35 conform, 8–9 legacy outliers (`clustering`, `depth-functions`, `spm`, `gmm-clustering`, `outlier-detection`, `seasonal-analysis`, `covariance-functions`, `elastic-clustering`, `ex-sonar-tsrvf`) use off-spec fonts/viewBox/palette
-3. **Figure/example pipeline** — datasets → `docs_fig`/`docs_data` → build-time SVG figures → pages; gated by `mkdocs build --strict` + `check_docs_figures.py` (post-build, not pre-build — exec blocks fail silently otherwise)
+1. **`Provider` protocol** — Runtime-checkable; all adapters implement `complete_structured(schema, messages, system) -> dict` + `supports_native_structured_output` flag
+2. **Per-provider adapters** — Anthropic/OpenAI use native mode; Gemini/Ollama use JSON-mode with schema injection
+3. **`ValidateAndRetry` wrapper** — Schema validation + repair-prompt retry (max 1 retry) + `_check_grounding` guard
+4. **Per-aspect diagnostic builders** — Pure NumPy, offline, deterministic; lazy-imported
+5. **Shared dispatcher + prompt system** — Single `_system_prompt(task, aspect)` function with base grounding invariant + aspect-specific clauses
+6. **MCP tool layer** — `_SUPPORTED_METHODS` extended; tools remain compute-only
+
+---
 
 ### Critical Pitfalls
 
-Top items from `research/PITFALLS.md` (all HIGH confidence — observed directly in source):
+1. **Schema Features Don't Port Across Providers** — OpenAI requires nullable unions; Gemini rejects `additionalProperties`; Ollama's constrained decoding silently fails if `think=True` is set. **Mitigation:** `schema_for(provider)` serializers per adapter; `test_schema_round_trip[provider]` offline tests with stored response fixtures.
 
-1. **R-era content in diagrams** (`spm.svg`, `basis-representation.svg`) — grep for `extendr`/`autoplot`/R identifiers in the audit; highest-priority accuracy fixes.
-2. **Method-inaccurate diagrams** — `smoothing.svg` (smoothed panel reuses noisy coordinates); `conformal-prediction.svg` (scalar interval instead of functional band `ŷ(t) ± q(t)`). Validate each diagram against the actual method semantics on the rendered page.
-3. **Consistency drift with no enforcement** — the two-convention split (modern `<style>` vs legacy inline `font-family`) will spread without a machine linter; land SVGO + STYLE_SPEC.md *before* revising any diagram.
-4. **Silent example rot** — `check_docs_figures.py` misses wrong-output from changed API defaults (the issue-#37 `lambda_` pattern), empty figures, and dict-key drift in result wrappers; add value assertions + dict-key checks to example UAT.
-5. **Slow builds discourage local verification** — repeated expensive calls (`karcher_mean(max_iter=25)` ×4 in `growth-alignment.md`, `equivalence_test(nb=500)`); add a `DOCS_FAST` gate and reduce iteration counts in exec blocks.
+2. **Validate-and-Retry Without Hard Contract** — Retry loops lacking ceiling, error state, or fabrication check lead to infinite loops, silent fabrication, or latency surprises. **Mitigation:** Define `max_retries=1` in `Provider` protocol before any adapter; repair prompts must re-include diagnostics; use constrained decoding instead of retries for local models.
+
+3. **Grounding-Invariant Leaks** — New adapters omit system prompt, inject incorrectly, or return empty `Advice` without raising error. **Mitigation:** Centralize `_check_grounding(advice, diagnostics)` as post-generation validator; write `test_grounding_check_catches_fabrication` per adapter.
+
+4. **Offline/CI Testing Traps** — Import-at-module-level breaks pytest in bare venvs; Python 3.9 vs. 3.10+ typing breaks 3.9 CI; env var leakage causes unexpected live tests. **Mitigation:** Deferred imports via `_require_*()` guards; recorded response fixtures per provider; gate integration tests on `FDARS_INTEGRATION=1` + provider key; Python 3.9 CI matrix.
+
+5. **Dependency and Config Traps** — Version drift in `openai` breaks API; `base_url` without `api_key` triggers auth error; Gemini SDK namespace collision. **Mitigation:** Min version pins with comments; adapter maps `api_key=None` to dummy for local endpoints; use `google-genai` not deprecated `google-generativeai`; no SDK imports at package init.
+
+6. **Prompt Sprawl & Diagnostic Key Divergence** — 7 aspects × 3 tasks × 4 providers = 84 naive test paths; temptation to duplicate prompts and use inconsistent key names. **Mitigation:** Single `_system_prompt(task, aspect)` function; shared `DiagnosticsKeys` namespace; two-layer test strategy (9 offline aspect + 4 provider fixture + 1 live per provider = 14 tests, not 84).
+
+---
 
 ## Implications for Roadmap
 
-Research forces a dependency-ordered structure. Granularity is **Fine**, so section sweeps split into their own phases.
+### Phase A: Provider Protocol + Anthropic Adapter Refactor
 
-### Phase 1: Foundation — Style Spec + Guardrails
-**Rationale:** Nothing else can be measured or kept consistent without a written spec and a linter; determinism + test tooling must exist before sweeps.
-**Delivers:** `docs/assets/diagrams/STYLE_SPEC.md`; `svgo.config.mjs`; `svg.hashsalt` in `docs_fig.py`; `pymdownx.snippets` in `mkdocs.yml`; `pytest-markdown-docs` + `conftest.py` globals; `DOCS_FAST` build gate; frozen docs deps (NumPy pin).
-**Avoids:** consistency drift, non-deterministic figures, slow builds.
+**Rationale:** Foundation. Blocks all downstream work.
 
-### Phase 2: Nav + Reference-API Audit
-**Rationale:** User chose to derive the coverage/new-example list from a nav + API audit; gap detection must precede sweeps.
-**Delivers:** cross-section diagram map (page → diagram, accurate/inconsistent/missing), grep report for R-era identifiers, ranked coverage-gap + new-example list for user selection.
-**Addresses:** coverage gaps; **Avoids:** guessing scope.
+**Delivers:**
+- `Provider` protocol + `AnthropicAdapter` + `ValidateAndRetry` + `resolve_provider()` factory
+- Refactored `advise()` with optional `provider=` parameter (default: Anthropic)
+- Package restructure: `advisor/` with `_schema.py`, `_prompts.py`, `providers/`, `aspects/`
+- All 5 existing aspect builders moved to `advisor/aspects/`
 
-### Phases 3–8: Section-by-Section Diagram Sweeps (with per-section review gate)
-**Rationale:** Diagrams are the priority; sweep highest-risk methods first; SVGO green before each section starts. Order: **learn → represent → align → analyze → regression → monitoring** (regression is largest ~12 pages and most likely to surface accuracy issues).
-**Delivers:** each section's diagrams brought to STYLE_SPEC.md and made method-accurate; legacy outliers migrated; user reviews the built site per section before the next begins.
-**Uses:** SVGO lint, STYLE_SPEC.md. **Implements:** the diagram design-system component.
+**Tests:** Existing advisor tests pass unchanged; offline unit tests for retry path; bare-venv smoke test.
 
-### Phase 9 (last): Examples Sweep
-**Rationale:** Deliberately last — running example code may reveal API issues that must be fixed before figures finalize.
-**Delivers:** every `docs/examples/*.md` correct against current API (pytest-markdown-docs), enriched narrative, improved figures/captions, and the 5 new worked examples.
-**Avoids:** example rot (value + dict-key assertions, two-consecutive-build determinism as UAT).
+**Duration:** 4–6 weeks.
 
-### Phase Ordering Rationale
-- Style spec + linter are a hard prerequisite for every diagram sweep (consistency ruler must exist first).
-- Audit precedes sweeps so scope is evidence-based, not guessed.
-- Diagrams before examples (user priority) and because example fixes may depend on nothing, but example execution may surface API bugs best handled after diagrams are settled.
-- Section sweeps run serially with review gates matching the user's per-section approval preference.
+---
 
-### Research Flags
-Phases likely needing deeper research during planning:
-- **Regression + Monitoring diagram sweeps:** method semantics (scalar-on-function β(t), conformal functional bands, SPM Phase I/II control limits) must be verified against `fdars-core` behavior to draw them correctly.
-- **Examples sweep:** confirm `pytest-markdown-docs` handles multi-block narrative state on a real page before adopting it as the CI pattern.
+### Phase B: Per-Provider Adapter Implementation
 
-Phases with standard patterns (can skip research-phase):
-- **Foundation + Audit:** mechanical/tooling; no external research needed.
-- **learn/represent/align/analyze diagram sweeps:** established concepts, baseline already defined.
+**Rationale:** Can run in parallel with C after A completes. Validates grounding across all providers.
+
+**Delivers:**
+- `OpenAIAdapter` (with `base_url` for local endpoints)
+- `GeminiAdapter` (structured output + json fallback)
+- `OllamaAdapter` (local, constrained decoding)
+- Per-adapter optional extras; offline fixture tests; grounding violation tests
+- Python 3.9 compatibility guard for Gemini
+
+**Tests:** 4 offline schema round-trip; 4 offline grounding violation; env-gated integration per provider.
+
+**Duration:** 6–8 weeks (1.5–2 weeks per adapter).
+
+---
+
+### Phase C: Per-Aspect Diagnostic Builders
+
+**Rationale:** Can run in parallel with B after A completes. Offline, deterministic, no provider dependency.
+
+**Delivers:**
+- `advisor/aspects/_base.py` (shared helpers)
+- Five new aspect builders: depth, regression, monitoring, classification, represent
+- Extended dispatcher; extended `_system_prompt()` with per-aspect clauses
+- MCP extension; `DiagnosticsKeys` namespace
+
+**Tests:** 7 offline determinism tests; `test_diagnostics_key_consistency`; MCP tool tests.
+
+**Duration:** 8–10 weeks (1–1.5 weeks per aspect builder; SPM is highest complexity).
+
+---
+
+### Phase D: Surface Updates + Packaging + Testing Strategy
+
+**Rationale:** Assembly and validation after A+B+C complete.
+
+**Delivers:**
+- Finalized `pyproject.toml` with all optional extras
+- CI matrix (Python 3.9–3.14, per-provider integration tests env-gated)
+- Bare-venv smoke test; test-strategy documentation
+- Updated SKILL.md; walkthrough script gains `--provider` flag
+
+**Duration:** 2–3 weeks.
+
+---
+
+### Phase E: Documentation
+
+**Rationale:** Last phase; documents shipped system.
+
+**Delivers:**
+- Provider setup guide (env vars, credentials, Python 3.9 limitation for Gemini)
+- Per-aspect advisor pages (depth, regression, monitoring, classification, represent)
+- Updated advisor overview; updated API docs
+
+**Duration:** 2–4 weeks.
+
+---
+
+## Phase Ordering Rationale
+
+1. **Phase A first** — Blocking dependency for all other work. Provider protocol + ValidateAndRetry + `_check_grounding` must exist before any adapter.
+
+2. **Phases B and C parallelizable** — No hard dependency on each other. Both depend on Phase A's package structure.
+
+3. **Phase B validates grounding** — Offline fixture tests catch schema portability bugs before they ship.
+
+4. **Phase C exploits parallelism within aspects** — Depth, regression, monitoring, classification can be built in parallel.
+
+5. **Phase D is assembly** — Shorter, can proceed serially.
+
+6. **Phase E is documentation** — Deferring it does not block functionality.
+
+---
+
+## Research Flags
+
+**Phases likely needing deeper research during planning:**
+- **Phase B:** Schema-portability per provider (OpenAI `nullable`, Gemini `additionalProperties`, Ollama `think+format` conflict). Confirm Ollama structured-output stability (issue #10929).
+- **Phase C:** SPM diagnostics complexity (highest in all aspects). Validate `spe_moment_match_diagnostic` fdars function signature.
+
+**Phases with standard patterns (skip dedicated research-phase):**
+- **Phase A:** Well-established pattern (refactoring existing code). Standard planning sufficient.
+- **Phase D:** Standard CI/packaging patterns.
+- **Phase E:** No research needed; documentation follows shipped interface.
+
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | MEDIUM | Core tool versions verified vs live PyPI/npm; SVGO/pytest config details LOW (not yet run against the actual files) |
-| Features | MEDIUM | Cross-checked vs scikit-fda/scikit-learn/statsmodels; per-method priority needs audit to confirm |
-| Architecture | HIGH | All 43 SVGs + scripts + Makefile + mkdocs.yml inspected directly |
-| Pitfalls | HIGH | Specific accuracy bugs observable in SVG source; example-rot patterns confirmed in CI scripts + issue #37 history |
+| **Stack** | HIGH | All four provider SDKs verified against live PyPI + official docs. Version pins, Python floors, structured-output API shapes confirmed. Anthropic already shipping provides reference implementation. |
+| **Features** | HIGH | Derived directly from existing `advisor.py`, v2.0 shipped coverage, and fdars library inventory. Per-aspect diagnostics cross-checked against fdars module signatures. MVP aligns with dependency graph. |
+| **Architecture** | HIGH | Direct codebase analysis (`advisor.py` 1161 lines, MCP, SKILL.md, PROJECT.md). Package refactoring confirmed against existing `sys.modules` injection. Component boundaries derived from code inspection. |
+| **Pitfalls** | MEDIUM | Derived from codebase patterns + provider SDK docs + GitHub issues (Ollama #10929, Gemini #1815/#706, OpenAI). Community writeups on validate-and-retry cited with LOW confidence (needs Phase B validation). Grounding leaks extrapolated from Anthropic pattern — extent on new providers unknown until Phase B integration tests. |
 
-**Overall confidence:** MEDIUM–HIGH (implementation ground truth is strong; some tool-config specifics need a smoke test in Phase 1).
+**Overall confidence:** **HIGH** for roadmap structure and phase ordering. **MEDIUM** for detailed pitfall mitigation (will be refined during Phase B implementation).
 
 ### Gaps to Address
-- **SVGO config vs real files:** validate `cleanupIds:false` / `convertTransform:false` against the actual SVGs in Phase 1 (may be relaxable for extra savings).
-- **pytest-markdown-docs multi-block state:** smoke-test on one narrative example page before committing to it as the CI pattern.
-- **Which of the 50 SVGs are inaccurate vs merely inconsistent:** resolved by the Phase 2 audit (requires rendering each page).
-- **Editorial scope questions:** `sonar-tsrvf` vs `phoneme-shape` overlap; whether the 4-page Andrews-wine series stays or consolidates — decide during the examples phase.
 
-## Sources
+1. **Ollama structured-output reliability** — Constrained decoding working since v0.5, but `think+format` conflict (issue #15260) indicates evolving behavior. Mitigation: Phase B planning includes Ollama spike to confirm v0.5+ stability.
 
-### Primary (HIGH confidence)
-- Project codebase — all 43 `docs/assets/diagrams/*.svg`, `scripts/docs_fig.py`, `scripts/docs_data.py`, `scripts/check_docs_figures.py`, `Makefile`, `mkdocs.yml`, `docs/hooks.py` (direct inspection; ground truth for baseline, outliers, and accuracy bugs)
-- `.planning/codebase/` map (ARCHITECTURE, STRUCTURE, CONCERNS) and issue #37 / MEMORY history for the `lambda_` example-rot pattern
+2. **Gemini 2.5 vs. 2.0 inconsistency** — Structured output fails on Gemini 2.5 with prior tool calls in history, but succeeds on 2.0. Unknown if bug or expected. Mitigation: Phase B planning includes live Gemini test with/without message history.
 
-### Secondary (MEDIUM confidence)
-- Comparative docs of scikit-fda, scikit-learn, statsmodels, GPyTorch — example structure and diagram conventions
-- Data/ink-ratio principle — teaching-vs-decorative diagram distinction
+3. **Google-genai namespace stability** — Switch from deprecated `google-generativeai` to `google-genai` documented; `google-genai` 3.0.0 warned to have breaking changes. Mitigation: Phase B monitoring of release notes; Phase D CI version check.
 
-### Tertiary (LOW confidence, validate in Phase 1)
-- PyPI/npm/GitHub version checks: markdown-exec 1.12.3, mkdocs-material 9.7.7, SVGO 3.3.4/4.0.2, pytest-markdown-docs 0.9.2, matplotlib 3.11.1
-- SVGO preset-default plugin docs; matplotlib `svg.hashsalt` changelog; Deque/WCAG 1.1.1 SVG accessibility guidance
+4. **SPM diagnostics completeness** — `spe_moment_match_diagnostic` fdars function signature and kurtosis return format need validation. Mitigation: Phase C planning includes spike on fdars monitoring module.
+
+5. **Multi-tenant CI secrets management** — Env var gating for integration tests recommended but not yet deployed. Mitigation: Phase D CI setup enforces strict gating and fails fast if key missing.
 
 ---
-*Research completed: 2026-08-07*
-*Ready for roadmap: yes*
+
+## Summary for Roadmapper
+
+**Critical prerequisite:** Provider protocol + Anthropic refactor (Phase A) blocks all downstream work. No adapters, no aspects, no MCP can proceed until this phase ships.
+
+**Parallelization opportunity:** Phases B and C are independent and can run in parallel after Phase A.
+
+**Risk mitigation:** Phase B must include offline schema-portability tests for all four providers (stored response fixtures). Phase C must include offline determinism tests for all 9 aspects. These validation gates prevent silent schema mismatches and diagnostic key divergence from shipping.
+
+**Testing strategy:** Two-layer approach (offline aspect tests + provider tests) avoids 84-path combinatorial explosion. Live end-to-end tests capped at 4 (one per provider).
+
+**Confidence:** HIGH for phase ordering and structure. MEDIUM for detailed pitfall mitigation (will be refined during Phase B implementation).
+
+---
+
+*Research completed: 2026-08-12*  
+*Synthesized by: gsd-synthesizer agent*  
+*Ready for roadmap creation: yes*

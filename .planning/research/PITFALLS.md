@@ -1,263 +1,205 @@
 # Pitfalls Research
 
-**Domain:** Documentation overhaul — hand-authored SVG concept diagrams + reproducible code examples for a scientific FDA library (pyfda / fdars)
-**Researched:** 2026-08-07
-**Confidence:** HIGH (primary-source: direct inspection of ~45 SVG files, 17 example pages, CI workflow, build scripts, `docs_fig.py`, `docs_data.py`)
+**Domain:** Multi-provider LLM advisor — provider-agnostic structured output, grounding invariant, per-aspect advisors, offline/CI testing (fdars v3.0)
+**Researched:** 2026-08-12
+**Confidence:** MEDIUM (cross-checked against existing advisor.py, provider SDK docs, community issue trackers)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Diagram Depicts Wrong Method Semantics
+### Pitfall 1: Schema Features That Don't Port Across Providers
 
 **What goes wrong:**
-A diagram illustrates a valid-looking conceptual shape but misrepresents what the underlying algorithm actually computes. For example: the `smoothing.svg` "smooth curve" panel re-uses the same jagged path from the noisy-input panel (Panel 3's path is identical to Panel 1's path with a different stroke color and an overlaid smooth curve layered on top), implying the smoother merely traces over the original data rather than extracting the signal. A reader who studies the SVG closely will see the noisy path still present behind the smooth one — the diagram shows overlay rather than replacement.
+A Pydantic schema that works perfectly with Anthropic's `client.messages.parse(output_format=Advice)` silently breaks or coerces incorrectly when the same schema is serialised for OpenAI `json_schema`, Gemini `response_schema`, or Ollama `format`. Specific failure modes per provider:
 
-More dangerous variants: an FPCA modes-of-variation diagram showing mean ± mode curves where the ± perturbation is symmetric but the drawn curves are not actually ± 2√λₖ · φₖ (just decorative wiggles); a warping function panel where the warp curve shown does not start and end at the identity diagonal endpoints (violating γ(0)=0, γ(T)=T); a conformal-prediction interval drawn as a symmetric band around a point rather than an asymmetric residual quantile region.
+- **OpenAI (`json_schema`)**: All fields must appear in `required`. `Optional[str]` is not handled as "omissible" — the model will always emit the field. Use `str | None` with `null` type in the schema, not `Optional[...]` without `required`. The `nullable` keyword is silently ignored on some model versions, so `Union[str, None]` expressed as two type alternatives is safer than `nullable: true`. `additionalProperties` must be `false` (closed schema). Schemas above ~30 total fields increase latency and refusal risk. Deeply nested objects (5+ levels) are valid but increase constrained-decoding error rates.
+- **Gemini (`response_schema`)**: The `google-genai` SDK rejects schemas containing `additionalProperties` at the client-validation layer, even though the API now supports it. Polymorphic schemas (type-discriminated unions — e.g., a `kind` field that changes the schema of sibling fields) are not supported. When prior tool calls are in the message history, structured output fails on Gemini 2.5 models but not 2.0 models. `json_mode` and `response_schema` behave inconsistently between model families.
+- **Ollama (`format`)**: Since 0.3.0, passing a JSON schema to `format` enables GBNF-grammar constrained decoding. However, `format` and `think` (thinking/reasoning mode) are **mutually exclusive** — they cannot be used simultaneously. When `think=false` is set on some models (e.g., gemma4), the format constraint is silently ignored rather than raising an error. The `/api/chat` endpoint without `format` produces natural language only.
+- **Cross-provider coercion**: The `Literal["parameter", "method", "none"]` on `kind` maps to an enum in every provider's schema, but enum enforcement is soft on weaker local models — the model emits an out-of-enum string that passes JSON parse but fails Pydantic validation. The `evidence: List[str]` field is frequently coerced to a single string on smaller Ollama models (type coercion without a type error).
 
 **Why it happens:**
-Hand-authored SVGs are drawn by eye to look plausible, not derived from actual computed values. An author who understands the method knows what "roughly" looks right. The error is invisible to visual inspection by someone unfamiliar with the mathematical constraint; it only surfaces during expert peer review. The pressure to ship a complete, polished set of diagrams discourages iteration time.
+Developers author and test the schema against one provider (here, Anthropic) and assume JSON Schema is a universal standard. It is not: each provider serialises Pydantic models differently, enforces a different subset of JSON Schema Draft 2020-12, and applies different constraints at inference time vs. SDK validation time. The mismatch is invisible until the alternate provider is wired in.
 
 **How to avoid:**
-For each diagram class, write a one-sentence "mathematical invariant" the SVG paths must satisfy: warp functions must be monotone-increasing, start at (0,0), end at (T,T); FPCA panels must label axes with the formula μ̂ ± c·φₖ and the drawn curve must match the described perturbation direction; a smoother output must not share path geometry with the input. Review each diagram against its invariant checklist, not just visual impression.
+Define the canonical schema once in Pydantic (`Advice`, `Recommendation`) and write a `schema_for(provider)` serialiser per adapter. Each serialiser handles the provider's idiosyncratic requirements: OpenAI needs all-required + nullable union; Gemini needs `additionalProperties` stripped; Ollama needs a flat, non-nested JSON schema passed as `format`. Write a `test_schema_round_trip[anthropic|openai|gemini|ollama]` test for each provider that constructs the schema, serialises it via the adapter, then deserialises a known-good JSON response fixture through the same Pydantic model. These tests are all offline (no API calls) and must pass in CI.
 
 **Warning signs:**
-- "Looks good to me" sign-off without reading the SVG source to verify path coordinates
-- Reviewer who created the diagram is also the sole reviewer
-- Diagrams showing SRSF/elastic methods without an explicit identity-diagonal reference line in the warping panel
-- Any panel where the input and output `<path d="...">` share identical coordinate sequences
+- A single `model_json_schema()` call whose output is passed to all four providers without per-provider transformation
+- An integration test for provider X that passes but no corresponding test for providers Y and Z
+- `Optional[str]` fields in `Recommendation` or `Advice` that are not explicitly marked `required` with a null union
+- Gemini adapter code that includes `additionalProperties: false` in the serialised schema (triggers SDK-side `ValidationError` before the API call)
+- Ollama adapter that passes `think=True` alongside `format=schema` (silently disabled constraint)
 
 **Phase to address:**
-Style spec phase (before rollout). Invariant checklist should be codified in the shared style spec so each diagram draft is checked against it. Expert review gate (built-site review) is the verification step.
+Provider abstraction phase (the one introducing the `Provider` protocol and per-backend adapters). Schema portability tests belong in the same phase — do not defer to a later phase.
 
 ---
 
-### Pitfall 2: Stale R-Centric Content in Diagrams
+### Pitfall 2: Validate-and-Retry Without a Hard Contract
 
 **What goes wrong:**
-Two SVG files (`spm.svg` and `basis-representation.svg`) contain R-specific content — "powered by Rust / R" branding, `extendr` references, R function signatures — that belongs to the R package (`fdars`), not the Python package (`fdars` / pyfda). These were ported from the R documentation without updating the language layer. A user reading the Python docs encounters "Rust Backend (extendr)" (extendr is the R↔Rust bridge) and R function calls like `autoplot()`. This actively misleads Python users about what they are using.
+The retry loop for weaker/local models lacks a ceiling, a deterministic error state, or a fabrication check. Three sub-failures:
+
+1. **Infinite retry loop**: The model repeatedly emits structurally invalid JSON (missing brace, trailing comma, markdown fence wrapping the object) and each attempt triggers another call. Without a max-retry cap, the caller blocks indefinitely. With a max-retry cap but no terminal exception, the caller silently receives `None` or a partially-valid dict.
+2. **Silent fabrication on repair**: The repair step ("here is the invalid JSON, please correct it") gives the model an opportunity to invent new field values. A `rationale` field that was previously truncated gets "helpfully" extended with invented text. The repaired output is now structurally valid but contains fabricated content not derived from the diagnostics. This is invisible to Pydantic schema validation, which checks structure only.
+3. **Cost/latency surprise on Ollama**: Ollama runs locally and has no monetary cost, but a 3-retry loop on a large local model can take 30–90s per `advise()` call. If the retry loop is triggered by a structural validation failure (which happens frequently on 3B–7B models without constrained decoding), the caller hangs. The pattern "retry with feedback" reliably triggers a second full generation.
 
 **Why it happens:**
-The project started as an R package; pyfda is the newer Python binding. SVGs were created once and reused across documentation layers. The error is textual, not visual, so it survives visual-only review.
+Retry logic is typically added reactively when a provider first fails in testing. The "correct the JSON" repair prompt is an easy reach, but it bypasses the grounding invariant because the correction prompt does not include the original diagnostics, so the model re-generates content from memory rather than from the supplied evidence. Max-retry is a config value that gets set once and never revisited as new providers are added with different failure rates.
 
 **How to avoid:**
-During the nav + reference-API audit phase, explicitly grep SVG source for R-specific identifiers: `extendr`, `autoplot`, `R ↔ Rust`, `fclassif` (R name), and any reference to CRAN. Flag every hit for replacement. The style spec should require that all function-name labels in diagrams are verified against the current Python API surface.
+The `Provider` protocol's `generate(diagnostics, task, ...) -> Advice` method must define an explicit retry contract:
+- `max_retries: int = 2` (never more than 2 structural retries — on the third attempt, raise `ProviderStructuralError(provider, attempts=3)`).
+- On retry, the feedback prompt must re-include the full diagnostics blob from the original call — never repair without the original grounding input.
+- After a successful structural parse, run the grounding check (see Pitfall 3) before returning. A structurally valid but grounding-failed response does not trigger another retry — it raises `GroundingViolationError` immediately. Retrying on grounding failure rewards fabrication.
+- Ollama and other constrained-decoding providers should have `max_retries=0` when `format=schema` is enabled, because constrained decoding makes structural failure impossible by construction; retries on constrained providers are a sign of a schema serialisation bug, not a model reliability issue.
+- Expose a `_validate_structure(raw: str) -> Advice` hook per adapter (not per call site) so the validation+retry logic is adapter-owned and testable in isolation.
 
 **Warning signs:**
-- Any SVG showing `extendr` in the text content
-- Function labels using R-style names (e.g., `autoplot()`, `fclassif()`) rather than Python API names
-- The hero/introduction diagram listing R-only methods not exposed in `fdars` Python
-- `viewBox="0 0 720 480"` combined with `font-family="'Segoe UI', system-ui, sans-serif"` (the legacy pre-spec style applied to overview diagrams not yet updated)
+- `while attempts < max_retries` without a `finally: raise` branch
+- A repair prompt that does not include `json.dumps(diagnostics)` from the original call
+- `max_retries` set to 5 or higher (practically no ceiling given real model failure rates)
+- An `except (json.JSONDecodeError, ValidationError): continue` that swallows all parse errors without logging the provider and attempt number
+- A retry that runs on Ollama in `format=schema` mode (signals the schema serialiser is wrong, not the model)
 
 **Phase to address:**
-Nav + reference-API audit (first phase). Flag all such files before diagram revision begins. Fixing them during style-spec rollout is correct; discovering them during the final review gate is too late.
+Provider abstraction phase (same as Pitfall 1). The retry contract must be written into the `Provider` protocol spec before any adapter is implemented.
 
 ---
 
-### Pitfall 3: Visual Consistency Drift Across the 45-SVG Set
+### Pitfall 3: Grounding-Invariant Leaks Introduced by New Providers
 
 **What goes wrong:**
-With ~45 hand-authored SVGs, authoring drift accumulates across the rollout: different stroke widths for the same semantic (e.g., `stroke-width="1.3"` vs `1.6` vs `2.4` for "secondary curve"), different font sizes for labels, slightly different `rx` values for panel corners, inconsistent color usage (the orange `#fd7e14` in some diagrams, `#e8710a` in the palette spec, `#E6A020` in the legacy overview diagram), and caption y-positions that vary per diagram.
+The grounding invariant — "fdars computes every number; the LLM only interprets and cites" — is enforced in the existing Anthropic adapter through the system prompt and the `evidence: List[str]` required field. When new adapters are added, two leak paths emerge:
 
-The existing diagram set already shows this: `smoothing.svg` uses `stroke-width="1.3"` for the noisy path, while `elastic-alignment.svg` uses `stroke-width="1.8"` for comparable secondary curves. The legacy `spm.svg` / `basis-representation.svg` files use `font-family="'Segoe UI', system-ui, sans-serif"` with `font-size="12"` attributes directly on `<text>` elements, while the modern spec uses a `<style>` block with named classes (`.ttl`, `.sub`, `.lab`, `.sm`, `.mono`). Both conventions will coexist across the set until explicitly harmonised.
+1. **System prompt suppression**: Provider adapters omit or truncate the grounding system prompt because the new provider's API passes system messages differently (Gemini uses `system_instruction`, OpenAI uses the `system` role in messages, Anthropic has a top-level `system` parameter). An adapter that wires the system prompt incorrectly (e.g., injects it as the first `user` message instead of the system role) may still produce structurally valid output, but the model is no longer constrained by the grounding instructions.
+2. **Fallback prompt computation**: The "repair" prompt or the "retry with feedback" prompt does not reproduce the constraint "reason only from the diagnostics provided." A model receiving just "fix this JSON" will re-generate evidence entries from its parametric memory, inventing diagnostic values not present in the original dict.
+3. **Provider-specific schema enforcement gap**: Anthropic's `client.messages.parse` rejects `parsed_output=None` and the adapter raises a clear error. OpenAI's structured output mode returns `refusal` strings rather than `None` in some refusal cases. Gemini returns an empty response on some safety-filter triggers. If an adapter treats an empty/refusal response as a non-error, the caller receives a blank `Advice` with empty evidence — the grounding invariant is vacuously satisfied (there is nothing to cite) but the output is useless.
 
 **Why it happens:**
-Authors working section-by-section copy an existing "similar" diagram as a starting template. The template they copy is whichever one they opened, not necessarily the canonical one. Without a machine-checkable linter, no one notices that `rx="8"` became `rx="12"` in the next batch.
+The grounding check lives in the system prompt and in the schema's `required: evidence` field. These are necessary but not sufficient: a model that ignores the system prompt produces required-but-fabricated evidence strings. Adding providers means each adapter must independently re-implement the prompt injection, and there is no centralised grounding check that all adapters pass through. The first provider (Anthropic) had human UAT to verify; subsequent providers have no equivalent gate.
 
 **How to avoid:**
-The shared style spec must be a normative, machine-verifiable reference: one authoritative palette constant per color role, one `stroke-width` value per semantic role ("primary curve", "secondary curve", "axis line", "dashed reference"), one `rx` for panels, one viewBox aspect ratio per diagram layout type. Write a Python or shell linter (e.g., an xmllint + grep script) that checks each SVG in `docs/assets/diagrams/` against the spec. Run it in CI on every PR. Do not rely on human visual comparison across 45 files.
+Centralise the grounding check as a post-generation validator that runs in the base `Provider` call path, not in each adapter:
+
+```python
+def _check_grounding(advice: Advice, diagnostics: dict) -> None:
+    """Raise GroundingViolationError if any evidence item cites a value
+    not present in the diagnostics dict (string repr match).
+    """
+    diag_values = {str(v) for v in _flatten_values(diagnostics)}
+    for rec in advice.recommendations:
+        for ev in rec.evidence:
+            if not any(val in ev for val in diag_values):
+                raise GroundingViolationError(
+                    f"Evidence item cites no diagnostic value: {ev!r}"
+                )
+```
+
+This is not a perfect semantic check but catches fabricated numbers. Run this check after every successful parse, before returning `Advice` to the caller. The test suite must include a `test_grounding_check_catches_fabrication` test per provider adapter (use a mock adapter that returns an `Advice` with invented evidence values and assert the check raises).
+
+For system prompt injection: the `Provider` protocol defines `_system_prompt(task)` as a shared method that returns the exact grounding invariant string. Each adapter's `generate()` must call `_system_prompt(task)` and inject it using the provider's correct system-role mechanism — never inline the system prompt text in an adapter.
 
 **Warning signs:**
-- Reviewer notes "this looks slightly different from the others" more than twice per section
-- Any new SVG drafted from a `docs/assets/cards/` or `docs/assets/thumb/` file (those are separate conventions)
-- Hex colors in SVG source that are not in the approved palette (`#3f51b5`, `#e8710a`, `#198754`, `#dc3545`, `#6f42c1`, `#0dcaf0`, `#6c757d`, `#1a1a2e`, `#f8f9fa`, `#ced4da`, `#adb5bd`, `#495057`)
-- Diagrams where the font size on `.sm` label elements differs from 11px
+- An adapter that passes the system prompt as the first `user` message (not the system role)
+- A repair/retry prompt that does not reproduce the grounding instruction verbatim
+- An adapter where `parsed_output is None` is treated as an empty `Advice()` rather than a raised exception
+- No `test_grounding_check_catches_fabrication` test in the test suite
+- A new adapter's integration test that only checks `isinstance(result, Advice)` without checking that `evidence` entries cite real diagnostic values
 
 **Phase to address:**
-Style spec phase. The linter should be built and green before any diagram is revised. Running it retroactively after 20 diagrams have been revised is the wrong order.
+Provider abstraction phase. The `_check_grounding` function must be part of the `Provider` base class before any adapter is added. Every adapter integration test must include one grounding-violation fixture.
 
 ---
 
-### Pitfall 4: Example Rot — Silent API Drift
+### Pitfall 4: Offline/CI Testing Traps for Four Providers
 
 **What goes wrong:**
-A `markdown-exec` code block calls a function with parameters that silently changed. The existing `check_docs_figures.py` script catches `ModuleNotFoundError` and `.exec-error` tracebacks, but it does NOT catch: (a) API changes that produce the wrong output without raising, (b) changed return-dict keys (e.g., if `karcher_mean()` stops returning `"aligned_data"` and returns `"registered_data"` instead, `np.asarray(km["aligned_data"])` raises a `KeyError`, which IS caught — but if the key name changes to return an extra field and the old key is kept for backward compat, the example may produce silently wrong figures), (c) numeric changes in output values (e.g., default `lambda_` fix in issue #37 changed outputs without a visible error).
+Adding four providers creates four separate `import` paths, each guarded by an optional extra. The test suite breaks in three ways:
 
-The deeper risk is the `load_penicillin` function in `docs_data.py`: it is seeded-synthetic data using `np.random.default_rng(20260805)` — but if the NumPy random generator semantics change between minor versions (as they have in past NumPy releases for some distributions), the generated curves shift shape, and the monitoring example shows different figures than were reviewed.
-
-**Why it happens:**
-`markdown-exec` builds execute the code but do not assert on output values — they only detect hard exceptions. The `check_docs_figures.py` script is exception-only. There is no golden-output comparison. API changes in `fdars` that affect defaults (like the `lambda_=1.0 → 0.0` fix in issue #37) propagate silently into all figure outputs.
+1. **Import-at-module-level pollution**: If `adapter/openai.py` imports `openai` at the top of the file, running `pytest tests/` in an environment without `[openai]` installed fails with `ImportError` at collection time — not at the test that needs it. The existing advisor.py pattern (`_require_anthropic()` inside the function body) is correct but easy to break when adding adapters.
+2. **Python 3.9 vs. 3.10+ typing**: The `Provider` protocol uses `match/case` (structural pattern matching, Python 3.10+) or `X | Y` union syntax in type hints (Python 3.10+). Since fdars targets Python 3.9–3.14, any adapter that uses these features without `from __future__ import annotations` fails on Python 3.9. The existing codebase uses `from __future__ import annotations` correctly in `advisor.py`, but new adapter files may omit it.
+3. **No recorded-fixture path for CI**: Each provider adapter requires a live API key to test the generate path. Without a fixture-replay mechanism, provider tests are either skipped in CI (acceptable) or make real API calls (expensive, flaky, secret-dependent). The existing pattern (`pytestmark = pytest.mark.skipif(not os.environ.get("ANTHROPIC_API_KEY"), ...)`) is correct for the Anthropic adapter, but replicating it for four providers leads to four separate env-var gates that are easy to misconfigure. An env var like `OPENAI_API_KEY` may be set in the developer's environment for a different project, causing the OpenAI integration test to unexpectedly run in CI.
 
 **How to avoid:**
-(1) For deterministic outputs (scalar metrics printed alongside figures), add an assertion or print the value and document the expected range in a `!!! note` admonition — a reviewer can catch drift during section review. (2) For seeded-synthetic data, pin the NumPy version in `docs/requirements.txt` with a minimum version and document the seed contract in `docs_data.py`. (3) After any `fdars` API change, explicitly rebuild the docs and diff figure outputs before marking a section done. (4) For functions whose return keys may change (like `karcher_mean`, `fpca`, `equivalence_test`), add an explicit dict-key assertion at the top of each exec block: `assert "aligned_data" in km, f"unexpected keys: {list(km.keys())}"` — this converts silent drift to a caught error.
+- All provider adapters must use deferred import: no `import openai` at module top level. Use `_require_openai()`, `_require_gemini()`, `_require_ollama()` guards identical in structure to the existing `_require_anthropic()`.
+- Add a CI smoke test that imports `fdars.advisor` (and each adapter module by name) in a bare venv with only the core `fdars` package installed (no provider extras). This test must pass in zero-key CI.
+- Use recorded response fixtures for offline adapter unit tests: store a `tests/fixtures/adapter_responses/<provider>/advice_response.json` per provider. The fixture is the raw API response. The adapter test loads the fixture, passes it through the adapter's `_parse_response()` method, and asserts the resulting `Advice`. No network call. No API key.
+- For Python 3.9 compatibility: add a CI matrix entry for Python 3.9 that runs all offline advisor tests. Any `X | Y` union or `match/case` in advisor code must be caught by this matrix entry.
+- Gate integration tests strictly: use `pytest.mark.integration` on all live-key tests. The CI job that runs integration tests must explicitly set `FDARS_INTEGRATION=1` and fail fast if the required key is missing, rather than silently skipping. This prevents the "key set from another project" silent run.
 
 **Warning signs:**
-- `fdars` version in `pyproject.toml` or `Cargo.toml` is bumped without rebuilding docs
-- A function-result dict accessed by string key without assertion
-- `np.random.default_rng` with a date-based seed (e.g., `20260805`) — signals the seed was chosen arbitrarily and may not be stable across NumPy minor versions
-- No pinned minimum NumPy version in `docs/requirements.txt`
-- Example output prose ("about 8 cm/yr", "R² of 0.94–0.98") that was manually transcribed from a past build and not rechecked
+- `import openai` or `import google.generativeai` at the top level of any adapter file
+- `X | Y` union syntax in function signatures in files that do not have `from __future__ import annotations`
+- Integration tests that use `skipif(not os.environ.get("OPENAI_API_KEY"))` without also asserting `FDARS_INTEGRATION=1` is set
+- No `tests/fixtures/adapter_responses/` directory with at least one fixture per adapter
+- A bare-venv import test that is not in the CI matrix
 
 **Phase to address:**
-Examples phase. The dict-key assertions and output-range notes should be added during example authoring, not retroactively. The NumPy pin should be addressed in the foundation/audit phase.
+Provider abstraction phase for the import guard and Python 3.9 compat. Fixture infrastructure should be established before the first adapter is implemented, not retroactively.
 
 ---
 
-### Pitfall 5: Non-Deterministic Figures from Random Splits
+### Pitfall 5: Dependency and Config Traps Across 3–4 Provider SDKs
 
 **What goes wrong:**
-Several examples use `np.random.default_rng(42)` for train/test splits (e.g., `tecator-regression.md` uses `rng.permutation(X.shape[0])`). These are correctly seeded. However, two specific risks exist: (1) `equivalence_test(..., nb=500, seed=42)` in `growth-alignment.md` — if the fdars binding does not thread the seed through to Rust's RNG correctly, the bootstrap will produce different p-values across builds. (2) The `scatter` jitter in the same example (`np.random.default_rng(0).uniform(-.08, .08, ...)`) is correctly seeded, but the RNG is created inline — if the call is executed multiple times (e.g., during local `mkdocs serve` with hot-reload), the second RNG state will differ if there are upstream side effects. Neither will fail CI but both will produce visually different figures across builds.
+Managing four provider SDKs in one package introduces compounding configuration and versioning problems:
 
-**Why it happens:**
-Seeds in Python code are per-object, not global. The Rust side of `equivalence_test` may use its own RNG state unless the `seed` parameter is explicitly passed. Markdown-exec re-executes all blocks in a fresh process for each build, so top-level state is reset — but any mutable global state (matplotlib rcParams modified by a prior block) persists within a single page build.
+1. **Version drift**: The `openai` SDK breaks its API surface frequently (v0.x → v1.x was a complete rewrite; `AsyncOpenAI` vs. `OpenAI`, `response_format` parameter shape changes between minor versions). Pinning `openai>=1.40.0` is necessary because structured outputs were added in 1.40. Failing to pin means a user with `openai==1.30` installs the `[openai]` extra and gets a runtime `AttributeError` on `.parse()` with no clear error message.
+2. **`base_url` / auth confusion for OpenAI-compatible endpoints**: The OpenAI Python SDK reads `OPENAI_API_KEY` from the environment unconditionally when using `OpenAI()` without explicit `api_key`. For local/compatible endpoints (vLLM, LM Studio, LocalAI), the user sets `base_url` but may not set a dummy `api_key`, causing a `openai.AuthenticationError` from the SDK's own validation before the request is sent. The error message says "provide an API key" but the underlying endpoint doesn't require one. The adapter must accept `api_key=None` and pass `api_key="none"` (a non-empty dummy) to the SDK when the user configures a local base URL without a key.
+3. **`OPENAI_API_KEY` env var bleeds into Ollama adapter**: If the user has `OPENAI_API_KEY` set in their shell (for another project), and the Ollama adapter uses `openai.OpenAI(base_url="http://localhost:11434/v1")` (Ollama's OpenAI-compatible endpoint), the SDK reads the env var and sends it as a Bearer token. This is harmless for Ollama (it ignores auth) but creates confusion when debugging: the log shows an OpenAI-style auth header sent to a local Ollama instance.
+4. **Extras that accidentally become hard deps**: If `pyproject.toml` lists `[project.dependencies]` instead of `[project.optional-dependencies]` for provider SDKs, or if an `__init__.py` imports from an adapter at module load time, the provider SDK becomes a hard requirement. Users who `pip install fdars` without any provider extra get an `ImportError` on the first `import fdars.advisor` call if any adapter module is imported at package init time.
+5. **Gemini SDK namespace collision**: The `google-generativeai` SDK and the `google-genai` SDK coexist on PyPI with overlapping namespace (`import google.generativeai` vs. `import google.genai`). The newer `google-genai` is the supported one as of late 2025, but many tutorials still reference `google-generativeai`. Listing the wrong one in `[gemini]` extra installs the deprecated package, which imports successfully but has a completely different API surface.
 
 **How to avoid:**
-(1) Verify that every `nb=` bootstrap call also passes `seed=` explicitly. (2) Each exec block that produces a plot should start with an explicit `rng = np.random.default_rng(<fixed_int>)` and use it for all random operations. (3) For blocks that call `np.random.default_rng(0)` inline, move the RNG construction to the top of the block. (4) Do not rely on matplotlib global state from a prior block — each block should call `plt.rcParams.update(...)` if it needs non-default settings, or use `docs_fig.fig()` exclusively.
+- Pin minimum versions for all provider extras: `openai>=1.40.0`, `anthropic>=0.72.0`, `google-genai>=1.0`, `ollama>=0.3.0`. Document the minimum version and why (what feature it unlocks) in a comment in `pyproject.toml`.
+- The OpenAI-compatible adapter must accept `api_key: str | None = None` and map `None` to `"none"` (dummy) when constructing the client with a custom `base_url`. Document this in the adapter docstring and the user-facing configuration docs.
+- Use `google-genai` (not `google-generativeai`) in the `[gemini]` extra. Add a comment and a CI check that `google.generativeai` is not importable in the gemini test environment.
+- No provider SDK may be imported at `fdars` package init time. The pattern to verify: `python -c "import fdars; print('ok')"` must succeed with zero provider extras installed.
+- Add a `test_no_hard_deps` test that mocks all provider extras as absent (using `sys.modules` patching) and asserts `import fdars.advisor; fdars.advisor.build_diagnostics(...)` succeeds.
 
 **Warning signs:**
-- `nb=` argument to bootstrap functions without an accompanying `seed=`
-- `np.random.default_rng()` called without arguments (non-deterministic)
-- A figure that looks different on two consecutive local builds
-- Any use of `random.seed()` (stdlib random) instead of `np.random.default_rng`
+- `import openai` in `python/fdars/__init__.py` or `python/fdars/advisor.py` at module scope
+- `[project.dependencies]` in `pyproject.toml` containing `openai` or `anthropic`
+- An adapter that constructs `OpenAI()` without `api_key` when `base_url` is set to a local endpoint
+- `import google.generativeai` anywhere in the codebase (use `google.genai` instead)
+- A user bug report saying "I got an AuthenticationError when using Ollama"
 
 **Phase to address:**
-Examples phase. Each example page review should include a "two consecutive builds produce identical SVG output" check as a UAT criterion.
+Provider abstraction phase for the `pyproject.toml` extras definitions and import guards. Configuration documentation (base_url, key handling) should be in the same phase. The `google-genai` vs. `google-generativeai` call must be made before writing the Gemini adapter.
 
 ---
 
-### Pitfall 6: Hidden State Between Exec Blocks on the Same Page
+### Pitfall 6: Scaling to ~7 Per-Aspect Advisors — Prompt Sprawl and Test Explosion
 
 **What goes wrong:**
-`markdown-exec` runs all exec blocks on a page in the same Python process (within a single page build). This means variables defined in Block 1 are visible in Block 2. The existing examples intentionally exploit this (e.g., `growth-alignment.md` reloads `age, X, meta` in every block for independence) — but a reviewer editing Block 4 to use a variable from Block 3 creates a fragile ordering dependency. If the block order in the markdown file is later rearranged, Block 4 breaks silently (produces a NameError, which `check_docs_figures.py` would catch) or — worse — uses a stale value from a prior block with the same variable name.
+Each per-aspect advisor (clustering, smoothing, FPCA/regression, alignment, basis, depth/outliers, monitoring/SPM) needs its own `build_diagnostics` branch, its own system prompt task clause, and its own suite of task families (interpretation, parameter, method). With 7 aspects × 3 task families × 4 providers, the naive approach produces 84 integration test cases, 21 prompt templates, and 7 diagnostics builders that share no code and drift from each other. Concrete failure modes:
 
-The specific risk here: `karcher_mean()` is called three times in `growth-alignment.md` with `max_iter=25`. If an editor consolidates those calls by caching `km` at the top of the page, subsequent blocks may silently pick up the cached `km` even after the code in those blocks appears to recompute it, because the `km = karcher_mean(...)` line is now in a prior block.
-
-**Why it happens:**
-`markdown-exec` shares the Python interpreter namespace across blocks on one page to allow progressive example building. This is a deliberate feature, but it makes each block's preconditions implicit. Authors who copy a block from one page to another may not copy the necessary setup blocks.
-
-**How to avoid:**
-Each exec block that produces a self-contained output must either (a) re-import and recompute all inputs from scratch (current pattern in `growth-alignment.md` — good), or (b) be documented in a comment at the top: `# requires: km defined in block above`. Add a convention to the style spec: "standalone figure blocks always reload from `docs_data`; dependent blocks label their dependency explicitly." The per-section review should open the page in a fresh build and verify that removing Block N-1 from the markdown causes Block N to fail (proving it does not silently depend on prior state).
-
-**Warning signs:**
-- A block that does not call a `load_*` function but uses data-shaped variables (`X`, `V`, `age`, etc.)
-- Any block where the only `import` statements are for matplotlib/numpy but not fdars or docs_data
-- Variable names repeated across blocks on the same page without re-assignment
-
-**Phase to address:**
-Examples phase. Convention should be established in the audit phase; enforced in examples authoring; verified in per-section review.
-
----
-
-### Pitfall 7: Build-Time Figure Errors That Slip Past `check_docs_figures.py`
-
-**What goes wrong:**
-`check_docs_figures.py` scans the built HTML for three string markers: `Traceback (most recent call last)`, `ModuleNotFoundError`, and `class="exec-error"`. It misses: (a) warnings printed to stderr (not embedded in HTML), (b) figures that rendered but produced an empty SVG (`<svg></svg>` or a figure with no data lines), (c) `UserWarning` from matplotlib about missing data, (d) a `KeyError` that markdown-exec catches and renders as plain text (not a traceback div), and (e) `DeprecationWarning` from fdars that signals an API change but does not raise.
-
-Concretely: if `fpca()` returns a dict where `"singular_values"` is renamed, `np.asarray(pc["singular_values"])` raises `KeyError` — but `KeyError` is a Python exception with a traceback, so it IS caught. However, if `fpca()` returns an empty list for a singular_values key, `np.asarray([])` silently produces a zero-length array, `s / s.sum()` raises `ZeroDivisionError`... which IS caught. The gap is specifically silent wrong-but-not-erroring cases.
-
-**Why it happens:**
-The check script was designed to catch the most common failure mode (import errors, hard exceptions). Soft failures (wrong shape, empty output, matplotlib warning) are harder to detect without output assertions.
+1. **Divergent diagnostic key names**: `alignment` uses `amplitude_mean` but `depth` uses `mean_amplitude` (or `amplitude_distance_mean`). Downstream grounding checks that look for diagnostic values by key cannot be shared. The system prompt for one aspect references a key name that does not exist in the diagnostics dict of another.
+2. **Prompt sprawl**: Each `_system_prompt(task)` variant grows independently. The FDA primer (currently shared in the base string) gets duplicated-and-diverged. The grounding invariant sentence in one aspect's prompt drifts from another's. The `evidence` instruction becomes weaker in later aspects because the author shortens it for brevity.
+3. **Task family contracts not shared**: `interpretation` in the alignment advisor means "explain amplitude vs phase split." `interpretation` in the monitoring advisor means "explain control-limit exceedances." If these return `Advice` objects with the same schema but incompatible semantic content of the `interpretation` field, callers that handle both become inconsistent.
+4. **Combinatorial test explosion**: 7 aspects × 4 providers × 3 task families = 84 integration test paths. Running all live is expensive and slow. Running none offline means a broken aspect+provider combination can ship undetected.
 
 **How to avoid:**
-(1) Add shape assertions after each key API call: `assert scores.shape == (n, n_comp), scores.shape`. (2) Add a figure content check: each `render(f)` call can be preceded by `assert any(len(ax.get_lines()) > 0 or len(ax.collections) > 0 for ax in f.axes), "empty figure"`. (3) Extend `check_docs_figures.py` to also scan for empty `<svg>` tags with no child elements. These checks should be added to `docs_fig.py`'s `render()` function as a debug-mode assertion.
+
+**DRY diagnostics contract**: Define a shared `DiagnosticsKeys` namespace (a frozen dataclass or module-level constants) that specifies the key names for values shared across aspects. All `_build_*_diagnostics` functions must use `DiagnosticsKeys.AMPLITUDE_MEAN` (not the string literal) for the same concept. Write a `test_diagnostics_key_consistency` test that imports all aspect builders, calls them with synthetic inputs, and asserts that shared concept keys are spelled identically.
+
+**Shared prompt scaffold**: `_system_prompt(task)` must remain a single function (not 7 copies). The base grounding invariant and FDA primer do not change per aspect. Each aspect adds a narrow **aspect clause** (what this aspect's diagnostics mean, what parameters are tunable) and nothing else. The grounding invariant sentence is a module-level constant, never inlined.
+
+**Task family contracts are aspect-agnostic**: `interpretation`, `parameter`, and `method` have the same `Advice` output schema regardless of aspect. The task clause tells the model how to interpret within that aspect, but the output structure (and the grounding requirement on `evidence`) is identical. This means a single `_validate_advice(advice, task, diagnostics)` function works for all aspects.
+
+**Test strategy — two-layer**: Layer 1 is offline aspect tests (7 aspects × fixtures = 7 tests, no API calls, no provider). Layer 2 is provider adapter tests (4 providers × 1 fixture response per provider = 4 tests, no aspect-specific logic). The combinatorial cross is not tested in CI — it is covered by the contract that adapters are aspect-agnostic and aspects are provider-agnostic. A single live integration test per provider (using one aspect, typically clustering as the canonical example) covers the end-to-end path. This keeps the live test count at 4, not 84.
 
 **Warning signs:**
-- A figure block that calls `print(render(f))` without any preceding data-shape check
-- A figure shown in the docs that has axes but no visible data series
-- A build that passes CI but a reviewer notices a blank or axis-only figure
+- A second copy of the grounding invariant string anywhere in the codebase
+- A `_system_prompt_alignment()`, `_system_prompt_depth()`, etc. (per-aspect system prompt functions rather than a single function with an aspect clause)
+- A `build_diagnostics` function that raises `ValueError` for a newly-added aspect because no branch was added (signals the aspect was not integrated into the shared dispatcher)
+- More than one `test_advise_returns_advice_schema` test class that differs only in the aspect used (signals the test is not using the provider-fixture abstraction correctly)
+- Diagnostic key names that differ by aspect for the same concept (e.g., `amplitude_mean` vs. `mean_amplitude`)
 
 **Phase to address:**
-Foundation/audit phase. The `render()` function and `check_docs_figures.py` improvements should be done before example authoring begins.
-
----
-
-### Pitfall 8: SVG Accessibility Gaps — Missing or Wrong `aria-label`, No Font Fallback
-
-**What goes wrong:**
-The modern diagram convention correctly uses `role="img"` and `aria-label` on the root `<svg>`. However: (1) two legacy diagrams (`spm.svg`, `basis-representation.svg`) have neither `role="img"` nor `aria-label` — they will be announced as "unlabelled image" by screen readers. (2) Several diagrams render text using `system-ui,-apple-system,sans-serif` — this renders differently on Linux (Noto Sans), macOS (San Francisco), and Windows (Segoe UI), causing different character widths that can cause text overflow or clipping inside fixed-width `<rect>` containers. The CI build runs on Ubuntu; the deployed site is served to all OS users. (3) No SVG diagram uses `<title>` or `<desc>` elements (only the root `aria-label`), so embedded inline SVG in HTML lacks a DOM-accessible text alternative for assistive tech that reads inline SVG differently from `<img>`.
-
-**Why it happens:**
-Accessibility is typically treated as a post-hoc concern. The root `aria-label` was added to the modern convention but not backported to the two oldest overview diagrams. Font rendering differences across OS are invisible in the CI environment.
-
-**How to avoid:**
-(1) The style spec linter should assert `role="img"` and `aria-label` are present on the root `<svg>` element of every diagram. (2) Review each diagram at 80% zoom on a narrow viewport (600px width) to catch text overflow before it ships. (3) For the two legacy overview diagrams, add `role="img"` and `aria-label` during the style-spec harmonisation phase. (4) If a diagram's text content is critical for comprehension, add a `<title>` child element (immediately inside `<svg>`) with the same text as `aria-label` — this improves inline SVG accessibility in browsers that do not surface `aria-label` on inline SVGs.
-
-**Warning signs:**
-- Any SVG file that does not contain `role="img"` in its root element
-- Text elements positioned within 8px of a `<rect>` boundary (clipping risk)
-- A diagram reviewed only on macOS by an author who will deploy to users on all platforms
-
-**Phase to address:**
-Style spec phase (linter catches missing role/aria-label). Per-section review should include a cross-platform spot-check on at least one diagram per section.
-
----
-
-### Pitfall 9: Slow Builds Blocking Local Iteration
-
-**What goes wrong:**
-Each `markdown-exec` exec block runs live Python code at build time. The full docs build with `mkdocs build --strict` runs all blocks in all 17 example pages plus concept pages. Slow operations — `karcher_mean(..., max_iter=25)` on 93 growth curves, `equivalence_test(..., nb=500)` — execute on every full build. This can push `mkdocs build` to 3–10 minutes locally, making the per-section review loop painfully slow. Authors start skipping local builds and doing visual review only after pushing to CI, which delays error discovery.
-
-In `growth-alignment.md`, `karcher_mean(Vp, ap, max_iter=25)` is called four times across four separate exec blocks on the same page, each time reloading and recomputing from scratch. Each call is O(n · max_iter) elastic alignment.
-
-**Why it happens:**
-`markdown-exec` re-executes all blocks on every build. The "each block is self-contained" convention (correct for correctness) conflicts with performance because it prevents caching.
-
-**How to avoid:**
-(1) Add a `DOCS_FAST=1` environment variable check in expensive blocks to skip computation and render a placeholder: `if os.environ.get("DOCS_FAST"): print("<p>Figure skipped in fast mode</p>"); sys.exit(0)`. (2) For multi-call heavy pages, document in a comment that the block is slow and give a `--no-exec` workaround for section review. (3) Consider adding a Makefile target `docs-fast` that sets `DOCS_FAST=1` for local review. (4) The four separate `karcher_mean` calls in `growth-alignment.md` should be consolidated to one block that stores the result, with subsequent blocks referencing the cached variable — this requires accepting the cross-block dependency (acceptable on a single page if explicitly documented).
-
-**Warning signs:**
-- A single page with more than two calls to alignment, bootstrap, or FPCA functions
-- Build time exceeding 2 minutes locally on the author's machine
-- Authors reporting they "just push to CI to check" rather than building locally
-
-**Phase to address:**
-Foundation/audit phase. The `DOCS_FAST` mechanism should be in place before example authoring begins. Heavy call consolidation is a per-example decision made during examples phase.
-
----
-
-### Pitfall 10: Section-by-Section Rollout Letting Inconsistencies Accumulate
-
-**What goes wrong:**
-The defined rollout order is `learn/ → align/ → analyze/ → regression/ → monitoring/ → represent/ → examples/`. If the style spec is not fully finalised before `learn/` begins, then every subsequent section inherits the spec-as-it-was, and any spec refinements made after reviewing `align/` must be backported to `learn/`. This has happened in previous doc overhauls: the "last section" always looks more polished than the first, creating a visible quality gradient.
-
-Specific risk for this project: the conformal prediction interval visual in `conformal-prediction.svg` shows a scalar prediction interval (a symmetric band around a point ŷ) rather than a functional prediction band (a time-varying region around a curve). For conformal functional regression this is methodologically wrong. If the conformal diagram is revised in the `regression/` section after `analyze/` has already been reviewed, the reviewer for `analyze/` may not re-review the updated methodology when it lands.
-
-**Why it happens:**
-Review gates are per-section. A correction to a concept that spans sections (e.g., "conformal" appears in both `analyze/tolerance-bands.md` and `regression/`) may be reviewed and approved in one section without the cross-section correctness check.
-
-**How to avoid:**
-(1) Before the rollout begins, hold a single "cross-section diagram map" review: for every method that appears in multiple sections, verify that the diagrams in all sections use a consistent representation. (2) The style spec must be frozen before the first section begins, not "largely finalised." Any spec change after rollout start requires a re-sweep of all previously reviewed sections. (3) For the specific conformal pitfall: the `conformal-prediction.svg` and `conformal-classification.svg` diagrams should depict functional bands (y-axis = function value at each time t, shaded region = interval around ŷ(t)), not scalar point intervals. This must be corrected before the regression/analyze sections are reviewed.
-
-**Warning signs:**
-- A method name (e.g., "conformal", "FPCA", "basis") appearing in diagrams in more than two section directories
-- Style spec document with "TBD" or "to be decided" items at the start of any section
-- A reviewer signing off on a section without checking whether any diagram in that section also appears (or is closely related to a diagram) in a not-yet-reviewed section
-
-**Phase to address:**
-Foundation/audit phase (cross-section map). Style spec phase (freeze before rollout). Per-section reviews should reference the cross-section map.
-
----
-
-### Pitfall 11: Conformal and Tolerance Band Diagrams Conflating Interval Types
-
-**What goes wrong:**
-`conformal-prediction.svg` currently shows a scalar prediction interval — a horizontal shaded rectangle around a single point ŷ, with horizontal boundary lines at `ŷ ± interval`. This correctly depicts scalar conformal prediction (one number in, one number out). However, `fdars`'s `conformal_fregre_lm()` produces a **functional** prediction band — a time-varying region around a predicted curve ŷ(t). The current diagram is correct only for the scalar-response conformal use case, not the functional one.
-
-Similarly, `tolerance-bands.svg` shows a static shaded region around a mean curve, which correctly represents a tolerance band. But the method box says "Conformal · elastic" — mixing two distinct ideas (distribution-free conformal regions vs. elastic-amplitude tolerance regions) without distinguishing them. A reader will not understand when to use `fpca_tolerance_band()` vs. `conformal_fregre_lm()`.
-
-**Why it happens:**
-Scalar examples are easier to draw and generalise visually. The distinction between "interval for one scalar prediction" and "band for one functional prediction" requires depicting a 2D functional output, which is harder to sketch in the 720×300 three-panel layout.
-
-**How to avoid:**
-The conformal prediction diagram must be split into two versions or redesigned to depict the functional output: the Panel 3 "Prediction Interval" should show a time axis with a shaded region ŷ(t) ± q, not a point ŷ ± interval. The tolerance band diagram should separate its method box into two sub-rows: one for FPCA-based tolerance (with a note "population coverage") and one for conformal (with a note "marginal coverage guarantee"). The method distinction caption should be added to the `aria-label`.
-
-**Warning signs:**
-- Any diagram Panel 3 showing a scalar value when the API returns an array or curve
-- Method box listing two unrelated methods (e.g., "Conformal · elastic") without distinguishing when each applies
-- `aria-label` text that describes the output as a "point" when the function returns a band
-
-**Phase to address:**
-Analyze/regression section review. The cross-section diagram map (from the audit phase) should flag this pair for joint review before either section is approved.
+Shared prompt scaffold and DRY diagnostics contract: provider abstraction phase (before per-aspect advisors are built). Per-aspect advisor implementation: per-aspect advisor phase(s). Test strategy definition: provider abstraction phase.
 
 ---
 
@@ -265,11 +207,13 @@ Analyze/regression section review. The cross-section diagram map (from the audit
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Copy an existing SVG as template for a new diagram | Fast start, already-consistent structure | Inherits any errors in the template; palette constants duplicated rather than referenced | Never: always start from the frozen style spec template, not an arbitrary existing file |
-| Reuse R-era diagram with just text label changes | No redraw needed | R API names and `extendr` branding mislead Python users | Never for the Python docs |
-| Skip `aria-label` update when diagram content changes | Saves one edit | Screen-reader users get stale description; fails accessibility linter | Never |
-| Set `max_iter` high for "better" results in examples | More accurate output | Build time 3–10x longer; blocks local iteration loop | Only in the final published version, not during authoring |
-| Write example output values as prose ("about 8 cm/yr") without an assertion | Easier to write | Silently wrong when API defaults change (e.g., lambda_ fix) | Acceptable if the page has a version-pinned rebuild guarantee; otherwise, always add the assertion |
+| Copy `_system_prompt()` per aspect and edit | Fast to implement new aspect | Grounding invariant sentence drifts; 7 copies to update on every prompt revision | Never: use a single function with an aspect clause parameter |
+| Use `json.loads(response.content)` without schema validation | Works immediately on happy path | Silent fabrication, type coercions, missing fields — all accepted | Never for production; only in one-off debugging scripts |
+| Import provider SDK at module level in adapter | Simpler code | Breaks `import fdars.advisor` in bare envs; import-time `ImportError` collection failures in pytest | Never |
+| Set `max_retries=5` for local models | Handles flaky small models | 5× latency on every structural failure; no deterministic failure mode | Never: use constrained decoding (`format=schema`) instead and set `max_retries=0` |
+| Hardcode `api_key="none"` for all local endpoints | Works for most setups | Masks auth misconfiguration for endpoints that do require a key | Acceptable only as a default when `base_url` points to localhost; make configurable |
+| Inline the full diagnostics dict in the retry/repair prompt without grounding instruction | Quick repair | Model regenerates evidence from memory, not from diagnostics | Never |
+| One provider adapter, skip the others until needed | Ship faster | Provider protocol ossifies around the first adapter's assumptions; retrofitting the 2nd provider is harder than designing for 4 from the start | Never: define the protocol for all 4 before writing any adapter |
 
 ---
 
@@ -277,37 +221,29 @@ Analyze/regression section review. The cross-section diagram map (from the audit
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| `markdown-exec` + `docs_fig.py` | Calling `plt.show()` inside an exec block — it blocks the build process or produces no output | Always use `print(render(f))` and never call `plt.show()` |
-| `markdown-exec` + `docs_fig.py` | Forgetting `plt.close(figure)` — `render()` does close it, but any figure created with `plt.figure()` directly rather than `fig()` may leak state | Always use `docs_fig.fig()` wrapper or explicitly call `plt.close()` |
-| `markdown-exec` + `PYTHONPATH` | Running `mkdocs serve` locally without `PYTHONPATH=scripts` — `docs_fig` import fails silently via `hooks.py` fallback if `sys.path` was already populated | Always use `PYTHONPATH=scripts mkdocs serve` or the Makefile target |
-| `fdars` API + exec blocks | Using `np.asarray(result["key"])` without checking that `result` is not `None` or that "key" exists | Add `assert "key" in result` before array conversion |
-| inline SVG in MkDocs Material | SVGs with `<defs><marker id="...">` — if the same marker id appears in two SVGs on the same page, the second definition silently shadows the first | Use diagram-name-prefixed marker IDs (e.g., `id="arr-smoothing"` not `id="arr"`) |
-
----
-
-## Performance Traps
-
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Multiple `karcher_mean()` calls on the same page | Full `mkdocs build` takes 5+ minutes; CI timeout | Consolidate to one call per page; use cross-block variable | Any page with 3+ alignment calls |
-| `equivalence_test(nb=500)` per build | Each bootstrap adds ~2–5s to build | Use `nb=200` for doc builds; note "nb=500 for publication" | Not a threshold issue — cumulative across many pages |
-| `fpca()` called once per comparison method per example | Fine for 2–3 methods; slow at 6+ | Pre-compute FPCA once, pass scores to all methods | 4+ fpca calls on one page |
-| `mkdocs build --strict` runs all blocks unconditionally | No skip mechanism | Add `DOCS_FAST` env var gate in heavy blocks | Always a risk on developer machines |
+| OpenAI `response_format` + Pydantic | Passing `model.model_json_schema()` directly — includes `title` and `$defs` keys that the OpenAI API rejects in strict mode | Strip `title` at schema root, inline `$defs` references before passing to `response_format` |
+| Gemini `response_schema` + `additionalProperties` | Pydantic's default schema includes `additionalProperties: false` which the `google-genai` SDK's client-side validator rejects | Use `response_json_schema` (raw dict) and remove `additionalProperties` from the serialised schema before passing |
+| Ollama `format` + thinking models | Setting `think=True` alongside `format=schema` — format constraint silently disabled on some models | Never set `think=True` with a format schema; use two-stage: think first (no format), then format-constrained extraction call |
+| OpenAI-compatible `base_url` (vLLM/LM Studio) + `OpenAI()` | `OpenAI()` reads `OPENAI_API_KEY` from env and sends it to the local endpoint; if unset, SDK raises `AuthenticationError` before the request | Pass `api_key="none"` explicitly when constructing `OpenAI(base_url=local_url, api_key="none")` |
+| `ANTHROPIC_API_KEY` env var present in developer shell | OpenAI integration tests run unexpectedly if the test skip logic checks the wrong env var | Gate each provider integration test on `FDARS_INTEGRATION=1` AND the provider-specific key; both must be set |
+| Pydantic v1 vs. v2 | `Advice.schema()` (v1) vs. `Advice.model_json_schema()` (v2) — calling v1 method in a v2 environment silently returns a deprecated schema | Always use `model_json_schema()` and add a `pydantic>=2.0` pin in `[advisor]` extra |
+| Gemini function-call history + structured output | Structured output fails on Gemini 2.5 if prior tool calls are in the message history | For Gemini adapter, use fresh conversation context per `advise()` call; do not reuse session history |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Diagram updated for style spec:** Verify the SVG source uses the `<style>` block with `.ttl/.sub/.lab/.sm/.mono` classes — not inline `font-size` attributes
-- [ ] **Diagram uses correct viewBox:** Standard concept diagrams must have `viewBox="0 0 720 300"` — any other height requires explicit justification in the spec
-- [ ] **Diagram has `role="img"` and `aria-label`:** Check the root `<svg>` tag, not just visual output
-- [ ] **Method box shows Python API names:** Verify against `fdars` Python API reference, not R docs
-- [ ] **Example seeds all RNG uses:** Every `np.random.default_rng()` call has an explicit integer seed
-- [ ] **Example re-loads data in each block:** No block uses a variable defined only in a prior block without a comment saying so
-- [ ] **Conformal diagrams show functional output:** Panel 3 depicts a time-varying band, not a scalar interval
-- [ ] **Warp function diagrams show identity diagonal:** The reference line (γ(t) = t) must be present and labeled
-- [ ] **FPCA modes diagram labels the formula:** The ± perturbation is labeled `μ̂ ± c·φₖ` with the scaling factor explicit
-- [ ] **CI passes `check_docs_figures.py`:** Not just `mkdocs build --strict` — the figure-error scan must also pass
+- [ ] **Provider abstraction tested offline**: Each adapter has a fixture-based test that parses a stored response JSON through `_parse_response()` without any API call — verify this test runs in CI without keys
+- [ ] **Grounding check wired on every adapter**: `_check_grounding(advice, diagnostics)` is called after every `_parse_response()` call — grep for `_check_grounding` in each adapter file
+- [ ] **System prompt grounding invariant not duplicated**: There is exactly one copy of the "reason only from the diagnostics provided" sentence — verify with `grep -r "reason only from" python/`
+- [ ] **All four adapters implement the same `Provider` protocol**: Run `mypy --strict` on each adapter and verify the `@runtime_checkable Protocol` check passes
+- [ ] **Python 3.9 CI matrix entry passes**: A 3.9 matrix entry runs all offline advisor tests — check the CI matrix in `.github/workflows/`
+- [ ] **Bare-venv import test passes**: `python -c "import fdars.advisor; fdars.advisor.build_diagnostics({'centers': [[1,2]],'cluster':[0],'k':1}, method='clustering')"` succeeds with zero provider extras installed
+- [ ] **`max_retries` cap is enforced**: Every adapter's retry loop raises `ProviderStructuralError` on the third failure — check that no adapter has a bare `while True:` or unbounded retry
+- [ ] **OpenAI-compatible adapter handles missing api_key**: When `base_url` is set to a localhost URL and no `api_key` is given, the adapter passes `"none"` not `None` to `OpenAI()` — verify with a unit test
+- [ ] **`google-genai` not `google-generativeai`**: `grep -r "google.generativeai" python/` returns no hits
+- [ ] **All per-aspect `build_diagnostics` branches dispatched**: `build_diagnostics(..., method="depth")` does not raise `ValueError` — verify each new aspect has a dispatch branch
+- [ ] **Grounding violation test per adapter**: Each adapter has a `test_grounding_check_catches_fabrication` test with a fixture that contains invented evidence values — verify it raises `GroundingViolationError`
 
 ---
 
@@ -315,13 +251,13 @@ Analyze/regression section review. The cross-section diagram map (from the audit
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Diagram misrepresents method semantics | MEDIUM | Reopen SVG, correct path coordinates against mathematical invariant, re-review; 1–4 hours per diagram |
-| Stale R branding in SVG | LOW | Text replacement in SVG source; 15 min per file; verify against Python API reference |
-| Visual consistency drift across 20+ diagrams | HIGH | Requires a pass over all already-delivered diagrams; 1–2 days; justifies the linter investment in advance |
-| Example rot (silent API drift) | LOW-MEDIUM | Rebuild docs after each `fdars` version bump; add dict-key assertions; update prose values |
-| Non-deterministic figures | LOW | Add explicit seeds to every RNG call; two-consecutive-build check |
-| Slow build blocking review | LOW | Add `DOCS_FAST` gate; rebuild without heavy blocks for section review |
-| Section-by-section quality gradient | MEDIUM | Backport style spec changes to reviewed sections; requires second pass |
+| Schema feature incompatibility discovered in production for a provider | MEDIUM | Add `schema_for(provider)` serialiser to the adapter; write the round-trip test; re-validate with the provider's sandbox |
+| Infinite retry loop in production | LOW | Add `max_retries` cap at the `Provider` base class level; deploy hotfix; check if constrained decoding can replace retry for the affected provider |
+| Grounding violation discovered via user report | HIGH | Audit all adapters for system prompt injection correctness; add `_check_grounding` if missing; add per-adapter grounding violation tests; run live integration tests to verify |
+| Optional dep became a hard dep (broke bare installs) | LOW | Move to `[project.optional-dependencies]`; add deferred import guard; add bare-venv smoke test to CI |
+| Per-aspect diagnostic key names diverged | MEDIUM | Define `DiagnosticsKeys` constants; update all builders to use constants; update all system prompt task clauses that reference key names; run `test_diagnostics_key_consistency` |
+| Gemini SDK namespace wrong (`google-generativeai`) | LOW | Swap to `google-genai` in extras; update import; re-run adapter tests |
+| Ollama thinking+format conflict causes silent grounding bypass | MEDIUM | Disable `think=True` in Ollama adapter; document the constraint; add a test that asserts `think` is never passed with `format` |
 
 ---
 
@@ -329,29 +265,28 @@ Analyze/regression section review. The cross-section diagram map (from the audit
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Diagram method semantics wrong | Style spec + invariant checklist (before rollout) | Expert peer review of each diagram against its mathematical invariant |
-| Stale R content in SVGs | Nav + reference-API audit (first phase) | Grep SVG sources for R-specific identifiers; zero hits required |
-| Visual consistency drift | Style spec (linter, before rollout) | CI linter passes on all SVGs before any section is approved |
-| Example API rot | Examples phase + foundation (dict-key assertions) | Rebuild docs after each `fdars` bump; `check_docs_figures.py` passes |
-| Non-deterministic figures | Examples phase | Two consecutive local builds produce bit-identical SVG output |
-| Hidden cross-block state | Examples authoring convention + per-section review | Block-isolation check: removing Block N-1 causes Block N to fail or reload correctly |
-| Build-time figure check gaps | Foundation/audit phase | `check_docs_figures.py` extended; shape assertions added to `render()` |
-| SVG accessibility gaps | Style spec (linter) | `role="img"` and `aria-label` present on all SVG root elements |
-| Slow build blocking iteration | Foundation/audit phase | `DOCS_FAST=1` build completes in under 30s |
-| Cross-section quality gradient | Foundation/audit (cross-section diagram map) | Frozen style spec before first section; spec changes trigger re-sweep |
-| Conformal/tolerance band conflation | Analyze + regression section review | Functional-output requirement verified: Panel 3 shows time-varying band |
+| Schema portability across providers | Provider abstraction phase | `test_schema_round_trip[provider]` tests pass offline for all four providers |
+| Validate-and-retry without a hard contract | Provider abstraction phase | Every adapter raises `ProviderStructuralError` after `max_retries` in a unit test |
+| Grounding-invariant leaks via new providers | Provider abstraction phase | `test_grounding_check_catches_fabrication` per adapter; system prompt not duplicated (grep) |
+| Offline/CI testing traps (import errors, 3.9 compat) | Provider abstraction phase | Python 3.9 CI matrix passes; bare-venv smoke test passes |
+| Dependency and config traps (version pins, base_url, namespace) | Provider abstraction phase | No hard deps in `[project.dependencies]`; `test_no_hard_deps` passes; `google-generativeai` grep returns zero hits |
+| Prompt sprawl / diagnostic key divergence across aspects | Provider abstraction phase (define scaffold); per-aspect phases (enforce it) | Single `_system_prompt` function; `DiagnosticsKeys` constants used by all builders; `test_diagnostics_key_consistency` passes |
+| Combinatorial test explosion | Provider abstraction phase | Two-layer test strategy documented; live integration test count capped at 4 (one per provider); aspect-specific tests are offline |
 
 ---
 
 ## Sources
 
-- Direct inspection of `docs/assets/diagrams/*.svg` (all 45 files including `smoothing.svg`, `fpca.svg`, `elastic-alignment.svg`, `conformal-prediction.svg`, `tolerance-bands.svg`, `spm.svg`, `elastic-fpca.svg`, `landmark-registration.svg`, `basis-representation.svg`) — HIGH confidence (first-party source code)
-- Direct inspection of `docs/examples/growth-alignment.md`, `docs/examples/tecator-regression.md` — HIGH confidence
-- Direct inspection of `scripts/docs_fig.py`, `scripts/docs_data.py`, `scripts/check_docs_figures.py`, `docs/hooks.py` — HIGH confidence
-- Direct inspection of `.github/workflows/docs.yml`, `mkdocs.yml`, `docs/requirements.txt` — HIGH confidence
-- Direct inspection of `.planning/codebase/CONCERNS.md` (known API instability patterns, fdars-core version pinning, result wrapper fragility) — HIGH confidence
+- Direct inspection of `python/fdars/advisor.py` (existing Anthropic-only implementation: `_require_anthropic()`, `_system_prompt()`, `advise()`, `build_diagnostics()` branches) — HIGH confidence (first-party)
+- Direct inspection of `tests/test_advisor.py` (existing test pattern: offline vs. env-gated integration) — HIGH confidence (first-party)
+- OpenAI Structured Outputs official docs and GitHub issue #1049 (nullable modifier silently ignored) — MEDIUM confidence (verified against source)
+- Gemini `google-genai` SDK GitHub issues #1815 (additionalProperties), #706 (2.0 vs. 2.5 inconsistency) — MEDIUM confidence (verified against source)
+- Ollama GitHub issue #10929 (thinking mode + structured output conflict), issue #15260 (think=false silently disabling format) — MEDIUM confidence (verified against source)
+- Community writeups on validate-and-retry JSON repair (60%→97% success, +200ms latency) — LOW confidence (web, not verified against first-party source)
+- Community writeups on OpenAI-compatible `base_url` / dummy `api_key` pattern for local endpoints — LOW confidence (web)
+- `logic.inc/resources/structured-outputs-guide` (cross-provider JSON Schema comparison) — LOW confidence (web)
 
 ---
 
-*Pitfalls research for: pyfda documentation overhaul (SVG diagrams + reproducible examples)*
-*Researched: 2026-08-07*
+*Pitfalls research for: fdars v3.0 — provider-agnostic advisor with per-aspect coverage*
+*Researched: 2026-08-12*
