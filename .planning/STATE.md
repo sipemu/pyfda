@@ -2,15 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Document the AI Advisor
-status: planning
-last_updated: "2026-08-11T00:00:00.000Z"
+current_phase: 14
+current_phase_name: advisor-concept-diagrams
+status: verifying
+stopped_at: Phase 14 Plan 01 complete (Tasks 1-4 done; Task 5 human-verify checkpoint pending)
+last_updated: "2026-08-11T17:56:12.223Z"
 last_activity: 2026-08-11
+last_activity_desc: Phase 14 execution started
 progress:
   total_phases: 5
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
+  percent: 20
 ---
 
 # Project State
@@ -20,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-11)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method does, every example runs against the current API
-**Current focus:** Milestone v2.1 (Document the AI Advisor) roadmapped — Phases 14–18 defined; ready to plan Phase 14
+**Current focus:** Phase 14 — advisor-concept-diagrams
 
 ## Current Position
 
-Phase: 14 — Advisor Concept & Diagrams (not started)
-Plan: —
-Status: Roadmap complete, awaiting Phase 14 planning
-Last activity: 2026-08-11 — Roadmap created for v2.1 (Phases 14–18)
+Phase: 14 (advisor-concept-diagrams) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-08-11 — Phase 14 execution started
 
 ## Performance Metrics
 
@@ -83,6 +87,7 @@ Last activity: 2026-08-11 — Roadmap created for v2.1 (Phases 14–18)
 | Phase 12 P03 | 7min | 3 tasks | 5 files |
 | Phase 13 P01 | 4min | 3 tasks | 3 files |
 | Phase 13 P02 | 2min | 3 tasks | 0 files |
+| Phase 14 P01 | 4min | 4 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -104,6 +109,8 @@ Recent decisions affecting current work:
 - [v2.0 roadmap]: `anthropic` is an optional `[advisor]` extra; `build_diagnostics` works offline with no network in CI; the LLM integration test is stubbed / env-gated
 - [v2.0]: MCP transport = stdio only; HTTP/SSE deferred to a future milestone
 - [v2.0]: skill execution target = Managed Agents env; git-URL install documented as authoritative until `[mcp]`/`[advisor]` extras ship on PyPI
+- [Phase ?]: Two-lane metaphor for grounding-invariant diagram (fdars computes / LLM cites) with explicit cites arrow into Advice.evidence
+- [Phase ?]: Overview page stays conceptual/diagram-led; no runnable code fence; first worked example deferred to Phase 15
 
 ### Pending Todos
 
@@ -123,8 +130,8 @@ None open.
 
 ## Session Continuity
 
-Last session: 2026-08-11
-Stopped at: Roadmap created for milestone v2.1 (Phases 14–18); all 15 v1 requirements mapped
+Last session: 2026-08-11T17:56:12.215Z
+Stopped at: Phase 14 Plan 01 complete (Tasks 1-4 done; Task 5 human-verify checkpoint pending)
 Resume file: None
 
 ## Operator Next Steps

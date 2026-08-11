@@ -12,9 +12,9 @@ in `docs/data/`.
 
 ### Concept & Overview
 
-- [ ] **CONCEPT-01**: Reader can open a top-level "AI Advisor" overview page explaining what the advisor is, the three surfaces (Python / MCP / Agent Skill), and when to use it
-- [ ] **CONCEPT-02**: Overview page explains the grounding invariant — fdars computes every number, the LLM only interprets and cites diagnostic values
-- [ ] **CONCEPT-03**: Overview page documents installation extras (`[advisor]`, `[mcp]`) and the offline-core vs. env-gated LLM (`ANTHROPIC_API_KEY`) boundary
+- [x] **CONCEPT-01**: Reader can open a top-level "AI Advisor" overview page explaining what the advisor is, the three surfaces (Python / MCP / Agent Skill), and when to use it
+- [x] **CONCEPT-02**: Overview page explains the grounding invariant — fdars computes every number, the LLM only interprets and cites diagnostic values
+- [x] **CONCEPT-03**: Overview page documents installation extras (`[advisor]`, `[mcp]`) and the offline-core vs. env-gated LLM (`ANTHROPIC_API_KEY`) boundary
 
 ### Python API
 
@@ -35,8 +35,8 @@ in `docs/data/`.
 
 ### Diagrams
 
-- [ ] **ADVDIA-01**: New hand-authored inline SVG diagram of the grounding invariant, to `STYLE_SPEC` standard, passing the SVGO/determinism CI gate
-- [ ] **ADVDIA-02**: New hand-authored inline SVG diagram of the advisor loop (interpret→recommend→re-run→compare), to `STYLE_SPEC` standard
+- [x] **ADVDIA-01**: New hand-authored inline SVG diagram of the grounding invariant, to `STYLE_SPEC` standard, passing the SVGO/determinism CI gate
+- [x] **ADVDIA-02**: New hand-authored inline SVG diagram of the advisor loop (interpret→recommend→re-run→compare), to `STYLE_SPEC` standard
 
 ### Nav & Build Integration
 
@@ -77,11 +77,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONCEPT-01 | Phase 14 | Pending |
-| CONCEPT-02 | Phase 14 | Pending |
-| CONCEPT-03 | Phase 14 | Pending |
-| ADVDIA-01 | Phase 14 | Pending |
-| ADVDIA-02 | Phase 14 | Pending |
+| CONCEPT-01 | Phase 14 | Complete |
+| CONCEPT-02 | Phase 14 | Complete |
+| CONCEPT-03 | Phase 14 | Complete |
+| ADVDIA-01 | Phase 14 | Complete |
+| ADVDIA-02 | Phase 14 | Complete |
 | PYDOC-01 | Phase 15 | Pending |
 | PYDOC-02 | Phase 15 | Pending |
 | PYDOC-03 | Phase 15 | Pending |
@@ -94,6 +94,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NAVDOC-02 | Phase 18 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 15 total
 - Mapped to phases: 15 ✓
 - Unmapped: 0
