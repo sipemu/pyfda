@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Advisor loop: interpret, recommend, re-run, compare — cyclic agentic workflow with Python API recommend-only exit">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="26" text-anchor="middle">Advisor Loop</text>
+  <text class="sub" x="360" y="44" text-anchor="middle">interpret → recommend → re-run → compare → interpret …</text>
+
+  <!-- ===== Agentic loop background panel (MCP / Agent Skill) ===== -->
+  <rect x="20" y="58" width="490" height="220" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="34" y="77" fill="#fd7e14">MCP / Agent Skill — agentic loop</text>
+
+  <!-- Node 1: interpret (x=46, cy=122) -->
+  <rect x="36" y="96" width="108" height="52" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="90" y="118" text-anchor="middle" fill="#495057">interpret</text>
+  <text class="sm" x="90" y="134" text-anchor="middle">read diagnostics</text>
+
+  <!-- Arrow: interpret → recommend -->
+  <line x1="144" y1="122" x2="172" y2="122" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+
+  <!-- Node 2: recommend (cx=230) -->
+  <rect x="172" y="96" width="116" height="52" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="230" y="116" text-anchor="middle" fill="#495057">recommend</text>
+  <text class="mono" x="230" y="134" text-anchor="middle" fill="#1a1a2e">advise()</text>
+
+  <!-- Arrow: recommend → re-run -->
+  <line x1="288" y1="122" x2="316" y2="122" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+
+  <!-- Node 3: re-run (cx=374) -->
+  <rect x="316" y="96" width="116" height="52" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="374" y="116" text-anchor="middle" fill="#495057">re-run</text>
+  <text class="mono" x="374" y="134" text-anchor="middle" fill="#1a1a2e">fdars_run_method</text>
+
+  <!-- Arrow: re-run → compare -->
+  <line x1="432" y1="122" x2="458" y2="122" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+
+  <!-- Node 4: compare (cx=506) -->
+  <rect x="458" y="96" width="36" height="52" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="476" y="116" text-anchor="middle" fill="#495057">com-</text>
+  <text class="lab" x="476" y="132" text-anchor="middle" fill="#495057">pare</text>
+
+  <!-- Compare: before/after delta label -->
+  <rect x="458" y="162" width="52" height="36" rx="6" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="mono" x="484" y="177" text-anchor="middle" fill="#fd7e14">delta</text>
+  <text class="sm" x="484" y="191" text-anchor="middle">before/after</text>
+  <line x1="476" y1="148" x2="476" y2="162" stroke="#fd7e14" stroke-width="1.5" stroke-dasharray="3 2"/>
+
+  <!-- Loop-back arrow: compare bottom → interpret bottom (curved) -->
+  <path d="M476 215 Q476 252 90 252 Q36 252 36 215 Q36 210 36 166 Q36 156 36 148" stroke="#fd7e14" stroke-width="2" fill="none" marker-end="url(#arrorange)"/>
+  <text class="sm" x="240" y="266" text-anchor="middle" fill="#fd7e14">loop back to interpret</text>
+
+  <!-- ===== Python API exit (recommend-only) ===== -->
+  <!-- Vertical exit arrow down from recommend node -->
+  <line x1="230" y1="148" x2="230" y2="174" stroke="#6c757d" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrgrey)"/>
+
+  <!-- Python API exit box (below recommend) -->
+  <rect x="624" y="88" width="80" height="64" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="664" y="110" text-anchor="middle" fill="#495057">Python API</text>
+  <text class="sm" x="664" y="126" text-anchor="middle">recommend-only</text>
+  <text class="sm" x="664" y="140" text-anchor="middle">stops after</text>
+  <text class="mono" x="664" y="145" text-anchor="middle" fill="#1a1a2e"> </text>
+
+  <!-- Arrow from recommend node to Python API exit box (exits loop, goes right) -->
+  <path d="M230 96 Q230 68 510 68 Q624 68 624 120" stroke="#6c757d" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#arrgrey)"/>
+
+  <!-- Python API Advice label inside exit box -->
+  <text class="mono" x="664" y="142" text-anchor="middle" fill="#1a1a2e">Advice</text>
+
+  <!-- Python API annotation label outside box -->
+  <text class="sm" x="664" y="170" text-anchor="middle" fill="#6c757d">returns Advice,</text>
+  <text class="sm" x="664" y="183" text-anchor="middle" fill="#6c757d">does not re-run</text>
+
+  <!-- ===== Defs ===== -->
+  <defs>
+    <marker id="arrorange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+    <marker id="arrgrey" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#6c757d"/>
+    </marker>
+  </defs>
+</svg>
