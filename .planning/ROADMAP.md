@@ -126,7 +126,10 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
   2. The full docs build succeeds with the new section and every new page's executable code fence runs against the current API
   3. All new inline SVG diagrams still pass the SVGO/determinism CI gate in the full build
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 18-01-PLAN.md — Wire the "AI Advisor" nav section into mkdocs.yml (after Analyze, before Examples) and run the full-build gate (build exit 0, four pages rendered, FDARS_FENCE_OK fence executes, both advisor SVGs SVGO-idempotent, no broken internal links)
+
 **UI hint**: yes
 
 ## Progress
@@ -137,7 +140,7 @@ Give the published MkDocs site first-class, method-accurate coverage of the ship
 | 15. Python API Page | 1/1 | Complete    | 2026-08-11 |
 | 16. Tool / MCP Server Page | 1/1 | Complete    | 2026-08-11 |
 | 17. Agent Skill Page | 1/1 | Complete    | 2026-08-11 |
-| 18. Nav & Build Integration | 0/? | Not started | - |
+| 18. Nav & Build Integration | 0/1 | Not started | - |
 
 ---
 
