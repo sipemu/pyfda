@@ -58,7 +58,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 
 ### Summary
 
-- [ ] **Phase 19: Provider Foundation & Grounding Contract** - `Provider` protocol + Anthropic-adapter refactor + validate-and-retry + centralized `_check_grounding`; provider selection via params/env. Blocks all downstream work.
+- [x] **Phase 19: Provider Foundation & Grounding Contract** - `Provider` protocol + Anthropic-adapter refactor + validate-and-retry + centralized `_check_grounding`; provider selection via params/env. Blocks all downstream work. (completed 2026-08-12)
 - [ ] **Phase 20: Additional Provider Adapters** - OpenAI (+ `base_url`), Ollama (local, no key), Gemini adapters behind the protocol, each an optional extra. Parallel-eligible with Phase 21.
 - [ ] **Phase 21: Per-Aspect Advisor Coverage** - `build_diagnostics` + grounded task families for represent/basis, depth/outliers, classification, regression/CV, monitoring/SPM. Parallel-eligible with Phase 20.
 - [ ] **Phase 22: Surface Integration** - MCP exposes new aspect diagnostics (LLM-free); provider selection wired through the Python `advise()`; Agent Skill documents providers + full coverage.
@@ -98,7 +98,11 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
   3. `advise(provider="gemini", …)` works against Google Gemini, with the Pydantic→Gemini schema translation applied so structured output validates.
   4. Each provider installs as an optional extra (`[openai]`, `[gemini]`, `[ollama]`); the base package imports and the offline core runs with no provider installed, and a missing extra raises an actionable ImportError.
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+  - [ ] 20-01-PLAN.md — Tracer: OpenAI adapter end-to-end + phase-wide plumbing (extras, deferred guards, resolve_provider extension) [PROV-03, PROV-07]
+  - [ ] 20-02-PLAN.md — Ollama adapter (local, no key; validate-and-retry / `supports_native=False` path) [PROV-04]
+  - [ ] 20-03-PLAN.md — Gemini adapter (`_gemini_schema` translation) + env-gated live integration tests [PROV-05]
 
 ### Phase 21: Per-Aspect Advisor Coverage
 
@@ -159,7 +163,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 19. Provider Foundation & Grounding Contract | 0/3 | Not started | - |
+| 19. Provider Foundation & Grounding Contract | 3/3 | Complete    | 2026-08-12 |
 | 20. Additional Provider Adapters | 0/? | Not started | - |
 | 21. Per-Aspect Advisor Coverage | 0/? | Not started | - |
 | 22. Surface Integration | 0/? | Not started | - |
