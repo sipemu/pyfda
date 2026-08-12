@@ -26,7 +26,7 @@ Requirements for this milestone (v3.0). Each maps to roadmap phases.
 
 ### Per-Aspect Advisor Coverage (ASPECT)
 
-- [ ] **ASPECT-01**: `build_diagnostics` supports represent/basis with deterministic, offline diagnostics.
+- [x] **ASPECT-01**: `build_diagnostics` supports represent/basis with deterministic, offline diagnostics.
 - [x] **ASPECT-02**: `build_diagnostics` supports depth and outliers.
 - [x] **ASPECT-03**: `build_diagnostics` supports classification.
 - [x] **ASPECT-04**: `build_diagnostics` supports regression and regression-CV (`fregre_lm` / `fregre_pls` / `fregre_cv`).
@@ -95,7 +95,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROV-04 | Phase 20 | Complete |
 | PROV-05 | Phase 20 | Complete |
 | PROV-07 | Phase 20 | Complete |
-| ASPECT-01 | Phase 21 | Pending |
+| ASPECT-01 | Phase 21 | Complete |
 | ASPECT-02 | Phase 21 | Complete |
 | ASPECT-03 | Phase 21 | Complete |
 | ASPECT-04 | Phase 21 | Complete |
