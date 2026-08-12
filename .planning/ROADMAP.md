@@ -156,7 +156,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 **Plans**: 2 plans
 
 - [x] 23-01-PLAN.md — TRACER: bare-venv smoke script + CI test-python matrix expansion to 3.9–3.14 with 3.9 gating (no gemini/mcp) + bare-venv smoke CI job [QUAL-03, QUAL-04]
-- [ ] 23-02-PLAN.md — Aspect × provider offline cross-coverage matrix test + live-integration one-per-provider clean-skip confirmation [QUAL-01, QUAL-02]
+- [x] 23-02-PLAN.md — Aspect × provider offline cross-coverage matrix test + live-integration one-per-provider clean-skip confirmation [QUAL-01, QUAL-02]
 
 ### Phase 24: Documentation
 
