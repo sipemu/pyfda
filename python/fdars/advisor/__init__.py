@@ -112,7 +112,10 @@ def build_diagnostics(
     ValueError
         If ``method`` is not in the currently supported set.
     """
-    _supported = {"alignment", "fpca", "basis", "smoothing", "clustering"}
+    _supported = {
+        "alignment", "fpca", "basis", "smoothing", "clustering",  # existing
+        "depth",                                                    # ASPECT-02 (plan 21-01)
+    }
     method_lc = method.lower()
     if method_lc not in _supported:
         raise ValueError(
@@ -121,8 +124,17 @@ def build_diagnostics(
         )
 
     # Unwrap result wrappers (e.g. fdars.results.AlignmentResult).
-    raw: dict = getattr(result, "raw", result)
-    if not isinstance(raw, dict):
+    raw = getattr(result, "raw", result)
+    # Coerce to dict ONLY when the value is not already a dict, not an
+    # ndarray/array-like (depth returns a score array — `__array__` present),
+    # and not an Fdata-like object (`.data` attribute present — represent branch
+    # in plan 21-03 accepts Fdata directly).  Both array and Fdata inputs must
+    # reach their builder without `dict(raw)` being attempted.
+    if (
+        not isinstance(raw, dict)
+        and not hasattr(raw, "__array__")
+        and not hasattr(raw, "data")
+    ):
         raw = dict(raw)
 
     if method_lc == "alignment":
@@ -144,6 +156,10 @@ def build_diagnostics(
     if method_lc == "clustering":
         from fdars.advisor.aspects.clustering import _build_clustering_diagnostics  # noqa: PLC0415
         return _build_clustering_diagnostics(raw, argvals=argvals, **kwargs)
+
+    if method_lc == "depth":
+        from fdars.advisor.aspects.depth import _build_depth_diagnostics  # noqa: PLC0415
+        return _build_depth_diagnostics(raw, **kwargs)
 
     # Unreachable given the check above, but kept for safety.
     raise ValueError(f"Unhandled method: {method!r}")
