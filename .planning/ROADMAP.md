@@ -169,7 +169,12 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
   2. Per-aspect advisor pages document the diagnostics and task families for each fdars aspect.
   3. The AI Advisor overview and Python API pages are updated for provider-agnostic operation and full-library coverage, and `mkdocs build --strict` passes offline with any executed fences running against the current implementation.
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+- [ ] 24-01-PLAN.md — Provider setup guide `docs/advisor/providers.md` (four backends, selection/precedence, extras; illustrative-only fences) [DOCS-01]
+- [ ] 24-02-PLAN.md — Per-aspect page `docs/advisor/aspects.md` (12 aspects, builder-derived diagnostics keys + 3 task families + executed offline depth/fpca fences) [DOCS-02]
+- [ ] 24-03-PLAN.md — index.md + python-api.md provider-agnostic/full-coverage updates, nav wiring, strict offline build gate [DOCS-03]
+
 **UI hint**: yes
 
 ### Progress
@@ -181,7 +186,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 | 21. Per-Aspect Advisor Coverage | 5/5 | Complete    | 2026-08-12 |
 | 22. Surface Integration | 3/3 | Complete    | 2026-08-12 |
 | 23. Packaging & CI | 2/2 | Complete    | 2026-08-12 |
-| 24. Documentation | 0/? | Not started | - |
+| 24. Documentation | 0/3 | Planned | - |
 
 </details>
 
