@@ -5,15 +5,15 @@ milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
 current_phase: 21
 current_phase_name: Per-Aspect Advisor Coverage
 status: planning
-stopped_at: Completed 21-02-PLAN.md (outliers+classification)
-last_updated: "2026-08-12T08:39:02.259Z"
+stopped_at: Completed 21-03-PLAN.md (_utils + fpca refactor + represent)
+last_updated: "2026-08-12T11:00:00.000Z"
 last_activity: 2026-08-12
 last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 11
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -67,6 +67,7 @@ Progress: [███████░░░] 73%
 | Phase 20 P03 | 6 | 3 tasks | 5 files |
 | Phase 21-per-aspect-advisor-coverage P01 | 5m | 3 tasks | 4 files |
 | Phase 21 P02 | 4 | 3 tasks | 4 files |
+| Phase 21 P03 | 35 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Array-coercion guard uses __array__ + .data checks to protect ndarray and Fdata inputs
 - [Phase ?]: n_classes as explicit keyword param on build_diagnostics() (BLOCKER #5); forwarded only to classification branch
 - [Phase ?]: RESEARCH corrections #2+#6 applied: CV key is error_rate not cv_error_rate; accuracy guarded
+- [21-03]: _utils.py shared helper extracted — fpca refactor uses it, spm.py (plan 21-05) will import it too
+- [21-03]: represent is a new method string (not basis/fpca extension) — operates on INPUT data, not method output
+- [21-03]: represent input resolution: attribute-first (Fdata .data/.argvals), then dict fallback — no dict(raw) coercion
 
 ### Pending Todos
 
@@ -121,8 +125,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-12T08:39:02.247Z
-Stopped at: Completed 21-02-PLAN.md (outliers+classification)
+Last session: 2026-08-12T11:00:00.000Z
+Stopped at: Completed 21-03-PLAN.md (_utils + fpca refactor + represent)
 Resume file: None
 
 ## Operator Next Steps
