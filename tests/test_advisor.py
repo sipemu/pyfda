@@ -134,6 +134,107 @@ class TestBuildDiagnosticsOffline:
         assert "n_obs" in diag
         assert diag["n_obs"] == 6
 
+    def test_outliers_deterministic(self):
+        """Outliers build_diagnostics is byte-identical on repeated calls (ASPECT-02).
+
+        Verifies: two calls on the same fixed LRT fixture produce equal dicts
+        AND byte-identical json.dumps(sort_keys=True).  A recursive walker
+        asserts no value is a numpy scalar (no np.generic).
+        Also verifies magnitude_shape path for completeness.
+        """
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        def check_no_numpy(obj):
+            """Recursive walker: fail if any value is a numpy scalar."""
+            assert not isinstance(obj, np.generic), (
+                f"numpy scalar leaked into output: {type(obj)!r} = {obj!r}"
+            )
+            if isinstance(obj, dict):
+                for v in obj.values():
+                    check_no_numpy(v)
+            elif isinstance(obj, list):
+                for v in obj:
+                    check_no_numpy(v)
+
+        # LRT fixture
+        lrt_result = {
+            "outliers": np.array([False, False, True, False, False]),
+            "threshold": 2.47,
+        }
+        d1 = build_diagnostics(lrt_result, method="outliers")
+        d2 = build_diagnostics(lrt_result, method="outliers")
+        assert d1 == d2, "Two calls on LRT fixture produced different dicts"
+        s1 = json.dumps(d1, sort_keys=True)
+        s2 = json.dumps(d2, sort_keys=True)
+        assert s1 == s2, "json.dumps not byte-identical between outliers LRT calls"
+        check_no_numpy(d1)
+
+        # magnitude_shape fixture
+        ms_result = {
+            "magnitude": np.array([0.1, 0.3, 2.5, 0.2, 0.15]),
+            "shape": np.array([0.05, 0.1, 0.8, 0.07, 0.06]),
+        }
+        m1 = build_diagnostics(ms_result, method="outliers")
+        m2 = build_diagnostics(ms_result, method="outliers")
+        assert m1 == m2, "Two calls on magnitude_shape fixture produced different dicts"
+        assert json.dumps(m1, sort_keys=True) == json.dumps(m2, sort_keys=True), (
+            "json.dumps not byte-identical between magnitude_shape calls"
+        )
+        check_no_numpy(m1)
+
+    def test_classification_deterministic(self):
+        """Classification build_diagnostics is byte-identical on repeated calls (ASPECT-03).
+
+        Verifies: two calls on the same fixed point-estimate fixture produce
+        equal dicts AND byte-identical json.dumps(sort_keys=True).  A recursive
+        walker asserts no value is a numpy scalar.  Also verifies the CV fixture
+        (cv_error_rate path) for completeness.
+        """
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        def check_no_numpy(obj):
+            """Recursive walker: fail if any value is a numpy scalar."""
+            assert not isinstance(obj, np.generic), (
+                f"numpy scalar leaked into output: {type(obj)!r} = {obj!r}"
+            )
+            if isinstance(obj, dict):
+                for v in obj.values():
+                    check_no_numpy(v)
+            elif isinstance(obj, list):
+                for v in obj:
+                    check_no_numpy(v)
+
+        # Point-estimate fixture
+        clf_result = {
+            "predicted": np.array([0, 0, 1, 1, 2, 2]),
+            "accuracy": 0.8333,
+        }
+        p1 = build_diagnostics(clf_result, method="classification", n_classes=3)
+        p2 = build_diagnostics(clf_result, method="classification", n_classes=3)
+        assert p1 == p2, "Two calls on point-estimate fixture produced different dicts"
+        assert json.dumps(p1, sort_keys=True) == json.dumps(p2, sort_keys=True), (
+            "json.dumps not byte-identical between classification point-estimate calls"
+        )
+        check_no_numpy(p1)
+
+        # CV fixture (confirms cv_error_rate path)
+        cv_result = {
+            "error_rate": 0.18,
+            "fold_errors": np.array([0.15, 0.20, 0.17, 0.22, 0.16]),
+            "best_ncomp": 4,
+        }
+        c1 = build_diagnostics(cv_result, method="classification")
+        c2 = build_diagnostics(cv_result, method="classification")
+        assert c1 == c2, "Two calls on CV fixture produced different dicts"
+        assert json.dumps(c1, sort_keys=True) == json.dumps(c2, sort_keys=True), (
+            "json.dumps not byte-identical between classification CV calls"
+        )
+        check_no_numpy(c1)
+
     def test_advise_raises_importerror_without_anthropic(self, monkeypatch):
         monkeypatch.setitem(sys.modules, "anthropic", None)
         from fdars.advisor import advise, build_diagnostics
