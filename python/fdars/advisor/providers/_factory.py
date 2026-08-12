@@ -79,21 +79,51 @@ def resolve_provider(
     resolved_key: "str | None" = api_key or os.environ.get(
         _KEY_ENV.get(provider_name, ""), None
     )
-    # base_url: reserved for Phase 20 adapters; resolve and pass through
+    # base_url: resolve and pass through to OpenAI and Ollama adapters
     resolved_base_url: "str | None" = base_url or os.environ.get(
         "FDARS_ADVISOR_BASE_URL"
     )
-    _ = resolved_base_url  # consumed by Phase 20 adapters
 
     if provider_name == "anthropic":
         from fdars.advisor.providers.anthropic import AnthropicProvider  # noqa: PLC0415
-
         adapter = AnthropicProvider(model=resolved_model, api_key=resolved_key)
+
+    elif provider_name == "openai":
+        # adapter added via plan 20-01
+        from fdars.advisor.providers.openai import OpenAIProvider  # noqa: PLC0415
+        adapter = OpenAIProvider(
+            model=resolved_model,
+            api_key=resolved_key,
+            base_url=resolved_base_url,
+        )
+
+    elif provider_name == "gemini":
+        # adapter added in plan 20-03
+        try:
+            from fdars.advisor.providers.gemini import GeminiProvider  # noqa: PLC0415
+        except ImportError as _exc:
+            raise ValueError(
+                f"resolve_provider: gemini adapter not yet installed. "
+                f"Install with: pip install fdars[gemini]"
+            ) from _exc
+        adapter = GeminiProvider(model=resolved_model, api_key=resolved_key)
+
+    elif provider_name == "ollama":
+        # adapter added in plan 20-02; Ollama uses 'host' not 'base_url'
+        try:
+            from fdars.advisor.providers.ollama import OllamaProvider  # noqa: PLC0415
+        except ImportError as _exc:
+            raise ValueError(
+                f"resolve_provider: ollama adapter not yet installed. "
+                f"Install with: pip install fdars[ollama]"
+            ) from _exc
+        adapter = OllamaProvider(model=resolved_model, host=resolved_base_url)
+
     else:
         raise ValueError(
             f"resolve_provider: unknown provider {provider_name!r}. "
-            f"Supported in Phase 19: 'anthropic'. "
-            f"Additional providers (openai, gemini, ollama) are added in Phase 20."
+            f"Supported providers: 'anthropic', 'openai', 'gemini', 'ollama'. "
+            f"Install the corresponding extra: pip install fdars[<provider>]"
         )
 
     return ValidateAndRetry(adapter)
@@ -101,10 +131,14 @@ def resolve_provider(
 
 _DEFAULT_MODELS: dict = {
     "anthropic": "claude-opus-4-8",
-    # Phase 20: "openai": "gpt-4o", "gemini": "gemini-2.0-flash", "ollama": "llama3.2"
+    "openai":    "gpt-4o",
+    "gemini":    "gemini-2.0-flash",
+    "ollama":    "llama3.2",
 }
 
 _KEY_ENV: dict = {
     "anthropic": "ANTHROPIC_API_KEY",
-    # Phase 20: "openai": "OPENAI_API_KEY", "gemini": "GEMINI_API_KEY"
+    "openai":    "OPENAI_API_KEY",
+    "gemini":    "GEMINI_API_KEY",
+    # ollama: no API key required
 }

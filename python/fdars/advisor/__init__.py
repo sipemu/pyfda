@@ -47,10 +47,12 @@ from typing import List
 import numpy as np
 
 # ---------------------------------------------------------------------------
-# SDK version floor (Phase 10 open decision — RESOLVED)
+# SDK version floors (Phase 10 resolved; Phase 20 additions)
 # ---------------------------------------------------------------------------
 
 ADVISOR_ANTHROPIC_MIN_VERSION = "0.72.0"
+ADVISOR_OPENAI_MIN_VERSION = "1.40.0"
+ADVISOR_OLLAMA_MIN_VERSION = "0.6.2"
 
 # ---------------------------------------------------------------------------
 # Schema — re-exported from advisor._schema
@@ -207,6 +209,92 @@ def _require_pydantic():
             "The fdars advisor requires pydantic for structured output. "
             "Install it with: pip install fdars[advisor]"
         ) from exc
+
+
+# ---------------------------------------------------------------------------
+# Provider import guards (Phase 20 — OpenAI, Gemini, Ollama)
+# ---------------------------------------------------------------------------
+
+def _require_openai():
+    """Import and return the ``openai`` module, or raise a clear ImportError.
+
+    Raises
+    ------
+    ImportError
+        When the ``openai`` package is not installed or is below the version
+        floor.  The error message contains ``pip install fdars[openai]``.
+    """
+    try:
+        import openai  # noqa: PLC0415
+    except ImportError as exc:
+        raise ImportError(
+            "The fdars OpenAI adapter requires the openai SDK. "
+            f"Install it with: pip install fdars[openai]\n"
+            f"Requires: openai>={ADVISOR_OPENAI_MIN_VERSION},<2.0"
+        ) from exc
+
+    installed = tuple(int(x) for x in openai.__version__.split(".")[:3])
+    floor = tuple(int(x) for x in ADVISOR_OPENAI_MIN_VERSION.split(".")[:3])
+    if installed < floor:
+        raise ImportError(
+            f"fdars openai adapter requires openai>={ADVISOR_OPENAI_MIN_VERSION}; "
+            f"found {openai.__version__}. "
+            f"Run: pip install 'openai>={ADVISOR_OPENAI_MIN_VERSION},<2.0'"
+        )
+    return openai
+
+
+def _require_gemini():
+    """Import and return the ``google.genai`` module, or raise a clear ImportError.
+
+    Note: google-genai requires Python >=3.10.  The adapter enforces this at
+    runtime with a clear ImportError before calling this guard.
+
+    Raises
+    ------
+    ImportError
+        When the ``google-genai`` package is not installed.  The error message
+        contains ``pip install fdars[gemini]`` and notes the Python >=3.10
+        requirement.
+    """
+    try:
+        from google import genai  # noqa: PLC0415
+        return genai
+    except ImportError as exc:
+        raise ImportError(
+            "The fdars Gemini adapter requires the google-genai SDK. "
+            "Install it with: pip install fdars[gemini]\n"
+            "Note: requires Python >=3.10."
+        ) from exc
+
+
+def _require_ollama():
+    """Import and return the ``ollama`` module, or raise a clear ImportError.
+
+    Raises
+    ------
+    ImportError
+        When the ``ollama`` package is not installed or is below the version
+        floor.  The error message contains ``pip install fdars[ollama]``.
+    """
+    try:
+        import ollama  # noqa: PLC0415
+    except ImportError as exc:
+        raise ImportError(
+            "The fdars Ollama adapter requires the ollama SDK. "
+            "Install it with: pip install fdars[ollama]\n"
+            "Requires a running Ollama daemon (https://ollama.com)."
+        ) from exc
+
+    installed = tuple(int(x) for x in ollama.__version__.split(".")[:3])
+    floor = tuple(int(x) for x in ADVISOR_OLLAMA_MIN_VERSION.split(".")[:3])
+    if installed < floor:
+        raise ImportError(
+            f"fdars ollama adapter requires ollama>={ADVISOR_OLLAMA_MIN_VERSION}; "
+            f"found {ollama.__version__}. "
+            f"Run: pip install 'ollama>={ADVISOR_OLLAMA_MIN_VERSION}'"
+        )
+    return ollama
 
 
 # ---------------------------------------------------------------------------

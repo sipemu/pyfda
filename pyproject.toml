@@ -42,6 +42,25 @@ advisor = ["anthropic>=0.72.0", "pydantic>=2.0"]
 # Note: mcp requires Python >=3.10. This extra is not compatible with Python 3.9.
 mcp = ["mcp>=2.0.0"]
 
+# Provider extras — each ships as an independently installable extra.
+# pydantic>=2.0 is repeated in each extra because every adapter needs
+# model_json_schema() and model_validate_json(), and we cannot assume
+# [advisor] is installed alongside.
+# Note: [gemini] requires Python >=3.10 (google-genai SDK requirement);
+# the adapter enforces this at runtime with a clear ImportError.
+openai = ["openai>=1.40,<2.0", "pydantic>=2.0"]
+gemini = ["google-genai>=1.0,<3.0", "pydantic>=2.0"]
+ollama = ["ollama>=0.6.2", "pydantic>=2.0"]
+
+# Meta-extra for dev/test environments and documentation examples.
+# Includes all provider extras plus the base advisor (Anthropic).
+all-providers = [
+    "fdars[advisor]",
+    "fdars[openai]",
+    "fdars[gemini]",
+    "fdars[ollama]",
+]
+
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
