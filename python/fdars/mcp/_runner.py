@@ -1,4 +1,4 @@
-"""fdars MCP method runner — dispatches the five supported fdars methods.
+"""fdars MCP method runner — dispatches the six supported fdars methods.
 
 This module exposes ``run_method``, which retrieves a dataset from the
 handle registry by its opaque ID, calls the appropriate real fdars function,
@@ -7,7 +7,7 @@ plain-Python types here — that conversion happens downstream in
 ``advisor.build_diagnostics`` (Pitfall 4: avoid double-conversion overhead
 and keep the runner's responsibility narrow).
 
-Supported methods:
+Supported methods (``_RUNNABLE_METHODS``):
 
 - ``alignment``  → :func:`fdars.alignment.karcher_mean`
 - ``fpca``       → :func:`fdars.regression.fpca`
@@ -19,6 +19,12 @@ Supported methods:
   re-calls ``pspline_fit_gcv`` internally when only argvals is present —
   this mapping decision keeps the tool boundary handle-only)
 - ``clustering`` → :func:`fdars.clustering.kmeans_fd`
+- ``depth``      → :func:`fdars.depth.fraiman_muniz_1d` (self-depth:
+  ``fraiman_muniz_1d(data, data)``; MCP entry point is hard-coded to
+  ``fraiman_muniz`` to avoid string-injection risk; callers needing
+  ``modal_1d`` or ``random_projection_1d`` should run those manually and
+  pass their result to ``fdars_build_diagnostics``).
+  Returns ``{"scores": ndarray(n,), "method_name": "fraiman_muniz"}``.
 
 Only scalar parameters (``float``/``int``/``None``) are accepted as
 ``run_method`` arguments; no arrays are accepted (threat T-12-03).
@@ -47,10 +53,15 @@ if sys.version_info < (3, 10):
 
 __all__ = ["run_method"]
 
-# Closed set of valid method names — mirrors advisor._supported (T-12-02)
-_SUPPORTED_METHODS = frozenset(
-    {"alignment", "fpca", "basis", "smoothing", "clustering"}
+# Closed set of runnable method names — these are the methods that
+# run_method can dispatch to fdars.  Widened from 5 to 6 in Plan 22-01
+# to include "depth" (SURF-01).  Mirrors server._RUNNABLE_METHODS (T-12-02).
+_RUNNABLE_METHODS = frozenset(
+    {"alignment", "fpca", "basis", "smoothing", "clustering", "depth"}
 )
+
+# Backward-compat alias for any external code that imported _SUPPORTED_METHODS
+_SUPPORTED_METHODS = _RUNNABLE_METHODS
 
 
 def run_method(
@@ -77,8 +88,8 @@ def run_method(
         Opaque handle ID returned by :meth:`HandleRegistry.store_dataset`.
     method : str
         One of ``'alignment'``, ``'fpca'``, ``'basis'``, ``'smoothing'``,
-        ``'clustering'``.  Case-insensitive.  Raises :exc:`ValueError` on
-        unknown method (T-12-02).
+        ``'clustering'``, ``'depth'``.  Case-insensitive.  Raises
+        :exc:`ValueError` on unknown method (T-12-02).
     lambda_ : float, optional
         Warp penalty for ``alignment`` (``karcher_mean``) or smoothing
         regularisation for ``smoothing`` (``pspline_fit_gcv``).
@@ -105,7 +116,7 @@ def run_method(
     ------
     ValueError
         If ``method`` is not in the supported set
-        ``{'alignment','fpca','basis','smoothing','clustering'}``.
+        ``{'alignment','fpca','basis','smoothing','clustering','depth'}``.
     KeyError
         If ``dataset_id`` is not found in the registry.
 
@@ -140,10 +151,10 @@ def run_method(
     """
     # V5 input validation — validate method before any fdars call (T-12-02)
     method_lc = method.lower()
-    if method_lc not in _SUPPORTED_METHODS:
+    if method_lc not in _RUNNABLE_METHODS:
         raise ValueError(
             f"run_method: unsupported method {method!r}. "
-            f"Supported: {sorted(_SUPPORTED_METHODS)!r}."
+            f"Supported: {sorted(_RUNNABLE_METHODS)!r}."
         )
 
     from fdars.mcp._registry import registry
@@ -199,6 +210,19 @@ def run_method(
             argvals,
             lambda_=lambda_ if lambda_ is not None else 0.0,
         )
+
+    if method_lc == "depth":
+        from fdars import depth as _depth
+
+        # MCP entry point: fraiman_muniz_1d with self-depth (data as its own
+        # reference sample).  String method_name param deliberately omitted
+        # to avoid injection risk (T-12-03); hard-coded to fraiman_muniz.
+        # For modal_1d or random_projection_1d, callers should run those
+        # functions manually and pass the result to fdars_build_diagnostics
+        # via result_id.  Note: fraiman_muniz_1d(data, ref_data) — ref_data
+        # is the reference sample, NOT argvals; argvals is the evaluation grid.
+        scores = _depth.fraiman_muniz_1d(data, data)
+        return {"scores": scores, "method_name": "fraiman_muniz"}
 
     # Unreachable given the check above, but kept for safety.
     raise ValueError(f"Unhandled method: {method!r}")  # pragma: no cover
