@@ -138,7 +138,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 **Plans**: 3 plans
 
 - [x] 22-01-PLAN.md — TRACER: depth runnable via MCP end-to-end (`_RUNNABLE_METHODS` + depth dispatch + server scores-unwrap) + LLM-free invariant lock [SURF-01, SURF-02]
-- [ ] 22-02-PLAN.md — Diagnostics-only expansion: `_DIAGNOSTICS_METHODS` (12) guard + `n_classes` param + represent argvals injection + guard-sync + rejection tests [SURF-01]
+- [x] 22-02-PLAN.md — Diagnostics-only expansion: `_DIAGNOSTICS_METHODS` (12) guard + `n_classes` param + represent argvals injection + guard-sync + rejection tests [SURF-01]
 - [x] 22-03-PLAN.md — SKILL.md 4 targeted edits (full aspect list, Provider Selection section, corrected install note, refreshed Tools Referenced) + 2 skill tests [SURF-03, SURF-02]
 
 ### Phase 23: Packaging & CI
