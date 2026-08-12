@@ -983,6 +983,173 @@ class TestRegression:
         )
 
 
+class TestSpm:
+    """Offline and fdars-guarded tests for spm aspect (ASPECT-05 — plan 21-05).
+
+    test_spm_basic: validates field presence + JSON-serialisability without
+    requiring the compiled fdars extension (the spe_moment_match_diagnostic path
+    is guarded by try/except in the builder so None fallback is exercised here).
+
+    test_spm_deterministic: uses pytest.importorskip("fdars.spm") so the test
+    is skipped in environments without the compiled extension.  Exercises the
+    live spe_moment_match_diagnostic call and asserts byte-identical JSON output,
+    no numpy scalar leaks, and that spe_kurtosis_excess is a native float.
+    """
+
+    # ------------------------------------------------------------------
+    # Shared helper: recursive numpy-scalar leak checker
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _check_no_numpy(obj):
+        """Recursive walker: fail if any value is a numpy scalar (np.generic)."""
+        assert not isinstance(obj, np.generic), (
+            f"numpy scalar leaked into output: {type(obj)!r} = {obj!r}"
+        )
+        if isinstance(obj, dict):
+            for v in obj.values():
+                TestSpm._check_no_numpy(v)
+        elif isinstance(obj, list):
+            for v in obj:
+                TestSpm._check_no_numpy(v)
+
+    # ------------------------------------------------------------------
+    # Synthetic Phase-I fixture (from 21-RESEARCH §8)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _spm_fixture():
+        return {
+            "t2": np.array([1.2, 3.4, 0.8, 5.1, 2.3, 4.0, 1.5, 2.7, 0.9, 3.1]),
+            "spe": np.array([0.05, 0.12, 0.03, 0.25, 0.08, 0.18, 0.04, 0.09, 0.02, 0.11]),
+            "t2_limit": 4.5,
+            "spe_limit": 0.20,
+            "eigenvalues": np.array([2.1, 0.8, 0.3]),
+        }
+
+    # ------------------------------------------------------------------
+    # Task 1 tests (RED gate — spm builder must exist + be wired)
+    # ------------------------------------------------------------------
+
+    def test_spm_basic(self):
+        """spm branch present in dispatcher; core fields correct; JSON-serialisable.
+
+        Does NOT require fdars.spm (spe_moment_match_diagnostic path is guarded
+        by try/except in the builder — None fallback must be tested here).
+        RED gate for Task 1 (plan 21-05).
+        """
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        spm_result = self._spm_fixture()
+        d = build_diagnostics(spm_result, method="spm")
+
+        assert d["method"] == "spm"
+        assert d["n_obs"] == 10
+        assert d["ncomp"] == 3
+        assert abs(d["t2_limit"] - 4.5) < 1e-9
+        assert abs(d["spe_limit"] - 0.20) < 1e-9
+        # t2: values [1.2, 3.4, 0.8, 5.1, 2.3, 4.0, 1.5, 2.7, 0.9, 3.1], limit=4.5
+        # exceeds: [5.1] -> 1/10 = 0.1
+        assert abs(d["t2_exceedance_rate"] - 0.1) < 1e-9, (
+            f"t2_exceedance_rate expected 0.1, got {d['t2_exceedance_rate']}"
+        )
+        # spe: values [...0.25...0.18...], limit=0.20
+        # exceeds: [0.25] -> 1/10 = 0.1
+        assert abs(d["spe_exceedance_rate"] - 0.1) < 1e-9, (
+            f"spe_exceedance_rate expected 0.1, got {d['spe_exceedance_rate']}"
+        )
+        # Cumulative variance: eigenvalues=[2.1, 0.8, 0.3], sum=3.2
+        # evr=[0.65625, 0.25, 0.09375], cumsum=[0.65625, 0.90625, 1.0]
+        assert abs(d["variance_explained_cumulative"][-1] - 1.0) < 1e-9, (
+            f"Last cumulative variance should be ~1.0, got {d['variance_explained_cumulative'][-1]}"
+        )
+        # eigenvalues emitted as plain list
+        assert d["eigenvalues"] == [2.1, 0.8, 0.3] or all(
+            abs(a - b) < 1e-9 for a, b in zip(d["eigenvalues"], [2.1, 0.8, 0.3])
+        )
+        # JSON-serialisable
+        json.dumps(d, sort_keys=True)
+
+    def test_spm_deterministic(self):
+        """spm build_diagnostics is byte-identical on repeated calls (ASPECT-05).
+
+        Requires fdars.spm (uses the live spe_moment_match_diagnostic call).
+        Two calls on the same Phase-I fixture must produce equal dicts AND
+        byte-identical json.dumps(sort_keys=True).  All values must be native
+        Python types (no numpy scalars).  spe_kurtosis_excess must be a native
+        float (not None), confirming the live call succeeded.
+        """
+        import json
+
+        pytest.importorskip("fdars.spm")
+
+        from fdars.advisor import build_diagnostics
+
+        spm_result = self._spm_fixture()
+        d1 = build_diagnostics(spm_result, method="spm")
+        d2 = build_diagnostics(spm_result, method="spm")
+
+        assert d1 == d2, "Two calls produced different dicts"
+        s1 = json.dumps(d1, sort_keys=True)
+        s2 = json.dumps(d2, sort_keys=True)
+        assert s1 == s2, "json.dumps not byte-identical between calls"
+
+        # No numpy scalar types
+        self._check_no_numpy(d1)
+
+        # Live call succeeded: spe_kurtosis_excess must be a native float
+        assert d1["spe_kurtosis_excess"] is not None, (
+            "spe_kurtosis_excess should not be None when fdars.spm is available"
+        )
+        assert isinstance(d1["spe_kurtosis_excess"], float), (
+            f"spe_kurtosis_excess must be native float, got {type(d1['spe_kurtosis_excess'])!r}"
+        )
+        assert isinstance(d1["spe_moment_match_adequate"], bool), (
+            f"spe_moment_match_adequate must be native bool, got {type(d1['spe_moment_match_adequate'])!r}"
+        )
+
+    # ------------------------------------------------------------------
+    # Task 2 prompt tests (spm clause)
+    # ------------------------------------------------------------------
+
+    def test_spm_prompt_clause(self):
+        """t2_exceedance_rate token appears in spm-aspect prompt, not in base (ASPECT-06)."""
+        from fdars.advisor._prompts import _system_prompt
+
+        spm_prompt = _system_prompt("interpretation", "spm")
+        assert "t2_exceedance_rate" in spm_prompt, (
+            "'t2_exceedance_rate' token missing from spm-aspect prompt"
+        )
+        base_prompt = _system_prompt("interpretation", "")
+        assert "t2_exceedance_rate" not in base_prompt, (
+            "'t2_exceedance_rate' unexpectedly appears in base (no-aspect) prompt"
+        )
+
+    def test_all_seven_aspect_primers_present(self):
+        """All seven new aspects have primer clauses in _ASPECT_PRIMERS (ASPECT-06).
+
+        This is the final Nyquist gate for ASPECT-06 coverage: every new aspect
+        added in Phase 21 must have a primer entry so that _system_prompt(task, aspect)
+        delivers an FDA-grounded clause for each analysis type.
+        """
+        from fdars.advisor._prompts import _ASPECT_PRIMERS
+
+        required = {
+            "depth",
+            "outliers",
+            "classification",
+            "represent",
+            "regression",
+            "regression_cv",
+            "spm",
+        }
+        assert required <= set(_ASPECT_PRIMERS), (
+            f"Missing aspect primers: {required - set(_ASPECT_PRIMERS)}"
+        )
+
+
 class TestAdvisorIntegration:
     """LLM integration tests — skipped in CI without ANTHROPIC_API_KEY."""
 

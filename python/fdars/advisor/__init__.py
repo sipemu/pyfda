@@ -95,7 +95,7 @@ def build_diagnostics(
         Native fdars output dict (or a ``fdars.results`` wrapper whose ``.raw``
         attribute is the underlying dict).
     method : {"alignment", "fpca", "basis", "smoothing", "clustering", "depth", \
-"outliers", "classification", "represent", "regression", "regression_cv"}
+"outliers", "classification", "represent", "regression", "regression_cv", "spm"}
         The fdars method that produced ``result``.  For ``"represent"``, pass
         the raw data dict (``{"data": ..., "argvals": ...}``) or an Fdata-like
         object with ``.data``/``.argvals`` attributes directly — not an fdars
@@ -128,6 +128,7 @@ def build_diagnostics(
         "classification",                                           # ASPECT-03 (plan 21-02)
         "represent",                                               # ASPECT-01 (plan 21-03)
         "regression", "regression_cv",                              # ASPECT-04 (plan 21-04)
+        "spm",                                                      # ASPECT-05 (plan 21-05)
     }
     method_lc = method.lower()
     if method_lc not in _supported:
@@ -193,6 +194,10 @@ def build_diagnostics(
     if method_lc == "regression_cv":
         from fdars.advisor.aspects.regression_cv import _build_regression_cv_diagnostics  # noqa: PLC0415
         return _build_regression_cv_diagnostics(raw, **kwargs)
+
+    if method_lc == "spm":
+        from fdars.advisor.aspects.spm import _build_spm_diagnostics  # noqa: PLC0415
+        return _build_spm_diagnostics(raw, **kwargs)
 
     # Unreachable given the check above, but kept for safety.
     raise ValueError(f"Unhandled method: {method!r}")
