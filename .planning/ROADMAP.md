@@ -83,7 +83,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 **Plans**: 3 plans
 
 - [x] 19-01-PLAN.md — TRACER: advisor.py→advisor/ package + Provider protocol + AnthropicProvider + ValidateAndRetry + resolve_provider + centralized _check_grounding; wire advise() end-to-end (green gate)
-- [ ] 19-02-PLAN.md — Mechanical split: _schema.py, _prompts.py, aspects/*.py; build_diagnostics dispatches lazily (green gate)
+- [x] 19-02-PLAN.md — Mechanical split: _schema.py, _prompts.py, aspects/*.py; build_diagnostics dispatches lazily (green gate)
 - [ ] 19-03-PLAN.md — Offline provider/grounding test suite with in-memory fake providers (protocol, retry-cap, refusal, grounding-reject, precedence)
 
 ### Phase 20: Additional Provider Adapters
