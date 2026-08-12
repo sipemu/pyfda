@@ -15,10 +15,10 @@ Usage (in-process test)::
         tools = await client.list_tools()
         result = await client.call_tool("fdars_build_diagnostics", {...})
 
-Tools exposed (Plan 12-01/02/03):
+Tools exposed (Plans 12-01/02/03 + 22-01):
 
 - ``fdars_build_diagnostics`` — deterministic offline diagnostics (TOOL-01/02)
-- ``fdars_run_method`` — run any of five fdars methods; returns result handle (TOOL-01)
+- ``fdars_run_method`` — run any of six fdars methods; returns result handle (TOOL-01)
 - ``fdars_compare_run`` — re-run with new params; return before/after delta (TOOL-03)
 """
 
@@ -41,10 +41,18 @@ from mcp.server import MCPServer  # type: ignore[import-untyped]
 mcp = MCPServer("fdars-advisor")
 
 # ---------------------------------------------------------------------------
-# Validated method set (mirrors advisor.build_diagnostics _supported)
+# Validated method sets
 # ---------------------------------------------------------------------------
 
-_SUPPORTED_METHODS = frozenset({"alignment", "fpca", "basis", "smoothing", "clustering"})
+# Methods that run_method can dispatch (and fdars_compare_run can re-run).
+# Must mirror _runner._RUNNABLE_METHODS (T-12-02).  Widened to 6 in Plan 22-01.
+_RUNNABLE_METHODS = frozenset(
+    {"alignment", "fpca", "basis", "smoothing", "clustering", "depth"}
+)
+
+# Backward-compat alias (used only in this file; external code should import
+# _runner._RUNNABLE_METHODS directly).
+_SUPPORTED_METHODS = _RUNNABLE_METHODS
 
 # ---------------------------------------------------------------------------
 # Tool: fdars_build_diagnostics
@@ -73,7 +81,8 @@ def fdars_build_diagnostics(
         Obtain via ``registry.store_dataset(data, argvals)``.
     method : str
         One of ``'alignment'``, ``'fpca'``, ``'basis'``, ``'smoothing'``,
-        ``'clustering'``.  Passed directly to ``build_diagnostics``.
+        ``'clustering'``, ``'depth'``.  Passed directly to
+        ``build_diagnostics``.
     result_id : str, optional
         Handle to a stored result dict (e.g. from a prior ``fdars_run_method``
         call).  If ``None``, ``build_diagnostics`` is called with the raw
@@ -98,10 +107,10 @@ def fdars_build_diagnostics(
     """
     # V5 input validation — validate method before any fdars call (T-12-02)
     method_lc = method.lower()
-    if method_lc not in _SUPPORTED_METHODS:
+    if method_lc not in _RUNNABLE_METHODS:
         raise ValueError(
             f"fdars_build_diagnostics: unsupported method {method!r}. "
-            f"Supported: {sorted(_SUPPORTED_METHODS)!r}."
+            f"Supported: {sorted(_RUNNABLE_METHODS)!r}."
         )
 
     from fdars.mcp._registry import registry
@@ -118,10 +127,19 @@ def fdars_build_diagnostics(
         # so build_diagnostics can extract what it needs (e.g. for smoothing).
         result = {"data": data}
 
+    # Depth unwrap (Pitfall 2 / T-22-04): the depth runner returns a dict
+    # {"scores": ndarray, "method_name": str}; _build_depth_diagnostics
+    # expects the raw ndarray (np.asarray(raw)).  Unwrap before delegating.
+    depth_kwargs: dict = {}
+    if method_lc == "depth" and isinstance(result, dict) and "scores" in result:
+        depth_kwargs["method_name"] = result.get("method_name", "unknown")
+        result = result["scores"]
+
     # Delegate to advisor — do NOT reimplement diagnostics here (Anti-Pattern)
     kwargs: dict = {}
     if with_argvals:
         kwargs["argvals"] = argvals
+    kwargs.update(depth_kwargs)
 
     diagnostics = build_diagnostics(result, method_lc, **kwargs)
 
@@ -161,12 +179,12 @@ def fdars_run_method(
         The dataset must be pre-registered before calling this tool.
     method : str
         One of ``'alignment'``, ``'fpca'``, ``'basis'``, ``'smoothing'``,
-        ``'clustering'``.  Case-insensitive.  Raises :exc:`ValueError` on
-        unknown method (T-12-02).
+        ``'clustering'``, ``'depth'``.  Case-insensitive.  Raises
+        :exc:`ValueError` on unknown method (T-12-02).
     lambda_ : float, optional
         Warp penalty for ``alignment`` (default ``0.0``) or regularisation
         strength for ``smoothing`` (passed to ``pspline_fit_gcv``).
-        Ignored for ``fpca``, ``basis``, and ``clustering``.
+        Ignored for ``fpca``, ``basis``, ``clustering``, and ``depth``.
     n_basis : int, optional
         Number of B-spline basis functions for the ``smoothing`` method
         (``pspline_fit_gcv``).  Default ``15``.  Ignored for other methods.
@@ -204,6 +222,7 @@ def fdars_run_method(
     - ``basis``:      ``lambda_`` (default ``1.0``)
     - ``smoothing``:  ``n_basis`` (default ``15``)
     - ``clustering``: ``k`` (default ``3``), ``seed`` (default ``42``)
+    - ``depth``:      no scalar params (always ``fraiman_muniz_1d``)
 
     The tool handlers are **synchronous** (``def``, not ``async def``) because
     fdars methods are synchronous Rust calls that release the GIL via PyO3
@@ -325,11 +344,13 @@ def fdars_compare_run(
     fdars methods are synchronous Rust calls (Pitfall 2).
     """
     # V5: validate method at tool boundary before delegating (T-12-02; fail fast)
+    # compare_run is restricted to _RUNNABLE_METHODS only (Pitfall 3: you can
+    # only compare before/after on re-runnable methods, not diagnostics-only ones).
     method_lc = method.lower()
-    if method_lc not in _SUPPORTED_METHODS:
+    if method_lc not in _RUNNABLE_METHODS:
         raise ValueError(
             f"fdars_compare_run: unsupported method {method!r}. "
-            f"Supported: {sorted(_SUPPORTED_METHODS)!r}."
+            f"Supported: {sorted(_RUNNABLE_METHODS)!r}."
         )
 
     # Assemble params_after from non-None typed args (Pitfall 6: flat schema)
