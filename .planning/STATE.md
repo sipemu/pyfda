@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
-current_phase: 21
-current_phase_name: Per-Aspect Advisor Coverage
+current_phase: 22
+current_phase_name: Surface Integration
 status: planning
-stopped_at: Completed 21-05-PLAN.md (FINAL wave of Phase 21 — all aspects covered)
-last_updated: "2026-08-12T08:58:29.700Z"
+stopped_at: Completed 22-01-PLAN.md (depth runnable + LLM-free invariant lock)
+last_updated: "2026-08-12T13:01:07.595Z"
 last_activity: 2026-08-12
 last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 12
 ---
 
 # Project State
@@ -27,18 +27,18 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 
 ## Current Position
 
-Phase: 21 of 24 (Per-Aspect Advisor Coverage)
+Phase: 22 of 24 (Surface Integration)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-08-12 — Phase 20 complete, transitioned to Phase 21
+Last activity: 2026-08-12 — Phase 21 complete, transitioned to Phase 22
 
-Progress: [██████████] 100%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 6 (v1.0–v2.1)
+- Total plans completed: 11 (v1.0–v2.1)
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -48,6 +48,7 @@ Progress: [██████████] 100%
 |-------|-------|-------|----------|
 | 19 | 3 | - | - |
 | 20 | 3 | - | - |
+| 21 | 5 | - | - |
 
 **Recent Trend:**
 
@@ -70,6 +71,7 @@ Progress: [██████████] 100%
 | Phase 21 P03 | 35 | 3 tasks | 5 files |
 | Phase 21 P04 | 20m | 3 tasks | 4 files |
 | Phase 21-per-aspect-advisor-coverage P05 | 3 | 3 tasks | 3 files |
+| Phase 22-surface-integration P01 | 15 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -110,6 +112,8 @@ Recent decisions affecting current work:
 - [Phase ?]: regression/regression_cv aspects use guarded key access for variably-shaped result dicts; pure-NumPy skewness and elbow detection (no scipy)
 - [Phase ?]: spe_kurtosis_excess renamed from excess_kurtosis per RESEARCH correction #8 for LLM clarity
 - [Phase ?]: arl0_t2 excluded from SPM builder: stochastic Monte Carlo breaks offline determinism guarantee (FUT-02)
+- [Phase ?]: fraiman_muniz_1d(data, data) self-depth for MCP: ref_data is a data matrix not argvals; hard-coded to avoid string injection
+- [Phase ?]: _RUNNABLE_METHODS frozenset as single source of truth across runner+server; _SUPPORTED_METHODS kept as backward-compat alias
 
 ### Pending Todos
 
@@ -130,8 +134,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-12T08:58:29.690Z
-Stopped at: Completed 21-05-PLAN.md (FINAL wave of Phase 21 — all aspects covered)
+Last session: 2026-08-12T13:01:07.586Z
+Stopped at: Completed 22-01-PLAN.md (depth runnable + LLM-free invariant lock)
 Resume file: None
 
 ## Operator Next Steps
