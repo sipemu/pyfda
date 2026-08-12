@@ -30,7 +30,7 @@ Requirements for this milestone (v3.0). Each maps to roadmap phases.
 - [x] **ASPECT-02**: `build_diagnostics` supports depth and outliers.
 - [x] **ASPECT-03**: `build_diagnostics` supports classification.
 - [x] **ASPECT-04**: `build_diagnostics` supports regression and regression-CV (`fregre_lm` / `fregre_pls` / `fregre_cv`).
-- [ ] **ASPECT-05**: `build_diagnostics` supports monitoring/SPM (Phase-1 T²/SPE, `spe_moment_match_diagnostic`), excluding stochastic ARL.
+- [x] **ASPECT-05**: `build_diagnostics` supports monitoring/SPM (Phase-1 T²/SPE, `spe_moment_match_diagnostic`), excluding stochastic ARL.
 - [x] **ASPECT-06**: Every fdars analysis aspect (clustering, smoothing, alignment, basis/represent, depth/outliers, classification, regression/FPCA, monitoring/SPM) offers grounded advice task families (interpretation, parameter guidance, method guidance) through the same schema + grounding machinery — no per-aspect duplication.
 - [x] **ASPECT-07**: Aspect is always caller-specified (never auto-detected from result keys) to avoid key-collision misrouting.
 
@@ -99,7 +99,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASPECT-02 | Phase 21 | Complete |
 | ASPECT-03 | Phase 21 | Complete |
 | ASPECT-04 | Phase 21 | Complete |
-| ASPECT-05 | Phase 21 | Pending |
+| ASPECT-05 | Phase 21 | Complete |
 | ASPECT-06 | Phase 21 | Complete |
 | ASPECT-07 | Phase 21 | Complete |
 | SURF-01 | Phase 22 | Pending |

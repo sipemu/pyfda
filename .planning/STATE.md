@@ -5,15 +5,15 @@ milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
 current_phase: 21
 current_phase_name: Per-Aspect Advisor Coverage
 status: planning
-stopped_at: Completed 21-04-PLAN.md
-last_updated: "2026-08-12T08:52:03.729Z"
+stopped_at: Completed 21-05-PLAN.md (FINAL wave of Phase 21 — all aspects covered)
+last_updated: "2026-08-12T08:58:29.700Z"
 last_activity: 2026-08-12
 last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-08-12 — Phase 20 complete, transitioned to Phase 21
 
-Progress: [█████████░] 91%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [█████████░] 91%
 | Phase 21 P02 | 4 | 3 tasks | 4 files |
 | Phase 21 P03 | 35 | 3 tasks | 5 files |
 | Phase 21 P04 | 20m | 3 tasks | 4 files |
+| Phase 21-per-aspect-advisor-coverage P05 | 3 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,8 @@ Recent decisions affecting current work:
 - [21-03]: represent is a new method string (not basis/fpca extension) — operates on INPUT data, not method output
 - [21-03]: represent input resolution: attribute-first (Fdata .data/.argvals), then dict fallback — no dict(raw) coercion
 - [Phase ?]: regression/regression_cv aspects use guarded key access for variably-shaped result dicts; pure-NumPy skewness and elbow detection (no scipy)
+- [Phase ?]: spe_kurtosis_excess renamed from excess_kurtosis per RESEARCH correction #8 for LLM clarity
+- [Phase ?]: arl0_t2 excluded from SPM builder: stochastic Monte Carlo breaks offline determinism guarantee (FUT-02)
 
 ### Pending Todos
 
@@ -127,8 +130,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-12T08:52:03.717Z
-Stopped at: Completed 21-04-PLAN.md
+Last session: 2026-08-12T08:58:29.690Z
+Stopped at: Completed 21-05-PLAN.md (FINAL wave of Phase 21 — all aspects covered)
 Resume file: None
 
 ## Operator Next Steps
