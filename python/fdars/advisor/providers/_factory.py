@@ -98,14 +98,10 @@ def resolve_provider(
         )
 
     elif provider_name == "gemini":
-        # adapter added in plan 20-03
-        try:
-            from fdars.advisor.providers.gemini import GeminiProvider  # noqa: PLC0415
-        except ImportError as _exc:
-            raise ValueError(
-                f"resolve_provider: gemini adapter not yet installed. "
-                f"Install with: pip install fdars[gemini]"
-            ) from _exc
+        # adapter landed in plan 20-03; ImportError from _require_gemini()
+        # (inside GeminiProvider.__init__) surfaces directly — it already
+        # names 'pip install fdars[gemini]'.
+        from fdars.advisor.providers.gemini import GeminiProvider  # noqa: PLC0415
         adapter = GeminiProvider(model=resolved_model, api_key=resolved_key)
 
     elif provider_name == "ollama":
