@@ -84,4 +84,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| _pending roadmap_ | — | Pending |
+| PROV-01 | Phase 19 | Pending |
+| PROV-02 | Phase 19 | Pending |
+| PROV-06 | Phase 19 | Pending |
+| GROUND-01 | Phase 19 | Pending |
+| GROUND-02 | Phase 19 | Pending |
+| GROUND-03 | Phase 19 | Pending |
+| GROUND-04 | Phase 19 | Pending |
+| PROV-03 | Phase 20 | Pending |
+| PROV-04 | Phase 20 | Pending |
+| PROV-05 | Phase 20 | Pending |
+| PROV-07 | Phase 20 | Pending |
+| ASPECT-01 | Phase 21 | Pending |
+| ASPECT-02 | Phase 21 | Pending |
+| ASPECT-03 | Phase 21 | Pending |
+| ASPECT-04 | Phase 21 | Pending |
+| ASPECT-05 | Phase 21 | Pending |
+| ASPECT-06 | Phase 21 | Pending |
+| ASPECT-07 | Phase 21 | Pending |
+| SURF-01 | Phase 22 | Pending |
+| SURF-02 | Phase 22 | Pending |
+| SURF-03 | Phase 22 | Pending |
+| QUAL-01 | Phase 23 | Pending |
+| QUAL-02 | Phase 23 | Pending |
+| QUAL-03 | Phase 23 | Pending |
+| QUAL-04 | Phase 23 | Pending |
+| DOCS-01 | Phase 24 | Pending |
+| DOCS-02 | Phase 24 | Pending |
+| DOCS-03 | Phase 24 | Pending |
