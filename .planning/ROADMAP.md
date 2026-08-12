@@ -62,7 +62,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 - [x] **Phase 20: Additional Provider Adapters** - OpenAI (+ `base_url`), Ollama (local, no key), Gemini adapters behind the protocol, each an optional extra. Parallel-eligible with Phase 21. (completed 2026-08-12)
 - [x] **Phase 21: Per-Aspect Advisor Coverage** - `build_diagnostics` + grounded task families for represent/basis, depth/outliers, classification, regression/CV, monitoring/SPM. Parallel-eligible with Phase 20. (completed 2026-08-12)
 - [x] **Phase 22: Surface Integration** - MCP exposes new aspect diagnostics (LLM-free); provider selection wired through the Python `advise()`; Agent Skill documents providers + full coverage. (completed 2026-08-12)
-- [ ] **Phase 23: Packaging & CI** - Per-provider extras finalized; Python 3.9–3.14 matrix with version/extra gating; bare-venv smoke; two-layer offline + env-gated live tests.
+- [x] **Phase 23: Packaging & CI** - Per-provider extras finalized; Python 3.9–3.14 matrix with version/extra gating; bare-venv smoke; two-layer offline + env-gated live tests. (completed 2026-08-12)
 - [ ] **Phase 24: Documentation** - Provider setup guide + per-aspect advisor pages + updated overview/API pages; docs build stays offline (`mkdocs build --strict`).
 
 ### Phase Details
@@ -180,7 +180,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 | 20. Additional Provider Adapters | 3/3 | Complete    | 2026-08-12 |
 | 21. Per-Aspect Advisor Coverage | 5/5 | Complete    | 2026-08-12 |
 | 22. Surface Integration | 3/3 | Complete    | 2026-08-12 |
-| 23. Packaging & CI | 0/2 | Planned | - |
+| 23. Packaging & CI | 2/2 | Complete    | 2026-08-12 |
 | 24. Documentation | 0/? | Not started | - |
 
 </details>
