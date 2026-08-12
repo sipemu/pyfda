@@ -331,6 +331,7 @@ def advise(
     domain_context: str,
     model: str = "claude-opus-4-8",
     provider: "str | object | None" = None,
+    aspect: str = "",
 ) -> Advice:
     """Return schema-validated :class:`Advice` for the given diagnostics.
 
@@ -357,6 +358,10 @@ def advise(
         LLM provider.  ``None`` (default) reproduces today's Anthropic behavior
         exactly.  Pass a provider name (``"anthropic"``) or an existing
         ``Provider`` instance to override.
+    aspect : str, optional
+        Selects the per-aspect FDA primer clause injected into the system
+        prompt (e.g. ``"depth"``, ``"outliers"``).  Default ``""`` reproduces
+        prior behavior exactly — no aspect clause is added (ASPECT-06).
 
     Returns
     -------
@@ -381,7 +386,7 @@ def advise(
 
     p = resolve_provider(provider=provider, model=model)
 
-    system = _system_prompt(task)
+    system = _system_prompt(task, aspect)
 
     user_content = (
         f"Domain context: {domain_context}\n\n"

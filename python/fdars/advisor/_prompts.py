@@ -34,6 +34,68 @@ _GROUNDING_INVARIANT = (
 
 
 # ---------------------------------------------------------------------------
+# Per-aspect FDA primer clauses (Phase 21, ASPECT-06)
+# ---------------------------------------------------------------------------
+
+# Each entry is a short FDA-primer clause string specific to one analysis
+# aspect.  _system_prompt appends the matching clause (or nothing for "") after
+# the shared FDA-primer block and before the task clause.  Using "" as the key
+# would return "" via .get("", ""), so aspect="" reproduces prior behavior
+# exactly — no entry for "" is intentional.
+_ASPECT_PRIMERS: dict = {
+    "depth": (
+        "- Functional depth: measures how central each curve is relative to the "
+        "sample. High depth = central/representative curve. "
+        "Low depth = peripheral/outlier-like curve. "
+        "depth_q10 is the 10th percentile of depth scores; a low depth_q10 "
+        "value indicates many peripheral curves in the sample.\n"
+    ),
+    "outliers": (
+        "- Functional outlier detection: outlier_fraction is the proportion "
+        "flagged. A threshold derived from the null distribution (LRT) or a "
+        "geometrical criterion (outliergram). "
+        "magnitude outlyingness captures amplitude-direction outliers; "
+        "shape outlyingness captures shape-direction outliers.\n"
+    ),
+    "classification": (
+        "- Functional classification: accuracy is the proportion correctly "
+        "classified. error_rate = 1 - accuracy. fold_error_std measures "
+        "instability across CV folds. best_ncomp is the number of FPC components "
+        "that minimises CV error.\n"
+    ),
+    "represent": (
+        "- Functional data representation: n_points is the number of evaluation "
+        "grid points per curve. is_uniform_grid indicates whether the argvals "
+        "spacing is regular. Sparse grids (n_points < 20) and irregular grids "
+        "may require pre-smoothing before group-level analysis.\n"
+    ),
+    "regression": (
+        "- Functional regression: r_squared measures goodness-of-fit (0-1). "
+        "residual_skew > 0 indicates right-skewed residuals; large "
+        "residual_max_abs may flag influential outlier observations. "
+        "beta_t is the functional coefficient curve; beta_t_range summarises "
+        "its magnitude.\n"
+    ),
+    "regression_cv": (
+        "- Functional regression CV: optimal_k is the number of FPC components "
+        "minimising CV error. elbow_present indicates whether the CV curve has a "
+        "clear minimum away from the boundary. If optimal_k is at the k_max "
+        "boundary, more components should be tested.\n"
+    ),
+    "spm": (
+        "- Functional SPM Phase I: t2_exceedance_rate is the fraction of "
+        "in-control observations exceeding the T² limit; for a "
+        "well-calibrated chart this should approximately equal the design alpha. "
+        "spe_kurtosis_excess from spe_moment_match_diagnostic measures departure "
+        "of SPE from the moment-matched chi-squared approximation -- high values "
+        "indicate the approximation is inadequate. "
+        "variance_explained_cumulative shows how much variation the chosen ncomp "
+        "components capture.\n"
+    ),
+}
+
+
+# ---------------------------------------------------------------------------
 # System prompt
 # ---------------------------------------------------------------------------
 
@@ -41,7 +103,9 @@ def _system_prompt(task: str, aspect: str = "") -> str:
     """Build the grounded-output system prompt for the given task family.
 
     The base prompt encodes the grounding invariant (via ``_GROUNDING_INVARIANT``)
-    and an FDA primer.  A task-family clause is appended based on ``task``.
+    and an FDA primer.  A per-aspect clause (from ``_ASPECT_PRIMERS``) is
+    appended after the FDA primer when ``aspect`` is non-empty.  A task-family
+    clause is appended last based on ``task``.
 
     Parameters
     ----------
@@ -49,8 +113,9 @@ def _system_prompt(task: str, aspect: str = "") -> str:
         Task family identifier (case-insensitive).  Supported:
         ``"interpretation"``, ``"parameter"``, ``"method"``.
     aspect : str, optional
-        Reserved for Phase 21 per-aspect specialisation.  Unused today;
-        accepted so callers can pass it without error.
+        Selects the per-aspect FDA primer clause from ``_ASPECT_PRIMERS``
+        (e.g. ``"depth"``, ``"outliers"``).  Default ``""`` reproduces
+        prior behavior exactly — no aspect clause is added (ASPECT-06).
 
     Returns
     -------
@@ -89,6 +154,12 @@ def _system_prompt(task: str, aspect: str = "") -> str:
         "- Variance explained: cumulative proportion of total functional variation "
         "captured by the leading FPCA components.\n"
     )
+
+    # -- Per-aspect primer clause (Phase 21, ASPECT-06) ---------------------
+    # Appended after FDA primer, before task clause.  aspect="" returns ""
+    # from .get so this block is a no-op for default callers.
+    aspect_primer = _ASPECT_PRIMERS.get(aspect.lower(), "")
+    base = base + aspect_primer
 
     # -- Task-family clause -------------------------------------------------
     _supported_tasks = {"interpretation", "parameter", "method"}
