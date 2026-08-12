@@ -85,3 +85,27 @@ jobs:
         run: |
           source .venv/bin/activate
           pytest tests/ -v
+
+  smoke-bare-venv:
+    name: Bare-venv smoke (no provider extras)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Create virtualenv and install base deps only
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install maturin numpy pandas
+      - name: Build and install base package (no extras)
+        run: |
+          source .venv/bin/activate
+          maturin develop --release
+      - name: Run bare-venv smoke test
+        run: |
+          source .venv/bin/activate
+          python scripts/bare_venv_smoke.py
