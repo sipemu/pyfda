@@ -9,20 +9,20 @@ Requirements for this milestone (v3.0). Each maps to roadmap phases.
 
 ### Provider Abstraction (PROV)
 
-- [ ] **PROV-01**: A `Provider` protocol defines a uniform structured-completion interface (`complete_structured(schema, messages, system)`, `name`, `model`, `supports_native_structured_output`) that all backends implement.
-- [ ] **PROV-02**: The existing Anthropic path is refactored into an `AnthropicProvider` adapter behind the protocol with no change to `advise()`'s public behavior or outputs (existing advisor tests stay green).
+- [x] **PROV-01**: A `Provider` protocol defines a uniform structured-completion interface (`complete_structured(schema, messages, system)`, `name`, `model`, `supports_native_structured_output`) that all backends implement.
+- [x] **PROV-02**: The existing Anthropic path is refactored into an `AnthropicProvider` adapter behind the protocol with no change to `advise()`'s public behavior or outputs (existing advisor tests stay green).
 - [ ] **PROV-03**: An `OpenAIProvider` adapter supports OpenAI and any OpenAI-compatible endpoint via a configurable `base_url` (vLLM / LM Studio / LocalAI).
 - [ ] **PROV-04**: An `OllamaProvider` adapter runs fully local with no API key.
 - [ ] **PROV-05**: A `GeminiProvider` adapter supports Google Gemini (with the required Pydantic→Gemini schema translation).
-- [ ] **PROV-06**: The user selects provider and model via explicit `advise(provider=…, model=…)` parameters and/or environment variables (`FDARS_ADVISOR_PROVIDER` / `_MODEL` / `_BASE_URL` + per-provider API keys), with documented precedence.
+- [x] **PROV-06**: The user selects provider and model via explicit `advise(provider=…, model=…)` parameters and/or environment variables (`FDARS_ADVISOR_PROVIDER` / `_MODEL` / `_BASE_URL` + per-provider API keys), with documented precedence.
 - [ ] **PROV-07**: Each provider ships as an optional extra (`[openai]`, `[gemini]`, `[ollama]` alongside existing `[advisor]`); the base package imports and the offline core runs without any provider installed (a missing extra raises an actionable ImportError).
 
 ### Grounding Across Providers (GROUND)
 
-- [ ] **GROUND-01**: Providers with native structured output / tool-use (Anthropic, OpenAI) return schema-validated `Advice` via the native path.
-- [ ] **GROUND-02**: Providers/models without reliable native structured output use a validate-and-retry/repair path (Pydantic validation, ≤2 retries with the full diagnostics re-included) and fail deterministically after the cap — no silent fabrication.
-- [ ] **GROUND-03**: A centralized grounding check (`_check_grounding`) enforces, on every provider, that recommendations cite computed diagnostic values and that the LLM introduces no numbers absent from the diagnostics.
-- [ ] **GROUND-04**: Provider refusals or empty responses raise a clear error rather than yielding a vacuously-valid `Advice`.
+- [x] **GROUND-01**: Providers with native structured output / tool-use (Anthropic, OpenAI) return schema-validated `Advice` via the native path.
+- [x] **GROUND-02**: Providers/models without reliable native structured output use a validate-and-retry/repair path (Pydantic validation, ≤2 retries with the full diagnostics re-included) and fail deterministically after the cap — no silent fabrication.
+- [x] **GROUND-03**: A centralized grounding check (`_check_grounding`) enforces, on every provider, that recommendations cite computed diagnostic values and that the LLM introduces no numbers absent from the diagnostics.
+- [x] **GROUND-04**: Provider refusals or empty responses raise a clear error rather than yielding a vacuously-valid `Advice`.
 
 ### Per-Aspect Advisor Coverage (ASPECT)
 
@@ -84,13 +84,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROV-01 | Phase 19 | Pending |
-| PROV-02 | Phase 19 | Pending |
-| PROV-06 | Phase 19 | Pending |
-| GROUND-01 | Phase 19 | Pending |
-| GROUND-02 | Phase 19 | Pending |
-| GROUND-03 | Phase 19 | Pending |
-| GROUND-04 | Phase 19 | Pending |
+| PROV-01 | Phase 19 | Complete |
+| PROV-02 | Phase 19 | Complete |
+| PROV-06 | Phase 19 | Complete |
+| GROUND-01 | Phase 19 | Complete |
+| GROUND-02 | Phase 19 | Complete |
+| GROUND-03 | Phase 19 | Complete |
+| GROUND-04 | Phase 19 | Complete |
 | PROV-03 | Phase 20 | Pending |
 | PROV-04 | Phase 20 | Pending |
 | PROV-05 | Phase 20 | Pending |
