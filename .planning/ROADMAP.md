@@ -171,7 +171,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 
 **Plans**: 3 plans
 
-- [ ] 24-01-PLAN.md — Provider setup guide `docs/advisor/providers.md` (four backends, selection/precedence, extras; illustrative-only fences) [DOCS-01]
+- [x] 24-01-PLAN.md — Provider setup guide `docs/advisor/providers.md` (four backends, selection/precedence, extras; illustrative-only fences) [DOCS-01]
 - [ ] 24-02-PLAN.md — Per-aspect page `docs/advisor/aspects.md` (12 aspects, builder-derived diagnostics keys + 3 task families + executed offline depth/fpca fences) [DOCS-02]
 - [ ] 24-03-PLAN.md — index.md + python-api.md provider-agnostic/full-coverage updates, nav wiring, strict offline build gate [DOCS-03]
 
