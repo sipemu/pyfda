@@ -13,7 +13,7 @@ Requirements for this milestone (v3.0). Each maps to roadmap phases.
 - [x] **PROV-02**: The existing Anthropic path is refactored into an `AnthropicProvider` adapter behind the protocol with no change to `advise()`'s public behavior or outputs (existing advisor tests stay green).
 - [x] **PROV-03**: An `OpenAIProvider` adapter supports OpenAI and any OpenAI-compatible endpoint via a configurable `base_url` (vLLM / LM Studio / LocalAI).
 - [x] **PROV-04**: An `OllamaProvider` adapter runs fully local with no API key.
-- [ ] **PROV-05**: A `GeminiProvider` adapter supports Google Gemini (with the required Pydantic→Gemini schema translation).
+- [x] **PROV-05**: A `GeminiProvider` adapter supports Google Gemini (with the required Pydantic→Gemini schema translation).
 - [x] **PROV-06**: The user selects provider and model via explicit `advise(provider=…, model=…)` parameters and/or environment variables (`FDARS_ADVISOR_PROVIDER` / `_MODEL` / `_BASE_URL` + per-provider API keys), with documented precedence.
 - [x] **PROV-07**: Each provider ships as an optional extra (`[openai]`, `[gemini]`, `[ollama]` alongside existing `[advisor]`); the base package imports and the offline core runs without any provider installed (a missing extra raises an actionable ImportError).
 
@@ -93,7 +93,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GROUND-04 | Phase 19 | Complete |
 | PROV-03 | Phase 20 | Complete |
 | PROV-04 | Phase 20 | Complete |
-| PROV-05 | Phase 20 | Pending |
+| PROV-05 | Phase 20 | Complete |
 | PROV-07 | Phase 20 | Complete |
 | ASPECT-01 | Phase 21 | Pending |
 | ASPECT-02 | Phase 21 | Pending |

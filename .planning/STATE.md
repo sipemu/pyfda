@@ -5,15 +5,15 @@ milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
 current_phase: 20
 current_phase_name: Additional Provider Adapters
 status: planning
-stopped_at: Completed 20-02-PLAN.md (Ollama adapter)
-last_updated: "2026-08-12T07:20:17.914Z"
+stopped_at: Completed 20-03-PLAN.md
+last_updated: "2026-08-12T07:28:37.181Z"
 last_activity: 2026-08-12
 last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-08-12 — Phase 19 complete, transitioned to Phase 20
 
-Progress: [████████░░] 83%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [████████░░] 83%
 | Phase 19 P03 | 8 | 3 tasks | 1 files |
 | Phase 20-additional-provider-adapters P01 | 35 | 3 tasks | 6 files |
 | Phase 20-additional-provider-adapters P02 | 3 | 2 tasks | 4 files |
+| Phase 20 P03 | 6 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,8 @@ Recent decisions affecting current work:
 - [Phase ?]: gemini/ollama factory branches wrap ImportError as ValueError to keep Phase 19 test_unknown_provider_raises green until plans 02/03 land
 - [Phase ?]: OllamaProvider.supports_native_structured_output=False routes through ValidateAndRetry._fallback_with_retry
 - [Phase ?]: Factory shim removal: ollama branch raises actionable ImportError not ValueError once ollama.py exists
+- [Phase ?]: Client cached on self._client in GeminiProvider.__init__; simpler sync approach
+- [Phase ?]: gemini factory shim removed; ImportError from _require_gemini() surfaces directly naming pip install fdars[gemini]
 
 ### Pending Todos
 
@@ -110,8 +113,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-12T07:20:17.905Z
-Stopped at: Completed 20-02-PLAN.md (Ollama adapter)
+Last session: 2026-08-12T07:28:37.172Z
+Stopped at: Completed 20-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
