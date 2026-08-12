@@ -44,8 +44,8 @@ Requirements for this milestone (v3.0). Each maps to roadmap phases.
 
 - [ ] **QUAL-01**: Two-layer offline tests — per-aspect diagnostics fixtures × per-provider adapter fixtures (recorded responses / mocks) — cover the aspect × provider contract without network.
 - [ ] **QUAL-02**: Env-gated live integration tests, one per provider, skip cleanly without keys / a local server.
-- [ ] **QUAL-03**: CI matrix covers Python 3.9–3.14 with correct extra/version gating (`openai<2.0` on 3.9; `[gemini]`/`[mcp]` 3.10+); a bare-venv smoke test proves the core imports with no provider extra installed.
-- [ ] **QUAL-04**: All offline tests (core + aspect + adapter) run network-free and deterministically.
+- [x] **QUAL-03**: CI matrix covers Python 3.9–3.14 with correct extra/version gating (`openai<2.0` on 3.9; `[gemini]`/`[mcp]` 3.10+); a bare-venv smoke test proves the core imports with no provider extra installed.
+- [x] **QUAL-04**: All offline tests (core + aspect + adapter) run network-free and deterministically.
 
 ### Documentation (DOCS)
 
@@ -107,8 +107,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SURF-03 | Phase 22 | Complete |
 | QUAL-01 | Phase 23 | Pending |
 | QUAL-02 | Phase 23 | Pending |
-| QUAL-03 | Phase 23 | Pending |
-| QUAL-04 | Phase 23 | Pending |
+| QUAL-03 | Phase 23 | Complete |
+| QUAL-04 | Phase 23 | Complete |
 | DOCS-01 | Phase 24 | Pending |
 | DOCS-02 | Phase 24 | Pending |
 | DOCS-03 | Phase 24 | Pending |

@@ -5,15 +5,15 @@ milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
 current_phase: 23
 current_phase_name: Packaging & CI
 status: planning
-stopped_at: Completed 22-02-PLAN.md
-last_updated: "2026-08-12T13:17:21.156Z"
+stopped_at: Completed 23-01-PLAN.md
+last_updated: "2026-08-12T13:31:11.906Z"
 last_activity: 2026-08-12
 last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 4
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 16
+  completed_plans: 15
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-08-12 — Phase 22 complete, transitioned to Phase 23
 
-Progress: [██████████] 100%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Progress: [██████████] 100%
 | Phase 22-surface-integration P01 | 15 | 3 tasks | 3 files |
 | Phase 22 P03 | 128 | 2 tasks | 2 files |
 | Phase 22 P02 | 243 | 3 tasks | 2 files |
+| Phase 23-packaging-ci P01 | 139 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,8 @@ Recent decisions affecting current work:
 - [Phase ?]: SKILL.md install note corrected: provider extras ([openai]/[ollama]/[gemini]) publish with fdars 3.0, not current PyPI; git-URL install documented
 - [Phase ?]: _DIAGNOSTICS_METHODS (12) guards fdars_build_diagnostics; _RUNNABLE_METHODS (6) guards run_method — clear split enforced at tool boundary
 - [Phase ?]: Guard/advisor sync locked by test_diagnostics_methods_match_advisor_supported (parses advisor error message, asserts set equality)
+- [Phase ?]: Version-gated CI extras via two if: steps (3.9 vs !=3.9); gemini+mcp excluded on 3.9 since both require Python 3.10+
+- [Phase ?]: smoke-bare-venv CI job uses Python 3.12 (single version, mid-matrix); no extras installed to prove base-package self-sufficiency
 
 ### Pending Todos
 
@@ -142,8 +145,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-12T13:12:29.990Z
-Stopped at: Completed 22-02-PLAN.md
+Last session: 2026-08-12T13:31:11.896Z
+Stopped at: Completed 23-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
