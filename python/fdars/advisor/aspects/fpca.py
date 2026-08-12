@@ -1,12 +1,17 @@
 """fdars.advisor.aspects.fpca — FPCA diagnostics builder.
 
 Contains ``_build_fpca_diagnostics``, moved verbatim from
-``advisor/__init__.py``.  Logic is unchanged; this is a pure file move.
+``advisor/__init__.py``.  Logic is unchanged except that the
+``cumulative_variance_explained`` computation now delegates to the shared
+``_eigenvalues_to_variance_cumulative`` helper in ``_utils.py`` to avoid
+duplicating the pattern across fpca and spm.
 """
 
 from __future__ import annotations
 
 import numpy as np
+
+from fdars.advisor.aspects._utils import _eigenvalues_to_variance_cumulative
 
 
 def _build_fpca_diagnostics(raw: dict) -> dict:
@@ -41,7 +46,8 @@ def _build_fpca_diagnostics(raw: dict) -> dict:
         else:
             evr = np.zeros_like(eigenvalues)
 
-        cum_list = [float(v) for v in np.cumsum(evr)]
+        # Delegate cumulative variance to the shared helper (reused by spm.py).
+        cum_list = _eigenvalues_to_variance_cumulative(eigenvalues)
 
         diag["n_components"] = n_comp
         diag["n_obs"] = n_obs

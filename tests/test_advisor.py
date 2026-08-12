@@ -246,6 +246,89 @@ class TestBuildDiagnosticsOffline:
         with pytest.raises(ImportError, match="pip install fdars\\[advisor\\]"):
             advise(diag, task="interpretation", domain_context="test")
 
+    # ------------------------------------------------------------------
+    # Task 1 (Wave 3): _utils shared helper + fpca refactor regression guard
+    # ------------------------------------------------------------------
+
+    def test_utils_eigenvalues_variance(self):
+        """_eigenvalues_to_variance_cumulative returns a list of native floats,
+        monotonically non-decreasing, last≈1.0; zero-sum input returns [0.0]*n.
+        RED gate for _utils.py (Task 1 of plan 21-03).
+        """
+        from fdars.advisor.aspects._utils import _eigenvalues_to_variance_cumulative
+
+        # Normal case
+        result = _eigenvalues_to_variance_cumulative(np.array([2.1, 0.8, 0.3]))
+        assert len(result) == 3
+        # All native floats (no numpy scalars)
+        for v in result:
+            assert isinstance(v, float), f"Expected float, got {type(v)!r}"
+        # Monotonically non-decreasing
+        for i in range(len(result) - 1):
+            assert result[i] <= result[i + 1], "Result not monotonically non-decreasing"
+        # Last value approximately 1.0
+        assert abs(result[-1] - 1.0) < 1e-9, f"Last value should be ~1.0, got {result[-1]}"
+
+        # Zero-sum case: no divide-by-zero, returns [0.0]*n
+        zero_result = _eigenvalues_to_variance_cumulative(np.array([0.0, 0.0, 0.0]))
+        assert zero_result == [0.0, 0.0, 0.0], f"Zero-sum case wrong: {zero_result}"
+        for v in zero_result:
+            assert isinstance(v, float), f"Zero case: expected float, got {type(v)!r}"
+
+        # Single element
+        single = _eigenvalues_to_variance_cumulative(np.array([5.0]))
+        assert abs(single[0] - 1.0) < 1e-9
+
+    def test_fpca_output_unchanged_after_refactor(self):
+        """fpca build_diagnostics output is byte-identical before and after the
+        _utils refactor.  The expected dict is derived from the pre-refactor
+        fpca.py logic, captured inline so the test is self-contained.
+        RED gate: passes once fpca.py uses _utils but produces same output.
+        """
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        # Fixed FPCA fixture — no RNG
+        sv = np.array([3.0, 1.5, 0.8])
+        n_obs = 10
+        scores = np.zeros((n_obs, 3))  # shape only; used for n_obs
+        fpca_fixture = {
+            "singular_values": sv,
+            "scores": scores,
+        }
+
+        # Compute expected dict inline from the original fpca.py logic
+        denom = max(n_obs - 1, 1)
+        eigenvalues = (sv ** 2) / denom
+        total_var = float(eigenvalues.sum())
+        evr = eigenvalues / total_var
+        cum_list = [float(v) for v in np.cumsum(evr)]
+        n_comp = 3
+        leading_var = float(evr[0])
+        remaining_var = float(evr[1:].sum())
+        phase_leakage_indicator = float(remaining_var)
+        expected = {
+            "method": "fpca",
+            "n_components": n_comp,
+            "n_obs": n_obs,
+            "eigenvalues": [float(v) for v in eigenvalues],
+            "explained_variance_ratio": [float(v) for v in evr],
+            "cumulative_variance_explained": cum_list,
+            "total_variance": total_var,
+            "phase_leakage_indicator": phase_leakage_indicator,
+            "phase_leakage_flagged": bool(phase_leakage_indicator > 0.5),
+        }
+
+        actual = build_diagnostics(fpca_fixture, method="fpca")
+        assert actual == expected, (
+            f"fpca output changed after refactor.\n"
+            f"Expected: {json.dumps(expected, sort_keys=True)}\n"
+            f"Actual:   {json.dumps(actual, sort_keys=True)}"
+        )
+        # Byte-identical JSON
+        assert json.dumps(actual, sort_keys=True) == json.dumps(expected, sort_keys=True)
+
 
 class TestPrompts:
     """Offline tests for _system_prompt aspect threading (ASPECT-06)."""
