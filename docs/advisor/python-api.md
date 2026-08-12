@@ -50,14 +50,17 @@ on the same input always return an equal dict.
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `result` | `dict` or result wrapper | — | Native fdars output dict, or a wrapper whose `.raw` attribute is the underlying dict |
-| `method` | `str` | — | The fdars method that produced `result`; one of `"alignment"`, `"fpca"`, `"basis"`, `"smoothing"`, `"clustering"` |
+| `method` | `str` | — | The fdars method that produced `result`; one of `"alignment"`, `"fpca"`, `"basis"`, `"smoothing"`, `"clustering"`, `"depth"`, `"outliers"`, `"classification"`, `"represent"`, `"regression"`, `"regression_cv"`, `"spm"` |
 | `argvals` | `array_like` | `None` | Shared evaluation grid, shape `(m,)`. Used for amplitude/phase distance computations |
+| `n_classes` | `int` | `None` | Ground-truth class count for the `"classification"` aspect; cannot be inferred from a result dict, so the caller supplies it. Ignored by all other methods |
 | `**kwargs` | | | Reserved for future per-method options |
 
 **Returns**
 
 A plain-Python `dict` with JSON-serialisable values (`float`, `list`, `str`,
-`bool`, `int`, `None`). No NumPy scalars. Keys depend on `method`:
+`bool`, `int`, `None`). No NumPy scalars. Keys depend on `method` — see
+[Per-Aspect Coverage](aspects.md) for the complete per-aspect key sets. A
+summary of the most commonly used aspects:
 
 - `"clustering"` — `k`, `cluster_means`, `cluster_sizes`,
   `pairwise_amplitude_distance`, `pairwise_phase_distance`,
@@ -69,6 +72,8 @@ A plain-Python `dict` with JSON-serialisable values (`float`, `list`, `str`,
   `cumulative_variance_explained`, `total_variance`, `phase_leakage_indicator`,
   `phase_leakage_flagged`
 - `"basis"` and `"smoothing"` — GCV curve, optimal value, and EDF keys
+- `"depth"`, `"outliers"`, `"classification"`, `"represent"`, `"regression"`,
+  `"regression_cv"`, `"spm"` — see [Per-Aspect Coverage](aspects.md) for details
 
 **Raises**
 
@@ -79,14 +84,19 @@ A plain-Python `dict` with JSON-serialisable values (`float`, `list`, `str`,
 ### `advise`
 
 ```
-advise(diagnostics, *, task, domain_context, model="claude-opus-4-8") -> Advice
+advise(diagnostics, *, task, domain_context, model="claude-opus-4-8",
+       provider=None, aspect="") -> Advice
 ```
 
-Return a schema-validated `Advice` object by passing `diagnostics` to Claude
-with a grounding-invariant system prompt.
+Return a schema-validated `Advice` object by routing `diagnostics` through
+a uniform Provider protocol to any of four LLM backends with a
+grounding-invariant system prompt. The three task families (`"interpretation"`,
+`"parameter"`, `"method"`) apply to every aspect. See [Provider Setup](providers.md)
+for backend selection, model names, and credential precedence.
 
-Requires the `[advisor]` extra (`pip install fdars[advisor]`). Raises
-`ImportError` if the `anthropic` package is not installed.
+Requires the `[advisor]` extra (`pip install fdars[advisor]`) when using the
+Anthropic backend (default). Raises `ImportError` if the required SDK is not
+installed.
 
 **Parameters**
 
@@ -95,7 +105,9 @@ Requires the `[advisor]` extra (`pip install fdars[advisor]`). Raises
 | `diagnostics` | `dict` | — | Output from `build_diagnostics` |
 | `task` | `str` | — | Task family: `"interpretation"`, `"parameter"`, or `"method"` |
 | `domain_context` | `str` | — | Free-text description of the problem domain, dataset, or analysis goal |
-| `model` | `str` | `"claude-opus-4-8"` | Claude model identifier |
+| `model` | `str` | `"claude-opus-4-8"` | Model identifier for the selected provider (e.g. `"claude-opus-4-8"`, `"gpt-4o"`, `"gemini-2.0-flash"`, `"llama3.2"`) |
+| `provider` | `str \| Provider \| None` | `None` | LLM backend. `None` → Anthropic (default, preserves pre-v3.0 behaviour). Pass `"anthropic"`, `"openai"`, `"gemini"`, or `"ollama"` to select a backend explicitly. See [Provider Setup](providers.md). |
+| `aspect` | `str` | `""` | Selects the per-aspect FDA primer clause injected into the system prompt (e.g. `"depth"`, `"outliers"`, `"spm"`). Default `""` uses no aspect clause — equivalent to pre-v3.0 behaviour. |
 
 **Returns**
 
@@ -184,10 +196,11 @@ For the full interpret → recommend → re-run → compare agentic loop, see
 
 ## Illustrative `advise()` call
 
-!!! warning "Requires `ANTHROPIC_API_KEY` — not run in the docs build"
+!!! warning "Requires a provider credential — not run in the docs build"
     The fence below is illustrative only. It requires `pip install fdars[advisor]`
-    and `ANTHROPIC_API_KEY` to be set. It is **not** an executed fence and does
-    not run during the docs build.
+    and a provider credential (e.g. `ANTHROPIC_API_KEY` for the default Anthropic
+    backend — see [Provider Setup](providers.md) for other backends). It is **not**
+    an executed fence and does not run during the docs build.
 
 ```python
 from docs_data import load_canadian_weather
