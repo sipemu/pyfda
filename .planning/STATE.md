@@ -5,15 +5,15 @@ milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
 current_phase: 24
 current_phase_name: Documentation
 status: planning
-stopped_at: Completed 24-01-PLAN.md (Provider Setup Guide)
-last_updated: "2026-08-12T13:55:58.968Z"
+stopped_at: Completed 24-03-PLAN.md (final plan of Phase 24 / v3.0 milestone)
+last_updated: "2026-08-12T14:15:24.863Z"
 last_activity: 2026-08-12
 last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 19
-  completed_plans: 17
+  completed_plans: 19
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-08-12 — Phase 23 complete, transitioned to Phase 24
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -79,6 +79,7 @@ Progress: [█████████░] 89%
 | Phase 23-packaging-ci P01 | 139 | 3 tasks | 2 files |
 | Phase 23 P02 | 2 | 2 tasks | 1 files |
 | Phase 24 P01 | 65 | 2 tasks | 1 files |
+| Phase 24 P03 | 752 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,8 @@ Recent decisions affecting current work:
 - [Phase ?]: smoke-bare-venv CI job uses Python 3.12 (single version, mid-matrix); no extras installed to prove base-package self-sufficiency
 - [Phase ?]: Evidence construction uses a generic helper that scans built diagnostics for the first numeric value to cite in grounding-safe evidence strings — robust across all 12 aspects
 - [Phase ?]: Used GEMINI_API_KEY (not GOOGLE_API_KEY) in providers.md — method-accurate against _factory.py _KEY_ENV table
+- [Phase ?]: index.md: listed all 12 aspects inline in build_diagnostics description for direct verify coverage
+- [Phase ?]: mkdocs.yml: Provider Setup before Per-Aspect Coverage, both after Python API and before MCP Server
 
 ### Pending Todos
 
@@ -150,8 +153,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-12T13:55:58.959Z
-Stopped at: Completed 24-01-PLAN.md (Provider Setup Guide)
+Last session: 2026-08-12T14:15:24.853Z
+Stopped at: Completed 24-03-PLAN.md (final plan of Phase 24 / v3.0 milestone)
 Resume file: None
 
 ## Operator Next Steps

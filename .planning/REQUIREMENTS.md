@@ -51,7 +51,7 @@ Requirements for this milestone (v3.0). Each maps to roadmap phases.
 
 - [x] **DOCS-01**: A provider setup guide covers all four backends (keys, `base_url`, local Ollama, selection/precedence).
 - [ ] **DOCS-02**: Per-aspect advisor pages document diagnostics + task families for each fdars aspect.
-- [ ] **DOCS-03**: The AI Advisor overview and Python API pages are updated to reflect provider-agnostic operation and full-library coverage; the docs build stays offline (`mkdocs build --strict`).
+- [x] **DOCS-03**: The AI Advisor overview and Python API pages are updated to reflect provider-agnostic operation and full-library coverage; the docs build stays offline (`mkdocs build --strict`).
 
 ## v2 Requirements
 
@@ -111,4 +111,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QUAL-04 | Phase 23 | Complete |
 | DOCS-01 | Phase 24 | Complete |
 | DOCS-02 | Phase 24 | Pending |
-| DOCS-03 | Phase 24 | Pending |
+| DOCS-03 | Phase 24 | Complete |
