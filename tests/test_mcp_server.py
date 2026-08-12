@@ -1,4 +1,4 @@
-"""Tests for the fdars MCP server surface (Plans 12-01, 12-02, 12-03, 22-01).
+"""Tests for the fdars MCP server surface (Plans 12-01, 12-02, 12-03, 22-01, 22-02).
 
 Requires: fdars[mcp] (mcp>=2.0.0, Python >=3.10) and pytest-asyncio.
 
@@ -21,6 +21,12 @@ Plan 12-03 (compare loop — TOOL-03):
 Plan 22-01 (depth runnable + LLM-free invariant lock — SURF-01/02):
   - test_mcp_does_not_import_advise
   - test_run_method_depth
+
+Plan 22-02 (diagnostics-only aspect expansion — SURF-01):
+  - test_diagnostics_methods_match_advisor_supported
+  - test_build_diagnostics_represent
+  - test_build_diagnostics_classification_with_n_classes
+  - test_run_method_rejects_diagnostics_only
 """
 
 from __future__ import annotations
@@ -486,6 +492,77 @@ def test_mcp_does_not_import_advise():
     assert not violations, (
         f"MCP files reference '{_token}' (LLM-free invariant violation — "
         f"SURF-02): {violations}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Plan 22-02 TESTS (SURF-01: diagnostics-only aspect expansion)
+# ---------------------------------------------------------------------------
+
+
+def test_diagnostics_methods_match_advisor_supported():
+    """T-12-02 drift lock: _DIAGNOSTICS_METHODS stays in sync with advisor._supported.
+
+    Reconstructs the advisor's canonical supported-method set by provoking a
+    ValueError with a method name that is guaranteed to be absent, then
+    checking that each member of _DIAGNOSTICS_METHODS appears in the error
+    message.  The advisor's error text embeds the full sorted supported list
+    (verified manually: 'Supported: [...]').
+
+    This test requires no asyncio and no network.  It fails immediately if:
+    - A new aspect is added to advisor.build_diagnostics but not mirrored in
+      _DIAGNOSTICS_METHODS (stale MCP guard — T-22-07 drift scenario A), OR
+    - A method is listed in _DIAGNOSTICS_METHODS that the advisor no longer
+      supports (phantom entry — T-22-07 drift scenario B).
+    """
+    import pytest  # noqa: PLC0415 (re-import is fine in nested scope)
+    from fdars.mcp.server import _DIAGNOSTICS_METHODS  # noqa: PLC0415
+    from fdars.advisor import build_diagnostics  # noqa: PLC0415
+
+    # Step 1: provoke the ValueError using a sentinel name that is definitely
+    # not a valid advisor method.
+    _sentinel = "__gsd_22_02_sentinel__"
+    try:
+        build_diagnostics({}, _sentinel)
+    except ValueError as exc:
+        advisor_error_msg = str(exc)
+    else:
+        pytest.fail(
+            f"build_diagnostics did not raise ValueError for sentinel {_sentinel!r}"
+        )
+
+    # The error message format is:
+    #   "build_diagnostics: unsupported method '...'. Supported: ['alignment', ...]."
+    # Verify it contains the Supported: prefix so our substring check is meaningful.
+    assert "Supported:" in advisor_error_msg, (
+        f"Unexpected advisor error message format (no 'Supported:' prefix): "
+        f"{advisor_error_msg!r}"
+    )
+
+    # Step 2: check each _DIAGNOSTICS_METHODS entry appears in the error text.
+    # This catches both drift scenarios:
+    #   A) entry in _DIAGNOSTICS_METHODS not in advisor's supported set (phantom)
+    #   B) new advisor aspect not yet in _DIAGNOSTICS_METHODS (stale guard)
+    missing_from_advisor = [
+        m for m in _DIAGNOSTICS_METHODS if f"'{m}'" not in advisor_error_msg
+    ]
+    assert not missing_from_advisor, (
+        f"_DIAGNOSTICS_METHODS entries not found in advisor._supported error message "
+        f"(T-22-07 drift — update _DIAGNOSTICS_METHODS to match advisor): "
+        f"{missing_from_advisor}\n"
+        f"Advisor error message: {advisor_error_msg!r}"
+    )
+
+    # Step 3: assert cardinality matches (catches advisor additions not yet in guard).
+    # Parse the sorted list from the error message.
+    import ast  # noqa: PLC0415
+    list_start = advisor_error_msg.index("[")
+    list_end = advisor_error_msg.rindex("]") + 1
+    advisor_supported = set(ast.literal_eval(advisor_error_msg[list_start:list_end]))
+    assert _DIAGNOSTICS_METHODS == advisor_supported, (
+        f"_DIAGNOSTICS_METHODS != advisor._supported (T-22-07 drift).\n"
+        f"  In _DIAGNOSTICS_METHODS only: {_DIAGNOSTICS_METHODS - advisor_supported}\n"
+        f"  In advisor._supported only:   {advisor_supported - _DIAGNOSTICS_METHODS}"
     )
 
 
