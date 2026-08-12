@@ -15,7 +15,7 @@ Usage (in-process test)::
         tools = await client.list_tools()
         result = await client.call_tool("fdars_build_diagnostics", {...})
 
-Tools exposed (Plans 12-01/02/03 + 22-01):
+Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02):
 
 - ``fdars_build_diagnostics`` — deterministic offline diagnostics (TOOL-01/02)
 - ``fdars_run_method`` — run any of six fdars methods; returns result handle (TOOL-01)
@@ -54,6 +54,32 @@ _RUNNABLE_METHODS = frozenset(
 # _runner._RUNNABLE_METHODS directly).
 _SUPPORTED_METHODS = _RUNNABLE_METHODS
 
+# All methods that fdars_build_diagnostics can accept — mirrors
+# advisor.build_diagnostics._supported (T-22-05 / T-22-07 drift lock).
+# Superset of _RUNNABLE_METHODS: adds the six diagnostics-only aspects
+# (outliers, classification, represent, regression, regression_cv, spm) whose
+# fdars bindings need caller-supplied inputs (reference sample, labels, y,
+# etc.) that the MCP dataset model cannot provide at run_method time.
+_DIAGNOSTICS_METHODS = frozenset(
+    {
+        # Runnable aspects (also in _RUNNABLE_METHODS)
+        "alignment",
+        "fpca",
+        "basis",
+        "smoothing",
+        "clustering",
+        "depth",
+        # Diagnostics-only aspects — reachable via fdars_build_diagnostics
+        # over a caller-supplied result dict; NOT dispatchable by run_method.
+        "outliers",
+        "classification",
+        "represent",
+        "regression",
+        "regression_cv",
+        "spm",
+    }
+)
+
 # ---------------------------------------------------------------------------
 # Tool: fdars_build_diagnostics
 # ---------------------------------------------------------------------------
@@ -65,6 +91,7 @@ def fdars_build_diagnostics(
     method: str,
     result_id: str | None = None,
     with_argvals: bool = True,
+    n_classes: int | None = None,
 ) -> dict:
     """Build offline diagnostics for an fdars result.
 
@@ -80,16 +107,22 @@ def fdars_build_diagnostics(
         Handle to the dataset stored in the registry (data + argvals arrays).
         Obtain via ``registry.store_dataset(data, argvals)``.
     method : str
-        One of ``'alignment'``, ``'fpca'``, ``'basis'``, ``'smoothing'``,
-        ``'clustering'``, ``'depth'``.  Passed directly to
-        ``build_diagnostics``.
+        One of the twelve supported aspects (``_DIAGNOSTICS_METHODS``):
+        ``'alignment'``, ``'fpca'``, ``'basis'``, ``'smoothing'``,
+        ``'clustering'``, ``'depth'``, ``'outliers'``, ``'classification'``,
+        ``'represent'``, ``'regression'``, ``'regression_cv'``, ``'spm'``.
+        Passed directly to ``build_diagnostics``.
     result_id : str, optional
         Handle to a stored result dict (e.g. from a prior ``fdars_run_method``
-        call).  If ``None``, ``build_diagnostics`` is called with the raw
-        dataset data matrix as ``result``.
+        call).  If ``None``, ``build_diagnostics`` is called with a fallback
+        result assembled from the dataset.
     with_argvals : bool, optional
         When ``True`` (default), pass the dataset's ``argvals`` array to
         ``build_diagnostics`` for distance metrics.
+    n_classes : int, optional
+        Ground-truth class count.  **Required for** ``method="classification"``
+        (cannot be inferred from the result dict).  Ignored by all other
+        methods.  Passed directly to ``build_diagnostics(..., n_classes=K)``.
 
     Returns
     -------
@@ -101,16 +134,17 @@ def fdars_build_diagnostics(
     Raises
     ------
     ValueError
-        If ``method`` is not in the supported set.
+        If ``method`` is not in the supported set (``_DIAGNOSTICS_METHODS``).
     KeyError
         If ``dataset_id`` or ``result_id`` is not found in the registry.
     """
-    # V5 input validation — validate method before any fdars call (T-12-02)
+    # V5 input validation — validate method before any fdars call (T-22-05)
+    # Uses _DIAGNOSTICS_METHODS (12), NOT _RUNNABLE_METHODS (6).
     method_lc = method.lower()
-    if method_lc not in _RUNNABLE_METHODS:
+    if method_lc not in _DIAGNOSTICS_METHODS:
         raise ValueError(
             f"fdars_build_diagnostics: unsupported method {method!r}. "
-            f"Supported: {sorted(_RUNNABLE_METHODS)!r}."
+            f"Supported: {sorted(_DIAGNOSTICS_METHODS)!r}."
         )
 
     from fdars.mcp._registry import registry
@@ -119,12 +153,16 @@ def fdars_build_diagnostics(
     # Resolve dataset handle (T-12-01: unknown id raises KeyError, fail closed)
     data, argvals = registry.get_dataset(dataset_id)
 
-    # Resolve result handle (or use data matrix directly)
+    # Resolve result handle (or build a fallback from dataset arrays).
     if result_id is not None:
         result = registry.get_result(result_id)
+    elif method_lc == "represent":
+        # Represent builder reads raw.get("argvals") to compute grid statistics
+        # (Pitfall 4 / argvals-injection fix).  Inject argvals into the fallback
+        # dict so _build_represent_diagnostics finds the evaluation grid.
+        result = {"data": data, "argvals": argvals}
     else:
-        # When no result_id is given, use the raw data matrix as the result
-        # so build_diagnostics can extract what it needs (e.g. for smoothing).
+        # For all other methods, the raw data matrix is sufficient.
         result = {"data": data}
 
     # Depth unwrap (Pitfall 2 / T-22-04): the depth runner returns a dict
@@ -140,6 +178,11 @@ def fdars_build_diagnostics(
     if with_argvals:
         kwargs["argvals"] = argvals
     kwargs.update(depth_kwargs)
+
+    # Forward n_classes for the classification aspect (cannot be inferred from
+    # the result dict; forwarded as a scalar int — no array-injection risk T-22-06).
+    if n_classes is not None:
+        kwargs["n_classes"] = n_classes
 
     diagnostics = build_diagnostics(result, method_lc, **kwargs)
 
