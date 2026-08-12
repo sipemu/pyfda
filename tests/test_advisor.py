@@ -714,6 +714,275 @@ class TestRepresent:
         )
 
 
+class TestRegression:
+    """Offline determinism tests for regression + regression_cv aspects (ASPECT-04).
+
+    RED gate: these tests fail until regression.py and regression_cv.py are
+    created and wired into the dispatcher.
+    """
+
+    # ------------------------------------------------------------------
+    # Shared helper: recursive numpy-scalar leak checker
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _check_no_numpy(obj):
+        """Recursive walker: fail if any value is a numpy scalar (np.generic)."""
+        assert not isinstance(obj, np.generic), (
+            f"numpy scalar leaked into output: {type(obj)!r} = {obj!r}"
+        )
+        if isinstance(obj, dict):
+            for v in obj.values():
+                TestRegression._check_no_numpy(v)
+        elif isinstance(obj, list):
+            for v in obj:
+                TestRegression._check_no_numpy(v)
+
+    # ------------------------------------------------------------------
+    # Task 1: regression builder tests (corrections #3/#4/#5)
+    # ------------------------------------------------------------------
+
+    def test_regression_fregre_lm_basic(self):
+        """fregre_lm fixture: r_squared present, has_fosr=False, residual stats OK (ASPECT-04)."""
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        lm_result = {
+            "fitted_values": np.array([1.1, 2.0, 3.2, 0.9, 2.5]),
+            "residuals": np.array([0.1, -0.2, 0.3, -0.1, 0.2]),
+            "beta_t": np.linspace(-0.5, 0.5, 30),
+            "r_squared": 0.82,
+            "coefficients": np.array([0.3, -0.1, 0.05]),
+            "intercept": 0.15,
+        }
+        d = build_diagnostics(lm_result, method="regression")
+        assert d["method"] == "regression"
+        assert abs(d["r_squared"] - 0.82) < 1e-9, "r_squared must be 0.82"
+        assert d["has_fosr"] is False, "fregre_lm must not be flagged as fosr"
+        assert d["residual_mean"] is not None, "residual_mean must be present for 1-D residuals"
+        assert d["residual_skew"] is not None, "residual_skew must be present for 1-D residuals"
+        assert d["beta_t_range"] is not None, "beta_t_range must be present when beta_t key exists"
+        assert isinstance(d["beta_t_range"], list)
+        assert len(d["beta_t_range"]) == 2
+        # JSON-serialisable
+        json.dumps(d, sort_keys=True)
+
+    def test_regression_fregre_l1_no_r_squared(self):
+        """fregre_l1 fixture: no r_squared key -> r_squared=None, no KeyError (correction #3)."""
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        l1_result = {
+            "fitted_values": np.array([1.0, 2.1, 3.0, 1.0, 2.4]),
+            "residuals": np.array([0.2, -0.3, 0.5, -0.2, 0.3]),
+            "beta_t": np.linspace(-0.3, 0.3, 30),
+        }
+        d = build_diagnostics(l1_result, method="regression")
+        assert d["r_squared"] is None, "r_squared must be None when key absent (correction #3)"
+        assert d["residual_mean"] is not None, "residual_mean still present for 1-D residuals"
+        json.dumps(d, sort_keys=True)
+
+    def test_regression_fosr_2d_residuals(self):
+        """fosr fixture: 2-D residuals -> residual stats=None; has_fosr=True (correction #4/#5)."""
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        fosr_result = {
+            "fitted": np.ones((4, 6)),        # 2-D "fitted" key (not "fitted_values")
+            "residuals": np.zeros((4, 6)),    # 2-D residuals
+            "r_squared": 0.5,
+        }
+        d = build_diagnostics(fosr_result, method="regression")
+        assert d["has_fosr"] is True, "fosr with 2-D fitted must set has_fosr=True (correction #5)"
+        assert d["residual_mean"] is None, (
+            "residual_mean must be None when residuals are 2-D (correction #4)"
+        )
+        assert d["residual_skew"] is None, "residual_skew must be None for 2-D residuals"
+        json.dumps(d, sort_keys=True)
+
+    def test_regression_1d_fitted_not_fosr(self):
+        """A 1-D 'fitted' array must NOT set has_fosr=True (ndim==2 guard, correction #5)."""
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        not_fosr_result = {
+            "fitted": np.array([1.1, 2.0, 3.2, 0.9, 2.5]),  # 1-D, NOT 2-D
+            "residuals": np.array([0.1, -0.2, 0.3, -0.1, 0.2]),
+            "r_squared": 0.7,
+        }
+        d = build_diagnostics(not_fosr_result, method="regression")
+        assert d["has_fosr"] is False, (
+            "A 1-D fitted array must NOT be flagged as fosr — ndim==2 guard must reject it"
+        )
+        assert d["residual_mean"] is not None, (
+            "residual_mean must be present for 1-D residuals even with 1-D fitted key"
+        )
+        json.dumps(d, sort_keys=True)
+
+    def test_regression_deterministic(self):
+        """Two calls on fregre_lm fixture -> equal dicts + byte-identical JSON (ASPECT-04)."""
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        def check_no_numpy(obj):
+            assert not isinstance(obj, np.generic), (
+                f"numpy scalar leaked: {type(obj)!r} = {obj!r}"
+            )
+            if isinstance(obj, dict):
+                for v in obj.values():
+                    check_no_numpy(v)
+            elif isinstance(obj, list):
+                for v in obj:
+                    check_no_numpy(v)
+
+        # fregre_lm fixture (with r_squared)
+        lm_result = {
+            "fitted_values": np.array([1.1, 2.0, 3.2, 0.9, 2.5]),
+            "residuals": np.array([0.1, -0.2, 0.3, -0.1, 0.2]),
+            "beta_t": np.linspace(-0.5, 0.5, 30),
+            "r_squared": 0.82,
+            "coefficients": np.array([0.3, -0.1, 0.05]),
+            "intercept": 0.15,
+        }
+        d1 = build_diagnostics(lm_result, method="regression")
+        d2 = build_diagnostics(lm_result, method="regression")
+        assert d1 == d2, "Two calls on lm fixture produced different dicts"
+        s1 = json.dumps(d1, sort_keys=True)
+        s2 = json.dumps(d2, sort_keys=True)
+        assert s1 == s2, "json.dumps not byte-identical between regression lm calls"
+        check_no_numpy(d1)
+
+        # fregre_l1 fixture (no r_squared)
+        l1_result = {
+            "fitted_values": np.array([1.0, 2.1, 3.0, 1.0, 2.4]),
+            "residuals": np.array([0.2, -0.3, 0.5, -0.2, 0.3]),
+            "beta_t": np.linspace(-0.3, 0.3, 30),
+        }
+        l1_d1 = build_diagnostics(l1_result, method="regression")
+        l1_d2 = build_diagnostics(l1_result, method="regression")
+        assert l1_d1 == l1_d2, "Two calls on l1 fixture produced different dicts"
+        assert json.dumps(l1_d1, sort_keys=True) == json.dumps(l1_d2, sort_keys=True), (
+            "json.dumps not byte-identical between regression l1 calls"
+        )
+        check_no_numpy(l1_d1)
+        assert l1_d1["r_squared"] is None, "l1 fixture must have r_squared=None"
+
+    # ------------------------------------------------------------------
+    # Task 2: regression_cv builder tests (correction #7)
+    # ------------------------------------------------------------------
+
+    def test_regression_cv_fregre_cv_basic(self):
+        """fregre_cv fixture: optimal_k, min_cv_error, elbow_present, array->list (ASPECT-04)."""
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        cv_result = {
+            "optimal_k": 3,
+            "min_cv_error": 0.045,
+            "k_values": np.array([1, 2, 3, 4, 5]),
+            "cv_errors": np.array([0.12, 0.07, 0.045, 0.046, 0.048]),
+            "fold_errors": np.array([0.04, 0.05, 0.04, 0.05, 0.04]),
+        }
+        d = build_diagnostics(cv_result, method="regression_cv")
+        assert d["method"] == "regression_cv"
+        assert d["optimal_k"] == 3
+        assert abs(d["min_cv_error"] - 0.045) < 1e-9
+        assert d["k_values"] == [1, 2, 3, 4, 5], "k_values must be a list of native ints"
+        assert isinstance(d["k_values"][0], int), "k_values[0] must be native int, not numpy"
+        assert d["elbow_present"] is True, "CV curve has interior minimum at index 2"
+        # JSON-serialisable
+        json.dumps(d, sort_keys=True)
+
+    def test_regression_cv_model_selection_ncomp(self):
+        """model_selection_ncomp fixture: criteria tuples -> optimal_k, cv_curve (correction #7)."""
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        ms_result = {
+            "best_ncomp": 2,
+            "criteria": [
+                (1, 10.0, 11.0, 0.5),
+                (2, 9.0, 10.0, 0.3),
+                (3, 9.5, 10.5, 0.35),
+            ],
+        }
+        d = build_diagnostics(ms_result, method="regression_cv")
+        assert d["optimal_k"] == 2, "optimal_k must come from best_ncomp"
+        assert d["k_values"] == [1, 2, 3], "k_values from criteria tuple index 0"
+        assert abs(d["cv_curve"][1] - 0.3) < 1e-9, "cv_curve from GCV at tuple index 3"
+        json.dumps(d, sort_keys=True)
+
+    def test_regression_cv_deterministic(self):
+        """Two calls on fregre_cv fixture -> equal dicts + byte-identical JSON (ASPECT-04)."""
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        def check_no_numpy(obj):
+            assert not isinstance(obj, np.generic), (
+                f"numpy scalar leaked: {type(obj)!r} = {obj!r}"
+            )
+            if isinstance(obj, dict):
+                for v in obj.values():
+                    check_no_numpy(v)
+            elif isinstance(obj, list):
+                for v in obj:
+                    check_no_numpy(v)
+
+        cv_result = {
+            "optimal_k": 3,
+            "min_cv_error": 0.045,
+            "k_values": np.array([1, 2, 3, 4, 5]),
+            "cv_errors": np.array([0.12, 0.07, 0.045, 0.046, 0.048]),
+            "fold_errors": np.array([0.04, 0.05, 0.04, 0.05, 0.04]),
+        }
+        d1 = build_diagnostics(cv_result, method="regression_cv")
+        d2 = build_diagnostics(cv_result, method="regression_cv")
+        assert d1 == d2, "Two calls on fregre_cv fixture produced different dicts"
+        s1 = json.dumps(d1, sort_keys=True)
+        s2 = json.dumps(d2, sort_keys=True)
+        assert s1 == s2, "json.dumps not byte-identical between regression_cv calls"
+        check_no_numpy(d1)
+        assert d1["elbow_present"] is True, "elbow_present must be True for interior minimum"
+
+    # ------------------------------------------------------------------
+    # Task 3: prompt clause assertions (ASPECT-06)
+    # ------------------------------------------------------------------
+
+    def test_regression_prompt_clause(self):
+        """r_squared token appears in regression-aspect prompt (ASPECT-06)."""
+        from fdars.advisor._prompts import _system_prompt
+
+        regr_prompt = _system_prompt("interpretation", "regression")
+        assert "r_squared" in regr_prompt, (
+            "'r_squared' token missing from regression-aspect prompt"
+        )
+        base_prompt = _system_prompt("interpretation", "")
+        assert "r_squared" not in base_prompt, (
+            "'r_squared' unexpectedly appears in base (no-aspect) prompt"
+        )
+
+    def test_regression_cv_prompt_clause(self):
+        """optimal_k token appears in regression_cv-aspect prompt (ASPECT-06)."""
+        from fdars.advisor._prompts import _system_prompt
+
+        cv_prompt = _system_prompt("interpretation", "regression_cv")
+        assert "optimal_k" in cv_prompt, (
+            "'optimal_k' token missing from regression_cv-aspect prompt"
+        )
+        base_prompt = _system_prompt("interpretation", "")
+        assert "optimal_k" not in base_prompt, (
+            "'optimal_k' unexpectedly appears in base (no-aspect) prompt"
+        )
+
+
 class TestAdvisorIntegration:
     """LLM integration tests — skipped in CI without ANTHROPIC_API_KEY."""
 
