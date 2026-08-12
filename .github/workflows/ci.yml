@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -71,6 +71,16 @@ jobs:
         run: |
           source .venv/bin/activate
           maturin develop --release
+      - name: Install provider extras (Python 3.9 — no gemini/mcp)
+        if: matrix.python-version == '3.9'
+        run: |
+          source .venv/bin/activate
+          pip install -e ".[advisor,openai,ollama]"
+      - name: Install provider extras (Python 3.10+ — all-providers + mcp)
+        if: matrix.python-version != '3.9'
+        run: |
+          source .venv/bin/activate
+          pip install -e ".[all-providers,mcp]"
       - name: Run tests
         run: |
           source .venv/bin/activate
