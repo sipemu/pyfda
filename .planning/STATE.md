@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
-current_phase: 20
-current_phase_name: Additional Provider Adapters
+current_phase: 21
+current_phase_name: Per-Aspect Advisor Coverage
 status: planning
-stopped_at: Completed 20-03-PLAN.md
-last_updated: "2026-08-12T07:28:37.181Z"
+stopped_at: Completed 21-01-PLAN.md (depth tracer)
+last_updated: "2026-08-12T08:04:09.180Z"
 last_activity: 2026-08-12
 last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 11
+  completed_plans: 7
 ---
 
 # Project State
@@ -27,18 +27,18 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 
 ## Current Position
 
-Phase: 20 of 24 (Additional Provider Adapters)
+Phase: 21 of 24 (Per-Aspect Advisor Coverage)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-08-12 — Phase 19 complete, transitioned to Phase 20
+Last activity: 2026-08-12 — Phase 20 complete, transitioned to Phase 21
 
-Progress: [██████████] 100%
+Progress: [██████░░░░] 64%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3 (v1.0–v2.1)
+- Total plans completed: 6 (v1.0–v2.1)
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -47,6 +47,7 @@ Progress: [██████████] 100%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 19 | 3 | - | - |
+| 20 | 3 | - | - |
 
 **Recent Trend:**
 
@@ -64,6 +65,7 @@ Progress: [██████████] 100%
 | Phase 20-additional-provider-adapters P01 | 35 | 3 tasks | 6 files |
 | Phase 20-additional-provider-adapters P02 | 3 | 2 tasks | 4 files |
 | Phase 20 P03 | 6 | 3 tasks | 5 files |
+| Phase 21-per-aspect-advisor-coverage P01 | 5m | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -93,6 +95,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Factory shim removal: ollama branch raises actionable ImportError not ValueError once ollama.py exists
 - [Phase ?]: Client cached on self._client in GeminiProvider.__init__; simpler sync approach
 - [Phase ?]: gemini factory shim removed; ImportError from _require_gemini() surfaces directly naming pip install fdars[gemini]
+- [Phase ?]: depth branch accepts raw ndarray (not dict) — all fdars depth functions return PyArray1<f64>
+- [Phase ?]: _ASPECT_PRIMERS dict in _prompts.py; aspect='' preserves backward compat
+- [Phase ?]: Array-coercion guard uses __array__ + .data checks to protect ndarray and Fdata inputs
 
 ### Pending Todos
 
@@ -113,8 +118,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-12T07:28:37.172Z
-Stopped at: Completed 20-03-PLAN.md
+Last session: 2026-08-12T08:04:08.699Z
+Stopped at: Completed 21-01-PLAN.md (depth tracer)
 Resume file: None
 
 ## Operator Next Steps
