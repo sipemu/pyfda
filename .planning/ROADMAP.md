@@ -100,7 +100,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 
 **Plans**: 3 plans
 
-  - [ ] 20-01-PLAN.md — Tracer: OpenAI adapter end-to-end + phase-wide plumbing (extras, deferred guards, resolve_provider extension) [PROV-03, PROV-07]
+  - [x] 20-01-PLAN.md — Tracer: OpenAI adapter end-to-end + phase-wide plumbing (extras, deferred guards, resolve_provider extension) [PROV-03, PROV-07]
   - [ ] 20-02-PLAN.md — Ollama adapter (local, no key; validate-and-retry / `supports_native=False` path) [PROV-04]
   - [ ] 20-03-PLAN.md — Gemini adapter (`_gemini_schema` translation) + env-gated live integration tests [PROV-05]
 

@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
-current_phase: 19
-current_phase_name: first v3.0 phase
+current_phase: 20
+current_phase_name: Additional Provider Adapters
 status: planning
-stopped_at: Completed 19-03-PLAN.md
-last_updated: "2026-08-12T06:45:09.456Z"
+stopped_at: Completed 20-01-PLAN.md (OpenAI adapter + phase plumbing)
+last_updated: "2026-08-12T07:13:11.827Z"
 last_activity: 2026-08-12
 last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
 ---
 
 # Project State
@@ -27,18 +27,18 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 
 ## Current Position
 
-Phase: 19 of 24 (Provider Foundation & Grounding Contract) — first v3.0 phase
-Plan: — (not yet planned)
+Phase: 20 of 24 (Additional Provider Adapters)
+Plan: Not started
 Status: Ready to plan
-Last activity: 2026-08-12 — v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
+Last activity: 2026-08-12 — Phase 19 complete, transitioned to Phase 20
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 32 (v1.0–v2.1)
+- Total plans completed: 3 (v1.0–v2.1)
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -46,7 +46,7 @@ Progress: [██████████] 100%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 19 | - | - | - |
+| 19 | 3 | - | - |
 
 **Recent Trend:**
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100%
 | Phase 19 P01 | 46m | 3 tasks | 6 files |
 | Phase 19-provider-foundation-grounding-contract P02 | 424 | 3 tasks | 9 files |
 | Phase 19 P03 | 8 | 3 tasks | 1 files |
+| Phase 20-additional-provider-adapters P01 | 35 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Fake providers defined at module level in test_advisor_providers.py for isolation — not conftest.py
 - [Phase ?]: FakeFallbackProvider accepts response list for deterministic retry-sequence testing
 - [Phase ?]: resolve_provider precedence tested via local _patched_resolve closure to avoid lazy-import-chain monkeypatching
+- [Phase ?]: OpenAI pin >=1.40,<2.0: floor resolves STACK/PITFALLS version disagreement; <2.0 keeps Python 3.9 compatibility
+- [Phase ?]: OpenAI _openai_schema passes $defs/$ref as-is: OpenAI strict mode supports them since 2024-08
+- [Phase ?]: gemini/ollama factory branches wrap ImportError as ValueError to keep Phase 19 test_unknown_provider_raises green until plans 02/03 land
 
 ### Pending Todos
 
@@ -103,8 +107,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-12T06:45:09.449Z
-Stopped at: Completed 19-03-PLAN.md
+Last session: 2026-08-12T07:13:11.820Z
+Stopped at: Completed 20-01-PLAN.md (OpenAI adapter + phase plumbing)
 Resume file: None
 
 ## Operator Next Steps
