@@ -38,7 +38,7 @@ Requirements for this milestone (v3.0). Each maps to roadmap phases.
 
 - [x] **SURF-01**: The MCP tool surface exposes the new aspect diagnostics/methods while remaining LLM-free (compute-only; grounding invariant preserved).
 - [x] **SURF-02**: Provider selection is available through the Python API `advise()`; the MCP tools do not call `advise()`.
-- [ ] **SURF-03**: The Agent Skill documents provider selection (including local/offline) and the full per-aspect advisor coverage.
+- [x] **SURF-03**: The Agent Skill documents provider selection (including local/offline) and the full per-aspect advisor coverage.
 
 ### Testing, Packaging & CI (QUAL)
 
@@ -104,7 +104,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASPECT-07 | Phase 21 | Complete |
 | SURF-01 | Phase 22 | Complete |
 | SURF-02 | Phase 22 | Complete |
-| SURF-03 | Phase 22 | Pending |
+| SURF-03 | Phase 22 | Complete |
 | QUAL-01 | Phase 23 | Pending |
 | QUAL-02 | Phase 23 | Pending |
 | QUAL-03 | Phase 23 | Pending |

@@ -5,15 +5,15 @@ milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
 current_phase: 22
 current_phase_name: Surface Integration
 status: planning
-stopped_at: Completed 22-01-PLAN.md (depth runnable + LLM-free invariant lock)
-last_updated: "2026-08-12T13:01:07.595Z"
+stopped_at: Completed 22-03-PLAN.md
+last_updated: "2026-08-12T13:05:35.636Z"
 last_activity: 2026-08-12
 last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-08-12 — Phase 21 complete, transitioned to Phase 22
 
-Progress: [█████████░] 86%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [█████████░] 86%
 | Phase 21 P04 | 20m | 3 tasks | 4 files |
 | Phase 21-per-aspect-advisor-coverage P05 | 3 | 3 tasks | 3 files |
 | Phase 22-surface-integration P01 | 15 | 3 tasks | 3 files |
+| Phase 22 P03 | 128 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,9 @@ Recent decisions affecting current work:
 - [Phase ?]: arl0_t2 excluded from SPM builder: stochastic Monte Carlo breaks offline determinism guarantee (FUT-02)
 - [Phase ?]: fraiman_muniz_1d(data, data) self-depth for MCP: ref_data is a data matrix not argvals; hard-coded to avoid string injection
 - [Phase ?]: _RUNNABLE_METHODS frozenset as single source of truth across runner+server; _SUPPORTED_METHODS kept as backward-compat alias
+- [Phase ?]: Four surgical edits to SKILL.md only — no rewrite; all frontmatter keys and existing sections preserved
+- [Phase ?]: Provider selection documented in SKILL.md body only; MCP tools remain compute-only (advise() not called from any MCP handler)
+- [Phase ?]: SKILL.md install note corrected: provider extras ([openai]/[ollama]/[gemini]) publish with fdars 3.0, not current PyPI; git-URL install documented
 
 ### Pending Todos
 
@@ -134,8 +138,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-12T13:01:07.586Z
-Stopped at: Completed 22-01-PLAN.md (depth runnable + LLM-free invariant lock)
+Last session: 2026-08-12T13:05:35.628Z
+Stopped at: Completed 22-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
