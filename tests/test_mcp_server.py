@@ -1,4 +1,4 @@
-"""Tests for the fdars MCP server surface (Plans 12-01, 12-02, and 12-03).
+"""Tests for the fdars MCP server surface (Plans 12-01, 12-02, 12-03, 22-01).
 
 Requires: fdars[mcp] (mcp>=2.0.0, Python >=3.10) and pytest-asyncio.
 
@@ -17,6 +17,10 @@ Plan 12-03 (compare loop — TOOL-03):
   - test_compare_run_unit_allowlist
   - test_compare_run_smoothing
   - test_compare_run_delta_sign
+
+Plan 22-01 (depth runnable + LLM-free invariant lock — SURF-01/02):
+  - test_mcp_does_not_import_advise
+  - test_run_method_depth
 """
 
 from __future__ import annotations
@@ -447,4 +451,99 @@ async def test_compare_run_delta_sign(dataset_id):
         numeric_keys = [k for k, v in delta.items() if isinstance(v, (int, float))]
         assert len(numeric_keys) > 0, (
             f"No numeric keys in delta: {delta}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Plan 22-01 TESTS (SURF-01/02: depth runnable + LLM-free invariant lock)
+# ---------------------------------------------------------------------------
+
+
+def test_mcp_does_not_import_advise():
+    """SURF-02: no file under python/fdars/mcp/ references the advisor entrypoint.
+
+    File-scan invariant: the MCP layer must stay LLM-free — no tool handler
+    may call or import ``advise()``.  The search token is constructed at
+    runtime so this test file does not self-flag (the bare identifier would
+    appear in the source and trigger a false positive).
+
+    No pytestmark skip needed: this test only reads files via pathlib; it
+    never imports fdars.mcp.
+    """
+    import pathlib
+
+    # Build the search token at runtime to avoid this file self-flagging.
+    _token = "adv" + "ise"
+
+    mcp_dir = (
+        pathlib.Path(__file__).resolve().parents[1] / "python" / "fdars" / "mcp"
+    )
+    violations = [
+        str(py_file)
+        for py_file in mcp_dir.rglob("*.py")
+        if _token in py_file.read_text()
+    ]
+    assert not violations, (
+        f"MCP files reference '{_token}' (LLM-free invariant violation — "
+        f"SURF-02): {violations}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_run_method_depth(dataset_id):
+    """SURF-01: fdars_run_method dispatches 'depth'; result flows through fdars_build_diagnostics.
+
+    End-to-end tracer:
+    1. fdars_run_method('depth') returns a result_id (SURF-01).
+    2. registry.get_result(result_id) is a dict containing 'scores' (by-reference invariant).
+    3. fdars_build_diagnostics(result_id=..., method='depth') returns diagnostics
+       with method=='depth', n_obs (int), and depth_mean (float) (SURF-01).
+
+    Offline, compute-only.  No ANTHROPIC_API_KEY.  No network.
+    """
+    from mcp import Client
+    from fdars.mcp.server import mcp
+    from fdars.mcp._registry import registry
+
+    async with Client(mcp) as client:
+        # Step 1: run depth via the MCP tool
+        run_response = await client.call_tool(
+            "fdars_run_method",
+            {"dataset_id": dataset_id, "method": "depth"},
+        )
+        run_result = _unwrap_tool_result(run_response)
+        assert "result_id" in run_result, (
+            f"fdars_run_method('depth') did not return result_id: {run_result}"
+        )
+        result_id = run_result["result_id"]
+
+        # Step 2: confirm the stored result is the wrapper dict (by-reference invariant)
+        stored = registry.get_result(result_id)
+        assert isinstance(stored, dict), (
+            f"registry.get_result returned {type(stored)}, expected dict"
+        )
+        assert "scores" in stored, (
+            f"stored depth result missing 'scores' key: {list(stored.keys())}"
+        )
+
+        # Step 3: build diagnostics — server must unwrap 'scores' before delegating
+        diag_response = await client.call_tool(
+            "fdars_build_diagnostics",
+            {
+                "dataset_id": dataset_id,
+                "result_id": result_id,
+                "method": "depth",
+            },
+        )
+        diag = _unwrap_tool_result(diag_response)
+
+        assert diag.get("method") == "depth", (
+            f"Expected method='depth', got {diag.get('method')!r}"
+        )
+        assert isinstance(diag.get("n_obs"), int), (
+            f"Expected n_obs to be int, got {type(diag.get('n_obs'))}: {diag.get('n_obs')}"
+        )
+        assert isinstance(diag.get("depth_mean"), float), (
+            f"Expected depth_mean to be float, got {type(diag.get('depth_mean'))}: "
+            f"{diag.get('depth_mean')}"
         )
