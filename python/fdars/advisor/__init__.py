@@ -943,14 +943,17 @@ def advise(
     task: str,
     domain_context: str,
     model: str = "claude-opus-4-8",
+    provider: "str | object | None" = None,
 ) -> Advice:
     """Return schema-validated :class:`Advice` for the given diagnostics.
 
-    Calls the Claude API via ``client.messages.parse`` with adaptive thinking
-    and the grounding-invariant system prompt.  Returns the validated
-    :class:`Advice` object.
+    Routes through :func:`~fdars.advisor.providers.resolve_provider` to select
+    the LLM backend, calls ``complete_structured``, then runs a centralized
+    grounding check before returning.  The grounding check (GROUND-03) runs on
+    every provider path — it is NOT inside the provider adapter.
 
-    Requires the ``anthropic`` package (``pip install fdars[advisor]``).
+    Requires the ``anthropic`` package (``pip install fdars[advisor]``) when
+    ``provider`` is ``None`` or ``"anthropic"`` (the default).
 
     Parameters
     ----------
@@ -963,6 +966,10 @@ def advise(
         Helps the model ground its interpretation in the user's context.
     model : str, optional
         Claude model identifier.  Default ``"claude-opus-4-8"``.
+    provider : str or Provider or None, optional
+        LLM provider.  ``None`` (default) reproduces today's Anthropic behavior
+        exactly.  Pass a provider name (``"anthropic"``) or an existing
+        ``Provider`` instance to override.
 
     Returns
     -------
@@ -973,11 +980,19 @@ def advise(
     Raises
     ------
     ImportError
-        When the ``anthropic`` package is not installed.
+        When the ``anthropic`` package is not installed (and provider is None
+        or ``"anthropic"``).
+    GroundingViolationError
+        When the returned Advice cites a numeric value absent from diagnostics.
     """
-    anthropic = _require_anthropic()
     _require_pydantic()
-    client = anthropic.Anthropic()
+
+    # Lazy import: resolve_provider pulls in the providers layer only here,
+    # so import fdars never touches an LLM SDK.
+    from fdars.advisor.providers._factory import resolve_provider  # noqa: PLC0415
+    from fdars.advisor.providers._validate import _check_grounding  # noqa: PLC0415
+
+    p = resolve_provider(provider=provider, model=model)
 
     system = _system_prompt(task)
 
@@ -988,23 +1003,16 @@ def advise(
         + json.dumps(diagnostics, sort_keys=True, indent=2)
     )
 
-    response = client.messages.parse(
-        model=model,
-        max_tokens=16000,
-        thinking={"type": "adaptive"},
-        system=system,
-        output_format=Advice,
-        messages=[{"role": "user", "content": user_content}],
-    )
+    messages = [{"role": "user", "content": user_content}]
+    advice = p.complete_structured(Advice, messages, system)
 
-    parsed = response.parsed_output
-    if parsed is None:
-        raise ValueError(
-            "advise: the Anthropic API did not return a parseable Advice object. "
-            "The model may have responded with only a thinking block or a refusal. "
-            f"Raw response stop_reason: {response.stop_reason!r}"
-        )
-    return parsed
+    # GROUND-03: centralized grounding check — runs on every provider path,
+    # not inside the adapter.  Raises GroundingViolationError immediately;
+    # never triggers a repair retry (retrying on grounding failure rewards
+    # fabrication).
+    _check_grounding(advice, diagnostics)
+
+    return advice
 
 
 # ---------------------------------------------------------------------------
@@ -1018,6 +1026,7 @@ def describe_cluster_differences(
     domain_context: str = "",
     model: str = "claude-opus-4-8",
     run_llm: bool = True,
+    provider: "str | object | None" = None,
     **kwargs,
 ):
     """Interpret cluster differences from an fdars clustering result.
@@ -1069,6 +1078,9 @@ def describe_cluster_differences(
         :class:`Advice` object.  When ``False``, return the raw clustering
         diagnostics dict (the Stage 1 feature report) without any LLM or
         network call — fully offline and exercisable in CI without an API key.
+    provider : str or Provider or None, optional
+        LLM provider forwarded to :func:`advise`.  ``None`` (default) uses the
+        Anthropic default, reproducing today's behavior exactly.
     **kwargs
         Forwarded to :func:`build_diagnostics` (reserved for future
         per-method options).
@@ -1122,6 +1134,7 @@ def describe_cluster_differences(
         task="interpretation",
         domain_context=domain_context,
         model=model,
+        provider=provider,
     )
 
 
