@@ -60,7 +60,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 
 - [x] **Phase 19: Provider Foundation & Grounding Contract** - `Provider` protocol + Anthropic-adapter refactor + validate-and-retry + centralized `_check_grounding`; provider selection via params/env. Blocks all downstream work. (completed 2026-08-12)
 - [x] **Phase 20: Additional Provider Adapters** - OpenAI (+ `base_url`), Ollama (local, no key), Gemini adapters behind the protocol, each an optional extra. Parallel-eligible with Phase 21. (completed 2026-08-12)
-- [ ] **Phase 21: Per-Aspect Advisor Coverage** - `build_diagnostics` + grounded task families for represent/basis, depth/outliers, classification, regression/CV, monitoring/SPM. Parallel-eligible with Phase 20.
+- [x] **Phase 21: Per-Aspect Advisor Coverage** - `build_diagnostics` + grounded task families for represent/basis, depth/outliers, classification, regression/CV, monitoring/SPM. Parallel-eligible with Phase 20. (completed 2026-08-12)
 - [ ] **Phase 22: Surface Integration** - MCP exposes new aspect diagnostics (LLM-free); provider selection wired through the Python `advise()`; Agent Skill documents providers + full coverage.
 - [ ] **Phase 23: Packaging & CI** - Per-provider extras finalized; Python 3.9–3.14 matrix with version/extra gating; bare-venv smoke; two-layer offline + env-gated live tests.
 - [ ] **Phase 24: Documentation** - Provider setup guide + per-aspect advisor pages + updated overview/API pages; docs build stays offline (`mkdocs build --strict`).
@@ -135,7 +135,11 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
   2. Provider selection is available through the Python API `advise()`, and the MCP tools do not call `advise()`.
   3. The Agent Skill's `SKILL.md` documents provider selection (including the local/offline path) and the full per-aspect advisor coverage.
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+- [ ] 22-01-PLAN.md — TRACER: depth runnable via MCP end-to-end (`_RUNNABLE_METHODS` + depth dispatch + server scores-unwrap) + LLM-free invariant lock [SURF-01, SURF-02]
+- [ ] 22-02-PLAN.md — Diagnostics-only expansion: `_DIAGNOSTICS_METHODS` (12) guard + `n_classes` param + represent argvals injection + guard-sync + rejection tests [SURF-01]
+- [ ] 22-03-PLAN.md — SKILL.md 4 targeted edits (full aspect list, Provider Selection section, corrected install note, refreshed Tools Referenced) + 2 skill tests [SURF-03, SURF-02]
 
 ### Phase 23: Packaging & CI
 
@@ -171,8 +175,8 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 |-------|----------------|--------|-----------|
 | 19. Provider Foundation & Grounding Contract | 3/3 | Complete    | 2026-08-12 |
 | 20. Additional Provider Adapters | 3/3 | Complete    | 2026-08-12 |
-| 21. Per-Aspect Advisor Coverage | 0/? | Not started | - |
-| 22. Surface Integration | 0/? | Not started | - |
+| 21. Per-Aspect Advisor Coverage | 5/5 | Complete    | 2026-08-12 |
+| 22. Surface Integration | 0/3 | Not started | - |
 | 23. Packaging & CI | 0/? | Not started | - |
 | 24. Documentation | 0/? | Not started | - |
 
