@@ -59,7 +59,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 ### Summary
 
 - [x] **Phase 19: Provider Foundation & Grounding Contract** - `Provider` protocol + Anthropic-adapter refactor + validate-and-retry + centralized `_check_grounding`; provider selection via params/env. Blocks all downstream work. (completed 2026-08-12)
-- [ ] **Phase 20: Additional Provider Adapters** - OpenAI (+ `base_url`), Ollama (local, no key), Gemini adapters behind the protocol, each an optional extra. Parallel-eligible with Phase 21.
+- [x] **Phase 20: Additional Provider Adapters** - OpenAI (+ `base_url`), Ollama (local, no key), Gemini adapters behind the protocol, each an optional extra. Parallel-eligible with Phase 21. (completed 2026-08-12)
 - [ ] **Phase 21: Per-Aspect Advisor Coverage** - `build_diagnostics` + grounded task families for represent/basis, depth/outliers, classification, regression/CV, monitoring/SPM. Parallel-eligible with Phase 20.
 - [ ] **Phase 22: Surface Integration** - MCP exposes new aspect diagnostics (LLM-free); provider selection wired through the Python `advise()`; Agent Skill documents providers + full coverage.
 - [ ] **Phase 23: Packaging & CI** - Per-provider extras finalized; Python 3.9–3.14 matrix with version/extra gating; bare-venv smoke; two-layer offline + env-gated live tests.
@@ -116,7 +116,13 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
   3. The aspect is always caller-specified and never auto-detected from result keys, so key collisions (e.g. `r_squared`, `edf`) cannot misroute a request.
   4. Each new aspect's diagnostics pass an offline determinism test (same input → byte-identical JSON-serialisable output, no numpy scalars).
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+- [ ] 21-01-PLAN.md — TRACER: depth aspect end-to-end (builder + dispatcher + `_supported` + prompt clause + additive `advise(aspect=…)` param + determinism/no-auto-detection tests) [ASPECT-02, ASPECT-06, ASPECT-07]
+- [ ] 21-02-PLAN.md — outliers + classification builders (LOW; guarded multi-shape keys, corrected `error_rate`) [ASPECT-02, ASPECT-03, ASPECT-06]
+- [ ] 21-03-PLAN.md — shared `_utils.py` eigenvalue→variance helper + output-preserving fpca refactor + represent aspect (new method string) [ASPECT-01, ASPECT-06]
+- [ ] 21-04-PLAN.md — regression + regression_cv builders (MEDIUM; guarded r_squared / 2-D residuals / cv array casts / criteria tuples) [ASPECT-04, ASPECT-06]
+- [ ] 21-05-PLAN.md — SPM aspect (HIGH; T²/SPE exceedance + one live `spe_moment_match_diagnostic` call + shared helper reuse, arl0_t2 excluded) [ASPECT-05, ASPECT-06]
 
 ### Phase 22: Surface Integration
 
@@ -164,7 +170,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 19. Provider Foundation & Grounding Contract | 3/3 | Complete    | 2026-08-12 |
-| 20. Additional Provider Adapters | 0/? | Not started | - |
+| 20. Additional Provider Adapters | 3/3 | Complete    | 2026-08-12 |
 | 21. Per-Aspect Advisor Coverage | 0/? | Not started | - |
 | 22. Surface Integration | 0/? | Not started | - |
 | 23. Packaging & CI | 0/? | Not started | - |
