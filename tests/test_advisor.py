@@ -57,6 +57,22 @@ class TestBuildDiagnosticsOffline:
         d2 = build_diagnostics(result, method="basis")
         assert d1 == d2
 
+    def test_depth_build_diagnostics_basic(self):
+        """RED gate: depth branch must exist in build_diagnostics (Task 1)."""
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        scores = np.array([0.05, 0.2, 0.5, 0.8, 0.95, 0.3, 0.45, 0.6, 0.15, 0.7])
+        diag = build_diagnostics(scores, method="depth", method_name="fraiman_muniz")
+        assert diag["method"] == "depth"
+        assert diag["n_obs"] == 10
+        assert diag["method_name"] == "fraiman_muniz"
+        assert abs(diag["depth_min"] - 0.05) < 1e-9
+        assert sum(diag["depth_histogram"]) == 10
+        # JSON-serialisable
+        json.dumps(diag, sort_keys=True)
+
     def test_advise_raises_importerror_without_anthropic(self, monkeypatch):
         monkeypatch.setitem(sys.modules, "anthropic", None)
         from fdars.advisor import advise, build_diagnostics
