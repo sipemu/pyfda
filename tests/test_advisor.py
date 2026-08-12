@@ -73,6 +73,67 @@ class TestBuildDiagnosticsOffline:
         # JSON-serialisable
         json.dumps(diag, sort_keys=True)
 
+    def test_depth_deterministic(self):
+        """Depth build_diagnostics is byte-identical on repeated calls (ASPECT-02).
+
+        Verifies: two calls on the same fixed score array produce equal dicts
+        AND byte-identical json.dumps(sort_keys=True).  A recursive walker
+        asserts no value is a numpy scalar (no np.generic).
+        """
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        scores = np.array([0.05, 0.2, 0.5, 0.8, 0.95, 0.3, 0.45, 0.6, 0.15, 0.7])
+        d1 = build_diagnostics(scores, method="depth", method_name="fraiman_muniz")
+        d2 = build_diagnostics(scores, method="depth", method_name="fraiman_muniz")
+
+        assert d1 == d2, "Two calls produced different dicts"
+        s1 = json.dumps(d1, sort_keys=True)
+        s2 = json.dumps(d2, sort_keys=True)
+        assert s1 == s2, "json.dumps not byte-identical between calls"
+
+        def check_no_numpy(obj):
+            """Recursive walker: fail if any value is a numpy scalar."""
+            assert not isinstance(obj, np.generic), (
+                f"numpy scalar leaked into output: {type(obj)!r} = {obj!r}"
+            )
+            if isinstance(obj, dict):
+                for v in obj.values():
+                    check_no_numpy(v)
+            elif isinstance(obj, list):
+                for v in obj:
+                    check_no_numpy(v)
+
+        check_no_numpy(d1)
+
+    def test_no_auto_detection(self):
+        """Unsupported method raises ValueError; no auto-detection from keys (ASPECT-07).
+
+        A result dict that looks like a real method result must raise ValueError
+        when the method string is not in _supported — the dispatcher never
+        infers the method from key shapes or values.
+        """
+        from fdars.advisor import build_diagnostics
+
+        with pytest.raises(ValueError, match="unsupported method"):
+            build_diagnostics({"r_squared": 0.9}, method="not_a_real_method")
+
+    def test_aspect_caller_specified(self):
+        """Depth array with method='depth' runs the depth branch (ASPECT-07).
+
+        Locks the caller-specified contract: the method parameter determines
+        routing, never the input shape or key content.  A depth score array
+        with method='depth' must produce diag['method']=='depth'.
+        """
+        from fdars.advisor import build_diagnostics
+
+        scores = np.array([0.1, 0.5, 0.9, 0.3, 0.7, 0.4])
+        diag = build_diagnostics(scores, method="depth")
+        assert diag["method"] == "depth"
+        assert "n_obs" in diag
+        assert diag["n_obs"] == 6
+
     def test_advise_raises_importerror_without_anthropic(self, monkeypatch):
         monkeypatch.setitem(sys.modules, "anthropic", None)
         from fdars.advisor import advise, build_diagnostics
@@ -83,6 +144,34 @@ class TestBuildDiagnosticsOffline:
         )
         with pytest.raises(ImportError, match="pip install fdars\\[advisor\\]"):
             advise(diag, task="interpretation", domain_context="test")
+
+
+class TestPrompts:
+    """Offline tests for _system_prompt aspect threading (ASPECT-06)."""
+
+    def test_prompt_aspect_backward_compatible(self):
+        """aspect='' reproduces the same output as calling without aspect (ASPECT-06).
+
+        _system_prompt('interpretation') and _system_prompt('interpretation','')
+        must be byte-identical.  The depth clause must appear only when
+        aspect='depth' is passed.
+        """
+        from fdars.advisor._prompts import _system_prompt
+
+        base_no_arg = _system_prompt("interpretation")
+        base_empty = _system_prompt("interpretation", "")
+
+        assert base_no_arg == base_empty, (
+            "aspect='' did not reproduce no-arg output: outputs diverged"
+        )
+
+        depth_prompt = _system_prompt("interpretation", "depth")
+        assert "depth_q10" in depth_prompt, (
+            "depth_q10 token missing from depth-aspect prompt"
+        )
+        assert "depth_q10" not in base_no_arg, (
+            "depth_q10 unexpectedly appeared in base prompt (no aspect)"
+        )
 
 
 class TestAdvisorIntegration:
