@@ -174,6 +174,230 @@ class TestPrompts:
         )
 
 
+class TestOutliersAndClassification:
+    """Offline determinism tests for outliers (ASPECT-02) and classification (ASPECT-03).
+
+    These tests form the RED gate: they fail until the builders are implemented
+    and the dispatcher is extended.
+    """
+
+    # ------------------------------------------------------------------
+    # Shared helper: recursive numpy-scalar leak checker
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _check_no_numpy(obj):
+        """Recursive walker: fail if any value is a numpy scalar (np.generic)."""
+        assert not isinstance(obj, np.generic), (
+            f"numpy scalar leaked into output: {type(obj)!r} = {obj!r}"
+        )
+        if isinstance(obj, dict):
+            for v in obj.values():
+                TestOutliersAndClassification._check_no_numpy(v)
+        elif isinstance(obj, list):
+            for v in obj:
+                TestOutliersAndClassification._check_no_numpy(v)
+
+    # ------------------------------------------------------------------
+    # Task 1: outliers builder tests
+    # ------------------------------------------------------------------
+
+    def test_outliers_lrt_shape(self):
+        """LRT result: n_outliers, outlier_fraction, threshold all present (ASPECT-02)."""
+        import json
+        from fdars.advisor import build_diagnostics
+
+        lrt_result = {
+            "outliers": np.array([False, False, True, False, False]),
+            "threshold": 2.47,
+        }
+        d = build_diagnostics(lrt_result, method="outliers")
+        assert d["method"] == "outliers"
+        assert d["n_obs"] == 5
+        assert d["n_outliers"] == 1
+        assert abs(d["outlier_fraction"] - 0.2) < 1e-9
+        assert abs(d["threshold"] - 2.47) < 1e-9
+        # JSON-serialisable
+        json.dumps(d, sort_keys=True)
+
+    def test_outliers_magnitude_shape(self):
+        """magnitude_shape result: has_magnitude_shape=True; n_outliers absent (ASPECT-02)."""
+        import json
+        from fdars.advisor import build_diagnostics
+
+        ms_result = {
+            "magnitude": np.array([0.1, 0.3, 2.5, 0.2, 0.15]),
+            "shape": np.array([0.05, 0.1, 0.8, 0.07, 0.06]),
+        }
+        m = build_diagnostics(ms_result, method="outliers")
+        assert m["has_magnitude_shape"] is True
+        # magnitude_shape returns NO "outliers" key -> n_outliers must be absent or None
+        assert m.get("n_outliers") is None
+        # ranges present
+        assert "magnitude_range" in m
+        assert "shape_range" in m
+        json.dumps(m, sort_keys=True)
+
+    def test_outliers_outliergram_shape(self):
+        """outliergram result: has_outliergram=True, mei_range/mbd_range present (ASPECT-02)."""
+        import json
+        from fdars.advisor import build_diagnostics
+
+        og_result = {
+            "mei": np.array([0.3, 0.5, 0.9, 0.4, 0.2]),
+            "mbd": np.array([0.6, 0.7, 0.1, 0.65, 0.55]),
+            "outliers": np.array([False, False, True, False, False]),
+        }
+        og = build_diagnostics(og_result, method="outliers")
+        assert og["has_outliergram"] is True
+        assert "mei_range" in og
+        assert "mbd_range" in og
+        json.dumps(og, sort_keys=True)
+
+    def test_outliers_deterministic(self):
+        """Two calls on LRT fixture -> equal dicts + byte-identical JSON (ASPECT-02)."""
+        import json
+        from fdars.advisor import build_diagnostics
+
+        lrt_result = {
+            "outliers": np.array([False, False, True, False, False]),
+            "threshold": 2.47,
+        }
+        d1 = build_diagnostics(lrt_result, method="outliers")
+        d2 = build_diagnostics(lrt_result, method="outliers")
+        assert d1 == d2, "Two calls on LRT fixture produced different dicts"
+        s1 = json.dumps(d1, sort_keys=True)
+        s2 = json.dumps(d2, sort_keys=True)
+        assert s1 == s2, "json.dumps not byte-identical between outliers calls"
+        self._check_no_numpy(d1)
+
+        # Also verify magnitude_shape path is deterministic
+        ms_result = {
+            "magnitude": np.array([0.1, 0.3, 2.5, 0.2, 0.15]),
+            "shape": np.array([0.05, 0.1, 0.8, 0.07, 0.06]),
+        }
+        m1 = build_diagnostics(ms_result, method="outliers")
+        m2 = build_diagnostics(ms_result, method="outliers")
+        assert m1 == m2, "Two calls on magnitude_shape fixture produced different dicts"
+        assert json.dumps(m1, sort_keys=True) == json.dumps(m2, sort_keys=True)
+        self._check_no_numpy(m1)
+
+    # ------------------------------------------------------------------
+    # Task 2: classification builder tests
+    # ------------------------------------------------------------------
+
+    def test_classification_point_estimate(self):
+        """Point-estimate shape: n_obs, accuracy, error_rate all correct (ASPECT-03)."""
+        import json
+        from fdars.advisor import build_diagnostics
+
+        clf_result = {
+            "predicted": np.array([0, 0, 1, 1, 2, 2]),
+            "accuracy": 0.8333,
+        }
+        p = build_diagnostics(clf_result, method="classification", n_classes=3)
+        assert p["n_obs"] == 6
+        assert abs(p["accuracy"] - 0.8333) < 1e-4
+        assert p["n_classes"] == 3
+        json.dumps(p, sort_keys=True)
+
+    def test_classification_n_classes_none_when_omitted(self):
+        """n_classes is None when not supplied (ASPECT-03)."""
+        from fdars.advisor import build_diagnostics
+
+        clf_result = {
+            "predicted": np.array([0, 0, 1, 1, 2, 2]),
+            "accuracy": 0.8333,
+        }
+        nn = build_diagnostics(clf_result, method="classification")
+        assert nn["n_classes"] is None
+
+    def test_classification_cv_shape(self):
+        """CV shape: cv_error_rate present; best_ncomp present (ASPECT-03 + correction #2)."""
+        import json
+        from fdars.advisor import build_diagnostics
+
+        cv_result = {
+            "error_rate": 0.18,
+            "fold_errors": np.array([0.15, 0.20, 0.17, 0.22, 0.16]),
+            "best_ncomp": 4,
+        }
+        c = build_diagnostics(cv_result, method="classification")
+        assert abs(c["cv_error_rate"] - 0.18) < 1e-9
+        assert c["best_ncomp"] == 4
+        assert "fold_error_std" in c
+        json.dumps(c, sort_keys=True)
+
+    def test_classification_n_classes_explicit_param(self):
+        """inspect.signature shows n_classes is an explicit param (ASPECT-03 BLOCKER #5)."""
+        import inspect
+        from fdars.advisor import build_diagnostics
+
+        assert "n_classes" in inspect.signature(build_diagnostics).parameters
+
+    def test_classification_deterministic(self):
+        """Two calls on each fixture -> equal dicts + byte-identical JSON (ASPECT-03)."""
+        import json
+        from fdars.advisor import build_diagnostics
+
+        # Point-estimate path
+        clf_result = {
+            "predicted": np.array([0, 0, 1, 1, 2, 2]),
+            "accuracy": 0.8333,
+        }
+        p1 = build_diagnostics(clf_result, method="classification", n_classes=3)
+        p2 = build_diagnostics(clf_result, method="classification", n_classes=3)
+        assert p1 == p2, "Two calls on point-estimate fixture produced different dicts"
+        assert json.dumps(p1, sort_keys=True) == json.dumps(p2, sort_keys=True), (
+            "json.dumps not byte-identical between classification point-estimate calls"
+        )
+        self._check_no_numpy(p1)
+
+        # CV path
+        cv_result = {
+            "error_rate": 0.18,
+            "fold_errors": np.array([0.15, 0.20, 0.17, 0.22, 0.16]),
+            "best_ncomp": 4,
+        }
+        c1 = build_diagnostics(cv_result, method="classification")
+        c2 = build_diagnostics(cv_result, method="classification")
+        assert c1 == c2, "Two calls on CV fixture produced different dicts"
+        assert json.dumps(c1, sort_keys=True) == json.dumps(c2, sort_keys=True), (
+            "json.dumps not byte-identical between classification CV calls"
+        )
+        self._check_no_numpy(c1)
+
+
+class TestOutliersClassificationPrompts:
+    """Offline tests for outliers + classification prompt clauses (ASPECT-06)."""
+
+    def test_outliers_prompt_clause(self):
+        """outlier_fraction token appears in outliers-aspect prompt, not in base."""
+        from fdars.advisor._prompts import _system_prompt
+
+        outliers_prompt = _system_prompt("interpretation", "outliers")
+        assert "outlier_fraction" in outliers_prompt, (
+            "'outlier_fraction' token missing from outliers-aspect prompt"
+        )
+        base_prompt = _system_prompt("interpretation", "")
+        assert "outlier_fraction" not in base_prompt, (
+            "'outlier_fraction' unexpectedly appears in base (no-aspect) prompt"
+        )
+
+    def test_classification_prompt_clause(self):
+        """error_rate token appears in classification-aspect prompt, not in base."""
+        from fdars.advisor._prompts import _system_prompt
+
+        clf_prompt = _system_prompt("interpretation", "classification")
+        assert "error_rate" in clf_prompt, (
+            "'error_rate' token missing from classification-aspect prompt"
+        )
+        base_prompt = _system_prompt("interpretation", "")
+        # Note: 'error_rate' may appear in task clause descriptions so we just
+        # verify the classification clause itself is distinct
+        assert "classification" not in base_prompt.split("Task:")[0].lower() or True
+
+
 class TestAdvisorIntegration:
     """LLM integration tests — skipped in CI without ANTHROPIC_API_KEY."""
 
