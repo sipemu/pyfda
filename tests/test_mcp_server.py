@@ -624,3 +624,145 @@ async def test_run_method_depth(dataset_id):
             f"Expected depth_mean to be float, got {type(diag.get('depth_mean'))}: "
             f"{diag.get('depth_mean')}"
         )
+
+
+@pytest.mark.asyncio
+async def test_build_diagnostics_represent(dataset_id):
+    """SURF-01: fdars_build_diagnostics works for 'represent' with no result_id.
+
+    Exercises the argvals-injection fix from Plan 22-02 Task 1: when no
+    result_id is supplied, the handler injects argvals into the fallback dict
+    so that _build_represent_diagnostics can compute grid statistics.
+
+    Asserts:
+    - method == "represent"
+    - n_obs is an int (number of rows in the data matrix)
+    - n_points is an int (number of evaluation grid points)
+
+    Offline, compute-only.  No ANTHROPIC_API_KEY.  No network.
+    """
+    from mcp import Client
+    from fdars.mcp.server import mcp
+
+    async with Client(mcp) as client:
+        diag_response = await client.call_tool(
+            "fdars_build_diagnostics",
+            {
+                "dataset_id": dataset_id,
+                "method": "represent",
+                "with_argvals": True,
+                # No result_id — exercises the argvals-injection fallback path
+            },
+        )
+        diag = _unwrap_tool_result(diag_response)
+
+        assert diag.get("method") == "represent", (
+            f"Expected method='represent', got {diag.get('method')!r}"
+        )
+        assert isinstance(diag.get("n_obs"), int), (
+            f"Expected n_obs to be int, got {type(diag.get('n_obs'))}: {diag.get('n_obs')}"
+        )
+        assert isinstance(diag.get("n_points"), int), (
+            f"Expected n_points to be int, got {type(diag.get('n_points'))}: "
+            f"{diag.get('n_points')}"
+        )
+
+
+@pytest.mark.asyncio
+async def test_build_diagnostics_classification_with_n_classes(dataset_id):
+    """SURF-01: fdars_build_diagnostics forwards n_classes to build_diagnostics.
+
+    Stores a synthetic classification point-estimate result dict in the
+    registry, then calls fdars_build_diagnostics with method="classification"
+    and n_classes=2.  Asserts that the returned diagnostics reflect the
+    correct n_classes value (confirming the param is forwarded from the tool
+    param → build_diagnostics(result, 'classification', n_classes=K)).
+
+    Offline, compute-only.  No ANTHROPIC_API_KEY.  No network.
+    """
+    import numpy as np  # noqa: PLC0415
+    from mcp import Client  # noqa: PLC0415
+    from fdars.mcp.server import mcp  # noqa: PLC0415
+    from fdars.mcp._registry import registry  # noqa: PLC0415
+
+    # Build a synthetic classification point-estimate result dict.
+    # _build_classification_diagnostics reads: "predicted" (int array) and
+    # "accuracy" (float).  This is the minimal valid point-estimate shape.
+    rng = np.random.default_rng(0)
+    n_obs = 20
+    synthetic_result = {
+        "predicted": rng.integers(0, 2, size=n_obs).tolist(),  # binary labels
+        "accuracy": 0.80,
+    }
+    result_id = registry.store_result(synthetic_result)
+
+    async with Client(mcp) as client:
+        diag_response = await client.call_tool(
+            "fdars_build_diagnostics",
+            {
+                "dataset_id": dataset_id,
+                "result_id": result_id,
+                "method": "classification",
+                "n_classes": 2,
+            },
+        )
+        diag = _unwrap_tool_result(diag_response)
+
+        assert diag.get("method") == "classification", (
+            f"Expected method='classification', got {diag.get('method')!r}"
+        )
+        # Confirm n_classes param was forwarded (the builder sets it from the param)
+        assert diag.get("n_classes") == 2, (
+            f"Expected n_classes=2, got {diag.get('n_classes')!r}"
+        )
+
+
+@pytest.mark.asyncio
+async def test_run_method_rejects_diagnostics_only(dataset_id):
+    """SURF-01: fdars_run_method rejects diagnostics-only aspects (split enforced).
+
+    'regression' is a diagnostics-only aspect — its fdars binding needs a
+    scalar response vector y that the MCP dataset model cannot supply.  Calls
+    fdars_run_method with method='regression' and asserts that the tool raises
+    (mcp wraps the runner's ValueError in the response as an error or exception).
+
+    This proves the runnable-vs-diagnostics split holds at the run_method
+    boundary: diagnostics-only aspects cannot be dispatched by run_method.
+
+    Offline, compute-only.  No ANTHROPIC_API_KEY.  No network.
+    """
+    from mcp import Client
+    from fdars.mcp.server import mcp
+
+    async with Client(mcp) as client:
+        # fdars_run_method should raise because 'regression' is not in
+        # _RUNNABLE_METHODS.  The mcp framework converts the handler ValueError
+        # into an error response.  We assert the error is surfaced (not silently
+        # ignored), checking both common mcp error-surfacing patterns.
+        try:
+            response = await client.call_tool(
+                "fdars_run_method",
+                {"dataset_id": dataset_id, "method": "regression"},
+            )
+            # If call_tool returned normally, the response must carry an error
+            # flag or an error key — check both patterns used by the mcp library.
+            is_error = getattr(response, "isError", None)
+            if is_error is True:
+                return  # error was correctly surfaced
+            # Fall back: check the content text for an error indicator
+            content = getattr(response, "content", [])
+            if content:
+                text = getattr(content[0], "text", "")
+                if "unsupported" in text.lower() or "error" in text.lower():
+                    return  # error embedded in text content
+            # If we reach here, the tool did not signal an error — that is a
+            # test failure: run_method must reject diagnostics-only methods.
+            pytest.fail(
+                "fdars_run_method did not raise or signal an error for "
+                "method='regression' (diagnostics-only aspect must be rejected "
+                "at the run_method boundary)"
+            )
+        except Exception:
+            # Any exception raised by call_tool itself means the tool errored
+            # out — that is the expected behavior.
+            pass
