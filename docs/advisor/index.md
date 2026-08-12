@@ -33,12 +33,17 @@ The advisor works in two stages:
 1. **Offline diagnostics** — `build_diagnostics(result, method)` takes your fdars
    result dict and computes a deterministic, JSON-serialisable diagnostics dict from
    fdars and NumPy only. No network call, no API key, no randomness. Two calls on
-   the same input return the same dict.
+   the same input return the same dict. All 12 fdars aspects are covered —
+   clustering, smoothing, alignment, basis, fpca, represent, depth, outliers,
+   classification, regression, regression_cv, and spm — see
+   [Per-Aspect Coverage](aspects.md) for the full diagnostics key sets.
 
-2. **Grounded interpretation** — `advise(diagnostics, task=…)` passes those
-   diagnostics to Claude with a grounding-invariant system prompt and returns a
-   schema-validated `Advice` object whose every `Recommendation` cites specific
-   values from the diagnostics dict.
+2. **Grounded interpretation** — `advise(diagnostics, task=…)` routes those
+   diagnostics through a uniform Provider protocol to any of four LLM backends
+   (Anthropic, OpenAI/OpenAI-compatible, Google Gemini, or local Ollama) with a
+   grounding-invariant system prompt, and returns a schema-validated `Advice` object
+   whose every `Recommendation` cites specific values from the diagnostics dict.
+   See [Provider Setup](providers.md) for backend selection and credentials.
 
 The `describe_cluster_differences` function is a convenience wrapper that runs
 both stages in sequence for clustering results.
@@ -60,9 +65,8 @@ See [Python API](python-api.md) for worked examples.
 The MCP server exposes the advisor as three composable tools over stdio:
 
 - `fdars_build_diagnostics` — builds offline diagnostics from a registered dataset
-  handle (no API key required).
-- `fdars_run_method` — runs any of the five supported fdars methods
-  (alignment, FPCA, basis, smoothing, clustering) and returns an opaque result
+  handle (no API key required). Covers all 12 `build_diagnostics` aspects.
+- `fdars_run_method` — runs an fdars method and returns an opaque result
   handle. Arrays stay in-process; only the handle ID is returned.
 - `fdars_compare_run` — re-runs the method with new parameters and returns a
   before/after `delta` dict of scalar numeric differences — all fdars-computed.
@@ -107,25 +111,42 @@ updated diagnostics back into *interpret* for the next iteration.
 
 ## Installation
 
-!!! info "Two optional extras"
+!!! info "Optional extras"
 
-    The advisor is split into two optional extras so you only install what you need.
+    The advisor is split into focused optional extras so you only install what you
+    need. The core extra enables the Anthropic backend (default); additional extras
+    unlock the other providers.
 
 ```bash
-# For the Python API (advise, build_diagnostics, describe_cluster_differences):
+# Python API — Anthropic backend (default):
 pip install "fdars[advisor]"
 
-# For the MCP server and Agent Skill (Python 3.10+ required):
+# OpenAI or OpenAI-compatible endpoints (vLLM, LM Studio, LocalAI):
+pip install "fdars[openai]"
+
+# Google Gemini (Python 3.10+ required):
+pip install "fdars[gemini]"
+
+# Local Ollama (no API key required):
+pip install "fdars[ollama]"
+
+# All four provider backends at once:
+pip install "fdars[all-providers]"
+
+# MCP server and Agent Skill (Python 3.10+ required):
 pip install "fdars[mcp,advisor]"
 ```
 
 The `[advisor]` extra installs `anthropic>=0.72.0` and `pydantic>=2.0`.
 The `[mcp]` extra additionally installs `mcp>=2.0.0` and requires Python 3.10+.
 
+See [Provider Setup](providers.md) for backend selection, environment variables,
+and credential precedence.
+
 !!! info "Offline core vs. env-gated LLM"
 
     `build_diagnostics` and the `run_llm=False` path of `describe_cluster_differences`
     work **fully offline** — no API key, no network connection. The grounded
-    interpretation step (`advise`) requires `ANTHROPIC_API_KEY` to be set in your
-    environment. If the key is absent the function raises a clear `ImportError` with
-    the install hint.
+    interpretation step (`advise`) requires the selected provider's credential to be
+    set in your environment (none required for local Ollama). If the credential is
+    absent the function raises a clear `ImportError` with the install hint.
