@@ -582,6 +582,59 @@ class TestOutliersClassificationPrompts:
         assert "classification" not in base_prompt.split("Task:")[0].lower() or True
 
 
+class TestRepresent:
+    """RED gate tests for represent aspect (ASPECT-01 — plan 21-03, Task 2).
+
+    These tests fail until represent.py is created and wired into the dispatcher.
+    """
+
+    def test_represent_dict_form_basic(self):
+        """Dict form: n_obs, n_points, is_uniform_grid, argvals range (ASPECT-01)."""
+        import json
+
+        from fdars.advisor import build_diagnostics
+
+        data = np.ones((20, 50))
+        argvals = np.linspace(0, 1, 50)
+        d = build_diagnostics({"data": data, "argvals": argvals}, method="represent")
+        assert d["n_obs"] == 20
+        assert d["n_points"] == 50
+        assert d["is_uniform_grid"] is True
+        assert abs(d["argvals_min"] - 0.0) < 1e-9
+        assert abs(d["argvals_max"] - 1.0) < 1e-9
+        # JSON-serialisable
+        json.dumps(d, sort_keys=True)
+
+    def test_represent_fdata_like_form(self):
+        """Fdata-like object (attrs .data/.argvals) yields same fields as dict form."""
+        import types
+
+        from fdars.advisor import build_diagnostics
+
+        data = np.ones((20, 50))
+        argvals = np.linspace(0, 1, 50)
+        dict_result = build_diagnostics({"data": data, "argvals": argvals}, method="represent")
+
+        obj = types.SimpleNamespace(data=data, argvals=argvals)
+        obj_result = build_diagnostics(obj, method="represent")
+        assert obj_result == dict_result, (
+            "Fdata-like object must yield same fields as dict form"
+        )
+
+    def test_represent_prompt_clause(self):
+        """is_uniform_grid token appears in represent-aspect prompt, not in base."""
+        from fdars.advisor._prompts import _system_prompt
+
+        repr_prompt = _system_prompt("interpretation", "represent")
+        assert "is_uniform_grid" in repr_prompt, (
+            "'is_uniform_grid' token missing from represent-aspect prompt"
+        )
+        base_prompt = _system_prompt("interpretation", "")
+        assert "is_uniform_grid" not in base_prompt, (
+            "'is_uniform_grid' unexpectedly appears in base (no-aspect) prompt"
+        )
+
+
 class TestAdvisorIntegration:
     """LLM integration tests — skipped in CI without ANTHROPIC_API_KEY."""
 

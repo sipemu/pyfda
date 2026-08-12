@@ -95,8 +95,11 @@ def build_diagnostics(
         Native fdars output dict (or a ``fdars.results`` wrapper whose ``.raw``
         attribute is the underlying dict).
     method : {"alignment", "fpca", "basis", "smoothing", "clustering", "depth", \
-"outliers", "classification"}
-        The fdars method that produced ``result``.
+"outliers", "classification", "represent"}
+        The fdars method that produced ``result``.  For ``"represent"``, pass
+        the raw data dict (``{"data": ..., "argvals": ...}``) or an Fdata-like
+        object with ``.data``/``.argvals`` attributes directly — not an fdars
+        method output.
     argvals : array_like, optional
         Shared evaluation grid, shape ``(m,)``.  Used for amplitude/phase
         distance computations when ``aligned_data`` is present.
@@ -123,6 +126,7 @@ def build_diagnostics(
         "depth",                                                    # ASPECT-02 (plan 21-01)
         "outliers",                                                 # ASPECT-02 (plan 21-02)
         "classification",                                           # ASPECT-03 (plan 21-02)
+        "represent",                                               # ASPECT-01 (plan 21-03)
     }
     method_lc = method.lower()
     if method_lc not in _supported:
@@ -176,6 +180,10 @@ def build_diagnostics(
     if method_lc == "classification":
         from fdars.advisor.aspects.classification import _build_classification_diagnostics  # noqa: PLC0415
         return _build_classification_diagnostics(raw, n_classes=n_classes, **kwargs)
+
+    if method_lc == "represent":
+        from fdars.advisor.aspects.represent import _build_represent_diagnostics  # noqa: PLC0415
+        return _build_represent_diagnostics(raw, **kwargs)
 
     # Unreachable given the check above, but kept for safety.
     raise ValueError(f"Unhandled method: {method!r}")
