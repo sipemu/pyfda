@@ -5,15 +5,15 @@ milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
 current_phase: 21
 current_phase_name: Per-Aspect Advisor Coverage
 status: planning
-stopped_at: Completed 21-01-PLAN.md (depth tracer)
-last_updated: "2026-08-12T08:04:09.180Z"
+stopped_at: Completed 21-02-PLAN.md (outliers+classification)
+last_updated: "2026-08-12T08:39:02.259Z"
 last_activity: 2026-08-12
 last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 11
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-08-12 — Phase 20 complete, transitioned to Phase 21
 
-Progress: [██████░░░░] 64%
+Progress: [███████░░░] 73%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [██████░░░░] 64%
 | Phase 20-additional-provider-adapters P02 | 3 | 2 tasks | 4 files |
 | Phase 20 P03 | 6 | 3 tasks | 5 files |
 | Phase 21-per-aspect-advisor-coverage P01 | 5m | 3 tasks | 4 files |
+| Phase 21 P02 | 4 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ Recent decisions affecting current work:
 - [Phase ?]: depth branch accepts raw ndarray (not dict) — all fdars depth functions return PyArray1<f64>
 - [Phase ?]: _ASPECT_PRIMERS dict in _prompts.py; aspect='' preserves backward compat
 - [Phase ?]: Array-coercion guard uses __array__ + .data checks to protect ndarray and Fdata inputs
+- [Phase ?]: n_classes as explicit keyword param on build_diagnostics() (BLOCKER #5); forwarded only to classification branch
+- [Phase ?]: RESEARCH corrections #2+#6 applied: CV key is error_rate not cv_error_rate; accuracy guarded
 
 ### Pending Todos
 
@@ -118,8 +121,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-12T08:04:08.699Z
-Stopped at: Completed 21-01-PLAN.md (depth tracer)
+Last session: 2026-08-12T08:39:02.247Z
+Stopped at: Completed 21-02-PLAN.md (outliers+classification)
 Resume file: None
 
 ## Operator Next Steps

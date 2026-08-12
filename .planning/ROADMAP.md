@@ -119,7 +119,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 **Plans**: 5 plans
 
 - [x] 21-01-PLAN.md — TRACER: depth aspect end-to-end (builder + dispatcher + `_supported` + prompt clause + additive `advise(aspect=…)` param + determinism/no-auto-detection tests) [ASPECT-02, ASPECT-06, ASPECT-07]
-- [ ] 21-02-PLAN.md — outliers + classification builders (LOW; guarded multi-shape keys, corrected `error_rate`) [ASPECT-02, ASPECT-03, ASPECT-06]
+- [x] 21-02-PLAN.md — outliers + classification builders (LOW; guarded multi-shape keys, corrected `error_rate`) [ASPECT-02, ASPECT-03, ASPECT-06]
 - [ ] 21-03-PLAN.md — shared `_utils.py` eigenvalue→variance helper + output-preserving fpca refactor + represent aspect (new method string) [ASPECT-01, ASPECT-06]
 - [ ] 21-04-PLAN.md — regression + regression_cv builders (MEDIUM; guarded r_squared / 2-D residuals / cv array casts / criteria tuples) [ASPECT-04, ASPECT-06]
 - [ ] 21-05-PLAN.md — SPM aspect (HIGH; T²/SPE exceedance + one live `spe_moment_match_diagnostic` call + shared helper reuse, arl0_t2 excluded) [ASPECT-05, ASPECT-06]
