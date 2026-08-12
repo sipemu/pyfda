@@ -208,3 +208,50 @@ def test_walkthrough_py39_exit0():
         "Version guard appears AFTER 'from fdars.mcp' import — "
         "this will raise ImportError on Python 3.9 (Pitfall 4)"
     )
+
+
+# ---------------------------------------------------------------------------
+# Plan 22-03 tests (Phase 22 SURF-03 — full-aspect coverage + provider section)
+# ---------------------------------------------------------------------------
+
+
+def test_skill_md_full_aspect_coverage():
+    """SKILL.md description and body mention all Phase-21 advisor aspects.
+
+    Verifies SURF-03: the fdars-advisor skill documents the full per-aspect
+    coverage, not just the original five aspects.  Checks for the five aspects
+    added in Phase 21: depth, outliers, classification, regression, and spm
+    (monitoring/SPM).  The check is case-insensitive so "SPM", "spm", and
+    "monitoring/SPM" all pass.
+    """
+    assert SKILL_MD.exists(), f"SKILL.md not found at {SKILL_MD}"
+    text = SKILL_MD.read_text().lower()
+    new_aspects = ["depth", "outliers", "classification", "regression", "spm"]
+    missing = [a for a in new_aspects if a not in text]
+    assert not missing, (
+        f"SKILL.md is missing Phase-21 aspect keywords: {missing}. "
+        f"Update the 'description' field and the '## Tools Referenced' section."
+    )
+
+
+def test_skill_md_provider_selection_section():
+    """SKILL.md has a Provider Selection section documenting the local/offline path.
+
+    Verifies SURF-03 (with SURF-02 touchpoint): the skill documents that
+    advise(provider=, model=) is the sole provider-selection entry point, covers
+    the local Ollama path (key-free), and lists the FDARS_ADVISOR_PROVIDER env var.
+    """
+    assert SKILL_MD.exists(), f"SKILL.md not found at {SKILL_MD}"
+    text = SKILL_MD.read_text()
+    assert "Provider Selection" in text, (
+        "SKILL.md missing '## Provider Selection' section (SURF-03). "
+        "Add a section documenting advise(provider=, model=), env vars, and local Ollama path."
+    )
+    assert "ollama" in text.lower(), (
+        "SKILL.md Provider Selection section does not mention Ollama (local/offline path). "
+        "Document the key-free local provider path in the Provider Selection section."
+    )
+    assert "FDARS_ADVISOR_PROVIDER" in text, (
+        "SKILL.md Provider Selection section does not list env var FDARS_ADVISOR_PROVIDER. "
+        "Document the environment variable interface for provider selection."
+    )
