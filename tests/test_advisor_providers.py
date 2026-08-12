@@ -491,11 +491,16 @@ class TestResolveProvider:
         assert result.name == "anthropic"
 
     def test_unknown_provider_raises(self):
-        """resolve_provider(provider='ollama') raises ValueError naming only anthropic."""
+        """resolve_provider(provider='bogus') raises ValueError for an unknown name.
+
+        Updated in Phase 20 plan 02: now that 'ollama' is a recognised provider
+        (plan 20-02 landed OllamaProvider), the test uses a genuinely unknown
+        name so it does not accidentally pass via the ollama branch.
+        """
         from fdars.advisor.providers import resolve_provider
 
-        with pytest.raises(ValueError, match="ollama"):
-            resolve_provider(provider="ollama")
+        with pytest.raises(ValueError, match="bogus"):
+            resolve_provider(provider="bogus")
 
     def test_default_returns_anthropic_wrapped(self, monkeypatch):
         """resolve_provider() with no args and no env returns an anthropic-named provider.

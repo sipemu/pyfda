@@ -109,14 +109,10 @@ def resolve_provider(
         adapter = GeminiProvider(model=resolved_model, api_key=resolved_key)
 
     elif provider_name == "ollama":
-        # adapter added in plan 20-02; Ollama uses 'host' not 'base_url'
-        try:
-            from fdars.advisor.providers.ollama import OllamaProvider  # noqa: PLC0415
-        except ImportError as _exc:
-            raise ValueError(
-                f"resolve_provider: ollama adapter not yet installed. "
-                f"Install with: pip install fdars[ollama]"
-            ) from _exc
+        # adapter landed in plan 20-02; Ollama uses 'host' not 'base_url'.
+        # ImportError from _require_ollama() (inside OllamaProvider.__init__)
+        # surfaces directly — it already names 'pip install fdars[ollama]'.
+        from fdars.advisor.providers.ollama import OllamaProvider  # noqa: PLC0415
         adapter = OllamaProvider(model=resolved_model, host=resolved_base_url)
 
     else:
