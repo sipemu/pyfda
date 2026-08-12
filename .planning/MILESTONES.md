@@ -1,5 +1,22 @@
 # Milestones
 
+## v3.0 Provider-Agnostic Advisor, Full-Library Coverage (Shipped: 2026-08-12)
+
+**Phases completed:** 6 phases, 19 plans, 33 tasks
+
+**Key accomplishments:**
+
+- **Phase 19 — Provider foundation & grounding contract:** converted `advisor.py` into an `advisor/` package and refactored `advise()` behind a uniform `Provider` protocol + `AnthropicProvider` + a centralized `ValidateAndRetry` (native / validate-and-retry-to-cap) and `_check_grounding` guard — a pure refactor with the existing advisor suite green throughout.
+- **Phase 20 — Additional provider adapters:** added `OpenAIProvider` (+ `base_url` for OpenAI-compatible/local endpoints), `OllamaProvider` (fully local, no key), and `GeminiProvider` (with `_gemini_schema` Pydantic→Gemini translation), each an optional extra (`[openai]`/`[gemini]`/`[ollama]`/`[all-providers]`) with deferred imports and actionable ImportErrors; base package still imports with no provider installed.
+- **Phase 21 — Per-aspect advisor coverage:** added deterministic offline `build_diagnostics` for depth, outliers, classification, represent, regression, regression-CV, and SPM so all 12 fdars aspects now carry the three grounded task families through one shared schema/prompt (`_ASPECT_PRIMERS`) — no per-aspect duplication.
+- **Phase 22 — Surface integration:** exposed the new coverage through the MCP tools (depth runnable; 6 aspects diagnostics-only via `fdars_build_diagnostics`) while keeping the MCP boundary provably LLM-free, and documented provider selection in the Agent Skill; provider selection stays Python-API-only.
+- **Phase 23 — Packaging & CI:** Python 3.9–3.14 CI matrix with version-gated extras (`openai<2.0` on 3.9; `[gemini]`/`[mcp]` 3.10+), a bare-venv smoke proof (core imports with zero provider SDKs), and a 24-cell aspect × provider offline grounding matrix + live-contract confirmation.
+- **Phase 24 — Documentation:** new provider setup guide + per-aspect coverage page (builder-derived key tables, executed offline `build_diagnostics` fences emitting `FDARS_FENCE_OK`), updated overview/Python-API docs for provider-agnostic operation, all passing `mkdocs build --strict` offline.
+
+**Verification:** all 28 requirements (PROV/GROUND/ASPECT/SURF/QUAL/DOCS) Complete; milestone audit PASSED (28/28 wired, both core intents met); full suite 259 passed / 4 skipped.
+
+---
+
 ## v2.1 Document the AI Advisor (Shipped: 2026-08-11)
 
 **Phases completed:** 5 phases, 5 plans, 7 tasks
