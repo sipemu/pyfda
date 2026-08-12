@@ -153,7 +153,10 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
   3. The CI matrix covers Python 3.9–3.14 with correct extra/version gating (`openai<2.0` on 3.9; `[gemini]`/`[mcp]` 3.10+).
   4. A bare-venv smoke test proves the core imports and the offline `build_diagnostics` runs with no provider extra installed.
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+- [ ] 23-01-PLAN.md — TRACER: bare-venv smoke script + CI test-python matrix expansion to 3.9–3.14 with 3.9 gating (no gemini/mcp) + bare-venv smoke CI job [QUAL-03, QUAL-04]
+- [ ] 23-02-PLAN.md — Aspect × provider offline cross-coverage matrix test + live-integration one-per-provider clean-skip confirmation [QUAL-01, QUAL-02]
 
 ### Phase 24: Documentation
 
@@ -177,7 +180,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 | 20. Additional Provider Adapters | 3/3 | Complete    | 2026-08-12 |
 | 21. Per-Aspect Advisor Coverage | 5/5 | Complete    | 2026-08-12 |
 | 22. Surface Integration | 3/3 | Complete    | 2026-08-12 |
-| 23. Packaging & CI | 0/? | Not started | - |
+| 23. Packaging & CI | 0/2 | Planned | - |
 | 24. Documentation | 0/? | Not started | - |
 
 </details>
