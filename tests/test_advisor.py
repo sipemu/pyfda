@@ -329,6 +329,63 @@ class TestBuildDiagnosticsOffline:
         # Byte-identical JSON
         assert json.dumps(actual, sort_keys=True) == json.dumps(expected, sort_keys=True)
 
+    def test_represent_deterministic(self):
+        """represent build_diagnostics is byte-identical on repeated calls (ASPECT-01).
+
+        Uses the deterministic np.ones((20,50)) + np.linspace(0,1,50) fixture
+        (no RNG) so byte-identity holds unconditionally.  Verifies:
+        - Two calls return equal dicts.
+        - json.dumps(sort_keys=True) is byte-identical between calls.
+        - No numpy scalar types leak into the output.
+        - Both the dict form and the Fdata-like object form produce the same result.
+        """
+        import json
+        import types
+
+        from fdars.advisor import build_diagnostics
+
+        data = np.ones((20, 50))
+        argvals = np.linspace(0, 1, 50)
+
+        # ---- Dict form ----
+        d1 = build_diagnostics({"data": data, "argvals": argvals}, method="represent")
+        d2 = build_diagnostics({"data": data, "argvals": argvals}, method="represent")
+        assert d1 == d2, "Two calls (dict form) produced different dicts"
+        s1 = json.dumps(d1, sort_keys=True)
+        s2 = json.dumps(d2, sort_keys=True)
+        assert s1 == s2, "json.dumps not byte-identical between dict-form calls"
+
+        # No numpy scalar leak
+        def check_no_numpy(obj):
+            """Recursive walker: fail if any value is a numpy scalar (np.generic)."""
+            assert not isinstance(obj, np.generic), (
+                f"numpy scalar leaked into output: {type(obj)!r} = {obj!r}"
+            )
+            if isinstance(obj, dict):
+                for v in obj.values():
+                    check_no_numpy(v)
+            elif isinstance(obj, list):
+                for v in obj:
+                    check_no_numpy(v)
+
+        check_no_numpy(d1)
+
+        # ---- Fdata-like object form ----
+        obj = types.SimpleNamespace(data=data, argvals=argvals)
+        o1 = build_diagnostics(obj, method="represent")
+        o2 = build_diagnostics(obj, method="represent")
+        assert o1 == o2, "Two calls (object form) produced different dicts"
+        assert json.dumps(o1, sort_keys=True) == json.dumps(o2, sort_keys=True), (
+            "json.dumps not byte-identical between object-form calls"
+        )
+        check_no_numpy(o1)
+
+        # ---- Both forms produce identical output ----
+        assert d1 == o1, "Dict form and Fdata-like object form produced different results"
+        assert s1 == json.dumps(o1, sort_keys=True), (
+            "json.dumps of dict form and object form not byte-identical"
+        )
+
 
 class TestPrompts:
     """Offline tests for _system_prompt aspect threading (ASPECT-06)."""
@@ -355,6 +412,28 @@ class TestPrompts:
         )
         assert "depth_q10" not in base_no_arg, (
             "depth_q10 unexpectedly appeared in base prompt (no aspect)"
+        )
+
+    def test_prompt_represent_clause(self):
+        """represent clause appears only when aspect='represent' (ASPECT-06).
+
+        - is_uniform_grid token is present in _system_prompt(..., 'represent')
+        - is_uniform_grid token is absent from the base prompt (aspect='')
+        - represent-aspect prompt differs from depth-aspect prompt
+        """
+        from fdars.advisor._prompts import _system_prompt
+
+        repr_prompt = _system_prompt("interpretation", "represent")
+        assert "is_uniform_grid" in repr_prompt, (
+            "'is_uniform_grid' token missing from represent-aspect prompt"
+        )
+        base_prompt = _system_prompt("interpretation", "")
+        assert "is_uniform_grid" not in base_prompt, (
+            "'is_uniform_grid' unexpectedly appears in base (no-aspect) prompt"
+        )
+        depth_prompt = _system_prompt("interpretation", "depth")
+        assert repr_prompt != depth_prompt, (
+            "represent prompt must differ from depth prompt"
         )
 
 
