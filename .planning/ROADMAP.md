@@ -77,7 +77,10 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
   3. A centralized `_check_grounding` check runs on every provider path and rejects any `Advice` whose recommendations cite numbers not present in the diagnostics.
   4. A provider refusal or empty response raises a clear error rather than yielding a vacuously-valid `Advice`.
   5. The user selects provider and model via explicit `advise(provider=…, model=…)` params and/or env vars (`FDARS_ADVISOR_PROVIDER` / `_MODEL` / `_BASE_URL` + per-provider keys) with documented precedence; `provider=None` reproduces today's Anthropic default.
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 19-01-PLAN.md — TRACER: advisor.py→advisor/ package + Provider protocol + AnthropicProvider + ValidateAndRetry + resolve_provider + centralized _check_grounding; wire advise() end-to-end (green gate)
+- [ ] 19-02-PLAN.md — Mechanical split: _schema.py, _prompts.py, aspects/*.py; build_diagnostics dispatches lazily (green gate)
+- [ ] 19-03-PLAN.md — Offline provider/grounding test suite with in-memory fake providers (protocol, retry-cap, refusal, grounding-reject, precedence)
 
 ### Phase 20: Additional Provider Adapters
 **Goal**: Any of OpenAI (including OpenAI-compatible local endpoints), Ollama (fully local), and Gemini can back the advisor through the Phase 19 protocol, each installable as its own optional extra, with the grounding invariant holding on every backend.
@@ -137,7 +140,7 @@ Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-co
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 19. Provider Foundation & Grounding Contract | 0/? | Not started | - |
+| 19. Provider Foundation & Grounding Contract | 0/3 | Not started | - |
 | 20. Additional Provider Adapters | 0/? | Not started | - |
 | 21. Per-Aspect Advisor Coverage | 0/? | Not started | - |
 | 22. Surface Integration | 0/? | Not started | - |
