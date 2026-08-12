@@ -138,6 +138,8 @@ nav:
   - AI Advisor:
     - advisor/index.md
     - Python API: advisor/python-api.md
+    - Provider Setup: advisor/providers.md
+    - Per-Aspect Coverage: advisor/aspects.md
     - MCP Server: advisor/mcp.md
     - Agent Skill: advisor/agent-skill.md
   - Examples:
