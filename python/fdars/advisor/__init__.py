@@ -79,6 +79,7 @@ def build_diagnostics(
     method: str,
     *,
     argvals=None,
+    n_classes: "int | None" = None,
     **kwargs,
 ) -> dict:
     """Build a deterministic, JSON-serialisable diagnostics dict from an fdars result.
@@ -93,11 +94,16 @@ def build_diagnostics(
     result : dict or AlignmentResult
         Native fdars output dict (or a ``fdars.results`` wrapper whose ``.raw``
         attribute is the underlying dict).
-    method : {"alignment", "fpca", "basis", "smoothing", "clustering"}
+    method : {"alignment", "fpca", "basis", "smoothing", "clustering", "depth", \
+"outliers", "classification"}
         The fdars method that produced ``result``.
     argvals : array_like, optional
         Shared evaluation grid, shape ``(m,)``.  Used for amplitude/phase
         distance computations when ``aligned_data`` is present.
+    n_classes : int, optional
+        Ground-truth class count for the ``"classification"`` aspect; cannot be
+        inferred from a result dict (which contains only predicted labels), so
+        the caller supplies it.  Ignored by all other methods.
     **kwargs
         Reserved for future per-method options.
 
@@ -115,6 +121,8 @@ def build_diagnostics(
     _supported = {
         "alignment", "fpca", "basis", "smoothing", "clustering",  # existing
         "depth",                                                    # ASPECT-02 (plan 21-01)
+        "outliers",                                                 # ASPECT-02 (plan 21-02)
+        "classification",                                           # ASPECT-03 (plan 21-02)
     }
     method_lc = method.lower()
     if method_lc not in _supported:
@@ -160,6 +168,14 @@ def build_diagnostics(
     if method_lc == "depth":
         from fdars.advisor.aspects.depth import _build_depth_diagnostics  # noqa: PLC0415
         return _build_depth_diagnostics(raw, **kwargs)
+
+    if method_lc == "outliers":
+        from fdars.advisor.aspects.outliers import _build_outliers_diagnostics  # noqa: PLC0415
+        return _build_outliers_diagnostics(raw, **kwargs)
+
+    if method_lc == "classification":
+        from fdars.advisor.aspects.classification import _build_classification_diagnostics  # noqa: PLC0415
+        return _build_classification_diagnostics(raw, n_classes=n_classes, **kwargs)
 
     # Unreachable given the check above, but kept for safety.
     raise ValueError(f"Unhandled method: {method!r}")
