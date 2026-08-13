@@ -1,340 +1,452 @@
 # Stack Research
 
-**Domain:** Provider-agnostic LLM advisor layer — custom `Provider` protocol + per-backend adapters (Anthropic, OpenAI/OpenAI-compatible, Google Gemini, Ollama local)
-**Researched:** 2026-08-12
-**Confidence:** MEDIUM (package versions verified against PyPI live pages; structured-output API shapes verified against official docs and Ollama docs; Python version constraints verified)
+**Domain:** PyO3 Rust-to-Python binding layer — fdars-core 0.14.0 → 0.17.0 upgrade
+**Researched:** 2026-08-13
+**Confidence:** HIGH (all signatures verified against docs.rs/fdars-core/0.17.0; Cargo caret semantics and lock behaviour verified against local Cargo.lock)
 
 ---
 
-## Context
+## Decision Summary
 
-This STACK.md covers **only the additions needed for v3.0** — provider-agnostic backends plus full-library advisor coverage. The existing stack (MkDocs, SVGO, matplotlib, pytest-markdown-docs — from the v1.0 STACK.md) is unchanged. The existing advisor (anthropic>=0.72.0, pydantic>=2.0) is already shipped; this document prescribes what NEW deps are needed and how to wire them.
-
-The hard constraints from PROJECT.md:
-
-- **No LiteLLM, no pydantic-ai, no LangChain** — custom `Provider` protocol only.
-- **Core stays offline** — `build_diagnostics` never imports any provider SDK; tests run without network.
-- **Python 3.9–3.14** — the package targets this range; two of the new SDKs require >=3.10 (constraint documented per provider).
-- **CI network-free** — integration tests are env-gated; offline adapter mocks required for all backends.
+The upgrade is a single-line Cargo.toml change. No new Rust dependencies are required, no PyO3/numpy crate version changes are needed, and no Python packaging extras need adding. The `linalg` feature is opt-in and should NOT be enabled in this milestone (see rationale). The binding implementation uses the existing `convert.rs` layer without any modification.
 
 ---
 
-## Recommended Stack
+## 1. Cargo.toml Change — Exact Line
 
-### Existing (keep, no changes)
-
-| Technology | Version (current) | Purpose | Notes |
-|------------|-------------------|---------|-------|
-| `anthropic` | `>=0.72.0` | First-class Anthropic backend | Already in `[advisor]` extra; `client.messages.parse(output_format=Advice)` is the structured-output path |
-| `pydantic` | `>=2.0` | Schema validation and structured output | Already in `[advisor]` extra; `.model_json_schema()` used as input to every provider's schema API |
-
-### New Backend SDKs
-
-| Library | Pin | Python floor | Purpose | Why this, not httpx |
-|---------|-----|--------------|---------|---------------------|
-| `openai` | `>=1.30.0,<2.0` | 3.7.1+ (1.x) | OpenAI + all OpenAI-compatible endpoints via `base_url=` | The 1.x series covers 3.9; the 2.x series (2.54.0 current) requires 3.10. Pin to 1.x to stay within fdars's 3.9 floor. The `base_url` parameter on `OpenAI()` redirects to any endpoint (vLLM, LM Studio, LocalAI, Ollama-OpenAI-compat) with zero additional deps. Native `parse()`/`response_format` structured-output support in 1.x. |
-| `google-genai` | `>=1.0.0,<3.0` | 3.10+ | Google Gemini backend | The **only** current SDK — `google-generativeai` was deprecated Nov 2025 and ended support. `google-genai` 2.17.0 (Aug 2026) is GA; pin `<3.0` per upstream warning that 3.0.0 has breaking changes. Native `response_json_schema=` structured-output support. Requires Python 3.10+, so this extra cannot be installed on 3.9. |
-| `ollama` | `>=0.5.0` | 3.8+ | Local Ollama backend (no API key, no network) | Official `ollama` Python SDK (0.6.2, Apr 2026). Python >=3.8 — the most permissive floor of all providers. Native `format=` parameter for constrained JSON-schema decoding (introduced Ollama v0.5). Avoid the OpenAI-compat path for Ollama structured outputs — the native client's `format=` is more reliable than `response_format=` through the OpenAI-compat layer. |
-
-**Why NOT plain httpx for any of these:**
-
-- `openai` 1.x is a thin, well-maintained client; the `base_url=` param already covers all OpenAI-compatible endpoints — httpx would replicate it for no benefit.
-- `google-genai` handles auth (OAuth / API key / service account), retry, and streaming — not worth reimplementing.
-- `ollama` SDK wraps the local REST API simply; httpx would save ~15 KB of dependency but gain nothing.
-
-httpx is acceptable only as an internal implementation detail inside adapters (all three SDKs use it or httpx-core internally).
-
-### Supporting Libraries
-
-| Library | Already present? | Version | Purpose | When needed |
-|---------|-----------------|---------|---------|-------------|
-| `pydantic` | Yes (`[advisor]`) | `>=2.0` | Schema definition, `.model_json_schema()`, `model_validate_json()` for repair path | Every provider path |
-| `json-repair` | NO — do NOT add | — | Third-party JSON repair | **Do not add** — implement a simple 1-retry `model_validate_json` + reprompt loop; a full repair lib is overkill and a dep-bloat risk |
-
----
-
-## Structured-Output API Shape Per Provider
-
-This is the most consequential section for the adapter implementation.
-
-### Anthropic (existing, keep)
-
-```python
-# client.messages.parse with Pydantic output_format — already used in advisor.py
-response = client.messages.parse(
-    model=model,
-    max_tokens=16000,
-    thinking={"type": "adaptive"},
-    system=system_prompt,
-    output_format=Advice,          # Pydantic BaseModel → SDK converts to JSON schema
-    messages=[{"role": "user", "content": user_content}],
-)
-advice = response.parsed_output   # Advice instance, schema-validated
-```
-
-- **Confidence:** HIGH — already shipping in v2.0.
-- **Fallback:** Not needed; `messages.parse` raises on schema failure.
-- **Beta header:** SDK injects `"structured-outputs-2025-12-15"` beta header automatically.
-
-### OpenAI (new)
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key=os.environ["OPENAI_API_KEY"],
-    base_url="https://api.openai.com/v1",   # or http://localhost:1234/v1 for LM Studio etc.
-)
-
-# 1.x structured-output path (compatible with 3.9):
-response = client.chat.completions.create(
-    model=model,
-    response_format={
-        "type": "json_schema",
-        "json_schema": {
-            "name": "Advice",
-            "strict": True,
-            "schema": Advice.model_json_schema(),
-        },
-    },
-    messages=[{"role": "system", "content": system_prompt},
-              {"role": "user", "content": user_content}],
-)
-raw_json = response.choices[0].message.content
-advice = Advice.model_validate_json(raw_json)  # validate; retry on ValidationError
-```
-
-- **OpenAI-compatible endpoints (vLLM, LM Studio, LocalAI, Ollama-compat):** Set `base_url=` and `api_key="ollama"` (or any string). These endpoints implement the same `/v1/chat/completions` API surface. However, not all of them reliably support `json_schema` with `strict: true` — vLLM and LM Studio do; LocalAI has partial support; Ollama's OpenAI-compat layer may not honor the schema. Use the **validate-and-retry fallback** for all OpenAI-compat endpoints.
-- **Validate-and-retry fallback:** Catch `pydantic.ValidationError` or `json.JSONDecodeError`, reprompt with the error message included once, then raise if second attempt also fails.
-- **Python 3.9:** Use `openai>=1.30.0,<2.0`. The 2.x series (current: 2.54.0) requires Python 3.10+.
-
-### Google Gemini (new)
-
-```python
-from google import genai
-from google.genai import types
-
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-
-response = client.models.generate_content(
-    model=model,                                        # e.g. "gemini-2.0-flash"
-    contents=user_content,
-    config=types.GenerateContentConfig(
-        system_instruction=system_prompt,
-        response_mime_type="application/json",
-        response_json_schema=Advice.model_json_schema(),
-    ),
-)
-raw_json = response.text
-advice = Advice.model_validate_json(raw_json)
-```
-
-- **Python floor:** `google-genai >=1.0,<3.0` requires Python >=3.10. The `[gemini]` extra must declare `python_requires` or carry a runtime guard so users on 3.9 get a clear error.
-- **Schema subset:** Gemini supports a subset of JSON Schema. Deep nesting and `anyOf`/`oneOf` may be rejected. The `Advice` schema (flat object with nested `Recommendation` list) is within supported bounds — verify in adapter tests.
-- **Version pin rationale:** Pin `<3.0` because upstream (googleapis/python-genai) explicitly warns users to pin `<3.0.0` ahead of a breaking-change release.
-- **Validate-and-retry:** Apply the same retry pattern as OpenAI (one retry on `ValidationError`).
-
-### Ollama (new, local)
-
-```python
-import ollama
-
-response = ollama.chat(
-    model=model,                        # e.g. "llama3.2", "mistral"
-    messages=[{"role": "user", "content": full_prompt}],
-    format=Advice.model_json_schema(),  # dict accepted directly since Ollama v0.5
-    options={"temperature": 0},         # lower temperature improves schema adherence
-)
-raw_json = response.message.content
-advice = Advice.model_validate_json(raw_json)
-```
-
-- **No API key, no network call from CI** — Ollama is a local daemon; tests can mock `ollama.chat`.
-- **Python floor:** `ollama>=0.5.0` requires Python >=3.8 — no constraint on 3.9.
-- **Constrained decoding:** Ollama applies grammar-constrained decoding from the JSON schema since v0.5. More reliable than prompting alone with weaker local models, but still imperfect — the validate-and-retry fallback is required.
-- **Include schema in prompt:** Add the JSON schema to the prompt text as a reference ("Respond with JSON matching this schema: …"). This significantly improves adherence on smaller models.
-- **Not the OpenAI-compat path:** The native `ollama` SDK `format=` parameter is preferred over routing through `OpenAI(base_url="http://localhost:11434/v1")` for Ollama, because the OpenAI-compat layer's `response_format=json_schema` support is inconsistent across Ollama versions.
-
----
-
-## Validate-and-Retry Fallback (shared across all backends)
-
-For providers where structured-output guarantees are weaker (OpenAI-compat endpoints, Gemini with complex schemas, Ollama with small models), implement a single shared retry helper inside the adapter base class:
-
-```python
-def _parse_with_retry(raw_json: str, model_cls, call_fn, max_retries: int = 1):
-    """Try model_validate_json; on failure reprompt once with the error."""
-    try:
-        return model_cls.model_validate_json(raw_json)
-    except (json.JSONDecodeError, ValidationError) as exc:
-        if max_retries == 0:
-            raise
-        repair_prompt = (
-            f"Your previous response was not valid JSON matching the schema. "
-            f"Error: {exc}. Please correct and respond with only valid JSON."
-        )
-        raw_json = call_fn(repair_prompt)
-        return model_cls.model_validate_json(raw_json)  # raise on second failure
-```
-
-Do NOT add `json-repair` or `instructor` as deps — this simple loop covers the actual failure modes (missing fields, markdown-fenced JSON, type coercion errors) without extra dependencies.
-
----
-
-## Optional Extras Design
-
+**Current (`Cargo.toml` line 18):**
 ```toml
-# pyproject.toml additions
-
-[project.optional-dependencies]
-# Existing
-advisor = ["anthropic>=0.72.0", "pydantic>=2.0"]
-mcp    = ["mcp>=2.0.0"]           # Python 3.10+ (note already in pyproject.toml)
-
-# New per-provider extras
-openai = ["openai>=1.30.0,<2.0", "pydantic>=2.0"]
-gemini = ["google-genai>=1.0.0,<3.0", "pydantic>=2.0"]
-ollama = ["ollama>=0.5.0", "pydantic>=2.0"]
-
-# Meta-extra for "I want everything" — install all at once
-all-providers = [
-    "fdars[advisor]",
-    "fdars[openai]",
-    "fdars[gemini]",
-    "fdars[ollama]",
-]
+fdars-core = { version = "0.14.0", features = ["parallel"] }
 ```
 
-**Rationale:**
-
-- `[advisor]` stays as-is (backward compatibility for existing Anthropic users).
-- Each `[openai]`, `[gemini]`, `[ollama]` includes `pydantic>=2.0` because every adapter needs it for `.model_json_schema()` and `model_validate_json()`. This is a ~1MB dep but already required via `[advisor]`; installing any provider extra effectively brings it in.
-- `pydantic` is NOT added to the base `dependencies` list — `build_diagnostics` and the offline core must remain importable without it.
-- `[all-providers]` is a convenience meta-extra for docs examples and test environments.
-- `[gemini]` and `[openai 2.x]` both require Python 3.10+; the extras can be installed but the runtime guard in the adapter should check `sys.version_info >= (3, 10)` and raise `ImportError` with a clear message on 3.9.
-
-**Python 3.9 constraint table:**
-
-| Extra | Python 3.9 installable? | Notes |
-|-------|------------------------|-------|
-| `[advisor]` (Anthropic) | Yes | anthropic 0.72+ supports 3.9 |
-| `[openai]` (1.x pin) | Yes | openai 1.x supports 3.7.1+ |
-| `[gemini]` | No (runtime error) | google-genai requires 3.10+ |
-| `[ollama]` | Yes | ollama SDK supports 3.8+ |
-
----
-
-## What NOT to Add
-
-| Do NOT add | Why | Use instead |
-|-----------|-----|-------------|
-| `litellm` | Explicitly rejected per PROJECT.md; ~70MB dep; version churn; opaque routing; not needed when each adapter is 50 lines | Custom `Provider` protocol with per-backend adapters |
-| `pydantic-ai` | Explicitly rejected per PROJECT.md; heavy framework; forces opinionated agent patterns | Custom `Provider` protocol |
-| `langchain` / `langchain-*` | Explicitly rejected per PROJECT.md; massive dep tree; unnecessary abstraction | Custom `Provider` protocol |
-| `instructor` | Third-party retry/repair framework; adds a dep for functionality covered by a ~20-line retry helper | Inline `_parse_with_retry` in adapter base |
-| `json-repair` | Overkill; the failure modes (markdown fences, type coercion) are handled by reprompt; real schema violations should surface as errors | `model_validate_json` + one reprompt |
-| `openai>=2.0` | Requires Python 3.10+, breaking 3.9 support; 2.x API shape changed from 1.x | `openai>=1.30.0,<2.0` |
-| `google-generativeai` | Deprecated since Nov 2025, support ended; no new features | `google-genai` |
-| `aiohttp` / async-first design | The current advisor is sync; fdars users expect sync; adding async doubles the surface without clear benefit for this use case | Sync `Provider` protocol; add async adapter later if needed |
-
----
-
-## Provider Protocol Design (implementation note)
-
-The `Provider` protocol that all adapters implement should be minimal:
-
-```python
-# python/fdars/advisor/provider.py
-from typing import Protocol, runtime_checkable
-from fdars.advisor import Advice
-
-@runtime_checkable
-class Provider(Protocol):
-    def complete(self, system: str, user: str, output_cls: type) -> Advice:
-        """Call the LLM and return a schema-validated Advice object."""
-        ...
+**Required change:**
+```toml
+fdars-core = { version = "0.17.0", features = ["parallel"] }
 ```
 
-Each backend adapter (`AnthropicProvider`, `OpenAIProvider`, `GeminiProvider`, `OllamaProvider`) implements `complete()` and handles its own import guard (`try: import openai; except ImportError: raise ImportError("pip install fdars[openai]")`).
+### Caret semantics — why an explicit bump is required
 
-The existing `advise()` function in `advisor.py` should be refactored to:
+Cargo's default caret requirement `"0.14.0"` is equivalent to `^0.14.0`, which resolves to `>=0.14.0, <0.15.0`. The current `Cargo.lock` records `version = "0.14.0" checksum = "93dab17c..."`. This means Cargo will never resolve 0.15.0 or later unless the version string is changed. Writing `"0.17.0"` shifts the ceiling to `<0.18.0`, allowing Cargo to pick 0.17.x. After the change, run `cargo update` (or `maturin develop`) to regenerate `Cargo.lock` — the existing checksum entry will be replaced by the 0.17.0 checksum. Commit the updated `Cargo.lock`.
 
-```python
-def advise(diagnostics, *, task, domain_context, provider: Provider | None = None, model: str | None = None) -> Advice:
-    if provider is None:
-        provider = _default_provider(model)  # backward compat: defaults to Anthropic
-    ...
+### The `parallel` feature — keep it
+
+The `parallel` feature enables rayon-based parallelism throughout fdars-core and has been the only enabled feature since the project started. In 0.17.0 it additionally covers parallel CV folds, parallel elastic-FPCA (vert/horiz/joint), and the banded elastic distance parallelism introduced in 0.16.0. There is no reason to remove it.
+
+### The `linalg` feature — do NOT enable
+
+The `linalg` feature gates `faer` + `anofox-regression` (faster SVD for FPCA, 1.8–4.1x speedup, plus `ridge_regression_fit`).
+
+Do not enable it in this milestone for three reasons:
+
+1. **MSRV conflict.** `linalg` requires Rust 1.84+. pyfda's declared MSRV is `rust-version = "1.83"` in `Cargo.toml`. Enabling `linalg` would silently break CI on any Rust 1.83 runner or force an undeclared MSRV bump — both bad outcomes.
+2. **WASM incompatibility.** Upstream marks `linalg` as not WASM-compatible. pyfda does not currently ship WASM wheels, but enabling an incompatible feature without investigation is unnecessary risk.
+3. **No new public API to bind.** The FPCA speedup is internal. No functions in the 0.17.0 new-API list are gated solely behind `linalg`. The performance win is inherited if `linalg` is ever added in a future milestone after an MSRV bump to 1.84.
+
+---
+
+## 2. MSRV, Cargo.lock, and Transitive Dependency Implications
+
+**MSRV:** No change required. `rust-version = "1.83"` in `Cargo.toml` is compatible with fdars-core 0.17.0 + `parallel` feature only.
+
+**Transitive dependencies (current lock):**
+```
+fdars-core 0.14.0 → getrandom, nalgebra, num-complex, rand, rand_distr, rayon, rustfft
 ```
 
-This preserves backward compatibility (existing callers with no `provider` arg keep working) while enabling provider injection for tests and new backends.
+Upstream release notes for 0.15.0 and 0.16.0 both explicitly state **"no new dependencies"** for the additive APIs being bound. The `linalg` feature would add `faer` and `anofox-regression`, but since it is not being enabled those do not appear. After bumping the version string, regenerate `Cargo.lock` and commit it; CI will validate the resolved dependency tree.
+
+**PyO3 crate version:** No change. `pyo3 = { version = "0.28", features = ["extension-module", "abi3-py39"] }` is compatible with fdars-core 0.17.0 (fdars-core has no PyO3 dependency of its own).
+
+**numpy crate version:** No change. `numpy = "0.28"` for zero-copy array exchange is unaffected.
+
+**maturin build backend:** No change. `maturin>=1.0,<2.0` in `pyproject.toml` is compatible.
 
 ---
 
-## Version Compatibility
+## 3. New Rust Dependencies
 
-| Package | Compatible Python | Compatible with `pydantic>=2.0` | Notes |
-|---------|-------------------|--------------------------------|-------|
-| `anthropic>=0.72.0` | 3.8+ | Yes | Already shipping |
-| `openai>=1.30.0,<2.0` | 3.7.1+ | Yes | Use 1.x for 3.9 compat |
-| `google-genai>=1.0.0,<3.0` | 3.10+ | Yes | Pin <3.0 per upstream warning |
-| `ollama>=0.5.0` | 3.8+ | Yes | Best Python floor |
-| `pydantic>=2.0` | 3.8+ | — | Required by all adapters |
-| `mcp>=2.0.0` | 3.10+ | Yes | Unchanged from current |
+**None.** The upstream 0.15.0 and 0.16.0 release notes both state "no new dependencies." The new API (interpolation helpers, functional stats, scoring metrics, alignment registration) is implemented using existing transitive deps (`nalgebra`, `rayon`, `rustfft`). No new crate entries will appear in `Cargo.lock` beyond the fdars-core version number change itself.
 
 ---
 
-## Installation
+## 4. New Public API — Exact Signatures
 
-```bash
-# Anthropic (existing)
-pip install "fdars[advisor]"
+All signatures verified against `docs.rs/fdars-core/0.17.0`. `Result<T, FdarError>` indicates fallible functions whose errors must be converted via the existing `convert::to_pyresult()` helper. Functions returning a plain type are infallible.
 
-# OpenAI + OpenAI-compatible (vLLM, LM Studio, LocalAI)
-pip install "fdars[openai]"
+### 4a. Interpolation & Representation — `fdars_core::helpers`
 
-# Google Gemini (Python 3.10+ only)
-pip install "fdars[gemini]"
+This is a new module introduced in 0.15.0–0.16.0 (`fdars_core::helpers`). All items are re-exported at the crate root. No equivalent module existed in 0.14.0.
 
-# Ollama local (Python 3.8+, no API key)
-pip install "fdars[ollama]"
+**Enums:**
 
-# All providers at once (for docs examples and test envs)
-pip install "fdars[all-providers]"
+```rust
+// InterpolationMethod — #[non_exhaustive]
+pub enum InterpolationMethod {
+    Linear,        // linear interpolation between adjacent points
+    CubicHermite,  // monotone, C1-continuous cubic Hermite splines
+}
 
-# Dev environment with all providers + tests
-pip install "fdars[all-providers,dev,mcp]"
+// ExtrapolationPolicy — controls behavior when query point falls outside domain
+pub enum ExtrapolationPolicy {
+    Boundary,      // clamp to nearest boundary value (t < t_min → val at t_min)
+    Exception,     // return FdarError::InvalidParameter for out-of-range queries
+    Fill(f64),     // substitute this constant value for out-of-range queries
+    Periodic,      // wrap query points modulo domain length (((t-t_min)%L+L)%L)
+}
+
+// ImputationMethod
+pub enum ImputationMethod {
+    Linear,        // linear interpolation between nearest non-NaN neighbors
+    Mean,          // replace NaN with curve's mean of its non-NaN values
+    Constant(f64), // replace NaN with user-supplied constant
+}
+```
+
+**Functions:**
+
+```rust
+// Basic resampling — INFALLIBLE (boundary-clamps by default)
+pub fn fdata_interpolate(
+    data: &FdMatrix,
+    argvals: &[f64],      // original grid, length m, sorted
+    new_argvals: &[f64],  // target grid, length m_new, sorted, within original domain
+    method: InterpolationMethod,
+) -> FdMatrix             // shape (n, m_new)
+
+// Resampling with explicit extrapolation control — FALLIBLE
+pub fn fdata_interpolate_with_policy(
+    data: &FdMatrix,
+    argvals: &[f64],
+    new_argvals: &[f64],
+    method: InterpolationMethod,
+    policy: ExtrapolationPolicy,
+) -> Result<FdMatrix, FdarError>
+
+// B-spline fit-per-curve + evaluate at arbitrary query points — FALLIBLE
+pub fn spline_interpolate(
+    data: &FdMatrix,
+    argvals: &[f64],
+    query_points: &[f64],
+    order: usize,           // spline order: 1=linear, 4=cubic; must be in [1, m)
+) -> Result<FdMatrix, FdarError>
+
+// B-spline with explicit extrapolation control — FALLIBLE
+pub fn spline_interpolate_with_policy(
+    data: &FdMatrix,
+    argvals: &[f64],
+    query_points: &[f64],
+    order: usize,
+    policy: ExtrapolationPolicy,
+) -> Result<FdMatrix, FdarError>
+
+// NaN gap-filling — FALLIBLE
+// Error: InvalidDimension if argvals.len() != data.ncols();
+//        InvalidParameter if an entire curve is NaN
+pub fn impute_missing_values(
+    data: &FdMatrix,
+    argvals: &[f64],        // sorted, matches data column count
+    method: ImputationMethod,
+) -> Result<FdMatrix, FdarError>
+```
+
+**PyO3 binding notes for interpolation group:**
+- All `FdMatrix` I/O uses existing `numpy2d_to_fdmatrix` / `fdmatrix_to_numpy2d` — no new converter needed.
+- `InterpolationMethod` and `ExtrapolationPolicy` should be accepted as `&str` from Python and matched to enum variants in the wrapper, following the same pattern as `NormalizationMethod` in `fdata_mod.rs`.
+- `ExtrapolationPolicy::Fill(f64)` and `ImputationMethod::Constant(f64)` require an extra `f64` parameter (e.g. `fill_value: f64 = 0.0`) with a `#[pyo3(signature = (...))]` default when not applicable.
+- `fdata_interpolate` is infallible — the wrapper returns `Bound<'py, PyArray2<f64>>` directly, no `PyResult` wrapping.
+- All `Result`-returning functions use `to_pyresult(fdars_core::helpers::xyz(...))`.
+- **Target module:** New `src/helpers_mod.rs`; register as `"helpers"` submodule in `src/lib.rs`.
+
+### 4b. Functional Statistics — `fdars_core::fdata`
+
+These extend the existing `fdata` module. Add to `src/fdata_mod.rs` and include in its `register()` function.
+
+```rust
+// Pointwise sample variance (Bessel-corrected, ddof = n-1) — FALLIBLE
+// Error: InvalidDimension if n < 2
+pub fn functional_variance(data: &FdMatrix) -> Result<Vec<f64>, FdarError>
+
+// Pointwise sample std dev (ddof = n-1) — FALLIBLE
+// Error: InvalidDimension if n < 2
+pub fn functional_std(data: &FdMatrix) -> Result<Vec<f64>, FdarError>
+
+// M×M sample covariance matrix (Bessel-corrected) — FALLIBLE
+// Error: InvalidDimension if n < 2; InvalidParameter if m² overflows
+pub fn functional_covariance(data: &FdMatrix) -> Result<FdMatrix, FdarError>
+
+// Index of deepest curve under Fraiman-Muniz depth — FALLIBLE
+// Error: InvalidDimension if n < 1
+pub fn depth_based_median(data: &FdMatrix) -> Result<usize, FdarError>
+
+// Depth-trimmed mean — FALLIBLE
+// Error: if alpha outside [0,1) or data has zero rows
+pub fn trim_mean(data: &FdMatrix, alpha: f64) -> Result<Vec<f64>, FdarError>
+```
+
+**PyO3 binding notes for functional stats group:**
+- `functional_variance` → `PyResult<Bound<'py, PyArray1<f64>>>` via `vec_to_numpy1d`.
+- `functional_std` → same.
+- `functional_covariance` → `PyResult<Bound<'py, PyArray2<f64>>>` via `fdmatrix_to_numpy2d`.
+- `depth_based_median` → `PyResult<usize>`. PyO3 converts `usize` to Python `int` natively; no array helper needed. Document in the Python docstring that this is a 0-based row index into the data matrix, not a curve value.
+- `trim_mean` → `PyResult<Bound<'py, PyArray1<f64>>>` with `alpha: f64` parameter.
+- All five use `to_pyresult(fdars_core::fdata::xyz(...))`.
+
+### 4c. Scoring Metrics — `fdars_core::scoring`
+
+New `scoring` module (did not exist in 0.14.0). Create `src/scoring_mod.rs` and register as `"scoring"` submodule in `src/lib.rs`.
+
+```rust
+// All five take (y_true, y_pred, argvals) — FALLIBLE
+// Return scalar f64 (Simpson-integrated over argvals domain)
+// Error: InvalidDimension if shapes of y_true, y_pred, argvals are inconsistent,
+//        or n < 1, or m < 2
+
+pub fn functional_mae(
+    y_true: &FdMatrix,
+    y_pred: &FdMatrix,
+    argvals: &[f64],
+) -> Result<f64, FdarError>
+
+pub fn functional_mse(
+    y_true: &FdMatrix,
+    y_pred: &FdMatrix,
+    argvals: &[f64],
+) -> Result<f64, FdarError>
+
+pub fn functional_mape(
+    y_true: &FdMatrix,
+    y_pred: &FdMatrix,
+    argvals: &[f64],
+) -> Result<f64, FdarError>
+
+pub fn functional_msle(
+    y_true: &FdMatrix,
+    y_pred: &FdMatrix,
+    argvals: &[f64],
+) -> Result<f64, FdarError>
+
+pub fn functional_explained_variance(
+    y_true: &FdMatrix,
+    y_pred: &FdMatrix,
+    argvals: &[f64],
+) -> Result<f64, FdarError>
+```
+
+**IMPORTANT name correction:** The crate-level name is `functional_explained_variance`, not `explained_variance`. The milestone context used `explained_variance` as a shorthand; use the exact upstream identifier when writing the binding and the Python-side name.
+
+**PyO3 binding notes for scoring group:**
+- Both `y_true` and `y_pred` are `PyReadonlyArray2<'py, f64>`, each converted via `numpy2d_to_fdmatrix`.
+- `argvals` is `PyReadonlyArray1<'py, f64>`, converted via `numpy1d_to_vec`, passed as `&[f64]` via `.as_slice()` / reference to the owned `Vec`.
+- Return type for all five: `PyResult<f64>` — no array wrapping.
+- All five use `to_pyresult(fdars_core::scoring::xyz(...))`.
+- These pure scoring functions have no state and are natural candidates for the advisor's `build_diagnostics` pipeline.
+
+### 4d. Alignment / Registration — `fdars_core::alignment`
+
+These extend the existing `alignment_mod.rs`. No new file needed.
+
+#### Shift registration
+
+```rust
+// Struct (non_exhaustive) — access fields by name, never by destructuring pattern
+pub struct ShiftRegistrationResult {
+    pub registered_data: FdMatrix,  // aligned curves, same shape as input (n × m)
+    pub shifts: Vec<f64>,           // per-curve horizontal shifts δᵢ, length n
+                                    // positive = rightward shift, negative = leftward
+}
+
+// FALLIBLE — rigid horizontal shift registration via golden-section search
+// Error: various InvalidDimension/InvalidParameter conditions
+pub fn least_squares_shift_registration(
+    data: &FdMatrix,
+    argvals: &[f64],  // sorted ascending
+    max_shift: f64,   // half-width of shift search interval, must be > 0
+) -> Result<ShiftRegistrationResult, FdarError>
+```
+
+**PyO3 binding note:** Destructure `ShiftRegistrationResult` into a `PyDict` with keys `"registered_data"` (via `fdmatrix_to_numpy2d`) and `"shifts"` (via `vec_to_numpy1d`). The struct is `#[non_exhaustive]` — field access by name is stable; pattern destructuring is not.
+
+#### Registration quality scores
+
+```rust
+// Mean Simpson-weighted L2 spread of registered curves — FALLIBLE
+pub fn least_squares_score(
+    registered: &FdMatrix,
+    argvals: &[f64],
+) -> Result<f64, FdarError>
+
+// Mean pairwise Pearson correlation over all n(n-1)/2 curve pairs — FALLIBLE
+// Requires n >= 2
+pub fn pairwise_correlation_score(
+    registered: &FdMatrix,
+    argvals: &[f64],
+) -> Result<f64, FdarError>
+
+// LS spread + derivative-penalty term weighted by lambda — FALLIBLE
+pub fn sobolev_least_squares_score(
+    registered: &FdMatrix,
+    argvals: &[f64],
+    lambda: f64,    // non-negative weight for derivative penalty
+) -> Result<f64, FdarError>
+```
+
+**PyO3 binding notes:** All three return `PyResult<f64>`. `registered` is `PyReadonlyArray2<'py, f64>` via `numpy2d_to_fdmatrix`.
+
+#### Banded elastic alignment
+
+```rust
+// Karcher mean with optional Sakoe-Chiba band — INFALLIBLE
+// Returns same KarcherMeanResult as existing karcher_mean
+pub fn karcher_mean_with_band(
+    data: &FdMatrix,
+    argvals: &[f64],
+    max_iter: usize,
+    tol: f64,
+    lambda: f64,
+    band_frac: Option<f64>,  // None = exact DP; Some(0.2) = 20% band, 4-6× faster
+) -> KarcherMeanResult
+
+// Banded elastic self distance matrix — INFALLIBLE
+pub fn elastic_self_distance_matrix_with_band(
+    data: &FdMatrix,
+    argvals: &[f64],
+    lambda: f64,
+    band_frac: Option<f64>,
+) -> FdMatrix
+
+// Banded elastic cross distance matrix — INFALLIBLE
+pub fn elastic_cross_distance_matrix_with_band(
+    data1: &FdMatrix,
+    data2: &FdMatrix,
+    argvals: &[f64],
+    lambda: f64,
+    band_frac: Option<f64>,
+) -> FdMatrix
+```
+
+**PyO3 binding notes for banded group:**
+- `band_frac: Option<f64>` — expose from Python as `band_frac: Option<f64>` with `#[pyo3(signature = (..., band_frac=None))]`. PyO3 0.28 handles `Option<f64>` natively; Python callers pass `None` or a float.
+- `karcher_mean_with_band` returns `KarcherMeanResult` — use the same dict decomposition as the existing `karcher_mean` binding (keys: `mean`, `mean_srsf`, `aligned_data`, `gammas`, `n_iter`, `converged`).
+- Both distance-matrix variants are infallible — return `Bound<'py, PyArray2<f64>>` directly via `fdmatrix_to_numpy2d`.
+- `band_frac=None` falls back to the exact (unbanded) DP; `band_frac=Some(0.2)` restricts to 20% of grid length and runs 4–6× faster with minor approximation error.
+
+---
+
+## 5. Python Packaging Extras — No Changes Required
+
+All new API is pure Rust computation. No new Python runtime dependencies are introduced.
+
+- Interpolation helpers, functional stats, scoring metrics → core package (no extra)
+- Shift registration and banded alignment → core package (no extra)
+- Advisor wiring that consumes scoring metrics remains inside the existing `[advisor]` extra boundary
+
+The existing extras in `pyproject.toml` are unchanged:
+```toml
+plot      = ["matplotlib>=3.6"]
+dev       = ["pytest", "matplotlib>=3.6"]
+advisor   = ["anthropic>=0.72.0", "pydantic>=2.0"]
+mcp       = ["mcp>=2.0.0"]
+openai    = ["openai>=1.40,<2.0", "pydantic>=2.0"]
+gemini    = ["google-genai>=1.0,<3.0", "pydantic>=2.0"]
+ollama    = ["ollama>=0.6.2", "pydantic>=2.0"]
+all-providers = [...]
 ```
 
 ---
 
-## Alternatives Considered
+## 6. Module Placement Summary
 
-| Recommended | Alternative | Why Not |
-|-------------|-------------|---------|
-| `openai>=1.30.0,<2.0` | `openai>=2.0` | 2.x requires Python 3.10+, breaking 3.9; 1.x has full structured-output support and covers 3.9 |
-| `openai` SDK with `base_url=` | Separate deps per compatible endpoint | One SDK covers Ollama-compat, vLLM, LM Studio, LocalAI — no per-server dep needed |
-| `google-genai` | `google-generativeai` | Deprecated Nov 2025; new features only in `google-genai` |
-| `google-genai <3.0` | Latest unconstrained | Upstream warns 3.0.0 has breaking changes; pin to stay stable |
-| `ollama` native SDK | `OpenAI(base_url="http://localhost:11434/v1")` for Ollama | The native SDK's `format=` constrained decoding is more reliable than the OpenAI-compat `response_format` layer for local models |
-| Inline `_parse_with_retry` | `instructor` library | `instructor` adds a hard dep for ~20 lines of retry logic; not worth it |
+| New Content | Target Location |
+|-------------|----------------|
+| `fdata_interpolate`, `fdata_interpolate_with_policy`, `spline_interpolate`, `spline_interpolate_with_policy`, `impute_missing_values`, `InterpolationMethod`, `ExtrapolationPolicy`, `ImputationMethod` | New `src/helpers_mod.rs`; register as `"helpers"` in `src/lib.rs` |
+| `functional_variance`, `functional_std`, `functional_covariance`, `depth_based_median`, `trim_mean` | Extend existing `src/fdata_mod.rs` |
+| `functional_mae`, `functional_mse`, `functional_mape`, `functional_msle`, `functional_explained_variance` | New `src/scoring_mod.rs`; register as `"scoring"` in `src/lib.rs` |
+| `least_squares_shift_registration`, `least_squares_score`, `pairwise_correlation_score`, `sobolev_least_squares_score`, `karcher_mean_with_band`, `elastic_self_distance_matrix_with_band`, `elastic_cross_distance_matrix_with_band` | Extend existing `src/alignment_mod.rs` |
+
+---
+
+## 7. Existing convert.rs Layer — No Changes Required
+
+The existing `convert.rs` provides every primitive needed for the new bindings:
+
+| Converter | Used by new bindings |
+|-----------|---------------------|
+| `numpy2d_to_fdmatrix` | All new FdMatrix inputs |
+| `fdmatrix_to_numpy2d` | `functional_covariance`, `registered_data`, distance matrices |
+| `numpy1d_to_vec` | `argvals`, `query_points`, `shifts` |
+| `vec_to_numpy1d` | `functional_variance`, `functional_std`, `trim_mean`, `shifts` |
+| `to_pyresult` | Every `Result<T, FdarError>` conversion |
+| `to_pyerr` | Direct error wrapping where needed |
+
+The `usize` return of `depth_based_median` converts to Python `int` natively through PyO3 — no converter needed.
+
+---
+
+## 8. Signature Uncertainty Flags
+
+All core signatures are HIGH confidence (verified via docs.rs individual function pages).
+
+| Item | Confidence | Note |
+|------|------------|------|
+| `fdata_interpolate` infallibility | HIGH | Docs show plain `FdMatrix` return, no `Result` wrapper |
+| `karcher_mean_with_band` infallibility | HIGH | Docs show plain `KarcherMeanResult` return, same as `karcher_mean` |
+| `elastic_*_with_band` infallibility | HIGH | Docs show plain `FdMatrix` return |
+| `ShiftRegistrationResult` fields | HIGH | Struct page verified: `registered_data: FdMatrix`, `shifts: Vec<f64>` |
+| `functional_explained_variance` exact name | HIGH | Scoring module page confirms this is the full name (not `explained_variance`) |
+| `InterpolationMethod` variants | HIGH | Enum page verified: `Linear`, `CubicHermite` (#[non_exhaustive]) |
+| `ExtrapolationPolicy::Fill(f64)` | HIGH | Enum page verified with all four variants |
+| `linalg` MSRV = 1.84 | MEDIUM | Stated in docs summary; not verified against upstream `Cargo.toml` MSRV field directly |
+
+---
+
+## 9. Key Risks
+
+| Risk | Severity | Mitigation |
+|------|----------|------------|
+| `linalg` feature MSRV bump (Rust 1.84 required) | Medium | Do not enable `linalg`; MSRV stays at 1.83 |
+| `#[non_exhaustive]` on `ShiftRegistrationResult` | Low | Access fields by name in wrapper code, not via pattern destructuring |
+| `InterpolationMethod` is `#[non_exhaustive]` | Low | Add `_ => Err(PyValueError::new_err(...))` arm in the match |
+| `depth_based_median` returns 0-based `usize` index | Low | Document in Python docstring that the return is a row index, not a value |
+| `band_frac=None` = exact DP (not a no-op) | Low | Default `band_frac=None` in pyo3 signature to preserve existing accuracy; document that Some(0.2) trades accuracy for ~5x speed |
+| Column-major layout for all new FdMatrix I/O | Low | Existing `numpy2d_to_fdmatrix` / `fdmatrix_to_numpy2d` handle this — unchanged from all existing bindings |
+| `scoring` module path (`fdars_core::scoring::functional_explained_variance`, not `explained_variance`) | Low | Use the exact upstream name when writing the binding |
 
 ---
 
 ## Sources
 
-- [openai PyPI](https://pypi.org/project/openai/) — version 2.54.0 (Aug 2026), Python >=3.10 for 2.x (LOW, websearch)
-- [OpenAI structured outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs) — parse() method, json_schema response_format (LOW, webfetch)
-- [google-genai PyPI](https://pypi.org/project/google-genai/) — version 2.17.0 (Aug 2026), Python >=3.10 (LOW, webfetch)
-- [googleapis/python-genai GitHub](https://github.com/googleapis/python-genai) — response_json_schema param, pin <3.0 warning (LOW, webfetch)
-- [google-generativeai deprecated](https://github.com/google-gemini/deprecated-generative-ai-python) — deprecated Nov 2025 (LOW, websearch)
-- [ollama PyPI](https://pypi.org/project/ollama/) — version 0.6.2 (Apr 2026), Python >=3.8 (LOW, webfetch)
-- [Ollama structured outputs docs](https://docs.ollama.com/capabilities/structured-outputs) — format= parameter, JSON schema, Pydantic, temperature=0 (LOW, webfetch)
-- [LM Studio OpenAI compat structured output](https://lmstudio.ai/docs/developer/openai-compat/structured-output) — json_schema mode confirmed (LOW, websearch)
-- [vLLM structured outputs](https://docs.vllm.ai/en/v0.8.2/features/structured_outputs.html) — guided_json via OpenAI-compat (LOW, websearch)
-- [Gemini structured output docs](https://ai.google.dev/gemini-api/docs/structured-output) — response_json_schema, Pydantic support (LOW, webfetch)
-- Existing codebase: `python/fdars/advisor.py` — Anthropic adapter patterns, `_require_anthropic()` guard model
+- `docs.rs/fdars-core/0.17.0/fdars_core/` — module index, feature flags [HIGH — official docs]
+- `docs.rs/fdars-core/0.17.0/fdars_core/fdata/fn.functional_variance.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/fdata/fn.functional_std.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/fdata/fn.functional_covariance.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/fdata/fn.depth_based_median.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/fdata/fn.trim_mean.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/helpers/index.html` — module contents [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/helpers/fn.spline_interpolate.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/helpers/fn.spline_interpolate_with_policy.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/helpers/fn.fdata_interpolate.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/helpers/fn.fdata_interpolate_with_policy.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/helpers/fn.impute_missing_values.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/helpers/enum.ImputationMethod.html` — variants verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/helpers/enum.ExtrapolationPolicy.html` — variants verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/helpers/enum.InterpolationMethod.html` — variants verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/scoring/fn.functional_mae.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/scoring/fn.functional_mse.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/scoring/fn.functional_mape.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/scoring/fn.functional_msle.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/scoring/fn.functional_explained_variance.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/alignment/fn.least_squares_shift_registration.html` — signature + struct fields [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/alignment/struct.ShiftRegistrationResult.html` — struct definition [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/alignment/fn.karcher_mean_with_band.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/alignment/fn.elastic_self_distance_matrix_with_band.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/alignment/fn.elastic_cross_distance_matrix_with_band.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/alignment/fn.least_squares_score.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/alignment/fn.pairwise_correlation_score.html` — signature verified [HIGH]
+- `docs.rs/fdars-core/0.17.0/fdars_core/alignment/fn.sobolev_least_squares_score.html` — signature verified [HIGH]
+- `github.com/sipemu/fdars/releases` — 0.15.0 and 0.16.0 release notes [MEDIUM — GitHub page]
+- `/home/simonm/projects/rust/pyfda/Cargo.toml` + `Cargo.lock` — current pin and dependency tree [HIGH — local source]
 
 ---
 
-*Stack research for: fdars v3.0 — provider-agnostic LLM advisor backends*
-*Researched: 2026-08-12*
+*Stack research for: pyfda v4.0 — fdars-core 0.14.0 → 0.17.0 upgrade*
+*Researched: 2026-08-13*
