@@ -1,19 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: Provider-Agnostic Advisor, Full-Library Coverage
-status: Awaiting next milestone
-stopped_at: Completed 24-03-PLAN.md (final plan of Phase 24 / v3.0 milestone)
-last_updated: "2026-08-12T14:33:33.980Z"
-last_activity: 2026-08-12
-last_activity_desc: v3.0 roadmap created (Phases 19–24), 28/28 requirements mapped
+milestone: v4.0
+milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
+status: planning
+last_updated: "2026-08-13T19:59:46.572Z"
+last_activity: 2026-08-13
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 19
-  completed_plans: 19
-current_phase: 24
-current_phase_name: Documentation
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -27,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 
 ## Current Position
 
-Phase: Milestone v3.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-12 — Milestone v3.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-08-13 — Milestone v4.0 started
 
 ## Performance Metrics
 

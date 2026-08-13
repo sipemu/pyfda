@@ -14,26 +14,25 @@ The documentation — diagrams first, examples second — must make functional d
 - ✅ **v1.0 — Documentation Overhaul** (Phases 1–9): shared SVG `STYLE_SPEC.md` + SVGO/determinism CI guardrails, a nav+reference-API audit that derived the gap/example scope, six section diagram sweeps (learn/represent/align/analyze/regression/monitoring — all method-accurate and R-era-free), and an examples sweep (all pages run against the current API, plus five new worked examples).
 - ✅ **v2.0 — Grounded AI analysis advisor** (Phases 10–13): a deterministic, offline `build_diagnostics` core + grounded `advise()` (Claude structured outputs, `claude-opus-4-8`) exposed across four surfaces — Python API (recommend-only), Tool/MCP (agentic re-run/compare over stdio), and an Anthropic Agent Skill. The grounding invariant holds throughout: fdars computes every number, the LLM only interprets and cites diagnostic values. Human UAT (2026-08-10) confirmed the real-key path produces grounded advice.
 - ✅ **v2.1 — Document the AI Advisor** (Phases 14–18): a new top-level "AI Advisor" docs-site section — a concept/grounding-invariant overview with two hand-authored inline SVG diagrams (grounding invariant, advisor loop), plus per-surface pages for the Python API (recommend-only, with an offline worked example that executes in the docs build), the Tool/MCP server (3 tools, by-reference handle model, stdio, re-run/compare loop), and the Agent Skill (git-URL install + interpret→recommend→re-run→compare walkthrough) — all wired into nav and passing a `mkdocs build --strict` gate. Method-accurate against the shipped v2.0 code; diagrams pass the SVGO/determinism gate.
+- ✅ **v3.0 — Provider-Agnostic Advisor, Full-Library Coverage** (Phases 19–24): a custom `Provider` protocol with Anthropic/OpenAI(-compatible)/Gemini/Ollama adapters (per-provider optional extras) and a centralized validate-and-retry + `_check_grounding` guard, deterministic offline `build_diagnostics` for all 12 fdars aspects through one shared schema/prompt, MCP + Agent Skill surface updates (MCP stays LLM-free), a Python 3.9–3.14 CI matrix with version-gated extras + bare-venv smoke proof, and a provider-setup + per-aspect docs section. 28/28 requirements complete; suite 259 passed / 4 skipped.
 
 **Grounding invariant (v2.0):** every recommendation cites computed diagnostics and states an expected effect; the LLM never fabricates numbers.
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v3.0 Provider-Agnostic Advisor, Full-Library Coverage
+## Current Milestone: v4.0 fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 
-**Goal:** Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-compatible, Google Gemini, and local models via Ollama) through a custom `Provider` protocol, and give every fdars analysis aspect its own advisor (diagnostics + grounded task families) like clustering has today — with the grounding invariant preserved on every backend.
+**Goal:** Upgrade the pinned `fdars-core` from 0.14.0 to 0.17.0, expose the new upstream functional-data capabilities through PyO3 bindings and the Python API, extend the v3.0 AI advisor to cover the relevant new capabilities, and document everything to the project's method-accurate standard (hand-authored SVG diagrams + runnable worked examples).
 
 **Target features:**
-- Custom `Provider` protocol + per-backend adapters: `anthropic` (keep first-class), `openai` (+ `base_url` for OpenAI-compatible: vLLM/LM Studio/LocalAI), `gemini`, `ollama` (local, no API key).
-- Provider selection & config: choose provider+model via params/env, key handling, `base_url` for local/compatible endpoints, offline-capable local path.
-- Grounding across providers: native structured outputs/tool-use where available (Anthropic, OpenAI); JSON-schema validate-and-retry/repair fallback for weaker/local models. fdars still computes every number; the LLM only interprets and cites.
-- Refactor existing advisors (clustering, smoothing, FPCA, alignment, basis) onto the provider layer.
-- New per-aspect advisors — `build_diagnostics` + grounded task families — for represent/basis, smoothing, alignment, depth/outliers, classification, regression/FPCA, and monitoring/SPM (control charts, tolerance, conformal, seasonal).
-- Surface updates: extend the Tool/MCP server + Agent Skill to expose new aspect advisors and provider selection.
-- Packaging: per-provider optional extras (`[openai]`, `[gemini]`, `[ollama]`) alongside `[advisor]`.
-- Tests & docs: offline determinism per aspect, adapter tests with mocks, env-gated live integration; update the AI Advisor docs section (provider setup + per-aspect pages).
+- Crate bump `fdars-core 0.14.0 → 0.17.0` (all upstream changes 0.15→0.17 are additive/non-breaking); rebuild via maturin; verify the full existing binding + advisor test suite stays green (perf wins — parallel CV folds, faer FPCA SVD, parallel elastic-FPCA — come for free, no new API to bind).
+- New bindings — Interpolation & representation: `spline_interpolate`, interpolation/spline with `ExtrapolationPolicy` (Boundary/Exception/Fill/Periodic), `impute_missing_values` + `ImputationMethod` (Linear/Mean/Constant).
+- New bindings — Functional statistics & scoring: `functional_variance`/`functional_std`/`functional_covariance`, `depth_based_median`, `trim_mean`; scoring metrics `functional_mae`/`mse`/`mape`/`msle`/`explained_variance`.
+- New bindings — Alignment / registration: `least_squares_shift_registration` + `ShiftRegistrationResult`; registration-quality scores (`least_squares_score`, `pairwise_correlation_score`, `sobolev_least_squares_score`); banded elastic alignment (`karcher_mean_with_band`, `*_distance_matrix_with_band`, `band_frac`).
+- Advisor extension: wire relevant new capabilities (scoring metrics, imputation, registration quality) into `build_diagnostics` / grounded task families / MCP surface, preserving the grounding invariant.
+- Docs: new/updated inline SVG concept diagrams + runnable worked examples across `represent/`, `analyze/`, `align/` (and advisor pages); full `mkdocs build --strict` green.
 
-**Key context:** Crosses from docs into feature/code + packaging + CI work (`python/fdars/advisor`, `python/fdars/mcp`, `pyproject.toml` extras). Custom protocol only — no LiteLLM/pydantic-ai dependency. The grounding invariant is the hard constraint on every provider, including offline local. Large scope: all aspects in one milestone — the roadmap phases them.
+**Key context:** Crosses back into binding + advisor code (`Cargo.toml`, `src/*_mod.rs`, `python/fdars/`, `python/fdars/advisor`, `python/fdars/mcp`, `pyproject.toml` if extras change) — the v1.0 "docs-only, no code changes" framing no longer applies (v2.0/v3.0 already crossed this line). The grounding invariant remains the hard constraint on any advisor work. Upstream 0.15→0.17 is non-breaking, so the bump should not disturb existing bindings; risk concentrates in new-binding correctness (column-major layout, `Result` conversions) and method-accuracy of the new diagrams/examples. Large scope — the roadmap phases the three binding groups + advisor + docs.
 
 ## Requirements
 
@@ -74,18 +73,26 @@ The documentation — diagrams first, examples second — must make functional d
 - ✓ Agent Skill page — git-URL install + interpret→recommend→re-run→compare walkthrough (SKILLDOC-01/02) — v2.1
 - ✓ "AI Advisor" nav section wired into `mkdocs.yml`; full `mkdocs build --strict` green (NAVDOC-01/02) — v2.1
 
+**v3.0 — Provider-Agnostic Advisor, Full-Library Coverage (Phases 19–24):**
+- ✓ Custom `Provider` protocol + Anthropic/OpenAI(-compatible)/Gemini/Ollama adapters, centralized validate-and-retry + `_check_grounding` guard (PROV/GROUND) — v3.0
+- ✓ Deterministic offline `build_diagnostics` + three grounded task families for all 12 fdars aspects via one shared schema/prompt (ASPECT) — v3.0
+- ✓ MCP + Agent Skill surface integration; MCP boundary stays provably LLM-free; provider selection Python-API-only (SURF) — v3.0
+- ✓ Python 3.9–3.14 CI matrix with version-gated extras + bare-venv smoke proof + aspect×provider offline grounding matrix (QUAL) — v3.0
+- ✓ Provider-setup + per-aspect coverage docs section, executed offline `build_diagnostics` fences, `mkdocs build --strict` green (DOCS) — v3.0
+
 ### Active
 
-<!-- v3.0 in progress — provider-agnostic advisor + full-library advisor coverage. Requirements defined in REQUIREMENTS.md. -->
+<!-- v4.0 in progress — fdars-core 0.17 upgrade: new bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
 
-_v3.0 in progress — see `## Current Milestone: v3.0` above and `REQUIREMENTS.md` for scoped REQ-IDs (provider abstraction, grounding-across-providers, per-aspect advisors, surface/packaging/docs updates)._
+_v4.0 in progress — see `## Current Milestone: v4.0` above and `REQUIREMENTS.md` for scoped REQ-IDs (crate bump + regression, interpolation/representation bindings, functional-stats & scoring bindings, alignment/registration bindings, advisor extension, diagrams + worked-example docs)._
 
 ### Out of Scope
 
 - Programmatic/tool-generated diagrams — user chose to keep diagrams hand-authored inline SVG
 - Dark-mode / theming rework of SVGs — not part of this milestone's intent
-- Library/runtime code changes to `fdars` or `fdars-core` — this is a documentation milestone; code fixes only if an example exposes a genuine binding bug
 - R-parity feature work — tracked separately (see `PARITY_PLAN.md`)
+- Binding upstream internals with no public API — the 0.15→0.17 performance wins (parallel CV folds, faer FPCA SVD, parallel elastic-FPCA) are inherited via the crate bump, not separately exposed
+- HTTP/SSE MCP transport (HTTP-01 / FUT-01) — still deferred; stdio only
 
 ## Context
 
@@ -137,4 +144,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-12 — started v3.0 milestone (Provider-Agnostic Advisor, Full-Library Coverage)*
+*Last updated: 2026-08-13 — started v4.0 milestone (fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs)*
