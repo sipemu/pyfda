@@ -91,7 +91,8 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
   1. `Cargo.toml` pins `fdars-core = "0.17.0"` with the `parallel` feature retained and the `linalg` feature NOT enabled (MSRV 1.83 preserved); `Cargo.lock` is regenerated and committed, and `maturin develop` builds the extension green.
   2. The full existing binding + advisor test suite passes against 0.17.0, with FPCA-related tolerances relaxed so results are equivalent within `1e-8·σ₁` and no exact-equality FPCA test or doc fence breaks on the faer SVD drift.
   3. No existing binding signature or public behavior changes — the additive/non-breaking 0.15→0.17 diff is confirmed against the live suite, not assumed.
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 25-01-PLAN.md — Bump fdars-core 0.14.0→0.17.0, regenerate Cargo.lock, maturin build, full suite green with minimally-scoped FPCA tolerance relaxations (DEP-01, DEP-02)
 
 ### Phase 26: Interpolation, Imputation & Functional Statistics Bindings
 **Goal**: Users can spline-interpolate onto off-grid points with a chosen extrapolation policy, impute missing values on a regular grid, and compute functional variance/std/covariance plus depth-based median and trimmed mean — all layout-correct across the numpy↔FdMatrix boundary.
@@ -145,7 +146,7 @@ Phases execute in numeric order: 25 → 26 ∥ 27 → 28 → 29 (26 and 27 are p
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 25. Crate Bump + Regression Gate | 0/TBD | Not started | - |
+| 25. Crate Bump + Regression Gate | 0/1 | Not started | - |
 | 26. Interpolation, Imputation & Functional Statistics Bindings | 0/TBD | Not started | - |
 | 27. Scoring Metrics & Alignment/Registration Bindings | 0/TBD | Not started | - |
 | 28. Advisor Extension | 0/TBD | Not started | - |
