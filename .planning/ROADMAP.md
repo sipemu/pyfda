@@ -75,7 +75,7 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
 
 ### Summary
 
-- [ ] **Phase 25: Crate Bump + Regression Gate** - Bump `fdars-core` 0.14.0→0.17.0, regenerate `Cargo.lock`, rebuild via maturin, full existing suite green with FPCA tolerances relaxed to absorb the faer SVD drift. Blocks all binding work.
+- [x] **Phase 25: Crate Bump + Regression Gate** - Bump `fdars-core` 0.14.0→0.17.0, regenerate `Cargo.lock`, rebuild via maturin, full existing suite green with FPCA tolerances relaxed to absorb the faer SVD drift. Blocks all binding work. (completed 2026-08-14)
 - [ ] **Phase 26: Interpolation, Imputation & Functional Statistics Bindings** - Spline/interpolation `_with_policy` + `ExtrapolationPolicy`, `impute_missing_values` + `ImputationMethod`, `functional_variance/std/covariance`, `depth_based_median`, `trim_mean`; `fd.interpolate()`/`fd.impute()` methods; multi-curve round-trip transposition tests. Parallel-eligible with Phase 27.
 - [ ] **Phase 27: Scoring Metrics & Alignment/Registration Bindings** - `functional_mae/mse/mape/msle/explained_variance`; `least_squares_shift_registration` (+ result dict); registration-quality scores; banded `*_with_band` elastic alignment. Parallel-eligible with Phase 26.
 - [ ] **Phase 28: Advisor Extension** - `scoring` diagnostics method + imputation-quality on `represent` + registration-quality on `alignment`, MCP guard-sync updated in one atomic commit; grounding invariant preserved; offline determinism tests. Depends on Phases 26 + 27.
@@ -162,7 +162,7 @@ Phases execute in numeric order: 25 → 26 ∥ 27 → 28 → 29 (26 and 27 are p
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 25. Crate Bump + Regression Gate | 0/1 | Not started | - |
+| 25. Crate Bump + Regression Gate | 1/1 | Complete    | 2026-08-14 |
 | 26. Interpolation, Imputation & Functional Statistics Bindings | 0/TBD | Not started | - |
 | 27. Scoring Metrics & Alignment/Registration Bindings | 0/TBD | Not started | - |
 | 28. Advisor Extension | 0/TBD | Not started | - |

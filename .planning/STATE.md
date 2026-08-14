@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
-current_phase: 25
-current_phase_name: crate-bump-regression-gate
-status: verifying
+current_phase: 26
+current_phase_name: Interpolation, Imputation & Functional Statistics Bindings
+status: planning
 stopped_at: "Phase 25 Plan 01 complete — checkpoint:human-verify awaiting user"
-last_updated: "2026-08-14T07:53:43.277Z"
+last_updated: "2026-08-14T10:08:00.218Z"
 last_activity: 2026-08-14
 last_activity_desc: Phase 25 execution started
 progress:
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 ## Current Position
 
-Phase: 25 (crate-bump-regression-gate) — EXECUTING
-Plan: 1 of 1
-Status: Phase complete — ready for verification
-Last activity: 2026-08-14 — Phase 25 execution started
+Phase: 26 — Interpolation, Imputation & Functional Statistics Bindings
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-14 — Phase 25 complete, transitioned to Phase 26
 
 Progress: [██████████] 100%
 
@@ -38,7 +38,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 0 (this milestone); 19 across v1.0–v3.0
+- Total plans completed: 1 (this milestone); 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -46,7 +46,7 @@ Progress: [██████████] 100%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 25 | TBD | - | - |
+| 25 | 1 | - | - |
 | 26 | TBD | - | - |
 | 27 | TBD | - | - |
 | 28 | TBD | - | - |

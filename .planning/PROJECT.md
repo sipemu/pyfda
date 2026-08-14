@@ -80,11 +80,14 @@ The documentation — diagrams first, examples second — must make functional d
 - ✓ Python 3.9–3.14 CI matrix with version-gated extras + bare-venv smoke proof + aspect×provider offline grounding matrix (QUAL) — v3.0
 - ✓ Provider-setup + per-aspect coverage docs section, executed offline `build_diagnostics` fences, `mkdocs build --strict` green (DOCS) — v3.0
 
+**v4.0 — fdars-core 0.17 Upgrade (Phases 25–29, in progress):**
+- ✓ `fdars-core` bumped 0.14.0 → 0.17.0 (parallel-only, no `linalg`); full binding + advisor suite green (259 passed / 4 skipped / 0 failed), zero FPCA tolerance changes needed — the faer SVD `1e-8·σ₁` drift never surfaced (DEP-01/02) — Phase 25
+
 ### Active
 
 <!-- v4.0 in progress — fdars-core 0.17 upgrade: new bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
 
-_v4.0 in progress — see `## Current Milestone: v4.0` above and `REQUIREMENTS.md` for scoped REQ-IDs (crate bump + regression, interpolation/representation bindings, functional-stats & scoring bindings, alignment/registration bindings, advisor extension, diagrams + worked-example docs)._
+_v4.0 in progress — Phase 25 (crate bump + regression gate) ✓ shipped on the 0.17.0 baseline. Remaining: interpolation/representation bindings (26), functional-stats & scoring + alignment/registration bindings (27), advisor extension (28), diagrams + worked-example docs (29). See `## Current Milestone: v4.0` and `REQUIREMENTS.md` for scoped REQ-IDs._
 
 ### Out of Scope
 
@@ -125,6 +128,7 @@ _v4.0 in progress — see `## Current Milestone: v4.0` above and `REQUIREMENTS.m
 | Advisor docs live in a new top-level "AI Advisor" nav section | The v2.0 feature shipped without user-facing docs; a dedicated section makes it discoverable | ✓ Good — section + 4 pages wired, `--strict` build green (v2.1) |
 | Only the Python API page carries an executed offline fence; MCP/Skill fences illustrative | The docs build must not depend on the `[mcp]`/`[advisor]` extras, Python 3.10+, or an API key | ✓ Good — build stays offline; fence execution proven via `FDARS_FENCE_OK` sentinel (v2.1) |
 | Per-page human review gate on the built site, self-served during the autonomous run | User authorized a fully-autonomous run; orchestrator self-reviewed each page against source + rendered diagrams | ✓ Good — caught a diagram label-overlap and 7 stale cross-refs, fixed inline (v2.1) |
+| Bump `fdars-core` to 0.17.0 as an isolated regression gate before any new bindings | Isolate the sole numeric change (faer FPCA SVD drift) on a green baseline so binding-correctness issues can't hide behind an upgrade regression | ✓ Good — suite green with zero test changes; drift never exceeded existing tolerances (v4.0 Phase 25) |
 
 ## Evolution
 
@@ -144,4 +148,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-13 — started v4.0 milestone (fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs)*
+*Last updated: 2026-08-14 after Phase 25 — fdars-core bumped to 0.17.0, regression gate green (v4.0 in progress)*
