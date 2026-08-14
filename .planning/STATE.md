@@ -2,15 +2,18 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
-status: planning
-last_updated: "2026-08-13T00:00:00.000Z"
-last_activity: 2026-08-13
+current_phase: 25
+current_phase_name: crate-bump-regression-gate
+status: verifying
+stopped_at: "Phase 25 Plan 01 complete — checkpoint:human-verify awaiting user"
+last_updated: "2026-08-14T07:53:43.277Z"
+last_activity: 2026-08-14
+last_activity_desc: Phase 25 execution started
 progress:
-  total_phases: 5
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 1
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
 ---
 
 # Project State
@@ -20,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-13)
 
 **Core value:** Upgrade `fdars-core` 0.14.0→0.17.0, expose the new functional-data capabilities (interpolation/imputation, functional statistics/scoring, shift registration/registration-quality/banded elastic alignment) through PyO3 bindings + the Python API, extend the v3.0 grounded advisor to cover the relevant new capabilities, and document everything method-accurately — with the grounding invariant intact throughout.
-**Current focus:** Phase 25 — Crate Bump + Regression Gate
+**Current focus:** Phase 25 — crate-bump-regression-gate
 
 ## Current Position
 
-Phase: 25 of 29 (Crate Bump + Regression Gate)
-Plan: — of — in current phase
-Status: Ready to plan
-Last activity: 2026-08-13 — v4.0 roadmap created (Phases 25–29); 16/16 requirements mapped
+Phase: 25 (crate-bump-regression-gate) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-08-14 — Phase 25 execution started
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -55,6 +58,11 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 25 P01 | 50 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -70,6 +78,8 @@ Recent decisions affecting current work:
 - [v4.0 roadmap]: Docs LAST (Phase 29) so executed offline fences + diagrams run against the real shipped bindings
 - [research]: Do NOT enable `linalg` feature (requires Rust 1.84 > MSRV 1.83); `parallel` retained; 0.15→0.17 perf wins inherited via the bump, no API to bind
 - [research]: Enums cross the boundary as string params + `match` arms with a `#[non_exhaustive]` fallback; compound results return as PyDict; `fd.interpolate()`/`fd.impute()` become Fdata methods, stats/scoring stay module-level
+- [Phase ?]: Cargo.lock gitignored (library crate convention); regenerated on disk but not committed — consistent with repo policy
+- [Phase ?]: faer FPCA SVD drift (1e-8·σ₁, fdars-core 0.15+) did not surface at suite's existing tolerances: zero test failures, zero tolerance relaxations; DEP-02 satisfied
 
 ### Pending Todos
 
@@ -96,8 +106,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-13
-Stopped at: v4.0 roadmap created — Phases 25–29 written, 16/16 requirements mapped, traceability filled
+Last session: 2026-08-14T07:53:43.262Z
+Stopped at: Phase 25 Plan 01 complete — checkpoint:human-verify awaiting user
 Resume file: None
 
 ## Operator Next Steps

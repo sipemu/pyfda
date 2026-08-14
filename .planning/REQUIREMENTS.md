@@ -10,8 +10,8 @@
 
 ### Dependency & Regression (DEP)
 
-- [ ] **DEP-01**: `fdars-core` bumped 0.14.0 → 0.17.0 in `Cargo.toml`; `Cargo.lock` regenerated and committed; `parallel` feature retained; `linalg` feature NOT enabled (requires Rust 1.84 > pyfda MSRV 1.83).
-- [ ] **DEP-02**: The full existing binding + advisor test suite passes against 0.17.0, with FPCA-related tolerances relaxed to absorb the faer SVD numeric drift (results equivalent within `1e-8·σ₁`).
+- [x] **DEP-01**: `fdars-core` bumped 0.14.0 → 0.17.0 in `Cargo.toml`; `Cargo.lock` regenerated and committed; `parallel` feature retained; `linalg` feature NOT enabled (requires Rust 1.84 > pyfda MSRV 1.83).
+- [x] **DEP-02**: The full existing binding + advisor test suite passes against 0.17.0, with FPCA-related tolerances relaxed to absorb the faer SVD numeric drift (results equivalent within `1e-8·σ₁`).
 
 ### Interpolation & Representation (REPR)
 
@@ -63,8 +63,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEP-01 | Phase 25 | Pending |
-| DEP-02 | Phase 25 | Pending |
+| DEP-01 | Phase 25 | Complete |
+| DEP-02 | Phase 25 | Complete |
 | REPR-01 | Phase 26 | Pending |
 | REPR-02 | Phase 26 | Pending |
 | REPR-03 | Phase 26 | Pending |

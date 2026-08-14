@@ -84,58 +84,74 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
 ### Phase Details
 
 ### Phase 25: Crate Bump + Regression Gate
+
 **Goal**: The pinned `fdars-core` is upgraded to 0.17.0 and the entire existing binding + advisor suite proves green on the new engine, isolating the sole numeric behavior change (faer FPCA SVD drift) before any new binding work begins.
 **Depends on**: Nothing (first phase of v4.0; builds on shipped v3.0)
 **Requirements**: DEP-01, DEP-02
 **Success Criteria** (what must be TRUE):
+
   1. `Cargo.toml` pins `fdars-core = "0.17.0"` with the `parallel` feature retained and the `linalg` feature NOT enabled (MSRV 1.83 preserved); `Cargo.lock` is regenerated and committed, and `maturin develop` builds the extension green.
   2. The full existing binding + advisor test suite passes against 0.17.0, with FPCA-related tolerances relaxed so results are equivalent within `1e-8·σ₁` and no exact-equality FPCA test or doc fence breaks on the faer SVD drift.
   3. No existing binding signature or public behavior changes — the additive/non-breaking 0.15→0.17 diff is confirmed against the live suite, not assumed.
+
 **Plans**: 1 plan
-- [ ] 25-01-PLAN.md — Bump fdars-core 0.14.0→0.17.0, regenerate Cargo.lock, maturin build, full suite green with minimally-scoped FPCA tolerance relaxations (DEP-01, DEP-02)
+
+- [x] 25-01-PLAN.md — Bump fdars-core 0.14.0→0.17.0, regenerate Cargo.lock, maturin build, full suite green with minimally-scoped FPCA tolerance relaxations (DEP-01, DEP-02)
 
 ### Phase 26: Interpolation, Imputation & Functional Statistics Bindings
+
 **Goal**: Users can spline-interpolate onto off-grid points with a chosen extrapolation policy, impute missing values on a regular grid, and compute functional variance/std/covariance plus depth-based median and trimmed mean — all layout-correct across the numpy↔FdMatrix boundary.
 **Depends on**: Phase 25
 **Requirements**: REPR-01, REPR-02, REPR-03, STAT-01, STAT-02
 **Success Criteria** (what must be TRUE):
+
   1. User can spline-interpolate functional data onto arbitrary off-grid query points via `spline_interpolate` / `spline_interpolate_with_policy`, and select an `ExtrapolationPolicy` (Boundary / Exception / Fill(value) / Periodic) passed as a string with a forward-compatible fallback arm for out-of-domain queries.
   2. User can impute missing values on a regular grid with `impute_missing_values` (`ImputationMethod` Linear / Mean / Constant), and both interpolation and imputation are reachable as `Fdata` methods (`fd.interpolate()`, `fd.impute()`).
   3. User can compute `functional_variance`, `functional_std`, and `functional_covariance`, and the matrix-returning covariance is proven layout-correct by a multi-curve round-trip test (guards the column-major #33 transposition bug class — shape/symmetry checks alone are insufficient).
   4. User can compute `depth_based_median` — the binding resolves the returned `usize` index to the actual median curve, never a bare integer — and `trim_mean` (α=0 reproducing the mean).
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 27: Scoring Metrics & Alignment/Registration Bindings
+
 **Goal**: Users can score functional predictions with five error metrics and run least-squares shift registration, registration-quality scoring, and banded elastic alignment — with every fallible input surfacing as a clean `ValueError` rather than a Rust panic.
 **Depends on**: Phase 25
 **Requirements**: STAT-03, ALGN-01, ALGN-02, ALGN-03
 **Success Criteria** (what must be TRUE):
+
   1. User can score functional predictions with `functional_mae`, `functional_mse`, `functional_mape`, `functional_msle`, and `functional_explained_variance`; fallible inputs (MAPE near-zero truths, MSLE values ≤ −1) surface as `ValueError` via `to_pyresult()` with no `.unwrap()` panics.
   2. User can run `least_squares_shift_registration` and receive the registered curves plus per-curve shifts, with `ShiftRegistrationResult` marshalled as a dict.
   3. User can score registration quality with `least_squares_score`, `pairwise_correlation_score`, and `sobolev_least_squares_score`, and the Sobolev score's uniform-grid requirement is surfaced clearly (not a silent wrong answer).
   4. User can run banded elastic alignment (`karcher_mean_with_band`, `elastic_self_distance_matrix_with_band`, `elastic_cross_distance_matrix_with_band`) with an optional `band_frac` where `None` means unbanded, and the banded distance matrices are proven layout-correct by a multi-curve round-trip test.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 28: Advisor Extension (grounding-invariant preserved)
+
 **Goal**: The v3.0 advisor covers the relevant new capabilities — a `scoring` diagnostics method, imputation-quality on `represent`, registration-quality on `alignment` — with every new diagnostic fdars-computed and citing a real number, and the MCP guard-sync kept green.
 **Depends on**: Phase 26, Phase 27
 **Requirements**: ADV-01, ADV-02
 **Success Criteria** (what must be TRUE):
+
   1. `scoring` is added as a diagnostics method wired simultaneously into `build_diagnostics`, the advisor `_supported` set, and the MCP `_DIAGNOSTICS_METHODS` guard in a single atomic commit, so `test_diagnostics_methods_match_advisor_supported` stays green and `_RUNNABLE_METHODS` is unchanged.
   2. Imputation-quality diagnostics extend the `represent` aspect and registration-quality diagnostics extend the `alignment` aspect, and each new diagnostic calls a bound fdars function (never Python math) and cites a real computed number — the grounding invariant is preserved.
   3. New offline determinism tests prove each new aspect/method produces byte-identical JSON-serialisable output for the same input (no numpy scalars, no network).
+
 **Plans**: TBD
 
 ### Phase 29: Docs — Diagrams & Worked Examples
+
 **Goal**: The published site documents every new capability to the project's method-accurate standard — new/updated hand-authored inline SVG diagrams and runnable offline worked examples across `represent/`, `analyze/`, `align/` and the advisor pages — with the full strict build green against the real shipped bindings.
 **Depends on**: Phase 28
 **Requirements**: DOCS-01, DOCS-02, DOCS-03
 **Success Criteria** (what must be TRUE):
+
   1. New/updated hand-authored inline SVG concept diagrams for the new methods exist across `represent/`, `analyze/`, and `align/`, each method-accurate (human PNG review) and passing the SVGO idempotence + build-determinism gates.
   2. Runnable offline worked examples for the new capabilities run against existing `docs/data/` datasets; every executed `markdown-exec` fence stays network-free and deterministic (fixed seeds, base extras only) and emits the `FDARS_FENCE_OK` sentinel.
   3. The AI Advisor docs section is updated for the new scoring / registration-quality / imputation coverage, and full `mkdocs build --strict` passes offline against the current implementation.
+
 **Plans**: TBD
 **UI hint**: yes
 
