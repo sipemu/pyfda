@@ -48,6 +48,7 @@ _submodule_names = (
     "conformal",
     "simulation",
     "explain",
+    "represent",
 )
 
 for _name in _submodule_names:

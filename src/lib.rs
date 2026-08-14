@@ -22,6 +22,7 @@ mod seasonal_mod;
 mod simulation_mod;
 mod smoothing_mod;
 mod spm_mod;
+mod represent_mod;
 mod tolerance_mod;
 
 /// Create a submodule, register its contents, and attach it to a parent module.
@@ -52,6 +53,7 @@ fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     register_submodule!(m, "conformal", conformal_mod::register);
     register_submodule!(m, "simulation", simulation_mod::register);
     register_submodule!(m, "explain", explain_mod::register);
+    register_submodule!(m, "represent", represent_mod::register);
 
     Ok(())
 }
