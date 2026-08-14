@@ -6,6 +6,7 @@
 - ✅ **v2.0 — Grounded AI analysis advisor** — Phases 10–13 (shipped 2026-08-10)
 - ✅ **v2.1 — Document the AI Advisor** — Phases 14–18 (shipped 2026-08-11)
 - ✅ **v3.0 — Provider-Agnostic Advisor, Full-Library Coverage** — Phases 19–24 (shipped 2026-08-12)
+- 🚧 **v4.0 — fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs** — Phases 25–29 (in progress)
 
 ## Phases
 
@@ -51,145 +52,107 @@ Gave the published MkDocs site a first-class, method-accurate "AI Advisor" secti
 
 </details>
 
-<details open>
-<summary>🚧 v3.0 Provider-Agnostic Advisor, Full-Library Coverage (Phases 19–24) — IN PROGRESS</summary>
+<details>
+<summary>✅ v3.0 Provider-Agnostic Advisor, Full-Library Coverage (Phases 19–24) — SHIPPED 2026-08-12</summary>
 
-Make the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-compatible, Google Gemini, local Ollama) through a custom `Provider` protocol, and give every fdars analysis aspect its own advisor (diagnostics + grounded task families) like clustering has today — with the grounding invariant preserved on every backend. Dependency-ordered: the provider/grounding foundation ships first and blocks everything; adapters and per-aspect diagnostics are then independent (parallel-eligible); surfaces, packaging/CI, and docs assemble on top; docs last.
+Made the fdars AI advisor work with any LLM backend (Anthropic, OpenAI/OpenAI-compatible, Google Gemini, local Ollama) through a custom `Provider` protocol, and gave every fdars analysis aspect its own advisor (diagnostics + grounded task families) — with the grounding invariant preserved on every backend. Dependency-ordered: provider/grounding foundation first (blocking); adapters and per-aspect diagnostics parallel-eligible; surfaces, packaging/CI, and docs on top; docs last. 28/28 requirements complete; suite 259 passed / 4 skipped. Full detail: `.planning/milestones/v3.0-ROADMAP.md`.
+
+- [x] Phase 19: Provider Foundation & Grounding Contract — `Provider` protocol + Anthropic refactor + validate-and-retry + centralized `_check_grounding` (completed 2026-08-12)
+- [x] Phase 20: Additional Provider Adapters — OpenAI (+ `base_url`), Ollama (local, no key), Gemini adapters as optional extras (completed 2026-08-12)
+- [x] Phase 21: Per-Aspect Advisor Coverage — `build_diagnostics` + three grounded task families for all 12 fdars aspects via one shared schema/prompt (completed 2026-08-12)
+- [x] Phase 22: Surface Integration — MCP exposes new aspect diagnostics (LLM-free); provider selection via Python `advise()`; Agent Skill documents coverage (completed 2026-08-12)
+- [x] Phase 23: Packaging & CI — Python 3.9–3.14 matrix with version-gated extras + bare-venv smoke + aspect × provider offline grounding matrix (completed 2026-08-12)
+- [x] Phase 24: Documentation — provider setup guide + per-aspect coverage page + updated overview/API pages; `mkdocs build --strict` offline (completed 2026-08-12)
+
+</details>
+
+<details open>
+<summary>🚧 v4.0 fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs (Phases 25–29) — IN PROGRESS</summary>
+
+Upgrade the pinned `fdars-core` from 0.14.0 to 0.17.0, expose the new upstream functional-data capabilities (interpolation/imputation, functional statistics/scoring, shift registration/registration-quality/banded elastic alignment) through PyO3 bindings + the Python API, extend the v3.0 AI advisor to cover the relevant new capabilities, and document everything to the project's method-accurate standard (hand-authored inline SVG diagrams + runnable offline worked examples). Upstream 0.15→0.17 is additive/non-breaking; risk concentrates in new-binding correctness (column-major layout, `Result` conversions) and diagram/example method-accuracy — not in the bump.
+
+Dependency-ordered: the crate bump + regression gate ships first (isolates the sole numeric change — faer FPCA SVD drift — and unblocks all binding work); the two binding groups are then independent (parallel-eligible after the gate); the advisor extension assembles on top of the bound functions; docs last, so executed fences and diagrams run against the real shipped bindings.
 
 ### Summary
 
-- [x] **Phase 19: Provider Foundation & Grounding Contract** - `Provider` protocol + Anthropic-adapter refactor + validate-and-retry + centralized `_check_grounding`; provider selection via params/env. Blocks all downstream work. (completed 2026-08-12)
-- [x] **Phase 20: Additional Provider Adapters** - OpenAI (+ `base_url`), Ollama (local, no key), Gemini adapters behind the protocol, each an optional extra. Parallel-eligible with Phase 21. (completed 2026-08-12)
-- [x] **Phase 21: Per-Aspect Advisor Coverage** - `build_diagnostics` + grounded task families for represent/basis, depth/outliers, classification, regression/CV, monitoring/SPM. Parallel-eligible with Phase 20. (completed 2026-08-12)
-- [x] **Phase 22: Surface Integration** - MCP exposes new aspect diagnostics (LLM-free); provider selection wired through the Python `advise()`; Agent Skill documents providers + full coverage. (completed 2026-08-12)
-- [x] **Phase 23: Packaging & CI** - Per-provider extras finalized; Python 3.9–3.14 matrix with version/extra gating; bare-venv smoke; two-layer offline + env-gated live tests. (completed 2026-08-12)
-- [x] **Phase 24: Documentation** - Provider setup guide + per-aspect advisor pages + updated overview/API pages; docs build stays offline (`mkdocs build --strict`). (completed 2026-08-12)
+- [ ] **Phase 25: Crate Bump + Regression Gate** - Bump `fdars-core` 0.14.0→0.17.0, regenerate `Cargo.lock`, rebuild via maturin, full existing suite green with FPCA tolerances relaxed to absorb the faer SVD drift. Blocks all binding work.
+- [ ] **Phase 26: Interpolation, Imputation & Functional Statistics Bindings** - Spline/interpolation `_with_policy` + `ExtrapolationPolicy`, `impute_missing_values` + `ImputationMethod`, `functional_variance/std/covariance`, `depth_based_median`, `trim_mean`; `fd.interpolate()`/`fd.impute()` methods; multi-curve round-trip transposition tests. Parallel-eligible with Phase 27.
+- [ ] **Phase 27: Scoring Metrics & Alignment/Registration Bindings** - `functional_mae/mse/mape/msle/explained_variance`; `least_squares_shift_registration` (+ result dict); registration-quality scores; banded `*_with_band` elastic alignment. Parallel-eligible with Phase 26.
+- [ ] **Phase 28: Advisor Extension** - `scoring` diagnostics method + imputation-quality on `represent` + registration-quality on `alignment`, MCP guard-sync updated in one atomic commit; grounding invariant preserved; offline determinism tests. Depends on Phases 26 + 27.
+- [ ] **Phase 29: Docs — Diagrams & Worked Examples** - New/updated inline SVG concept diagrams + runnable offline worked examples across `represent/`, `analyze/`, `align/` (and advisor pages); `mkdocs build --strict` green. Last.
 
 ### Phase Details
 
-### Phase 19: Provider Foundation & Grounding Contract
-
-**Goal**: The advisor runs behind a uniform `Provider` protocol with the grounding/retry machinery centralized, so every later adapter and aspect inherits a checked grounding contract instead of re-implementing it. This is a pure refactor: existing Anthropic behavior and outputs are unchanged.
-**Depends on**: Nothing (first phase of v3.0; builds on shipped v2.0 advisor)
-**Requirements**: PROV-01, PROV-02, PROV-06, GROUND-01, GROUND-02, GROUND-03, GROUND-04
+### Phase 25: Crate Bump + Regression Gate
+**Goal**: The pinned `fdars-core` is upgraded to 0.17.0 and the entire existing binding + advisor suite proves green on the new engine, isolating the sole numeric behavior change (faer FPCA SVD drift) before any new binding work begins.
+**Depends on**: Nothing (first phase of v4.0; builds on shipped v3.0)
+**Requirements**: DEP-01, DEP-02
 **Success Criteria** (what must be TRUE):
+  1. `Cargo.toml` pins `fdars-core = "0.17.0"` with the `parallel` feature retained and the `linalg` feature NOT enabled (MSRV 1.83 preserved); `Cargo.lock` is regenerated and committed, and `maturin develop` builds the extension green.
+  2. The full existing binding + advisor test suite passes against 0.17.0, with FPCA-related tolerances relaxed so results are equivalent within `1e-8·σ₁` and no exact-equality FPCA test or doc fence breaks on the faer SVD drift.
+  3. No existing binding signature or public behavior changes — the additive/non-breaking 0.15→0.17 diff is confirmed against the live suite, not assumed.
+**Plans**: TBD
 
-  1. `advise()` runs through a `Provider` protocol with an `AnthropicProvider` adapter, and every existing advisor test (offline + env-gated integration) passes unchanged — same public behavior and outputs.
-  2. A provider with native structured output returns a schema-validated `Advice` via the native path; a provider without it goes through a validate-and-retry path (Pydantic validation, ≤2 retries with full diagnostics re-included) that fails deterministically after the cap with no fabrication.
-  3. A centralized `_check_grounding` check runs on every provider path and rejects any `Advice` whose recommendations cite numbers not present in the diagnostics.
-  4. A provider refusal or empty response raises a clear error rather than yielding a vacuously-valid `Advice`.
-  5. The user selects provider and model via explicit `advise(provider=…, model=…)` params and/or env vars (`FDARS_ADVISOR_PROVIDER` / `_MODEL` / `_BASE_URL` + per-provider keys) with documented precedence; `provider=None` reproduces today's Anthropic default.
-
-**Plans**: 3 plans
-
-- [x] 19-01-PLAN.md — TRACER: advisor.py→advisor/ package + Provider protocol + AnthropicProvider + ValidateAndRetry + resolve_provider + centralized _check_grounding; wire advise() end-to-end (green gate)
-- [x] 19-02-PLAN.md — Mechanical split: _schema.py, _prompts.py, aspects/*.py; build_diagnostics dispatches lazily (green gate)
-- [x] 19-03-PLAN.md — Offline provider/grounding test suite with in-memory fake providers (protocol, retry-cap, refusal, grounding-reject, precedence)
-
-### Phase 20: Additional Provider Adapters
-
-**Goal**: Any of OpenAI (including OpenAI-compatible local endpoints), Ollama (fully local), and Gemini can back the advisor through the Phase 19 protocol, each installable as its own optional extra, with the grounding invariant holding on every backend.
-**Depends on**: Phase 19
-**Requirements**: PROV-03, PROV-04, PROV-05, PROV-07
+### Phase 26: Interpolation, Imputation & Functional Statistics Bindings
+**Goal**: Users can spline-interpolate onto off-grid points with a chosen extrapolation policy, impute missing values on a regular grid, and compute functional variance/std/covariance plus depth-based median and trimmed mean — all layout-correct across the numpy↔FdMatrix boundary.
+**Depends on**: Phase 25
+**Requirements**: REPR-01, REPR-02, REPR-03, STAT-01, STAT-02
 **Success Criteria** (what must be TRUE):
+  1. User can spline-interpolate functional data onto arbitrary off-grid query points via `spline_interpolate` / `spline_interpolate_with_policy`, and select an `ExtrapolationPolicy` (Boundary / Exception / Fill(value) / Periodic) passed as a string with a forward-compatible fallback arm for out-of-domain queries.
+  2. User can impute missing values on a regular grid with `impute_missing_values` (`ImputationMethod` Linear / Mean / Constant), and both interpolation and imputation are reachable as `Fdata` methods (`fd.interpolate()`, `fd.impute()`).
+  3. User can compute `functional_variance`, `functional_std`, and `functional_covariance`, and the matrix-returning covariance is proven layout-correct by a multi-curve round-trip test (guards the column-major #33 transposition bug class — shape/symmetry checks alone are insufficient).
+  4. User can compute `depth_based_median` — the binding resolves the returned `usize` index to the actual median curve, never a bare integer — and `trim_mean` (α=0 reproducing the mean).
+**Plans**: TBD
+**UI hint**: yes
 
-  1. `advise(provider="openai", …)` works against OpenAI and any OpenAI-compatible endpoint via a configurable `base_url` (vLLM / LM Studio / LocalAI).
-  2. `advise(provider="ollama", …)` produces grounded advice fully locally with no API key.
-  3. `advise(provider="gemini", …)` works against Google Gemini, with the Pydantic→Gemini schema translation applied so structured output validates.
-  4. Each provider installs as an optional extra (`[openai]`, `[gemini]`, `[ollama]`); the base package imports and the offline core runs with no provider installed, and a missing extra raises an actionable ImportError.
-
-**Plans**: 3 plans
-
-  - [x] 20-01-PLAN.md — Tracer: OpenAI adapter end-to-end + phase-wide plumbing (extras, deferred guards, resolve_provider extension) [PROV-03, PROV-07]
-  - [x] 20-02-PLAN.md — Ollama adapter (local, no key; validate-and-retry / `supports_native=False` path) [PROV-04]
-  - [x] 20-03-PLAN.md — Gemini adapter (`_gemini_schema` translation) + env-gated live integration tests [PROV-05]
-
-### Phase 21: Per-Aspect Advisor Coverage
-
-**Goal**: Every fdars analysis aspect — not just clustering — has deterministic offline diagnostics and grounded advice task families, driven by the same schema, prompt, and grounding machinery with no per-aspect duplication.
-**Depends on**: Phase 19
-**Requirements**: ASPECT-01, ASPECT-02, ASPECT-03, ASPECT-04, ASPECT-05, ASPECT-06, ASPECT-07
+### Phase 27: Scoring Metrics & Alignment/Registration Bindings
+**Goal**: Users can score functional predictions with five error metrics and run least-squares shift registration, registration-quality scoring, and banded elastic alignment — with every fallible input surfacing as a clean `ValueError` rather than a Rust panic.
+**Depends on**: Phase 25
+**Requirements**: STAT-03, ALGN-01, ALGN-02, ALGN-03
 **Success Criteria** (what must be TRUE):
+  1. User can score functional predictions with `functional_mae`, `functional_mse`, `functional_mape`, `functional_msle`, and `functional_explained_variance`; fallible inputs (MAPE near-zero truths, MSLE values ≤ −1) surface as `ValueError` via `to_pyresult()` with no `.unwrap()` panics.
+  2. User can run `least_squares_shift_registration` and receive the registered curves plus per-curve shifts, with `ShiftRegistrationResult` marshalled as a dict.
+  3. User can score registration quality with `least_squares_score`, `pairwise_correlation_score`, and `sobolev_least_squares_score`, and the Sobolev score's uniform-grid requirement is surfaced clearly (not a silent wrong answer).
+  4. User can run banded elastic alignment (`karcher_mean_with_band`, `elastic_self_distance_matrix_with_band`, `elastic_cross_distance_matrix_with_band`) with an optional `band_frac` where `None` means unbanded, and the banded distance matrices are proven layout-correct by a multi-curve round-trip test.
+**Plans**: TBD
+**UI hint**: yes
 
-  1. `build_diagnostics` produces deterministic, offline diagnostics for represent/basis, depth & outliers, classification, regression & regression-CV (`fregre_lm`/`fregre_pls`/`fregre_cv`), and monitoring/SPM (Phase-1 T²/SPE, `spe_moment_match_diagnostic`, excluding stochastic ARL).
-  2. Every aspect (clustering, smoothing, alignment, basis/represent, depth/outliers, classification, regression/FPCA, monitoring/SPM) offers the three grounded task families (interpretation, parameter guidance, method guidance) through the shared schema + grounding machinery — no per-aspect prompt or schema duplication.
-  3. The aspect is always caller-specified and never auto-detected from result keys, so key collisions (e.g. `r_squared`, `edf`) cannot misroute a request.
-  4. Each new aspect's diagnostics pass an offline determinism test (same input → byte-identical JSON-serialisable output, no numpy scalars).
-
-**Plans**: 5 plans
-
-- [x] 21-01-PLAN.md — TRACER: depth aspect end-to-end (builder + dispatcher + `_supported` + prompt clause + additive `advise(aspect=…)` param + determinism/no-auto-detection tests) [ASPECT-02, ASPECT-06, ASPECT-07]
-- [x] 21-02-PLAN.md — outliers + classification builders (LOW; guarded multi-shape keys, corrected `error_rate`) [ASPECT-02, ASPECT-03, ASPECT-06]
-- [x] 21-03-PLAN.md — shared `_utils.py` eigenvalue→variance helper + output-preserving fpca refactor + represent aspect (new method string) [ASPECT-01, ASPECT-06]
-- [x] 21-04-PLAN.md — regression + regression_cv builders (MEDIUM; guarded r_squared / 2-D residuals / cv array casts / criteria tuples) [ASPECT-04, ASPECT-06]
-- [x] 21-05-PLAN.md — SPM aspect (HIGH; T²/SPE exceedance + one live `spe_moment_match_diagnostic` call + shared helper reuse, arl0_t2 excluded) [ASPECT-05, ASPECT-06]
-
-### Phase 22: Surface Integration
-
-**Goal**: The MCP tool surface and the Agent Skill expose the new per-aspect coverage, and provider selection is reachable from the Python API — while the MCP boundary stays LLM-free and provider selection lives only in `advise()`.
-**Depends on**: Phase 20, Phase 21
-**Requirements**: SURF-01, SURF-02, SURF-03
+### Phase 28: Advisor Extension (grounding-invariant preserved)
+**Goal**: The v3.0 advisor covers the relevant new capabilities — a `scoring` diagnostics method, imputation-quality on `represent`, registration-quality on `alignment` — with every new diagnostic fdars-computed and citing a real number, and the MCP guard-sync kept green.
+**Depends on**: Phase 26, Phase 27
+**Requirements**: ADV-01, ADV-02
 **Success Criteria** (what must be TRUE):
+  1. `scoring` is added as a diagnostics method wired simultaneously into `build_diagnostics`, the advisor `_supported` set, and the MCP `_DIAGNOSTICS_METHODS` guard in a single atomic commit, so `test_diagnostics_methods_match_advisor_supported` stays green and `_RUNNABLE_METHODS` is unchanged.
+  2. Imputation-quality diagnostics extend the `represent` aspect and registration-quality diagnostics extend the `alignment` aspect, and each new diagnostic calls a bound fdars function (never Python math) and cites a real computed number — the grounding invariant is preserved.
+  3. New offline determinism tests prove each new aspect/method produces byte-identical JSON-serialisable output for the same input (no numpy scalars, no network).
+**Plans**: TBD
 
-  1. The MCP tools expose the new aspect diagnostics/methods and remain compute-only (no `advise()` call in a tool handler; grounding invariant preserved).
-  2. Provider selection is available through the Python API `advise()`, and the MCP tools do not call `advise()`.
-  3. The Agent Skill's `SKILL.md` documents provider selection (including the local/offline path) and the full per-aspect advisor coverage.
-
-**Plans**: 3 plans
-
-- [x] 22-01-PLAN.md — TRACER: depth runnable via MCP end-to-end (`_RUNNABLE_METHODS` + depth dispatch + server scores-unwrap) + LLM-free invariant lock [SURF-01, SURF-02]
-- [x] 22-02-PLAN.md — Diagnostics-only expansion: `_DIAGNOSTICS_METHODS` (12) guard + `n_classes` param + represent argvals injection + guard-sync + rejection tests [SURF-01]
-- [x] 22-03-PLAN.md — SKILL.md 4 targeted edits (full aspect list, Provider Selection section, corrected install note, refreshed Tools Referenced) + 2 skill tests [SURF-03, SURF-02]
-
-### Phase 23: Packaging & CI
-
-**Goal**: The full aspect × provider contract is proven network-free and deterministically, the extras/version matrix is correct across Python 3.9–3.14, and the core provably imports with no provider extra installed.
-**Depends on**: Phase 20, Phase 21, Phase 22
-**Requirements**: QUAL-01, QUAL-02, QUAL-03, QUAL-04
-**Success Criteria** (what must be TRUE):
-
-  1. Two-layer offline tests (per-aspect diagnostics fixtures × per-provider adapter fixtures with recorded responses/mocks) cover the aspect × provider contract with no network, and all offline tests (core + aspect + adapter) run deterministically.
-  2. Env-gated live integration tests, one per provider, skip cleanly when keys / a local server are absent.
-  3. The CI matrix covers Python 3.9–3.14 with correct extra/version gating (`openai<2.0` on 3.9; `[gemini]`/`[mcp]` 3.10+).
-  4. A bare-venv smoke test proves the core imports and the offline `build_diagnostics` runs with no provider extra installed.
-
-**Plans**: 2 plans
-
-- [x] 23-01-PLAN.md — TRACER: bare-venv smoke script + CI test-python matrix expansion to 3.9–3.14 with 3.9 gating (no gemini/mcp) + bare-venv smoke CI job [QUAL-03, QUAL-04]
-- [x] 23-02-PLAN.md — Aspect × provider offline cross-coverage matrix test + live-integration one-per-provider clean-skip confirmation [QUAL-01, QUAL-02]
-
-### Phase 24: Documentation
-
-**Goal**: The published AI Advisor docs section reflects provider-agnostic operation and full-library coverage, with executed offline fences running against the real shipped implementation and the docs build staying offline.
-**Depends on**: Phase 23
+### Phase 29: Docs — Diagrams & Worked Examples
+**Goal**: The published site documents every new capability to the project's method-accurate standard — new/updated hand-authored inline SVG diagrams and runnable offline worked examples across `represent/`, `analyze/`, `align/` and the advisor pages — with the full strict build green against the real shipped bindings.
+**Depends on**: Phase 28
 **Requirements**: DOCS-01, DOCS-02, DOCS-03
 **Success Criteria** (what must be TRUE):
-
-  1. A provider setup guide covers all four backends — keys, `base_url`, local Ollama, and selection/precedence.
-  2. Per-aspect advisor pages document the diagnostics and task families for each fdars aspect.
-  3. The AI Advisor overview and Python API pages are updated for provider-agnostic operation and full-library coverage, and `mkdocs build --strict` passes offline with any executed fences running against the current implementation.
-
-**Plans**: 3 plans
-
-- [x] 24-01-PLAN.md — Provider setup guide `docs/advisor/providers.md` (four backends, selection/precedence, extras; illustrative-only fences) [DOCS-01]
-- [x] 24-02-PLAN.md — Per-aspect page `docs/advisor/aspects.md` (12 aspects, builder-derived diagnostics keys + 3 task families + executed offline depth/fpca fences) [DOCS-02]
-- [x] 24-03-PLAN.md — index.md + python-api.md provider-agnostic/full-coverage updates, nav wiring, strict offline build gate [DOCS-03]
-
+  1. New/updated hand-authored inline SVG concept diagrams for the new methods exist across `represent/`, `analyze/`, and `align/`, each method-accurate (human PNG review) and passing the SVGO idempotence + build-determinism gates.
+  2. Runnable offline worked examples for the new capabilities run against existing `docs/data/` datasets; every executed `markdown-exec` fence stays network-free and deterministic (fixed seeds, base extras only) and emits the `FDARS_FENCE_OK` sentinel.
+  3. The AI Advisor docs section is updated for the new scoring / registration-quality / imputation coverage, and full `mkdocs build --strict` passes offline against the current implementation.
+**Plans**: TBD
 **UI hint**: yes
 
 ### Progress
 
+**Execution Order:**
+Phases execute in numeric order: 25 → 26 ∥ 27 → 28 → 29 (26 and 27 are parallel-eligible after 25).
+
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 19. Provider Foundation & Grounding Contract | 3/3 | Complete    | 2026-08-12 |
-| 20. Additional Provider Adapters | 3/3 | Complete    | 2026-08-12 |
-| 21. Per-Aspect Advisor Coverage | 5/5 | Complete    | 2026-08-12 |
-| 22. Surface Integration | 3/3 | Complete    | 2026-08-12 |
-| 23. Packaging & CI | 2/2 | Complete    | 2026-08-12 |
-| 24. Documentation | 3/3 | Complete    | 2026-08-12 |
+| 25. Crate Bump + Regression Gate | 0/TBD | Not started | - |
+| 26. Interpolation, Imputation & Functional Statistics Bindings | 0/TBD | Not started | - |
+| 27. Scoring Metrics & Alignment/Registration Bindings | 0/TBD | Not started | - |
+| 28. Advisor Extension | 0/TBD | Not started | - |
+| 29. Docs — Diagrams & Worked Examples | 0/TBD | Not started | - |
 
 </details>
 
 ---
 
-_Full phase detail for shipped milestones is archived under `.planning/milestones/` (`v1.0-ROADMAP.md`, `v2.0-ROADMAP.md`, `v2.1-ROADMAP.md`). Phase directories are archived under `.planning/milestones/v{1.0,2.0,2.1}-phases/`._
+_Full phase detail for shipped milestones is archived under `.planning/milestones/` (`v1.0-ROADMAP.md`, `v2.0-ROADMAP.md`, `v2.1-ROADMAP.md`, `v3.0-ROADMAP.md`). Phase directories are archived under `.planning/milestones/v{1.0,2.0,2.1,3.0}-phases/`._

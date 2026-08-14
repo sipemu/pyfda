@@ -63,21 +63,21 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEP-01 | — | Pending roadmap |
-| DEP-02 | — | Pending roadmap |
-| REPR-01 | — | Pending roadmap |
-| REPR-02 | — | Pending roadmap |
-| REPR-03 | — | Pending roadmap |
-| STAT-01 | — | Pending roadmap |
-| STAT-02 | — | Pending roadmap |
-| STAT-03 | — | Pending roadmap |
-| ALGN-01 | — | Pending roadmap |
-| ALGN-02 | — | Pending roadmap |
-| ALGN-03 | — | Pending roadmap |
-| ADV-01 | — | Pending roadmap |
-| ADV-02 | — | Pending roadmap |
-| DOCS-01 | — | Pending roadmap |
-| DOCS-02 | — | Pending roadmap |
-| DOCS-03 | — | Pending roadmap |
+| DEP-01 | Phase 25 | Pending |
+| DEP-02 | Phase 25 | Pending |
+| REPR-01 | Phase 26 | Pending |
+| REPR-02 | Phase 26 | Pending |
+| REPR-03 | Phase 26 | Pending |
+| STAT-01 | Phase 26 | Pending |
+| STAT-02 | Phase 26 | Pending |
+| STAT-03 | Phase 27 | Pending |
+| ALGN-01 | Phase 27 | Pending |
+| ALGN-02 | Phase 27 | Pending |
+| ALGN-03 | Phase 27 | Pending |
+| ADV-01 | Phase 28 | Pending |
+| ADV-02 | Phase 28 | Pending |
+| DOCS-01 | Phase 29 | Pending |
+| DOCS-02 | Phase 29 | Pending |
+| DOCS-03 | Phase 29 | Pending |
 
-*Traceability filled in by the roadmapper (`ROADMAP.md`).*
+*Traceability filled in by the roadmapper (`ROADMAP.md`). Coverage: 16/16 v4.0 requirements mapped, each to exactly one phase.*

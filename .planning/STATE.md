@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 status: planning
-last_updated: "2026-08-13T19:59:46.572Z"
+last_updated: "2026-08-13T00:00:00.000Z"
 last_activity: 2026-08-13
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,23 +17,25 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-12)
+See: .planning/PROJECT.md (updated 2026-08-13)
 
-**Core value:** The fdars AI advisor must work with any LLM backend — cloud or local — while the grounding invariant holds everywhere: fdars computes every number, the LLM only interprets and cites it. Every fdars analysis aspect gets advisor coverage on par with clustering.
-**Current focus:** Phase 19 — Provider Foundation & Grounding Contract
+**Core value:** Upgrade `fdars-core` 0.14.0→0.17.0, expose the new functional-data capabilities (interpolation/imputation, functional statistics/scoring, shift registration/registration-quality/banded elastic alignment) through PyO3 bindings + the Python API, extend the v3.0 grounded advisor to cover the relevant new capabilities, and document everything method-accurately — with the grounding invariant intact throughout.
+**Current focus:** Phase 25 — Crate Bump + Regression Gate
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-08-13 — Milestone v4.0 started
+Phase: 25 of 29 (Crate Bump + Regression Gate)
+Plan: — of — in current phase
+Status: Ready to plan
+Last activity: 2026-08-13 — v4.0 roadmap created (Phases 25–29); 16/16 requirements mapped
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 19 (v1.0–v2.1)
+- Total plans completed: 0 (this milestone); 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -41,12 +43,11 @@ Last activity: 2026-08-13 — Milestone v4.0 started
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 19 | 3 | - | - |
-| 20 | 3 | - | - |
-| 21 | 5 | - | - |
-| 22 | 3 | - | - |
-| 23 | 2 | - | - |
-| 24 | 3 | - | - |
+| 25 | TBD | - | - |
+| 26 | TBD | - | - |
+| 27 | TBD | - | - |
+| 28 | TBD | - | - |
+| 29 | TBD | - | - |
 
 **Recent Trend:**
 
@@ -54,28 +55,6 @@ Last activity: 2026-08-13 — Milestone v4.0 started
 - Trend: -
 
 *Updated after each plan completion*
-**Per-Plan Metrics:**
-
-| Plan | Duration | Tasks | Files |
-|------|----------|-------|-------|
-| Phase 19 P01 | 46m | 3 tasks | 6 files |
-| Phase 19-provider-foundation-grounding-contract P02 | 424 | 3 tasks | 9 files |
-| Phase 19 P03 | 8 | 3 tasks | 1 files |
-| Phase 20-additional-provider-adapters P01 | 35 | 3 tasks | 6 files |
-| Phase 20-additional-provider-adapters P02 | 3 | 2 tasks | 4 files |
-| Phase 20 P03 | 6 | 3 tasks | 5 files |
-| Phase 21-per-aspect-advisor-coverage P01 | 5m | 3 tasks | 4 files |
-| Phase 21 P02 | 4 | 3 tasks | 4 files |
-| Phase 21 P03 | 35 | 3 tasks | 5 files |
-| Phase 21 P04 | 20m | 3 tasks | 4 files |
-| Phase 21-per-aspect-advisor-coverage P05 | 3 | 3 tasks | 3 files |
-| Phase 22-surface-integration P01 | 15 | 3 tasks | 3 files |
-| Phase 22 P03 | 128 | 2 tasks | 2 files |
-| Phase 22 P02 | 243 | 3 tasks | 2 files |
-| Phase 23-packaging-ci P01 | 139 | 3 tasks | 2 files |
-| Phase 23 P02 | 2 | 2 tasks | 1 files |
-| Phase 24 P01 | 65 | 2 tasks | 1 files |
-| Phase 24 P03 | 752 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -84,51 +63,13 @@ Last activity: 2026-08-13 — Milestone v4.0 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v3.0 roadmap]: Phase numbering CONTINUES from v2.1 (starts at Phase 19; v2.1 ended at Phase 18)
-- [v3.0 roadmap]: Foundation FIRST — `Provider` protocol + Anthropic refactor + validate-and-retry + `_check_grounding` (Phase 19) is the single blocking prerequisite; must ship the base grounding/retry machinery before any adapter or aspect so aspects don't each inherit unchecked grounding vulnerabilities
-- [v3.0 roadmap]: Adapters (Phase 20) and per-aspect diagnostics (Phase 21) are INDEPENDENT and parallel-eligible after Phase 19
-- [v3.0 roadmap]: MCP boundary stays LLM-free (SURF-01); provider selection lives only in the Python `advise()` (SURF-02)
-- [v3.0 roadmap]: Packaging/CI (Phase 23) and Docs (Phase 24) come after code ships; docs LAST so executed offline fences run against the real implementation
-- [v3.0 roadmap]: Custom `Provider` protocol only — no LiteLLM / pydantic-ai / LangChain; aspect always caller-specified (never auto-detected from result keys)
-- [v2.0]: One deterministic `build_diagnostics` core shared by all surfaces; grounding invariant enforced by Pydantic schema + system prompt (fdars computes numbers, LLM only interprets/cites)
-- [v2.0]: MCP transport = stdio only; HTTP/SSE deferred
-- [Phase ?]: Kept _require_anthropic/_require_pydantic in advisor/__init__.py (not moved to providers/) so the sys.modules monkeypatch chain for ImportError tests remains intact through Phase 19-02 split
-- [Phase ?]: providers/__init__.py imports AnthropicProvider at module level (safe: anthropic SDK deferred to AnthropicProvider.__init__ — no SDK import at module load)
-- [Phase ?]: _GROUNDING_INVARIANT single constant in _prompts.py; build_diagnostics dispatches to aspects/ lazily; _selfcheck kept in __init__.py per RESEARCH.md Open Q2
-- [Phase ?]: Fake providers defined at module level in test_advisor_providers.py for isolation — not conftest.py
-- [Phase ?]: FakeFallbackProvider accepts response list for deterministic retry-sequence testing
-- [Phase ?]: resolve_provider precedence tested via local _patched_resolve closure to avoid lazy-import-chain monkeypatching
-- [Phase ?]: OpenAI pin >=1.40,<2.0: floor resolves STACK/PITFALLS version disagreement; <2.0 keeps Python 3.9 compatibility
-- [Phase ?]: OpenAI _openai_schema passes $defs/$ref as-is: OpenAI strict mode supports them since 2024-08
-- [Phase ?]: gemini/ollama factory branches wrap ImportError as ValueError to keep Phase 19 test_unknown_provider_raises green until plans 02/03 land
-- [Phase ?]: OllamaProvider.supports_native_structured_output=False routes through ValidateAndRetry._fallback_with_retry
-- [Phase ?]: Factory shim removal: ollama branch raises actionable ImportError not ValueError once ollama.py exists
-- [Phase ?]: Client cached on self._client in GeminiProvider.__init__; simpler sync approach
-- [Phase ?]: gemini factory shim removed; ImportError from _require_gemini() surfaces directly naming pip install fdars[gemini]
-- [Phase ?]: depth branch accepts raw ndarray (not dict) — all fdars depth functions return PyArray1<f64>
-- [Phase ?]: _ASPECT_PRIMERS dict in _prompts.py; aspect='' preserves backward compat
-- [Phase ?]: Array-coercion guard uses __array__ + .data checks to protect ndarray and Fdata inputs
-- [Phase ?]: n_classes as explicit keyword param on build_diagnostics() (BLOCKER #5); forwarded only to classification branch
-- [Phase ?]: RESEARCH corrections #2+#6 applied: CV key is error_rate not cv_error_rate; accuracy guarded
-- [21-03]: _utils.py shared helper extracted — fpca refactor uses it, spm.py (plan 21-05) will import it too
-- [21-03]: represent is a new method string (not basis/fpca extension) — operates on INPUT data, not method output
-- [21-03]: represent input resolution: attribute-first (Fdata .data/.argvals), then dict fallback — no dict(raw) coercion
-- [Phase ?]: regression/regression_cv aspects use guarded key access for variably-shaped result dicts; pure-NumPy skewness and elbow detection (no scipy)
-- [Phase ?]: spe_kurtosis_excess renamed from excess_kurtosis per RESEARCH correction #8 for LLM clarity
-- [Phase ?]: arl0_t2 excluded from SPM builder: stochastic Monte Carlo breaks offline determinism guarantee (FUT-02)
-- [Phase ?]: fraiman_muniz_1d(data, data) self-depth for MCP: ref_data is a data matrix not argvals; hard-coded to avoid string injection
-- [Phase ?]: _RUNNABLE_METHODS frozenset as single source of truth across runner+server; _SUPPORTED_METHODS kept as backward-compat alias
-- [Phase ?]: Four surgical edits to SKILL.md only — no rewrite; all frontmatter keys and existing sections preserved
-- [Phase ?]: Provider selection documented in SKILL.md body only; MCP tools remain compute-only (advise() not called from any MCP handler)
-- [Phase ?]: SKILL.md install note corrected: provider extras ([openai]/[ollama]/[gemini]) publish with fdars 3.0, not current PyPI; git-URL install documented
-- [Phase ?]: _DIAGNOSTICS_METHODS (12) guards fdars_build_diagnostics; _RUNNABLE_METHODS (6) guards run_method — clear split enforced at tool boundary
-- [Phase ?]: Guard/advisor sync locked by test_diagnostics_methods_match_advisor_supported (parses advisor error message, asserts set equality)
-- [Phase ?]: Version-gated CI extras via two if: steps (3.9 vs !=3.9); gemini+mcp excluded on 3.9 since both require Python 3.10+
-- [Phase ?]: smoke-bare-venv CI job uses Python 3.12 (single version, mid-matrix); no extras installed to prove base-package self-sufficiency
-- [Phase ?]: Evidence construction uses a generic helper that scans built diagnostics for the first numeric value to cite in grounding-safe evidence strings — robust across all 12 aspects
-- [Phase ?]: Used GEMINI_API_KEY (not GOOGLE_API_KEY) in providers.md — method-accurate against _factory.py _KEY_ENV table
-- [Phase ?]: index.md: listed all 12 aspects inline in build_diagnostics description for direct verify coverage
-- [Phase ?]: mkdocs.yml: Provider Setup before Per-Aspect Coverage, both after Python API and before MCP Server
+- [v4.0 roadmap]: Phase numbering CONTINUES from v3.0 (starts at Phase 25; v3.0 ended at Phase 24)
+- [v4.0 roadmap]: Crate bump + regression gate FIRST (Phase 25, DEP-01/02) — isolates the sole numeric change (faer FPCA SVD drift, relax FPCA tolerances to `1e-8·σ₁`) and unblocks all binding work
+- [v4.0 roadmap]: Phases 26 (REPR + functional-stats) and 27 (scoring + ALGN) are INDEPENDENT binding groups, parallel-eligible after Phase 25; both must precede the advisor
+- [v4.0 roadmap]: Advisor extension (Phase 28) depends on the binding phases (calls the bound functions); MCP guard-sync (`_DIAGNOSTICS_METHODS` + `_supported`) must land in a single atomic commit to keep `test_diagnostics_methods_match_advisor_supported` green; `_RUNNABLE_METHODS` unchanged (scoring needs caller-supplied y_true/y_pred)
+- [v4.0 roadmap]: Docs LAST (Phase 29) so executed offline fences + diagrams run against the real shipped bindings
+- [research]: Do NOT enable `linalg` feature (requires Rust 1.84 > MSRV 1.83); `parallel` retained; 0.15→0.17 perf wins inherited via the bump, no API to bind
+- [research]: Enums cross the boundary as string params + `match` arms with a `#[non_exhaustive]` fallback; compound results return as PyDict; `fd.interpolate()`/`fd.impute()` become Fdata methods, stats/scoring stay module-level
 
 ### Pending Todos
 
@@ -136,8 +77,13 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 20 research flag]: Schema portability across providers (OpenAI nullable unions, Gemini `additionalProperties` rejection, Ollama `think+format` conflict) — confirm during Phase 20 planning
-- [Phase 21 research flag]: SPM diagnostics are highest-complexity; validate `spe_moment_match_diagnostic` fdars signature during Phase 21 planning
+- [Phase 25 risk]: faer FPCA SVD drift magnitude on the live suite is unverified (release-note prose, not run) — discover empirically and relax FPCA tolerances (~`atol=1e-6`) before new binding work
+- [Phase 26/27 risk]: numpy(row-major)↔FdMatrix(column-major) transposition (#33 class) on every matrix-returning binding (`functional_covariance`, banded distance matrices) — route through `fdmatrix_to_numpy2d`, carry a multi-curve round-trip test
+- [Phase 26 risk]: `depth_based_median` returns a `usize` index — resolve to the actual curve row in the binding
+- [Phase 27 risk]: all 10 new scoring/quality fns return `Result` — no `.unwrap()`, route through `to_pyresult()`, add ValueError tests (MAPE has no epsilon guard; Sobolev needs a uniform grid); bind `*_with_band` (`band_frac: Option<f64>`) NOT the 0.14 `*_banded`
+- [Phase 28 research flag]: guard-sync interdependencies + grounding-invariant patterns for the new aspects/method — deeper planning-time research
+- [Phase 29 research flag]: SVGO/determinism gate workflow + per-diagram method-accuracy review checklist
+- [Gaps]: module placement (helpers/scoring vs extend fdata/metric) decided in Phase 26/27; confirm `ShiftRegistrationResult` / `impute_missing_values` field names against crate source after the bump
 
 ## Deferred Items
 
@@ -146,13 +92,14 @@ None yet.
 | Accessibility | A11Y-01: Long-form `<title>`/`<desc>` + aria-labelledby for complex diagrams | v2 | Init |
 | Examples | EX2-01: Editorial consolidation (sonar-tsrvf vs phoneme-shape; Andrews-wine series) | v2 | Init |
 | Transport | HTTP-01: HTTP/SSE MCP transport for the fdars-advisor server (stdio shipped in v2.0) | v3.x (FUT-01) | v2.0 close |
+| API coverage | Additional 0.14.0-era upstream methods not in this milestone's three groups (Bayesian/closed-curve/partial-match alignment, GP/covariance kernels) | later coverage milestone | v4.0 roadmap |
 
 ## Session Continuity
 
-Last session: 2026-08-12T14:15:24.853Z
-Stopped at: Completed 24-03-PLAN.md (final plan of Phase 24 / v3.0 milestone)
+Last session: 2026-08-13
+Stopped at: v4.0 roadmap created — Phases 25–29 written, 16/16 requirements mapped, traceability filled
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Review the v4.0 roadmap draft (`.planning/ROADMAP.md`), then plan Phase 25 with `/gsd-plan-phase 25`
