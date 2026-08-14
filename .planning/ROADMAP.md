@@ -110,7 +110,11 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
   3. User can compute `functional_variance`, `functional_std`, and `functional_covariance`, and the matrix-returning covariance is proven layout-correct by a multi-curve round-trip test (guards the column-major #33 transposition bug class — shape/symmetry checks alone are insufficient).
   4. User can compute `depth_based_median` — the binding resolves the returned `usize` index to the actual median curve, never a bare integer — and `trim_mean` (α=0 reproducing the mean).
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+- [ ] 26-01-PLAN.md — New `fdars.represent` submodule: `spline_interpolate` (tracer, end-to-end) + `spline_interpolate_with_policy`/`fdata_interpolate_with_policy` (ExtrapolationPolicy string enum) + `impute_missing_values` (ImputationMethod) + `fd.interpolate()`/`fd.impute()` methods; multi-curve transposition round-trip test (REPR-01, REPR-02, REPR-03)
+- [ ] 26-02-PLAN.md — Functional statistics in `fdars.fdata`: `functional_variance`/`functional_std`/`functional_covariance` (m×m round-trip test) + `depth_based_median` (index→curve) + `trim_mean` (α=0==mean) + `fd.var()`/`fd.std()`/`fd.cov()`/`fd.median()` methods (STAT-01, STAT-02)
+
 **UI hint**: yes
 
 ### Phase 27: Scoring Metrics & Alignment/Registration Bindings
@@ -163,7 +167,7 @@ Phases execute in numeric order: 25 → 26 ∥ 27 → 28 → 29 (26 and 27 are p
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 25. Crate Bump + Regression Gate | 1/1 | Complete    | 2026-08-14 |
-| 26. Interpolation, Imputation & Functional Statistics Bindings | 0/TBD | Not started | - |
+| 26. Interpolation, Imputation & Functional Statistics Bindings | 0/2 | Not started | - |
 | 27. Scoring Metrics & Alignment/Registration Bindings | 0/TBD | Not started | - |
 | 28. Advisor Extension | 0/TBD | Not started | - |
 | 29. Docs — Diagrams & Worked Examples | 0/TBD | Not started | - |
