@@ -554,6 +554,104 @@ class Fdata:
             self.data, self.argvals, max_iter, tol
         )
 
+    # ---- represent convenience (interpolation + imputation) -----------------
+
+    def interpolate(
+        self,
+        query_points,
+        policy: str = "exception",
+        fill_value: float = 0.0,
+        order: int = 4,
+    ) -> "Fdata":
+        """Interpolate this functional data object onto a new evaluation grid.
+
+        Delegates to ``fdars.represent.spline_interpolate_with_policy`` so the
+        same B-spline fitting is applied per-curve with the chosen extrapolation
+        policy.  Only supported for 1-D (non-surface) Fdata objects.
+
+        Parameters
+        ----------
+        query_points : array-like
+            New evaluation points to interpolate at.  Must lie within the
+            current argvals domain when ``policy='exception'`` (the default).
+        policy : str, optional
+            Extrapolation policy for out-of-domain query points: one of
+            ``'boundary'``, ``'exception'`` (default), ``'fill'``, or
+            ``'periodic'``.
+        fill_value : float, optional
+            Constant to return for out-of-domain cells when
+            ``policy='fill'``.  Default 0.0.
+        order : int, optional
+            B-spline order (1 = linear, 4 = cubic, default 4).
+
+        Returns
+        -------
+        Fdata
+            New Fdata object with argvals equal to ``query_points`` and the
+            interpolated data matrix.
+
+        Raises
+        ------
+        ValueError
+            For invalid policy, order, or (under 'exception') out-of-domain
+            query points.
+        """
+        qp = np.asarray(query_points, dtype=np.float64)
+        new_data = _native.represent.spline_interpolate_with_policy(
+            self.data, self.argvals, qp, policy, fill_value, order
+        )
+        new_rangeval = (float(qp[0]), float(qp[-1])) if len(qp) >= 2 else self.rangeval
+        return Fdata(
+            data=new_data,
+            argvals=qp,
+            rangeval=new_rangeval,
+            names=self.names.copy(),
+            id=self.id.copy(),
+            metadata=self.metadata,
+        )
+
+    def impute(
+        self,
+        method: str = "linear",
+        constant_value: float = 0.0,
+    ) -> "Fdata":
+        """Impute NaN values in this functional data object.
+
+        Delegates to ``fdars.represent.impute_missing_values``.  Only
+        supported for 1-D (non-surface) Fdata objects.
+
+        Parameters
+        ----------
+        method : str, optional
+            Imputation strategy: ``'linear'`` (default), ``'mean'``, or
+            ``'constant'``.
+        constant_value : float, optional
+            Replacement value when ``method='constant'``.  Default 0.0.
+
+        Returns
+        -------
+        Fdata
+            New Fdata object with the same argvals and rangeval but NaN
+            entries replaced according to `method`.
+
+        Raises
+        ------
+        ValueError
+            If `method` is unknown, argvals length mismatches, or any curve
+            consists entirely of NaN values.
+        """
+        new_data = _native.represent.impute_missing_values(
+            self.data, self.argvals, method, constant_value
+        )
+        return Fdata(
+            data=new_data,
+            argvals=self.argvals,
+            rangeval=self.rangeval,
+            names=self.names.copy(),
+            id=self.id.copy(),
+            metadata=self.metadata,
+        )
+
     # ---- depth convenience --------------------------------------------------
 
     def depth(self, method: str = "fraiman_muniz", ref: Optional["Fdata"] = None,
