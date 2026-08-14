@@ -15,9 +15,9 @@
 
 ### Interpolation & Representation (REPR)
 
-- [ ] **REPR-01**: User can spline-interpolate functional data onto arbitrary off-grid query points (`spline_interpolate` and `spline_interpolate_with_policy`).
-- [ ] **REPR-02**: User can select an `ExtrapolationPolicy` (Boundary / Exception / Fill(value) / Periodic) for out-of-domain queries via the interpolation bindings (`fdata_interpolate_with_policy` / `spline_interpolate_with_policy`), passed as a string with a forward-compatible fallback arm.
-- [ ] **REPR-03**: User can impute missing values on a regular grid (`impute_missing_values` with `ImputationMethod` Linear / Mean / Constant); interpolation and imputation are exposed as `Fdata` methods (`fd.interpolate()`, `fd.impute()`).
+- [x] **REPR-01**: User can spline-interpolate functional data onto arbitrary off-grid query points (`spline_interpolate` and `spline_interpolate_with_policy`).
+- [x] **REPR-02**: User can select an `ExtrapolationPolicy` (Boundary / Exception / Fill(value) / Periodic) for out-of-domain queries via the interpolation bindings (`fdata_interpolate_with_policy` / `spline_interpolate_with_policy`), passed as a string with a forward-compatible fallback arm.
+- [x] **REPR-03**: User can impute missing values on a regular grid (`impute_missing_values` with `ImputationMethod` Linear / Mean / Constant); interpolation and imputation are exposed as `Fdata` methods (`fd.interpolate()`, `fd.impute()`).
 
 ### Functional Statistics & Scoring (STAT)
 
@@ -65,9 +65,9 @@
 |-------------|-------|--------|
 | DEP-01 | Phase 25 | Complete |
 | DEP-02 | Phase 25 | Complete |
-| REPR-01 | Phase 26 | Pending |
-| REPR-02 | Phase 26 | Pending |
-| REPR-03 | Phase 26 | Pending |
+| REPR-01 | Phase 26 | Complete |
+| REPR-02 | Phase 26 | Complete |
+| REPR-03 | Phase 26 | Complete |
 | STAT-01 | Phase 26 | Pending |
 | STAT-02 | Phase 26 | Pending |
 | STAT-03 | Phase 27 | Pending |

@@ -112,7 +112,7 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
 
 **Plans**: 2 plans
 
-- [ ] 26-01-PLAN.md — New `fdars.represent` submodule: `spline_interpolate` (tracer, end-to-end) + `spline_interpolate_with_policy`/`fdata_interpolate_with_policy` (ExtrapolationPolicy string enum) + `impute_missing_values` (ImputationMethod) + `fd.interpolate()`/`fd.impute()` methods; multi-curve transposition round-trip test (REPR-01, REPR-02, REPR-03)
+- [x] 26-01-PLAN.md — New `fdars.represent` submodule: `spline_interpolate` (tracer, end-to-end) + `spline_interpolate_with_policy`/`fdata_interpolate_with_policy` (ExtrapolationPolicy string enum) + `impute_missing_values` (ImputationMethod) + `fd.interpolate()`/`fd.impute()` methods; multi-curve transposition round-trip test (REPR-01, REPR-02, REPR-03)
 - [ ] 26-02-PLAN.md — Functional statistics in `fdars.fdata`: `functional_variance`/`functional_std`/`functional_covariance` (m×m round-trip test) + `depth_based_median` (index→curve) + `trim_mean` (α=0==mean) + `fd.var()`/`fd.std()`/`fd.cov()`/`fd.median()` methods (STAT-01, STAT-02)
 
 **UI hint**: yes
