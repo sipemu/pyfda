@@ -460,6 +460,21 @@ class Fdata:
         """
         return _native.fdata.functional_std(self.data)
 
+    def cov(self) -> np.ndarray:
+        """Bessel-corrected m×m pointwise covariance surface.
+
+        Returns
+        -------
+        numpy.ndarray
+            2-D array of shape (n_points, n_points).
+
+        Raises
+        ------
+        ValueError
+            If n_obs < 2.
+        """
+        return _native.fdata.functional_covariance(self.data)
+
     def center(self) -> "Fdata":
         """Subtract the pointwise mean (centering).
 

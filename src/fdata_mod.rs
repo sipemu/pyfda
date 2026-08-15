@@ -378,6 +378,36 @@ pub fn functional_std<'py>(
     Ok(vec_to_numpy1d(py, result))
 }
 
+/// Compute the Bessel-corrected m×m covariance surface of 1D functional data.
+///
+/// Returns the full m×m pointwise covariance matrix, where entry (j1, j2)
+/// is the Bessel-corrected sample covariance between grid point j1 and j2.
+/// The diagonal equals the pointwise variance returned by `functional_variance`.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     2D array of shape (n_obs, n_points).  Requires n_obs >= 2.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     2D array of shape (n_points, n_points) — the covariance surface.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n_obs < 2.
+#[pyfunction]
+pub fn functional_covariance<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let result = to_pyresult(fdars_core::fdata::functional_covariance(&mat))?;
+    Ok(fdmatrix_to_numpy2d(py, &result))
+}
+
 /// Register fdata functions on the module.
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(mean_1d, m)?)?;
@@ -392,5 +422,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(normalize_with_argvals, m)?)?;
     m.add_function(wrap_pyfunction!(functional_variance, m)?)?;
     m.add_function(wrap_pyfunction!(functional_std, m)?)?;
+    m.add_function(wrap_pyfunction!(functional_covariance, m)?)?;
     Ok(())
 }
