@@ -326,6 +326,58 @@ pub fn normalize_with_argvals<'py>(
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
+/// Compute the Bessel-corrected pointwise variance of 1D functional data.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     2D array of shape (n_obs, n_points).  Requires n_obs >= 2.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     1D array of length n_points (pointwise variance across observations).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n_obs < 2 (not enough observations to compute variance).
+#[pyfunction]
+pub fn functional_variance<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let result = to_pyresult(fdars_core::fdata::functional_variance(&mat))?;
+    Ok(vec_to_numpy1d(py, result))
+}
+
+/// Compute the Bessel-corrected pointwise standard deviation of 1D functional data.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     2D array of shape (n_obs, n_points).  Requires n_obs >= 2.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     1D array of length n_points (pointwise std across observations).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n_obs < 2 (not enough observations to compute std).
+#[pyfunction]
+pub fn functional_std<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let result = to_pyresult(fdars_core::fdata::functional_std(&mat))?;
+    Ok(vec_to_numpy1d(py, result))
+}
+
 /// Register fdata functions on the module.
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(mean_1d, m)?)?;
@@ -338,5 +390,7 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(geometric_median_2d, m)?)?;
     m.add_function(wrap_pyfunction!(normalize, m)?)?;
     m.add_function(wrap_pyfunction!(normalize_with_argvals, m)?)?;
+    m.add_function(wrap_pyfunction!(functional_variance, m)?)?;
+    m.add_function(wrap_pyfunction!(functional_std, m)?)?;
     Ok(())
 }

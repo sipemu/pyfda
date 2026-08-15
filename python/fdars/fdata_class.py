@@ -430,6 +430,36 @@ class Fdata:
             return _native.fdata.mean_2d(self.data)
         return _native.fdata.mean_1d(self.data)
 
+    def var(self) -> np.ndarray:
+        """Bessel-corrected pointwise variance across observations.
+
+        Returns
+        -------
+        numpy.ndarray
+            1-D array of length n_points.
+
+        Raises
+        ------
+        ValueError
+            If n_obs < 2.
+        """
+        return _native.fdata.functional_variance(self.data)
+
+    def std(self) -> np.ndarray:
+        """Bessel-corrected pointwise standard deviation across observations.
+
+        Returns
+        -------
+        numpy.ndarray
+            1-D array of length n_points.
+
+        Raises
+        ------
+        ValueError
+            If n_obs < 2.
+        """
+        return _native.fdata.functional_std(self.data)
+
     def center(self) -> "Fdata":
         """Subtract the pointwise mean (centering).
 
