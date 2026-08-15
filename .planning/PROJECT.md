@@ -82,12 +82,13 @@ The documentation — diagrams first, examples second — must make functional d
 
 **v4.0 — fdars-core 0.17 Upgrade (Phases 25–29, in progress):**
 - ✓ `fdars-core` bumped 0.14.0 → 0.17.0 (parallel-only, no `linalg`); full binding + advisor suite green (259 passed / 4 skipped / 0 failed), zero FPCA tolerance changes needed — the faer SVD `1e-8·σ₁` drift never surfaced (DEP-01/02) — Phase 25
+- ✓ New `fdars.represent` submodule (spline interpolation + extrapolation policy + missing-value imputation) and functional statistics in `fdars.fdata` (variance/std/covariance, depth-based median resolving to the actual curve, trimmed mean), plus six `Fdata` methods (`interpolate/impute/var/std/cov/median`); layout-correct via multi-curve transposition tests; 328 passed / 4 skipped (REPR-01/02/03, STAT-01/02) — Phase 26
 
 ### Active
 
 <!-- v4.0 in progress — fdars-core 0.17 upgrade: new bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
 
-_v4.0 in progress — Phase 25 (crate bump + regression gate) ✓ shipped on the 0.17.0 baseline. Remaining: interpolation/representation bindings (26), functional-stats & scoring + alignment/registration bindings (27), advisor extension (28), diagrams + worked-example docs (29). See `## Current Milestone: v4.0` and `REQUIREMENTS.md` for scoped REQ-IDs._
+_v4.0 in progress — Phases 25 (crate bump) ✓ and 26 (interpolation/imputation + functional statistics bindings) ✓ shipped on the 0.17.0 baseline. Remaining: scoring metrics + alignment/registration bindings (27), advisor extension (28), diagrams + worked-example docs (29). See `## Current Milestone: v4.0` and `REQUIREMENTS.md` for scoped REQ-IDs._
 
 ### Out of Scope
 
@@ -148,4 +149,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-14 after Phase 25 — fdars-core bumped to 0.17.0, regression gate green (v4.0 in progress)*
+*Last updated: 2026-08-14 after Phase 26 — fdars.represent + functional statistics bindings shipped (v4.0 in progress)*

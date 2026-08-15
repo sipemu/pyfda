@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
-current_phase: 26
-current_phase_name: interpolation-imputation-functional-statistics-bindings
-status: verifying
+current_phase: 27
+current_phase_name: Scoring Metrics & Alignment/Registration Bindings
+status: planning
 stopped_at: Completed 26-02-PLAN.md
-last_updated: "2026-08-15T18:17:29.210Z"
-last_activity: 2026-08-14
-last_activity_desc: Phase 25 execution started
+last_updated: "2026-08-15T18:23:42.112Z"
+last_activity: 2026-08-15
+last_activity_desc: Phase 26 complete, transitioned to Phase 27
 progress:
   total_phases: 2
   completed_phases: 2
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 ## Current Position
 
-Phase: 26 (interpolation-imputation-functional-statistics-bindings) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-08-14 — Phase 26 execution started
+Phase: 27 — Scoring Metrics & Alignment/Registration Bindings
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-15 — Phase 26 complete, transitioned to Phase 27
 
 Progress: [██████████] 100%
 
@@ -38,7 +38,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 1 (this milestone); 19 across v1.0–v3.0
+- Total plans completed: 3 (this milestone); 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -47,7 +47,7 @@ Progress: [██████████] 100%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 25 | 1 | - | - |
-| 26 | TBD | - | - |
+| 26 | 2 | - | - |
 | 27 | TBD | - | - |
 | 28 | TBD | - | - |
 | 29 | TBD | - | - |
