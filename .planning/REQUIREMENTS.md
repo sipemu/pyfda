@@ -27,9 +27,9 @@
 
 ### Alignment & Registration (ALGN)
 
-- [ ] **ALGN-01**: User can run least-squares shift registration (`least_squares_shift_registration`), receiving the registered curves and per-curve shifts (`ShiftRegistrationResult` marshalled as a dict).
-- [ ] **ALGN-02**: User can score registration quality with `least_squares_score`, `pairwise_correlation_score`, and `sobolev_least_squares_score` (Sobolev requires a uniform grid; surfaced clearly).
-- [ ] **ALGN-03**: User can run banded elastic alignment (`karcher_mean_with_band`, `elastic_self_distance_matrix_with_band`, `elastic_cross_distance_matrix_with_band`) with an optional `band_frac` (`None` = unbanded).
+- [x] **ALGN-01**: User can run least-squares shift registration (`least_squares_shift_registration`), receiving the registered curves and per-curve shifts (`ShiftRegistrationResult` marshalled as a dict).
+- [x] **ALGN-02**: User can score registration quality with `least_squares_score`, `pairwise_correlation_score`, and `sobolev_least_squares_score` (Sobolev requires a uniform grid; surfaced clearly).
+- [x] **ALGN-03**: User can run banded elastic alignment (`karcher_mean_with_band`, `elastic_self_distance_matrix_with_band`, `elastic_cross_distance_matrix_with_band`) with an optional `band_frac` (`None` = unbanded).
 
 ### Advisor Extension (ADV)
 
@@ -71,9 +71,9 @@
 | STAT-01 | Phase 26 | Complete |
 | STAT-02 | Phase 26 | Complete |
 | STAT-03 | Phase 27 | Complete |
-| ALGN-01 | Phase 27 | Pending |
-| ALGN-02 | Phase 27 | Pending |
-| ALGN-03 | Phase 27 | Pending |
+| ALGN-01 | Phase 27 | Complete |
+| ALGN-02 | Phase 27 | Complete |
+| ALGN-03 | Phase 27 | Complete |
 | ADV-01 | Phase 28 | Pending |
 | ADV-02 | Phase 28 | Pending |
 | DOCS-01 | Phase 29 | Pending |

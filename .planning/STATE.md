@@ -4,16 +4,16 @@ milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 current_phase: 27
 current_phase_name: scoring-metrics-alignment-registration-bindings
-status: executing
-stopped_at: Completed 27-01-PLAN.md (fdars.scoring submodule)
-last_updated: "2026-08-15T21:27:30.561Z"
+status: verifying
+stopped_at: Completed 27-02-PLAN.md
+last_updated: "2026-08-15T21:36:03.234Z"
 last_activity: 2026-08-15
 last_activity_desc: Phase 26 complete, transitioned to Phase 27
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 Phase: 27 (scoring-metrics-alignment-registration-bindings) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-15 — Phase 27 execution started
 
-Progress: [████████░░] 80%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [████████░░] 80%
 | Phase 26-interpolation-imputation-functional-statistics-bindings P01 | 25min | 3 tasks | 5 files |
 | Phase 26-interpolation-imputation-functional-statistics-bindings P02 | 6 minutes | 3 tasks | 3 files |
 | Phase 27 P01 | 7m | 2 tasks | 4 files |
+| Phase 27 P02 | 364 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase ?]: fd.median() returns Fdata row (n_obs=1) with original argvals, per CONTEXT.md
 - [Phase ?]: fdars.scoring: new PyO3 submodule for 5 Simpson-integrated prediction-scoring metrics (STAT-03)
 - [Phase ?]: TDD RED/GREEN used for Task 2 expansion of 4 metrics after tracer gate
+- [Phase ?]: Bind *_with_band variants (band_frac: Option<f64>=None) NOT *_banded — consistent with CONTEXT.md locked decision; None disables band cleanly
+- [Phase ?]: ShiftRegistrationResult marshalled as PyDict {registered_data, shifts} — mirrors karcher_mean dict convention
+- [Phase ?]: fd.shift_register() returns (Fdata, ndarray) 2-tuple preserving argvals/rangeval/names/id/metadata
 
 ### Pending Todos
 
@@ -116,8 +120,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-15T21:27:30.550Z
-Stopped at: Completed 27-01-PLAN.md (fdars.scoring submodule)
+Last session: 2026-08-15T21:36:03.226Z
+Stopped at: Completed 27-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
