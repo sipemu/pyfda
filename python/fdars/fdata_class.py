@@ -723,6 +723,53 @@ class Fdata:
             metadata=self.metadata,
         )
 
+    # ---- alignment convenience ----------------------------------------------
+
+    def shift_register(self, max_shift: float) -> tuple["Fdata", np.ndarray]:
+        """Register curves by a per-curve rigid horizontal shift (least-squares).
+
+        Delegates to ``fdars.alignment.least_squares_shift_registration``, which
+        finds the shift δᵢ ∈ [−max_shift, +max_shift] that minimises the
+        Simpson-weighted L2 distance of each curve to the cross-sectional mean.
+        Shifted curves are re-evaluated at the original ``argvals`` grid via
+        linear interpolation.
+
+        Parameters
+        ----------
+        max_shift : float
+            Half-width of the shift search interval (must be > 0).
+            Recommended: ``0.25 * (argvals[-1] - argvals[0])``, i.e. 25 % of the
+            domain width.
+
+        Returns
+        -------
+        tuple[Fdata, numpy.ndarray]
+            A 2-tuple ``(registered, shifts)`` where
+
+            * ``registered`` — new :class:`Fdata` with the same argvals, rangeval,
+              names, and id as ``self``, but with the registered curve matrix;
+            * ``shifts`` — 1-D ndarray of shape ``(n_obs,)`` giving the per-curve
+              horizontal shift δᵢ (positive = shifted right).
+
+        Raises
+        ------
+        ValueError
+            If ``max_shift ≤ 0``, ``data`` is empty, or ``argvals`` length
+            mismatches the number of evaluation points.
+        """
+        result = _native.alignment.least_squares_shift_registration(
+            self.data, self.argvals, max_shift
+        )
+        registered_fdata = Fdata(
+            data=result["registered_data"],
+            argvals=self.argvals,
+            rangeval=self.rangeval,
+            names=self.names.copy(),
+            id=self.id.copy(),
+            metadata=self.metadata,
+        )
+        return registered_fdata, result["shifts"]
+
     # ---- depth convenience --------------------------------------------------
 
     def depth(self, method: str = "fraiman_muniz", ref: Optional["Fdata"] = None,
