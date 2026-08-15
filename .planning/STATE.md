@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
-current_phase: 27
-current_phase_name: scoring-metrics-alignment-registration-bindings
-status: verifying
+current_phase: 28
+current_phase_name: Advisor Extension (grounding-invariant preserved)
+status: planning
 stopped_at: Completed 27-02-PLAN.md
-last_updated: "2026-08-15T21:36:03.234Z"
+last_updated: "2026-08-15T21:43:02.986Z"
 last_activity: 2026-08-15
 last_activity_desc: Phase 26 complete, transitioned to Phase 27
 progress:
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 ## Current Position
 
-Phase: 27 (scoring-metrics-alignment-registration-bindings) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-08-15 — Phase 27 execution started
+Phase: 28 — Advisor Extension (grounding-invariant preserved)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-15 — Phase 27 complete, transitioned to Phase 28
 
 Progress: [██████████] 100%
 
@@ -38,7 +38,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 3 (this milestone); 19 across v1.0–v3.0
+- Total plans completed: 5 (this milestone); 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -48,7 +48,7 @@ Progress: [██████████] 100%
 |-------|-------|-------|----------|
 | 25 | 1 | - | - |
 | 26 | 2 | - | - |
-| 27 | TBD | - | - |
+| 27 | 2 | - | - |
 | 28 | TBD | - | - |
 | 29 | TBD | - | - |
 
