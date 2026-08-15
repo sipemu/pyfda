@@ -23,7 +23,7 @@
 
 - [x] **STAT-01**: User can compute `functional_variance`, `functional_std`, and `functional_covariance`; matrix-returning results are verified layout-correct with a multi-curve round-trip test (guards the column-major #33 bug class).
 - [x] **STAT-02**: User can compute `depth_based_median` (binding resolves the returned index to the actual median curve) and `trim_mean`.
-- [ ] **STAT-03**: User can score functional predictions with `functional_mae`, `functional_mse`, `functional_mape`, `functional_msle`, and `functional_explained_variance`; fallible inputs (MAPE near-zero truths, MSLE values ≤ −1) surface as `ValueError`.
+- [x] **STAT-03**: User can score functional predictions with `functional_mae`, `functional_mse`, `functional_mape`, `functional_msle`, and `functional_explained_variance`; fallible inputs (MAPE near-zero truths, MSLE values ≤ −1) surface as `ValueError`.
 
 ### Alignment & Registration (ALGN)
 
@@ -70,7 +70,7 @@
 | REPR-03 | Phase 26 | Complete |
 | STAT-01 | Phase 26 | Complete |
 | STAT-02 | Phase 26 | Complete |
-| STAT-03 | Phase 27 | Pending |
+| STAT-03 | Phase 27 | Complete |
 | ALGN-01 | Phase 27 | Pending |
 | ALGN-02 | Phase 27 | Pending |
 | ALGN-03 | Phase 27 | Pending |

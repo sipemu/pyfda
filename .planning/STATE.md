@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 current_phase: 27
-current_phase_name: Scoring Metrics & Alignment/Registration Bindings
-status: planning
-stopped_at: Completed 26-02-PLAN.md
-last_updated: "2026-08-15T18:23:42.112Z"
+current_phase_name: scoring-metrics-alignment-registration-bindings
+status: executing
+stopped_at: Completed 27-01-PLAN.md (fdars.scoring submodule)
+last_updated: "2026-08-15T21:27:30.561Z"
 last_activity: 2026-08-15
 last_activity_desc: Phase 26 complete, transitioned to Phase 27
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-13)
 
 **Core value:** Upgrade `fdars-core` 0.14.0→0.17.0, expose the new functional-data capabilities (interpolation/imputation, functional statistics/scoring, shift registration/registration-quality/banded elastic alignment) through PyO3 bindings + the Python API, extend the v3.0 grounded advisor to cover the relevant new capabilities, and document everything method-accurately — with the grounding invariant intact throughout.
-**Current focus:** Phase 26 — interpolation-imputation-functional-statistics-bindings
+**Current focus:** Phase 27 — scoring-metrics-alignment-registration-bindings
 
 ## Current Position
 
-Phase: 27 — Scoring Metrics & Alignment/Registration Bindings
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-15 — Phase 26 complete, transitioned to Phase 27
+Phase: 27 (scoring-metrics-alignment-registration-bindings) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-08-15 — Phase 27 execution started
 
-Progress: [██████████] 100%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [██████████] 100%
 | Phase 25 P01 | 50 | 2 tasks | 1 files |
 | Phase 26-interpolation-imputation-functional-statistics-bindings P01 | 25min | 3 tasks | 5 files |
 | Phase 26-interpolation-imputation-functional-statistics-bindings P02 | 6 minutes | 3 tasks | 3 files |
+| Phase 27 P01 | 7m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,8 @@ Recent decisions affecting current work:
 - [Phase ?]: functional_covariance returns m×m via fdmatrix_to_numpy2d; diagonal==variance guards layout correctness
 - [Phase ?]: depth_based_median resolves usize via mat.row(idx); never returns bare int
 - [Phase ?]: fd.median() returns Fdata row (n_obs=1) with original argvals, per CONTEXT.md
+- [Phase ?]: fdars.scoring: new PyO3 submodule for 5 Simpson-integrated prediction-scoring metrics (STAT-03)
+- [Phase ?]: TDD RED/GREEN used for Task 2 expansion of 4 metrics after tracer gate
 
 ### Pending Todos
 
@@ -113,8 +116,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-15T18:17:29.201Z
-Stopped at: Completed 26-02-PLAN.md
+Last session: 2026-08-15T21:27:30.550Z
+Stopped at: Completed 27-01-PLAN.md (fdars.scoring submodule)
 Resume file: None
 
 ## Operator Next Steps

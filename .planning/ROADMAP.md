@@ -131,7 +131,7 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
 
 **Plans**: 2 plans
 
-- [ ] 27-01-PLAN.md — NEW `fdars.scoring` submodule: 5 functional prediction-scoring metrics (`functional_mae`/`mse`/`mape`/`msle`/`explained_variance`), tracer-first, with MAPE/MSLE ValueError guards and a hand-checked `functional_mse(X,X)==0` (STAT-03)
+- [x] 27-01-PLAN.md — NEW `fdars.scoring` submodule: 5 functional prediction-scoring metrics (`functional_mae`/`mse`/`mape`/`msle`/`explained_variance`), tracer-first, with MAPE/MSLE ValueError guards and a hand-checked `functional_mse(X,X)==0` (STAT-03)
 - [ ] 27-02-PLAN.md — `fdars.alignment` additions: `least_squares_shift_registration` (dict) + `fd.shift_register()`; 3 registration-quality scores (Sobolev non-uniform-grid ValueError); 3 banded `*_with_band` fns (`band_frac=None`) with multi-curve transposition test (ALGN-01, ALGN-02, ALGN-03)
 
 **UI hint**: yes
