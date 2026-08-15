@@ -408,6 +408,73 @@ pub fn functional_covariance<'py>(
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
+/// Return the depth-based median curve of 1D functional data.
+///
+/// Finds the observation with the highest Fraiman-Muniz depth and returns
+/// that curve as a 1-D array of length n_points.  The upstream usize index
+/// is resolved to the actual curve row — a bare integer is never returned.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     2D array of shape (n_obs, n_points).
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     1D array of length n_points — the median curve (deepest observation).
+///
+/// Raises
+/// ------
+/// ValueError
+///     Propagated from fdars-core if the computation fails.
+#[pyfunction]
+pub fn depth_based_median<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let idx = to_pyresult(fdars_core::fdata::depth_based_median(&mat))?;
+    // Resolve the index to the actual curve row (never return the bare usize).
+    // mat is column-major with shape (n_obs, n_points); row(idx) yields n_points values.
+    let row_vec: Vec<f64> = mat.row(idx);
+    Ok(vec_to_numpy1d(py, row_vec))
+}
+
+/// Compute the depth-trimmed mean of 1D functional data.
+///
+/// Trims the fraction `alpha` of the least-central observations (by
+/// Fraiman-Muniz depth) and returns the pointwise mean of the remainder.
+/// At alpha=0.0 this equals the plain pointwise mean exactly.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     2D array of shape (n_obs, n_points).
+/// alpha : float, optional
+///     Trimming fraction in [0, 1).  Default 0.0 (no trimming = plain mean).
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     1D array of length n_points.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If alpha is not in [0, 1).
+#[pyfunction]
+#[pyo3(signature = (data, alpha=0.0))]
+pub fn trim_mean<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    alpha: f64,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let result = to_pyresult(fdars_core::fdata::trim_mean(&mat, alpha))?;
+    Ok(vec_to_numpy1d(py, result))
+}
+
 /// Register fdata functions on the module.
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(mean_1d, m)?)?;
@@ -423,5 +490,7 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(functional_variance, m)?)?;
     m.add_function(wrap_pyfunction!(functional_std, m)?)?;
     m.add_function(wrap_pyfunction!(functional_covariance, m)?)?;
+    m.add_function(wrap_pyfunction!(depth_based_median, m)?)?;
+    m.add_function(wrap_pyfunction!(trim_mean, m)?)?;
     Ok(())
 }

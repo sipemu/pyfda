@@ -321,12 +321,19 @@ class TestDepthBasedMedian:
 class TestTrimMean:
     """STAT-02 part: trim_mean with α=0 identity and degenerate inputs."""
 
-    # Dataset with outlier in row 2 to make trim_mean meaningful.
+    # Dataset with outlier to make trim_mean meaningful.
+    # 10 observations so that alpha=0.2 trims at least 2 curves (floor(0.2*10)=2).
     X_OUT = np.array([
         [1.0, 2.0, 3.0],
         [1.5, 2.5, 3.5],
         [1.2, 2.2, 3.2],
-        [9.0, 9.0, 9.0],   # outlier
+        [1.3, 2.3, 3.3],
+        [0.9, 1.9, 2.9],
+        [1.1, 2.1, 3.1],
+        [1.4, 2.4, 3.4],
+        [1.0, 2.0, 3.0],
+        [1.6, 2.6, 3.6],
+        [9.0, 9.0, 9.0],   # outlier — low depth, gets trimmed at alpha=0.2
     ], dtype=np.float64)
 
     def test_trim_mean_alpha_zero_equals_mean(self):

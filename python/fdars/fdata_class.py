@@ -599,6 +599,32 @@ class Fdata:
             self.data, self.argvals, max_iter, tol
         )
 
+    def median(self) -> "Fdata":
+        """Return the depth-based median curve as a single-observation Fdata.
+
+        Finds the deepest observation (by Fraiman-Muniz depth) and returns it
+        wrapped in a new Fdata with one row, preserving argvals and rangeval.
+
+        Returns
+        -------
+        Fdata
+            Single-observation Fdata whose data row is the median curve.
+
+        Raises
+        ------
+        ValueError
+            Propagated from the native binding if the computation fails.
+        """
+        curve = _native.fdata.depth_based_median(self.data)
+        return Fdata(
+            data=curve[np.newaxis, :],
+            argvals=self.argvals,
+            rangeval=self.rangeval,
+            names=self.names.copy(),
+            id=["median"],
+            metadata=None,
+        )
+
     # ---- represent convenience (interpolation + imputation) -----------------
 
     def interpolate(
