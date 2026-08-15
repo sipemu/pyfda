@@ -49,6 +49,7 @@ _submodule_names = (
     "simulation",
     "explain",
     "represent",
+    "scoring",
 )
 
 for _name in _submodule_names:
