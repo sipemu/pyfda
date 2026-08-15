@@ -4,16 +4,16 @@ milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 current_phase: 26
 current_phase_name: interpolation-imputation-functional-statistics-bindings
-status: executing
-stopped_at: Completed 26-01-PLAN.md
-last_updated: "2026-08-14T10:29:20.277Z"
+status: verifying
+stopped_at: Completed 26-02-PLAN.md
+last_updated: "2026-08-15T18:17:29.210Z"
 last_activity: 2026-08-14
 last_activity_desc: Phase 25 execution started
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 Phase: 26 (interpolation-imputation-functional-statistics-bindings) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-14 — Phase 26 execution started
 
-Progress: [███████░░░] 67%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [███████░░░] 67%
 |------|----------|-------|-------|
 | Phase 25 P01 | 50 | 2 tasks | 1 files |
 | Phase 26-interpolation-imputation-functional-statistics-bindings P01 | 25min | 3 tasks | 5 files |
+| Phase 26-interpolation-imputation-functional-statistics-bindings P02 | 6 minutes | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Recent decisions affecting current work:
 - [Phase ?]: faer FPCA SVD drift (1e-8·σ₁, fdars-core 0.15+) did not surface at suite's existing tolerances: zero test failures, zero tolerance relaxations; DEP-02 satisfied
 - [Phase ?]: New fdars.represent submodule for interpolation+imputation (per CONTEXT.md locked decision — not extending fdata_mod)
 - [Phase ?]: ExtrapolationPolicy/ImputationMethod cross as plain &str + match arms with _ => PyValueError fallback (Python 3.9 safe, no StrEnum)
+- [Phase ?]: functional_covariance returns m×m via fdmatrix_to_numpy2d; diagonal==variance guards layout correctness
+- [Phase ?]: depth_based_median resolves usize via mat.row(idx); never returns bare int
+- [Phase ?]: fd.median() returns Fdata row (n_obs=1) with original argvals, per CONTEXT.md
 
 ### Pending Todos
 
@@ -109,8 +113,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-14T10:29:20.268Z
-Stopped at: Completed 26-01-PLAN.md
+Last session: 2026-08-15T18:17:29.201Z
+Stopped at: Completed 26-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
