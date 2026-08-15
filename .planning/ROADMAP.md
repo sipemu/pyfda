@@ -129,7 +129,11 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
   3. User can score registration quality with `least_squares_score`, `pairwise_correlation_score`, and `sobolev_least_squares_score`, and the Sobolev score's uniform-grid requirement is surfaced clearly (not a silent wrong answer).
   4. User can run banded elastic alignment (`karcher_mean_with_band`, `elastic_self_distance_matrix_with_band`, `elastic_cross_distance_matrix_with_band`) with an optional `band_frac` where `None` means unbanded, and the banded distance matrices are proven layout-correct by a multi-curve round-trip test.
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+- [ ] 27-01-PLAN.md — NEW `fdars.scoring` submodule: 5 functional prediction-scoring metrics (`functional_mae`/`mse`/`mape`/`msle`/`explained_variance`), tracer-first, with MAPE/MSLE ValueError guards and a hand-checked `functional_mse(X,X)==0` (STAT-03)
+- [ ] 27-02-PLAN.md — `fdars.alignment` additions: `least_squares_shift_registration` (dict) + `fd.shift_register()`; 3 registration-quality scores (Sobolev non-uniform-grid ValueError); 3 banded `*_with_band` fns (`band_frac=None`) with multi-curve transposition test (ALGN-01, ALGN-02, ALGN-03)
+
 **UI hint**: yes
 
 ### Phase 28: Advisor Extension (grounding-invariant preserved)
@@ -168,7 +172,7 @@ Phases execute in numeric order: 25 → 26 ∥ 27 → 28 → 29 (26 and 27 are p
 |-------|----------------|--------|-----------|
 | 25. Crate Bump + Regression Gate | 1/1 | Complete    | 2026-08-14 |
 | 26. Interpolation, Imputation & Functional Statistics Bindings | 2/2 | Complete    | 2026-08-15 |
-| 27. Scoring Metrics & Alignment/Registration Bindings | 0/TBD | Not started | - |
+| 27. Scoring Metrics & Alignment/Registration Bindings | 0/2 | Not started | - |
 | 28. Advisor Extension | 0/TBD | Not started | - |
 | 29. Docs — Diagrams & Worked Examples | 0/TBD | Not started | - |
 
