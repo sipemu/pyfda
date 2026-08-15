@@ -2071,6 +2071,292 @@ pub fn elastic_changepoint<'py>(
     Ok(dict)
 }
 
+// ─── Phase 27-02: Shift registration, quality scores, banded variants ──────
+
+/// Register curves by a per-curve rigid horizontal shift (least-squares).
+///
+/// Finds the shift δᵢ ∈ [−max_shift, +max_shift] that minimises the
+/// Simpson-weighted L2 distance of each curve to the cross-sectional mean.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Functional data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m. Must be sorted ascending.
+/// max_shift : float
+///     Half-width of the shift search interval (must be > 0).
+///     Recommended: 0.25 * (argvals[-1] - argvals[0]).
+///
+/// Returns
+/// -------
+/// dict
+///     registered_data : ndarray, shape (n, m) — shifted curves on the
+///     original grid; shifts : ndarray, shape (n,) — per-curve shifts δᵢ.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If data is empty, argvals length mismatches m, or max_shift ≤ 0.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, max_shift))]
+pub fn least_squares_shift_registration<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    max_shift: f64,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = to_pyresult(fdars_core::alignment::least_squares_shift_registration(
+        &mat, &av, max_shift,
+    ))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item(
+        "registered_data",
+        fdmatrix_to_numpy2d(py, &result.registered_data),
+    )?;
+    dict.set_item("shifts", vec_to_numpy1d(py, result.shifts))?;
+    Ok(dict)
+}
+
+/// Least-squares registration score: mean Simpson-weighted L2 spread of the
+/// registered curves around their cross-sectional mean.
+///
+/// Lower is better after registration.
+///
+/// Parameters
+/// ----------
+/// registered : numpy.ndarray
+///     Registered functional data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+///
+/// Returns
+/// -------
+/// float
+///     Mean L2 spread (≥ 0).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If registered is empty, argvals length mismatches m, or m < 2.
+#[pyfunction]
+pub fn least_squares_score(
+    registered: PyReadonlyArray2<'_, f64>,
+    argvals: PyReadonlyArray1<'_, f64>,
+) -> PyResult<f64> {
+    let mat = numpy2d_to_fdmatrix(registered)?;
+    let av = numpy1d_to_vec(argvals);
+    to_pyresult(fdars_core::alignment::least_squares_score(&mat, &av))
+}
+
+/// Pairwise correlation registration score: mean functional Pearson correlation
+/// over all n(n−1)/2 pairs of registered curves.
+///
+/// Higher scores indicate greater pairwise alignment (range approximately [-1, 1]).
+///
+/// Parameters
+/// ----------
+/// registered : numpy.ndarray
+///     Registered functional data, shape (n, m), n ≥ 2.
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+///
+/// Returns
+/// -------
+/// float
+///     Mean pairwise Pearson correlation.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n < 2, m < 2, or argvals length mismatches m.
+#[pyfunction]
+pub fn pairwise_correlation_score(
+    registered: PyReadonlyArray2<'_, f64>,
+    argvals: PyReadonlyArray1<'_, f64>,
+) -> PyResult<f64> {
+    let mat = numpy2d_to_fdmatrix(registered)?;
+    let av = numpy1d_to_vec(argvals);
+    to_pyresult(fdars_core::alignment::pairwise_correlation_score(&mat, &av))
+}
+
+/// Sobolev least-squares registration score: LS spread plus a derivative-penalty
+/// term weighted by ``lambda_``.
+///
+/// When ``lambda_=0`` this is identical to :func:`least_squares_score`.
+///
+/// **Uniform-grid requirement (when lambda_ > 0):** The derivative term uses a
+/// 5-point stencil that requires a *uniform* ``argvals`` grid. Passing a
+/// non-uniform grid with ``lambda_ > 0`` raises ``ValueError``.
+///
+/// Parameters
+/// ----------
+/// registered : numpy.ndarray
+///     Registered functional data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m. Must be uniform when ``lambda_ > 0``.
+/// lambda_ : float, optional
+///     Weight for the derivative penalty (default 0.0). Must be ≥ 0.
+///
+/// Returns
+/// -------
+/// float
+///     Sobolev score (≥ 0).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If registered is empty, argvals length mismatches m, m < 2, lambda_ < 0,
+///     or lambda_ > 0 with a non-uniform grid.
+#[pyfunction]
+#[pyo3(signature = (registered, argvals, lambda_=0.0))]
+pub fn sobolev_least_squares_score(
+    registered: PyReadonlyArray2<'_, f64>,
+    argvals: PyReadonlyArray1<'_, f64>,
+    lambda_: f64,
+) -> PyResult<f64> {
+    let mat = numpy2d_to_fdmatrix(registered)?;
+    let av = numpy1d_to_vec(argvals);
+    to_pyresult(fdars_core::alignment::sobolev_least_squares_score(
+        &mat, &av, lambda_,
+    ))
+}
+
+/// Karcher (Fréchet) mean under the elastic metric with optional Sakoe–Chiba band.
+///
+/// Identical to :func:`karcher_mean` when ``band_frac=None`` (no band restriction).
+/// Passing ``band_frac`` ∈ (0, 1) restricts the DP warping path to a Sakoe–Chiba
+/// corridor of that fractional width.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// lambda_ : float, optional
+///     Regularization (default 0.0).
+/// max_iter : int, optional
+///     Maximum iterations (default 20).
+/// tol : float, optional
+///     Convergence tolerance (default 1e-4).
+/// band_frac : float or None, optional
+///     Sakoe–Chiba band fraction ∈ (0, 1).  ``None`` (default) disables the band
+///     (equivalent to unbanded :func:`karcher_mean`).
+///
+/// Returns
+/// -------
+/// dict
+///     mean (m,), mean_srsf (m,), aligned_data (n, m), gammas (n, m),
+///     n_iter, converged.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, lambda_=0.0, max_iter=20, tol=1e-4, band_frac=None))]
+pub fn karcher_mean_with_band<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    lambda_: f64,
+    max_iter: usize,
+    tol: f64,
+    band_frac: Option<f64>,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result =
+        fdars_core::alignment::karcher_mean_with_band(&mat, &av, max_iter, tol, lambda_, band_frac);
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("mean", vec_to_numpy1d(py, result.mean))?;
+    dict.set_item("mean_srsf", vec_to_numpy1d(py, result.mean_srsf))?;
+    dict.set_item(
+        "aligned_data",
+        fdmatrix_to_numpy2d(py, &result.aligned_data),
+    )?;
+    dict.set_item("gammas", fdmatrix_to_numpy2d(py, &result.gammas))?;
+    dict.set_item("n_iter", result.n_iter)?;
+    dict.set_item("converged", result.converged)?;
+    Ok(dict)
+}
+
+/// Elastic self-distance matrix with optional Sakoe–Chiba band.
+///
+/// Computes pairwise elastic (Fisher-Rao) distances between all curve pairs in
+/// ``data``, optionally restricting the DP path to a Sakoe–Chiba band.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// lambda_ : float, optional
+///     Regularization (default 0.0).
+/// band_frac : float or None, optional
+///     Sakoe–Chiba band fraction ∈ (0, 1).  ``None`` (default) disables the band.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Symmetric distance matrix, shape (n, n), zero diagonal.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, lambda_=0.0, band_frac=None))]
+pub fn elastic_self_distance_matrix_with_band<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    lambda_: f64,
+    band_frac: Option<f64>,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = fdars_core::alignment::elastic_self_distance_matrix_with_band(
+        &mat, &av, lambda_, band_frac,
+    );
+    Ok(fdmatrix_to_numpy2d(py, &result))
+}
+
+/// Elastic cross-distance matrix with optional Sakoe–Chiba band.
+///
+/// Computes elastic (Fisher-Rao) distances between every pair of curves
+/// (data1[i], data2[j]), optionally restricting the DP path to a Sakoe–Chiba band.
+///
+/// Parameters
+/// ----------
+/// data1 : numpy.ndarray
+///     First dataset, shape (n1, m).
+/// data2 : numpy.ndarray
+///     Second dataset, shape (n2, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// lambda_ : float, optional
+///     Regularization (default 0.0).
+/// band_frac : float or None, optional
+///     Sakoe–Chiba band fraction ∈ (0, 1).  ``None`` (default) disables the band.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Distance matrix, shape (n1, n2).
+#[pyfunction]
+#[pyo3(signature = (data1, data2, argvals, lambda_=0.0, band_frac=None))]
+pub fn elastic_cross_distance_matrix_with_band<'py>(
+    py: Python<'py>,
+    data1: PyReadonlyArray2<'py, f64>,
+    data2: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    lambda_: f64,
+    band_frac: Option<f64>,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let m1 = numpy2d_to_fdmatrix(data1)?;
+    let m2 = numpy2d_to_fdmatrix(data2)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = fdars_core::alignment::elastic_cross_distance_matrix_with_band(
+        &m1, &m2, &av, lambda_, band_frac,
+    );
+    Ok(fdmatrix_to_numpy2d(py, &result))
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(elastic_changepoint, m)?)?;
     m.add_function(wrap_pyfunction!(detect_landmarks, m)?)?;
@@ -2134,5 +2420,13 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(horiz_fpns, m)?)?;
     m.add_function(wrap_pyfunction!(reparameterize_curve, m)?)?;
     m.add_function(wrap_pyfunction!(warp_inverse_error, m)?)?;
+    // Phase 27-02: shift registration, quality scores, banded variants
+    m.add_function(wrap_pyfunction!(least_squares_shift_registration, m)?)?;
+    m.add_function(wrap_pyfunction!(least_squares_score, m)?)?;
+    m.add_function(wrap_pyfunction!(pairwise_correlation_score, m)?)?;
+    m.add_function(wrap_pyfunction!(sobolev_least_squares_score, m)?)?;
+    m.add_function(wrap_pyfunction!(karcher_mean_with_band, m)?)?;
+    m.add_function(wrap_pyfunction!(elastic_self_distance_matrix_with_band, m)?)?;
+    m.add_function(wrap_pyfunction!(elastic_cross_distance_matrix_with_band, m)?)?;
     Ok(())
 }
