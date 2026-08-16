@@ -163,7 +163,14 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
   2. Runnable offline worked examples for the new capabilities run against existing `docs/data/` datasets; every executed `markdown-exec` fence stays network-free and deterministic (fixed seeds, base extras only) and emits the `FDARS_FENCE_OK` sentinel.
   3. The AI Advisor docs section is updated for the new scoring / registration-quality / imputation coverage, and full `mkdocs build --strict` passes offline against the current implementation.
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 29-01-PLAN.md — Tracer: represent pages (interpolation + imputation) + 2 SVGs + executed fences + nav + strict build
+- [ ] 29-02-PLAN.md — Analyze pages (functional-statistics + scoring-metrics) + 2 SVGs + executed fences
+- [ ] 29-03-PLAN.md — Align pages (shift-registration + banded-alignment) + 2 SVGs + executed fences + advisor aspects.md update
+- [ ] 29-04-PLAN.md — Nav wiring + whole-site strict build + SVGO/determinism gate + blocking human diagram review
+
 **UI hint**: yes
 
 ### Progress
