@@ -147,7 +147,10 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
   2. Imputation-quality diagnostics extend the `represent` aspect and registration-quality diagnostics extend the `alignment` aspect, and each new diagnostic calls a bound fdars function (never Python math) and cites a real computed number — the grounding invariant is preserved.
   3. New offline determinism tests prove each new aspect/method produces byte-identical JSON-serialisable output for the same input (no numpy scalars, no network).
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+- [ ] 28-01-PLAN.md — ADV-01 tracer: `scoring` as the 13th advisor aspect (`aspects/scoring.py` + dispatch + `_supported` + MCP `_DIAGNOSTICS_METHODS` + `_ASPECT_PRIMERS['scoring']`) wired in ONE atomic commit, guard-sync green, offline-determinism + grounding tests (ADV-01)
+- [ ] 28-02-PLAN.md — ADV-02: imputation-quality on the existing `represent` aspect + registration-quality (3 fdars scores) on the existing `alignment` aspect, both grounded (bound-fdars values, no numpy), no guard-sync churn, offline-determinism + grounding + backward-compat tests (ADV-02)
 
 ### Phase 29: Docs — Diagrams & Worked Examples
 
@@ -173,7 +176,7 @@ Phases execute in numeric order: 25 → 26 ∥ 27 → 28 → 29 (26 and 27 are p
 | 25. Crate Bump + Regression Gate | 1/1 | Complete    | 2026-08-14 |
 | 26. Interpolation, Imputation & Functional Statistics Bindings | 2/2 | Complete    | 2026-08-15 |
 | 27. Scoring Metrics & Alignment/Registration Bindings | 2/2 | Complete    | 2026-08-15 |
-| 28. Advisor Extension | 0/TBD | Not started | - |
+| 28. Advisor Extension | 0/2 | Not started | - |
 | 29. Docs — Diagrams & Worked Examples | 0/TBD | Not started | - |
 
 </details>
