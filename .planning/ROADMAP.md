@@ -150,7 +150,7 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
 **Plans**: 2 plans
 
 - [x] 28-01-PLAN.md — ADV-01 tracer: `scoring` as the 13th advisor aspect (`aspects/scoring.py` + dispatch + `_supported` + MCP `_DIAGNOSTICS_METHODS` + `_ASPECT_PRIMERS['scoring']`) wired in ONE atomic commit, guard-sync green, offline-determinism + grounding tests (ADV-01)
-- [ ] 28-02-PLAN.md — ADV-02: imputation-quality on the existing `represent` aspect + registration-quality (3 fdars scores) on the existing `alignment` aspect, both grounded (bound-fdars values, no numpy), no guard-sync churn, offline-determinism + grounding + backward-compat tests (ADV-02)
+- [x] 28-02-PLAN.md — ADV-02: imputation-quality on the existing `represent` aspect + registration-quality (3 fdars scores) on the existing `alignment` aspect, both grounded (bound-fdars values, no numpy), no guard-sync churn, offline-determinism + grounding + backward-compat tests (ADV-02)
 
 ### Phase 29: Docs — Diagrams & Worked Examples
 

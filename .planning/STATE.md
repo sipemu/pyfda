@@ -4,16 +4,16 @@ milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 current_phase: 28
 current_phase_name: advisor-extension
-status: executing
-stopped_at: Completed 28-01-PLAN.md (scoring advisor aspect)
-last_updated: "2026-08-16T19:08:29.745Z"
+status: verifying
+stopped_at: Completed 28-02-PLAN.md
+last_updated: "2026-08-16T19:17:49.921Z"
 last_activity: 2026-08-16
 last_activity_desc: Phase 28 execution started
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 Phase: 28 (advisor-extension) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-16 — Phase 28 execution started
 
-Progress: [█████████░] 86%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [█████████░] 86%
 | Phase 27 P01 | 7m | 2 tasks | 4 files |
 | Phase 27 P02 | 364 | 3 tasks | 3 files |
 | Phase 28 P01 | 5m | 3 tasks | 5 files |
+| Phase 28 P02 | 7m | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,9 @@ Recent decisions affecting current work:
 - [Phase ?]: ADV-01: Caller passes 5 fdars-computed metrics to build_diagnostics; builder summarises without recomputing — grounding invariant
 - [Phase ?]: ADV-01: Three guarded edits (scoring.py + dispatch, _supported, _DIAGNOSTICS_METHODS) land in ONE atomic commit — guard-sync test stays green
 - [Phase ?]: ADV-01: _RUNNABLE_METHODS stays 6; scoring is diagnostics-only in MCP
+- [Phase ?]: Registration-quality: three bound fdars.alignment scores; imputation-quality: fdars.scoring.functional_mae for the evidence residual (grounding invariant)
+- [Phase ?]: Backward-compat: new keys default None when inputs absent; no change to _supported/_DIAGNOSTICS_METHODS (guard-sync stays green)
+- [Phase ?]: [Rule 1 Bug] represent.py data_range statistics fixed to use nan-aware subset to prevent float('nan') equality failure in determinism tests
 
 ### Pending Todos
 
@@ -124,8 +128,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-16T19:08:29.737Z
-Stopped at: Completed 28-01-PLAN.md (scoring advisor aspect)
+Last session: 2026-08-16T19:17:49.912Z
+Stopped at: Completed 28-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

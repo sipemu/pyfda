@@ -34,7 +34,7 @@
 ### Advisor Extension (ADV)
 
 - [x] **ADV-01**: `scoring` is added as a diagnostics method wired simultaneously into `build_diagnostics`, the advisor `_supported` set, and the MCP `_DIAGNOSTICS_METHODS` guard — in a single atomic commit so `test_diagnostics_methods_match_advisor_supported` stays green (`_RUNNABLE_METHODS` unchanged).
-- [ ] **ADV-02**: Imputation-quality diagnostics extend the `represent` aspect and registration-quality diagnostics extend the `alignment` aspect; every new diagnostic is fdars-computed and cites a real number (grounding invariant preserved; offline determinism tests added).
+- [x] **ADV-02**: Imputation-quality diagnostics extend the `represent` aspect and registration-quality diagnostics extend the `alignment` aspect; every new diagnostic is fdars-computed and cites a real number (grounding invariant preserved; offline determinism tests added).
 
 ### Docs — Diagrams & Worked Examples (DOCS)
 
@@ -75,7 +75,7 @@
 | ALGN-02 | Phase 27 | Complete |
 | ALGN-03 | Phase 27 | Complete |
 | ADV-01 | Phase 28 | Complete |
-| ADV-02 | Phase 28 | Pending |
+| ADV-02 | Phase 28 | Complete |
 | DOCS-01 | Phase 29 | Pending |
 | DOCS-02 | Phase 29 | Pending |
 | DOCS-03 | Phase 29 | Pending |
