@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 current_phase: 28
-current_phase_name: Advisor Extension (grounding-invariant preserved)
-status: planning
-stopped_at: Completed 27-02-PLAN.md
-last_updated: "2026-08-15T21:43:02.986Z"
-last_activity: 2026-08-15
-last_activity_desc: Phase 26 complete, transitioned to Phase 27
+current_phase_name: advisor-extension
+status: executing
+stopped_at: Completed 28-01-PLAN.md (scoring advisor aspect)
+last_updated: "2026-08-16T19:08:29.745Z"
+last_activity: 2026-08-16
+last_activity_desc: Phase 28 execution started
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 7
+  completed_plans: 6
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-13)
 
 **Core value:** Upgrade `fdars-core` 0.14.0→0.17.0, expose the new functional-data capabilities (interpolation/imputation, functional statistics/scoring, shift registration/registration-quality/banded elastic alignment) through PyO3 bindings + the Python API, extend the v3.0 grounded advisor to cover the relevant new capabilities, and document everything method-accurately — with the grounding invariant intact throughout.
-**Current focus:** Phase 27 — scoring-metrics-alignment-registration-bindings
+**Current focus:** Phase 28 — advisor-extension
 
 ## Current Position
 
-Phase: 28 — Advisor Extension (grounding-invariant preserved)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-15 — Phase 27 complete, transitioned to Phase 28
+Phase: 28 (advisor-extension) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-08-16 — Phase 28 execution started
 
-Progress: [██████████] 100%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [██████████] 100%
 | Phase 26-interpolation-imputation-functional-statistics-bindings P02 | 6 minutes | 3 tasks | 3 files |
 | Phase 27 P01 | 7m | 2 tasks | 4 files |
 | Phase 27 P02 | 364 | 3 tasks | 3 files |
+| Phase 28 P01 | 5m | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Bind *_with_band variants (band_frac: Option<f64>=None) NOT *_banded — consistent with CONTEXT.md locked decision; None disables band cleanly
 - [Phase ?]: ShiftRegistrationResult marshalled as PyDict {registered_data, shifts} — mirrors karcher_mean dict convention
 - [Phase ?]: fd.shift_register() returns (Fdata, ndarray) 2-tuple preserving argvals/rangeval/names/id/metadata
+- [Phase ?]: ADV-01: Caller passes 5 fdars-computed metrics to build_diagnostics; builder summarises without recomputing — grounding invariant
+- [Phase ?]: ADV-01: Three guarded edits (scoring.py + dispatch, _supported, _DIAGNOSTICS_METHODS) land in ONE atomic commit — guard-sync test stays green
+- [Phase ?]: ADV-01: _RUNNABLE_METHODS stays 6; scoring is diagnostics-only in MCP
 
 ### Pending Todos
 
@@ -120,8 +124,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-15T21:36:03.226Z
-Stopped at: Completed 27-02-PLAN.md
+Last session: 2026-08-16T19:08:29.737Z
+Stopped at: Completed 28-01-PLAN.md (scoring advisor aspect)
 Resume file: None
 
 ## Operator Next Steps
