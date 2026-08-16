@@ -86,6 +86,53 @@ def _build_alignment_diagnostics(raw: dict, *, argvals=None) -> dict:
         diag["phase_mean"] = None
         diag["phase_max"] = None
 
+    # -- Registration quality scores (ADV-02, plan 28-02) ------------------
+    # Three fdars-computed registration-quality scores are added when the
+    # registered matrix and argvals are present.  Each score is cast to a
+    # native float; a score that raises (e.g. n < 2 for pairwise correlation,
+    # or any fdars ValueError) maps to None without failing the builder.
+    # When aligned_raw or argvals is absent, all three keys are None and
+    # ALL pre-existing behavior is byte-for-byte unchanged (backward-compatible).
+    if aligned_raw is not None and argvals is not None:
+        aligned_arr_reg = np.asarray(aligned_raw, dtype=float)
+        av_arr_reg = np.asarray(argvals, dtype=float)
+        # Reuse the lazy import already established above (alignment branch).
+        from fdars import alignment as _alignment  # noqa: PLC0415
+
+        # least_squares_score — lower is better; mean L2 spread around mean
+        try:
+            diag["least_squares_score"] = float(
+                _alignment.least_squares_score(aligned_arr_reg, av_arr_reg)
+            )
+        except Exception:
+            diag["least_squares_score"] = None
+
+        # pairwise_correlation_score — higher is better; guard n >= 2
+        n_reg = int(aligned_arr_reg.shape[0])
+        if n_reg >= 2:
+            try:
+                diag["pairwise_correlation_score"] = float(
+                    _alignment.pairwise_correlation_score(aligned_arr_reg, av_arr_reg)
+                )
+            except Exception:
+                diag["pairwise_correlation_score"] = None
+        else:
+            diag["pairwise_correlation_score"] = None
+
+        # sobolev_least_squares_score — lambda_=0.0 is safe on any grid
+        try:
+            diag["sobolev_score"] = float(
+                _alignment.sobolev_least_squares_score(
+                    aligned_arr_reg, av_arr_reg, lambda_=0.0
+                )
+            )
+        except Exception:
+            diag["sobolev_score"] = None
+    else:
+        diag["least_squares_score"] = None
+        diag["pairwise_correlation_score"] = None
+        diag["sobolev_score"] = None
+
     # -- Convergence --------------------------------------------------------
     converged_raw = raw.get("converged")
     diag["converged"] = bool(converged_raw) if converged_raw is not None else None

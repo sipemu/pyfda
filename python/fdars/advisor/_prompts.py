@@ -63,6 +63,19 @@ _ASPECT_PRIMERS: dict = {
         "instability across CV folds. best_ncomp is the number of FPC components "
         "that minimises CV error.\n"
     ),
+    "alignment": (
+        "- Functional alignment registration quality: three fdars scores summarise "
+        "how well the curves were registered. "
+        "least_squares_score (lower is better): mean L2 spread of registered curves "
+        "around their cross-sectional mean — a high value indicates residual "
+        "amplitude variation after alignment. "
+        "pairwise_correlation_score (higher is better, range ≈ [-1, 1]): mean "
+        "functional Pearson correlation across all pairs — values near 1 indicate "
+        "well-aligned shape agreement. "
+        "sobolev_score (lower is better, lambda_=0.0): identical to "
+        "least_squares_score when lambda_ is 0; increases with lambda_ to "
+        "penalise highly oscillatory warps.\n"
+    ),
     "represent": (
         "- Functional data representation: n_points is the number of evaluation "
         "grid points per curve. is_uniform_grid indicates whether the argvals "
