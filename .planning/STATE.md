@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 current_phase: 29
-current_phase_name: Docs — Diagrams & Worked Examples
-status: planning
-stopped_at: Completed 28-02-PLAN.md
-last_updated: "2026-08-16T19:23:35.292Z"
+current_phase_name: docs-diagrams-worked-examples
+status: executing
+stopped_at: Completed 29-01-PLAN.md — halted at Task 3 spot-check checkpoint
+last_updated: "2026-08-16T22:26:09.328Z"
 last_activity: 2026-08-16
 last_activity_desc: Phase 28 execution started
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 11
+  completed_plans: 8
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-13)
 
 **Core value:** Upgrade `fdars-core` 0.14.0→0.17.0, expose the new functional-data capabilities (interpolation/imputation, functional statistics/scoring, shift registration/registration-quality/banded elastic alignment) through PyO3 bindings + the Python API, extend the v3.0 grounded advisor to cover the relevant new capabilities, and document everything method-accurately — with the grounding invariant intact throughout.
-**Current focus:** Phase 28 — advisor-extension
+**Current focus:** Phase 29 — docs-diagrams-worked-examples
 
 ## Current Position
 
-Phase: 29 — Docs — Diagrams & Worked Examples
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-16 — Phase 28 complete, transitioned to Phase 29
+Phase: 29 (docs-diagrams-worked-examples) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-08-16 — Phase 29 execution started
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 73%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [██████████] 100%
 | Phase 27 P02 | 364 | 3 tasks | 3 files |
 | Phase 28 P01 | 5m | 3 tasks | 5 files |
 | Phase 28 P02 | 7m | 3 tasks | 5 files |
+| Phase 29 P01 | 55 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Registration-quality: three bound fdars.alignment scores; imputation-quality: fdars.scoring.functional_mae for the evidence residual (grounding invariant)
 - [Phase ?]: Backward-compat: new keys default None when inputs absent; no change to _supported/_DIAGNOSTICS_METHODS (guard-sync stays green)
 - [Phase ?]: [Rule 1 Bug] represent.py data_range statistics fixed to use nan-aware subset to prevent float('nan') equality failure in determinism tests
+- [Phase ?]: ExtrapolationPolicy::Exception drawn as red stop markers (raises) — never draws extrapolated curve; LINEAR boundary gap is a flat extension, not a ramp to zero
+- [Phase ?]: Growth dataset chosen for both interpolation and imputation worked examples — fixed seeds ensure deterministic offline builds
 
 ### Pending Todos
 
@@ -128,8 +131,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-16T19:17:49.912Z
-Stopped at: Completed 28-02-PLAN.md
+Last session: 2026-08-16T22:26:09.310Z
+Stopped at: Completed 29-01-PLAN.md — halted at Task 3 spot-check checkpoint
 Resume file: None
 
 ## Operator Next Steps

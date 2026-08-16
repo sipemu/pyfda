@@ -38,9 +38,9 @@
 
 ### Docs — Diagrams & Worked Examples (DOCS)
 
-- [ ] **DOCS-01**: New/updated hand-authored inline SVG concept diagrams for the new methods across `represent/`, `analyze/`, and `align/`, each method-accurate and passing the SVGO idempotence + build-determinism gates.
-- [ ] **DOCS-02**: Runnable offline worked examples for the new capabilities against existing `docs/data/` datasets; executed `markdown-exec` fences stay network-free/deterministic and emit the `FDARS_FENCE_OK` sentinel.
-- [ ] **DOCS-03**: The AI Advisor docs section is updated for the new scoring / registration-quality / imputation coverage; full `mkdocs build --strict` passes offline.
+- [x] **DOCS-01**: New/updated hand-authored inline SVG concept diagrams for the new methods across `represent/`, `analyze/`, and `align/`, each method-accurate and passing the SVGO idempotence + build-determinism gates.
+- [x] **DOCS-02**: Runnable offline worked examples for the new capabilities against existing `docs/data/` datasets; executed `markdown-exec` fences stay network-free/deterministic and emit the `FDARS_FENCE_OK` sentinel.
+- [x] **DOCS-03**: The AI Advisor docs section is updated for the new scoring / registration-quality / imputation coverage; full `mkdocs build --strict` passes offline.
 
 ---
 
@@ -76,8 +76,8 @@
 | ALGN-03 | Phase 27 | Complete |
 | ADV-01 | Phase 28 | Complete |
 | ADV-02 | Phase 28 | Complete |
-| DOCS-01 | Phase 29 | Pending |
-| DOCS-02 | Phase 29 | Pending |
-| DOCS-03 | Phase 29 | Pending |
+| DOCS-01 | Phase 29 | Complete |
+| DOCS-02 | Phase 29 | Complete |
+| DOCS-03 | Phase 29 | Complete |
 
 *Traceability filled in by the roadmapper (`ROADMAP.md`). Coverage: 16/16 v4.0 requirements mapped, each to exactly one phase.*
