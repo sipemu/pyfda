@@ -95,6 +95,7 @@ nav:
     - Elastic FPCA: represent/elastic-fpca.md
     - Basis Representation: represent/basis-representation.md
     - Interpolation: represent/interpolation.md
+    - Imputation: represent/imputation.md
     - Andrews Transformation: represent/andrews-transformation.md
     - Depth Functions: represent/depth-functions.md
     - Streaming Depth: represent/streaming-depth.md
