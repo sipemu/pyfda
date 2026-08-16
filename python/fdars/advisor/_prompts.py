@@ -92,6 +92,20 @@ _ASPECT_PRIMERS: dict = {
         "variance_explained_cumulative shows how much variation the chosen ncomp "
         "components capture.\n"
     ),
+    "scoring": (
+        "- Functional prediction scoring: five fdars metrics measure prediction "
+        "quality. functional_mae (mean absolute error) and functional_mse (mean "
+        "squared error) penalise large pointwise deviations; functional_mse "
+        "is more sensitive to outlier curves because errors are squared. "
+        "functional_mape (mean absolute percentage error) is scale-free but "
+        "inflates when true values are near zero. functional_msle (mean squared "
+        "log error) penalises under-prediction more than over-prediction. "
+        "functional_explained_variance measures the fraction of functional "
+        "variance captured by the model: high >= 0.9, moderate 0.5-0.9, "
+        "low < 0.5. largest_error_metric names the metric with the highest "
+        "absolute value among the present error metrics; explained_variance_band "
+        "gives the qualitative band derived from functional_explained_variance.\n"
+    ),
 }
 
 
