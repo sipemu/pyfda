@@ -80,7 +80,15 @@ _ASPECT_PRIMERS: dict = {
         "- Functional data representation: n_points is the number of evaluation "
         "grid points per curve. is_uniform_grid indicates whether the argvals "
         "spacing is regular. Sparse grids (n_points < 20) and irregular grids "
-        "may require pre-smoothing before group-level analysis.\n"
+        "may require pre-smoothing before group-level analysis. "
+        "imputed_fraction is the fraction of data cells that were NaN and "
+        "subsequently imputed; a high imputed_fraction (> 0.2) indicates the "
+        "representation relies heavily on imputed values and downstream results "
+        "should be interpreted cautiously. "
+        "imputation_mae is the fdars-computed functional mean absolute error "
+        "between the original observed cells and the imputed reconstruction; "
+        "a non-zero imputation_mae means the imputer altered observed values "
+        "and larger values indicate less consistent imputation.\n"
     ),
     "regression": (
         "- Functional regression: r_squared measures goodness-of-fit (0-1). "

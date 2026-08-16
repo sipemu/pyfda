@@ -128,15 +128,108 @@ def _build_represent_diagnostics(raw, **kwargs) -> dict:
         diag["is_uniform_grid"] = None
 
     # -----------------------------------------------------------------------
-    # Data matrix range
+    # Data matrix range (use nan-aware reductions so NaN cells in the original
+    # data matrix — which may be present when imputation context is supplied —
+    # do not propagate to the output as float('nan'), which would break
+    # determinism (nan != nan in Python equality comparisons).
     # -----------------------------------------------------------------------
     if data is not None and data.size > 0:
-        diag["data_range_min"] = float(np.min(data))
-        diag["data_range_max"] = float(np.max(data))
-        diag["data_range_mean"] = float(np.mean(data))
+        non_nan = data[~np.isnan(data)]
+        if non_nan.size > 0:
+            diag["data_range_min"] = float(np.min(non_nan))
+            diag["data_range_max"] = float(np.max(non_nan))
+            diag["data_range_mean"] = float(np.mean(non_nan))
+        else:
+            # All cells are NaN — nothing to summarise
+            diag["data_range_min"] = None
+            diag["data_range_max"] = None
+            diag["data_range_mean"] = None
     else:
         diag["data_range_min"] = None
         diag["data_range_max"] = None
         diag["data_range_mean"] = None
+
+    # -----------------------------------------------------------------------
+    # Imputation quality (ADV-02, plan 28-02) — optional extension.
+    #
+    # Activated when the caller supplies an 'imputed' matrix alongside the
+    # original 'data' (which may contain NaN cells).  Follows the same
+    # attribute-first / dict-fallback resolution as data/argvals above so
+    # Fdata-like objects with an 'imputed' attribute are also supported.
+    #
+    # Two new keys are added:
+    #   imputed_fraction — structural count: fraction of data cells that were
+    #       NaN/imputed.  This is a plain count, NOT a scientific metric, so
+    #       it is computed from the data matrix directly (acceptable).
+    #   imputation_mae — fdars-computed consistency residual: the functional
+    #       MAE between the original matrix (with NaN replaced by the imputed
+    #       values) and the imputed matrix, computed by the BOUND fdars function
+    #       fdars.scoring.functional_mae.  NEVER numpy arithmetic for this value
+    #       (grounding invariant, per ADV-02 plan decisions).
+    #
+    # When no imputed matrix is present, both keys are None and ALL pre-existing
+    # represent behavior is byte-for-byte unchanged (backward-compatible).
+    # -----------------------------------------------------------------------
+    imputed_raw = getattr(raw, "imputed", None)
+    if imputed_raw is None and isinstance(raw, dict):
+        imputed_raw = raw.get("imputed")
+
+    if imputed_raw is not None and data is not None and argvals is not None:
+        try:
+            imputed_arr = np.asarray(imputed_raw, dtype=float)
+            data_arr = np.asarray(data_raw, dtype=float)
+
+            if (
+                data_arr.ndim == 2
+                and imputed_arr.ndim == 2
+                and data_arr.shape == imputed_arr.shape
+                and data_arr.size > 0
+            ):
+                # imputed_fraction: count NaN cells in the original data divided
+                # by the total cell count — a structural count, not a cited metric.
+                nan_mask = np.isnan(data_arr)
+                total_cells = int(data_arr.size)
+                nan_count = int(np.sum(nan_mask))
+                diag["imputed_fraction"] = float(nan_count) / float(total_cells)
+
+                # imputation_mae: fdars-computed consistency residual.
+                # We compare the imputed matrix against the original matrix with
+                # NaN cells replaced by their imputed values (i.e. imputed_arr)
+                # so the MAE measures how much the imputation changed the
+                # observed cells.  When the imputed matrix matches the original
+                # everywhere the observed cells agree (NaN → imputed), the
+                # residual reflects only the NaN-filled cells.
+                # For a clean consistency measure: compare imputed_arr against
+                # itself but replace the NON-NaN cells in data_arr as y_true —
+                # equivalently, functional_mae(imputed_arr, imputed_arr, argvals)
+                # would be zero.  Instead we use y_true = data_arr with NaN
+                # cells filled from imputed_arr, and y_pred = imputed_arr, so
+                # the MAE captures the difference at the *observed* (non-NaN)
+                # cells only.  This requires a non-NaN y_true array:
+                y_true_clean = data_arr.copy()
+                y_true_clean[nan_mask] = imputed_arr[nan_mask]
+                # y_true_clean has NO NaNs; y_pred = imputed_arr.
+                # functional_mae(y_true_clean, imputed_arr, argvals) == 0 only
+                # when the original data and the imputed data agree at every
+                # observed (non-NaN) cell.  Non-zero values indicate the imputer
+                # modified observed cells, which measures consistency.
+                av_arr = np.asarray(argvals, dtype=float)
+
+                # Lazy import — matching alignment.py's lazy-import idiom so
+                # importing advisor never forces the full fdars.scoring chain.
+                from fdars import scoring as _scoring  # noqa: PLC0415
+
+                diag["imputation_mae"] = float(
+                    _scoring.functional_mae(y_true_clean, imputed_arr, av_arr)
+                )
+            else:
+                diag["imputed_fraction"] = None
+                diag["imputation_mae"] = None
+        except Exception:
+            diag["imputed_fraction"] = None
+            diag["imputation_mae"] = None
+    else:
+        diag["imputed_fraction"] = None
+        diag["imputation_mae"] = None
 
     return diag
