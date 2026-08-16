@@ -78,7 +78,7 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
 - [x] **Phase 25: Crate Bump + Regression Gate** - Bump `fdars-core` 0.14.0→0.17.0, regenerate `Cargo.lock`, rebuild via maturin, full existing suite green with FPCA tolerances relaxed to absorb the faer SVD drift. Blocks all binding work. (completed 2026-08-14)
 - [x] **Phase 26: Interpolation, Imputation & Functional Statistics Bindings** - Spline/interpolation `_with_policy` + `ExtrapolationPolicy`, `impute_missing_values` + `ImputationMethod`, `functional_variance/std/covariance`, `depth_based_median`, `trim_mean`; `fd.interpolate()`/`fd.impute()` methods; multi-curve round-trip transposition tests. Parallel-eligible with Phase 27. (completed 2026-08-15)
 - [x] **Phase 27: Scoring Metrics & Alignment/Registration Bindings** - `functional_mae/mse/mape/msle/explained_variance`; `least_squares_shift_registration` (+ result dict); registration-quality scores; banded `*_with_band` elastic alignment. Parallel-eligible with Phase 26. (completed 2026-08-15)
-- [ ] **Phase 28: Advisor Extension** - `scoring` diagnostics method + imputation-quality on `represent` + registration-quality on `alignment`, MCP guard-sync updated in one atomic commit; grounding invariant preserved; offline determinism tests. Depends on Phases 26 + 27.
+- [x] **Phase 28: Advisor Extension** - `scoring` diagnostics method + imputation-quality on `represent` + registration-quality on `alignment`, MCP guard-sync updated in one atomic commit; grounding invariant preserved; offline determinism tests. Depends on Phases 26 + 27. (completed 2026-08-16)
 - [ ] **Phase 29: Docs — Diagrams & Worked Examples** - New/updated inline SVG concept diagrams + runnable offline worked examples across `represent/`, `analyze/`, `align/` (and advisor pages); `mkdocs build --strict` green. Last.
 
 ### Phase Details
@@ -176,7 +176,7 @@ Phases execute in numeric order: 25 → 26 ∥ 27 → 28 → 29 (26 and 27 are p
 | 25. Crate Bump + Regression Gate | 1/1 | Complete    | 2026-08-14 |
 | 26. Interpolation, Imputation & Functional Statistics Bindings | 2/2 | Complete    | 2026-08-15 |
 | 27. Scoring Metrics & Alignment/Registration Bindings | 2/2 | Complete    | 2026-08-15 |
-| 28. Advisor Extension | 0/2 | Not started | - |
+| 28. Advisor Extension | 2/2 | Complete    | 2026-08-16 |
 | 29. Docs — Diagrams & Worked Examples | 0/TBD | Not started | - |
 
 </details>

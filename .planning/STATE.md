@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
-current_phase: 28
-current_phase_name: advisor-extension
-status: verifying
+current_phase: 29
+current_phase_name: Docs — Diagrams & Worked Examples
+status: planning
 stopped_at: Completed 28-02-PLAN.md
-last_updated: "2026-08-16T19:17:49.921Z"
+last_updated: "2026-08-16T19:23:35.292Z"
 last_activity: 2026-08-16
 last_activity_desc: Phase 28 execution started
 progress:
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 ## Current Position
 
-Phase: 28 (advisor-extension) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-08-16 — Phase 28 execution started
+Phase: 29 — Docs — Diagrams & Worked Examples
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-16 — Phase 28 complete, transitioned to Phase 29
 
 Progress: [██████████] 100%
 
@@ -38,7 +38,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 5 (this milestone); 19 across v1.0–v3.0
+- Total plans completed: 7 (this milestone); 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -49,7 +49,7 @@ Progress: [██████████] 100%
 | 25 | 1 | - | - |
 | 26 | 2 | - | - |
 | 27 | 2 | - | - |
-| 28 | TBD | - | - |
+| 28 | 2 | - | - |
 | 29 | TBD | - | - |
 
 **Recent Trend:**

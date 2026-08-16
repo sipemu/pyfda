@@ -84,12 +84,13 @@ The documentation — diagrams first, examples second — must make functional d
 - ✓ `fdars-core` bumped 0.14.0 → 0.17.0 (parallel-only, no `linalg`); full binding + advisor suite green (259 passed / 4 skipped / 0 failed), zero FPCA tolerance changes needed — the faer SVD `1e-8·σ₁` drift never surfaced (DEP-01/02) — Phase 25
 - ✓ New `fdars.represent` submodule (spline interpolation + extrapolation policy + missing-value imputation) and functional statistics in `fdars.fdata` (variance/std/covariance, depth-based median resolving to the actual curve, trimmed mean), plus six `Fdata` methods (`interpolate/impute/var/std/cov/median`); layout-correct via multi-curve transposition tests; 328 passed / 4 skipped (REPR-01/02/03, STAT-01/02) — Phase 26
 - ✓ New `fdars.scoring` submodule (5 prediction-scoring metrics — mae/mse/mape/msle/explained_variance, `ValueError` on MAPE-near-zero / MSLE≤−1) and `fdars.alignment` extensions — least-squares shift registration (dict result + `fd.shift_register()`), 3 registration-quality scores (Sobolev uniform-grid guarded), and banded elastic alignment (`*_with_band`, transposition-tested); 388 passed / 4 skipped (STAT-03, ALGN-01/02/03) — Phase 27
+- ✓ Advisor extended to the new capabilities: `scoring` as diagnostics aspect #13 (full grounded treatment; guard-synced atomic commit; `_RUNNABLE_METHODS` still 6), imputation-quality on the `represent` aspect, and registration-quality on the `alignment` aspect — every new diagnostic fdars-computed and citing a real number (grounding invariant preserved), offline-deterministic, no numpy scalars; 426 passed / 4 skipped (ADV-01/02) — Phase 28
 
 ### Active
 
 <!-- v4.0 in progress — fdars-core 0.17 upgrade: new bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
 
-_v4.0 in progress — Phases 25 (crate bump), 26 (represent + functional stats), 27 (scoring + alignment/registration) ✓ shipped on the 0.17.0 baseline. Remaining: advisor extension (28), diagrams + worked-example docs (29). See `## Current Milestone: v4.0` and `REQUIREMENTS.md` for scoped REQ-IDs._
+_v4.0 in progress — Phases 25 (crate bump), 26 (represent + functional stats), 27 (scoring + alignment/registration), 28 (advisor extension) ✓ shipped. Remaining: diagrams + worked-example docs (29) — the final phase. See `## Current Milestone: v4.0` and `REQUIREMENTS.md` for scoped REQ-IDs._
 
 ### Out of Scope
 
@@ -150,4 +151,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-14 after Phase 27 — scoring + alignment/registration bindings shipped (v4.0 in progress)*
+*Last updated: 2026-08-16 after Phase 28 — advisor extended (scoring/imputation/registration), grounding preserved (v4.0 in progress)*
