@@ -437,3 +437,244 @@ class TestScbTwoSampleTest:
         boys, girls, age = growth_subsets
         with pytest.raises(ValueError, match="multiplier"):
             scb_two_sample_test(boys, girls, age, 5.0, nb=50, multiplier="bogus")
+
+
+# ---------------------------------------------------------------------------
+# INFER-06: flm_f_test (FLM overall-significance F-test, re-fit internally)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def tecator_fixture():
+    """Return (X_small, fat) from Tecator for FLM inference tests.
+
+    Uses 30 observations and a column stride (::10) to keep m small and tests fast.
+    n_comp must stay small (e.g. 3) relative to n for a non-degenerate fit.
+    """
+    from fdars.datasets import load_tecator
+
+    wav, X, meta = load_tecator(return_fdata=False)
+    n = 30
+    X_small = X[:n, ::10].copy()
+    fat = meta["fat"].values[:n].astype(float)
+    return X_small, fat
+
+
+class TestFlmFTestImport:
+    """flm_f_test must be importable from fdars.inference."""
+
+    def test_flm_f_test_importable(self):
+        import fdars.inference
+
+        assert callable(fdars.inference.flm_f_test)
+
+    def test_from_import(self):
+        from fdars.inference import flm_f_test  # noqa: F401
+
+
+class TestFlmFTest:
+    """flm_f_test correctness: dict keys, n_perm==0, degenerate-fit ValueError."""
+
+    def test_returns_dict_with_three_keys(self, tecator_fixture):
+        """flm_f_test must return a dict with keys statistic, p_value, n_perm."""
+        from fdars.inference import flm_f_test
+
+        X, fat = tecator_fixture
+        result = flm_f_test(X, fat, n_comp=3)
+        assert isinstance(result, dict)
+        assert set(result.keys()) == {"statistic", "p_value", "n_perm"}
+
+    def test_n_perm_is_zero(self, tecator_fixture):
+        """Asymptotic F-test always has n_perm == 0."""
+        from fdars.inference import flm_f_test
+
+        X, fat = tecator_fixture
+        result = flm_f_test(X, fat, n_comp=3)
+        assert result["n_perm"] == 0
+
+    def test_p_value_in_range(self, tecator_fixture):
+        from fdars.inference import flm_f_test
+
+        X, fat = tecator_fixture
+        result = flm_f_test(X, fat, n_comp=3)
+        assert 0.0 <= result["p_value"] <= 1.0
+
+    def test_statistic_nonnegative(self, tecator_fixture):
+        from fdars.inference import flm_f_test
+
+        X, fat = tecator_fixture
+        result = flm_f_test(X, fat, n_comp=3)
+        assert result["statistic"] >= 0.0
+
+    def test_values_plain_types(self, tecator_fixture):
+        """json.dumps must not raise (no numpy scalar leakage)."""
+        import json
+
+        from fdars.inference import flm_f_test
+
+        X, fat = tecator_fixture
+        result = flm_f_test(X, fat, n_comp=3)
+        serialized = json.dumps(result, sort_keys=True)
+        assert isinstance(serialized, str)
+
+    def test_degenerate_n_comp_raises_value_error(self, tecator_fixture):
+        """n_comp >= n - 1 makes the internal fregre_lm degenerate (raises ValueError)."""
+        from fdars.inference import flm_f_test
+
+        X, fat = tecator_fixture
+        n = X.shape[0]
+        # n_comp >= n makes the fit degenerate
+        with pytest.raises(ValueError):
+            flm_f_test(X, fat, n_comp=n)
+
+
+# ---------------------------------------------------------------------------
+# INFER-07: flm_gof_test (Ramsey-RESET goodness-of-fit, symmetric with flm_f_test)
+# ---------------------------------------------------------------------------
+
+
+class TestFlmGofTestImport:
+    """flm_gof_test must be importable from fdars.inference."""
+
+    def test_flm_gof_test_importable(self):
+        import fdars.inference
+
+        assert callable(fdars.inference.flm_gof_test)
+
+    def test_from_import(self):
+        from fdars.inference import flm_gof_test  # noqa: F401
+
+
+class TestFlmGofTest:
+    """flm_gof_test correctness: dict keys, n_perm==0, degenerate ValueError."""
+
+    def test_returns_dict_with_three_keys(self, tecator_fixture):
+        from fdars.inference import flm_gof_test
+
+        X, fat = tecator_fixture
+        result = flm_gof_test(X, fat, n_comp=3)
+        assert isinstance(result, dict)
+        assert set(result.keys()) == {"statistic", "p_value", "n_perm"}
+
+    def test_n_perm_is_zero(self, tecator_fixture):
+        from fdars.inference import flm_gof_test
+
+        X, fat = tecator_fixture
+        result = flm_gof_test(X, fat, n_comp=3)
+        assert result["n_perm"] == 0
+
+    def test_p_value_in_range(self, tecator_fixture):
+        from fdars.inference import flm_gof_test
+
+        X, fat = tecator_fixture
+        result = flm_gof_test(X, fat, n_comp=3)
+        assert 0.0 <= result["p_value"] <= 1.0
+
+    def test_degenerate_n_comp_raises_value_error(self, tecator_fixture):
+        """Same degenerate-fit error as flm_f_test (same re-fit path)."""
+        from fdars.inference import flm_gof_test
+
+        X, fat = tecator_fixture
+        n = X.shape[0]
+        with pytest.raises(ValueError):
+            flm_gof_test(X, fat, n_comp=n)
+
+
+# ---------------------------------------------------------------------------
+# INFER-08: oneway_anova_vstat (asymptotic one-way functional ANOVA V-statistic)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def canadian_anova_fixture():
+    """Return (X_small, groups_i64, grid) from Canadian Weather for ANOVA tests.
+
+    Maps the meta 'region' column to 0-indexed integer codes.
+    Uses a column stride (::30) to keep m small.
+    """
+    from fdars.datasets import load_canadian_weather
+
+    day, X, meta = load_canadian_weather(variable="temperature", return_fdata=False)
+    grid = day[::30].copy()
+    X_small = X[:, ::30].copy()
+    # Map region strings to 0-indexed integer codes
+    _, group_codes = np.unique(meta["region"], return_inverse=True)
+    groups_i64 = group_codes.astype(np.int64)
+    return X_small, groups_i64, grid
+
+
+class TestOnewayAnovaVstatImport:
+    """oneway_anova_vstat must be importable from fdars.inference."""
+
+    def test_importable(self):
+        import fdars.inference
+
+        assert callable(fdars.inference.oneway_anova_vstat)
+
+    def test_from_import(self):
+        from fdars.inference import oneway_anova_vstat  # noqa: F401
+
+
+class TestOnewayAnovaVstat:
+    """oneway_anova_vstat: dict keys, n_perm==0, group-label validation."""
+
+    def test_returns_dict_with_three_keys(self, canadian_anova_fixture):
+        from fdars.inference import oneway_anova_vstat
+
+        X, groups, grid = canadian_anova_fixture
+        result = oneway_anova_vstat(X, groups, grid)
+        assert isinstance(result, dict)
+        assert set(result.keys()) == {"statistic", "p_value", "n_perm"}
+
+    def test_n_perm_is_zero(self, canadian_anova_fixture):
+        """Asymptotic V-statistic always has n_perm == 0."""
+        from fdars.inference import oneway_anova_vstat
+
+        X, groups, grid = canadian_anova_fixture
+        result = oneway_anova_vstat(X, groups, grid)
+        assert result["n_perm"] == 0
+
+    def test_p_value_in_range(self, canadian_anova_fixture):
+        from fdars.inference import oneway_anova_vstat
+
+        X, groups, grid = canadian_anova_fixture
+        result = oneway_anova_vstat(X, groups, grid)
+        assert 0.0 <= result["p_value"] <= 1.0
+
+    def test_statistic_nonnegative(self, canadian_anova_fixture):
+        from fdars.inference import oneway_anova_vstat
+
+        X, groups, grid = canadian_anova_fixture
+        result = oneway_anova_vstat(X, groups, grid)
+        assert result["statistic"] >= 0.0
+
+    def test_values_plain_types(self, canadian_anova_fixture):
+        """json.dumps must not raise (no numpy scalar leakage)."""
+        import json
+
+        from fdars.inference import oneway_anova_vstat
+
+        X, groups, grid = canadian_anova_fixture
+        result = oneway_anova_vstat(X, groups, grid)
+        serialized = json.dumps(result, sort_keys=True)
+        assert isinstance(serialized, str)
+
+    def test_single_group_raises_value_error(self, canadian_anova_fixture):
+        """Fewer than 2 distinct groups raises ValueError."""
+        from fdars.inference import oneway_anova_vstat
+
+        X, _, grid = canadian_anova_fixture
+        # All observations in group 0
+        n = X.shape[0]
+        single_group = np.zeros(n, dtype=np.int64)
+        with pytest.raises(ValueError):
+            oneway_anova_vstat(X, single_group, grid)
+
+    def test_groups_length_mismatch_raises_value_error(self, canadian_anova_fixture):
+        """groups.len() != n raises ValueError."""
+        from fdars.inference import oneway_anova_vstat
+
+        X, groups, grid = canadian_anova_fixture
+        short_groups = groups[:-1]
+        with pytest.raises(ValueError):
+            oneway_anova_vstat(X, short_groups, grid)
