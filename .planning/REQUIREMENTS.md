@@ -31,9 +31,9 @@ Requirements for milestone v5.0. Each maps to a roadmap phase. All 13 new bindin
 
 ### Basis & Smoothing Quick Wins (extend `fdars.basis` / `fdars.smoothing`)
 
-- [ ] **BASIS-01**: User can construct an all-ones intercept column via `fdars.basis.constant_basis(argvals)` → `ndarray` (exact signature/dimension confirmed at plan time).
-- [ ] **BASIS-02**: User can select an AIC-optimal basis roughness penalty via `fdars.smoothing.smooth_basis_aic(...)` → dict, and pass `criterion="aic"` to `basis_nbasis_cv` (`BasisCriterion::Aic`, already confirmed present).
-- [ ] **BASIS-03**: User can select an AIC-optimal kernel bandwidth via `aic_smoother` and/or `criterion="aic"` on the existing bandwidth-selection binding (`CvCriterion::Aic`).
+- [x] **BASIS-01**: User can construct an all-ones intercept column via `fdars.basis.constant_basis(argvals)` → `ndarray` (exact signature/dimension confirmed at plan time).
+- [x] **BASIS-02**: User can select an AIC-optimal basis roughness penalty via `fdars.basis.smooth_basis_aic(...)` → dict, and pass `criterion="aic"` to `basis_nbasis_cv` (`BasisCriterion::Aic`, already confirmed present). _(Delivered as `fdars.basis.smooth_basis_aic` — placed beside its GCV twin `fdars.basis.smooth_basis_gcv` where the analog actually lives, per Phase 33 plan; supersedes the original `fdars.smoothing` prose.)_
+- [x] **BASIS-03**: User can select an AIC-optimal kernel bandwidth via `aic_smoother` and/or `criterion="aic"` on the existing bandwidth-selection binding (`CvCriterion::Aic`).
 
 ### Advisor Extension
 
@@ -97,9 +97,9 @@ Which phases cover which requirements. Populated during roadmap creation (Step 1
 | INFER-09 | Phase 31 | Complete |
 | DEPTH-01 | Phase 32 | Complete |
 | DEPTH-02 | Phase 32 | Complete |
-| BASIS-01 | Phase 33 | Pending |
-| BASIS-02 | Phase 33 | Pending |
-| BASIS-03 | Phase 33 | Pending |
+| BASIS-01 | Phase 33 | Complete |
+| BASIS-02 | Phase 33 | Complete |
+| BASIS-03 | Phase 33 | Complete |
 | ADV-03 | Phase 34 | Pending |
 | DOCS-04 | Phase 35 | Pending |
 | DOCS-05 | Phase 35 | Pending |

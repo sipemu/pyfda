@@ -87,7 +87,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 - [x] **Phase 30: Crate Bump + Regression Gate** - Bump 0.17→0.20, add the `CvCriterion` wildcard fallback arm, full ~426-test suite green as the sole gate (completed 2026-08-17)
 - [x] **Phase 31: Group A — `fdars.inference` Bindings** - New submodule: two-sample permutation tests + SCB bands + FLM inference + one-way ANOVA V-stat (`TestResult`/`ToleranceBand` → PyDict, deterministic seed) (completed 2026-08-17)
 - [x] **Phase 32: Group B — Depth/Boxplot Bindings** - `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth` (completed 2026-08-17)
-- [ ] **Phase 33: Group C — Basis/Smoothing Quick Wins** - `constant_basis` + AIC basis/kernel selection extending `fdars.basis`/`fdars.smoothing`
+- [x] **Phase 33: Group C — Basis/Smoothing Quick Wins** - `constant_basis` + AIC basis/kernel selection extending `fdars.basis`/`fdars.smoothing` (completed 2026-08-17)
 - [ ] **Phase 34: Advisor Extension** - `inference` diagnostics aspect; grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync (single atomic commit) preserved
 - [ ] **Phase 35: Docs — Diagrams & Worked Examples** - New pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` examples; `mkdocs build --strict` green
 
@@ -156,7 +156,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 
 **Plans**: 1 plan
 
-- [ ] 33-01-PLAN.md — constant_basis + smooth_basis_aic (basis_mod) + optim_bandwidth criterion="aic" output-arm fix (smoothing_mod) + basis_nbasis_cv "aic" test coverage (BASIS-01/02/03)
+- [x] 33-01-PLAN.md — constant_basis + smooth_basis_aic (basis_mod) + optim_bandwidth criterion="aic" output-arm fix (smoothing_mod) + basis_nbasis_cv "aic" test coverage (BASIS-01/02/03)
 
 ### Phase 34: Advisor Extension
 
