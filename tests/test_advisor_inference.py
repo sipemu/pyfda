@@ -354,3 +354,66 @@ class TestInferenceRobustness:
         diag = build_diagnostics(raw_pairs, method="inference")
         assert diag["method"] == "inference"
         assert isinstance(diag["statistic"], float)
+
+
+# ---------------------------------------------------------------------------
+# Test 9: Exact-threshold boundary — pins strict-< semantics of significance
+# flags so a future change from < to <= would be caught immediately.
+# ---------------------------------------------------------------------------
+
+class TestInferenceExactBoundary:
+    """Exact-boundary tests for significance flags.
+
+    p_value == alpha must NOT be significant (strict ``<``, not ``<=``).
+    p_value just below alpha (by a value well within float precision) MUST be.
+    """
+
+    def test_exact_0_05_not_significant(self):
+        """p_value == 0.05: NOT significant at 0.05 (strict <), but IS at 0.10."""
+        from fdars.advisor import build_diagnostics
+
+        diag = build_diagnostics(
+            {"statistic": 1.0, "p_value": 0.05, "n_perm": 999},
+            method="inference",
+        )
+        assert diag["significant_at_0.05"] is False
+        # 0.05 < 0.10, so the result IS significant at the 0.10 level
+        assert diag["significant_at_0.10"] is True
+        assert diag["strongest_significance_level"] == pytest.approx(0.10)
+
+    def test_just_below_0_05_is_significant(self):
+        """p_value == 0.0499: significant at 0.05 (strict <)."""
+        from fdars.advisor import build_diagnostics
+
+        diag = build_diagnostics(
+            {"statistic": 1.0, "p_value": 0.0499, "n_perm": 999},
+            method="inference",
+        )
+        assert diag["significant_at_0.05"] is True
+        assert diag["significant_at_0.01"] is False
+        assert diag["strongest_significance_level"] == pytest.approx(0.05)
+
+    def test_exact_0_01_not_significant(self):
+        """p_value == 0.01: NOT significant at 0.01 (strict <)."""
+        from fdars.advisor import build_diagnostics
+
+        diag = build_diagnostics(
+            {"statistic": 1.0, "p_value": 0.01, "n_perm": 999},
+            method="inference",
+        )
+        assert diag["significant_at_0.01"] is False
+        assert diag["significant_at_0.05"] is True
+        assert diag["strongest_significance_level"] == pytest.approx(0.05)
+
+    def test_exact_0_10_not_significant(self):
+        """p_value == 0.10: NOT significant at 0.10 (strict <)."""
+        from fdars.advisor import build_diagnostics
+
+        diag = build_diagnostics(
+            {"statistic": 1.0, "p_value": 0.10, "n_perm": 999},
+            method="inference",
+        )
+        assert diag["significant_at_0.10"] is False
+        assert diag["significant_at_0.05"] is False
+        assert diag["significant_at_0.01"] is False
+        assert diag["strongest_significance_level"] is None

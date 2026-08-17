@@ -122,6 +122,10 @@ def _build_inference_diagnostics(raw, **kwargs) -> dict:
 
     has_test_result_keys = "p_value" in raw or "statistic" in raw
     has_tolerance_band_keys = "half_width" in raw and "center" in raw
+    # Routing precedence: TestResult wins when both key sets are present (a dict
+    # mixing p_value and half_width/center is pathological in practice — fdars
+    # TestResult and ToleranceBand are disjoint outputs — so half_width is silently
+    # ignored on the TestResult path rather than raising an ambiguity error.
 
     if not has_test_result_keys and not has_tolerance_band_keys:
         raise ValueError(

@@ -95,7 +95,8 @@ def build_diagnostics(
         Native fdars output dict (or a ``fdars.results`` wrapper whose ``.raw``
         attribute is the underlying dict).
     method : {"alignment", "fpca", "basis", "smoothing", "clustering", "depth", \
-"outliers", "classification", "represent", "regression", "regression_cv", "spm"}
+"outliers", "classification", "represent", "regression", "regression_cv", \
+"spm", "scoring", "inference"}
         The fdars method that produced ``result``.  For ``"represent"``, pass
         the raw data dict (``{"data": ..., "argvals": ...}``) or an Fdata-like
         object with ``.data``/``.argvals`` attributes directly — not an fdars
