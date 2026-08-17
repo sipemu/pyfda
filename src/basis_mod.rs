@@ -417,6 +417,75 @@ pub fn smooth_basis_gcv<'py>(
     Ok(dict.into_any())
 }
 
+/// Smooth functional data using basis expansion with AIC-optimal lambda.
+///
+/// Identical parameter set to `smooth_basis_gcv`; selects the roughness
+/// penalty parameter lambda by minimising AIC rather than GCV.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// n_basis : int
+///     Number of basis functions.
+/// basis_type : str, optional
+///     "bspline" (default) or "fourier".
+/// lfd_order : int, optional
+///     Derivative order for the penalty (default 2).
+/// log_lambda_min : float, optional
+///     Minimum log10(lambda) for search (default -8.0).
+/// log_lambda_max : float, optional
+///     Maximum log10(lambda) for search (default 4.0).
+/// n_grid : int, optional
+///     Number of grid points for lambda search (default 25).
+///
+/// Returns
+/// -------
+/// dict
+///     Dictionary with keys: fitted (n, m), coefficients (n, nbasis),
+///     edf, gcv, aic, bic, nbasis
+#[pyfunction]
+#[pyo3(signature = (data, argvals, n_basis, basis_type="bspline", lfd_order=2, log_lambda_min=-8.0, log_lambda_max=4.0, n_grid=25))]
+pub fn smooth_basis_aic<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    n_basis: usize,
+    basis_type: &str,
+    lfd_order: usize,
+    log_lambda_min: f64,
+    log_lambda_max: f64,
+    n_grid: usize,
+) -> PyResult<Bound<'py, PyAny>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let bt = parse_smooth_basis_type(basis_type, &av)?;
+    let result = fdars_core::smooth_basis::smooth_basis_aic(
+        &mat,
+        &av,
+        &bt,
+        n_basis,
+        lfd_order,
+        (log_lambda_min, log_lambda_max),
+        n_grid,
+    )
+    .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("smooth_basis_aic failed"))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
+    dict.set_item(
+        "coefficients",
+        fdmatrix_to_numpy2d(py, &result.coefficients),
+    )?;
+    dict.set_item("edf", result.edf)?;
+    dict.set_item("gcv", result.gcv)?;
+    dict.set_item("aic", result.aic)?;
+    dict.set_item("bic", result.bic)?;
+    dict.set_item("nbasis", result.nbasis)?;
+    Ok(dict.into_any())
+}
+
 /// Cross-validated selection of number of basis functions.
 ///
 /// Parameters
@@ -699,6 +768,7 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(bspline_basis, m)?)?;
     m.add_function(wrap_pyfunction!(fourier_basis, m)?)?;
     m.add_function(wrap_pyfunction!(smooth_basis_gcv, m)?)?;
+    m.add_function(wrap_pyfunction!(smooth_basis_aic, m)?)?;
     m.add_function(wrap_pyfunction!(basis_nbasis_cv, m)?)?;
     m.add_function(wrap_pyfunction!(fourier_basis_with_period, m)?)?;
     m.add_function(wrap_pyfunction!(bspline_basis_from_knots, m)?)?;
