@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
-current_phase: 30
-current_phase_name: crate-bump-regression-gate
-status: verifying
+current_phase: 31
+current_phase_name: Group A — `fdars.inference` Bindings
+status: planning
 stopped_at: Completed 30-01-PLAN.md
-last_updated: "2026-08-17T13:20:52.279Z"
+last_updated: "2026-08-17T13:26:47.213Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 30 execution started
 progress:
@@ -28,16 +28,16 @@ See: .planning/PROJECT.md (updated 2026-08-17)
 
 ## Current Position
 
-Phase: 30 (crate-bump-regression-gate) — EXECUTING
-Plan: 1 of 1
-Status: Phase complete — ready for verification
-Last activity: 2026-08-17 — Phase 30 execution started
+Phase: 31 — Group A — `fdars.inference` Bindings
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-17 — Phase 30 complete, transitioned to Phase 31
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0 (this milestone); 11 in v4.0; 19 across v1.0–v3.0
+- Total plans completed: 1 (this milestone); 11 in v4.0; 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -45,7 +45,7 @@ Last activity: 2026-08-17 — Phase 30 execution started
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 30 | - | - | - |
+| 30 | 1 | - | - |
 | 31 | - | - | - |
 | 32 | - | - | - |
 | 33 | - | - | - |
