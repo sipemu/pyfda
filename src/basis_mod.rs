@@ -1,8 +1,34 @@
 //! Basis representations and smoothing for functional data.
 
 use crate::convert::*;
-use numpy::{PyArray2, PyReadonlyArray1, PyReadonlyArray2};
+use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::*;
+
+/// Evaluate the constant (intercept) basis on a grid of evaluation points.
+///
+/// Returns a 1-D ndarray of ones with the same length as `argvals`.
+/// This is the intercept column of a regression design matrix — the single
+/// basis function is the constant ``f(t) = 1``.
+///
+/// Parameters
+/// ----------
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     1-D float64 ndarray of shape (m,) with every entry equal to 1.0.
+///     An empty input grid returns a length-0 array without panicking.
+#[pyfunction]
+pub fn constant_basis<'py>(
+    py: Python<'py>,
+    argvals: PyReadonlyArray1<'py, f64>,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    let av = numpy1d_to_vec(argvals);
+    let result = fdars_core::basis::constant_basis(&av);
+    Ok(vec_to_numpy1d(py, result))
+}
 
 /// Project functional data onto a B-spline or Fourier basis.
 ///
@@ -664,6 +690,7 @@ pub fn select_fourier_nbasis_gcv(
 }
 
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(constant_basis, m)?)?;
     m.add_function(wrap_pyfunction!(fdata_to_basis_1d, m)?)?;
     m.add_function(wrap_pyfunction!(basis_to_fdata_1d, m)?)?;
     m.add_function(wrap_pyfunction!(pspline_fit_1d, m)?)?;
