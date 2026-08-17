@@ -139,7 +139,8 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
   2. User can call `fdars.depth.functional_boxplot(data, method=..., factor=1.5, **kwargs)` → dict `{median, central_lower, central_upper, whisker_lower, whisker_upper, outliers, depths}` with band fields as 1-D arrays via the numpy conversion helper and `outliers` as a Python list of ints.
   3. A multi-curve transposition round-trip test guards the column-major layout of every `FdMatrix`-returning boxplot field (finite values, correct shapes) — no silent transposition.
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 32-01-PLAN.md — functional_depth (string→DepthMethod dispatch) + functional_boxplot (7-key dict) extending fdars.depth, with layout round-trip guard
 
 ### Phase 33: Group C — Basis/Smoothing Quick Wins
 
