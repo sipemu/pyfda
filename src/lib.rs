@@ -18,12 +18,12 @@ mod fdata_mod;
 mod metric_mod;
 mod outliers_mod;
 mod regression_mod;
+mod represent_mod;
+mod scoring_mod;
 mod seasonal_mod;
 mod simulation_mod;
 mod smoothing_mod;
 mod spm_mod;
-mod represent_mod;
-mod scoring_mod;
 mod tolerance_mod;
 
 /// Create a submodule, register its contents, and attach it to a parent module.

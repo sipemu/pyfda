@@ -95,8 +95,9 @@ pub fn spline_interpolate_with_policy<'py>(
     let av = numpy1d_to_vec(argvals);
     let qp = numpy1d_to_vec(query_points);
     let ep = parse_extrapolation_policy(policy, fill_value)?;
-    let result =
-        to_pyresult(fdars_core::spline_interpolate_with_policy(&mat, &av, &qp, order, ep))?;
+    let result = to_pyresult(fdars_core::spline_interpolate_with_policy(
+        &mat, &av, &qp, order, ep,
+    ))?;
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -148,8 +149,9 @@ pub fn fdata_interpolate_with_policy<'py>(
     let qp = numpy1d_to_vec(query_points);
     let ep = parse_extrapolation_policy(policy, fill_value)?;
     let im = parse_interpolation_method(method)?;
-    let result =
-        to_pyresult(fdars_core::fdata_interpolate_with_policy(&mat, &av, &qp, im, ep))?;
+    let result = to_pyresult(fdars_core::fdata_interpolate_with_policy(
+        &mat, &av, &qp, im, ep,
+    ))?;
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -222,7 +224,10 @@ fn parse_interpolation_method(method: &str) -> PyResult<fdars_core::Interpolatio
     }
 }
 
-fn parse_imputation_method(method: &str, constant_value: f64) -> PyResult<fdars_core::ImputationMethod> {
+fn parse_imputation_method(
+    method: &str,
+    constant_value: f64,
+) -> PyResult<fdars_core::ImputationMethod> {
     match method {
         "linear" => Ok(fdars_core::ImputationMethod::Linear),
         "mean" => Ok(fdars_core::ImputationMethod::Mean),

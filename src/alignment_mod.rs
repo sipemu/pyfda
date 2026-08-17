@@ -2427,6 +2427,9 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sobolev_least_squares_score, m)?)?;
     m.add_function(wrap_pyfunction!(karcher_mean_with_band, m)?)?;
     m.add_function(wrap_pyfunction!(elastic_self_distance_matrix_with_band, m)?)?;
-    m.add_function(wrap_pyfunction!(elastic_cross_distance_matrix_with_band, m)?)?;
+    m.add_function(wrap_pyfunction!(
+        elastic_cross_distance_matrix_with_band,
+        m
+    )?)?;
     Ok(())
 }
