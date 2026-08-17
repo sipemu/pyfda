@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
 current_phase: 31
-current_phase_name: Group A — `fdars.inference` Bindings
-status: planning
-stopped_at: Completed 30-01-PLAN.md
-last_updated: "2026-08-17T13:26:47.213Z"
+current_phase_name: group-a-fdars-inference-bindings
+status: executing
+stopped_at: Completed 31-01-PLAN.md
+last_updated: "2026-08-17T15:12:30.000Z"
 last_activity: 2026-08-17
-last_activity_desc: Phase 30 execution started
+last_activity_desc: Phase 31 Plan 01 complete — fdars.inference submodule with t_perm_test, f_perm_test, two_sample_mean_test
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
-  percent: 17
+  total_plans: 4
+  completed_plans: 2
+  percent: 25
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-17)
 
 **Core value:** Upgrade `fdars-core` 0.17.0→0.20.0 (parallel-only, no linalg), expose the new functional-inference + depth/boxplot + basis/smoothing surface through PyO3 bindings + the Python API, extend the v3.0 grounded advisor with an `inference` diagnostics aspect, and document everything method-accurately — with the grounding invariant intact throughout.
-**Current focus:** Phase 30 — crate-bump-regression-gate
+**Current focus:** Phase 31 — group-a-fdars-inference-bindings
 
 ## Current Position
 
-Phase: 31 — Group A — `fdars.inference` Bindings
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-17 — Phase 30 complete, transitioned to Phase 31
+Phase: 31 (group-a-fdars-inference-bindings) — EXECUTING
+Plan: 2 of 3 (31-01 complete, 31-02 next)
+Status: Executing Phase 31
+Last activity: 2026-08-17 — Completed 31-01: fdars.inference submodule skeleton + t_perm_test + f_perm_test + two_sample_mean_test
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Last activity: 2026-08-17 — Phase 30 complete, transitioned to Phase 31
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 30 P01 | 4 | 2 tasks | 2 files |
+| Phase 31 P01 | 6 | 4 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Do NOT enable linalg feature (requires Rust 1.84 > MSRV 1.83; not needed for v5.0 Groups A/B/C)
 - [Phase ?]: Bump lands as single isolated commit (Cargo.toml + smoothing_mod.rs only; Cargo.lock gitignored) before Phase 31/32/33 binding work
 - [Phase ?]: Zero numeric drift on 0.17->0.20 bump: 426 passed / 4 skipped / 0 failed, no tolerance relaxations
+- [Phase 31-01]: seed=None resolves to u64 default 0 (locked); mod inference_mod placed alphabetically in lib.rs (rustfmt); 31-SIGNATURES.md is the plan-time authority for all 8 Group A function signatures
 
 ### Pending Todos
 
@@ -112,8 +114,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-17T13:20:52.272Z
-Stopped at: Completed 30-01-PLAN.md
+Last session: 2026-08-17T15:12:30.000Z
+Stopped at: Completed 31-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
