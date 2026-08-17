@@ -30,6 +30,14 @@ from fdars.advisor.providers._validate import (
     _check_grounding,
 )
 
+# The Gemini adapter requires Python >= 3.10 (google-genai SDK); its provider
+# raises ImportError on 3.9 before any test mock applies, so skip the whole
+# module there (mirrors tests/test_mcp_server.py).
+pytestmark = pytest.mark.skipif(
+    sys.version_info < (3, 10),
+    reason="gemini (google-genai SDK) requires Python 3.10+",
+)
+
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
