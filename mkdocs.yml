@@ -102,8 +102,10 @@ nav:
     - Distance Metrics: represent/distance-metrics.md
   - Align:
     - align/index.md
+    - Shift Registration: align/shift-registration.md
     - Elastic Alignment: align/elastic-alignment.md
     - Advanced Elastic Alignment: align/advanced-alignment.md
+    - Banded Elastic Alignment: align/banded-alignment.md
     - Landmark Registration: align/landmark-registration.md
     - TSRVF: align/tsrvf.md
     - Comparing Methods: align/alignment-comparison.md
@@ -137,6 +139,8 @@ nav:
     - Seasonal Analysis: analyze/seasonal-analysis.md
     - Equivalence Testing: analyze/equivalence-testing.md
     - Covariance Functions: analyze/covariance-functions.md
+    - Functional Statistics: analyze/functional-statistics.md
+    - Scoring Metrics: analyze/scoring-metrics.md
   - AI Advisor:
     - advisor/index.md
     - Python API: advisor/python-api.md
