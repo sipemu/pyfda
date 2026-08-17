@@ -130,6 +130,7 @@ def build_diagnostics(
         "regression", "regression_cv",                              # ASPECT-04 (plan 21-04)
         "spm",                                                      # ASPECT-05 (plan 21-05)
         "scoring",                                                  # ADV-01 (plan 28-01)
+        "inference",                                               # ADV-03 (plan 34-01) - diagnostics-only
     }
     method_lc = method.lower()
     if method_lc not in _supported:
@@ -203,6 +204,10 @@ def build_diagnostics(
     if method_lc == "scoring":
         from fdars.advisor.aspects.scoring import _build_scoring_diagnostics  # noqa: PLC0415
         return _build_scoring_diagnostics(raw, **kwargs)
+
+    if method_lc == "inference":
+        from fdars.advisor.aspects.inference import _build_inference_diagnostics  # noqa: PLC0415
+        return _build_inference_diagnostics(raw, **kwargs)
 
     # Unreachable given the check above, but kept for safety.
     raise ValueError(f"Unhandled method: {method!r}")

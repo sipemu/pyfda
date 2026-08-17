@@ -77,7 +77,8 @@ _DIAGNOSTICS_METHODS = frozenset(
         "regression",
         "regression_cv",
         "spm",
-        "scoring",  # ADV-01 (plan 28-01) — diagnostics-only; needs caller-supplied metrics
+        "scoring",    # ADV-01 (plan 28-01) — diagnostics-only; needs caller-supplied metrics
+        "inference",  # ADV-03 (plan 34-01) — diagnostics-only; caller supplies TestResult dict
     }
 )
 

@@ -127,6 +127,20 @@ _ASPECT_PRIMERS: dict = {
         "absolute value among the present error metrics; explained_variance_band "
         "gives the qualitative band derived from functional_explained_variance.\n"
     ),
+    "inference": (
+        "- Functional inference: statistic is the fdars-computed test statistic "
+        "(e.g. permutation F-statistic or Hotelling T² value); p_value is the "
+        "fdars-computed permutation or asymptotic p-value; n_perm is the number "
+        "of permutations used. n_perm == 0 denotes an asymptotic test (e.g. "
+        "Hotelling T²) while n_perm > 0 denotes a permutation test — "
+        "is_permutation_test is the derived boolean flag. "
+        "significant_at_0.01 / significant_at_0.05 / significant_at_0.10 are "
+        "derived significance flags (p_value < alpha); strongest_significance_level "
+        "is the smallest alpha at which the result is significant. "
+        "Interpret these values in the context of the study design and sample "
+        "size — do not claim significance or non-significance beyond the "
+        "p_value and alpha levels already provided.\n"
+    ),
 }
 
 

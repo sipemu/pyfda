@@ -12,4 +12,5 @@ fpca       : ``_build_fpca_diagnostics``
 basis      : ``_build_basis_diagnostics``
 smoothing  : ``_build_smoothing_diagnostics``
 clustering : ``_build_clustering_diagnostics``
+inference  : ``_build_inference_diagnostics``
 """
