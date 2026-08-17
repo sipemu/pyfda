@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
 current_phase: 33
-current_phase_name: Group C — Basis/Smoothing Quick Wins
-status: planning
-stopped_at: Completed 32-01-PLAN.md
-last_updated: "2026-08-17T18:52:34.481Z"
+current_phase_name: group-c-basis-smoothing-quick-wins
+status: executing
+stopped_at: Completed 33-01-PLAN.md
+last_updated: "2026-08-17T19:08:32.370Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 31 Plan 01 complete — fdars.inference submodule with t_perm_test, f_perm_test, two_sample_mean_test
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
-  percent: 50
+  completed_phases: 4
+  total_plans: 6
+  completed_plans: 6
+  percent: 67
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-17)
 
 **Core value:** Upgrade `fdars-core` 0.17.0→0.20.0 (parallel-only, no linalg), expose the new functional-inference + depth/boxplot + basis/smoothing surface through PyO3 bindings + the Python API, extend the v3.0 grounded advisor with an `inference` diagnostics aspect, and document everything method-accurately — with the grounding invariant intact throughout.
-**Current focus:** Phase 32 — group-b-depth-boxplot-bindings
+**Current focus:** Phase 33 — group-c-basis-smoothing-quick-wins
 
 ## Current Position
 
-Phase: 33 — Group C — Basis/Smoothing Quick Wins
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-17 — Phase 32 complete, transitioned to Phase 33
+Phase: 33 (group-c-basis-smoothing-quick-wins) — EXECUTING
+Plan: 1 of ?
+Status: Executing Phase 33
+Last activity: 2026-08-17 — Phase 33 execution resumed (wave continue)
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Last activity: 2026-08-17 — Phase 32 complete, transitioned to Phase 33
 | Phase 31-group-a-fdars-inference-bindings P02 | 4 | 2 tasks | 2 files |
 | Phase 31 P03 | 35 | 3 tasks | 2 files |
 | Phase 32 P01 | 4 | 2 tasks | 2 files |
+| Phase 33-group-c-basis-smoothing-quick-wins P01 | 5m | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,8 @@ Recent decisions affecting current work:
 - [Phase ?]: flm_f_test/flm_gof_test default n_comp=5; core clamps n_comp silently — degenerate-input tests use n<3 (fregre_lm error) and n=4 (GoF degenerate df) respectively
 - [Phase ?]: outliers Vec<usize> -> Python list of ints (not ndarray) — matches locked 32-CONTEXT.md decision
 - [Phase ?]: seed=None resolves to u64 default 0 inside depth_method_from_str — byte-identical RandomProjection reproducibility
+- [Phase ?]: smooth_basis_aic placed in basis_mod.rs beside GCV twin per closest-analog placement rule in 33-CONTEXT.md
+- [Phase ?]: CvCriterion::Aic output arm explicit; _ wildcard retained for non_exhaustive enum forward-compat
 
 ### Pending Todos
 
@@ -122,8 +125,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-17T18:41:21.077Z
-Stopped at: Completed 32-01-PLAN.md
+Last session: 2026-08-17T19:08:32.360Z
+Stopped at: Completed 33-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
