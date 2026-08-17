@@ -41,6 +41,16 @@ def test_optim_bandwidth_gcv_unchanged():
     assert math.isfinite(result["h_opt"]) and result["h_opt"] > 0
 
 
+def test_optim_bandwidth_cv_unchanged():
+    """CV path still returns criterion == 'cv' (non-regression — guards the
+    adjacent aic/cv match arms in optim_bandwidth from a silent swap)."""
+    import fdars.smoothing as sm
+    x, y = _make_signal()
+    result = sm.optim_bandwidth(x, y, criterion="cv", n_grid=15)
+    assert result["criterion"] == "cv"
+    assert math.isfinite(result["h_opt"]) and result["h_opt"] > 0
+
+
 def test_optim_bandwidth_unknown_criterion_raises():
     """Unknown criterion string raises ValueError."""
     import fdars.smoothing as sm

@@ -445,7 +445,9 @@ pub fn smooth_basis_gcv<'py>(
 /// -------
 /// dict
 ///     Dictionary with keys: fitted (n, m), coefficients (n, nbasis),
-///     edf, gcv, aic, bic, nbasis
+///     edf, gcv, aic, bic, nbasis. Selection minimizes AIC; the `gcv`, `bic`,
+///     and `aic` keys are the respective scores evaluated at the AIC-optimal
+///     lambda (i.e. `gcv` is reported for reference, not used for selection).
 #[pyfunction]
 #[pyo3(signature = (data, argvals, n_basis, basis_type="bspline", lfd_order=2, log_lambda_min=-8.0, log_lambda_max=4.0, n_grid=25))]
 pub fn smooth_basis_aic<'py>(
