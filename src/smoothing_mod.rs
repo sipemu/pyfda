@@ -162,7 +162,7 @@ pub fn knn_smoother<'py>(
 /// y : numpy.ndarray
 ///     Response values, length n.
 /// criterion : str, optional
-///     "gcv" (default) or "cv".
+///     "gcv" (default), "cv", or "aic".
 /// kernel : str, optional
 ///     Kernel type: "gaussian" (default), "epanechnikov", or "tricube".
 /// n_grid : int, optional
@@ -193,9 +193,10 @@ pub fn optim_bandwidth<'py>(
     let crit = match criterion {
         "cv" => fdars_core::smoothing::CvCriterion::Cv,
         "gcv" => fdars_core::smoothing::CvCriterion::Gcv,
+        "aic" => fdars_core::smoothing::CvCriterion::Aic,
         _ => {
             return Err(pyo3::exceptions::PyValueError::new_err(
-                "criterion must be 'cv' or 'gcv'",
+                "criterion must be 'cv', 'gcv', or 'aic'",
             ))
         }
     };
@@ -209,6 +210,7 @@ pub fn optim_bandwidth<'py>(
     let crit_str = match result.criterion {
         fdars_core::smoothing::CvCriterion::Cv => "cv",
         fdars_core::smoothing::CvCriterion::Gcv => "gcv",
+        fdars_core::smoothing::CvCriterion::Aic => "aic",
         _ => "unknown",
     };
     dict.set_item("criterion", crit_str)?;
