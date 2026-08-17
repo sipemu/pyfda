@@ -2,10 +2,9 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
-current_phase: 29
-status: completed
+status: Awaiting next milestone
 stopped_at: "Completed 29-04-PLAN.md (halted at checkpoint:human-verify Task 3)"
-last_updated: "2026-08-17T09:13:51.424Z"
+last_updated: "2026-08-17T09:18:42.197Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 29 complete
 progress:
@@ -13,6 +12,7 @@ progress:
   completed_phases: 5
   total_plans: 11
   completed_plans: 11
+current_phase: 29
 current_phase_name: docs-diagrams-worked-examples
 ---
 
@@ -27,12 +27,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 ## Current Position
 
-Phase: 29
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-08-17 — Phase 29 complete
-
-Progress: [██████████] 100%
+Phase: Milestone v4.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-17 — Milestone v4.0 completed and archived
 
 ## Performance Metrics
 
@@ -147,4 +145,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Review the v4.0 roadmap draft (`.planning/ROADMAP.md`), then plan Phase 25 with `/gsd-plan-phase 25`
+- Start the next milestone with /gsd-new-milestone

@@ -73,6 +73,40 @@ A new top-level "AI Advisor" docs-site section documenting the shipped v2.0 advi
 
 ---
 
+## Milestone: v4.0 — fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
+
+**Shipped:** 2026-08-17
+**Phases:** 5 (25–29) | **Plans:** 11 | **Tasks:** 16
+
+### What Was Built
+Upgraded `fdars-core` 0.14.0 → 0.17.0 and bound the new upstream surface: `fdars.represent` (spline interpolation + `ExtrapolationPolicy` + `impute_missing_values`), functional statistics + `depth_based_median`/`trim_mean` in `fdars.fdata` with six new `Fdata` methods, a new `fdars.scoring` submodule (5 Simpson-integrated metrics), and `fdars.alignment` additions (least-squares shift registration + `fd.shift_register()`, 3 registration-quality scores, banded elastic alignment). Extended the advisor with a `scoring` aspect (#13) + imputation/registration diagnostics, and shipped 6 new docs pages + 6 method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples. Suite grew 259 → 426 passed / 4 skipped; whole-site `mkdocs build --strict` green offline.
+
+### What Worked
+- **Crate-bump-as-isolated-gate first.** Landing 0.17.0 + a full regression pass before any new binding work meant the one numeric change (faer FPCA SVD) was measured in isolation — and it turned out to need zero tolerance changes, so all later phases built on a proven-green baseline.
+- **Milestone-level research reused across binding phases.** The four research reports (STACK/FEATURES/ARCHITECTURE/PITFALLS) pre-resolved exact 0.17 signatures, the #33 transposition trap, and the guard-sync/atomic-commit requirement — so per-phase research was skipped and planners/executors worked from accurate specs.
+- **Tracer-first + multi-curve transposition tests** caught the column-major class deterministically; `depth_based_median` returning the observed curve and `trim_mean(α=0)==mean` were asserted exactly.
+- **Self-review of diagrams via rsvg-convert PNG rendering** let the orchestrator catch/confirm method-accuracy (rigid-shift-vs-warp, depth-median-vs-synthetic, Sakoe–Chiba corridor) before the human sign-off gate.
+
+### What Was Inefficient
+- **Docs build is ~18 min** because executed worked-example fences run genuine fdars compute; multiple concurrent builds piled up and needed manual cleanup. Lighter fence datasets / figure caching would make CI docs builds far cheaper.
+- **One executor process was interrupted mid-run** (26-02) — recovered cleanly because it had made zero partial commits (safe-resume gate), but confirms the value of the clean-tree + no-partial-work check before re-dispatch.
+- Executor commit granularity occasionally coarser than the task structure (27-02) — work was fully committed, but per-task commits aid traceability.
+
+### Patterns Established
+- New public API namespaces mirror upstream fdars-core modules where it reads cleanly (`fdars.represent`, `fdars.scoring`) rather than bloating existing modules — decided per-milestone via smart-discuss.
+- Advisor guard-sync (`_supported` ↔ MCP `_DIAGNOSTICS_METHODS`) edits must land in ONE atomic commit; offline-determinism tests assert byte-identical `json.dumps` + no numpy scalars.
+
+### Key Lessons
+- For a dependency-catch-up milestone, an isolated bump+regression phase is worth its own phase — it de-risks everything downstream for a small cost.
+- Executed-fence docs are powerful (examples provably run against the real API) but their build cost scales with the compute in each fence — keep fence data small by design.
+
+### Cost Observations
+- Model mix: planners/roadmapper opus; executors/verifiers/integration sonnet; plan-checkers haiku.
+- Sessions: 1 (single autonomous `/gsd-autonomous` run across all 5 phases).
+- Notable: background subagents kept orchestrator context lean; the ~18-min docs builds dominated wall-clock in Phase 29.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution

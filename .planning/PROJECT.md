@@ -15,12 +15,13 @@ The documentation — diagrams first, examples second — must make functional d
 - ✅ **v2.0 — Grounded AI analysis advisor** (Phases 10–13): a deterministic, offline `build_diagnostics` core + grounded `advise()` (Claude structured outputs, `claude-opus-4-8`) exposed across four surfaces — Python API (recommend-only), Tool/MCP (agentic re-run/compare over stdio), and an Anthropic Agent Skill. The grounding invariant holds throughout: fdars computes every number, the LLM only interprets and cites diagnostic values. Human UAT (2026-08-10) confirmed the real-key path produces grounded advice.
 - ✅ **v2.1 — Document the AI Advisor** (Phases 14–18): a new top-level "AI Advisor" docs-site section — a concept/grounding-invariant overview with two hand-authored inline SVG diagrams (grounding invariant, advisor loop), plus per-surface pages for the Python API (recommend-only, with an offline worked example that executes in the docs build), the Tool/MCP server (3 tools, by-reference handle model, stdio, re-run/compare loop), and the Agent Skill (git-URL install + interpret→recommend→re-run→compare walkthrough) — all wired into nav and passing a `mkdocs build --strict` gate. Method-accurate against the shipped v2.0 code; diagrams pass the SVGO/determinism gate.
 - ✅ **v3.0 — Provider-Agnostic Advisor, Full-Library Coverage** (Phases 19–24): a custom `Provider` protocol with Anthropic/OpenAI(-compatible)/Gemini/Ollama adapters (per-provider optional extras) and a centralized validate-and-retry + `_check_grounding` guard, deterministic offline `build_diagnostics` for all 12 fdars aspects through one shared schema/prompt, MCP + Agent Skill surface updates (MCP stays LLM-free), a Python 3.9–3.14 CI matrix with version-gated extras + bare-venv smoke proof, and a provider-setup + per-aspect docs section. 28/28 requirements complete; suite 259 passed / 4 skipped.
+- ✅ **v4.0 — fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs** (Phases 25–29): upgraded `fdars-core` 0.14.0 → 0.17.0 (parallel-only, no linalg; zero FPCA drift) and exposed the new upstream surface — `fdars.represent` (interpolation/extrapolation-policy/imputation), functional statistics + `depth_based_median`/`trim_mean` in `fdars.fdata` with six new `Fdata` methods, a new `fdars.scoring` submodule (5 metrics), and `fdars.alignment` shift registration (+ `fd.shift_register()`) / registration-quality scores / banded elastic alignment. Extended the advisor with a `scoring` aspect (#13) + imputation/registration diagnostics (grounding invariant + MCP guard-sync preserved), and documented it all with 6 new dedicated pages + 6 method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples (whole-site `mkdocs build --strict` green). 16/16 requirements complete; suite 426 passed / 4 skipped.
 
 **Grounding invariant (v2.0):** every recommendation cites computed diagnostics and states an expected effect; the LLM never fabricates numbers.
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v4.0 fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
+## Last Shipped Milestone: v4.0 fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs (shipped 2026-08-17)
 
 **Goal:** Upgrade the pinned `fdars-core` from 0.14.0 to 0.17.0, expose the new upstream functional-data capabilities through PyO3 bindings and the Python API, extend the v3.0 AI advisor to cover the relevant new capabilities, and document everything to the project's method-accurate standard (hand-authored SVG diagrams + runnable worked examples).
 
@@ -91,7 +92,7 @@ The documentation — diagrams first, examples second — must make functional d
 
 <!-- v4.0 in progress — fdars-core 0.17 upgrade: new bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
 
-_v4.0 — all 5 phases (25 crate bump · 26 represent+stats · 27 scoring+alignment · 28 advisor · 29 docs) shipped on the 0.17.0 baseline; 16/16 requirements validated. Entering milestone lifecycle (audit → complete → cleanup)._
+_No active milestone — v4.0 shipped and archived 2026-08-17 (16/16 requirements validated). Start the next milestone with `/gsd-new-milestone`. Candidate follow-ups: A11Y-01 (diagram accessibility), EX2-01 (example consolidation), HTTP-01/FUT-01 (HTTP/SSE MCP transport), lighter docs-fence data for faster CI builds, R-parity feature work (`PARITY_PLAN.md`)._
 
 ### Out of Scope
 
@@ -152,4 +153,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-17 after Phase 29 — v4.0 docs sweep complete; all 5 phases shipped, entering milestone lifecycle*
+*Last updated: 2026-08-17 after v4.0 milestone — shipped & archived; awaiting next milestone*

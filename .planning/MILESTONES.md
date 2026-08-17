@@ -1,5 +1,22 @@
 # Milestones
 
+## v4.0 fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs (Shipped: 2026-08-17)
+
+**Phases completed:** 5 phases, 11 plans, 16 tasks
+
+**Key accomplishments:**
+
+- fdars-core pinned to 0.17.0 (parallel only, no linalg); maturin build green; 259-test Python suite passes with zero failures and zero FPCA tolerance relaxations needed.
+- New module `src/represent_mod.rs`
+- Five new `#[pyfunction]`s in `src/fdata_mod.rs`
+- Five Simpson-integrated prediction-scoring metrics (`functional_mae/mse/mape/msle/explained_variance`) bound in a new `fdars.scoring` PyO3 submodule with MAPE/MSLE `ValueError` guards and zero `.unwrap()` calls.
+- 1. [Rule 1 - Bug] NaN propagation in represent.py data_range statistics
+- Two new represent section pages (spline interpolation + ExtrapolationPolicy, missing-value imputation) each with a hand-authored STYLE_SPEC-conforming SVG concept diagram and an executed offline FDARS_FENCE_OK worked example, wired into the MkDocs Represent nav, with the full docs toolchain proven end-to-end.
+- Two new analyze section pages (functional summary statistics and scoring metrics) each with a STYLE_SPEC-conforming hand-authored SVG and an executed offline FDARS_FENCE_OK worked example against the real shipped fdars.fdata and fdars.scoring bindings.
+- All six new Phase 29 capability pages wired into mkdocs.yml nav, whole-site strict build green (1088s, offline, exit 0), all six new SVGs SVGO-idempotent, all six executed fences emit FDARS_FENCE_OK — halted at the blocking human diagram-review checkpoint.
+
+---
+
 ## v3.0 Provider-Agnostic Advisor, Full-Library Coverage (Shipped: 2026-08-12)
 
 **Phases completed:** 6 phases, 19 plans, 33 tasks
