@@ -109,7 +109,7 @@ The documentation — diagrams first, examples second — must make functional d
 - [x] Crate bump `fdars-core 0.17.0 → 0.20.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate — ✓ Phase 30 (426 passed / 4 skipped, zero drift; `CvCriterion` wildcard arm added)
 - [x] Group A — `fdars.inference` submodule: two-sample permutation tests + SCB bands + FLM inference (`TestResult` → PyDict, deterministic seed) — ✓ Phase 31 (8 functions, 495 passed / 4 skipped; FLM re-fits internally; CR-01 negative-label guard added)
 - [x] Group B — `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth` — ✓ Phase 32 (7-key boxplot dict, outliers as int list, transposition-guarded; 524 passed / 4 skipped)
-- [ ] Group C — `constant_basis` + AIC smoothing selection extending `fdars.basis`/`fdars.smoothing`
+- [x] Group C — `constant_basis` + AIC smoothing selection extending `fdars.basis`/`fdars.smoothing` — ✓ Phase 33 (constant_basis + `fdars.basis.smooth_basis_aic` + `optim_bandwidth(criterion="aic")`; Phase-30 CvCriterion stopgap fixed; 535 passed / 4 skipped)
 - [ ] Advisor extension (where relevant) — inference/boxplot diagnostics aspect, grounding invariant + MCP guard-sync preserved
 - [ ] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green
 
