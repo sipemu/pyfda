@@ -4,11 +4,15 @@ Covers:
 - t_perm_test (Task 2 tracer)
 - f_perm_test (Task 3)
 - two_sample_mean_test (Task 4)
+- mean_scb (Task 1 of plan 31-02: INFER-04)
+- scb_two_sample_test (Task 2 of plan 31-02: INFER-05)
 
 Dataset: Berkeley Growth Study (93 subjects x 31 age-points).
   Boys: rows 0-38, girls: rows 39-92.
 Test slices are small (10 boys, 10 girls) for fast CI.
 n_perm is kept to 19-29 in tests to avoid slow CI.
+
+Canadian Weather dataset used for mean_scb (single group).
 """
 
 import json
@@ -272,3 +276,164 @@ class TestTwoSampleMeanTest:
         bad_age = age[:-1]
         with pytest.raises(ValueError):
             two_sample_mean_test(boys, girls, bad_age, ncomp=3)
+
+
+# ---------------------------------------------------------------------------
+# INFER-04: mean_scb
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def canadian_scb_fixture():
+    """Return (X_small, grid) from Canadian Weather for SCB tests.
+
+    Uses a column stride (::30) to keep m small and tests fast.
+    n >= 3 required by Degras; we use all 35 stations, stride columns.
+    """
+    from fdars.datasets import load_canadian_weather
+
+    day, X, _ = load_canadian_weather(variable="temperature", return_fdata=False)
+    # Stride to keep m small and speed up nb iterations.
+    grid = day[::30].copy()
+    X_small = X[:, ::30].copy()
+    return X_small, grid
+
+
+class TestMeanScbImport:
+    """mean_scb must be importable from fdars.inference."""
+
+    def test_mean_scb_importable(self):
+        import fdars.inference
+
+        assert callable(fdars.inference.mean_scb)
+
+    def test_from_import(self):
+        from fdars.inference import mean_scb  # noqa: F401
+
+
+class TestMeanScb:
+    """mean_scb correctness: dict keys, band shapes, finite values, multipliers."""
+
+    def test_returns_dict_with_four_keys(self, canadian_scb_fixture):
+        from fdars.inference import mean_scb
+
+        X, grid = canadian_scb_fixture
+        result = mean_scb(X, grid, 20.0, nb=50)
+        assert isinstance(result, dict)
+        assert set(result.keys()) == {"lower", "upper", "center", "half_width"}
+
+    def test_band_shape_equals_m(self, canadian_scb_fixture):
+        """Each band array has shape (m,) matching the argvals length."""
+        from fdars.inference import mean_scb
+
+        X, grid = canadian_scb_fixture
+        m = len(grid)
+        result = mean_scb(X, grid, 20.0, nb=50)
+        for key in ("lower", "upper", "center", "half_width"):
+            arr = result[key]
+            assert isinstance(arr, np.ndarray), f"{key} must be ndarray"
+            assert arr.shape == (m,), f"{key}: expected shape ({m},), got {arr.shape}"
+
+    def test_band_values_are_finite(self, canadian_scb_fixture):
+        """All entries in all four band arrays must be finite."""
+        from fdars.inference import mean_scb
+
+        X, grid = canadian_scb_fixture
+        result = mean_scb(X, grid, 20.0, nb=50)
+        for key in ("lower", "upper", "center", "half_width"):
+            assert np.all(np.isfinite(result[key])), (
+                f"{key}: contains non-finite values"
+            )
+
+    def test_multiplier_rademacher_succeeds(self, canadian_scb_fixture):
+        """multiplier='rademacher' must succeed and return same shape."""
+        from fdars.inference import mean_scb
+
+        X, grid = canadian_scb_fixture
+        m = len(grid)
+        result = mean_scb(X, grid, 20.0, nb=50, multiplier="rademacher")
+        assert set(result.keys()) == {"lower", "upper", "center", "half_width"}
+        for key in ("lower", "upper", "center", "half_width"):
+            assert result[key].shape == (m,)
+
+    def test_unknown_multiplier_raises_value_error(self, canadian_scb_fixture):
+        """An unrecognised multiplier string must raise ValueError."""
+        from fdars.inference import mean_scb
+
+        X, grid = canadian_scb_fixture
+        with pytest.raises(ValueError, match="multiplier"):
+            mean_scb(X, grid, 20.0, nb=50, multiplier="bogus")
+
+    def test_nb_zero_raises_value_error(self, canadian_scb_fixture):
+        """nb=0 must raise ValueError (forwarded from fdars-core)."""
+        from fdars.inference import mean_scb
+
+        X, grid = canadian_scb_fixture
+        with pytest.raises(ValueError):
+            mean_scb(X, grid, 20.0, nb=0)
+
+    def test_confidence_out_of_range_raises_value_error(self, canadian_scb_fixture):
+        """confidence=1.5 (outside (0, 1)) must raise ValueError."""
+        from fdars.inference import mean_scb
+
+        X, grid = canadian_scb_fixture
+        with pytest.raises(ValueError):
+            mean_scb(X, grid, 20.0, nb=50, confidence=1.5)
+
+    def test_lower_le_center_le_upper(self, canadian_scb_fixture):
+        """Ordering invariant: lower <= center <= upper at every grid point."""
+        from fdars.inference import mean_scb
+
+        X, grid = canadian_scb_fixture
+        result = mean_scb(X, grid, 20.0, nb=50)
+        assert np.all(result["lower"] <= result["center"]), (
+            "lower must be <= center at every point"
+        )
+        assert np.all(result["center"] <= result["upper"]), (
+            "center must be <= upper at every point"
+        )
+
+
+# ---------------------------------------------------------------------------
+# INFER-05: scb_two_sample_test
+# ---------------------------------------------------------------------------
+
+
+class TestScbTwoSampleImport:
+    """scb_two_sample_test must be importable from fdars.inference."""
+
+    def test_scb_two_sample_test_importable(self):
+        import fdars.inference
+
+        assert callable(fdars.inference.scb_two_sample_test)
+
+    def test_from_import(self):
+        from fdars.inference import scb_two_sample_test  # noqa: F401
+
+
+class TestScbTwoSampleTest:
+    """scb_two_sample_test: dict keys, n_perm==0, multiplier dispatch, errors."""
+
+    def test_returns_dict_with_three_keys(self, growth_subsets):
+        from fdars.inference import scb_two_sample_test
+
+        boys, girls, age = growth_subsets
+        result = scb_two_sample_test(boys, girls, age, 5.0, nb=50)
+        assert isinstance(result, dict)
+        assert set(result.keys()) == {"statistic", "p_value", "n_perm"}
+
+    def test_n_perm_is_zero(self, growth_subsets):
+        """SCB path always returns n_perm == 0 (asymptotic, not permutation)."""
+        from fdars.inference import scb_two_sample_test
+
+        boys, girls, age = growth_subsets
+        result = scb_two_sample_test(boys, girls, age, 5.0, nb=50)
+        assert result["n_perm"] == 0
+
+    def test_unknown_multiplier_raises_value_error(self, growth_subsets):
+        """An unrecognised multiplier string must raise ValueError."""
+        from fdars.inference import scb_two_sample_test
+
+        boys, girls, age = growth_subsets
+        with pytest.raises(ValueError, match="multiplier"):
+            scb_two_sample_test(boys, girls, age, 5.0, nb=50, multiplier="bogus")
