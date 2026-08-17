@@ -19,9 +19,9 @@ Requirements for milestone v5.0. Each maps to a roadmap phase. All 13 new bindin
 - [ ] **INFER-03**: User can run an asymptotic two-sample mean test (Hotelling T² on a shared FPC basis) via `fdars.inference.two_sample_mean_test(data_a, data_b, argvals, ncomp)` → dict (`n_perm=0`, seedless).
 - [x] **INFER-04**: User can compute a Degras simultaneous confidence band for the mean via `fdars.inference.mean_scb(...)` → dict of `{lower, upper, center, half_width}` 1-D arrays (`ToleranceBand`); `multiplier` selected by string with a `ValueError` fallback.
 - [x] **INFER-05**: User can run an SCB test for the mean-difference curve via `fdars.inference.scb_two_sample_test(...)` → dict (`TestResult`).
-- [ ] **INFER-06**: User can run an overall-significance F-test on a fitted functional linear model via `fdars.inference.flm_f_test(...)` → dict; the wrapper re-fits `fregre_lm` internally (accepts raw data/response/n_comp — no persistent handle).
-- [ ] **INFER-07**: User can run a Ramsey–RESET goodness-of-fit / lack-of-fit test on a fitted FLM via `fdars.inference.flm_gof_test(...)` → dict; bound symmetrically with INFER-06.
-- [ ] **INFER-08**: User can run an asymptotic one-way functional ANOVA V-statistic via `fdars.inference.oneway_anova_vstat(data, groups, argvals)` → dict (`n_perm=0`); complements the existing permutation `fanova`.
+- [x] **INFER-06**: User can run an overall-significance F-test on a fitted functional linear model via `fdars.inference.flm_f_test(...)` → dict; the wrapper re-fits `fregre_lm` internally (accepts raw data/response/n_comp — no persistent handle).
+- [x] **INFER-07**: User can run a Ramsey–RESET goodness-of-fit / lack-of-fit test on a fitted FLM via `fdars.inference.flm_gof_test(...)` → dict; bound symmetrically with INFER-06.
+- [x] **INFER-08**: User can run an asymptotic one-way functional ANOVA V-statistic via `fdars.inference.oneway_anova_vstat(data, groups, argvals)` → dict (`n_perm=0`); complements the existing permutation `fanova`.
 - [ ] **INFER-09**: The `fdars.inference` submodule is registered (`src/inference_mod.rs` + `register_submodule!` in `lib.rs` + `_submodule_names`) and importable; all `u64` seeds are exposed as Python `seed=None` resolving to a fixed default for byte-identical reproducibility; degenerate inputs (mismatched grids, too few curves, invalid params) raise `ValueError` (no `.unwrap()`, all fallible fns via `to_pyresult()`).
 
 ### Depth & Functional Boxplot (extend `fdars.depth`)
@@ -91,9 +91,9 @@ Which phases cover which requirements. Populated during roadmap creation (Step 1
 | INFER-03 | Phase 31 | Pending |
 | INFER-04 | Phase 31 | Complete |
 | INFER-05 | Phase 31 | Complete |
-| INFER-06 | Phase 31 | Pending |
-| INFER-07 | Phase 31 | Pending |
-| INFER-08 | Phase 31 | Pending |
+| INFER-06 | Phase 31 | Complete |
+| INFER-07 | Phase 31 | Complete |
+| INFER-08 | Phase 31 | Complete |
 | INFER-09 | Phase 31 | Pending |
 | DEPTH-01 | Phase 32 | Pending |
 | DEPTH-02 | Phase 32 | Pending |

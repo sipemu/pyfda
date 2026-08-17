@@ -4,17 +4,17 @@ milestone: v5.0
 milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
 current_phase: 31
 current_phase_name: group-a-fdars-inference-bindings
-status: executing
-stopped_at: Completed 31-02-PLAN.md
-last_updated: "2026-08-17T15:21:22.747Z"
+status: verifying
+stopped_at: Completed 31-03-PLAN.md
+last_updated: "2026-08-17T18:10:33.639Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 31 Plan 01 complete — fdars.inference submodule with t_perm_test, f_perm_test, two_sample_mean_test
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
-  percent: 17
+  completed_plans: 4
+  percent: 33
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-08-17)
 
 Phase: 31 (group-a-fdars-inference-bindings) — EXECUTING
 Plan: 3 of 3 (31-01 complete, 31-02 next)
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-17 — Completed 31-01: fdars.inference submodule skeleton + t_perm_test + f_perm_test + two_sample_mean_test
 
 ## Performance Metrics
@@ -65,6 +65,7 @@ Last activity: 2026-08-17 — Completed 31-01: fdars.inference submodule skeleto
 | Phase 30 P01 | 4 | 2 tasks | 2 files |
 | Phase 31 P01 | 6 | 4 tasks | 5 files |
 | Phase 31-group-a-fdars-inference-bindings P02 | 4 | 2 tasks | 2 files |
+| Phase 31 P03 | 35 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,7 @@ Recent decisions affecting current work:
 - [Phase 31-01]: seed=None resolves to u64 default 0 (locked); mod inference_mod placed alphabetically in lib.rs (rustfmt); 31-SIGNATURES.md is the plan-time authority for all 8 Group A function signatures
 - [Phase ?]: multiplier_from_str() private helper dispatches string to MultiplierDistribution with non_exhaustive wildcard arm returning PyValueError
 - [Phase ?]: ToleranceBand Vec<f64> fields converted via vec_to_numpy1d per field (not fdmatrix_to_numpy2d) per INFER-04 locked decision
+- [Phase ?]: flm_f_test/flm_gof_test default n_comp=5; core clamps n_comp silently — degenerate-input tests use n<3 (fregre_lm error) and n=4 (GoF degenerate df) respectively
 
 ### Pending Todos
 
@@ -117,8 +119,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-17T15:21:22.738Z
-Stopped at: Completed 31-02-PLAN.md
+Last session: 2026-08-17T18:10:33.629Z
+Stopped at: Completed 31-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
