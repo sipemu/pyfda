@@ -88,7 +88,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 - [x] **Phase 31: Group A — `fdars.inference` Bindings** - New submodule: two-sample permutation tests + SCB bands + FLM inference + one-way ANOVA V-stat (`TestResult`/`ToleranceBand` → PyDict, deterministic seed) (completed 2026-08-17)
 - [x] **Phase 32: Group B — Depth/Boxplot Bindings** - `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth` (completed 2026-08-17)
 - [x] **Phase 33: Group C — Basis/Smoothing Quick Wins** - `constant_basis` + AIC basis/kernel selection extending `fdars.basis`/`fdars.smoothing` (completed 2026-08-17)
-- [ ] **Phase 34: Advisor Extension** - `inference` diagnostics aspect; grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync (single atomic commit) preserved
+- [x] **Phase 34: Advisor Extension** - `inference` diagnostics aspect; grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync (single atomic commit) preserved (completed 2026-08-17)
 - [ ] **Phase 35: Docs — Diagrams & Worked Examples** - New pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` examples; `mkdocs build --strict` green
 
 ## Phase Details (v5.0)
@@ -171,7 +171,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 
 **Plans**: 1 plan
 
-- [ ] 34-01-PLAN.md — `inference` aspect builder + three-file guard-sync (advisor `_supported`/dispatch + MCP `_DIAGNOSTICS_METHODS` + `_ASPECT_PRIMERS`) in a single atomic commit + offline test suite (ADV-03)
+- [x] 34-01-PLAN.md — `inference` aspect builder + three-file guard-sync (advisor `_supported`/dispatch + MCP `_DIAGNOSTICS_METHODS` + `_ASPECT_PRIMERS`) in a single atomic commit + offline test suite (ADV-03)
 
 **UI hint**: no
 
