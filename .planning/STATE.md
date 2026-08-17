@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
-current_phase: 32
-current_phase_name: group-b-depth-boxplot-bindings
-status: executing
+current_phase: 33
+current_phase_name: Group C — Basis/Smoothing Quick Wins
+status: planning
 stopped_at: Completed 32-01-PLAN.md
-last_updated: "2026-08-17T18:41:21.089Z"
+last_updated: "2026-08-17T18:52:34.481Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 31 Plan 01 complete — fdars.inference submodule with t_perm_test, f_perm_test, two_sample_mean_test
 progress:
@@ -28,16 +28,16 @@ See: .planning/PROJECT.md (updated 2026-08-17)
 
 ## Current Position
 
-Phase: 32 (group-b-depth-boxplot-bindings) — EXECUTING
-Plan: 1 of ?
-Status: Executing Phase 32
-Last activity: 2026-08-17 — Phase 32 execution resumed (wave continue)
+Phase: 33 — Group C — Basis/Smoothing Quick Wins
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-17 — Phase 32 complete, transitioned to Phase 33
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 4 (this milestone); 11 in v4.0; 19 across v1.0–v3.0
+- Total plans completed: 5 (this milestone); 11 in v4.0; 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -47,7 +47,7 @@ Last activity: 2026-08-17 — Phase 32 execution resumed (wave continue)
 |-------|-------|-------|----------|
 | 30 | 1 | - | - |
 | 31 | 3 | - | - |
-| 32 | - | - | - |
+| 32 | 1 | - | - |
 | 33 | - | - | - |
 | 34 | - | - | - |
 | 35 | - | - | - |

@@ -86,7 +86,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 
 - [x] **Phase 30: Crate Bump + Regression Gate** - Bump 0.17→0.20, add the `CvCriterion` wildcard fallback arm, full ~426-test suite green as the sole gate (completed 2026-08-17)
 - [x] **Phase 31: Group A — `fdars.inference` Bindings** - New submodule: two-sample permutation tests + SCB bands + FLM inference + one-way ANOVA V-stat (`TestResult`/`ToleranceBand` → PyDict, deterministic seed) (completed 2026-08-17)
-- [ ] **Phase 32: Group B — Depth/Boxplot Bindings** - `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth`
+- [x] **Phase 32: Group B — Depth/Boxplot Bindings** - `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth` (completed 2026-08-17)
 - [ ] **Phase 33: Group C — Basis/Smoothing Quick Wins** - `constant_basis` + AIC basis/kernel selection extending `fdars.basis`/`fdars.smoothing`
 - [ ] **Phase 34: Advisor Extension** - `inference` diagnostics aspect; grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync (single atomic commit) preserved
 - [ ] **Phase 35: Docs — Diagrams & Worked Examples** - New pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` examples; `mkdocs build --strict` green
@@ -140,7 +140,8 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
   3. A multi-curve transposition round-trip test guards the column-major layout of every `FdMatrix`-returning boxplot field (finite values, correct shapes) — no silent transposition.
 
 **Plans**: 1 plan
-- [ ] 32-01-PLAN.md — functional_depth (string→DepthMethod dispatch) + functional_boxplot (7-key dict) extending fdars.depth, with layout round-trip guard
+
+- [x] 32-01-PLAN.md — functional_depth (string→DepthMethod dispatch) + functional_boxplot (7-key dict) extending fdars.depth, with layout round-trip guard
 
 ### Phase 33: Group C — Basis/Smoothing Quick Wins
 
