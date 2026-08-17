@@ -11,8 +11,10 @@
 //!
 //! All fallible functions route errors through `to_pyresult()` — no `.unwrap()`
 //! appears in this module. Degenerate inputs raise `ValueError` on the Python side.
-//! `seed=None` resolves to fixed default `0` for byte-identical reproducibility
-//! across runs (required for offline docs fences and advisor determinism).
+//! `seed=None` resolves to fixed default `0` for [`t_perm_test`] and [`f_perm_test`],
+//! giving byte-identical results across calls with the same inputs.
+//! [`mean_scb`] and [`scb_two_sample_test`] accept no `seed` parameter; their
+//! bootstrap randomness is internal to fdars-core and not externally seeded.
 
 use crate::convert::*;
 use numpy::{PyReadonlyArray1, PyReadonlyArray2};
@@ -499,9 +501,10 @@ pub fn flm_gof_test<'py>(
 /// data : numpy.ndarray
 ///     Functional data matrix, shape ``(n, m)``. Rows are observations.
 /// groups : numpy.ndarray
-///     1-D integer array of length ``n`` with 0-indexed group labels. Float
-///     arrays are rejected by the binding (dtype must be int64). Labels need
-///     not be contiguous — any distinct ``int64`` values define the groups.
+///     1-D integer array of length ``n`` with non-negative 0-indexed group
+///     labels (dtype int64). Negative values raise ``ValueError``. Labels
+///     need not be contiguous — any distinct non-negative ``int64`` values
+///     define the groups.
 /// argvals : numpy.ndarray
 ///     Evaluation grid, length ``m``. Must match the column count of ``data``.
 ///
@@ -515,7 +518,8 @@ pub fn flm_gof_test<'py>(
 /// ------
 /// ValueError
 ///     If ``groups.len() != n``, if fewer than 2 distinct groups are present,
-///     if ``n < 3``, or if ``argvals.len() != m`` (or ``m == 0``).
+///     if ``n < 3``, if ``argvals.len() != m`` (or ``m == 0``), or if any
+///     group label is negative.
 #[pyfunction]
 #[pyo3(signature = (data, groups, argvals))]
 pub fn oneway_anova_vstat<'py>(
@@ -525,7 +529,13 @@ pub fn oneway_anova_vstat<'py>(
     argvals: PyReadonlyArray1<'py, f64>,
 ) -> PyResult<Bound<'py, PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let grp = numpy1d_to_usize_vec(groups);
+    let raw = groups.as_array();
+    if raw.iter().any(|&x| x < 0) {
+        return Err(PyValueError::new_err(
+            "groups must contain non-negative integer labels; got at least one negative value",
+        ));
+    }
+    let grp = raw.iter().map(|&x| x as usize).collect::<Vec<_>>();
     let av = numpy1d_to_vec(argvals);
     let result = to_pyresult(fdars_core::inference::oneway_anova_vstat(&mat, &grp, &av))?;
     test_result_to_pydict(py, result)

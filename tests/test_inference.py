@@ -438,6 +438,30 @@ class TestScbTwoSampleTest:
         with pytest.raises(ValueError, match="multiplier"):
             scb_two_sample_test(boys, girls, age, 5.0, nb=50, multiplier="bogus")
 
+    def test_p_value_in_range(self, growth_subsets):
+        """p_value must lie within [0, 1]."""
+        from fdars.inference import scb_two_sample_test
+
+        boys, girls, age = growth_subsets
+        result = scb_two_sample_test(boys, girls, age, 5.0, nb=50)
+        assert 0.0 <= result["p_value"] <= 1.0
+
+    def test_statistic_nonnegative(self, growth_subsets):
+        """statistic (max standardised excursion) must be >= 0."""
+        from fdars.inference import scb_two_sample_test
+
+        boys, girls, age = growth_subsets
+        result = scb_two_sample_test(boys, girls, age, 5.0, nb=50)
+        assert result["statistic"] >= 0.0
+
+    def test_values_plain_types(self, growth_subsets):
+        """json.dumps must not raise — no numpy scalar leakage in returned dict."""
+        from fdars.inference import scb_two_sample_test
+
+        boys, girls, age = growth_subsets
+        result = scb_two_sample_test(boys, girls, age, 5.0, nb=50)
+        json.dumps(result, sort_keys=True)  # raises TypeError on numpy scalars
+
 
 # ---------------------------------------------------------------------------
 # INFER-06: flm_f_test (FLM overall-significance F-test, re-fit internally)
@@ -684,3 +708,13 @@ class TestOnewayAnovaVstat:
         short_groups = groups[:-1]
         with pytest.raises(ValueError):
             oneway_anova_vstat(X, short_groups, grid)
+
+    def test_negative_group_label_raises_value_error(self, canadian_anova_fixture):
+        """Any negative group label must raise ValueError at the binding layer."""
+        from fdars.inference import oneway_anova_vstat
+
+        X, _, grid = canadian_anova_fixture
+        n = X.shape[0]
+        bad_groups = np.array([-1] + [0] * (n - 1), dtype=np.int64)
+        with pytest.raises(ValueError):
+            oneway_anova_vstat(X, bad_groups, grid)
