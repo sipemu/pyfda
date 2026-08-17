@@ -5,15 +5,15 @@ milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 current_phase: 29
 current_phase_name: docs-diagrams-worked-examples
 status: executing
-stopped_at: Completed 29-02-PLAN.md
-last_updated: "2026-08-17T07:35:29.803Z"
+stopped_at: "Completed 29-03-PLAN.md: align docs + advisor aspects"
+last_updated: "2026-08-17T08:19:28.908Z"
 last_activity: 2026-08-16
 last_activity_desc: Phase 28 execution started
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 ## Current Position
 
 Phase: 29 (docs-diagrams-worked-examples) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-08-16 — Phase 29 execution started
 
-Progress: [████████░░] 82%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -71,6 +71,7 @@ Progress: [████████░░] 82%
 | Phase 28 P02 | 7m | 3 tasks | 5 files |
 | Phase 29 P01 | 55 | 2 tasks | 4 files |
 | Phase 29 P02 | 130 | 2 tasks | 4 files |
+| Phase 29 P03 | 40 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,8 @@ Recent decisions affecting current work:
 - [Phase ?]: depth_based_median Python binding returns curve directly (not index); fence uses in-sample assertion
 - [Phase ?]: Tecator NIR spectra (positive values) chosen for scoring-metrics fence to avoid MAPE/MSLE domain restrictions in executed code
 - [Phase ?]: functional-statistics SVG uses 720x480 two-row 4-panel layout for richer depth-median vs mean vs geometric_median illustration
+- [Phase ?]: Used canadian_weather (uniform daily grid) for shift-registration and banded-alignment fences — growth has non-uniform age grid incompatible with sobolev_least_squares_score (lambda>0 requires uniform grid)
+- [Phase ?]: banded-alignment.svg uses 720x480 viewBox (tall) to accommodate DP grid panel + curve comparison panels without crowding
 
 ### Pending Todos
 
@@ -135,8 +138,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-17T07:35:29.793Z
-Stopped at: Completed 29-02-PLAN.md
+Last session: 2026-08-17T08:19:28.883Z
+Stopped at: Completed 29-03-PLAN.md: align docs + advisor aspects
 Resume file: None
 
 ## Operator Next Steps
