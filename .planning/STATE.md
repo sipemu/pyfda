@@ -5,16 +5,16 @@ milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot
 current_phase: 31
 current_phase_name: group-a-fdars-inference-bindings
 status: executing
-stopped_at: Completed 31-01-PLAN.md
-last_updated: "2026-08-17T15:12:30.000Z"
+stopped_at: Completed 31-02-PLAN.md
+last_updated: "2026-08-17T15:21:22.747Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 31 Plan 01 complete — fdars.inference submodule with t_perm_test, f_perm_test, two_sample_mean_test
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 4
-  completed_plans: 2
-  percent: 25
+  completed_plans: 3
+  percent: 17
 ---
 
 # Project State
@@ -29,8 +29,8 @@ See: .planning/PROJECT.md (updated 2026-08-17)
 ## Current Position
 
 Phase: 31 (group-a-fdars-inference-bindings) — EXECUTING
-Plan: 2 of 3 (31-01 complete, 31-02 next)
-Status: Executing Phase 31
+Plan: 3 of 3 (31-01 complete, 31-02 next)
+Status: Ready to execute
 Last activity: 2026-08-17 — Completed 31-01: fdars.inference submodule skeleton + t_perm_test + f_perm_test + two_sample_mean_test
 
 ## Performance Metrics
@@ -64,6 +64,7 @@ Last activity: 2026-08-17 — Completed 31-01: fdars.inference submodule skeleto
 |------|----------|-------|-------|
 | Phase 30 P01 | 4 | 2 tasks | 2 files |
 | Phase 31 P01 | 6 | 4 tasks | 5 files |
+| Phase 31-group-a-fdars-inference-bindings P02 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Bump lands as single isolated commit (Cargo.toml + smoothing_mod.rs only; Cargo.lock gitignored) before Phase 31/32/33 binding work
 - [Phase ?]: Zero numeric drift on 0.17->0.20 bump: 426 passed / 4 skipped / 0 failed, no tolerance relaxations
 - [Phase 31-01]: seed=None resolves to u64 default 0 (locked); mod inference_mod placed alphabetically in lib.rs (rustfmt); 31-SIGNATURES.md is the plan-time authority for all 8 Group A function signatures
+- [Phase ?]: multiplier_from_str() private helper dispatches string to MultiplierDistribution with non_exhaustive wildcard arm returning PyValueError
+- [Phase ?]: ToleranceBand Vec<f64> fields converted via vec_to_numpy1d per field (not fdmatrix_to_numpy2d) per INFER-04 locked decision
 
 ### Pending Todos
 
@@ -114,8 +117,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-17T15:12:30.000Z
-Stopped at: Completed 31-01-PLAN.md
+Last session: 2026-08-17T15:21:22.738Z
+Stopped at: Completed 31-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
