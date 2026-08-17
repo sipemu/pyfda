@@ -85,7 +85,7 @@ Upgraded `fdars-core` 0.14.0 → 0.17.0 and exposed the new upstream functional-
 Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) and expose the new upstream functional-inference + depth/boxplot + basis/smoothing surface through PyO3 bindings + the Python API, extend the v3.0 grounded advisor with an inference diagnostics aspect (grounding invariant preserved), and document everything to the project's method-accurate standard (hand-authored inline SVG diagrams + runnable offline worked examples). Same shape as v4.0: crate bump + regression gate first (BLOCKS everything), three independent binding groups (parallel-eligible after the bump), advisor on top (needs the inference bindings), docs last (run against the real shipped bindings).
 
 - [x] **Phase 30: Crate Bump + Regression Gate** - Bump 0.17→0.20, add the `CvCriterion` wildcard fallback arm, full ~426-test suite green as the sole gate (completed 2026-08-17)
-- [ ] **Phase 31: Group A — `fdars.inference` Bindings** - New submodule: two-sample permutation tests + SCB bands + FLM inference + one-way ANOVA V-stat (`TestResult`/`ToleranceBand` → PyDict, deterministic seed)
+- [x] **Phase 31: Group A — `fdars.inference` Bindings** - New submodule: two-sample permutation tests + SCB bands + FLM inference + one-way ANOVA V-stat (`TestResult`/`ToleranceBand` → PyDict, deterministic seed) (completed 2026-08-17)
 - [ ] **Phase 32: Group B — Depth/Boxplot Bindings** - `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth`
 - [ ] **Phase 33: Group C — Basis/Smoothing Quick Wins** - `constant_basis` + AIC basis/kernel selection extending `fdars.basis`/`fdars.smoothing`
 - [ ] **Phase 34: Advisor Extension** - `inference` diagnostics aspect; grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync (single atomic commit) preserved
@@ -124,9 +124,9 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 
 **Plans**: 3 plans
 
-- [ ] 31-01-PLAN.md — Submodule scaffold + verification spike (all 8 signatures) + end-to-end tracer (t_perm_test) + f_perm_test + two_sample_mean_test (INFER-01/02/03/09)
-- [ ] 31-02-PLAN.md — Degras SCB bands: mean_scb (ToleranceBand → dict) + scb_two_sample_test; string multiplier + ValueError fallback (INFER-04/05)
-- [ ] 31-03-PLAN.md — FLM re-fit inference (flm_f_test + flm_gof_test) + oneway_anova_vstat (0-indexed groups) (INFER-06/07/08)
+- [x] 31-01-PLAN.md — Submodule scaffold + verification spike (all 8 signatures) + end-to-end tracer (t_perm_test) + f_perm_test + two_sample_mean_test (INFER-01/02/03/09)
+- [x] 31-02-PLAN.md — Degras SCB bands: mean_scb (ToleranceBand → dict) + scb_two_sample_test; string multiplier + ValueError fallback (INFER-04/05)
+- [x] 31-03-PLAN.md — FLM re-fit inference (flm_f_test + flm_gof_test) + oneway_anova_vstat (0-indexed groups) (INFER-06/07/08)
 
 ### Phase 32: Group B — Depth/Boxplot Bindings
 
