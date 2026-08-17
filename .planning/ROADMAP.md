@@ -154,7 +154,9 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
   2. User can select an AIC-optimal basis roughness penalty via `fdars.smoothing.smooth_basis_aic(...)` → dict and pass `criterion="aic"` to `basis_nbasis_cv` (`BasisCriterion::Aic`).
   3. User can select an AIC-optimal kernel bandwidth via `aic_smoother` and/or `criterion="aic"` on the existing bandwidth-selection binding (`CvCriterion::Aic`), with the `CvCriterion` match carrying the forward-compatible `#[non_exhaustive]` fallback arm added in Phase 30.
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 33-01-PLAN.md — constant_basis + smooth_basis_aic (basis_mod) + optim_bandwidth criterion="aic" output-arm fix (smoothing_mod) + basis_nbasis_cv "aic" test coverage (BASIS-01/02/03)
 
 ### Phase 34: Advisor Extension
 
@@ -192,7 +194,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 | 30. Crate Bump + Regression Gate | 0/1 | Not started | - |
 | 31. Group A — `fdars.inference` Bindings | 0/3 | Not started | - |
 | 32. Group B — Depth/Boxplot Bindings | 0/? | Not started | - |
-| 33. Group C — Basis/Smoothing Quick Wins | 0/? | Not started | - |
+| 33. Group C — Basis/Smoothing Quick Wins | 0/1 | Planned | - |
 | 34. Advisor Extension | 0/? | Not started | - |
 | 35. Docs — Diagrams & Worked Examples | 0/? | Not started | - |
 
