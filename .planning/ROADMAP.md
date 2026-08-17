@@ -168,7 +168,7 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
 Plans:
 
 - [x] 29-01-PLAN.md — Tracer: represent pages (interpolation + imputation) + 2 SVGs + executed fences + nav + strict build
-- [ ] 29-02-PLAN.md — Analyze pages (functional-statistics + scoring-metrics) + 2 SVGs + executed fences
+- [x] 29-02-PLAN.md — Analyze pages (functional-statistics + scoring-metrics) + 2 SVGs + executed fences
 - [ ] 29-03-PLAN.md — Align pages (shift-registration + banded-alignment) + 2 SVGs + executed fences + advisor aspects.md update
 - [ ] 29-04-PLAN.md — Nav wiring + whole-site strict build + SVGO/determinism gate + blocking human diagram review
 

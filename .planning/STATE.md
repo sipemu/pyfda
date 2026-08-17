@@ -5,15 +5,15 @@ milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 current_phase: 29
 current_phase_name: docs-diagrams-worked-examples
 status: executing
-stopped_at: Completed 29-01-PLAN.md — halted at Task 3 spot-check checkpoint
-last_updated: "2026-08-16T22:26:09.328Z"
+stopped_at: Completed 29-02-PLAN.md
+last_updated: "2026-08-17T07:35:29.803Z"
 last_activity: 2026-08-16
 last_activity_desc: Phase 28 execution started
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 11
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 ## Current Position
 
 Phase: 29 (docs-diagrams-worked-examples) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-08-16 — Phase 29 execution started
 
-Progress: [███████░░░] 73%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [███████░░░] 73%
 | Phase 28 P01 | 5m | 3 tasks | 5 files |
 | Phase 28 P02 | 7m | 3 tasks | 5 files |
 | Phase 29 P01 | 55 | 2 tasks | 4 files |
+| Phase 29 P02 | 130 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,9 @@ Recent decisions affecting current work:
 - [Phase ?]: [Rule 1 Bug] represent.py data_range statistics fixed to use nan-aware subset to prevent float('nan') equality failure in determinism tests
 - [Phase ?]: ExtrapolationPolicy::Exception drawn as red stop markers (raises) — never draws extrapolated curve; LINEAR boundary gap is a flat extension, not a ramp to zero
 - [Phase ?]: Growth dataset chosen for both interpolation and imputation worked examples — fixed seeds ensure deterministic offline builds
+- [Phase ?]: depth_based_median Python binding returns curve directly (not index); fence uses in-sample assertion
+- [Phase ?]: Tecator NIR spectra (positive values) chosen for scoring-metrics fence to avoid MAPE/MSLE domain restrictions in executed code
+- [Phase ?]: functional-statistics SVG uses 720x480 two-row 4-panel layout for richer depth-median vs mean vs geometric_median illustration
 
 ### Pending Todos
 
@@ -131,8 +135,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-16T22:26:09.310Z
-Stopped at: Completed 29-01-PLAN.md — halted at Task 3 spot-check checkpoint
+Last session: 2026-08-17T07:35:29.793Z
+Stopped at: Completed 29-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
