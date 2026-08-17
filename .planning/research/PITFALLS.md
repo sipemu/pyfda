@@ -1,309 +1,352 @@
 # Pitfalls Research
 
-**Domain:** PyO3/maturin Rust-Python bindings — fdars-core 0.14.0 → 0.17.0 crate bump + new function bindings (interpolation/imputation, functional stats/scoring, shift registration/alignment quality, banded elastic alignment), advisor extension, and docs
-**Researched:** 2026-08-13
-**Confidence:** HIGH for layout/transposition and grounding-invariant pitfalls (confirmed against convert.rs source and live docs.rs API); HIGH for banded-naming resolution (both `_banded` and `_with_band` variants confirmed to coexist in 0.17.0); MEDIUM for numeric-behavior change pitfalls (faer FPCA SVD path — confirmed additive/non-breaking but numeric equivalence tolerance unverified against real test suite); HIGH for docs/offline-determinism pitfalls (established from v2.1 retrospective and SVGO gate patterns)
+**Domain:** PyO3 binding upgrade — fdars-core 0.17 → 0.20 (functional inference + depth/boxplot + AIC smoothing)
+**Researched:** 2026-08-17
+**Confidence:** HIGH (docs.rs signatures verified against 0.20.0; codebase read directly; v4.0 retrospective confirmed)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Multi-Curve Transposition Scrambling in Matrix-Returning New Bindings
+### Pitfall 1: `seed` Is `u64` Not `Option<u64>` — Forced Exposure Breaks Optional Semantics
 
 **What goes wrong:**
-Any new binding that receives a 2-D result from fdars-core (`functional_covariance` → m×m FdMatrix, `spline_interpolate` / `spline_interpolate_with_policy` on n curves at new query points → n×q FdMatrix, `karcher_mean_with_band` aligned_data → n×m FdMatrix) must route through `fdmatrix_to_numpy2d`. If a developer forgets this and calls `PyArray2::from_vec2` directly on `mat.to_column_major()` (or on the raw flat Vec without transposing), numpy receives a column-major layout interpreted as row-major. The result looks plausible on a single curve (shape is right, values are numeric) but every multi-curve result is scrambled — observations and time-points are swapped. This is exactly the bug class that upstream shipped a fix for in 0.14.0 (#33: the B-spline basis recon path was reading column-major data as row-major).
-
-For `functional_covariance` the stakes are higher: the output is an m×m symmetric matrix. A transposition bug produces a matrix that is still symmetric and still has the right shape, so no shape assertion catches it — the values are silently wrong at every off-diagonal entry. Only a numerical round-trip test against a known covariance (e.g., covariance of constant curves = 0, covariance of two known curves computed by hand) will catch it.
+`t_perm_test` and `f_perm_test` take `seed: u64` (required, non-optional in Rust). The wrapper must make it optional at the Python boundary (`seed: Option<u64>`) and pick a documented default (e.g. `42`) when `None`. If the wrapper accepts an optional Python value but passes it straight through to a non-optional Rust parameter, the compiler will reject it. If the wrapper hard-codes a magic constant without documenting it, docs fences will produce non-reproducible byte streams across runs (CI false-negatives on the determinism test). `two_sample_mean_test` is seedless (uses chi-squared asymptotic distribution) — no seed parameter should be exposed for it.
 
 **Why it happens:**
-The pattern is invisible: `mat.to_row_major()` exists and is used by `fdmatrix_to_numpy2d`, but `mat.to_column_major()` also exists and is tempting when the developer is looking at the raw flat Vec. Every existing binding uses `fdmatrix_to_numpy2d` correctly, but each new binding is a fresh opportunity to forget.
+Upstream Rust API takes `u64` directly (uses `StdRng::seed_from_u64(seed)` internally). Developers mirroring the Rust signature forget that Python callers expect `seed=None` as a reproducibility opt-in, not a mandatory integer.
 
 **How to avoid:**
-Enforce a single conversion rule: **never call `PyArray2::from_vec2` directly on FdMatrix data; always call `fdmatrix_to_numpy2d(py, &result)`**. For `functional_covariance` specifically, add a dedicated round-trip test: construct data with known covariance (two orthogonal step functions → off-diagonal covariance = 0; two identical curves → covariance = variance); assert element-wise that cov[i, j] == cov[j, i] AND that the diagonal equals the pointwise variance. For interpolation bindings, construct a dataset where every curve is a known function (e.g., `f(t) = sin(t)`), interpolate at query points you can compute analytically, then assert `np.testing.assert_allclose(result[i], expected[i])` per-curve — a scramble test that no shape-only check catches.
+- In the wrapper: `#[pyo3(signature = (data_a, data_b, argvals, n_perm=999, seed=None))]`; inside, resolve `seed.unwrap_or(42)` and document the default explicitly in the docstring.
+- For `two_sample_mean_test` (no seed): expose `ncomp: usize` with a documented default (e.g. `3`). Do not add a spurious `seed` parameter.
+- Determinism test: assert that calling the wrapper twice with identical `seed` returns byte-identical `json.dumps` output; assert that the result dict contains only plain Python `float` values, not `np.float64` scalars.
 
 **Warning signs:**
-- A new `*_mod.rs` function that builds a `PyArray2` without calling `fdmatrix_to_numpy2d`
-- A test that only checks `result.shape == (n, m)` without checking per-curve values
-- A covariance test that only checks symmetry without checking known off-diagonal values
+- Compiler error "expected `u64`, found `Option<u64>`" in the wrapper.
+- Determinism CI test sees different p-values across two consecutive calls with `seed=None` after the default is set (exposes a non-deterministic default).
+- The offline docs fence emits a different `statistic` value on each docs build.
 
 **Phase to address:**
-Interpolation/imputation binding phase (earliest matrix-returning new bindings). Add the multi-curve round-trip transposition test as a first-wave deliverable before any other function in that phase goes green.
+Group A bindings phase (inference submodule). Determinism tests must be written in the same phase before docs fences are authored.
 
 ---
 
-### Pitfall 2: Banded Alignment Naming Ambiguity — Two Parallel APIs in 0.17.0
+### Pitfall 2: `CvCriterion`, `DepthMethod`, and `MultiplierDistribution` Are `#[non_exhaustive]` — Missing Wildcard Arm Blocks Compilation
 
 **What goes wrong:**
-fdars-core 0.17.0 exports **both** `karcher_mean_banded` (takes `band_frac: f64`) **and** `karcher_mean_with_band` (takes `band_frac: Option<f64>`), and similarly for `elastic_self_distance_matrix_banded` / `elastic_self_distance_matrix_with_band` and the cross variants. These are **not aliases** — they have different call signatures:
-
-```
-karcher_mean_banded(data, argvals, max_iter, tol, lambda, band_frac: f64) -> KarcherMeanResult
-karcher_mean_with_band(data, argvals, max_iter, tol, lambda, band_frac: Option<f64>) -> KarcherMeanResult
-```
-
-The `_banded` variant always applies the band (a `band_frac ≤ 0 || ≥ 1` reproduces unbanded); the `_with_band` variant treats `None` as "skip the band entirely, identical to `karcher_mean`." Binding the wrong one, or binding both as if they are the same, causes either silent wrong behavior (band_frac=0.0 does not disable the band in `_banded`, it effectively sets zero-width band — likely panics or gives degenerate results) or unnecessary API surface duplication visible to Python users.
-
-The PROJECT.md target says "banded elastic alignment (`karcher_mean_with_band`, `*_distance_matrix_with_band`, `band_frac`)" — this names the `_with_band` family explicitly. Bind the `_with_band` variants; expose `band_frac` as `Optional[float] = None` in the Python signature. Do not also bind the `_banded` variants unless a separate use case is scoped.
+`fdars_core::smoothing::CvCriterion` (variants: `Cv`, `Gcv`, `Aic`) and `fdars_core::tolerance::MultiplierDistribution` (variants: `Gaussian`, `Rademacher`) and `fdars_core::depth::dispatch::DepthMethod` (variants: `FraimanMuniz { scale }`, `Band`, `ModifiedBand`, `RandomProjection { nproj, seed }`) are all `#[non_exhaustive]`. The existing `optim_bandwidth` binding in `smoothing_mod.rs` has a two-arm match (`"cv" => CvCriterion::Cv`, `"gcv" => CvCriterion::Gcv`) and a result-stringify match (`CvCriterion::Cv => "cv"`, `CvCriterion::Gcv => "gcv"`) with no wildcard arm. After bumping to 0.20 the crate reports `Aic` as a third variant. Rust will refuse to compile any exhaustive match on a `#[non_exhaustive]` enum from another crate. The same pattern recurs for the `mean_scb`/`scb_two_sample_test` wrappers that accept a `MultiplierDistribution` string param and for `functional_depth`/`functional_boxplot` that accept a `DepthMethod` string param.
 
 **Why it happens:**
-The naming coexists because 0.16.0 added the `_with_band` opt-in family and 0.17.0 kept both for backwards compatibility with any direct fdars-core Rust consumers. A developer scanning `fdars_core::alignment::` will see both names and reasonably wonder which to use.
+The v4.0 bindings were written against 0.14→0.17 where `CvCriterion` only had `Cv`/`Gcv`. The bump to 0.20 adds `Aic` to `CvCriterion` and introduces `DepthMethod` and `MultiplierDistribution` as `#[non_exhaustive]` enums.
 
 **How to avoid:**
-When writing `alignment_mod.rs`, import `fdars_core::alignment::karcher_mean_with_band` (not `karcher_mean_banded`) and map `band_frac: Option<f64>` directly. Write a Python-level test that calls `karcher_mean_with_band(data, argvals, band_frac=None)` and asserts the output equals `karcher_mean(data, argvals)` to numerical tolerance — this is the spec stated in the 0.17.0 docs. Add a docstring in `alignment_mod.rs` and the Python stub explaining: "pass `band_frac=None` for the unbanded elastic Karcher mean (equivalent to `karcher_mean`); pass a float in (0, 1) to restrict alignment to a Sakoe-Chiba band of that width."
+- All match arms on `CvCriterion` (both string-to-enum and enum-to-string directions): add `_ => return Err(PyValueError::new_err("criterion must be 'cv', 'gcv', or 'aic'"))` and `_ => "unknown"` respectively.
+- `MultiplierDistribution` wrappers: `"gaussian" => MultiplierDistribution::Gaussian`, `"rademacher" => MultiplierDistribution::Rademacher`, `_ => return Err(PyValueError...)`.
+- `DepthMethod` wrappers: `"fraiman_muniz"` → `FraimanMuniz { scale }`, `"band"` → `Band`, `"modified_band"` → `ModifiedBand`, `"random_projection"` → `RandomProjection { nproj, seed }`, `_` → `PyValueError`.
+- `BasisCriterion` in `smooth_basis` is NOT `#[non_exhaustive]` — no wildcard needed there (confirmed from docs.rs).
 
 **Warning signs:**
-- Cargo.toml uses `fdars_core::alignment::karcher_mean_banded` in any new binding
-- A Python test that passes `band_frac=0.0` expecting unbanded behavior
-- A `register()` call that adds both `karcher_mean_banded` and `karcher_mean_with_band` as separate Python functions
+- `cargo build` error: `non-exhaustive patterns: _ not covered` on any match touching `CvCriterion`, `DepthMethod`, or `MultiplierDistribution`.
+- Clippy `-D warnings` (enforced in CI) will promote this to a hard failure if rustc does not catch it first.
 
 **Phase to address:**
-Alignment/registration binding phase. Flag the naming choice explicitly in the plan before writing the binding.
+Crate bump phase (Phase 1 regression gate). The existing `optim_bandwidth` binding already has the missing wildcard for `CvCriterion` — it must be fixed as part of the bump itself before any new bindings are written, or the compile will fail and block all downstream phases.
 
 ---
 
-### Pitfall 3: Grounding-Invariant Regression When Extending build_diagnostics
+### Pitfall 3: `FunctionalBoxplotResult` and `TestResult` Are `#[non_exhaustive]` — Struct-Literal Construction Blocked in Tests
 
 **What goes wrong:**
-The `_DIAGNOSTICS_METHODS` / `_RUNNABLE_METHODS` guard-sync test (`test_diagnostics_methods_match_advisor_supported`) enforces a set-equality invariant: every method in `build_diagnostics` must be in `_DIAGNOSTICS_METHODS`; every method in `_RUNNABLE_METHODS` must be runnable via `fdars_run_method`. When new diagnostic branches are added for v4.0 capabilities (scoring metrics, imputation quality, registration quality), a developer may add the branch in `build_diagnostics` but forget to:
-
-1. Add the method name to `_DIAGNOSTICS_METHODS` in `advisor.py` → test fails (set is a strict superset)
-2. Add a grounded-evidence key: if the new branch returns a scalar computed by Python code rather than by fdars (e.g., the developer calls `np.mean(shifts)` instead of `fdars.alignment.least_squares_score(registered, argvals)`), the grounding invariant is violated — LLM advice will cite a number not computed by fdars. The schema validator does not catch this because the number is still a number.
-3. Forget to add the new method to the offline CI offline-diagnostics matrix test — the branch gets no test coverage.
-
-The second failure is the most dangerous because it is silent: tests pass, schema validates, but the advisor is now hallucinating-adjacent (citing a Python-computed mean as if it were a fdars metric).
+Both `FunctionalBoxplotResult` (fields: `median Vec<f64>`, `central_lower Vec<f64>`, `central_upper Vec<f64>`, `whisker_lower Vec<f64>`, `whisker_upper Vec<f64>`, `outliers Vec<usize>`, `depths Vec<f64>`) and `TestResult` (fields: `statistic f64`, `p_value f64`, `n_perm usize`) are `#[non_exhaustive]`. Field access via `.field` is safe. The pitfall is constructing test fixtures using struct literals (`TestResult { statistic: 1.0, p_value: 0.05, n_perm: 999 }`) — the compiler will refuse. Future upstream fields would also be silently dropped from the PyDict if the wrapper manually hard-codes the field list.
 
 **Why it happens:**
-The grounding invariant is enforced by discipline (schema + system prompt) and by the guard-sync set-equality test, but not by the type system. A developer who does not know the invariant will naturally write `np.mean(result.shifts)` for the shifts diagnostic because it is the shortest path.
+Developers copy the Rust struct-literal test pattern from intra-crate tests (valid within the defining crate). The same literal syntax fails in external crates like pyfda.
 
 **How to avoid:**
-For every new diagnostic branch: (a) identify the fdars function that computes the evidence value — for registration quality, use `fdars.alignment.least_squares_score`, `pairwise_correlation_score`, or `sobolev_least_squares_score`; for scoring metrics, use `fdars.scoring.functional_mae` / `functional_mse` etc.; (b) write the diagnostic so it calls the bound fdars function, not Python math; (c) add the method key to `_DIAGNOSTICS_METHODS` in the same commit as the branch; (d) add a test that exercises the new branch with an offline fixture and asserts the evidence dict contains at least one key with a finite float.
-
-Before merging the advisor extension phase, run the guard-sync test explicitly: `pytest tests/test_advisor.py -k test_diagnostics_methods_match_advisor_supported -v`. Its failure message names the mismatched keys.
+- In PyO3 wrappers: access each field individually (`result.median`, `result.central_lower`, etc.) — safe for `#[non_exhaustive]` structs.
+- In test fixtures: construct `TestResult` via the public functions that return it (call `t_perm_test` with minimal synthetic data of 5 curves × 3 grid points), not via struct literals.
+- `FunctionalBoxplotResult` complete dict mapping: `median`, `central_lower`, `central_upper`, `whisker_lower`, `whisker_upper`, `outliers` (Vec<usize> → i64 numpy array via `usize_vec_to_numpy1d`), `depths`.
+- `TestResult` complete dict mapping: `statistic` (f64 → float), `p_value` (f64 → float), `n_perm` (usize → int).
 
 **Warning signs:**
-- A new `build_diagnostics` branch that calls `np.mean`, `np.std`, or `statistics.*` on fdars output instead of a bound fdars function
-- A commit that adds a branch in `build_diagnostics` but does not touch `_DIAGNOSTICS_METHODS`
-- A new advisor test that mocks the fdars call rather than using the real bound function
+- Compiler error: "cannot create non-exhaustive struct using struct expression."
+- Missing dict key at runtime (Python `KeyError`) if a field is omitted from the `dict.set_item` block.
 
 **Phase to address:**
-Advisor extension phase (after new bindings are green). The guard-sync test must be in the verify checklist for that phase.
+Group A and Group B binding phases. Field-name list must be verified against docs.rs before writing wrapper code.
 
 ---
 
-### Pitfall 4: Result-Error Propagation Gaps in New Bindings
+### Pitfall 4: FLM Inference Takes `&FregreLmResult` — Python Has No Handle to a Rust Struct
 
 **What goes wrong:**
-The new fdars-core functions return `Result<T, FdarError>` far more consistently than the 0.14.0 surface:
-
-- `spline_interpolate` → `Result<FdMatrix, FdarError>` (rejects OOD query points)
-- `spline_interpolate_with_policy` → `Result<FdMatrix, FdarError>`
-- `impute_missing_values` → `Result<FdMatrix, FdarError>` (rejects all-NaN rows, dimension mismatch)
-- `functional_variance` → `Result<Vec<f64>, FdarError>` (rejects n < 2)
-- `functional_covariance` → `Result<FdMatrix, FdarError>`
-- `trim_mean` → `Result<Vec<f64>, FdarError>` (rejects alpha outside [0,1))
-- `depth_based_median` → `Result<usize, FdarError>` (rejects empty data)
-- `least_squares_shift_registration` → `Result<ShiftRegistrationResult, FdarError>`
-- `least_squares_score` / `pairwise_correlation_score` / `sobolev_least_squares_score` → all `Result<f64, FdarError>`
-- `functional_mae` / `functional_mse` / `functional_mape` / `functional_msle` / `functional_explained_variance` → all `Result<f64, FdarError>`
-
-A binding that uses `.unwrap()` instead of `to_pyresult()` will panic on the Python side with a Rust backtrace rather than raising a clean `ValueError`. This matches the known tech debt in `convert.rs:57` and `basis_mod.rs` documented in CONCERNS.md — do not replicate it in new bindings.
-
-Additionally, `depth_based_median` returns `Result<usize, FdarError>` — the caller must use the index to retrieve the actual curve. A binding that only returns the index (a Python `int`) forces users to index back into the input data themselves; the ergonomic pattern is to return the curve as a 1-D numpy array (i.e., call `fdmatrix_to_numpy2d` on the full matrix, then slice row `idx`).
+`flm_f_test(fit: &FregreLmResult)` and `flm_gof_test(fit: &FregreLmResult)` take a reference to a Rust struct. The existing Python binding for `fregre_lm` converts the Rust result to a PyDict and discards the Rust struct. A naive wrapper for `flm_f_test` cannot reconstruct `FregreLmResult` from a Python dict because `FregreLmResult` is `#[non_exhaustive]` and cannot be built with struct literals from outside the crate. `FregreLmResult` is in `fdars_core::scalar_on_function`, not `fdars_core::regression` — the module path must be verified.
 
 **Why it happens:**
-Developers copy the pattern from 0.14.0 bindings that called infallible fdars-core functions and used `.unwrap()` casually. The new functions are explicitly fallible, but the old code pattern is right there to copy.
+Rust's ownership model means Rust structs live on the Rust side; PyO3 does not automatically create Python-side handles to arbitrary Rust structs unless they are wrapped in `#[pyclass]`. `FregreLmResult` is not a `#[pyclass]`.
 
 **How to avoid:**
-Every new `*_mod.rs` function must end with `to_pyresult(...)?.into()` or equivalent — no `.unwrap()` on any fdars-core return value. For `depth_based_median`, return the actual curve row, not the index: `let idx = to_pyresult(fdars_core::fdata::depth_based_median(&mat))?; Ok(vec_to_numpy1d(py, mat.row(idx).to_vec()))`. Add an explicit error-propagation test for each fallible function: pass an empty matrix and assert `pytest.raises(ValueError, match="...")`; pass mismatched dimensions and assert the same. These tests cost nothing and prevent the panic-in-production class.
+- Preferred pattern: expose `flm_f_test` as a Python function that accepts the same inputs as `fregre_lm` (data + response + n_comp), re-runs `fdars_core::scalar_on_function::fregre_lm` internally, then calls `flm_f_test` on the Rust result. Return a dict with both the fit fields and the `TestResult` fields.
+- Alternative: a combined `fregre_lm_with_inference` wrapper that bundles fit + f-test + gof-test in one call.
+- Do NOT expose a Python-callable `flm_f_test(fit_dict)` that tries to reconstruct `FregreLmResult` from a Python dict — it will not compile.
+- `FregreLmResult` confirmed fields: `intercept`, `beta_t`, `beta_se`, `gamma`, `fitted_values`, `residuals`, `r_squared`, `r_squared_adj`, `std_errors`, `ncomp`, `fpca` (FpcaResult nested), `coefficients`, `residual_se`, `gcv`, `aic`, `bic`.
 
 **Warning signs:**
-- Any `.unwrap()` in new `*_mod.rs` files
-- A `depth_based_median` binding that returns `usize` / Python `int` to the caller
-- A test suite for a new binding that has no `pytest.raises(ValueError)` test
+- Compiler error about struct literal on `#[non_exhaustive]` struct.
+- The `flm_f_test` docstring says "pass the fitted model" with no explanation of how Python callers obtain one.
 
 **Phase to address:**
-All three binding phases (interpolation/imputation, functional stats/scoring, alignment/registration). Add `.unwrap()` to the CI clippy deny list for new files: `#![deny(clippy::unwrap_used)]` in new modules, or enforce via code review checklist.
+Group A bindings phase. The design decision (re-run vs. combined wrapper) must be made before writing the code — it affects the Python API surface visible to users.
 
 ---
 
-### Pitfall 5: NaN / Off-Grid / Boundary Edge Cases in Interpolation and Imputation
+### Pitfall 5: Permutation Tests in Executed Docs Fences — `n_perm=999` Blows Up the 18-Minute Build
 
 **What goes wrong:**
-
-**spline_interpolate strict domain rejection:** `spline_interpolate` returns `FdarError::InvalidParameter` when any query point lies outside `[argvals[0], argvals[m-1]]`. If the Python binding does not expose `spline_interpolate_with_policy`, users who accidentally pass a query point 1e-10 outside the domain (floating-point rounding near the boundary) get a cryptic `ValueError` instead of useful behavior. The binding should expose `spline_interpolate_with_policy` with `ExtrapolationPolicy` mapped to a Python string enum:
-
-```
-"boundary" → ExtrapolationPolicy::Boundary  (clamp to nearest endpoint)
-"exception" → ExtrapolationPolicy::Exception (raise ValueError — the default)
-"fill"      → ExtrapolationPolicy::Fill(v)   (constant v for OOD points)
-"periodic"  → ExtrapolationPolicy::Periodic  (wrap modulo domain length)
-```
-
-The `Fill(v)` variant carries a payload value — map this to a Python `fill_value: float = 0.0` parameter that is only used when `policy="fill"`.
-
-**impute_missing_values all-NaN row rejection:** `impute_missing_values` raises `FdarError::InvalidParameter` when an entire curve row is NaN. A Python user who passes a matrix with even one all-NaN row gets an error. The binding must surface this with a descriptive message (fdars-core's message becomes the `ValueError` string via `to_pyerr`). Pre-binding validation that counts NaN rows and raises early with "row i is entirely NaN — cannot impute" is friendlier, though not required.
-
-**ExtrapolationPolicy::Periodic domain length requirement:** Periodic wrapping requires domain length > 0 (i.e., `argvals[-1] - argvals[0] > 0`). Passing a constant grid (all same value) with `policy="periodic"` will produce `FdarError::InvalidParameter` from the core. The Python binding should not add its own check (let the error propagate cleanly) but the docs example must not use a zero-length domain with Periodic.
+A standard `t_perm_test` call with `n_perm=999` on even a 50-curve dataset adds several seconds of compute per fence. Multiplied across five or six worked-example fences (permutation test, SCB band, two-sample test, ANOVA), the existing ~18-minute wall time could double or triple. `mkdocs build` already caused timeouts and process pile-ups in v4.0.
 
 **Why it happens:**
-Off-grid edge cases are easy to miss when writing tests with clean linspace grids. The distinction between `spline_interpolate` (strict) and `spline_interpolate_with_policy` (flexible) is invisible if only the strict version is bound.
+Developers use production-quality `n_perm` values (999 or 1999) in examples to show credible p-values. The docs build runs every fence sequentially, so each example contributes additively.
 
 **How to avoid:**
-Bind `spline_interpolate_with_policy` (not `spline_interpolate`) as the primary Python-facing function. Expose `policy: str = "exception"` and `fill_value: float = 0.0`. Add tests: (a) query point exactly at boundary — must succeed; (b) query point 1e-10 outside boundary with `policy="boundary"` — must return boundary value; (c) all-NaN row to `impute_missing_values` — must raise `ValueError` with a message containing "NaN" or "entirely" or similar; (d) `policy="fill"` with query outside domain — must return `fill_value`.
+- All executed docs fences for inference functions: `n_perm=19` (enough to avoid degenerate p-values; keeps per-fence compute under 0.5s).
+- Use small synthetic datasets (20 curves × 10 grid points) embedded inline in the fence — not loaded from `docs/data/` CSV.
+- Use the illustrative-vs-executed fence split (established in v2.1): show a full-resolution reference fence in a collapsible tab (not executed) and only run the cheap version.
+- Wire inference fences behind the `DOCS_FAST` env var check already established in the project.
+- For SCB fences: `nb=50` bootstrap replicates instead of `nb=1000`.
 
 **Warning signs:**
-- Only `spline_interpolate` (strict) is bound, with no `policy` parameter
-- No test for query points at or near domain boundaries
-- No test for all-NaN rows passed to `impute_missing_values`
-- `policy="periodic"` used in a docs example without verifying domain length > 0
+- A fence takes > 5 seconds in local `mkdocs serve`.
+- `mkdocs build` takes 30+ minutes in CI.
+- `n_perm >= 100` appears in any executed fence.
 
 **Phase to address:**
-Interpolation/imputation binding phase. Edge-case tests must be in the phase verify checklist before the phase closes.
+Docs phase (last). But the constraint must be documented in the binding-phase plan so worked-example authors know the limit before writing.
 
 ---
 
-### Pitfall 6: Offline / Deterministic Docs Build Broken by New Executed Fences
+### Pitfall 6: `mean_scb` Returns `ToleranceBand` Not `TestResult` — Layout Is 1×m, Not n×m
 
 **What goes wrong:**
-New worked-example fences for interpolation, scoring metrics, shift registration, and registration quality will run against the real compiled `fdars` during `mkdocs build`. Three distinct failure modes:
-
-1. **Network or API key required:** a fence that calls `advise()` (LLM path) or imports an optional extra not in the base docs build environment will cause the build to fail in CI. Every new fence must either be illustrative (not executed) or provably offline (calls only `fdars.*` functions, no `[mcp]`/`[advisor]` extras, no API key).
-
-2. **Non-deterministic numeric output in fences:** if a new fence calls any function with internal randomness (e.g., `cluster_optim`, any seeded depth projection) without a fixed seed, the fence output will differ between builds, breaking the byte-identical determinism gate. For registration/alignment, `karcher_mean_with_band` is iterative — its output is deterministic given the same data and seed, but only if the data is constructed from a deterministic source (fixed `np.random.seed` or literal array). Any fence using `np.random` without a seed will fail the determinism gate.
-
-3. **Fence output hard-codes numbers that break with the 0.17.0 bump:** if a fence was written against 0.14.0 with exact numeric output (e.g., `depth_based_median returns curve 3`), and the 0.17.0 faer SVD path (enabled by the `linalg` feature) or parallel fold reordering changes the numeric result, the fence will print different numbers and the doc-test sentinel will fail.
+`mean_scb` returns `Result<ToleranceBand, FdarError>`. `ToleranceBand` is a tolerance-band struct with `lower` and `upper` fields of type `Vec<f64>` (length m each) — not an FdMatrix, not a `TestResult`. `scb_two_sample_test` returns `Result<TestResult, FdarError>` (scalar: statistic, p-value, n_perm=0 fixed). Conflating the two leads to a wrong return type in the wrapper. If the wrapper passes `ToleranceBand`'s flat Vec to `fdmatrix_to_numpy2d`, the call will panic on the shape mismatch.
 
 **Why it happens:**
-The fast-path during phase execution is to write a fence that "runs and looks right," which is easy to verify locally. The determinism gate only catches it during the SVGO/build CI run, which is slow (~400s). Pattern established in v2.1: only the Python-API advisor page carries an executed fence; MCP/Skill pages are illustrative.
+The name `mean_scb` suggests it returns a "test" but it actually returns the band itself. The two SCB functions have different return types and require separate wrapper strategies.
 
 **How to avoid:**
-For every new executed fence: (a) fix all random seeds (`np.random.seed(42)` at the top of the block); (b) use only base-extras functions (`fdars.fdata`, `fdars.alignment`, `fdars.scoring`, `fdars.helpers` — not `fdars.advisor` or `fdars.mcp`); (c) print a `FDARS_FENCE_OK` sentinel at the end and grep the built HTML for it during verify; (d) if a fence must cite advisor output, make it illustrative (comment out the `advise()` call, show the expected output as a literal string). For scoring metrics fences specifically, construct data from literal numpy arrays, not from `np.random`, so the integrated error is analytically known and can be asserted in a comment.
+- `mean_scb` wrapper: return a dict with `lower: ndarray(m,)` and `upper: ndarray(m,)` extracted from `ToleranceBand.lower` and `ToleranceBand.upper` as 1-D arrays via `vec_to_numpy1d`. Verify `ToleranceBand` field names against docs.rs before writing.
+- `scb_two_sample_test` wrapper: return a dict with `statistic`, `p_value`, `n_perm` (always 0 for this function).
+- Shape assertion test: `assert result["lower"].shape == (m,)`.
 
 **Warning signs:**
-- A new ```` ```python exec="1" ``` ```` fence that imports from `fdars.advisor` or uses `advise()`
-- A fence with `np.random.randn(...)` but no `np.random.seed(...)` call
-- A fence with literal numeric output that was generated against a local build (not verified against CI)
+- `fdmatrix_to_numpy2d` panics on a 1-D flat vector.
+- The returned array has shape `(1, m)` or `(m, 1)` instead of `(m,)`.
 
 **Phase to address:**
-Docs phase (diagram/example authoring). Add "run `mkdocs build --strict` and grep HTML for `FDARS_FENCE_OK`" to the phase verify checklist. The SVGO idempotence gate covers diagram determinism; the `FDARS_FENCE_OK` pattern covers fence execution.
+Group A bindings phase. Shape assertions must be part of the binding test before the docs fence is authored.
 
 ---
 
-### Pitfall 7: faer FPCA SVD Path — Silent Numeric-Behavior Change Breaking Exact-Equality Tests
+### Pitfall 7: `functional_depth` Dispatcher — `DepthMethod::RandomProjection` Carries `seed: u64` In the Variant
 
 **What goes wrong:**
-fdars-core 0.15.0 introduced a faer-backed FPCA SVD path (1.8–4.1× speedup) under the `parallel` feature (which pyfda already enables). The upstream release notes say results are "equivalent within 1e-8·σ₁" — meaning the leading singular value magnitude sets the absolute tolerance. For a typical functional dataset with `σ₁ ≈ 10`, the tolerance is `1e-7`. Any existing test or doc fence that asserts FPCA results to `1e-9` absolute tolerance or tighter will start failing after the bump.
-
-The failure mode is insidious: the test suite is green on the 0.14.0 wheel but fails immediately on the first `maturin develop` after bumping `Cargo.toml`. The engineer sees a CI failure in `test_r_parity.py` on a line like `np.testing.assert_allclose(scores, expected_scores, atol=1e-10)` and does not immediately connect it to the SVD backend change.
+`functional_depth(data: &FdMatrix, method: DepthMethod) -> Result<Vec<f64>, FdarError>`. `DepthMethod::RandomProjection { nproj: usize, seed: u64 }` carries the seed inside the enum variant, not as a separate function argument. The Python wrapper must accept `seed` as a top-level Python kwarg (`seed=None`) and route it into the enum construction: `DepthMethod::RandomProjection { nproj, seed: seed_val.unwrap_or(42) }`. If the wrapper accepts `method="random_projection"` with no `seed` kwarg and silently defaults to `seed=0`, results differ from the named `random_projection_1d` function (which uses a different default). Consistency test: `functional_depth(data, method="fraiman_muniz", scale=True)` must equal `fraiman_muniz_1d(data, data, scale=True)` (self-depth on all curves).
 
 **Why it happens:**
-The 0.14.0 test suite was written against the nalgebra SVD. The faer SVD is numerically equivalent but not bit-identical. Tests written with `atol=0` (the default for `assert_array_equal`) or very tight `atol` will fail.
+Per-variant fields are invisible from the Python side. Developers unfamiliar with the `DepthMethod` enum shape may omit `nproj` and `seed` from the Python signature entirely.
 
 **How to avoid:**
-Immediately after the crate bump (first phase of v4.0), run the full test suite and compare FPCA-related failures. For any failing assertion, relax the tolerance to `atol=1e-6, rtol=1e-5` (generous but scientifically correct). Update any fence that hard-codes FPCA scores to use `assert abs(result - expected) < 1e-6` in the comment. Document the tolerance level in a new comment: `# tolerance: faer SVD path, equivalent within 1e-8*sigma_1 per 0.15.0 release notes`. The doc fence determinism is unaffected as long as: (a) the same fdars wheel is used across both build runs (CI rebuilds from the same Cargo.lock), and (b) no fence hard-codes numeric output from FPCA — if it does, regenerate the expected output after the bump.
+- Wrapper signature: `#[pyo3(signature = (data, method="fraiman_muniz", scale=True, nproj=50, seed=None))]`.
+- String-to-enum dispatch with wildcard: `"fraiman_muniz"` → `FraimanMuniz { scale }`, `"band"` → `Band`, `"modified_band"` → `ModifiedBand`, `"random_projection"` → `RandomProjection { nproj, seed: seed.unwrap_or(42) }`, `_` → `PyValueError`.
+- Determinism test for `method="random_projection"`: two calls with same `seed` return identical depth vectors.
+- Self-depth consistency test: `functional_depth(data, "fraiman_muniz", scale=True)` == `fraiman_muniz_1d(data, data, scale=True)`.
 
 **Warning signs:**
-- `np.testing.assert_allclose(fpca_result, expected, atol=1e-10)` in any test touching `to_pc()` or `fpca_*` functions
-- `np.testing.assert_array_equal` on floating-point FPCA outputs (no tolerance at all)
-- Doc fences with literal FPCA variance-explained values copied from a local 0.14.0 run
+- Non-exhaustive match compile error on `DepthMethod`.
+- Depth values from `functional_depth(method="fraiman_muniz")` diverge from `fraiman_muniz_1d` (scale default mismatch).
 
 **Phase to address:**
-Crate bump phase (first phase of v4.0, before any new bindings). Run `pytest tests/ -x` immediately after `maturin develop --release` with the bumped `Cargo.toml`. Address all FPCA tolerance failures in that phase before proceeding.
+Group B bindings phase.
 
 ---
 
-### Pitfall 8: Cargo.toml Caret Pin Not Covering 0.17.0
+### Pitfall 8: `functional_boxplot` `factor` Has No Rust Default — Python Default Must Be `1.5`; `outliers` Is `Vec<usize>` Not `Vec<f64>`
 
 **What goes wrong:**
-The current `Cargo.toml` pins `fdars-core = "0.14.0"` (exact, no caret). A bump to `"0.17.0"` is also exact. The risk is not the bump itself (it is intentional) but what happens after: `"0.17.0"` will not automatically pick up 0.17.1 patch fixes. Given that bugs #33 and #34 both required a rapid rebuild+re-release of pyfda, locking to an exact patch version creates the same operational burden: every upstream patch requires a manual bump and re-release.
-
-The alternative, `fdars-core = "0.17"` (caret, equivalent to `>=0.17.0, <0.18.0`), accepts patch releases automatically via `cargo update` without a Cargo.toml change. The risk is that a 0.17.x patch introduces a numeric change that breaks tests — but this is caught by the existing test suite on the next CI run.
+`functional_boxplot(data: &FdMatrix, method: DepthMethod, factor: f64) -> Result<FunctionalBoxplotResult, FdarError>` — `factor` is required in Rust with no default. If the Python default is `1.0` or `2.0`, the outlier classification diverges from the López-Pintado–Romo canonical value and from R's `fBoxplot` default. Additionally, `FunctionalBoxplotResult.outliers` is `Vec<usize>` (row indices) — passing it to `vec_to_numpy1d` (which handles only `f64`) will cause a type error; the correct converter is `usize_vec_to_numpy1d`.
 
 **Why it happens:**
-The original CONCERNS.md documents this as a known issue ("fdars-core dependency version lock"). The exact-pin was a deliberate choice for maximum reproducibility, but it creates a manual re-release burden for every upstream patch.
+Rust makes `factor` required; the canonical default `1.5` is documented only in the method paper and docs.rs description. The type mismatch on `outliers` is easy to miss because all other `FunctionalBoxplotResult` fields are `Vec<f64>`.
 
 **How to avoid:**
-At the crate bump, set `fdars-core = "0.17"` (caret) in `Cargo.toml`, not `"0.17.0"`. This allows `cargo update` to pick up patches. If the team wants stricter reproducibility, use `fdars-core = "=0.17.0"` (the `=` prefix is the Cargo exact-version syntax) but document the operational cost. Do not silently leave the version as `"0.14.0"` in `Cargo.toml` and expect the bump to happen automatically — it will not.
+- `#[pyo3(signature = (data, method="fraiman_muniz", factor=1.5, scale=True, nproj=50, seed=None))]`.
+- Convert `result.outliers` with `usize_vec_to_numpy1d(py, result.outliers)` — same pattern as existing alignment_mod.rs usage.
+- Write a test that with a clean dataset (no outliers) `factor=1.5` returns an empty `outliers` array, and that with a spike-contaminated dataset it flags the spike.
+- Docstring: cite López-Pintado and Romo (2009) for `factor=1.5`.
 
 **Warning signs:**
-- `Cargo.toml` still reads `fdars-core = "0.14.0"` after the bump phase closes
-- `cargo tree | grep fdars-core` shows 0.14.0 after `maturin develop`
+- Type error at runtime from passing a `Vec<usize>` to `vec_to_numpy1d`.
+- Outlier set differs from reference implementation for the same dataset.
 
 **Phase to address:**
-Crate bump phase (first). Verify with `cargo tree | grep fdars-core` that the resolved version is 0.17.x before any new binding work begins.
+Group B bindings phase.
 
 ---
 
-### Pitfall 9: Python 3.9–3.14 Extra Gating for New Optional Bindings
+### Pitfall 9: `oneway_anova_vstat` Groups Parameter — Python `ndarray` Must Be `i64` Not `f64`
 
 **What goes wrong:**
-The v3.0 CI matrix covers Python 3.9–3.14 with version-gated extras (`[mcp]` requires Python 3.10+). If any new v4.0 binding or advisor extension introduces a new dependency that does not support all of 3.9–3.14, the CI matrix will fail on the lower bound. Concrete risks:
-
-- If the scoring metrics Python wrapper imports `scipy.integrate` (for cross-checking), scipy 1.10 is the minimum — but `scipy` is already listed as a docs dependency, so it is not new.
-- If a new advisor task family uses `tomllib` (stdlib in 3.11+) or `typing.Self` (3.11+) or `match` syntax (3.10+), the 3.9 CI runner will fail with a syntax error.
-- If `ImputationMethod` or `ExtrapolationPolicy` are exposed as Python `StrEnum` (Python 3.11+), the 3.9/3.10 CI will fail.
+`oneway_anova_vstat(data: &FdMatrix, groups: &[usize], argvals: &[f64]) -> Result<TestResult, FdarError>`. `groups` is `&[usize]` in Rust. The pyfda convention for integer arrays uses `PyReadonlyArray1<'py, i64>` on the Python side and `numpy1d_to_usize_vec` to convert (already established in the codebase). If the wrapper uses `PyReadonlyArray1<'py, f64>` for groups, the conversion is lossy and may silently produce wrong group assignments. Numpy callers may also pass 1-indexed groups (Python convention) while Rust expects 0-indexed.
 
 **Why it happens:**
-The bindings layer is ABI3 (stable ABI, `abi3-py39`) so the compiled wheel itself is fine. The Python wrapper code in `python/fdars/` is where version-gating is needed. A developer on Python 3.12 who writes `method: ImputationMethod = ImputationMethod.LINEAR` as a `StrEnum` will not see the 3.9 failure locally.
+Functional inference is new territory; the groups-as-integer-array input pattern appears only in clustering outputs in the existing code. An integer array input requires explicit handling.
 
 **How to avoid:**
-For enums exposed to Python from new bindings (`ExtrapolationPolicy`, `ImputationMethod`, `ShiftRegistrationResult`), implement them as plain string constants or as a class with string class attributes (compatible with 3.9+), not as `StrEnum`. Use `Literal["boundary", "exception", "fill", "periodic"]` in type hints (not `StrEnum` subclasses). Add a bare-venv smoke test on the 3.9 CI runner that imports the new modules and calls at least one function — the same pattern used in v3.0 for the provider-agnostic advisor.
+- Use `PyReadonlyArray1<'py, i64>` for the Python-facing `groups` parameter.
+- Convert with the existing `numpy1d_to_usize_vec` utility from `convert.rs`.
+- Validation guard: if `groups` is empty or contains indices ≥ `data.nrows()`, raise `PyValueError` before calling the Rust function.
+- Document that groups are 0-indexed.
+- Test with two groups (8+7 curves) to verify correct group parsing and that the returned `TestResult.n_perm > 0`.
 
 **Warning signs:**
-- `from enum import StrEnum` in any new `python/fdars/*.py` file (3.11+ only)
-- `match ... case ...` syntax in new Python wrapper code (3.10+ only)
-- `tomllib` or `typing.Self` in new Python wrapper code (3.11+ only)
-- A new extra (`[scoring]` or similar) that is not guarded with a version check in `pyproject.toml`
+- Python caller passes `groups=np.array([1,2,1,2,...], dtype=float)` and the binding silently accepts it.
+- Group indices are off-by-one.
 
 **Phase to address:**
-All three binding phases (new Python wrapper code written per phase). Run `python3.9 -c "import fdars.fdata; import fdars.helpers"` on a 3.9 venv immediately after each phase's maturin build.
+Group A bindings phase.
 
 ---
 
-### Pitfall 10: ShiftRegistrationResult Field Access Pattern
+### Pitfall 10: Advisor Guard-Sync Broken If `inference` Aspect Lands in Two Commits
 
 **What goes wrong:**
-`least_squares_shift_registration` returns `ShiftRegistrationResult` with fields `registered_data` (FdMatrix) and `shifts` (Vec<f64>). The binding must expose both fields to Python. A developer who only exposes `registered_data` (because that is the primary output) leaves the `shifts` vector inaccessible, forcing users to re-run the function or compute shifts themselves. The correct pattern is to return a Python dict with both keys — consistent with the existing pattern in `alignment_mod.rs` (see `elastic_align_pair` returning `{"f_aligned", "gamma", "distance"}`).
-
-A second pitfall: `registered_data` is an FdMatrix (column-major) and must go through `fdmatrix_to_numpy2d`, not be returned as-is. `shifts` is a Vec<f64> and goes through `vec_to_numpy1d`. If the developer swaps the two (returns `shifts` through `fdmatrix_to_numpy2d` or `registered_data` through `vec_to_numpy1d`), the error is type-level and will be caught by PyO3 at runtime — but only if a test actually exercises both fields.
+The `test_diagnostics_methods_match_advisor_supported` test (`tests/test_mcp_server.py:503`) asserts that `_DIAGNOSTICS_METHODS` in `mcp/server.py` equals the `_supported` set inferred from `advisor/__init__.py:build_diagnostics`. Adding `"inference"` to `build_diagnostics._supported` in one commit and updating `_DIAGNOSTICS_METHODS` in a second commit leaves a window where the test fails in CI between the two commits. The v4.0 retrospective explicitly called out that guard-sync edits must land in one atomic commit.
 
 **Why it happens:**
-Dict-returning bindings require explicitly mapping every struct field. It is easy to ship with only the "interesting" field and leave the rest.
+Advisor work and MCP server work are in different files, tempting developers to separate them into separate commits.
 
 **How to avoid:**
-Test both fields: `result["registered_data"].shape == (n, m)` and `result["shifts"].shape == (n,)` and `result["shifts"].dtype == np.float64`. Add a numerical test: for data that is already aligned (identity shift), assert `np.allclose(result["shifts"], 0.0, atol=1e-6)`.
+- Write both the `build_diagnostics` `"inference"` branch and the `_DIAGNOSTICS_METHODS` frozenset update in a single atomic commit.
+- Run `pytest tests/test_mcp_server.py::test_diagnostics_methods_match_advisor_supported` locally before the commit to catch drift.
+- The plan for the advisor phase must explicitly name this as a single-task commit, not two separate tasks.
+- Decision required during the advisor discuss phase: `inference` should be diagnostics-only (not in `_RUNNABLE_METHODS`) because two-sample tests require two datasets and the single-dataset MCP runner cannot dispatch them.
 
 **Warning signs:**
-- `least_squares_shift_registration` binding returns only a single numpy array
-- No test that accesses `result["shifts"]`
+- CI goes red on `test_diagnostics_methods_match_advisor_supported` between two commits.
+- The `aspects/inference.py` file exists but `_DIAGNOSTICS_METHODS` has not been updated.
 
 **Phase to address:**
-Alignment/registration binding phase.
+Advisor extension phase.
 
 ---
 
-### Pitfall 11: Method-Accuracy Errors in New SVG Diagrams
+### Pitfall 11: Grounding-Invariant Violation — p-Values and Statistics Must Be Plain Python `float`, Not `np.float64`
 
 **What goes wrong:**
-The v3.0 retrospective identified that diagram label-overlaps and stale cross-refs slipped past automated gates and were only caught by visual review. For v4.0, three diagram domains are new: shift registration (horizontal shift concept), ExtrapolationPolicy (boundary/fill/periodic clamp behavior), and registration quality scores (spread-around-mean concept). Each has a specific failure mode:
-
-- **Shift registration:** diagram shows curves shifted in the vertical direction (value shift) instead of horizontal direction (time shift). This is the most common confusion in the domain — "shift registration" in FDA means rigid horizontal (time-axis) translation, not vertical offset.
-- **ExtrapolationPolicy:** diagram omits the `Fill(v)` variant or shows it as extrapolation (continuing the spline trend) instead of constant fill.
-- **Registration quality:** diagram shows `least_squares_score` as the mean L2 distance between curve pairs, but the correct definition is the Simpson-weighted L2 spread of registered curves around their cross-sectional mean (not pairwise distance). These are different quantities.
+`TestResult.statistic` and `TestResult.p_value` arrive in Python as `f64` converted by PyO3 to Python `float`. However, if the inference diagnostics aspect assembles these with `np.float64` intermediates (e.g. `result["statistic"]` extracted from a dict holding a numpy scalar), the `json.dumps` call in the offline determinism test fails with `TypeError: Object of type float64 is not JSON serializable`. Additionally, the grounding check (`_check_grounding`) walks the diagnostics dict looking for numbers to cross-reference against the LLM's advice; a numpy scalar is not found by a `str(float_val)` substring search.
 
 **Why it happens:**
-Hand-authored diagrams require the author to know the precise mathematical definition. "Shift registration" sounds like it could be vertical; "pairwise score" and "mean spread" look similar in a cartoon.
+The inference aspect builder receives a Python dict. If a value was produced via numpy arithmetic, it arrives as `np.float64`. The builder inserts it without an explicit `float()` cast.
 
 **How to avoid:**
-Write the mathematical definition in a comment at the top of each new SVG file before drawing any path elements. For shift registration: "each curve f_i is replaced by f_i(t + δ_i) where δ_i is the optimal horizontal shift — the time axis, not the value axis, moves." Review each diagram against the fdars-core docs.rs function documentation before SVGO gate. Run `rsvg-convert -w 1440 -h 600 <svg> -o out.png` and Read the PNG to confirm labels match arrows, axes are labeled correctly, and the visual story matches the definition.
+- In `aspects/inference.py`: wrap every numeric field with `float(...)` before inserting into the diagnostics dict.
+- Add the standard determinism assertion to the inference advisor test: `json.dumps(diag, sort_keys=True)` must not raise, and two calls must produce byte-identical output.
+- Add the numpy-scalar leakage walk (same pattern as `test_advisor_registration_quality.py:229`): `assert not isinstance(val, np.generic)` for every leaf value.
 
 **Warning signs:**
-- A shift registration diagram where arrows point vertically (up/down) instead of horizontally (left/right)
-- An ExtrapolationPolicy diagram with only 2-3 variants shown (all 4 must be shown or the omission must be documented)
-- A registration quality diagram that shows pairwise arrows between curves instead of curves clustered around a mean
+- `TypeError: Object of type float64 is not JSON serializable` in the offline advisor test.
+- `json.dumps(diag)` raises in the docs fence (fence silently fails instead of printing `FDARS_FENCE_OK`).
 
 **Phase to address:**
-Docs phase. SVGO idempotence gate catches SVG formatting issues but not method-accuracy errors; a human review of the rendered PNG is the only method-accuracy gate.
+Advisor extension phase. The test must be written in the same task as the inference aspect, not after.
+
+---
+
+### Pitfall 12: Numeric Drift on the Existing 426-Test Suite From the 0.17 → 0.20 Bump
+
+**What goes wrong:**
+The existing suite (426 tests) uses floating-point tolerance comparisons for FPCA, elastic alignment, smoothing, and depth values. The 0.18 release was audit-only and 0.19 added the inference suite; 0.20 added quick wins. If any of these releases incidentally changed the numerical path for existing algorithms (reordered rayon task scheduling, changed tolerance epsilon), existing tolerance assertions could fail.
+
+**Why it happens:**
+The v4.0 bump (0.14→0.17) showed zero drift — but that was confirmed experimentally, not guaranteed. The 0.20 path passes through two additional releases. Even an audit-only pass can change LLVM optimization paths, leading to ULP-level differences.
+
+**How to avoid:**
+- The crate bump must be its own isolated phase (Phase 1), committed and CI-green before any new binding work.
+- After the bump, run `cargo test` and `pytest` and capture the full result. Any failures are drift regressions, not new-binding bugs.
+- If tolerance assertions fail, widen by one ULP at a time (do not blindly add `rtol=1e-5`); document the specific function that drifted.
+- Do NOT widen tolerances in the same commit that adds new bindings — it hides the regression source.
+
+**Warning signs:**
+- `pytest` shows failures in `test_basic.py` or `test_r_parity.py` immediately after `cargo build` with the new crate version, before any new code was written.
+- The failure involves an existing function (not one of the three new groups).
+
+**Phase to address:**
+Crate bump phase (Phase 1). This phase has one and only one success criterion: the existing 426-test suite passes unchanged.
+
+---
+
+### Pitfall 13: `constant_basis` Output Is `Vec<f64>` of Ones — Python Shape Should Be `(m, 1)` for Concatenation
+
+**What goes wrong:**
+`constant_basis(t: &[f64]) -> Vec<f64>` returns a flat `Vec<f64>` of length `m` (all ones). All other basis functions (`bspline_basis`, `fourier_basis`) return `(m, nbasis)` 2-D arrays. If the wrapper returns a 1-D numpy array of shape `(m,)`, users cannot horizontally stack it with `bspline_basis` output without a reshape. If the wrapper uses `fdmatrix_to_numpy2d` on the flat vec (wrong: it expects an FdMatrix, not a plain Vec), the call panics.
+
+**Why it happens:**
+The natural API for a single-column intercept basis is a 1-D vector, but the usage context (basis concatenation) requires a 2-D column.
+
+**How to avoid:**
+- Return `(m, 1)` numpy array: `PyArray2::from_vec2(py, &v.iter().map(|&x| vec![x]).collect::<Vec<_>>()).unwrap()`.
+- Write a test: `np.hstack([fdars.basis.constant_basis(av).reshape(-1,1), fdars.basis.bspline_basis(av, nknots=3)])` produces shape `(m, 4)`.
+- Alternatively, document explicitly that the returned `(m,)` array must be reshaped by the caller — but the `(m, 1)` default is safer.
+
+**Warning signs:**
+- User reports `ValueError: all input arrays must have the same number of dimensions` when concatenating `constant_basis` with `bspline_basis` output.
+- The wrapper uses `fdmatrix_to_numpy2d` on a plain Vec (panics).
+
+**Phase to address:**
+Group C bindings phase (basis/smoothing).
+
+---
+
+### Pitfall 14: AIC Smoother Is in `fdars_core::smoothing`, Not `fdars_core::basis` — Wrong Module Placement
+
+**What goes wrong:**
+The existing `basis_nbasis_cv` binding already handles `criterion="aic"` via `BasisCriterion::Aic` (not `#[non_exhaustive]`). The new `aic_smoother` in `fdars_core::smoothing` is a separate function returning a scalar AIC score for a kernel smoother — a different concept. Binding `aic_smoother` in `basis_mod.rs` instead of `smoothing_mod.rs` causes a path lookup failure (`fdars_core::basis::aic_smoother` does not exist). `smooth_basis_aic` is mentioned in the milestone context but does not appear in the `smoothing` module index on docs.rs 0.20.0 — its existence must be verified before the plan is written.
+
+**Why it happens:**
+The name collision ("aic" appears in both `BasisCriterion` and `smoothing::CvCriterion`) creates a mental model where AIC is "already handled." `smoothing::CvCriterion::Aic` (new in 0.20) is a separate enum variant from `smooth_basis::BasisCriterion::Aic` (which already existed and is not `#[non_exhaustive]`).
+
+**How to avoid:**
+- `aic_smoother` goes in `smoothing_mod.rs` — it is a kernel smoother score function parallel to `cv_smoother` and `gcv_smoother` (confirmed from docs.rs: `pub fn aic_smoother(x: &[f64], y: &[f64], bandwidth: f64, kernel: &str) -> f64`).
+- `CvCriterion::Aic` expands the accepted string values in the `optim_bandwidth` binding in `smoothing_mod.rs` (fix the non-exhaustive match in Phase 1).
+- `smooth_basis_aic` — verify its existence and exact module path against docs.rs 0.20.0 before the plan is written. Do not bind a function that does not exist.
+
+**Warning signs:**
+- `fdars_core::basis::aic_smoother` path lookup failure at compile time.
+- A plan task references `smooth_basis_aic` without a verified docs.rs link.
+
+**Phase to address:**
+Group C bindings phase. Verify exact module path for each new function against docs.rs 0.20.0 before the plan is written.
+
+---
+
+### Pitfall 15: SCB Band `nb` and `confidence` Parameters — Undocumented Defaults and Validation Gaps
+
+**What goes wrong:**
+`mean_scb(data, argvals, bandwidth, nb, confidence, multiplier)` — all parameters required in Rust. If the Python wrapper exposes them all as required positional arguments, the function is unusable without reading the paper. Using `nb=1000` in a docs fence would add ~5 seconds to the build (Pitfall 5). The `multiplier` parameter requires string-to-enum conversion for `MultiplierDistribution` (Pitfall 2, which is `#[non_exhaustive]`). If `confidence` is passed outside (0, 1), the Rust function may panic or return a nonsensical band without a clear Python error.
+
+**How to avoid:**
+- Wrapper: `#[pyo3(signature = (data, argvals, bandwidth, nb=200, confidence=0.95, multiplier="gaussian"))]`.
+- Validation guard: if `confidence <= 0.0 || confidence >= 1.0`, return `PyValueError`.
+- Validation guard: if `nb == 0`, return `PyValueError`.
+- Docs fences: `nb=50` to bound build time.
+- Write an input-validation test: `mean_scb(..., nb=0, confidence=0.95)` → `ValueError`.
+
+**Warning signs:**
+- The function is exposed with all parameters positional-only, making it a 6-argument required call.
+- `nb=1000` appears in any executed docs fence.
+
+**Phase to address:**
+Group A bindings phase. Input-validation tests and default-parameter design must be in the binding plan.
 
 ---
 
@@ -311,13 +354,13 @@ Docs phase. SVGO idempotence gate catches SVG formatting issues but not method-a
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| `.unwrap()` on new fdars-core `Result` returns | Saves 2 lines per binding | Panics in production on degenerate input instead of clean `ValueError`; replicates CONCERNS.md known tech debt | Never — use `to_pyresult()` |
-| Returning `depth_based_median` result as Python `int` (index only) | Simpler binding | Forces users to index back into data manually; inconsistent with other median-returning functions that return the curve | Never — return the curve row |
-| Binding `karcher_mean_banded` instead of `karcher_mean_with_band` | Already exists in module search | Wrong semantics: `band_frac=0.0` does not mean unbanded in `_banded`; API inconsistency with the `_with_band` family | Never for the primary binding |
-| Executed fence with `np.random` and no seed | Easier to write | Breaks the build-determinism CI gate; causes random test flake | Never in executed fences |
-| Exact version pin `fdars-core = "=0.17.0"` instead of caret | Maximum reproducibility | Manual re-release burden for every upstream patch (repeated v2/v3 experience) | Acceptable if team has a defined patch SLA |
-| Caret pin `fdars-core = "0.17"` | Automatic patch uptake | A 0.17.x patch may silently change numeric output and break tests | Acceptable — CI catches it |
-| StrEnum for ExtrapolationPolicy / ImputationMethod | Idiomatic Python 3.11+ | Breaks Python 3.9/3.10 CI runners | Never — use string literals / Literal type hints |
+| Add `inference` to `_DIAGNOSTICS_METHODS` in a follow-up commit | Cleaner git log | Guard-sync test fails in CI between commits | Never — must be atomic |
+| Use `np.float64` in diagnostics dict without `float()` cast | One less line per key | `json.dumps` TypeError; grounding check misses values | Never |
+| Default `n_perm=999` in docs fences | Credible p-values in examples | Docs build time doubles or triples | Never in executed fences; acceptable in illustrative (non-executed) code blocks |
+| Skip multi-curve transposition round-trip test for SCB bands | Faster PR | Silent row/column swap bug on band arrays | Never |
+| Expose `flm_f_test` accepting a Python dict of fit fields | Simpler API surface | Does not compile (cannot reconstruct `#[non_exhaustive]` struct from outside crate) | Never |
+| Omit wildcard arm on `DepthMethod`, `CvCriterion`, or `MultiplierDistribution` match | Shorter code | Compile failure on bump (blocking CI) | Never |
+| Bind `aic_smoother` in `basis_mod.rs` | Seems thematically close | Compile error — wrong module path | Never |
 
 ---
 
@@ -325,13 +368,12 @@ Docs phase. SVGO idempotence gate catches SVG formatting issues but not method-a
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| `fdars_core::helpers::spline_interpolate` | Binding only the strict form, no policy parameter | Bind `spline_interpolate_with_policy` as the primary function with `policy: str = "exception"` |
-| `fdars_core::fdata::functional_covariance` | Returning FdMatrix directly without `fdmatrix_to_numpy2d` | Always route through `fdmatrix_to_numpy2d(py, &result)` — m×m output is still a matrix |
-| `fdars_core::fdata::depth_based_median` | Returning the `usize` index to Python | Use the index to retrieve the curve row: `mat.row(idx)` → `vec_to_numpy1d` |
-| `fdars_core::alignment::karcher_mean_with_band` | Passing `band_frac: f64` as a required parameter | Expose as `Optional[float] = None` in the Python signature; pass `Some(v)` only when not None |
-| `fdars_core::scoring::functional_mae` (and siblings) | Assuming inputs are (y_pred, y_true) order | The order is `(y_true, y_pred, argvals)` — document explicitly, test with asymmetric inputs |
-| `_DIAGNOSTICS_METHODS` guard-sync test | Adding a `build_diagnostics` branch without updating the set | Always update `_DIAGNOSTICS_METHODS` in the same commit as the branch |
-| MCP boundary | Calling any fdars scoring or registration function inside the MCP server beyond the existing dispatch table | New methods belong in `fdars_run_method` dispatch only, with fdars doing the computation — not in the LLM request path |
+| `functional_depth` dispatcher + existing per-method depth fns | Expose `functional_depth` and assume it replaces `fraiman_muniz_1d` etc. | Keep both; `functional_depth` is a convenience dispatcher; per-method fns remain for fine-grained control |
+| FLM inference via `flm_f_test` | Pass Python dict from `fregre_lm` to `flm_f_test` | Re-run `fregre_lm` inside the Rust wrapper and pass the Rust struct directly |
+| MCP `fdars_run_method` + inference | Add `"inference"` to `_RUNNABLE_METHODS` | Inference tests require two datasets; keep inference diagnostics-only, not in `_RUNNABLE_METHODS` |
+| `mean_scb` result + advisor grounding | Treat `ToleranceBand` as a matrix (n×m) | Return as two 1-D arrays (`lower`, `upper`) of shape (m,); document as pointwise mean bounds |
+| `CvCriterion` back-conversion in `optim_bandwidth` result dict | Stringify via exhaustive match | Add `_ => "unknown"` wildcard arm to avoid compile failure on `#[non_exhaustive]` |
+| `FregreLmResult` module path | Import from `fdars_core::regression` | Correct path is `fdars_core::scalar_on_function::FregreLmResult` |
 
 ---
 
@@ -339,26 +381,28 @@ Docs phase. SVGO idempotence gate catches SVG formatting issues but not method-a
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Calling `spline_interpolate_with_policy` per-curve in a Python loop | O(n) maturin boundary crossings; each crossing pays the row-major→column-major transpose cost | Pass the full `(n, m)` matrix; let fdars loop internally | n > 100 curves |
-| Calling `functional_covariance` on a high-m dataset | m×m output matrix: at m=1000, that is 1M floats (8MB) copied through the boundary | Document in docstring; recommend downsampling `argvals` before covariance if m > 500 | m > 500 evaluation points |
-| `karcher_mean_with_band` with `band_frac=None` (unbanded) on large n | Same cost as `karcher_mean` — O(n × max_iter × m²) without the band speedup | Use `band_frac ≈ 0.3` for exploratory work; reserve unbanded for final publication runs | n > 200 curves, m > 200 points |
-| Running `mkdocs build` in full mode (no `DOCS_FAST=1`) to verify a single new fence | Full build is ~400s because all fences execute | Use `DOCS_FAST=1` for fence iteration; run full build only for final verify | Every phase — will repeatedly time out the 2-min shell limit |
+| `n_perm=999` in executed docs fence | `mkdocs build` takes 30+ min; CI timeout | `n_perm=19` in all executed fences | Any fence with permutation test |
+| `nb=1000` bootstrap replicates in SCB fence | Same as above | `nb=50` in fences | Any SCB fence |
+| `functional_boxplot` on the full Canadian Weather dataset (35×365) | Each docs build adds ~2s per fence | Use 20 curves × 20 grid points synthetic data | Always when data is large |
+| Calling `optim_bandwidth` inside `mean_scb` in a fence to auto-select bandwidth | Adds 0.5–2s per call | Hard-code a bandwidth value in fences | Any executed fence |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Crate bump:** `cargo tree | grep fdars-core` confirms 0.17.x, not 0.14.0 — verify before any new binding work
-- [ ] **Layout correctness:** every new matrix-returning binding has a multi-curve round-trip test (not just a shape assertion)
-- [ ] **Banded naming:** `karcher_mean_with_band` (not `karcher_mean_banded`) is registered in `alignment_mod.rs`; `band_frac=None` test passes
-- [ ] **Error propagation:** every new binding has at least one `pytest.raises(ValueError)` test for a degenerate/invalid input
-- [ ] **Guard-sync test green:** `test_diagnostics_methods_match_advisor_supported` passes after the advisor extension phase
-- [ ] **Grounding invariant:** every new `build_diagnostics` branch calls a bound fdars function for its evidence value, not Python math
-- [ ] **Offline docs build:** every new executed fence prints `FDARS_FENCE_OK` and the built HTML contains that string
-- [ ] **FPCA tolerance:** no `assert_array_equal` or `atol < 1e-6` on any FPCA output in tests or doc fences
-- [ ] **Python 3.9 clean:** `python3.9 -c "import fdars.fdata; import fdars.helpers; import fdars.scoring"` succeeds on a bare 3.9 venv
-- [ ] **ShiftRegistrationResult:** binding returns `{"registered_data": ndarray(n,m), "shifts": ndarray(n,)}`; both fields tested
-- [ ] **SVG diagram method-accuracy:** shift registration diagram shows horizontal shift; ExtrapolationPolicy shows all 4 variants; quality score diagram shows spread-around-mean, not pairwise distance
+- [ ] **`CvCriterion` match in `optim_bandwidth`:** Has `_ => return Err(PyValueError...)` wildcard — verify both string-to-enum and enum-to-string directions.
+- [ ] **`DepthMethod` match in `functional_depth` and `functional_boxplot`:** Has `_ => return Err(PyValueError...)` wildcard.
+- [ ] **`MultiplierDistribution` match in `mean_scb`:** Has `_ => return Err(PyValueError...)` wildcard.
+- [ ] **`TestResult` PyDict:** All three fields mapped — `statistic` (float), `p_value` (float), `n_perm` (int).
+- [ ] **`FunctionalBoxplotResult` PyDict:** All seven fields mapped — `outliers` converted via `usize_vec_to_numpy1d` (not `vec_to_numpy1d`).
+- [ ] **Inference diagnostics aspect:** `float()` cast on every numeric value before insertion into the diagnostics dict.
+- [ ] **Guard-sync atomic commit:** `_supported` in `build_diagnostics` and `_DIAGNOSTICS_METHODS` in `mcp/server.py` updated in a single commit; `test_diagnostics_methods_match_advisor_supported` passes.
+- [ ] **Seed determinism test:** Two calls to `t_perm_test`/`f_perm_test`/`functional_depth(method="random_projection")` with identical seed return byte-identical `json.dumps` output.
+- [ ] **`constant_basis` shape:** Returns `(m, 1)` numpy array, compatible with `np.hstack` concatenation with `(m, nbasis)` basis matrices.
+- [ ] **`aic_smoother` module:** In `smoothing_mod.rs`, not `basis_mod.rs`.
+- [ ] **Inference aspect NOT in `_RUNNABLE_METHODS`:** Two-dataset inference tests cannot be dispatched by `fdars_run_method`; they are diagnostics-only.
+- [ ] **FLM wrapper strategy:** `flm_f_test` and `flm_gof_test` re-run `fregre_lm` internally (via `fdars_core::scalar_on_function::fregre_lm`) and return enriched dicts.
+- [ ] **`mean_scb` return shape:** `lower.shape == (m,)` and `upper.shape == (m,)` — not `(1, m)` or `(n, m)`.
 
 ---
 
@@ -366,13 +410,14 @@ Docs phase. SVGO idempotence gate catches SVG formatting issues but not method-a
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Multi-curve transposition bug found after bindings merged | MEDIUM | Write the round-trip test first to confirm the bug; swap `from_vec2(mat.to_column_major())` for `fdmatrix_to_numpy2d(py, &mat)`; re-run tests |
-| Guard-sync test fails after advisor extension | LOW | Add the missing method key(s) to `_DIAGNOSTICS_METHODS` and/or `_RUNNABLE_METHODS`; the failure message names the mismatched keys |
-| FPCA tolerance failures after crate bump | LOW | Relax `atol` to `1e-6` on affected assertions; update doc fence expected outputs by running `maturin develop` and re-executing the fence locally |
-| Banded alignment bound to `_banded` variant | LOW | Replace `karcher_mean_banded` with `karcher_mean_with_band` in `alignment_mod.rs`; change `band_frac: f64` to `band_frac: Option<f64>`; update register() call |
-| Docs fence breaks build determinism (missing seed) | LOW | Add `np.random.seed(42)` at top of fence; regenerate expected outputs; re-run `mkdocs build --strict` |
-| Python 3.9 CI failure from StrEnum | LOW | Replace `StrEnum` with a plain class or `Literal` type hint; no functional change needed |
-| `impute_missing_values` panics on all-NaN row | LOW | Ensure `to_pyresult()` wraps the call; the FdarError message ("entirely NaN") becomes the ValueError message |
+| Compile failure from missing `#[non_exhaustive]` wildcard arm | LOW | Add wildcard arm; `cargo build` passes immediately |
+| Guard-sync drift caught by CI | LOW | Add missing aspect to `_DIAGNOSTICS_METHODS` in same commit that updates `_supported` |
+| NumPy scalar leak in diagnostics | LOW | Wrap each value in `float()`; re-run determinism test |
+| Docs build timeout from high `n_perm` | LOW | Reduce `n_perm` to 19 in executed fences; rebuild |
+| `FregreLmResult` reconstruction fails at compile time | MEDIUM | Redesign wrapper to re-run `fregre_lm` and pass Rust struct directly |
+| Transposition bug in SCB band output | MEDIUM | Add shape assertion test; fix return to use `vec_to_numpy1d` for each field |
+| Regression drift in existing 426 tests after bump | MEDIUM | Identify drifted function; widen tolerance by one ULP; document in commit |
+| `aic_smoother` in wrong module | LOW | Move to `smoothing_mod.rs`; update `register()` call |
 
 ---
 
@@ -380,30 +425,37 @@ Docs phase. SVGO idempotence gate catches SVG formatting issues but not method-a
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Multi-curve transposition scrambling | Interpolation/imputation binding phase (earliest matrix-returning new bindings) | Multi-curve round-trip test: known function, assert per-curve values not just shape |
-| Banded alignment naming ambiguity | Alignment/registration binding phase | `band_frac=None` produces same output as `karcher_mean`; clippy: no `karcher_mean_banded` in new bindings |
-| Grounding-invariant regression | Advisor extension phase | `test_diagnostics_methods_match_advisor_supported` green; offline fixture test for each new branch |
-| Result-error propagation gaps | All three binding phases | `pytest.raises(ValueError)` tests for every new fallible function; no `.unwrap()` in new `*_mod.rs` files |
-| NaN / off-grid / boundary edge cases | Interpolation/imputation binding phase | Tests: OOD query with `policy="boundary"`, all-NaN row, Periodic with valid domain |
-| Offline / deterministic docs build | Docs phase | `FDARS_FENCE_OK` in built HTML; `mkdocs build --strict` green in CI; byte-identical repeat build |
-| faer FPCA SVD numeric change | Crate bump phase (first) | Run full test suite immediately after bump; relax FPCA atol before proceeding |
-| Cargo.toml pin not covering 0.17.0 | Crate bump phase (first) | `cargo tree \| grep fdars-core` shows 0.17.x |
-| Python 3.9–3.14 extra gating | All three binding phases | Bare 3.9 venv smoke import; CI matrix all-green |
-| ShiftRegistrationResult field access | Alignment/registration binding phase | Test both `result["registered_data"]` shape and `result["shifts"]` shape and values |
-| SVG diagram method-accuracy | Docs phase | `rsvg-convert` visual review of each new diagram PNG before SVGO gate |
+| Numeric drift on existing suite (Pitfall 12) | Phase 1: crate bump + regression gate | `pytest` shows 426+ passed / 0 failed before any new bindings |
+| `#[non_exhaustive]` wildcard on `CvCriterion` in existing `optim_bandwidth` (Pitfall 2) | Phase 1: crate bump | `cargo build` passes with no exhaustiveness errors |
+| `seed: u64` vs `Option<u64>` for permutation tests (Pitfall 1) | Phase 2: Group A inference bindings | Determinism test: two calls with same seed → byte-identical output |
+| FLM wrapper strategy — re-run vs. dict reconstruction (Pitfall 4) | Phase 2: Group A inference bindings | Compile succeeds; `flm_f_test` returns valid dict from Python |
+| `mean_scb` returns `ToleranceBand` not `TestResult` (Pitfall 6) | Phase 2: Group A inference bindings | Shape assertion: `lower.shape == (m,)` |
+| `oneway_anova_vstat` groups parameter type (Pitfall 9) | Phase 2: Group A inference bindings | Test with int64 array input; verify group assignment is correct |
+| SCB `nb`/`confidence` validation (Pitfall 15) | Phase 2: Group A inference bindings | `pytest.raises(ValueError)` on `nb=0` and `confidence=1.1` |
+| `DepthMethod` enum variants and wildcard arm (Pitfall 7) | Phase 3: Group B depth/boxplot bindings | Exhaustive method-string test; self-depth consistency test |
+| `functional_boxplot` factor default and `outliers` type (Pitfall 8) | Phase 3: Group B depth/boxplot bindings | `outliers` dtype is int64; factor=1.5 matches reference results |
+| `TestResult` / `FunctionalBoxplotResult` non-exhaustive struct field access (Pitfall 3) | Phase 2+3: Group A+B bindings | All expected dict keys present in Python result |
+| `constant_basis` shape — 1-D vs 2-D (Pitfall 13) | Phase 4: Group C basis/smoothing bindings | `np.hstack([constant_basis(av).reshape(-1,1), bspline_basis(av, nknots=3)])` succeeds |
+| `aic_smoother` module placement (Pitfall 14) | Phase 4: Group C basis/smoothing bindings | `from fdars.smoothing import aic_smoother` succeeds |
+| `MultiplierDistribution` wildcard arm in `mean_scb` (Pitfall 2 extension) | Phase 2: Group A inference bindings | `cargo build` passes; `pytest.raises(ValueError)` on unknown multiplier string |
+| Grounding-invariant numpy scalar leak (Pitfall 11) | Phase 5: advisor extension | `json.dumps(diag)` does not raise; no `isinstance(val, np.generic)` in leaf values |
+| Guard-sync atomic commit (Pitfall 10) | Phase 5: advisor extension | `test_diagnostics_methods_match_advisor_supported` passes on the commit |
+| Executed-fence `n_perm` cost (Pitfall 5) | Phase 6: docs | No executed fence has `n_perm >= 100`; docs build delta < 3 min vs pre-inference baseline |
 
 ---
 
 ## Sources
 
-- `src/convert.rs` (pyfda) — live source of `numpy2d_to_fdmatrix` / `fdmatrix_to_numpy2d`; confirmed row-major ↔ column-major transpose pattern
-- `.planning/codebase/CONCERNS.md` (pyfda) — documents `.unwrap()` tech debt in convert.rs:57, basis_mod.rs, alignment_mod.rs; input validation gaps
-- `.planning/RETROSPECTIVE.md` (pyfda) — v2.1 retrospective: diagram label-overlap, stale cross-refs, execution-sentinel pattern, illustrative-vs-executed fence split
-- `docs.rs/fdars-core/0.17.0` — confirmed `karcher_mean_with_band` and `karcher_mean_banded` coexist with different `band_frac` types; confirmed all new function signatures and `Result` return types; confirmed `depth_based_median` returns `usize` not a curve; confirmed `functional_covariance` returns m×m FdMatrix
-- `github.com/sipemu/fdars` releases page — confirmed 0.15.0 added faer FPCA SVD ("equivalent within 1e-8·σ₁"), 0.16.0 added `_with_band` family + imputation + scoring metrics
-- pyfda memory: `fdars-core-basis-bug.md` — #33 transposition bug in B-spline basis path fixed in 0.14.0; confirms the exact class of layout bug that must be prevented in new bindings
-- pyfda memory: `pyfda-release-versioning.md` — versioning and publish trigger patterns
+- `docs.rs/fdars-core/0.20.0` — verified signatures for `t_perm_test`, `f_perm_test`, `two_sample_mean_test`, `mean_scb`, `scb_two_sample_test`, `flm_f_test`, `flm_gof_test`, `oneway_anova_vstat`, `functional_depth`, `functional_boxplot`, `aic_smoother`, `constant_basis` (HIGH confidence — official crate docs)
+- `docs.rs/fdars-core/0.20.0` — verified `#[non_exhaustive]` on `DepthMethod` (variants: `FraimanMuniz { scale }`, `Band`, `ModifiedBand`, `RandomProjection { nproj, seed }`), `CvCriterion` (variants: `Cv`, `Gcv`, `Aic`), `MultiplierDistribution` (variants: `Gaussian`, `Rademacher`), `TestResult` (fields: `statistic f64`, `p_value f64`, `n_perm usize`), `FunctionalBoxplotResult` (fields: `median`, `central_lower`, `central_upper`, `whisker_lower`, `whisker_upper`, `outliers Vec<usize>`, `depths`), `FregreLmResult` (in `scalar_on_function` module)
+- `BasisCriterion` confirmed NOT `#[non_exhaustive]` (variants: `Gcv`, `Cv`, `Aic`, `Bic`)
+- `src/depth_mod.rs`, `src/basis_mod.rs`, `src/smoothing_mod.rs`, `src/convert.rs`, `src/regression_mod.rs` — existing binding patterns (read directly from codebase, HIGH confidence)
+- `python/fdars/mcp/server.py` — `_DIAGNOSTICS_METHODS` frozenset and guard-sync pattern
+- `python/fdars/advisor/__init__.py` — `_supported` set and `build_diagnostics` dispatch pattern
+- `tests/test_mcp_server.py:503` — `test_diagnostics_methods_match_advisor_supported` guard-sync test
+- `tests/test_advisor_registration_quality.py` — numpy-scalar leak pattern and `json.dumps` determinism pattern
+- `.planning/RETROSPECTIVE.md` — v4.0 lessons: isolated bump phase, 18-min docs build cost, atomic guard-sync commit requirement
 
 ---
-*Pitfalls research for: pyfda v4.0 — fdars-core 0.17 binding upgrade*
-*Researched: 2026-08-13*
+*Pitfalls research for: pyfda v5.0 — fdars-core 0.20 upgrade (functional inference + depth/boxplot + AIC-smoothing)*
+*Researched: 2026-08-17*

@@ -1,138 +1,183 @@
 # Project Research Summary
 
-**Project:** pyfda — fdars-core 0.17 Upgrade (New Bindings, Advisor & Docs)
-**Domain:** PyO3/maturin binding layer + functional-data-analysis library + MkDocs docs + grounded LLM advisor
-**Researched:** 2026-08-13
-**Confidence:** HIGH
+**Project:** pyfda v5.0 — fdars-core 0.17.0 → 0.20.0 upgrade (functional inference + depth/boxplot + basis/smoothing)
+**Domain:** PyO3 binding layer upgrade for functional data analysis library
+**Researched:** 2026-08-17
+**Confidence:** HIGH — all signatures verified against docs.rs; codebase patterns extracted directly; v4.0 retrospective validated
+
+---
 
 ## Executive Summary
 
-pyfda v4.0 is a **crate-bump milestone plus a substantial additive API surface**. Upgrading `fdars-core` from 0.14.0 to 0.17.0 unlocks new public functions across three groups — interpolation/extrapolation/imputation, functional statistics/scoring metrics, and shift registration/registration-quality/banded elastic alignment. The upgrade itself is **one line in `Cargo.toml`** (caret semantics lock `^0.14.0` to `<0.15.0`, so an explicit bump is required) and the upstream diff 0.15→0.17 is **explicitly additive and non-breaking** — no existing binding signatures change and no new Rust or Python dependencies are introduced.
+The v5.0 milestone is a structured binding upgrade that adds three groups of new functionality to pyfda while bumping its upstream dependency (fdars-core) from 0.17.0 to 0.20.0. The upgrade requires exactly one Cargo.toml change (version pin), zero new Rust/Python dependencies, and three parallelizable binding phases (inference, depth/boxplot, basis/smoothing) plus an advisor extension and documentation overhaul. The critical blocker before any new work: the existing `optim_bandwidth` binding's `CvCriterion` match requires a wildcard arm to accommodate the `Aic` variant now present in 0.20.0. Once that one-line fix lands in the crate-bump phase, the path is clear for 13 new bindings organized into 4 parallel execution groups. Risk is well-understood and mitigated by established v4.0 patterns (atomic commits, transposition round-trip tests, guard-sync enforcement).
 
-The recommended approach is a **strict dependency-ordered sequence**: bump the crate and run a full regression pass FIRST (the faer FPCA SVD path introduced in 0.15 makes FPCA results equivalent only within `1e-8·σ₁`, so any tighter exact-equality test or doc fence must be relaxed before new work begins), then land the three binding groups (two are parallel-eligible), then extend the v3.0 AI advisor "where relevant," then do the method-accurate docs (hand-authored SVG diagrams + runnable offline worked examples) last so executed fences run against the real compiled API.
-
-The main risks are not in the bump but in **new-binding correctness and docs accuracy**: numpy(row-major)↔FdMatrix(column-major) transposition bugs in the new matrix-returning functions (the exact class upstream fixed as #33), the grounding invariant when extending `build_diagnostics`, and keeping new executed doc fences offline/deterministic. All are known, testable, and mapped to owning phases below.
+---
 
 ## Key Findings
 
 ### Recommended Stack
 
-A **single-line dependency bump** with no transitive or packaging changes. Change `fdars-core = { version = "0.14.0", ... }` to `"0.17.0"`, regenerate/commit `Cargo.lock`, keep `features = ["parallel"]`. All 20 new functions are pure-Rust compute — no new Python runtime deps, so **no new extras** are needed.
+The existing stack (Rust 1.83, PyO3 0.28, NumPy 0.28, Maturin 1.x) remains unchanged. The upgrade path is:
 
-**Core technologies (unchanged):**
-- **fdars-core 0.17.0** (`parallel` feature): the upgraded compute engine — purpose is the new API surface; recommended because all changes are additive/non-breaking.
-- **PyO3 0.28 (abi3-py39) + numpy 0.28 crate + maturin 1.x**: existing binding toolchain — unchanged; new wrappers reuse `convert.rs` converters as-is.
-- **Do NOT enable the `linalg` feature**: it gates faer/anofox-regression and requires Rust 1.84 (> pyfda MSRV 1.83) and is WASM-incompatible; its speedups are internal with no exclusively-gated public API.
+**Cargo.toml single change:**
+```toml
+fdars-core = { version = "0.20.0", features = ["parallel"] }  # was 0.17.0
+```
+
+**Why this is safe:**
+- MSRV: pyfda 1.83 > fdars-core 0.20.0 MSRV 1.81 — no breaking requirement.
+- Dependencies: The full dependency tree for `["parallel"]` is identical across 0.17.0, 0.19.0, 0.20.0 (nalgebra 0.33, rand 0.8, rustfft 6.2, rayon 1.10).
+- **Do NOT enable `linalg` feature** — requires Rust 1.84 (breaks MSRV), pulls in faer+anofox-regression (not needed for v5.0 targets).
+- No PyPI dependency changes required; all new result types decompose to PyDict (established pattern).
 
 ### Expected Features
 
-Fourteen documented method families (≈20 pyfunctions incl. `_with_policy`/`_with_band` variants), all thin wrappers over established FDA methods.
+The v5.0 launch surface contains **13 new bindings** across three groups:
 
-**Must have (table stakes):**
-- **Interpolation & representation** — `spline_interpolate` (order-k B-spline per curve, off-grid eval; reuses the already-bound basis system), `*_with_policy` + `ExtrapolationPolicy{Boundary,Exception,Fill(f64),Periodic}`, `impute_missing_values` + `ImputationMethod{Linear,Mean,Constant}`.
-- **Functional statistics** — `functional_variance/std/covariance`, `depth_based_median` (Fraiman–Muniz depth; returns an **index**, distinct from `geometric_median`), `trim_mean` (α=0 ≡ mean).
-- **Scoring metrics** — `functional_mae/mse/mape/msle/functional_explained_variance` (Simpson-integrated scalars, `Result`-returning).
-- **Shift registration** — `least_squares_shift_registration` (rigid horizontal shift δ to the cross-sectional mean via golden-section L2 min) + `ShiftRegistrationResult`.
-- **Registration-quality scores** — `least_squares_score` (L2 spread, lower=better), `pairwise_correlation_score` (centered functional Pearson, higher=better), `sobolev_least_squares_score` (adds derivative penalty; requires uniform grid).
+**Group A — Functional Inference** (8 functions, NEW `fdars.inference` submodule):
+- `t_perm_test`, `f_perm_test` — two-sample permutation tests
+- `two_sample_mean_test` — asymptotic Hotelling T-squared on FPC basis
+- `mean_scb`, `scb_two_sample_test` — simultaneous confidence bands (Degras multiplier-bootstrap)
+- `flm_f_test`, `flm_gof_test` — FLM post-hoc inference (re-fit internally)
+- `oneway_anova_vstat` — asymptotic one-way functional ANOVA
 
-**Should have (differentiator):**
-- **Banded elastic alignment** — `karcher_mean_with_band`, `elastic_self/cross_distance_matrix_with_band` (`band_frac: Option<f64>`; Sakoe–Chiba corridor, ~4–6× faster on large grids). Result struct identical to unbanded.
+**Group B — Depth and Boxplot** (2 functions, extend `fdars.depth`):
+- `functional_depth` — unified self-depth dispatcher
+- `functional_boxplot` — Lopez-Pintado–Romo outlier detection
 
-**Defer (out of scope):** the 0.15→0.17 internal perf wins (parallel CV folds, faer FPCA SVD, parallel elastic-FPCA) — inherited via the bump, no API to bind.
+**Group C — Basis and Smoothing Quick Wins** (3 functions, extend `fdars.basis` + `fdars.smoothing`):
+- `constant_basis` — all-ones intercept column
+- `smooth_basis_aic` — AIC-optimal smoothing parameter selection
+- `CvCriterion::Aic` extension — adds AIC to criterion dispatch
 
 ### Architecture Approach
 
-New functions integrate into the existing three-layer stack (PyO3 wrappers `src/*_mod.rs` → `convert.rs` marshalling → Python API/`Fdata`/advisor) with **no redesign**. Enums cross the boundary as **string params + `match` arms** (established convention: `linkage`/`basis_type`/`penalty_type`), with a fallback arm since upstream enums are `#[non_exhaustive]`. Compound results return as **`PyDict`** (every existing compound-result function does; no `#[pyclass]` result type exists). `fd.interpolate()`/`fd.impute()` become `Fdata` methods; stats/scoring stay module-level functions.
+Binding organization preserves three-layer architecture (Python → PyO3 → fdars-core):
 
-**Major components / placement:**
-1. **Interpolation + imputation bindings** — 4 interpolation fns + `impute_missing_values` + enum handling. *Placement is the one open decision (see Gaps):* new `src/helpers_mod.rs` (upstream `fdars_core::helpers` parity, STACK.md) vs extend `fdata_mod.rs` (smaller footprint, ARCHITECTURE.md).
-2. **Functional stats + scoring bindings** — stats extend `fdata_mod.rs`; scoring is new `src/scoring_mod.rs` (upstream `fdars_core::scoring`) or extends `metric_mod.rs`.
-3. **Alignment/registration bindings** — extend existing `alignment_mod.rs` (shift registration + 3 quality scores + 3 banded fns).
-4. **Advisor extension** — `"scoring"` becomes diagnostics method #13; imputation-quality extends the `represent` aspect; registration-quality extends the `alignment` aspect. `_RUNNABLE_METHODS` stays 6 (scoring needs caller-supplied y_true/y_pred the MCP dataset model can't provide).
+1. **`src/inference_mod.rs`** — NEW file for Group A (8 functions). Follows `represent_mod.rs` (v4.0) precedent.
+2. **`src/depth_mod.rs`** — EXTEND with `functional_depth` + `functional_boxplot` (Group B).
+3. **`src/basis_mod.rs`** — EXTEND with `constant_basis` (Group C).
+4. **`src/smoothing_mod.rs`** — EXTEND with AIC smoothing + `CvCriterion::Aic` arm (Group C).
+5. **`src/lib.rs`** — ADD `mod inference_mod;` and `register_submodule!` call.
+6. **`python/fdars/__init__.py`** — ADD `"inference"` to `_submodule_names` tuple.
+7. **Advisor & MCP** — Atomic commit: add `"inference"` to `_supported` and `_DIAGNOSTICS_METHODS` (diagnostics-only, not runnable).
 
-### Critical Pitfalls
+**Key patterns:**
+- All result types decompose to PyDict (established v4.0 pattern).
+- FLM inference re-fits internally via `fdars_core::scalar_on_function::fregre_lm` — no Python handle needed.
+- String-to-enum dispatch with wildcard fallback for `#[non_exhaustive]` enums.
 
-1. **Column-major transposition (#33 class)** — every new matrix-returning binding (`functional_covariance`, interpolation on a new grid, banded distance matrices) must go through `fdmatrix_to_numpy2d` and carry a **multi-curve round-trip test** (shape/symmetry checks alone won't catch scrambling).
-2. **faer FPCA SVD numeric drift** — after the bump, FPCA results shift within `1e-8·σ₁`; relax any FPCA test/doc-fence tolerance to ~`atol=1e-6` in the crate-bump phase *before* new binding work.
-3. **Banded naming ambiguity** — bind `*_with_band` (`band_frac: Option<f64>`, `None` = unbanded), NOT the 0.14 `*_banded` (`f64`, where `0.0` does not disable the band).
-4. **`depth_based_median` returns a `usize` index** — resolve to the actual curve row in the binding, else users get a bare integer.
-5. **Result-error propagation** — all 10 new scoring/quality fns return `Result<T, FdarError>`; no `.unwrap()`, route through `to_pyresult()`, and add `ValueError` tests (MAPE has **no epsilon guard** → errors on near-zero truths; `sobolev_least_squares_score` needs a uniform grid).
-6. **Grounding-invariant + guard-sync** — new advisor diagnostics must call the bound fdars functions (never Python math) and cite a real number; `_DIAGNOSTICS_METHODS` and `advisor._supported` must update in the **same commit** to keep `test_diagnostics_methods_match_advisor_supported` green.
-7. **Offline/deterministic docs** — new executed fences use fixed seeds, base extras only, and emit the `FDARS_FENCE_OK` sentinel; diagrams pass SVGO idempotence + build-determinism gates and a human PNG method-accuracy review.
+### Critical Pitfalls (Top 3)
+
+**1. `CvCriterion` Non-Exhaustive Wildcard (Phase 1 blocker)**
+Existing `optim_bandwidth` binding has no fallback arm. The 0.20.0 bump adds `CvCriterion::Aic`. **Fix in Phase 1:** add `_ => return Err(PyValueError...)` to match. One-line fix unblocks downstream phases.
+
+**2. FLM Re-Fit Strategy (Phase 2 design lock-in)**
+`flm_f_test` takes `&FregreLmResult` (non-exhaustive Rust struct). Python cannot reconstruct it. **Solution:** Accept `data + response + n_comp`, re-run `fregre_lm` inside wrapper. Matches existing `predict_fregre_lm` pattern.
+
+**3. Seed Determinism for Permutation Tests (Phase 2+3 tests)**
+`t_perm_test`, `f_perm_test`, and `functional_depth(method="random_projection")` require reproducibility. Python signature: `seed: Option<u64> = None` (default `42`). **Determinism test required:** two calls with same seed must return byte-identical `json.dumps` output.
+
+---
 
 ## Implications for Roadmap
 
-Suggested phase structure (continues numbering from v3.0 → starts at **Phase 25**):
+### Suggested Phase Structure
 
-### Phase 25: Crate Bump + Regression Gate
-**Rationale:** Hard dependency gate for everything else; isolates the one numeric behavior change (faer FPCA SVD) from new-binding work.
-**Delivers:** `Cargo.toml` → 0.17.0, regenerated `Cargo.lock`, `maturin develop` green, full existing suite (259+ tests) passing with FPCA tolerances relaxed to absorb the `1e-8·σ₁` drift.
-**Avoids:** silent caret non-upgrade; FPCA exact-equality test/fence breakage.
+**Phase 1: Crate Bump + Regression Gate (2 days)**
+- Cargo.toml: fdars-core 0.17.0 → 0.20.0
+- Fix `optim_bandwidth` `CvCriterion` match wildcard arm
+- `cargo test` and `pytest` all pass (426+ tests)
 
-### Phase 26: Interpolation, Imputation & Functional Statistics Bindings
-**Rationale:** Foundational table-stakes; `spline_interpolate` reuses the bound basis system; earliest matrix-returning phase → establishes the transposition-test pattern.
-**Delivers:** interpolation/`_with_policy` + `ExtrapolationPolicy`, `impute_missing_values` + `ImputationMethod`, `functional_variance/std/covariance`, `depth_based_median`, `trim_mean`; `fd.interpolate()`/`fd.impute()` methods; multi-curve round-trip tests.
-**Uses:** existing `convert.rs`, string-enum + `#[non_exhaustive]` fallback convention.
-**Avoids:** transposition (#33), `depth_based_median` index bug, off-grid/NaN edge cases.
+**Phase 2: Group A — Functional Inference Bindings (5 days)**
+- `src/inference_mod.rs` (new file) with 8 functions
+- `TestResult`, `ToleranceBand` to PyDict decomposition
+- Determinism, shape assertion, input validation tests
+- Research spike: Verify `MultiplierDistribution` variants and `ToleranceBand` fields (docs.rs 404 at research time)
 
-### Phase 27: Scoring Metrics & Alignment/Registration Bindings
-**Rationale:** Independent of Phase 26 → **parallel-eligible** after Phase 25; groups the `Result`-heavy scoring + registration surface.
-**Delivers:** `functional_mae/mse/mape/msle/functional_explained_variance`; `least_squares_shift_registration` + `ShiftRegistrationResult` (PyDict); `least_squares/pairwise_correlation/sobolev_least_squares_score`; banded `*_with_band` alignment.
-**Avoids:** `.unwrap()` panics, MAPE zero-guard / Sobolev uniform-grid surprises, banded naming confusion.
+**Phase 3: Group B — Depth/Boxplot Extensions (3 days)**
+- `src/depth_mod.rs`: `functional_depth` + `functional_boxplot`
+- `DepthMethod` string-dispatch with per-variant fields
+- Transposition round-trip test (v4.0 guard pattern)
+- Self-depth consistency test
 
-### Phase 28: Advisor Extension (grounding-invariant preserved)
-**Rationale:** Depends on Phases 26+27 (needs the bound functions to call); highest-complexity deliverable.
-**Delivers:** `"scoring"` diagnostics method, imputation-quality on `represent`, registration-quality on `alignment`, MCP guard-sync updated in one commit; offline determinism + grounding tests.
-**Avoids:** grounding-invariant regression; MCP guard-sync test failure.
+**Phase 4: Group C — Basis/Smoothing Quick Wins (1 day)**
+- `constant_basis` (trivial): returns `(m, 1)` array
+- `smooth_basis_aic`: copy-paste of GCV binding
+- `CvCriterion::Aic` extension: one match arm
 
-### Phase 29: Docs — Diagrams + Worked Examples
-**Rationale:** Last; executed fences must run against the shipped bindings.
-**Delivers:** new/updated inline SVG concept diagrams + runnable offline worked examples across `represent/`, `analyze/`, `align/` and advisor pages; `mkdocs build --strict` green.
-**Avoids:** non-deterministic fences; method-inaccurate diagrams (human PNG review).
+**Phase 5: Advisor Extension (2 days)**
+- `python/fdars/advisor/__init__.py` + `aspects/inference.py`
+- `python/fdars/mcp/server.py` `_DIAGNOSTICS_METHODS` update
+- **Atomic commit:** guard-sync test `test_diagnostics_methods_match_advisor_supported` enforces this
+- Inference diagnostics-only (not in `_RUNNABLE_METHODS`)
+
+**Phase 6: Docs Overhaul (8-10 days)**
+- Hand-authored SVG diagrams (permutation test, SCB, boxplot)
+- 5-6 worked examples (t-test, boxplot, FLM, ANOVA, AIC smoothing, basis construction)
+- All executed fences: `n_perm <= 19`, `nb <= 50`, synthetic/subset data
+- `mkdocs build --strict` gate
 
 ### Phase Ordering Rationale
-- **Bump first** isolates the sole numeric change and unblocks all binding work.
-- **26 ∥ 27** are independent binding groups; both must precede the advisor.
-- **Advisor after bindings** because diagnostics call the bound functions.
-- **Docs last** so executed fences and diagrams reflect the real, green API.
+
+1. **Phase 1 first:** Regression gate isolates bump risk from new-code issues (v4.0 pattern).
+2. **Phases 2–4 sequential or parallel:** Independent binding groups; sequential recommended for focused review.
+3. **Phase 5 after Phase 2:** Advisor needs inference bindings to exist.
+4. **Phase 6 last:** Docs depend on all bindings + advisor stability.
 
 ### Research Flags
-Phases likely needing deeper planning-time research:
-- **Phase 28 (Advisor):** guard-sync interdependencies + grounding-invariant patterns for the new aspects/method.
-- **Phase 29 (Docs):** SVGO/determinism gate workflow + per-diagram method-accuracy review checklist.
 
-Standard patterns (skip research-phase):
-- **Phases 25, 26, 27:** established bump/binding conventions, exact signatures already verified.
+**Phases requiring plan-time research spike:**
+- **Phase 2:** Verify `MultiplierDistribution` variants, `ToleranceBand` fields (docs.rs 404)
+- **Phase 2:** Confirm FLM combined `fit_and_test` function or re-fit approach
+
+**Phases with standard patterns (no spike needed):**
+- **Phase 1:** Straightforward version pin + lock regeneration
+- **Phase 3:** `DepthMethod` variants confirmed; round-trip test pattern from v4.0
+- **Phase 4:** Copy-paste + one-line extension
+- **Phase 5:** Atomic guard-sync pattern established in v4.0
+- **Phase 6:** SVG/example development are creative tasks
+
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | One-line bump; all 20 signatures verified on docs.rs/0.17.0; "no new deps" stated in 0.15/0.16 notes |
-| Features | HIGH | 14 method families with exact formulas/signatures from docs.rs; dataset + docs-section mapping from repo reads |
-| Architecture | HIGH | Enum/struct/method conventions each cited to real repo examples with line refs; advisor points grounded in `_supported`/guard test |
-| Pitfalls | HIGH | Layout/transposition, banded naming, Result propagation, grounding-sync all source-verified; faer tolerance MEDIUM (stated, not run) |
+| **Stack** | HIGH | MSRV safety verified; dependency tree identical across versions; version history confirmed (0.18 never published). |
+| **Features** | HIGH | All 13 function signatures verified against docs.rs 0.20.0. `MultiplierDistribution` variants and `constant_basis` signature flagged (docs.rs 404) — plan-time spike required. |
+| **Architecture** | HIGH | Patterns extracted directly from codebase. Precedent established in v4.0 (`represent_mod.rs`, `scoring_mod.rs`). Guard-sync test verified in code. |
+| **Pitfalls** | HIGH | 15 pitfalls from docs.rs, codebase, and v4.0 retrospective. Each has recovery strategy. Pitfall 12 (drift) validated by v4.0 (zero drift observed). |
 
-**Overall confidence:** HIGH
+**Overall confidence:** HIGH — Upgrade of established v4.0 pattern with well-verified upstream API and zero architectural unknowns.
 
 ### Gaps to Address
-- **Module placement (helpers/scoring):** new `src/helpers_mod.rs` + `src/scoring_mod.rs` (upstream-module parity) vs extend `fdata_mod.rs`/`metric_mod.rs` (smaller footprint). Planner decides in Phase 26/27; leaning to whichever keeps pyfda boundaries aligned with upstream fdars-core modules where cleaner.
-- **Exact struct field names** (`ShiftRegistrationResult`, `impute_missing_values` outputs): confirm against the crate source once the bump is applied, before writing wrappers.
-- **`band_frac` shape:** confirmed as an `Option<f64>` parameter on `karcher_mean_with_band` (not a standalone fn) — reverify at bind time.
-- **faer FPCA tolerance:** exact magnitude of drift on the real suite unverified; discover empirically in Phase 25.
-- **`functional_covariance` / `sobolev` API polish:** whether covariance is also an `Fdata` method and whether Python-side pre-validates a uniform grid for a friendlier error.
+
+1. **`MultiplierDistribution` variants:** Research blocked by docs.rs 404. Action: Fetch from crates.io source during Phase 2 planning.
+2. **`smooth_basis_aic` existence:** Listed in context but unverified. Action: Confirm against 0.20.0 source during Phase 4 planning.
+3. **`constant_basis` signature:** Parameter name and return type unverified. Action: Confirm via docs.rs before coding.
+4. **FLM combined fit+test:** Unknown if 0.20.0 exposes combined function. Action: Verify during Phase 2 planning.
+5. **`DepthMethod` non-exhaustive status:** Inferred but not explicitly confirmed. Action: Verify wildcard arm requirement during Phase 3 planning.
+
+---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- `docs.rs/fdars-core/0.17.0` — all new function/struct/enum signatures, module index (`helpers`, `scoring`)
-- `github.com/sipemu/fdars` — release notes v0.15.0 (FEAT-01/02, PERF-01/02) & v0.16.0 (FEAT-03/04/05, PERF-03), PR #41 (v0.17.0 FEAT-06/07, PERF-04); note the committed CHANGELOG file is stale at 0.14.0
-- Repo source: `Cargo.toml`, `Cargo.lock`, `src/convert.rs`, `src/lib.rs`, `src/{alignment,basis,metric,fdata}_mod.rs`, `python/fdars/{__init__,fdata_class}.py`, `python/fdars/advisor/*`, `python/fdars/mcp/*`, `.planning/codebase/*`, `.planning/RETROSPECTIVE.md`
+- **crates.io v1 API:** fdars-core version history, MSRV metadata
+- **docs.rs fdars-core 0.20.0:** Function signatures, struct fields, enum variants and `#[non_exhaustive]` status
 
-### Secondary (MEDIUM confidence)
-- faer FPCA SVD equivalence "within `1e-8·σ₁`" — release-note prose, not yet run against the live suite
-- `linalg` MSRV 1.84 constraint — docs prose; upstream `rust-version` field not directly inspected
+### Secondary (HIGH confidence)
+- `/home/simonm/projects/rust/pyfda/Cargo.toml` — current pin, MSRV
+- `/home/simonm/projects/rust/pyfda/src/` — binding patterns, conversions, module registration
+- `/home/simonm/projects/rust/pyfda/python/fdars/` — advisor, MCP guard-sync patterns
+- `/home/simonm/projects/rust/pyfda/tests/test_mcp_server.py` — guard-sync test enforcement
+
+### Tertiary (MEDIUM confidence)
+- **`.planning/RETROSPECTIVE.md` (v4.0):** Bump isolation, build cost, atomic commit requirements
+- **Project conventions (CLAUDE.md):** Hand-authored diagrams, env var checks, method-accuracy validation
 
 ---
-*Research completed: 2026-08-13*
+
+*Research completed: 2026-08-17*
 *Ready for roadmap: yes*
