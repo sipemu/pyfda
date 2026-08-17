@@ -106,7 +106,7 @@ The documentation — diagrams first, examples second — must make functional d
 
 <!-- v5.0 in progress — fdars-core 0.20 upgrade: functional inference + depth/boxplot + basis/smoothing bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
 
-- [ ] Crate bump `fdars-core 0.17.0 → 0.20.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate
+- [x] Crate bump `fdars-core 0.17.0 → 0.20.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate — ✓ Phase 30 (426 passed / 4 skipped, zero drift; `CvCriterion` wildcard arm added)
 - [ ] Group A — `fdars.inference` submodule: two-sample permutation tests + SCB bands + FLM inference (`TestResult` → PyDict, deterministic seed)
 - [ ] Group B — `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth`
 - [ ] Group C — `constant_basis` + AIC smoothing selection extending `fdars.basis`/`fdars.smoothing`
