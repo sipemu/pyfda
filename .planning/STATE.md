@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
 current_phase: 34
-current_phase_name: Advisor Extension
-status: planning
-stopped_at: Completed 33-01-PLAN.md
-last_updated: "2026-08-17T19:16:06.755Z"
+current_phase_name: advisor-extension
+status: executing
+stopped_at: Completed 34-01-PLAN.md
+last_updated: "2026-08-17T19:53:00.201Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 31 Plan 01 complete — fdars.inference submodule with t_perm_test, f_perm_test, two_sample_mean_test
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 6
-  completed_plans: 6
-  percent: 67
+  completed_phases: 5
+  total_plans: 7
+  completed_plans: 7
+  percent: 83
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-17)
 
 **Core value:** Upgrade `fdars-core` 0.17.0→0.20.0 (parallel-only, no linalg), expose the new functional-inference + depth/boxplot + basis/smoothing surface through PyO3 bindings + the Python API, extend the v3.0 grounded advisor with an `inference` diagnostics aspect, and document everything method-accurately — with the grounding invariant intact throughout.
-**Current focus:** Phase 33 — group-c-basis-smoothing-quick-wins
+**Current focus:** Phase 34 — advisor-extension
 
 ## Current Position
 
-Phase: 34 — Advisor Extension
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-17 — Phase 33 complete, transitioned to Phase 34
+Phase: 34 (advisor-extension) — EXECUTING
+Plan: 1 of ?
+Status: Executing Phase 34
+Last activity: 2026-08-17 — Phase 34 execution resumed (wave continue)
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Last activity: 2026-08-17 — Phase 33 complete, transitioned to Phase 34
 | Phase 31 P03 | 35 | 3 tasks | 2 files |
 | Phase 32 P01 | 4 | 2 tasks | 2 files |
 | Phase 33-group-c-basis-smoothing-quick-wins P01 | 5m | 3 tasks | 3 files |
+| Phase 34-advisor-extension P01 | 8m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,7 @@ Recent decisions affecting current work:
 - [Phase ?]: seed=None resolves to u64 default 0 inside depth_method_from_str — byte-identical RandomProjection reproducibility
 - [Phase ?]: smooth_basis_aic placed in basis_mod.rs beside GCV twin per closest-analog placement rule in 33-CONTEXT.md
 - [Phase ?]: CvCriterion::Aic output arm explicit; _ wildcard retained for non_exhaustive enum forward-compat
+- [Phase ?]: inference aspect (ADV-03): diagnostics-only, caller supplies TestResult dict; n_perm==0 is legitimate asymptotic test value; ToleranceBand shape detected by half_width+center presence without p_value
 
 ### Pending Todos
 
@@ -125,8 +127,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-17T19:08:32.360Z
-Stopped at: Completed 33-01-PLAN.md
+Last session: 2026-08-17T19:53:00.191Z
+Stopped at: Completed 34-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

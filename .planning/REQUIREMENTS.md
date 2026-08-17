@@ -37,7 +37,7 @@ Requirements for milestone v5.0. Each maps to a roadmap phase. All 13 new bindin
 
 ### Advisor Extension
 
-- [ ] **ADV-03**: The grounded advisor gains an `inference` diagnostics aspect that summarizes fdars-computed `TestResult` p-values/statistics (diagnostics-only, not in `_RUNNABLE_METHODS`); the `build_diagnostics` dispatch + `advisor` `_supported` set + MCP `_DIAGNOSTICS_METHODS` change in a single atomic commit (keeping `test_diagnostics_methods_match_advisor_supported` green); grounding invariant + offline determinism (no numpy scalars, byte-identical `json.dumps`) preserved. Exact scope (full aspect vs. folding into an existing aspect, plus optional functional-boxplot outlier diagnostics) confirmed at discuss/plan.
+- [x] **ADV-03**: The grounded advisor gains an `inference` diagnostics aspect that summarizes fdars-computed `TestResult` p-values/statistics (diagnostics-only, not in `_RUNNABLE_METHODS`); the `build_diagnostics` dispatch + `advisor` `_supported` set + MCP `_DIAGNOSTICS_METHODS` change in a single atomic commit (keeping `test_diagnostics_methods_match_advisor_supported` green); grounding invariant + offline determinism (no numpy scalars, byte-identical `json.dumps`) preserved. Exact scope (full aspect vs. folding into an existing aspect, plus optional functional-boxplot outlier diagnostics) confirmed at discuss/plan.
 
 ### Documentation
 
@@ -100,7 +100,7 @@ Which phases cover which requirements. Populated during roadmap creation (Step 1
 | BASIS-01 | Phase 33 | Complete |
 | BASIS-02 | Phase 33 | Complete |
 | BASIS-03 | Phase 33 | Complete |
-| ADV-03 | Phase 34 | Pending |
+| ADV-03 | Phase 34 | Complete |
 | DOCS-04 | Phase 35 | Pending |
 | DOCS-05 | Phase 35 | Pending |
 | DOCS-06 | Phase 35 | Pending |
