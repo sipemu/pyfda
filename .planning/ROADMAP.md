@@ -169,7 +169,10 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
   2. The `build_diagnostics` dispatch + advisor `_supported` set + MCP `_DIAGNOSTICS_METHODS` change land in a SINGLE atomic commit, keeping `test_diagnostics_methods_match_advisor_supported` green.
   3. Offline determinism is preserved — no numpy scalars, byte-identical `json.dumps` output — and the grounding invariant holds (LLM only interprets and cites diagnostic values).
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 34-01-PLAN.md — `inference` aspect builder + three-file guard-sync (advisor `_supported`/dispatch + MCP `_DIAGNOSTICS_METHODS` + `_ASPECT_PRIMERS`) in a single atomic commit + offline test suite (ADV-03)
+
 **UI hint**: no
 
 ### Phase 35: Docs — Diagrams & Worked Examples
@@ -195,7 +198,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 | 31. Group A — `fdars.inference` Bindings | 0/3 | Not started | - |
 | 32. Group B — Depth/Boxplot Bindings | 0/? | Not started | - |
 | 33. Group C — Basis/Smoothing Quick Wins | 0/1 | Planned | - |
-| 34. Advisor Extension | 0/? | Not started | - |
+| 34. Advisor Extension | 0/1 | Planned | - |
 | 35. Docs — Diagrams & Worked Examples | 0/? | Not started | - |
 
 ---
