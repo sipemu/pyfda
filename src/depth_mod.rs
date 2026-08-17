@@ -1,8 +1,11 @@
 //! Depth measures for functional data.
 
 use crate::convert::*;
+use fdars_core::depth::DepthMethod;
 use numpy::{PyArray1, PyReadonlyArray1, PyReadonlyArray2};
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 
 /// Fraiman-Muniz depth for 1D functional data.
 ///
@@ -399,6 +402,183 @@ pub fn random_projection_deriv_1d<'py>(
     Ok(vec_to_numpy1d(py, result))
 }
 
+// ---------------------------------------------------------------------------
+// Internal helper: map a method string to DepthMethod.
+//
+// The enum is #[non_exhaustive] — the wildcard arm is mandatory.  An unknown
+// string becomes a Python ValueError listing the four accepted values.
+// `seed=None` resolves to `0` here, matching the Phase 31 seed contract and
+// giving byte-identical results for `random_projection` by default.
+// ---------------------------------------------------------------------------
+
+fn depth_method_from_str(
+    method: &str,
+    scale: bool,
+    nproj: usize,
+    seed: Option<u64>,
+) -> PyResult<DepthMethod> {
+    match method {
+        "fraiman_muniz" => Ok(DepthMethod::FraimanMuniz { scale }),
+        "band" => Ok(DepthMethod::Band),
+        "modified_band" => Ok(DepthMethod::ModifiedBand),
+        "random_projection" => Ok(DepthMethod::RandomProjection {
+            nproj,
+            seed: seed.unwrap_or(0),
+        }),
+        other => Err(PyValueError::new_err(format!(
+            "method must be 'fraiman_muniz', 'band', 'modified_band', or 'random_projection', got '{other}'"
+        ))),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper: map a FunctionalBoxplotResult to a Python dict.
+//
+// The struct is #[non_exhaustive] — never struct-literal it; access each
+// field individually.  Band fields (Vec<f64>, length m) become 1-D ndarrays
+// via vec_to_numpy1d; outliers (Vec<usize>) become a Python list of ints.
+// ---------------------------------------------------------------------------
+
+fn boxplot_result_to_pydict<'py>(
+    py: Python<'py>,
+    r: fdars_core::depth::FunctionalBoxplotResult,
+) -> PyResult<Bound<'py, PyDict>> {
+    let dict = PyDict::new(py);
+    dict.set_item("median", vec_to_numpy1d(py, r.median))?;
+    dict.set_item("central_lower", vec_to_numpy1d(py, r.central_lower))?;
+    dict.set_item("central_upper", vec_to_numpy1d(py, r.central_upper))?;
+    dict.set_item("whisker_lower", vec_to_numpy1d(py, r.whisker_lower))?;
+    dict.set_item("whisker_upper", vec_to_numpy1d(py, r.whisker_upper))?;
+    dict.set_item(
+        "outliers",
+        r.outliers
+            .into_iter()
+            .map(|x| x as i64)
+            .collect::<Vec<i64>>(),
+    )?;
+    dict.set_item("depths", vec_to_numpy1d(py, r.depths))?;
+    Ok(dict)
+}
+
+/// Unified self-depth dispatcher for functional data.
+///
+/// Computes the self-depth of every curve in `data` with respect to the sample
+/// itself, dispatching to the underlying depth algorithm selected by `method`.
+/// Returns one depth per curve — an ndarray of shape `(n,)` where `n` is the
+/// number of rows (observations) in `data`.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Functional data matrix, shape `(n, m)`. Rows are observations; columns
+///     are evaluation points.
+/// method : str, optional
+///     Depth measure to use. One of ``"fraiman_muniz"`` (default), ``"band"``,
+///     ``"modified_band"``, or ``"random_projection"``. An unknown string raises
+///     ``ValueError``.
+/// scale : bool, optional
+///     Applies only to ``"fraiman_muniz"``: whether to scale depths to
+///     ``2·min(Fn, 1-Fn)`` form (default ``True``).
+/// nproj : int, optional
+///     Number of random projection directions; applies only to
+///     ``"random_projection"`` (default 50). Must be ``>= 1``.
+/// seed : int or None, optional
+///     RNG seed for ``"random_projection"``. ``None`` resolves to fixed default
+///     ``0`` — two calls with ``seed=None`` and identical inputs are
+///     byte-identical. Pass an explicit integer to override.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Self-depth values, shape ``(n,)``.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If ``method`` is not one of the four accepted strings; if ``data`` is
+///     empty; if ``"band"`` or ``"modified_band"`` is requested with fewer than
+///     2 curves; or if ``nproj == 0`` for ``"random_projection"``.
+#[pyfunction]
+#[pyo3(signature = (data, method = "fraiman_muniz", scale = true, nproj = 50, seed = None))]
+pub fn functional_depth<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    method: &str,
+    scale: bool,
+    nproj: usize,
+    seed: Option<u64>,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    let d = numpy2d_to_fdmatrix(data)?;
+    let m = depth_method_from_str(method, scale, nproj, seed)?;
+    let result = to_pyresult(fdars_core::depth::functional_depth(&d, m))?;
+    Ok(vec_to_numpy1d(py, result))
+}
+
+/// Canonical López-Pintado–Romo depth-fence functional boxplot (numeric only).
+///
+/// Ranks curves by self-depth, takes the deepest curve as the median, builds
+/// the 50% central region as the pointwise envelope of the deepest half,
+/// inflates it by `factor × (central width)` to form the fence/whiskers, and
+/// flags any curve that exceeds the fence at any evaluation point as an outlier.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Functional data matrix, shape ``(n, m)``. Rows are observations.
+///     Requires at least 2 rows.
+/// method : str, optional
+///     Depth measure used to rank curves. One of ``"fraiman_muniz"``,
+///     ``"band"``, ``"modified_band"`` (default), or ``"random_projection"``.
+///     An unknown string raises ``ValueError``.
+/// factor : float, optional
+///     Fence inflation factor (default 1.5, the Tukey convention). Must be
+///     finite and ``>= 0``. Negative or non-finite values raise ``ValueError``.
+/// scale : bool, optional
+///     Passed to ``"fraiman_muniz"`` (default ``True``).
+/// nproj : int, optional
+///     Number of projection directions for ``"random_projection"`` (default 50).
+/// seed : int or None, optional
+///     RNG seed for ``"random_projection"``. ``None`` resolves to ``0`` for
+///     byte-identical results across calls.
+///
+/// Returns
+/// -------
+/// dict
+///     A seven-key dict:
+///
+///     - ``"median"``: ndarray of shape ``(m,)`` — the deepest curve's values.
+///     - ``"central_lower"``: ndarray of shape ``(m,)`` — pointwise lower bound
+///       of the 50% central region.
+///     - ``"central_upper"``: ndarray of shape ``(m,)`` — pointwise upper bound
+///       of the 50% central region.
+///     - ``"whisker_lower"``: ndarray of shape ``(m,)`` — lower fence values.
+///     - ``"whisker_upper"``: ndarray of shape ``(m,)`` — upper fence values.
+///     - ``"outliers"``: Python ``list`` of ``int`` — 0-based row indices of
+///       curves flagged as outliers (length variable).
+///     - ``"depths"``: ndarray of shape ``(n,)`` — per-curve self-depth.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If ``data`` has fewer than 2 rows, if ``data`` is empty, if ``factor``
+///     is negative or non-finite, or if ``method`` is an unknown string.
+#[pyfunction]
+#[pyo3(signature = (data, method = "modified_band", factor = 1.5, scale = true, nproj = 50, seed = None))]
+pub fn functional_boxplot<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    method: &str,
+    factor: f64,
+    scale: bool,
+    nproj: usize,
+    seed: Option<u64>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let d = numpy2d_to_fdmatrix(data)?;
+    let m = depth_method_from_str(method, scale, nproj, seed)?;
+    let result = to_pyresult(fdars_core::depth::functional_boxplot(&d, m, factor))?;
+    boxplot_result_to_pydict(py, result)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fraiman_muniz_1d, m)?)?;
     m.add_function(wrap_pyfunction!(random_projection_deriv_1d, m)?)?;
@@ -416,5 +596,7 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(functional_spatial_2d, m)?)?;
     m.add_function(wrap_pyfunction!(kernel_functional_spatial_1d, m)?)?;
     m.add_function(wrap_pyfunction!(kernel_functional_spatial_2d, m)?)?;
+    m.add_function(wrap_pyfunction!(functional_depth, m)?)?;
+    m.add_function(wrap_pyfunction!(functional_boxplot, m)?)?;
     Ok(())
 }
