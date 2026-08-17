@@ -102,7 +102,8 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
   2. The existing `optim_bandwidth` binding compiles against 0.20.0's now-`#[non_exhaustive]` `CvCriterion` because a wildcard `_ => PyValueError` fallback arm was added — the crate does NOT compile without it.
   3. The full existing binding + advisor suite (~426 tests) passes unchanged — no new tests, no tolerance relaxations — as the sole success criterion.
   4. The bump lands as an isolated commit before any new-binding work, so any downstream binding issue cannot hide behind an upgrade regression.
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 30-01-PLAN.md — Bump fdars-core 0.17→0.20 + CvCriterion #[non_exhaustive] wildcard fix + full ~426-test regression gate green
 
 ### Phase 31: Group A — `fdars.inference` Bindings
 **Goal**: Users can run the full functional-inference surface (two-sample tests, simultaneous confidence bands, FLM post-hoc inference, one-way ANOVA V-statistic) from a new, importable `fdars.inference` submodule with deterministic, reproducible results.
@@ -163,7 +164,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 30. Crate Bump + Regression Gate | 0/? | Not started | - |
+| 30. Crate Bump + Regression Gate | 0/1 | Not started | - |
 | 31. Group A — `fdars.inference` Bindings | 0/? | Not started | - |
 | 32. Group B — Depth/Boxplot Bindings | 0/? | Not started | - |
 | 33. Group C — Basis/Smoothing Quick Wins | 0/? | Not started | - |
