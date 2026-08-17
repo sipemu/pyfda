@@ -209,6 +209,7 @@ pub fn optim_bandwidth<'py>(
     let crit_str = match result.criterion {
         fdars_core::smoothing::CvCriterion::Cv => "cv",
         fdars_core::smoothing::CvCriterion::Gcv => "gcv",
+        _ => "unknown",
     };
     dict.set_item("criterion", crit_str)?;
     dict.set_item("value", result.value)?;
