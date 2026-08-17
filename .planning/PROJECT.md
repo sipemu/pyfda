@@ -110,7 +110,7 @@ The documentation — diagrams first, examples second — must make functional d
 - [x] Group A — `fdars.inference` submodule: two-sample permutation tests + SCB bands + FLM inference (`TestResult` → PyDict, deterministic seed) — ✓ Phase 31 (8 functions, 495 passed / 4 skipped; FLM re-fits internally; CR-01 negative-label guard added)
 - [x] Group B — `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth` — ✓ Phase 32 (7-key boxplot dict, outliers as int list, transposition-guarded; 524 passed / 4 skipped)
 - [x] Group C — `constant_basis` + AIC smoothing selection extending `fdars.basis`/`fdars.smoothing` — ✓ Phase 33 (constant_basis + `fdars.basis.smooth_basis_aic` + `optim_bandwidth(criterion="aic")`; Phase-30 CvCriterion stopgap fixed; 535 passed / 4 skipped)
-- [ ] Advisor extension (where relevant) — inference/boxplot diagnostics aspect, grounding invariant + MCP guard-sync preserved
+- [x] Advisor extension — `inference` diagnostics aspect (#14) summarizing TestResult stats + significance flags; grounding invariant + MCP guard-sync (single atomic commit) preserved — ✓ Phase 34 (560 passed / 4 skipped; boxplot-outlier diagnostics deferred to future)
 - [ ] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green
 
 ### Out of Scope
