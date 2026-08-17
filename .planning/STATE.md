@@ -1,19 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
-status: Awaiting next milestone
-stopped_at: "Completed 29-04-PLAN.md (halted at checkpoint:human-verify Task 3)"
-last_updated: "2026-08-17T09:18:42.197Z"
+milestone: v5.0
+milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
+status: planning
+last_updated: "2026-08-17T12:02:51.083Z"
 last_activity: 2026-08-17
-last_activity_desc: Phase 29 complete
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
-current_phase: 29
-current_phase_name: docs-diagrams-worked-examples
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -27,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 ## Current Position
 
-Phase: Milestone v4.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-17 — Milestone v4.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-08-17 — Milestone v5.0 started
 
 ## Performance Metrics
 

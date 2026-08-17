@@ -21,6 +21,20 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
+## Current Milestone: v5.0 fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
+
+**Goal:** Upgrade the pinned `fdars-core` from 0.17.0 to 0.20.0, expose the new upstream functional-inference + depth/boxplot + basis/smoothing capabilities through PyO3 bindings and the Python API, extend the v3.0 AI advisor where relevant, and document everything to the project's method-accurate standard (hand-authored inline SVG diagrams + runnable offline worked examples). Same shape as v4.0.
+
+**Target features:**
+- Crate bump `fdars-core 0.17.0 → 0.20.0` (0.18 = audit-only, 0.19 = inference suite, 0.20 = quick wins; all additive/non-breaking, no new Rust/Python deps); keep `parallel`, do NOT enable `linalg` (needs Rust 1.84 > MSRV 1.83); rebuild via maturin; the ~426-test suite is the regression gate.
+- New bindings — **Group A, Functional inference** (NEW `fdars.inference` submodule, mirroring the v4.0 `fdars.represent`/`fdars.scoring` new-submodule pattern): two-sample permutation tests (`t_perm_test`, `f_perm_test`, `two_sample_mean_test`), simultaneous confidence bands (`mean_scb`, `scb_two_sample_test`), FLM inference on a fitted model (`flm_f_test`, `flm_gof_test`, `oneway_anova_vstat`). All return `TestResult` → PyDict; permutation tests take a deterministic `seed`.
+- New bindings — **Group B, Depth & functional boxplot** (extend `fdars.depth`): `functional_depth` unified dispatcher (`DepthMethod` variants via string param + `#[non_exhaustive]` fallback arm), `functional_boxplot` → `FunctionalBoxplotResult` PyDict (median / central region / fence / outlier flags).
+- New bindings — **Group C, Basis & smoothing quick wins** (extend `fdars.basis`/`fdars.smoothing`): `constant_basis` intercept column, AIC smoothing-parameter selection (`CvCriterion::Aic`, `aic_smoother`, `smooth_basis_aic`); `CvCriterion` is now `#[non_exhaustive]` → forward-compatible fallback arm required.
+- Advisor extension (where relevant): an `inference` diagnostics aspect (summarize `TestResult` p-values/statistics, grounded) and/or functional-boxplot outlier diagnostics; grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync (single atomic commit) exactly as v4.0 Phase 28. Exact scope confirmed during discuss/research.
+- Docs: new dedicated pages + method-accurate hand-authored inline SVG diagrams + runnable offline `FDARS_FENCE_OK` worked examples for inference (two-sample tests, SCB bands, functional ANOVA), functional boxplot, and the basis/smoothing additions; whole-site `mkdocs build --strict` green.
+
+**Key context:** Crosses back into binding + advisor + docs code (`Cargo.toml`, `src/*_mod.rs`, `src/lib.rs`, `python/fdars/`, `python/fdars/advisor`, `python/fdars/mcp`, `docs/`). Upstream 0.18→0.20 is additive/non-breaking (existing signatures unchanged), so the bump should not disturb existing bindings — risk concentrates in new-binding correctness (column-major layout round-trips, `Result` conversions, `#[non_exhaustive]` fallback arms) and method-accuracy of the new diagrams/examples. Open questions for research: exact 0.20 signatures + `TestResult`/`FunctionalBoxplotResult` field names, how FLM inference consumes a fitted `FregreLmResult` (handle vs re-fit), advisor scope per capability, and worked-example datasets (two-sample tests need two groups). Grounding invariant remains the hard constraint on advisor work. Docs build is ~18 min (executed fences run real compute) — keep fence data small. Large scope — the roadmap phases it (bump → bindings ∥ → advisor → docs), same as v4.0.
+
 ## Last Shipped Milestone: v4.0 fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs (shipped 2026-08-17)
 
 **Goal:** Upgrade the pinned `fdars-core` from 0.14.0 to 0.17.0, expose the new upstream functional-data capabilities through PyO3 bindings and the Python API, extend the v3.0 AI advisor to cover the relevant new capabilities, and document everything to the project's method-accurate standard (hand-authored SVG diagrams + runnable worked examples).
@@ -90,9 +104,14 @@ The documentation — diagrams first, examples second — must make functional d
 
 ### Active
 
-<!-- v4.0 in progress — fdars-core 0.17 upgrade: new bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
+<!-- v5.0 in progress — fdars-core 0.20 upgrade: functional inference + depth/boxplot + basis/smoothing bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
 
-_No active milestone — v4.0 shipped and archived 2026-08-17 (16/16 requirements validated). Start the next milestone with `/gsd-new-milestone`. Candidate follow-ups: A11Y-01 (diagram accessibility), EX2-01 (example consolidation), HTTP-01/FUT-01 (HTTP/SSE MCP transport), lighter docs-fence data for faster CI builds, R-parity feature work (`PARITY_PLAN.md`)._
+- [ ] Crate bump `fdars-core 0.17.0 → 0.20.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate
+- [ ] Group A — `fdars.inference` submodule: two-sample permutation tests + SCB bands + FLM inference (`TestResult` → PyDict, deterministic seed)
+- [ ] Group B — `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth`
+- [ ] Group C — `constant_basis` + AIC smoothing selection extending `fdars.basis`/`fdars.smoothing`
+- [ ] Advisor extension (where relevant) — inference/boxplot diagnostics aspect, grounding invariant + MCP guard-sync preserved
+- [ ] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green
 
 ### Out of Scope
 
@@ -153,4 +172,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-17 after v4.0 milestone — shipped & archived; awaiting next milestone*
+*Last updated: 2026-08-17 after starting v5.0 milestone — fdars-core 0.20 upgrade (inference + depth/boxplot + basis/smoothing)*
