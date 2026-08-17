@@ -369,6 +369,169 @@ pub fn scb_two_sample_test<'py>(
 }
 
 // ---------------------------------------------------------------------------
+// flm_f_test
+// ---------------------------------------------------------------------------
+
+/// Functional linear model overall-significance F-test.
+///
+/// Re-fits a scalar-on-function linear regression (``fregre_lm``) internally
+/// from ``data``, ``response``, and ``n_comp``, then applies the
+/// ``fdars_core::inference::flm_f_test`` F-test on the fitted object.
+/// The ``FregreLmResult`` never crosses the Python boundary.
+///
+/// A significant result (small ``p_value``) indicates that the functional
+/// predictor explains a statistically significant fraction of the variance in
+/// the scalar response (i.e. the overall regression is meaningful).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Functional predictors, shape ``(n, m)``. Rows are observations.
+/// response : numpy.ndarray
+///     Scalar response, length ``n``.
+/// n_comp : int, optional
+///     Number of FPC components for the internal fit (default 5). Must be
+///     strictly less than ``n - 1``; a degenerate fit (too few observations
+///     relative to ``n_comp``) raises ``ValueError``.
+///
+/// Returns
+/// -------
+/// dict
+///     ``{"statistic": float, "p_value": float, "n_perm": int}`` with
+///     ``n_perm`` always equal to ``0`` (asymptotic, not permutation-based).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If the internal ``fregre_lm`` fit is degenerate (e.g. ``n_comp`` is too
+///     large relative to ``n``), or if the F-test denominator degrees of
+///     freedom are non-positive, or if ``r_squared`` is non-finite.
+#[pyfunction]
+#[pyo3(signature = (data, response, n_comp=5))]
+pub fn flm_f_test<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    response: PyReadonlyArray1<'py, f64>,
+    n_comp: usize,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let resp = numpy1d_to_vec(response);
+    let fit = to_pyresult(fdars_core::scalar_on_function::fregre_lm(
+        &mat, &resp, None, n_comp,
+    ))?;
+    let result = to_pyresult(fdars_core::inference::flm_f_test(&fit))?;
+    test_result_to_pydict(py, result)
+}
+
+// ---------------------------------------------------------------------------
+// flm_gof_test
+// ---------------------------------------------------------------------------
+
+/// Functional linear model goodness-of-fit test (Ramsey-RESET style).
+///
+/// Re-fits a scalar-on-function linear regression (``fregre_lm``) internally
+/// from ``data``, ``response``, and ``n_comp``, then applies the
+/// ``fdars_core::inference::flm_gof_test`` lack-of-fit test on the fitted
+/// object. The ``FregreLmResult`` never crosses the Python boundary.
+///
+/// A significant result (small ``p_value``) indicates that the functional
+/// linear model misses a nonlinear effect of the functional predictor, i.e.
+/// the linear specification is insufficient.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Functional predictors, shape ``(n, m)``. Rows are observations.
+/// response : numpy.ndarray
+///     Scalar response, length ``n``.
+/// n_comp : int, optional
+///     Number of FPC components for the internal fit (default 5). Must satisfy
+///     ``n > n_comp + Q + 1`` (where Q = 3 auxiliary polynomial powers) for
+///     sufficient residual degrees of freedom; a degenerate fit raises
+///     ``ValueError``.
+///
+/// Returns
+/// -------
+/// dict
+///     ``{"statistic": float, "p_value": float, "n_perm": int}`` with
+///     ``n_perm`` always equal to ``0`` (asymptotic, not permutation-based).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If the internal ``fregre_lm`` fit is degenerate, if ``n <= 4``
+///     (insufficient auxiliary df), if residuals/fitted values contain
+///     non-finite values, or if the auxiliary design is rank-deficient
+///     (constant fitted values).
+#[pyfunction]
+#[pyo3(signature = (data, response, n_comp=5))]
+pub fn flm_gof_test<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    response: PyReadonlyArray1<'py, f64>,
+    n_comp: usize,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let resp = numpy1d_to_vec(response);
+    let fit = to_pyresult(fdars_core::scalar_on_function::fregre_lm(
+        &mat, &resp, None, n_comp,
+    ))?;
+    let result = to_pyresult(fdars_core::inference::flm_gof_test(&fit))?;
+    test_result_to_pydict(py, result)
+}
+
+// ---------------------------------------------------------------------------
+// oneway_anova_vstat
+// ---------------------------------------------------------------------------
+
+/// One-way functional ANOVA V-statistic (asymptotic scaled-χ² test).
+///
+/// Computes the Satterthwaite-approximated V-statistic for testing equality of
+/// group mean functions in a one-way functional ANOVA design. The test is
+/// asymptotic (no permutations); ``result["n_perm"]`` is always ``0``.
+///
+/// Complements the existing permutation ``fanova`` (from ``fdars.regression``):
+/// this function is faster (single computation) but relies on the asymptotic
+/// distribution, while ``fanova`` is exact under the permutation null.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Functional data matrix, shape ``(n, m)``. Rows are observations.
+/// groups : numpy.ndarray
+///     1-D integer array of length ``n`` with 0-indexed group labels. Float
+///     arrays are rejected by the binding (dtype must be int64). Labels need
+///     not be contiguous — any distinct ``int64`` values define the groups.
+/// argvals : numpy.ndarray
+///     Evaluation grid, length ``m``. Must match the column count of ``data``.
+///
+/// Returns
+/// -------
+/// dict
+///     ``{"statistic": float, "p_value": float, "n_perm": int}`` with
+///     ``n_perm`` always equal to ``0`` (asymptotic).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If ``groups.len() != n``, if fewer than 2 distinct groups are present,
+///     if ``n < 3``, or if ``argvals.len() != m`` (or ``m == 0``).
+#[pyfunction]
+#[pyo3(signature = (data, groups, argvals))]
+pub fn oneway_anova_vstat<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    groups: PyReadonlyArray1<'py, i64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let grp = numpy1d_to_usize_vec(groups);
+    let av = numpy1d_to_vec(argvals);
+    let result = to_pyresult(fdars_core::inference::oneway_anova_vstat(&mat, &grp, &av))?;
+    test_result_to_pydict(py, result)
+}
+
+// ---------------------------------------------------------------------------
 // Module registration
 // ---------------------------------------------------------------------------
 
@@ -378,5 +541,8 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(two_sample_mean_test, m)?)?;
     m.add_function(wrap_pyfunction!(mean_scb, m)?)?;
     m.add_function(wrap_pyfunction!(scb_two_sample_test, m)?)?;
+    m.add_function(wrap_pyfunction!(flm_f_test, m)?)?;
+    m.add_function(wrap_pyfunction!(flm_gof_test, m)?)?;
+    m.add_function(wrap_pyfunction!(oneway_anova_vstat, m)?)?;
     Ok(())
 }

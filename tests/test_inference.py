@@ -517,15 +517,17 @@ class TestFlmFTest:
         serialized = json.dumps(result, sort_keys=True)
         assert isinstance(serialized, str)
 
-    def test_degenerate_n_comp_raises_value_error(self, tecator_fixture):
-        """n_comp >= n - 1 makes the internal fregre_lm degenerate (raises ValueError)."""
+    def test_degenerate_input_raises_value_error(self):
+        """n < 3 rows makes the internal fregre_lm degenerate (raises ValueError).
+
+        The core requires at least 3 observations for a valid fit.
+        """
         from fdars.inference import flm_f_test
 
-        X, fat = tecator_fixture
-        n = X.shape[0]
-        # n_comp >= n makes the fit degenerate
+        X_tiny = np.ones((2, 5))  # only 2 rows — triggers InvalidDimension in fregre_lm
+        y_tiny = np.array([1.0, 2.0])
         with pytest.raises(ValueError):
-            flm_f_test(X, fat, n_comp=n)
+            flm_f_test(X_tiny, y_tiny, n_comp=1)
 
 
 # ---------------------------------------------------------------------------
@@ -570,14 +572,18 @@ class TestFlmGofTest:
         result = flm_gof_test(X, fat, n_comp=3)
         assert 0.0 <= result["p_value"] <= 1.0
 
-    def test_degenerate_n_comp_raises_value_error(self, tecator_fixture):
-        """Same degenerate-fit error as flm_f_test (same re-fit path)."""
+    def test_degenerate_input_raises_value_error(self):
+        """n <= 4 rows makes the RESET auxiliary regression degenerate (raises ValueError).
+
+        The GoF test requires n > 4 for sufficient auxiliary degrees of freedom.
+        """
         from fdars.inference import flm_gof_test
 
-        X, fat = tecator_fixture
-        n = X.shape[0]
+        X_tiny = np.ones((4, 5))  # n=4 — triggers degenerate-df error in flm_gof_test
+        X_tiny[:, 0] = [1.0, 2.0, 3.0, 4.0]  # some variation to allow fregre_lm fit
+        y_tiny = np.array([1.0, 2.0, 3.0, 4.0])
         with pytest.raises(ValueError):
-            flm_gof_test(X, fat, n_comp=n)
+            flm_gof_test(X_tiny, y_tiny, n_comp=1)
 
 
 # ---------------------------------------------------------------------------
