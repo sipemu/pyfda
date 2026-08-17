@@ -2,15 +2,19 @@
 gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
-status: planning
-last_updated: "2026-08-17T12:30:00.000Z"
+current_phase: 30
+current_phase_name: crate-bump-regression-gate
+status: verifying
+stopped_at: Completed 30-01-PLAN.md
+last_updated: "2026-08-17T13:20:52.279Z"
 last_activity: 2026-08-17
+last_activity_desc: Phase 30 execution started
 progress:
   total_phases: 6
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
+  percent: 17
 ---
 
 # Project State
@@ -20,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-17)
 
 **Core value:** Upgrade `fdars-core` 0.17.0→0.20.0 (parallel-only, no linalg), expose the new functional-inference + depth/boxplot + basis/smoothing surface through PyO3 bindings + the Python API, extend the v3.0 grounded advisor with an `inference` diagnostics aspect, and document everything method-accurately — with the grounding invariant intact throughout.
-**Current focus:** Phase 30 — crate bump + regression gate (roadmap just created)
+**Current focus:** Phase 30 — crate-bump-regression-gate
 
 ## Current Position
 
-Phase: 30 — Crate Bump + Regression Gate (not started)
-Plan: —
-Status: Roadmap created; ready to plan Phase 30
-Last activity: 2026-08-17 — Milestone v5.0 roadmap created (Phases 30–35)
+Phase: 30 (crate-bump-regression-gate) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-08-17 — Phase 30 execution started
 
 ## Performance Metrics
 
@@ -54,6 +58,11 @@ Last activity: 2026-08-17 — Milestone v5.0 roadmap created (Phases 30–35)
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 30 P01 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -72,6 +81,9 @@ Recent decisions affecting current work:
 - [research]: FLM inference re-fits `fregre_lm` internally (accepts raw data/response/n_comp) — `FregreLmResult` is a non-pyclass Rust struct and never crosses the boundary; matches existing `predict_fregre_lm` pattern
 - [research]: Compound results decompose to PyDict (`TestResult`, `ToleranceBand`, `FunctionalBoxplotResult`); enums cross as `&str` + match arms with `_ => PyValueError` `#[non_exhaustive]` fallback (`DepthMethod`, `CvCriterion::Aic`, `MultiplierDistribution`)
 - [research]: All permutation-test/random-projection seeds exposed as Python `seed=None` resolving to a fixed default for byte-identical reproducibility
+- [Phase ?]: Do NOT enable linalg feature (requires Rust 1.84 > MSRV 1.83; not needed for v5.0 Groups A/B/C)
+- [Phase ?]: Bump lands as single isolated commit (Cargo.toml + smoothing_mod.rs only; Cargo.lock gitignored) before Phase 31/32/33 binding work
+- [Phase ?]: Zero numeric drift on 0.17->0.20 bump: 426 passed / 4 skipped / 0 failed, no tolerance relaxations
 
 ### Pending Todos
 
@@ -100,8 +112,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-17T12:30:00.000Z
-Stopped at: v5.0 roadmap created (Phases 30–35); REQUIREMENTS.md traceability filled (21/21 mapped)
+Last session: 2026-08-17T13:20:52.272Z
+Stopped at: Completed 30-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

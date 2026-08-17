@@ -9,8 +9,8 @@ Requirements for milestone v5.0. Each maps to a roadmap phase. All 13 new bindin
 
 ### Crate Upgrade
 
-- [ ] **DEP-03**: `fdars-core` bumped 0.17.0 → 0.20.0 in `Cargo.toml` with `features = ["parallel"]` (do NOT enable `linalg` — needs Rust 1.84 > MSRV 1.83); `maturin develop` build green. (0.18 was never published; upgrade path is 0.17 → 0.20 directly.)
-- [ ] **DEP-04**: Regression gate — the existing `optim_bandwidth` binding compiles against 0.20.0's now-`#[non_exhaustive]` `CvCriterion` (add a wildcard `_ => PyValueError` fallback arm), and the full existing binding + advisor suite (~426 tests) passes unchanged as the sole success criterion. Isolated commit before any new binding work.
+- [x] **DEP-03**: `fdars-core` bumped 0.17.0 → 0.20.0 in `Cargo.toml` with `features = ["parallel"]` (do NOT enable `linalg` — needs Rust 1.84 > MSRV 1.83); `maturin develop` build green. (0.18 was never published; upgrade path is 0.17 → 0.20 directly.)
+- [x] **DEP-04**: Regression gate — the existing `optim_bandwidth` binding compiles against 0.20.0's now-`#[non_exhaustive]` `CvCriterion` (add a wildcard `_ => PyValueError` fallback arm), and the full existing binding + advisor suite (~426 tests) passes unchanged as the sole success criterion. Isolated commit before any new binding work.
 
 ### Functional Inference (new `fdars.inference` submodule)
 
@@ -84,8 +84,8 @@ Which phases cover which requirements. Populated during roadmap creation (Step 1
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEP-03 | Phase 30 | Pending |
-| DEP-04 | Phase 30 | Pending |
+| DEP-03 | Phase 30 | Complete |
+| DEP-04 | Phase 30 | Complete |
 | INFER-01 | Phase 31 | Pending |
 | INFER-02 | Phase 31 | Pending |
 | INFER-03 | Phase 31 | Pending |
@@ -107,6 +107,7 @@ Which phases cover which requirements. Populated during roadmap creation (Step 1
 | DOCS-07 | Phase 35 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 21 total
 - Mapped to phases: 21
 - Unmapped: 0 ✓
