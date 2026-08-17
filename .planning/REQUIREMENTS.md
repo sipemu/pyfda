@@ -84,32 +84,32 @@ Which phases cover which requirements. Populated during roadmap creation (Step 1
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEP-03 | TBD | Pending |
-| DEP-04 | TBD | Pending |
-| INFER-01 | TBD | Pending |
-| INFER-02 | TBD | Pending |
-| INFER-03 | TBD | Pending |
-| INFER-04 | TBD | Pending |
-| INFER-05 | TBD | Pending |
-| INFER-06 | TBD | Pending |
-| INFER-07 | TBD | Pending |
-| INFER-08 | TBD | Pending |
-| INFER-09 | TBD | Pending |
-| DEPTH-01 | TBD | Pending |
-| DEPTH-02 | TBD | Pending |
-| BASIS-01 | TBD | Pending |
-| BASIS-02 | TBD | Pending |
-| BASIS-03 | TBD | Pending |
-| ADV-03 | TBD | Pending |
-| DOCS-04 | TBD | Pending |
-| DOCS-05 | TBD | Pending |
-| DOCS-06 | TBD | Pending |
-| DOCS-07 | TBD | Pending |
+| DEP-03 | Phase 30 | Pending |
+| DEP-04 | Phase 30 | Pending |
+| INFER-01 | Phase 31 | Pending |
+| INFER-02 | Phase 31 | Pending |
+| INFER-03 | Phase 31 | Pending |
+| INFER-04 | Phase 31 | Pending |
+| INFER-05 | Phase 31 | Pending |
+| INFER-06 | Phase 31 | Pending |
+| INFER-07 | Phase 31 | Pending |
+| INFER-08 | Phase 31 | Pending |
+| INFER-09 | Phase 31 | Pending |
+| DEPTH-01 | Phase 32 | Pending |
+| DEPTH-02 | Phase 32 | Pending |
+| BASIS-01 | Phase 33 | Pending |
+| BASIS-02 | Phase 33 | Pending |
+| BASIS-03 | Phase 33 | Pending |
+| ADV-03 | Phase 34 | Pending |
+| DOCS-04 | Phase 35 | Pending |
+| DOCS-05 | Phase 35 | Pending |
+| DOCS-06 | Phase 35 | Pending |
+| DOCS-07 | Phase 35 | Pending |
 
 **Coverage:**
 - v1 requirements: 21 total
-- Mapped to phases: 0 (roadmapper fills this)
-- Unmapped: 21 ⚠️ (resolved at roadmap creation)
+- Mapped to phases: 21
+- Unmapped: 0 ✓
 
 ### Plan-time verification spikes (from research — resolve before coding the affected binding)
 
@@ -121,4 +121,4 @@ Which phases cover which requirements. Populated during roadmap creation (Step 1
 
 ---
 *Requirements defined: 2026-08-17*
-*Last updated: 2026-08-17 after initial definition*
+*Last updated: 2026-08-17 after roadmap creation — traceability filled (21/21 mapped to Phases 30–35)*
