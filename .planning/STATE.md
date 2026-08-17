@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
 current_phase: 32
-current_phase_name: Group B — Depth/Boxplot Bindings
-status: planning
+current_phase_name: group-b-depth-boxplot-bindings
+status: executing
 stopped_at: Completed 31-03-PLAN.md
-last_updated: "2026-08-17T18:28:03.288Z"
+last_updated: "2026-08-17T18:35:23.627Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 31 Plan 01 complete — fdars.inference submodule with t_perm_test, f_perm_test, two_sample_mean_test
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 4
+  total_plans: 5
   completed_plans: 4
   percent: 33
 ---
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-17)
 
 **Core value:** Upgrade `fdars-core` 0.17.0→0.20.0 (parallel-only, no linalg), expose the new functional-inference + depth/boxplot + basis/smoothing surface through PyO3 bindings + the Python API, extend the v3.0 grounded advisor with an `inference` diagnostics aspect, and document everything method-accurately — with the grounding invariant intact throughout.
-**Current focus:** Phase 31 — group-a-fdars-inference-bindings
+**Current focus:** Phase 32 — group-b-depth-boxplot-bindings
 
 ## Current Position
 
-Phase: 32 — Group B — Depth/Boxplot Bindings
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-17 — Phase 31 complete, transitioned to Phase 32
+Phase: 32 (group-b-depth-boxplot-bindings) — EXECUTING
+Plan: 1 of ?
+Status: Executing Phase 32
+Last activity: 2026-08-17 — Phase 32 execution resumed (wave continue)
 
 ## Performance Metrics
 
