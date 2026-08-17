@@ -79,7 +79,7 @@ Dependency-ordered: the crate bump + regression gate ships first (isolates the s
 - [x] **Phase 26: Interpolation, Imputation & Functional Statistics Bindings** - Spline/interpolation `_with_policy` + `ExtrapolationPolicy`, `impute_missing_values` + `ImputationMethod`, `functional_variance/std/covariance`, `depth_based_median`, `trim_mean`; `fd.interpolate()`/`fd.impute()` methods; multi-curve round-trip transposition tests. Parallel-eligible with Phase 27. (completed 2026-08-15)
 - [x] **Phase 27: Scoring Metrics & Alignment/Registration Bindings** - `functional_mae/mse/mape/msle/explained_variance`; `least_squares_shift_registration` (+ result dict); registration-quality scores; banded `*_with_band` elastic alignment. Parallel-eligible with Phase 26. (completed 2026-08-15)
 - [x] **Phase 28: Advisor Extension** - `scoring` diagnostics method + imputation-quality on `represent` + registration-quality on `alignment`, MCP guard-sync updated in one atomic commit; grounding invariant preserved; offline determinism tests. Depends on Phases 26 + 27. (completed 2026-08-16)
-- [ ] **Phase 29: Docs — Diagrams & Worked Examples** - New/updated inline SVG concept diagrams + runnable offline worked examples across `represent/`, `analyze/`, `align/` (and advisor pages); `mkdocs build --strict` green. Last.
+- [x] **Phase 29: Docs — Diagrams & Worked Examples** - New/updated inline SVG concept diagrams + runnable offline worked examples across `represent/`, `analyze/`, `align/` (and advisor pages); `mkdocs build --strict` green. Last. (completed 2026-08-17)
 
 ### Phase Details
 
@@ -185,7 +185,7 @@ Phases execute in numeric order: 25 → 26 ∥ 27 → 28 → 29 (26 and 27 are p
 | 26. Interpolation, Imputation & Functional Statistics Bindings | 2/2 | Complete    | 2026-08-15 |
 | 27. Scoring Metrics & Alignment/Registration Bindings | 2/2 | Complete    | 2026-08-15 |
 | 28. Advisor Extension | 2/2 | Complete    | 2026-08-16 |
-| 29. Docs — Diagrams & Worked Examples | 0/TBD | Not started | - |
+| 29. Docs — Diagrams & Worked Examples | 4/4 | Complete    | 2026-08-17 |
 
 </details>
 

@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 current_phase: 29
-current_phase_name: docs-diagrams-worked-examples
-status: verifying
+status: completed
 stopped_at: "Completed 29-04-PLAN.md (halted at checkpoint:human-verify Task 3)"
-last_updated: "2026-08-17T09:11:08.362Z"
-last_activity: 2026-08-16
-last_activity_desc: Phase 28 execution started
+last_updated: "2026-08-17T09:13:51.424Z"
+last_activity: 2026-08-17
+last_activity_desc: Phase 29 complete
 progress:
   total_phases: 5
   completed_phases: 5
   total_plans: 11
   completed_plans: 11
+current_phase_name: docs-diagrams-worked-examples
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 ## Current Position
 
-Phase: 29 (docs-diagrams-worked-examples) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-08-16 — Phase 29 execution started
+Phase: 29
+Plan: Not started
+Status: All phases complete
+Last activity: 2026-08-17 — Phase 29 complete
 
 Progress: [██████████] 100%
 
@@ -38,7 +38,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 7 (this milestone); 19 across v1.0–v3.0
+- Total plans completed: 11 (this milestone); 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -50,7 +50,7 @@ Progress: [██████████] 100%
 | 26 | 2 | - | - |
 | 27 | 2 | - | - |
 | 28 | 2 | - | - |
-| 29 | TBD | - | - |
+| 29 | 4 | - | - |
 
 **Recent Trend:**
 

@@ -85,12 +85,13 @@ The documentation — diagrams first, examples second — must make functional d
 - ✓ New `fdars.represent` submodule (spline interpolation + extrapolation policy + missing-value imputation) and functional statistics in `fdars.fdata` (variance/std/covariance, depth-based median resolving to the actual curve, trimmed mean), plus six `Fdata` methods (`interpolate/impute/var/std/cov/median`); layout-correct via multi-curve transposition tests; 328 passed / 4 skipped (REPR-01/02/03, STAT-01/02) — Phase 26
 - ✓ New `fdars.scoring` submodule (5 prediction-scoring metrics — mae/mse/mape/msle/explained_variance, `ValueError` on MAPE-near-zero / MSLE≤−1) and `fdars.alignment` extensions — least-squares shift registration (dict result + `fd.shift_register()`), 3 registration-quality scores (Sobolev uniform-grid guarded), and banded elastic alignment (`*_with_band`, transposition-tested); 388 passed / 4 skipped (STAT-03, ALGN-01/02/03) — Phase 27
 - ✓ Advisor extended to the new capabilities: `scoring` as diagnostics aspect #13 (full grounded treatment; guard-synced atomic commit; `_RUNNABLE_METHODS` still 6), imputation-quality on the `represent` aspect, and registration-quality on the `alignment` aspect — every new diagnostic fdars-computed and citing a real number (grounding invariant preserved), offline-deterministic, no numpy scalars; 426 passed / 4 skipped (ADV-01/02) — Phase 28
+- ✓ Docs sweep: 6 new dedicated pages (represent/interpolation + imputation, analyze/functional-statistics + scoring-metrics, align/shift-registration + banded-alignment) + advisor `aspects.md` update, each with a runnable offline worked example emitting `FDARS_FENCE_OK`, plus 6 new method-accurate hand-authored inline SVG diagrams (SVGO-idempotent; human PNG review); whole-site `mkdocs build --strict` green offline (DOCS-01/02/03) — Phase 29
 
 ### Active
 
 <!-- v4.0 in progress — fdars-core 0.17 upgrade: new bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
 
-_v4.0 in progress — Phases 25 (crate bump), 26 (represent + functional stats), 27 (scoring + alignment/registration), 28 (advisor extension) ✓ shipped. Remaining: diagrams + worked-example docs (29) — the final phase. See `## Current Milestone: v4.0` and `REQUIREMENTS.md` for scoped REQ-IDs._
+_v4.0 — all 5 phases (25 crate bump · 26 represent+stats · 27 scoring+alignment · 28 advisor · 29 docs) shipped on the 0.17.0 baseline; 16/16 requirements validated. Entering milestone lifecycle (audit → complete → cleanup)._
 
 ### Out of Scope
 
@@ -151,4 +152,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-16 after Phase 28 — advisor extended (scoring/imputation/registration), grounding preserved (v4.0 in progress)*
+*Last updated: 2026-08-17 after Phase 29 — v4.0 docs sweep complete; all 5 phases shipped, entering milestone lifecycle*
