@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Shift Registration: rigid horizontal translation to the cross-sectional mean">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Shift Registration: Rigid Horizontal Translation</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Each curve slides left or right by a scalar &#948; — shape unchanged</text>
+
+  <!-- Panel 1: misaligned curves -->
+  <rect x="24" y="60" width="188" height="196" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="118" y="82" text-anchor="middle" fill="#495057">Unregistered</text>
+  <!-- axis -->
+  <line x1="40" y1="226" x2="200" y2="226" stroke="#ced4da" stroke-width="1.2"/>
+  <!-- curve 1: peak at t=0.3 (x≈88) -->
+  <path d="M44 224 C54 224 66 224 78 200 C86 184 90 164 96 148 C102 132 106 130 112 148 C118 166 124 200 132 220 C144 224 160 224 200 224" stroke="#3f51b5" stroke-width="2" stroke-opacity="0.7"/>
+  <!-- curve 2: peak at t=0.5 (x≈122) -->
+  <path d="M44 224 C60 224 80 224 100 218 C110 210 116 190 122 166 C128 142 130 136 136 158 C140 174 148 210 160 222 C172 224 186 224 200 224" stroke="#e8710a" stroke-width="2" stroke-opacity="0.7"/>
+  <!-- curve 3: peak at t=0.65 (x≈148) -->
+  <path d="M44 224 C64 224 90 224 116 222 C128 218 134 210 142 186 C148 166 150 156 156 174 C162 192 168 214 180 222 C190 224 198 224 200 224" stroke="#198754" stroke-width="2" stroke-opacity="0.7"/>
+  <!-- cross-sec mean: blurred, wider -->
+  <path d="M44 224 C64 224 84 222 104 210 C116 200 126 182 134 168 C140 156 146 155 150 162 C156 172 162 192 174 212 C182 220 192 224 200 224" stroke="#dc3545" stroke-width="2.2" stroke-dasharray="5 3"/>
+  <text class="sm" x="118" y="246" text-anchor="middle" fill="#dc3545">mean (blurred)</text>
+
+  <!-- Arrow between panels 1 and 2 -->
+  <path d="M220 158 h30" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M250 158 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method (orange accent) -->
+  <rect x="258" y="60" width="204" height="196" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="mono" x="360" y="84" text-anchor="middle" fill="#fd7e14">shift_register(&#948;&#7522;)</text>
+  <text class="sm" x="360" y="102" text-anchor="middle">&#948;&#7522; = argmin&#8320; &#8747;(X&#7522;(t+&#948;)&#8722;&#956;(t))&#178;dt</text>
+  <!-- single curve before shift, with arrow showing horizontal slide -->
+  <line x1="274" y1="196" x2="446" y2="196" stroke="#ced4da" stroke-width="1"/>
+  <path d="M280 195 C296 195 306 195 318 175 C324 163 328 152 334 144 C338 138 342 138 346 148 C352 162 358 185 370 193 C380 195 400 195 446 195" stroke="#e8710a" stroke-width="2" stroke-opacity="0.5"/>
+  <!-- shifted (after) curve -->
+  <path d="M280 195 C296 195 310 195 330 175 C338 163 342 148 348 138 C352 132 356 132 360 142 C366 156 372 182 386 192 C398 195 420 195 446 195" stroke="#e8710a" stroke-width="2.2"/>
+  <!-- horizontal shift arrow -->
+  <path d="M334 136 h20" stroke="#fd7e14" stroke-width="2"/>
+  <path d="M354 136 l-7 -4 v8 z" fill="#fd7e14"/>
+  <text class="sm" x="352" y="128" text-anchor="middle" fill="#fd7e14">&#948; (rigid)</text>
+  <!-- L2-to-mean shaded area -->
+  <path d="M310 195 C316 192 322 183 328 170 C332 161 338 148 346 145 C352 142 356 146 360 154 C364 164 370 184 382 193 C390 195 406 195 420 195 Z" fill="#fd7e14" fill-opacity="0.10"/>
+  <text class="sm" x="360" y="215" text-anchor="middle" fill="#fd7e14">L2 objective</text>
+  <!-- Contrast key: rigid vs elastic -->
+  <line x1="278" y1="248" x2="302" y2="248" stroke="#3f51b5" stroke-width="2"/>
+  <path d="M302 248 l-7 -4 v8 z" fill="#3f51b5"/>
+  <text class="sm" x="310" y="252" fill="#3f51b5">shift (rigid)</text>
+  <path d="M360 244 Q378 240 388 248 Q398 255 408 248" stroke="#6c757d" stroke-width="1.6" fill="none" stroke-dasharray="3 2"/>
+  <path d="M408 248 l-7 -3 v7 z" fill="#6c757d"/>
+  <text class="sm" x="384" y="263" text-anchor="middle" fill="#6c757d">elastic warp</text>
+
+  <!-- Arrow between panels 2 and 3 -->
+  <path d="M470 158 h30" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M500 158 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: registered curves -->
+  <rect x="508" y="60" width="188" height="196" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="602" y="82" text-anchor="middle" fill="#fd7e14">Registered</text>
+  <!-- axis -->
+  <line x1="524" y1="226" x2="684" y2="226" stroke="#ced4da" stroke-width="1.2"/>
+  <!-- registered curves: peaks now aligned around t=0.5 (x≈604) -->
+  <path d="M528 224 C548 224 564 224 576 200 C582 186 586 165 592 148 C596 134 600 130 604 130 C608 130 612 134 618 148 C624 165 628 186 636 202 C644 218 652 224 666 224" stroke="#3f51b5" stroke-width="2" stroke-opacity="0.7"/>
+  <path d="M528 224 C548 224 564 224 578 202 C584 186 588 165 594 146 C598 132 602 128 606 128 C610 128 614 134 620 150 C626 168 630 188 640 206 C648 218 660 224 672 224" stroke="#e8710a" stroke-width="2" stroke-opacity="0.7"/>
+  <path d="M528 224 C548 224 564 224 580 204 C586 188 590 167 596 150 C600 136 604 132 608 132 C612 136 616 150 622 168 C628 186 634 206 646 218 C656 222 670 224 680 224" stroke="#198754" stroke-width="2" stroke-opacity="0.7"/>
+  <!-- sharpened mean -->
+  <path d="M528 224 C548 224 564 222 580 202 C586 188 590 165 596 146 C600 132 604 128 608 128 C612 132 616 148 622 166 C628 186 634 206 648 218 C660 222 672 224 680 224" stroke="#dc3545" stroke-width="2.4" stroke-dasharray="5 3"/>
+  <text class="sm" x="602" y="246" text-anchor="middle" fill="#dc3545">mean (sharp)</text>
+</svg>
