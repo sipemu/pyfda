@@ -4,16 +4,16 @@ milestone: v4.0
 milestone_name: fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs
 current_phase: 29
 current_phase_name: docs-diagrams-worked-examples
-status: executing
-stopped_at: "Completed 29-03-PLAN.md: align docs + advisor aspects"
-last_updated: "2026-08-17T08:19:28.908Z"
+status: verifying
+stopped_at: "Completed 29-04-PLAN.md (halted at checkpoint:human-verify Task 3)"
+last_updated: "2026-08-17T09:11:08.362Z"
 last_activity: 2026-08-16
 last_activity_desc: Phase 28 execution started
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-13)
 
 Phase: 29 (docs-diagrams-worked-examples) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-16 — Phase 29 execution started
 
-Progress: [█████████░] 91%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [█████████░] 91%
 | Phase 29 P01 | 55 | 2 tasks | 4 files |
 | Phase 29 P02 | 130 | 2 tasks | 4 files |
 | Phase 29 P03 | 40 | 3 tasks | 5 files |
+| Phase 29 P04 | 47 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,8 @@ Recent decisions affecting current work:
 - [Phase ?]: functional-statistics SVG uses 720x480 two-row 4-panel layout for richer depth-median vs mean vs geometric_median illustration
 - [Phase ?]: Used canadian_weather (uniform daily grid) for shift-registration and banded-alignment fences — growth has non-uniform age grid incompatible with sobolev_least_squares_score (lambda>0 requires uniform grid)
 - [Phase ?]: banded-alignment.svg uses 720x480 viewBox (tall) to accommodate DP grid panel + curve comparison panels without crowding
+- [Phase ?]: All 6 new Phase 29 pages wired into mkdocs.yml; Shift Registration placed before Elastic Alignment; Banded Alignment after Advanced Elastic Alignment; Functional Statistics and Scoring Metrics after Covariance Functions
+- [Phase ?]: Phase-end gates all green: whole-site strict build (1088s, exit 0, offline), SVGO idempotent for all 6 SVGs, FDARS_FENCE_OK present in all 6 built pages — halted at blocking human diagram-review checkpoint
 
 ### Pending Todos
 
@@ -138,8 +141,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-17T08:19:28.883Z
-Stopped at: Completed 29-03-PLAN.md: align docs + advisor aspects
+Last session: 2026-08-17T09:11:08.347Z
+Stopped at: Completed 29-04-PLAN.md (halted at checkpoint:human-verify Task 3)
 Resume file: None
 
 ## Operator Next Steps
