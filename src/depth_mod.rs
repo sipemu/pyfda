@@ -509,8 +509,8 @@ pub fn functional_depth<'py>(
     seed: Option<u64>,
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
-    let m = depth_method_from_str(method, scale, nproj, seed)?;
-    let result = to_pyresult(fdars_core::depth::functional_depth(&d, m))?;
+    let depth_method = depth_method_from_str(method, scale, nproj, seed)?;
+    let result = to_pyresult(fdars_core::depth::functional_depth(&d, depth_method))?;
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -574,8 +574,12 @@ pub fn functional_boxplot<'py>(
     seed: Option<u64>,
 ) -> PyResult<Bound<'py, PyDict>> {
     let d = numpy2d_to_fdmatrix(data)?;
-    let m = depth_method_from_str(method, scale, nproj, seed)?;
-    let result = to_pyresult(fdars_core::depth::functional_boxplot(&d, m, factor))?;
+    let depth_method = depth_method_from_str(method, scale, nproj, seed)?;
+    let result = to_pyresult(fdars_core::depth::functional_boxplot(
+        &d,
+        depth_method,
+        factor,
+    ))?;
     boxplot_result_to_pydict(py, result)
 }
 

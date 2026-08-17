@@ -117,6 +117,15 @@ class TestFunctionalDepthDeterminism:
         d2 = fdars.depth.functional_depth(X, method="random_projection", nproj=20, seed=None)
         assert np.array_equal(d1, d2), "seed=None must resolve to a fixed default giving identical results"
 
+    def test_seed_none_equals_seed_zero(self, cw_temp):
+        """Documented contract: seed=None resolves to seed=0."""
+        import fdars.depth
+
+        X = cw_temp
+        d_none = fdars.depth.functional_depth(X, method="random_projection", nproj=20, seed=None)
+        d_zero = fdars.depth.functional_depth(X, method="random_projection", nproj=20, seed=0)
+        assert np.array_equal(d_none, d_zero), "seed=None must equal seed=0 (documented contract)"
+
 
 class TestFunctionalDepthValueErrors:
     """Degenerate inputs raise ValueError."""
@@ -257,7 +266,7 @@ class TestFunctionalBoxplotValueErrors:
     def test_unknown_method_raises(self, cw_temp):
         import fdars.depth
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="not_a_method"):
             fdars.depth.functional_boxplot(cw_temp, method="not_a_method", factor=1.5)
 
     def test_random_projection_boxplot_small_nproj(self, cw_temp):
@@ -273,3 +282,25 @@ class TestFunctionalBoxplotValueErrors:
         )
         assert np.array_equal(r1["depths"], r2["depths"]), "boxplot depths must be seed-reproducible"
         assert np.array_equal(r1["median"], r2["median"])
+
+
+class TestFunctionalBoxplotDeterminism:
+    """seed=None must equal seed=0 for functional_boxplot (documented contract)."""
+
+    def test_boxplot_seed_none_equals_seed_zero(self, cw_temp):
+        """Documented contract: seed=None resolves to seed=0 for functional_boxplot."""
+        import fdars.depth
+
+        X = cw_temp
+        r_none = fdars.depth.functional_boxplot(
+            X, method="random_projection", factor=1.5, nproj=20, seed=None
+        )
+        r_zero = fdars.depth.functional_boxplot(
+            X, method="random_projection", factor=1.5, nproj=20, seed=0
+        )
+        assert np.array_equal(r_none["depths"], r_zero["depths"]), (
+            "seed=None must equal seed=0 for boxplot depths (documented contract)"
+        )
+        assert np.array_equal(r_none["median"], r_zero["median"]), (
+            "seed=None must equal seed=0 for boxplot median (documented contract)"
+        )
