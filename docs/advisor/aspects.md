@@ -19,15 +19,16 @@ The three task families available for every aspect are:
 |---|---|---|---|
 | `clustering` | `fdars.clustering.kmeans_fd` | k, cluster_means, cluster_sizes, pairwise distances, separations (7) | [python-api.md](python-api.md) |
 | `smoothing` | `fdars.basis.smooth_basis_gcv`, `pspline_fit_gcv` | lambda sweep or single-fit GCV scalars (8) | — |
-| `alignment` | `fdars.alignment.karcher_mean`, `karcher_mean_elastic` | mean curve stats, amplitude/phase distances, convergence (14) | — |
+| `alignment` | `fdars.alignment.karcher_mean`, `karcher_mean_elastic` | mean curve stats, amplitude/phase distances, convergence, registration-quality scores (17) | — |
 | `basis` | `fdars.basis.basis_nbasis_cv` | n_basis sweep, GCV curve, optimal n_basis (8) | — |
 | `fpca` | `fdars.regression.fpca` | n_components, eigenvalues, cumulative variance, phase leakage (8) | [this page](#fpca) |
-| `represent` | raw `Fdata` or `{"data":…,"argvals":…}` dict | grid stats, data range (10) | — |
+| `represent` | raw `Fdata` or `{"data":…,"argvals":…}` dict | grid stats, data range, imputation-quality diagnostics (13) | — |
 | `depth` | `fdars.depth.*` score arrays | n_obs, depth statistics, histogram (9) | [this page](#depth) |
 | `outliers` | `fdars.outliers.*` result dicts | n_outliers, outlier_fraction, magnitude/shape/outliergram ranges (10) | — |
 | `classification` | `fdars.classification.*` result dicts | accuracy, cv_error_rate, fold_error_std, best_ncomp (7) | — |
 | `regression` | `fdars.regression.fregre_*`, `fosr`, `fosr_fpc` | r_squared, residual stats, beta_t_range, has_fosr (8) | — |
 | `regression_cv` | `fdars.regression.fregre_cv`, `model_selection_ncomp` | optimal_k, cv_curve, elbow_present (6) | — |
+| `scoring` | `fdars.scoring.functional_mae/mse/mape/msle/explained_variance` | five integrated prediction-quality scalars (5) | [this page](#scoring) |
 | `spm` | `fdars.spm.spm_phase1` | T², SPE stats, exceedance rates, eigenvalues, kurtosis check (14) | — |
 
 ---
@@ -104,9 +105,15 @@ Without `argvals`, the distance keys are `None` but mean-curve stats are always 
 | `phase_max` | Maximum phase distance; `None` when `argvals` absent |
 | `converged` | Whether the Karcher iteration converged; `None` if not reported |
 | `n_iter` | Number of Karcher iterations taken; `None` if not reported |
+| `ls_score` | `least_squares_score` on the registered curves — mean $L^2$ spread around the mean; lower is better; `None` when registration inputs absent |
+| `pairwise_corr_score` | `pairwise_correlation_score` — mean centered functional Pearson correlation across all pairs; range $[-1,1]$; higher is better; `None` when absent |
+| `sobolev_score` | `sobolev_least_squares_score` at a default $\lambda$ — LS score plus derivative penalty; lower is better; `None` when absent or grid is non-uniform |
 
-**Task families:** `"interpretation"` (assess phase/amplitude separation) · `"parameter"` (adjust max iterations or tolerance)
-· `"method"` (switch between elastic and non-elastic alignment)
+!!! tip "Registration-quality interpretation"
+    `pairwise_corr_score` below 0.7 after shift registration suggests the phase variation is not purely rigid — prefer elastic alignment (`karcher_mean`). A high `ls_score` relative to the cross-sectional variance indicates persistent phase spread after alignment, recommending a wider `max_shift` or more Karcher iterations.
+
+**Task families:** `"interpretation"` (assess phase/amplitude separation, registration quality) · `"parameter"` (adjust max iterations, tolerance, or max_shift)
+· `"method"` (switch between elastic and non-elastic alignment; try banded alignment for large datasets)
 
 ---
 
@@ -196,9 +203,17 @@ method output. Pass either an `Fdata` object or a plain dict with `"data"` and `
 | `data_range_min` | Minimum value in the data matrix |
 | `data_range_max` | Maximum value in the data matrix |
 | `data_range_mean` | Mean value in the data matrix |
+| `nan_frac` | Fraction of all data-matrix entries that are NaN; `None` when no NaN inputs were present |
+| `has_boundary_nans` | `True` when any NaN appears in the first or last column of the data matrix (boundary NaN requires boundary-extension imputation rather than interpolation); `None` when no NaN inputs present |
+| `imputation_method` | The `ImputationMethod` string used (`"linear"`, `"mean"`, or `"constant"`); `None` when imputation was not applied |
 
-**Task families:** `"interpretation"` (assess data quality / grid regularity) · `"parameter"` (adjust grid density or range)
-· `"method"` (switch to irregular-grid methods if `is_uniform_grid=False`)
+These three keys default `None` when the input data contains no NaN values — they populate only after an `impute_missing_values` call is included in the result.
+
+!!! tip "Imputation-quality guidance"
+    `nan_frac` above 0.30 suggests high missingness — the `"mean"` or `"constant"` imputation methods are safer than `"linear"` when more than a third of values per curve are missing. `has_boundary_nans=True` means linear imputation will extrapolate from the nearest valid interior point; consider `"mean"` imputation instead if the boundary values matter for downstream analysis.
+
+**Task families:** `"interpretation"` (assess data quality / grid regularity / missingness) · `"parameter"` (adjust grid density or range; choose imputation method)
+· `"method"` (switch to irregular-grid methods if `is_uniform_grid=False`; use `impute_missing_values` before smoothing or depth when NaN present)
 
 ---
 
@@ -355,6 +370,74 @@ Two source functions are detected by key presence: `fregre_cv` exposes `"optimal
 
 **Task families:** `"interpretation"` (read optimal k and curve shape) · `"parameter"` (widen k range to expose elbow)
 · `"method"` (switch CV strategy or regression variant)
+
+---
+
+## scoring
+
+**fdars source:** `fdars.scoring.functional_mae`, `fdars.scoring.functional_mse`,
+`fdars.scoring.functional_mape`, `fdars.scoring.functional_msle`,
+`fdars.scoring.functional_explained_variance`
+
+The `scoring` aspect reports domain-integrated prediction-quality scalars. Unlike
+column-wise averages, each metric integrates the error (or squared error) over the
+evaluation domain via Simpson's rule. Pass a dict with the computed scalar values directly
+to `build_diagnostics` — the advisor does not recompute them.
+
+```python
+from fdars.advisor import build_diagnostics
+from fdars import scoring
+
+# Assuming y_true, y_pred, argvals are arrays
+result = {
+    "functional_mae": scoring.functional_mae(y_true, y_pred, argvals),
+    "functional_mse": scoring.functional_mse(y_true, y_pred, argvals),
+    "functional_explained_variance": scoring.functional_explained_variance(y_true, y_pred, argvals),
+}
+diag = build_diagnostics(result, method="scoring")
+```
+
+| Key | Meaning |
+|---|---|
+| `method` | Always `"scoring"` |
+| `functional_mae` | Mean absolute integrated error; same units as the data; robust to outlier curves |
+| `functional_mse` | Mean squared integrated error; penalises large errors more heavily; squared units |
+| `functional_mape` | Mean absolute percentage integrated error; `None` when not computed or inputs near zero |
+| `functional_msle` | Mean squared log-error; `None` when not computed; requires all values $> -1$ |
+| `functional_explained_variance` | Integrated explained variance; range $(-\infty, 1]$; 1 = perfect prediction |
+
+!!! danger "MAPE and MSLE domain restrictions"
+    `functional_mape` raises `ValueError` when any `|y_true(t)| < ε` for any grid point — the library correctly rejects inputs near zero rather than producing numerically undefined results. `functional_msle` raises `ValueError` when any value is $\leq -1$. Do not include these keys in the result dict when the data does not satisfy their domain conditions; use `functional_mae` or `functional_mse` instead.
+
+The fence below builds a scoring diagnostics report on a synthetic regression prediction.
+No API key is required — this runs live in the docs build.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from fdars.advisor import build_diagnostics
+from fdars import scoring
+
+rng = np.random.default_rng(42)
+n, m = 12, 80
+t = np.linspace(0, 1, m)
+y_true = np.array([np.sin(2 * np.pi * t + rng.uniform(-0.2, 0.2)) for _ in range(n)])
+y_pred = y_true + rng.normal(0, 0.08, size=y_true.shape)
+
+result = {
+    "functional_mae": scoring.functional_mae(y_true, y_pred, t),
+    "functional_mse": scoring.functional_mse(y_true, y_pred, t),
+    "functional_explained_variance": scoring.functional_explained_variance(y_true, y_pred, t),
+}
+diag = build_diagnostics(result, method="scoring")
+
+print(f"functional_mae:                {diag['functional_mae']:.4f}")
+print(f"functional_mse:                {diag['functional_mse']:.4f}")
+print(f"functional_explained_variance: {diag['functional_explained_variance']:.4f}  FDARS_FENCE_OK")
+```
+
+**Task families:** `"interpretation"` (read prediction quality and choose a primary metric for reporting)
+· `"parameter"` (adjust regularisation or model complexity to improve scores)
+· `"method"` (switch from scalar to functional regression; use `functional_explained_variance` as primary quality signal; if MAPE or MSLE are undefined, fall back to MAE/MSE)
 
 ---
 
