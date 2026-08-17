@@ -122,7 +122,11 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
   4. The `fdars.inference` submodule is registered (`src/inference_mod.rs` + `register_submodule!` in `lib.rs` + `_submodule_names`) and importable both as `fdars.inference.fn` and `from fdars.inference import fn`; all `seed=None` params resolve to a fixed default for byte-identical reproducibility across two calls.
   5. Degenerate inputs (mismatched grids, too few curves, invalid params) raise `ValueError` — no `.unwrap()`, all fallible functions routed through `to_pyresult()`.
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+- [ ] 31-01-PLAN.md — Submodule scaffold + verification spike (all 8 signatures) + end-to-end tracer (t_perm_test) + f_perm_test + two_sample_mean_test (INFER-01/02/03/09)
+- [ ] 31-02-PLAN.md — Degras SCB bands: mean_scb (ToleranceBand → dict) + scb_two_sample_test; string multiplier + ValueError fallback (INFER-04/05)
+- [ ] 31-03-PLAN.md — FLM re-fit inference (flm_f_test + flm_gof_test) + oneway_anova_vstat (0-indexed groups) (INFER-06/07/08)
 
 ### Phase 32: Group B — Depth/Boxplot Bindings
 
@@ -184,7 +188,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 30. Crate Bump + Regression Gate | 0/1 | Not started | - |
-| 31. Group A — `fdars.inference` Bindings | 0/? | Not started | - |
+| 31. Group A — `fdars.inference` Bindings | 0/3 | Not started | - |
 | 32. Group B — Depth/Boxplot Bindings | 0/? | Not started | - |
 | 33. Group C — Basis/Smoothing Quick Wins | 0/? | Not started | - |
 | 34. Advisor Extension | 0/? | Not started | - |
