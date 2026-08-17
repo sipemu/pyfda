@@ -26,8 +26,8 @@ Requirements for milestone v5.0. Each maps to a roadmap phase. All 13 new bindin
 
 ### Depth & Functional Boxplot (extend `fdars.depth`)
 
-- [ ] **DEPTH-01**: User can compute self-depth for a sample via `fdars.depth.functional_depth(data, method="fraiman_muniz"|"band"|"modified_band"|"random_projection", **kwargs)` → `ndarray (n,)`; `method` dispatches to a `DepthMethod` variant with a `#[non_exhaustive]` wildcard fallback.
-- [ ] **DEPTH-02**: User can compute a López-Pintado–Romo functional boxplot via `fdars.depth.functional_boxplot(data, method=..., factor=1.5, **kwargs)` → dict `{median, central_lower, central_upper, whisker_lower, whisker_upper, outliers, depths}` (band fields as 1-D arrays via the numpy conversion helper with a round-trip shape test; `outliers` as a Python list of ints).
+- [x] **DEPTH-01**: User can compute self-depth for a sample via `fdars.depth.functional_depth(data, method="fraiman_muniz"|"band"|"modified_band"|"random_projection", **kwargs)` → `ndarray (n,)`; `method` dispatches to a `DepthMethod` variant with a `#[non_exhaustive]` wildcard fallback.
+- [x] **DEPTH-02**: User can compute a López-Pintado–Romo functional boxplot via `fdars.depth.functional_boxplot(data, method=..., factor=1.5, **kwargs)` → dict `{median, central_lower, central_upper, whisker_lower, whisker_upper, outliers, depths}` (band fields as 1-D arrays via the numpy conversion helper with a round-trip shape test; `outliers` as a Python list of ints).
 
 ### Basis & Smoothing Quick Wins (extend `fdars.basis` / `fdars.smoothing`)
 
@@ -95,8 +95,8 @@ Which phases cover which requirements. Populated during roadmap creation (Step 1
 | INFER-07 | Phase 31 | Complete |
 | INFER-08 | Phase 31 | Complete |
 | INFER-09 | Phase 31 | Complete |
-| DEPTH-01 | Phase 32 | Pending |
-| DEPTH-02 | Phase 32 | Pending |
+| DEPTH-01 | Phase 32 | Complete |
+| DEPTH-02 | Phase 32 | Complete |
 | BASIS-01 | Phase 33 | Pending |
 | BASIS-02 | Phase 33 | Pending |
 | BASIS-03 | Phase 33 | Pending |
