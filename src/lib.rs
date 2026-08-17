@@ -15,6 +15,7 @@ mod conformal_mod;
 mod depth_mod;
 mod explain_mod;
 mod fdata_mod;
+mod inference_mod;
 mod metric_mod;
 mod outliers_mod;
 mod regression_mod;
@@ -56,6 +57,7 @@ fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     register_submodule!(m, "explain", explain_mod::register);
     register_submodule!(m, "represent", represent_mod::register);
     register_submodule!(m, "scoring", scoring_mod::register);
+    register_submodule!(m, "inference", inference_mod::register);
 
     Ok(())
 }

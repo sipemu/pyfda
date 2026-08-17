@@ -50,6 +50,7 @@ _submodule_names = (
     "explain",
     "represent",
     "scoring",
+    "inference",
 )
 
 for _name in _submodule_names:
