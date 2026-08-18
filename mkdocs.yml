@@ -129,6 +129,8 @@ nav:
     - Process Monitoring: monitoring/spm.md
     - Advanced SPM: monitoring/advanced-spm.md
     - Profile & Partial-Domain Monitoring: monitoring/profile-partial-monitoring.md
+  - Inference:
+    - Functional Inference: inference/functional-inference.md
   - Analyze:
     - analyze/index.md
     - Tolerance Bands: analyze/tolerance-bands.md
