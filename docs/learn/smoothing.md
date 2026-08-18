@@ -400,6 +400,90 @@ print(f"Optimal nbasis: {cv_basis['optimal_nbasis']}")
     A roughness penalty (next section) prevents overfitting even with many basis
     functions, so you rarely need to tune $K$ precisely once you penalize.
 
+### AIC-based selection
+
+GCV approximates leave-one-out cross-validation efficiently, but **AIC (Akaike Information Criterion)** penalises effective degrees of freedom (EDF) more explicitly:
+
+$$
+\mathrm{AIC}(\lambda) = n \log\!\left(\frac{\mathrm{RSS}}{n}\right) + 2\,\mathrm{edf}(\lambda)
+$$
+
+where $\mathrm{edf}(\lambda) = \operatorname{tr}(H_\lambda)$ is the trace of the hat matrix. AIC tends to select slightly more complex models than GCV when the signal-to-noise ratio is high, making it a useful cross-check.
+
+Three fdars functions expose AIC-based selection:
+
+**`smooth_basis_aic` (AIC-optimal P-spline penalty)**
+
+Searches a log-$\lambda$ grid and returns the fit minimising AIC. The returned dict includes `fitted`, `coefficients`, `edf`, `aic`, `gcv`, `bic`, and `nbasis`. Use this when you want the same output shape as `smooth_basis_gcv` but with AIC-selected smoothness:
+
+```python
+from fdars.basis import smooth_basis_aic
+
+result = smooth_basis_aic(
+    fd_noisy.data, age,
+    n_basis=20, basis_type="bspline", lfd_order=2,
+)
+print(f"AIC:  {result['aic']:.4f}")
+print(f"EDF:  {result['edf']:.2f}")
+```
+
+**`optim_bandwidth(criterion="aic")` (AIC-optimal kernel bandwidth)**
+
+Selects the kernel bandwidth that minimises AIC instead of GCV. The interface is identical to the GCV call — only `criterion="aic"` changes:
+
+```python
+from fdars.smoothing import optim_bandwidth
+
+result_aic = optim_bandwidth(age, y, criterion="aic", kernel="gaussian")
+print(f"h_opt (AIC): {result_aic['h_opt']:.4f}")
+```
+
+**`basis_nbasis_cv(criterion="aic")` (AIC-optimal basis count)**
+
+Searches the basis-count grid and selects $K$ by AIC rather than GCV. Particularly useful for B-splines when you suspect GCV under-smooths (AIC's stronger EDF penalty pushes toward sparser representations):
+
+```python
+from fdars.basis import basis_nbasis_cv
+
+cv_aic = basis_nbasis_cv(
+    fd_noisy.data, age,
+    nbasis_min=5, nbasis_max=20,
+    basis_type="bspline", criterion="aic",
+)
+print(f"Optimal n_basis (AIC): {cv_aic['optimal_nbasis']}")
+```
+
+The fence below runs all three AIC paths on a small synthetic dataset to confirm they return valid selections. No real dataset is loaded — the grid is kept tiny to protect the build.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from fdars.basis import smooth_basis_aic, basis_nbasis_cv
+from fdars.smoothing import optim_bandwidth
+
+rng = np.random.default_rng(42)
+t = np.linspace(0, 1, 30)
+true = np.sin(2 * np.pi * t)
+X = np.array([true + 0.25 * rng.standard_normal(t.size) for _ in range(12)])
+y = X[0]
+
+# AIC-optimal P-spline penalty
+r_aic = smooth_basis_aic(X, t, n_basis=10, n_grid=15)
+# AIC-optimal kernel bandwidth
+bw_aic = optim_bandwidth(t, y, criterion="aic", n_grid=20)
+# AIC-optimal basis count
+cv_aic = basis_nbasis_cv(X, t, nbasis_min=4, nbasis_max=12, criterion="aic")
+
+print(f"smooth_basis_aic  edf: {r_aic['edf']:.2f}  aic: {r_aic['aic']:.3f}")
+print(f"optim_bandwidth   h_opt (AIC): {bw_aic['h_opt']:.4f}")
+print(f"basis_nbasis_cv   optimal_nbasis (AIC): {cv_aic['optimal_nbasis']}  FDARS_FENCE_OK")
+```
+
+!!! tip "GCV vs AIC in practice"
+    GCV and AIC usually agree within one or two basis functions / bandwidth steps.
+    AIC may prefer a slightly more complex model when the true signal has sharp
+    features. GCV is the faster approximation for large samples; AIC's explicit EDF
+    accounting can be more reliable when $n$ is small relative to $m$.
+
 ---
 
 ## Penalized Basis (P-spline) Smoothing
@@ -662,6 +746,7 @@ adolescence as the girls approach their adult heights.
 | Basis expansion | `fdars.basis` | Dimensionality reduction |
 | P-spline / penalized basis | `fdars.basis` | General purpose, automatic penalty; smooths all curves at once |
 | Fourier basis | `fdars.basis` | Periodic / seasonal data |
+| AIC-optimal smoothing | `fdars.basis`, `fdars.smoothing` | Explicit EDF penalisation; cross-check for GCV |
 
 **Rules of thumb:**
 

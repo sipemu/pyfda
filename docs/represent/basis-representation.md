@@ -167,6 +167,46 @@ reconstructed_f = basis_to_fdata_1d(coeffs_f, fd_p.argvals, n_basis=nbasis_f,
                                      basis_type="fourier")
 ```
 
+## Constant basis
+
+The **constant basis** is the simplest possible basis: a single function $\phi_1(t) = 1$ that is one everywhere on the domain. Its basis matrix is an $m \times 1$ all-ones vector, so projection onto it computes the curve mean and reconstruction gives the constant mean surface.
+
+Use cases include:
+
+- **Intercept column** in a functional regression design matrix (the "level" component in a model $X(t) = c_0 \cdot 1 + \sum_{j>0} c_j \phi_j(t)$).
+- **Mean-correction reference** -- subtract the constant-basis projection before applying depth or alignment methods to remove the global offset.
+- **Sanity check** -- if a functional method is tested against the constant basis, its output should collapse to a scalar (the projected coefficient equals the observed mean).
+
+```python
+from fdars.basis import constant_basis
+```
+
+The function takes a single argument -- the evaluation grid -- and returns a 1-D array of ones with the same length.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from fdars.basis import constant_basis
+
+t = np.linspace(0, 1, 50)
+phi = np.asarray(constant_basis(t))
+
+print(f"Shape:   {phi.shape}")       # (50,)
+print(f"All ones: {np.all(phi == 1.0)}  FDARS_FENCE_OK")
+```
+
+| Parameter | Description |
+|-----------|-------------|
+| `argvals` | Evaluation grid, length m |
+
+| Return | Description |
+|--------|-------------|
+| `ndarray (m,)` | All-ones float64 array |
+
+!!! note "One function, one coefficient"
+    Because the constant basis has exactly one function, `fdata_to_basis_1d` with `n_basis=1` and any basis type does NOT produce the constant basis — it produces the first B-spline or Fourier function. Use `constant_basis` directly when you need the intercept vector.
+
+---
+
 ## Evaluating basis matrices directly
 
 For advanced use (e.g., building your own penalty matrices), you can evaluate the raw basis matrix.
@@ -458,6 +498,7 @@ The CV-selected B-spline (green) and the GCV P-spline (purple) both hug the dash
 | `select_basis_auto_1d(data, argvals, ...)` | Automatic basis type + count selection |
 | `basis_nbasis_cv(data, argvals, ...)` | Cross-validated basis count selection |
 | `smooth_basis_gcv(data, argvals, n_basis, ...)` | Basis smoothing with GCV penalty selection |
+| `constant_basis(argvals)` | Constant (intercept) basis — all-ones vector |
 
 All functions are imported from `fdars.basis`.
 
