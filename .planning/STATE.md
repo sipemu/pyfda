@@ -3,10 +3,9 @@ gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
 current_phase: 35
-current_phase_name: docs-diagrams-worked-examples
-status: executing
+status: completed
 stopped_at: 35-04-PLAN.md Task 3 — blocking human-verify checkpoint (diagram method-accuracy review pending)
-last_updated: "2026-08-18T20:40:28.203Z"
+last_updated: "2026-08-18T21:06:05.764Z"
 last_activity: 2026-08-18
 last_activity_desc: Phase 35 execution started
 progress:
@@ -15,6 +14,7 @@ progress:
   total_plans: 11
   completed_plans: 11
   percent: 100
+current_phase_name: docs-diagrams-worked-examples
 ---
 
 # Project State
@@ -28,16 +28,16 @@ See: .planning/PROJECT.md (updated 2026-08-17)
 
 ## Current Position
 
-Phase: 35 (docs-diagrams-worked-examples) — EXECUTING
-Plan: 1 of ?
-Status: Executing Phase 35
-Last activity: 2026-08-18 — Phase 35 execution resumed (wave continue)
+Phase: 35
+Plan: Not started
+Status: All phases complete
+Last activity: 2026-08-18 — Phase 35 complete
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 7 (this milestone); 11 in v4.0; 19 across v1.0–v3.0
+- Total plans completed: 11 (this milestone); 11 in v4.0; 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -50,7 +50,7 @@ Last activity: 2026-08-18 — Phase 35 execution resumed (wave continue)
 | 32 | 1 | - | - |
 | 33 | 1 | - | - |
 | 34 | 1 | - | - |
-| 35 | - | - | - |
+| 35 | 4 | - | - |
 
 **Recent Trend:**
 

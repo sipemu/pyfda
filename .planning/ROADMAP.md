@@ -89,7 +89,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 - [x] **Phase 32: Group B — Depth/Boxplot Bindings** - `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth` (completed 2026-08-17)
 - [x] **Phase 33: Group C — Basis/Smoothing Quick Wins** - `constant_basis` + AIC basis/kernel selection extending `fdars.basis`/`fdars.smoothing` (completed 2026-08-17)
 - [x] **Phase 34: Advisor Extension** - `inference` diagnostics aspect; grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync (single atomic commit) preserved (completed 2026-08-17)
-- [ ] **Phase 35: Docs — Diagrams & Worked Examples** - New pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` examples; `mkdocs build --strict` green
+- [x] **Phase 35: Docs — Diagrams & Worked Examples** - New pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` examples; `mkdocs build --strict` green (completed 2026-08-18)
 
 ## Phase Details (v5.0)
 
@@ -191,8 +191,8 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 
 - [x] 35-01-PLAN.md — Functional Inference page (two-sample tests, SCB, ANOVA) + 3 SVGs + fences + Inference nav (tracer-first)
 - [x] 35-02-PLAN.md — Functional Boxplot page under analyze/ + SVG + fence + nav
-- [ ] 35-03-PLAN.md — constant_basis + AIC selection doc additions + advisor inference aspect
-- [ ] 35-04-PLAN.md — Whole-site strict build + SVGO/determinism gate + blocking human diagram review
+- [x] 35-03-PLAN.md — constant_basis + AIC selection doc additions + advisor inference aspect
+- [x] 35-04-PLAN.md — Whole-site strict build + SVGO/determinism gate + blocking human diagram review
 
 **UI hint**: yes
 
