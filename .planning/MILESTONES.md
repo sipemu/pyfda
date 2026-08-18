@@ -1,5 +1,22 @@
 # Milestones
 
+## v5.0 fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing (Shipped: 2026-08-18)
+
+**Phases completed:** 6 phases, 11 plans, 17 tasks
+
+**Key accomplishments:**
+
+- fdars-core pinned at 0.20.0 (parallel-only) with CvCriterion #[non_exhaustive] wildcard arm; 426-test regression baseline confirmed green with zero numeric drift
+- New `fdars.inference` submodule (8 functions: two-sample permutation tests, Degras SCB bands, FLM post-hoc inference re-fitting `fregre_lm` internally, and one-way ANOVA V-statistic), registered and importable; `TestResult`/`ToleranceBand` → PyDict, deterministic `seed=None`→0; degenerate inputs raise `ValueError` (incl. a negative-group-label guard from code review)
+- Unified string-dispatched `functional_depth` + `functional_boxplot` with 7-key dict contract and layout-guard tests, extending `fdars.depth` via fdars-core 0.20 dispatch functions.
+- AIC model selection added for kernel bandwidth (optim_bandwidth), basis smoothing (smooth_basis_aic), and intercept column (constant_basis) via three additive PyO3 bindings against fdars-core 0.20.
+- Created the Functional Inference page with three method-accurate hand-authored SVGs and four offline executed fences covering two-sample tests, SCB bands, one-way functional ANOVA, and FLM inference.
+- Functional Boxplot page with López-Pintado–Romo depth-fence theory, STYLE_SPEC-conformant SVG (median/50% central region/whiskers/outliers), executed Canadian Weather fence emitting FDARS_FENCE_OK, and Analyze nav wiring.
+- docs/represent/basis-representation.md
+- Whole-site `mkdocs build --strict` (19 min, exit 0) + SVGO idempotence (all 4 new SVGs PASS) + pytest green (560 passed / 4 skipped) — halted at blocking human diagram method-accuracy review.
+
+---
+
 ## v4.0 fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs (Shipped: 2026-08-17)
 
 **Phases completed:** 5 phases, 11 plans, 16 tasks

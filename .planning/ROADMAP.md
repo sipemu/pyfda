@@ -7,7 +7,7 @@
 - ✅ **v2.1 — Document the AI Advisor** — Phases 14–18 (shipped 2026-08-11)
 - ✅ **v3.0 — Provider-Agnostic Advisor, Full-Library Coverage** — Phases 19–24 (shipped 2026-08-12)
 - ✅ **v4.0 — fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs** — Phases 25–29 (shipped 2026-08-17)
-- 🚧 **v5.0 — fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing** — Phases 30–35 (in progress)
+- ✅ **v5.0 — fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing** — Phases 30–35 (shipped 2026-08-18)
 
 ## Phases
 
@@ -80,133 +80,20 @@ Upgraded `fdars-core` 0.14.0 → 0.17.0 and exposed the new upstream functional-
 
 </details>
 
-### 🚧 v5.0 fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing (Phases 30–35)
+<details>
+<summary>✅ v5.0 fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing (Phases 30–35) — SHIPPED 2026-08-18</summary>
 
-Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) and expose the new upstream functional-inference + depth/boxplot + basis/smoothing surface through PyO3 bindings + the Python API, extend the v3.0 grounded advisor with an inference diagnostics aspect (grounding invariant preserved), and document everything to the project's method-accurate standard (hand-authored inline SVG diagrams + runnable offline worked examples). Same shape as v4.0: crate bump + regression gate first (BLOCKS everything), three independent binding groups (parallel-eligible after the bump), advisor on top (needs the inference bindings), docs last (run against the real shipped bindings).
+Upgraded `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) and exposed the new upstream functional-inference + depth/boxplot + basis/smoothing surface through PyO3 bindings + the Python API — a new `fdars.inference` submodule (two-sample tests, Degras SCB bands, FLM post-hoc inference, one-way ANOVA V-statistic), `fdars.depth.functional_depth`/`functional_boxplot`, and `fdars.basis.constant_basis`/`smooth_basis_aic` + `optim_bandwidth(criterion="aic")` — extended the grounded advisor with an `inference` diagnostics aspect (#14; grounding invariant + guard-sync preserved), and documented it all to the method-accurate standard (new Inference nav section + functional-boxplot page + basis/smoothing fold-ins + advisor aspects.md; 4 hand-authored SVGs; human diagram review approved). Dependency-ordered: crate bump + regression gate first; three independent binding groups; advisor on top; docs last. 21/21 requirements complete; suite 560 passed / 4 skipped; whole-site `mkdocs build --strict` green offline. Full detail: `.planning/milestones/v5.0-ROADMAP.md`.
 
-- [x] **Phase 30: Crate Bump + Regression Gate** - Bump 0.17→0.20, add the `CvCriterion` wildcard fallback arm, full ~426-test suite green as the sole gate (completed 2026-08-17)
-- [x] **Phase 31: Group A — `fdars.inference` Bindings** - New submodule: two-sample permutation tests + SCB bands + FLM inference + one-way ANOVA V-stat (`TestResult`/`ToleranceBand` → PyDict, deterministic seed) (completed 2026-08-17)
-- [x] **Phase 32: Group B — Depth/Boxplot Bindings** - `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth` (completed 2026-08-17)
-- [x] **Phase 33: Group C — Basis/Smoothing Quick Wins** - `constant_basis` + AIC basis/kernel selection extending `fdars.basis`/`fdars.smoothing` (completed 2026-08-17)
-- [x] **Phase 34: Advisor Extension** - `inference` diagnostics aspect; grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync (single atomic commit) preserved (completed 2026-08-17)
-- [x] **Phase 35: Docs — Diagrams & Worked Examples** - New pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` examples; `mkdocs build --strict` green (completed 2026-08-18)
+- [x] Phase 30: Crate Bump + Regression Gate — 0.20.0 pinned (parallel-only, no linalg) + `CvCriterion` wildcard arm; 426-test baseline green, zero drift (completed 2026-08-17)
+- [x] Phase 31: Group A — `fdars.inference` Bindings — new submodule: two-sample permutation tests + SCB bands + FLM inference + ANOVA V-stat (`TestResult`/`ToleranceBand` → PyDict, deterministic seed) (completed 2026-08-17)
+- [x] Phase 32: Group B — Depth/Boxplot Bindings — `functional_depth` dispatcher + `functional_boxplot` (7-key dict, transposition-guarded) extending `fdars.depth` (completed 2026-08-17)
+- [x] Phase 33: Group C — Basis/Smoothing Quick Wins — `constant_basis` + `smooth_basis_aic` + `optim_bandwidth(criterion="aic")` (Phase-30 stopgap fixed) (completed 2026-08-17)
+- [x] Phase 34: Advisor Extension — `inference` diagnostics aspect (#14); grounding invariant + MCP guard-sync (single atomic commit) preserved (completed 2026-08-17)
+- [x] Phase 35: Docs — Diagrams & Worked Examples — new Inference section + boxplot page + basis/smoothing fold-ins + aspects.md; 4 method-accurate hand-authored SVGs; whole-site strict build green; human review approved (completed 2026-08-18)
 
-## Phase Details (v5.0)
-
-### Phase 30: Crate Bump + Regression Gate
-
-**Goal**: `fdars-core` is pinned at 0.20.0 and the entire existing binding + advisor suite still passes, on a green baseline, before any new binding work begins.
-**Depends on**: Nothing (first phase of v5.0; continues from v4.0 Phase 29)
-**Requirements**: DEP-03, DEP-04
-**Success Criteria** (what must be TRUE):
-
-  1. `Cargo.toml` pins `fdars-core = { version = "0.20.0", features = ["parallel"] }` (no `linalg`) and `maturin develop` builds green.
-  2. The existing `optim_bandwidth` binding compiles against 0.20.0's now-`#[non_exhaustive]` `CvCriterion` because a wildcard `_ => PyValueError` fallback arm was added — the crate does NOT compile without it.
-  3. The full existing binding + advisor suite (~426 tests) passes unchanged — no new tests, no tolerance relaxations — as the sole success criterion.
-  4. The bump lands as an isolated commit before any new-binding work, so any downstream binding issue cannot hide behind an upgrade regression.
-
-**Plans**: 1 plan
-
-- [x] 30-01-PLAN.md — Bump fdars-core 0.17→0.20 + CvCriterion #[non_exhaustive] wildcard fix + full ~426-test regression gate green
-
-### Phase 31: Group A — `fdars.inference` Bindings
-
-**Goal**: Users can run the full functional-inference surface (two-sample tests, simultaneous confidence bands, FLM post-hoc inference, one-way ANOVA V-statistic) from a new, importable `fdars.inference` submodule with deterministic, reproducible results.
-**Depends on**: Phase 30
-**Requirements**: INFER-01, INFER-02, INFER-03, INFER-04, INFER-05, INFER-06, INFER-07, INFER-08, INFER-09
-**Success Criteria** (what must be TRUE):
-
-  1. User can run `t_perm_test` and `f_perm_test` (two-sample integrated-L2/-F permutation tests) and `two_sample_mean_test` (asymptotic Hotelling T² on a shared FPC basis), each returning a `{statistic, p_value, n_perm}` dict.
-  2. User can compute a Degras simultaneous confidence band via `mean_scb` → `{lower, upper, center, half_width}` dict and run `scb_two_sample_test` on the mean-difference curve → `TestResult` dict, with the `multiplier` selected by string and a `ValueError` fallback for unknown values.
-  3. User can run `flm_f_test` and `flm_gof_test` on a functional linear model (the wrapper re-fits `fregre_lm` internally from raw data/response/n_comp — no persistent handle) and `oneway_anova_vstat` for a grouped asymptotic ANOVA V-statistic, each returning a dict.
-  4. The `fdars.inference` submodule is registered (`src/inference_mod.rs` + `register_submodule!` in `lib.rs` + `_submodule_names`) and importable both as `fdars.inference.fn` and `from fdars.inference import fn`; all `seed=None` params resolve to a fixed default for byte-identical reproducibility across two calls.
-  5. Degenerate inputs (mismatched grids, too few curves, invalid params) raise `ValueError` — no `.unwrap()`, all fallible functions routed through `to_pyresult()`.
-
-**Plans**: 3 plans
-
-- [x] 31-01-PLAN.md — Submodule scaffold + verification spike (all 8 signatures) + end-to-end tracer (t_perm_test) + f_perm_test + two_sample_mean_test (INFER-01/02/03/09)
-- [x] 31-02-PLAN.md — Degras SCB bands: mean_scb (ToleranceBand → dict) + scb_two_sample_test; string multiplier + ValueError fallback (INFER-04/05)
-- [x] 31-03-PLAN.md — FLM re-fit inference (flm_f_test + flm_gof_test) + oneway_anova_vstat (0-indexed groups) (INFER-06/07/08)
-
-### Phase 32: Group B — Depth/Boxplot Bindings
-
-**Goal**: Users can compute unified functional self-depth and a López-Pintado–Romo functional boxplot (median / central region / whiskers / flagged outliers) from the extended `fdars.depth` submodule, layout-correct across the numpy↔FdMatrix boundary.
-**Depends on**: Phase 30
-**Requirements**: DEPTH-01, DEPTH-02
-**Success Criteria** (what must be TRUE):
-
-  1. User can call `fdars.depth.functional_depth(data, method="fraiman_muniz"|"band"|"modified_band"|"random_projection", **kwargs)` → `ndarray (n,)`, with `method` dispatched to a `DepthMethod` variant and a `#[non_exhaustive]` wildcard fallback raising `ValueError` on unknown methods.
-  2. User can call `fdars.depth.functional_boxplot(data, method=..., factor=1.5, **kwargs)` → dict `{median, central_lower, central_upper, whisker_lower, whisker_upper, outliers, depths}` with band fields as 1-D arrays via the numpy conversion helper and `outliers` as a Python list of ints.
-  3. A multi-curve transposition round-trip test guards the column-major layout of every `FdMatrix`-returning boxplot field (finite values, correct shapes) — no silent transposition.
-
-**Plans**: 1 plan
-
-- [x] 32-01-PLAN.md — functional_depth (string→DepthMethod dispatch) + functional_boxplot (7-key dict) extending fdars.depth, with layout round-trip guard
-
-### Phase 33: Group C — Basis/Smoothing Quick Wins
-
-**Goal**: Users can construct a constant intercept basis and select AIC-optimal basis/kernel smoothing parameters, via additive extensions to `fdars.basis` and `fdars.smoothing`.
-**Depends on**: Phase 30
-**Requirements**: BASIS-01, BASIS-02, BASIS-03
-**Success Criteria** (what must be TRUE):
-
-  1. User can call `fdars.basis.constant_basis(argvals)` → an all-ones intercept-column `ndarray` (exact signature/dimension confirmed at plan time).
-  2. User can select an AIC-optimal basis roughness penalty via `fdars.smoothing.smooth_basis_aic(...)` → dict and pass `criterion="aic"` to `basis_nbasis_cv` (`BasisCriterion::Aic`).
-  3. User can select an AIC-optimal kernel bandwidth via `aic_smoother` and/or `criterion="aic"` on the existing bandwidth-selection binding (`CvCriterion::Aic`), with the `CvCriterion` match carrying the forward-compatible `#[non_exhaustive]` fallback arm added in Phase 30.
-
-**Plans**: 1 plan
-
-- [x] 33-01-PLAN.md — constant_basis + smooth_basis_aic (basis_mod) + optim_bandwidth criterion="aic" output-arm fix (smoothing_mod) + basis_nbasis_cv "aic" test coverage (BASIS-01/02/03)
-
-### Phase 34: Advisor Extension
-
-**Goal**: The grounded advisor gains an `inference` diagnostics aspect that summarizes fdars-computed test statistics and p-values, with the grounding invariant and the advisor/MCP guard-sync preserved.
-**Depends on**: Phase 31 (calls the inference bindings)
-**Requirements**: ADV-03
-**Success Criteria** (what must be TRUE):
-
-  1. `build_diagnostics(test_result, method="inference")` produces a grounded diagnostics dict summarizing `TestResult` p-values/statistics — every value fdars-computed (no fabricated numbers), diagnostics-only (not added to `_RUNNABLE_METHODS`).
-  2. The `build_diagnostics` dispatch + advisor `_supported` set + MCP `_DIAGNOSTICS_METHODS` change land in a SINGLE atomic commit, keeping `test_diagnostics_methods_match_advisor_supported` green.
-  3. Offline determinism is preserved — no numpy scalars, byte-identical `json.dumps` output — and the grounding invariant holds (LLM only interprets and cites diagnostic values).
-
-**Plans**: 1 plan
-
-- [x] 34-01-PLAN.md — `inference` aspect builder + three-file guard-sync (advisor `_supported`/dispatch + MCP `_DIAGNOSTICS_METHODS` + `_ASPECT_PRIMERS`) in a single atomic commit + offline test suite (ADV-03)
-
-**UI hint**: no
-
-### Phase 35: Docs — Diagrams & Worked Examples
-
-**Goal**: The published MkDocs site documents the new inference, functional-boxplot, and basis/smoothing capabilities to the project's method-accurate standard, with the whole site building strict-green offline against the real shipped bindings.
-**Depends on**: Phase 31, Phase 32, Phase 33, Phase 34
-**Requirements**: DOCS-04, DOCS-05, DOCS-06, DOCS-07
-**Success Criteria** (what must be TRUE):
-
-  1. New functional-inference page(s) cover two-sample tests, SCB bands, and functional ANOVA — each with a method-accurate hand-authored inline SVG and a runnable offline worked example emitting `FDARS_FENCE_OK` at small params (`n_perm=19`, SCB `nb=50`, synthetic/subset data).
-  2. A new functional-boxplot page carries a method-accurate hand-authored SVG (central region / whiskers / median / flagged outliers) + a runnable offline worked example; the basis/smoothing additions (`constant_basis` + AIC selection) are documented with example(s) and the advisor `aspects.md` is updated to reflect the new `inference` aspect.
-  3. All new pages are wired into `mkdocs.yml` nav and the whole-site `mkdocs build --strict` passes offline (exit 0); every new SVG is SVGO-idempotent and determinism-clean.
-  4. A blocking human diagram method-accuracy review gate is satisfied before the milestone closes.
-
-**Plans**: 2/4 plans executed
-
-- [x] 35-01-PLAN.md — Functional Inference page (two-sample tests, SCB, ANOVA) + 3 SVGs + fences + Inference nav (tracer-first)
-- [x] 35-02-PLAN.md — Functional Boxplot page under analyze/ + SVG + fence + nav
-- [x] 35-03-PLAN.md — constant_basis + AIC selection doc additions + advisor inference aspect
-- [x] 35-04-PLAN.md — Whole-site strict build + SVGO/determinism gate + blocking human diagram review
-
-**UI hint**: yes
-
-## Progress (v5.0)
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 30. Crate Bump + Regression Gate | 0/1 | Not started | - |
-| 31. Group A — `fdars.inference` Bindings | 0/3 | Not started | - |
-| 32. Group B — Depth/Boxplot Bindings | 0/? | Not started | - |
-| 33. Group C — Basis/Smoothing Quick Wins | 0/1 | Planned | - |
-| 34. Advisor Extension | 0/1 | Planned | - |
-| 35. Docs — Diagrams & Worked Examples | 2/4 | In Progress|  |
+</details>
 
 ---
 
-_Full phase detail for shipped milestones is archived under `.planning/milestones/` (`v1.0-ROADMAP.md`, `v2.0-ROADMAP.md`, `v2.1-ROADMAP.md`, `v3.0-ROADMAP.md`, `v4.0-ROADMAP.md`). Phase directories are archived under `.planning/milestones/v{1.0,2.0,2.1,3.0,4.0}-phases/`._
+_Full phase detail for shipped milestones is archived under `.planning/milestones/` (`v1.0-ROADMAP.md` … `v5.0-ROADMAP.md`). Phase directories are archived under `.planning/milestones/v{1.0,2.0,2.1,3.0,4.0,5.0}-phases/`._

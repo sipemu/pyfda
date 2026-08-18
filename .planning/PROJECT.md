@@ -21,7 +21,10 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v5.0 fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
+## Last Shipped Milestone: v5.0 fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing (shipped 2026-08-18)
+
+_All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs build --strict` green offline; human diagram review approved. Full detail: `.planning/milestones/v5.0-ROADMAP.md`._
+
 
 **Goal:** Upgrade the pinned `fdars-core` from 0.17.0 to 0.20.0, expose the new upstream functional-inference + depth/boxplot + basis/smoothing capabilities through PyO3 bindings and the Python API, extend the v3.0 AI advisor where relevant, and document everything to the project's method-accurate standard (hand-authored inline SVG diagrams + runnable offline worked examples). Same shape as v4.0.
 
@@ -172,4 +175,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-17 after starting v5.0 milestone — fdars-core 0.20 upgrade (inference + depth/boxplot + basis/smoothing)*
+*Last updated: 2026-08-18 after v5.0 milestone — shipped & archived (fdars-core 0.20 upgrade: inference + depth/boxplot + basis/smoothing; 21/21 requirements validated)*
