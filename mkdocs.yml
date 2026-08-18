@@ -138,6 +138,7 @@ nav:
     - GMM Clustering: analyze/gmm-clustering.md
     - Elastic Clustering: analyze/elastic-clustering.md
     - Outlier Detection: analyze/outlier-detection.md
+    - Functional Boxplot: analyze/functional-boxplot.md
     - Seasonal Analysis: analyze/seasonal-analysis.md
     - Equivalence Testing: analyze/equivalence-testing.md
     - Covariance Functions: analyze/covariance-functions.md
