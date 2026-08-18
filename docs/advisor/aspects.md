@@ -30,6 +30,7 @@ The three task families available for every aspect are:
 | `regression_cv` | `fdars.regression.fregre_cv`, `model_selection_ncomp` | optimal_k, cv_curve, elbow_present (6) | — |
 | `scoring` | `fdars.scoring.functional_mae/mse/mape/msle/explained_variance` | five integrated prediction-quality scalars (5) | [this page](#scoring) |
 | `spm` | `fdars.spm.spm_phase1` | T², SPE stats, exceedance rates, eigenvalues, kurtosis check (14) | — |
+| `inference` | caller-supplied `TestResult` / `ToleranceBand` dict from `fdars.inference` (diagnostics-only) | statistic, p_value, n_perm, significance flags, is_permutation_test (9) | [this page](#inference) |
 
 ---
 
@@ -471,3 +472,57 @@ when the compiled extension is unavailable.
 
 **Task families:** `"interpretation"` (read process stability and exceedance rates) · `"parameter"` (adjust ncomp or significance level)
 · `"method"` (add UCL monitoring or switch to functional T² variants)
+
+---
+
+## inference
+
+**fdars source:** caller-supplied `TestResult` or `ToleranceBand` dict from `fdars.inference` — **diagnostics-only**
+
+Unlike every other aspect, `inference` does **not** call an fdars function internally. The caller runs one of the Phase 31 inference functions (`fdars.inference.t_perm_test`, `f_perm_test`, `two_sample_mean_test`, `mean_scb`, `scb_two_sample_test`, `oneway_anova_vstat`, `flm_f_test`, `flm_gof_test`) and passes the returned dict directly to `build_diagnostics`. This preserves the grounding invariant: the advisor never re-computes inference statistics.
+
+Two input shapes are handled:
+
+**TestResult** (primary — from permutation or asymptotic tests): keys `statistic`, `p_value`, `n_perm`.
+`n_perm == 0` is a **legitimate** value indicating the asymptotic path (e.g. Hotelling T² in `two_sample_mean_test`), not a missing value.
+
+**ToleranceBand / SCB** (secondary — from `mean_scb`): keys `lower`, `upper`, `center`, `half_width`. Detected by the presence of `half_width` + `center` **without** `p_value`. All significance fields are set to `None` for this shape.
+
+| Key | Meaning |
+|---|---|
+| `method` | Always `"inference"` |
+| `statistic` | The fdars-computed test statistic (float); `None` for ToleranceBand path |
+| `p_value` | Permutation or asymptotic p-value; `None` for ToleranceBand path |
+| `n_perm` | Permutations used; `0` = asymptotic path; `None` when key absent |
+| `significant_at_0.01` | `p_value < 0.01`; `None` when `p_value` absent |
+| `significant_at_0.05` | `p_value < 0.05`; `None` when `p_value` absent |
+| `significant_at_0.10` | `p_value < 0.10`; `None` when `p_value` absent |
+| `strongest_significance_level` | Smallest alpha at which the result is significant (0.01, 0.05, or 0.10); `None` when not significant at any level |
+| `is_permutation_test` | `True` when `n_perm > 0`; `False` when `n_perm == 0` (asymptotic); `None` when `n_perm` absent |
+| `band_present` | `True` for the ToleranceBand path; absent from the TestResult path |
+| `half_width` | Mean SCB half-width (float); present only for the ToleranceBand path |
+
+**Task families:** `"interpretation"` (read significance level and test path) · `"parameter"` (adjust `n_perm` or significance threshold)
+· `"method"` (switch between permutation test and asymptotic test; consider SCB for continuous inference)
+
+The fence below constructs a small synthetic TestResult dict (no API key, no real permutation compute) and builds the offline diagnostics report — mirroring the offline precedent of the `fpca` and `depth` fences above.
+
+```python exec="1" html="1" source="above"
+from fdars.advisor import build_diagnostics
+
+# Synthetic TestResult from a (hypothetical) permutation test.
+# No fdars.inference call — grounding invariant preserved offline.
+test_result = {
+    "statistic": 3.142,
+    "p_value": 0.038,
+    "n_perm": 99,
+}
+
+diag = build_diagnostics(test_result, method="inference")
+
+print(f"method:                     {diag['method']}")
+print(f"p_value:                    {diag['p_value']:.3f}")
+print(f"significant_at_0.05:        {diag['significant_at_0.05']}")
+print(f"strongest_significance_level: {diag['strongest_significance_level']}")
+print(f"is_permutation_test:        {diag['is_permutation_test']}  FDARS_FENCE_OK")
+```
