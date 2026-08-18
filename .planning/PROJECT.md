@@ -111,7 +111,7 @@ The documentation — diagrams first, examples second — must make functional d
 - [x] Group B — `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth` — ✓ Phase 32 (7-key boxplot dict, outliers as int list, transposition-guarded; 524 passed / 4 skipped)
 - [x] Group C — `constant_basis` + AIC smoothing selection extending `fdars.basis`/`fdars.smoothing` — ✓ Phase 33 (constant_basis + `fdars.basis.smooth_basis_aic` + `optim_bandwidth(criterion="aic")`; Phase-30 CvCriterion stopgap fixed; 535 passed / 4 skipped)
 - [x] Advisor extension — `inference` diagnostics aspect (#14) summarizing TestResult stats + significance flags; grounding invariant + MCP guard-sync (single atomic commit) preserved — ✓ Phase 34 (560 passed / 4 skipped; boxplot-outlier diagnostics deferred to future)
-- [ ] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green
+- [x] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green — ✓ Phase 35 (new Inference section + functional-inference page, analyze/functional-boxplot page, basis/smoothing fold-ins, advisor aspects.md #14; 4 new SVGs svgo-stable; whole-site strict build exit 0; human diagram review approved)
 
 ### Out of Scope
 
