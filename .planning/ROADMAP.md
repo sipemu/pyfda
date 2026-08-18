@@ -187,11 +187,13 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
   3. All new pages are wired into `mkdocs.yml` nav and the whole-site `mkdocs build --strict` passes offline (exit 0); every new SVG is SVGO-idempotent and determinism-clean.
   4. A blocking human diagram method-accuracy review gate is satisfied before the milestone closes.
 
-**Plans**: 4 plans
-- [ ] 35-01-PLAN.md — Functional Inference page (two-sample tests, SCB, ANOVA) + 3 SVGs + fences + Inference nav (tracer-first)
-- [ ] 35-02-PLAN.md — Functional Boxplot page under analyze/ + SVG + fence + nav
+**Plans**: 2/4 plans executed
+
+- [x] 35-01-PLAN.md — Functional Inference page (two-sample tests, SCB, ANOVA) + 3 SVGs + fences + Inference nav (tracer-first)
+- [x] 35-02-PLAN.md — Functional Boxplot page under analyze/ + SVG + fence + nav
 - [ ] 35-03-PLAN.md — constant_basis + AIC selection doc additions + advisor inference aspect
 - [ ] 35-04-PLAN.md — Whole-site strict build + SVGO/determinism gate + blocking human diagram review
+
 **UI hint**: yes
 
 ## Progress (v5.0)
@@ -203,7 +205,7 @@ Upgrade the pinned `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) a
 | 32. Group B — Depth/Boxplot Bindings | 0/? | Not started | - |
 | 33. Group C — Basis/Smoothing Quick Wins | 0/1 | Planned | - |
 | 34. Advisor Extension | 0/1 | Planned | - |
-| 35. Docs — Diagrams & Worked Examples | 0/4 | Planned | - |
+| 35. Docs — Diagrams & Worked Examples | 2/4 | In Progress|  |
 
 ---
 

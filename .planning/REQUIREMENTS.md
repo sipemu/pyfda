@@ -42,7 +42,7 @@ Requirements for milestone v5.0. Each maps to a roadmap phase. All 13 new bindin
 ### Documentation
 
 - [x] **DOCS-04**: New functional-inference docs page(s) covering two-sample tests, SCB bands, and functional ANOVA — each with a method-accurate hand-authored inline SVG diagram and a runnable offline worked example emitting `FDARS_FENCE_OK` (small params: `n_perm=19`, SCB `nb=50`, small/synthetic data to protect the ~18-min build).
-- [ ] **DOCS-05**: New functional-boxplot docs page — method-accurate hand-authored SVG (central region / whiskers / median / flagged outliers) + runnable offline worked example.
+- [x] **DOCS-05**: New functional-boxplot docs page — method-accurate hand-authored SVG (central region / whiskers / median / flagged outliers) + runnable offline worked example.
 - [ ] **DOCS-06**: Basis/smoothing additions documented (constant_basis + AIC selection) with example(s); advisor `aspects.md` updated to reflect the new `inference` aspect.
 - [x] **DOCS-07**: All new pages wired into `mkdocs.yml` nav; whole-site `mkdocs build --strict` passes offline (exit 0); every new SVG is SVGO-idempotent and determinism-clean; blocking human diagram method-accuracy review.
 
@@ -102,7 +102,7 @@ Which phases cover which requirements. Populated during roadmap creation (Step 1
 | BASIS-03 | Phase 33 | Complete |
 | ADV-03 | Phase 34 | Complete |
 | DOCS-04 | Phase 35 | Complete |
-| DOCS-05 | Phase 35 | Pending |
+| DOCS-05 | Phase 35 | Complete |
 | DOCS-06 | Phase 35 | Pending |
 | DOCS-07 | Phase 35 | Complete |
 
