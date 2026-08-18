@@ -5,16 +5,16 @@ milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot
 current_phase: 35
 current_phase_name: docs-diagrams-worked-examples
 status: executing
-stopped_at: Completed 35-02-PLAN.md
-last_updated: "2026-08-18T19:33:06.738Z"
+stopped_at: Completed 35-03-PLAN.md
+last_updated: "2026-08-18T20:14:56.056Z"
 last_activity: 2026-08-18
 last_activity_desc: Phase 35 execution started
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 11
-  completed_plans: 9
-  percent: 82
+  completed_plans: 10
+  percent: 83
 ---
 
 # Project State
@@ -71,6 +71,7 @@ Last activity: 2026-08-18 — Phase 35 execution resumed (wave continue)
 | Phase 34-advisor-extension P01 | 8m | 2 tasks | 6 files |
 | Phase 35 P01 | 42 | 3 tasks | 5 files |
 | Phase 35 P02 | 32m | 2 tasks | 3 files |
+| Phase 35 P03 | 39 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,9 @@ Recent decisions affecting current work:
 - [Phase ?]: inference aspect (ADV-03): diagnostics-only, caller supplies TestResult dict; n_perm==0 is legitimate asymptotic test value; ToleranceBand shape detected by half_width+center presence without p_value
 - [Phase ?]: Functional Inference page uses 4 atomic fences (two-sample, SCB, ANOVA, FLM) written together to avoid broken SVG links in strict build
 - [Phase ?]: Downsampled Canadian Weather to every-other-day (183 pts) for executed fence budget within build time
+- [Phase ?]: constant_basis subsection placed before 'Evaluating basis matrices directly' (natural basis-matrix neighbour)
+- [Phase ?]: AIC selection documented inside Basis Expansion section covering all 3 entry points (smooth_basis_aic, optim_bandwidth(aic), basis_nbasis_cv(aic)) with one fence
+- [Phase ?]: inference advisor fence uses synthetic TestResult dict (no live fdars.inference call) — grounding invariant preserved, matching offline precedent
 
 ### Pending Todos
 
@@ -131,8 +135,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-18T19:33:06.712Z
-Stopped at: Completed 35-02-PLAN.md
+Last session: 2026-08-18T20:14:56.046Z
+Stopped at: Completed 35-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
