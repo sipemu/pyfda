@@ -153,3 +153,123 @@ class TestGroundingHelpers:
         assert _is_grounded_number("5.4035", nums)  # 4 dp — accurate citation
         assert not _is_grounded_number("5.41", nums)  # 2 dp — 5.40 != 5.41
         assert not _is_grounded_number("5.5", nums)  # 1 dp — 5.4 != 5.5
+
+
+# ---------------------------------------------------------------------------
+# Follow-up (debug session advisor-grounding-fp-part2): two MORE false-positive
+# classes surfaced by the first real FPCA example (Tecator NIR spectra). The
+# guard from d427da5 still rejected valid grounded citations that used:
+#   4. positional array subscripts  — "explained_variance_ratio[2]=0.9987"
+#   5. scientific notation           — "explained_variance_ratio[4]=5.22e-05"
+# Diagnostics modelled on the actual FPCA diagnostics dict: list-valued fields
+# and a sub-1e-4 explained-variance-ratio entry.
+# ---------------------------------------------------------------------------
+
+FPCA_DIAG = {
+    "method": "fpca",
+    "n_components": 10,
+    "n_obs": 240,
+    "eigenvalues": [52.91, 0.4685],
+    "explained_variance_ratio": [
+        0.9862,
+        0.0087,
+        0.0038,
+        0.0012,
+        5.2269939358072166e-05,  # the tiny sci-notation entry
+    ],
+    "cumulative_variance_explained": [0.9862, 0.9949, 0.9986859982552292, 0.9999, 1.0],
+    "total_variance": 53.653,
+    "phase_leakage_indicator": 0.01384,
+    "phase_leakage_flagged": False,
+}
+
+
+class TestGroundingArraySubscriptCleared:
+    """Class 4: positional list subscripts are references, not cited values."""
+
+    def test_subscript_index_not_treated_as_value(self):
+        """`[2]` is a positional index; only the value 0.9987 is a citation."""
+        advice = _advice(
+            ["cumulative_variance_explained[2]=0.9986859982552292 at component three"]
+        )
+        _check_grounding(advice, FPCA_DIAG)
+
+    def test_subscript_with_rounded_value(self):
+        """Subscript stripped; a rounded value citation still grounds."""
+        advice = _advice(["cumulative_variance_explained[2] is about 0.9987"])
+        _check_grounding(advice, FPCA_DIAG)
+
+    def test_multidigit_subscript_stripped(self):
+        """A two-digit index (e.g. [10]) is also stripped, not grounded."""
+        advice = _advice(["eigenvalues[0]=52.91 dominates the spectrum"])
+        _check_grounding(advice, FPCA_DIAG)
+
+    def test_extract_numbers_strips_subscript(self):
+        assert _extract_numbers("cumulative_variance_explained[2]=0.9987") == [
+            "0.9987"
+        ]
+
+    def test_extract_numbers_strips_multidigit_subscript(self):
+        assert _extract_numbers("field[10]=3.14") == ["3.14"]
+
+
+class TestGroundingScientificNotationCleared:
+    """Class 5: scientific-notation floats parse whole and match by tolerance."""
+
+    def test_scientific_notation_exact_is_grounded(self):
+        """The full-precision sci citation matches the stored float."""
+        advice = _advice(
+            ["explained_variance_ratio[4]=5.2269939358072166e-05 is negligible"]
+        )
+        _check_grounding(advice, FPCA_DIAG)
+
+    def test_scientific_notation_rounded_is_grounded(self):
+        """A rounded sci citation (5.22e-05) grounds via relative tolerance."""
+        advice = _advice(
+            ["the fifth component explains only 5.22e-05 of the variance"]
+        )
+        _check_grounding(advice, FPCA_DIAG)
+
+    def test_scientific_notation_positive_exponent(self):
+        """Sci notation with a positive exponent parses as one token."""
+        # 5.22e+01 == 52.2 which rounds to eigenvalue 52.91? no — assert extract only.
+        assert _extract_numbers("scale is 5.22e+01 units") == ["5.22e+01"]
+
+    def test_extract_numbers_sci_single_token(self):
+        assert _extract_numbers("ratio 5.2269939358072166e-05") == [
+            "5.2269939358072166e-05"
+        ]
+
+    def test_extract_numbers_sci_no_decimal_point(self):
+        """Sci notation without a mantissa decimal point still parses whole."""
+        assert _extract_numbers("about 5e-05 of variance") == ["5e-05"]
+
+    def test_is_grounded_number_sci_rejects_fabrication(self):
+        """A fabricated small value at the same magnitude must NOT ground."""
+        nums = [5.2269939358072166e-05]
+        assert _is_grounded_number("5.22e-05", nums)  # grounded
+        assert _is_grounded_number("5.2e-05", nums)  # grounded (coarser)
+        assert not _is_grounded_number("9.99e-05", nums)  # fabricated
+        assert not _is_grounded_number("5.30e-05", nums)  # fabricated at 2 dp
+
+
+class TestGroundingFabricationsStillRejectedAfterFpcaFix:
+    """Re-confirm the true-positive case survives the part-2 fix (no regression)."""
+
+    def test_fabricated_silhouette_still_raises_on_fpca_diag(self):
+        advice = _advice(["the silhouette score is 0.87"])
+        with pytest.raises(GroundingViolationError):
+            _check_grounding(advice, FPCA_DIAG)
+
+    def test_fabricated_k_still_raises_on_fpca_diag(self):
+        advice = _advice(["the analysis chose k=7 clusters"])
+        with pytest.raises(GroundingViolationError):
+            _check_grounding(advice, FPCA_DIAG)
+
+    def test_fabricated_sci_value_raises(self):
+        """A sci-notation value absent from diagnostics must still raise."""
+        advice = _advice(
+            ["the fifth component explains 9.99e-05 of the variance"]
+        )
+        with pytest.raises(GroundingViolationError):
+            _check_grounding(advice, FPCA_DIAG)

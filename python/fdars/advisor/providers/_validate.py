@@ -128,6 +128,11 @@ def _check_grounding(advice: object, diagnostics: dict) -> None:
        because ``round(1.9034…, 1) == 1.9``.
     3. **Negative numbers** (``"-28.9375"``): the leading sign is now preserved
        by :func:`_extract_numbers`, so it matches the stored ``-28.9375``.
+    4. **Array subscripts** (``"explained_variance_ratio[2]=0.9987"``): the
+       positional index ``2`` is stripped before extraction, so only the cited
+       value ``0.9987`` is checked.
+    5. **Scientific notation** (``"5.22e-05"``): parsed as one token and matched
+       by relative tolerance, so it grounds against the stored small float.
 
     Fabricated values still raise: a cited ``0.87`` that equals no diagnostic
     scalar at 2-decimal precision is rejected, so the guard keeps catching
@@ -215,7 +220,29 @@ def _is_grounded_number(token: str, diag_numbers: list) -> bool:
     except ValueError:
         return False
 
-    # Number of decimal places explicitly written in the citation.
+    # Scientific-notation citations (``5.22e-05``) cannot use decimal-place
+    # rounding: counting characters after the ``.`` is meaningless once an
+    # exponent is present (it would over-count wildly).  Instead compare with a
+    # *relative* tolerance keyed off the mantissa's precision — one unit in its
+    # last written decimal place — so a rounded citation (``5.22e-05``) grounds
+    # against the stored full-precision float while a fabricated ``9.99e-05``
+    # does not.
+    if "e" in token or "E" in token:
+        mantissa = re.split(r"[eE]", token, maxsplit=1)[0]
+        sig_decimals = len(mantissa.split(".", 1)[1]) if "." in mantissa else 0
+        rel_tol = 10 ** (-sig_decimals) if sig_decimals > 0 else 1e-9
+        import math  # noqa: PLC0415
+
+        for diag in diag_numbers:
+            if diag == 0.0:
+                if value == 0.0:
+                    return True
+            elif math.isclose(value, diag, rel_tol=rel_tol):
+                return True
+        return False
+
+    # Plain integer/decimal citation: the number of decimal places explicitly
+    # written sets the rounding tolerance.
     if "." in token:
         decimals = len(token.split(".", 1)[1])
     else:
@@ -228,13 +255,34 @@ def _is_grounded_number(token: str, diag_numbers: list) -> bool:
     return False
 
 
-def _extract_numbers(text: str) -> list:
-    """Extract signed decimal numeric tokens from an evidence string.
+# Positional list/array subscripts (``field[2]``) are *references*, not cited
+# values — the index must never be treated as a grounded statistic.  Strip the
+# whole ``[ int ]`` substring before number extraction.  (Dict-key index
+# integers cited in prose, e.g. ``"cluster 2"``, are unaffected: they carry no
+# brackets and remain groundable via the numeric-key path in
+# :func:`_flatten_diagnostics_numbers`.)
+_SUBSCRIPT_RE = re.compile(r"\[\s*\d+\s*\]")
 
-    Matches integers (``4``), decimals (``0.312``) and **negative** values
-    (``-28.9375``).  The optional leading ``-`` is only captured when it directly
-    precedes a digit run, so hyphenated words are unaffected.  A lookbehind
-    prevents splitting the fractional tail of a larger number into a spurious
-    token.
+# Numeric-token pattern.  The scientific-notation alternative is ordered FIRST so
+# a value like ``5.22e-05`` is consumed as ONE token rather than being split into
+# mantissa ``5.22`` and exponent ``-05``.  Both alternatives share the
+# ``-?(?<![\d.])`` prefix: an optional leading sign captured only when it directly
+# precedes a digit run (so hyphenated words are unaffected), plus a lookbehind
+# that prevents splitting the fractional tail of a larger number.
+_NUMBER_RE = re.compile(
+    r"-?(?<![\d.])\d*\.?\d+[eE][+-]?\d+"  # scientific notation, whole token
+    r"|-?(?<![\d.])\d+(?:\.\d+)?"          # plain integer / decimal
+)
+
+
+def _extract_numbers(text: str) -> list:
+    """Extract signed numeric tokens (incl. scientific notation) from evidence.
+
+    Matches integers (``4``), decimals (``0.312``), **negative** values
+    (``-28.9375``) and **scientific-notation** floats (``5.22e-05``,
+    ``5.22e+05``) as single tokens.  Positional array/list subscripts
+    (``field[2]``) are stripped first, so the index digit is never mistaken for a
+    cited value.
     """
-    return re.findall(r"-?(?<![\d.])\d+(?:\.\d+)?", text)
+    text = _SUBSCRIPT_RE.sub("", text)
+    return _NUMBER_RE.findall(text)
