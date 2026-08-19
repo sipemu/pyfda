@@ -115,15 +115,24 @@ class ValidateAndRetry:
 def _check_grounding(advice: object, diagnostics: dict) -> None:
     """Raise GroundingViolationError if evidence cites a number absent from diagnostics.
 
-    Strategy: collect all numeric tokens (integers and floats) that appear in
-    every evidence string across all recommendations.  For each such token,
-    verify it appears somewhere in the flattened string representation of the
-    diagnostics values.  Evidence items with no numeric tokens pass unchecked
-    (they are qualitative statements, which is valid).
+    Strategy: collect every numeric token — including negative values and
+    decimals — from each evidence string, then match each cited number
+    *numerically* against the scalar values in the diagnostics dict.  A citation
+    is grounded when it equals some diagnostic scalar **at the citation's own
+    decimal precision** (i.e. rounding-tolerant).  This clears three classes of
+    false positive that plagued the original exact-string heuristic:
 
-    This is a lightweight heuristic — it catches clearly fabricated values
-    (e.g. "k=7" when diagnostics has k=4) but is deliberately lenient on
-    floating-point formatting to avoid false positives.
+    1. **Index/label integers** (``"cluster 2"`` → ``2``): grounded because ``2``
+       equals a real diagnostic scalar (a cluster index / count) when rounded.
+    2. **Rounded citations** (``"near 1.9"`` for a stored ``1.9034…``): grounded
+       because ``round(1.9034…, 1) == 1.9``.
+    3. **Negative numbers** (``"-28.9375"``): the leading sign is now preserved
+       by :func:`_extract_numbers`, so it matches the stored ``-28.9375``.
+
+    Fabricated values still raise: a cited ``0.87`` that equals no diagnostic
+    scalar at 2-decimal precision is rejected, so the guard keeps catching
+    genuinely hallucinated statistics.  Evidence items with no numeric tokens
+    pass unchecked (qualitative statements are valid).
 
     Parameters
     ----------
@@ -139,48 +148,93 @@ def _check_grounding(advice: object, diagnostics: dict) -> None:
         diagnostics.  Raises immediately — never triggers a repair retry,
         because retrying on grounding failure rewards fabrication.
     """
-    diag_text = _flatten_diagnostics_text(diagnostics)
+    diag_numbers = _flatten_diagnostics_numbers(diagnostics)
     for rec in advice.recommendations:  # type: ignore[union-attr]
         for ev in rec.evidence:
-            nums = _extract_numbers(ev)
-            for n in nums:
-                if n not in diag_text:
+            for token in _extract_numbers(ev):
+                if not _is_grounded_number(token, diag_numbers):
                     raise GroundingViolationError(
-                        f"Evidence item cites value {n!r} not found in diagnostics: "
+                        f"Evidence item cites value {token!r} not found in diagnostics: "
                         f"{ev!r}"
                     )
 
 
-def _flatten_diagnostics_text(d: dict) -> set:
-    """Return a set of string representations of all scalar values in a nested dict.
+def _flatten_diagnostics_numbers(d: dict) -> list:
+    """Return every numeric scalar (as ``float``) found in a nested dict/list.
 
-    Adds multiple float representations to reduce false positives from
-    floating-point formatting differences (e.g. ``0.3124`` appears as
-    ``"0.3124"``, ``"0.312"``, and ``"0.3124"`` in the set).
+    Both dict **values** and numeric dict **keys** are collected.  Numeric keys
+    matter because cluster/group identifiers (e.g. ``{"0": {...}, "2": {...}}``)
+    are legitimate labels the advisor references as ``"cluster 2"``; treating
+    them as grounded values clears the index-reference false-positive class
+    without loosening the check for genuine fabrications.
+
+    Booleans are excluded (``bool`` is a subclass of ``int`` in Python but is
+    never a cited statistic).  Non-numeric scalars are ignored — grounding only
+    concerns numbers.
     """
-    result: set = set()
+    result: list = []
+
+    def _coerce(obj: object) -> None:
+        if isinstance(obj, bool):
+            return
+        if isinstance(obj, (int, float)):
+            result.append(float(obj))
+        elif isinstance(obj, str):
+            # Some builders store numeric values (or keys) as strings; recover them.
+            try:
+                result.append(float(obj))
+            except ValueError:
+                pass
 
     def _recurse(obj: object) -> None:
         if isinstance(obj, dict):
-            for v in obj.values():
+            for k, v in obj.items():
+                _coerce(k)  # numeric keys are groundable labels (cluster ids)
                 _recurse(v)
         elif isinstance(obj, (list, tuple)):
             for v in obj:
                 _recurse(v)
-        elif obj is not None:
-            result.add(str(obj))
-            if isinstance(obj, float):
-                result.add(f"{obj:.3f}")
-                result.add(f"{obj:.4f}")
+        else:
+            _coerce(obj)
 
     _recurse(d)
     return result
 
 
-def _extract_numbers(text: str) -> list:
-    """Extract decimal numeric tokens from an evidence string.
+def _is_grounded_number(token: str, diag_numbers: list) -> bool:
+    """Return True if ``token`` matches a diagnostic scalar at the token's precision.
 
-    Matches both integers (``4``) and decimals (``0.312``).  The word-boundary
-    anchor ``\\b`` avoids matching substrings of larger numbers.
+    The citation's own number of decimal places sets the comparison tolerance:
+    a citation of ``1.9`` (1 decimal) is grounded by any diagnostic value that
+    rounds to ``1.9`` at 1 decimal; a citation of ``0.4158`` (4 decimals)
+    requires a match at 4 decimals.  This mirrors how a human cites a rounded
+    statistic while still rejecting fabricated values that round to nothing real.
     """
-    return re.findall(r"\b\d+\.?\d*\b", text)
+    try:
+        value = float(token)
+    except ValueError:
+        return False
+
+    # Number of decimal places explicitly written in the citation.
+    if "." in token:
+        decimals = len(token.split(".", 1)[1])
+    else:
+        decimals = 0
+
+    cited = round(value, decimals)
+    for diag in diag_numbers:
+        if round(diag, decimals) == cited:
+            return True
+    return False
+
+
+def _extract_numbers(text: str) -> list:
+    """Extract signed decimal numeric tokens from an evidence string.
+
+    Matches integers (``4``), decimals (``0.312``) and **negative** values
+    (``-28.9375``).  The optional leading ``-`` is only captured when it directly
+    precedes a digit run, so hyphenated words are unaffected.  A lookbehind
+    prevents splitting the fractional tail of a larger number into a spurious
+    token.
+    """
+    return re.findall(r"-?(?<![\d.])\d+(?:\.\d+)?", text)
