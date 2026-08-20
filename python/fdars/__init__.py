@@ -51,6 +51,7 @@ _submodule_names = (
     "represent",
     "scoring",
     "inference",
+    "pace_fpca",  # Phase 38 — PACE FPCA + IrregFdata opaque handle
 )
 
 for _name in _submodule_names:

@@ -26,6 +26,7 @@ mod simulation_mod;
 mod smoothing_mod;
 mod spm_mod;
 mod tolerance_mod;
+mod pace_fpca_mod;
 
 /// Create a submodule, register its contents, and attach it to a parent module.
 macro_rules! register_submodule {
@@ -58,6 +59,7 @@ fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     register_submodule!(m, "represent", represent_mod::register);
     register_submodule!(m, "scoring", scoring_mod::register);
     register_submodule!(m, "inference", inference_mod::register);
+    register_submodule!(m, "pace_fpca", pace_fpca_mod::register);
 
     Ok(())
 }
