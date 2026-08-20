@@ -120,7 +120,8 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
   3. The full existing binding + advisor suite (~560 tests) passes unchanged — no new tests, no tolerance relaxations — as the sole success criterion.
   4. The bump lands as an isolated commit before any new-binding work, so any downstream binding issue cannot hide behind an upgrade regression.
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 36-01-PLAN.md — Bump fdars-core 0.20.0→0.23.0 (parallel-only, no linalg), rebuild via maturin develop, and run the full existing suite as the regression gate (zero failures)
 **UI hint**: no
 
 ### Phase 37: Group A — Regression Bindings
