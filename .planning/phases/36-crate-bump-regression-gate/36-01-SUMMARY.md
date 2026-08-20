@@ -153,3 +153,9 @@ None — this is a pure infrastructure phase with no user-facing output.
 ---
 *Phase: 36-crate-bump-regression-gate*
 *Completed: 2026-08-20*
+
+## Self-Check: PASSED
+
+- FOUND: Cargo.toml (fdars-core = { version = "0.23.0", features = ["parallel"] })
+- FOUND: .planning/phases/36-crate-bump-regression-gate/36-01-SUMMARY.md
+- FOUND commit 88344f3 (chore(36-01): bump fdars-core 0.20.0 -> 0.23.0)
