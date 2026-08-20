@@ -140,7 +140,10 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
 
 **Plan-time spike**: confirm `ConcurrentRegrResult.beta_curve` orientation `(p, m)` against the multi-predictor transposition test (REGR-01).
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 37-01-PLAN.md — `concurrent_regression` (tracer proves `list[np.ndarray]`→`Vec<FdMatrix>` binding + `beta_curve` `(p,m)` transposition guard) + `functional_glm` (all-14-field converter, `GlmFamily` string dispatch, embedded fpca kept internal, 4-family + domain guards) in `src/regression_mod.rs`
+
 **UI hint**: no
 
 ### Phase 38: Group B — FPCA & Classification Bindings
@@ -214,7 +217,7 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 36. Crate Bump + Regression Gate | 0/? | Not started | - |
-| 37. Group A — Regression Bindings | 0/? | Not started | - |
+| 37. Group A — Regression Bindings | 0/1 | Planned | - |
 | 38. Group B — FPCA & Classification Bindings | 0/? | Not started | - |
 | 39. Group C — Depth/Outliers/Interval-Inference Bindings | 0/? | Not started | - |
 | 40. Advisor Extension | 0/? | Not started | - |
