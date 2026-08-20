@@ -71,9 +71,10 @@ class TestIrregFdataRoundTrip:
 class TestIrregFdataValidation:
     """Validation guards for irreg_fdata_from_lists (PACE-01 guards)."""
 
-    def test_dense_array_rejection(self):
-        """A dense 2-D numpy array must be rejected with ValueError, not silently accepted."""
-        data_2d = np.zeros((5, 10))
+    @pytest.mark.parametrize("dtype", [np.float64, np.float32, np.int32, np.int64])
+    def test_dense_array_rejection(self, dtype):
+        """A dense 2-D numpy array must be rejected with ValueError for any dtype."""
+        data_2d = np.zeros((5, 10), dtype=dtype)
         with pytest.raises(ValueError, match="2-D"):
             pf.irreg_fdata_from_lists(data_2d, data_2d)
 
@@ -141,6 +142,20 @@ class TestPaceFpcaResult:
         )
         # Eigenfunctions must be 2-D float arrays (shape is the critical guard)
         assert ef.dtype.kind == "f", f"eigenfunctions must be float, got {ef.dtype}"
+        # Approximate column orthonormality via the discrete functional L2 inner product.
+        # PACE eigenfunctions are L2-normalised on the work grid, not Euclidean-normalised:
+        # the correct inner product is  dt * ef.T @ ef  where dt = grid spacing.
+        # For a small-data fixture (n=6 curves) the approximation is loose; atol=0.30
+        # is conservative enough to pass while still catching transposition (which would
+        # give diagonal entries ~M^2/M = M instead of ~1) or NaN propagation.
+        if k >= 1:
+            argvals = result["argvals"]
+            dt = float(argvals[1] - argvals[0])
+            gram_l2 = dt * (ef.T @ ef)
+            assert np.allclose(gram_l2, np.eye(k), atol=0.30), (
+                f"eigenfunctions columns are not approximately L2-orthonormal "
+                f"(dt * ef.T @ ef should be ~I): {gram_l2}"
+            )
 
     def test_scores_transposition_guard(self, result):
         """scores.shape must be (n, ncomp), with n != m != ncomp."""

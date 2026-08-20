@@ -8,9 +8,10 @@
 //! input type has a named Python type and validates once at construction.
 
 use crate::convert::{fdmatrix_to_numpy2d, to_pyresult, vec_to_numpy1d};
+use numpy::PyUntypedArrayMethods;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::{PyDict, PyList, PyTuple};
 
 // ---------------------------------------------------------------------------
 // Opaque #[pyclass] handle
@@ -39,6 +40,11 @@ fn extract_list_of_vecs(list: &Bound<'_, PyList>) -> PyResult<Vec<Vec<f64>>> {
             } else if let Ok(seq) = item.cast::<PyList>() {
                 // Accept a plain Python list of floats
                 seq.iter()
+                    .map(|x| x.extract::<f64>())
+                    .collect::<PyResult<Vec<_>>>()
+            } else if let Ok(tup) = item.cast::<PyTuple>() {
+                // Accept a Python tuple of floats (natural alternative to list)
+                tup.iter()
                     .map(|x| x.extract::<f64>())
                     .collect::<PyResult<Vec<_>>>()
             } else {
@@ -88,10 +94,20 @@ pub fn irreg_fdata_from_lists<'py>(
     argvals_list: &Bound<'py, PyAny>,
     values_list: &Bound<'py, PyAny>,
 ) -> PyResult<Py<PyIrregFdata>> {
-    // Guard: reject dense 2-D numpy arrays (T-38-03)
-    if argvals_list.is_instance_of::<numpy::PyArray2<f64>>()
-        || values_list.is_instance_of::<numpy::PyArray2<f64>>()
-    {
+    // Guard: reject dense 2-D numpy arrays of any dtype (T-38-03, CR-01).
+    // is_instance_of::<PyArray2<f64>>() checks both ndim==2 AND dtype==f64, so
+    // arrays of other dtypes (int32, float32, int64, …) would bypass the guard.
+    // Instead, downcast to the untyped PyUntypedArray base (any numpy ndarray)
+    // and inspect its ndim — dtype-agnostic.
+    let arg_is_2d = argvals_list
+        .cast::<numpy::PyUntypedArray>()
+        .map(|a| a.ndim() == 2)
+        .unwrap_or(false);
+    let val_is_2d = values_list
+        .cast::<numpy::PyUntypedArray>()
+        .map(|a| a.ndim() == 2)
+        .unwrap_or(false);
+    if arg_is_2d || val_is_2d {
         return Err(PyValueError::new_err(
             "irreg_fdata_from_lists: received a 2-D numpy array; \
              pass two Python lists of 1-D arrays (one per curve), not a dense matrix. \

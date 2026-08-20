@@ -87,7 +87,7 @@ class TestElasticMultinomial:
         n = 30
         # Labels skip 1: [0, 2, 0, 2, ...] — core rejects non-contiguous range
         bad_labels = np.array([0, 2] * (n // 2), dtype=np.int64)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="contiguous"):
             cls.elastic_multinomial(
                 data, bad_labels, argvals, ncomp_beta=5, lambda_=0.1,
                 max_iter=5, tol=1e-3
