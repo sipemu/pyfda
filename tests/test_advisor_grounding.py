@@ -273,3 +273,125 @@ class TestGroundingFabricationsStillRejectedAfterFpcaFix:
         )
         with pytest.raises(GroundingViolationError):
             _check_grounding(advice, FPCA_DIAG)
+
+
+# ---------------------------------------------------------------------------
+# Redesign (debug session advisor-grounding-redesign): the SIXTH — and general —
+# false-positive class. Two prior patches (dict-key ints, array subscripts) were
+# special cases of one problem: digit-runs that belong to an IDENTIFIER, not to a
+# cited value, were extracted and validated. This surfaced on the depth and spm
+# aspects, whose field names embed digits:
+#   depth_q90 / depth_q10  → spurious '90' / '10' (quantile labels)
+#   t2_max / t2_limit / t2_mean → spurious '2'    (Hotelling T²)
+# Fix: _NUMBER_RE's lookbehind now rejects a numeric literal glued to a preceding
+# identifier char (letter/underscore/digit/dot), so only the VALUE (right of the
+# =/:/space) is ever extracted. Fabrications in value position must STILL raise.
+# ---------------------------------------------------------------------------
+
+# Diagnostics modelled on the actual depth aspect (Fraiman–Muniz quantile band)
+# and spm aspect (Hotelling T² monitoring): field NAMES embed digits, values do
+# not equal those embedded digits.
+DEPTH_DIAG = {
+    "method": "depth",
+    "depth_q10": 0.5,
+    "depth_q90": 0.7845009784735811,
+    "median_depth": 0.6421,
+    "n_obs": 35,
+}
+
+SPM_DIAG = {
+    "method": "spm",
+    "t2_max": 22.451286505855457,
+    "t2_mean": 8.1037,
+    "t2_limit": 15.086,
+    "spe_max": 3.14,
+    "arl0": 200,
+    "n_flagged": 4,
+}
+
+
+class TestGroundingDigitsInIdentifierCleared:
+    """Class 6: digit-runs inside field NAMES are never treated as cited values."""
+
+    def test_depth_q90_identifier_digits_not_grounded(self):
+        """`depth_q90=0.7845…` cites 0.7845…, not the label digits 90."""
+        advice = _advice(["depth_q90=0.7845009784735811 marks the upper band"])
+        _check_grounding(advice, DEPTH_DIAG)
+
+    def test_depth_q10_identifier_digits_not_grounded(self):
+        """`depth_q10=0.5` cites 0.5, not the label digits 10."""
+        advice = _advice(["depth_q10=0.5 marks the lower band"])
+        _check_grounding(advice, DEPTH_DIAG)
+
+    def test_depth_quantiles_in_prose(self):
+        """Both quantile labels cited in prose still ground on their values."""
+        advice = _advice(
+            ["the depth_q10 floor is 0.5 while depth_q90 reaches 0.7845"]
+        )
+        _check_grounding(advice, DEPTH_DIAG)
+
+    def test_hotelling_t2_field_digit_not_grounded(self):
+        """`t2_max: 22.45…` cites 22.45…, not the Hotelling-T² label digit 2."""
+        advice = _advice(["t2_max: 22.451286505855457 exceeds the limit"])
+        _check_grounding(advice, SPM_DIAG)
+
+    def test_hotelling_t2_multiple_fields(self):
+        """t2_max / t2_mean / t2_limit all cited; only their values are checked."""
+        advice = _advice(
+            ["t2_max is 22.451286505855457, t2_mean is 8.1037, t2_limit is 15.086"]
+        )
+        _check_grounding(advice, SPM_DIAG)
+
+    def test_arl0_identifier_digit_not_grounded(self):
+        """`arl0=200`: the label's trailing 0 must not be a spurious citation."""
+        advice = _advice(["arl0=200 is the in-control run length"])
+        _check_grounding(advice, SPM_DIAG)
+
+    def test_extract_numbers_skips_identifier_digits(self):
+        """Unit: the label digits of t2_/q90/q10 are never extracted."""
+        assert _extract_numbers("t2_max: 22.451286505855457") == [
+            "22.451286505855457"
+        ]
+        assert _extract_numbers("depth_q90=0.7845009784735811") == [
+            "0.7845009784735811"
+        ]
+        assert _extract_numbers("depth_q10=0.5") == ["0.5"]
+        assert _extract_numbers("arl0=200") == ["200"]
+
+    def test_extract_numbers_glued_trailing_digits_skipped(self):
+        """A digit-run glued to a preceding identifier (no separator) is skipped."""
+        # 'chi2' / 'pc1' style: trailing label digits must not leak as citations.
+        assert _extract_numbers("component pc1 explains most variance") == []
+        assert _extract_numbers("the chi2 statistic is large") == []
+
+
+class TestGroundingFabricatedValueInValuePositionStillRaises:
+    """The redesign must NOT blind the guard to a fabricated right-hand value.
+
+    The identifier (`t2_max`) is legitimate, but the value to the RIGHT of the
+    separator is fabricated — value-position extraction must still surface it.
+    """
+
+    def test_fabricated_value_after_legit_identifier_raises(self):
+        """`t2_max = 999.9` when no diagnostic equals 999.9 must raise."""
+        advice = _advice(["t2_max = 999.9 breaches the control limit"])
+        with pytest.raises(GroundingViolationError):
+            _check_grounding(advice, SPM_DIAG)
+
+    def test_fabricated_depth_quantile_value_raises(self):
+        """`depth_q90 = 0.99` when the stored value is 0.7845… must raise."""
+        advice = _advice(["depth_q90 = 0.99 marks the upper band"])
+        with pytest.raises(GroundingViolationError):
+            _check_grounding(advice, DEPTH_DIAG)
+
+    def test_fabricated_value_in_prose_after_digit_field_raises(self):
+        """Prose citing t2_max then a fabricated number still raises."""
+        advice = _advice(["t2_max reaches 77.7 at the worst sample"])
+        with pytest.raises(GroundingViolationError):
+            _check_grounding(advice, SPM_DIAG)
+
+    def test_fabricated_k_still_raises_on_spm_diag(self):
+        """A fabricated k=7 (no such diagnostic) still raises on spm diagnostics."""
+        advice = _advice(["the analysis chose k=7 groups"])
+        with pytest.raises(GroundingViolationError):
+            _check_grounding(advice, SPM_DIAG)

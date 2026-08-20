@@ -133,6 +133,12 @@ def _check_grounding(advice: object, diagnostics: dict) -> None:
        value ``0.9987`` is checked.
     5. **Scientific notation** (``"5.22e-05"``): parsed as one token and matched
        by relative tolerance, so it grounds against the stored small float.
+    6. **Digits inside identifiers** (``"t2_max"``, ``"depth_q90"``,
+       ``"depth_q10"``): the digit-runs that belong to the *name* (the ``2`` of
+       Hotelling T², the ``90``/``10`` quantile labels) are never extracted — only
+       the value to the right of the ``=``/``:``/space is checked — so citations
+       of legitimate diagnostics with digit-bearing field names no longer
+       false-positive.
 
     Fabricated values still raise: a cited ``0.87`` that equals no diagnostic
     scalar at 2-decimal precision is rejected, so the guard keeps catching
@@ -265,24 +271,47 @@ _SUBSCRIPT_RE = re.compile(r"\[\s*\d+\s*\]")
 
 # Numeric-token pattern.  The scientific-notation alternative is ordered FIRST so
 # a value like ``5.22e-05`` is consumed as ONE token rather than being split into
-# mantissa ``5.22`` and exponent ``-05``.  Both alternatives share the
-# ``-?(?<![\d.])`` prefix: an optional leading sign captured only when it directly
-# precedes a digit run (so hyphenated words are unaffected), plus a lookbehind
-# that prevents splitting the fractional tail of a larger number.
+# mantissa ``5.22`` and exponent ``-05``.
+#
+# The lookbehind ``(?<![A-Za-z0-9_.])`` is the heart of the value-only design: a
+# numeric literal is extracted only when its first character is NOT glued to a
+# preceding *identifier* character (a letter, digit, underscore, or dot).  This
+# realizes identifier-token stripping as a single guard — a digit-run that is part
+# of a NAME (``t2``, ``depth_q90``, ``depth_q10``, ``chi2``, ``arl0``, ``pc1``) is
+# preceded by a letter/underscore and therefore rejected, while a genuinely cited
+# value — always separated from its identifier by ``=``, ``:`` or whitespace
+# (``k=7``, ``cluster 2``, ``t2_max = 999.9``, ``-28.9375``, ``5.22e-05``) — has a
+# non-identifier char (or nothing) before it and survives.  The dot in the class
+# also prevents splitting the fractional tail of a larger number.  The optional
+# leading sign is captured only when it directly precedes a digit run, so
+# hyphenated words are unaffected.
+#
+# This single lookbehind eliminates the WHOLE digits-in-identifier false-positive
+# class (t2_*, depth_q90/q10, cluster labels, component ids), subsuming the two
+# prior special-case patches: array subscripts are still stripped by
+# ``_SUBSCRIPT_RE`` below, and standalone dict-key indices (``cluster 2``) still
+# survive extraction and ground via the numeric-key path in
+# :func:`_flatten_diagnostics_numbers`.
 _NUMBER_RE = re.compile(
-    r"-?(?<![\d.])\d*\.?\d+[eE][+-]?\d+"  # scientific notation, whole token
-    r"|-?(?<![\d.])\d+(?:\.\d+)?"          # plain integer / decimal
+    r"(?<![A-Za-z0-9_.])-?\d*\.?\d+[eE][+-]?\d+"  # scientific notation, whole token
+    r"|(?<![A-Za-z0-9_.])-?\d+(?:\.\d+)?"          # plain integer / decimal
 )
 
 
 def _extract_numbers(text: str) -> list:
-    """Extract signed numeric tokens (incl. scientific notation) from evidence.
+    """Extract only cited *values* — numeric literals, never identifier digits.
 
     Matches integers (``4``), decimals (``0.312``), **negative** values
     (``-28.9375``) and **scientific-notation** floats (``5.22e-05``,
-    ``5.22e+05``) as single tokens.  Positional array/list subscripts
-    (``field[2]``) are stripped first, so the index digit is never mistaken for a
-    cited value.
+    ``5.22e+05``) as single tokens.
+
+    Crucially, a digit-run that is part of an *identifier* is not extracted:
+    ``t2_max``, ``depth_q90``, ``depth_q10`` yield only their right-hand value,
+    because :data:`_NUMBER_RE`'s lookbehind rejects a numeric literal glued to a
+    preceding letter/underscore/digit/dot.  A cited value is always separated
+    from its identifier by ``=``, ``:`` or whitespace, so it survives.  Positional
+    array/list subscripts (``field[2]``) are additionally stripped first, so the
+    index digit is never mistaken for a cited value.
     """
     text = _SUBSCRIPT_RE.sub("", text)
     return _NUMBER_RE.findall(text)
