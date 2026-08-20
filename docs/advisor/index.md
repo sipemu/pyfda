@@ -16,7 +16,7 @@ fdars computes every number. The LLM only interprets and cites those values — 
 **The LLM in `advise` only interprets and cites those diagnostic values in each**
 **`Recommendation`'s `evidence` field. It never fabricates numbers.**
 
-The invariant is enforced at two levels:
+The invariant is enforced at three levels:
 
 - **Schema:** `Recommendation.evidence` is a required `list[str]` field in the
   Pydantic model. The LLM cannot omit it; every recommendation must cite specific
@@ -25,6 +25,13 @@ The invariant is enforced at two levels:
   one evidence item per recommendation, to omit any claim not supported by a
   provided value, and to never estimate or assume numerical results not explicitly
   given in the diagnostics.
+- **Runtime guard:** after the model responds, `advise` runs a programmatic
+  grounding check (`_check_grounding`) that inspects every `Recommendation.evidence`
+  item and raises `GroundingViolationError` if it cites a numeric value not present
+  in the diagnostics dict. The check runs on every provider path, and it never
+  retries on a violation — retrying a fabrication would only reward it. This makes
+  "the LLM never fabricates numbers" a runtime-enforced guarantee, not just a
+  prompt request: a hallucinated statistic raises rather than reaching the caller.
 
 ## What the Advisor Does
 
@@ -33,9 +40,9 @@ The advisor works in two stages:
 1. **Offline diagnostics** — `build_diagnostics(result, method)` takes your fdars
    result dict and computes a deterministic, JSON-serialisable diagnostics dict from
    fdars and NumPy only. No network call, no API key, no randomness. Two calls on
-   the same input return the same dict. All 12 fdars aspects are covered —
+   the same input return the same dict. All 14 fdars aspects are covered —
    clustering, smoothing, alignment, basis, fpca, represent, depth, outliers,
-   classification, regression, regression_cv, and spm — see
+   classification, regression, regression_cv, spm, scoring, and inference — see
    [Per-Aspect Coverage](aspects.md) for the full diagnostics key sets.
 
 2. **Grounded interpretation** — `advise(diagnostics, task=…)` routes those
@@ -65,7 +72,7 @@ See [Python API](python-api.md) for worked examples.
 The MCP server exposes the advisor as three composable tools over stdio:
 
 - `fdars_build_diagnostics` — builds offline diagnostics from a registered dataset
-  handle (no API key required). Covers all 12 `build_diagnostics` aspects.
+  handle (no API key required). Covers all 14 `build_diagnostics` aspects.
 - `fdars_run_method` — runs an fdars method and returns an opaque result
   handle. Arrays stay in-process; only the handle ID is returned.
 - `fdars_compare_run` — re-runs the method with new parameters and returns a

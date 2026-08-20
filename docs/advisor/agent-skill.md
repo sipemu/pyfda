@@ -225,13 +225,17 @@ full function reference.
 
 Every recommendation cites a diagnostics value computed by fdars (via `build_diagnostics`).
 The LLM (`advise()`) never fabricates numbers — it only interprets and reasons over the
-diagnostics dict. This invariant is enforced at two levels:
+diagnostics dict. This invariant is enforced at three levels:
 
 - **Schema:** the Pydantic `Recommendation.evidence` schema requires a non-empty `list[str]`.
   Every recommendation must include at least one evidence item citing a specific diagnostic value.
 - **System prompt:** the grounding prompt instructs the model to include at least one evidence
   item per recommendation, to omit any claim not supported by a provided value, and to never
   estimate or assume numerical results not explicitly given in the diagnostics.
+- **Runtime guard:** after the model responds, `advise()` runs a programmatic grounding check
+  (`_check_grounding`) that inspects every evidence item and raises `GroundingViolationError` if
+  it cites a numeric value absent from the diagnostics dict. It runs on every provider path and
+  never retries on a violation, so a fabricated number raises rather than reaching the caller.
 
 The walkthrough confirms this end-to-end: the delta values printed in Step 5 are the same
 whether or not `advise()` was called in Step 4 — fdars computes every number regardless of
