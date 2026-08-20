@@ -21,9 +21,9 @@ Prior-milestone requirements: see `.planning/milestones/v5.0-REQUIREMENTS.md` (a
 
 ### Group B — FPCA & Classification
 
-- [ ] **PACE-01**: A new sparse/irregular functional-data input path is exposed — `fdars` gains an `IrregFdata` builder (e.g. `fdars.irreg_fdata_from_lists(argvals_list, values_list)`) accepting two Python lists of 1-D arrays (ragged per-curve grids) and constructing the fdars-core CSR-layout `IrregFdata`; passing a plain dense 2-D array is rejected with a `ValueError` (not silently misinterpreted). Exact interface confirmed by a plan-time spike (no existing PyO3 precedent in pyfda).
-- [ ] **PACE-02**: User can run PACE sparse/irregular FPCA via `fdars.pace_fpca(irreg_fdata, config...)` → dict (`PaceFpcaResult`, all 10 fields incl. eigenfunctions `(m, ncomp)`, scores `(n, ncomp)`, and per-curve confidence bands) with a `PaceFpcaConfig` (NOT `#[non_exhaustive]` — struct-literal safe); `eigenfunctions`/`scores` layout is transposition-guarded; `actual_ncomp` truncation handled. Lives in the new `src/pace_fpca_mod.rs`.
-- [ ] **CLASS-01**: User can fit a K-class one-vs-rest elastic multinomial classifier via `fdars.classification.elastic_multinomial(data, labels, argvals, ...)` → dict (`ElasticMultinomialResult`; `train_probabilities` `(n, K)` transposition-guarded at `K ≥ 3`); labels must be 0-indexed contiguous (`0..K`) — a negative/non-contiguous-label guard (v5.0 CR-01 pattern) raises a helpful `ValueError` rather than wrapping `i64→usize`.
+- [x] **PACE-01**: A new sparse/irregular functional-data input path is exposed — `fdars` gains an `IrregFdata` builder (e.g. `fdars.irreg_fdata_from_lists(argvals_list, values_list)`) accepting two Python lists of 1-D arrays (ragged per-curve grids) and constructing the fdars-core CSR-layout `IrregFdata`; passing a plain dense 2-D array is rejected with a `ValueError` (not silently misinterpreted). Exact interface confirmed by a plan-time spike (no existing PyO3 precedent in pyfda).
+- [x] **PACE-02**: User can run PACE sparse/irregular FPCA via `fdars.pace_fpca(irreg_fdata, config...)` → dict (`PaceFpcaResult`, all 10 fields incl. eigenfunctions `(m, ncomp)`, scores `(n, ncomp)`, and per-curve confidence bands) with a `PaceFpcaConfig` (NOT `#[non_exhaustive]` — struct-literal safe); `eigenfunctions`/`scores` layout is transposition-guarded; `actual_ncomp` truncation handled. Lives in the new `src/pace_fpca_mod.rs`.
+- [x] **CLASS-01**: User can fit a K-class one-vs-rest elastic multinomial classifier via `fdars.classification.elastic_multinomial(data, labels, argvals, ...)` → dict (`ElasticMultinomialResult`; `train_probabilities` `(n, K)` transposition-guarded at `K ≥ 3`); labels must be 0-indexed contiguous (`0..K`) — a negative/non-contiguous-label guard (v5.0 CR-01 pattern) raises a helpful `ValueError` rather than wrapping `i64→usize`.
 
 ### Group C — Depth / Outliers / Interval Inference (extend `fdars.depth` / `fdars.outliers` / `fdars.inference`)
 
@@ -74,9 +74,9 @@ REQ-ID → Phase mapping. 23/23 v6.0 requirements mapped, each to exactly one ph
 | REGR-01 | Phase 37 | Complete |
 | REGR-02 | Phase 37 | Complete |
 | REGR-03 | Phase 37 | Complete |
-| PACE-01 | Phase 38 | Pending |
-| PACE-02 | Phase 38 | Pending |
-| CLASS-01 | Phase 38 | Pending |
+| PACE-01 | Phase 38 | Complete |
+| PACE-02 | Phase 38 | Complete |
+| CLASS-01 | Phase 38 | Complete |
 | DEPTH-03 | Phase 39 | Pending |
 | OUTL-01 | Phase 39 | Pending |
 | OUTL-02 | Phase 39 | Pending |

@@ -101,7 +101,7 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
 
 - [x] **Phase 36: Crate Bump + Regression Gate** — Bump 0.20.0 → 0.23.0 (parallel-only, no linalg), wildcard fallback arms for any newly-`#[non_exhaustive]` upstream enums reached by existing code, full ~560-test suite green as the sole gate; isolated commit before any new binding work (completed 2026-08-20)
 - [x] **Phase 37: Group A — Regression Bindings** — `concurrent_regression` (`beta_curve` `(p,m)` transposition-guarded) + `functional_glm` (`GlmFamily` string dispatch, re-fits FPCA internally; Gamma inverse-link + AIC caveat) extending `fdars.regression` (completed 2026-08-20)
-- [ ] **Phase 38: Group B — FPCA & Classification Bindings** — new `src/pace_fpca_mod.rs`: `IrregFdata` lists-of-arrays builder + `pace_fpca`; `elastic_multinomial` (CR-01 label guard) extending `fdars.classification` [IrregFdata interface spike at plan time]
+- [x] **Phase 38: Group B — FPCA & Classification Bindings** — new `src/pace_fpca_mod.rs`: `IrregFdata` lists-of-arrays builder + `pace_fpca`; `elastic_multinomial` (CR-01 label guard) extending `fdars.classification` [IrregFdata interface spike at plan time] (completed 2026-08-21)
 - [ ] **Phase 39: Group C — Depth/Outliers/Interval-Inference Bindings** — 9 new `DepthMethod` variants + 4 outlier detectors (`tvdmss`/`muod`/`sequential_transform_outliers`/`depthgram`) + 3 ITP tests (`itp_one_pop`/`itp_two_pop`/`itp_flm`) with a new `itp_result_to_pydict` [outliers seed audit spike at plan time]
 - [ ] **Phase 40: Advisor Extension** — extend the `outliers` aspect (new detector scalar diagnostics; closes the Phase-34 deferral) + the `regression` aspect (GLM deviance/AIC, concurrent fit summary); Group B advisor coverage decided at plan time; grounding invariant + MCP guard-sync (single atomic commit) preserved [ADV-05 feasibility spike at plan time]
 - [ ] **Phase 41: Docs — Diagrams & Worked Examples** — new Regression / PACE-FPCA + elastic-multinomial / depth-outliers-inference pages + method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples; advisor aspects.md update; whole-site `mkdocs build --strict` green; blocking human diagram review
@@ -162,7 +162,7 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
 
 **Plans**: 1 plan
 
-- [ ] 38-01-PLAN.md — Tracer-first: pyfda's first `#[pyclass] PyIrregFdata` + `irreg_fdata_from_lists` + `pace_fpca` round-trip (novel-risk-first), then IrregFdata dense/ragged/outer-length `ValueError` guards, the full 10-key `pace_fpca` dict with eigenfunctions/scores `(m,ncomp)`/`(n,ncomp)` transposition guards + `actual_ncomp` truncation + determinism, and `elastic_multinomial` (CR-01 label guard, `(n,K)` proba guard, `class_models` omitted) extending `fdars.classification`; new `src/pace_fpca_mod.rs` + `lib.rs`/`__init__.py` registration
+- [x] 38-01-PLAN.md — Tracer-first: pyfda's first `#[pyclass] PyIrregFdata` + `irreg_fdata_from_lists` + `pace_fpca` round-trip (novel-risk-first), then IrregFdata dense/ragged/outer-length `ValueError` guards, the full 10-key `pace_fpca` dict with eigenfunctions/scores `(m,ncomp)`/`(n,ncomp)` transposition guards + `actual_ncomp` truncation + determinism, and `elastic_multinomial` (CR-01 label guard, `(n,K)` proba guard, `class_models` omitted) extending `fdars.classification`; new `src/pace_fpca_mod.rs` + `lib.rs`/`__init__.py` registration
 
 **UI hint**: no
 

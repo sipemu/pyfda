@@ -126,7 +126,7 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 - [x] Crate bump `fdars-core 0.20.0 → 0.23.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate — ✓ Phase 36 (600 passed / 4 skipped / 0 failed; zero drift; zero wildcard arms needed — existing CvCriterion/ProjectionBasisType arms already present)
 - [x] Group A — Regression: `concurrent_regression` + `functional_glm` extending `fdars.regression` — ✓ Phase 37 (2 bindings + 2 PyDict converters; `beta_curve (p,m)` transposition-guarded at p=3,n=10; 4 GLM families via `#[non_exhaustive]` `GlmFamily` string dispatch; embedded `fpca` excluded; `functional_glm` takes no argvals per core; 620 passed / 4 skipped)
-- [ ] Group B — FPCA & Classification: `pace_fpca` (sparse/PACE FPCA) + `elastic_multinomial` extending `fdars.classification`
+- [x] Group B — FPCA & Classification: `pace_fpca` (sparse/PACE FPCA) + `elastic_multinomial` extending `fdars.classification` — ✓ Phase 38 (pyfda's first `#[pyclass]` `PyIrregFdata` + `fdars.pace_fpca` submodule with dtype-agnostic ragged-list guards + 10-key dict / transposition-guarded eigenfunctions·scores; `elastic_multinomial` with CR-01 label guard, `class_models` omitted; 643 passed / 4 skipped)
 - [ ] Group C — Depth / Outliers / Interval Inference: new depth methods + outlier detectors (`tvdmss`/`muod`/`sequential_transform`/depthgram) + interval-wise testing (`itp_*`) extending `fdars.depth`/`fdars.outliers`/`fdars.inference`
 - [ ] Advisor extension (where relevant) — grounded diagnostics for new aspects; grounding invariant + MCP guard-sync (single atomic commit) preserved
 - [ ] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green
@@ -198,4 +198,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-20 after Phase 37 — Group A regression bindings (concurrent_regression + functional_glm); 620 passed / 4 skipped*
+*Last updated: 2026-08-21 after Phase 38 — Group B FPCA & classification bindings (PyIrregFdata + pace_fpca + elastic_multinomial); 643 passed / 4 skipped*
