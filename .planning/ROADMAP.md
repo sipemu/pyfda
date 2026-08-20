@@ -8,6 +8,7 @@
 - ✅ **v3.0 — Provider-Agnostic Advisor, Full-Library Coverage** — Phases 19–24 (shipped 2026-08-12)
 - ✅ **v4.0 — fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs** — Phases 25–29 (shipped 2026-08-17)
 - ✅ **v5.0 — fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing** — Phases 30–35 (shipped 2026-08-18)
+- 🚧 **v6.0 — fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference** — Phases 36–41 (in progress)
 
 ## Phases
 
@@ -93,6 +94,128 @@ Upgraded `fdars-core` 0.17.0 → 0.20.0 (parallel-only, no `linalg`) and exposed
 - [x] Phase 35: Docs — Diagrams & Worked Examples — new Inference section + boxplot page + basis/smoothing fold-ins + aspects.md; 4 method-accurate hand-authored SVGs; whole-site strict build green; human review approved (completed 2026-08-18)
 
 </details>
+
+### 🚧 v6.0 fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference (Phases 36–41)
+
+Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV verified 1.81 ≤ 1.83) and expose the new upstream surface through PyO3 bindings + the Python API across three independent capability groups — Group A Regression (`concurrent_regression` + `functional_glm` extending `fdars.regression`), Group B FPCA & Classification (`pace_fpca` on a new sparse/irregular `IrregFdata` input + `elastic_multinomial` extending `fdars.classification`), Group C Depth/Outliers/Interval-Inference (9 new depth methods + 4 outlier detectors extending `fdars.outliers` + 3 interval-wise tests extending `fdars.inference`) — extend the grounded advisor where a real grounded scalar exists (extend the `outliers` aspect, closing the v5.0 Phase-34 boxplot-outlier deferral; extend the `regression` aspect; Group B advisor treatment decided at plan time), and document everything to the method-accurate standard (new pages + hand-authored inline SVGs + offline `FDARS_FENCE_OK` worked examples). Same shape as v4.0/v5.0: crate bump + regression gate first (BLOCKS everything), three independent binding groups (parallel-eligible after the bump — distinct `src/*_mod.rs` files), advisor on top (needs the shipped result dicts), docs last (run against the real shipped bindings).
+
+- [ ] **Phase 36: Crate Bump + Regression Gate** — Bump 0.20.0 → 0.23.0 (parallel-only, no linalg), wildcard fallback arms for any newly-`#[non_exhaustive]` upstream enums reached by existing code, full ~560-test suite green as the sole gate; isolated commit before any new binding work
+- [ ] **Phase 37: Group A — Regression Bindings** — `concurrent_regression` (`beta_curve` `(p,m)` transposition-guarded) + `functional_glm` (`GlmFamily` string dispatch, re-fits FPCA internally; Gamma inverse-link + AIC caveat) extending `fdars.regression`
+- [ ] **Phase 38: Group B — FPCA & Classification Bindings** — new `src/pace_fpca_mod.rs`: `IrregFdata` lists-of-arrays builder + `pace_fpca`; `elastic_multinomial` (CR-01 label guard) extending `fdars.classification` [IrregFdata interface spike at plan time]
+- [ ] **Phase 39: Group C — Depth/Outliers/Interval-Inference Bindings** — 9 new `DepthMethod` variants + 4 outlier detectors (`tvdmss`/`muod`/`sequential_transform_outliers`/`depthgram`) + 3 ITP tests (`itp_one_pop`/`itp_two_pop`/`itp_flm`) with a new `itp_result_to_pydict` [outliers seed audit spike at plan time]
+- [ ] **Phase 40: Advisor Extension** — extend the `outliers` aspect (new detector scalar diagnostics; closes the Phase-34 deferral) + the `regression` aspect (GLM deviance/AIC, concurrent fit summary); Group B advisor coverage decided at plan time; grounding invariant + MCP guard-sync (single atomic commit) preserved [ADV-05 feasibility spike at plan time]
+- [ ] **Phase 41: Docs — Diagrams & Worked Examples** — new Regression / PACE-FPCA + elastic-multinomial / depth-outliers-inference pages + method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples; advisor aspects.md update; whole-site `mkdocs build --strict` green; blocking human diagram review
+
+## Phase Details (v6.0)
+
+### Phase 36: Crate Bump + Regression Gate
+
+**Goal**: `fdars-core` is pinned at 0.23.0 and the entire existing binding + advisor suite still passes, on a green baseline, before any new binding work begins.
+**Depends on**: Nothing (first phase of v6.0; continues from v5.0 Phase 35)
+**Requirements**: DEP-05, DEP-06
+**Success Criteria** (what must be TRUE):
+
+  1. `Cargo.toml` pins `fdars-core = { version = "0.23.0", features = ["parallel"] }` (no `linalg`) and `maturin develop` builds green — the bump is a single-field dependency diff (0.21/0.22/0.23 all additive/non-breaking).
+  2. Any upstream enum that became `#[non_exhaustive]` at 0.23 and is reached by existing pyfda code carries a wildcard `_ => PyValueError` fallback arm — the crate does NOT compile without it.
+  3. The full existing binding + advisor suite (~560 tests) passes unchanged — no new tests, no tolerance relaxations — as the sole success criterion.
+  4. The bump lands as an isolated commit before any new-binding work, so any downstream binding issue cannot hide behind an upgrade regression.
+
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 37: Group A — Regression Bindings
+
+**Goal**: Users can fit a concurrent (varying-coefficient) functional regression and an exponential-family functional GLM from the extended `fdars.regression` submodule, layout-correct across the numpy↔FdMatrix boundary.
+**Depends on**: Phase 36
+**Requirements**: REGR-01, REGR-02, REGR-03
+**Success Criteria** (what must be TRUE):
+
+  1. User can call `fdars.regression.concurrent_regression(predictors, response, argvals, ...)` with `predictors` a `list[np.ndarray]` → a dict from `ConcurrentRegrResult`; the `beta_curve` field is shaped `(p, m)` (predictors × grid, NOT `(n_obs, m)`) and round-trips correctly, proven by a multi-predictor (`p ≥ 2`) transposition guard test.
+  2. User can call `fdars.regression.functional_glm(data, response, argvals, family=..., n_comp=..., ...)` → a dict from `FunctionalGlmResult` (all fields exposed); `family` dispatches a `#[non_exhaustive]` `GlmFamily` (Binomial/Poisson/Gamma/Gaussian) by string with a `ValueError` wildcard fallback, and the wrapper re-fits FPCA internally (raw data in, no persistent handle).
+  3. Both functions are registered in `src/regression_mod.rs` + `register_submodule!` with a `ConcurrentRegrResult`/`FunctionalGlmResult` → PyDict converter each; all fallible paths route through `to_pyresult()` (no `.unwrap()`); degenerate inputs (mismatched grids, too few curves, invalid family/ncomp) raise `ValueError`.
+  4. The docs-facing caveats are captured for Phase 41: Gamma's inverse canonical link (1/μ) and the non-R-comparable `functional_glm` AIC magnitude.
+
+**Plan-time spike**: confirm `ConcurrentRegrResult.beta_curve` orientation `(p, m)` against the multi-predictor transposition test (REGR-01).
+
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 38: Group B — FPCA & Classification Bindings
+
+**Goal**: Users can run sparse/irregular PACE functional PCA over a new ragged-grid `IrregFdata` input, and fit a K-class one-vs-rest elastic multinomial classifier, from a new `src/pace_fpca_mod.rs` and the extended `fdars.classification` submodule.
+**Depends on**: Phase 36
+**Requirements**: PACE-01, PACE-02, CLASS-01
+**Success Criteria** (what must be TRUE):
+
+  1. A sparse/irregular input path is exposed — `fdars.irreg_fdata_from_lists(argvals_list, values_list)` accepts two Python lists of 1-D arrays (ragged per-curve grids) and constructs the fdars-core CSR-layout `IrregFdata`; passing a plain dense 2-D array is rejected with a `ValueError` (never silently misinterpreted).
+  2. User can call `fdars.pace_fpca(irreg_fdata, config...)` → a dict from `PaceFpcaResult` (all 10 fields incl. eigenfunctions `(m, ncomp)`, scores `(n, ncomp)`, per-curve confidence bands) with a struct-literal-safe `PaceFpcaConfig`; `eigenfunctions`/`scores` layout is transposition-guarded and `actual_ncomp` truncation is handled. Lives in the new `src/pace_fpca_mod.rs`.
+  3. User can call `fdars.classification.elastic_multinomial(data, labels, argvals, ...)` → a dict from `ElasticMultinomialResult` (`train_probabilities` `(n, K)` transposition-guarded at `K ≥ 3`); labels must be 0-indexed contiguous (`0..K`) — a negative/non-contiguous-label guard (v5.0 CR-01 pattern) raises a helpful `ValueError` rather than wrapping `i64→usize`.
+  4. All new functions are registered with `to_pyresult()` guards (no `.unwrap()`); degenerate inputs (mismatched list lengths, dense-array-to-IrregFdata, invalid ncomp/labels) raise `ValueError`.
+
+**Plan-time spike**: `IrregFdata` list-of-arrays PyO3 constructor interface — no existing pyfda precedent; resolve before writing `pace_fpca` (PACE-01/PACE-02).
+
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 39: Group C — Depth/Outliers/Interval-Inference Bindings
+
+**Goal**: Users gain 9 new functional-depth methods, 4 functional-outlier detectors, and 3 interval-wise tests — extending `fdars.depth`, `fdars.outliers`, and `fdars.inference` respectively — all deterministic offline and layout-correct across the numpy↔FdMatrix boundary.
+**Depends on**: Phase 36
+**Requirements**: DEPTH-03, OUTL-01, OUTL-02, OUTL-03, OUTL-04, ITP-01, ITP-02, ITP-03, ITP-04
+**Success Criteria** (what must be TRUE):
+
+  1. `fdars.depth.functional_depth(..., method=...)` (and `functional_boxplot`'s `method`) accepts the 9 new fdars-core 0.23 `DepthMethod` variants (`hypograph_index`, `modified_hypograph_index`, `epigraph_index`, `half_region`, `modified_half_region`, `extremal`, `extreme_rank_length`, `l_infinity`, `total_variation` — 13 total); the Python string map covers every new variant and the `#[non_exhaustive]` wildcard error message lists all supported methods.
+  2. User can run all four outlier detectors — `fdars.outliers.tvdmss`, `.muod`, `.sequential_transform_outliers(transforms=[...])`, `.depthgram` — each returning a dict with outlier indices as a Python `list[int]` plus fdars-computed scores/threshold; `transforms` maps a `#[non_exhaustive]` `SeqTransform` by string with a `ValueError` wildcard fallback; any random component takes `seed=None` → fixed default for byte-identical offline reproducibility.
+  3. User can run all three interval-wise tests — `fdars.inference.itp_one_pop(mu0=...)`, `.itp_two_pop(seed=None)`, `.itp_flm(basis_type=...)` — each returning an `ItpResult` dict with **vector** closure-adjusted p-values + unadjusted p-values + the test-statistic curve; `basis_type` maps a `#[non_exhaustive]` `ProjectionBasisType` by string with a `ValueError` fallback, and `itp_flm` re-fits internally (no persistent handle).
+  4. The three ITP functions are registered in `src/inference_mod.rs` + `register_submodule!` via a **new** `itp_result_to_pydict` helper (distinct from `test_result_to_pydict`, since results are p-value vectors not scalars) exposing vectors as 1-D arrays; all fallible paths route through `to_pyresult()`; degenerate inputs raise `ValueError`.
+
+**Plan-time spike**: audit `outliers_mod.rs` / fdars-core 0.23 outlier signatures for existing `seed` parameters; add seed exposure where random components exist (OUTL-01..04).
+
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 40: Advisor Extension
+
+**Goal**: The grounded advisor's existing `outliers` and `regression` aspects surface grounded scalar diagnostics for the new detector and regression results, with the grounding invariant and the advisor/MCP guard-sync preserved.
+**Depends on**: Phase 37 (regression bindings), Phase 39 (outlier-detector bindings)
+**Requirements**: ADV-04, ADV-05
+**Success Criteria** (what must be TRUE):
+
+  1. The existing `outliers` aspect summarizes the new fdars-computed outlier-detector results as grounded scalar diagnostics (e.g. `n_outliers`, outlier fraction, score/threshold ranges — never raw index lists or numpy aggregates), closing the v5.0 Phase-34 functional-boxplot-outlier deferral; no new aspect key is added — `build_diagnostics` dispatch detects the new result-dict keys.
+  2. The existing `regression` aspect surfaces grounded diagnostics for the new regression results (`functional_glm` deviance/AIC, `concurrent_regression` fit summary) wherever a real fdars-computed scalar is available; grounding invariant preserved.
+  3. Any change to `_DIAGNOSTICS_METHODS`/`_RUNNABLE_METHODS`/`_supported` lands in a SINGLE atomic commit keeping `test_diagnostics_methods_match_advisor_supported` green; offline determinism is preserved (no numpy scalars, byte-identical `json.dumps`) and the LLM only interprets and cites diagnostic values.
+  4. Group B advisor coverage (`pace_fpca` via the `fpca` aspect, `elastic_multinomial` via the `classification` aspect) is decided at plan time on feasibility — included only if a genuinely grounded scalar diagnostic exists, otherwise left as bindings + docs only.
+
+**Plan-time spike**: confirm whether `pace_fpca` / `elastic_multinomial` expose a genuinely grounded scalar diagnostic before committing advisor coverage; finalize the exact outlier scalar spec (ADV-05).
+
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 41: Docs — Diagrams & Worked Examples
+
+**Goal**: The published MkDocs site documents the new regression, PACE-FPCA/classification, and depth/outliers/interval-inference capabilities to the project's method-accurate standard, with the whole site building strict-green offline against the real shipped bindings.
+**Depends on**: Phase 37, Phase 38, Phase 39, Phase 40
+**Requirements**: DOCS-08, DOCS-09, DOCS-10, DOCS-11
+**Success Criteria** (what must be TRUE):
+
+  1. New/updated Regression docs cover `concurrent_regression` + `functional_glm` with method-accurate hand-authored inline SVG(s) + a runnable offline worked example emitting `FDARS_FENCE_OK` (small/synthetic or subsampled data), documenting the Gamma inverse link + AIC caveat.
+  2. New FPCA/Classification docs carry a PACE-FPCA page (SVG showing irregular/sparse observations + recovered eigenfunctions; executed fence using small inline synthetic sparse data, `n ≤ 20`) and elastic-multinomial coverage (phoneme.csv subsampled to 3 classes, `m ≤ 64` for fence speed).
+  3. New/updated Depth-Outliers-Inference docs fold the 9 new depth methods into the depth page, add a functional-outliers page for the 4 detectors (method-accurate SVG), and add an interval-wise-inference page for `itp_*` (SVG showing closure-adjusted p-value intervals, correct closure direction); each new page carries a runnable offline `FDARS_FENCE_OK` worked example.
+  4. Advisor `aspects.md` is updated for the extended `outliers`/`regression` diagnostics; all new pages are wired into `mkdocs.yml` nav; whole-site `mkdocs build --strict` passes offline (exit 0); every new SVG is SVGO-idempotent and determinism-clean; a blocking human diagram method-accuracy review (rsvg-convert PNG check: depth asymmetry, PACE irregular observations, ITP closure direction) is satisfied before the milestone closes.
+
+**Plans**: TBD
+**UI hint**: yes
+
+## Progress (v6.0)
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 36. Crate Bump + Regression Gate | 0/? | Not started | - |
+| 37. Group A — Regression Bindings | 0/? | Not started | - |
+| 38. Group B — FPCA & Classification Bindings | 0/? | Not started | - |
+| 39. Group C — Depth/Outliers/Interval-Inference Bindings | 0/? | Not started | - |
+| 40. Advisor Extension | 0/? | Not started | - |
+| 41. Docs — Diagrams & Worked Examples | 0/? | Not started | - |
 
 ---
 

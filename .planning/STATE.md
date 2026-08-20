@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-08-20T18:42:39.860Z"
 last_activity: 2026-08-20
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,23 +17,23 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-17)
+See: .planning/PROJECT.md (updated 2026-08-20)
 
-**Core value:** Upgrade `fdars-core` 0.17.0→0.20.0 (parallel-only, no linalg), expose the new functional-inference + depth/boxplot + basis/smoothing surface through PyO3 bindings + the Python API, extend the v3.0 grounded advisor with an `inference` diagnostics aspect, and document everything method-accurately — with the grounding invariant intact throughout.
-**Current focus:** Phase 35 — docs-diagrams-worked-examples
+**Core value:** Bump `fdars-core` 0.20.0→0.23.0 (parallel-only, no linalg), expose the new upstream surface through PyO3 bindings + the Python API across three capability groups (Group A Regression, Group B PACE-FPCA & Classification, Group C Depth/Outliers/Interval-Inference), extend the grounded advisor where a real grounded scalar exists, and document everything method-accurately — with the grounding invariant intact throughout. Same shape as v4.0/v5.0.
+**Current focus:** Phase 36 — crate bump + regression gate
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 36 — Crate Bump + Regression Gate (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-08-20 — Milestone v6.0 started
+Status: Roadmap created — ready to plan Phase 36
+Last activity: 2026-08-20 — v6.0 roadmap created (6 phases, 23 requirements, 100% coverage)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 11 (this milestone); 11 in v4.0; 19 across v1.0–v3.0
+- Total plans completed: 0 (this milestone); 11 in v5.0; 11 in v4.0; 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -41,12 +41,12 @@ Last activity: 2026-08-20 — Milestone v6.0 started
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 30 | 1 | - | - |
-| 31 | 3 | - | - |
-| 32 | 1 | - | - |
-| 33 | 1 | - | - |
-| 34 | 1 | - | - |
-| 35 | 4 | - | - |
+| 36 | TBD | - | - |
+| 37 | TBD | - | - |
+| 38 | TBD | - | - |
+| 39 | TBD | - | - |
+| 40 | TBD | - | - |
+| 41 | TBD | - | - |
 
 **Recent Trend:**
 
@@ -54,20 +54,6 @@ Last activity: 2026-08-20 — Milestone v6.0 started
 - Trend: -
 
 *Updated after each plan completion*
-**Per-Plan Metrics:**
-
-| Plan | Duration | Tasks | Files |
-|------|----------|-------|-------|
-| Phase 30 P01 | 4 | 2 tasks | 2 files |
-| Phase 31 P01 | 6 | 4 tasks | 5 files |
-| Phase 31-group-a-fdars-inference-bindings P02 | 4 | 2 tasks | 2 files |
-| Phase 31 P03 | 35 | 3 tasks | 2 files |
-| Phase 32 P01 | 4 | 2 tasks | 2 files |
-| Phase 33-group-c-basis-smoothing-quick-wins P01 | 5m | 3 tasks | 3 files |
-| Phase 34-advisor-extension P01 | 8m | 2 tasks | 6 files |
-| Phase 35 P01 | 42 | 3 tasks | 5 files |
-| Phase 35 P02 | 32m | 2 tasks | 3 files |
-| Phase 35 P03 | 39 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -76,33 +62,17 @@ Last activity: 2026-08-20 — Milestone v6.0 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v5.0 roadmap]: Phase numbering CONTINUES from v4.0 (starts at Phase 30; v4.0 ended at Phase 29) — no reset
-- [v5.0 roadmap]: Same shape as v4.0 — crate bump + regression gate FIRST (Phase 30, DEP-03/04), then three INDEPENDENT binding groups (Phases 31/32/33, parallel-eligible after Phase 30), advisor on top (Phase 34), docs last (Phase 35)
-- [v5.0 roadmap]: Phase 30 BLOCKS all downstream phases; the `CvCriterion` `#[non_exhaustive]` wildcard fallback arm is a compile prerequisite (crate does NOT build without it), not just a robustness nicety
-- [v5.0 roadmap]: Three binding groups kept as three separate phases (matches v4.0 per-group review cadence + fine granularity): Group A = `fdars.inference` new submodule (Phase 31, largest/highest-risk), Group B = depth/boxplot extending `fdars.depth` (Phase 32), Group C = basis/smoothing quick wins (Phase 33, smallest)
-- [v5.0 roadmap]: Advisor extension (Phase 34, ADV-03) depends on Phase 31 — needs the inference bindings to exist; `inference` is diagnostics-only (NOT in `_RUNNABLE_METHODS`); three-file guard-sync (`advisor/__init__.py` `_supported` + dispatch, `advisor/aspects/inference.py`, `mcp/server.py` `_DIAGNOSTICS_METHODS`) in a SINGLE atomic commit to keep `test_diagnostics_methods_match_advisor_supported` green
-- [v5.0 roadmap]: Docs LAST (Phase 35) so executed offline fences + diagrams run against the real shipped bindings
-- [research]: Do NOT enable `linalg` (requires Rust 1.84 > MSRV 1.83); `parallel` retained; 0.18 never published — upgrade path is 0.17 → 0.20 directly; 0.18→0.20 additive/non-breaking, zero new Rust/Python deps
-- [research]: FLM inference re-fits `fregre_lm` internally (accepts raw data/response/n_comp) — `FregreLmResult` is a non-pyclass Rust struct and never crosses the boundary; matches existing `predict_fregre_lm` pattern
-- [research]: Compound results decompose to PyDict (`TestResult`, `ToleranceBand`, `FunctionalBoxplotResult`); enums cross as `&str` + match arms with `_ => PyValueError` `#[non_exhaustive]` fallback (`DepthMethod`, `CvCriterion::Aic`, `MultiplierDistribution`)
-- [research]: All permutation-test/random-projection seeds exposed as Python `seed=None` resolving to a fixed default for byte-identical reproducibility
-- [Phase ?]: Do NOT enable linalg feature (requires Rust 1.84 > MSRV 1.83; not needed for v5.0 Groups A/B/C)
-- [Phase ?]: Bump lands as single isolated commit (Cargo.toml + smoothing_mod.rs only; Cargo.lock gitignored) before Phase 31/32/33 binding work
-- [Phase ?]: Zero numeric drift on 0.17->0.20 bump: 426 passed / 4 skipped / 0 failed, no tolerance relaxations
-- [Phase 31-01]: seed=None resolves to u64 default 0 (locked); mod inference_mod placed alphabetically in lib.rs (rustfmt); 31-SIGNATURES.md is the plan-time authority for all 8 Group A function signatures
-- [Phase ?]: multiplier_from_str() private helper dispatches string to MultiplierDistribution with non_exhaustive wildcard arm returning PyValueError
-- [Phase ?]: ToleranceBand Vec<f64> fields converted via vec_to_numpy1d per field (not fdmatrix_to_numpy2d) per INFER-04 locked decision
-- [Phase ?]: flm_f_test/flm_gof_test default n_comp=5; core clamps n_comp silently — degenerate-input tests use n<3 (fregre_lm error) and n=4 (GoF degenerate df) respectively
-- [Phase ?]: outliers Vec<usize> -> Python list of ints (not ndarray) — matches locked 32-CONTEXT.md decision
-- [Phase ?]: seed=None resolves to u64 default 0 inside depth_method_from_str — byte-identical RandomProjection reproducibility
-- [Phase ?]: smooth_basis_aic placed in basis_mod.rs beside GCV twin per closest-analog placement rule in 33-CONTEXT.md
-- [Phase ?]: CvCriterion::Aic output arm explicit; _ wildcard retained for non_exhaustive enum forward-compat
-- [Phase ?]: inference aspect (ADV-03): diagnostics-only, caller supplies TestResult dict; n_perm==0 is legitimate asymptotic test value; ToleranceBand shape detected by half_width+center presence without p_value
-- [Phase ?]: Functional Inference page uses 4 atomic fences (two-sample, SCB, ANOVA, FLM) written together to avoid broken SVG links in strict build
-- [Phase ?]: Downsampled Canadian Weather to every-other-day (183 pts) for executed fence budget within build time
-- [Phase ?]: constant_basis subsection placed before 'Evaluating basis matrices directly' (natural basis-matrix neighbour)
-- [Phase ?]: AIC selection documented inside Basis Expansion section covering all 3 entry points (smooth_basis_aic, optim_bandwidth(aic), basis_nbasis_cv(aic)) with one fence
-- [Phase ?]: inference advisor fence uses synthetic TestResult dict (no live fdars.inference call) — grounding invariant preserved, matching offline precedent
+- [v6.0 roadmap]: Phase numbering CONTINUES from v5.0 (starts at Phase 36; v5.0 ended at Phase 35) — no reset
+- [v6.0 roadmap]: Same shape as v4.0/v5.0 — crate bump + regression gate FIRST (Phase 36, DEP-05/06), then three INDEPENDENT binding groups (Phases 37/38/39, parallel-eligible after Phase 36 — distinct `src/*_mod.rs` files), advisor on top (Phase 40), docs last (Phase 41)
+- [v6.0 roadmap]: Phase 36 BLOCKS all downstream phases; wildcard fallback arms for any upstream enum that became `#[non_exhaustive]` at 0.23 and is reached by existing code are a compile prerequisite (crate does NOT build without them), landed in the bump commit
+- [v6.0 roadmap]: Three binding groups kept as three separate phases (matches v4.0/v5.0 per-group review cadence + fine granularity): Group A = regression extension (Phase 37), Group B = PACE-FPCA + elastic_multinomial incl. the novel IrregFdata input + new `src/pace_fpca_mod.rs` (Phase 38, highest-novelty), Group C = depth/outliers/interval-inference (Phase 39, largest pitfall surface)
+- [v6.0 roadmap]: Advisor extension (Phase 40, ADV-04/05) depends on Phase 37 + Phase 39 — needs the regression + outlier-detector result dicts to exist; extends the EXISTING `outliers` and `regression` aspects (no new aspect key by default), closing the v5.0 Phase-34 boxplot-outlier deferral; any `_DIAGNOSTICS_METHODS`/`_supported` change in a SINGLE atomic commit to keep `test_diagnostics_methods_match_advisor_supported` green
+- [v6.0 roadmap]: Docs LAST (Phase 41) so executed offline fences + diagrams run against the real shipped bindings
+- [research]: Do NOT enable `linalg` (still gates only `ridge_regression_fit`, still wants Rust 1.84 > MSRV 1.83); `parallel` retained; 0.20→0.23 additive/non-breaking (single-field Cargo.toml diff upstream), MSRV actually drops to 1.81 ≤ pyfda's 1.83 pin; zero new Python extras / datasets / CI-matrix changes
+- [research]: Group B's `pace_fpca` takes `&IrregFdata` — a CSR-layout sparse type with NO existing Python binding precedent; needs a new `src/pace_fpca_mod.rs` + a lists-of-arrays builder (`fdars.irreg_fdata_from_lists`); a plain dense 2-D array compiles but silently produces wrong results
+- [research]: Compound results decompose to PyDict via 5 new helpers following the canonical `test_result_to_pydict()` pattern (`ConcurrentRegrResult`, `FunctionalGlmResult`, `PaceFpcaResult`, `ElasticMultinomialResult`, `ItpResult` — the last is a NEW `itp_result_to_pydict` because ITP p-values are vectors not scalars)
+- [research]: Four enum dispatch patterns need wildcard `_ => PyValueError` arms AND matching Python string maps: `DepthMethod` (extend +9 variants), `GlmFamily`, `SeqTransform`, `ProjectionBasisType`; Rust catches a missing arm but NOT a missing Python string mapping
+- [research]: `functional_glm` and `itp_flm` re-fit internally (raw data in, no persistent handle); Gamma GLM uses inverse canonical link 1/μ and its AIC is NOT comparable to R `glm()` (document both in Phase 41)
 
 ### Pending Todos
 
@@ -110,14 +80,15 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 30 prerequisite]: `optim_bandwidth` binding will NOT compile against 0.20's `#[non_exhaustive]` `CvCriterion` without a wildcard `_ => PyValueError` fallback arm — this is a compile blocker, land it in the bump commit
-- [Phase 31 plan-time spikes]: `MultiplierDistribution` variants (docs.rs 404) before INFER-04/05; `flm_f_test`/`flm_gof_test` re-fit strategy + `fdars_core::scalar_on_function::FregreLmResult` cross-module import before INFER-06/07; `oneway_anova_vstat` group-label base (0- vs 1-indexed) before INFER-08; confirm exact `TestResult`/`ToleranceBand` field names before coding
-- [Phase 31 risk]: permutation-test determinism — two calls with same seed must return byte-identical `json.dumps`; carry a determinism test
-- [Phase 32 plan-time spike]: `DepthMethod` `#[non_exhaustive]` confirmation + exact variant names before DEPTH-01; `FunctionalBoxplotResult` field names / which fields are `FdMatrix` vs `Vec<f64>` before DEPTH-02
-- [Phase 32 risk]: numpy(row-major)↔FdMatrix(column-major) transposition (#33 class) on every `FdMatrix`-returning boxplot field — route through `fdmatrix_to_numpy2d` (never `vec_to_numpy1d`), carry a multi-curve round-trip shape test
-- [Phase 33 plan-time spike]: `constant_basis` exact signature/dimension (docs.rs 404) before BASIS-01; `smooth_basis_aic` existence + `aic_smoother`/`CvCriterion::Aic` module path before BASIS-02/03 (confirm `CvCriterion` in `fdars_core::smoothing` is the same enum vs a new one)
-- [Phase 34 risk]: guard-sync must be atomic (three files, one commit) or `test_diagnostics_methods_match_advisor_supported` goes red on the intermediate state; grounding invariant + offline determinism (no numpy scalars) preserved
-- [Phase 35 risk]: docs build ~18 min (executed fences run real compute) — keep fence data small (`n_perm=19`, SCB `nb=50`, synthetic/subset); two-sample tests need two groups — pick worked-example datasets accordingly; SVGO idempotence + determinism gate + blocking human diagram review
+- [Phase 36 prerequisite]: any upstream enum newly `#[non_exhaustive]` at 0.23 and reached by existing pyfda code needs a wildcard `_ => PyValueError` fallback arm — compile blocker, land in the bump commit; verify MSRV 1.81 ≤ 1.83 and that `linalg` stays off
+- [Phase 37 plan-time spike]: confirm `ConcurrentRegrResult.beta_curve` orientation `(p, m)` (predictors × grid, NOT `(n_obs, m)`) against a multi-predictor (`p ≥ 2`) transposition guard test before REGR-01; confirm `FunctionalGlmResult` field names + `GlmFamily` variants
+- [Phase 38 plan-time spike]: `IrregFdata` list-of-arrays PyO3 constructor interface — NO existing pyfda precedent (recommend `fdars.irreg_fdata_from_lists(argvals_list, values_list)`); resolve before writing `pace_fpca` (PACE-01/02). Confirm `PaceFpcaResult` 10 fields + `PaceFpcaConfig` struct-literal safety + `ElasticMultinomialResult` field names
+- [Phase 38 risk]: `elastic_multinomial` negative/non-contiguous labels wrap `i64→usize` to `usize::MAX` (v5.0 CR-01) — add the 0-indexed contiguous label guard → helpful `ValueError`; `train_probabilities` `(n, K)` transposition guard at `K ≥ 3`; `pace_fpca` `eigenfunctions (m,ncomp)`/`scores (n,ncomp)` transposition guards
+- [Phase 39 plan-time spike]: audit `outliers_mod.rs` / fdars-core 0.23 outlier signatures for existing `seed` params; add `seed=None`→fixed default where random components exist (OUTL-01..04). Confirm exact `DepthMethod` (+9), `SeqTransform`, `ProjectionBasisType` variant names + `ItpResult` field names
+- [Phase 39 risk]: ITP determinism + numpy-scalar leak — permutation seed defaults to 0 for offline determinism; reduce `ItpResult` vectors to `float()`/1-D arrays (not `np.float64`) for JSON/grounding; new `itp_result_to_pydict` distinct from `test_result_to_pydict`
+- [Phase 40 plan-time spike]: confirm whether `pace_fpca` / `elastic_multinomial` expose a genuinely grounded scalar diagnostic before committing Group B advisor coverage (ADV-05 — otherwise bindings + docs only); finalize the exact outlier scalar spec (n_outliers, fraction, score/threshold ranges — never raw index lists or numpy aggregates)
+- [Phase 40 risk]: guard-sync must be atomic (advisor `_supported`/dispatch + MCP `_DIAGNOSTICS_METHODS` in one commit) or `test_diagnostics_methods_match_advisor_supported` goes red on the intermediate state; grounding invariant + offline determinism (no numpy scalars, byte-identical `json.dumps`) preserved
+- [Phase 41 risk]: docs build ~19 min (executed fences run real compute) — keep fence data small (PACE/ITP synthetic `n ≤ 20`; phoneme subsampled to 3 classes, `m ≤ 64`), keep total build under ~25 min; SVGO idempotence + determinism gate + blocking human diagram method-accuracy review (depth asymmetry, PACE irregular observations, ITP closure direction)
 
 ## Deferred Items
 
@@ -126,15 +97,16 @@ None yet.
 | Plotting | PLOT-01: `fdars.plot.plot_functional_boxplot()` helper rendering the `functional_boxplot` numeric result | v2/future | v5.0 init |
 | Accessibility | A11Y-01: Long-form `<title>`/`<desc>` + aria-labelledby for complex diagrams | v2 | Init |
 | Examples | EX2-01: Editorial consolidation (sonar-tsrvf vs phoneme-shape; Andrews-wine series) | v2 | Init |
-| Transport | HTTP-01: HTTP/SSE MCP transport for the fdars-advisor server (stdio shipped in v2.0) | v3.x (FUT-01) | v2.0 close |
-| API coverage | Additional upstream methods not in v5.0's three groups; 0.15→0.20 internal perf wins (inherited via the bump, no separate public API) | later coverage milestone | v5.0 init |
+| Transport | HTTP-01 / FUT-01: HTTP/SSE MCP transport for the fdars-advisor server (stdio shipped in v2.0) | v3.x | v2.0 close |
+| Advisor | PACE-ADV / MULTINOM-ADV: dedicated advisor aspects for PACE-FPCA and elastic multinomial, if ADV-05's plan-time feasibility check defers them | future | v6.0 init |
+| Core | `linalg`-gated `ridge_regression_fit` (Rust 1.84+ > MSRV 1.83) + HEAD 0.24-bound work (FAM, mixed models, FoF-RE) — not in published 0.23.0 | out of scope | v6.0 init |
 
 ## Session Continuity
 
-Last session: 2026-08-18T20:40:28.192Z
-Stopped at: 35-04-PLAN.md Task 3 — blocking human-verify checkpoint (diagram method-accuracy review pending)
-Resume file: .planning/phases/35-docs-diagrams-worked-examples/35-04-PLAN.md
+Last session: 2026-08-20 — v6.0 roadmap created
+Stopped at: Roadmap complete — ready to plan Phase 36
+Resume file: .planning/ROADMAP.md
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Plan the first phase with `/gsd-plan-phase 36`

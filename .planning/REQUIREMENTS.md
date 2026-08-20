@@ -65,7 +65,35 @@ Prior-milestone requirements: see `.planning/milestones/v5.0-REQUIREMENTS.md` (a
 
 ## Traceability
 
-<!-- Filled by gsd-roadmapper: REQ-ID → Phase mapping, 100% coverage validation. -->
+REQ-ID → Phase mapping. 23/23 v6.0 requirements mapped, each to exactly one phase — 100% coverage, no orphans, no duplicates.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| DEP-05 | Phase 36 | Pending |
+| DEP-06 | Phase 36 | Pending |
+| REGR-01 | Phase 37 | Pending |
+| REGR-02 | Phase 37 | Pending |
+| REGR-03 | Phase 37 | Pending |
+| PACE-01 | Phase 38 | Pending |
+| PACE-02 | Phase 38 | Pending |
+| CLASS-01 | Phase 38 | Pending |
+| DEPTH-03 | Phase 39 | Pending |
+| OUTL-01 | Phase 39 | Pending |
+| OUTL-02 | Phase 39 | Pending |
+| OUTL-03 | Phase 39 | Pending |
+| OUTL-04 | Phase 39 | Pending |
+| ITP-01 | Phase 39 | Pending |
+| ITP-02 | Phase 39 | Pending |
+| ITP-03 | Phase 39 | Pending |
+| ITP-04 | Phase 39 | Pending |
+| ADV-04 | Phase 40 | Pending |
+| ADV-05 | Phase 40 | Pending |
+| DOCS-08 | Phase 41 | Pending |
+| DOCS-09 | Phase 41 | Pending |
+| DOCS-10 | Phase 41 | Pending |
+| DOCS-11 | Phase 41 | Pending |
+
+**Coverage summary:** 36→2 (DEP), 37→3 (REGR), 38→3 (PACE/CLASS), 39→9 (DEPTH/OUTL/ITP), 40→2 (ADV), 41→4 (DOCS). Total 23/23 ✓
 
 ## Plan-time verification spikes (from research — resolve before coding the affected binding)
 
