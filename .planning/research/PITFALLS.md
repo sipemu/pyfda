@@ -1,352 +1,344 @@
 # Pitfalls Research
 
-**Domain:** PyO3 binding upgrade — fdars-core 0.17 → 0.20 (functional inference + depth/boxplot + AIC smoothing)
-**Researched:** 2026-08-17
-**Confidence:** HIGH (docs.rs signatures verified against 0.20.0; codebase read directly; v4.0 retrospective confirmed)
+**Domain:** PyO3 binding layer upgrade — fdars-core 0.20 → 0.23 (Regression, PACE-FPCA, Depth/Outliers/Interval Inference)
+**Researched:** 2026-08-20
+**Confidence:** HIGH (all pitfalls derived from v0.23.0 source inspection, prior-milestone code-review fix reports, and pyfda's established patterns)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: `seed` Is `u64` Not `Option<u64>` — Forced Exposure Breaks Optional Semantics
+### Pitfall 1: `ConcurrentRegrResult.beta_curve` transposition — predictor axis vs. curve axis
 
 **What goes wrong:**
-`t_perm_test` and `f_perm_test` take `seed: u64` (required, non-optional in Rust). The wrapper must make it optional at the Python boundary (`seed: Option<u64>`) and pick a documented default (e.g. `42`) when `None`. If the wrapper accepts an optional Python value but passes it straight through to a non-optional Rust parameter, the compiler will reject it. If the wrapper hard-codes a magic constant without documenting it, docs fences will produce non-reproducible byte streams across runs (CI false-negatives on the determinism test). `two_sample_mean_test` is seedless (uses chi-squared asymptotic distribution) — no seed parameter should be exposed for it.
+`beta_curve` in `ConcurrentRegrResult` has FdMatrix shape `(p, m)` — `nrows=p` (predictor count), `ncols=m` (grid points). When converted through `fdmatrix_to_numpy2d`, the Python caller receives shape `(p, m)` — correct. However if a binding author confuses this with the standard `(n_obs, m)` convention and transposes it (as happened with multi-curve returns in v4.0 Phases 26 and 27), Python receives shape `(m, p)` and the β(t) curves are indexed on the wrong axis. `fitted` and `residuals` are `(n, m)` — the usual convention — making the mismatch non-obvious when `p == n`.
 
 **Why it happens:**
-Upstream Rust API takes `u64` directly (uses `StdRng::seed_from_u64(seed)` internally). Developers mirroring the Rust signature forget that Python callers expect `seed=None` as a reproducibility opt-in, not a mandatory integer.
+`beta_curve` breaks pyfda's dominant `(n_obs, m)` convention. Almost every other FdMatrix is `(n_obs, n_points)`. `beta_curve` has `nrows = p` (number of predictors, typically 1–5), not `nrows = n`. Under time pressure the binding author applies `fdmatrix_to_numpy2d` assuming `nrows=n_obs` and documents Python shape as `(n_obs, m)`, which is subtly wrong.
 
 **How to avoid:**
-- In the wrapper: `#[pyo3(signature = (data_a, data_b, argvals, n_perm=999, seed=None))]`; inside, resolve `seed.unwrap_or(42)` and document the default explicitly in the docstring.
-- For `two_sample_mean_test` (no seed): expose `ncomp: usize` with a documented default (e.g. `3`). Do not add a spurious `seed` parameter.
-- Determinism test: assert that calling the wrapper twice with identical `seed` returns byte-identical `json.dumps` output; assert that the result dict contains only plain Python `float` values, not `np.float64` scalars.
+In the binding comment for `beta_curve`, write explicitly: `# shape (p, m): p predictors × m grid points, NOT (n_obs, m)`. Write a multi-predictor transposition test (`p >= 2`) asserting `result["beta_curve"].shape == (p, m)` and checking each row is a smooth curve over the grid. This is the standard multi-curve transposition guard pattern from v4.0.
 
 **Warning signs:**
-- Compiler error "expected `u64`, found `Option<u64>`" in the wrapper.
-- Determinism CI test sees different p-values across two consecutive calls with `seed=None` after the default is set (exposes a non-deterministic default).
-- The offline docs fence emits a different `statistic` value on each docs build.
+Tests that only exercise `p == 1` will not catch this — `(1, m)` is indistinguishable from `(n_obs, m)` when `n_obs == 1`. Always write a `p >= 2` test.
 
-**Phase to address:**
-Group A bindings phase (inference submodule). Determinism tests must be written in the same phase before docs fences are authored.
+**Phase to address:** Bindings — Group A (Regression).
 
 ---
 
-### Pitfall 2: `CvCriterion`, `DepthMethod`, and `MultiplierDistribution` Are `#[non_exhaustive]` — Missing Wildcard Arm Blocks Compilation
+### Pitfall 2: `pace_fpca` requires `IrregFdata`, not a 2-D numpy array — new container type with no Python binding yet
 
 **What goes wrong:**
-`fdars_core::smoothing::CvCriterion` (variants: `Cv`, `Gcv`, `Aic`) and `fdars_core::tolerance::MultiplierDistribution` (variants: `Gaussian`, `Rademacher`) and `fdars_core::depth::dispatch::DepthMethod` (variants: `FraimanMuniz { scale }`, `Band`, `ModifiedBand`, `RandomProjection { nproj, seed }`) are all `#[non_exhaustive]`. The existing `optim_bandwidth` binding in `smoothing_mod.rs` has a two-arm match (`"cv" => CvCriterion::Cv`, `"gcv" => CvCriterion::Gcv`) and a result-stringify match (`CvCriterion::Cv => "cv"`, `CvCriterion::Gcv => "gcv"`) with no wildcard arm. After bumping to 0.20 the crate reports `Aic` as a third variant. Rust will refuse to compile any exhaustive match on a `#[non_exhaustive]` enum from another crate. The same pattern recurs for the `mean_scb`/`scb_two_sample_test` wrappers that accept a `MultiplierDistribution` string param and for `functional_depth`/`functional_boxplot` that accept a `DepthMethod` string param.
+`pace_fpca` accepts `&IrregFdata` (a CSR-like struct: offset vector + flat argvals/values arrays), not an `FdMatrix`. There is no existing `PyClass` for `IrregFdata` in pyfda. If the binding exposes `pace_fpca(data: np.ndarray, ...)` with a regular array shim, it silently reconstructs a fake regular grid and the sparse-FPCA computation is meaningless.
 
 **Why it happens:**
-The v4.0 bindings were written against 0.14→0.17 where `CvCriterion` only had `Cv`/`Gcv`. The bump to 0.20 adds `Aic` to `CvCriterion` and introduces `DepthMethod` and `MultiplierDistribution` as `#[non_exhaustive]` enums.
+`IrregFdata` has never been exposed to Python (it lives in `fdars_core::irreg_fdata` and has only been used internally). The binding author may improvise a regular-array shim that pads or zeroes missing observations, which destroys PACE semantics.
 
 **How to avoid:**
-- All match arms on `CvCriterion` (both string-to-enum and enum-to-string directions): add `_ => return Err(PyValueError::new_err("criterion must be 'cv', 'gcv', or 'aic'"))` and `_ => "unknown"` respectively.
-- `MultiplierDistribution` wrappers: `"gaussian" => MultiplierDistribution::Gaussian`, `"rademacher" => MultiplierDistribution::Rademacher`, `_ => return Err(PyValueError...)`.
-- `DepthMethod` wrappers: `"fraiman_muniz"` → `FraimanMuniz { scale }`, `"band"` → `Band`, `"modified_band"` → `ModifiedBand`, `"random_projection"` → `RandomProjection { nproj, seed }`, `_` → `PyValueError`.
-- `BasisCriterion` in `smooth_basis` is NOT `#[non_exhaustive]` — no wildcard needed there (confirmed from docs.rs).
+Create a builder function `irreg_fdata_from_lists(argvals_list: list[list[float]], values_list: list[list[float]])` returning an opaque handle (or a `PyIrregFdata` pyclass wrapper), and require it as the sole input type for `pace_fpca`. Accept Python lists-of-arrays and construct `IrregFdata::from_lists` inside the binding. Document: each sublist is one curve's (argvals, values); curves need not share observation times; each curve must have at least 2 points (core enforces this with `FdarError::InvalidDimension`).
 
 **Warning signs:**
-- `cargo build` error: `non-exhaustive patterns: _ not covered` on any match touching `CvCriterion`, `DepthMethod`, or `MultiplierDistribution`.
-- Clippy `-D warnings` (enforced in CI) will promote this to a hard failure if rustc does not catch it first.
+Any `pace_fpca` binding signature accepting a single 2-D numpy array is wrong. The test dataset must use curves with different lengths — a regular matrix cannot test the PACE path.
 
-**Phase to address:**
-Crate bump phase (Phase 1 regression gate). The existing `optim_bandwidth` binding already has the missing wildcard for `CvCriterion` — it must be fixed as part of the bump itself before any new bindings are written, or the compile will fail and block all downstream phases.
+**Phase to address:** Bindings — Group B (FPCA & Classification). Must be resolved at plan-time before coding.
 
 ---
 
-### Pitfall 3: `FunctionalBoxplotResult` and `TestResult` Are `#[non_exhaustive]` — Struct-Literal Construction Blocked in Tests
+### Pitfall 3: `PaceFpcaResult.eigenfunctions` is `(m, ncomp)` in FdMatrix — transpose differs from `FpcaResult.scores` convention
 
 **What goes wrong:**
-Both `FunctionalBoxplotResult` (fields: `median Vec<f64>`, `central_lower Vec<f64>`, `central_upper Vec<f64>`, `whisker_lower Vec<f64>`, `whisker_upper Vec<f64>`, `outliers Vec<usize>`, `depths Vec<f64>`) and `TestResult` (fields: `statistic f64`, `p_value f64`, `n_perm usize`) are `#[non_exhaustive]`. Field access via `.field` is safe. The pitfall is constructing test fixtures using struct literals (`TestResult { statistic: 1.0, p_value: 0.05, n_perm: 999 }`) — the compiler will refuse. Future upstream fields would also be silently dropped from the PyDict if the wrapper manually hard-codes the field list.
+`PaceFpcaResult.eigenfunctions` has FdMatrix shape `(m, ncomp)` (rows = grid points, columns = components). `fdmatrix_to_numpy2d` produces `(m, ncomp)` in Python — correct. If the binding author inverts this to follow a "components are rows" model, Python receives `(ncomp, m)` and eigenfunction plots are transposed. In addition, `scores` is `(n, ncomp)` (consistent with existing FPC convention). A binding author who incorrectly transposes `eigenfunctions` may also transpose `scores` to be "symmetric," compounding the error.
 
 **Why it happens:**
-Developers copy the Rust struct-literal test pattern from intra-crate tests (valid within the defining crate). The same literal syntax fails in external crates like pyfda.
+`eigenfunctions[(j, k)]` is accessed as `(grid_point, component)` in Rust — the mathematical convention (columns = eigenvectors). This conflicts with the intuitive "rows are things" Python reading where each row might be expected to be one eigenfunction.
 
 **How to avoid:**
-- In PyO3 wrappers: access each field individually (`result.median`, `result.central_lower`, etc.) — safe for `#[non_exhaustive]` structs.
-- In test fixtures: construct `TestResult` via the public functions that return it (call `t_perm_test` with minimal synthetic data of 5 curves × 3 grid points), not via struct literals.
-- `FunctionalBoxplotResult` complete dict mapping: `median`, `central_lower`, `central_upper`, `whisker_lower`, `whisker_upper`, `outliers` (Vec<usize> → i64 numpy array via `usize_vec_to_numpy1d`), `depths`.
-- `TestResult` complete dict mapping: `statistic` (f64 → float), `p_value` (f64 → float), `n_perm` (usize → int).
+Document Python shape explicitly in the binding: `eigenfunctions: np.ndarray, shape (m, ncomp) — each column is one eigenfunction`. Write a test asserting `result["eigenfunctions"].shape == (m, ncomp)` and column orthonormality: `np.allclose(ef.T @ ef, np.eye(ncomp), atol=0.1)`. Access the k-th eigenfunction as `ef[:, k]`, not `ef[k, :]`.
 
 **Warning signs:**
-- Compiler error: "cannot create non-exhaustive struct using struct expression."
-- Missing dict key at runtime (Python `KeyError`) if a field is omitted from the `dict.set_item` block.
+A sign-convention test that uses `pearson_corr(ef[0, :], true_phi1)` (row access) rather than `pearson_corr(ef[:, 0], true_phi1)` (column access) is wrong and will silently pass on transposed output.
 
-**Phase to address:**
-Group A and Group B binding phases. Field-name list must be verified against docs.rs before writing wrapper code.
+**Phase to address:** Bindings — Group B (FPCA & Classification).
 
 ---
 
-### Pitfall 4: FLM Inference Takes `&FregreLmResult` — Python Has No Handle to a Rust Struct
+### Pitfall 4: `PaceFpcaResult.ncomp` may be less than requested — binding must not hardcode the requested component count
 
 **What goes wrong:**
-`flm_f_test(fit: &FregreLmResult)` and `flm_gof_test(fit: &FregreLmResult)` take a reference to a Rust struct. The existing Python binding for `fregre_lm` converts the Rust result to a PyDict and discards the Rust struct. A naive wrapper for `flm_f_test` cannot reconstruct `FregreLmResult` from a Python dict because `FregreLmResult` is `#[non_exhaustive]` and cannot be built with struct literals from outside the crate. `FregreLmResult` is in `fdars_core::scalar_on_function`, not `fdars_core::regression` — the module path must be verified.
+`pace_fpca` returns `actual_ncomp` which may be less than `config.ncomp` when the smoothed covariance surface yields fewer positive eigenvalues (a documented finite-sample artifact). If the binding preallocates a `(n, config.ncomp)` numpy array or extracts `scores[:, :config.ncomp]`, it will index out of bounds or silently zero-pad when `actual_ncomp < config.ncomp`.
 
 **Why it happens:**
-Rust's ownership model means Rust structs live on the Rust side; PyO3 does not automatically create Python-side handles to arbitrary Rust structs unless they are wrapped in `#[pyclass]`. `FregreLmResult` is not a `#[pyclass]`.
+Callers naturally assume "I asked for 3 components, I get 3." The divergence is only documented in `PaceFpcaResult`'s struct docstring ("ncomp in the result may be less than the requested config.ncomp"). Small datasets (typical for docs worked examples) hit this frequently.
 
 **How to avoid:**
-- Preferred pattern: expose `flm_f_test` as a Python function that accepts the same inputs as `fregre_lm` (data + response + n_comp), re-runs `fdars_core::scalar_on_function::fregre_lm` internally, then calls `flm_f_test` on the Rust result. Return a dict with both the fit fields and the `TestResult` fields.
-- Alternative: a combined `fregre_lm_with_inference` wrapper that bundles fit + f-test + gof-test in one call.
-- Do NOT expose a Python-callable `flm_f_test(fit_dict)` that tries to reconstruct `FregreLmResult` from a Python dict — it will not compile.
-- `FregreLmResult` confirmed fields: `intercept`, `beta_t`, `beta_se`, `gamma`, `fitted_values`, `residuals`, `r_squared`, `r_squared_adj`, `std_errors`, `ncomp`, `fpca` (FpcaResult nested), `coefficients`, `residual_se`, `gcv`, `aic`, `bic`.
+Always read `result.ncomp` (the actual count), not the input `config.ncomp`. Assert in tests: `assert result["ncomp"] <= config_ncomp`. Use `result.ncomp` for all matrix dimension extractions. Write a test where the synthetic dataset is small enough to produce `actual_ncomp < 3` when `config.ncomp == 3`.
 
 **Warning signs:**
-- Compiler error about struct literal on `#[non_exhaustive]` struct.
-- The `flm_f_test` docstring says "pass the fitted model" with no explanation of how Python callers obtain one.
+Tests with large, dense synthetic data will never exercise `actual_ncomp < requested`. Always include a small-dataset test where the covariance surface is degenerate.
 
-**Phase to address:**
-Group A bindings phase. The design decision (re-run vs. combined wrapper) must be made before writing the code — it affects the Python API surface visible to users.
+**Phase to address:** Bindings — Group B (FPCA & Classification).
 
 ---
 
-### Pitfall 5: Permutation Tests in Executed Docs Fences — `n_perm=999` Blows Up the 18-Minute Build
+### Pitfall 5: `elastic_multinomial` requires contiguous 0-indexed labels — negative-label guard from v5.0 CR-01 must be applied here too
 
 **What goes wrong:**
-A standard `t_perm_test` call with `n_perm=999` on even a 50-curve dataset adds several seconds of compute per fence. Multiplied across five or six worked-example fences (permutation test, SCB band, two-sample test, ANOVA), the existing ~18-minute wall time could double or triple. `mkdocs build` already caused timeouts and process pile-ups in v4.0.
+`elastic_multinomial` enforces labels forming the contiguous range `0..K` (validated in core with `FdarError::InvalidParameter`). The binding accepts `y: &[usize]` from a Python `i64` numpy array. If the conversion uses `numpy1d_to_usize_vec` directly (which casts `i64 → usize` without sign checking), negative labels wrap to `usize::MAX` — the same bug fixed in v5.0 Phase 31 for `oneway_anova_vstat` (CR-01 fix). Additionally, users passing `[1, 2, 3]` (1-indexed) or `[0, 2, 4]` (gap) get a cryptic Rust error rather than a clear Python `ValueError`.
 
 **Why it happens:**
-Developers use production-quality `n_perm` values (999 or 1999) in examples to show credible p-values. The docs build runs every fence sequentially, so each example contributes additively.
+The v5.0 CR-01 fix was applied to `inference_mod.rs` (for `oneway_anova_vstat`). It was NOT applied to `classification_mod.rs` because `elastic_multinomial` is new in 0.23. The same unchecked `numpy1d_to_usize_vec` path will reintroduce the bug.
 
 **How to avoid:**
-- All executed docs fences for inference functions: `n_perm=19` (enough to avoid degenerate p-values; keeps per-fence compute under 0.5s).
-- Use small synthetic datasets (20 curves × 10 grid points) embedded inline in the fence — not loaded from `docs/data/` CSV.
-- Use the illustrative-vs-executed fence split (established in v2.1): show a full-resolution reference fence in a collapsible tab (not executed) and only run the cheap version.
-- Wire inference fences behind the `DOCS_FAST` env var check already established in the project.
-- For SCB fences: `nb=50` bootstrap replicates instead of `nb=1000`.
+In the `elastic_multinomial` binding: (1) iterate the raw `i64` array and raise `PyValueError` if any value is `< 0` (mirrors CR-01); (2) validate that the `usize` values form `0..K`; (3) emit a helpful message: "labels must be contiguous 0-indexed integers (0..K); remap before calling." Add `pytest.raises(ValueError)` tests for negative labels (`[-1, 0, 1]`) and non-contiguous labels (`[0, 2]`).
 
 **Warning signs:**
-- A fence takes > 5 seconds in local `mkdocs serve`.
-- `mkdocs build` takes 30+ minutes in CI.
-- `n_perm >= 100` appears in any executed fence.
+Any classification test that only uses labels `{0, 1, 2}` will not catch the `usize::MAX` wrapping. Explicitly test the negative-label path.
 
-**Phase to address:**
-Docs phase (last). But the constraint must be documented in the binding-phase plan so worked-example authors know the limit before writing.
+**Phase to address:** Bindings — Group B (FPCA & Classification). Same fix class as v5.0 CR-01.
 
 ---
 
-### Pitfall 6: `mean_scb` Returns `ToleranceBand` Not `TestResult` — Layout Is 1×m, Not n×m
+### Pitfall 6: `DepthMethod` is `#[non_exhaustive]` with 9 new variants in 0.23 — Python string dispatcher must be extended
 
 **What goes wrong:**
-`mean_scb` returns `Result<ToleranceBand, FdarError>`. `ToleranceBand` is a tolerance-band struct with `lower` and `upper` fields of type `Vec<f64>` (length m each) — not an FdMatrix, not a `TestResult`. `scb_two_sample_test` returns `Result<TestResult, FdarError>` (scalar: statistic, p-value, n_perm=0 fixed). Conflating the two leads to a wrong return type in the wrapper. If the wrapper passes `ToleranceBand`'s flat Vec to `fdmatrix_to_numpy2d`, the call will panic on the shape mismatch.
+The existing `functional_depth` binding dispatches a Python string to `DepthMethod` variants. In v5.0 the binding was written for 4 variants (FraimanMuniz, Band, ModifiedBand, RandomProjection). The 0.23 `DepthMethod` enum adds 9 more: HypographIndex, ModifiedHypographIndex, EpigraphIndex, HalfRegion, ModifiedHalfRegion, Extremal, ExtremeRankLength, LInfinity, TotalVariation. If the Python-side string-to-variant map is not extended, any call to `functional_depth(data, method="half_region")` returns a confusing `ValueError("unknown depth method")`.
 
 **Why it happens:**
-The name `mean_scb` suggests it returns a "test" but it actually returns the band itself. The two SCB functions have different return types and require separate wrapper strategies.
+The `#[non_exhaustive]` attribute on the Rust enum requires a wildcard `_ =>` arm in Rust match expressions — but the Python-side dispatcher is an `if/else if` chain or dict that is not protected by the Rust compiler. Omitting new variant strings from the Python chain silently falls through to the error branch.
 
 **How to avoid:**
-- `mean_scb` wrapper: return a dict with `lower: ndarray(m,)` and `upper: ndarray(m,)` extracted from `ToleranceBand.lower` and `ToleranceBand.upper` as 1-D arrays via `vec_to_numpy1d`. Verify `ToleranceBand` field names against docs.rs before writing.
-- `scb_two_sample_test` wrapper: return a dict with `statistic`, `p_value`, `n_perm` (always 0 for this function).
-- Shape assertion test: `assert result["lower"].shape == (m,)`.
+Add all 9 new variant strings to the Python-side dispatcher: `"hypograph_index"` → `DepthMethod::HypographIndex`, `"modified_hypograph_index"` → `DepthMethod::ModifiedHypographIndex`, `"epigraph_index"` → `DepthMethod::EpigraphIndex`, `"half_region"` → `DepthMethod::HalfRegion`, `"modified_half_region"` → `DepthMethod::ModifiedHalfRegion`, `"extremal"` → `DepthMethod::Extremal`, `"extreme_rank_length"` → `DepthMethod::ExtremeRankLength`, `"l_infinity"` → `DepthMethod::LInfinity`, `"total_variation"` → `DepthMethod::TotalVariation`. The Rust wildcard arm must raise `PyValueError("unknown depth method: {}; supported: [...]")`. Add a smoke test for each new variant.
 
 **Warning signs:**
-- `fdmatrix_to_numpy2d` panics on a 1-D flat vector.
-- The returned array has shape `(1, m)` or `(m, 1)` instead of `(m,)`.
+`cargo build` succeeds but `pytest` shows `ValueError: unknown depth method: half_region` for any new variant. The `#[non_exhaustive]` guard only fires for Rust pattern exhaustiveness — it does not catch missing Python string mappings.
 
-**Phase to address:**
-Group A bindings phase. Shape assertions must be part of the binding test before the docs fence is authored.
+**Phase to address:** Bindings — Group C (Depth/Outliers/Interval Inference).
 
 ---
 
-### Pitfall 7: `functional_depth` Dispatcher — `DepthMethod::RandomProjection` Carries `seed: u64` In the Variant
+### Pitfall 7: `SeqTransform` is `#[non_exhaustive]` and has 5 variants including a surprising `D2` ("identical to D1") — Python sequence encoding must cover all 5
 
 **What goes wrong:**
-`functional_depth(data: &FdMatrix, method: DepthMethod) -> Result<Vec<f64>, FdarError>`. `DepthMethod::RandomProjection { nproj: usize, seed: u64 }` carries the seed inside the enum variant, not as a separate function argument. The Python wrapper must accept `seed` as a top-level Python kwarg (`seed=None`) and route it into the enum construction: `DepthMethod::RandomProjection { nproj, seed: seed_val.unwrap_or(42) }`. If the wrapper accepts `method="random_projection"` with no `seed` kwarg and silently defaults to `seed=0`, results differ from the named `random_projection_1d` function (which uses a different default). Consistency test: `functional_depth(data, method="fraiman_muniz", scale=True)` must equal `fraiman_muniz_1d(data, data, scale=True)` (self-depth on all curves).
-
-**Why it happens:**
-Per-variant fields are invisible from the Python side. Developers unfamiliar with the `DepthMethod` enum shape may omit `nproj` and `seed` from the Python signature entirely.
+`sequential_transform_outliers` takes a `&[SeqTransform]` slice. The binding accepts a Python list of strings and maps them to variants. The enum has 5 variants: T0, T1, T2, D1, D2 — where D2 is documented as "Identical to D1; included for R parity." Missing D2 or mishandling the default lowercase mapping will silently drop transforms from the sequence. The `#[non_exhaustive]` attribute requires a Rust wildcard arm; without it, the binding fails to compile.
 
 **How to avoid:**
-- Wrapper signature: `#[pyo3(signature = (data, method="fraiman_muniz", scale=True, nproj=50, seed=None))]`.
-- String-to-enum dispatch with wildcard: `"fraiman_muniz"` → `FraimanMuniz { scale }`, `"band"` → `Band`, `"modified_band"` → `ModifiedBand`, `"random_projection"` → `RandomProjection { nproj, seed: seed.unwrap_or(42) }`, `_` → `PyValueError`.
-- Determinism test for `method="random_projection"`: two calls with same `seed` return identical depth vectors.
-- Self-depth consistency test: `functional_depth(data, "fraiman_muniz", scale=True)` == `fraiman_muniz_1d(data, data, scale=True)`.
+Accept lowercase strings from Python: `"t0"`, `"t1"`, `"t2"`, `"d1"`, `"d2"`. Map case-insensitively. In the Rust wildcard arm: `_ => return Err(PyValueError::new_err(format!("unknown transform: {v}; supported: t0, t1, t2, d1, d2")))`. Test all 5 variants individually. Document D2 in the Python docstring: "D2 applies the same lag-1 difference as D1; included for parity with R `fdaoutlier`."
 
 **Warning signs:**
-- Non-exhaustive match compile error on `DepthMethod`.
-- Depth values from `functional_depth(method="fraiman_muniz")` diverge from `fraiman_muniz_1d` (scale default mismatch).
+Tests that only use `["T1", "D1"]` (the common R defaults) will not catch broken T0/T2/D2. Write an explicit test for each variant.
 
-**Phase to address:**
-Group B bindings phase.
+**Phase to address:** Bindings — Group C (Depth/Outliers/Interval Inference).
 
 ---
 
-### Pitfall 8: `functional_boxplot` `factor` Has No Rust Default — Python Default Must Be `1.5`; `outliers` Is `Vec<usize>` Not `Vec<f64>`
+### Pitfall 8: `GlmFamily` is `#[non_exhaustive]` and `Gamma` uses inverse canonical link — docstring accuracy risk
 
 **What goes wrong:**
-`functional_boxplot(data: &FdMatrix, method: DepthMethod, factor: f64) -> Result<FunctionalBoxplotResult, FdarError>` — `factor` is required in Rust with no default. If the Python default is `1.0` or `2.0`, the outlier classification diverges from the López-Pintado–Romo canonical value and from R's `fBoxplot` default. Additionally, `FunctionalBoxplotResult.outliers` is `Vec<usize>` (row indices) — passing it to `vec_to_numpy1d` (which handles only `f64`) will cause a type error; the correct converter is `usize_vec_to_numpy1d`.
+`functional_glm` takes `family: GlmFamily`. Two problems:
 
-**Why it happens:**
-Rust makes `factor` required; the canonical default `1.5` is documented only in the method paper and docs.rs description. The type mismatch on `outliers` is easy to miss because all other `FunctionalBoxplotResult` fields are `Vec<f64>`.
+1. The enum is `#[non_exhaustive]`: the Rust `match` in the binding must have a wildcard arm (`_ => return Err(PyValueError::new_err(...))`), or compilation fails when a new family is added upstream.
+2. `GlmFamily::Gamma` uses the **inverse canonical link** (`g(μ) = 1/μ`), NOT the log link that Python's `statsmodels` and R's `glm()` default to. The core docstring explicitly flags this: "Gamma uses inverse link (g(μ)=1/μ), NOT log-link." If the Python binding docstring says "Gamma uses log link" or omits this, users will misinterpret β(t) coefficients.
 
 **How to avoid:**
-- `#[pyo3(signature = (data, method="fraiman_muniz", factor=1.5, scale=True, nproj=50, seed=None))]`.
-- Convert `result.outliers` with `usize_vec_to_numpy1d(py, result.outliers)` — same pattern as existing alignment_mod.rs usage.
-- Write a test that with a clean dataset (no outliers) `factor=1.5` returns an empty `outliers` array, and that with a spike-contaminated dataset it flags the spike.
-- Docstring: cite López-Pintado and Romo (2009) for `factor=1.5`.
+Include the wildcard arm: `_ => return Err(PyValueError::new_err(format!("unknown family: {f}; supported: binomial, poisson, gamma, gaussian")))`. In the Python docstring, include a link-function table matching the core's table. Add a note: "Gamma uses the inverse canonical link g(μ)=1/μ — the coefficient β(t) represents the effect on 1/E[Y], not log(E[Y])." Write a test asserting `result["iterations"] == 1` for Gaussian family (the single-IRLS-step invariant is documented in the core).
 
 **Warning signs:**
-- Type error at runtime from passing a `Vec<usize>` to `vec_to_numpy1d`.
-- Outlier set differs from reference implementation for the same dataset.
+A docs worked example for `functional_glm(family="gamma")` that interprets β(t) as a log-rate effect — this is wrong and misleads users.
 
-**Phase to address:**
-Group B bindings phase.
+**Phase to address:** Bindings — Group A (Regression) for the enum guard; Docs phase for the link-function clarification.
 
 ---
 
-### Pitfall 9: `oneway_anova_vstat` Groups Parameter — Python `ndarray` Must Be `i64` Not `f64`
+### Pitfall 9: ITP functions take `seed: u64` — must default to 0 for offline determinism, not a random value
 
 **What goes wrong:**
-`oneway_anova_vstat(data: &FdMatrix, groups: &[usize], argvals: &[f64]) -> Result<TestResult, FdarError>`. `groups` is `&[usize]` in Rust. The pyfda convention for integer arrays uses `PyReadonlyArray1<'py, i64>` on the Python side and `numpy1d_to_usize_vec` to convert (already established in the codebase). If the wrapper uses `PyReadonlyArray1<'py, f64>` for groups, the conversion is lossy and may silently produce wrong group assignments. Numpy callers may also pass 1-indexed groups (Python convention) while Rust expects 0-indexed.
+`itp_one_pop`, `itp_two_pop`, and `itp_flm` all take `seed: u64`. If the Python binding resolves `seed=None` to `time.time_ns()` (or any non-deterministic value), ITP results are non-reproducible across calls. This violates the advisor grounding invariant (two `build_diagnostics` calls on the same data must return byte-identical JSON) and breaks offline `FDARS_FENCE_OK` docs fences.
 
 **Why it happens:**
-Functional inference is new territory; the groups-as-integer-array input pattern appears only in clustering outputs in the existing code. An integer array input requires explicit handling.
+v5.0 Phase 31 established: `seed=None` resolves to fixed default `0`. But the ITP entry points are new in this milestone — the pattern may not be carried forward from the existing inference binding if the binding author treats them as separate from the existing permutation tests.
 
 **How to avoid:**
-- Use `PyReadonlyArray1<'py, i64>` for the Python-facing `groups` parameter.
-- Convert with the existing `numpy1d_to_usize_vec` utility from `convert.rs`.
-- Validation guard: if `groups` is empty or contains indices ≥ `data.nrows()`, raise `PyValueError` before calling the Rust function.
-- Document that groups are 0-indexed.
-- Test with two groups (8+7 curves) to verify correct group parsing and that the returned `TestResult.n_perm > 0`.
+Mirror the v5.0 pattern exactly: `seed: u64 = 0` in the `#[pyo3(signature = (...))]` decorator. Docstring: "seed=0 is the fixed offline default; pass a different value only for sensitivity analysis." Add a determinism test: call `itp_one_pop` twice with identical args and assert `result1["adjusted_pvalues"] == result2["adjusted_pvalues"]` elementwise. Add a `json.dumps(result, sort_keys=True)` equality test (matching the WR-02 pattern from v5.0 Phase 31).
 
 **Warning signs:**
-- Python caller passes `groups=np.array([1,2,1,2,...], dtype=float)` and the binding silently accepts it.
-- Group indices are off-by-one.
+Any ITP test that only asserts `0 <= p_value <= 1.0` without asserting exact value equality across calls does not catch non-determinism.
 
-**Phase to address:**
-Group A bindings phase.
+**Phase to address:** Bindings — Group C (Depth/Outliers/Interval Inference).
 
 ---
 
-### Pitfall 10: Advisor Guard-Sync Broken If `inference` Aspect Lands in Two Commits
+### Pitfall 10: `ItpResult.n_basis` may differ from the requested `nbasis` — always read from result dict, not from the argument
 
 **What goes wrong:**
-The `test_diagnostics_methods_match_advisor_supported` test (`tests/test_mcp_server.py:503`) asserts that `_DIAGNOSTICS_METHODS` in `mcp/server.py` equals the `_supported` set inferred from `advisor/__init__.py:build_diagnostics`. Adding `"inference"` to `build_diagnostics._supported` in one commit and updating `_DIAGNOSTICS_METHODS` in a second commit leaves a window where the test fails in CI between the two commits. The v4.0 retrospective explicitly called out that guard-sync edits must land in one atomic commit.
-
-**Why it happens:**
-Advisor work and MCP server work are in different files, tempting developers to separate them into separate commits.
+`ItpResult` carries `n_basis` (actual basis functions used after B-spline knot clamping) which may be less than the `nbasis` argument. `adjusted_pvalues` and `raw_pvalues` have length `n_basis`, not `nbasis`. If the binding preallocates a numpy array of length `nbasis` and writes `result.adjusted_pvalues` into it, the lengths may mismatch and trailing slots are zeroed or garbage. `ItpResult` is `#[non_exhaustive]` — struct-literal test helpers cannot construct it; all tests go through a real call.
 
 **How to avoid:**
-- Write both the `build_diagnostics` `"inference"` branch and the `_DIAGNOSTICS_METHODS` frozenset update in a single atomic commit.
-- Run `pytest tests/test_mcp_server.py::test_diagnostics_methods_match_advisor_supported` locally before the commit to catch drift.
-- The plan for the advisor phase must explicitly name this as a single-task commit, not two separate tasks.
-- Decision required during the advisor discuss phase: `inference` should be diagnostics-only (not in `_RUNNABLE_METHODS`) because two-sample tests require two datasets and the single-dataset MCP runner cannot dispatch them.
+Convert `adjusted_pvalues` and `raw_pvalues` directly via `vec_to_numpy1d` (vector length determines array size). Always include `n_basis` and `n_perm` in the PyDict. Write a test asserting `len(result["adjusted_pvalues"]) == result["n_basis"]` (not `== nbasis`) with a B-spline call where knot clamping is likely.
 
 **Warning signs:**
-- CI goes red on `test_diagnostics_methods_match_advisor_supported` between two commits.
-- The `aspects/inference.py` file exists but `_DIAGNOSTICS_METHODS` has not been updated.
+Tests using only Fourier basis (where `n_basis == nbasis` always) will not catch B-spline knot clamping. Include at least one B-spline test.
 
-**Phase to address:**
-Advisor extension phase.
+**Phase to address:** Bindings — Group C (Depth/Outliers/Interval Inference).
 
 ---
 
-### Pitfall 11: Grounding-Invariant Violation — p-Values and Statistics Must Be Plain Python `float`, Not `np.float64`
+### Pitfall 11: All four new outlier detectors return outlier indices as `Vec<usize>`, not `Vec<bool>` — wrong converter reuse
 
 **What goes wrong:**
-`TestResult.statistic` and `TestResult.p_value` arrive in Python as `f64` converted by PyO3 to Python `float`. However, if the inference diagnostics aspect assembles these with `np.float64` intermediates (e.g. `result["statistic"]` extracted from a dict holding a numpy scalar), the `json.dumps` call in the offline determinism test fails with `TypeError: Object of type float64 is not JSON serializable`. Additionally, the grounding check (`_check_grounding`) walks the diagnostics dict looking for numbers to cross-reference against the LLM's advice; a numpy scalar is not found by a `str(float_val)` substring search.
-
-**Why it happens:**
-The inference aspect builder receives a Python dict. If a value was produced via numpy arithmetic, it arrives as `np.float64`. The builder inserts it without an explicit `float()` cast.
+`TvdMssOutliers`, `MuodResult`, `SeqTransformOutliers`, and `DepthgramResult` return outlier sets as `Vec<usize>` (sorted row indices), not `Vec<bool>`. The existing `detect_outliers_lrt` binding returns a `Vec<bool>`. If a binding author copies the `bool_vec_to_numpy1d` converter from the existing outlier binding, the index vectors are silently mistyped. `MuodResult` has three outlier index vectors (`shape_outliers`, `magnitude_outliers`, `amplitude_outliers`) plus three continuous score arrays — all six must appear in the PyDict.
 
 **How to avoid:**
-- In `aspects/inference.py`: wrap every numeric field with `float(...)` before inserting into the diagnostics dict.
-- Add the standard determinism assertion to the inference advisor test: `json.dumps(diag, sort_keys=True)` must not raise, and two calls must produce byte-identical output.
-- Add the numpy-scalar leakage walk (same pattern as `test_advisor_registration_quality.py:229`): `assert not isinstance(val, np.generic)` for every leaf value.
+Use `usize_vec_to_numpy1d` (not `bool_vec_to_numpy1d`) for all `*_outliers` fields in the new detector results. In tests, assert `result["shape_outliers"].dtype == np.int64` and each element is a valid row index `< n`. Include all continuous score arrays in the PyDict (e.g., `MuodResult.shape_index`, `magnitude_index`, `amplitude_index`).
 
 **Warning signs:**
-- `TypeError: Object of type float64 is not JSON serializable` in the offline advisor test.
-- `json.dumps(diag)` raises in the docs fence (fence silently fails instead of printing `FDARS_FENCE_OK`).
+A test that only asserts `len(result["shape_outliers"]) >= 0` does not catch a dtype error. Assert dtype and bounds.
 
-**Phase to address:**
-Advisor extension phase. The test must be written in the same task as the inference aspect, not after.
+**Phase to address:** Bindings — Group C (Depth/Outliers/Interval Inference).
 
 ---
 
-### Pitfall 12: Numeric Drift on the Existing 426-Test Suite From the 0.17 → 0.20 Bump
+### Pitfall 12: `outliers_threshold_lrt` / `outliers_threshold_lrt_with_dist` take `seed: u64` — audit existing binding for omission
 
 **What goes wrong:**
-The existing suite (426 tests) uses floating-point tolerance comparisons for FPCA, elastic alignment, smoothing, and depth values. The 0.18 release was audit-only and 0.19 added the inference suite; 0.20 added quick wins. If any of these releases incidentally changed the numerical path for existing algorithms (reordered rayon task scheduling, changed tolerance epsilon), existing tolerance assertions could fail.
-
-**Why it happens:**
-The v4.0 bump (0.14→0.17) showed zero drift — but that was confirmed experimentally, not guaranteed. The 0.20 path passes through two additional releases. Even an audit-only pass can change LLVM optimization paths, leading to ULP-level differences.
+Both bootstrap-based functions take `seed: u64`. If the existing `outliers_mod.rs` binding (from pre-0.23 work) exposed these without a `seed` parameter (resolving to 0 internally without telling the user), extending them for the new detector bootstrap paths will produce non-deterministic results when users change the seed expectation.
 
 **How to avoid:**
-- The crate bump must be its own isolated phase (Phase 1), committed and CI-green before any new binding work.
-- After the bump, run `cargo test` and `pytest` and capture the full result. Any failures are drift regressions, not new-binding bugs.
-- If tolerance assertions fail, widen by one ULP at a time (do not blindly add `rtol=1e-5`); document the specific function that drifted.
-- Do NOT widen tolerances in the same commit that adds new bindings — it hides the regression source.
+Before writing any new outlier bindings, audit `src/outliers_mod.rs` to confirm whether `seed` is already exposed. If not, add `seed: u64 = 0` with a fixed default and a determinism test. This audit belongs at the start of the Group C bindings plan.
 
-**Warning signs:**
-- `pytest` shows failures in `test_basic.py` or `test_r_parity.py` immediately after `cargo build` with the new crate version, before any new code was written.
-- The failure involves an existing function (not one of the three new groups).
-
-**Phase to address:**
-Crate bump phase (Phase 1). This phase has one and only one success criterion: the existing 426-test suite passes unchanged.
+**Phase to address:** Bindings — Group C (Depth/Outliers/Interval Inference) — audit first, extend second.
 
 ---
 
-### Pitfall 13: `constant_basis` Output Is `Vec<f64>` of Ones — Python Shape Should Be `(m, 1)` for Concatenation
+### Pitfall 13: `ConcurrentRegrResult` and `FunctionalGlmResult` are `#[non_exhaustive]` — no struct-literal construction in tests
 
 **What goes wrong:**
-`constant_basis(t: &[f64]) -> Vec<f64>` returns a flat `Vec<f64>` of length `m` (all ones). All other basis functions (`bspline_basis`, `fourier_basis`) return `(m, nbasis)` 2-D arrays. If the wrapper returns a 1-D numpy array of shape `(m,)`, users cannot horizontally stack it with `bspline_basis` output without a reshape. If the wrapper uses `fdmatrix_to_numpy2d` on the flat vec (wrong: it expects an FdMatrix, not a plain Vec), the call panics.
-
-**Why it happens:**
-The natural API for a single-column intercept basis is a 1-D vector, but the usage context (basis concatenation) requires a 2-D column.
+Both result types carry `#[non_exhaustive]`. Rust code outside the crate cannot construct them with struct-literal syntax. If any test helper tries to construct a mock result to test PyDict conversion in isolation, it will fail to compile with "cannot create non-exhaustive struct with struct expression."
 
 **How to avoid:**
-- Return `(m, 1)` numpy array: `PyArray2::from_vec2(py, &v.iter().map(|&x| vec![x]).collect::<Vec<_>>()).unwrap()`.
-- Write a test: `np.hstack([fdars.basis.constant_basis(av).reshape(-1,1), fdars.basis.bspline_basis(av, nknots=3)])` produces shape `(m, 4)`.
-- Alternatively, document explicitly that the returned `(m,)` array must be reshaped by the caller — but the `(m, 1)` default is safer.
+All pyfda result tests go through a real call path (call → inspect PyDict). Never construct `ConcurrentRegrResult` or `FunctionalGlmResult` literals in test code. This is already the project convention; document it for these new types.
 
 **Warning signs:**
-- User reports `ValueError: all input arrays must have the same number of dimensions` when concatenating `constant_basis` with `bspline_basis` output.
-- The wrapper uses `fdmatrix_to_numpy2d` on a plain Vec (panics).
+Compiler error: "cannot create non-exhaustive struct with struct expression." Caught at compile time, not runtime — but can waste debugging time if attempted.
 
-**Phase to address:**
-Group C bindings phase (basis/smoothing).
+**Phase to address:** Bindings — Group A (Regression). Caught at compile time.
 
 ---
 
-### Pitfall 14: AIC Smoother Is in `fdars_core::smoothing`, Not `fdars_core::basis` — Wrong Module Placement
+## Advisor Pitfalls
+
+### Pitfall 14: ITP `adjusted_pvalues` aggregated as numpy scalar in advisor diagnostics — grounding invariant broken
 
 **What goes wrong:**
-The existing `basis_nbasis_cv` binding already handles `criterion="aic"` via `BasisCriterion::Aic` (not `#[non_exhaustive]`). The new `aic_smoother` in `fdars_core::smoothing` is a separate function returning a scalar AIC score for a kernel smoother — a different concept. Binding `aic_smoother` in `basis_mod.rs` instead of `smoothing_mod.rs` causes a path lookup failure (`fdars_core::basis::aic_smoother` does not exist). `smooth_basis_aic` is mentioned in the milestone context but does not appear in the `smoothing` module index on docs.rs 0.20.0 — its existence must be verified before the plan is written.
+ITP results carry `adjusted_pvalues` and `raw_pvalues` as numpy arrays (length = n_basis). Extending `_build_inference_diagnostics` naively by writing `diag["min_adjusted_pval"] = result["adjusted_pvalues"].min()` produces a `np.float64` scalar — not a Python `float`. The grounding guard (`json.dumps` roundtrip) fails because `numpy.float64` is not JSON-serialisable. This is the same numpy-scalar class that WR-02 (v5.0 Phase 31) guarded against for `TestResult` scalars.
 
 **Why it happens:**
-The name collision ("aic" appears in both `BasisCriterion` and `smoothing::CvCriterion`) creates a mental model where AIC is "already handled." `smoothing::CvCriterion::Aic` (new in 0.20) is a separate enum variant from `smooth_basis::BasisCriterion::Aic` (which already existed and is not `#[non_exhaustive]`).
+The existing `_resolve_float` helper in `inference.py` handles the `TestResult` scalar case. ITP results require aggregating a vector — the natural idiom is `.min()` / `.mean()` which return numpy scalars. Adding a new code path that bypasses `_resolve_float` reintroduces the bug.
 
 **How to avoid:**
-- `aic_smoother` goes in `smoothing_mod.rs` — it is a kernel smoother score function parallel to `cv_smoother` and `gcv_smoother` (confirmed from docs.rs: `pub fn aic_smoother(x: &[f64], y: &[f64], bandwidth: f64, kernel: &str) -> f64`).
-- `CvCriterion::Aic` expands the accepted string values in the `optim_bandwidth` binding in `smoothing_mod.rs` (fix the non-exhaustive match in Phase 1).
-- `smooth_basis_aic` — verify its existence and exact module path against docs.rs 0.20.0 before the plan is written. Do not bind a function that does not exist.
+Always wrap numpy-array aggregates with `float(...)`: `diag["min_adjusted_pval"] = float(result["adjusted_pvalues"].min())`. For means, use a plain-Python loop: `vals = [float(v) for v in result["adjusted_pvalues"]]; diag["mean_adjusted_pval"] = float(sum(vals) / len(vals)) if vals else None`. Add a `json.dumps(build_diagnostics(result, method="itp"), sort_keys=True)` assertion to the ITP advisor test.
 
 **Warning signs:**
-- `fdars_core::basis::aic_smoother` path lookup failure at compile time.
-- A plan task references `smooth_basis_aic` without a verified docs.rs link.
+`json.dumps(diagnostics)` raises `TypeError: Object of type float64 is not JSON serialisable`.
 
-**Phase to address:**
-Group C bindings phase. Verify exact module path for each new function against docs.rs 0.20.0 before the plan is written.
+**Phase to address:** Advisor extension phase.
 
 ---
 
-### Pitfall 15: SCB Band `nb` and `confidence` Parameters — Undocumented Defaults and Validation Gaps
+### Pitfall 15: New outlier detector diagnostics must store scalar counts, not raw index lists
 
 **What goes wrong:**
-`mean_scb(data, argvals, bandwidth, nb, confidence, multiplier)` — all parameters required in Rust. If the Python wrapper exposes them all as required positional arguments, the function is unusable without reading the paper. Using `nb=1000` in a docs fence would add ~5 seconds to the build (Pitfall 5). The `multiplier` parameter requires string-to-enum conversion for `MultiplierDistribution` (Pitfall 2, which is `#[non_exhaustive]`). If `confidence` is passed outside (0, 1), the Rust function may panic or return a nonsensical band without a clear Python error.
+`TvdMssOutliers`, `MuodResult`, and `DepthgramResult` return multiple `Vec<usize>` outlier index sets. If the new `_build_outliers_diagnostics` extension stores raw index lists (`"shape_outliers": [2, 7, 14]`) in the diagnostics dict, the LLM cannot cite a single grounded number — it would have to fabricate a summary. The grounding invariant requires a fdars-computed scalar that the LLM cites directly.
 
 **How to avoid:**
-- Wrapper: `#[pyo3(signature = (data, argvals, bandwidth, nb=200, confidence=0.95, multiplier="gaussian"))]`.
-- Validation guard: if `confidence <= 0.0 || confidence >= 1.0`, return `PyValueError`.
-- Validation guard: if `nb == 0`, return `PyValueError`.
-- Docs fences: `nb=50` to bound build time.
-- Write an input-validation test: `mean_scb(..., nb=0, confidence=0.95)` → `ValueError`.
+For each outlier set, store scalar counts: `diag["n_shape_outliers"] = len(result.get("shape_outliers", []))`, `diag["shape_outlier_fraction"] = float(len(...)) / float(n_obs)`. The LLM can then cite "3 shape outliers detected (15% of sample)." Also store the scalar range of continuous score arrays (min/max of `shape_index`, `magnitude_index`, `amplitude_index`) as plain `float` values for grounded interpretation.
 
 **Warning signs:**
-- The function is exposed with all parameters positional-only, making it a 6-argument required call.
-- `nb=1000` appears in any executed docs fence.
+Advisor output that says "several outliers were detected" without citing a specific count is a fabrication. The grounding guard should catch this if the test prompt requires evidence citation.
 
-**Phase to address:**
-Group A bindings phase. Input-validation tests and default-parameter design must be in the binding plan.
+**Phase to address:** Advisor extension phase.
+
+---
+
+### Pitfall 16: MCP `_DIAGNOSTICS_METHODS` guard-sync — new aspects require a single atomic commit with the diagnostics builder
+
+**What goes wrong:**
+`python/fdars/mcp/server.py:_DIAGNOSTICS_METHODS` is a frozenset that must exactly match the set of aspects `build_diagnostics` supports. If a new aspect (e.g., `"itp"` for interval testing) is added to `build_diagnostics` without simultaneously updating `_DIAGNOSTICS_METHODS`, the MCP tool rejects valid calls with "unsupported method." The reverse — updating the guard before the builder exists — causes a `KeyError` at runtime.
+
+**Why it happens:**
+The single-atomic-commit discipline was established in v4.0 Phase 28 and reinforced in v5.0 Phase 34. Advisor work spanning multiple commits (builder in one, guard update in a follow-up) leaves CI broken between commits.
+
+**How to avoid:**
+Update `_DIAGNOSTICS_METHODS` and the aspect builder in the same commit. The existing guard-sync test (asserting the two sets are equal) must pass in CI. Never split these into two commits.
+
+**Warning signs:**
+Any commit touching `advisor/aspects/` without also touching `mcp/server.py:_DIAGNOSTICS_METHODS`, or vice versa.
+
+**Phase to address:** Advisor extension phase.
+
+---
+
+## Docs Pitfalls
+
+### Pitfall 17: Depth-fence diagram drawn as symmetric pointwise bands — method-accuracy trap
+
+**What goes wrong:**
+The functional boxplot / depth-fence concept diagram shows the central region and whisker envelopes. A common mistake is drawing symmetric bands (mean ± k·SD), which is both statistically wrong for the depth-fence method and visually misleading. The functional boxplot central region is the band swept by the deepest 50% of curves (by modified band depth ordering) — it is asymmetric and tracks actual data variation, not a confidence interval.
+
+**How to avoid:**
+Draw the central region as the band swept by the deepest 50% curves. Include at least one example curve that is clearly non-central (lower depth) and lies partially outside the central region. The `functional_boxplot` result provides the `central_region` matrix — use those values to set the diagram's band boundaries. Verify via `rsvg-convert` PNG before sign-off (the v4.0 retrospective established this as the method-accuracy gate).
+
+**Warning signs:**
+A diagram where the upper and lower whisker envelopes are symmetric about the center line over the full domain.
+
+**Phase to address:** Docs phase.
+
+---
+
+### Pitfall 18: PACE FPCA concept diagram showing curves on a regular shared grid — misrepresents sparse/irregular FPCA
+
+**What goes wrong:**
+The PACE FPCA concept diagram must show that each curve is observed at different, sparse time points. If the diagram shows equally spaced observations or the same grid for all curves, it misrepresents PACE — the whole point of PACE is handling the sparse/irregular case. This will be caught at the per-section review gate, but fixing a diagram late is more expensive than getting it right.
+
+**How to avoid:**
+Draw each curve's observations as dots at distinct, staggered, irregular time positions (e.g., curve 1 has 3 dots at t=0.1, 0.4, 0.8; curve 2 has 5 dots at t=0.0, 0.2, 0.5, 0.7, 0.9). The fitted trajectory (from BLUP scores) is a smooth line on the work grid with pointwise confidence bands. Mark observed points as open circles or crosses, clearly separate from the smooth fitted line.
+
+**Warning signs:**
+Any PACE diagram where all curves have the same number of observations at the same x-positions.
+
+**Phase to address:** Docs phase.
+
+---
+
+### Pitfall 19: ITP adjusted p-value diagram shows adjusted values below raw values — violates closure adjustment direction
+
+**What goes wrong:**
+The ITP closure adjustment makes `adjusted_pvalues[k]` the maximum over all contiguous intervals containing component `k` — so the adjusted p-value is always at least as large as the raw p-value. A diagram showing adjusted p-values below raw p-values is methodologically wrong. This is a method-accuracy error.
+
+**Why it happens:**
+"Closure" sounds like tightening (smaller p-values), but ITP closure conservatively inflates p-values to control the family-wise error rate. This is the opposite of what a non-specialist expects.
+
+**How to avoid:**
+In the ITP concept diagram, show both `raw_pvalues` (lower curve, less conservative) and `adjusted_pvalues` (upper curve, conservative) over the basis-component index. Label them clearly. Caption: "Adjusted p-values are at or above raw p-values — the interval-wise closure adjustment inflates, not deflates, significance thresholds."
+
+**Warning signs:**
+Any diagram where the adjusted_pvalues curve dips below the raw_pvalues curve at any basis component.
+
+**Phase to address:** Docs phase.
+
+---
+
+### Pitfall 20: PACE and ITP executed fence datasets too large — ~19-minute docs build will grow to 30+ minutes
+
+**What goes wrong:**
+PACE FPCA runs a 6-step pipeline (covariance surface smoothing, Simpson-weighted eigendecomposition, per-curve Cholesky solves). ITP runs `n_perm` permutation sign-flips over `n_basis` components. Docs fences using real datasets (Canadian Weather n=35, Growth n=93) with default parameters will add 5–10 minutes per fence to the already ~19-minute build.
+
+**How to avoid:**
+PACE fences: n=10 synthetic curves with 3–5 points each, `ncomp=2`, `bandwidth=0.2`, 21-point work grid. ITP fences: n=20 synthetic curves, `nbasis=10`, `n_perm=199`. Assert `FDARS_FENCE_OK` sentinel at the end. Document the small-data choice in the fence comment. Never use Canadian Weather, Growth, or Tecator datasets for PACE/ITP executed fences.
+
+**Warning signs:**
+A fence that takes more than 30 seconds on a laptop CPU. Time the build locally before merging: `mkdocs build` must finish in under 25 minutes.
+
+**Phase to address:** Docs phase.
 
 ---
 
@@ -354,13 +346,12 @@ Group A bindings phase. Input-validation tests and default-parameter design must
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Add `inference` to `_DIAGNOSTICS_METHODS` in a follow-up commit | Cleaner git log | Guard-sync test fails in CI between commits | Never — must be atomic |
-| Use `np.float64` in diagnostics dict without `float()` cast | One less line per key | `json.dumps` TypeError; grounding check misses values | Never |
-| Default `n_perm=999` in docs fences | Credible p-values in examples | Docs build time doubles or triples | Never in executed fences; acceptable in illustrative (non-executed) code blocks |
-| Skip multi-curve transposition round-trip test for SCB bands | Faster PR | Silent row/column swap bug on band arrays | Never |
-| Expose `flm_f_test` accepting a Python dict of fit fields | Simpler API surface | Does not compile (cannot reconstruct `#[non_exhaustive]` struct from outside crate) | Never |
-| Omit wildcard arm on `DepthMethod`, `CvCriterion`, or `MultiplierDistribution` match | Shorter code | Compile failure on bump (blocking CI) | Never |
-| Bind `aic_smoother` in `basis_mod.rs` | Seems thematically close | Compile error — wrong module path | Never |
+| Expose `pace_fpca` with a plain 2-D numpy array instead of `IrregFdata` builder | No new Python type needed | Silently wrong PACE on regular data; cannot represent truly sparse curves | Never |
+| Resolve ITP seed from `time.time_ns()` | No need to document default | Non-deterministic advisor diagnostics; broken docs fences | Never |
+| Skip `json.dumps` determinism test for ITP/outlier advisor extensions | Faster to write tests | numpy-scalar leak undetected until CI fails on another Python version | Never |
+| Use `nbasis` (input) instead of `result["n_basis"]` to size ITP p-value arrays | One fewer dict lookup | Index-out-of-bounds or zero-padding on B-spline knot clamping | Never |
+| Combine `_DIAGNOSTICS_METHODS` update and aspect builder in separate commits | Smaller diffs | MCP tool broken for one CI window; guard-sync test fails between commits | Never |
+| Use real datasets (Canadian Weather, Growth) for PACE/ITP executed fences | Real-data examples | ~19-minute build grows to 30+ minutes | Never for executed fences; OK for illustrative (non-executed) fences |
 
 ---
 
@@ -368,12 +359,11 @@ Group A bindings phase. Input-validation tests and default-parameter design must
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| `functional_depth` dispatcher + existing per-method depth fns | Expose `functional_depth` and assume it replaces `fraiman_muniz_1d` etc. | Keep both; `functional_depth` is a convenience dispatcher; per-method fns remain for fine-grained control |
-| FLM inference via `flm_f_test` | Pass Python dict from `fregre_lm` to `flm_f_test` | Re-run `fregre_lm` inside the Rust wrapper and pass the Rust struct directly |
-| MCP `fdars_run_method` + inference | Add `"inference"` to `_RUNNABLE_METHODS` | Inference tests require two datasets; keep inference diagnostics-only, not in `_RUNNABLE_METHODS` |
-| `mean_scb` result + advisor grounding | Treat `ToleranceBand` as a matrix (n×m) | Return as two 1-D arrays (`lower`, `upper`) of shape (m,); document as pointwise mean bounds |
-| `CvCriterion` back-conversion in `optim_bandwidth` result dict | Stringify via exhaustive match | Add `_ => "unknown"` wildcard arm to avoid compile failure on `#[non_exhaustive]` |
-| `FregreLmResult` module path | Import from `fdars_core::regression` | Correct path is `fdars_core::scalar_on_function::FregreLmResult` |
+| `IrregFdata` in Python | Pass a 2-D numpy array to `pace_fpca` | Expose `irreg_fdata_from_lists(argvals_list, values_list)` and require it as the sole input |
+| `GlmFamily::Gamma` | Document as "log link" (statsmodels default) | Document as "inverse canonical link g(μ)=1/μ"; include a link-function table in the docs page |
+| `DepthMethod` string dispatch | Only map the original 4 v5.0 variants | Map all 13 variants; include a `ValueError` wildcard for unknown strings |
+| `ElasticMultinomialResult.train_probabilities` | Return as FdMatrix without noting it is row-normalised | Document "each row sums to 1.0"; add a test: `np.allclose(probs.sum(axis=1), 1.0)` |
+| `ConcurrentRegrResult.beta_curve` row indexing | Access as `beta_curve[i, :]` thinking `i` is observation | Predictor k's β(t) is `beta_curve[k, :]` — rows are predictors, not observations |
 
 ---
 
@@ -381,43 +371,24 @@ Group A bindings phase. Input-validation tests and default-parameter design must
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| `n_perm=999` in executed docs fence | `mkdocs build` takes 30+ min; CI timeout | `n_perm=19` in all executed fences | Any fence with permutation test |
-| `nb=1000` bootstrap replicates in SCB fence | Same as above | `nb=50` in fences | Any SCB fence |
-| `functional_boxplot` on the full Canadian Weather dataset (35×365) | Each docs build adds ~2s per fence | Use 20 curves × 20 grid points synthetic data | Always when data is large |
-| Calling `optim_bandwidth` inside `mean_scb` in a fence to auto-select bandwidth | Adds 0.5–2s per call | Hard-code a bandwidth value in fences | Any executed fence |
+| Dense curves in `IrregFdata` (n_i >> 100) | Per-curve Cholesky solve is O(n_i³) | Document "expected regime: sparse data, n_i ≤ ~50 per curve"; warn if `total_points / n_obs > 50` | n_i > 200 per curve |
+| `n_perm=999` in ITP docs fences | Docs build time exceeds 30 min | Use `n_perm=199` for fences; note full `n_perm=999` as production default in docstring | Any executed fence with default params |
+| `ncomp` too large for sparse PACE data | `actual_ncomp=0` → `FdarError::ComputationFailed` | Document "ncomp should be ≤ min n_i − 1"; add a pre-call check | `ncomp >= min(n_i)` |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **`CvCriterion` match in `optim_bandwidth`:** Has `_ => return Err(PyValueError...)` wildcard — verify both string-to-enum and enum-to-string directions.
-- [ ] **`DepthMethod` match in `functional_depth` and `functional_boxplot`:** Has `_ => return Err(PyValueError...)` wildcard.
-- [ ] **`MultiplierDistribution` match in `mean_scb`:** Has `_ => return Err(PyValueError...)` wildcard.
-- [ ] **`TestResult` PyDict:** All three fields mapped — `statistic` (float), `p_value` (float), `n_perm` (int).
-- [ ] **`FunctionalBoxplotResult` PyDict:** All seven fields mapped — `outliers` converted via `usize_vec_to_numpy1d` (not `vec_to_numpy1d`).
-- [ ] **Inference diagnostics aspect:** `float()` cast on every numeric value before insertion into the diagnostics dict.
-- [ ] **Guard-sync atomic commit:** `_supported` in `build_diagnostics` and `_DIAGNOSTICS_METHODS` in `mcp/server.py` updated in a single commit; `test_diagnostics_methods_match_advisor_supported` passes.
-- [ ] **Seed determinism test:** Two calls to `t_perm_test`/`f_perm_test`/`functional_depth(method="random_projection")` with identical seed return byte-identical `json.dumps` output.
-- [ ] **`constant_basis` shape:** Returns `(m, 1)` numpy array, compatible with `np.hstack` concatenation with `(m, nbasis)` basis matrices.
-- [ ] **`aic_smoother` module:** In `smoothing_mod.rs`, not `basis_mod.rs`.
-- [ ] **Inference aspect NOT in `_RUNNABLE_METHODS`:** Two-dataset inference tests cannot be dispatched by `fdars_run_method`; they are diagnostics-only.
-- [ ] **FLM wrapper strategy:** `flm_f_test` and `flm_gof_test` re-run `fregre_lm` internally (via `fdars_core::scalar_on_function::fregre_lm`) and return enriched dicts.
-- [ ] **`mean_scb` return shape:** `lower.shape == (m,)` and `upper.shape == (m,)` — not `(1, m)` or `(n, m)`.
-
----
-
-## Recovery Strategies
-
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| Compile failure from missing `#[non_exhaustive]` wildcard arm | LOW | Add wildcard arm; `cargo build` passes immediately |
-| Guard-sync drift caught by CI | LOW | Add missing aspect to `_DIAGNOSTICS_METHODS` in same commit that updates `_supported` |
-| NumPy scalar leak in diagnostics | LOW | Wrap each value in `float()`; re-run determinism test |
-| Docs build timeout from high `n_perm` | LOW | Reduce `n_perm` to 19 in executed fences; rebuild |
-| `FregreLmResult` reconstruction fails at compile time | MEDIUM | Redesign wrapper to re-run `fregre_lm` and pass Rust struct directly |
-| Transposition bug in SCB band output | MEDIUM | Add shape assertion test; fix return to use `vec_to_numpy1d` for each field |
-| Regression drift in existing 426 tests after bump | MEDIUM | Identify drifted function; widen tolerance by one ULP; document in commit |
-| `aic_smoother` in wrong module | LOW | Move to `smoothing_mod.rs`; update `register()` call |
+- [ ] **`pace_fpca` binding:** `IrregFdata` Python type is exposed (not a numpy array shim) — verify `fdars.irreg_fdata_from_lists([...], [...])` works as the entry point
+- [ ] **`elastic_multinomial` binding:** negative-label guard applied (not relying on core error alone) — verify `pytest.raises(ValueError)` for `y=[-1, 0, 1]`
+- [ ] **`DepthMethod` dispatcher:** all 9 new variants mapped — verify `functional_depth(data, method="extreme_rank_length")` returns without `ValueError`
+- [ ] **ITP determinism:** seed defaults to 0 — verify two calls with identical args produce bit-identical `adjusted_pvalues`
+- [ ] **ITP p-value array length:** `len(result["adjusted_pvalues"]) == result["n_basis"]` — verify with a B-spline call where knot clamping may reduce the actual count
+- [ ] **Outlier index dtype:** `result["shape_outliers"].dtype == np.int64` (not bool) — verify for all four new detectors
+- [ ] **Advisor grounding:** `json.dumps(build_diagnostics(result, method="itp"), sort_keys=True)` succeeds without `TypeError` — verify in CI
+- [ ] **MCP guard-sync commit:** `_DIAGNOSTICS_METHODS` updated in same commit as new aspect builder — verify no green→red→green in CI
+- [ ] **PACE diagram:** observations shown as irregular per-curve dots, not shared grid — verify visually via `rsvg-convert` PNG
+- [ ] **ITP diagram:** adjusted p-values shown at or above raw p-values everywhere — verify visually
 
 ---
 
@@ -425,37 +396,39 @@ Group A bindings phase. Input-validation tests and default-parameter design must
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Numeric drift on existing suite (Pitfall 12) | Phase 1: crate bump + regression gate | `pytest` shows 426+ passed / 0 failed before any new bindings |
-| `#[non_exhaustive]` wildcard on `CvCriterion` in existing `optim_bandwidth` (Pitfall 2) | Phase 1: crate bump | `cargo build` passes with no exhaustiveness errors |
-| `seed: u64` vs `Option<u64>` for permutation tests (Pitfall 1) | Phase 2: Group A inference bindings | Determinism test: two calls with same seed → byte-identical output |
-| FLM wrapper strategy — re-run vs. dict reconstruction (Pitfall 4) | Phase 2: Group A inference bindings | Compile succeeds; `flm_f_test` returns valid dict from Python |
-| `mean_scb` returns `ToleranceBand` not `TestResult` (Pitfall 6) | Phase 2: Group A inference bindings | Shape assertion: `lower.shape == (m,)` |
-| `oneway_anova_vstat` groups parameter type (Pitfall 9) | Phase 2: Group A inference bindings | Test with int64 array input; verify group assignment is correct |
-| SCB `nb`/`confidence` validation (Pitfall 15) | Phase 2: Group A inference bindings | `pytest.raises(ValueError)` on `nb=0` and `confidence=1.1` |
-| `DepthMethod` enum variants and wildcard arm (Pitfall 7) | Phase 3: Group B depth/boxplot bindings | Exhaustive method-string test; self-depth consistency test |
-| `functional_boxplot` factor default and `outliers` type (Pitfall 8) | Phase 3: Group B depth/boxplot bindings | `outliers` dtype is int64; factor=1.5 matches reference results |
-| `TestResult` / `FunctionalBoxplotResult` non-exhaustive struct field access (Pitfall 3) | Phase 2+3: Group A+B bindings | All expected dict keys present in Python result |
-| `constant_basis` shape — 1-D vs 2-D (Pitfall 13) | Phase 4: Group C basis/smoothing bindings | `np.hstack([constant_basis(av).reshape(-1,1), bspline_basis(av, nknots=3)])` succeeds |
-| `aic_smoother` module placement (Pitfall 14) | Phase 4: Group C basis/smoothing bindings | `from fdars.smoothing import aic_smoother` succeeds |
-| `MultiplierDistribution` wildcard arm in `mean_scb` (Pitfall 2 extension) | Phase 2: Group A inference bindings | `cargo build` passes; `pytest.raises(ValueError)` on unknown multiplier string |
-| Grounding-invariant numpy scalar leak (Pitfall 11) | Phase 5: advisor extension | `json.dumps(diag)` does not raise; no `isinstance(val, np.generic)` in leaf values |
-| Guard-sync atomic commit (Pitfall 10) | Phase 5: advisor extension | `test_diagnostics_methods_match_advisor_supported` passes on the commit |
-| Executed-fence `n_perm` cost (Pitfall 5) | Phase 6: docs | No executed fence has `n_perm >= 100`; docs build delta < 3 min vs pre-inference baseline |
+| `beta_curve` transposition (p vs n_obs) | Bindings — Group A (Regression) | Multi-predictor test: `result["beta_curve"].shape == (p, m)` with `p=3` |
+| `IrregFdata` missing as Python type | Bindings — Group B (FPCA) | `fdars.irreg_fdata_from_lists` exists; `pace_fpca` accepts its result |
+| `eigenfunctions` shape (m, ncomp) vs (ncomp, m) | Bindings — Group B (FPCA) | `result["eigenfunctions"].shape == (m, ncomp)`; column orthonormality |
+| `actual_ncomp < requested ncomp` | Bindings — Group B (FPCA) | Test with tiny data producing `actual_ncomp < config.ncomp` |
+| `elastic_multinomial` negative/noncontiguous labels | Bindings — Group B (Classification) | `pytest.raises(ValueError)` for `[-1,0,1]` and `[0,2,4]` |
+| `DepthMethod` 9 new variants not mapped | Bindings — Group C (Depth/Outliers/ITP) | Smoke test for each of 9 new variant strings |
+| `SeqTransform` wildcard arm + all 5 variants | Bindings — Group C | Compile check + 5-variant smoke tests |
+| `GlmFamily` wildcard + Gamma inverse link | Bindings — Group A (Regression) + Docs | Compile check; Gamma worked example documents inverse link explicitly |
+| ITP seed non-determinism | Bindings — Group C | Determinism test: two calls → equal `adjusted_pvalues` |
+| `ItpResult.n_basis` vs `nbasis` mismatch | Bindings — Group C | `len(result["adjusted_pvalues"]) == result["n_basis"]` with B-spline call |
+| Outlier index dtype (usize not bool) | Bindings — Group C | `result["shape_outliers"].dtype == np.int64` for all four detectors |
+| `outliers_threshold_lrt` seed not exposed | Bindings — Group C | Audit `outliers_mod.rs` before extending; add seed if missing |
+| Non-exhaustive struct literals in tests | Bindings — all groups | Compiler catches at build time; never attempt struct-literal construction |
+| numpy scalar in ITP advisor diagnostics | Advisor extension | `json.dumps(build_diagnostics(..., method="itp"), sort_keys=True)` in CI |
+| Outlier advisor stores index lists not scalars | Advisor extension | Each diagnostic value is `float` or `int`; grounding guard passes |
+| `_DIAGNOSTICS_METHODS` guard-sync | Advisor extension | Single-atomic-commit check; guard-sync CI assertion test |
+| Depth-fence diagram symmetric bands | Docs | `rsvg-convert` PNG review: asymmetric bands following depth order |
+| PACE diagram showing regular shared grid | Docs | `rsvg-convert` PNG review: per-curve irregular observation dots visible |
+| ITP closure direction — adjusted below raw | Docs | Visual check: adjusted ≥ raw at every basis component index |
+| PACE/ITP fence datasets too large | Docs | `mkdocs build` completes in < 25 min; time the build locally |
 
 ---
 
 ## Sources
 
-- `docs.rs/fdars-core/0.20.0` — verified signatures for `t_perm_test`, `f_perm_test`, `two_sample_mean_test`, `mean_scb`, `scb_two_sample_test`, `flm_f_test`, `flm_gof_test`, `oneway_anova_vstat`, `functional_depth`, `functional_boxplot`, `aic_smoother`, `constant_basis` (HIGH confidence — official crate docs)
-- `docs.rs/fdars-core/0.20.0` — verified `#[non_exhaustive]` on `DepthMethod` (variants: `FraimanMuniz { scale }`, `Band`, `ModifiedBand`, `RandomProjection { nproj, seed }`), `CvCriterion` (variants: `Cv`, `Gcv`, `Aic`), `MultiplierDistribution` (variants: `Gaussian`, `Rademacher`), `TestResult` (fields: `statistic f64`, `p_value f64`, `n_perm usize`), `FunctionalBoxplotResult` (fields: `median`, `central_lower`, `central_upper`, `whisker_lower`, `whisker_upper`, `outliers Vec<usize>`, `depths`), `FregreLmResult` (in `scalar_on_function` module)
-- `BasisCriterion` confirmed NOT `#[non_exhaustive]` (variants: `Gcv`, `Cv`, `Aic`, `Bic`)
-- `src/depth_mod.rs`, `src/basis_mod.rs`, `src/smoothing_mod.rs`, `src/convert.rs`, `src/regression_mod.rs` — existing binding patterns (read directly from codebase, HIGH confidence)
-- `python/fdars/mcp/server.py` — `_DIAGNOSTICS_METHODS` frozenset and guard-sync pattern
-- `python/fdars/advisor/__init__.py` — `_supported` set and `build_diagnostics` dispatch pattern
-- `tests/test_mcp_server.py:503` — `test_diagnostics_methods_match_advisor_supported` guard-sync test
-- `tests/test_advisor_registration_quality.py` — numpy-scalar leak pattern and `json.dumps` determinism pattern
-- `.planning/RETROSPECTIVE.md` — v4.0 lessons: isolated bump phase, 18-min docs build cost, atomic guard-sync commit requirement
+- `fdars-core` v0.23.0 source: `concurrent_regression.rs`, `pace_fpca.rs`, `outliers.rs`, `inference/itp.rs`, `elastic_regression/logistic.rs`, `scalar_on_function/glm.rs`, `depth/dispatch.rs` — HIGH confidence (authoritative source)
+- pyfda `.planning/milestones/v5.0-phases/31-REVIEW-FIX.md` — CR-01 negative-label guard, WR-01 seed-default doc fix, WR-02 `json.dumps` determinism test pattern — HIGH confidence
+- pyfda `.planning/milestones/v4.0-phases/27-CONTEXT.md` — multi-curve transposition guard, banded distance-matrix test pattern — HIGH confidence
+- pyfda `.planning/RETROSPECTIVE.md` — v4.0 tracer-first + transposition test discipline, v5.0 `CvCriterion` wildcard-arm lesson — HIGH confidence
+- pyfda `src/convert.rs` — layout conversion functions; confirmed transposition mechanism — HIGH confidence
+- pyfda `.planning/codebase/CONCERNS.md` — existing `unwrap` risks, fragile result-dict patterns, `numpy1d_to_usize_vec` unchecked cast — MEDIUM confidence (dated 2026-08-07, pre-v5.0; underlying structural concerns remain valid)
+- pyfda `python/fdars/mcp/server.py:_DIAGNOSTICS_METHODS` and `advisor/aspects/` — grounding pattern, `json.dumps` guard, `_resolve_float` helper — HIGH confidence
 
 ---
-*Pitfalls research for: pyfda v5.0 — fdars-core 0.20 upgrade (functional inference + depth/boxplot + AIC-smoothing)*
-*Researched: 2026-08-17*
+*Pitfalls research for: pyfda v6.0 — fdars-core 0.23 bindings (Regression, PACE-FPCA/Classification, Depth/Outliers/ITP)*
+*Researched: 2026-08-20*

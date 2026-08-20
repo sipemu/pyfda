@@ -1,575 +1,545 @@
-# Feature Research
+# Feature Landscape — v6.0 fdars-core 0.23 New Bindings
 
-**Domain:** PyO3 binding layer — fdars-core 0.20.0 new API surface (functional inference + depth/boxplot + basis/smoothing)
-**Researched:** 2026-08-17
-**Confidence:** HIGH (signatures verified against docs.rs/fdars-core/0.20.0; struct fields verified against dispatch.rs source; conceptual descriptions drawn from upstream docstrings)
-
----
-
-## Verified Signatures and Struct Definitions
-
-All signatures below were fetched from `docs.rs/fdars-core/0.20.0`. Fields marked **[confirm at plan time]** could not be resolved via the docs.rs HTML path and must be cross-checked against the crate source before binding.
+**Domain:** PyO3 binding layer for functional data analysis (Rust → Python)
+**Researched:** 2026-08-20
+**Source:** fdars-core v0.23.0 git tag — every signature and field enumerated directly from source
 
 ---
 
-## Group A — Functional Inference (`fdars.inference` — NEW submodule)
+## Table Stakes
 
-### Pattern context
-
-This is fdars-core's first standalone inference surface (added in 0.19.0). It mirrors the R `fda` / `fda.usc` ecosystem. All public functions return `Result<_, FdarError>`; input validation fires at entry. `DEFAULT_N_PERM = 999`.
-
-The **permutation test trio** (`t_perm_test`, `f_perm_test`, `scb_two_sample_test`) take two FdMatrix arguments — one per group — plus argvals, permutation count, and a `u64` seed for reproducibility. They return `TestResult`.
-
-The **asymptotic tests** (`two_sample_mean_test`, `oneway_anova_vstat`) have no seed parameter; they use a closed-form or moment-matched chi-square approximation.
-
-The **SCB functions** (`mean_scb`, `scb_two_sample_test`) take an additional `MultiplierDistribution` enum argument. `MultiplierDistribution` variants were not individually resolved via docs.rs HTML (404); **confirm variants at plan time**.
-
-The **FLM inference functions** (`flm_f_test`, `flm_gof_test`) take only `&FregreLmResult` — no data re-passed.
-
----
-
-### A1. `t_perm_test` — Integrated L2 permutation t-test
-
-**Verified signature:**
-```rust
-pub fn t_perm_test(
-    data_a: &FdMatrix,
-    data_b: &FdMatrix,
-    argvals: &[f64],
-    n_perm: usize,
-    seed: u64,
-) -> Result<TestResult, FdarError>
-```
-
-**Conceptual behavior:** Computes the integrated L2 distance between two group sample-mean curves as the test statistic: `T = integral (m_A(t) - m_B(t))^2 dt`. Under the null (equal population means), observed curves from both groups are pooled and randomly re-split into two groups of the original sizes `n_perm` times; the statistic is recomputed each time. The p-value is the fraction of permuted statistics >= the observed value. Mirrors `fda::tperm.fd` in R.
-
-**Input shape:** Two independent groups of functional curves evaluated on a common grid. Each group is an `(n_group, m)` matrix; the argvals vector has length `m`. Groups need not be the same size. This is a two-sample test — it does NOT accept a group-label vector.
-
-**Dataset fit:** Growth (boys vs girls, 39/54 x 31 points) is the canonical example: two biological groups, same evaluation grid. Sonar (Mine vs Rock, 111/97 x 60 points) is a second option. Canadian Weather by region requires subsetting into two groups and is viable.
-
-**Return:** `TestResult { statistic: f64, p_value: f64, n_perm: usize }` (non-exhaustive; `n_perm` matches the input `n_perm` for permutation tests).
-
-**Python binding I/O contract:**
-- Inputs: `data_a: ndarray (n_a, m)`, `data_b: ndarray (n_b, m)`, `argvals: ndarray (m,)`, `n_perm: int = 999`, `seed: int = 0`
-- Output: `dict` with keys `statistic`, `p_value`, `n_perm`
-- Column-major conversion required for both data arrays (standard `numpy2d_to_fdmatrix`).
-
----
-
-### A2. `f_perm_test` — Integrated-F permutation test
-
-**Verified signature:**
-```rust
-pub fn f_perm_test(
-    data_a: &FdMatrix,
-    data_b: &FdMatrix,
-    argvals: &[f64],
-    n_perm: usize,
-    seed: u64,
-) -> Result<TestResult, FdarError>
-```
-
-**Conceptual behavior:** Like `t_perm_test` but uses an integrated F-ratio statistic — the pointwise ratio of between-group to within-group variance, integrated over the domain. The F-statistic upweights domain regions where the between-group signal is large relative to the pooled within-group spread. Mirrors `fda::Fperm.fd` in R.
-
-**Input shape:** Identical to `t_perm_test` (two independent groups, common grid).
-
-**Dataset fit:** Same candidates as `t_perm_test`; Growth (sex split) is cleanest.
-
-**Return:** `TestResult` (same struct). `n_perm` stores the input permutation count.
-
-**Python binding I/O contract:** Identical shape to `t_perm_test`; only the function name and internal statistic differ.
-
-**Differentiation from `t_perm_test`:** The integrated-F statistic is more sensitive when group variance also differs between groups; the t-statistic focuses purely on the mean-curve difference. Both are valid — expose both.
-
----
-
-### A3. `two_sample_mean_test` — Hotelling T-squared on FPC basis
-
-**Verified signature:**
-```rust
-pub fn two_sample_mean_test(
-    data_a: &FdMatrix,
-    data_b: &FdMatrix,
-    argvals: &[f64],
-    ncomp: usize,
-) -> Result<TestResult, FdarError>
-```
-
-**Conceptual behavior:** Projects both groups onto a shared FPC basis (computed from pooled data), reducing each curve to a `ncomp`-dimensional score vector. Applies Hotelling's T-squared to the difference in mean score vectors. The test statistic is scaled by the effective sample size and compared to a chi-squared distribution with `ncomp` degrees of freedom (asymptotic approximation). Mirrors `fda.usc` methodology.
-
-**Input shape:** Two groups, common grid. `ncomp` is a tuning parameter (number of FPC components to retain; typically 2-10). Depends on internal FPCA — no pre-fitted basis object required.
-
-**Dataset fit:** Same as `t_perm_test`. `ncomp` should be small relative to `min(n_a, n_b)`.
-
-**Return:** `TestResult`. `n_perm = 0` always (asymptotic test, no permutations).
-
-**Python binding I/O contract:**
-- Inputs: `data_a: ndarray (n_a, m)`, `data_b: ndarray (n_b, m)`, `argvals: ndarray (m,)`, `ncomp: int`
-- Output: `dict` with keys `statistic`, `p_value`, `n_perm` (always 0)
-- No default for `ncomp` — caller must choose; suggest `ncomp=5` as a reasonable default in the Python wrapper's docstring.
-
-**Dependency on existing feature:** Internally uses FPCA (the same FPCA machinery bound in `fdars.regression.fdata_to_pc_1d`). This is an internal dependency — no existing Python object is consumed.
-
----
-
-### A4. `mean_scb` — Degras simultaneous confidence band
-
-**Verified signature:**
-```rust
-pub fn mean_scb(
-    data: &FdMatrix,
-    argvals: &[f64],
-    bandwidth: f64,
-    nb: usize,
-    confidence: f64,
-    multiplier: MultiplierDistribution,
-) -> Result<ToleranceBand, FdarError>
-```
-
-**Return type verified:** `ToleranceBand { lower: Vec<f64>, upper: Vec<f64>, center: Vec<f64>, half_width: Vec<f64> }` (non-exhaustive).
-
-**MultiplierDistribution variants:** NOT resolved via docs.rs HTML (404 on enum page). **Confirm variants at plan time** against crate source. Expected to be Gaussian / Rademacher based on the Degras (2011) bootstrap-multiplier methodology.
-
-**Conceptual behavior:** Computes a pointwise-simultaneous confidence band for the true mean function mu(t) using the Degras (2011) multiplier-bootstrap method. At each point t, the band `[center(t) +/- half_width(t)]` is constructed so that `P(mu(t) in [lower(t), upper(t)] for all t) approx confidence`. The bandwidth parameter governs the smoothing of the covariance kernel estimator used internally. `nb` is the number of bootstrap multiplier draws.
-
-**Input shape:** Single-group functional data, shape `(n, m)`. This is NOT a two-sample test — it characterizes one sample's mean.
-
-**Dataset fit:** Canadian Weather (all 35 stations, temperature); Growth (all girls, or all boys, 39 or 54 curves x 31 points). Prefer a dataset with enough curves (n >= 20) for the bootstrap to be meaningful.
-
-**Python binding I/O contract:**
-- Inputs: `data: ndarray (n, m)`, `argvals: ndarray (m,)`, `bandwidth: float`, `nb: int`, `confidence: float`, `multiplier: str` (string-dispatch to `MultiplierDistribution` variant — pattern from `fdars.depth`)
-- Output: `dict` with keys `lower`, `upper`, `center`, `half_width` (each a 1-D ndarray of length m)
-
-**Complexity note:** The `multiplier` parameter requires a string-to-enum dispatch in the Rust binding. Because `MultiplierDistribution` non-exhaustive status is unknown — **confirm** — the binding must include a fallback `PyValueError` arm for unknown strings.
-
----
-
-### A5. `scb_two_sample_test` — SCB test for mean difference
-
-**Verified signature:**
-```rust
-pub fn scb_two_sample_test(
-    data_a: &FdMatrix,
-    data_b: &FdMatrix,
-    argvals: &[f64],
-    bandwidth: f64,
-    nb: usize,
-    confidence: f64,
-    multiplier: MultiplierDistribution,
-) -> Result<TestResult, FdarError>
-```
-
-**Conceptual behavior:** Constructs a simultaneous confidence band around the mean-difference curve `mu_A(t) - mu_B(t)`. Rejects equal-means null when the band excludes zero anywhere on the domain. The `statistic` field encodes the maximum standardized excursion of the difference band from zero. This is geometrically interpretable — the user can visualize the band and see where means differ.
-
-**Input shape:** Two independent groups, common grid. Same parameter set as `mean_scb` plus the second group.
-
-**Dataset fit:** Growth (boys vs girls split) gives a biologically meaningful mean-difference band.
-
-**Python binding I/O contract:**
-- Inputs: `data_a: ndarray (n_a, m)`, `data_b: ndarray (n_b, m)`, `argvals: ndarray (m,)`, `bandwidth: float`, `nb: int`, `confidence: float`, `multiplier: str`
-- Output: `dict` with keys `statistic`, `p_value`, `n_perm` (n_perm = nb for SCB bootstrap, not standard permutation — verify at plan time which value is stored)
-
----
-
-### A6. `flm_f_test` — Overall-significance F-test for fitted FLM
-
-**Verified signature:**
-```rust
-pub fn flm_f_test(fit: &FregreLmResult) -> Result<TestResult, FdarError>
-```
-
-**Conceptual behavior:** Tests whether the functional predictor has ANY effect. Uses the classical regression F-formula: `F = (R_sq/p) / ((1 - R_sq)/(n - p - 1))`, where p is the number of FPC components retained in the model and n is the sample size. The p-value is from an F-distribution with degrees of freedom `(p, n - p - 1)`. Returns an error for degenerate fits (zero components, invalid R-squared, non-positive df).
-
-**Input shape:** A **fitted** `FregreLmResult` object — the output of the existing `fdars.regression` FLM fitting function. No raw data needed; all necessary quantities (R-squared, n, p, residuals) are stored in the fit struct.
-
-**FregreLmResult fields (verified):** `intercept`, `beta_t`, `gamma`, `r_squared`, `r_squared_adj`, `residual_se`, `aic`, `bic`, `gcv`, `fitted_values`, `residuals`, `beta_se`, `std_errors`, `fpca`, `coefficients`, `ncomp`.
-
-**Python dependency:** The Python binding MUST consume the existing `FregreLmResult` dict that `fdars.regression` already returns. Two options: (1) accept the raw dict fields and reconstruct the Rust struct internally, or (2) expose a new "fitted model handle" type. Option 1 matches the v4.0 pattern for `ShiftRegistrationResult`; **preferred approach** is to accept the relevant scalar fields (r_squared, n_obs, ncomp) directly as Python floats/ints rather than demanding the user re-pass the full dict — simpler API, avoids a handle registry. **Confirm binding strategy at plan time.**
-
-**Dataset fit:** Tecator NIR spectra -> fat content scalar response (the canonical FLM benchmark: 240 spectra x 100 wavelengths, fat% as response).
-
----
-
-### A7. `flm_gof_test` — Ramsey-RESET goodness-of-fit test
-
-**Verified signature:**
-```rust
-pub fn flm_gof_test(fit: &FregreLmResult) -> Result<TestResult, FdarError>
-```
-
-**Conceptual behavior:** Residual-based lack-of-fit test. Regresses FLM residuals against polynomial terms of the fitted values (RESET-style specification check) and reports an F-statistic for whether any polynomial term is significant. A significant result (small p-value) indicates the linear model fails to capture the conditional mean structure — the functional predictor has a nonlinear effect on the scalar response.
-
-**Input shape:** Same as `flm_f_test` — a fitted `FregreLmResult`.
-
-**Dataset fit:** Tecator (same as `flm_f_test`; natural to run both tests after fitting one model).
-
-**Binding note:** Same binding strategy question as `flm_f_test` — these two functions should be bound symmetrically.
-
----
-
-### A8. `oneway_anova_vstat` — Asymptotic one-way functional ANOVA (V-statistic)
-
-**Verified signature:**
-```rust
-pub fn oneway_anova_vstat(
-    data: &FdMatrix,
-    groups: &[usize],
-    argvals: &[f64],
-) -> Result<TestResult, FdarError>
-```
-
-**Conceptual behavior:** Tests whether K >= 2 groups share a common mean curve. The V-statistic is the Simpson-integrated between-group sum of squares: `V = n * integral sum_k n_k/n (m_k(t) - m(t))^2 dt`. The null p-value uses a scaled chi-squared approximation (Satterthwaite moment-matching) to handle the unknown functional covariance. `TestResult.n_perm = 0` always (asymptotic). The existing permutation-based `fanova` function in `fdars.depth` (already bound) is the complementary alternative — the V-statistic version avoids the cost of permutation resampling.
-
-**Input shape:** Single combined data matrix `(n_total, m)`, with a `groups: &[usize]` slice of length `n_total` containing integer group labels. This is the standard "pooled matrix + label vector" encoding, distinct from the two separate matrices used by the two-sample tests. **Confirm 0-indexed vs 1-indexed at plan time.**
-
-**Dataset fit:** Canadian Weather by region (Atlantic/Pacific/Continental — 3 groups, ~35 stations total) is the natural K=3 example. Phoneme (5 classes x 80 curves each, 400 total, 256 points) is ideal for a K=5 test but is a larger dataset.
-
-**Python binding I/O contract:**
-- Inputs: `data: ndarray (n, m)`, `groups: ndarray (n,)` of int, `argvals: ndarray (m,)`
-- Output: `dict` with keys `statistic`, `p_value`, `n_perm` (always 0)
-- `groups` should accept a Python list or 1-D int array — binding converts to `Vec<usize>`.
-
-**Dependency on existing feature:** Complements the existing permutation `fanova` in `fdars.depth` — expose together, document as "asymptotic (fast) vs permutation (exact)".
-
----
-
-## Group B — Depth & Functional Boxplot (extend `fdars.depth`)
-
-### B1. `functional_depth` — Unified self-depth dispatcher
-
-**Verified signature:**
-```rust
-pub fn functional_depth(
-    data: &FdMatrix,
-    method: DepthMethod,
-) -> Result<Vec<f64>, FdarError>
-```
-
-**DepthMethod enum (verified from dispatch.rs source):**
-```rust
-pub enum DepthMethod {
-    FraimanMuniz { scale: bool },
-    Band,
-    ModifiedBand,
-    RandomProjection { nproj: usize, seed: u64 },
-}
-```
-
-**Non-exhaustive status:** Flagged in PROJECT.md as `#[non_exhaustive]` — **confirm at plan time**. If non-exhaustive, the binding match arm must include a wildcard fallback that returns `PyValueError`.
-
-**Conceptual behavior:** Computes the **self-depth** of every curve with respect to the sample itself — i.e., how central each curve is within its own group. Unlike the lower-level functions (`fraiman_muniz_1d`, `band_1d`, etc.) which accept a separate `ref_data` parameter, `functional_depth` uses `data` as both the set of curves to score AND the reference distribution. Returns a `Vec<f64>` of length `n` (one depth value per observation, higher = more central).
-
-**Input shape:** Single-group matrix `(n, m)`. The method parameter selects the depth algorithm and its internal hyperparameters.
-
-**Python binding I/O contract:**
-- Inputs: `data: ndarray (n, m)`, `method: str` (e.g., `"fraiman_muniz"`, `"band"`, `"modified_band"`, `"random_projection"`), plus method-specific kwargs — **preferred API**: keyword args `scale: bool = True`, `nproj: int = 50`, `seed: int = 0` passed alongside `method` string, with the binding constructing the `DepthMethod` variant.
-- Output: `ndarray (n,)` of depth values
-
-**Dataset fit:** Canadian Weather (35 stations x 365 days) is canonical for depth examples (already used in the existing `fdars.depth` docs).
-
-**Complexity:** LOW — thin dispatcher over already-bound functions. The main implementation work is the string-to-enum dispatch with `#[non_exhaustive]` fallback.
-
----
-
-### B2. `functional_boxplot` — Lopez-Pintado–Romo functional boxplot
-
-**Verified signature:**
-```rust
-pub fn functional_boxplot(
-    data: &FdMatrix,
-    method: DepthMethod,
-    factor: f64,
-) -> Result<FunctionalBoxplotResult, FdarError>
-```
-
-**FunctionalBoxplotResult fields (verified from dispatch.rs source):**
-```rust
-pub struct FunctionalBoxplotResult {
-    pub median: Vec<f64>,          // deepest curve (pointwise at evaluation grid)
-    pub central_lower: Vec<f64>,   // lower bound of 50% central region
-    pub central_upper: Vec<f64>,   // upper bound of 50% central region
-    pub whisker_lower: Vec<f64>,   // lower fence = central_lower - factor * spread
-    pub whisker_upper: Vec<f64>,   // upper fence = central_upper + factor * spread
-    pub outliers: Vec<usize>,      // row indices of observations outside fence
-    pub depths: Vec<f64>,          // per-curve depth scores (same as functional_depth)
-}
-```
-
-**Non-exhaustive status:** **Confirm at plan time.**
-
-**Conceptual behavior:** Implements the Lopez-Pintado & Romo (2009) functional boxplot algorithm:
-1. Compute self-depth for all n curves.
-2. Identify the **median curve**: the deepest observation (highest depth score). Unlike a pointwise median, this is an actual observed curve.
-3. Construct the **50% central region** (CR_50): the pointwise envelope of the top 50% deepest curves. `central_lower[t] = min over top-50%-deepest curves at t`, `central_upper[t] = max`.
-4. Inflate the central region by `factor` (default 1.5 by convention, same as Tukey boxplot) to obtain **whisker/fence** bounds.
-5. Any curve that exits the fence at any point t is flagged as an **outlier** (its row index is added to `outliers`).
-
-This is a **numeric-only** operation — no plotting is done. The result struct is designed to be passed to a separate plotting function (in Python: `fdars.plot`).
-
-**`factor` parameter:** Analogous to Tukey's 1.5 x IQR factor. `factor=1.5` is the standard choice; expose with default 1.5.
-
-**Input shape:** Single-group matrix `(n, m)` plus a `DepthMethod` selection.
-
-**Python binding I/O contract:**
-- Inputs: `data: ndarray (n, m)`, `method: str`, `factor: float = 1.5`, plus method-specific kwargs (same pattern as `functional_depth`)
-- Output: `dict` with keys `median` (ndarray m,), `central_lower` (ndarray m,), `central_upper` (ndarray m,), `whisker_lower` (ndarray m,), `whisker_upper` (ndarray m,), `outliers` (list[int]), `depths` (ndarray n,)
-
-**Dataset fit:** Canadian Weather (35 stations x 365 days) is the canonical example — Lopez-Pintado & Romo's original paper uses temperature curves. Expect ~2-4 outlier stations at factor=1.5.
-
-**Complexity:** MEDIUM — the struct-to-dict conversion is straightforward but `outliers: Vec<usize>` requires conversion to a Python list (not a numpy array). The `DepthMethod` string dispatch is shared with `functional_depth`.
-
-**Diagram opportunity:** The functional boxplot is highly visual — the central region, whiskers, median, and flagged outliers map directly to a band-plot SVG. This is the most diagram-rich new feature in the milestone.
-
----
-
-## Group C — Basis & Smoothing Quick Wins
-
-### C1. `constant_basis` — All-ones intercept column
-
-**Verified presence in module:** Listed in `fdars_core::basis` index. **Exact signature NOT verified** — docs.rs fn page returned 404.
-
-**Expected signature [confirm at plan time]:**
-```rust
-pub fn constant_basis(argvals: &[f64]) -> Vec<f64>
-```
-
-**Confirm:** parameter name (`t` or `argvals`), return type (plain `Vec<f64>` or `Result`), and whether it returns a 1-D vector or an `(m, 1)` matrix.
-
-**Conceptual behavior:** Returns a vector of all 1.0s of length `m` (the number of evaluation points). This is the m x 1 constant/intercept column used in penalized regression when a constant term is included in the basis expansion. Adding this as the first column of a basis matrix ensures the model has a free intercept that is not penalized. It is the functional-data analog of an intercept column in a design matrix.
-
-**Input shape:** `argvals: ndarray (m,)` -> output `ndarray (m,)` (all ones). Trivial computation, but having it as a named function makes basis construction explicit and matches the style of `bspline_basis`, `fourier_basis`.
-
-**Python binding I/O contract:**
-- Input: `argvals: ndarray (m,)`
-- Output: `ndarray (m,)` of 1.0s
-
-**Dataset fit:** N/A — demonstrated inline in basis-construction examples (e.g., `np.column_stack([constant_basis(t), bspline_basis(t, nbasis=8)])`).
-
-**Complexity:** LOW — trivially thin.
-
----
-
-### C2. `smooth_basis_aic` — AIC-optimal basis roughness penalty
-
-**Verified signature:**
-```rust
-pub fn smooth_basis_aic(
-    data: &FdMatrix,
-    argvals: &[f64],
-    basis_type: &BasisType,
-    nbasis: usize,
-    lfd_order: usize,
-    log_lambda_range: (f64, f64),
-    n_grid: usize,
-) -> Option<SmoothBasisResult>
-```
-
-**SmoothBasisResult fields (verified):** `coefficients: FdMatrix`, `fitted: FdMatrix`, `edf: f64`, `aic: f64`, `gcv: f64`, `bic: f64`, `penalty_matrix: Vec<f64>`, `nbasis: usize` (non-exhaustive).
-
-**BasisType enum string map:** Shared with existing `smooth_basis_gcv` binding — `"bspline"` / `"fourier"` matching the existing `basis_type` string convention in `basis_mod.rs`. **Confirm exact strings at plan time.**
-
-**Conceptual behavior:** Identical in structure to `smooth_basis_gcv` (already bound) — grid-searches `log10(lambda)` over `log_lambda_range` at `n_grid` points — but selects the smoothing parameter lambda by minimizing AIC rather than GCV. AIC = `n * log(RSS/n) + 2 * EDF` where EDF is the effective degrees of freedom computed from the hat-matrix trace. AIC penalizes model complexity more lightly than GCV for small n, often yielding smoother fits; GCV has better theoretical properties for large n. Exposing both gives the user a practical choice.
-
-**Return type:** `Option<SmoothBasisResult>` (returns `None` if the grid search fails or data is degenerate) — the binding converts `None` to `PyValueError("smooth_basis_aic failed")`, matching the pattern for `smooth_basis_gcv`.
-
-**Python binding I/O contract:**
-- Inputs: `data: ndarray (n, m)`, `argvals: ndarray (m,)`, `basis_type: str`, `nbasis: int`, `lfd_order: int`, `log_lambda_range: tuple[float, float]`, `n_grid: int`
-- Output: `dict` with keys `coefficients` (ndarray n x nbasis), `fitted` (ndarray n x m), `edf`, `aic`, `gcv`, `bic`, `nbasis`
-
-**Dataset fit:** Canadian Weather (35 x 365) or Tecator (240 x 100). A natural comparison: run `smooth_basis_gcv` and `smooth_basis_aic` on the same data and compare the selected lambda and EDF.
-
-**Complexity:** LOW — literal copy-paste of the `smooth_basis_gcv` binding with the function name changed. The `BasisType` dispatch is already written.
-
----
-
-### C3. `BasisCriterion::Aic` — AIC criterion for `basis_nbasis_cv`
-
-**Verified:** `BasisCriterion` enum has four variants: `Gcv`, `Cv`, `Aic`, `Bic`. The `Aic` variant is confirmed at docs.rs/fdars-core/0.20.0.
-
-**`basis_nbasis_cv` signature (verified):**
-```rust
-pub fn basis_nbasis_cv(
-    data: &FdMatrix,
-    argvals: &[f64],
-    nbasis_range: &[usize],
-    basis_type: &BasisType,
-    criterion: BasisCriterion,
-    n_folds: usize,
-    lambda: f64,
-) -> Option<BasisNbasisCvResult>
-```
-
-**Conceptual behavior of `Aic` variant:** When `criterion = BasisCriterion::Aic`, the function evaluates each candidate `nbasis` value by fitting a penalized smoother and selecting the one that minimizes AIC (using the hat-matrix trace to compute EDF, same as `smooth_basis_aic`). This is additive to the existing `Gcv`/`Cv`/`Bic` variants — the binding extension is a string-dispatch addition: accept `"aic"` as a valid `criterion` string alongside the existing accepted strings.
-
-**Python binding impact:** The existing `basis_nbasis_cv` binding in `smoothing_mod.rs` likely already accepts a `criterion: &str` parameter. Adding `"aic"` to the match arm is the full scope of the change. **Confirm the existing binding's criterion string map at plan time.**
-
-**Complexity:** TRIVIAL — one match arm addition in an existing binding. Not a new function — an extension of an existing one.
-
----
-
-## Feature Landscape Summary
-
-### Table Stakes (Users Expect These)
-
-For an FDA library offering "functional inference" as a capability:
+Features that complete the expected surface of an existing submodule or close a known gap. Users of the existing `fdars` package would expect these.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Two-sample permutation t-test (`t_perm_test`) | Every FDA text covers this; mirrors R `fda::tperm.fd` | LOW | Thin binding; column-major for both groups |
-| Two-sample permutation F-test (`f_perm_test`) | Paired with t-test; slightly different statistic | LOW | Same binding pattern as t-test |
-| One-way functional ANOVA (`oneway_anova_vstat`) | Groups > 2 is the natural generalization | LOW | Grouped-data input; no permutation cost |
-| Functional boxplot (`functional_boxplot`) | Visual outlier detection; Lopez-Pintado & Romo is THE classic reference | MEDIUM | Struct to dict; DepthMethod dispatch |
-| Unified depth dispatcher (`functional_depth`) | Makes self-depth first-class; avoids calling specific `fraiman_muniz_1d` etc. | LOW | String dispatch over DepthMethod |
-| AIC smoothing selection (`smooth_basis_aic`) | AIC is familiar to any statistician; GCV alone is not sufficient | LOW | Copy of GCV binding with function swap |
+| New `DepthMethod` variants in `functional_depth` / `functional_boxplot` dispatcher | v5.0 introduced the dispatcher with 4 variants; 9 new variants are already in the core enum at v0.23 | Low per variant — dispatcher pattern already exists | Wildcard arm already present; just extend the `depth_method_from_str` match |
+| `tvdmss` outlier detector in `fdars.outliers` | Closes the v5.0 Phase-34 deferral: functional boxplot ships but its natural downstream outlier method (TVD-MSS) did not | Medium — two config structs, four-field result dict | Depends on `total_variation_depth_1d` already in `fdars.depth` |
+| `muod` outlier detector in `fdars.outliers` | Natural companion to existing `outliergram` and `magnitude_shape_outlyingness` | Low — single config float, six-field result dict | No upstream depth dependency; pure regression on the pointwise mean |
+| `sequential_transform_outliers` in `fdars.outliers` | Completes the fdaoutlier parity set; documented alongside tvdmss/muod in the upstream module | Medium — `SeqTransform` enum string-dispatch, nested result | Depends on existing `functional_boxplot`; SeqTransform variants must be string-dispatched on the Python side |
+| `depthgram` in `fdars.outliers` | Completes the fdaoutlier parity set | Medium — 12-field result dict, two config floats | Univariate-only at v0.23; three `_d / _t / _t2` field triplets are identical for p=1 |
+| `itp_one_pop`, `itp_two_pop`, `itp_flm` in `fdars.inference` | Interval-wise testing is the natural follow-on to the v5.0 permutation tests; same module | Medium — `ProjectionBasisType` string-dispatch, five-field result dict | Same `TestResult`-to-dict pattern as v5.0, but `ItpResult` is a different struct with `adjusted_pvalues`/`raw_pvalues` arrays instead of scalars |
+| `concurrent_regression` in `fdars.regression` | Varying-coefficient FDA regression is a standard FDA method; no existing equivalent in `fdars.regression` | Medium — slice-of-matrices input (Python: list of 2D arrays), five-field result dict | Most structurally novel input shape: `predictors` is `&[FdMatrix]` -> Python `list[np.ndarray]` |
 
-### Differentiators (Beyond the Baseline)
+## Differentiators
+
+Features that require a new submodule or a structurally new approach, distinguishing this milestone from routine extension.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Degras SCB for the mean (`mean_scb`) | Simultaneous bands (not pointwise) for the mean — statistically correct for functional inference | MEDIUM | `MultiplierDistribution` enum; `ToleranceBand` to dict |
-| SCB two-sample test (`scb_two_sample_test`) | Geometrically interpretable rejection (see where means differ); unique to FDA | MEDIUM | Same complexity as `mean_scb` |
-| Hotelling T-squared on FPC basis (`two_sample_mean_test`) | Bridges multivariate and functional testing; asymptotic, no resampling cost | LOW | FPC computed internally |
-| FLM overall-significance F-test (`flm_f_test`) | First-class inference for the existing regression surface | MEDIUM | Binding strategy for `FregreLmResult` handle is the key design choice |
-| FLM goodness-of-fit / RESET test (`flm_gof_test`) | Model diagnostic after fitting; uncommon in Python FDA libraries | MEDIUM | Same handle-strategy issue as `flm_f_test` |
-| `BasisCriterion::Aic` in `basis_nbasis_cv` | Completes criterion coverage (GCV/CV/AIC/BIC); all four now exposed | TRIVIAL | One match arm |
-| `constant_basis` intercept column | Explicit, named, basis-construction primitive; makes model building transparent | TRIVIAL | All-ones vector |
+| `pace_fpca` / `PaceFpcaConfig` / `PaceFpcaResult` — new submodule | PACE FPCA is the only FDA method for sparse/irregular data; no existing equivalent in `fdars` | High — `IrregFdata` CSR format must be exposed at the Python boundary (ragged list-of-lists input), two-struct config+result, nine-field result | `IrregFdata` has no prior Python-side representation; creates a new Python input pattern |
+| `functional_glm` in `fdars.regression` | Exponential-family GLM over FPC scores; covers Binomial/Poisson/Gamma/Gaussian responses; closes a gap vs. the existing binary-only `functional_logistic` | Medium-High — family string-dispatch, optional scalar covariates, 15-field result dict + predict function | Internal IRLS, re-fits FPCA internally; the `family` string must dispatch to `GlmFamily` enum |
+| `elastic_multinomial` in `fdars.classification` | OvR multinomial elastic classifier extending the existing binary `elastic_logistic`; completes the classification surface for K >= 2 | Medium — five-field result dict, `class_models` as a Python list of per-class dicts | `class_models: Vec<ElasticLogisticResult>` requires nested dict serialisation; `train_probabilities` FdMatrix -> 2D ndarray |
 
-### Anti-Features (Do Not Build These)
+## Anti-Features
 
-| Anti-Feature | Why Requested | Why Problematic | Alternative |
-|--------------|---------------|-----------------|-------------|
-| Plotting inside `functional_boxplot` binding | Users expect "boxplot" to show a plot | Mixing computation and I/O in a Rust binding is wrong; breaks the offline docs build | Return `FunctionalBoxplotResult` dict; let `fdars.plot` handle visualization separately |
-| Exposing `MultiplierDistribution` as an integer enum | Simpler for binding | Opaque to the user; breaks discoverability | String dispatch with clear error messages for unknown strings |
-| Re-fitting the model inside `flm_f_test` / `flm_gof_test` | Avoids a "handle" complexity | Regression is expensive; re-fitting would silently change results if args differed | Accept the fit dict fields directly; document the pattern |
-| Exposing `smooth_basis_gcv_with_config` / `basis_nbasis_cv_with_config` | "More control" | The config-struct API duplicates the primary function and adds binding complexity with no Python benefit | Bind only the primary `smooth_basis_aic` and `basis_nbasis_cv` |
+Features to explicitly not build in v6.0.
+
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| HTTP/SSE MCP transport | Still deferred per PROJECT.md decision | Keep stdio only; not related to v6.0 scope |
+| `predict_pace_fpca` prediction for new sparse curves | Not present in v0.23 API; PACE predicts on the training set only | Document fitted/lower/upper on the training set; defer prediction to a future milestone if upstreamed |
+| Automatic sigma2 estimation in PACE FPCA | Upstream defers auto-estimation: "Automatic sigma2 estimation from the raw-vs-smoothed diagonal is deferred" (pace_fpca.rs doc comment) | Caller supplies `sigma2`; document the choice |
+| `linalg` feature (ridge_regression_fit) | Requires Rust 1.84+ > MSRV 1.83; not WASM-compatible | Keep `parallel`-only at v0.23 |
+| Gamma family AIC comparison to R `glm()` | Module doc explicitly warns AIC magnitudes are not directly comparable (dispersion phi not folded in) | Document the divergence in the worked example |
+| `serde` feature in pyfda builds | Not currently enabled; would add weight with no Python-side benefit | Not needed for PyO3 dict output |
+
+---
+
+## Detailed Capability Specifications
+
+### Group A — Regression
+
+#### A1. `concurrent_regression` -> `ConcurrentRegrResult`
+
+**Public function at v0.23.0:**
+
+```rust
+pub fn concurrent_regression(
+    response: &FdMatrix,       // n x m functional response
+    predictors: &[FdMatrix],   // p matrices each n x m
+    argvals: Option<&[f64]>,   // length m; None -> uniform 0..1
+    bandwidth: f64,            // kernel bandwidth for beta(t) smoothing
+    kernel: &str,              // "gaussian" | "epanechnikov" | "tricube"
+) -> Result<ConcurrentRegrResult, FdarError>
+```
+
+**`ConcurrentRegrResult` fields (all `#[non_exhaustive]`):**
+
+| Field | Rust type | Meaning |
+|-------|-----------|---------|
+| `beta_curve` | `FdMatrix` (p x m) | Smoothed varying-coefficient curves beta_k(t), one row per predictor |
+| `intercept` | `Vec<f64>` (length m) | Smoothed time-varying intercept beta_0(t) |
+| `fitted` | `FdMatrix` (n x m) | Fitted functional response curves |
+| `residuals` | `FdMatrix` (n x m) | response - fitted |
+| `argvals` | `Vec<f64>` (length m) | Shared grid used (echoed from input or uniform) |
+
+**Python dict layout (proposed):**
+- `beta_curve` -> ndarray (p, m)
+- `intercept` -> ndarray (m,)
+- `fitted` -> ndarray (n, m)
+- `residuals` -> ndarray (n, m)
+- `argvals` -> ndarray (m,)
+
+**Input shape:** Python-side `predictors` will be `list[np.ndarray]` -> convert each element via `numpy2d_to_fdmatrix`, collect into `Vec<FdMatrix>`.
+
+**Validation errors:** n < 2, n <= p (underdetermined), any predictor shape != (n, m), bandwidth <= 0 or non-finite, argvals length mismatch.
+
+**Category:** Table stakes for `fdars.regression` extension. Adds varying-coefficient regression where both response and predictors are functional (same grid). No new submodule needed.
+
+**Dependency on existing bindings:** None beyond `numpy2d_to_fdmatrix` / `fdmatrix_to_numpy2d` converters already in `convert.rs`.
+
+#### A2. `functional_glm` -> `FunctionalGlmResult`
+
+**Public function at v0.23.0:**
+
+```rust
+pub fn functional_glm(
+    data: &FdMatrix,                         // n x m functional predictors
+    y: &[f64],                               // scalar response length n
+    family: GlmFamily,                       // Binomial | Poisson | Gamma | Gaussian
+    scalar_covariates: Option<&FdMatrix>,    // n x q optional scalar predictors
+    ncomp: usize,                            // FPC components (clamped to min(n-1, m))
+    max_iter: usize,                         // IRLS max iterations
+    tol: f64,                                // IRLS convergence tolerance (deviance-change)
+) -> Result<FunctionalGlmResult, FdarError>
+```
+
+**`GlmFamily` variants (not `#[non_exhaustive]` — exhaustive at v0.23):**
+- `Binomial` — logit link, binary y in {0.0, 1.0}
+- `Poisson` — log link, non-negative integer y
+- `Gamma` — inverse link (canonical, NOT log), y > 0
+- `Gaussian` — identity link, converges in one IRLS step
+
+**`FunctionalGlmResult` fields (all `#[non_exhaustive]`):**
+
+| Field | Rust type | Meaning |
+|-------|-----------|---------|
+| `intercept` | `f64` | Intercept alpha |
+| `beta_t` | `Vec<f64>` (m) | Functional coefficient beta(t) on the original grid |
+| `beta_se` | `Vec<f64>` (m) | Pointwise standard errors of beta(t) |
+| `gamma` | `Vec<f64>` (q) | Scalar covariate coefficients (empty if no scalar_covariates) |
+| `fitted_values` | `Vec<f64>` (n) | Fitted means mu = g^{-1}(eta) |
+| `linear_predictors` | `Vec<f64>` (n) | Linear predictors eta = X*beta |
+| `ncomp` | `usize` | FPC components actually used |
+| `coefficients` | `Vec<f64>` | All regression coefficients [intercept, gamma_1...gamma_K, z_1...z_P] |
+| `std_errors` | `Vec<f64>` | Standard errors of all coefficients |
+| `log_likelihood` | `f64` | Log-likelihood kernel at convergence |
+| `deviance` | `f64` | GLM deviance D = 2(LL_saturated - LL_fitted) |
+| `iterations` | `usize` | IRLS iterations performed |
+| `fpca` | `FpcaResult` | Embedded FPCA for new-data projection (does NOT cross Python boundary) |
+| `aic` | `f64` | -2*log_likelihood + 2*p |
+| `bic` | `f64` | -2*log_likelihood + p*ln(n) |
+| `family` | `GlmFamily` | Family used |
+
+**Python dict layout (proposed):** Keys: `intercept`, `beta_t`, `beta_se`, `gamma`, `fitted_values`, `linear_predictors`, `ncomp`, `coefficients`, `std_errors`, `log_likelihood`, `deviance`, `iterations`, `aic`, `bic`, `family` (as string). The embedded `fpca` is consumed internally for predict and NOT exposed to Python — same pattern as `flm_f_test` / `flm_gof_test` in v5.0 `inference_mod.rs`, where `FregreLmResult` never crosses the Python boundary.
+
+**`family` Python API:** string parameter (`"binomial"`, `"poisson"`, `"gamma"`, `"gaussian"`) dispatched to `GlmFamily` enum in the wrapper, returning `ValueError` on unknown strings.
+
+**Re-fits internally:** Yes — FPCA is re-fit from `data` inside `functional_glm`. No fitted handle needed from the caller. Same internal-refit pattern as `flm_f_test`.
+
+**AIC comparability caveat:** Gamma and Gaussian AIC magnitudes are NOT comparable to R `glm()` because phi is not folded into the log-likelihood kernel. Must be documented in the worked example.
+
+**Category:** Differentiator — closes the gap between binary-only `functional_logistic` (already bound) and full exponential-family GLM. Extends `fdars.regression`.
+
+**Dependency on existing bindings:** Reuses `numpy2d_to_fdmatrix`, `numpy1d_to_vec`. The optional `scalar_covariates` adds a second optional 2D array parameter — same pattern used by `fregre_lm` with `scalar_covariates`.
+
+---
+
+### Group B — FPCA & Classification
+
+#### B1. `pace_fpca` / `PaceFpcaConfig` / `PaceFpcaResult`
+
+**Public function at v0.23.0:**
+
+```rust
+pub fn pace_fpca(
+    data: &IrregFdata,
+    config: &PaceFpcaConfig,
+) -> Result<PaceFpcaResult, FdarError>
+```
+
+**`IrregFdata` — how sparse/irregular input works:**
+
+`IrregFdata` is a CSR-like (Compressed Sparse Row) struct with three flat `Vec<f64>` fields and an `offsets: Vec<usize>` of length n+1. Curve i has evaluation points `argvals[offsets[i]..offsets[i+1]]` and values `values[offsets[i]..offsets[i+1]]`. Each curve can have a different number of points (ragged per-curve grids — NOT a shared dense grid). The public constructor is `IrregFdata::from_lists(argvals_list: &[Vec<f64>], values_list: &[Vec<f64>])`.
+
+**Python-side input model:** The Python wrapper must accept two Python lists of 1D ndarrays (one per curve), convert each to a `Vec<f64>`, then call `IrregFdata::from_lists`. This is a new input shape with no prior pyfda precedent — it is NOT a 2D ndarray.
+
+**`PaceFpcaConfig` fields (no `#[non_exhaustive]` — allows struct literal in tests):**
+
+| Field | Type | Default | Meaning |
+|-------|------|---------|---------|
+| `ncomp` | `usize` | 3 | FPC components to extract |
+| `bandwidth` | `f64` | 0.1 | Kernel bandwidth for mean/covariance smoothing |
+| `sigma2` | `f64` | 0.01 | Measurement-error variance (must be > 0; required for Sigma_yi positive-definite) |
+| `work_grid` | `Vec<f64>` | 51 uniform points on [0,1] | Common evaluation grid for all outputs |
+| `alpha` | `f64` | 0.05 | Confidence level for bands (95% pointwise bands) |
+
+**Python constructor:** Config struct is not `#[non_exhaustive]`, so the wrapper exposes it as keyword arguments that are converted field-by-field.
+
+**`PaceFpcaResult` fields (all `#[non_exhaustive]`):**
+
+| Field | Rust type | Python shape | Meaning |
+|-------|-----------|-------------|---------|
+| `mean` | `Vec<f64>` (m) | ndarray (m,) | Kernel-smoothed mean on the work grid |
+| `eigenvalues` | `Vec<f64>` (ncomp) | ndarray (ncomp,) | Variance explained per component |
+| `eigenfunctions` | `FdMatrix` (m x ncomp) | ndarray (m, ncomp) | Orthonormal eigenfunctions on the work grid |
+| `scores` | `FdMatrix` (n x ncomp) | ndarray (n, ncomp) | BLUP (conditional-expectation) FPC scores |
+| `fitted` | `FdMatrix` (n x m) | ndarray (n, m) | Fitted trajectories on the work grid |
+| `fitted_lower` | `FdMatrix` (n x m) | ndarray (n, m) | Lower pointwise confidence band |
+| `fitted_upper` | `FdMatrix` (n x m) | ndarray (n, m) | Upper pointwise confidence band |
+| `argvals` | `Vec<f64>` (m) | ndarray (m,) | Work grid used (echoed from config) |
+| `sigma2` | `f64` | float | Measurement-error variance used |
+| `ncomp` | `usize` | int | Components actually extracted (may be < config.ncomp if fewer positive eigenvalues) |
+
+**Result ncomp note:** `result.ncomp` may be less than `config.ncomp` when the smoothed covariance yields fewer positive eigenvalues than requested — a finite-sample artefact on sparse data. The binding must echo `result.ncomp` in the dict, not assume it matches the input.
+
+**Validation errors:** n=0, any curve has < 2 points, work_grid < 2 points, ncomp=0, bandwidth <= 0 or non-finite, sigma2 <= 0 or non-finite, alpha not in (0,1), work_grid not sorted or contains non-finite values. Computation errors: `mean_irreg` returns non-finite values, no positive eigenvalues, Cholesky solve fails.
+
+**Category:** Differentiator — the only FDA method for sparse/irregular longitudinal data in `fdars`. Requires a new Python input format (`IrregFdata` via list-of-lists). Belongs in a dedicated `fdars.pace_fpca` submodule (separate from `fdars.regression`) given the structurally different input format and the two-struct config+result pattern.
+
+**Dependency on existing bindings:** None directly, but the column-major FdMatrix layout convention applies to `eigenfunctions`, `scores`, `fitted`, `fitted_lower`, `fitted_upper` — each requires `fdmatrix_to_numpy2d` conversion with transposition. The `mean` and `argvals` Vec fields use `vec_to_numpy1d`.
+
+#### B2. `elastic_multinomial` -> `ElasticMultinomialResult`
+
+**Public function at v0.23.0:**
+
+```rust
+pub fn elastic_multinomial(
+    data: &FdMatrix,       // n x m functional data
+    y: &[usize],           // class labels in 0..K (contiguous), length n
+    argvals: &[f64],       // evaluation points, length m
+    ncomp_beta: usize,     // B-spline basis functions for beta per OvR model
+    lambda: f64,           // roughness penalty on beta
+    max_iter: usize,       // IRLS max iterations per OvR model
+    tol: f64,              // convergence tolerance
+) -> Result<ElasticMultinomialResult, FdarError>
+```
+
+**`ElasticMultinomialResult` fields (not `#[non_exhaustive]`):**
+
+| Field | Rust type | Python shape | Meaning |
+|-------|-----------|-------------|---------|
+| `n_classes` | `usize` | int | Number of classes K |
+| `classes` | `Vec<usize>` | list[int] | Sorted distinct class labels (always 0..K) |
+| `class_models` | `Vec<ElasticLogisticResult>` | list[dict] | One OvR binary model per class, with at minimum `alpha` and `beta_t` |
+| `train_probabilities` | `FdMatrix` (n x K) | ndarray (n, K) | Row-normalised OvR posteriors |
+| `predicted_classes` | `Vec<usize>` | ndarray (n,) int | Training predictions |
+| `train_accuracy` | `f64` | float | Fraction correctly classified on training data |
+
+**Label constraint:** Labels must be the contiguous range `0..K`; non-contiguous or non-zero-based labels raise `ValueError`. This must be documented.
+
+**`class_models` serialisation:** Each `ElasticLogisticResult` should be serialised as a Python dict with at minimum `alpha: float`, `beta_t: ndarray (m,)`. Full field list can be expanded in later phases if needed; a partial dict is acceptable for v6.0.
+
+**Prediction:** `predict_elastic_multinomial(fit, new_data, argvals) -> Vec<usize>` exists upstream but can be deferred for v6.0. `predicted_classes` in the training result dict is sufficient for worked examples.
+
+**Category:** Differentiator — extends `fdars.classification` to K >= 2 classes with elastic (SRSF-warping) feature extraction. The existing `elastic_logistic` binary classifier is already bound.
+
+**Dependency on existing bindings:** `numpy2d_to_fdmatrix`, `numpy1d_to_usize_vec`, `fdmatrix_to_numpy2d`. The `class_models` nested structure is new — requires manual field-by-field dict construction.
+
+---
+
+### Group C — Depth / Outliers / Interval Inference
+
+#### C1. New `DepthMethod` variants in the existing dispatcher
+
+**At v0.23.0, `DepthMethod` has 9 new variants beyond the 4 already bound:**
+
+| New variant | String key (proposed) | Underlying function | Min-n constraint |
+|-------------|----------------------|---------------------|-----------------|
+| `HypographIndex` | `"hypograph_index"` | `hypograph_index_1d` | n >= 2 |
+| `ModifiedHypographIndex` | `"modified_hypograph_index"` | `modified_hypograph_index_1d` | n >= 1 |
+| `EpigraphIndex` | `"epigraph_index"` | `epigraph_index_1d` | n >= 2 |
+| `HalfRegion` | `"half_region"` | `half_region_depth_1d` | n >= 2 |
+| `ModifiedHalfRegion` | `"modified_half_region"` | `modified_half_region_depth_1d` | n >= 1 |
+| `Extremal` | `"extremal"` | `extremal_depth_1d` | n >= 3 |
+| `ExtremeRankLength` | `"extreme_rank_length"` | `extreme_rank_length_depth_1d` | n >= 2 |
+| `LInfinity` | `"linfinity"` | `linfinity_depth_1d` | n >= 1 |
+| `TotalVariation` | `"total_variation"` | `total_variation_depth_1d` (TVD component only) | n >= 3 |
+
+**How they slot into the dispatcher:** The existing `depth_method_from_str` in `src/depth_mod.rs` is a `match` on a `&str` with a wildcard arm that raises `ValueError`. Adding the 9 new string variants extends that match. `functional_depth` and `functional_boxplot` both use `depth_method_from_str` so both pick up all 9 new methods for free once the match is extended. The error message listing accepted strings must also be updated.
+
+**TotalVariation note:** The dispatcher dispatches only the TVD (magnitude depth) component — not the MSS shape component. The full `TvdMssResult` (both tvd and mss) is returned by the standalone `total_variation_depth_1d` function, which is separate from the dispatcher path.
+
+**No new function parameters needed** for any of the 9 new variants — all take only `data` and `ref_data` (or just `data` for self-depth). The dispatcher already has `scale` and `nproj` for the FM/RP variants; these are unused for the new variants.
+
+**Category:** Table stakes — natural extension of the v5.0 dispatcher pattern. Zero structural change to `functional_depth` / `functional_boxplot` Python signatures.
+
+#### C2. New outlier detectors in `fdars.outliers`
+
+**tvdmss:**
+
+```
+tvdmss(data: &FdMatrix, config: TvdMssConfig) -> Result<TvdMssOutliers, FdarError>
+```
+
+`TvdMssConfig` fields: `emp_factor_mss: f64` (default 1.5), `emp_factor_tvd: f64` (default 1.5), `central_region_tvd: f64` (default 0.5, informational only).
+
+`TvdMssOutliers` fields -> Python dict:
+- `magnitude_outliers` -> `list[int]` (row indices)
+- `shape_outliers` -> `list[int]` (row indices)
+- `tvd` -> ndarray (n,) — total variation depth per curve
+- `mss` -> ndarray (n,) — modified shape similarity index per curve
+
+Min-n: 3 curves and >= 1 column.
+
+**muod:**
+
+```
+muod(data: &FdMatrix, config: MuodConfig) -> Result<MuodResult, FdarError>
+```
+
+`MuodConfig` fields: `factor: f64` (default 1.5, IQR multiplier).
+
+`MuodResult` fields -> Python dict:
+- `shape_outliers` -> `list[int]`
+- `magnitude_outliers` -> `list[int]`
+- `amplitude_outliers` -> `list[int]`
+- `shape_index` -> ndarray (n,) — |corr(X_i, mu) - 1|
+- `magnitude_index` -> ndarray (n,) — |intercept_i|
+- `amplitude_index` -> ndarray (n,) — |slope_i - 1|
+
+Min-n: 3 curves, >= 2 columns.
+
+**sequential_transform_outliers:**
+
+```
+sequential_transform_outliers(
+    data: &FdMatrix,
+    sequence: &[SeqTransform],
+    config: SeqTransformConfig,
+) -> Result<SeqTransformOutliers, FdarError>
+```
+
+`SeqTransform` enum variants (to be string-dispatched on Python side):
+- `T0` -> `"t0"` (identity / raw data)
+- `T1` -> `"t1"` (vertical centering — subtract per-curve mean)
+- `T2` -> `"t2"` (L2 normalisation)
+- `D1` -> `"d1"` (lag-1 first difference)
+- `D2` -> `"d2"` (identical to D1 in this implementation)
+
+`SeqTransformConfig` fields: `depth_method: DepthMethod` (default ModifiedBand), `emp_factor: f64` (default 1.5).
+
+`SeqTransformOutliers` fields -> Python dict:
+- `per_transform_outliers` -> `list[tuple[str, list[int]]]` — (transform_name, indices) per step
+- `union_outliers` -> `list[int]` — sorted deduplicated union across all steps
+
+Python signature: `sequence` should be a `list[str]` of transform names; `depth_method` and `emp_factor` as keyword args.
+
+Note: `SeqTransformConfig` carries a `DepthMethod` (not serde-serializable — not relevant for PyO3); the Python wrapper builds it from `depth_method` string + `emp_factor` float using the existing `depth_method_from_str` helper.
+
+Min-n: 2 curves.
+
+**depthgram:**
+
+```
+depthgram(data: &FdMatrix, config: DepthgramConfig) -> Result<DepthgramResult, FdarError>
+```
+
+`DepthgramConfig` fields: `outliergram_factor: f64` (default 1.5), `boxplot_factor: f64` (default 1.5).
+
+`DepthgramResult` fields -> Python dict:
+- `mbd_mei_d` / `mbd_mei_t` / `mbd_mei_t2` -> ndarray (n,) — all identical for p=1 (univariate)
+- `mei_mbd_d` / `mei_mbd_t` / `mei_mbd_t2` -> ndarray (n,) — all identical for p=1
+- `shape_outliers` -> `list[int]`
+- `magnitude_outliers` -> `list[int]`
+- `mbd` -> ndarray (n,)
+- `mei` -> ndarray (n,)
+
+Total 12 keys. For clarity in docs, the `_d/_t/_t2` triplets can be documented as "all equal for univariate data (p=1); multivariate support is a future upstream addition".
+
+Min-n: 2 curves, >= 1 column.
+
+**Shared `iqr_fence` helper:** The `iqr_fence` function is private in `fdars-core`. It is NOT a public binding target. No Python exposure needed.
+
+**Category:** All four outlier detectors are table stakes (completing the fdaoutlier parity set that includes the already-bound LRT, outliergram, magnitude-shape). `tvdmss` closes the v5.0 Phase-34 deferral explicitly.
+
+#### C3. Interval-wise testing in `fdars.inference`
+
+**Three public functions at v0.23.0:**
+
+```rust
+pub fn itp_one_pop(
+    data: &FdMatrix,                    // n x m
+    argvals: &[f64],                    // length m
+    mu0: Option<&[f64]>,                // optional null-hypothesis mean, length m
+    basis_type: ProjectionBasisType,    // Bspline | Fourier
+    nbasis: usize,                      // >= 2; actual n_basis may differ for B-splines
+    n_perm: usize,                      // >= 1
+    seed: u64,
+) -> Result<ItpResult, FdarError>
+
+pub fn itp_two_pop(
+    data_a: &FdMatrix,                  // n_a x m
+    data_b: &FdMatrix,                  // n_b x m; same m as data_a
+    argvals: &[f64],                    // length m
+    basis_type: ProjectionBasisType,
+    nbasis: usize,
+    n_perm: usize,
+    seed: u64,
+) -> Result<ItpResult, FdarError>
+
+pub fn itp_flm(
+    data: &FdMatrix,                    // n x m functional predictors
+    y: &[f64],                          // scalar response, length n
+    argvals: &[f64],                    // length m
+    basis_type: ProjectionBasisType,
+    nbasis: usize,
+    n_perm: usize,
+    seed: u64,
+) -> Result<ItpResult, FdarError>
+```
+
+**`ItpResult` fields (all `#[non_exhaustive]`):**
+
+| Field | Rust type | Python shape | Meaning |
+|-------|-----------|-------------|---------|
+| `adjusted_pvalues` | `Vec<f64>` (n_basis) | ndarray (n_basis,) | Interval-wise closure-adjusted p-values per basis component |
+| `raw_pvalues` | `Vec<f64>` (n_basis) | ndarray (n_basis,) | Raw per-component permutation p-values (+1 correction) |
+| `basis_type` | `ProjectionBasisType` | str | `"bspline"` or `"fourier"` |
+| `n_basis` | `usize` | int | Actual basis functions used (may differ from requested `nbasis` for B-splines) |
+| `n_perm` | `usize` | int | Permutations used |
+
+**Python dict layout:** `{"adjusted_pvalues": ndarray, "raw_pvalues": ndarray, "basis_type": str, "n_basis": int, "n_perm": int}`.
+
+**`ProjectionBasisType` Python dispatch:** `"bspline"` -> `Bspline`, `"fourier"` -> `Fourier`. Unknown string -> `ValueError`. Default should be `"bspline"` (matches the R `fdatest` default).
+
+**`mu0` in `itp_one_pop`:** Python `None` maps to `Option::None` (test H_0: mu(t) = 0). Python array of length m maps to `Option::Some`.
+
+**Relationship to v5.0 `TestResult` pattern:** `ItpResult` is structurally different from `TestResult`. `TestResult` has three scalar fields (`statistic: f64`, `p_value: f64`, `n_perm: usize`). `ItpResult` has two vector fields (`adjusted_pvalues`, `raw_pvalues`) plus metadata. The mapping function must be `itp_result_to_pydict` — a NEW helper distinct from `test_result_to_pydict`. The `fdars.inference` Python module gains three new functions alongside the existing eight.
+
+**`seed` convention:** Same as v5.0 permutation tests — `seed=None` (Python) resolves to `0` (Rust) for deterministic byte-identical results; explicit integer overrides.
+
+**`itp_flm` does NOT re-fit FPCA:** Unlike `flm_f_test` / `flm_gof_test` which re-fit `fregre_lm` internally, `itp_flm` projects `data` onto a basis, then permutes the scalar response `y`. The functional predictor design matrix (basis coefficients) is computed once and reused. No FPCA re-fit.
+
+**Category:** Table stakes extension of `fdars.inference`. Same module, same PyDict output pattern (though different struct). The interval-wise adjusted p-values are novel output (vectors not scalars) but the pattern mirrors existing TestResult handling.
 
 ---
 
 ## Feature Dependencies
 
 ```
-functional_boxplot
-    └──requires──> functional_depth (DepthMethod dispatch shared; boxplot reuses depth internals)
+concurrent_regression
+  -> numpy2d_to_fdmatrix (existing)
+  -> fdmatrix_to_numpy2d (existing)
+  -> vec_to_numpy1d (existing)
 
-flm_f_test
-    └──requires──> FregreLmResult (fitted via existing fdars.regression FLM fitting)
-flm_gof_test
-    └──requires──> FregreLmResult (same)
+functional_glm
+  -> numpy2d_to_fdmatrix (existing)
+  -> numpy1d_to_vec (existing)
+  -> GlmFamily string dispatch (new in wrapper)
 
-oneway_anova_vstat ──complements──> existing fdars.depth.fanova (permutation ANOVA)
-    note: V-statistic is asymptotic (fast); fanova is permutation (exact)
+pace_fpca
+  -> IrregFdata::from_lists (new Python-side input format)
+  -> fdmatrix_to_numpy2d (existing, for eigenfunctions/scores/fitted matrices)
+  -> vec_to_numpy1d (existing)
 
-smooth_basis_aic ──mirrors──> existing smooth_basis_gcv (same signature, AIC criterion)
-BasisCriterion::Aic ──extends──> existing basis_nbasis_cv (add "aic" to criterion dispatch)
+elastic_multinomial
+  -> numpy2d_to_fdmatrix (existing)
+  -> numpy1d_to_usize_vec (existing)
+  -> fdmatrix_to_numpy2d (existing, for train_probabilities)
+  -> usize_vec_to_numpy1d (existing)
 
-mean_scb ──returns──> ToleranceBand (same struct as fdars.tolerance — already bound)
-scb_two_sample_test ──returns──> TestResult (same as permutation tests)
+new DepthMethod variants
+  -> depth_method_from_str (existing, extend the match)
+  -> functional_depth / functional_boxplot (existing, unchanged signatures)
+
+tvdmss / muod / sequential_transform_outliers / depthgram
+  -> numpy2d_to_fdmatrix (existing)
+  -> vec_to_numpy1d (existing)
+  -> depth_method_from_str (existing, for SeqTransformConfig.depth_method)
+
+itp_one_pop / itp_two_pop / itp_flm
+  -> numpy2d_to_fdmatrix (existing)
+  -> numpy1d_to_vec (existing)
+  -> vec_to_numpy1d (existing)
+  -> ProjectionBasisType string dispatch (new in wrapper)
+  -> itp_result_to_pydict (new helper, analogous to test_result_to_pydict)
 ```
 
-### Dependency Notes
+---
 
-- `functional_boxplot` shares the `DepthMethod` enum dispatch with `functional_depth` — implement both in the same binding block in `depth_mod.rs`.
-- `flm_f_test` and `flm_gof_test` consume `FregreLmResult` from `fdars_core::scalar_on_function`, not `fdars_core::regression` (FPCA/PLS). The existing `fdars.regression` Python surface binds FPCA/PLS; the FLM binding lives in a different upstream module. **The `inference_mod.rs` binding will need to import `fdars_core::scalar_on_function::FregreLmResult`** — this is a cross-module dependency in the Rust binding layer.
-- `mean_scb` returns `ToleranceBand` — this type is already used by `fdars.tolerance`. The conversion function `toleranceband_to_pydict` (or equivalent) may already exist in `convert.rs`. **Check at plan time.**
-- `oneway_anova_vstat` produces `TestResult.n_perm = 0` consistently — document this convention so users do not mistake it for a permutation test that ran zero permutations.
+## Advisor Extension Scope
+
+**Where grounded diagnostics make sense:**
+
+| Capability | Advisor relevance | Rationale |
+|------------|------------------|-----------|
+| `tvdmss` / `muod` / `depthgram` | HIGH — closes v5.0 Phase-34 deferral | Outlier indices + depth scores are directly interpretable grounded diagnostics; `n_outliers`, `shape_vs_magnitude` breakdown; all numbers fdars-computed |
+| `itp_*` tests | HIGH — natural extension of existing `inference` aspect (#14) | `adjusted_pvalues` array summarised as "significant interval count" + "minimum adjusted p-value" — fully grounded |
+| `concurrent_regression` | MEDIUM | Grounded: `beta_curve.argmax()` per predictor as a computed diagnostic |
+| `functional_glm` | MEDIUM | Grounded: `aic`, `deviance`, `iterations` (convergence flag) directly fdars-computed |
+| `pace_fpca` | LOW | Grounded but specialised: `eigenvalues`, `ncomp` actual vs requested; advisor would rarely reach PACE scenarios |
+| `elastic_multinomial` | LOW | `train_accuracy` is grounded but classification accuracy is already covered by existing `fclassif_*` aspects |
+
+**Recommended advisor scope for v6.0:** Add outlier detection as a new aspect (#15) covering `tvdmss` / `muod` / `depthgram` (closes the Phase-34 deferral). Extend existing `inference` aspect (#14) to include ITP interval significance counts. Concurrent regression and GLM can be folded into the existing `regression` aspect diagnostics (AIC, deviance as additional fields). Skip PACE and elastic_multinomial from advisor — not enough grounding surface and specialised use-case.
 
 ---
 
-## Input Data Shapes by Method
+## MVP Recommendation
 
-| Method | Input Shape | Dataset Recommendation |
-|--------|-------------|----------------------|
-| `t_perm_test` | Two separate `(n_a, m)` and `(n_b, m)` arrays | Growth: boys (39x31) vs girls (54x31) |
-| `f_perm_test` | Two separate `(n_a, m)` and `(n_b, m)` arrays | Growth: boys vs girls |
-| `two_sample_mean_test` | Two separate `(n_a, m)` and `(n_b, m)` + `ncomp` | Growth: boys vs girls |
-| `mean_scb` | Single `(n, m)` + bandwidth, nb, confidence | Canadian Weather temperature (35x365) |
-| `scb_two_sample_test` | Two separate `(n_a, m)` and `(n_b, m)` + SCB params | Growth: boys vs girls |
-| `flm_f_test` | Fitted `FregreLmResult` (scalar fields from dict) | Tecator NIR -> fat% |
-| `flm_gof_test` | Fitted `FregreLmResult` (scalar fields from dict) | Tecator NIR -> fat% |
-| `oneway_anova_vstat` | Pooled `(n, m)` + `groups: (n,)` int array | Canadian Weather by region (3 regions, ~35 stations) |
-| `functional_depth` | Single `(n, m)` + method string | Canadian Weather temperature (35x365) |
-| `functional_boxplot` | Single `(n, m)` + method string + factor | Canadian Weather temperature (35x365) |
-| `constant_basis` | `argvals (m,)` | Used inline in basis-construction examples |
-| `smooth_basis_aic` | `(n, m)` data + `(m,)` argvals + basis params | Canadian Weather (35x365) or Tecator (240x100) |
-| `BasisCriterion::Aic` | Same as `basis_nbasis_cv` — `(n, m)` + params | Canadian Weather (35x365) |
+**Phase ordering within v6.0:**
 
----
+1. **Crate bump + regression gate** — bump `fdars-core` 0.20.0 -> 0.23.0, keep `parallel`, verify the ~560-test baseline green; this is the prerequisite for everything else.
 
-## MVP Definition for v5.0 Milestone
+2. **Bind all three groups in parallel** — Group A (concurrent_regression, functional_glm), Group B (pace_fpca, elastic_multinomial), Group C (depth variants + outlier detectors + ITP tests) can be worked in parallel once the crate bump is green.
 
-### Launch With (binding phase)
+3. **Advisor extension** — extend outlier detector aspect and ITP inference aspect after bindings are tested.
 
-The binding phase delivers all functions. There is no partial launch — the goal is to expose the full 0.20.0 surface.
+4. **Docs sweep** — new pages + SVGs + worked examples after advisor is in place.
 
-Priority order within the binding phase (by risk/dependency):
+**Prioritise within each group:**
 
-- **New `inference_mod.rs`** — Group A in full: 8 functions + `TestResult -> dict` conversion. The `FregreLmResult` handle strategy and `MultiplierDistribution` enum are the two open design questions; resolve both before writing code.
-- **`functional_depth` + `functional_boxplot`** in `depth_mod.rs` — Group B: DepthMethod dispatch + FunctionalBoxplotResult dict. Lower risk than Group A (no new struct import dependencies).
-- **`constant_basis` + `smooth_basis_aic` + `BasisCriterion::Aic`** in `basis_mod.rs` / `smoothing_mod.rs` — Group C: trivially thin or one-match-arm extensions.
+- Group A: `concurrent_regression` before `functional_glm` (simpler result dict, no family dispatch)
+- Group B: `elastic_multinomial` before `pace_fpca` (reuses existing FdMatrix input format; PACE needs the new IrregFdata Python input pattern)
+- Group C: depth dispatcher extension before outlier detectors (one-line match extension); ITP tests after outlier detectors
 
-### Add After Binding (advisor phase)
-
-- Inference diagnostics aspect in `build_diagnostics`: summarize `TestResult` p-values/statistics, grounded. Scope: confirm whether a full 14th aspect is warranted or the inference results are better surfaced via the existing interpretation task family.
-- Functional-boxplot outlier diagnostics: expose outlier indices and depths as a structured diagnostic (parallels the existing depth-based outlier diagnostics in `fdars.outliers`).
-
-### Future Consideration
-
-- Plotting support for functional boxplot in `fdars.plot` — the numeric result is the binding deliverable; a `plot_functional_boxplot()` helper is useful but not required for v5.0 correctness.
-- HTTP/SSE MCP transport — deferred since v2.0; not relevant to this milestone.
+**Defer:**
+- `predict_elastic_multinomial` as a Python function — `predicted_classes` is already in the training result dict; cross-validated prediction can wait
+- Any PACE "predict on new sparse data" — not in v0.23.0 upstream API
 
 ---
 
-## Feature Prioritization Matrix
+## Worked Example Data Needs
 
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| `t_perm_test` | HIGH | LOW | P1 |
-| `f_perm_test` | HIGH | LOW | P1 |
-| `functional_boxplot` | HIGH | MEDIUM | P1 |
-| `functional_depth` | HIGH | LOW | P1 |
-| `smooth_basis_aic` | HIGH | LOW | P1 |
-| `oneway_anova_vstat` | HIGH | LOW | P1 |
-| `two_sample_mean_test` | MEDIUM | LOW | P1 |
-| `constant_basis` | MEDIUM | TRIVIAL | P1 |
-| `BasisCriterion::Aic` | LOW | TRIVIAL | P1 |
-| `mean_scb` | MEDIUM | MEDIUM | P2 |
-| `scb_two_sample_test` | MEDIUM | MEDIUM | P2 |
-| `flm_f_test` | MEDIUM | MEDIUM | P2 |
-| `flm_gof_test` | MEDIUM | MEDIUM | P2 |
+| Capability | Data needed | Available in `docs/data/`? |
+|------------|------------|--------------------------|
+| `concurrent_regression` | Functional response + >= 1 functional predictor, shared dense grid | Yes — canadian_weather (temperature as response, precipitation as predictor, 365-point grid) |
+| `functional_glm` Binomial | Binary scalar y + functional predictor | Yes — tecator (fat content thresholded at 20% -> binary; 100-column spectra) |
+| `functional_glm` Poisson | Integer count y + functional predictor | Not directly. Recommend small synthetic count data inline in the fence |
+| `functional_glm` Gamma | Positive continuous y + functional predictor | Yes — tecator (fat content as continuous positive response) |
+| `functional_glm` Gaussian | Continuous y + functional predictor | Yes — standard FLM example, same as `flm_f_test` in v5.0 docs |
+| `pace_fpca` | Sparse/irregular longitudinal curves (list-of-lists, ragged) | NO — all existing datasets are on a dense shared grid. Must generate small synthetic sparse data inline. Keep n <= 20, <= 8 points per curve so the fence runs fast |
+| `elastic_multinomial` | K >= 3 class labels + functional predictors | Yes — phoneme.csv has 5 classes (aa, ao, dcl, iy, sh) and 256 evaluation points. Subsample to 2-3 classes (e.g. "sh", "aa", "iy") and m <= 64 for fence speed |
+| new depth methods (HI/MHI/EI/HRD/MHRD/Extremal/ERL/LInf/TVD) | Dense functional sample, n >= 3 | Yes — canadian_weather temperature is the standard example |
+| `tvdmss` | Dense functional sample, n >= 3 | Yes — canadian_weather or tecator |
+| `muod` | Dense functional sample, n >= 3, >= 2 columns | Yes — same |
+| `sequential_transform_outliers` | Dense functional sample, n >= 2 | Yes — same |
+| `depthgram` | Dense functional sample, n >= 2 | Yes — same |
+| `itp_one_pop` | One functional sample + optional null mean | Yes — canadian_weather (test if mean temperature == 0, or any group) |
+| `itp_two_pop` | Two functional samples | Yes — canadian_weather split into coast/inland groups (same split used in v5.0 two-sample tests) |
+| `itp_flm` | Functional X + scalar y | Yes — tecator (fat content as scalar y + spectra as X, same as flm_f_test example) |
 
-**Priority key:**
-- P1: Bind in the core bindings phase (all present — no optional items)
-- P2: Bind in the core bindings phase but design questions must be resolved first (MultiplierDistribution variants; FregreLmResult handle strategy)
-- P3: Not used — all features are in scope for this milestone
+**Critical data note for PACE:** No existing dataset is sparse/irregular. The fence must use inline-generated synthetic data (e.g. 10 Brownian bridge curves sampled at 3-7 random points each). Keep the fence small enough that the docs build (~19 min) does not regress. The `DOCS_FAST` path must also work.
 
----
-
-## Open Questions (Confirm at Plan Time)
-
-1. **`MultiplierDistribution` variants**: 404 on enum doc page. Fetch from source (`src/inference/mod.rs` or equivalent). Required before binding `mean_scb` and `scb_two_sample_test`.
-2. **`flm_f_test` / `flm_gof_test` binding strategy**: Accept extracted scalar fields (`r_squared: f64, ncomp: usize, n_obs: usize, residuals: ndarray`) rather than a handle object? Or reconstruct a minimal `FregreLmResult`-compatible struct? The v4.0 `ShiftRegistrationResult` binding accepted dict fields for a simpler API — prefer that pattern unless `FregreLmResult`'s F-test computation uses deeper fields.
-3. **`DepthMethod` non-exhaustive status**: PROJECT.md says `#[non_exhaustive]` — confirm whether a wildcard fallback is required in the Rust binding match arm.
-4. **`oneway_anova_vstat` group indexing**: 0-indexed or 1-indexed `usize` group labels? The binding should accept Python int arrays and document the expected base.
-5. **`ToleranceBand` in `convert.rs`**: Does a `toleranceband_to_pydict` conversion already exist (from `fdars.tolerance` bindings)? Reuse if so; write once if not.
-6. **`constant_basis` exact signature**: Confirm the parameter name (`t` vs `argvals`), return type (plain `Vec<f64>` vs `Result`), and dimension (1-D vector vs 2-D `(m, 1)` matrix).
-7. **`scb_two_sample_test` `n_perm` field value**: Is `n_perm` set to `nb` (bootstrap draws) or 0 in the returned `TestResult`? Impacts how the Python dict documents this field.
-8. **Existing `basis_nbasis_cv` Python binding**: Does it already accept a `criterion: str` parameter? If so, confirm the current accepted values before adding `"aic"`.
+**Phoneme for elastic_multinomial:** phoneme.csv has 400 observations x 256 evaluation points x 5 classes. For the fence, subsample to 3 classes (e.g. "sh", "aa", "iy") and m <= 64 to keep SRSF warping tractable in the docs build.
 
 ---
 
 ## Sources
 
-- `docs.rs/fdars-core/0.20.0/fdars_core/inference/` — verified (WebFetch; function signatures and TestResult fields verified; HIGH confidence)
-- `docs.rs/fdars-core/0.20.0/fdars_core/depth/dispatch/index.html` — verified (dispatch module; DepthMethod + FunctionalBoxplotResult fields verified from dispatch.rs source view; HIGH confidence)
-- `docs.rs/fdars-core/0.20.0/fdars_core/smooth_basis/` — verified (smooth_basis_aic signature + SmoothBasisResult fields + BasisCriterion variants; HIGH confidence)
-- `docs.rs/fdars-core/0.20.0/fdars_core/tolerance/struct.ToleranceBand.html` — verified (ToleranceBand fields; HIGH confidence)
-- `docs.rs/fdars-core/0.20.0/fdars_core/scalar_on_function/` — verified (FregreLmResult fields; HIGH confidence)
-- `docs.rs/fdars-core/0.20.0/fdars_core/basis/` — `constant_basis` listed in module index; fn page returned 404 — signature UNVERIFIED
-- `MultiplierDistribution` enum — doc page returned 404 — variants UNVERIFIED
-- `/home/simonm/projects/rust/pyfda/.planning/PROJECT.md` — milestone context and binding patterns from v4.0
-- `/home/simonm/projects/rust/pyfda/src/depth_mod.rs` / `basis_mod.rs` / `smoothing_mod.rs` — existing binding patterns
-- `/home/simonm/projects/rust/pyfda/docs/data/README.md` — dataset shapes and group structure for example selection
-
----
-*Feature research for: pyfda v5.0 — fdars-core 0.20.0 binding (inference + depth/boxplot + basis/smoothing)*
-*Researched: 2026-08-17*
+- `fdars-core v0.23.0:fdars-core/src/concurrent_regression.rs` — `ConcurrentRegrResult` fields, `concurrent_regression` signature; verified directly from `git show v0.23.0:`
+- `fdars-core v0.23.0:fdars-core/src/scalar_on_function/mod.rs` — `GlmFamily` enum, `FunctionalGlmResult` struct (all 15 fields confirmed)
+- `fdars-core v0.23.0:fdars-core/src/scalar_on_function/glm.rs` — `functional_glm` signature (7 parameters confirmed)
+- `fdars-core v0.23.0:fdars-core/src/pace_fpca.rs` — `PaceFpcaConfig` (5 fields), `PaceFpcaResult` (10 fields), `pace_fpca` signature; validation errors enumerated from source
+- `fdars-core v0.23.0:fdars-core/src/irreg_fdata/mod.rs` — `IrregFdata` CSR layout, `from_lists` constructor
+- `fdars-core v0.23.0:fdars-core/src/elastic_regression/logistic.rs` — `ElasticMultinomialResult` (6 fields), `elastic_multinomial` signature (7 parameters), label contiguity constraint
+- `fdars-core v0.23.0:fdars-core/src/depth/dispatch.rs` — `DepthMethod` enum with all 13 variants (4 existing + 9 new); `functional_depth` dispatch body
+- `fdars-core v0.23.0:fdars-core/src/depth/mod.rs` — all depth module re-exports confirming which functions are public
+- `fdars-core v0.23.0:fdars-core/src/outliers.rs` — `TvdMssConfig`, `TvdMssOutliers`, `MuodConfig`, `MuodResult`, `SeqTransform`, `SeqTransformConfig`, `SeqTransformOutliers`, `DepthgramConfig`, `DepthgramResult`; all function signatures; `iqr_fence` confirmed private
+- `fdars-core v0.23.0:fdars-core/src/inference/itp.rs` — `ItpResult` (5 fields), `itp_one_pop` / `itp_two_pop` / `itp_flm` signatures; seed convention; itp_flm basis-projection-not-FPCA confirmed
+- `fdars-core v0.23.0:fdars-core/src/inference/mod.rs` — confirmed `itp_*` functions exported from `inference`
+- `fdars-core v0.23.0:fdars-core/src/basis/projection.rs` — `ProjectionBasisType` enum (Bspline, Fourier)
+- `pyfda:src/inference_mod.rs` — `test_result_to_pydict` helper pattern; seed convention (`None -> 0`); existing 8 registered functions
+- `pyfda:src/depth_mod.rs` — `depth_method_from_str` wildcard arm; 4 existing variants; `boxplot_result_to_pydict` pattern
+- `pyfda:python/fdars/__init__.py` — submodule registration pattern; 19 existing submodules
+- `pyfda/docs/data/` — dataset inventory; phoneme classes (aa, ao, dcl, iy, sh) and wine classes (1, 2, 3) confirmed via Python csv parsing

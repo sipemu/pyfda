@@ -1,504 +1,418 @@
-# Architecture Research
+# Architecture Patterns
 
-**Domain:** PyO3 binding layer — fdars-core 0.20.0 upgrade (inference + depth/boxplot + basis/smoothing)
-**Researched:** 2026-08-17
-**Confidence:** HIGH (grounded entirely in real file content)
-
----
-
-## Standard Architecture
-
-All evidence drawn from the live codebase. No inference required — every claim
-has a file:line citation.
-
-### System Overview
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│  Python user layer  (import fdars; fdars.inference.t_perm_test(...))    │
-├─────────────────────────────────────────────────────────────────────────┤
-│  python/fdars/__init__.py  — _submodule_names tuple + sys.modules loop  │
-│  python/fdars/fdata_class.py  — Fdata OOP wrapper                       │
-│  python/fdars/advisor/__init__.py  — build_diagnostics + advise()       │
-│  python/fdars/mcp/server.py  — _DIAGNOSTICS_METHODS / _RUNNABLE_METHODS │
-├─────────────────────────────────────────────────────────────────────────┤
-│  PyO3 binding layer  (src/*_mod.rs + src/lib.rs + src/convert.rs)       │
-│  ┌──────────────┐ ┌─────────────┐ ┌────────────┐ ┌──────────────────┐  │
-│  │inference_mod │ │  depth_mod  │ │  basis_mod │ │  smoothing_mod   │  │
-│  │  (NEW file)  │ │  (extend)   │ │  (extend)  │ │  (extend)        │  │
-│  └──────────────┘ └─────────────┘ └────────────┘ └──────────────────┘  │
-│  convert.rs: numpy2d_to_fdmatrix / fdmatrix_to_numpy2d / to_pyresult()  │
-├─────────────────────────────────────────────────────────────────────────┤
-│  fdars-core 0.20.0  (Rust crate, Cargo.toml dependency)                 │
-│  inference::  depth::  smooth_basis::  basis::                          │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-### Component Responsibilities
-
-| Component | Responsibility | File(s) |
-|-----------|----------------|---------|
-| `_native` pymodule | Root PyO3 extension; registers all submodules via `register_submodule!` macro | `src/lib.rs` |
-| `register_submodule!` macro | Creates a `PyModule`, calls the module's `register(m)` fn, attaches to parent | `src/lib.rs:30-36` |
-| `*_mod.rs` | One file per functional category; each exports `#[pyfunction]`s + a `register(m)` fn | `src/*_mod.rs` |
-| `convert.rs` | numpy (row-major) ↔ FdMatrix (column-major) marshalling; `to_pyresult()` / `to_pyerr()` | `src/convert.rs` |
-| `__init__.py` `_submodule_names` | Tuple that drives the `sys.modules` registration loop; both `fdars.X.fn` and `from fdars.X import fn` work | `python/fdars/__init__.py:34-53` |
-| `build_diagnostics` `_supported` set | Inner set literal in `advisor/__init__.py` that gates valid method names; must stay in sync with `_DIAGNOSTICS_METHODS` | `python/fdars/advisor/__init__.py:124-133` |
-| `_DIAGNOSTICS_METHODS` | `frozenset` in `mcp/server.py`; must equal `_supported`; enforced by `test_diagnostics_methods_match_advisor_supported` | `python/fdars/mcp/server.py:63-82` |
-| `_RUNNABLE_METHODS` | Subset of `_DIAGNOSTICS_METHODS`; methods that `fdars_run_method` / `fdars_compare_run` can dispatch without caller-supplied arrays | `python/fdars/mcp/server.py:49-51`, `mcp/_runner.py:59-60` |
+**Project:** pyfda v6.0 — fdars-core 0.23 Upgrade
+**Researched:** 2026-08-20
 
 ---
 
-## Recommended Project Structure — v5.0 Changes
+## 1. Module Integration Map: New vs Existing Files
 
-```
-src/
-├── lib.rs                    # ADD: mod inference_mod; register_submodule!(m, "inference", ...)
-├── inference_mod.rs          # NEW FILE — Group A
-├── depth_mod.rs              # EXTEND — Group B (functional_depth + functional_boxplot)
-├── basis_mod.rs              # EXTEND — Group C (constant_basis)
-├── smoothing_mod.rs          # EXTEND — Group C (aic_smoother, smooth_basis_aic, CvCriterion::Aic)
-└── convert.rs                # NO CHANGE
+### Group A — Regression
 
-python/fdars/
-├── __init__.py               # ADD "inference" to _submodule_names tuple
-├── advisor/
-│   ├── __init__.py           # ADD "inference" to _supported set + dispatch branch
-│   └── aspects/
-│       └── inference.py      # NEW FILE — _build_inference_diagnostics
-└── mcp/
-    └── server.py             # ADD "inference" to _DIAGNOSTICS_METHODS (atomic commit with advisor/__init__.py)
-```
+| Capability | Target File | Action |
+|---|---|---|
+| `concurrent_regression` / `ConcurrentRegrResult` | `src/regression_mod.rs` | **EXTEND** — add binding at bottom, register in existing `register()` |
+| `functional_glm` / `FunctionalGlmResult` / `GlmFamily` / `predict_functional_glm` | `src/regression_mod.rs` | **EXTEND** — add `functional_glm` + `predict_functional_glm`, register alongside existing fns |
 
-### Structure Rationale
+`concurrent_regression` takes `response: &FdMatrix`, a slice of predictor `&[FdMatrix]`, `argvals: Option<&[f64]>`, `bandwidth: f64`, and `kernel: &str` (string pass-through for `"gaussian"/"epanechnikov"/"tricube"` — no `#[non_exhaustive]` enum). Returns `Result<ConcurrentRegrResult, FdarError>` via `to_pyresult()`.
 
-- **`inference_mod.rs` as a new file:** Mirrors the v4.0 precedent (`represent_mod.rs`, `scoring_mod.rs`). The inference surface is a distinct conceptual category (hypothesis testing, confidence bands, FLM post-hoc); it does not belong in `regression_mod.rs` (regression fits) or `depth_mod.rs` (depth scores).
-- **`depth_mod.rs` extended (not a new file):** `functional_depth` and `functional_boxplot` are depth-family operations. Placing them in the existing `depth_mod.rs` keeps the module cohesive and avoids a proliferation of very small files.
-- **`basis_mod.rs` and `smoothing_mod.rs` extended:** `constant_basis` is a basis constructor (Group C); AIC smoothing (`aic_smoother`, `smooth_basis_aic`, `CvCriterion::Aic`) extends the existing `CvCriterion` match arm in `smoothing_mod.rs`. Both are additive additions to existing files.
+`functional_glm` takes `data: &FdMatrix`, `y: &[f64]`, `family: GlmFamily` (enum — see §3), `scalar_covariates: Option<&FdMatrix>`, `ncomp: usize`, `max_iter: usize`, `tol: f64`. Returns `Result<FunctionalGlmResult, FdarError>` via `to_pyresult()`.
+
+**No new Rust source files for Group A.** Both functions land in `src/regression_mod.rs`.
+
+### Group B — FPCA & Classification
+
+| Capability | Target File | Action |
+|---|---|---|
+| `pace_fpca` / `PaceFpcaConfig` / `PaceFpcaResult` | **NEW** `src/pace_fpca_mod.rs` | **NEW FILE** — PACE takes `IrregFdata` (not `FdMatrix`), requiring a new Python-side input path; a dedicated module keeps `regression_mod.rs` coherent |
+| `elastic_multinomial` / `ElasticMultinomialResult` / `predict_elastic_multinomial` | `src/classification_mod.rs` | **EXTEND** — add alongside `elastic_logistic` (same file, same registration pattern) |
+
+**`pace_fpca_mod.rs` is a new Rust file** and requires one new `register_submodule!` entry in `src/lib.rs` and a new name in `python/fdars/__init__.py::_submodule_names`. This matches the v4.0 `represent_mod.rs` / `scoring_mod.rs` new-submodule pattern.
+
+`pace_fpca` takes `IrregFdata` — an irregularly-sampled container (offsets + concatenated argvals + values + rangeval). The binding receives the irregular data as lists-of-arrays on the Python side, not a dense `(n, m)` numpy array. `PaceFpcaConfig` is a plain Rust struct (NOT `#[non_exhaustive]`), assembled from individual Python keyword arguments via struct literal.
+
+`elastic_multinomial` lives in `fdars-core/src/elastic_regression/logistic.rs` (same file as `elastic_logistic`). Labels are `&[usize]` (0-indexed class labels) — receive as `PyReadonlyArray1<'py, i64>` and map via `numpy1d_to_usize_vec`.
+
+### Group C — Depth / Outliers / Interval Inference
+
+| Capability | Target File | Action |
+|---|---|---|
+| 9 new `DepthMethod` variants + new standalone depth fns | `src/depth_mod.rs` | **EXTEND** — extend `depth_method_from_str()` with 9 new arms; add `#[pyfunction]` entries for the new standalone functions |
+| `tvdmss` / `muod` / `sequential_transform_outliers` / `depthgram` | `src/outliers_mod.rs` | **EXTEND** |
+| `itp_one_pop` / `itp_two_pop` / `itp_flm` / `ItpResult` | `src/inference_mod.rs` | **EXTEND** — `ItpResult → PyDict` mirrors `test_result_to_pydict`; add `basis_type` string helpers |
+
+**No new Rust source files for Group C.**
+
+The `DepthMethod` enum is `#[non_exhaustive]` and gains 9 new variants in 0.23. The existing `depth_method_from_str()` in `depth_mod.rs` uses a wildcard `_ => PyValueError` arm that remains in place; 9 new string-to-variant arms are added above it. The wildcard error message string must be updated to list all 13 valid method names.
 
 ---
 
-## Architectural Patterns
+## 2. New Result-Struct → PyDict Conversions
 
-### Pattern 1: New Submodule Registration
+### Pattern Source of Truth
 
-**What:** Any new top-level `fdars.X` submodule requires four coordinated edits.
-**When to use:** Group A (`fdars.inference`). Not needed for Groups B/C which extend existing modules.
+`inference_mod.rs::test_result_to_pydict()` is the canonical template: a private `fn` that takes the result struct by value, accesses fields individually (never struct-literal on a `#[non_exhaustive]` type), calls `dict.set_item()` for each, and returns `PyResult<Bound<'py, PyDict>>`. Apply this pattern to every new result type.
 
-Four files must change in a single commit:
+### New Conversions Required
 
-1. `src/lib.rs` — add `mod inference_mod;` and `register_submodule!(m, "inference", inference_mod::register);`
-2. `src/inference_mod.rs` — new file with `#[pyfunction]` definitions + `pub fn register(m)`
-3. `python/fdars/__init__.py` — add `"inference"` to `_submodule_names` tuple
-4. (advisor + MCP sync in the advisor integration commit — see Pattern 4)
+#### `ConcurrentRegrResult → PyDict` (`regression_mod.rs`)
 
-**Example (lib.rs additions):**
+All fields accessed individually (`#[non_exhaustive]`):
+- `beta_curve: FdMatrix` — `fdmatrix_to_numpy2d(py, &r.beta_curve)` — shape `(p, m)` (predictor count × grid points)
+- `intercept: Vec<f64>` — `vec_to_numpy1d(py, r.intercept)` — length `m`
+- `fitted: FdMatrix` — `fdmatrix_to_numpy2d` — shape `(n, m)`
+- `residuals: FdMatrix` — `fdmatrix_to_numpy2d` — shape `(n, m)`
+- `argvals: Vec<f64>` — `vec_to_numpy1d` — length `m`
+
+`beta_curve` shape `(p, m)` is unusual: rows = predictor index, columns = grid points. `fdmatrix_to_numpy2d` returns row-major numpy, so Python sees `(p, m)`. Correct — but guard with a round-trip test at `p > 1`.
+
+#### `FunctionalGlmResult → PyDict` (`regression_mod.rs`)
+
+All fields accessed individually (`#[non_exhaustive]`):
+- `intercept: f64` — scalar
+- `beta_t: Vec<f64>` — `vec_to_numpy1d` — length `m`
+- `beta_se: Vec<f64>` — `vec_to_numpy1d` — length `m`
+- `gamma: Vec<f64>` — `vec_to_numpy1d` — length `p_scalar` (may be 0)
+- `fitted_values: Vec<f64>` — `vec_to_numpy1d` — length `n`
+- `linear_predictors: Vec<f64>` — `vec_to_numpy1d` — length `n`
+- `ncomp: usize` — Python int
+- `coefficients: Vec<f64>` — `vec_to_numpy1d`
+- `std_errors: Vec<f64>` — `vec_to_numpy1d`
+- `log_likelihood: f64` — scalar
+- `family: GlmFamily` — string via `family_to_str()` helper (see §3)
+- Do NOT expose `fpca: FpcaResult` — internal projection handle; excluded per the `fregre_lm`/FLM-inference re-fit-internally precedent
+
+`GlmFamily` is `#[non_exhaustive]`. `FunctionalGlmResult` is `#[non_exhaustive]`.
+
+#### `PaceFpcaResult → PyDict` (`pace_fpca_mod.rs`)
+
+All fields accessed individually (`#[non_exhaustive]`):
+- `mean: Vec<f64>` — `vec_to_numpy1d` — length `m`
+- `eigenvalues: Vec<f64>` — `vec_to_numpy1d` — length `ncomp`
+- `eigenfunctions: FdMatrix` — `fdmatrix_to_numpy2d` — shape `(m, ncomp)` (grid × components)
+- `scores: FdMatrix` — `fdmatrix_to_numpy2d` — shape `(n, ncomp)`
+- `fitted: FdMatrix` — `fdmatrix_to_numpy2d` — shape `(n, m)`
+- `fitted_lower: FdMatrix` — `fdmatrix_to_numpy2d` — shape `(n, m)`
+- `fitted_upper: FdMatrix` — `fdmatrix_to_numpy2d` — shape `(n, m)`
+- `argvals: Vec<f64>` — `vec_to_numpy1d`
+- `sigma2: f64` — scalar
+- `ncomp: usize` — int (may be < requested due to finite-sample eigendecomposition)
+
+`PaceFpcaResult` is `#[non_exhaustive]`. `PaceFpcaConfig` is NOT `#[non_exhaustive]` — safe to use struct literal.
+
+#### `ElasticMultinomialResult → PyDict` (`classification_mod.rs`)
+
+All fields accessed individually (`#[non_exhaustive]`):
+- `n_classes: usize` — int
+- `classes: Vec<usize>` — `usize_vec_to_numpy1d` (as i64 array)
+- `train_probabilities: FdMatrix` — `fdmatrix_to_numpy2d` — shape `(n, K)`
+- `predicted_classes: Vec<usize>` — `usize_vec_to_numpy1d`
+- `train_accuracy: f64` — scalar
+- Do NOT expose `class_models: Vec<ElasticLogisticResult>` — complex nested type
+
+`ElasticMultinomialResult` is `#[non_exhaustive]`.
+
+#### `ItpResult → PyDict` (`inference_mod.rs`)
+
+Private helper `itp_result_to_pydict()` mirrors `test_result_to_pydict()`:
+- `adjusted_pvalues: Vec<f64>` — `vec_to_numpy1d` — length = `n_basis`
+- `raw_pvalues: Vec<f64>` — `vec_to_numpy1d` — length = `n_basis`
+- `basis_type: ProjectionBasisType` — string via `basis_type_to_str()` helper (see §3)
+- `n_basis: usize` — int (always read from result; may differ from requested for B-splines due to knot clamping)
+- `n_perm: usize` — int
+
+`ItpResult` is `#[non_exhaustive]`.
+
+#### New Outlier Result Types (`outliers_mod.rs`)
+
+All four new detectors return `Result<T, FdarError>` via `to_pyresult()`.
+
+**`TvdMssOutliers → PyDict`** (`#[non_exhaustive]`):
+- `magnitude_outliers: Vec<usize>` — `.into_iter().map(|x| x as i64).collect::<Vec<i64>>()`
+- `shape_outliers: Vec<usize>` — same
+- `tvd: Vec<f64>` — `vec_to_numpy1d`
+- `mss: Vec<f64>` — `vec_to_numpy1d`
+
+**`MuodResult → PyDict`** (`#[non_exhaustive]`):
+- `shape_outliers`, `magnitude_outliers`, `amplitude_outliers: Vec<usize>` — lists of i64
+- `shape_index`, `magnitude_index`, `amplitude_index: Vec<f64>` — `vec_to_numpy1d`
+
+**`SeqTransformOutliers → PyDict`** (`#[non_exhaustive]`):
+- `per_transform_outliers: Vec<(SeqTransform, Vec<usize>)>` — Python list of `(str, list[int])` tuples; `SeqTransform` variant → string via `seq_transform_to_str()` helper
+- `union_outliers: Vec<usize>` — list of i64
+
+`SeqTransform` is `#[non_exhaustive]` — the `seq_transform_to_str()` helper needs a wildcard arm returning `"unknown"`.
+
+**`DepthgramResult → PyDict`** (`#[non_exhaustive]`):
+- `mbd_mei_d`, `mei_mbd_d`, `mbd_mei_t`, `mei_mbd_t`, `mbd_mei_t2`, `mei_mbd_t2: Vec<f64>` — `vec_to_numpy1d`
+- `shape_outliers`, `magnitude_outliers: Vec<usize>` — lists of i64
+- `mbd`, `mei: Vec<f64>` — `vec_to_numpy1d`
+
+#### New Standalone Depth Functions (`depth_mod.rs`)
+
+The new standalone depth functions (`hypograph_index_1d`, `epigraph_index_1d`, `modified_hypograph_index_1d`, `half_region_depth_1d`, `modified_half_region_depth_1d`, `extremal_depth_1d`, `extreme_rank_length_depth_1d`, `linfinity_depth_1d`) all return `Result<Vec<f64>, FdarError>` — map via `to_pyresult()` then `vec_to_numpy1d`. No new dict conversion needed.
+
+`total_variation_depth_1d` returns `Result<TvdMssResult, FdarError>` with fields `tvd: Vec<f64>` and `mss: Vec<f64>` — wrap as a 2-key PyDict.
+
+---
+
+## 3. Enum Handling: `#[non_exhaustive]` Fallback Arms and String Dispatch
+
+### `GlmFamily` (Group A, both directions)
+
+`GlmFamily` is `#[non_exhaustive]`. String-to-enum helper for the Python binding parameter:
 ```rust
-mod inference_mod;  // alongside existing mod lines
-
-// inside _native():
-register_submodule!(m, "inference", inference_mod::register);
-```
-
-**Example (`inference_mod.rs` skeleton):**
-```rust
-//! Functional inference — two-sample tests, SCB bands, FLM inference.
-
-use crate::convert::*;
-use numpy::{PyReadonlyArray1, PyReadonlyArray2};
-use pyo3::prelude::*;
-
-// ... #[pyfunction] definitions ...
-
-pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(t_perm_test, m)?)?;
-    m.add_function(wrap_pyfunction!(f_perm_test, m)?)?;
-    // etc.
-    Ok(())
-}
-```
-
-### Pattern 2: Struct Result to PyDict
-
-**What:** fdars-core compound result types cross the boundary as `PyDict`. No Rust struct is exposed directly to Python.
-**When to use:** All new result types — `TestResult`, `FunctionalBoxplotResult`, `ShiftRegistrationResult` (v4.0 precedent).
-
-Evidence from `regression_mod.rs:35-45` (`fpca` returns dict):
-```rust
-let dict = pyo3::types::PyDict::new(py);
-dict.set_item("scores", fdmatrix_to_numpy2d(py, &result.scores))?;
-dict.set_item("singular_values", vec_to_numpy1d(py, result.singular_values))?;
-dict.set_item("r_squared", result.r_squared)?;
-Ok(dict.into_any())
-```
-
-**`TestResult` to PyDict mapping (all inference functions):**
-
-```rust
-let dict = pyo3::types::PyDict::new(py);
-dict.set_item("statistic", result.statistic)?;        // f64
-dict.set_item("p_value", result.p_value)?;            // f64
-// permutation-test-specific:
-dict.set_item("n_perm", result.n_perm)?;              // usize
-dict.set_item("reject", result.reject)?;              // bool (optional, may be absent)
-Ok(dict.into_any())
-```
-
-Actual field names must be verified against `fdars-core 0.20.0` docs.rs before coding. Placeholder names above follow the project's existing convention (`p_value` not `pval`; `statistic` not `stat`).
-
-**`FunctionalBoxplotResult` to PyDict mapping:**
-
-```rust
-let dict = pyo3::types::PyDict::new(py);
-dict.set_item("median", fdmatrix_to_numpy2d(py, &result.median))?;        // (1, m) matrix -> ndarray
-dict.set_item("central_region", fdmatrix_to_numpy2d(py, &result.central_region))?;  // (2, m)
-dict.set_item("fence", fdmatrix_to_numpy2d(py, &result.fence))?;          // (2, m)
-dict.set_item("outlier_flags", bool_vec_to_numpy1d(py, result.outlier_flags))?;  // (n,)
-Ok(dict.into_any())
-```
-
-**Note:** Any `FdMatrix` field (multi-row matrix) must route through `fdmatrix_to_numpy2d`. Single-curve fields (median, fence bounds) are still `FdMatrix` in fdars-core and must use the same converter — do not use `vec_to_numpy1d` on a matrix. This is the column-major transposition pitfall from v4.0 Phase 26.
-
-### Pattern 3: String-Enum Dispatch with non_exhaustive Fallback
-
-**What:** Rust enums cross the boundary as `&str` parameters; a `match` arm maps them to the enum variant, and a wildcard arm raises `PyValueError` for unknown strings. The `_ =>` arm is mandatory because upstream enums are `#[non_exhaustive]`.
-**When to use:** `DepthMethod` (Group B), `CvCriterion::Aic` (Group C).
-
-Established pattern from `smoothing_mod.rs:193-201`:
-```rust
-let crit = match criterion {
-    "cv"  => fdars_core::smoothing::CvCriterion::Cv,
-    "gcv" => fdars_core::smoothing::CvCriterion::Gcv,
-    _ => {
-        return Err(pyo3::exceptions::PyValueError::new_err(
-            "criterion must be 'cv' or 'gcv'",
-        ))
+fn glm_family_from_str(s: &str) -> PyResult<fdars_core::scalar_on_function::GlmFamily> {
+    match s {
+        "binomial" => Ok(GlmFamily::Binomial),
+        "poisson"  => Ok(GlmFamily::Poisson),
+        "gamma"    => Ok(GlmFamily::Gamma),
+        "gaussian" => Ok(GlmFamily::Gaussian),
+        _ => Err(PyValueError::new_err(format!(
+            "family must be 'binomial', 'poisson', 'gamma', or 'gaussian', got '{s}'"
+        ))),
     }
-};
+}
 ```
-
-**Group C extension** — `CvCriterion::Aic` requires updating the message string too:
+Enum-to-string helper for the result dict (wildcard arm for forward-compat):
 ```rust
-"aic" => fdars_core::smoothing::CvCriterion::Aic,   // NEW
-_ => return Err(pyo3::exceptions::PyValueError::new_err(
-    "criterion must be 'cv', 'gcv', or 'aic'",       // message updated
-))
-```
-
-Note: `BasisCriterion` in `basis_mod.rs` already has an `"aic"` arm at line 442 for `basis_nbasis_cv`. The Group C work adds AIC to the `smoothing_mod.rs` `CvCriterion` match and exposes `aic_smoother`/`smooth_basis_aic` functions.
-
-**`DepthMethod` dispatcher** (Group B, `functional_depth`):
-```rust
-let method = match method_str {
-    "fraiman_muniz" => fdars_core::depth::DepthMethod::FraimanMuniz,
-    "modal"         => fdars_core::depth::DepthMethod::Modal,
-    "band"          => fdars_core::depth::DepthMethod::Band,
-    // ... other variants as they exist in 0.20.0 ...
-    _ => return Err(pyo3::exceptions::PyValueError::new_err(
-        format!("unknown depth method: {method_str:?}")
-    ))
-};
-```
-
-Actual `DepthMethod` variants must be verified against docs.rs before coding. The fallback arm is non-negotiable.
-
-### Pattern 4: Advisor and MCP Guard-Sync (Single Atomic Commit)
-
-**What:** Adding a new `build_diagnostics` aspect requires three files to change together; the drift-lock test (`test_diagnostics_methods_match_advisor_supported`) enforces this is atomic.
-**When to use:** Adding `"inference"` to the advisor.
-
-The three files that must change in a single commit:
-1. `python/fdars/advisor/__init__.py` — add `"inference"` to `_supported` set (line ~124) and add a dispatch branch `if method_lc == "inference": ...`
-2. `python/fdars/advisor/aspects/inference.py` — NEW: `_build_inference_diagnostics` function
-3. `python/fdars/mcp/server.py` — add `"inference"` to `_DIAGNOSTICS_METHODS` frozenset (line ~63)
-
-The test at `tests/test_mcp_server.py:503-566` compares `_DIAGNOSTICS_METHODS` with the set parsed from the advisor's `ValueError` message. A partial commit that updates only 1 or 2 of these files will fail CI immediately.
-
-**Grounding invariant constraint:** `_build_inference_diagnostics` must compute every value using fdars (e.g., `p_value`, `statistic`, `n_perm` from the `TestResult` dict). The LLM only interprets values that appear in the diagnostics dict. No fabricated numbers.
-
-**`"inference"` is diagnostics-only** (not added to `_RUNNABLE_METHODS`): FLM inference requires a prior fit result that the MCP dataset model cannot supply independently; two-sample tests require two groups. This mirrors `"scoring"` (v4.0 Phase 28), which is in `_DIAGNOSTICS_METHODS` but not `_RUNNABLE_METHODS`.
-
----
-
-## Data Flow
-
-### New Binding Request Flow (Group A example — t_perm_test)
-
-```
-fdars.inference.t_perm_test(group1, group2, n_perm=999, seed=42)
-    |
-    v
-src/inference_mod.rs  t_perm_test()  #[pyfunction]
-    | numpy2d_to_fdmatrix(group1)   (row-major -> col-major)
-    | numpy2d_to_fdmatrix(group2)
-    | fdars_core::inference::t_perm_test(&g1, &g2, n_perm, Some(seed))
-    | to_pyresult(result)?           (FdarError -> PyValueError)
-    | PyDict::new(py)
-    | dict.set_item("statistic", result.statistic)
-    | dict.set_item("p_value", result.p_value)
-    | dict.set_item("n_perm", result.n_perm)
-    v
-{"statistic": f64, "p_value": f64, "n_perm": usize}
-```
-
-### FLM Inference Data Flow (FLM-consumption question — answered below)
-
-```
-# Python user code:
-fit = fdars.regression.fregre_lm(data, response, n_comp=5)
-# fit is a plain Python dict: {"fitted_values": ndarray, "residuals": ndarray,
-#                               "beta_t": ndarray, "r_squared": float,
-#                               "coefficients": ndarray, "intercept": float}
-
-result = fdars.inference.flm_f_test(data, response, n_comp=5, n_perm=999, seed=0)
-# or, if 0.20.0 exposes a combined fit+test function:
-result = fdars.inference.flm_f_test(data, response, n_comp=5, n_perm=999)
-```
-
-**FLM-fit consumption decision: RE-FIT inside the inference call (recommended).**
-
-Evidence: `regression_mod.rs` never exposes `FregreLmResult` as a Python object or handle. The existing `predict_fregre_lm` binding (`regression_mod.rs:478-493`) demonstrates the established pattern: it re-fits internally by calling `fdars_core::scalar_on_function::fregre_lm(...)` and then calls `predict_fregre_lm(&fit, ...)` — the Rust struct never leaves Rust. The same pattern applies to `predict_fregre_pls` (line 527) and `predict_fregre_robust` (line 571-578).
-
-This means `flm_f_test` and `flm_gof_test` should accept the raw data + response + `n_comp` (the same inputs as `fregre_lm`) and re-fit internally:
-
-```rust
-#[pyfunction]
-#[pyo3(signature = (data, response, n_comp=3, n_perm=999, seed=None))]
-pub fn flm_f_test<'py>(
-    py: Python<'py>,
-    data: PyReadonlyArray2<'py, f64>,
-    response: PyReadonlyArray1<'py, f64>,
-    n_comp: usize,
-    n_perm: usize,
-    seed: Option<u64>,
-) -> PyResult<Bound<'py, PyAny>> {
-    let mat = numpy2d_to_fdmatrix(data)?;
-    let resp = numpy1d_to_vec(response);
-    // Re-fit inside the binding — FregreLmResult never crosses the boundary.
-    let fit = to_pyresult(fdars_core::scalar_on_function::fregre_lm(&mat, &resp, None, n_comp))?;
-    let result = to_pyresult(fdars_core::inference::flm_f_test(&fit, n_perm, seed))?;
-    // map TestResult -> PyDict
-    let dict = pyo3::types::PyDict::new(py);
-    dict.set_item("statistic", result.statistic)?;
-    dict.set_item("p_value", result.p_value)?;
-    Ok(dict.into_any())
+fn family_to_str(f: &GlmFamily) -> &'static str {
+    match f {
+        GlmFamily::Binomial => "binomial",
+        GlmFamily::Poisson  => "poisson",
+        GlmFamily::Gamma    => "gamma",
+        GlmFamily::Gaussian => "gaussian",
+        _ => "unknown",
+    }
 }
 ```
 
-**Alternative (opaque handle) is explicitly rejected:** Python has no `FregreLmResult` type — it only has the dict returned by `fregre_lm`. Accepting a dict back and re-parsing it to reconstruct a `FregreLmResult` (or requiring the user to pass a handle ID) is more complex and breaks the simple call pattern. The re-fit cost is negligible for the typical inference use case (one-shot fit + test).
+### `ProjectionBasisType` (Group C, ITP)
 
-**Plan-time flag:** This decision depends on the actual 0.20.0 signature of `fdars_core::inference::flm_f_test`. If the upstream function takes a `FregreLmResult` by reference, the re-fit approach is straightforward. If it exposes a combined `fit_and_test` function, use that. Verify against docs.rs/fdars-core/0.20.0 before implementation.
-
-### Advisor Build-Diagnostics Flow
-
+`ProjectionBasisType` is `#[non_exhaustive]`. Two helpers in `inference_mod.rs`:
+```rust
+fn basis_type_from_str(s: &str) -> PyResult<ProjectionBasisType> {
+    match s {
+        "bspline" => Ok(ProjectionBasisType::Bspline),
+        "fourier" => Ok(ProjectionBasisType::Fourier),
+        _ => Err(PyValueError::new_err(
+            format!("basis_type must be 'bspline' or 'fourier', got '{s}'")))
+    }
+}
+fn basis_type_to_str(b: &ProjectionBasisType) -> &'static str {
+    match b {
+        ProjectionBasisType::Bspline => "bspline",
+        ProjectionBasisType::Fourier => "fourier",
+        _ => "unknown",
+    }
+}
 ```
-build_diagnostics(test_result_dict, method="inference")
-    |
-    v _supported check (must include "inference")
-    v from fdars.advisor.aspects.inference import _build_inference_diagnostics
-    v _build_inference_diagnostics(raw)
-        - float(raw["p_value"])       # fdars-computed, no fabrication
-        - float(raw["statistic"])
-        - int(raw["n_perm"])
-        - bool: p_value < 0.05        # derived, still grounded
-    v
-{"method": "inference", "p_value": float, "statistic": float, "n_perm": int, ...}
+
+### `SeqTransform` (Group C, outliers)
+
+`SeqTransform` is `#[non_exhaustive]`. Helper in `outliers_mod.rs`:
+```rust
+fn seq_transform_to_str(t: &SeqTransform) -> &'static str {
+    match t {
+        SeqTransform::T0 => "t0",
+        SeqTransform::T1 => "t1",
+        SeqTransform::T2 => "t2",
+        SeqTransform::D1 => "d1",
+        SeqTransform::D2 => "d2",
+        _ => "unknown",
+    }
+}
 ```
+
+### `DepthMethod` Extension (Group C, `depth_mod.rs`)
+
+The existing `depth_method_from_str()` gains 9 new match arms before the existing wildcard:
+```
+"hypograph_index"          => DepthMethod::HypographIndex
+"modified_hypograph_index" => DepthMethod::ModifiedHypographIndex
+"epigraph_index"           => DepthMethod::EpigraphIndex
+"half_region"              => DepthMethod::HalfRegion
+"modified_half_region"     => DepthMethod::ModifiedHalfRegion
+"extremal"                 => DepthMethod::Extremal
+"extreme_rank_length"      => DepthMethod::ExtremeRankLength
+"linfinity"                => DepthMethod::LInfinity
+"total_variation"          => DepthMethod::TotalVariation
+```
+The wildcard error message must list all 13 valid method names.
 
 ---
 
-## Module Placement — Explicit Decision Table
+## 4. Column-Major Layout Concerns
 
-| Capability | Module | File | Action |
-|------------|--------|------|--------|
-| `t_perm_test` | `fdars.inference` | `src/inference_mod.rs` | NEW file |
-| `f_perm_test` | `fdars.inference` | `src/inference_mod.rs` | NEW file |
-| `two_sample_mean_test` | `fdars.inference` | `src/inference_mod.rs` | NEW file |
-| `mean_scb` | `fdars.inference` | `src/inference_mod.rs` | NEW file |
-| `scb_two_sample_test` | `fdars.inference` | `src/inference_mod.rs` | NEW file |
-| `flm_f_test` | `fdars.inference` | `src/inference_mod.rs` | NEW file |
-| `flm_gof_test` | `fdars.inference` | `src/inference_mod.rs` | NEW file |
-| `oneway_anova_vstat` | `fdars.inference` | `src/inference_mod.rs` | NEW file |
-| `functional_depth` (dispatcher) | `fdars.depth` | `src/depth_mod.rs` | EXTEND existing |
-| `functional_boxplot` | `fdars.depth` | `src/depth_mod.rs` | EXTEND existing |
-| `constant_basis` | `fdars.basis` | `src/basis_mod.rs` | EXTEND existing |
-| `aic_smoother` | `fdars.smoothing` | `src/smoothing_mod.rs` | EXTEND existing |
-| `smooth_basis_aic` | `fdars.smoothing` | `src/smoothing_mod.rs` | EXTEND existing |
-| `CvCriterion::Aic` arm | existing match | `src/smoothing_mod.rs` | EXTEND match arm |
+### Functions Requiring `numpy2d_to_fdmatrix` on Input
 
-### `__init__.py` change
+| Function | Matrices In | Matrices Out | Transposition Guard Needed |
+|---|---|---|---|
+| `concurrent_regression` | `response (n,m)`, each predictor `(n,m)` | `beta_curve (p,m)`, `fitted (n,m)`, `residuals (n,m)` | YES — `beta_curve` shape `(p,m)` unusual; round-trip test with `p > 1` required |
+| `functional_glm` | `data (n,m)`, optional `scalar_covariates (n,q)` | `beta_t (m,)`, `fitted_values (n,)` — 1D outputs only | Standard |
+| `elastic_multinomial` | `data (n,m)` | `train_probabilities (n,K)` matrix | YES — test K=3; verify numpy shape `(n,K)` |
+| `pace_fpca` | `IrregFdata` (custom, not FdMatrix) | `eigenfunctions (m,ncomp)`, `scores (n,ncomp)`, `fitted/lower/upper (n,m)` | YES — `eigenfunctions (m,ncomp)` transposition must be guarded; `(n,ncomp)` scores too |
+| `tvdmss`, `muod`, `sequential_transform_outliers`, `depthgram` | `data (n,m)` | all 1D Vec or `Vec<usize>` outlier lists — no matrix outputs | Standard |
+| `itp_one_pop`, `itp_two_pop`, `itp_flm` | `data (n,m)` or two `(n,m)` samples | `adjusted_pvalues`, `raw_pvalues` — 1D Vec | Standard |
+| New standalone depth fns | `data (n,m)`, `ref_data (n,m)` | `Vec<f64>` → 1D array | Standard |
 
-Only `"inference"` is added. Groups B/C extend existing modules — no change to `_submodule_names`.
+### PACE-FPCA Input: `IrregFdata` — New Input Pattern
 
-```python
-_submodule_names = (
-    "fdata", "depth", "metric", "basis", "smoothing",
-    "clustering", "regression", "alignment", "outliers",
-    "seasonal", "spm", "classification", "tolerance",
-    "conformal", "simulation", "explain", "represent",
-    "scoring",
-    "inference",   # NEW -- Group A
-)
-```
+`pace_fpca` consumes `fdars_core::irreg_fdata::IrregFdata` (offsets + concatenated argvals + values + rangeval). There is no precedent for this input type in the existing 19 binding modules — it is the primary implementation risk in Group B.
+
+The Python-facing API should accept:
+- `argvals_list: list[np.ndarray]` — per-curve observation times
+- `values_list: list[np.ndarray]` — per-curve observed values
+
+The binding constructs `IrregFdata::new(argvals_list, values_list)` on the Rust side by iterating the Python lists and extracting each 1D array. `IrregFdata::new` panics if list lengths differ or any pair has mismatched lengths — catch this before the call.
+
+`PaceFpcaConfig` is assembled as a Rust struct literal (NOT `#[non_exhaustive]` — per-module doc explicitly follows `ElasticPcrConfig` convention for config structs).
+
+### Concurrent Regression: `predictors: &[FdMatrix]` — List-of-Arrays Pattern
+
+`concurrent_regression` takes a slice of FdMatrix. The Python-facing API accepts `predictors: list[np.ndarray]` where each element is `(n, m)`. The binding iterates the Python list, calls `numpy2d_to_fdmatrix` on each element, collects into `Vec<FdMatrix>`, and passes `&predictors`. This is also a new input pattern — explicit test at `p=2` required.
 
 ---
 
-## Matrix Returns and Transposition Round-Trip Tests
+## 5. Advisor Integration Points
 
-**Rule (from v4.0 Phase 26):** Any binding that returns an `FdMatrix` must use `fdmatrix_to_numpy2d` — never `vec_to_numpy1d` — and must have a multi-curve transposition round-trip test.
+### New Aspects vs. Extending Existing
 
-Functions requiring a round-trip test:
+All new capabilities map to existing aspects. No new aspect key is required.
 
-| Function | Return field | Why |
-|----------|-------------|-----|
-| `functional_boxplot` -> `median` | `FdMatrix` (1-row matrix) | column-major pitfall |
-| `functional_boxplot` -> `central_region` | `FdMatrix` (2-row matrix) | column-major pitfall |
-| `functional_boxplot` -> `fence` | `FdMatrix` (2-row matrix) | column-major pitfall |
-| `mean_scb` -> lower/upper band | `FdMatrix` (band arrays) | column-major pitfall |
-| `scb_two_sample_test` -> any band field | `FdMatrix` | column-major pitfall |
+| Capability | Advisor Action | Aspect Key |
+|---|---|---|
+| `concurrent_regression` | Extend `_build_regression_diagnostics`: detect by `"beta_curve"` key in result dict; emit `max_beta_range`, `mean_beta_t` variability summary | `"regression"` (existing) |
+| `functional_glm` | Extend `_build_regression_diagnostics`: detect by `"log_likelihood"` key; emit `log_likelihood`, `glm_family`, `ncomp`, `beta_t` summary | `"regression"` (existing) |
+| `pace_fpca` | Extend `_build_fpca_diagnostics`: detect by `"sigma2"` + `"fitted_lower"` keys; emit `explained_variance_ratio`, `sigma2`, `mean_band_width` (from `fitted_upper - fitted_lower`) | `"fpca"` (existing) |
+| `elastic_multinomial` | Extend `_build_classification_diagnostics`: detect by `"train_probabilities"` key; emit multi-class `train_accuracy`, `n_classes` | `"classification"` (existing) |
+| New depth method strings | No change needed — `functional_depth`/`functional_boxplot` output shape unchanged; dispatcher extension is transparent to advisor | `"depth"` (no change) |
+| `tvdmss`, `muod`, `sequential_transform_outliers`, `depthgram` | Extend `_build_outliers_diagnostics`: detect by keys `"tvd"`/`"shape_index"`/`"per_transform_outliers"`/`"mbd_mei_d"` respectively; close v5.0 Phase 34 deferral of boxplot-outlier advisor work | `"outliers"` (existing) |
+| `itp_one_pop`, `itp_two_pop`, `itp_flm` | Extend `_build_inference_diagnostics`: detect by `"adjusted_pvalues"` array key (vs scalar `"p_value"` in `TestResult`); emit `min_adjusted_pvalue`, `n_significant_components`, `basis_type`, `n_basis` | `"inference"` (existing #14) |
 
-**Scalar/vector-only returns** (`TestResult` from permutation tests) do not require the round-trip test because no `FdMatrix` is involved — `statistic`, `p_value`, and `n_perm` are plain scalars.
+### Grounding Invariant + MCP Guard-Sync Protocol
 
-**Round-trip test template:**
-```python
-def test_functional_boxplot_layout():
-    """Guard: column-major transposition round-trip for FunctionalBoxplotResult."""
-    import numpy as np
-    import fdars.depth as depth
-    rng = np.random.default_rng(0)
-    data = rng.standard_normal((10, 20))  # 10 obs, 20 points
-    result = depth.functional_boxplot(data, data)
-    # median shape: (1, 20) -- one curve
-    assert result["median"].shape == (1, 20), result["median"].shape
-    # central_region shape: (2, 20) -- lower and upper envelope
-    assert result["central_region"].shape == (2, 20)
-    # Values must be finite (no NaN from a bad transposition)
-    assert np.all(np.isfinite(result["median"]))
-```
+Exactly as in v4.0 Phase 28 / v5.0 Phase 34:
+
+Since no new aspect key is being added to `_supported`, the guard-sync commit scope is **aspect builder files only** — `advisor/__init__.py::_supported` and `mcp/server.py::_DIAGNOSTICS_METHODS` do not change. The advisor aspect builder extensions in `aspects/regression.py`, `aspects/fpca.py`, `aspects/classification.py`, `aspects/outliers.py`, and `aspects/inference.py` land together in one atomic commit.
+
+If at plan time it is decided to add a new key (e.g. `"concurrent_regression"` or `"itp"` as distinct from `"inference"`), then the three-file guard-sync (advisor `_supported`, MCP `_DIAGNOSTICS_METHODS`, aspect dispatch branch in `advisor/__init__.py`) must land in a single atomic commit to keep `test_diagnostics_methods_match_advisor_supported` green.
 
 ---
 
-## Integration Points
+## 6. Build Order and Phase Dependencies
 
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| `inference_mod.rs` + `convert.rs` | `use crate::convert::*` (direct import) | Same as all other `*_mod.rs` files |
-| `depth_mod.rs` + `fdars-core 0.20.0 depth::` | Direct function calls | `functional_depth` dispatcher + `functional_boxplot` |
-| `advisor/__init__.py._supported` + `mcp/server.py._DIAGNOSTICS_METHODS` | Must be equal; enforced by `test_diagnostics_methods_match_advisor_supported` | Single atomic commit required; test at `tests/test_mcp_server.py:503` |
-| `advisor/aspects/inference.py` + `advisor/__init__.py` | Lazy import via `if method_lc == "inference": from ...aspects.inference import ...` | Same pattern as all 13 existing aspects |
-
-### Upstream API Verification Required Before Coding
-
-The following must be confirmed against docs.rs/fdars-core/0.20.0 during the plan-phase for Group A:
-
-1. Exact `TestResult` field names (`statistic`? `test_stat`? `p_value`? `pval`?)
-2. Whether `flm_f_test` takes `&FregreLmResult` directly or provides a combined fit+test fn
-3. `FunctionalBoxplotResult` field names and which fields are `FdMatrix` vs `Vec<f64>`
-4. `DepthMethod` enum variant names (for the `functional_depth` dispatcher)
-5. Whether `CvCriterion` in 0.20.0 for AIC smoothing is the same enum in `fdars_core::smoothing` or a new one — currently `smoothing_mod.rs` has `CvCriterion` with Cv/Gcv arms only; `basis_mod.rs` has `BasisCriterion` with Gcv/Cv/Aic/Bic. The milestone says `CvCriterion::Aic` is new in 0.20 for smoothing — confirm the enum path.
-6. `aic_smoother` and `smooth_basis_aic` module path in `fdars_core`
-
----
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Exposing Rust Structs as Python Objects
-
-**What people do:** Return a `FregreLmResult` as an opaque Python object or add a `PyClass` wrapper so `flm_f_test` can accept it.
-**Why it's wrong:** Breaks the thin-wrapper principle. Every existing predict/test function re-fits internally (`predict_fregre_lm`, `predict_fregre_pls`, `predict_fregre_robust` at `regression_mod.rs:486,527,571`). The pattern is established and consistent.
-**Do this instead:** Accept `data + response + n_comp` (the fit inputs) and re-fit inside the inference binding. `FregreLmResult` stays in Rust.
-
-### Anti-Pattern 2: Using vec_to_numpy1d on FdMatrix Fields
-
-**What people do:** Return a functional boxplot's median or SCB band bounds via `vec_to_numpy1d(py, result.median.to_row_major())`.
-**Why it's wrong:** Column-major layout means the rows/columns are swapped — the resulting array has shape `(m,)` or is transposed, losing the curve structure.
-**Do this instead:** Always use `fdmatrix_to_numpy2d(py, &result.median)`. Enforce with a shape assertion in tests.
-
-### Anti-Pattern 3: Partial Advisor/MCP Sync
-
-**What people do:** Add `"inference"` to `advisor/_supported` in one commit, then add it to `_DIAGNOSTICS_METHODS` in a later commit.
-**Why it's wrong:** `test_diagnostics_methods_match_advisor_supported` fails immediately on the intermediate state. CI will be red between the two commits.
-**Do this instead:** Update `advisor/__init__.py` (both `_supported` set and dispatch branch), `advisor/aspects/inference.py`, and `mcp/server.py` `_DIAGNOSTICS_METHODS` in a single commit.
-
-### Anti-Pattern 4: Hardcoded Enum Variants Without a Fallback Arm
-
-**What people do:** Match only the variants known at authoring time and let Rust's exhaustiveness checker produce a compile error when upstream adds new variants.
-**Why it's wrong:** `DepthMethod` and `CvCriterion` are `#[non_exhaustive]` in fdars-core; upstream additions would cause compilation failures.
-**Do this instead:** Always include a `_ => PyValueError` arm. This is the pattern established for `CvCriterion` in `smoothing_mod.rs:196-200` and `BasisCriterion` in `basis_mod.rs:444-448`.
-
----
-
-## Suggested Build Order
-
-The order respects compilation dependencies (bindings before advisor before docs) and parallelism opportunities:
+### Dependency Graph
 
 ```
-Phase 1: Crate bump (fdars-core 0.17 -> 0.20, parallel-only, no linalg)
-         Cargo.toml + maturin develop + full suite green as regression gate.
-         Unblocks everything else.
-
-Phase 2: New bindings -- parallelizable after Phase 1:
-  2A: Group A -- src/inference_mod.rs (new file)
-               + lib.rs + __init__.py (new submodule)
-  2B: Group B -- src/depth_mod.rs extensions
-               (functional_depth dispatcher + functional_boxplot)
-  2C: Group C -- src/basis_mod.rs + src/smoothing_mod.rs extensions
-               (constant_basis + AIC smoothing)
-  NOTE: 2A/2B/2C are independent; can be done sequentially or in parallel.
-        Each binding group must have its round-trip tests before merging.
-
-Phase 3: Advisor extension
-         Depends on Phase 2A (inference bindings must exist to test the aspect).
-         Single atomic commit: advisor/__init__.py + aspects/inference.py +
-         mcp/server.py _DIAGNOSTICS_METHODS.
-         Functional boxplot outlier diagnostics optionally added to the
-         existing "depth" branch in build_diagnostics (no new guard-set entry).
-
-Phase 4: Docs
-         Depends on Phases 2 + 3 (all bindings and advisor surface stable).
-         New pages + hand-authored SVG diagrams + runnable FDARS_FENCE_OK
-         worked examples for inference, functional boxplot, basis/smoothing
-         additions. mkdocs build --strict green gate.
-```
-
-**Dependency graph:**
-
-```
-Phase 1 (crate bump)
-    |
-    +---- Phase 2A (inference bindings)
-    |         |
-    +---- Phase 2B (depth extensions)
-    |
-    +---- Phase 2C (basis/smoothing extensions)
+Phase N:   Crate Bump 0.20 → 0.23 + Regression Gate
               |
-         Phase 3 (advisor -- needs 2A for inference aspect)
+              +-- Phase N+1: Group A — Regression Bindings
+              |   (src/regression_mod.rs — extend)
+              |   INDEPENDENT of N+2 and N+3
               |
-         Phase 4 (docs -- needs 2 + 3 complete)
+              +-- Phase N+2: Group B — FPCA/Classification Bindings
+              |   (src/pace_fpca_mod.rs NEW + src/classification_mod.rs extend)
+              |   (src/lib.rs, python/fdars/__init__.py)
+              |   INDEPENDENT of N+1 and N+3
+              |
+              +-- Phase N+3: Group C — Depth/Outliers/ITP Inference Bindings
+                  (src/depth_mod.rs + src/outliers_mod.rs + src/inference_mod.rs — extend)
+                  INDEPENDENT of N+1 and N+2
+                         |
+              Phase N+4: Advisor Extension
+              (aspects/regression.py, aspects/fpca.py, aspects/classification.py,
+               aspects/outliers.py, aspects/inference.py — single atomic guard-sync commit)
+              DEPENDS ON: N+1 (regression result shapes), N+2 (FPCA/classification shapes),
+                          N+3 (outlier/ITP result shapes)
+                         |
+              Phase N+5: Docs — Diagrams & Worked Examples
+              DEPENDS ON: N+1 through N+4
 ```
+
+Phases N+1, N+2, N+3 are mutually independent and parallel-eligible after the bump gate. This mirrors v4.0 (Phases 26+27 parallel) and v5.0 (Phases 31+32+33 parallel) exactly.
+
+### Bump Gate Notes (Phase N)
+
+Unlike v5.0 (where `CvCriterion` became `#[non_exhaustive]` blocking compilation), 0.21→0.23 adds new `DepthMethod` variants but `depth_mod.rs::depth_method_from_str()` uses string dispatch — no Rust compilation failure on bump. The new top-level modules (`concurrent_regression`, `pace_fpca`) are additive. The bump should be clean: change only `Cargo.toml`, rebuild, run ~560-test suite as the gate.
+
+MSRV at 0.23 is **Rust 1.81** (lowered from 1.83 in the prior pyfda build). pyfda's CI targets 1.83+ — no change needed. Do NOT enable `linalg` (requires Rust 1.84+; faer 0.23+).
+
+### Suggested Phase Numbers (continuing from v5.0 Phase 35)
+
+| Phase | Name | Target Files |
+|---|---|---|
+| 36 | Crate Bump 0.20 → 0.23 + Regression Gate | `Cargo.toml` only |
+| 37 | Group A — Regression Bindings | `src/regression_mod.rs` |
+| 38 | Group B — FPCA & Classification Bindings | `src/pace_fpca_mod.rs` (NEW), `src/classification_mod.rs`, `src/lib.rs`, `python/fdars/__init__.py` |
+| 39 | Group C — Depth/Outliers/ITP Inference Bindings | `src/depth_mod.rs`, `src/outliers_mod.rs`, `src/inference_mod.rs` |
+| 40 | Advisor Extension | `python/fdars/advisor/aspects/*.py` (5 files) — single atomic commit |
+| 41 | Docs — Diagrams & Worked Examples | `docs/`, `mkdocs.yml` |
+
+---
+
+## 7. Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Struct-Literal on `#[non_exhaustive]` Result Types
+
+Writing `let r = ConcurrentRegrResult { beta_curve: ..., ... }` in pyfda (outside `fdars-core`) fails to compile. Access fields individually via `r.beta_curve`, `r.intercept`, etc. Affected types: `ConcurrentRegrResult`, `FunctionalGlmResult` (`#[non_exhaustive]`), `PaceFpcaResult`, `ElasticMultinomialResult`, `TvdMssOutliers`, `MuodResult`, `SeqTransformOutliers`, `DepthgramResult`, `ItpResult`.
+
+`PaceFpcaConfig` is the exception — NOT `#[non_exhaustive]` by design; struct literal construction is safe and expected.
+
+### Anti-Pattern 2: Missing Wildcard Arm on `#[non_exhaustive]` Enum Helpers
+
+New `GlmFamily` / `ProjectionBasisType` / `SeqTransform` match arms require wildcard fallbacks returning `"unknown"` (for enum-to-string) or `PyValueError` (for string-to-enum). Applies to all four new helpers: `family_to_str`, `basis_type_from_str`, `basis_type_to_str`, `seq_transform_to_str`.
+
+### Anti-Pattern 3: Exposing `fpca: FpcaResult` from `FunctionalGlmResult`
+
+`FpcaResult` is a complex nested type used internally for projection. Expose only the scalar/vector fields of `FunctionalGlmResult` in the PyDict. Follow the FLM inference precedent: the inference functions in v5.0 Phase 31 re-fit `fregre_lm` internally without the `FregreLmResult` ever crossing the Python boundary.
+
+### Anti-Pattern 4: `pace_fpca` Accepting Dense `(n, m)` Numpy Array
+
+PACE FPCA is specifically designed for irregularly sampled data. Accepting a dense `FdMatrix` would discard the per-curve observation timing information. Users with dense data should use `fdars.regression.fpca`. The `pace_fpca_mod.rs` binding must accept `list[np.ndarray]` inputs.
+
+### Anti-Pattern 5: Advisor Guard-Sync Split Across Multiple Commits
+
+If any new aspect key is added: all three files (`advisor/__init__.py::_supported`, `mcp/server.py::_DIAGNOSTICS_METHODS`, aspect dispatch branch) must change in one atomic commit. Splitting causes `test_diagnostics_methods_match_advisor_supported` to fail in between. Even if only aspect builders change (no new key), group all advisor file changes in one commit.
+
+---
+
+## 8. File Change Summary
+
+### New Files
+
+| File | Type | Trigger |
+|---|---|---|
+| `src/pace_fpca_mod.rs` | NEW Rust binding module | `pace_fpca` takes `IrregFdata`, not `FdMatrix` — new input path warrants dedicated module |
+
+### Modified Files
+
+| File | Change |
+|---|---|
+| `Cargo.toml` | `fdars-core = "0.23.0"` (parallel only, no linalg) |
+| `src/lib.rs` | `mod pace_fpca_mod;` + one new `register_submodule!(m, "pace_fpca", pace_fpca_mod::register)` |
+| `src/regression_mod.rs` | Add `concurrent_regression` + `functional_glm` + `predict_functional_glm` bindings and register |
+| `src/depth_mod.rs` | Extend `depth_method_from_str()` with 9 arms; add 9+ new standalone depth `#[pyfunction]`s; update docstrings |
+| `src/outliers_mod.rs` | Add `tvdmss`, `muod`, `sequential_transform_outliers`, `depthgram` bindings and register |
+| `src/inference_mod.rs` | Add `itp_one_pop`, `itp_two_pop`, `itp_flm` bindings + `itp_result_to_pydict` helper + `basis_type_*` helpers |
+| `src/classification_mod.rs` | Add `elastic_multinomial` + `predict_elastic_multinomial` bindings and register |
+| `python/fdars/__init__.py` | Add `"pace_fpca"` to `_submodule_names` |
+| `python/fdars/advisor/aspects/regression.py` | Detect `ConcurrentRegrResult`-style (`"beta_curve"`) and `FunctionalGlmResult`-style (`"log_likelihood"`) dicts |
+| `python/fdars/advisor/aspects/fpca.py` | Detect `PaceFpcaResult`-style (`"sigma2"` + `"fitted_lower"`) dicts |
+| `python/fdars/advisor/aspects/classification.py` | Detect `ElasticMultinomialResult`-style (`"train_probabilities"`) dicts |
+| `python/fdars/advisor/aspects/outliers.py` | Add `tvdmss`/`muod`/`sequential_transform`/`depthgram` sub-branches; close v5.0 Phase 34 deferral |
+| `python/fdars/advisor/aspects/inference.py` | Detect `ItpResult`-style (`"adjusted_pvalues"` array key) dicts |
 
 ---
 
 ## Sources
 
-All findings derived from live codebase files:
-- `src/lib.rs` — submodule registration macro and full module list
-- `src/convert.rs` — numpy ↔ FdMatrix marshalling, `to_pyresult()`
-- `src/depth_mod.rs` — existing depth function pattern
-- `src/regression_mod.rs` — `fregre_lm` dict return pattern; `predict_fregre_lm` re-fit-inside-binding pattern (lines 486-492)
-- `src/represent_mod.rs` — v4.0 new-submodule precedent
-- `src/scoring_mod.rs` — v4.0 new-submodule precedent (diagnostics-only in MCP)
-- `src/alignment_mod.rs:2103-2121` — `ShiftRegistrationResult` to PyDict + `fdmatrix_to_numpy2d` pattern
-- `src/smoothing_mod.rs:193-216` — `CvCriterion` string-enum dispatch + `_ => PyValueError` fallback
-- `src/basis_mod.rs:425-476` — `BasisCriterion` ("aic" already present in `basis_nbasis_cv` match)
-- `python/fdars/__init__.py:34-53` — `_submodule_names` tuple
-- `python/fdars/advisor/__init__.py:124-133` — `_supported` set and dispatch branches
-- `python/fdars/mcp/server.py:49-82` — `_RUNNABLE_METHODS` / `_DIAGNOSTICS_METHODS`
-- `python/fdars/mcp/_runner.py:59-60` — `_RUNNABLE_METHODS` mirror
-- `tests/test_mcp_server.py:503-566` — `test_diagnostics_methods_match_advisor_supported` guard-sync test
-
----
-*Architecture research for: pyfda v5.0 — fdars-core 0.20 upgrade binding integration*
-*Researched: 2026-08-17*
+- Direct inspection of `fdars-core` v0.23.0 source via `git show v0.23.0:fdars-core/src/...`
+- `fdars-core/src/lib.rs` diff v0.20.0..v0.23.0 confirming the exact new re-exports
+- `src/inference_mod.rs` — v5.0 `TestResult→PyDict` + `#[non_exhaustive]` wildcard precedent (pyfda main branch, verified)
+- `src/depth_mod.rs` — v5.0 `depth_method_from_str()` + `boxplot_result_to_pydict()` precedent (pyfda main branch, verified)
+- `src/regression_mod.rs`, `src/classification_mod.rs`, `src/outliers_mod.rs` — existing binding patterns (pyfda main branch, verified)
+- `python/fdars/advisor/__init__.py` — `_supported` set + dispatch pattern (verified: 14 aspects including `"inference"`)
+- `python/fdars/mcp/server.py` — `_DIAGNOSTICS_METHODS` (14 entries) + `_RUNNABLE_METHODS` (6 entries) guard pattern (verified)
+- `.planning/milestones/v5.0-ROADMAP.md` — Phase 30–35 precedent structure (bump → three parallel groups → advisor → docs)
+- `.planning/PROJECT.md` — v6.0 milestone definition and target feature list

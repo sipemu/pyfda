@@ -1,251 +1,219 @@
 # Stack Research
 
-**Domain:** PyO3 binding library upgrade — fdars-core 0.17.0 → 0.20.0 (functional inference + depth/boxplot + basis/smoothing)
-**Researched:** 2026-08-17
-**Confidence:** HIGH — all version, MSRV, dependency, and feature data verified directly against crates.io API and docs.rs/crate source for 0.17.0, 0.19.0, and 0.20.0.
+**Domain:** PyO3 binding layer — fdars-core 0.20.0 → 0.23.0 upgrade
+**Researched:** 2026-08-20
+**Confidence:** HIGH — all findings read directly from the v0.23.0 git tag in the local fdars-core checkout at `/home/simonm/projects/rust/fdars`; no inference from secondary sources.
 
 ---
 
-## Decision Summary
+## Summary Verdicts
 
-The 0.17.0 → 0.20.0 upgrade requires **exactly one change** to the existing stack: bump the fdars-core version string in `Cargo.toml`. No new Rust dependencies, no new Python dependencies, no PyO3/numpy/maturin version changes, and no CI matrix changes are required. The `parallel` feature stays; the `linalg` feature must NOT be enabled. The existing `convert.rs` layer handles all new binding types without modification.
-
-**Note on version history:** 0.18.0 was never published to crates.io. The registry jumps from 0.17.0 (2026-08-12) to 0.19.0 (2026-08-16) to 0.20.0 (2026-08-16). The "0.18 = audit-only" description in PROJECT.md refers to an internal increment that was never released as a public crate. The practical upgrade path is 0.17.0 → 0.20.0 directly.
+| Question | Verdict | Evidence |
+|----------|---------|----------|
+| MSRV raised above Rust 1.83? | **NO — MSRV is 1.81** | `fdars-core/Cargo.toml` `rust-version = "1.81"` at v0.23.0 tag, unchanged from v0.20.0 |
+| `linalg` feature required for new capabilities? | **NO** | All new 0.21–0.23 functions are in default-feature or `parallel`-only code paths; `linalg` still gates only `ridge_regression_fit` + `faer`/`anofox-regression` (unchanged) |
+| Dependency graph additive? | **YES — zero new direct deps** | `git diff v0.20.0 v0.23.0 -- fdars-core/Cargo.toml` shows only the version field changed; every dependency entry is byte-for-byte identical |
+| New Python extras needed? | **NO** | All new capabilities bind through the existing numpy/FdMatrix boundary; no new Python packages are implied |
+| Pinned version string to use | `fdars-core = { version = "0.23.0", features = ["parallel"] }` | Direct read of v0.23.0 Cargo.toml |
 
 ---
 
-## 1. Cargo.toml Change — Exact Line
+## Recommended Stack
 
-**Current (`Cargo.toml` line 18):**
-```toml
-fdars-core = { version = "0.17.0", features = ["parallel"] }
-```
+### Core Technologies — unchanged, bump version pin only
 
-**Required change:**
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| fdars-core | **0.23.0** (was 0.20.0) | Upstream FDA computation engine | Single version bump; zero dependency graph change |
+| PyO3 | 0.28 | Rust↔Python bridge, abi3-py39 stable ABI | No change; not touched by the 0.21–0.23 crate series |
+| numpy (crate) | 0.28 | Zero-copy ndarray ↔ FdMatrix conversion | No change |
+| maturin | 1.0–2.0 | Build backend | No change |
+| Rust toolchain | stable / 1.83 MSRV | pyfda's own MSRV (Cargo.toml `rust-version = "1.83"`) | fdars-core dropped to 1.81 at 0.23, so pyfda's 1.83 pin remains the binding constraint and is still satisfied |
+
+### Transitive Rust Dependencies — resolved versions unchanged
+
+The `git diff` between v0.20.0 and v0.23.0 on `fdars-core/Cargo.toml` shows only the `version` field changed.
+Every dependency spec (rayon 1.10, rand 0.8, rand_distr 0.4, rustfft 6.2, num-complex 0.4, nalgebra 0.33, faer 0.23 optional, anofox-regression 0.4 optional) is identical.
+
+Current `Cargo.lock` resolved versions that will carry forward:
+- `nalgebra` 0.33.3
+- `rayon` 1.11.0
+- `rand` 0.8.5
+- `rustfft` 6.4.1
+- `num-complex` 0.4.6
+
+`cargo update` after the version bump may resolve to later patch versions of rayon/rand/etc. within the same SemVer range; that is normal and safe. No major version jumps are introduced.
+
+`faer`/`anofox-regression` remain optional and gated behind `linalg`; they are not activated by pyfda's `parallel`-only build.
+
+### New Rust Modules Added 0.20→0.23
+
+Two new top-level `pub mod` entries appear in `fdars-core/src/lib.rs` at v0.23.0 (absent at v0.20.0):
+
+| Module | Added in | What it provides |
+|--------|----------|-----------------|
+| `concurrent_regression` | 0.21 | `concurrent_regression()` + `ConcurrentRegrResult` |
+| `pace_fpca` | 0.22 | `pace_fpca()` + `PaceFpcaConfig` + `PaceFpcaResult` |
+
+All other new capabilities (elastic_multinomial, functional_glm, depth variants, outlier detectors, ITP inference) are **additions inside existing modules**, not new modules.
+
+### New Public Surface by Capability Group
+
+#### Group A — Regression (extend `fdars.regression` + new concurrent binding)
+
+| Symbol | Module in fdars-core | Type | Notes |
+|--------|---------------------|------|-------|
+| `concurrent_regression` | `concurrent_regression` | fn | `(response: &FdMatrix, predictors: &[FdMatrix], argvals: Option<&[f64]>, bandwidth: f64, kernel: &str) -> Result<ConcurrentRegrResult>` |
+| `ConcurrentRegrResult` | `concurrent_regression` | struct (#[non_exhaustive]) | fields: `beta_curve: FdMatrix`, `intercept: Vec<f64>`, `fitted: FdMatrix`, `residuals: FdMatrix`, `argvals: Vec<f64>` |
+| `functional_glm` | `scalar_on_function` | fn | `(data: &FdMatrix, y: &[f64], family: GlmFamily, scalar_covariates: Option<&FdMatrix>, ncomp: usize, max_iter: usize, tol: f64) -> Result<FunctionalGlmResult>` |
+| `predict_functional_glm` | `scalar_on_function` | fn | takes `fit: &FunctionalGlmResult` + `new_data` + optional `new_scalar`; **uses fitted handle, does NOT re-fit** |
+| `FunctionalGlmResult` | `scalar_on_function` | struct | fields: `intercept`, `beta_t`, `beta_se`, `gamma`, `fitted_values`, `linear_predictors`, `ncomp`, `coefficients`, `std_errors`, `log_likelihood`, `deviance`, `iterations`, `fpca` (embedded FpcaResult), `aic`, `bic` |
+| `GlmFamily` | `scalar_on_function` | enum (#[non_exhaustive]) | variants: `Binomial`, `Poisson`, `Gamma`, `Gaussian` |
+
+`concurrent_regression` is in `fdars_core::concurrent_regression`, not `fdars_core::scalar_on_function`. It extends `fdars.regression` on the Python side (not a new submodule). `functional_glm`/`predict_functional_glm` are in `fdars_core::scalar_on_function` alongside the existing `fregre_lm` etc.; they also extend `fdars.regression`.
+
+#### Group B — FPCA & Classification
+
+| Symbol | Module in fdars-core | Type | Notes |
+|--------|---------------------|------|-------|
+| `pace_fpca` | `pace_fpca` | fn | `(data: &IrregFdata, config: &PaceFpcaConfig) -> Result<PaceFpcaResult>` |
+| `PaceFpcaConfig` | `pace_fpca` | struct (has Default) | fields: `ncomp: usize` (default 3), `bandwidth: f64` (default 0.1), `sigma2: f64` (default 0.01, **must be strictly positive**), `work_grid: Vec<f64>` (default 51-point [0,1]), `alpha: f64` (default 0.05) |
+| `PaceFpcaResult` | `pace_fpca` | struct (#[non_exhaustive]) | fields: `mean: Vec<f64>`, `eigenvalues: Vec<f64>`, `eigenfunctions: FdMatrix` (m×ncomp), `scores: FdMatrix` (n×ncomp), `fitted: FdMatrix` (n×m), `fitted_lower: FdMatrix` (n×m), `fitted_upper: FdMatrix` (n×m), `argvals: Vec<f64>`, `sigma2: f64`, `ncomp: usize` |
+| `IrregFdata` | `irreg_fdata` | struct | CSR-layout sparse functional data; constructed via `IrregFdata::from_lists(argvals_list, values_list)`; **NOT currently exposed in pyfda** — must add Python constructor |
+| `elastic_multinomial` | `elastic_regression` | fn | `(data: &FdMatrix, y: &[usize], argvals: &[f64], ncomp_beta: usize, lambda: f64, max_iter: usize, tol: f64) -> Result<ElasticMultinomialResult>` |
+| `predict_elastic_multinomial` | `elastic_regression` | fn | takes `fit: &ElasticMultinomialResult` + `new_data` + `new_argvals` |
+| `ElasticMultinomialResult` | `elastic_regression` | struct (#[non_exhaustive]) | fields: `n_classes: usize`, `classes: Vec<usize>`, `class_models: Vec<ElasticLogisticResult>`, `train_probabilities: FdMatrix` (n×K), `predicted_classes: Vec<usize>`, `train_accuracy: f64` |
+
+**Key design note on IrregFdata:** `pace_fpca` is the only new function requiring `IrregFdata`. This type uses CSR-style storage with `offsets: Vec<usize>`, `argvals: Vec<f64>`, `values: Vec<f64>`, `rangeval: [f64; 2]`. The Python binding must accept lists-of-arrays (one per observation) and construct `IrregFdata::from_lists`. This is a new binding pattern not present in any existing pyfda module.
+
+#### Group C — Depth / Outliers / Interval Inference
+
+**Depth:** `DepthMethod` enum extended with 10 new variants (was 4 at v0.20.0, is 14 at v0.23.0):
+
+New variants: `HypographIndex`, `ModifiedHypographIndex`, `EpigraphIndex`, `ModifiedEpigraphIndex`, `HalfRegion`, `ModifiedHalfRegion`, `Extremal`, `ExtremeRankLength`, `LInfinity`, `TotalVariation`
+
+New standalone functions added to `depth` module (callable directly, not only via dispatcher):
+- `hypograph_index_1d`, `modified_hypograph_index_1d`
+- `epigraph_index_1d`, `modified_epigraph_index_1d`
+- `half_region_depth_1d`, `modified_half_region_depth_1d`
+- `extremal_depth_1d`, `extreme_rank_length_depth_1d`, `linfinity_depth_1d`
+- `total_variation_depth_1d` — returns `TvdMssResult { tvd: Vec<f64>, mss: Vec<f64> }` (not `Vec<f64>`)
+
+`TvdMssResult` is a new struct type, re-exported from lib.rs at v0.23.0.
+
+The existing `functional_depth` dispatcher in `depth_mod.rs` has a string-matching `parse_depth_method` helper — it must be extended with all 10 new string keys and a `#[non_exhaustive]` wildcard arm. The error message in the fallback must list all 14 variants.
+
+**Outliers:** Four new detectors added to `fdars_core::outliers` (was 3 functions at v0.20.0):
+
+| Symbol | Type | Key fields |
+|--------|------|-----------|
+| `tvdmss(data, TvdMssConfig)` | fn -> `TvdMssOutliers` | config: `emp_factor_mss` (1.5), `emp_factor_tvd` (1.5), `central_region_tvd` (0.5); result: `magnitude_outliers: Vec<usize>`, `shape_outliers: Vec<usize>`, `tvd: Vec<f64>`, `mss: Vec<f64>` |
+| `muod(data, MuodConfig)` | fn -> `MuodResult` | config: `emp_factor` (1.5); result: `shape_outliers`, `magnitude_outliers`, `amplitude_outliers`, `shape_index`, `magnitude_index`, `amplitude_index` (all `Vec<usize>` or `Vec<f64>`) |
+| `sequential_transform_outliers(data, SeqTransformConfig)` | fn -> `SeqTransformOutliers` | `SeqTransform` enum: `T0`, `T1`, `T2`, `T3`; result: `per_transform_outliers: Vec<(SeqTransform, Vec<usize>)>`, `union_outliers: Vec<usize>` |
+| `depthgram(data, DepthgramConfig)` | fn -> `DepthgramResult` | config: `emp_factor` (1.5); result: `mbd_mei_d`, `mei_mbd_d`, `mbd_mei_t`, `mei_mbd_t`, `mbd_mei_t2`, `mei_mbd_t2` (all `Vec<f64>`), `shape_outliers`, `magnitude_outliers`, `mbd`, `mei` |
+
+**ITP Inference** (extend `fdars.inference`):
+
+| Symbol | Signature | Notes |
+|--------|-----------|-------|
+| `itp_one_pop` | `(data, argvals, mu0: Option<&[f64]>, basis_type: ProjectionBasisType, nbasis: usize, n_perm: usize, seed: u64)` | One-sample pointwise interval test |
+| `itp_two_pop` | `(data_a, data_b, argvals, basis_type, nbasis, n_perm, seed)` | Two-sample pointwise interval test |
+| `itp_flm` | `(data, y: &[f64], argvals, basis_type, nbasis, n_perm, seed)` | Functional linear model ITP |
+| `ItpResult` | struct | `adjusted_pvalues: Vec<f64>`, `raw_pvalues: Vec<f64>`, `basis_type: ProjectionBasisType`, `n_basis: usize`, `n_perm: usize` |
+| `ProjectionBasisType` | enum | `Bspline`, `Fourier` — from `basis::projection`, re-exported via inference module |
+
+`ItpResult.basis_type` is a `ProjectionBasisType` enum value. The Python binding should serialize it as a string (`"bspline"` / `"fourier"`). The Python API should accept a `basis_type: str` parameter mapping to the enum, consistent with how `DepthMethod` is handled via string dispatch.
+
+### Python-side Dependencies — no changes
+
+| Package | Current Constraint | Change for v6.0 |
+|---------|-------------------|-----------------|
+| numpy | (pinned in pyproject.toml) | None |
+| pandas | (dependency) | None |
+| scipy | docs only | None — existing datasets/examples sufficient for new capabilities |
+| scikit-learn | docs only | None |
+| matplotlib | `[plot]` extra | None |
+| anthropic | `[advisor]` extra | None |
+
+No new Python extras are added. The new capabilities (PACE FPCA, concurrent regression, GLM, depth variants, outlier detectors, ITP) can all be demonstrated using existing datasets in `docs/data/` (canadian weather, growth, tecator, phoneme). The `pace_fpca` example should use a subsampled irregular form of an existing dataset (e.g., canadian weather with sparse observations per station); no new dataset file is needed.
+
+---
+
+## Cargo.toml Change
+
+Only one line changes in `/home/simonm/projects/rust/pyfda/Cargo.toml`:
+
 ```toml
+# Before
 fdars-core = { version = "0.20.0", features = ["parallel"] }
+
+# After
+fdars-core = { version = "0.23.0", features = ["parallel"] }
 ```
 
-### Caret semantics — why this pin is appropriate
-
-Cargo's default caret requirement `"0.20.0"` is equivalent to `^0.20.0`, which resolves to `>=0.20.0, <0.21.0`. This is the correct pin: it accepts only 0.20.x patch releases, keeping the minor version locked. There is no reason to use `=` exact pinning — the upstream author (same person, sipemu) follows semver, and patch releases within 0.20.x are safe to accept. After the change, run `cargo update -p fdars-core` to regenerate `Cargo.lock` — the existing 0.17.0 checksum entry will be replaced by the 0.20.0 checksum. Commit the updated `Cargo.lock`.
-
-### The `parallel` feature — keep it
-
-The `parallel` feature enables rayon-based parallelism throughout fdars-core and has been the only enabled feature since 0.14.0. It is defined identically across 0.17.0, 0.19.0, and 0.20.0.
-
-### The `linalg` feature — do NOT enable
-
-Do not enable `linalg` for three reasons:
-
-1. **MSRV conflict.** The docs.rs documentation for fdars-core 0.20.0 states explicitly: "`linalg` requires Rust 1.84+." pyfda's declared MSRV is `rust-version = "1.83"`. Enabling `linalg` would break the MSRV.
-2. **New transitive dependencies.** `linalg` pulls in `faer` and `anofox-regression` as non-optional transitive dependencies. Keeping `linalg` disabled means no new crate entries appear in `Cargo.lock`.
-3. **Not required by v5.0 targets.** None of Groups A, B, or C (inference, depth/boxplot, basis/smoothing quick wins) require ridge regression or the faer SVD path that `linalg` gates.
+Do NOT add `linalg`. Do NOT change pyo3, numpy, or any other dependency.
 
 ---
 
-## 2. MSRV Safety — Verified
+## Binding Patterns for New Capabilities
 
-| Version | fdars-core declared MSRV | pyfda MSRV | Compatible? |
-|---------|--------------------------|------------|-------------|
-| 0.17.0 | 1.81 (verified via docs.rs Cargo.toml) | 1.83 | YES — pyfda demands more of the toolchain than upstream requires |
-| 0.19.0 | 1.81 (verified via docs.rs Cargo.toml) | 1.83 | YES |
-| 0.20.0 | 1.81 (verified via docs.rs Cargo.toml) | 1.83 | YES |
+### Standard pattern (Groups A partial, C partial)
+All new functions taking `&FdMatrix` inputs follow the existing `numpy2d_to_fdmatrix` / `vec_to_numpy1d` / `fdmatrix_to_numpy2d` round-trip. No new conversion helpers are needed.
 
-pyfda's MSRV (1.83) is strictly higher than fdars-core 0.20.0's MSRV (1.81). The bump introduces no MSRV risk. The `linalg` feature's 1.84 requirement is fully isolated behind the feature gate — it is never triggered when using `features = ["parallel"]` only.
+### New pattern: IrregFdata constructor (Group B: pace_fpca)
+The Python caller passes `argvals_list: list[np.ndarray]` and `values_list: list[np.ndarray]`. The binding iterates over these, constructs `Vec<Vec<f64>>`, and calls `IrregFdata::from_lists`. This is the only structural binding novelty in v6.0.
 
----
+### New pattern: SeqTransform per-step result (Group C: sequential_transform_outliers)
+`SeqTransformOutliers.per_transform_outliers` is `Vec<(SeqTransform, Vec<usize>)>`. The binding should serialize this as a Python list of `(str, list[int])` tuples, with the `SeqTransform` enum serialized as its string name (`"T0"`, `"T1"`, `"T2"`, `"T3"`).
 
-## 3. No New Dependencies — Verified
+### Existing pattern extended: DepthMethod string dispatch
+The `parse_depth_method` helper in `depth_mod.rs` currently handles 4 variants. It must be extended to handle 14 variants with new string keys matching the new enum variants. The wildcard `other =>` error arm must be updated to list all valid strings.
 
-Cross-referencing Cargo.toml from docs.rs/crate source for all three versions:
-
-| Dependency | 0.17.0 | 0.19.0 | 0.20.0 | Notes |
-|------------|--------|--------|--------|-------|
-| nalgebra | 0.33 | 0.33 | 0.33 | Unchanged |
-| rand | 0.8 | 0.8 | 0.8 | Unchanged |
-| rand_distr | 0.4 | 0.4 | 0.4 | Unchanged |
-| rustfft | 6.2 | 6.2 | 6.2 | Unchanged |
-| num-complex | 0.4 | 0.4 | 0.4 | Unchanged |
-| rayon | 1.10 (optional, parallel) | 1.10 (optional, parallel) | 1.10 (optional, parallel) | Unchanged; the one enabled optional dep |
-| faer | 0.23 (optional, linalg only) | 0.23 (optional, linalg only) | 0.23 (optional, linalg only) | Unchanged; gated, not enabled |
-| anofox-regression | 0.4 (optional, linalg only) | 0.4 (optional, linalg only) | 0.4 (optional, linalg only) | Unchanged; gated, not enabled |
-| serde | optional | optional | optional | Unchanged; not enabled |
-| serde_json | optional | optional | optional | Unchanged; not enabled |
-| getrandom | optional | optional | optional | Unchanged; not enabled |
-
-**Conclusion:** The dependency tree for `features = ["parallel"]` is byte-for-byte identical across 0.17.0, 0.19.0, and 0.20.0. No new transitive Rust dependencies are introduced by the bump.
+### Existing pattern extended: non_exhaustive structs
+`ConcurrentRegrResult`, `PaceFpcaResult`, `ElasticMultinomialResult` are all `#[non_exhaustive]`. Access fields individually; never struct-literal them. This is the same pattern already in use for `FunctionalBoxplotResult`.
 
 ---
 
-## 4. Feature Flags — Verified Against docs.rs/crate/fdars-core/0.20.0/source/Cargo.toml
+## What NOT to Add
 
-```toml
-[features]
-default = ["parallel"]
-dhat-heap = []
-js = ["getrandom/js"]
-linalg = ["faer", "anofox-regression"]
-parallel = ["rayon"]
-serde = ["dep:serde", "dep:serde_json"]
-```
-
-| Feature | Enable? | Reason |
-|---------|---------|--------|
-| `parallel` | YES | Required; rayon parallelism; unchanged from 0.17.0 |
-| `linalg` | NO | Requires Rust 1.84 > pyfda MSRV 1.83; adds faer + anofox-regression; not needed for v5.0 |
-| `serde` | NO | Not needed for PyO3 bindings |
-| `js` | NO | WebAssembly target; not applicable |
-| `dhat-heap` | NO | Heap profiling dev tool; not applicable |
-
-This feature set is identical to the feature set used in the 0.17.0 pin.
+| Avoid | Reason |
+|-------|--------|
+| `linalg` feature | Requires Rust 1.84+ (faer 0.23 dep), above pyfda MSRV 1.83; gates only `ridge_regression_fit`, nothing in the v6.0 scope |
+| `serde` feature | Optional serialization; not needed for PyO3 dict conversions |
+| New Python runtime dependencies | All new capabilities serialize to numpy arrays + Python dicts; no new packages required |
+| New Python extras | Scope is binding-layer + advisor; existing `[advisor]`, `[mcp]`, `[plot]` extras are sufficient |
+| New dataset files | Existing `docs/data/` datasets cover all new worked-example scenarios |
 
 ---
 
-## 5. No New Python Dependencies
+## Version Compatibility
 
-Groups A (inference), B (depth/boxplot), and C (basis/smoothing quick wins) are pure PyO3 bindings over existing numpy/PyO3 machinery:
-
-- `TestResult` and `FunctionalBoxplotResult` return types map to PyDict — the same pattern used for `ShiftRegistrationResult` and `KarcherMeanResult` in 0.17.0.
-- No new Python package is required in `pyproject.toml` `[project.dependencies]` or any optional extra.
-- The advisor extension for inference/boxplot diagnostics uses the existing `anthropic`/`openai`/`gemini`/`ollama` optional extras — no new extras are added.
-
-The existing extras in `pyproject.toml` are unchanged:
-```toml
-plot          = ["matplotlib>=3.6"]
-dev           = ["pytest", "matplotlib>=3.6"]
-advisor       = ["anthropic>=0.72.0", "pydantic>=2.0"]
-mcp           = ["mcp>=2.0.0"]
-openai        = ["openai>=1.40,<2.0", "pydantic>=2.0"]
-gemini        = ["google-genai>=1.0,<3.0", "pydantic>=2.0"]
-ollama        = ["ollama>=0.6.2", "pydantic>=2.0"]
-all-providers = [...]
-```
-
----
-
-## 6. Cargo.lock and Build Implications
-
-After editing `Cargo.toml`:
-
-```bash
-cargo update -p fdars-core
-```
-
-This updates only the fdars-core entry in `Cargo.lock` without touching other locked dependencies. Since no transitive deps changed names or versions, the lock file diff will be minimal: one crate entry updated (name, version, checksum). Commit the updated `Cargo.lock` alongside the `Cargo.toml` change in the same atomic commit (Phase 30 — crate bump).
-
-After regenerating the lock file, rebuild via maturin and run the full suite:
-
-```bash
-maturin develop
-pytest
-```
-
-The ~426-test suite (426 passed / 4 skipped at v4.0 end state) is the regression gate. Zero test changes are expected from the bump itself — this matches the v4.0 pattern where the 0.14→0.17 bump required zero test changes. The new APIs in 0.20.0 are strictly additive; no existing signatures changed.
-
----
-
-## 7. CvCriterion Non-Exhaustive — Binding Implication
-
-The upstream release notes for 0.20.0 (as described in PROJECT.md) state that `CvCriterion` is now `#[non_exhaustive]`. This affects the Group C basis/smoothing bindings where `CvCriterion::Aic` is consumed. The binding wrapper must include a forward-compatible fallback arm:
-
-```rust
-match criterion_str {
-    "cv" => CvCriterion::Cv,
-    "aic" => CvCriterion::Aic,
-    _ => return Err(PyValueError::new_err(format!("Unknown CvCriterion: {}", criterion_str))),
-}
-```
-
-This is the same pattern already used for `InterpolationMethod` and `ExtrapolationPolicy` in the 0.17.0 bindings.
-
----
-
-## 8. Recommended Stack (Unchanged Except Crate Version)
-
-### Core Technologies
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| fdars-core | **0.20.0** | Rust FDA compute engine | Target of this upgrade; all new inference/depth/basis features live here |
-| PyO3 | 0.28 | Rust-to-Python bindings with ABI3 stable interface | Already in place; no change required |
-| numpy (pyo3) | 0.28 | Zero-copy NumPy ↔ Rust array exchange | Already in place; no change required |
-| maturin | 1.x | Build backend — compiles PyO3 extension, produces wheels | Already in place; no change required |
-| Rust toolchain | 1.83 (pyfda MSRV) | Compilation | Safe — upstream MSRV is 1.81 |
-
-### Supporting Libraries (Python, Unchanged)
-
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| matplotlib | 3.6+ | Plotting for docs examples | All visual worked examples |
-| scipy | 1.10+ | Numerical reference (docs examples) | Signal processing, stats in docs |
-| scikit-learn | 1.3+ | ML utilities (docs examples) | Clustering/classification examples |
-| pandas | current | Metadata handling in Fdata class | DataFrame metadata support |
-| pytest | current | Test runner | All 426+ tests |
-
-### Development Tools (Unchanged)
-
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| maturin develop | Build extension in-place for dev | Run after Cargo.toml bump |
-| cargo update -p fdars-core | Refresh Cargo.lock after version bump | Required after version change |
-| MkDocs Material 9.5+ | Docs site | No change |
-| markdown-exec 1.8+ | Live code execution in docs | No change |
-
----
-
-## 9. Existing convert.rs Layer — No Changes Required
-
-The existing `src/convert.rs` provides every primitive needed for the new bindings in Groups A, B, and C:
-
-| Converter | Used by new v5.0 bindings |
-|-----------|--------------------------|
-| `numpy2d_to_fdmatrix` | All new FdMatrix inputs (inference tests, functional_boxplot, basis/smoothing) |
-| `fdmatrix_to_numpy2d` | FunctionalBoxplotResult region matrices, smoothed output |
-| `numpy1d_to_vec` | `argvals` inputs throughout |
-| `vec_to_numpy1d` | Outlier flag vectors, boxplot components |
-| `to_pyresult` | All `Result<T, FdarError>` conversions (inference functions are fallible) |
-| `to_pyerr` | Direct error wrapping where needed |
-
-`TestResult` and `FunctionalBoxplotResult` will decompose to PyDict using the same pattern as `ShiftRegistrationResult` — no new converter primitives needed.
-
----
-
-## 10. What NOT to Change
-
-| Item | Why Not |
-|------|---------|
-| `linalg` feature | Requires Rust 1.84; breaks MSRV; not needed for v5.0 targets |
-| PyO3 version | 0.28 is current and correct; no upstream requirement for a newer version |
-| numpy (pyo3) version | 0.28 matches PyO3 0.28; no change needed |
-| pyproject.toml extras | No new Python dependencies for Groups A/B/C |
-| Python CI matrix | 3.9–3.14 unchanged |
-| maturin version | No build system change required |
-| CI workflows | No changes to `.github/workflows/` needed |
-
----
-
-## 11. Alternatives Considered
-
-| Item | Recommended | Alternative | When Alternative Makes Sense |
-|------|-------------|-------------|------------------------------|
-| Version pin style | `"0.20.0"` (caret `^0.20.0`) | `"=0.20.0"` (exact) | Only if upstream has broken semver discipline — not the case here |
-| Feature set | `["parallel"]` | `["parallel", "linalg"]` | Only if ridge regression bindings or faer SVD are a v5.0 target — they are not; also breaks MSRV |
+| Component | Constraint | Status |
+|-----------|-----------|--------|
+| fdars-core 0.23.0 MSRV | Rust 1.81 | Satisfied by pyfda's 1.83 toolchain |
+| pyfda MSRV | Rust 1.83 | Unchanged; CI matrix `[stable, "1.83"]` unaffected |
+| PyO3 0.28 + abi3-py39 | Python 3.9–3.14 | Unchanged; fdars-core 0.23 adds no new Python constraints |
+| fdars-core 0.23 parallel feature | rayon 1.10+ | Resolved: rayon 1.11.0 in current Cargo.lock; within the ^1.10 range |
+| fdars-core 0.23 nalgebra | 0.33 | Resolved: nalgebra 0.33.3; within range |
 
 ---
 
 ## Sources
 
-- `https://crates.io/api/v1/crates/fdars-core/0.20.0` — version ID 3012586, publish date 2026-08-16, MSRV 1.81, yanked: No — **HIGH confidence** (crates.io registry API)
-- `https://docs.rs/crate/fdars-core/0.20.0/source/Cargo.toml` — complete feature flags, all dependency names+versions, MSRV 1.81 — **HIGH confidence** (docs.rs crate source)
-- `https://docs.rs/fdars-core/0.20.0` — feature flag descriptions including explicit "linalg requires Rust 1.84+" statement — **HIGH confidence** (docs.rs generated docs)
-- `https://docs.rs/crate/fdars-core/0.17.0/source/Cargo.toml` — baseline dependency set for diff — **HIGH confidence** (docs.rs crate source)
-- `https://crates.io/api/v1/crates/fdars-core/0.17.0` — MSRV 1.81, publish date 2026-08-12 — **HIGH confidence** (crates.io registry API)
-- `https://docs.rs/crate/fdars-core/0.19.0/source/Cargo.toml` — intermediate version dependency set for diff — **HIGH confidence** (docs.rs crate source)
-- `https://crates.io/api/v1/crates/fdars-core/versions` — full version history confirming 0.18.0 was never published; jump is 0.17.0 → 0.19.0 → 0.20.0 — **HIGH confidence** (crates.io registry API)
-- `/home/simonm/projects/rust/pyfda/Cargo.toml` — current pin `= "0.17.0"`, MSRV `rust-version = "1.83"` — **HIGH confidence** (local source)
+All findings verified directly from the local fdars-core git repository at `/home/simonm/projects/rust/fdars`:
+
+- `git show v0.23.0:fdars-core/Cargo.toml` — MSRV, features, all dependency specs
+- `git diff v0.20.0 v0.23.0 -- fdars-core/Cargo.toml` — confirmed single-line version-only change
+- `git log --oneline v0.20.0..v0.23.0 -- fdars-core/Cargo.toml` — 3 release commits, none touch deps
+- `git diff v0.20.0 v0.23.0 --name-only -- fdars-core/src/` — new/changed source files
+- `git show v0.23.0:fdars-core/src/lib.rs` — full public API re-export diff
+- `git show v0.23.0:fdars-core/src/{concurrent_regression,pace_fpca,outliers,depth/dispatch,depth/tvd,inference/itp,scalar_on_function/glm,elastic_regression/logistic}.rs` — struct fields and function signatures
+- `/home/simonm/projects/rust/pyfda/Cargo.lock` — resolved transitive dependency versions (nalgebra 0.33.3, rayon 1.11.0, rand 0.8.5, rustfft 6.4.1, num-complex 0.4.6)
+- `/home/simonm/projects/rust/pyfda/src/depth_mod.rs` — existing DepthMethod dispatch pattern to extend
+- `/home/simonm/projects/rust/pyfda/Cargo.toml` — current pyfda dependency declarations and MSRV
+
+Confidence: HIGH — all data read from local source files at the exact tagged version; no web lookups required.
 
 ---
-
-*Stack research for: pyfda v5.0 — fdars-core 0.17.0 → 0.20.0 upgrade*
-*Researched: 2026-08-17*
+*Stack research for: pyfda v6.0 — fdars-core 0.20.0 → 0.23.0 upgrade*
+*Researched: 2026-08-20*
