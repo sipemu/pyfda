@@ -10,14 +10,14 @@ Prior-milestone requirements: see `.planning/milestones/v5.0-REQUIREMENTS.md` (a
 
 ### Crate Upgrade
 
-- [ ] **DEP-05**: `fdars-core` bumped 0.20.0 → 0.23.0 in `Cargo.toml` with `features = ["parallel"]` (do NOT enable `linalg` — still gates only `ridge_regression_fit` and still wants Rust 1.84+; MSRV verified 1.81 ≤ pyfda 1.83); `maturin develop` build green. Bump is dependency-additive (single-field `Cargo.toml` diff upstream).
-- [ ] **DEP-06**: Regression gate — the full existing binding + advisor suite (~560 tests) passes unchanged as the sole success criterion, with any new `#[non_exhaustive]` upstream enums reached by existing code given wildcard fallback arms. Isolated commit before any new binding work.
+- [x] **DEP-05**: `fdars-core` bumped 0.20.0 → 0.23.0 in `Cargo.toml` with `features = ["parallel"]` (do NOT enable `linalg` — still gates only `ridge_regression_fit` and still wants Rust 1.84+; MSRV verified 1.81 ≤ pyfda 1.83); `maturin develop` build green. Bump is dependency-additive (single-field `Cargo.toml` diff upstream).
+- [x] **DEP-06**: Regression gate — the full existing binding + advisor suite (~560 tests) passes unchanged as the sole success criterion, with any new `#[non_exhaustive]` upstream enums reached by existing code given wildcard fallback arms. Isolated commit before any new binding work.
 
 ### Group A — Regression (extend `fdars.regression`)
 
-- [ ] **REGR-01**: User can fit a concurrent (varying-coefficient) functional regression via `fdars.regression.concurrent_regression(predictors, response, argvals, ...)` — `predictors` a `list[np.ndarray]` (slice-of-matrices) — receiving a dict from `ConcurrentRegrResult`; the `beta_curve` field is shaped `(p, m)` (predictors × grid, NOT `(n_obs, m)`) and is round-tripped correctly, verified by a multi-predictor (`p ≥ 2`) transposition guard test.
-- [ ] **REGR-02**: User can fit an exponential-family functional GLM over FPC scores via `fdars.regression.functional_glm(data, response, argvals, family=..., n_comp=..., ...)` → dict (`FunctionalGlmResult`, all fields exposed); `family` dispatches a `#[non_exhaustive]` `GlmFamily` (Binomial/Poisson/Gamma/Gaussian) via string with a `ValueError` wildcard fallback; the wrapper re-fits FPCA internally (raw data in, no persistent handle). Gamma's inverse canonical link (1/μ) and the non-R-comparable AIC magnitude are documented.
-- [ ] **REGR-03**: Both functions are registered in `src/regression_mod.rs` + `register_submodule!`, with a `ConcurrentRegrResult`/`FunctionalGlmResult` → PyDict converter each; all fallible paths go through `to_pyresult()` (no `.unwrap()`); degenerate inputs (mismatched grids, too few curves, invalid family/ncomp) raise `ValueError`.
+- [x] **REGR-01**: User can fit a concurrent (varying-coefficient) functional regression via `fdars.regression.concurrent_regression(predictors, response, argvals, ...)` — `predictors` a `list[np.ndarray]` (slice-of-matrices) — receiving a dict from `ConcurrentRegrResult`; the `beta_curve` field is shaped `(p, m)` (predictors × grid, NOT `(n_obs, m)`) and is round-tripped correctly, verified by a multi-predictor (`p ≥ 2`) transposition guard test.
+- [x] **REGR-02**: User can fit an exponential-family functional GLM over FPC scores via `fdars.regression.functional_glm(data, response, argvals, family=..., n_comp=..., ...)` → dict (`FunctionalGlmResult`, all fields exposed); `family` dispatches a `#[non_exhaustive]` `GlmFamily` (Binomial/Poisson/Gamma/Gaussian) via string with a `ValueError` wildcard fallback; the wrapper re-fits FPCA internally (raw data in, no persistent handle). Gamma's inverse canonical link (1/μ) and the non-R-comparable AIC magnitude are documented.
+- [x] **REGR-03**: Both functions are registered in `src/regression_mod.rs` + `register_submodule!`, with a `ConcurrentRegrResult`/`FunctionalGlmResult` → PyDict converter each; all fallible paths go through `to_pyresult()` (no `.unwrap()`); degenerate inputs (mismatched grids, too few curves, invalid family/ncomp) raise `ValueError`.
 
 ### Group B — FPCA & Classification
 
@@ -69,11 +69,11 @@ REQ-ID → Phase mapping. 23/23 v6.0 requirements mapped, each to exactly one ph
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEP-05 | Phase 36 | Pending |
-| DEP-06 | Phase 36 | Pending |
-| REGR-01 | Phase 37 | Pending |
-| REGR-02 | Phase 37 | Pending |
-| REGR-03 | Phase 37 | Pending |
+| DEP-05 | Phase 36 | Complete |
+| DEP-06 | Phase 36 | Complete |
+| REGR-01 | Phase 37 | Complete |
+| REGR-02 | Phase 37 | Complete |
+| REGR-03 | Phase 37 | Complete |
 | PACE-01 | Phase 38 | Pending |
 | PACE-02 | Phase 38 | Pending |
 | CLASS-01 | Phase 38 | Pending |

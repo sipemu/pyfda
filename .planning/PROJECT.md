@@ -125,7 +125,7 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 <!-- v6.0 in progress — fdars-core 0.23 upgrade: regression + PACE-FPCA/classification + depth/outliers/interval-inference bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
 
 - [x] Crate bump `fdars-core 0.20.0 → 0.23.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate — ✓ Phase 36 (600 passed / 4 skipped / 0 failed; zero drift; zero wildcard arms needed — existing CvCriterion/ProjectionBasisType arms already present)
-- [ ] Group A — Regression: `concurrent_regression` + `functional_glm` extending `fdars.regression`
+- [x] Group A — Regression: `concurrent_regression` + `functional_glm` extending `fdars.regression` — ✓ Phase 37 (2 bindings + 2 PyDict converters; `beta_curve (p,m)` transposition-guarded at p=3,n=10; 4 GLM families via `#[non_exhaustive]` `GlmFamily` string dispatch; embedded `fpca` excluded; `functional_glm` takes no argvals per core; 620 passed / 4 skipped)
 - [ ] Group B — FPCA & Classification: `pace_fpca` (sparse/PACE FPCA) + `elastic_multinomial` extending `fdars.classification`
 - [ ] Group C — Depth / Outliers / Interval Inference: new depth methods + outlier detectors (`tvdmss`/`muod`/`sequential_transform`/depthgram) + interval-wise testing (`itp_*`) extending `fdars.depth`/`fdars.outliers`/`fdars.inference`
 - [ ] Advisor extension (where relevant) — grounded diagnostics for new aspects; grounding invariant + MCP guard-sync (single atomic commit) preserved
@@ -198,4 +198,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-20 after Phase 36 — fdars-core pinned 0.23.0, regression gate green (600 passed / 4 skipped / 0 failed)*
+*Last updated: 2026-08-20 after Phase 37 — Group A regression bindings (concurrent_regression + functional_glm); 620 passed / 4 skipped*
