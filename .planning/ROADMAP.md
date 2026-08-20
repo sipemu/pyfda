@@ -160,7 +160,10 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
 
 **Plan-time spike**: `IrregFdata` list-of-arrays PyO3 constructor interface — no existing pyfda precedent; resolve before writing `pace_fpca` (PACE-01/PACE-02).
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 38-01-PLAN.md — Tracer-first: pyfda's first `#[pyclass] PyIrregFdata` + `irreg_fdata_from_lists` + `pace_fpca` round-trip (novel-risk-first), then IrregFdata dense/ragged/outer-length `ValueError` guards, the full 10-key `pace_fpca` dict with eigenfunctions/scores `(m,ncomp)`/`(n,ncomp)` transposition guards + `actual_ncomp` truncation + determinism, and `elastic_multinomial` (CR-01 label guard, `(n,K)` proba guard, `class_models` omitted) extending `fdars.classification`; new `src/pace_fpca_mod.rs` + `lib.rs`/`__init__.py` registration
+
 **UI hint**: no
 
 ### Phase 39: Group C — Depth/Outliers/Interval-Inference Bindings
@@ -218,7 +221,7 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
 |-------|----------------|--------|-----------|
 | 36. Crate Bump + Regression Gate | 0/? | Not started | - |
 | 37. Group A — Regression Bindings | 0/1 | Planned | - |
-| 38. Group B — FPCA & Classification Bindings | 0/? | Not started | - |
+| 38. Group B — FPCA & Classification Bindings | 0/1 | Planned | - |
 | 39. Group C — Depth/Outliers/Interval-Inference Bindings | 0/? | Not started | - |
 | 40. Advisor Extension | 0/? | Not started | - |
 | 41. Docs — Diagrams & Worked Examples | 0/? | Not started | - |
