@@ -974,6 +974,222 @@ pub fn fregre_np_mixed<'py>(
     Ok(dict)
 }
 
+// ---------------------------------------------------------------------------
+// Internal helper: ConcurrentRegrResult → Python dict.
+//
+// The struct is #[non_exhaustive] — access each field by name; never
+// struct-literal it.
+//
+// Shape note: beta_curve is (p, m) where rows index predictors and columns
+// index grid points — NOT (n_obs, m) as with every other FdMatrix in pyfda.
+// fdmatrix_to_numpy2d faithfully preserves this (p, m) shape.
+// ---------------------------------------------------------------------------
+
+fn concurrent_regr_result_to_pydict<'py>(
+    py: Python<'py>,
+    r: fdars_core::concurrent_regression::ConcurrentRegrResult,
+) -> PyResult<Bound<'py, PyAny>> {
+    let dict = pyo3::types::PyDict::new(py);
+    // beta_curve: shape (p, m) — rows are predictor curves, NOT observations
+    dict.set_item("beta_curve", fdmatrix_to_numpy2d(py, &r.beta_curve))?;
+    dict.set_item("intercept", vec_to_numpy1d(py, r.intercept))?;
+    dict.set_item("fitted", fdmatrix_to_numpy2d(py, &r.fitted))?;
+    dict.set_item("residuals", fdmatrix_to_numpy2d(py, &r.residuals))?;
+    dict.set_item("argvals", vec_to_numpy1d(py, r.argvals))?;
+    Ok(dict.into_any())
+}
+
+/// Concurrent (varying-coefficient) functional regression.
+///
+/// Estimates a time-varying regression model where each predictor has its own
+/// smooth coefficient curve β_j(t). The response functional curve is modelled
+/// as ``y(t) = β₀(t) + β₁(t)·x₁(t) + … + β_p(t)·x_p(t)`` and the
+/// coefficients are estimated pointwise via local-linear kernel smoothing.
+///
+/// Parameters
+/// ----------
+/// predictors : list[numpy.ndarray]
+///     List of p predictor matrices, each shape (n, m). One matrix per
+///     predictor; the list must be non-empty.
+/// response : numpy.ndarray
+///     Functional response matrix, shape (n, m).
+/// argvals : numpy.ndarray, optional
+///     Evaluation grid, length m. ``None`` generates a uniform [0, 1] grid.
+/// bandwidth : float, optional
+///     Kernel bandwidth (must be > 0 and finite, default 0.2).
+/// kernel : str, optional
+///     Kernel name: ``"gaussian"``, ``"epanechnikov"``, or ``"tricube"``
+///     (default ``"gaussian"``).
+///
+/// Returns
+/// -------
+/// dict
+///     beta_curve (p, m), intercept (m,), fitted (n, m),
+///     residuals (n, m), argvals (m,).
+///
+/// Raises
+/// ------
+/// ValueError
+///     On empty predictor list, bandwidth <= 0, shape mismatches, or
+///     underdetermined systems (n <= p).
+#[pyfunction]
+#[pyo3(signature = (predictors, response, argvals=None, bandwidth=0.2, kernel="gaussian"))]
+pub fn concurrent_regression<'py>(
+    py: Python<'py>,
+    predictors: Vec<PyReadonlyArray2<'py, f64>>,
+    response: PyReadonlyArray2<'py, f64>,
+    argvals: Option<PyReadonlyArray1<'py, f64>>,
+    bandwidth: f64,
+    kernel: &str,
+) -> PyResult<Bound<'py, PyAny>> {
+    let pred_mats: Vec<fdars_core::matrix::FdMatrix> = predictors
+        .into_iter()
+        .map(numpy2d_to_fdmatrix)
+        .collect::<PyResult<Vec<_>>>()?;
+    let resp_mat = numpy2d_to_fdmatrix(response)?;
+    let av: Option<Vec<f64>> = argvals.map(numpy1d_to_vec);
+    let result = to_pyresult(fdars_core::concurrent_regression::concurrent_regression(
+        &resp_mat,
+        &pred_mats,
+        av.as_deref(),
+        bandwidth,
+        kernel,
+    ))?;
+    concurrent_regr_result_to_pydict(py, result)
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper: &str → GlmFamily dispatch.
+//
+// GlmFamily is #[non_exhaustive] — the wildcard arm is mandatory so that a
+// future upstream variant cannot silently pass through as a compile error.
+// An unknown string becomes a Python ValueError listing the accepted values.
+// ---------------------------------------------------------------------------
+
+fn family_from_str(s: &str) -> PyResult<fdars_core::scalar_on_function::GlmFamily> {
+    use fdars_core::scalar_on_function::GlmFamily;
+    match s {
+        "binomial" => Ok(GlmFamily::Binomial),
+        "poisson" => Ok(GlmFamily::Poisson),
+        "gamma" => Ok(GlmFamily::Gamma),
+        "gaussian" => Ok(GlmFamily::Gaussian),
+        _ => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "family must be 'binomial', 'poisson', 'gamma', or 'gaussian', got '{s}'"
+        ))),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper: FunctionalGlmResult → Python dict.
+//
+// The struct is #[non_exhaustive] — access each field by name.
+// 14 keys are exposed; r.fpca is intentionally NOT inserted — the embedded
+// FpcaResult is consumed internally for fit only (mirrors flm_f_test pattern).
+//
+// DOCS caveat (Phase 41, DOCS-08):
+//   - Gamma uses inverse canonical link g(μ)=1/μ, NOT log-link (unlike R default).
+//   - functional_glm AIC magnitude is not comparable to R glm() AIC.
+// ---------------------------------------------------------------------------
+
+fn functional_glm_result_to_pydict<'py>(
+    py: Python<'py>,
+    r: fdars_core::scalar_on_function::FunctionalGlmResult,
+) -> PyResult<Bound<'py, PyAny>> {
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("intercept", r.intercept)?;
+    dict.set_item("beta_t", vec_to_numpy1d(py, r.beta_t))?;
+    dict.set_item("beta_se", vec_to_numpy1d(py, r.beta_se))?;
+    dict.set_item("gamma", vec_to_numpy1d(py, r.gamma))?;
+    dict.set_item("fitted_values", vec_to_numpy1d(py, r.fitted_values))?;
+    dict.set_item("linear_predictors", vec_to_numpy1d(py, r.linear_predictors))?;
+    dict.set_item("ncomp", r.ncomp)?;
+    dict.set_item("coefficients", vec_to_numpy1d(py, r.coefficients))?;
+    dict.set_item("std_errors", vec_to_numpy1d(py, r.std_errors))?;
+    dict.set_item("log_likelihood", r.log_likelihood)?;
+    dict.set_item("deviance", r.deviance)?;
+    dict.set_item("iterations", r.iterations)?;
+    dict.set_item("aic", r.aic)?;
+    dict.set_item("bic", r.bic)?;
+    // family exposed as string matching the accepted input tokens
+    let family_str = match r.family {
+        fdars_core::scalar_on_function::GlmFamily::Binomial => "binomial",
+        fdars_core::scalar_on_function::GlmFamily::Poisson => "poisson",
+        fdars_core::scalar_on_function::GlmFamily::Gamma => "gamma",
+        fdars_core::scalar_on_function::GlmFamily::Gaussian => "gaussian",
+        // wildcard required: GlmFamily is #[non_exhaustive]
+        _ => "unknown",
+    };
+    dict.set_item("family", family_str)?;
+    // r.fpca is intentionally NOT inserted — embedded for internal use only
+    Ok(dict.into_any())
+}
+
+/// Functional generalised linear model (GLM) via FPC scores.
+///
+/// Fits an exponential-family GLM where the linear predictor is formed by
+/// projecting functional data onto functional principal components. FPCA is
+/// re-fitted from raw data inside this call (no persistent handle required).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Functional predictors, shape (n, m).
+/// response : numpy.ndarray
+///     Scalar response, length n. Domain constraints vary by family:
+///     Binomial y ∈ {0.0, 1.0}; Poisson y ≥ 0 (integers); Gamma y > 0.
+/// family : str, optional
+///     Link family: ``"gaussian"`` (identity), ``"binomial"`` (logit),
+///     ``"poisson"`` (log), or ``"gamma"`` (inverse link, NOT log).
+///     Default ``"gaussian"``.
+/// n_comp : int, optional
+///     Number of FPC components (default 3; clamped to min(n-1, m) by core).
+/// scalar_covariates : numpy.ndarray, optional
+///     Additional scalar predictors, shape (n, q). ``None`` if unused.
+/// max_iter : int, optional
+///     Maximum IRLS iterations (default 25).
+/// tol : float, optional
+///     Convergence tolerance (default 1e-6).
+///
+/// Returns
+/// -------
+/// dict
+///     intercept, beta_t (m,), beta_se (m,), gamma (q,), fitted_values (n,),
+///     linear_predictors (n,), ncomp, coefficients, std_errors,
+///     log_likelihood, deviance, iterations, aic, bic, family.
+///
+/// Raises
+/// ------
+/// ValueError
+///     On invalid family string, out-of-domain response values, shape
+///     mismatches, or insufficient observations (n < 3).
+#[pyfunction]
+#[pyo3(signature = (data, response, family="gaussian", n_comp=3, scalar_covariates=None, max_iter=25, tol=1e-6))]
+pub fn functional_glm<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    response: PyReadonlyArray1<'py, f64>,
+    family: &str,
+    n_comp: usize,
+    scalar_covariates: Option<PyReadonlyArray2<'py, f64>>,
+    max_iter: usize,
+    tol: f64,
+) -> PyResult<Bound<'py, PyAny>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let y = numpy1d_to_vec(response);
+    let fam = family_from_str(family)?;
+    let sc = scalar_covariates.map(numpy2d_to_fdmatrix).transpose()?;
+    let result = to_pyresult(fdars_core::scalar_on_function::functional_glm(
+        &mat,
+        &y,
+        fam,
+        sc.as_ref(),
+        n_comp,
+        max_iter,
+        tol,
+    ))?;
+    functional_glm_result_to_pydict(py, result)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fregre_np_cv, m)?)?;
     m.add_function(wrap_pyfunction!(fregre_np_mixed, m)?)?;
@@ -997,5 +1213,7 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(bootstrap_ci_functional_logistic, m)?)?;
     m.add_function(wrap_pyfunction!(fosr_fpc, m)?)?;
     m.add_function(wrap_pyfunction!(predict_fosr, m)?)?;
+    m.add_function(wrap_pyfunction!(concurrent_regression, m)?)?;
+    m.add_function(wrap_pyfunction!(functional_glm, m)?)?;
     Ok(())
 }
