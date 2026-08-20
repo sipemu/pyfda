@@ -215,7 +215,7 @@ This skill orchestrates the Phase 12 MCP tools built in `python/fdars/mcp/`. See
 | `fdars_run_method` | `run_method` in `fdars.mcp._runner` | Run any of the five supported fdars methods (smoothing, clustering, FPCA, alignment, basis) and store the result handle. |
 | `fdars_compare_run` | `compare_run` in `fdars.mcp._compare` | Re-run with changed parameters and compute the before/after delta; all numbers are fdars-computed. |
 
-The Phase 11 advisor (`python/fdars/advisor.py`) provides `build_diagnostics` and `advise()`:
+The advisor package (`python/fdars/advisor/`) provides `build_diagnostics` and `advise()`:
 the grounding source for all LLM recommendations. See the [Python API](python-api.md) for the
 full function reference.
 
