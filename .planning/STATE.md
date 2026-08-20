@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v5.0
-milestone_name: fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing
-status: Awaiting next milestone
-stopped_at: 35-04-PLAN.md Task 3 — blocking human-verify checkpoint (diagram method-accuracy review pending)
-last_updated: "2026-08-18T21:18:44.698Z"
-last_activity: 2026-08-18
-last_activity_desc: Phase 35 execution started
+milestone: v6.0
+milestone_name: fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference
+status: planning
+last_updated: "2026-08-20T18:42:39.860Z"
+last_activity: 2026-08-20
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
-current_phase: 35
-current_phase_name: docs-diagrams-worked-examples
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-08-17)
 
 ## Current Position
 
-Phase: Milestone v5.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-18 — Milestone v5.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-08-20 — Milestone v6.0 started
 
 ## Performance Metrics
 

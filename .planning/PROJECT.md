@@ -16,10 +16,25 @@ The documentation — diagrams first, examples second — must make functional d
 - ✅ **v2.1 — Document the AI Advisor** (Phases 14–18): a new top-level "AI Advisor" docs-site section — a concept/grounding-invariant overview with two hand-authored inline SVG diagrams (grounding invariant, advisor loop), plus per-surface pages for the Python API (recommend-only, with an offline worked example that executes in the docs build), the Tool/MCP server (3 tools, by-reference handle model, stdio, re-run/compare loop), and the Agent Skill (git-URL install + interpret→recommend→re-run→compare walkthrough) — all wired into nav and passing a `mkdocs build --strict` gate. Method-accurate against the shipped v2.0 code; diagrams pass the SVGO/determinism gate.
 - ✅ **v3.0 — Provider-Agnostic Advisor, Full-Library Coverage** (Phases 19–24): a custom `Provider` protocol with Anthropic/OpenAI(-compatible)/Gemini/Ollama adapters (per-provider optional extras) and a centralized validate-and-retry + `_check_grounding` guard, deterministic offline `build_diagnostics` for all 12 fdars aspects through one shared schema/prompt, MCP + Agent Skill surface updates (MCP stays LLM-free), a Python 3.9–3.14 CI matrix with version-gated extras + bare-venv smoke proof, and a provider-setup + per-aspect docs section. 28/28 requirements complete; suite 259 passed / 4 skipped.
 - ✅ **v4.0 — fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs** (Phases 25–29): upgraded `fdars-core` 0.14.0 → 0.17.0 (parallel-only, no linalg; zero FPCA drift) and exposed the new upstream surface — `fdars.represent` (interpolation/extrapolation-policy/imputation), functional statistics + `depth_based_median`/`trim_mean` in `fdars.fdata` with six new `Fdata` methods, a new `fdars.scoring` submodule (5 metrics), and `fdars.alignment` shift registration (+ `fd.shift_register()`) / registration-quality scores / banded elastic alignment. Extended the advisor with a `scoring` aspect (#13) + imputation/registration diagnostics (grounding invariant + MCP guard-sync preserved), and documented it all with 6 new dedicated pages + 6 method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples (whole-site `mkdocs build --strict` green). 16/16 requirements complete; suite 426 passed / 4 skipped.
+- ✅ **v5.0 — fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing** (Phases 30–35): upgraded `fdars-core` 0.17.0 → 0.20.0 (parallel-only, zero drift; `CvCriterion` wildcard arm) and exposed a new `fdars.inference` submodule (two-sample permutation tests, Degras SCB bands, FLM post-hoc inference, one-way ANOVA — `TestResult`→PyDict, deterministic seed), `functional_depth`/`functional_boxplot` in `fdars.depth`, and AIC model selection + `constant_basis` in `fdars.basis`/`fdars.smoothing`. Added an `inference` advisor aspect (#14) and documented it all with new pages + 4 method-accurate SVGs + offline `FDARS_FENCE_OK` worked examples (whole-site `mkdocs build --strict` green). 21/21 requirements validated; suite 560 passed / 4 skipped.
 
 **Grounding invariant (v2.0):** every recommendation cites computed diagnostics and states an expected effect; the LLM never fabricates numbers.
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
+
+## Current Milestone: v6.0 fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference
+
+**Goal:** Bump `fdars-core` 0.20.0 → 0.23.0, expose the new upstream surface through PyO3 bindings and the Python API across three capability groups, extend the AI advisor where relevant (grounding invariant preserved), and document everything to the project's method-accurate standard (hand-authored inline SVG diagrams + runnable offline worked examples). Same shape as v4.0/v5.0.
+
+**Target features:**
+- Crate bump `fdars-core 0.20.0 → 0.23.0` (0.21/0.22/0.23 all additive/non-breaking, existing signatures unchanged) as an isolated regression gate on the ~560-test baseline; keep `parallel`, do NOT enable `linalg` (verify MSRV in research); rebuild via maturin.
+- **Group A — Regression** (extend `fdars.regression`): `concurrent_regression` / `ConcurrentRegrResult`, `functional_glm` (exponential-family GLM over FPC scores).
+- **Group B — FPCA & Classification**: `pace_fpca` / `PaceFpcaConfig` / `PaceFpcaResult` (sparse/irregular PACE FPCA — BLUP scores, fitted trajectories, prediction-variance bands); `elastic_multinomial` / `ElasticMultinomialResult` (OvR multinomial classifier, extend `fdars.classification`).
+- **Group C — Depth / Outliers / Interval Inference**: new depth methods (hypograph/epigraph, half-region HRD/MHRD, extremal, ERL, L-∞, total-variation + MSSI) extending the v5.0 `functional_depth` dispatcher; outlier detectors (`tvdmss`, `muod`, `sequential_transform_outliers`, depthgram) extending `fdars.outliers`; interval-wise testing (`itp_one_pop` / `itp_two_pop` / `itp_flm`, `ItpResult`) extending `fdars.inference`.
+- **Advisor extension (where relevant):** grounded diagnostics for the new aspects (e.g. ITP interval inference, outlier detectors — potentially closing the Phase-34 functional-boxplot-outlier deferral); grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync in single atomic commits, exactly as v4.0 Phase 28 / v5.0 Phase 34. Exact per-capability scope confirmed during research.
+- **Docs:** new dedicated pages + method-accurate hand-authored inline SVG diagrams + runnable offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green.
+
+**Key context:** Crosses binding + advisor + docs code (`Cargo.toml`, `src/*_mod.rs`, `src/lib.rs`, `python/fdars/`, `python/fdars/advisor`, `python/fdars/mcp`, `docs/`). Upstream 0.21→0.23 is additive/non-breaking, so the bump should not disturb existing bindings — risk concentrates in new-binding correctness (column-major layout round-trips, `Result`/dict conversions, `#[non_exhaustive]` fallback arms) and method-accuracy of the new diagrams/examples. Open questions for research: exact 0.23 signatures + `ConcurrentRegrResult`/`PaceFpcaResult`/`ElasticMultinomialResult`/`ItpResult` field names, how `pace_fpca` consumes sparse/irregular input, whether `functional_glm` re-fits or takes a fitted handle, MSRV/`linalg` status at 0.23, advisor scope per capability, and worked-example datasets. Grounding invariant remains the hard constraint on advisor work. Docs build is ~19 min (executed fences run real compute) — keep fence data small. Large scope — the roadmap phases it (bump → three binding groups ∥ → advisor → docs), same as v4.0/v5.0.
 
 ## Last Shipped Milestone: v5.0 fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing (shipped 2026-08-18)
 
@@ -107,14 +122,22 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- v5.0 in progress — fdars-core 0.20 upgrade: functional inference + depth/boxplot + basis/smoothing bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
+<!-- v6.0 in progress — fdars-core 0.23 upgrade: regression + PACE-FPCA/classification + depth/outliers/interval-inference bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
 
-- [x] Crate bump `fdars-core 0.17.0 → 0.20.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate — ✓ Phase 30 (426 passed / 4 skipped, zero drift; `CvCriterion` wildcard arm added)
-- [x] Group A — `fdars.inference` submodule: two-sample permutation tests + SCB bands + FLM inference (`TestResult` → PyDict, deterministic seed) — ✓ Phase 31 (8 functions, 495 passed / 4 skipped; FLM re-fits internally; CR-01 negative-label guard added)
-- [x] Group B — `functional_depth` unified dispatcher + `functional_boxplot` extending `fdars.depth` — ✓ Phase 32 (7-key boxplot dict, outliers as int list, transposition-guarded; 524 passed / 4 skipped)
-- [x] Group C — `constant_basis` + AIC smoothing selection extending `fdars.basis`/`fdars.smoothing` — ✓ Phase 33 (constant_basis + `fdars.basis.smooth_basis_aic` + `optim_bandwidth(criterion="aic")`; Phase-30 CvCriterion stopgap fixed; 535 passed / 4 skipped)
-- [x] Advisor extension — `inference` diagnostics aspect (#14) summarizing TestResult stats + significance flags; grounding invariant + MCP guard-sync (single atomic commit) preserved — ✓ Phase 34 (560 passed / 4 skipped; boxplot-outlier diagnostics deferred to future)
-- [x] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green — ✓ Phase 35 (new Inference section + functional-inference page, analyze/functional-boxplot page, basis/smoothing fold-ins, advisor aspects.md #14; 4 new SVGs svgo-stable; whole-site strict build exit 0; human diagram review approved)
+- [ ] Crate bump `fdars-core 0.20.0 → 0.23.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate
+- [ ] Group A — Regression: `concurrent_regression` + `functional_glm` extending `fdars.regression`
+- [ ] Group B — FPCA & Classification: `pace_fpca` (sparse/PACE FPCA) + `elastic_multinomial` extending `fdars.classification`
+- [ ] Group C — Depth / Outliers / Interval Inference: new depth methods + outlier detectors (`tvdmss`/`muod`/`sequential_transform`/depthgram) + interval-wise testing (`itp_*`) extending `fdars.depth`/`fdars.outliers`/`fdars.inference`
+- [ ] Advisor extension (where relevant) — grounded diagnostics for new aspects; grounding invariant + MCP guard-sync (single atomic commit) preserved
+- [ ] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green
+
+**v5.0 — fdars-core 0.20 Upgrade (Phases 30–35, shipped):**
+- ✓ Crate bump 0.17.0 → 0.20.0 (parallel-only, no linalg); 426-test regression gate green, zero drift; `CvCriterion` wildcard arm — Phase 30
+- ✓ Group A — `fdars.inference` submodule: two-sample permutation tests + SCB bands + FLM inference (`TestResult` → PyDict, deterministic seed; FLM re-fits internally; CR-01 negative-label guard) — Phase 31
+- ✓ Group B — `functional_depth` unified dispatcher + `functional_boxplot` (7-key dict, outliers as int list, transposition-guarded) extending `fdars.depth` — Phase 32
+- ✓ Group C — `constant_basis` + AIC smoothing selection (`smooth_basis_aic`, `optim_bandwidth(criterion="aic")`) extending `fdars.basis`/`fdars.smoothing` — Phase 33
+- ✓ Advisor extension — `inference` diagnostics aspect (#14) summarizing TestResult stats + significance flags; grounding invariant + MCP guard-sync preserved (boxplot-outlier diagnostics deferred) — Phase 34
+- ✓ Docs — new Inference section + functional-inference page, analyze/functional-boxplot page, basis/smoothing fold-ins, advisor aspects.md #14; 4 new SVGs; whole-site `--strict` build green; human diagram review approved — Phase 35
 
 ### Out of Scope
 
@@ -175,4 +198,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-18 after v5.0 milestone — shipped & archived (fdars-core 0.20 upgrade: inference + depth/boxplot + basis/smoothing; 21/21 requirements validated)*
+*Last updated: 2026-08-20 — v6.0 milestone started (fdars-core 0.23 upgrade: regression + PACE-FPCA/classification + depth/outliers/interval-inference bindings + advisor extension + docs)*
