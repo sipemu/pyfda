@@ -31,7 +31,7 @@ class TestConcurrentRegression:
     # ------------------------------------------------------------------
 
     def test_smoke(self):
-        """Single-predictor smoke: dict keys and fitted shape are correct."""
+        """Single-predictor smoke: dict keys and all output shapes are correct."""
         n, m = 8, 12
         response, predictors = self._make_data(n=n, m=m, p=1)
         result = regression.concurrent_regression(
@@ -45,6 +45,18 @@ class TestConcurrentRegression:
             "argvals",
         }
         assert result["fitted"].shape == (n, m)
+        assert result["beta_curve"].shape == (1, m), (
+            f"Expected beta_curve (1, {m}), got {result['beta_curve'].shape}"
+        )
+        assert result["intercept"].shape == (m,), (
+            f"Expected intercept ({m},), got {result['intercept'].shape}"
+        )
+        assert result["argvals"].shape == (m,), (
+            f"Expected argvals ({m},), got {result['argvals'].shape}"
+        )
+        assert result["residuals"].shape == (n, m), (
+            f"Expected residuals ({n}, {m}), got {result['residuals'].shape}"
+        )
 
     # ------------------------------------------------------------------
     # Task 2 — beta_curve (p, m) transposition guard + determinism + guards
@@ -137,7 +149,7 @@ class TestFunctionalGlm:
     # ------------------------------------------------------------------
 
     def test_gaussian_smoke(self):
-        """Gaussian family: 14 keys, no fpca, finite fitted_values, family round-trip."""
+        """Gaussian family: 15 keys, no fpca, finite fitted_values, family round-trip."""
         n, m = 20, 16
         data, _ = self._make_data(n=n, m=m)
         rng = np.random.default_rng(0)
@@ -162,10 +174,10 @@ class TestFunctionalGlm:
     # ------------------------------------------------------------------
 
     def test_binomial_family(self):
-        """Binomial: fitted_values in (0, 1), all finite, family string correct."""
+        """Binomial: fitted_values in (0, 1), all finite, family correct, IRLS converges."""
         n, m = 30, 16
         data, _ = self._make_data(n=n, m=m, seed=1)
-        rng = np.random.default_rng(1)
+        rng = np.random.default_rng(202)  # distinct seed from data generation (seed=1)
         # Binary response: half 0.0, half 1.0
         response = np.array([0.0] * (n // 2) + [1.0] * (n - n // 2))
         rng.shuffle(response)
@@ -178,6 +190,9 @@ class TestFunctionalGlm:
             f"Binomial fitted_values must be in (0, 1), got min={fv.min():.4f} max={fv.max():.4f}"
         )
         assert result["family"] == "binomial"
+        assert result["iterations"] <= 50, (
+            f"IRLS did not converge within max_iter=50 (iterations={result['iterations']})"
+        )
 
     def test_poisson_family(self):
         """Poisson: fitted_values > 0, all finite, family string correct."""

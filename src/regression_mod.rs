@@ -1083,8 +1083,9 @@ fn family_from_str(s: &str) -> PyResult<fdars_core::scalar_on_function::GlmFamil
 // Internal helper: FunctionalGlmResult → Python dict.
 //
 // The struct is #[non_exhaustive] — access each field by name.
-// 14 keys are exposed; r.fpca is intentionally NOT inserted — the embedded
-// FpcaResult is consumed internally for fit only (mirrors flm_f_test pattern).
+// 15 keys are exposed (the 14 non-fpca struct fields plus a derived "family"
+// string); r.fpca is intentionally NOT inserted — the embedded FpcaResult is
+// consumed internally for fit only (mirrors flm_f_test pattern).
 //
 // DOCS caveat (Phase 41, DOCS-08):
 //   - Gamma uses inverse canonical link g(μ)=1/μ, NOT log-link (unlike R default).
