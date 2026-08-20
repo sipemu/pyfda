@@ -216,12 +216,10 @@ pub fn run_pace_fpca<'py>(
         bandwidth,
         sigma2,
         // Default: 51 uniform points on [0, 1] matching core PaceFpcaConfig::default()
-        work_grid: work_grid
-            .unwrap_or_else(|| (0..51).map(|i| i as f64 / 50.0).collect()),
+        work_grid: work_grid.unwrap_or_else(|| (0..51).map(|i| i as f64 / 50.0).collect()),
         alpha,
     };
-    let result =
-        to_pyresult(fdars_core::pace_fpca::pace_fpca(&data.inner, &config))?;
+    let result = to_pyresult(fdars_core::pace_fpca::pace_fpca(&data.inner, &config))?;
     pace_fpca_result_to_pydict(py, result)
 }
 

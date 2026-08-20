@@ -18,6 +18,7 @@ mod fdata_mod;
 mod inference_mod;
 mod metric_mod;
 mod outliers_mod;
+mod pace_fpca_mod;
 mod regression_mod;
 mod represent_mod;
 mod scoring_mod;
@@ -26,7 +27,6 @@ mod simulation_mod;
 mod smoothing_mod;
 mod spm_mod;
 mod tolerance_mod;
-mod pace_fpca_mod;
 
 /// Create a submodule, register its contents, and attach it to a parent module.
 macro_rules! register_submodule {
