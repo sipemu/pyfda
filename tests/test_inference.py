@@ -777,3 +777,65 @@ class TestItpOnePop:
         argvals = np.linspace(0, 1, 24)
         with pytest.raises(ValueError, match="nope"):
             inf.itp_one_pop(data, argvals, basis_type="nope", n_perm=9)
+
+
+# ---------------------------------------------------------------------------
+# ITP-02: itp_two_pop (two-sample interval-wise testing + seed determinism)
+# ---------------------------------------------------------------------------
+
+
+class TestItpTwoPop:
+    """itp_two_pop: ItpResult dict shape, determinism under seed=None, degenerate."""
+
+    def test_itp_two_pop_smoke(self):
+        """5-key dict, p-value arrays with length n_basis, all in [0, 1]."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(10)
+        a = rng.standard_normal((15, 24))
+        b = rng.standard_normal((15, 24)) + 0.5
+        argvals = np.linspace(0, 1, 24)
+        result = inf.itp_two_pop(a, b, argvals, n_perm=99)
+        assert isinstance(result, dict)
+        assert set(result.keys()) == {
+            "adjusted_pvalues",
+            "raw_pvalues",
+            "basis_type",
+            "n_basis",
+            "n_perm",
+        }
+        n_basis = result["n_basis"]
+        adj = result["adjusted_pvalues"]
+        raw = result["raw_pvalues"]
+        assert isinstance(adj, np.ndarray)
+        assert isinstance(raw, np.ndarray)
+        assert adj.shape == (n_basis,)
+        assert raw.shape == (n_basis,)
+        assert np.all((adj >= 0.0) & (adj <= 1.0))
+        assert np.all((raw >= 0.0) & (raw <= 1.0))
+
+    def test_itp_two_pop_determinism(self):
+        """Two calls with seed=None (→ 0) and identical inputs are byte-identical."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(11)
+        a = rng.standard_normal((15, 24))
+        b = rng.standard_normal((15, 24)) + 0.5
+        argvals = np.linspace(0, 1, 24)
+        r1 = inf.itp_two_pop(a, b, argvals, n_perm=49)
+        r2 = inf.itp_two_pop(a, b, argvals, n_perm=49)
+        assert np.array_equal(r1["adjusted_pvalues"], r2["adjusted_pvalues"]), (
+            "seed=None must give byte-identical adjusted_pvalues"
+        )
+        assert np.array_equal(r1["raw_pvalues"], r2["raw_pvalues"])
+
+    def test_itp_two_pop_degenerate_nbasis(self):
+        """nbasis=1 (below the >= 2 guard) raises ValueError."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(12)
+        a = rng.standard_normal((15, 24))
+        b = rng.standard_normal((15, 24))
+        argvals = np.linspace(0, 1, 24)
+        with pytest.raises(ValueError):
+            inf.itp_two_pop(a, b, argvals, nbasis=1, n_perm=9)

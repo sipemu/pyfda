@@ -664,6 +664,70 @@ pub fn itp_one_pop<'py>(
 }
 
 // ---------------------------------------------------------------------------
+// itp_two_pop
+// ---------------------------------------------------------------------------
+
+/// Interval-wise testing procedure for two functional populations.
+///
+/// Tests whether the mean functions of ``data_a`` and ``data_b`` differ at
+/// each projection-basis coefficient. Returns closure-adjusted and raw
+/// p-values (one per basis function).
+///
+/// Parameters
+/// ----------
+/// data_a : numpy.ndarray
+///     First sample, shape ``(n_a, m)``. Requires ``n_a >= 2``.
+/// data_b : numpy.ndarray
+///     Second sample, shape ``(n_b, m)``. Requires ``n_b >= 2``. Must have
+///     the same column count as ``data_a``.
+/// argvals : numpy.ndarray
+///     Evaluation grid, length ``m``. Must match the column count.
+/// basis_type : str, optional
+///     Projection basis: ``"bspline"`` (default) or ``"fourier"``.
+/// nbasis : int, optional
+///     Number of basis functions to request (default 5). Must be >= 2.
+/// n_perm : int, optional
+///     Number of permutations (default 999). Must be >= 1.
+/// seed : int or None, optional
+///     RNG seed. ``None`` resolves to fixed default ``0`` — two calls with
+///     ``seed=None`` and identical inputs are byte-identical.
+///
+/// Returns
+/// -------
+/// dict
+///     ``{"adjusted_pvalues": ndarray(n_basis,), "raw_pvalues": ndarray(n_basis,),
+///     "basis_type": str, "n_basis": int, "n_perm": int}``
+///
+/// Raises
+/// ------
+/// ValueError
+///     If ``n_a < 2`` or ``n_b < 2``, column counts mismatch, ``argvals``
+///     length mismatches, ``nbasis < 2``, ``n_perm == 0``, or basis
+///     projection fails.
+#[pyfunction]
+#[pyo3(signature = (data_a, data_b, argvals, basis_type="bspline", nbasis=5, n_perm=999, seed=None))]
+pub fn itp_two_pop<'py>(
+    py: Python<'py>,
+    data_a: PyReadonlyArray2<'py, f64>,
+    data_b: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    basis_type: &str,
+    nbasis: usize,
+    n_perm: usize,
+    seed: Option<u64>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat_a = numpy2d_to_fdmatrix(data_a)?;
+    let mat_b = numpy2d_to_fdmatrix(data_b)?;
+    let av = numpy1d_to_vec(argvals);
+    let bt = basis_type_from_str(basis_type)?;
+    let s = seed.unwrap_or(0);
+    let r = to_pyresult(fdars_core::inference::itp_two_pop(
+        &mat_a, &mat_b, &av, bt, nbasis, n_perm, s,
+    ))?;
+    itp_result_to_pydict(py, r)
+}
+
+// ---------------------------------------------------------------------------
 // Module registration
 // ---------------------------------------------------------------------------
 
@@ -677,5 +741,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(flm_gof_test, m)?)?;
     m.add_function(wrap_pyfunction!(oneway_anova_vstat, m)?)?;
     m.add_function(wrap_pyfunction!(itp_one_pop, m)?)?;
+    m.add_function(wrap_pyfunction!(itp_two_pop, m)?)?;
     Ok(())
 }
