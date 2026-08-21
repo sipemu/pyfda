@@ -5,17 +5,17 @@ milestone_name: fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outlier
 current_phase: 41
 current_phase_name: Docs — Diagrams & Worked Examples
 status: executing
-stopped_at: Phase 40 complete, ready to plan Phase 41
-last_updated: "2026-08-21T14:51:43.468Z"
+stopped_at: Completed 41-02-PLAN.md — DOCS-09 FPCA & Classification
+last_updated: "2026-08-21T19:45:20.767Z"
 last_activity: 2026-08-21
 last_activity_desc: Phase 41 execution resumed (wave continue)
-state_head: 6418cc3aec59318b9b5cec4891aa408d51fc20b7
+state_head: 8e758aaf24eb93bee08467c3f93e3cc0b3659094
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 11
-  completed_plans: 8
-  percent: 73
+  completed_plans: 9
+  percent: 82
 ---
 
 # Project State
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-08-20)
 ## Current Position
 
 Phase: 41 (Docs — Diagrams & Worked Examples) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 41
+Plan: 2 of 4
+Status: Ready to execute
 Last activity: 2026-08-21 — Phase 41 execution resumed (wave continue)
 
 ## Performance Metrics
@@ -59,6 +59,11 @@ Last activity: 2026-08-21 — Phase 41 execution resumed (wave continue)
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 41 P02 | 240 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -78,6 +83,8 @@ Recent decisions affecting current work:
 - [research]: Compound results decompose to PyDict via 5 new helpers following the canonical `test_result_to_pydict()` pattern (`ConcurrentRegrResult`, `FunctionalGlmResult`, `PaceFpcaResult`, `ElasticMultinomialResult`, `ItpResult` — the last is a NEW `itp_result_to_pydict` because ITP p-values are vectors not scalars)
 - [research]: Four enum dispatch patterns need wildcard `_ => PyValueError` arms AND matching Python string maps: `DepthMethod` (extend +9 variants), `GlmFamily`, `SeqTransform`, `ProjectionBasisType`; Rust catches a missing arm but NOT a missing Python string mapping
 - [research]: `functional_glm` and `itp_flm` re-fit internally (raw data in, no persistent handle); Gamma GLM uses inverse canonical link 1/μ and its AIC is NOT comparable to R `glm()` (document both in Phase 41)
+- [Phase 41]: Task 1 (PACE-FPCA page + SVG + nav) was done by a prior stalled agent and salvaged intact in commit 6418cc3; resume agent verified and did not rewrite
+- [Phase 41]: elastic_multinomial fence updated to 20 obs/class (60 total) for faster builds; confirmed FDARS_FENCE_OK with both n=60 and n=240
 
 ### Pending Todos
 
@@ -108,9 +115,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-20 — v6.0 roadmap created
-Stopped at: Phase 40 complete, ready to plan Phase 41
-Resume file: .planning/ROADMAP.md
+Last session: 2026-08-21T19:45:20.702Z
+Stopped at: Completed 41-02-PLAN.md — DOCS-09 FPCA & Classification
+Resume file: None
 
 ## Operator Next Steps
 
