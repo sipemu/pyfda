@@ -5,17 +5,17 @@ milestone_name: fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outlier
 current_phase: 41
 current_phase_name: Docs — Diagrams & Worked Examples
 status: executing
-stopped_at: Completed 41-02-PLAN.md — DOCS-09 FPCA & Classification
-last_updated: "2026-08-21T19:45:20.767Z"
+stopped_at: Completed 41-03-PLAN.md (DOCS-10)
+last_updated: "2026-08-21T20:48:43.600Z"
 last_activity: 2026-08-21
 last_activity_desc: Phase 41 execution resumed (wave continue)
-state_head: 8e758aaf24eb93bee08467c3f93e3cc0b3659094
+state_head: a704c4f85d870208b67662ba6a60047c7e1d2321
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 11
-  completed_plans: 9
-  percent: 82
+  completed_plans: 10
+  percent: 83
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-08-20)
 ## Current Position
 
 Phase: 41 (Docs — Diagrams & Worked Examples) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-08-21 — Phase 41 execution resumed (wave continue)
 
@@ -64,6 +64,7 @@ Last activity: 2026-08-21 — Phase 41 execution resumed (wave continue)
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 41 P02 | 240 | 3 tasks | 5 files |
+| Phase 41 P03 | 55 min + 2 builds | 4 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Recent decisions affecting current work:
 - [research]: `functional_glm` and `itp_flm` re-fit internally (raw data in, no persistent handle); Gamma GLM uses inverse canonical link 1/μ and its AIC is NOT comparable to R `glm()` (document both in Phase 41)
 - [Phase 41]: Task 1 (PACE-FPCA page + SVG + nav) was done by a prior stalled agent and salvaged intact in commit 6418cc3; resume agent verified and did not rewrite
 - [Phase 41]: elastic_multinomial fence updated to 20 obs/class (60 total) for faster builds; confirmed FDARS_FENCE_OK with both n=60 and n=240
+- [Phase 41]: ITP closure direction corrected: adjusted p-values >= raw p-values (FWER control increases conservativeness; plan docs were wrong about direction)
+- [Phase 41]: Two sequential DOCS_FAST builds required: tracer build verified Task 1 before Tasks 2/3 were written; second build verified all
 
 ### Pending Todos
 
@@ -115,8 +118,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-21T19:45:20.702Z
-Stopped at: Completed 41-02-PLAN.md — DOCS-09 FPCA & Classification
+Last session: 2026-08-21T20:48:43.532Z
+Stopped at: Completed 41-03-PLAN.md (DOCS-10)
 Resume file: None
 
 ## Operator Next Steps

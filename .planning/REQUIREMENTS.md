@@ -46,7 +46,7 @@ Prior-milestone requirements: see `.planning/milestones/v5.0-REQUIREMENTS.md` (a
 
 - [ ] **DOCS-08**: New/updated Regression docs covering `concurrent_regression` + `functional_glm` — method-accurate hand-authored inline SVG(s) + a runnable offline worked example emitting `FDARS_FENCE_OK` (small/synthetic or subsampled data to protect the build); documents the Gamma inverse link + AIC caveat.
 - [x] **DOCS-09**: New FPCA/Classification docs — a PACE-FPCA page (method-accurate SVG showing irregular/sparse observations + recovered eigenfunctions; executed fence using **small inline synthetic sparse data**, n ≤ 20) and elastic-multinomial coverage (phoneme.csv subsampled to 3 classes, m ≤ 64 for fence speed).
-- [ ] **DOCS-10**: New/updated Depth-Outliers-Inference docs — the 9 new depth methods folded into the depth page, a functional-outliers page for the 4 detectors (method-accurate SVG), and an interval-wise-inference page for `itp_*` (SVG showing closure-adjusted p-value intervals; correct closure direction); each new page carries a runnable offline `FDARS_FENCE_OK` worked example.
+- [x] **DOCS-10**: New/updated Depth-Outliers-Inference docs — the 9 new depth methods folded into the depth page, a functional-outliers page for the 4 detectors (method-accurate SVG), and an interval-wise-inference page for `itp_*` (SVG showing closure-adjusted p-value intervals; correct closure direction); each new page carries a runnable offline `FDARS_FENCE_OK` worked example.
 - [ ] **DOCS-11**: Advisor `aspects.md` updated for the extended `outliers`/`regression` diagnostics; all new pages wired into `mkdocs.yml` nav; whole-site `mkdocs build --strict` passes offline (exit 0); every new SVG is SVGO-idempotent and determinism-clean; blocking human diagram method-accuracy review (rsvg-convert PNG check: depth asymmetry, PACE irregular observations, ITP closure direction).
 
 ## Future Requirements (deferred)
@@ -90,7 +90,7 @@ REQ-ID → Phase mapping. 23/23 v6.0 requirements mapped, each to exactly one ph
 | ADV-05 | Phase 40 | Complete |
 | DOCS-08 | Phase 41 | Pending |
 | DOCS-09 | Phase 41 | Complete |
-| DOCS-10 | Phase 41 | Pending |
+| DOCS-10 | Phase 41 | Complete |
 | DOCS-11 | Phase 41 | Pending |
 
 **Coverage summary:** 36→2 (DEP), 37→3 (REGR), 38→3 (PACE/CLASS), 39→9 (DEPTH/OUTL/ITP), 40→2 (ADV), 41→4 (DOCS). Total 23/23 ✓
