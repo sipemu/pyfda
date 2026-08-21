@@ -523,10 +523,10 @@ All `_1d` variants have `_2d` counterparts for surface data, imported from the s
 
 The hypograph index and epigraph index measure **opposite things**:
 
-- **Hypograph index**: high value → many curves above the reference (reference is near the bottom of the bundle).
-- **Epigraph index**: high value → many curves below the reference (reference is near the top of the bundle).
+- **Hypograph index**: high value → many curves below the reference (reference is near the top of the bundle).
+- **Epigraph index**: high value → many curves above the reference (reference is near the bottom of the bundle).
 
-These two indices are not symmetric in general unless the distribution of curves is itself symmetric. A curve at the bottom of the bundle will score **high on hypograph** (most curves are above it) and **low on epigraph** (few curves are below it). See [Outlier Detection](../analyze/outlier-detection.md) for a visual illustration.
+These two indices are not symmetric in general unless the distribution of curves is itself symmetric. A curve at the top of the bundle will score **high on hypograph** (most curves are below it) and **low on epigraph** (few curves are above it); a curve at the bottom scores the reverse. See [Outlier Detection](../analyze/outlier-detection.md) for a visual illustration.
 
 ### Example: all 9 new methods on a contaminated sample
 

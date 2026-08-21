@@ -11,43 +11,7 @@
   <text class="ttl" x="360" y="26" text-anchor="middle">Functional Outlier Depth — Hypograph vs Epigraph Asymmetry</text>
   <text class="sub" x="360" y="43" text-anchor="middle">A curve's position in the bundle determines which index captures its outlyingness</text>
 
-  <!-- ─── LEFT PANEL: hypograph (bottom curve) ─── -->
-  <rect x="28" y="56" width="310" height="216" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
-  <text class="lab" x="183" y="76" text-anchor="middle" fill="#1a1a2e">Hypograph Index</text>
-  <text class="sub" x="183" y="91" text-anchor="middle">proportion of curves BELOW reference</text>
-
-  <!-- x/y axes -->
-  <line x1="48" y1="240" x2="322" y2="240" stroke="#ced4da" stroke-width="1.2"/>
-  <line x1="48" y1="240" x2="48" y2="97" stroke="#ced4da" stroke-width="1.2"/>
-  <text class="sm" x="185" y="258" text-anchor="middle">t</text>
-
-  <!-- Background curves (main bundle) — drawn ABOVE the reference -->
-  <!-- 7 bundle curves above the reference -->
-  <path d="M52,160 Q105,130 185,125 Q265,120 322,135" stroke="#3f51b5" stroke-width="1.4" opacity="0.4"/>
-  <path d="M52,155 Q105,118 185,113 Q265,110 322,128" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
-  <path d="M52,165 Q105,140 185,136 Q265,130 322,144" stroke="#3f51b5" stroke-width="1.4" opacity="0.4"/>
-  <path d="M52,148 Q105,115 185,110 Q265,106 322,122" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
-  <path d="M52,170 Q105,145 185,142 Q265,136 322,150" stroke="#3f51b5" stroke-width="1.4" opacity="0.40"/>
-  <path d="M52,143 Q105,108 185,103 Q265,100 322,118" stroke="#3f51b5" stroke-width="1.4" opacity="0.30"/>
-  <path d="M52,175 Q105,152 185,148 Q265,142 322,156" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
-
-  <!-- Reference curve: near BOTTOM of bundle (low, many above it) -->
-  <!-- HIGH hypograph index (many curves above) -->
-  <path d="M52,205 Q105,200 185,198 Q265,196 322,202" stroke="#dc3545" stroke-width="2.4"/>
-  <text class="sm" x="162" y="220" fill="#dc3545">reference (bottom)</text>
-
-  <!-- Shaded region: curves above the reference = hypograph area -->
-  <!-- annotate counting arrows -->
-  <!-- Arrow from bundle down to reference -->
-  <line x1="185" y1="135" x2="185" y2="192" stroke="#e8710a" stroke-width="1.5" marker-end="url(#arr)"/>
-  <text class="sm" x="190" y="158" fill="#e8710a">7 curves above</text>
-  <text class="sm" x="190" y="170" fill="#e8710a">→ high hypograph</text>
-
-  <!-- Score box -->
-  <rect x="55" y="97" width="148" height="26" rx="4" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.2"/>
-  <text class="mono" x="60" y="114" fill="#fd7e14">hypograph_index ≈ 0.88</text>
-
-  <!-- Arrowhead marker -->
+  <!-- Arrowhead markers -->
   <defs>
     <marker id="arr" markerWidth="7" markerHeight="7" refX="4" refY="3" orient="auto">
       <path d="M0,0 L0,6 L6,3 z" fill="#e8710a"/>
@@ -57,7 +21,39 @@
     </marker>
   </defs>
 
-  <!-- ─── RIGHT PANEL: epigraph (top curve) ─── -->
+  <!-- ─── LEFT PANEL: hypograph_index high → reference near TOP, curves BELOW ─── -->
+  <rect x="28" y="56" width="310" height="216" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="183" y="76" text-anchor="middle" fill="#1a1a2e">Hypograph Index</text>
+  <text class="sub" x="183" y="91" text-anchor="middle">proportion of curves BELOW reference</text>
+
+  <!-- x/y axes -->
+  <line x1="48" y1="240" x2="322" y2="240" stroke="#ced4da" stroke-width="1.2"/>
+  <line x1="48" y1="240" x2="48" y2="97" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="185" y="258" text-anchor="middle">t</text>
+
+  <!-- 7 bundle curves BELOW the reference -->
+  <path d="M52,185 Q105,175 185,172 Q265,170 322,178" stroke="#3f51b5" stroke-width="1.4" opacity="0.40"/>
+  <path d="M52,190 Q105,182 185,178 Q265,176 322,184" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
+  <path d="M52,178 Q105,168 185,164 Q265,162 322,172" stroke="#3f51b5" stroke-width="1.4" opacity="0.40"/>
+  <path d="M52,195 Q105,188 185,185 Q265,183 322,190" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
+  <path d="M52,200 Q105,194 185,191 Q265,189 322,196" stroke="#3f51b5" stroke-width="1.4" opacity="0.40"/>
+  <path d="M52,172 Q105,161 185,158 Q265,156 322,165" stroke="#3f51b5" stroke-width="1.4" opacity="0.30"/>
+  <path d="M52,205 Q105,200 185,198 Q265,196 322,202" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
+
+  <!-- Reference curve: near TOP of bundle (high, many curves below it) → HIGH hypograph index -->
+  <path d="M52,120 Q105,108 185,105 Q265,103 322,112" stroke="#dc3545" stroke-width="2.4"/>
+  <text class="sm" x="322" y="101" text-anchor="end" fill="#dc3545">reference (top)</text>
+
+  <!-- Arrow from bundle UP to reference -->
+  <line x1="185" y1="172" x2="185" y2="127" stroke="#e8710a" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="sm" x="190" y="148" fill="#e8710a">7 curves below</text>
+  <text class="sm" x="190" y="160" fill="#e8710a">→ high hypograph</text>
+
+  <!-- Score box -->
+  <rect x="55" y="97" width="148" height="26" rx="4" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.2"/>
+  <text class="mono" x="60" y="114" fill="#fd7e14">hypograph_index ≈ 0.88</text>
+
+  <!-- ─── RIGHT PANEL: epigraph_index high → reference near BOTTOM, curves ABOVE ─── -->
   <rect x="356" y="56" width="340" height="216" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
   <text class="lab" x="526" y="76" text-anchor="middle" fill="#1a1a2e">Epigraph Index</text>
   <text class="sub" x="526" y="91" text-anchor="middle">proportion of curves ABOVE reference</text>
@@ -67,29 +63,28 @@
   <line x1="376" y1="240" x2="376" y2="97" stroke="#ced4da" stroke-width="1.2"/>
   <text class="sm" x="527" y="258" text-anchor="middle">t</text>
 
-  <!-- Background curves (main bundle) — drawn BELOW the reference -->
-  <path d="M380,185 Q433,175 513,172 Q593,170 650,178" stroke="#3f51b5" stroke-width="1.4" opacity="0.4"/>
-  <path d="M380,190 Q433,182 513,178 Q593,176 650,184" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
-  <path d="M380,178 Q433,168 513,164 Q593,162 650,172" stroke="#3f51b5" stroke-width="1.4" opacity="0.4"/>
-  <path d="M380,195 Q433,188 513,185 Q593,183 650,190" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
-  <path d="M380,200 Q433,194 513,191 Q593,189 650,196" stroke="#3f51b5" stroke-width="1.4" opacity="0.40"/>
-  <path d="M380,172 Q433,161 513,158 Q593,156 650,165" stroke="#3f51b5" stroke-width="1.4" opacity="0.30"/>
-  <path d="M380,205 Q433,200 513,198 Q593,196 650,202" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
+  <!-- 7 bundle curves ABOVE the reference -->
+  <path d="M380,160 Q433,130 513,125 Q593,120 650,135" stroke="#3f51b5" stroke-width="1.4" opacity="0.40"/>
+  <path d="M380,155 Q433,118 513,113 Q593,110 650,128" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
+  <path d="M380,165 Q433,140 513,136 Q593,130 650,144" stroke="#3f51b5" stroke-width="1.4" opacity="0.40"/>
+  <path d="M380,148 Q433,115 513,110 Q593,106 650,122" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
+  <path d="M380,170 Q433,145 513,142 Q593,136 650,150" stroke="#3f51b5" stroke-width="1.4" opacity="0.40"/>
+  <path d="M380,143 Q433,108 513,103 Q593,100 650,118" stroke="#3f51b5" stroke-width="1.4" opacity="0.30"/>
+  <path d="M380,175 Q433,152 513,148 Q593,142 650,156" stroke="#3f51b5" stroke-width="1.4" opacity="0.35"/>
 
-  <!-- Reference curve: near TOP of bundle (high, many below it) -->
-  <!-- HIGH epigraph index (many curves below) -->
-  <path d="M380,120 Q433,108 513,105 Q593,103 650,112" stroke="#6f42c1" stroke-width="2.4"/>
-  <text class="sm" x="490" y="98" fill="#6f42c1">reference (top)</text>
+  <!-- Reference curve: near BOTTOM of bundle (low, many curves above it) → HIGH epigraph index -->
+  <path d="M380,205 Q433,200 513,198 Q593,196 650,202" stroke="#6f42c1" stroke-width="2.4"/>
+  <text class="sm" x="490" y="222" fill="#6f42c1">reference (bottom)</text>
 
-  <!-- Arrow from bundle up to reference -->
-  <line x1="513" y1="172" x2="513" y2="115" stroke="#6f42c1" stroke-width="1.5" marker-end="url(#arr2)"/>
-  <text class="sm" x="518" y="148" fill="#6f42c1">7 curves below</text>
-  <text class="sm" x="518" y="160" fill="#6f42c1">→ high epigraph</text>
+  <!-- Arrow from bundle DOWN to reference -->
+  <line x1="513" y1="175" x2="513" y2="192" stroke="#6f42c1" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <text class="sm" x="518" y="176" fill="#6f42c1">7 curves above</text>
+  <text class="sm" x="518" y="188" fill="#6f42c1">→ high epigraph</text>
 
   <!-- Score box -->
   <rect x="383" y="97" width="142" height="26" rx="4" fill="#f0ecff" stroke="#6f42c1" stroke-width="1.2"/>
   <text class="mono" x="388" y="114" fill="#6f42c1">epigraph_index ≈ 0.88</text>
 
   <!-- Bottom legend: asymmetry note -->
-  <text class="sm" x="360" y="285" text-anchor="middle">Asymmetry: a curve at the bottom has HIGH hypograph + LOW epigraph; a curve at the top has LOW hypograph + HIGH epigraph.</text>
+  <text class="sm" x="360" y="285" text-anchor="middle">Asymmetry: a curve at the top has HIGH hypograph + LOW epigraph; a curve at the bottom has LOW hypograph + HIGH epigraph.</text>
 </svg>
