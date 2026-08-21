@@ -4,18 +4,18 @@ milestone: v6.0
 milestone_name: fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference
 current_phase: 41
 current_phase_name: Docs — Diagrams & Worked Examples
-status: planning
+status: executing
 stopped_at: Phase 40 complete, ready to plan Phase 41
-last_updated: "2026-08-21T08:35:04.310Z"
+last_updated: "2026-08-21T14:51:43.468Z"
 last_activity: 2026-08-21
-last_activity_desc: Phase 40 complete, transitioned to Phase 41
-state_head: befa49f28b4d004680252c173f117e4220e9981a
+last_activity_desc: Phase 41 execution resumed (wave continue)
+state_head: 6418cc3aec59318b9b5cec4891aa408d51fc20b7
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 7
-  completed_plans: 7
-  percent: 83
+  total_plans: 11
+  completed_plans: 8
+  percent: 73
 ---
 
 # Project State
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-20)
 
 **Core value:** Bump `fdars-core` 0.20.0→0.23.0 (parallel-only, no linalg), expose the new upstream surface through PyO3 bindings + the Python API across three capability groups (Group A Regression, Group B PACE-FPCA & Classification, Group C Depth/Outliers/Interval-Inference), extend the grounded advisor where a real grounded scalar exists, and document everything method-accurately — with the grounding invariant intact throughout. Same shape as v4.0/v5.0.
-**Current focus:** Phase 40 — Advisor Extension
+**Current focus:** Phase 41 — Docs — Diagrams & Worked Examples
 
 ## Current Position
 
-Phase: 41 — Docs — Diagrams & Worked Examples
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-21 — Phase 40 complete, transitioned to Phase 41
+Phase: 41 (Docs — Diagrams & Worked Examples) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 41
+Last activity: 2026-08-21 — Phase 41 execution resumed (wave continue)
 
 ## Performance Metrics
 
