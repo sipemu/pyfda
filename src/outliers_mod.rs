@@ -225,11 +225,83 @@ pub fn tvdmss<'py>(
     tvdmss_to_pydict(py, r)
 }
 
+// ---------------------------------------------------------------------------
+// Internal helper: MuodResult (#[non_exhaustive]) → PyDict.
+//
+// 3 index sets (Vec<usize>) → list[int] via x as i64 collect.
+// 3 score vectors (Vec<f64>) → 1-D numpy via vec_to_numpy1d.
+// ---------------------------------------------------------------------------
+
+fn muod_to_pydict<'py>(
+    py: Python<'py>,
+    r: fdars_core::outliers::MuodResult,
+) -> PyResult<Bound<'py, PyDict>> {
+    let dict = PyDict::new(py);
+    dict.set_item(
+        "shape_outliers",
+        r.shape_outliers
+            .into_iter()
+            .map(|x| x as i64)
+            .collect::<Vec<i64>>(),
+    )?;
+    dict.set_item(
+        "magnitude_outliers",
+        r.magnitude_outliers
+            .into_iter()
+            .map(|x| x as i64)
+            .collect::<Vec<i64>>(),
+    )?;
+    dict.set_item(
+        "amplitude_outliers",
+        r.amplitude_outliers
+            .into_iter()
+            .map(|x| x as i64)
+            .collect::<Vec<i64>>(),
+    )?;
+    dict.set_item("shape_index", vec_to_numpy1d(py, r.shape_index))?;
+    dict.set_item("magnitude_index", vec_to_numpy1d(py, r.magnitude_index))?;
+    dict.set_item("amplitude_index", vec_to_numpy1d(py, r.amplitude_index))?;
+    Ok(dict)
+}
+
+/// MUOD (Massive Unsupervised Outlier Detection) for functional data.
+///
+/// Detects shape, magnitude, and amplitude outliers via three independent
+/// outlyingness indices. Deterministic (no seed). Requires at least 3
+/// observations and at least 2 evaluation points.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m). Requires n >= 3 and m >= 2.
+/// factor : float, optional
+///     Empirical factor for outlier thresholds (default 1.5).
+///
+/// Returns
+/// -------
+/// dict
+///     shape_outliers (list[int]), magnitude_outliers (list[int]),
+///     amplitude_outliers (list[int]), shape_index (n,),
+///     magnitude_index (n,), amplitude_index (n,).
+#[pyfunction]
+#[pyo3(signature = (data, factor=1.5))]
+pub fn muod<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    factor: f64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let config = fdars_core::outliers::MuodConfig { factor };
+    let r = to_pyresult(fdars_core::outliers::muod(&mat, config))?;
+    muod_to_pydict(py, r)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(detect_outliers_lrt, m)?)?;
     m.add_function(wrap_pyfunction!(detect_outliers_lrt_with_dist, m)?)?;
     m.add_function(wrap_pyfunction!(outliergram, m)?)?;
     m.add_function(wrap_pyfunction!(magnitude_shape, m)?)?;
     m.add_function(wrap_pyfunction!(tvdmss, m)?)?;
+    m.add_function(wrap_pyfunction!(muod, m)?)?;
     Ok(())
 }
