@@ -33,18 +33,28 @@ import numpy as np
 def _build_outliers_diagnostics(raw: dict, **kwargs) -> dict:
     """Compute outlier diagnostics from an fdars outliers result dict.
 
-    Handles four result shapes (``detect_outliers_lrt``, ``outliergram``,
-    ``magnitude_shape``, and ``detect_outliers_lrt_with_dist``) by inferring
-    which function was called from key presence.
+    Handles seven result shapes by inferring which function was called from
+    key presence: ``detect_outliers_lrt``, ``detect_outliers_lrt_with_dist``,
+    ``outliergram``, ``magnitude_shape``, ``tvdmss``, ``muod``, and
+    ``sequential_transform_outliers``, plus ``depthgram``.
 
     Parameters
     ----------
     raw : dict
         Native fdars outliers result dict.  Keys vary by function:
 
-        - ``detect_outliers_lrt``: ``"outliers"`` (bool array n,), ``"threshold"``
+        - ``detect_outliers_lrt`` / ``detect_outliers_lrt_with_dist``:
+          ``"outliers"`` (bool array n,), ``"threshold"``
         - ``outliergram``: ``"mei"``, ``"mbd"``, ``"outliers"``
         - ``magnitude_shape``: ``"magnitude"``, ``"shape"`` (NO ``"outliers"`` key)
+        - ``tvdmss``: ``"tvd"``, ``"mss"``, ``"magnitude_outliers"``,
+          ``"shape_outliers"``
+        - ``muod``: ``"amplitude_outliers"``, ``"shape_index"``,
+          ``"magnitude_index"``, ``"amplitude_index"``
+        - ``sequential_transform_outliers``: ``"union_outliers"``,
+          ``"per_transform_outliers"``
+        - ``depthgram``: ``"mbd_mei_d"``, ``"mbd"``, ``"mei"``,
+          ``"shape_outliers"``, ``"magnitude_outliers"``
 
     **kwargs
         Reserved for future per-method options (ignored).
@@ -56,8 +66,8 @@ def _build_outliers_diagnostics(raw: dict, **kwargs) -> dict:
         ``bool``, ``list``, ``None``).  No NumPy scalars.  Fields:
 
         - method (str): always ``"outliers"``
-        - n_obs (int): number of observations (inferred from whichever array is
-          present)
+        - n_obs (int or None): number of observations (inferred from whichever
+          array is present; ``None`` for sequential_transform_outliers)
         - n_outliers (int or None): count of flagged outliers when ``"outliers"``
           key is present; ``None`` for ``magnitude_shape`` results
         - outlier_fraction (float or None): fraction flagged; ``None`` when
@@ -68,9 +78,38 @@ def _build_outliers_diagnostics(raw: dict, **kwargs) -> dict:
         - magnitude_range (list or None): [min, max] of magnitude scores
         - shape_range (list or None): [min, max] of shape scores
         - has_outliergram (bool): True when ``"mei"`` and ``"mbd"`` keys are
-          both present
+          both present (and result is NOT depthgram)
         - mei_range (list or None): [min, max] of MEI scores
         - mbd_range (list or None): [min, max] of MBD scores
+        - has_tvdmss (bool): True when ``"tvd"`` and ``"mss"`` keys are present
+        - n_magnitude_outliers (int or None): tvdmss magnitude-direction count
+        - n_shape_outliers (int or None): tvdmss shape-direction count
+        - magnitude_outlier_fraction (float or None): tvdmss fraction; ``None``
+          when n_obs == 0
+        - shape_outlier_fraction (float or None): tvdmss fraction; ``None``
+          when n_obs == 0
+        - tvd_range (list or None): [min, max] of TVD scores
+        - mss_range (list or None): [min, max] of MSS scores
+        - has_muod (bool): True when ``"amplitude_outliers"`` key is present
+        - n_muod_magnitude_outliers (int or None): muod magnitude count
+        - n_muod_shape_outliers (int or None): muod shape count
+        - n_amplitude_outliers (int or None): muod amplitude count
+        - muod_magnitude_outlier_fraction (float or None): ``None`` when n_obs==0
+        - muod_shape_outlier_fraction (float or None): ``None`` when n_obs==0
+        - amplitude_outlier_fraction (float or None): ``None`` when n_obs==0
+        - shape_index_range (list or None): [min, max] of muod shape scores
+        - magnitude_index_range (list or None): [min, max] of muod magnitude scores
+        - amplitude_index_range (list or None): [min, max] of muod amplitude scores
+        - has_sequential_transform (bool): True when ``"union_outliers"`` present
+        - n_union_outliers (int or None): size of union across transform stages
+        - n_transforms (int or None): number of sequential detector stages
+        - has_depthgram (bool): True when ``"mbd_mei_d"`` key is present
+        - n_depthgram_shape_outliers (int or None): depthgram shape count
+        - n_depthgram_magnitude_outliers (int or None): depthgram magnitude count
+        - depthgram_shape_outlier_fraction (float or None): ``None`` when n_obs==0
+        - depthgram_magnitude_outlier_fraction (float or None): ``None`` when n_obs==0
+        - depthgram_mbd_range (list or None): [min, max] of depthgram MBD scores
+        - depthgram_mei_range (list or None): [min, max] of depthgram MEI scores
     """
     diag: dict = {"method": "outliers"}
 
@@ -146,8 +185,8 @@ def _build_outliers_diagnostics(raw: dict, **kwargs) -> dict:
             diag["magnitude_outlier_fraction"] = float(n_magnitude_outliers / n_obs)
             diag["shape_outlier_fraction"] = float(n_shape_outliers / n_obs)
         else:
-            diag["magnitude_outlier_fraction"] = 0.0
-            diag["shape_outlier_fraction"] = 0.0
+            diag["magnitude_outlier_fraction"] = None
+            diag["shape_outlier_fraction"] = None
         diag["tvd_range"] = [float(np.min(tvd)), float(np.max(tvd))]
         diag["mss_range"] = [float(np.min(mss)), float(np.max(mss))]
     else:
@@ -241,8 +280,8 @@ def _build_outliers_diagnostics(raw: dict, **kwargs) -> dict:
             diag["depthgram_shape_outlier_fraction"] = float(dg_n_shp / dg_n_obs)
             diag["depthgram_magnitude_outlier_fraction"] = float(dg_n_mag / dg_n_obs)
         else:
-            diag["depthgram_shape_outlier_fraction"] = 0.0
-            diag["depthgram_magnitude_outlier_fraction"] = 0.0
+            diag["depthgram_shape_outlier_fraction"] = None
+            diag["depthgram_magnitude_outlier_fraction"] = None
         diag["depthgram_mbd_range"] = [float(np.min(dg_mbd)), float(np.max(dg_mbd))]
         diag["depthgram_mei_range"] = [float(np.min(dg_mei)), float(np.max(dg_mei))]
     else:

@@ -32,7 +32,8 @@ def _build_regression_diagnostics(raw, **kwargs) -> dict:
     raw : dict
         Native fdars output dict from any of: ``fregre_lm``, ``fregre_pls``,
         ``fregre_l1``, ``fregre_huber``, ``fregre_np``, ``fosr``,
-        ``fosr_fpc``.  Keys vary by function — all accesses are guarded.
+        ``fosr_fpc``, ``functional_glm``, ``concurrent_regression``.
+        Keys vary by function — all accesses are guarded.
     **kwargs
         Reserved for future per-method options (ignored).
 
@@ -52,6 +53,22 @@ def _build_regression_diagnostics(raw, **kwargs) -> dict:
         - beta_t_range (list[float] or None): [min, max] when ``"beta_t"`` present
         - has_fosr (bool): True only when ``"fitted"`` key is present AND
           the array is 2-D (ndim==2); 1-D ``"fitted"`` arrays yield False
+        - has_functional_glm (bool): True when ``"deviance"`` key is present
+          (unique to ``functional_glm``)
+        - deviance (float or None): model fit measure (lower = better)
+        - aic (float or None): Akaike information criterion
+        - bic (float or None): Bayesian information criterion
+        - log_likelihood (float or None): log-likelihood at convergence
+        - iterations (int or None): IRLS iteration count to convergence
+        - glm_ncomp (int or None): number of FPC components used
+        - family (str or None): exponential-family distribution name
+        - has_concurrent_regression (bool): True when ``"beta_curve"`` key is
+          present (unique to ``concurrent_regression``)
+        - concurrent_residual_rms (float or None): root-mean-squared residual
+          over the full n x m grid; ``None`` when residuals are absent
+        - concurrent_residual_max_abs (float or None): max absolute residual
+          over the full grid; ``None`` when residuals are absent
+        - n_predictors (int or None): number of functional predictor curves
     """
     diag: dict = {"method": "regression"}
 
