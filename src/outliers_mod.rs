@@ -1,7 +1,9 @@
 //! Outlier detection for functional data.
 
 use crate::convert::*;
+use crate::depth_mod::depth_method_from_str;
 use numpy::PyReadonlyArray2;
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
@@ -296,6 +298,127 @@ pub fn muod<'py>(
     muod_to_pydict(py, r)
 }
 
+// ---------------------------------------------------------------------------
+// SeqTransform string dispatcher.
+//
+// Lowercase tokens (consistent with all other pyfda method tokens).
+// SeqTransform is #[non_exhaustive] — wildcard arm is mandatory.
+// ---------------------------------------------------------------------------
+
+fn seq_transform_from_str(s: &str) -> PyResult<fdars_core::outliers::SeqTransform> {
+    match s {
+        "t0" => Ok(fdars_core::outliers::SeqTransform::T0),
+        "t1" => Ok(fdars_core::outliers::SeqTransform::T1),
+        "t2" => Ok(fdars_core::outliers::SeqTransform::T2),
+        "d1" => Ok(fdars_core::outliers::SeqTransform::D1),
+        "d2" => Ok(fdars_core::outliers::SeqTransform::D2),
+        other => Err(PyValueError::new_err(format!(
+            "transform must be one of 't0', 't1', 't2', 'd1', 'd2', got '{other}'"
+        ))),
+    }
+}
+
+// Map a SeqTransform variant back to its lowercase string token.
+// Wildcard required: SeqTransform is #[non_exhaustive].
+fn seq_transform_variant_str(t: &fdars_core::outliers::SeqTransform) -> &'static str {
+    match t {
+        fdars_core::outliers::SeqTransform::T0 => "t0",
+        fdars_core::outliers::SeqTransform::T1 => "t1",
+        fdars_core::outliers::SeqTransform::T2 => "t2",
+        fdars_core::outliers::SeqTransform::D1 => "d1",
+        fdars_core::outliers::SeqTransform::D2 => "d2",
+        _ => "unknown",
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper: SeqTransformOutliers (#[non_exhaustive]) → PyDict.
+//
+// per_transform_outliers: Vec<(SeqTransform, Vec<usize>)> → list[dict]
+// Each dict has "transform": str and "outliers": list[int].
+// union_outliers: Vec<usize> → list[int].
+// ---------------------------------------------------------------------------
+
+fn seq_transform_to_pydict<'py>(
+    py: Python<'py>,
+    r: fdars_core::outliers::SeqTransformOutliers,
+) -> PyResult<Bound<'py, PyDict>> {
+    let dict = PyDict::new(py);
+
+    let per_transform: Vec<Bound<'_, PyDict>> = r
+        .per_transform_outliers
+        .into_iter()
+        .map(|(t, idxs)| {
+            let sub = PyDict::new(py);
+            sub.set_item("transform", seq_transform_variant_str(&t))?;
+            sub.set_item(
+                "outliers",
+                idxs.into_iter().map(|x| x as i64).collect::<Vec<i64>>(),
+            )?;
+            Ok(sub)
+        })
+        .collect::<PyResult<Vec<_>>>()?;
+
+    dict.set_item("per_transform_outliers", per_transform)?;
+    dict.set_item(
+        "union_outliers",
+        r.union_outliers
+            .into_iter()
+            .map(|x| x as i64)
+            .collect::<Vec<i64>>(),
+    )?;
+    Ok(dict)
+}
+
+/// Sequential transform outlier detection.
+///
+/// Applies a sequence of transforms (T0/T1/T2/D1/D2) to the data and detects
+/// outliers at each step via functional depth. Fully deterministic (no seed).
+/// Requires at least 2 observations.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m). Requires n >= 2.
+/// transforms : list[str]
+///     Sequence of transform tokens. Each must be one of 't0', 't1', 't2',
+///     'd1', 'd2'. An unrecognised token raises ValueError.
+/// depth_method : str, optional
+///     Depth method for outlier scoring (default "modified_band"). Accepts the
+///     same 13 tokens as fdars.depth.functional_depth.
+/// emp_factor : float, optional
+///     Empirical factor for outlier threshold (default 1.5).
+///
+/// Returns
+/// -------
+/// dict
+///     per_transform_outliers (list[dict] each with transform:str +
+///     outliers:list[int]), union_outliers (list[int]).
+#[pyfunction]
+#[pyo3(signature = (data, transforms, depth_method="modified_band", emp_factor=1.5))]
+pub fn sequential_transform_outliers<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    transforms: Vec<String>,
+    depth_method: &str,
+    emp_factor: f64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let seq = transforms
+        .iter()
+        .map(|s| seq_transform_from_str(s))
+        .collect::<PyResult<Vec<_>>>()?;
+    let dm = depth_method_from_str(depth_method, true, 50, None)?;
+    let config = fdars_core::outliers::SeqTransformConfig {
+        depth_method: dm,
+        emp_factor,
+    };
+    let r = to_pyresult(fdars_core::outliers::sequential_transform_outliers(
+        &mat, &seq, config,
+    ))?;
+    seq_transform_to_pydict(py, r)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(detect_outliers_lrt, m)?)?;
     m.add_function(wrap_pyfunction!(detect_outliers_lrt_with_dist, m)?)?;
@@ -303,5 +426,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(magnitude_shape, m)?)?;
     m.add_function(wrap_pyfunction!(tvdmss, m)?)?;
     m.add_function(wrap_pyfunction!(muod, m)?)?;
+    m.add_function(wrap_pyfunction!(sequential_transform_outliers, m)?)?;
     Ok(())
 }

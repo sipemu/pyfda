@@ -65,3 +65,57 @@ class TestMuod:
         data = np.zeros((2, 30))
         with pytest.raises(ValueError):
             outl.muod(data)
+
+
+class TestSeqTransform:
+    """Tests for fdars.outliers.sequential_transform_outliers (OUTL-03)."""
+
+    def test_seqtransform_smoke(self):
+        """sequential_transform_outliers returns correct dict structure."""
+        rng = np.random.default_rng(3)
+        data = rng.standard_normal((15, 30))
+        data[0, :] += 10
+
+        result = outl.sequential_transform_outliers(data, transforms=["t0", "t1", "d1"])
+
+        assert set(result.keys()) == {"per_transform_outliers", "union_outliers"}
+
+        per_tf = result["per_transform_outliers"]
+        assert isinstance(per_tf, list)
+        assert len(per_tf) == 3
+
+        valid_tokens = {"t0", "t1", "t2", "d1", "d2"}
+        for entry in per_tf:
+            assert isinstance(entry, dict)
+            assert set(entry.keys()) == {"transform", "outliers"}
+            assert entry["transform"] in valid_tokens
+            outliers = entry["outliers"]
+            assert isinstance(outliers, list)
+            assert all(isinstance(i, int) for i in outliers)
+
+        union = result["union_outliers"]
+        assert isinstance(union, list)
+        assert all(isinstance(i, int) for i in union)
+
+    def test_seqtransform_bad_transform(self):
+        """Invalid transform token raises ValueError naming the offending token."""
+        rng = np.random.default_rng(3)
+        data = rng.standard_normal((15, 30))
+        with pytest.raises(ValueError, match="nope"):
+            outl.sequential_transform_outliers(data, transforms=["t0", "nope"])
+
+    def test_seqtransform_depth_method(self):
+        """depth_method reuses the depth dispatcher; default and new token both work."""
+        rng = np.random.default_rng(3)
+        data = rng.standard_normal((15, 30))
+        data[0, :] += 10
+
+        result_default = outl.sequential_transform_outliers(
+            data, transforms=["t0"], depth_method="modified_band"
+        )
+        assert set(result_default.keys()) == {"per_transform_outliers", "union_outliers"}
+
+        result_tv = outl.sequential_transform_outliers(
+            data, transforms=["t0"], depth_method="total_variation"
+        )
+        assert set(result_tv.keys()) == {"per_transform_outliers", "union_outliers"}
