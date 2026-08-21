@@ -425,6 +425,7 @@ fn depth_method_from_str(
             nproj,
             seed: seed.unwrap_or(0),
         }),
+        "total_variation" => Ok(DepthMethod::TotalVariation),
         other => Err(PyValueError::new_err(format!(
             "method must be 'fraiman_muniz', 'band', 'modified_band', or 'random_projection', got '{other}'"
         ))),

@@ -284,6 +284,20 @@ class TestFunctionalBoxplotValueErrors:
         assert np.array_equal(r1["median"], r2["median"])
 
 
+class TestFunctionalDepthNewVariants:
+    """Task 1 tracer + Task 2 extension: 9 new DepthMethod tokens dispatch end-to-end."""
+
+    def test_total_variation_dispatch(self):
+        """Tracer: total_variation dispatches through functional_depth to a finite (10,) array."""
+        import fdars.depth
+
+        data = np.random.default_rng(0).standard_normal((10, 20))
+        result = fdars.depth.functional_depth(data, method="total_variation")
+        assert isinstance(result, np.ndarray)
+        assert result.shape == (10,)
+        assert np.all(np.isfinite(result))
+
+
 class TestFunctionalBoxplotDeterminism:
     """seed=None must equal seed=0 for functional_boxplot (documented contract)."""
 
