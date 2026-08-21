@@ -3,19 +3,18 @@ gsd_state_version: 1.0
 milestone: v6.0
 milestone_name: fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference
 current_phase: 41
-current_phase_name: Docs — Diagrams & Worked Examples
-status: executing
-stopped_at: Completed 41-03-PLAN.md (DOCS-10)
-last_updated: "2026-08-21T20:48:43.600Z"
-last_activity: 2026-08-21
-last_activity_desc: Phase 41 execution resumed (wave continue)
-state_head: a704c4f85d870208b67662ba6a60047c7e1d2321
+status: completed
+stopped_at: Phase 41 complete — all phases complete
+last_updated: "2026-08-21T22:38:56.908Z"
+last_activity: 2026-08-22
+last_activity_desc: Phase 41 complete
+state_head: b1a4799499cde00110cb4179ee9ef06ff198eef6
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 11
-  completed_plans: 10
-  percent: 83
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -29,16 +28,16 @@ See: .planning/PROJECT.md (updated 2026-08-20)
 
 ## Current Position
 
-Phase: 41 (Docs — Diagrams & Worked Examples) — EXECUTING
-Plan: 3 of 4
-Status: Ready to execute
-Last activity: 2026-08-21 — Phase 41 execution resumed (wave continue)
+Phase: 41
+Plan: Not started
+Status: All phases complete
+Last activity: 2026-08-22 — Phase 41 complete
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 7 (this milestone); 11 in v5.0; 11 in v4.0; 19 across v1.0–v3.0
+- Total plans completed: 11 (this milestone); 11 in v5.0; 11 in v4.0; 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -51,7 +50,7 @@ Last activity: 2026-08-21 — Phase 41 execution resumed (wave continue)
 | 38 | 1 | - | - |
 | 39 | 3 | - | - |
 | 40 | 1 | - | - |
-| 41 | TBD | - | - |
+| 41 | 4 | - | - |
 
 **Recent Trend:**
 
@@ -119,7 +118,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-08-21T20:48:43.532Z
-Stopped at: Completed 41-03-PLAN.md (DOCS-10)
+Stopped at: Phase 41 complete — all phases complete
 Resume file: None
 
 ## Operator Next Steps
