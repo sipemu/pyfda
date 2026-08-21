@@ -318,6 +318,12 @@ class TestBuildDiagnosticsOffline:
             "total_variance": total_var,
             "phase_leakage_indicator": phase_leakage_indicator,
             "phase_leakage_flagged": bool(phase_leakage_indicator > 0.5),
+            # pace_fpca branch keys (ADV-05 Group B) — None for standard FPCA input
+            "has_pace_fpca": False,
+            "pace_ncomp": None,
+            "pace_sigma2": None,
+            "pace_variance_explained_cumulative": None,
+            "pace_variance_explained_first": None,
         }
 
         actual = build_diagnostics(fpca_fixture, method="fpca")
