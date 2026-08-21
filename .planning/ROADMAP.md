@@ -215,12 +215,12 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
   3. New/updated Depth-Outliers-Inference docs fold the 9 new depth methods into the depth page, add a functional-outliers page for the 4 detectors (method-accurate SVG), and add an interval-wise-inference page for `itp_*` (SVG showing closure-adjusted p-value intervals, correct closure direction); each new page carries a runnable offline `FDARS_FENCE_OK` worked example.
   4. Advisor `aspects.md` is updated for the extended `outliers`/`regression` diagnostics; all new pages are wired into `mkdocs.yml` nav; whole-site `mkdocs build --strict` passes offline (exit 0); every new SVG is SVGO-idempotent and determinism-clean; a blocking human diagram method-accuracy review (rsvg-convert PNG check: depth asymmetry, PACE irregular observations, ITP closure direction) is satisfied before the milestone closes.
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans executed
 
 - [x] 41-01-PLAN.md — DOCS-08 Regression: new concurrent-regression.md + functional-glm.md pages, 2 hand-authored SVGs (time-varying β(t) curves; FPCA-score→exponential-family link with Gamma inverse-link label), offline FDARS_FENCE_OK fences, Regression nav wiring
 - [x] 41-02-PLAN.md — DOCS-09 FPCA/Classification: new pace-fpca.md page (ragged sparse obs → smooth eigenfunctions SVG, synthetic n≤20 fence) + elastic-multinomial section in classification.md (K OvR→softmax SVG, phoneme aa/ao/dcl m≤64 fence), Represent nav wiring
 - [x] 41-03-PLAN.md — DOCS-10 Depth/Outliers/ITP: fold 9 new depth methods into depth-functions.md; add 4 detectors + hypograph/epigraph asymmetry SVG to outlier-detection.md; new interval-inference.md (closure-direction SVG, itp_* fence), Inference nav wiring
-- [ ] 41-04-PLAN.md — DOCS-11 advisor + gate: update advisor/aspects.md with the actual Phase-40 diagnostic keys, confirm nav, run the whole-site strict build once, whole-corpus SVGO-idempotence + determinism, then the BLOCKING human diagram method-accuracy review
+- [x] 41-04-PLAN.md — DOCS-11 advisor + gate: update advisor/aspects.md with the actual Phase-40 diagnostic keys, confirm nav, run the whole-site strict build once, whole-corpus SVGO-idempotence + determinism, then the BLOCKING human diagram method-accuracy review
 
 **UI hint**: yes
 
@@ -233,7 +233,7 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
 | 38. Group B — FPCA & Classification Bindings | 0/1 | Planned | - |
 | 39. Group C — Depth/Outliers/Interval-Inference Bindings | 0/? | Not started | - |
 | 40. Advisor Extension | 0/? | Not started | - |
-| 41. Docs — Diagrams & Worked Examples | 3/4 | In Progress|  |
+| 41. Docs — Diagrams & Worked Examples | 4/4 | In Progress|  |
 
 ---
 
