@@ -136,6 +136,13 @@ class TestFunctionalDepthValueErrors:
         with pytest.raises(ValueError, match="not_a_method"):
             fdars.depth.functional_depth(cw_temp, method="not_a_method")
 
+    def test_unknown_method_lists_new_tokens(self, cw_temp):
+        """Rewritten wildcard error message lists all 13 supported methods (incl. new ones)."""
+        import fdars.depth
+
+        with pytest.raises(ValueError, match="total_variation"):
+            fdars.depth.functional_depth(cw_temp, method="not_a_method")
+
     def test_empty_data_raises(self):
         import fdars.depth
 
@@ -269,6 +276,13 @@ class TestFunctionalBoxplotValueErrors:
         with pytest.raises(ValueError, match="not_a_method"):
             fdars.depth.functional_boxplot(cw_temp, method="not_a_method", factor=1.5)
 
+    def test_unknown_method_boxplot_lists_new_tokens(self, cw_temp):
+        """Boxplot wildcard error message also lists the new tokens (same dispatcher)."""
+        import fdars.depth
+
+        with pytest.raises(ValueError, match="total_variation"):
+            fdars.depth.functional_boxplot(cw_temp, method="not_a_method", factor=1.5)
+
     def test_random_projection_boxplot_small_nproj(self, cw_temp):
         """RandomProjection boxplot with small nproj works and is seed-reproducible."""
         import fdars.depth
@@ -296,6 +310,52 @@ class TestFunctionalDepthNewVariants:
         assert isinstance(result, np.ndarray)
         assert result.shape == (10,)
         assert np.all(np.isfinite(result))
+
+    @pytest.mark.parametrize(
+        "method",
+        [
+            "hypograph_index",
+            "modified_hypograph_index",
+            "epigraph_index",
+            "half_region",
+            "modified_half_region",
+            "extremal",
+            "extreme_rank_length",
+            "l_infinity",
+            "total_variation",
+        ],
+    )
+    def test_new_variant_finite(self, method):
+        """All 9 new tokens return a finite (10,) array (n=10 satisfies every min-n guard)."""
+        import fdars.depth
+
+        data = np.random.default_rng(0).standard_normal((10, 20))
+        result = fdars.depth.functional_depth(data, method=method)
+        assert isinstance(result, np.ndarray)
+        assert result.shape == (10,), f"{method}: expected (10,), got {result.shape}"
+        assert np.all(np.isfinite(result)), f"{method}: result contains non-finite values"
+
+
+class TestFunctionalBoxplotNewMethods:
+    """Task 2: functional_boxplot accepts the new DepthMethod tokens and returns 7-key dict."""
+
+    @pytest.mark.parametrize("method", ["total_variation", "hypograph_index", "extremal"])
+    def test_boxplot_accepts_new_methods(self, method):
+        """Representative subset of new tokens accepted by functional_boxplot."""
+        import fdars.depth
+
+        data = np.random.default_rng(42).standard_normal((10, 20))
+        result = fdars.depth.functional_boxplot(data, method=method)
+        assert isinstance(result, dict)
+        assert set(result.keys()) == {
+            "median",
+            "central_lower",
+            "central_upper",
+            "whisker_lower",
+            "whisker_upper",
+            "outliers",
+            "depths",
+        }, f"{method}: unexpected keys {set(result.keys())}"
 
 
 class TestFunctionalBoxplotDeterminism:

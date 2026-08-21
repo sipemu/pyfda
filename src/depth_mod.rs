@@ -426,8 +426,20 @@ fn depth_method_from_str(
             seed: seed.unwrap_or(0),
         }),
         "total_variation" => Ok(DepthMethod::TotalVariation),
+        "hypograph_index" => Ok(DepthMethod::HypographIndex),
+        "modified_hypograph_index" => Ok(DepthMethod::ModifiedHypographIndex),
+        "epigraph_index" => Ok(DepthMethod::EpigraphIndex),
+        "half_region" => Ok(DepthMethod::HalfRegion),
+        "modified_half_region" => Ok(DepthMethod::ModifiedHalfRegion),
+        "extremal" => Ok(DepthMethod::Extremal),
+        "extreme_rank_length" => Ok(DepthMethod::ExtremeRankLength),
+        "l_infinity" => Ok(DepthMethod::LInfinity),
         other => Err(PyValueError::new_err(format!(
-            "method must be 'fraiman_muniz', 'band', 'modified_band', or 'random_projection', got '{other}'"
+            "method must be one of 'fraiman_muniz', 'band', 'modified_band', \
+             'random_projection', 'total_variation', 'hypograph_index', \
+             'modified_hypograph_index', 'epigraph_index', 'half_region', \
+             'modified_half_region', 'extremal', 'extreme_rank_length', \
+             'l_infinity' (13 supported methods), got '{other}'"
         ))),
     }
 }
@@ -474,9 +486,13 @@ fn boxplot_result_to_pydict<'py>(
 ///     Functional data matrix, shape `(n, m)`. Rows are observations; columns
 ///     are evaluation points.
 /// method : str, optional
-///     Depth measure to use. One of ``"fraiman_muniz"`` (default), ``"band"``,
-///     ``"modified_band"``, or ``"random_projection"``. An unknown string raises
-///     ``ValueError``.
+///     Depth measure to use. One of 13 supported strings (default
+///     ``"fraiman_muniz"``): ``"fraiman_muniz"``, ``"band"``,
+///     ``"modified_band"``, ``"random_projection"``, ``"total_variation"``,
+///     ``"hypograph_index"``, ``"modified_hypograph_index"``,
+///     ``"epigraph_index"``, ``"half_region"``, ``"modified_half_region"``,
+///     ``"extremal"``, ``"extreme_rank_length"``, ``"l_infinity"``.
+///     An unknown string raises ``ValueError`` listing all 13.
 /// scale : bool, optional
 ///     Applies only to ``"fraiman_muniz"``: whether to scale depths to
 ///     ``2·min(Fn, 1-Fn)`` form (default ``True``).
@@ -496,9 +512,9 @@ fn boxplot_result_to_pydict<'py>(
 /// Raises
 /// ------
 /// ValueError
-///     If ``method`` is not one of the four accepted strings; if ``data`` is
-///     empty; if ``"band"`` or ``"modified_band"`` is requested with fewer than
-///     2 curves; or if ``nproj == 0`` for ``"random_projection"``.
+///     If ``method`` is not one of the 13 accepted strings; if ``data`` is
+///     empty; if a method requiring ``n >= 2`` (or ``n >= 3``) is called with
+///     too few curves; or if ``nproj == 0`` for ``"random_projection"``.
 #[pyfunction]
 #[pyo3(signature = (data, method = "fraiman_muniz", scale = true, nproj = 50, seed = None))]
 pub fn functional_depth<'py>(
@@ -528,9 +544,13 @@ pub fn functional_depth<'py>(
 ///     Functional data matrix, shape ``(n, m)``. Rows are observations.
 ///     Requires at least 2 rows.
 /// method : str, optional
-///     Depth measure used to rank curves. One of ``"fraiman_muniz"``,
-///     ``"band"``, ``"modified_band"`` (default), or ``"random_projection"``.
-///     An unknown string raises ``ValueError``.
+///     Depth measure used to rank curves. One of 13 supported strings
+///     (default ``"modified_band"``): ``"fraiman_muniz"``, ``"band"``,
+///     ``"modified_band"``, ``"random_projection"``, ``"total_variation"``,
+///     ``"hypograph_index"``, ``"modified_hypograph_index"``,
+///     ``"epigraph_index"``, ``"half_region"``, ``"modified_half_region"``,
+///     ``"extremal"``, ``"extreme_rank_length"``, ``"l_infinity"``.
+///     An unknown string raises ``ValueError`` listing all 13.
 /// factor : float, optional
 ///     Fence inflation factor (default 1.5, the Tukey convention). Must be
 ///     finite and ``>= 0``. Negative or non-finite values raise ``ValueError``.
