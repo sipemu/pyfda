@@ -109,7 +109,14 @@ _ASPECT_PRIMERS: dict = {
         "residual_skew > 0 indicates right-skewed residuals; large "
         "residual_max_abs may flag influential outlier observations. "
         "beta_t is the functional coefficient curve; beta_t_range summarises "
-        "its magnitude.\n"
+        "its magnitude. "
+        "For functional_glm: deviance measures model fit (lower = better fit for "
+        "the chosen exponential family); aic and bic enable model comparison across "
+        "ncomp values (lower = preferred); iterations is the IRLS iteration count "
+        "to convergence; family names the exponential-family distribution used. "
+        "For concurrent_regression: concurrent_residual_rms is the root-mean-squared "
+        "residual over the full n x m grid — a single scalar summary of overall fit "
+        "quality; n_predictors is the number of functional predictor curves.\n"
     ),
     "regression_cv": (
         "- Functional regression CV: optimal_k is the number of FPC components "

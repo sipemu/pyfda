@@ -120,11 +120,73 @@ def _build_regression_diagnostics(raw, **kwargs) -> dict:
     # "fitted_values" array and NO 2-D "fitted" key — hence the ndim==2
     # test on the "fitted" key is what distinguishes fosr, and a 1-D
     # "fitted" value yields has_fosr=False.
+    # Note: concurrent_regression also has a 2-D "fitted" array so
+    # has_fosr is True for concurrent_regression too — a known documented
+    # overlap.  has_concurrent_regression is the specific discriminator.
     # ------------------------------------------------------------------
     has_fosr = (
         "fitted" in raw
         and np.asarray(raw["fitted"]).ndim == 2
     )
     diag["has_fosr"] = bool(has_fosr)
+
+    # ------------------------------------------------------------------
+    # functional_glm branch (ADV-05)
+    # Trigger: "deviance" in raw — unique to functional_glm among all
+    # existing regression result shapes.  None of fregre_lm/pls/l1/
+    # huber/np/fosr/fosr_fpc expose a "deviance" key.
+    #
+    # CRITICAL: The key is "iterations" (int), NOT "n_iter"; there is
+    # NO "converged" key in the shipped dict (regression_mod.rs:1112).
+    # ------------------------------------------------------------------
+    has_functional_glm = "deviance" in raw
+    diag["has_functional_glm"] = bool(has_functional_glm)
+    if has_functional_glm:
+        diag["deviance"] = float(raw["deviance"])
+        diag["aic"] = float(raw["aic"]) if "aic" in raw else None
+        diag["bic"] = float(raw["bic"]) if "bic" in raw else None
+        diag["log_likelihood"] = (
+            float(raw["log_likelihood"]) if "log_likelihood" in raw else None
+        )
+        diag["iterations"] = int(raw["iterations"]) if "iterations" in raw else None
+        diag["glm_ncomp"] = int(raw["ncomp"]) if "ncomp" in raw else None
+        diag["family"] = str(raw["family"]) if "family" in raw else None
+    else:
+        diag["deviance"] = None
+        diag["aic"] = None
+        diag["bic"] = None
+        diag["log_likelihood"] = None
+        diag["iterations"] = None
+        diag["glm_ncomp"] = None
+        diag["family"] = None
+
+    # ------------------------------------------------------------------
+    # concurrent_regression branch (ADV-05)
+    # Trigger: "beta_curve" in raw — unique to concurrent_regression;
+    # fosr/fosr_fpc use "beta" not "beta_curve".
+    # residuals are 2-D (n, m) — the existing ndim==1 guard correctly
+    # leaves residual_mean/std/skew as None.  This branch adds a 2-D
+    # summary: residual_rms (overall fit quality) and n_predictors.
+    # has_fosr is also True for concurrent_regression (2-D "fitted") —
+    # has_concurrent_regression is the specific discriminator.
+    # ------------------------------------------------------------------
+    has_concurrent_regression = "beta_curve" in raw
+    diag["has_concurrent_regression"] = bool(has_concurrent_regression)
+    if has_concurrent_regression:
+        res_2d = np.asarray(raw.get("residuals", np.zeros((0, 0))))
+        if res_2d.ndim == 2 and res_2d.size > 0:
+            diag["concurrent_residual_rms"] = float(
+                np.sqrt(np.mean(res_2d ** 2))
+            )
+            diag["concurrent_residual_max_abs"] = float(np.max(np.abs(res_2d)))
+        else:
+            diag["concurrent_residual_rms"] = None
+            diag["concurrent_residual_max_abs"] = None
+        beta_curve = np.asarray(raw["beta_curve"])
+        diag["n_predictors"] = int(beta_curve.shape[0])
+    else:
+        diag["concurrent_residual_rms"] = None
+        diag["concurrent_residual_max_abs"] = None
+        diag["n_predictors"] = None
 
     return diag
