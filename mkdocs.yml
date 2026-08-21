@@ -134,6 +134,7 @@ nav:
     - Profile & Partial-Domain Monitoring: monitoring/profile-partial-monitoring.md
   - Inference:
     - Functional Inference: inference/functional-inference.md
+    - Interval-wise Inference: inference/interval-inference.md
   - Analyze:
     - analyze/index.md
     - Tolerance Bands: analyze/tolerance-bands.md
