@@ -419,6 +419,81 @@ pub fn sequential_transform_outliers<'py>(
     seq_transform_to_pydict(py, r)
 }
 
+// ---------------------------------------------------------------------------
+// Internal helper: DepthgramResult (#[non_exhaustive]) → PyDict.
+//
+// 8 score vectors (Vec<f64>) → 1-D numpy via vec_to_numpy1d.
+// 2 index sets (Vec<usize>) → list[int] via x as i64 collect.
+// ---------------------------------------------------------------------------
+
+fn depthgram_to_pydict<'py>(
+    py: Python<'py>,
+    r: fdars_core::outliers::DepthgramResult,
+) -> PyResult<Bound<'py, PyDict>> {
+    let dict = PyDict::new(py);
+    dict.set_item("mbd_mei_d", vec_to_numpy1d(py, r.mbd_mei_d))?;
+    dict.set_item("mei_mbd_d", vec_to_numpy1d(py, r.mei_mbd_d))?;
+    dict.set_item("mbd_mei_t", vec_to_numpy1d(py, r.mbd_mei_t))?;
+    dict.set_item("mei_mbd_t", vec_to_numpy1d(py, r.mei_mbd_t))?;
+    dict.set_item("mbd_mei_t2", vec_to_numpy1d(py, r.mbd_mei_t2))?;
+    dict.set_item("mei_mbd_t2", vec_to_numpy1d(py, r.mei_mbd_t2))?;
+    dict.set_item(
+        "shape_outliers",
+        r.shape_outliers
+            .into_iter()
+            .map(|x| x as i64)
+            .collect::<Vec<i64>>(),
+    )?;
+    dict.set_item(
+        "magnitude_outliers",
+        r.magnitude_outliers
+            .into_iter()
+            .map(|x| x as i64)
+            .collect::<Vec<i64>>(),
+    )?;
+    dict.set_item("mbd", vec_to_numpy1d(py, r.mbd))?;
+    dict.set_item("mei", vec_to_numpy1d(py, r.mei))?;
+    Ok(dict)
+}
+
+/// Depthgram functional outlier detection.
+///
+/// Combines Modified Band Depth (MBD) and Mean Epigraph Index (MEI) to produce
+/// the depthgram diagram and identify outliers. Fully deterministic (no seed).
+/// Requires at least 2 observations and at least 1 evaluation point.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m). Requires n >= 2 and m >= 1.
+/// outliergram_factor : float, optional
+///     Empirical factor for outliergram outlier threshold (default 1.5).
+/// boxplot_factor : float, optional
+///     Empirical factor for boxplot outlier threshold (default 1.5).
+///
+/// Returns
+/// -------
+/// dict
+///     mbd_mei_d (n,), mei_mbd_d (n,), mbd_mei_t (n,), mei_mbd_t (n,),
+///     mbd_mei_t2 (n,), mei_mbd_t2 (n,), shape_outliers (list[int]),
+///     magnitude_outliers (list[int]), mbd (n,), mei (n,).
+#[pyfunction]
+#[pyo3(signature = (data, outliergram_factor=1.5, boxplot_factor=1.5))]
+pub fn depthgram<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    outliergram_factor: f64,
+    boxplot_factor: f64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let config = fdars_core::outliers::DepthgramConfig {
+        outliergram_factor,
+        boxplot_factor,
+    };
+    let r = to_pyresult(fdars_core::outliers::depthgram(&mat, config))?;
+    depthgram_to_pydict(py, r)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(detect_outliers_lrt, m)?)?;
     m.add_function(wrap_pyfunction!(detect_outliers_lrt_with_dist, m)?)?;
@@ -427,5 +502,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(tvdmss, m)?)?;
     m.add_function(wrap_pyfunction!(muod, m)?)?;
     m.add_function(wrap_pyfunction!(sequential_transform_outliers, m)?)?;
+    m.add_function(wrap_pyfunction!(depthgram, m)?)?;
     Ok(())
 }

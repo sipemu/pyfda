@@ -119,3 +119,54 @@ class TestSeqTransform:
             data, transforms=["t0"], depth_method="total_variation"
         )
         assert set(result_tv.keys()) == {"per_transform_outliers", "union_outliers"}
+
+
+class TestDepthgram:
+    """Tests for fdars.outliers.depthgram (OUTL-04)."""
+
+    def test_depthgram_smoke(self):
+        """depthgram returns a 10-key dict with 8 (n,) arrays + 2 list[int] index sets."""
+        rng = np.random.default_rng(4)
+        data = rng.standard_normal((15, 30))
+        data[0, :] += 10
+
+        result = outl.depthgram(data)
+
+        expected_keys = {
+            "mbd_mei_d",
+            "mei_mbd_d",
+            "mbd_mei_t",
+            "mei_mbd_t",
+            "mbd_mei_t2",
+            "mei_mbd_t2",
+            "shape_outliers",
+            "magnitude_outliers",
+            "mbd",
+            "mei",
+        }
+        assert set(result.keys()) == expected_keys
+
+        score_keys = {
+            "mbd_mei_d", "mei_mbd_d", "mbd_mei_t", "mei_mbd_t",
+            "mbd_mei_t2", "mei_mbd_t2", "mbd", "mei",
+        }
+        for key in score_keys:
+            arr = result[key]
+            assert isinstance(arr, np.ndarray), f"{key} must be ndarray"
+            assert arr.shape == (15,), f"{key} shape must be (15,), got {arr.shape}"
+
+        for key in ("shape_outliers", "magnitude_outliers"):
+            v = result[key]
+            assert isinstance(v, list), f"{key} must be a list"
+            assert all(isinstance(i, int) for i in v), f"{key} elements must be int"
+
+    def test_depthgram_determinism(self):
+        """depthgram is deterministic: two calls produce byte-identical mbd and mei."""
+        rng = np.random.default_rng(4)
+        data = rng.standard_normal((15, 30))
+
+        r1 = outl.depthgram(data)
+        r2 = outl.depthgram(data)
+
+        assert np.array_equal(r1["mbd"], r2["mbd"]), "mbd must be byte-identical across calls"
+        assert np.array_equal(r1["mei"], r2["mei"]), "mei must be byte-identical across calls"
