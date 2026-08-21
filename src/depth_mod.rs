@@ -411,7 +411,7 @@ pub fn random_projection_deriv_1d<'py>(
 // giving byte-identical results for `random_projection` by default.
 // ---------------------------------------------------------------------------
 
-fn depth_method_from_str(
+pub(crate) fn depth_method_from_str(
     method: &str,
     scale: bool,
     nproj: usize,

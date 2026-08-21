@@ -3,6 +3,7 @@
 use crate::convert::*;
 use numpy::PyReadonlyArray2;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 
 /// LRT-based outlier detection with bootstrap.
 ///
@@ -151,10 +152,84 @@ pub fn detect_outliers_lrt_with_dist<'py>(
     Ok(dict)
 }
 
+// ---------------------------------------------------------------------------
+// Internal helper: TvdMssOutliers (#[non_exhaustive]) → PyDict.
+//
+// Accesses fields individually (never struct-literal on a #[non_exhaustive]
+// type from a cross-crate dependency). Index sets via x as i64 collect
+// (the boxplot_result_to_pydict pattern); score vectors via vec_to_numpy1d.
+// ---------------------------------------------------------------------------
+
+fn tvdmss_to_pydict<'py>(
+    py: Python<'py>,
+    r: fdars_core::outliers::TvdMssOutliers,
+) -> PyResult<Bound<'py, PyDict>> {
+    let dict = PyDict::new(py);
+    dict.set_item(
+        "magnitude_outliers",
+        r.magnitude_outliers
+            .into_iter()
+            .map(|x| x as i64)
+            .collect::<Vec<i64>>(),
+    )?;
+    dict.set_item(
+        "shape_outliers",
+        r.shape_outliers
+            .into_iter()
+            .map(|x| x as i64)
+            .collect::<Vec<i64>>(),
+    )?;
+    dict.set_item("tvd", vec_to_numpy1d(py, r.tvd))?;
+    dict.set_item("mss", vec_to_numpy1d(py, r.mss))?;
+    Ok(dict)
+}
+
+/// TVD-MSS functional outlier detection.
+///
+/// Detects magnitude and shape outliers using Total Variation Depth (TVD) and
+/// Modified Shape Similarity (MSS). Both config fields are fully deterministic
+/// (no seed). Requires at least 3 observations.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m). Requires n >= 3.
+/// emp_factor_mss : float, optional
+///     Empirical factor for MSS outlier threshold (default 1.5).
+/// emp_factor_tvd : float, optional
+///     Empirical factor for TVD outlier threshold (default 1.5).
+/// central_region_tvd : float, optional
+///     Central region proportion for TVD (default 0.5).
+///
+/// Returns
+/// -------
+/// dict
+///     magnitude_outliers (list[int]), shape_outliers (list[int]),
+///     tvd (n,), mss (n,).
+#[pyfunction]
+#[pyo3(signature = (data, emp_factor_mss=1.5, emp_factor_tvd=1.5, central_region_tvd=0.5))]
+pub fn tvdmss<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    emp_factor_mss: f64,
+    emp_factor_tvd: f64,
+    central_region_tvd: f64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let config = fdars_core::outliers::TvdMssConfig {
+        emp_factor_mss,
+        emp_factor_tvd,
+        central_region_tvd,
+    };
+    let r = to_pyresult(fdars_core::outliers::tvdmss(&mat, config))?;
+    tvdmss_to_pydict(py, r)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(detect_outliers_lrt, m)?)?;
     m.add_function(wrap_pyfunction!(detect_outliers_lrt_with_dist, m)?)?;
     m.add_function(wrap_pyfunction!(outliergram, m)?)?;
     m.add_function(wrap_pyfunction!(magnitude_shape, m)?)?;
+    m.add_function(wrap_pyfunction!(tvdmss, m)?)?;
     Ok(())
 }
