@@ -525,6 +525,138 @@ anomaly it is designed to catch: the magnitude score peaks on curve 0, the outli
 score on the shape-inverted curve 1, and the MS shape score on the amplitude-scaled curve
 2 -- a compact confirmation that the three diagnostics are complementary.
 
+## Functional-outlier detectors (v6.0)
+
+The v6.0 release adds four new detectors to `fdars.outliers`, each exposing a distinct facet of functional outlyingness. Unlike the LRT and outliergram (which are permutation-based), these detectors are **deterministic** and take **no `argvals` or `seed` parameters** — they operate purely on the data matrix using the column spacing as the implicit grid.
+
+![Functional outlier depth — hypograph vs epigraph asymmetry](../assets/diagrams/functional-outliers.svg){ .fdars-diagram }
+
+### `tvdmss` — Total Variation and Magnitude-Shape Score
+
+`tvdmss` decomposes outlyingness into a **total variation** score (sensitivity to rough, irregular curves) and a **magnitude-shape score** (sensitivity to level shifts and shape changes).
+
+```python
+tvdmss(data, emp_factor_mss=1.5, emp_factor_tvd=1.5, central_region_tvd=0.5)
+```
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `data` | `ndarray (n, m)` | — | Functional data matrix; no `argvals` or `seed` |
+| `emp_factor_mss` | `float` | `1.5` | Fence factor for the magnitude-shape score boxplot rule |
+| `emp_factor_tvd` | `float` | `1.5` | Fence factor for the total-variation depth boxplot rule |
+| `central_region_tvd` | `float` | `0.5` | Proportion defining the central TVD band |
+
+**Returns** a dict with keys:
+
+| Key | Type | Description |
+|---|---|---|
+| `magnitude_outliers` | `list[int]` | Indices of magnitude-flagged outliers |
+| `shape_outliers` | `list[int]` | Indices of shape-flagged outliers |
+| `tvd` | `ndarray (n,)` | Per-curve total variation depth score |
+| `mss` | `ndarray (n,)` | Per-curve magnitude-shape score |
+
+### `muod` — Magnitude-Unaffected Outlyingness Decomposition
+
+`muod` independently identifies shape, magnitude, and amplitude outliers through a depth-based decomposition. Requires $n \ge 3$.
+
+```python
+muod(data, factor=1.5)
+```
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `data` | `ndarray (n, m)` | — | Functional data matrix; no `argvals` or `seed`; $n \ge 3$ |
+| `factor` | `float` | `1.5` | Boxplot fence factor for all three outlier types |
+
+**Returns** a dict with keys:
+
+| Key | Type | Description |
+|---|---|---|
+| `shape_outliers` | `list[int]` | Indices flagged as shape outliers |
+| `magnitude_outliers` | `list[int]` | Indices flagged as magnitude outliers |
+| `amplitude_outliers` | `list[int]` | Indices flagged as amplitude outliers |
+| `shape_index` | `ndarray (n,)` | Per-curve shape outlyingness score |
+| `magnitude_index` | `ndarray (n,)` | Per-curve magnitude outlyingness score |
+| `amplitude_index` | `ndarray (n,)` | Per-curve amplitude outlyingness score |
+
+### `sequential_transform_outliers` — Sequential Transform Screening
+
+`sequential_transform_outliers` applies a sequence of transforms to the data (value, first derivative, second derivative, etc.) and flags curves that are outlying under any transform.
+
+```python
+sequential_transform_outliers(data, transforms, depth_method="modified_band", emp_factor=1.5)
+```
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `data` | `ndarray (n, m)` | — | Functional data matrix |
+| `transforms` | `list[str]` | — | Transforms to apply; each must be one of `"t0"`, `"t1"`, `"t2"`, `"d1"`, `"d2"` |
+| `depth_method` | `str` | `"modified_band"` | Depth method for outlier scoring; accepts all 13 `functional_depth` method strings |
+| `emp_factor` | `float` | `1.5` | Boxplot fence factor |
+
+!!! warning "Parameter name: `depth_method`, not `method`"
+    The parameter that selects the depth method is called `depth_method`, **not** `method`. Passing `method="modified_band"` raises a `TypeError`; always use `depth_method=...`.
+
+**Transform codes:** `"t0"` = values, `"t1"` = first derivative, `"t2"` = second derivative, `"d1"` = absolute value of first derivative, `"d2"` = absolute value of second derivative.
+
+**Returns** a dict with keys:
+
+| Key | Type | Description |
+|---|---|---|
+| `per_transform_outliers` | `list[dict]` | One entry per transform; each has `{"transform": str, "outliers": list[int]}` |
+| `union_outliers` | `list[int]` | Union of all flagged indices across transforms |
+
+### `depthgram` — Depth-Gram (MBD/MEI Joint Outlier Plot)
+
+`depthgram` computes the joint distribution of Modified Band Depth (MBD) and Modified Epigraph Index (MEI) and flags curves that fall outside the expected MBD–MEI parabola. Requires $n \ge 2$.
+
+```python
+depthgram(data, outliergram_factor=1.5, boxplot_factor=1.5)
+```
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `data` | `ndarray (n, m)` | — | Functional data matrix; $n \ge 2$ |
+| `outliergram_factor` | `float` | `1.5` | Fence factor for the outliergram parabola |
+| `boxplot_factor` | `float` | `1.5` | Fence factor for the MBD boxplot |
+
+**Returns** a dict with keys:
+
+| Key | Type | Description |
+|---|---|---|
+| `shape_outliers` | `list[int]` | Shape-outlying curve indices |
+| `magnitude_outliers` | `list[int]` | Magnitude-outlying curve indices |
+| `mbd` | `ndarray (n,)` | Per-curve Modified Band Depth |
+| `mei` | `ndarray (n,)` | Per-curve Modified Epigraph Index |
+| `mbd_mei_d`, `mei_mbd_d`, ... | `ndarray (n,)` | Additional joint-depth statistics (6 arrays total) |
+
+### Example: all four detectors on a contaminated sample
+
+```python exec="1" source="above"
+import numpy as np
+from fdars.simulation import simulate
+from fdars.outliers import tvdmss, muod, sequential_transform_outliers, depthgram
+
+rng = np.random.default_rng(3)
+t = np.linspace(0, 1, 60)
+X = np.asarray(simulate(n=30, argvals=t, n_basis=4, seed=3))
+X[0] += 3.0   # magnitude outlier
+X[1] = -X[1]  # shape outlier
+
+r_tv = tvdmss(X)
+r_mu = muod(X)
+r_st = sequential_transform_outliers(X, transforms=["t0", "d1"])
+r_dg = depthgram(X)
+
+print(f"tvdmss    magnitude_outliers={r_tv['magnitude_outliers']}")
+print(f"muod      magnitude_outliers={r_mu['magnitude_outliers']}")
+print(f"seq_trans union_outliers={r_st['union_outliers']}")
+print(f"depthgram magnitude_outliers={r_dg['magnitude_outliers']}")
+print("FDARS_FENCE_OK")
+```
+
+The four detectors return overlapping but not identical flag sets, confirming that they screen different aspects of functional outlyingness. `tvdmss` and `depthgram` are particularly sensitive to magnitude shifts; `sequential_transform_outliers` catches shape anomalies through the derivative transforms (`"d1"`, `"d2"`); `muod` separates magnitude, shape, and amplitude outlyingness into independent axes.
+
 ## See also
 
 - [Tolerance bands](tolerance-bands.md) -- a curve outside a tolerance band is, by

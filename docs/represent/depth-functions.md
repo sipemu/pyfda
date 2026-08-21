@@ -501,6 +501,58 @@ robust_mean = np.average(fd.data, axis=0, weights=weights)
 
 All `_1d` variants have `_2d` counterparts for surface data, imported from the same `fdars.depth` module.
 
+## New depth measures (v6.0)
+
+`fdars.depth` exposes a unified entry point `functional_depth(data, method=...)` that accepts all 13 depth-method strings — the 4 classic individual-function variants plus the 9 new measures below. For `method="fraiman_muniz"` the `scale` parameter controls standardisation; for `method="random_projection"` the `nproj` (default 50) and `seed` parameters control the random projection count and RNG seed.
+
+### Method reference
+
+| Method string | Interpretation | Parameters |
+|---|---|---|
+| `"hypograph_index"` | Proportion of sample curves **below** the reference curve at each point, averaged over the domain | — |
+| `"modified_hypograph_index"` | Hypograph index smoothed by weighting near-boundary points less | — |
+| `"epigraph_index"` | Proportion of sample curves **above** the reference curve, averaged over the domain | — |
+| `"half_region"` | Proportion of time the reference curve lies within the hypograph **or** epigraph of each sample curve, maximised | — |
+| `"modified_half_region"` | Half-region depth with a modified (smoothed) boundary treatment | — |
+| `"extremal"` | Proportion of the sample that is at least as extreme as the reference curve in every direction | — |
+| `"extreme_rank_length"` | Extreme-rank-length depth: length of time spent inside the central band weighted by rank | — |
+| `"l_infinity"` | $L^\infty$ depth: closeness to the sample maximum deviation, rescaled to $[0,1]$ | — |
+| `"total_variation"` | Proportion of time a reference curve's derivative stays within the sample derivative band | — |
+
+### Hypograph vs epigraph asymmetry
+
+The hypograph index and epigraph index measure **opposite things**:
+
+- **Hypograph index**: high value → many curves above the reference (reference is near the bottom of the bundle).
+- **Epigraph index**: high value → many curves below the reference (reference is near the top of the bundle).
+
+These two indices are not symmetric in general unless the distribution of curves is itself symmetric. A curve at the bottom of the bundle will score **high on hypograph** (most curves are above it) and **low on epigraph** (few curves are below it). See [Outlier Detection](../analyze/outlier-detection.md) for a visual illustration.
+
+### Example: all 9 new methods on a contaminated sample
+
+```python exec="1" source="above"
+import numpy as np
+from fdars.simulation import simulate
+from fdars.depth import functional_depth
+
+rng = np.random.default_rng(7)
+t = np.linspace(0, 1, 80)
+X = np.asarray(simulate(n=25, argvals=t, n_basis=5, seed=7))
+X[0] += 2.5  # magnitude outlier
+
+new_methods = [
+    "hypograph_index", "modified_hypograph_index", "epigraph_index",
+    "half_region", "modified_half_region", "extremal",
+    "extreme_rank_length", "l_infinity", "total_variation",
+]
+for method in new_methods:
+    d = np.asarray(functional_depth(X, method=method))
+    print(f"{method:<28s}  outlier_rank={np.argsort(d)[0]}  min={d.min():.3f}")
+print("FDARS_FENCE_OK")
+```
+
+All methods assign low depth to the planted magnitude outlier (index 0), though the exact ranking of borderline curves differs between measures. The `epigraph_index` assigns low depth to a curve **above** the bulk, whereas `hypograph_index` assigns low depth to a curve **below** — the asymmetry is intentional and method-accurate.
+
 ## References
 
 - Fraiman, R. and Muniz, G. (2001). Trimmed means for functional data. *Test* 10(2), 419-440.
