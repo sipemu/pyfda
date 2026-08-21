@@ -75,7 +75,11 @@ _ASPECT_PRIMERS: dict = {
         "- Functional classification: accuracy is the proportion correctly "
         "classified. error_rate = 1 - accuracy. fold_error_std measures "
         "instability across CV folds. best_ncomp is the number of FPC components "
-        "that minimises CV error.\n"
+        "that minimises CV error. "
+        "For elastic_multinomial: train_accuracy is the in-sample proportion "
+        "correctly classified (distinct from cross-validation accuracy); "
+        "train_error_rate = 1 - train_accuracy; n_classes is the fdars-computed "
+        "number of classes.\n"
     ),
     "alignment": (
         "- Functional alignment registration quality: three fdars scores summarise "

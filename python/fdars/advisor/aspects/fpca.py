@@ -85,4 +85,26 @@ def _build_fpca_diagnostics(raw: dict) -> dict:
         diag["phase_leakage_indicator"] = None
         diag["phase_leakage_flagged"] = None
 
+    # -- pace_fpca branch (ADV-05 Group B) -----------------------------------
+    # Trigger: "eigenvalues" in raw — unique to pace_fpca.  The standard FPCA
+    # result (from fdars.regression.fpca) carries "singular_values" (not
+    # "eigenvalues"), so detection is unambiguous.
+    # The pace_fpca eigenvalues are ALREADY SCALED (returned directly by
+    # the PACE algorithm) — pass them directly to _eigenvalues_to_variance_cumulative
+    # without any additional sv**2/(n-1) scaling.
+    has_pace_fpca = "eigenvalues" in raw
+    diag["has_pace_fpca"] = bool(has_pace_fpca)
+    if has_pace_fpca:
+        diag["pace_ncomp"] = int(raw["ncomp"]) if "ncomp" in raw else None
+        diag["pace_sigma2"] = float(raw["sigma2"]) if "sigma2" in raw else None
+        ev_raw = raw["eigenvalues"]
+        cum_list = _eigenvalues_to_variance_cumulative(ev_raw)
+        diag["pace_variance_explained_cumulative"] = cum_list
+        diag["pace_variance_explained_first"] = float(cum_list[0]) if cum_list else None
+    else:
+        diag["pace_ncomp"] = None
+        diag["pace_sigma2"] = None
+        diag["pace_variance_explained_cumulative"] = None
+        diag["pace_variance_explained_first"] = None
+
     return diag

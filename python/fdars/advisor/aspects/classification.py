@@ -130,4 +130,22 @@ def _build_classification_diagnostics(
     # -- best_ncomp (CV path) -----------------------------------------------
     diag["best_ncomp"] = int(raw["best_ncomp"]) if "best_ncomp" in raw else None
 
+    # -- elastic_multinomial branch (ADV-05 Group B) -------------------------
+    # Trigger: "train_accuracy" in raw — unique to elastic_multinomial.
+    # Existing point-estimate results use "accuracy" (never "train_accuracy");
+    # fclassif_cv uses "error_rate" and "fold_errors".
+    # The elastic_multinomial result also carries "n_classes" in the raw dict —
+    # override the caller-supplied value with the fdars-computed count.
+    has_elastic_multinomial = "train_accuracy" in raw
+    diag["has_elastic_multinomial"] = bool(has_elastic_multinomial)
+    if has_elastic_multinomial:
+        diag["train_accuracy"] = float(raw["train_accuracy"])
+        diag["train_error_rate"] = float(1.0 - raw["train_accuracy"])
+        # Override caller-supplied n_classes with the fdars-computed count
+        if "n_classes" in raw:
+            diag["n_classes"] = int(raw["n_classes"])
+    else:
+        diag["train_accuracy"] = None
+        diag["train_error_rate"] = None
+
     return diag
