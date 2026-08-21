@@ -158,4 +158,99 @@ def _build_outliers_diagnostics(raw: dict, **kwargs) -> dict:
         diag["tvd_range"] = None
         diag["mss_range"] = None
 
+    # -- muod shape ----------------------------------------------------------
+    # Trigger: "amplitude_outliers" in raw (unique to muod).
+    # Note: muod also has "shape_outliers"/"magnitude_outliers" like tvdmss, but
+    # tvdmss does NOT have "amplitude_outliers"; muod does NOT have "tvd"/"mss".
+    has_muod = "amplitude_outliers" in raw
+    diag["has_muod"] = bool(has_muod)
+    if has_muod:
+        mag_out = raw.get("magnitude_outliers") or []
+        shp_out = raw.get("shape_outliers") or []
+        amp_out = raw.get("amplitude_outliers") or []
+        n_mag = int(len(mag_out))
+        n_shp = int(len(shp_out))
+        n_amp = int(len(amp_out))
+        diag["n_muod_magnitude_outliers"] = n_mag
+        diag["n_muod_shape_outliers"] = n_shp
+        diag["n_amplitude_outliers"] = n_amp
+        # n_obs for muod comes from the score arrays (e.g. shape_index)
+        muod_n_obs = n_obs if n_obs and n_obs > 0 else None
+        if muod_n_obs:
+            diag["muod_magnitude_outlier_fraction"] = float(n_mag / muod_n_obs)
+            diag["muod_shape_outlier_fraction"] = float(n_shp / muod_n_obs)
+            diag["amplitude_outlier_fraction"] = float(n_amp / muod_n_obs)
+        else:
+            diag["muod_magnitude_outlier_fraction"] = None
+            diag["muod_shape_outlier_fraction"] = None
+            diag["amplitude_outlier_fraction"] = None
+        # Score ranges — [float(min), float(max)] via np.asarray
+        for score_key, range_key in (
+            ("shape_index", "shape_index_range"),
+            ("magnitude_index", "magnitude_index_range"),
+            ("amplitude_index", "amplitude_index_range"),
+        ):
+            if score_key in raw:
+                arr = np.asarray(raw[score_key], dtype=float)
+                diag[range_key] = [float(np.min(arr)), float(np.max(arr))]
+            else:
+                diag[range_key] = None
+    else:
+        diag["n_muod_magnitude_outliers"] = None
+        diag["n_muod_shape_outliers"] = None
+        diag["n_amplitude_outliers"] = None
+        diag["muod_magnitude_outlier_fraction"] = None
+        diag["muod_shape_outlier_fraction"] = None
+        diag["amplitude_outlier_fraction"] = None
+        diag["shape_index_range"] = None
+        diag["magnitude_index_range"] = None
+        diag["amplitude_index_range"] = None
+
+    # -- sequential_transform_outliers shape ---------------------------------
+    # Trigger: "union_outliers" in raw (unique to this detector).
+    # CRITICAL: n_obs is NOT recoverable from this result dict — no score array
+    # is present.  Do NOT emit an outlier_fraction.
+    has_sequential_transform = "union_outliers" in raw
+    diag["has_sequential_transform"] = bool(has_sequential_transform)
+    if has_sequential_transform:
+        diag["n_union_outliers"] = int(len(raw["union_outliers"]))
+        per_tf = raw.get("per_transform_outliers") or []
+        diag["n_transforms"] = int(len(per_tf))
+    else:
+        diag["n_union_outliers"] = None
+        diag["n_transforms"] = None
+
+    # -- depthgram shape -----------------------------------------------------
+    # Trigger: "mbd_mei_d" in raw (unique to depthgram; shared "mei"/"mbd"
+    # keys already excluded from the outliergram block above via the
+    # "mbd_mei_d" not in raw guard).
+    has_depthgram = "mbd_mei_d" in raw
+    diag["has_depthgram"] = bool(has_depthgram)
+    if has_depthgram:
+        # n_obs from "mbd" (length n per depthgram structure)
+        dg_mbd = np.asarray(raw["mbd"], dtype=float)
+        dg_mei = np.asarray(raw["mei"], dtype=float)
+        dg_n_obs = int(len(dg_mbd))
+        dg_shp = raw.get("shape_outliers") or []
+        dg_mag = raw.get("magnitude_outliers") or []
+        dg_n_shp = int(len(dg_shp))
+        dg_n_mag = int(len(dg_mag))
+        diag["n_depthgram_shape_outliers"] = dg_n_shp
+        diag["n_depthgram_magnitude_outliers"] = dg_n_mag
+        if dg_n_obs > 0:
+            diag["depthgram_shape_outlier_fraction"] = float(dg_n_shp / dg_n_obs)
+            diag["depthgram_magnitude_outlier_fraction"] = float(dg_n_mag / dg_n_obs)
+        else:
+            diag["depthgram_shape_outlier_fraction"] = 0.0
+            diag["depthgram_magnitude_outlier_fraction"] = 0.0
+        diag["depthgram_mbd_range"] = [float(np.min(dg_mbd)), float(np.max(dg_mbd))]
+        diag["depthgram_mei_range"] = [float(np.min(dg_mei)), float(np.max(dg_mei))]
+    else:
+        diag["n_depthgram_shape_outliers"] = None
+        diag["n_depthgram_magnitude_outliers"] = None
+        diag["depthgram_shape_outlier_fraction"] = None
+        diag["depthgram_magnitude_outlier_fraction"] = None
+        diag["depthgram_mbd_range"] = None
+        diag["depthgram_mei_range"] = None
+
     return diag
