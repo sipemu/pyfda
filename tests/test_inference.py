@@ -778,6 +778,29 @@ class TestItpOnePop:
         with pytest.raises(ValueError, match="nope"):
             inf.itp_one_pop(data, argvals, basis_type="nope", n_perm=9)
 
+    def test_itp_one_pop_with_mu0(self):
+        """itp_one_pop accepts a non-None mu0 null mean without error."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(4)
+        data = rng.standard_normal((20, 24))
+        argvals = np.linspace(0, 1, 24)
+        mu0 = np.zeros(24)
+        result = inf.itp_one_pop(data, argvals, mu0=mu0, n_perm=49)
+        assert isinstance(result["adjusted_pvalues"], np.ndarray)
+        assert result["adjusted_pvalues"].shape == (result["n_basis"],)
+
+    def test_itp_one_pop_determinism(self):
+        """Two calls with seed=None produce byte-identical results."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(5)
+        data = rng.standard_normal((20, 24))
+        argvals = np.linspace(0, 1, 24)
+        r1 = inf.itp_one_pop(data, argvals, n_perm=49)
+        r2 = inf.itp_one_pop(data, argvals, n_perm=49)
+        assert np.array_equal(r1["adjusted_pvalues"], r2["adjusted_pvalues"])
+
 
 # ---------------------------------------------------------------------------
 # ITP-02: itp_two_pop (two-sample interval-wise testing + seed determinism)
@@ -828,6 +851,20 @@ class TestItpTwoPop:
             "seed=None must give byte-identical adjusted_pvalues"
         )
         assert np.array_equal(r1["raw_pvalues"], r2["raw_pvalues"])
+
+    def test_itp_two_pop_seed_none_equals_seed_zero(self):
+        """Documented contract: seed=None resolves to seed=0 for itp_two_pop."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(11)
+        a = rng.standard_normal((15, 24))
+        b = rng.standard_normal((15, 24)) + 0.5
+        argvals = np.linspace(0, 1, 24)
+        r_none = inf.itp_two_pop(a, b, argvals, n_perm=49)
+        r_zero = inf.itp_two_pop(a, b, argvals, n_perm=49, seed=0)
+        assert np.array_equal(r_none["adjusted_pvalues"], r_zero["adjusted_pvalues"]), (
+            "seed=None must equal seed=0 (documented contract)"
+        )
 
     def test_itp_two_pop_degenerate_nbasis(self):
         """nbasis=1 (below the >= 2 guard) raises ValueError."""
@@ -899,3 +936,15 @@ class TestItpFlm:
         assert result["basis_type"] == "fourier"
         n_basis = result["n_basis"]
         assert result["adjusted_pvalues"].shape == (n_basis,)
+
+    def test_itp_flm_determinism(self):
+        """Two calls with seed=None produce byte-identical results."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(23)
+        data = rng.standard_normal((25, 24))
+        y = data[:, :5].sum(axis=1) + 0.1 * rng.standard_normal(25)
+        argvals = np.linspace(0, 1, 24)
+        r1 = inf.itp_flm(data, y, argvals, n_perm=49)
+        r2 = inf.itp_flm(data, y, argvals, n_perm=49)
+        assert np.array_equal(r1["adjusted_pvalues"], r2["adjusted_pvalues"])

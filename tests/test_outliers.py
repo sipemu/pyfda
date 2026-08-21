@@ -28,6 +28,12 @@ class TestTvdMss:
             assert isinstance(arr, np.ndarray), f"{key} must be ndarray"
             assert arr.shape == (15,), f"{key} shape must be (15,), got {arr.shape}"
 
+    def test_tvdmss_degenerate_n_too_small(self):
+        """tvdmss raises ValueError when n < 3 (below core minimum)."""
+        data = np.zeros((2, 30))
+        with pytest.raises(ValueError):
+            outl.tvdmss(data)
+
 
 class TestMuod:
     """Tests for fdars.outliers.muod (OUTL-02)."""
@@ -98,11 +104,15 @@ class TestSeqTransform:
         assert all(isinstance(i, int) for i in union)
 
     def test_seqtransform_bad_transform(self):
-        """Invalid transform token raises ValueError naming the offending token."""
+        """Invalid transform token raises ValueError naming the offending token and listing valid tokens."""
         rng = np.random.default_rng(3)
         data = rng.standard_normal((15, 30))
-        with pytest.raises(ValueError, match="nope"):
+        with pytest.raises(ValueError, match="nope") as exc_info:
             outl.sequential_transform_outliers(data, transforms=["t0", "nope"])
+        # Error message must also list a valid token (mirroring depth test pattern).
+        assert "t0" in str(exc_info.value), (
+            "error message must list valid transform tokens (e.g. 't0')"
+        )
 
     def test_seqtransform_depth_method(self):
         """depth_method reuses the depth dispatcher; default and new token both work."""
@@ -170,3 +180,9 @@ class TestDepthgram:
 
         assert np.array_equal(r1["mbd"], r2["mbd"]), "mbd must be byte-identical across calls"
         assert np.array_equal(r1["mei"], r2["mei"]), "mei must be byte-identical across calls"
+
+    def test_depthgram_degenerate_n_too_small(self):
+        """depthgram raises ValueError when n < 2 (below core minimum)."""
+        data = np.zeros((1, 30))
+        with pytest.raises(ValueError):
+            outl.depthgram(data)
