@@ -27,15 +27,15 @@ Prior-milestone requirements: see `.planning/milestones/v5.0-REQUIREMENTS.md` (a
 
 ### Group C — Depth / Outliers / Interval Inference (extend `fdars.depth` / `fdars.outliers` / `fdars.inference`)
 
-- [ ] **DEPTH-03**: `fdars.depth.functional_depth(..., method=...)` gains the 9 new fdars-core 0.23 `DepthMethod` variants — `hypograph_index`, `modified_hypograph_index`, `epigraph_index`, `half_region`, `modified_half_region`, `extremal`, `extreme_rank_length`, `l_infinity`, `total_variation` (13 methods total). The Python string map covers every new variant and the `#[non_exhaustive]` wildcard error message lists all supported methods; `functional_boxplot`'s `method` param accepts them too.
-- [ ] **OUTL-01**: User can detect magnitude/shape outliers via `fdars.outliers.tvdmss(data, argvals, ...)` → dict (outlier indices as a Python `list[int]`, plus fdars-computed scores/threshold).
-- [ ] **OUTL-02**: User can run the MUOD (massive unsupervised outlier detection) detector via `fdars.outliers.muod(data, argvals, ...)` → dict (amplitude/magnitude/shape index sets + scores).
-- [ ] **OUTL-03**: User can run the sequential-transform outlier detector via `fdars.outliers.sequential_transform_outliers(data, argvals, transforms=[...], ...)` → dict; the `transforms` sequence maps to `#[non_exhaustive]` `SeqTransform` variants via string with a `ValueError` wildcard fallback.
-- [ ] **OUTL-04**: User can compute a depthgram / depthgram-based outlier detection via `fdars.outliers.depthgram(data, argvals, ...)` → dict (the two depth indices + flagged outliers). All four detectors: any permutation/random component takes a `seed` exposed as `seed=None` → fixed default for byte-identical offline reproducibility (plan-time audit of `outliers_mod.rs` for existing seed params); registered with `to_pyresult()` guards; degenerate inputs raise `ValueError`.
-- [ ] **ITP-01**: User can run a one-population interval-wise test via `fdars.inference.itp_one_pop(data, argvals, mu0=..., ...)` → dict (`ItpResult`), returning **vector** closure-adjusted p-values (`adjusted_pvalues`) + unadjusted p-values + the test statistic curve.
-- [ ] **ITP-02**: User can run a two-population interval-wise test via `fdars.inference.itp_two_pop(data_a, data_b, argvals, ...)` → dict (`ItpResult`); permutation `seed` exposed as `seed=None` → fixed default.
-- [ ] **ITP-03**: User can run an interval-wise FLM test via `fdars.inference.itp_flm(data, response, argvals, ...)` → dict (`ItpResult`); `basis_type` maps a `#[non_exhaustive]` `ProjectionBasisType` via string with a `ValueError` wildcard fallback; re-fits internally (no persistent handle).
-- [ ] **ITP-04**: The three ITP functions are registered in `src/inference_mod.rs` + `register_submodule!` via a **new** `itp_result_to_pydict` helper (distinct from `test_result_to_pydict`, since results are p-value vectors not scalars); vectors are exposed as 1-D arrays; all fallible paths via `to_pyresult()`; degenerate inputs raise `ValueError`.
+- [x] **DEPTH-03**: `fdars.depth.functional_depth(..., method=...)` gains the 9 new fdars-core 0.23 `DepthMethod` variants — `hypograph_index`, `modified_hypograph_index`, `epigraph_index`, `half_region`, `modified_half_region`, `extremal`, `extreme_rank_length`, `l_infinity`, `total_variation` (13 methods total). The Python string map covers every new variant and the `#[non_exhaustive]` wildcard error message lists all supported methods; `functional_boxplot`'s `method` param accepts them too.
+- [x] **OUTL-01**: User can detect magnitude/shape outliers via `fdars.outliers.tvdmss(data, argvals, ...)` → dict (outlier indices as a Python `list[int]`, plus fdars-computed scores/threshold).
+- [x] **OUTL-02**: User can run the MUOD (massive unsupervised outlier detection) detector via `fdars.outliers.muod(data, argvals, ...)` → dict (amplitude/magnitude/shape index sets + scores).
+- [x] **OUTL-03**: User can run the sequential-transform outlier detector via `fdars.outliers.sequential_transform_outliers(data, argvals, transforms=[...], ...)` → dict; the `transforms` sequence maps to `#[non_exhaustive]` `SeqTransform` variants via string with a `ValueError` wildcard fallback.
+- [x] **OUTL-04**: User can compute a depthgram / depthgram-based outlier detection via `fdars.outliers.depthgram(data, argvals, ...)` → dict (the two depth indices + flagged outliers). All four detectors: any permutation/random component takes a `seed` exposed as `seed=None` → fixed default for byte-identical offline reproducibility (plan-time audit of `outliers_mod.rs` for existing seed params); registered with `to_pyresult()` guards; degenerate inputs raise `ValueError`.
+- [x] **ITP-01**: User can run a one-population interval-wise test via `fdars.inference.itp_one_pop(data, argvals, mu0=..., ...)` → dict (`ItpResult`), returning **vector** closure-adjusted p-values (`adjusted_pvalues`) + unadjusted p-values + the test statistic curve.
+- [x] **ITP-02**: User can run a two-population interval-wise test via `fdars.inference.itp_two_pop(data_a, data_b, argvals, ...)` → dict (`ItpResult`); permutation `seed` exposed as `seed=None` → fixed default.
+- [x] **ITP-03**: User can run an interval-wise FLM test via `fdars.inference.itp_flm(data, response, argvals, ...)` → dict (`ItpResult`); `basis_type` maps a `#[non_exhaustive]` `ProjectionBasisType` via string with a `ValueError` wildcard fallback; re-fits internally (no persistent handle).
+- [x] **ITP-04**: The three ITP functions are registered in `src/inference_mod.rs` + `register_submodule!` via a **new** `itp_result_to_pydict` helper (distinct from `test_result_to_pydict`, since results are p-value vectors not scalars); vectors are exposed as 1-D arrays; all fallible paths via `to_pyresult()`; degenerate inputs raise `ValueError`.
 
 ### Advisor Extension (grounding invariant preserved)
 
@@ -77,15 +77,15 @@ REQ-ID → Phase mapping. 23/23 v6.0 requirements mapped, each to exactly one ph
 | PACE-01 | Phase 38 | Complete |
 | PACE-02 | Phase 38 | Complete |
 | CLASS-01 | Phase 38 | Complete |
-| DEPTH-03 | Phase 39 | Pending |
-| OUTL-01 | Phase 39 | Pending |
-| OUTL-02 | Phase 39 | Pending |
-| OUTL-03 | Phase 39 | Pending |
-| OUTL-04 | Phase 39 | Pending |
-| ITP-01 | Phase 39 | Pending |
-| ITP-02 | Phase 39 | Pending |
-| ITP-03 | Phase 39 | Pending |
-| ITP-04 | Phase 39 | Pending |
+| DEPTH-03 | Phase 39 | Complete |
+| OUTL-01 | Phase 39 | Complete |
+| OUTL-02 | Phase 39 | Complete |
+| OUTL-03 | Phase 39 | Complete |
+| OUTL-04 | Phase 39 | Complete |
+| ITP-01 | Phase 39 | Complete |
+| ITP-02 | Phase 39 | Complete |
+| ITP-03 | Phase 39 | Complete |
+| ITP-04 | Phase 39 | Complete |
 | ADV-04 | Phase 40 | Pending |
 | ADV-05 | Phase 40 | Pending |
 | DOCS-08 | Phase 41 | Pending |

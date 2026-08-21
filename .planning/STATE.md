@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v6.0
 milestone_name: fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference
-current_phase: 39
-current_phase_name: Group C — Depth/Outliers/Interval-Inference Bindings
+current_phase: 40
+current_phase_name: Advisor Extension
 status: planning
-stopped_at: Phase 38 complete, ready to plan Phase 39
-last_updated: "2026-08-20T22:36:13.726Z"
+stopped_at: Phase 39 complete, ready to plan Phase 40
+last_updated: "2026-08-21T06:19:54.169Z"
 last_activity: 2026-08-21
-last_activity_desc: Phase 38 complete, transitioned to Phase 39
-state_head: a34f4c68b913b74b4963fd90f88b89fa76159435
+last_activity_desc: Phase 39 complete, transitioned to Phase 40
+state_head: f852db3639dc870a9279ba6efdc7b49ffe2b29f7
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
-  percent: 50
+  completed_phases: 4
+  total_plans: 6
+  completed_plans: 6
+  percent: 67
 ---
 
 # Project State
@@ -25,20 +25,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-20)
 
 **Core value:** Bump `fdars-core` 0.20.0→0.23.0 (parallel-only, no linalg), expose the new upstream surface through PyO3 bindings + the Python API across three capability groups (Group A Regression, Group B PACE-FPCA & Classification, Group C Depth/Outliers/Interval-Inference), extend the grounded advisor where a real grounded scalar exists, and document everything method-accurately — with the grounding invariant intact throughout. Same shape as v4.0/v5.0.
-**Current focus:** Phase 38 — Group B — FPCA & Classification Bindings
+**Current focus:** Phase 39 — Group C — Depth/Outliers/Interval-Inference Bindings
 
 ## Current Position
 
-Phase: 39 — Group C — Depth/Outliers/Interval-Inference Bindings
+Phase: 40 — Advisor Extension
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-08-21 — Phase 38 complete, transitioned to Phase 39
+Last activity: 2026-08-21 — Phase 39 complete, transitioned to Phase 40
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3 (this milestone); 11 in v5.0; 11 in v4.0; 19 across v1.0–v3.0
+- Total plans completed: 6 (this milestone); 11 in v5.0; 11 in v4.0; 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -49,7 +49,7 @@ Last activity: 2026-08-21 — Phase 38 complete, transitioned to Phase 39
 | 36 | 1 | - | - |
 | 37 | 1 | - | - |
 | 38 | 1 | - | - |
-| 39 | TBD | - | - |
+| 39 | 3 | - | - |
 | 40 | TBD | - | - |
 | 41 | TBD | - | - |
 
@@ -109,7 +109,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-08-20 — v6.0 roadmap created
-Stopped at: Phase 38 complete, ready to plan Phase 39
+Stopped at: Phase 39 complete, ready to plan Phase 40
 Resume file: .planning/ROADMAP.md
 
 ## Operator Next Steps
