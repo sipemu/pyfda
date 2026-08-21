@@ -542,6 +542,128 @@ pub fn oneway_anova_vstat<'py>(
 }
 
 // ---------------------------------------------------------------------------
+// Internal helper: map a ProjectionBasisType variant to its string token.
+//
+// The enum is #[non_exhaustive] — the wildcard arm is mandatory.
+// ---------------------------------------------------------------------------
+
+fn basis_type_variant_str(b: &fdars_core::ProjectionBasisType) -> &'static str {
+    match b {
+        fdars_core::ProjectionBasisType::Bspline => "bspline",
+        fdars_core::ProjectionBasisType::Fourier => "fourier",
+        _ => "unknown",
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper: map a basis_type string to ProjectionBasisType.
+//
+// The enum is #[non_exhaustive] — an unknown token raises ValueError.
+// ---------------------------------------------------------------------------
+
+fn basis_type_from_str(s: &str) -> PyResult<fdars_core::ProjectionBasisType> {
+    match s {
+        "bspline" => Ok(fdars_core::ProjectionBasisType::Bspline),
+        "fourier" => Ok(fdars_core::ProjectionBasisType::Fourier),
+        other => Err(PyValueError::new_err(format!(
+            "basis_type must be 'bspline' or 'fourier', got '{other}'"
+        ))),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper: map a fdars_core::inference::ItpResult to a Python dict.
+//
+// The struct is #[non_exhaustive] — never struct-literal it; access each
+// field individually.  P-values are VECTORS (Vec<f64>) not scalars — exposed
+// as 1-D numpy arrays via vec_to_numpy1d.  This is DISTINCT from
+// test_result_to_pydict which expects scalar statistic/p_value fields.
+// ---------------------------------------------------------------------------
+
+fn itp_result_to_pydict<'py>(
+    py: Python<'py>,
+    r: fdars_core::inference::ItpResult,
+) -> PyResult<Bound<'py, PyDict>> {
+    let dict = PyDict::new(py);
+    dict.set_item("adjusted_pvalues", vec_to_numpy1d(py, r.adjusted_pvalues))?;
+    dict.set_item("raw_pvalues", vec_to_numpy1d(py, r.raw_pvalues))?;
+    dict.set_item("basis_type", basis_type_variant_str(&r.basis_type))?;
+    dict.set_item("n_basis", r.n_basis)?;
+    dict.set_item("n_perm", r.n_perm)?;
+    Ok(dict)
+}
+
+// ---------------------------------------------------------------------------
+// itp_one_pop
+// ---------------------------------------------------------------------------
+
+/// Interval-wise testing procedure for a single functional population.
+///
+/// Tests whether the mean function of ``data`` differs from a null mean
+/// ``mu0`` (default: zero function) at each projection-basis coefficient.
+/// Returns closure-adjusted and raw p-values (one per basis function).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Functional data matrix, shape ``(n, m)``. Requires ``n >= 2``.
+/// argvals : numpy.ndarray
+///     Evaluation grid, length ``m``. Must match the column count of ``data``.
+/// mu0 : numpy.ndarray or None, optional
+///     Null mean function, length ``m``. ``None`` uses the zero function.
+/// basis_type : str, optional
+///     Projection basis: ``"bspline"`` (default) or ``"fourier"``.
+/// nbasis : int, optional
+///     Number of basis functions to request (default 5). Must be >= 2.
+///     B-spline clamping may reduce the actual count; read ``n_basis`` from
+///     the returned dict for the actual length of the p-value arrays.
+/// n_perm : int, optional
+///     Number of permutations (default 999). Must be >= 1.
+/// seed : int or None, optional
+///     RNG seed. ``None`` resolves to fixed default ``0`` — two calls with
+///     ``seed=None`` and identical inputs are byte-identical.
+///
+/// Returns
+/// -------
+/// dict
+///     ``{"adjusted_pvalues": ndarray(n_basis,), "raw_pvalues": ndarray(n_basis,),
+///     "basis_type": str, "n_basis": int, "n_perm": int}``
+///
+/// Raises
+/// ------
+/// ValueError
+///     If ``n < 2``, ``argvals`` length mismatches, ``mu0`` length mismatches,
+///     ``nbasis < 2``, ``n_perm == 0``, or basis projection fails.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, mu0=None, basis_type="bspline", nbasis=5, n_perm=999, seed=None))]
+pub fn itp_one_pop<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    mu0: Option<PyReadonlyArray1<'py, f64>>,
+    basis_type: &str,
+    nbasis: usize,
+    n_perm: usize,
+    seed: Option<u64>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let mu0_vec = mu0.map(|a| numpy1d_to_vec(a));
+    let bt = basis_type_from_str(basis_type)?;
+    let s = seed.unwrap_or(0);
+    let r = to_pyresult(fdars_core::inference::itp_one_pop(
+        &mat,
+        &av,
+        mu0_vec.as_deref(),
+        bt,
+        nbasis,
+        n_perm,
+        s,
+    ))?;
+    itp_result_to_pydict(py, r)
+}
+
+// ---------------------------------------------------------------------------
 // Module registration
 // ---------------------------------------------------------------------------
 
@@ -554,5 +676,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(flm_f_test, m)?)?;
     m.add_function(wrap_pyfunction!(flm_gof_test, m)?)?;
     m.add_function(wrap_pyfunction!(oneway_anova_vstat, m)?)?;
+    m.add_function(wrap_pyfunction!(itp_one_pop, m)?)?;
     Ok(())
 }

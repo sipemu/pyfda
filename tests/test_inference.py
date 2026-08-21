@@ -718,3 +718,62 @@ class TestOnewayAnovaVstat:
         bad_groups = np.array([-1] + [0] * (n - 1), dtype=np.int64)
         with pytest.raises(ValueError):
             oneway_anova_vstat(X, bad_groups, grid)
+
+
+# ---------------------------------------------------------------------------
+# ITP-01: itp_one_pop (interval-wise testing, single population)
+# ---------------------------------------------------------------------------
+
+
+class TestItpOnePop:
+    """itp_one_pop: ItpResult dict shape, 1-D p-value arrays, basis dispatch."""
+
+    def test_itp_one_pop_smoke(self):
+        """Basic smoke test: 5-key dict, p-value arrays with correct shape."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(1)
+        data = rng.standard_normal((20, 24))
+        argvals = np.linspace(0, 1, 24)
+        result = inf.itp_one_pop(data, argvals, n_perm=99)
+        assert isinstance(result, dict)
+        assert set(result.keys()) == {
+            "adjusted_pvalues",
+            "raw_pvalues",
+            "basis_type",
+            "n_basis",
+            "n_perm",
+        }
+        n_basis = result["n_basis"]
+        adj = result["adjusted_pvalues"]
+        raw = result["raw_pvalues"]
+        assert isinstance(adj, np.ndarray)
+        assert isinstance(raw, np.ndarray)
+        assert adj.shape == (n_basis,), f"expected ({n_basis},), got {adj.shape}"
+        assert raw.shape == (n_basis,), f"expected ({n_basis},), got {raw.shape}"
+        assert np.all((adj >= 0.0) & (adj <= 1.0)), "adjusted_pvalues must be in [0, 1]"
+        assert np.all((raw >= 0.0) & (raw <= 1.0)), "raw_pvalues must be in [0, 1]"
+        assert result["basis_type"] == "bspline"
+        assert result["n_perm"] == 99
+
+    def test_itp_one_pop_fourier(self):
+        """basis_type='fourier' dispatches correctly and round-trips."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(2)
+        data = rng.standard_normal((20, 24))
+        argvals = np.linspace(0, 1, 24)
+        result = inf.itp_one_pop(data, argvals, basis_type="fourier", n_perm=99)
+        assert result["basis_type"] == "fourier"
+        n_basis = result["n_basis"]
+        assert result["adjusted_pvalues"].shape == (n_basis,)
+
+    def test_itp_one_pop_invalid_basis_raises(self):
+        """An invalid basis_type string raises ValueError naming the token."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(3)
+        data = rng.standard_normal((20, 24))
+        argvals = np.linspace(0, 1, 24)
+        with pytest.raises(ValueError, match="nope"):
+            inf.itp_one_pop(data, argvals, basis_type="nope", n_perm=9)
