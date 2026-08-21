@@ -128,7 +128,7 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 - [x] Group A — Regression: `concurrent_regression` + `functional_glm` extending `fdars.regression` — ✓ Phase 37 (2 bindings + 2 PyDict converters; `beta_curve (p,m)` transposition-guarded at p=3,n=10; 4 GLM families via `#[non_exhaustive]` `GlmFamily` string dispatch; embedded `fpca` excluded; `functional_glm` takes no argvals per core; 620 passed / 4 skipped)
 - [x] Group B — FPCA & Classification: `pace_fpca` (sparse/PACE FPCA) + `elastic_multinomial` extending `fdars.classification` — ✓ Phase 38 (pyfda's first `#[pyclass]` `PyIrregFdata` + `fdars.pace_fpca` submodule with dtype-agnostic ragged-list guards + 10-key dict / transposition-guarded eigenfunctions·scores; `elastic_multinomial` with CR-01 label guard, `class_models` omitted; 643 passed / 4 skipped)
 - [x] Group C — Depth / Outliers / Interval Inference: new depth methods + outlier detectors (`tvdmss`/`muod`/`sequential_transform`/depthgram) + interval-wise testing (`itp_*`) extending `fdars.depth`/`fdars.outliers`/`fdars.inference` — ✓ Phase 39 (3 plans: 9 new `functional_depth` variants →13 total; 4 deterministic outlier detectors with `list[int]`/`list[dict]` results; 3 ITP tests via new `itp_result_to_pydict` with `ProjectionBasisType` dispatch + seed determinism; 681 passed / 4 skipped)
-- [ ] Advisor extension (where relevant) — grounded diagnostics for new aspects; grounding invariant + MCP guard-sync (single atomic commit) preserved
+- [x] Advisor extension (where relevant) — grounded diagnostics for new aspects; grounding invariant + MCP guard-sync (single atomic commit) preserved — ✓ Phase 40 (extended 4 existing aspects: `outliers` for tvdmss/muod/sequential_transform/depthgram closing the Phase-34 deferral, `regression` for functional_glm/concurrent_regression, plus Group B `classification` elastic_multinomial + `fpca` pace_fpca; ITP deferred; all diagnostics native float/int, MCP guard-sync a no-op; 772 passed / 4 skipped)
 - [ ] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green
 
 **v5.0 — fdars-core 0.20 Upgrade (Phases 30–35, shipped):**
@@ -198,4 +198,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-21 after Phase 39 — Group C depth/outliers/ITP bindings (3 plans, recovered from a planner stall); 681 passed / 4 skipped*
+*Last updated: 2026-08-21 after Phase 40 — advisor extension (4 aspects: outliers/regression/classification/fpca; ITP deferred); 772 passed / 4 skipped*

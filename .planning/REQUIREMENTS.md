@@ -39,8 +39,8 @@ Prior-milestone requirements: see `.planning/milestones/v5.0-REQUIREMENTS.md` (a
 
 ### Advisor Extension (grounding invariant preserved)
 
-- [ ] **ADV-04**: The grounded advisor's **existing `outliers` aspect** is extended to summarize the new fdars-computed outlier-detector results as grounded scalar diagnostics (e.g. `n_outliers`, outlier fraction, score/threshold ranges — never raw index lists or numpy aggregates), closing the v5.0 Phase-34 functional-boxplot-outlier deferral. No new aspect key is added; the `build_diagnostics` dispatch detects the new result-dict keys. `_DIAGNOSTICS_METHODS`/`_RUNNABLE_METHODS` unchanged (or, if touched, changed in a single atomic commit keeping `test_diagnostics_methods_match_advisor_supported` green); offline determinism (no numpy scalars, byte-identical `json.dumps`) preserved.
-- [ ] **ADV-05**: The advisor's existing `regression` aspect surfaces grounded diagnostics for the new regression results (`functional_glm` deviance/AIC, `concurrent_regression` fit summary) where a real fdars-computed scalar is available; grounding invariant preserved. Advisor coverage of the Group B capabilities (`pace_fpca` via the `fpca` aspect, `elastic_multinomial` via the `classification` aspect) is **decided at plan time** on feasibility — included only if a genuinely grounded scalar diagnostic exists, otherwise left as bindings + docs only.
+- [x] **ADV-04**: The grounded advisor's **existing `outliers` aspect** is extended to summarize the new fdars-computed outlier-detector results as grounded scalar diagnostics (e.g. `n_outliers`, outlier fraction, score/threshold ranges — never raw index lists or numpy aggregates), closing the v5.0 Phase-34 functional-boxplot-outlier deferral. No new aspect key is added; the `build_diagnostics` dispatch detects the new result-dict keys. `_DIAGNOSTICS_METHODS`/`_RUNNABLE_METHODS` unchanged (or, if touched, changed in a single atomic commit keeping `test_diagnostics_methods_match_advisor_supported` green); offline determinism (no numpy scalars, byte-identical `json.dumps`) preserved.
+- [x] **ADV-05**: The advisor's existing `regression` aspect surfaces grounded diagnostics for the new regression results (`functional_glm` deviance/AIC, `concurrent_regression` fit summary) where a real fdars-computed scalar is available; grounding invariant preserved. Advisor coverage of the Group B capabilities (`pace_fpca` via the `fpca` aspect, `elastic_multinomial` via the `classification` aspect) is **decided at plan time** on feasibility — included only if a genuinely grounded scalar diagnostic exists, otherwise left as bindings + docs only.
 
 ### Documentation
 
@@ -86,8 +86,8 @@ REQ-ID → Phase mapping. 23/23 v6.0 requirements mapped, each to exactly one ph
 | ITP-02 | Phase 39 | Complete |
 | ITP-03 | Phase 39 | Complete |
 | ITP-04 | Phase 39 | Complete |
-| ADV-04 | Phase 40 | Pending |
-| ADV-05 | Phase 40 | Pending |
+| ADV-04 | Phase 40 | Complete |
+| ADV-05 | Phase 40 | Complete |
 | DOCS-08 | Phase 41 | Pending |
 | DOCS-09 | Phase 41 | Pending |
 | DOCS-10 | Phase 41 | Pending |

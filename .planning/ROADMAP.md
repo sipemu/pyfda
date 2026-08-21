@@ -103,7 +103,7 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
 - [x] **Phase 37: Group A — Regression Bindings** — `concurrent_regression` (`beta_curve` `(p,m)` transposition-guarded) + `functional_glm` (`GlmFamily` string dispatch, re-fits FPCA internally; Gamma inverse-link + AIC caveat) extending `fdars.regression` (completed 2026-08-20)
 - [x] **Phase 38: Group B — FPCA & Classification Bindings** — new `src/pace_fpca_mod.rs`: `IrregFdata` lists-of-arrays builder + `pace_fpca`; `elastic_multinomial` (CR-01 label guard) extending `fdars.classification` [IrregFdata interface spike at plan time] (completed 2026-08-21)
 - [x] **Phase 39: Group C — Depth/Outliers/Interval-Inference Bindings** — 9 new `DepthMethod` variants + 4 outlier detectors (`tvdmss`/`muod`/`sequential_transform_outliers`/`depthgram`) + 3 ITP tests (`itp_one_pop`/`itp_two_pop`/`itp_flm`) with a new `itp_result_to_pydict` [outliers seed audit spike at plan time] (completed 2026-08-21)
-- [ ] **Phase 40: Advisor Extension** — extend the `outliers` aspect (new detector scalar diagnostics; closes the Phase-34 deferral) + the `regression` aspect (GLM deviance/AIC, concurrent fit summary); Group B advisor coverage decided at plan time; grounding invariant + MCP guard-sync (single atomic commit) preserved [ADV-05 feasibility spike at plan time]
+- [x] **Phase 40: Advisor Extension** — extend the `outliers` aspect (new detector scalar diagnostics; closes the Phase-34 deferral) + the `regression` aspect (GLM deviance/AIC, concurrent fit summary); Group B advisor coverage decided at plan time; grounding invariant + MCP guard-sync (single atomic commit) preserved [ADV-05 feasibility spike at plan time] (completed 2026-08-21)
 - [ ] **Phase 41: Docs — Diagrams & Worked Examples** — new Regression / PACE-FPCA + elastic-multinomial / depth-outliers-inference pages + method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples; advisor aspects.md update; whole-site `mkdocs build --strict` green; blocking human diagram review
 
 ## Phase Details (v6.0)
@@ -198,7 +198,8 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
 **Plan-time spike**: confirm whether `pace_fpca` / `elastic_multinomial` expose a genuinely grounded scalar diagnostic before committing advisor coverage; finalize the exact outlier scalar spec (ADV-05). RESOLVED: Group B INCLUDED (elastic_multinomial `train_accuracy`; pace_fpca `eigenvalues`→variance-explained + `sigma2`/`ncomp` are grounded scalars); ITP DEFERRED (vector `adjusted_pvalues`, no single grounded scalar). MCP guard-sync is a strict no-op — no new aspect key (all four extended aspects already registered).
 
 **Plans**: 1 plan
-- [ ] 40-01-PLAN.md — extend outliers (tvdmss/muod/sequential_transform/depthgram), regression (functional_glm/concurrent_regression), classification (elastic_multinomial), fpca (pace_fpca) aspect builders with grounded scalar diagnostics + offline tests
+
+- [x] 40-01-PLAN.md — extend outliers (tvdmss/muod/sequential_transform/depthgram), regression (functional_glm/concurrent_regression), classification (elastic_multinomial), fpca (pace_fpca) aspect builders with grounded scalar diagnostics + offline tests
 
 **UI hint**: no
 
