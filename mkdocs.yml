@@ -93,6 +93,7 @@ nav:
     - represent/index.md
     - Functional PCA: represent/fpca.md
     - Elastic FPCA: represent/elastic-fpca.md
+    - PACE FPCA: represent/pace-fpca.md
     - Basis Representation: represent/basis-representation.md
     - Interpolation: represent/interpolation.md
     - Imputation: represent/imputation.md
