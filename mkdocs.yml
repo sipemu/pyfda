@@ -124,6 +124,8 @@ nav:
     - Conformal Prediction: regression/conformal-prediction.md
     - Conformal Classification: regression/conformal-classification.md
     - Robust Regression: regression/robust-regression.md
+    - Concurrent Regression: regression/concurrent-regression.md
+    - Functional GLM: regression/functional-glm.md
   - Monitoring:
     - monitoring/index.md
     - Process Monitoring: monitoring/spm.md
