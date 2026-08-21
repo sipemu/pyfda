@@ -21,12 +21,12 @@ The three task families available for every aspect are:
 | `smoothing` | `fdars.basis.smooth_basis_gcv`, `pspline_fit_gcv` | lambda sweep or single-fit GCV scalars (8) | — |
 | `alignment` | `fdars.alignment.karcher_mean`, `karcher_mean_elastic` | mean curve stats, amplitude/phase distances, convergence, registration-quality scores (17) | — |
 | `basis` | `fdars.basis.basis_nbasis_cv` | n_basis sweep, GCV curve, optimal n_basis (8) | — |
-| `fpca` | `fdars.regression.fpca` | n_components, eigenvalues, cumulative variance, phase leakage (8) | [this page](#fpca) |
+| `fpca` | `fdars.regression.fpca`, `fdars.pace_fpca` | n_components, eigenvalues, cumulative variance, phase leakage; PACE branch: pace_ncomp, pace_sigma2, pace_variance_explained_cumulative (12) | [this page](#fpca) |
 | `represent` | raw `Fdata` or `{"data":…,"argvals":…}` dict | grid stats, data range, imputation-quality diagnostics (13) | — |
 | `depth` | `fdars.depth.*` score arrays | n_obs, depth statistics, histogram (9) | [this page](#depth) |
-| `outliers` | `fdars.outliers.*` result dicts | n_outliers, outlier_fraction, magnitude/shape/outliergram ranges (10) | — |
-| `classification` | `fdars.classification.*` result dicts | accuracy, cv_error_rate, fold_error_std, best_ncomp (7) | — |
-| `regression` | `fdars.regression.fregre_*`, `fosr`, `fosr_fpc` | r_squared, residual stats, beta_t_range, has_fosr (8) | — |
+| `outliers` | `fdars.outliers.*` result dicts | n_outliers, outlier_fraction, magnitude/shape/outliergram ranges; tvdmss: has_tvdmss + 7 keys; muod: has_muod + 9 keys; sequential_transform: has_sequential_transform + 2 keys; depthgram: has_depthgram + 6 keys (37) | — |
+| `classification` | `fdars.classification.*` result dicts | accuracy, cv_error_rate, fold_error_std, best_ncomp; elastic_multinomial branch: has_elastic_multinomial, train_accuracy, train_error_rate (10) | — |
+| `regression` | `fdars.regression.fregre_*`, `fosr`, `fosr_fpc`, `functional_glm`, `concurrent_regression` | r_squared, residual stats, beta_t_range, has_fosr; GLM branch: has_functional_glm + 7 keys; concurrent branch: has_concurrent_regression + 3 keys (19) | — |
 | `regression_cv` | `fdars.regression.fregre_cv`, `model_selection_ncomp` | optimal_k, cv_curve, elbow_present (6) | — |
 | `scoring` | `fdars.scoring.functional_mae/mse/mape/msle/explained_variance` | five integrated prediction-quality scalars (5) | [this page](#scoring) |
 | `spm` | `fdars.spm.spm_phase1` | T², SPE stats, exceedance rates, eigenvalues, kurtosis check (14) | — |
@@ -144,25 +144,39 @@ raw data + `argvals` kwargs to trigger a live `basis_nbasis_cv` call.
 
 ## fpca
 
-**fdars source:** `fdars.regression.fpca`
+**fdars source:** `fdars.regression.fpca`, `fdars.pace_fpca`
 
-Returns a dict with `scores`, `singular_values`, `rotation`, `mean`. Eigenvalues are
-derived as `singular_values² / (n−1)`, matching `FPCAResult.explained_variance`.
+`fpca` returns a dict with `scores`, `singular_values`, `rotation`, `mean`. Eigenvalues
+are derived as `singular_values² / (n−1)`, matching `FPCAResult.explained_variance`.
+`pace_fpca` returns pre-scaled `eigenvalues` directly — detected by the presence of the
+`"eigenvalues"` key (unique to PACE; standard FPCA uses `"singular_values"`).
+
+**Standard FPCA keys** (from `fdars.regression.fpca`):
 
 | Key | Meaning |
 |---|---|
 | `method` | Always `"fpca"` |
 | `n_components` | Number of retained FPC components |
 | `n_obs` | Number of observations (rows in scores) |
-| `eigenvalues` | Per-component eigenvalues (list of floats) |
+| `eigenvalues` | Per-component eigenvalues (list of floats); `None` when `singular_values`/`scores` absent |
 | `explained_variance_ratio` | Per-component fraction of total variance |
 | `cumulative_variance_explained` | Running cumulative explained variance |
 | `total_variance` | Sum of all eigenvalues |
 | `phase_leakage_indicator` | Fraction of variance NOT explained by the first component; high value (≥ 0.5) suggests phase variation leaking into the amplitude decomposition |
 | `phase_leakage_flagged` | `True` when `phase_leakage_indicator > 0.5` |
 
-**Task families:** `"interpretation"` (read scree / phase leakage) · `"parameter"` (change n_comp)
-· `"method"` (use elastic FPCA instead)
+**pace_fpca keys** (trigger: `"eigenvalues"` in raw — unique to `pace_fpca`):
+
+| Key | Meaning |
+|---|---|
+| `has_pace_fpca` | `True` when `"eigenvalues"` key is present in the raw dict |
+| `pace_ncomp` | Actual number of PACE components returned (raw key `"ncomp"`); may be less than the requested count |
+| `pace_sigma2` | Measurement-noise variance estimate from PACE (raw key `"sigma2"`) |
+| `pace_variance_explained_cumulative` | Running cumulative variance explained by PACE eigenvalues |
+| `pace_variance_explained_first` | Fraction of variance explained by the leading PACE component |
+
+**Task families:** `"interpretation"` (read scree / phase leakage; PACE: assess noise level and component count) · `"parameter"` (change n_comp; PACE: adjust bandwidth or sigma2)
+· `"method"` (use elastic FPCA for dense regular data; use PACE for sparse irregular observations)
 
 The fence below loads the Canadian Weather dataset, runs `fpca`, and builds the offline
 diagnostics report. No API key is required — this runs live in the docs build.
@@ -272,39 +286,98 @@ print(f"depth_q90:   {diag['depth_q90']:.4f}")
 **fdars source:** `fdars.outliers.detect_outliers_lrt`,
 `fdars.outliers.detect_outliers_lrt_with_dist`,
 `fdars.outliers.outliergram`,
-`fdars.outliers.magnitude_shape`
+`fdars.outliers.magnitude_shape`,
+`fdars.outliers.tvdmss`,
+`fdars.outliers.muod`,
+`fdars.outliers.sequential_transform_outliers`,
+`fdars.outliers.depthgram`
 
-Four result shapes are handled by key-presence guards. `magnitude_shape` returns **no**
-`"outliers"` key — `n_outliers` and `outlier_fraction` are `None` for that variant.
+Eight result shapes are handled by key-presence guards (each detector's result is detected
+by a unique combination of keys). `magnitude_shape` returns **no** `"outliers"` key —
+`n_outliers` and `outlier_fraction` are `None` for that variant.
+`sequential_transform_outliers` does not expose a score array so `n_obs` is `None`.
+
+**Base keys (all shapes):**
 
 | Key | Meaning |
 |---|---|
 | `method` | Always `"outliers"` |
-| `n_obs` | Number of observations (inferred from whichever array is present) |
+| `n_obs` | Number of observations (inferred from the first score array present); `None` for `sequential_transform_outliers` |
 | `n_outliers` | Count of flagged outliers; `None` for `magnitude_shape` results |
 | `outlier_fraction` | Fraction flagged; `None` when `"outliers"` key absent |
 | `threshold` | LRT threshold when present; `None` otherwise |
 | `has_magnitude_shape` | `True` when `"magnitude"` and `"shape"` keys both present |
 | `magnitude_range` | `[min, max]` of magnitude scores; `None` when absent |
 | `shape_range` | `[min, max]` of shape scores; `None` when absent |
-| `has_outliergram` | `True` when `"mei"` and `"mbd"` keys both present |
+| `has_outliergram` | `True` when `"mei"` and `"mbd"` keys both present (and result is NOT depthgram) |
 | `mei_range` | `[min, max]` of MEI scores; `None` when absent |
 | `mbd_range` | `[min, max]` of MBD scores; `None` when absent |
 
+**tvdmss keys** (trigger: `"tvd"` and `"mss"` both in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_tvdmss` | `True` when `"tvd"` and `"mss"` keys are present |
+| `n_magnitude_outliers` | Count of tvdmss magnitude-direction outliers |
+| `n_shape_outliers` | Count of tvdmss shape-direction outliers |
+| `magnitude_outlier_fraction` | tvdmss magnitude-direction fraction; `None` when `n_obs == 0` |
+| `shape_outlier_fraction` | tvdmss shape-direction fraction; `None` when `n_obs == 0` |
+| `tvd_range` | `[min, max]` of TVD scores |
+| `mss_range` | `[min, max]` of MSS scores |
+
+**muod keys** (trigger: `"amplitude_outliers"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_muod` | `True` when `"amplitude_outliers"` key is present |
+| `n_muod_magnitude_outliers` | muod magnitude-direction count |
+| `n_muod_shape_outliers` | muod shape-direction count |
+| `n_amplitude_outliers` | muod amplitude-direction count |
+| `muod_magnitude_outlier_fraction` | muod magnitude fraction; `None` when `n_obs == 0` |
+| `muod_shape_outlier_fraction` | muod shape fraction; `None` when `n_obs == 0` |
+| `amplitude_outlier_fraction` | muod amplitude fraction; `None` when `n_obs == 0` |
+| `shape_index_range` | `[min, max]` of muod shape scores |
+| `magnitude_index_range` | `[min, max]` of muod magnitude scores |
+| `amplitude_index_range` | `[min, max]` of muod amplitude scores |
+
+**sequential_transform_outliers keys** (trigger: `"union_outliers"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_sequential_transform` | `True` when `"union_outliers"` key is present |
+| `n_union_outliers` | Size of the union of outliers across all sequential transform stages |
+| `n_transforms` | Number of sequential detector stages (length of `per_transform_outliers`) |
+
+**depthgram keys** (trigger: `"mbd_mei_d"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_depthgram` | `True` when `"mbd_mei_d"` key is present |
+| `n_depthgram_shape_outliers` | depthgram shape-direction count |
+| `n_depthgram_magnitude_outliers` | depthgram magnitude-direction count |
+| `depthgram_shape_outlier_fraction` | depthgram shape fraction; `None` when `n_obs == 0` |
+| `depthgram_magnitude_outlier_fraction` | depthgram magnitude fraction; `None` when `n_obs == 0` |
+| `depthgram_mbd_range` | `[min, max]` of depthgram MBD scores |
+| `depthgram_mei_range` | `[min, max]` of depthgram MEI scores |
+
 **Task families:** `"interpretation"` (read outlier count and type) · `"parameter"` (adjust threshold or alpha)
-· `"method"` (combine LRT + magnitude–shape for a richer outlier picture)
+· `"method"` (combine detectors; use `tvdmss`/`muod`/`depthgram` for direction-aware outlier analysis)
 
 ---
 
 ## classification
 
 **fdars source:** `fdars.classification.fclassif_lda`, `fclassif_qda`, `fclassif_knn`,
-`fclassif_kernel`, `fclassif_dd`, `fclassif_cv`
+`fclassif_kernel`, `fclassif_dd`, `fclassif_cv`,
+`fdars.classification.elastic_multinomial`
 
-Two result shapes are handled: point-estimate functions return `"accuracy"`;
-`fclassif_cv` returns `"error_rate"` (emitted as `cv_error_rate`) and has no `"accuracy"` key.
+Three result shapes are handled by key-presence guards: point-estimate functions return
+`"accuracy"`; `fclassif_cv` returns `"error_rate"` (emitted as `cv_error_rate`) and has
+no `"accuracy"` key; `elastic_multinomial` returns `"train_accuracy"` (detected by the
+unique `train_accuracy` key) and overrides `n_classes` from the raw dict.
 
-`n_classes` **cannot be inferred from the result dict** — supply it explicitly:
+`n_classes` **cannot be inferred from the result dict for LDA/QDA/KNN variants** —
+supply it explicitly:
 
 ```python
 diag = build_diagnostics(result, method="classification", n_classes=K)
@@ -314,41 +387,82 @@ diag = build_diagnostics(result, method="classification", n_classes=K)
 |---|---|
 | `method` | Always `"classification"` |
 | `n_obs` | Number of observations (from `predicted` length); `None` for CV-only results |
-| `n_classes` | Caller-supplied ground-truth class count; `None` when not passed |
+| `n_classes` | Caller-supplied ground-truth class count (overridden by `elastic_multinomial`'s raw `n_classes`); `None` when not passed |
 | `accuracy` | Proportion correctly classified; derived as `1 - cv_error_rate` when only CV result present |
 | `error_rate` | `1 - accuracy` for point-estimate results; `None` for CV-only |
 | `cv_error_rate` | CV error rate from `fclassif_cv` (raw key `"error_rate"`); `None` for point-estimate |
 | `fold_error_std` | Std of per-fold errors (CV path); `None` for point-estimate |
 | `best_ncomp` | Number of FPC components minimising CV error; `None` for point-estimate |
 
+**elastic_multinomial keys** (trigger: `"train_accuracy"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_elastic_multinomial` | `True` when `"train_accuracy"` key is present |
+| `train_accuracy` | Training-set proportion correctly classified (float) |
+| `train_error_rate` | `1 - train_accuracy` |
+
 **Task families:** `"interpretation"` (read classification accuracy and CV stability) · `"parameter"` (tune k / n_comp)
-· `"method"` (switch classifier)
+· `"method"` (switch classifier; use `elastic_multinomial` for K-class problems in the elastic SRSF domain)
 
 ---
 
 ## regression
 
 **fdars source:** `fdars.regression.fregre_lm`, `fregre_pls`, `fregre_l1`,
-`fregre_huber`, `fregre_np`, `fosr`, `fosr_fpc`
+`fregre_huber`, `fregre_np`, `fosr`, `fosr_fpc`,
+`fdars.regression.functional_glm`,
+`fdars.regression.concurrent_regression`
 
 Note that `fregre_l1` and `fregre_huber` do **not** return `r_squared` — that key is
 `None` for robust regression variants. `fosr`/`fosr_fpc` return 2-D residuals (shape
 `n × m`); residual summary statistics are computed only for 1-D residual arrays.
+`functional_glm` and `concurrent_regression` are detected by unique key guards and
+expose their own sub-tables below.
+
+**Base keys (all variants):**
 
 | Key | Meaning |
 |---|---|
 | `method` | Always `"regression"` |
 | `n_obs` | Number of observations (inferred from `fitted_values` or `fitted`) |
 | `r_squared` | Coefficient of determination; `None` for `fregre_l1` / `fregre_huber` |
-| `residual_mean` | Mean residual; `None` for `fosr`/`fosr_fpc` (2-D residuals) |
-| `residual_std` | Std of residuals; `None` for `fosr`/`fosr_fpc` |
-| `residual_max_abs` | Maximum absolute residual; `None` for `fosr`/`fosr_fpc` |
-| `residual_skew` | Pure-NumPy skewness of residuals; `None` for `fosr`/`fosr_fpc` |
+| `residual_mean` | Mean residual; `None` for `fosr`/`fosr_fpc`/`concurrent_regression` (2-D residuals) |
+| `residual_std` | Std of residuals; `None` for `fosr`/`fosr_fpc`/`concurrent_regression` |
+| `residual_max_abs` | Maximum absolute residual; `None` for `fosr`/`fosr_fpc`/`concurrent_regression` |
+| `residual_skew` | Pure-NumPy skewness of residuals; `None` for `fosr`/`fosr_fpc`/`concurrent_regression` |
 | `beta_t_range` | `[min, max]` of `beta_t`; `None` for `fregre_np` and `fosr`/`fosr_fpc` |
-| `has_fosr` | `True` only when `"fitted"` key is present AND the array is 2-D |
+| `has_fosr` | `True` only when `"fitted"` key is present AND the array is 2-D (also `True` for `concurrent_regression`) |
 
-**Task families:** `"interpretation"` (read model fit and residual behaviour) · `"parameter"` (adjust regularisation)
-· `"method"` (switch between scalar-response and function-on-scalar regression)
+**functional_glm keys** (trigger: `"deviance"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_functional_glm` | `True` when `"deviance"` key is present (unique to `functional_glm`) |
+| `deviance` | Model deviance — residual measure for the exponential-family fit (lower is better) |
+| `aic` | Akaike Information Criterion from the score-space GLM |
+| `bic` | Bayesian Information Criterion from the score-space GLM |
+| `log_likelihood` | Log-likelihood at IRLS convergence |
+| `iterations` | Number of IRLS iterations to convergence (key `"iterations"`, NOT `"n_iter"`) |
+| `glm_ncomp` | Number of FPC components used in the GLM (raw key `"ncomp"`) |
+| `family` | Exponential-family name string (`"gaussian"`, `"binomial"`, `"poisson"`, `"gamma"`) |
+
+!!! warning "Gamma AIC is not comparable to R `glm()` AIC"
+    The `aic` value from `functional_glm` is computed in the FPC score space, not the
+    original data space. It is **not** comparable to AIC from R's `glm()` function, which
+    operates in the original response space.
+
+**concurrent_regression keys** (trigger: `"beta_curve"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_concurrent_regression` | `True` when `"beta_curve"` key is present (unique to `concurrent_regression`) |
+| `n_predictors` | Number of functional predictor curves (rows of `beta_curve`; shape `(p, m)`) |
+| `concurrent_residual_rms` | Root-mean-squared residual over the full `n × m` grid; `None` when residuals absent |
+| `concurrent_residual_max_abs` | Maximum absolute residual over the full grid; `None` when residuals absent |
+
+**Task families:** `"interpretation"` (read model fit and residual behaviour) · `"parameter"` (adjust regularisation or IRLS max_iter)
+· `"method"` (switch between scalar-response, function-on-scalar, GLM, and varying-coefficient regression)
 
 ---
 
