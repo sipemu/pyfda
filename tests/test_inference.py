@@ -839,3 +839,63 @@ class TestItpTwoPop:
         argvals = np.linspace(0, 1, 24)
         with pytest.raises(ValueError):
             inf.itp_two_pop(a, b, argvals, nbasis=1, n_perm=9)
+
+
+# ---------------------------------------------------------------------------
+# ITP-03: itp_flm (FLM interval-wise testing, internal re-fit)
+# ---------------------------------------------------------------------------
+
+
+class TestItpFlm:
+    """itp_flm: ItpResult dict, basis dispatch, fourier round-trip, internal re-fit."""
+
+    def test_itp_flm_smoke(self):
+        """Basic smoke: 5-key dict, p-value arrays with length n_basis, all in [0, 1]."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(20)
+        data = rng.standard_normal((25, 24))
+        y = data[:, :5].sum(axis=1) + 0.1 * rng.standard_normal(25)
+        argvals = np.linspace(0, 1, 24)
+        result = inf.itp_flm(data, y, argvals, n_perm=99)
+        assert isinstance(result, dict)
+        assert set(result.keys()) == {
+            "adjusted_pvalues",
+            "raw_pvalues",
+            "basis_type",
+            "n_basis",
+            "n_perm",
+        }
+        n_basis = result["n_basis"]
+        adj = result["adjusted_pvalues"]
+        raw = result["raw_pvalues"]
+        assert isinstance(adj, np.ndarray)
+        assert isinstance(raw, np.ndarray)
+        assert adj.shape == (n_basis,)
+        assert raw.shape == (n_basis,)
+        assert np.all((adj >= 0.0) & (adj <= 1.0))
+        assert np.all((raw >= 0.0) & (raw <= 1.0))
+
+    def test_itp_flm_bad_basis(self):
+        """Invalid basis_type raises ValueError naming the offending token."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(21)
+        data = rng.standard_normal((25, 24))
+        y = rng.standard_normal(25)
+        argvals = np.linspace(0, 1, 24)
+        with pytest.raises(ValueError, match="nope"):
+            inf.itp_flm(data, y, argvals, basis_type="nope", n_perm=9)
+
+    def test_itp_flm_fourier(self):
+        """basis_type='fourier' round-trips through the result dict."""
+        import fdars.inference as inf
+
+        rng = np.random.default_rng(22)
+        data = rng.standard_normal((25, 24))
+        y = rng.standard_normal(25)
+        argvals = np.linspace(0, 1, 24)
+        result = inf.itp_flm(data, y, argvals, basis_type="fourier", n_perm=99)
+        assert result["basis_type"] == "fourier"
+        n_basis = result["n_basis"]
+        assert result["adjusted_pvalues"].shape == (n_basis,)
