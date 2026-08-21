@@ -1,7 +1,7 @@
 """fdars.advisor.aspects.outliers — Outlier diagnostics builder.
 
 Contains ``_build_outliers_diagnostics``.  Accepts the result dict returned by
-any ``fdars.outliers.*`` function.  Four distinct result shapes are handled by
+any ``fdars.outliers.*`` function.  Eight distinct result shapes are handled by
 key-presence guards:
 
 * ``detect_outliers_lrt`` / ``detect_outliers_lrt_with_dist`` ->
@@ -10,6 +10,14 @@ key-presence guards:
   ``{"mei": arr, "mbd": arr, "outliers": bool_arr}``
 * ``magnitude_shape`` ->
   ``{"magnitude": arr, "shape": arr}``  (NO "outliers" key!)
+* ``depthgram`` ->
+  ``{"mbd_mei_d": arr, "mbd": arr, "mei": arr, "shape_outliers": list, ...}``
+* ``muod`` ->
+  ``{"amplitude_outliers": list, "shape_index": arr, "magnitude_index": arr, ...}``
+* ``tvdmss`` ->
+  ``{"tvd": arr, "mss": arr, "magnitude_outliers": list, "shape_outliers": list}``
+* ``sequential_transform_outliers`` ->
+  ``{"union_outliers": list, "per_transform_outliers": list}``
 
 Every key access is guarded (ASVS V5).  Missing keys emit ``None`` rather than
 raising ``KeyError``.  All values in the returned dict are native Python types
@@ -68,9 +76,9 @@ def _build_outliers_diagnostics(raw: dict, **kwargs) -> dict:
 
     # -- Infer n_obs from whichever array is present first -------------------
     # Priority: "outliers" bool array, then "magnitude", then "shape",
-    # then "mei", then "mbd".
+    # then "mei", then "mbd", then "tvd" (tvdmss), then "shape_index" (muod).
     n_obs: int | None = None
-    for key in ("outliers", "magnitude", "shape", "mei", "mbd"):
+    for key in ("outliers", "magnitude", "shape", "mei", "mbd", "tvd", "shape_index"):
         if key in raw:
             arr = np.asarray(raw[key])
             n_obs = int(len(arr))
@@ -107,7 +115,9 @@ def _build_outliers_diagnostics(raw: dict, **kwargs) -> dict:
         diag["shape_range"] = None
 
     # -- outliergram shape ---------------------------------------------------
-    has_outliergram = "mei" in raw and "mbd" in raw
+    # Guard: depthgram also has "mei"/"mbd" but is detected separately below
+    # via its unique "mbd_mei_d" key.  Exclude depthgram from this block.
+    has_outliergram = "mei" in raw and "mbd" in raw and "mbd_mei_d" not in raw
     diag["has_outliergram"] = bool(has_outliergram)
     if has_outliergram:
         mei = np.asarray(raw["mei"], dtype=float)
@@ -117,5 +127,35 @@ def _build_outliers_diagnostics(raw: dict, **kwargs) -> dict:
     else:
         diag["mei_range"] = None
         diag["mbd_range"] = None
+
+    # -- tvdmss shape --------------------------------------------------------
+    # Trigger: "tvd" in raw and "mss" in raw (unique to tvdmss; neither
+    # outliergram nor muod carries these keys).
+    has_tvdmss = "tvd" in raw and "mss" in raw
+    diag["has_tvdmss"] = bool(has_tvdmss)
+    if has_tvdmss:
+        tvd = np.asarray(raw["tvd"], dtype=float)
+        mss = np.asarray(raw["mss"], dtype=float)
+        mag_out = raw.get("magnitude_outliers") or []
+        shp_out = raw.get("shape_outliers") or []
+        n_magnitude_outliers = int(len(mag_out))
+        n_shape_outliers = int(len(shp_out))
+        diag["n_magnitude_outliers"] = n_magnitude_outliers
+        diag["n_shape_outliers"] = n_shape_outliers
+        if n_obs and n_obs > 0:
+            diag["magnitude_outlier_fraction"] = float(n_magnitude_outliers / n_obs)
+            diag["shape_outlier_fraction"] = float(n_shape_outliers / n_obs)
+        else:
+            diag["magnitude_outlier_fraction"] = 0.0
+            diag["shape_outlier_fraction"] = 0.0
+        diag["tvd_range"] = [float(np.min(tvd)), float(np.max(tvd))]
+        diag["mss_range"] = [float(np.min(mss)), float(np.max(mss))]
+    else:
+        diag["n_magnitude_outliers"] = None
+        diag["n_shape_outliers"] = None
+        diag["magnitude_outlier_fraction"] = None
+        diag["shape_outlier_fraction"] = None
+        diag["tvd_range"] = None
+        diag["mss_range"] = None
 
     return diag
