@@ -569,6 +569,109 @@ reflect their bias-variance trade-offs rather than any failure to learn the sign
 5. Use the **DD** classifier when robustness to outliers matters most.
 6. Use **logistic regression** when you need calibrated probabilities or log-odds interpretation.
 
+---
+
+## Elastic Multinomial Classification
+
+When classes exceed two, `elastic_multinomial` extends the elastic binary
+classifier to K classes via a **one-vs-rest (OvR)** decomposition: it fits K
+independent binary elastic classifiers (each in the SRSF/elastic domain), then
+combines their raw scores with a softmax to produce calibrated class
+probabilities.
+
+![Elastic multinomial — K one-vs-rest binary elastic classifiers combined via softmax](../assets/diagrams/elastic-multinomial.svg){ .fdars-diagram }
+
+### Theory
+
+For K classes, let $s_k(x)$ be the score produced by the $k$-th OvR binary
+elastic classifier applied to curve $x$. The softmax aggregation yields
+
+$$P(y = k \mid x) = \frac{\exp(s_k(x))}{\sum_{j=1}^{K} \exp(s_j(x))}, \quad k = 1, \dots, K.$$
+
+Each binary classifier uses the same SRSF elastic penalty framework as
+`elastic_logistic`, so the model is **phase-invariant**: time-warping of input
+curves does not affect the decision boundary.
+
+### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `data` | `ndarray (n, m)` | — | Functional observations, one per row |
+| `labels` | `ndarray (n,)` dtype `int64` | — | 0-indexed contiguous class labels, 0 … K−1 |
+| `argvals` | `ndarray (m,)` | — | Evaluation grid |
+| `ncomp_beta` | `int` | 10 | B-spline basis functions per OvR classifier |
+| `lambda_` | `float` | 0.1 | Roughness penalty |
+| `max_iter` | `int` | 100 | Maximum IRLS iterations per OvR model |
+| `tol` | `float` | 1e-4 | Convergence tolerance |
+
+### Returns
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `n_classes` | `int` | Number of classes K |
+| `classes` | `ndarray (K,)` | Unique class indices |
+| `train_probabilities` | `ndarray (n, K)` | Softmax class probabilities |
+| `predicted_classes` | `ndarray (n,)` | Predicted class label per observation |
+| `train_accuracy` | `float` | Resubstitution accuracy |
+
+!!! note "Labels must be 0-indexed contiguous int64 (Pitfall 7)"
+    `labels` must have dtype `np.int64` and contain only the values
+    0, 1, …, K−1 with no gaps. Passing `np.int32`, a Python list, or
+    non-contiguous indices (e.g. `[0, 2]`) raises a `ValueError`. Remap
+    your class indices to 0 … K−1 before calling:
+
+    ```python
+    classes, y = np.unique(raw_labels, return_inverse=True)
+    y = y.astype(np.int64)
+    ```
+
+### Example: phoneme 3-class classification
+
+The phoneme dataset contains 80 log-periodograms for each of five spoken
+sounds. We subset to three classes — `aa`, `ao`, and `dcl` — and take
+20 observations per class (60 total) so the elastic alignment completes
+quickly during the docs build. Columns are also downsampled to m ≤ 64.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_phoneme
+import fdars.classification as clf
+
+freq, X, meta = load_phoneme()
+ph = meta["phoneme"].to_numpy()
+
+# 3-class subset: aa, ao, dcl — 20 obs per class for fence speed
+classes_3 = ["aa", "ao", "dcl"]
+rng = np.random.default_rng(7)
+idx = np.concatenate([
+    rng.choice(np.where(ph == c)[0], size=20, replace=False) for c in classes_3
+])
+X3 = X[idx]
+y3 = np.array([classes_3.index(ph[i]) for i in idx], dtype=np.int64)
+freq3 = freq
+
+# Subsample columns to m <= 64 for fence speed
+step = max(1, X3.shape[1] // 64)
+X3 = X3[:, ::step]
+freq3 = freq3[::step]
+
+res = clf.elastic_multinomial(X3, y3, freq3, ncomp_beta=8, lambda_=0.1)
+
+# Mean spectrum per class
+f, ax = fig()
+for k, (name, color) in enumerate(zip(classes_3, ["#3f51b5", "#e8710a", "#198754"])):
+    ax.plot(freq3, X3[y3 == k].mean(0), color=color, lw=2.2, label=name)
+ax.set(title=f"Phoneme 3-class (n_classes={res['n_classes']}, "
+             f"accuracy={res['train_accuracy']:.2%})",
+       xlabel="frequency index", ylabel="log-periodogram (subsampled)")
+ax.legend()
+print(render(f))
+print(f"n_classes={res['n_classes']}  train_accuracy={res['train_accuracy']:.3f}")
+print(f"train_probabilities shape: {np.asarray(res['train_probabilities']).shape}")
+print("FDARS_FENCE_OK")
+```
+
 ## References
 
 - Delaigle & Hall (2012), *JRSS-B*.
