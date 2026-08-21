@@ -195,9 +195,11 @@ Bump the pinned `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV
   3. Any change to `_DIAGNOSTICS_METHODS`/`_RUNNABLE_METHODS`/`_supported` lands in a SINGLE atomic commit keeping `test_diagnostics_methods_match_advisor_supported` green; offline determinism is preserved (no numpy scalars, byte-identical `json.dumps`) and the LLM only interprets and cites diagnostic values.
   4. Group B advisor coverage (`pace_fpca` via the `fpca` aspect, `elastic_multinomial` via the `classification` aspect) is decided at plan time on feasibility — included only if a genuinely grounded scalar diagnostic exists, otherwise left as bindings + docs only.
 
-**Plan-time spike**: confirm whether `pace_fpca` / `elastic_multinomial` expose a genuinely grounded scalar diagnostic before committing advisor coverage; finalize the exact outlier scalar spec (ADV-05).
+**Plan-time spike**: confirm whether `pace_fpca` / `elastic_multinomial` expose a genuinely grounded scalar diagnostic before committing advisor coverage; finalize the exact outlier scalar spec (ADV-05). RESOLVED: Group B INCLUDED (elastic_multinomial `train_accuracy`; pace_fpca `eigenvalues`→variance-explained + `sigma2`/`ncomp` are grounded scalars); ITP DEFERRED (vector `adjusted_pvalues`, no single grounded scalar). MCP guard-sync is a strict no-op — no new aspect key (all four extended aspects already registered).
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 40-01-PLAN.md — extend outliers (tvdmss/muod/sequential_transform/depthgram), regression (functional_glm/concurrent_regression), classification (elastic_multinomial), fpca (pace_fpca) aspect builders with grounded scalar diagnostics + offline tests
+
 **UI hint**: no
 
 ### Phase 41: Docs — Diagrams & Worked Examples
