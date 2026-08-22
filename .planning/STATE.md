@@ -4,17 +4,17 @@ milestone: v7.0
 milestone_name: Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
 current_phase: 43
 current_phase_name: SVG Fix — learn / represent / align
-status: planning
-stopped_at: Phase 42 complete, ready to plan Phase 43
-last_updated: "2026-08-22T15:13:49.558Z"
+status: verifying
+stopped_at: Completed 43-01-PLAN.md
+last_updated: "2026-08-22T15:33:45.708Z"
 last_activity: 2026-08-22
-last_activity_desc: Phase 42 complete, transitioned to Phase 43
-state_head: ff4197cb3ca775dffafb9983e78cb487e8bb4a18
+last_activity_desc: Phase 43 execution started
+state_head: 6aa9772f7638c5902b90708661f60350a5c80a40
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 2
+  completed_plans: 2
   percent: 13
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-22)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 42 — Diagram Audit
+**Current focus:** Phase 43 — SVG Fix — learn / represent / align
 
 ## Current Position
 
-Phase: 43 — SVG Fix — learn / represent / align
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-22 — Phase 42 complete, transitioned to Phase 43
+Phase: 43 (SVG Fix — learn / represent / align) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-08-22 — Phase 43 execution started
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 13%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 42 P01 | 9m | 3 tasks | 1 files |
+| Phase 43 P01 | 4m | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@ Recent decisions affecting current work:
 - [Phase 42]: Canonical diagram count is 61 (not 68); ex-sonar-tsrvf.svg assigned to Phase 43 bucket
 - [Phase 42]: conformal-prediction.svg confirmed accurate for scalar-response API; v1.0 misleading finding resolved
 - [Phase 42]: spm.svg confirmed fully redrawn (R-era content removed); was Phase 44 Major, now OK
+- [Phase 43]: depth-functions.svg: functional_boxplot confirmed exported at src/depth_mod.rs:625 — diagram reference correct
+- [Phase 43]: 5 represent/ XML-cleanup files left byte-unchanged: inline font-size= are intentional size reductions, not CSS-class-size duplicates
+- [Phase 43]: ex-sonar-tsrvf.svg migrated to viewBox 0 0 720 480 with canonical STYLE_SPEC five-class block
 
 ### Pending Todos
 
@@ -105,8 +109,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-22T15:04:44.306Z
-Stopped at: Phase 42 complete, ready to plan Phase 43
+Last session: 2026-08-22T15:33:45.683Z
+Stopped at: Completed 43-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

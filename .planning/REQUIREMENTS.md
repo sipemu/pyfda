@@ -13,10 +13,10 @@ Documentation-only quality milestone. No `fdars-core` bump, no new bindings. Req
 
 ### SVG Fix
 
-- [ ] **SVGFIX-01**: Every concept diagram flagged for visual/layout issues is corrected — no overlapping labels, consistent spacing, alignment, and sizing — verified on the built site (rendered PNG check).
-- [ ] **SVGFIX-02**: Every concept diagram conforms to `docs/assets/diagrams/STYLE_SPEC.md` — palette, system-ui fonts, `viewBox`, the `.ttl/.sub/.lab/.sm/.mono` CSS classes, and `role="img"` + `aria-label`.
-- [ ] **SVGFIX-03**: Every concept diagram's XML source is clean and hand-editable and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds for deterministic content).
-- [ ] **SVGFIX-04**: Every concept diagram is method-accurate against the shipped `fdars` bindings — no diagram misdepicts what its method does (per the v6.0 hypograph/epigraph lesson).
+- [x] **SVGFIX-01**: Every concept diagram flagged for visual/layout issues is corrected — no overlapping labels, consistent spacing, alignment, and sizing — verified on the built site (rendered PNG check).
+- [x] **SVGFIX-02**: Every concept diagram conforms to `docs/assets/diagrams/STYLE_SPEC.md` — palette, system-ui fonts, `viewBox`, the `.ttl/.sub/.lab/.sm/.mono` CSS classes, and `role="img"` + `aria-label`.
+- [x] **SVGFIX-03**: Every concept diagram's XML source is clean and hand-editable and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds for deterministic content).
+- [x] **SVGFIX-04**: Every concept diagram is method-accurate against the shipped `fdars` bindings — no diagram misdepicts what its method does (per the v6.0 hypograph/epigraph lesson).
 
 ### Diagram Coverage
 
@@ -59,10 +59,10 @@ Deferred, tracked but not in the current roadmap.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | AUDIT-01 | Phase 42 | Complete |
-| SVGFIX-01 | Phases 43, 44, 45 | Pending |
-| SVGFIX-02 | Phases 43, 44, 45 | Pending |
-| SVGFIX-03 | Phases 43, 44, 45 | Pending |
-| SVGFIX-04 | Phases 43, 44, 45 | Pending |
+| SVGFIX-01 | Phases 43, 44, 45 | Complete |
+| SVGFIX-02 | Phases 43, 44, 45 | Complete |
+| SVGFIX-03 | Phases 43, 44, 45 | Complete |
+| SVGFIX-04 | Phases 43, 44, 45 | Complete |
 | DIACOV-01 | Phase 46 | Pending |
 | DIACOV-02 | Phase 47 | Pending |
 | DEPTH-01 | Phase 48 | Pending |
