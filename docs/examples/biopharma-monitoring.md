@@ -23,6 +23,8 @@ running*. Each batch is a whole **trajectory**, so this is a
 in-control trajectory distribution from known-good batches (Phase I), then track
 every batch against that model (Phase II).
 
+![Biopharmaceutical Batch Monitoring — penicillin SPM Phase I/II with FPCA, spm_phase1, spm_monitor, ewma_scores, fregre_lm yield prediction](../assets/diagrams/ex-biopharma-monitoring.svg){ .fdars-diagram }
+
 ## Batch trajectory exploration
 
 ```python exec="1" html="1" source="above"

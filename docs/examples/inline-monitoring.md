@@ -18,6 +18,8 @@ size at which monitoring becomes practically useful.
     samples. The [biopharma page](biopharma-monitoring.md) runs the same
     machinery on fixed labelled batches.
 
+![Inline Quality Monitoring: Detection Power and False-Alarm Analysis — simulate KL curves, spm_phase1, spm_monitor, ewma_scores, power curve, F1 vs fault magnitude](../assets/diagrams/ex-inline-monitoring.svg){ .fdars-diagram }
+
 ## In-control data
 
 We build absorbance-like spectra on a 100-point grid: a smooth mean function

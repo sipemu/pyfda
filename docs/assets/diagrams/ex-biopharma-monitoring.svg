@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Biopharmaceutical Batch Monitoring — penicillin SPM Phase I/II with FPCA, spm_phase1, spm_monitor, ewma_scores, fregre_lm yield prediction">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Biopharmaceutical Batch Monitoring: Penicillin Fermentation</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">fpca + spm_phase1 builds in-control model · spm_monitor + ewma_scores detect faulty batches · fregre_cv predicts yield</text>
+
+  <!-- Dataset panel -->
+  <rect x="24" y="62" width="200" height="72" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="124" y="82" text-anchor="middle" fill="#495057">load_penicillin</text>
+  <text class="sm" x="124" y="97" text-anchor="middle">46 fed-batch runs · 200 time pts</text>
+  <text class="sm" x="124" y="111" text-anchor="middle">40 normal · 6 faulty batches</text>
+  <text class="sm" x="124" y="125" text-anchor="middle">penicillin conc. trajectory</text>
+
+  <!-- Arrow to FPCA -->
+  <line x1="224" y1="98" x2="250" y2="98" stroke="#666" stroke-width="1.5"/>
+  <polygon points="246,94 254,98 246,102" fill="#666"/>
+
+  <!-- FPCA panel -->
+  <rect x="254" y="62" width="200" height="72" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="354" y="82" text-anchor="middle" fill="#3f51b5">fpca (3 PCs)</text>
+  <text class="sm" x="354" y="97" text-anchor="middle">PC1 = yield level</text>
+  <text class="sm" x="354" y="111" text-anchor="middle">PC2 = growth timing</text>
+  <text class="sm" x="354" y="125" text-anchor="middle">normal batches form tight cloud</text>
+
+  <!-- Arrow to Phase I -->
+  <line x1="454" y1="98" x2="480" y2="98" stroke="#3f51b5" stroke-width="1.5"/>
+  <polygon points="476,94 484,98 476,102" fill="#3f51b5"/>
+
+  <!-- Phase I panel -->
+  <rect x="484" y="62" width="212" height="72" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="590" y="82" text-anchor="middle" fill="#3f51b5">Phase I — spm_phase1</text>
+  <text class="sm" x="590" y="97" text-anchor="middle">30 normal batches (random split)</text>
+  <text class="sm" x="590" y="111" text-anchor="middle">select_ncomp → var-90% rule</text>
+  <text class="sm" x="590" y="125" text-anchor="middle">T² UCL · SPE UCL (α=0.01)</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="150" x2="680" y2="150" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+  <text class="sub" x="360" y="168" text-anchor="middle">Phase II — fault detection on 6 faulty batches</text>
+
+  <!-- Shewhart panel -->
+  <rect x="24" y="178" width="312" height="80" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="180" y="198" text-anchor="middle" fill="#fd7e14">spm_monitor — Shewhart T²/SPE</text>
+  <text class="sm" x="180" y="213" text-anchor="middle">projects faulty trajectories onto Phase I model</text>
+  <text class="sm" x="180" y="227" text-anchor="middle">T² alarm OR SPE alarm → batch flagged</text>
+  <text class="mono" x="180" y="245" text-anchor="middle" fill="#fd7e14">detected: 6/6 faulty batches</text>
+
+  <!-- EWMA panel -->
+  <rect x="384" y="178" width="312" height="80" rx="8" fill="#f0fff4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="540" y="198" text-anchor="middle" fill="#198754">ewma_scores (λ=0.2)</text>
+  <text class="sm" x="540" y="213" text-anchor="middle">smooth FPC-score vectors; MEWMA statistic</text>
+  <text class="sm" x="540" y="227" text-anchor="middle">z²/(λ/(2−λ)·σ²) vs UCL; memory-based</text>
+  <text class="mono" x="540" y="245" text-anchor="middle" fill="#198754">detected: 6/6 (equal, fault is large)</text>
+
+  <!-- Divider 2 -->
+  <line x1="40" y1="274" x2="680" y2="274" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- False-alarm check panel -->
+  <rect x="24" y="284" width="312" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="180" y="304" text-anchor="middle" fill="#495057">False-alarm check</text>
+  <text class="sm" x="180" y="319" text-anchor="middle">held-out normal batches monitored</text>
+  <text class="sm" x="180" y="333" text-anchor="middle">precision · recall · F1 computed</text>
+  <text class="sm" x="180" y="350" text-anchor="middle">both charts: high F1 on synthetic data</text>
+
+  <!-- Yield prediction panel -->
+  <rect x="384" y="284" width="312" height="80" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="540" y="304" text-anchor="middle" fill="#fd7e14">fregre_lm + fregre_cv (yield)</text>
+  <text class="sm" x="540" y="319" text-anchor="middle">early 200 h trajectory → final conc.</text>
+  <text class="sm" x="540" y="333" text-anchor="middle">fregre_cv selects k by 5-fold CV</text>
+  <text class="sm" x="540" y="350" text-anchor="middle">R² ≈ high (synthetic); β(t) shows critical window</text>
+
+  <!-- Bottom note -->
+  <text class="sub" x="360" y="414" text-anchor="middle">Time-to-detection: partial trajectories at checkpoints (20, 40, …, 200 h) — faulty batches breach limit early in growth phase.</text>
+  <text class="sub" x="360" y="430" text-anchor="middle">Single-variable penicillin trajectory; R reference uses multivariate IndPenSim (CUSUM/MEWMA sections omitted from this build).</text>
+</svg>

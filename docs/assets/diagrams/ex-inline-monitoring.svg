@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Inline Quality Monitoring: Detection Power and False-Alarm Analysis — simulate KL curves, spm_phase1, spm_monitor, ewma_scores, power curve, F1 vs fault magnitude">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Inline Monitoring: Detection Power &amp; False-Alarm Analysis</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">simulate KL curves → spm_phase1 calibration → Shewhart + ewma_scores power curve → F1 vs fault magnitude</text>
+
+  <!-- Simulation panel -->
+  <rect x="24" y="62" width="220" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="134" y="82" text-anchor="middle" fill="#495057">simulate (KL expansion)</text>
+  <text class="sm" x="134" y="97" text-anchor="middle">n_basis=8 Fourier eigenfunctions</text>
+  <text class="sm" x="134" y="111" text-anchor="middle">exponential eigenvalue decay</text>
+  <text class="sm" x="134" y="128" text-anchor="middle">mean: μ(t) = 2 + 0.5sin2πt + 0.3cos4πt</text>
+
+  <!-- Arrow to Phase I -->
+  <line x1="244" y1="102" x2="270" y2="102" stroke="#666" stroke-width="1.5"/>
+  <polygon points="266,98 274,102 266,106" fill="#666"/>
+
+  <!-- Phase I calibration -->
+  <rect x="274" y="62" width="234" height="80" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="391" y="82" text-anchor="middle" fill="#3f51b5">Phase I — spm_phase1</text>
+  <text class="sm" x="391" y="97" text-anchor="middle">200 in-control curves (seed=100)</text>
+  <text class="sm" x="391" y="111" text-anchor="middle">select_ncomp: var-90% → few PCs</text>
+  <text class="sm" x="391" y="128" text-anchor="middle">T² UCL · SPE UCL (α = 0.01)</text>
+
+  <!-- Arrow to fault inject -->
+  <line x1="508" y1="102" x2="534" y2="102" stroke="#3f51b5" stroke-width="1.5"/>
+  <polygon points="530,98 538,102 530,106" fill="#3f51b5"/>
+
+  <!-- Fault injection panel -->
+  <rect x="538" y="62" width="158" height="80" rx="8" fill="#fff0f5" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="617" y="82" text-anchor="middle" fill="#dc3545">Fault injection</text>
+  <text class="sm" x="617" y="97" text-anchor="middle">eigenfunctions(φ₁)</text>
+  <text class="sm" x="617" y="111" text-anchor="middle">shift = 0, 0.5, 1, 2, 3 σ</text>
+  <text class="sm" x="617" y="128" text-anchor="middle">along PC1 direction</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="158" x2="680" y2="158" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+  <text class="sub" x="360" y="176" text-anchor="middle">Two charts compared across 200 faulty curves per shift level</text>
+
+  <!-- Shewhart chart panel -->
+  <rect x="24" y="186" width="318" height="80" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="183" y="206" text-anchor="middle" fill="#fd7e14">Shewhart T²/SPE — spm_monitor</text>
+  <text class="sm" x="183" y="221" text-anchor="middle">T² alarm OR SPE alarm per curve</text>
+  <text class="sm" x="183" y="235" text-anchor="middle">reacts to each observation independently</text>
+  <text class="mono" x="183" y="253" text-anchor="middle" fill="#fd7e14">FPR ≈ 5.5%  (nominal α = 1%)</text>
+
+  <!-- EWMA chart panel -->
+  <rect x="378" y="186" width="318" height="80" rx="8" fill="#f0fff4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="537" y="206" text-anchor="middle" fill="#198754">EWMA — ewma_scores (λ=0.2)</text>
+  <text class="sm" x="537" y="221" text-anchor="middle">smooth FPC scores; MEWMA statistic</text>
+  <text class="sm" x="537" y="235" text-anchor="middle">accumulates evidence across time</text>
+  <text class="mono" x="537" y="253" text-anchor="middle" fill="#198754">FPR ≈ 4.5% · detects earlier (small shifts)</text>
+
+  <!-- Power curve panel -->
+  <rect x="24" y="282" width="318" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="183" y="302" text-anchor="middle" fill="#495057">Detection power curve</text>
+  <text class="sm" x="183" y="317" text-anchor="middle">detection rate vs shift σ (0 → 3)</text>
+  <text class="sm" x="183" y="331" text-anchor="middle">EWMA curve rises faster (sustained shift)</text>
+  <text class="mono" x="183" y="350" text-anchor="middle" fill="#495057">Shewhart lags; EWMA dominates at 0.5–1 σ</text>
+
+  <!-- F1 panel -->
+  <rect x="378" y="282" width="318" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="537" y="302" text-anchor="middle" fill="#495057">Precision · recall · F1</text>
+  <text class="sm" x="537" y="317" text-anchor="middle">F1 vs fault magnitude per chart</text>
+  <text class="sm" x="537" y="331" text-anchor="middle">EWMA crosses F1 > 0.5 at smaller fault</text>
+  <text class="mono" x="537" y="350" text-anchor="middle" fill="#495057">= minimum detectable fault size</text>
+
+  <!-- Bottom note -->
+  <text class="sub" x="360" y="402" text-anchor="middle">Deployment insights: (1) below ~1σ neither chart is reliable. (2) in-control FPR exceeds nominal α (finite Phase I sample). (3) Shewhart for sudden faults; EWMA for slow drift.</text>
+  <text class="sub" x="360" y="418" text-anchor="middle">arl1_t2(eigenvalues, ucl, shift) estimates detection delay without faulty data (model-based ARL).</text>
+</svg>
