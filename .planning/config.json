@@ -25,7 +25,7 @@
     "auto_advance": false,
     "node_repair": true,
     "node_repair_budget": 2,
-    "ui_phase": true,
+    "ui_phase": false,
     "ui_safety_gate": true,
     "ai_integration_phase": true,
     "api_coverage_gate": true,
@@ -48,7 +48,8 @@
     "security_asvs_level": 1,
     "security_block_on": "high",
     "_auto_chain_active": false,
-    "use_worktrees": false
+    "use_worktrees": false,
+    "ui_review": false
   },
   "ship": {
     "pr_body_sections": [
