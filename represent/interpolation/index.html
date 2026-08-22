@@ -1,0 +1,7349 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="High-performance functional data analysis for Python, powered by Rust">
+      
+      
+      
+        <link rel="canonical" href="https://sipemu.github.io/pyfda/represent/interpolation/">
+      
+      
+        <link rel="prev" href="../basis-representation/">
+      
+      
+        <link rel="next" href="../imputation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Interpolation - fdars - Functional Data Analysis for Python</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_markdown_exec_pyodide.css">
+    
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&display=swap">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#spline-interpolation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="fdars - Functional Data Analysis for Python" class="md-header__button md-logo" aria-label="fdars - Functional Data Analysis for Python" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            fdars - Functional Data Analysis for Python
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Interpolation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="blue"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sipemu/pyfda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sipemu/pyfda
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../learn/" class="md-tabs__link">
+          
+  
+  
+  Learn
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Represent
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../align/" class="md-tabs__link">
+          
+  
+  
+  Align
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../regression/" class="md-tabs__link">
+          
+  
+  
+  Regression
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../monitoring/" class="md-tabs__link">
+          
+  
+  
+  Monitoring
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../inference/functional-inference/" class="md-tabs__link">
+          
+  
+  
+  Inference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../analyze/" class="md-tabs__link">
+          
+  
+  
+  Analyze
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../advisor/" class="md-tabs__link">
+          
+  
+  
+  AI Advisor
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../examples/" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="fdars - Functional Data Analysis for Python" class="md-nav__button md-logo" aria-label="fdars - Functional Data Analysis for Python" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    fdars - Functional Data Analysis for Python
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sipemu/pyfda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sipemu/pyfda
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/custom-plotting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Plotting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/derivatives/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Derivatives
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/irregular-sampling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Irregular Sampling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Represent
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Represent
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Represent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional PCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../elastic-fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Elastic FPCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pace-fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PACE FPCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basis-representation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basis Representation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interpolation
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interpolation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-spline-interpolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use spline interpolation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extrapolationpolicy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ExtrapolationPolicy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../imputation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Imputation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../andrews-transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Andrews Transformation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../depth-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Depth Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../streaming-depth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming Depth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../distance-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distance Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Align
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Align
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Align
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/shift-registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shift Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/elastic-alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Elastic Alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/advanced-alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Elastic Alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/banded-alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Banded Elastic Alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/landmark-registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Landmark Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/tsrvf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TSRVF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/alignment-comparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparing Methods
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/shape-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shape Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Regression
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/scalar-on-function/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scalar-on-Function
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/function-on-scalar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Function-on-Scalar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/classification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/elastic-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Elastic Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/scalar-on-shape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scalar-on-Shape
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cross-Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/regression-diagnostics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression Diagnostics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/uncertainty-quantification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uncertainty Quantification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/explainability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explainability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/conformal-prediction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conformal Prediction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/conformal-classification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conformal Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/robust-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Robust Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/concurrent-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concurrent Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/functional-glm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional GLM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/spm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/advanced-spm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced SPM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/profile-partial-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profile & Partial-Domain Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Inference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../inference/functional-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional Inference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../inference/interval-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interval-wise Inference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyze
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Analyze
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/tolerance-bands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tolerance Bands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/gmm-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GMM Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/elastic-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Elastic Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/outlier-detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Outlier Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/functional-boxplot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional Boxplot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/seasonal-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Seasonal Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/equivalence-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Equivalence Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/covariance-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Covariance Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/functional-statistics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional Statistics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/scoring-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scoring Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Advisor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    AI Advisor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advisor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Advisor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advisor/python-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advisor/providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Provider Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advisor/aspects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Per-Aspect Coverage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advisor/mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advisor/agent-skill/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Skill
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/growth-alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth — Elastic Alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/sonar-tsrvf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sonar — Mine vs Rock (TSRVF)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/andrews-wine-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Andrews Wine — Why Curves?
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/andrews-wine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Andrews Wine — Outlier Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/functional-outlier-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional Outlier Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/andrews-wine-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Andrews Wine — Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/andrews-wine-qc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Andrews Wine — Quality Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/tecator-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tecator — Scalar-on-Function Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/canadian-function-on-scalar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canadian Weather — Function-on-Scalar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tecator — Cross-Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/tecator-conformal-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tecator — Conformal Coverage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/tolerance-vs-conformal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tolerance Bands vs Conformal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/explainability-regions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tecator — Explainability Regions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/phoneme-shape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phoneme — Shape Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/canadian-weather/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canadian Weather — FPCA & Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/canadian-depth-centrality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canadian Weather — Depth Centrality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/canadian-seasonal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canadian Temperature — Seasonal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/canadian-precipitation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canadian Precipitation — Geographic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/tecator-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tecator — Inline Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/inline-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring — Detection Power
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/biopharma-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Penicillin — Batch Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/fdata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.fdata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/depth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.depth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metric/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.metric
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/basis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.basis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/outliers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.outliers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/seasonal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.seasonal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/spm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.spm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/classification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/tolerance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.tolerance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/conformal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.conformal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/explain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.explain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-spline-interpolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use spline interpolation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extrapolationpolicy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ExtrapolationPolicy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="spline-interpolation">Spline Interpolation<a class="headerlink" href="#spline-interpolation" title="Permanent link">&para;</a></h1>
+<p>Spline interpolation fits a B-spline curve per observation and evaluates it at arbitrary query points. This resamples functional data onto any evaluation grid -- denser, sparser, or misaligned -- while preserving the smooth shape of each curve.</p>
+<p><img alt="Interpolation — concept diagram" class="fdars-diagram" src="../../assets/diagrams/interpolation-policy.svg" /></p>
+<h2 id="when-to-use-spline-interpolation">When to use spline interpolation<a class="headerlink" href="#when-to-use-spline-interpolation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Upsampling</strong> -- go from a sparse measurement grid (e.g., 31 age points) to a fine inference grid (200 points) before computing velocities or depth functions.</li>
+<li><strong>Resampling to a common grid</strong> -- align curves measured at different frequencies before analysis.</li>
+<li><strong>Controlled extrapolation</strong> -- query beyond the observed domain with an explicit policy rather than silent extrapolation.</li>
+</ul>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<p>For each of the <span class="arithmatex">\(n\)</span> curves in the data matrix <span class="arithmatex">\(X\)</span> (shape <span class="arithmatex">\(n \times m\)</span>), <code>spline_interpolate</code> fits a B-spline of order <span class="arithmatex">\(k\)</span> through the observed evaluations <span class="arithmatex">\((t_1, \ldots, t_m)\)</span> and evaluates the fit at the query grid <span class="arithmatex">\(\tau_1, \ldots, \tau_q\)</span>. The result is an <span class="arithmatex">\(n \times q\)</span> matrix.</p>
+<div class="arithmatex">\[
+\hat{X}_i(\tau) \;=\; \sum_{j=1}^{K} c_{ij}\,B_j^{(k)}(\tau), \quad \tau \in [t_1, t_m],
+\]</div>
+<p>where the coefficients <span class="arithmatex">\(\mathbf{c}_i\)</span> are the B-spline fit through the observed <span class="arithmatex">\(m\)</span> points. This is exact interpolation, not smoothing -- the fitted curve passes through all observed values.</p>
+<h2 id="extrapolationpolicy">ExtrapolationPolicy<a class="headerlink" href="#extrapolationpolicy" title="Permanent link">&para;</a></h2>
+<p>The base <code>spline_interpolate</code> raises <code>ValueError</code> when any query point falls outside <span class="arithmatex">\([t_1, t_m]\)</span>. Use <code>spline_interpolate_with_policy</code> to control this behaviour explicitly.</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>String value</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Boundary</td>
+<td><code>"boundary"</code></td>
+<td>Clamp: return the spline value at the nearest domain endpoint</td>
+</tr>
+<tr>
+<td>Exception</td>
+<td><code>"exception"</code></td>
+<td>Raise <code>ValueError</code> for any out-of-domain query (default)</td>
+</tr>
+<tr>
+<td>Fill</td>
+<td><code>"fill"</code></td>
+<td>Assign a constant <code>fill_value</code> to all out-of-domain cells</td>
+</tr>
+<tr>
+<td>Periodic</td>
+<td><code>"periodic"</code></td>
+<td>Wrap: map <span class="arithmatex">\(\tau\)</span> to the domain modulo <span class="arithmatex">\(L = t_m - t_1\)</span> before evaluating</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Exception policy raises — it does not extrapolate</p>
+<p>With <code>policy="exception"</code> (the default), any query point outside <span class="arithmatex">\([t_1, t_m]\)</span> raises
+<code>ValueError: query … is outside domain</code>. The curve is <strong>not</strong> extended beyond the observed
+domain. Use <code>"boundary"</code> for a safe default when small floating-point overruns occur.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Periodic policy for seasonal data</p>
+<p>Canadian weather temperatures are inherently annual-periodic: day 366 should join
+naturally to day 1. With <code>policy="periodic"</code>, query points beyond day 365 wrap into the
+domain rather than raising. This is preferable to padding or clamping for truly cyclic data.</p>
+</div>
+<h2 id="worked-example">Worked example<a class="headerlink" href="#worked-example" title="Permanent link">&para;</a></h2>
+<p>The fence below upsamples the Berkeley Growth Study height curves from the 31 original age
+points onto a fine grid of 200 points, demonstrating both in-domain interpolation and the
+<code>"boundary"</code> policy for safe handling of a query grid that slightly overshoots the data range.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">docs_fig</span><span class="w"> </span><span class="kn">import</span> <span class="n">fig</span><span class="p">,</span> <span class="n">render</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">docs_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_growth</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars.represent</span><span class="w"> </span><span class="kn">import</span> <span class="n">spline_interpolate_with_policy</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Load growth data: 93 children × 31 age points (ages 1–18)</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">age</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">load_growth</span><span class="p">()</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># Upsample onto a fine grid — boundary policy safely clamps any tiny overshoots</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">query</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">age</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">age</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">200</span><span class="p">)</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">X_fine</span> <span class="o">=</span> <span class="n">spline_interpolate_with_policy</span><span class="p">(</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">X</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="s2">"boundary"</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">)</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># Also demonstrate fill policy: query slightly beyond domain → filled with 0</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="n">query_wide</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">age</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">age</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">220</span><span class="p">)</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="n">X_fill</span> <span class="o">=</span> <span class="n">spline_interpolate_with_policy</span><span class="p">(</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="n">X</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">query_wide</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="s2">"fill"</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="p">)</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">)</span> <span class="o">=</span> <span class="n">fig</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">))</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="c1"># Left: original sparse points vs smooth interpolant (first 6 curves)</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>    <span class="n">a0</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">X_fine</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="n">a0</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>    <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">age</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>    <span class="n">X</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>    <span class="n">s</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#1a1a2e"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="p">)</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="n">a0</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">"Upsampled onto 200 points (policy='boundary')"</span><span class="p">,</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>    <span class="n">xlabel</span><span class="o">=</span><span class="s2">"Age (years)"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"Height (cm)"</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="p">)</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="c1"># Right: fill policy effect at domain edges</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="n">a1</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="n">query_wide</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">age</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#dc3545"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.07</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"out-of-domain"</span><span class="p">)</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="n">a1</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="n">age</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">query_wide</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#dc3545"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.07</span><span class="p">)</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>    <span class="n">a1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">query_wide</span><span class="p">,</span> <span class="n">X_fill</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="n">a1</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#fd7e14"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"fill_value=0"</span><span class="p">)</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="n">a1</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">"Fill policy: out-of-domain → 0 (shaded)"</span><span class="p">,</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>    <span class="n">xlabel</span><span class="o">=</span><span class="s2">"Age (years)"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">"Height (cm)"</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="p">)</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="n">a1</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="nb">print</span><span class="p">(</span><span class="n">render</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Interpolated shape:"</span><span class="p">,</span> <span class="n">X_fine</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">" FDARS_FENCE_OK"</span><span class="p">)</span>
+</code></pre></div>
+<div class="fdars-figure"><svg xmlns:xlink="http://www.w3.org/1999/xlink" width="782.64pt" height="278.64pt" viewBox="0 0 782.64 278.64" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 278.64 
+L 782.64 278.64 
+L 782.64 0 
+L 0 0 
+L 0 278.64 
+z
+" style="fill: none"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 80.411016 238.44 
+L 385.38 238.44 
+L 385.38 22.698047 
+L 80.411016 22.698047 
+L 80.411016 238.44 
+z
+" style="fill: none"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <path d="M 118.735995 238.44 
+L 118.735995 22.698047 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_2">
+      <defs>
+       <path id="mf78ee66986" d="M 0 0 
+L 0 3.5 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#mf78ee66986" x="118.735995" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <!-- 2.5 -->
+      <g transform="translate(109.989276 253.797422) scale(0.11 -0.11)">
+       <defs>
+        <path id="DejaVuSans-15" d="M 1228 531 
+L 3431 531 
+L 3431 0 
+L 469 0 
+L 469 531 
+Q 828 903 1448 1529 
+Q 2069 2156 2228 2338 
+Q 2531 2678 2651 2914 
+Q 2772 3150 2772 3378 
+Q 2772 3750 2511 3984 
+Q 2250 4219 1831 4219 
+Q 1534 4219 1204 4116 
+Q 875 4013 500 3803 
+L 500 4441 
+Q 881 4594 1212 4672 
+Q 1544 4750 1819 4750 
+Q 2544 4750 2975 4387 
+Q 3406 4025 3406 3419 
+Q 3406 3131 3298 2873 
+Q 3191 2616 2906 2266 
+Q 2828 2175 2409 1742 
+Q 1991 1309 1228 531 
+z
+" transform="scale(0.015625)"/>
+        <path id="DejaVuSans-11" d="M 684 794 
+L 1344 794 
+L 1344 0 
+L 684 0 
+L 684 794 
+z
+" transform="scale(0.015625)"/>
+        <path id="DejaVuSans-18" d="M 691 4666 
+L 3169 4666 
+L 3169 4134 
+L 1269 4134 
+L 1269 2991 
+Q 1406 3038 1543 3061 
+Q 1681 3084 1819 3084 
+Q 2600 3084 3056 2656 
+Q 3513 2228 3513 1497 
+Q 3513 744 3044 326 
+Q 2575 -91 1722 -91 
+Q 1428 -91 1123 -41 
+Q 819 9 494 109 
+L 494 744 
+Q 775 591 1075 516 
+Q 1375 441 1709 441 
+Q 2250 441 2565 725 
+Q 2881 1009 2881 1497 
+Q 2881 1984 2565 2268 
+Q 2250 2553 1709 2553 
+Q 1456 2553 1204 2497 
+Q 953 2441 691 2322 
+L 691 4666 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#DejaVuSans-15"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(95.40625 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_3">
+      <path d="M 159.50725 238.44 
+L 159.50725 22.698047 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#mf78ee66986" x="159.50725" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <!-- 5.0 -->
+      <g transform="translate(150.760531 253.797422) scale(0.11 -0.11)">
+       <defs>
+        <path id="DejaVuSans-13" d="M 2034 4250 
+Q 1547 4250 1301 3770 
+Q 1056 3291 1056 2328 
+Q 1056 1369 1301 889 
+Q 1547 409 2034 409 
+Q 2525 409 2770 889 
+Q 3016 1369 3016 2328 
+Q 3016 3291 2770 3770 
+Q 2525 4250 2034 4250 
+z
+M 2034 4750 
+Q 2819 4750 3233 4129 
+Q 3647 3509 3647 2328 
+Q 3647 1150 3233 529 
+Q 2819 -91 2034 -91 
+Q 1250 -91 836 529 
+Q 422 1150 422 2328 
+Q 422 3509 836 4129 
+Q 1250 4750 2034 4750 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#DejaVuSans-18"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(95.40625 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_5">
+      <path d="M 200.278504 238.44 
+L 200.278504 22.698047 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#mf78ee66986" x="200.278504" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <!-- 7.5 -->
+      <g transform="translate(191.531785 253.797422) scale(0.11 -0.11)">
+       <defs>
+        <path id="DejaVuSans-1a" d="M 525 4666 
+L 3525 4666 
+L 3525 4397 
+L 1831 0 
+L 1172 0 
+L 2766 4134 
+L 525 4134 
+L 525 4666 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#DejaVuSans-1a"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(95.40625 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_7">
+      <path d="M 241.049759 238.44 
+L 241.049759 22.698047 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#mf78ee66986" x="241.049759" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <!-- 10.0 -->
+      <g transform="translate(228.803665 253.797422) scale(0.11 -0.11)">
+       <defs>
+        <path id="DejaVuSans-14" d="M 794 531 
+L 1825 531 
+L 1825 4091 
+L 703 3866 
+L 703 4441 
+L 1819 4666 
+L 2450 4666 
+L 2450 531 
+L 3481 531 
+L 3481 0 
+L 794 0 
+L 794 531 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#DejaVuSans-14"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(159.03125 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_9">
+      <path d="M 281.821013 238.44 
+L 281.821013 22.698047 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#mf78ee66986" x="281.821013" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <!-- 12.5 -->
+      <g transform="translate(269.57492 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-14"/>
+       <use xlink:href="#DejaVuSans-15" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(159.03125 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_11">
+      <path d="M 322.592268 238.44 
+L 322.592268 22.698047 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#mf78ee66986" x="322.592268" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <!-- 15.0 -->
+      <g transform="translate(310.346174 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-14"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(159.03125 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_7">
+     <g id="line2d_13">
+      <path d="M 363.363523 238.44 
+L 363.363523 22.698047 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_14">
+      <g>
+       <use xlink:href="#mf78ee66986" x="363.363523" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <!-- 17.5 -->
+      <g transform="translate(351.117429 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-14"/>
+       <use xlink:href="#DejaVuSans-1a" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(159.03125 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="text_8">
+     <!-- Age (years) -->
+     <g transform="translate(201.081445 268.797422) scale(0.11 -0.11)">
+      <defs>
+       <path id="DejaVuSans-24" d="M 2188 4044 
+L 1331 1722 
+L 3047 1722 
+L 2188 4044 
+z
+M 1831 4666 
+L 2547 4666 
+L 4325 0 
+L 3669 0 
+L 3244 1197 
+L 1141 1197 
+L 716 0 
+L 50 0 
+L 1831 4666 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-4a" d="M 2906 1791 
+Q 2906 2416 2648 2759 
+Q 2391 3103 1925 3103 
+Q 1463 3103 1205 2759 
+Q 947 2416 947 1791 
+Q 947 1169 1205 825 
+Q 1463 481 1925 481 
+Q 2391 481 2648 825 
+Q 2906 1169 2906 1791 
+z
+M 3481 434 
+Q 3481 -459 3084 -895 
+Q 2688 -1331 1869 -1331 
+Q 1566 -1331 1297 -1286 
+Q 1028 -1241 775 -1147 
+L 775 -588 
+Q 1028 -725 1275 -790 
+Q 1522 -856 1778 -856 
+Q 2344 -856 2625 -561 
+Q 2906 -266 2906 331 
+L 2906 616 
+Q 2728 306 2450 153 
+Q 2172 0 1784 0 
+Q 1141 0 747 490 
+Q 353 981 353 1791 
+Q 353 2603 747 3093 
+Q 1141 3584 1784 3584 
+Q 2172 3584 2450 3431 
+Q 2728 3278 2906 2969 
+L 2906 3500 
+L 3481 3500 
+L 3481 434 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-48" d="M 3597 1894 
+L 3597 1613 
+L 953 1613 
+Q 991 1019 1311 708 
+Q 1631 397 2203 397 
+Q 2534 397 2845 478 
+Q 3156 559 3463 722 
+L 3463 178 
+Q 3153 47 2828 -22 
+Q 2503 -91 2169 -91 
+Q 1331 -91 842 396 
+Q 353 884 353 1716 
+Q 353 2575 817 3079 
+Q 1281 3584 2069 3584 
+Q 2775 3584 3186 3129 
+Q 3597 2675 3597 1894 
+z
+M 3022 2063 
+Q 3016 2534 2758 2815 
+Q 2500 3097 2075 3097 
+Q 1594 3097 1305 2825 
+Q 1016 2553 972 2059 
+L 3022 2063 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-3" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-b" d="M 1984 4856 
+Q 1566 4138 1362 3434 
+Q 1159 2731 1159 2009 
+Q 1159 1288 1364 580 
+Q 1569 -128 1984 -844 
+L 1484 -844 
+Q 1016 -109 783 600 
+Q 550 1309 550 2009 
+Q 550 2706 781 3412 
+Q 1013 4119 1484 4856 
+L 1984 4856 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-5c" d="M 2059 -325 
+Q 1816 -950 1584 -1140 
+Q 1353 -1331 966 -1331 
+L 506 -1331 
+L 506 -850 
+L 844 -850 
+Q 1081 -850 1212 -737 
+Q 1344 -625 1503 -206 
+L 1606 56 
+L 191 3500 
+L 800 3500 
+L 1894 763 
+L 2988 3500 
+L 3597 3500 
+L 2059 -325 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-44" d="M 2194 1759 
+Q 1497 1759 1228 1600 
+Q 959 1441 959 1056 
+Q 959 750 1161 570 
+Q 1363 391 1709 391 
+Q 2188 391 2477 730 
+Q 2766 1069 2766 1631 
+L 2766 1759 
+L 2194 1759 
+z
+M 3341 1997 
+L 3341 0 
+L 2766 0 
+L 2766 531 
+Q 2569 213 2275 61 
+Q 1981 -91 1556 -91 
+Q 1019 -91 701 211 
+Q 384 513 384 1019 
+Q 384 1609 779 1909 
+Q 1175 2209 1959 2209 
+L 2766 2209 
+L 2766 2266 
+Q 2766 2663 2505 2880 
+Q 2244 3097 1772 3097 
+Q 1472 3097 1187 3025 
+Q 903 2953 641 2809 
+L 641 3341 
+Q 956 3463 1253 3523 
+Q 1550 3584 1831 3584 
+Q 2591 3584 2966 3190 
+Q 3341 2797 3341 1997 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-55" d="M 2631 2963 
+Q 2534 3019 2420 3045 
+Q 2306 3072 2169 3072 
+Q 1681 3072 1420 2755 
+Q 1159 2438 1159 1844 
+L 1159 0 
+L 581 0 
+L 581 3500 
+L 1159 3500 
+L 1159 2956 
+Q 1341 3275 1631 3429 
+Q 1922 3584 2338 3584 
+Q 2397 3584 2469 3576 
+Q 2541 3569 2628 3553 
+L 2631 2963 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-56" d="M 2834 3397 
+L 2834 2853 
+Q 2591 2978 2328 3040 
+Q 2066 3103 1784 3103 
+Q 1356 3103 1142 2972 
+Q 928 2841 928 2578 
+Q 928 2378 1081 2264 
+Q 1234 2150 1697 2047 
+L 1894 2003 
+Q 2506 1872 2764 1633 
+Q 3022 1394 3022 966 
+Q 3022 478 2636 193 
+Q 2250 -91 1575 -91 
+Q 1294 -91 989 -36 
+Q 684 19 347 128 
+L 347 722 
+Q 666 556 975 473 
+Q 1284 391 1588 391 
+Q 1994 391 2212 530 
+Q 2431 669 2431 922 
+Q 2431 1156 2273 1281 
+Q 2116 1406 1581 1522 
+L 1381 1569 
+Q 847 1681 609 1914 
+Q 372 2147 372 2553 
+Q 372 3047 722 3315 
+Q 1072 3584 1716 3584 
+Q 2034 3584 2315 3537 
+Q 2597 3491 2834 3397 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-c" d="M 513 4856 
+L 1013 4856 
+Q 1481 4119 1714 3412 
+Q 1947 2706 1947 2009 
+Q 1947 1309 1714 600 
+Q 1481 -109 1013 -844 
+L 513 -844 
+Q 928 -128 1133 580 
+Q 1338 1288 1338 2009 
+Q 1338 2731 1133 3434 
+Q 928 4138 513 4856 
+z
+" transform="scale(0.015625)"/>
+      </defs>
+      <use xlink:href="#DejaVuSans-24"/>
+      <use xlink:href="#DejaVuSans-4a" transform="translate(68.40625 0)"/>
+      <use xlink:href="#DejaVuSans-48" transform="translate(131.890625 0)"/>
+      <use xlink:href="#DejaVuSans-3" transform="translate(193.421875 0)"/>
+      <use xlink:href="#DejaVuSans-b" transform="translate(225.203125 0)"/>
+      <use xlink:href="#DejaVuSans-5c" transform="translate(264.21875 0)"/>
+      <use xlink:href="#DejaVuSans-48" transform="translate(323.40625 0)"/>
+      <use xlink:href="#DejaVuSans-44" transform="translate(384.9375 0)"/>
+      <use xlink:href="#DejaVuSans-55" transform="translate(446.21875 0)"/>
+      <use xlink:href="#DejaVuSans-56" transform="translate(487.328125 0)"/>
+      <use xlink:href="#DejaVuSans-c" transform="translate(539.421875 0)"/>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_15">
+      <path d="M 80.411016 215.030583 
+L 385.38 215.030583 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_16">
+      <defs>
+       <path id="md9a263970d" d="M 0 0 
+L -3.5 0 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#md9a263970d" x="80.411016" y="215.030583" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_9">
+      <!-- −150000 -->
+      <g transform="translate(22.200859 219.209294) scale(0.11 -0.11)">
+       <defs>
+        <path id="DejaVuSans-c9c" d="M 678 2272 
+L 4684 2272 
+L 4684 1741 
+L 678 1741 
+L 678 2272 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#DejaVuSans-c9c"/>
+       <use xlink:href="#DejaVuSans-14" transform="translate(83.796875 0)"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(147.421875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(211.046875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(274.671875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(338.296875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(401.921875 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_17">
+      <path d="M 80.411016 179.676069 
+L 385.38 179.676069 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_18">
+      <g>
+       <use xlink:href="#md9a263970d" x="80.411016" y="179.676069" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <!-- −100000 -->
+      <g transform="translate(22.200859 183.85478) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-c9c"/>
+       <use xlink:href="#DejaVuSans-14" transform="translate(83.796875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(147.421875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(211.046875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(274.671875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(338.296875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(401.921875 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_19">
+      <path d="M 80.411016 144.321554 
+L 385.38 144.321554 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_20">
+      <g>
+       <use xlink:href="#md9a263970d" x="80.411016" y="144.321554" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <!-- −50000 -->
+      <g transform="translate(29.199609 148.500265) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-c9c"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(83.796875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(147.421875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(211.046875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(274.671875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(338.296875 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_21">
+      <path d="M 80.411016 108.96704 
+L 385.38 108.96704 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_22">
+      <g>
+       <use xlink:href="#md9a263970d" x="80.411016" y="108.96704" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <!-- 0 -->
+      <g transform="translate(66.412266 113.145751) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-13"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_23">
+      <path d="M 80.411016 73.612525 
+L 385.38 73.612525 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_24">
+      <g>
+       <use xlink:href="#md9a263970d" x="80.411016" y="73.612525" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_13">
+      <!-- 50000 -->
+      <g transform="translate(38.417266 77.791236) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-18"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(190.875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(254.5 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_25">
+      <path d="M 80.411016 38.258011 
+L 385.38 38.258011 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_26">
+      <g>
+       <use xlink:href="#md9a263970d" x="80.411016" y="38.258011" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_14">
+      <!-- 100000 -->
+      <g transform="translate(31.418516 42.436721) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-14"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(190.875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(254.5 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(318.125 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="text_15">
+     <!-- Height (cm) -->
+     <g transform="translate(15.558281 163.171992) rotate(-90) scale(0.11 -0.11)">
+      <defs>
+       <path id="DejaVuSans-2b" d="M 628 4666 
+L 1259 4666 
+L 1259 2753 
+L 3553 2753 
+L 3553 4666 
+L 4184 4666 
+L 4184 0 
+L 3553 0 
+L 3553 2222 
+L 1259 2222 
+L 1259 0 
+L 628 0 
+L 628 4666 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-4c" d="M 603 3500 
+L 1178 3500 
+L 1178 0 
+L 603 0 
+L 603 3500 
+z
+M 603 4863 
+L 1178 4863 
+L 1178 4134 
+L 603 4134 
+L 603 4863 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-4b" d="M 3513 2113 
+L 3513 0 
+L 2938 0 
+L 2938 2094 
+Q 2938 2591 2744 2837 
+Q 2550 3084 2163 3084 
+Q 1697 3084 1428 2787 
+Q 1159 2491 1159 1978 
+L 1159 0 
+L 581 0 
+L 581 4863 
+L 1159 4863 
+L 1159 2956 
+Q 1366 3272 1645 3428 
+Q 1925 3584 2291 3584 
+Q 2894 3584 3203 3211 
+Q 3513 2838 3513 2113 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-57" d="M 1172 4494 
+L 1172 3500 
+L 2356 3500 
+L 2356 3053 
+L 1172 3053 
+L 1172 1153 
+Q 1172 725 1289 603 
+Q 1406 481 1766 481 
+L 2356 481 
+L 2356 0 
+L 1766 0 
+Q 1100 0 847 248 
+Q 594 497 594 1153 
+L 594 3053 
+L 172 3053 
+L 172 3500 
+L 594 3500 
+L 594 4494 
+L 1172 4494 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-46" d="M 3122 3366 
+L 3122 2828 
+Q 2878 2963 2633 3030 
+Q 2388 3097 2138 3097 
+Q 1578 3097 1268 2742 
+Q 959 2388 959 1747 
+Q 959 1106 1268 751 
+Q 1578 397 2138 397 
+Q 2388 397 2633 464 
+Q 2878 531 3122 666 
+L 3122 134 
+Q 2881 22 2623 -34 
+Q 2366 -91 2075 -91 
+Q 1284 -91 818 406 
+Q 353 903 353 1747 
+Q 353 2603 823 3093 
+Q 1294 3584 2113 3584 
+Q 2378 3584 2631 3529 
+Q 2884 3475 3122 3366 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-50" d="M 3328 2828 
+Q 3544 3216 3844 3400 
+Q 4144 3584 4550 3584 
+Q 5097 3584 5394 3201 
+Q 5691 2819 5691 2113 
+L 5691 0 
+L 5113 0 
+L 5113 2094 
+Q 5113 2597 4934 2840 
+Q 4756 3084 4391 3084 
+Q 3944 3084 3684 2787 
+Q 3425 2491 3425 1978 
+L 3425 0 
+L 2847 0 
+L 2847 2094 
+Q 2847 2600 2669 2842 
+Q 2491 3084 2119 3084 
+Q 1678 3084 1418 2786 
+Q 1159 2488 1159 1978 
+L 1159 0 
+L 581 0 
+L 581 3500 
+L 1159 3500 
+L 1159 2956 
+Q 1356 3278 1631 3431 
+Q 1906 3584 2284 3584 
+Q 2666 3584 2933 3390 
+Q 3200 3197 3328 2828 
+z
+" transform="scale(0.015625)"/>
+      </defs>
+      <use xlink:href="#DejaVuSans-2b"/>
+      <use xlink:href="#DejaVuSans-48" transform="translate(75.203125 0)"/>
+      <use xlink:href="#DejaVuSans-4c" transform="translate(136.734375 0)"/>
+      <use xlink:href="#DejaVuSans-4a" transform="translate(164.515625 0)"/>
+      <use xlink:href="#DejaVuSans-4b" transform="translate(228 0)"/>
+      <use xlink:href="#DejaVuSans-57" transform="translate(291.375 0)"/>
+      <use xlink:href="#DejaVuSans-3" transform="translate(330.578125 0)"/>
+      <use xlink:href="#DejaVuSans-b" transform="translate(362.359375 0)"/>
+      <use xlink:href="#DejaVuSans-46" transform="translate(401.375 0)"/>
+      <use xlink:href="#DejaVuSans-50" transform="translate(456.359375 0)"/>
+      <use xlink:href="#DejaVuSans-c" transform="translate(553.765625 0)"/>
+     </g>
+    </g>
+   </g>
+   <g id="line2d_27">
+    <path d="M 94.273242 108.909553 
+L 131.889334 108.974083 
+L 134.675712 109.202468 
+L 137.462089 109.661467 
+L 138.855277 109.924281 
+L 140.248466 110.020796 
+L 141.641655 109.7774 
+L 143.034843 109.020481 
+L 144.428032 107.576425 
+L 145.82122 105.27162 
+L 147.214409 101.932453 
+L 148.607598 97.453099 
+L 151.393975 87.509846 
+L 152.787163 83.77975 
+L 154.180352 82.035468 
+L 155.573541 83.145598 
+L 156.966729 87.978734 
+L 158.359918 97.40326 
+L 159.753106 111.704429 
+L 162.539484 148.292724 
+L 163.932672 166.70623 
+L 165.325861 182.616894 
+L 166.719049 194.087908 
+L 168.112238 199.182461 
+L 169.505427 196.016353 
+L 170.898615 184.49705 
+L 172.291804 166.722582 
+L 173.684992 144.924378 
+L 176.47137 98.182483 
+L 177.864558 77.701649 
+L 179.257747 62.122798 
+L 180.650935 53.405076 
+L 182.044124 51.283896 
+L 183.437313 54.408808 
+L 184.830501 61.422011 
+L 186.22369 70.965702 
+L 189.010067 92.213343 
+L 190.403256 101.20214 
+L 191.796444 107.695908 
+L 193.189633 111.892072 
+L 194.582821 114.190893 
+L 195.97601 114.992632 
+L 197.369199 114.69755 
+L 198.762387 113.705909 
+L 201.548764 111.226738 
+L 202.941953 110.323925 
+L 204.335142 109.678681 
+L 205.72833 109.248642 
+L 207.121519 108.991443 
+L 209.907896 108.826103 
+L 237.771668 108.861562 
+L 371.517773 108.829086 
+L 371.517773 108.829086 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #3f51b5; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_28">
+    <path d="M 94.273242 108.913159 
+L 130.496146 108.955901 
+L 133.282523 109.160281 
+L 136.0689 109.611246 
+L 138.855277 110.299597 
+L 140.248466 110.418158 
+L 141.641655 110.084003 
+L 143.034843 109.068056 
+L 144.428032 107.141244 
+L 145.82122 104.074493 
+L 147.214409 99.638729 
+L 148.607598 93.694648 
+L 151.393975 80.510827 
+L 152.787163 75.568787 
+L 154.180352 73.261451 
+L 155.573541 74.739913 
+L 156.966729 81.155267 
+L 158.359918 93.658325 
+L 159.753106 112.626817 
+L 162.539484 161.150115 
+L 163.932672 185.568607 
+L 165.325861 206.667448 
+L 166.719049 221.878481 
+L 168.112238 228.633548 
+L 169.505427 224.434251 
+L 170.898615 209.158006 
+L 172.291804 185.586985 
+L 173.684992 156.680254 
+L 176.47137 94.695925 
+L 177.864558 67.53646 
+L 179.257747 46.877549 
+L 180.650935 35.317185 
+L 182.044124 32.504499 
+L 183.437313 36.648667 
+L 184.830501 45.949118 
+L 186.22369 58.605281 
+L 189.010067 86.782452 
+L 190.403256 98.702915 
+L 191.796444 107.314783 
+L 193.189633 112.87984 
+L 194.582821 115.928854 
+L 195.97601 116.99259 
+L 197.369199 116.601813 
+L 198.762387 115.287288 
+L 201.548764 112.00044 
+L 202.941953 110.803485 
+L 204.335142 109.948022 
+L 205.72833 109.377889 
+L 207.121519 109.03692 
+L 208.514707 108.868949 
+L 211.301085 108.827349 
+L 222.446593 108.873065 
+L 371.517773 108.840683 
+L 371.517773 108.840683 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #e8710a; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_29">
+    <path d="M 94.273242 108.912735 
+L 147.214409 108.803619 
+L 155.573541 108.618658 
+L 158.359918 108.771807 
+L 162.539484 109.297035 
+L 166.719049 109.764614 
+L 169.505427 109.782571 
+L 172.291804 109.481203 
+L 179.257747 108.407866 
+L 182.044124 108.296123 
+L 186.22369 108.496526 
+L 191.796444 108.871185 
+L 197.369199 108.941541 
+L 219.660216 108.876973 
+L 371.517773 108.845774 
+L 371.517773 108.845774 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #198754; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_30">
+    <path d="M 94.273242 108.914644 
+L 143.034843 108.882285 
+L 145.82122 109.225096 
+L 147.214409 109.549289 
+L 152.787163 111.379845 
+L 154.180352 111.563874 
+L 155.573541 111.461175 
+L 156.966729 110.983086 
+L 158.359918 110.040968 
+L 159.753106 108.605253 
+L 162.539484 104.923325 
+L 163.932672 103.068142 
+L 165.325861 101.464163 
+L 166.719049 100.306904 
+L 168.112238 99.791878 
+L 169.505427 100.109293 
+L 170.898615 101.268655 
+L 172.291804 103.05854 
+L 175.078181 107.630351 
+L 176.47137 109.962519 
+L 177.864558 112.025686 
+L 179.257747 113.594973 
+L 180.650935 114.472939 
+L 182.044124 114.686229 
+L 183.437313 114.370916 
+L 184.830501 113.663811 
+L 187.616878 111.621473 
+L 189.010067 110.559865 
+L 190.403256 109.653667 
+L 191.796444 108.99886 
+L 193.189633 108.575556 
+L 194.582821 108.343427 
+L 197.369199 108.291389 
+L 205.72833 108.83775 
+L 212.694273 108.876149 
+L 356.192699 108.838731 
+L 371.517773 108.838491 
+L 371.517773 108.838491 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #dc3545; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_31">
+    <path d="M 94.273242 108.914574 
+L 371.517773 108.845067 
+L 371.517773 108.845067 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #6f42c1; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_32">
+    <path d="M 94.273242 108.912735 
+L 131.889334 108.805159 
+L 137.462089 108.528629 
+L 140.248466 108.432066 
+L 141.641655 108.544402 
+L 143.034843 108.844233 
+L 144.428032 109.391875 
+L 145.82122 110.247639 
+L 147.214409 111.47184 
+L 148.607598 113.100535 
+L 151.393975 116.69255 
+L 152.787163 118.031883 
+L 154.180352 118.649967 
+L 155.573541 118.234203 
+L 156.966729 116.471992 
+L 158.359918 113.050809 
+L 159.753106 107.868642 
+L 162.539484 94.623647 
+L 163.932672 87.961105 
+L 165.325861 82.20539 
+L 166.719049 78.056646 
+L 168.112238 76.215014 
+L 169.505427 77.361614 
+L 170.898615 81.529658 
+L 172.291804 87.960204 
+L 173.684992 95.84607 
+L 176.47137 112.755032 
+L 177.864558 120.163764 
+L 179.257747 125.799087 
+L 180.650935 128.952315 
+L 182.044124 129.719178 
+L 183.437313 128.58821 
+L 184.830501 126.050602 
+L 186.22369 122.597545 
+L 189.010067 114.909857 
+L 190.403256 111.657446 
+L 191.796444 109.307597 
+L 193.189633 107.788903 
+L 194.582821 106.95658 
+L 195.97601 106.665846 
+L 197.369199 106.771917 
+L 200.155576 107.59534 
+L 202.941953 108.351886 
+L 205.72833 108.7401 
+L 208.514707 108.878319 
+L 218.267028 108.874031 
+L 371.517773 108.844147 
+L 371.517773 108.844147 
+" clip-path="url(#p3b5de74d53)" style="fill: none; stroke: #0dcaf0; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 80.411016 238.44 
+L 80.411016 22.698047 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 80.411016 238.44 
+L 385.38 238.44 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_16">
+    <!-- Upsampled onto 200 points (policy='boundary') -->
+    <g transform="translate(64.605469 16.698047) scale(0.125 -0.125)">
+     <defs>
+      <path id="DejaVuSans-Bold-38" d="M 588 4666 
+L 1791 4666 
+L 1791 1869 
+Q 1791 1291 1980 1042 
+Q 2169 794 2597 794 
+Q 3028 794 3217 1042 
+Q 3406 1291 3406 1869 
+L 3406 4666 
+L 4609 4666 
+L 4609 1869 
+Q 4609 878 4112 393 
+Q 3616 -91 2597 -91 
+Q 1581 -91 1084 393 
+Q 588 878 588 1869 
+L 588 4666 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-53" d="M 1656 506 
+L 1656 -1331 
+L 538 -1331 
+L 538 3500 
+L 1656 3500 
+L 1656 2988 
+Q 1888 3294 2169 3439 
+Q 2450 3584 2816 3584 
+Q 3463 3584 3878 3070 
+Q 4294 2556 4294 1747 
+Q 4294 938 3878 423 
+Q 3463 -91 2816 -91 
+Q 2450 -91 2169 54 
+Q 1888 200 1656 506 
+z
+M 2400 2772 
+Q 2041 2772 1848 2508 
+Q 1656 2244 1656 1747 
+Q 1656 1250 1848 986 
+Q 2041 722 2400 722 
+Q 2759 722 2948 984 
+Q 3138 1247 3138 1747 
+Q 3138 2247 2948 2509 
+Q 2759 2772 2400 2772 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-56" d="M 3272 3391 
+L 3272 2541 
+Q 2913 2691 2578 2766 
+Q 2244 2841 1947 2841 
+Q 1628 2841 1473 2761 
+Q 1319 2681 1319 2516 
+Q 1319 2381 1436 2309 
+Q 1553 2238 1856 2203 
+L 2053 2175 
+Q 2913 2066 3209 1816 
+Q 3506 1566 3506 1031 
+Q 3506 472 3093 190 
+Q 2681 -91 1863 -91 
+Q 1516 -91 1145 -36 
+Q 775 19 384 128 
+L 384 978 
+Q 719 816 1070 734 
+Q 1422 653 1784 653 
+Q 2113 653 2278 743 
+Q 2444 834 2444 1013 
+Q 2444 1163 2330 1236 
+Q 2216 1309 1875 1350 
+L 1678 1375 
+Q 931 1469 631 1722 
+Q 331 1975 331 2491 
+Q 331 3047 712 3315 
+Q 1094 3584 1881 3584 
+Q 2191 3584 2531 3537 
+Q 2872 3491 3272 3391 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-44" d="M 2106 1575 
+Q 1756 1575 1579 1456 
+Q 1403 1338 1403 1106 
+Q 1403 894 1545 773 
+Q 1688 653 1941 653 
+Q 2256 653 2472 879 
+Q 2688 1106 2688 1447 
+L 2688 1575 
+L 2106 1575 
+z
+M 3816 1997 
+L 3816 0 
+L 2688 0 
+L 2688 519 
+Q 2463 200 2181 54 
+Q 1900 -91 1497 -91 
+Q 953 -91 614 226 
+Q 275 544 275 1050 
+Q 275 1666 698 1953 
+Q 1122 2241 2028 2241 
+L 2688 2241 
+L 2688 2328 
+Q 2688 2594 2478 2717 
+Q 2269 2841 1825 2841 
+Q 1466 2841 1156 2769 
+Q 847 2697 581 2553 
+L 581 3406 
+Q 941 3494 1303 3539 
+Q 1666 3584 2028 3584 
+Q 2975 3584 3395 3211 
+Q 3816 2838 3816 1997 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-50" d="M 3781 2919 
+Q 3994 3244 4286 3414 
+Q 4578 3584 4928 3584 
+Q 5531 3584 5847 3212 
+Q 6163 2841 6163 2131 
+L 6163 0 
+L 5038 0 
+L 5038 1825 
+Q 5041 1866 5042 1909 
+Q 5044 1953 5044 2034 
+Q 5044 2406 4934 2573 
+Q 4825 2741 4581 2741 
+Q 4263 2741 4089 2478 
+Q 3916 2216 3909 1719 
+L 3909 0 
+L 2784 0 
+L 2784 1825 
+Q 2784 2406 2684 2573 
+Q 2584 2741 2328 2741 
+Q 2006 2741 1831 2477 
+Q 1656 2213 1656 1722 
+L 1656 0 
+L 531 0 
+L 531 3500 
+L 1656 3500 
+L 1656 2988 
+Q 1863 3284 2130 3434 
+Q 2397 3584 2719 3584 
+Q 3081 3584 3359 3409 
+Q 3638 3234 3781 2919 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-4f" d="M 538 4863 
+L 1656 4863 
+L 1656 0 
+L 538 0 
+L 538 4863 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-48" d="M 4031 1759 
+L 4031 1441 
+L 1416 1441 
+Q 1456 1047 1700 850 
+Q 1944 653 2381 653 
+Q 2734 653 3104 758 
+Q 3475 863 3866 1075 
+L 3866 213 
+Q 3469 63 3072 -14 
+Q 2675 -91 2278 -91 
+Q 1328 -91 801 392 
+Q 275 875 275 1747 
+Q 275 2603 792 3093 
+Q 1309 3584 2216 3584 
+Q 3041 3584 3536 3087 
+Q 4031 2591 4031 1759 
+z
+M 2881 2131 
+Q 2881 2450 2695 2645 
+Q 2509 2841 2209 2841 
+Q 1884 2841 1681 2658 
+Q 1478 2475 1428 2131 
+L 2881 2131 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-47" d="M 2919 2988 
+L 2919 4863 
+L 4044 4863 
+L 4044 0 
+L 2919 0 
+L 2919 506 
+Q 2688 197 2409 53 
+Q 2131 -91 1766 -91 
+Q 1119 -91 703 423 
+Q 288 938 288 1747 
+Q 288 2556 703 3070 
+Q 1119 3584 1766 3584 
+Q 2128 3584 2408 3439 
+Q 2688 3294 2919 2988 
+z
+M 2181 722 
+Q 2541 722 2730 984 
+Q 2919 1247 2919 1747 
+Q 2919 2247 2730 2509 
+Q 2541 2772 2181 2772 
+Q 1825 2772 1636 2509 
+Q 1447 2247 1447 1747 
+Q 1447 1247 1636 984 
+Q 1825 722 2181 722 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-3" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-52" d="M 2203 2784 
+Q 1831 2784 1636 2517 
+Q 1441 2250 1441 1747 
+Q 1441 1244 1636 976 
+Q 1831 709 2203 709 
+Q 2569 709 2762 976 
+Q 2956 1244 2956 1747 
+Q 2956 2250 2762 2517 
+Q 2569 2784 2203 2784 
+z
+M 2203 3584 
+Q 3106 3584 3614 3096 
+Q 4122 2609 4122 1747 
+Q 4122 884 3614 396 
+Q 3106 -91 2203 -91 
+Q 1297 -91 786 396 
+Q 275 884 275 1747 
+Q 275 2609 786 3096 
+Q 1297 3584 2203 3584 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-51" d="M 4056 2131 
+L 4056 0 
+L 2931 0 
+L 2931 347 
+L 2931 1631 
+Q 2931 2084 2911 2256 
+Q 2891 2428 2841 2509 
+Q 2775 2619 2662 2680 
+Q 2550 2741 2406 2741 
+Q 2056 2741 1856 2470 
+Q 1656 2200 1656 1722 
+L 1656 0 
+L 538 0 
+L 538 3500 
+L 1656 3500 
+L 1656 2988 
+Q 1909 3294 2193 3439 
+Q 2478 3584 2822 3584 
+Q 3428 3584 3742 3212 
+Q 4056 2841 4056 2131 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-57" d="M 1759 4494 
+L 1759 3500 
+L 2913 3500 
+L 2913 2700 
+L 1759 2700 
+L 1759 1216 
+Q 1759 972 1856 886 
+Q 1953 800 2241 800 
+L 2816 800 
+L 2816 0 
+L 1856 0 
+Q 1194 0 917 276 
+Q 641 553 641 1216 
+L 641 2700 
+L 84 2700 
+L 84 3500 
+L 641 3500 
+L 641 4494 
+L 1759 4494 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-15" d="M 1844 884 
+L 3897 884 
+L 3897 0 
+L 506 0 
+L 506 884 
+L 2209 2388 
+Q 2438 2594 2547 2791 
+Q 2656 2988 2656 3200 
+Q 2656 3528 2436 3728 
+Q 2216 3928 1850 3928 
+Q 1569 3928 1234 3808 
+Q 900 3688 519 3450 
+L 519 4475 
+Q 925 4609 1322 4679 
+Q 1719 4750 2100 4750 
+Q 2938 4750 3402 4381 
+Q 3866 4013 3866 3353 
+Q 3866 2972 3669 2642 
+Q 3472 2313 2841 1759 
+L 1844 884 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-13" d="M 2944 2338 
+Q 2944 3213 2780 3570 
+Q 2616 3928 2228 3928 
+Q 1841 3928 1675 3570 
+Q 1509 3213 1509 2338 
+Q 1509 1453 1675 1090 
+Q 1841 728 2228 728 
+Q 2613 728 2778 1090 
+Q 2944 1453 2944 2338 
+z
+M 4147 2328 
+Q 4147 1169 3647 539 
+Q 3147 -91 2228 -91 
+Q 1306 -91 806 539 
+Q 306 1169 306 2328 
+Q 306 3491 806 4120 
+Q 1306 4750 2228 4750 
+Q 3147 4750 3647 4120 
+Q 4147 3491 4147 2328 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-4c" d="M 538 3500 
+L 1656 3500 
+L 1656 0 
+L 538 0 
+L 538 3500 
+z
+M 538 4863 
+L 1656 4863 
+L 1656 3950 
+L 538 3950 
+L 538 4863 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-b" d="M 2413 -844 
+L 1484 -844 
+Q 1006 -72 778 623 
+Q 550 1319 550 2003 
+Q 550 2688 779 3389 
+Q 1009 4091 1484 4856 
+L 2413 4856 
+Q 2013 4116 1813 3408 
+Q 1613 2700 1613 2009 
+Q 1613 1319 1811 609 
+Q 2009 -100 2413 -844 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-46" d="M 3366 3391 
+L 3366 2478 
+Q 3138 2634 2908 2709 
+Q 2678 2784 2431 2784 
+Q 1963 2784 1702 2511 
+Q 1441 2238 1441 1747 
+Q 1441 1256 1702 982 
+Q 1963 709 2431 709 
+Q 2694 709 2930 787 
+Q 3166 866 3366 1019 
+L 3366 103 
+Q 3103 6 2833 -42 
+Q 2563 -91 2291 -91 
+Q 1344 -91 809 395 
+Q 275 881 275 1747 
+Q 275 2613 809 3098 
+Q 1344 3584 2291 3584 
+Q 2566 3584 2833 3536 
+Q 3100 3488 3366 3391 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-5c" d="M 78 3500 
+L 1197 3500 
+L 2138 1125 
+L 2938 3500 
+L 4056 3500 
+L 2584 -331 
+Q 2363 -916 2067 -1148 
+Q 1772 -1381 1288 -1381 
+L 641 -1381 
+L 641 -647 
+L 991 -647 
+Q 1275 -647 1404 -556 
+Q 1534 -466 1606 -231 
+L 1638 -134 
+L 78 3500 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-20" d="M 678 3084 
+L 4684 3084 
+L 4684 2350 
+L 678 2350 
+L 678 3084 
+z
+M 678 1663 
+L 4684 1663 
+L 4684 922 
+L 678 922 
+L 678 1663 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-a" d="M 1350 4666 
+L 1350 2931 
+L 609 2931 
+L 609 4666 
+L 1350 4666 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-45" d="M 2400 722 
+Q 2759 722 2948 984 
+Q 3138 1247 3138 1747 
+Q 3138 2247 2948 2509 
+Q 2759 2772 2400 2772 
+Q 2041 2772 1848 2508 
+Q 1656 2244 1656 1747 
+Q 1656 1250 1848 986 
+Q 2041 722 2400 722 
+z
+M 1656 2988 
+Q 1888 3294 2169 3439 
+Q 2450 3584 2816 3584 
+Q 3463 3584 3878 3070 
+Q 4294 2556 4294 1747 
+Q 4294 938 3878 423 
+Q 3463 -91 2816 -91 
+Q 2450 -91 2169 54 
+Q 1888 200 1656 506 
+L 1656 0 
+L 538 0 
+L 538 4863 
+L 1656 4863 
+L 1656 2988 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-58" d="M 500 1363 
+L 500 3500 
+L 1625 3500 
+L 1625 3150 
+Q 1625 2866 1622 2436 
+Q 1619 2006 1619 1863 
+Q 1619 1441 1641 1255 
+Q 1663 1069 1716 984 
+Q 1784 875 1895 815 
+Q 2006 756 2150 756 
+Q 2500 756 2700 1025 
+Q 2900 1294 2900 1772 
+L 2900 3500 
+L 4019 3500 
+L 4019 0 
+L 2900 0 
+L 2900 506 
+Q 2647 200 2364 54 
+Q 2081 -91 1741 -91 
+Q 1134 -91 817 281 
+Q 500 653 500 1363 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-55" d="M 3138 2547 
+Q 2991 2616 2845 2648 
+Q 2700 2681 2553 2681 
+Q 2122 2681 1889 2404 
+Q 1656 2128 1656 1613 
+L 1656 0 
+L 538 0 
+L 538 3500 
+L 1656 3500 
+L 1656 2925 
+Q 1872 3269 2151 3426 
+Q 2431 3584 2822 3584 
+Q 2878 3584 2943 3579 
+Q 3009 3575 3134 3559 
+L 3138 2547 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-c" d="M 513 -844 
+Q 913 -100 1113 609 
+Q 1313 1319 1313 2009 
+Q 1313 2700 1113 3408 
+Q 913 4116 513 4856 
+L 1441 4856 
+Q 1916 4091 2145 3389 
+Q 2375 2688 2375 2003 
+Q 2375 1319 2147 623 
+Q 1919 -72 1441 -844 
+L 513 -844 
+z
+" transform="scale(0.015625)"/>
+     </defs>
+     <use xlink:href="#DejaVuSans-Bold-38"/>
+     <use xlink:href="#DejaVuSans-Bold-53" transform="translate(81.203125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-56" transform="translate(152.78125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-44" transform="translate(212.296875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-50" transform="translate(279.78125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-53" transform="translate(383.984375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-4f" transform="translate(455.5625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-48" transform="translate(489.84375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-47" transform="translate(557.671875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-3" transform="translate(629.25 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-52" transform="translate(664.0625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-51" transform="translate(732.765625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-57" transform="translate(803.953125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-52" transform="translate(851.75 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-3" transform="translate(920.453125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-15" transform="translate(955.265625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-13" transform="translate(1024.84375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-13" transform="translate(1094.421875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-3" transform="translate(1164 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-53" transform="translate(1198.8125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-52" transform="translate(1270.390625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-4c" transform="translate(1339.09375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-51" transform="translate(1373.375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-57" transform="translate(1444.5625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-56" transform="translate(1492.359375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-3" transform="translate(1551.875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-b" transform="translate(1586.6875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-53" transform="translate(1632.390625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-52" transform="translate(1703.96875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-4f" transform="translate(1772.671875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-4c" transform="translate(1806.953125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-46" transform="translate(1841.234375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-5c" transform="translate(1900.515625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-20" transform="translate(1965.703125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-a" transform="translate(2049.5 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-45" transform="translate(2080.109375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-52" transform="translate(2151.6875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-58" transform="translate(2220.390625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-51" transform="translate(2291.578125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-47" transform="translate(2362.765625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-44" transform="translate(2434.34375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-55" transform="translate(2501.828125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-5c" transform="translate(2551.140625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-a" transform="translate(2616.328125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-c" transform="translate(2646.9375 0)"/>
+    </g>
+   </g>
+   <g id="PathCollection_1">
+    <defs>
+     <path id="m1907290fcf" d="M 0 1.870829 
+C 0.49615 1.870829 0.972045 1.673706 1.322876 1.322876 
+C 1.673706 0.972045 1.870829 0.49615 1.870829 0 
+C 1.870829 -0.49615 1.673706 -0.972045 1.322876 -1.322876 
+C 0.972045 -1.673706 0.49615 -1.870829 0 -1.870829 
+C -0.49615 -1.870829 -0.972045 -1.673706 -1.322876 -1.322876 
+C -1.673706 -0.972045 -1.870829 -0.49615 -1.870829 0 
+C -1.870829 0.49615 -1.673706 0.972045 -1.322876 1.322876 
+C -0.972045 1.673706 -0.49615 1.870829 0 1.870829 
+z
+" style="stroke: #1a1a2e; stroke-opacity: 0.5"/>
+    </defs>
+    <g clip-path="url(#p3b5de74d53)">
+     <use xlink:href="#m1907290fcf" x="94.273242" y="108.909553" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="98.350368" y="108.907503" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="102.427493" y="108.905947" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="106.504619" y="108.904179" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="110.581744" y="108.902412" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="126.890246" y="108.895553" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="143.198748" y="108.889613" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="159.50725" y="108.885159" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="175.815751" y="108.880845" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="192.124253" y="108.875118" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="208.432755" y="108.86932" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="216.587006" y="108.867269" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="224.741257" y="108.865006" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="232.895508" y="108.862744" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="241.049759" y="108.860623" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="249.20401" y="108.858572" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="257.358261" y="108.856592" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="265.512511" y="108.854117" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="273.666762" y="108.851218" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="281.821013" y="108.847683" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="289.975264" y="108.84337" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="298.129515" y="108.838915" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="306.283766" y="108.835309" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="314.438017" y="108.832975" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="322.592268" y="108.831773" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="330.746519" y="108.831208" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="338.90077" y="108.830713" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="347.055021" y="108.83043" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="355.209272" y="108.830006" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="363.363523" y="108.829652" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="371.517773" y="108.829086" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="94.273242" y="108.913159" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="98.350368" y="108.91019" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="102.427493" y="108.90821" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="106.504619" y="108.906654" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="110.581744" y="108.905098" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="126.890246" y="108.898452" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="143.198748" y="108.893078" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="159.50725" y="108.887633" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="175.815751" y="108.882967" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="192.124253" y="108.878653" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="208.432755" y="108.875047" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="216.587006" y="108.872997" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="224.741257" y="108.8713" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="232.895508" y="108.869815" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="241.049759" y="108.868259" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="249.20401" y="108.866491" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="257.358261" y="108.865077" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="265.512511" y="108.863663" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="273.666762" y="108.86232" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="281.821013" y="108.861117" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="289.975264" y="108.859845" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="298.129515" y="108.858289" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="306.283766" y="108.856521" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="314.438017" y="108.854471" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="322.592268" y="108.851572" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="330.746519" y="108.848461" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="338.90077" y="108.845774" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="347.055021" y="108.843794" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="355.209272" y="108.842521" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="363.363523" y="108.841602" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="371.517773" y="108.840683" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="94.273242" y="108.912735" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="98.350368" y="108.910614" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="102.427493" y="108.908634" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="106.504619" y="108.907149" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="110.581744" y="108.905735" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="126.890246" y="108.900432" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="143.198748" y="108.896048" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="159.50725" y="108.89131" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="175.815751" y="108.887633" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="192.124253" y="108.883179" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="208.432755" y="108.87936" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="216.587006" y="108.877593" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="224.741257" y="108.875896" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="232.895508" y="108.874269" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="241.049759" y="108.872714" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="249.20401" y="108.871017" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="257.358261" y="108.869178" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="265.512511" y="108.86734" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="273.666762" y="108.865501" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="281.821013" y="108.863239" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="289.975264" y="108.86041" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="298.129515" y="108.85737" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="306.283766" y="108.854259" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="314.438017" y="108.851572" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="322.592268" y="108.849097" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="330.746519" y="108.84839" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="338.90077" y="108.847683" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="347.055021" y="108.846976" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="355.209272" y="108.846198" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="363.363523" y="108.845986" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="371.517773" y="108.845774" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="94.273242" y="108.914644" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="98.350368" y="108.911604" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="102.427493" y="108.908634" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="106.504619" y="108.906654" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="110.581744" y="108.904745" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="126.890246" y="108.897321" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="143.198748" y="108.893219" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="159.50725" y="108.888553" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="175.815751" y="108.884805" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="192.124253" y="108.879926" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="208.432755" y="108.875189" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="216.587006" y="108.872997" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="224.741257" y="108.870875" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="232.895508" y="108.868966" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="241.049759" y="108.867057" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="249.20401" y="108.865219" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="257.358261" y="108.863522" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="265.512511" y="108.861825" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="273.666762" y="108.859986" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="281.821013" y="108.857794" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="289.975264" y="108.855531" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="298.129515" y="108.85235" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="306.283766" y="108.848673" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="314.438017" y="108.845067" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="322.592268" y="108.84238" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="330.746519" y="108.840824" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="338.90077" y="108.839905" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="347.055021" y="108.839268" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="355.209272" y="108.838773" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="363.363523" y="108.838632" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="371.517773" y="108.838491" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="94.273242" y="108.914574" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="98.350368" y="108.913089" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="102.427493" y="108.911674" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="106.504619" y="108.91026" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="110.581744" y="108.908917" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="126.890246" y="108.903826" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="143.198748" y="108.898523" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="159.50725" y="108.893432" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="175.815751" y="108.888765" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="192.124253" y="108.885159" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="208.432755" y="108.880987" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="216.587006" y="108.878512" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="224.741257" y="108.876179" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="232.895508" y="108.874269" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="241.049759" y="108.872148" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="249.20401" y="108.869885" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="257.358261" y="108.867693" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="265.512511" y="108.865714" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="273.666762" y="108.863875" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="281.821013" y="108.861895" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="289.975264" y="108.859562" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="298.129515" y="108.856875" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="306.283766" y="108.853622" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="314.438017" y="108.850299" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="322.592268" y="108.847895" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="330.746519" y="108.846551" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="338.90077" y="108.845703" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="347.055021" y="108.845137" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="355.209272" y="108.845067" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="363.363523" y="108.845067" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="371.517773" y="108.845067" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="94.273242" y="108.912735" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="98.350368" y="108.911109" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="102.427493" y="108.909695" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="106.504619" y="108.907361" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="110.581744" y="108.90524" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="126.890246" y="108.900573" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="143.198748" y="108.894634" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="159.50725" y="108.889825" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="175.815751" y="108.884946" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="192.124253" y="108.880845" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="208.432755" y="108.876673" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="216.587006" y="108.875259" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="224.741257" y="108.873421" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="232.895508" y="108.871582" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="241.049759" y="108.869956" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="249.20401" y="108.868259" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="257.358261" y="108.866633" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="265.512511" y="108.865148" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="273.666762" y="108.863168" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="281.821013" y="108.860976" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="289.975264" y="108.858572" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="298.129515" y="108.855814" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="306.283766" y="108.852774" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="314.438017" y="108.850228" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="322.592268" y="108.847683" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="330.746519" y="108.846764" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="338.90077" y="108.845774" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="347.055021" y="108.845349" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="355.209272" y="108.844996" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="363.363523" y="108.844572" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+     <use xlink:href="#m1907290fcf" x="371.517773" y="108.844147" style="fill: #1a1a2e; fill-opacity: 0.5; stroke: #1a1a2e; stroke-opacity: 0.5"/>
+    </g>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_5">
+    <path d="M 470.471016 238.44 
+L 775.44 238.44 
+L 775.44 22.698047 
+L 470.471016 22.698047 
+L 470.471016 238.44 
+z
+" style="fill: none"/>
+   </g>
+   <g id="matplotlib.axis_3">
+    <g id="xtick_8">
+     <g id="line2d_33">
+      <path d="M 476.632005 238.44 
+L 476.632005 22.698047 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_34">
+      <g>
+       <use xlink:href="#mf78ee66986" x="476.632005" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_17">
+      <!-- 0.0 -->
+      <g transform="translate(467.885286 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-13"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(95.40625 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_9">
+     <g id="line2d_35">
+      <path d="M 515.13819 238.44 
+L 515.13819 22.698047 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_36">
+      <g>
+       <use xlink:href="#mf78ee66986" x="515.13819" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_18">
+      <!-- 2.5 -->
+      <g transform="translate(506.391471 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-15"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(95.40625 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_10">
+     <g id="line2d_37">
+      <path d="M 553.644375 238.44 
+L 553.644375 22.698047 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_38">
+      <g>
+       <use xlink:href="#mf78ee66986" x="553.644375" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_19">
+      <!-- 5.0 -->
+      <g transform="translate(544.897656 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-18"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(95.40625 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_11">
+     <g id="line2d_39">
+      <path d="M 592.15056 238.44 
+L 592.15056 22.698047 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_40">
+      <g>
+       <use xlink:href="#mf78ee66986" x="592.15056" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_20">
+      <!-- 7.5 -->
+      <g transform="translate(583.403841 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-1a"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(95.40625 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_12">
+     <g id="line2d_41">
+      <path d="M 630.656745 238.44 
+L 630.656745 22.698047 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_42">
+      <g>
+       <use xlink:href="#mf78ee66986" x="630.656745" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_21">
+      <!-- 10.0 -->
+      <g transform="translate(618.410651 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-14"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(159.03125 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_13">
+     <g id="line2d_43">
+      <path d="M 669.16293 238.44 
+L 669.16293 22.698047 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_44">
+      <g>
+       <use xlink:href="#mf78ee66986" x="669.16293" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_22">
+      <!-- 12.5 -->
+      <g transform="translate(656.916836 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-14"/>
+       <use xlink:href="#DejaVuSans-15" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(159.03125 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_14">
+     <g id="line2d_45">
+      <path d="M 707.669115 238.44 
+L 707.669115 22.698047 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_46">
+      <g>
+       <use xlink:href="#mf78ee66986" x="707.669115" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_23">
+      <!-- 15.0 -->
+      <g transform="translate(695.423021 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-14"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(159.03125 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_15">
+     <g id="line2d_47">
+      <path d="M 746.175299 238.44 
+L 746.175299 22.698047 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_48">
+      <g>
+       <use xlink:href="#mf78ee66986" x="746.175299" y="238.44" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_24">
+      <!-- 17.5 -->
+      <g transform="translate(733.929206 253.797422) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-14"/>
+       <use xlink:href="#DejaVuSans-1a" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-11" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(159.03125 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="text_25">
+     <!-- Age (years) -->
+     <g transform="translate(591.141445 268.797422) scale(0.11 -0.11)">
+      <use xlink:href="#DejaVuSans-24"/>
+      <use xlink:href="#DejaVuSans-4a" transform="translate(68.40625 0)"/>
+      <use xlink:href="#DejaVuSans-48" transform="translate(131.890625 0)"/>
+      <use xlink:href="#DejaVuSans-3" transform="translate(193.421875 0)"/>
+      <use xlink:href="#DejaVuSans-b" transform="translate(225.203125 0)"/>
+      <use xlink:href="#DejaVuSans-5c" transform="translate(264.21875 0)"/>
+      <use xlink:href="#DejaVuSans-48" transform="translate(323.40625 0)"/>
+      <use xlink:href="#DejaVuSans-44" transform="translate(384.9375 0)"/>
+      <use xlink:href="#DejaVuSans-55" transform="translate(446.21875 0)"/>
+      <use xlink:href="#DejaVuSans-56" transform="translate(487.328125 0)"/>
+      <use xlink:href="#DejaVuSans-c" transform="translate(539.421875 0)"/>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_7">
+     <g id="line2d_49">
+      <path d="M 470.471016 215.38307 
+L 775.44 215.38307 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_50">
+      <g>
+       <use xlink:href="#md9a263970d" x="470.471016" y="215.38307" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_26">
+      <!-- −150000 -->
+      <g transform="translate(412.260859 219.561781) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-c9c"/>
+       <use xlink:href="#DejaVuSans-14" transform="translate(83.796875 0)"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(147.421875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(211.046875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(274.671875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(338.296875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(401.921875 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_8">
+     <g id="line2d_51">
+      <path d="M 470.471016 179.854033 
+L 775.44 179.854033 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_52">
+      <g>
+       <use xlink:href="#md9a263970d" x="470.471016" y="179.854033" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_27">
+      <!-- −100000 -->
+      <g transform="translate(412.260859 184.032744) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-c9c"/>
+       <use xlink:href="#DejaVuSans-14" transform="translate(83.796875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(147.421875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(211.046875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(274.671875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(338.296875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(401.921875 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_9">
+     <g id="line2d_53">
+      <path d="M 470.471016 144.324996 
+L 775.44 144.324996 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_54">
+      <g>
+       <use xlink:href="#md9a263970d" x="470.471016" y="144.324996" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_28">
+      <!-- −50000 -->
+      <g transform="translate(419.259609 148.503707) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-c9c"/>
+       <use xlink:href="#DejaVuSans-18" transform="translate(83.796875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(147.421875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(211.046875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(274.671875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(338.296875 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_10">
+     <g id="line2d_55">
+      <path d="M 470.471016 108.795959 
+L 775.44 108.795959 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_56">
+      <g>
+       <use xlink:href="#md9a263970d" x="470.471016" y="108.795959" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_29">
+      <!-- 0 -->
+      <g transform="translate(456.472266 112.97467) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-13"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_11">
+     <g id="line2d_57">
+      <path d="M 470.471016 73.266922 
+L 775.44 73.266922 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_58">
+      <g>
+       <use xlink:href="#md9a263970d" x="470.471016" y="73.266922" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_30">
+      <!-- 50000 -->
+      <g transform="translate(428.477266 77.445633) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-18"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(190.875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(254.5 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_12">
+     <g id="line2d_59">
+      <path d="M 470.471016 37.737885 
+L 775.44 37.737885 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.22; stroke-width: 0.7; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_60">
+      <g>
+       <use xlink:href="#md9a263970d" x="470.471016" y="37.737885" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_31">
+      <!-- 100000 -->
+      <g transform="translate(421.478516 41.916596) scale(0.11 -0.11)">
+       <use xlink:href="#DejaVuSans-14"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(63.625 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(127.25 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(190.875 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(254.5 0)"/>
+       <use xlink:href="#DejaVuSans-13" transform="translate(318.125 0)"/>
+      </g>
+     </g>
+    </g>
+    <g id="text_32">
+     <!-- Height (cm) -->
+     <g transform="translate(405.618281 163.171992) rotate(-90) scale(0.11 -0.11)">
+      <use xlink:href="#DejaVuSans-2b"/>
+      <use xlink:href="#DejaVuSans-48" transform="translate(75.203125 0)"/>
+      <use xlink:href="#DejaVuSans-4c" transform="translate(136.734375 0)"/>
+      <use xlink:href="#DejaVuSans-4a" transform="translate(164.515625 0)"/>
+      <use xlink:href="#DejaVuSans-4b" transform="translate(228 0)"/>
+      <use xlink:href="#DejaVuSans-57" transform="translate(291.375 0)"/>
+      <use xlink:href="#DejaVuSans-3" transform="translate(330.578125 0)"/>
+      <use xlink:href="#DejaVuSans-b" transform="translate(362.359375 0)"/>
+      <use xlink:href="#DejaVuSans-46" transform="translate(401.375 0)"/>
+      <use xlink:href="#DejaVuSans-50" transform="translate(456.359375 0)"/>
+      <use xlink:href="#DejaVuSans-c" transform="translate(553.765625 0)"/>
+     </g>
+    </g>
+   </g>
+   <g id="patch_6">
+    <path d="M 484.333242 238.44 
+L 492.034479 238.44 
+L 492.034479 22.698047 
+L 484.333242 22.698047 
+z
+" clip-path="url(#pab0db3f7fc)" style="fill: #dc3545; opacity: 0.07; stroke: #dc3545; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 753.876536 238.44 
+L 761.577773 238.44 
+L 761.577773 22.698047 
+L 753.876536 22.698047 
+z
+" clip-path="url(#pab0db3f7fc)" style="fill: #dc3545; opacity: 0.07; stroke: #dc3545; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_61">
+    <path d="M 484.333242 108.795959 
+L 528.641729 108.874158 
+L 531.173642 109.173638 
+L 534.971513 109.849705 
+L 536.237469 109.761916 
+L 537.503426 109.261943 
+L 538.769383 108.194398 
+L 540.03534 106.403892 
+L 541.301297 103.735039 
+L 542.567253 100.032886 
+L 546.365124 85.986242 
+L 547.63108 82.816823 
+L 548.897037 81.699497 
+L 550.162994 83.411682 
+L 551.428951 88.730793 
+L 552.694907 98.43156 
+L 553.960864 112.601518 
+L 556.492778 148.09241 
+L 557.758734 165.946349 
+L 559.024691 181.561287 
+L 560.290648 193.203727 
+L 561.556605 199.140171 
+L 562.822562 197.644764 
+L 564.088518 188.120309 
+L 565.354475 172.28098 
+L 566.620432 152.123969 
+L 570.418302 85.718739 
+L 571.684259 68.262896 
+L 572.950216 56.464107 
+L 574.216172 51.241797 
+L 575.482129 51.584188 
+L 576.748086 56.276011 
+L 578.014043 64.101997 
+L 580.545956 84.29538 
+L 581.811913 94.232237 
+L 583.07787 102.450814 
+L 584.343827 108.313812 
+L 585.609783 112.097202 
+L 586.87574 114.159228 
+L 588.141697 114.858134 
+L 589.407654 114.552165 
+L 590.67361 113.599566 
+L 593.205524 111.184234 
+L 594.471481 110.276362 
+L 595.737437 109.613925 
+L 597.003394 109.159003 
+L 598.269351 108.873679 
+L 600.801264 108.660155 
+L 626.1204 108.690376 
+L 752.716076 108.657499 
+L 753.982033 108.795959 
+L 761.577773 108.795959 
+L 761.577773 108.795959 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #3f51b5; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_62">
+    <path d="M 484.333242 108.795959 
+L 527.375772 108.848944 
+L 529.907686 109.13278 
+L 532.439599 109.681526 
+L 533.705556 110.03518 
+L 534.971513 110.251106 
+L 536.237469 110.124274 
+L 537.503426 109.449659 
+L 538.769383 108.022234 
+L 540.03534 105.636969 
+L 541.301297 102.08884 
+L 542.567253 97.173395 
+L 546.365124 78.547275 
+L 547.63108 74.349022 
+L 548.897037 72.873097 
+L 550.162994 75.14976 
+L 551.428951 82.209269 
+L 552.694907 95.078322 
+L 553.960864 113.872571 
+L 556.492778 160.940424 
+L 557.758734 184.616884 
+L 559.024691 205.323606 
+L 560.290648 220.762017 
+L 561.556605 228.633548 
+L 562.822562 226.649758 
+L 564.088518 214.01885 
+L 565.354475 193.013981 
+L 566.620432 166.283596 
+L 570.418302 78.223784 
+L 571.684259 55.075776 
+L 572.950216 39.429604 
+L 574.216172 32.504499 
+L 575.482129 32.958752 
+L 576.748086 39.1808 
+L 578.014043 49.559084 
+L 580.545956 76.338119 
+L 581.811913 89.515749 
+L 583.07787 100.414824 
+L 584.343827 108.19022 
+L 585.609783 113.207884 
+L 586.87574 115.942867 
+L 588.141697 116.870217 
+L 589.407654 116.464985 
+L 590.67361 115.202218 
+L 593.205524 112.000011 
+L 594.471481 110.796349 
+L 595.737437 109.91809 
+L 597.003394 109.314964 
+L 598.269351 108.936704 
+L 599.535308 108.733039 
+L 602.067221 108.648422 
+L 612.194875 108.702547 
+L 740.056508 108.67063 
+L 752.716076 108.66911 
+L 753.982033 108.795959 
+L 761.577773 108.795959 
+L 761.577773 108.795959 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #e8710a; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_63">
+    <path d="M 484.333242 108.795959 
+L 540.03534 108.689312 
+L 550.162994 108.452357 
+L 552.694907 108.612908 
+L 557.758734 109.308073 
+L 560.290648 109.585975 
+L 562.822562 109.62971 
+L 565.354475 109.36858 
+L 572.950216 108.180014 
+L 575.482129 108.129312 
+L 579.279999 108.356183 
+L 584.343827 108.707721 
+L 589.407654 108.770307 
+L 610.928919 108.705341 
+L 752.716076 108.674214 
+L 753.982033 108.795959 
+L 761.577773 108.795959 
+L 761.577773 108.795959 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #198754; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_64">
+    <path d="M 484.333242 108.795959 
+L 532.439599 108.71882 
+L 537.503426 108.677821 
+L 540.03534 108.930243 
+L 542.567253 109.548315 
+L 546.365124 110.963851 
+L 547.63108 111.289894 
+L 548.897037 111.410779 
+L 550.162994 111.247155 
+L 551.428951 110.719666 
+L 552.694907 109.749233 
+L 553.960864 108.326384 
+L 556.492778 104.75478 
+L 557.758734 102.956006 
+L 559.024691 101.381905 
+L 560.290648 100.207467 
+L 561.556605 99.607682 
+L 562.822562 99.756769 
+L 564.088518 100.715116 
+L 565.354475 102.309992 
+L 566.620432 104.340124 
+L 570.418302 111.029312 
+L 571.684259 112.787726 
+L 572.950216 113.976155 
+L 574.216172 114.501934 
+L 575.482129 114.467006 
+L 576.748086 113.993823 
+L 578.014043 113.204834 
+L 583.07787 109.338963 
+L 584.343827 108.747729 
+L 585.609783 108.366032 
+L 586.87574 108.157779 
+L 589.407654 108.117232 
+L 598.269351 108.686414 
+L 608.397005 108.701042 
+L 752.716076 108.666857 
+L 753.982033 108.795959 
+L 761.577773 108.795959 
+L 761.577773 108.795959 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #dc3545; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_65">
+    <path d="M 484.333242 108.795959 
+L 570.418302 108.693458 
+L 578.014043 108.669588 
+L 597.003394 108.710784 
+L 752.716076 108.67333 
+L 753.982033 108.795959 
+L 761.577773 108.795959 
+L 761.577773 108.795959 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #6f42c1; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_66">
+    <path d="M 484.333242 108.795959 
+L 524.843859 108.701288 
+L 531.173642 108.467247 
+L 534.971513 108.252185 
+L 536.237469 108.306141 
+L 537.503426 108.511753 
+L 538.769383 108.923003 
+L 540.03534 109.593873 
+L 541.301297 110.578345 
+L 542.567253 111.930246 
+L 546.365124 117.008022 
+L 547.63108 118.143944 
+L 548.897037 118.535223 
+L 550.162994 117.902074 
+L 551.428951 115.964711 
+L 552.694907 112.44432 
+L 553.960864 107.310161 
+L 556.492778 94.462589 
+L 557.758734 88.002471 
+L 559.024691 82.353659 
+L 560.290648 78.1428 
+L 561.556605 75.996543 
+L 562.822562 76.538769 
+L 564.088518 79.985215 
+L 565.354475 85.715775 
+L 566.620432 93.008 
+L 570.418302 117.030158 
+L 571.684259 123.34454 
+L 572.950216 127.612392 
+L 574.216172 129.501138 
+L 575.482129 129.376794 
+L 576.748086 127.678993 
+L 578.014043 124.847363 
+L 583.07787 110.972043 
+L 584.343827 108.850398 
+L 585.609783 107.481049 
+L 586.87574 106.734413 
+L 588.141697 106.480903 
+L 589.407654 106.590936 
+L 591.939567 107.383286 
+L 594.471481 108.135574 
+L 597.003394 108.53902 
+L 599.535308 108.697165 
+L 605.865092 108.706402 
+L 683.088454 108.684699 
+L 752.716076 108.672491 
+L 753.982033 108.795959 
+L 761.577773 108.795959 
+L 761.577773 108.795959 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke: #0dcaf0; stroke-opacity: 0.8; stroke-width: 1.4; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_67">
+    <path d="M 470.471016 108.795959 
+L 775.44 108.795959 
+" clip-path="url(#pab0db3f7fc)" style="fill: none; stroke-dasharray: 4.44,1.92; stroke-dashoffset: 0; stroke: #fd7e14; stroke-opacity: 0.7; stroke-width: 1.2"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 470.471016 238.44 
+L 470.471016 22.698047 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 470.471016 238.44 
+L 775.44 238.44 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_33">
+    <!-- Fill policy: out-of-domain → 0 (shaded) -->
+    <g transform="translate(487.265078 16.698047) scale(0.125 -0.125)">
+     <defs>
+      <path id="DejaVuSans-Bold-29" d="M 588 4666 
+L 3834 4666 
+L 3834 3756 
+L 1791 3756 
+L 1791 2888 
+L 3713 2888 
+L 3713 1978 
+L 1791 1978 
+L 1791 0 
+L 588 0 
+L 588 4666 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-1d" d="M 716 3500 
+L 1844 3500 
+L 1844 2291 
+L 716 2291 
+L 716 3500 
+z
+M 716 1209 
+L 1844 1209 
+L 1844 0 
+L 716 0 
+L 716 1209 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-10" d="M 347 2297 
+L 2309 2297 
+L 2309 1388 
+L 347 1388 
+L 347 2297 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-49" d="M 2841 4863 
+L 2841 4128 
+L 2222 4128 
+Q 1984 4128 1890 4042 
+Q 1797 3956 1797 3744 
+L 1797 3500 
+L 2753 3500 
+L 2753 2700 
+L 1797 2700 
+L 1797 0 
+L 678 0 
+L 678 2700 
+L 122 2700 
+L 122 3500 
+L 678 3500 
+L 678 3744 
+Q 678 4316 997 4589 
+Q 1316 4863 1984 4863 
+L 2841 4863 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-c1c" d="M 5050 2225 
+L 5050 1788 
+L 3822 559 
+L 3369 1013 
+L 3988 1631 
+L 366 1631 
+L 366 2381 
+L 3988 2381 
+L 3369 3000 
+L 3822 3453 
+L 5050 2225 
+z
+" transform="scale(0.015625)"/>
+      <path id="DejaVuSans-Bold-4b" d="M 4056 2131 
+L 4056 0 
+L 2931 0 
+L 2931 347 
+L 2931 1625 
+Q 2931 2084 2911 2256 
+Q 2891 2428 2841 2509 
+Q 2775 2619 2662 2680 
+Q 2550 2741 2406 2741 
+Q 2056 2741 1856 2470 
+Q 1656 2200 1656 1722 
+L 1656 0 
+L 538 0 
+L 538 4863 
+L 1656 4863 
+L 1656 2988 
+Q 1909 3294 2193 3439 
+Q 2478 3584 2822 3584 
+Q 3428 3584 3742 3212 
+Q 4056 2841 4056 2131 
+z
+" transform="scale(0.015625)"/>
+     </defs>
+     <use xlink:href="#DejaVuSans-Bold-29"/>
+     <use xlink:href="#DejaVuSans-Bold-4c" transform="translate(68.3125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-4f" transform="translate(102.59375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-4f" transform="translate(136.875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-3" transform="translate(171.15625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-53" transform="translate(205.96875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-52" transform="translate(277.546875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-4f" transform="translate(346.25 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-4c" transform="translate(380.53125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-46" transform="translate(414.8125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-5c" transform="translate(474.09375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-1d" transform="translate(539.28125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-3" transform="translate(579.265625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-52" transform="translate(614.078125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-58" transform="translate(682.78125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-57" transform="translate(753.96875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-10" transform="translate(801.765625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-52" transform="translate(843.265625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-49" transform="translate(911.96875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-10" transform="translate(953.71875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-47" transform="translate(995.21875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-52" transform="translate(1066.796875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-50" transform="translate(1135.5 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-44" transform="translate(1239.703125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-4c" transform="translate(1307.1875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-51" transform="translate(1341.46875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-3" transform="translate(1412.65625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-c1c" transform="translate(1447.46875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-3" transform="translate(1531.265625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-13" transform="translate(1566.078125 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-3" transform="translate(1635.65625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-b" transform="translate(1670.46875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-56" transform="translate(1716.171875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-4b" transform="translate(1775.6875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-44" transform="translate(1846.875 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-47" transform="translate(1914.359375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-48" transform="translate(1985.9375 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-47" transform="translate(2053.765625 0)"/>
+     <use xlink:href="#DejaVuSans-Bold-c" transform="translate(2125.34375 0)"/>
+    </g>
+   </g>
+   <g id="legend_1">
+    <g id="patch_10">
+     <path d="M 576.252617 213.357031 
+L 595.252617 213.357031 
+L 595.252617 206.707031 
+L 576.252617 206.707031 
+z
+" style="fill: #dc3545; opacity: 0.07; stroke: #dc3545; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_34">
+     <!-- out-of-domain -->
+     <g transform="translate(602.852617 213.357031) scale(0.095 -0.095)">
+      <defs>
+       <path id="DejaVuSans-52" d="M 1959 3097 
+Q 1497 3097 1228 2736 
+Q 959 2375 959 1747 
+Q 959 1119 1226 758 
+Q 1494 397 1959 397 
+Q 2419 397 2687 759 
+Q 2956 1122 2956 1747 
+Q 2956 2369 2687 2733 
+Q 2419 3097 1959 3097 
+z
+M 1959 3584 
+Q 2709 3584 3137 3096 
+Q 3566 2609 3566 1747 
+Q 3566 888 3137 398 
+Q 2709 -91 1959 -91 
+Q 1206 -91 779 398 
+Q 353 888 353 1747 
+Q 353 2609 779 3096 
+Q 1206 3584 1959 3584 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-58" d="M 544 1381 
+L 544 3500 
+L 1119 3500 
+L 1119 1403 
+Q 1119 906 1312 657 
+Q 1506 409 1894 409 
+Q 2359 409 2629 706 
+Q 2900 1003 2900 1516 
+L 2900 3500 
+L 3475 3500 
+L 3475 0 
+L 2900 0 
+L 2900 538 
+Q 2691 219 2414 64 
+Q 2138 -91 1772 -91 
+Q 1169 -91 856 284 
+Q 544 659 544 1381 
+z
+M 1991 3584 
+L 1991 3584 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-10" d="M 313 2009 
+L 1997 2009 
+L 1997 1497 
+L 313 1497 
+L 313 2009 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-49" d="M 2375 4863 
+L 2375 4384 
+L 1825 4384 
+Q 1516 4384 1395 4259 
+Q 1275 4134 1275 3809 
+L 1275 3500 
+L 2222 3500 
+L 2222 3053 
+L 1275 3053 
+L 1275 0 
+L 697 0 
+L 697 3053 
+L 147 3053 
+L 147 3500 
+L 697 3500 
+L 697 3744 
+Q 697 4328 969 4595 
+Q 1241 4863 1831 4863 
+L 2375 4863 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-47" d="M 2906 2969 
+L 2906 4863 
+L 3481 4863 
+L 3481 0 
+L 2906 0 
+L 2906 525 
+Q 2725 213 2448 61 
+Q 2172 -91 1784 -91 
+Q 1150 -91 751 415 
+Q 353 922 353 1747 
+Q 353 2572 751 3078 
+Q 1150 3584 1784 3584 
+Q 2172 3584 2448 3432 
+Q 2725 3281 2906 2969 
+z
+M 947 1747 
+Q 947 1113 1208 752 
+Q 1469 391 1925 391 
+Q 2381 391 2643 752 
+Q 2906 1113 2906 1747 
+Q 2906 2381 2643 2742 
+Q 2381 3103 1925 3103 
+Q 1469 3103 1208 2742 
+Q 947 2381 947 1747 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-51" d="M 3513 2113 
+L 3513 0 
+L 2938 0 
+L 2938 2094 
+Q 2938 2591 2744 2837 
+Q 2550 3084 2163 3084 
+Q 1697 3084 1428 2787 
+Q 1159 2491 1159 1978 
+L 1159 0 
+L 581 0 
+L 581 3500 
+L 1159 3500 
+L 1159 2956 
+Q 1366 3272 1645 3428 
+Q 1925 3584 2291 3584 
+Q 2894 3584 3203 3211 
+Q 3513 2838 3513 2113 
+z
+" transform="scale(0.015625)"/>
+      </defs>
+      <use xlink:href="#DejaVuSans-52"/>
+      <use xlink:href="#DejaVuSans-58" transform="translate(61.1875 0)"/>
+      <use xlink:href="#DejaVuSans-57" transform="translate(124.5625 0)"/>
+      <use xlink:href="#DejaVuSans-10" transform="translate(163.765625 0)"/>
+      <use xlink:href="#DejaVuSans-52" transform="translate(201.703125 0)"/>
+      <use xlink:href="#DejaVuSans-49" transform="translate(262.890625 0)"/>
+      <use xlink:href="#DejaVuSans-10" transform="translate(292.625 0)"/>
+      <use xlink:href="#DejaVuSans-47" transform="translate(328.703125 0)"/>
+      <use xlink:href="#DejaVuSans-52" transform="translate(392.1875 0)"/>
+      <use xlink:href="#DejaVuSans-50" transform="translate(453.375 0)"/>
+      <use xlink:href="#DejaVuSans-44" transform="translate(550.78125 0)"/>
+      <use xlink:href="#DejaVuSans-4c" transform="translate(612.0625 0)"/>
+      <use xlink:href="#DejaVuSans-51" transform="translate(639.84375 0)"/>
+     </g>
+    </g>
+    <g id="line2d_68">
+     <path d="M 576.252617 224.282773 
+L 585.752617 224.282773 
+L 595.252617 224.282773 
+" style="fill: none; stroke-dasharray: 4.44,1.92; stroke-dashoffset: 0; stroke: #fd7e14; stroke-opacity: 0.7; stroke-width: 1.2"/>
+    </g>
+    <g id="text_35">
+     <!-- fill_value=0 -->
+     <g transform="translate(602.852617 227.607773) scale(0.095 -0.095)">
+      <defs>
+       <path id="DejaVuSans-13af" d="M 3431 3500 
+L 3431 0 
+L 2853 0 
+L 2853 3053 
+L 1275 3053 
+L 1275 0 
+L 697 0 
+L 697 3053 
+L 147 3053 
+L 147 3500 
+L 697 3500 
+L 697 3744 
+Q 697 4316 967 4589 
+Q 1238 4863 1797 4863 
+L 2375 4863 
+L 2375 4384 
+L 1825 4384 
+Q 1516 4384 1395 4259 
+Q 1275 4134 1275 3809 
+L 1275 3500 
+L 3431 3500 
+z
+M 2853 4856 
+L 3431 4856 
+L 3431 4128 
+L 2853 4128 
+L 2853 4856 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-4f" d="M 603 4863 
+L 1178 4863 
+L 1178 0 
+L 603 0 
+L 603 4863 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-42" d="M 3263 -1063 
+L 3263 -1509 
+L -63 -1509 
+L -63 -1063 
+L 3263 -1063 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-59" d="M 191 3500 
+L 800 3500 
+L 1894 563 
+L 2988 3500 
+L 3597 3500 
+L 2284 0 
+L 1503 0 
+L 191 3500 
+z
+" transform="scale(0.015625)"/>
+       <path id="DejaVuSans-20" d="M 678 2906 
+L 4684 2906 
+L 4684 2381 
+L 678 2381 
+L 678 2906 
+z
+M 678 1631 
+L 4684 1631 
+L 4684 1100 
+L 678 1100 
+L 678 1631 
+z
+" transform="scale(0.015625)"/>
+      </defs>
+      <use xlink:href="#DejaVuSans-13af"/>
+      <use xlink:href="#DejaVuSans-4f" transform="translate(62.984375 0)"/>
+      <use xlink:href="#DejaVuSans-4f" transform="translate(90.765625 0)"/>
+      <use xlink:href="#DejaVuSans-42" transform="translate(118.546875 0)"/>
+      <use xlink:href="#DejaVuSans-59" transform="translate(168.546875 0)"/>
+      <use xlink:href="#DejaVuSans-44" transform="translate(227.734375 0)"/>
+      <use xlink:href="#DejaVuSans-4f" transform="translate(289.015625 0)"/>
+      <use xlink:href="#DejaVuSans-58" transform="translate(316.796875 0)"/>
+      <use xlink:href="#DejaVuSans-48" transform="translate(380.171875 0)"/>
+      <use xlink:href="#DejaVuSans-20" transform="translate(441.703125 0)"/>
+      <use xlink:href="#DejaVuSans-13" transform="translate(525.5 0)"/>
+     </g>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p3b5de74d53">
+   <rect x="80.411016" y="22.698047" width="304.968984" height="215.741953"/>
+  </clipPath>
+  <clipPath id="pab0db3f7fc">
+   <rect x="470.471016" y="22.698047" width="304.968984" height="215.741953"/>
+  </clipPath>
+ </defs>
+</svg>
+</div>
+Interpolated shape: (93, 200)  FDARS_FENCE_OK
+
+<h2 id="api-summary">API summary<a class="headerlink" href="#api-summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spline_interpolate(data, argvals, query_points, order)</code></td>
+<td>Interpolate to new query points; raises on out-of-domain queries</td>
+</tr>
+<tr>
+<td><code>spline_interpolate_with_policy(data, argvals, query_points, policy, fill_value, order)</code></td>
+<td>Same, with explicit extrapolation policy</td>
+</tr>
+<tr>
+<td><code>fdata_interpolate_with_policy(data, argvals, query_points, policy, fill_value, order)</code></td>
+<td>FdMatrix-level equivalent of the above</td>
+</tr>
+</tbody>
+</table>
+<p>All functions are imported from <code>fdars.represent</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>ndarray (n, m)</code></td>
+<td>required</td>
+<td>Functional data matrix; rows are observations</td>
+</tr>
+<tr>
+<td><code>argvals</code></td>
+<td><code>ndarray (m,)</code></td>
+<td>required</td>
+<td>Sorted evaluation points</td>
+</tr>
+<tr>
+<td><code>query_points</code></td>
+<td><code>ndarray (q,)</code></td>
+<td>required</td>
+<td>Points to evaluate at</td>
+</tr>
+<tr>
+<td><code>policy</code></td>
+<td><code>str</code></td>
+<td><code>"exception"</code></td>
+<td>One of <code>"boundary"</code>, <code>"exception"</code>, <code>"fill"</code>, <code>"periodic"</code></td>
+</tr>
+<tr>
+<td><code>fill_value</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Replacement value for out-of-domain cells when <code>policy="fill"</code></td>
+</tr>
+<tr>
+<td><code>order</code></td>
+<td><code>int</code></td>
+<td><code>4</code></td>
+<td>B-spline order: 1 = linear, 2 = quadratic, 4 = cubic</td>
+</tr>
+</tbody>
+</table>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Ramsay, J.O., Silverman, B.W. (2005). <em>Functional Data Analysis</em>, 2nd ed. Springer.</li>
+<li>de Boor, C. (1978). <em>A Practical Guide to Splines.</em> Springer.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/sipemu/pyfda" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../assets/_markdown_exec_pyodide.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+      
+        <script src="../../javascripts/katex.js"></script>
+      
+    
+  </body>
+</html>

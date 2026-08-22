@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Function-on-scalar regression">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 96 C90 48 150 108 210 72 C245 52 275 82 298 66" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 124 C90 92 150 140 210 112 C245 96 275 120 298 108" stroke="#dc3545" stroke-opacity=".4" stroke-width="3" stroke-linecap="round"/>
+  <text x="238" y="60" fill="#dc3545" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">g=1</text>
+  <text x="238" y="140" fill="#dc3545" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".45">g=2</text>
+</svg>

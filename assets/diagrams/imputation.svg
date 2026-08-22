@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Missing-value imputation: three strategies for filling NaN gaps in functional data">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Missing-Value Imputation — Three Strategies</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Interior gaps: Linear ramps between neighbours — Boundary gaps: flat extension from last valid value</text>
+
+  <!-- Shared raw curve reference: a smooth arc with two NaN gap segments.
+       Layout: 3 panels side-by-side at y=62..258, x-ranges [8..240] [256..484] [500..712] -->
+
+  <!-- PANEL 1: Linear imputation -->
+  <rect x="8" y="62" width="232" height="212" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="124" y="83" text-anchor="middle" fill="#3f51b5">Linear</text>
+  <text class="mono" x="124" y="98" text-anchor="middle" fill="#3f51b5">method="linear"</text>
+
+  <!-- Axes: x-axis at y=248, domain x=24..232 → shift with g transform -->
+  <g transform="translate(24,110)">
+    <!-- x-axis -->
+    <line x1="0" y1="130" x2="200" y2="130" stroke="#ced4da" stroke-width="1.2"/>
+
+    <!-- Original curve (preserved non-NaN segments shown in grey, gaps as dotted) -->
+    <!-- Segment 1: x=0..50 (valid) -->
+    <path d="M0 80 C10 78 20 60 30 52 C40 44 50 48 60 50" stroke="#adb5bd" stroke-width="2.0" stroke-linecap="round"/>
+    <!-- Gap segment 1: x=60..100 (interior NaN — dotted) -->
+    <path d="M60 50 L100 50" stroke="#adb5bd" stroke-width="1.4" stroke-dasharray="4 3" stroke-opacity=".5"/>
+    <!-- Segment 2: x=100..150 (valid) -->
+    <path d="M100 72 C110 76 120 80 130 84 C140 88 150 82 160 70" stroke="#adb5bd" stroke-width="2.0" stroke-linecap="round"/>
+    <!-- Gap segment 2: x=160..200 (boundary NaN — dotted) -->
+    <path d="M160 70 L200 70" stroke="#adb5bd" stroke-width="1.4" stroke-dasharray="4 3" stroke-opacity=".5"/>
+
+    <!-- Linear fill — Interior gap: ramp from (60,50) to (100,72) -->
+    <line x1="60" y1="50" x2="100" y2="72" stroke="#3f51b5" stroke-width="2.2" stroke-linecap="round"/>
+
+    <!-- Linear fill — Boundary gap: FLAT horizontal from (160,70) to (200,70) -->
+    <line x1="160" y1="70" x2="200" y2="70" stroke="#3f51b5" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="5 2"/>
+
+    <!-- Gap region shading for interior gap -->
+    <rect x="60" y="0" width="40" height="130" fill="#3f51b5" fill-opacity=".05" rx="0"/>
+    <!-- Gap region shading for boundary gap -->
+    <rect x="160" y="0" width="40" height="130" fill="#3f51b5" fill-opacity=".05" rx="0"/>
+
+    <!-- Endpoints: dots at gap boundaries -->
+    <circle cx="60" cy="50" r="3.5" fill="#3f51b5"/>
+    <circle cx="100" cy="72" r="3.5" fill="#3f51b5"/>
+    <circle cx="160" cy="70" r="3.5" fill="#3f51b5"/>
+
+    <!-- Labels -->
+    <text class="sm" x="80" y="18" text-anchor="middle" fill="#3f51b5">ramp (interior)</text>
+    <text class="sm" x="180" y="18" text-anchor="middle" fill="#3f51b5">flat (boundary)</text>
+    <text class="sm" x="80" y="142" text-anchor="middle">NaN gap</text>
+    <text class="sm" x="180" y="142" text-anchor="middle">boundary gap</text>
+  </g>
+
+  <!-- PANEL 2: Mean imputation -->
+  <rect x="252" y="62" width="216" height="212" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="360" y="83" text-anchor="middle" fill="#198754">Mean</text>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#198754">method="mean"</text>
+
+  <g transform="translate(268,110)">
+    <line x1="0" y1="130" x2="184" y2="130" stroke="#ced4da" stroke-width="1.2"/>
+
+    <!-- Valid segments (same curve shape, greyed) -->
+    <path d="M0 80 C10 78 20 60 30 52 C40 44 50 48 60 50" stroke="#adb5bd" stroke-width="2.0" stroke-linecap="round"/>
+    <path d="M100 72 C110 76 120 80 130 84 C140 88 150 82 160 70" stroke="#adb5bd" stroke-width="2.0" stroke-linecap="round"/>
+
+    <!-- Mean level: mean of non-NaN values (conceptual level ~y=70 for this curve) -->
+    <line x1="0" y1="70" x2="184" y2="70" stroke="#198754" stroke-width="1.2" stroke-dasharray="5 3" stroke-opacity=".6"/>
+    <text class="sm" x="92" y="64" text-anchor="middle" fill="#198754">curve mean</text>
+
+    <!-- Mean fill in the two gap regions -->
+    <line x1="60" y1="70" x2="100" y2="70" stroke="#198754" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="160" y1="70" x2="184" y2="70" stroke="#198754" stroke-width="2.4" stroke-linecap="round"/>
+
+    <!-- Gap shading -->
+    <rect x="60" y="0" width="40" height="130" fill="#198754" fill-opacity=".05" rx="0"/>
+    <rect x="160" y="0" width="24" height="130" fill="#198754" fill-opacity=".05" rx="0"/>
+
+    <!-- Endpoints -->
+    <circle cx="60" cy="50" r="3" fill="#adb5bd"/>
+    <circle cx="100" cy="72" r="3" fill="#adb5bd"/>
+    <circle cx="160" cy="70" r="3" fill="#adb5bd"/>
+
+    <text class="sm" x="92" y="142" text-anchor="middle">gaps → curve mean</text>
+  </g>
+
+  <!-- PANEL 3: Constant imputation -->
+  <rect x="484" y="62" width="228" height="212" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="598" y="83" text-anchor="middle" fill="#fd7e14">Constant</text>
+  <text class="mono" x="598" y="98" text-anchor="middle" fill="#fd7e14">method="constant"</text>
+
+  <g transform="translate(500,110)">
+    <line x1="0" y1="130" x2="196" y2="130" stroke="#ced4da" stroke-width="1.2"/>
+
+    <!-- Valid segments (greyed) -->
+    <path d="M0 80 C10 78 20 60 30 52 C40 44 50 48 60 50" stroke="#adb5bd" stroke-width="2.0" stroke-linecap="round"/>
+    <path d="M100 72 C110 76 120 80 130 84 C140 88 150 82 160 70" stroke="#adb5bd" stroke-width="2.0" stroke-linecap="round"/>
+
+    <!-- Constant fill level (e.g., constant_value=0 mapped to y=108) -->
+    <line x1="0" y1="108" x2="196" y2="108" stroke="#fd7e14" stroke-width="1.2" stroke-dasharray="5 3" stroke-opacity=".6"/>
+    <text class="sm" x="98" y="102" text-anchor="middle" fill="#fd7e14">constant_value</text>
+
+    <!-- Constant fill in the two gap regions -->
+    <line x1="60" y1="108" x2="100" y2="108" stroke="#fd7e14" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="160" y1="108" x2="196" y2="108" stroke="#fd7e14" stroke-width="2.4" stroke-linecap="round"/>
+
+    <!-- Drop lines from endpoints to constant level -->
+    <line x1="60" y1="50" x2="60" y2="108" stroke="#fd7e14" stroke-width="1" stroke-dasharray="2 2" stroke-opacity=".6"/>
+    <line x1="100" y1="72" x2="100" y2="108" stroke="#fd7e14" stroke-width="1" stroke-dasharray="2 2" stroke-opacity=".6"/>
+    <line x1="160" y1="70" x2="160" y2="108" stroke="#fd7e14" stroke-width="1" stroke-dasharray="2 2" stroke-opacity=".6"/>
+
+    <!-- Gap shading -->
+    <rect x="60" y="0" width="40" height="130" fill="#fd7e14" fill-opacity=".05" rx="0"/>
+    <rect x="160" y="0" width="36" height="130" fill="#fd7e14" fill-opacity=".05" rx="0"/>
+
+    <!-- Endpoints -->
+    <circle cx="60" cy="50" r="3" fill="#adb5bd"/>
+    <circle cx="100" cy="72" r="3" fill="#adb5bd"/>
+    <circle cx="160" cy="70" r="3" fill="#adb5bd"/>
+
+    <text class="sm" x="98" y="142" text-anchor="middle">gaps → constant value</text>
+  </g>
+
+  <!-- Bottom legend: common note -->
+  <text class="sm" x="360" y="287" text-anchor="middle">Non-NaN values are preserved unchanged — only the shaded gap cells are filled</text>
+</svg>

@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="One-way Functional ANOVA — between-group and within-group variation decomposition">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">One-way Functional ANOVA — Variance Decomposition</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Total variation = Between-group (signal) + Within-group (noise)</text>
+
+  <!-- ===== Left panel: Between-group variation ===== -->
+  <rect x="22" y="60" width="310" height="200" rx="8" fill="#f8f9fa" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="177" y="82" text-anchor="middle" fill="#3f51b5">Between-group</text>
+  <text class="sm"  x="177" y="96" text-anchor="middle" fill="#3f51b5">group mean curves vs grand mean</text>
+
+  <!-- Axes left panel -->
+  <line x1="48"  y1="100" x2="48"  y2="240" stroke="#495057" stroke-width="1.0"/>
+  <line x1="48"  y1="240" x2="316" y2="240" stroke="#495057" stroke-width="1.0"/>
+
+  <!-- Grand mean (dashed grey) -->
+  <path d="M48 178 Q100 178 160 178 Q220 178 316 178"
+        stroke="#6c757d" stroke-width="1.6" stroke-dasharray="6 3" fill="none"/>
+  <text class="sm" x="228" y="196" fill="#6c757d">grand μ̄</text>
+
+  <!-- Group 1 mean (blue) — above grand mean -->
+  <path d="M48 138 Q100 130 160 134 Q220 138 316 136"
+        stroke="#3f51b5" stroke-width="2.4" fill="none"/>
+  <text class="sm" x="52" y="128" fill="#3f51b5">μ̄₁</text>
+
+  <!-- Group 2 mean (orange) — below grand mean -->
+  <path d="M48 208 Q100 214 160 210 Q220 206 316 208"
+        stroke="#e8710a" stroke-width="2.4" fill="none"/>
+  <text class="sm" x="52" y="222" fill="#e8710a">μ̄₂</text>
+
+  <!-- Group 3 mean (green) — slightly above grand mean -->
+  <path d="M48 162 Q100 158 160 160 Q220 164 316 162"
+        stroke="#198754" stroke-width="2.4" fill="none"/>
+  <text class="sm" x="52" y="156" fill="#198754">μ̄₃</text>
+
+  <!-- Vertical arrows indicating separation from grand mean -->
+  <line x1="80" y1="138" x2="80" y2="176" stroke="#3f51b5" stroke-width="1.4" stroke-dasharray="3 2"/>
+  <line x1="104" y1="208" x2="104" y2="178" stroke="#e8710a" stroke-width="1.4" stroke-dasharray="3 2"/>
+
+  <!-- Between label -->
+  <text class="sm" x="177" y="258" text-anchor="middle">→ large when groups are well separated</text>
+
+  <!-- ===== Right panel: Within-group variation ===== -->
+  <rect x="388" y="60" width="310" height="200" rx="8" fill="#f8f9fa" stroke="#e8710a" stroke-width="1.5"/>
+  <text class="lab" x="543" y="82" text-anchor="middle" fill="#e8710a">Within-group</text>
+  <text class="sm"  x="543" y="96" text-anchor="middle" fill="#e8710a">individual curves vs their group mean</text>
+
+  <!-- Axes right panel -->
+  <line x1="414" y1="100" x2="414" y2="240" stroke="#495057" stroke-width="1.0"/>
+  <line x1="414" y1="240" x2="682" y2="240" stroke="#495057" stroke-width="1.0"/>
+
+  <!-- Group 1 mean (blue, solid) -->
+  <path d="M414 148 Q470 144 530 148 Q590 152 682 148"
+        stroke="#3f51b5" stroke-width="2.4" fill="none"/>
+
+  <!-- Individual curves around group 1 mean (faint blue) -->
+  <path d="M414 138 Q470 134 530 140 Q590 144 682 140"
+        stroke="#3f51b5" stroke-width="1.0" opacity="0.45" fill="none"/>
+  <path d="M414 156 Q470 152 530 158 Q590 162 682 156"
+        stroke="#3f51b5" stroke-width="1.0" opacity="0.45" fill="none"/>
+  <path d="M414 130 Q470 128 530 134 Q590 136 682 130"
+        stroke="#3f51b5" stroke-width="1.0" opacity="0.35" fill="none"/>
+  <path d="M414 162 Q470 160 530 164 Q590 168 682 164"
+        stroke="#3f51b5" stroke-width="1.0" opacity="0.35" fill="none"/>
+
+  <!-- Group 2 mean (orange, solid) -->
+  <path d="M414 198 Q470 194 530 196 Q590 200 682 198"
+        stroke="#e8710a" stroke-width="2.4" fill="none"/>
+
+  <!-- Individual curves around group 2 mean (faint orange) -->
+  <path d="M414 188 Q470 186 530 188 Q590 192 682 190"
+        stroke="#e8710a" stroke-width="1.0" opacity="0.45" fill="none"/>
+  <path d="M414 208 Q470 204 530 206 Q590 210 682 208"
+        stroke="#e8710a" stroke-width="1.0" opacity="0.45" fill="none"/>
+  <path d="M414 182 Q470 180 530 184 Q590 186 682 184"
+        stroke="#e8710a" stroke-width="1.0" opacity="0.35" fill="none"/>
+  <path d="M414 214 Q470 210 530 212 Q590 216 682 214"
+        stroke="#e8710a" stroke-width="1.0" opacity="0.35" fill="none"/>
+
+  <!-- Spread indicator brace -->
+  <line x1="660" y1="130" x2="660" y2="168" stroke="#6c757d" stroke-width="1.4"/>
+  <line x1="656" y1="130" x2="664" y2="130" stroke="#6c757d" stroke-width="1.0"/>
+  <line x1="656" y1="168" x2="664" y2="168" stroke="#6c757d" stroke-width="1.0"/>
+  <text class="sm" x="666" y="150" fill="#6c757d">σ₁</text>
+
+  <!-- Within label -->
+  <text class="sm" x="543" y="258" text-anchor="middle">→ small when curves cluster tightly</text>
+
+  <!-- Equals sign / decomposition arrow -->
+  <text class="lab" x="356" y="170" text-anchor="middle" fill="#495057">Total</text>
+  <text class="sm"  x="356" y="184" text-anchor="middle" fill="#495057">= ∑ +</text>
+</svg>

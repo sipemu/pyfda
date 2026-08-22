@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Boxplot: median, 50% central region, whiskers/fence, flagged outliers">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title and subtitle -->
+  <text class="ttl" x="360" y="26" text-anchor="middle">Functional Boxplot</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Median (deepest curve) · 50% central region · whiskers/fence · outliers</text>
+
+  <!-- Main panel -->
+  <rect x="18" y="60" width="684" height="218" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+
+  <!-- Coordinate area: translate to (50, 78) -->
+  <g transform="translate(50,78)">
+    <!-- x-axis -->
+    <line x1="0" y1="182" x2="620" y2="182" stroke="#ced4da" stroke-width="1.2"/>
+    <!-- y-axis -->
+    <line x1="0" y1="0" x2="0" y2="182" stroke="#ced4da" stroke-width="1.2"/>
+    <!-- Axis labels -->
+    <text class="sm" x="310" y="198" text-anchor="middle">t (domain)</text>
+    <text class="sm" x="-16" y="92" text-anchor="middle" transform="rotate(-90,-16,92)">X(t)</text>
+
+    <!-- Whisker / fence lines (orange dashed) — top and bottom envelope -->
+    <!-- whisker_upper: inflated above central region -->
+    <path d="M0 20 C80 18 160 16 240 20 C320 24 400 28 480 26 C540 24 580 22 620 20"
+          stroke="#e8710a" stroke-width="1.4" stroke-dasharray="6 3" stroke-linecap="round"/>
+    <!-- whisker_lower: inflated below central region -->
+    <path d="M0 160 C80 158 160 162 240 165 C320 168 400 165 480 162 C540 160 580 158 620 156"
+          stroke="#e8710a" stroke-width="1.4" stroke-dasharray="6 3" stroke-linecap="round"/>
+
+    <!-- 50% central region: shaded band between central_lower and central_upper -->
+    <!-- central_upper top boundary -->
+    <!-- central_lower bottom boundary -->
+    <path d="M0 58 C80 55 160 52 240 56 C320 60 400 62 480 60 C540 58 580 56 620 54
+             L620 106 C580 108 540 110 480 112 C400 114 320 112 240 108 C160 104 80 102 0 100 Z"
+          fill="#3f51b5" fill-opacity="0.18"/>
+
+    <!-- Background faint sample curves (grey) — representing the full sample -->
+    <path d="M0 88 C80 84 160 78 240 80 C320 82 400 85 480 84 C540 83 580 82 620 80"
+          stroke="#adb5bd" stroke-width="0.9" stroke-opacity="0.5"/>
+    <path d="M0 95 C80 92 160 86 240 88 C320 90 400 93 480 91 C540 90 580 88 620 87"
+          stroke="#adb5bd" stroke-width="0.9" stroke-opacity="0.5"/>
+    <path d="M0 76 C80 72 160 66 240 70 C320 74 400 76 480 75 C540 74 580 72 620 70"
+          stroke="#adb5bd" stroke-width="0.9" stroke-opacity="0.5"/>
+    <path d="M0 104 C80 101 160 96 240 98 C320 100 400 104 480 102 C540 100 580 98 620 97"
+          stroke="#adb5bd" stroke-width="0.9" stroke-opacity="0.5"/>
+    <path d="M0 82 C80 79 160 73 240 75 C320 78 400 81 480 79 C540 78 580 76 620 75"
+          stroke="#adb5bd" stroke-width="0.9" stroke-opacity="0.5"/>
+    <path d="M0 112 C80 109 160 104 240 106 C320 108 400 111 480 109 C540 107 580 105 620 104"
+          stroke="#adb5bd" stroke-width="0.9" stroke-opacity="0.5"/>
+    <path d="M0 68 C80 64 160 59 240 62 C320 66 400 68 480 66 C540 65 580 63 620 62"
+          stroke="#adb5bd" stroke-width="0.9" stroke-opacity="0.5"/>
+
+    <!-- Outlier curves (red) — stray outside the fence -->
+    <!-- Outlier 1: runs above whisker_upper at left -->
+    <path d="M0 10 C60 8 120 12 200 18 C280 26 360 38 480 50 C540 56 580 62 620 68"
+          stroke="#dc3545" stroke-width="1.8" stroke-opacity="0.9"/>
+    <!-- Outlier 2: runs below whisker_lower at right -->
+    <path d="M0 130 C80 135 160 140 240 148 C320 156 400 165 480 172 C540 176 580 178 620 180"
+          stroke="#dc3545" stroke-width="1.8" stroke-opacity="0.9"/>
+
+    <!-- Median curve (bold indigo) — the deepest/most central observed curve -->
+    <path d="M0 78 C80 75 160 70 240 72 C320 76 400 78 480 77 C540 76 580 74 620 73"
+          stroke="#3f51b5" stroke-width="2.6" stroke-linecap="round"/>
+
+    <!-- Legend labels (inline .sm annotations) -->
+    <!-- Median label -->
+    <text class="sm" x="628" y="76" fill="#3f51b5">median</text>
+    <!-- Central region label -->
+    <text class="sm" x="628" y="90" fill="#3f51b5">50% CR</text>
+    <!-- Whisker label -->
+    <text class="sm" x="628" y="24" fill="#e8710a">fence</text>
+    <!-- Outlier label -->
+    <text class="sm" x="628" y="13" fill="#dc3545">outlier</text>
+    <text class="sm" x="628" y="183" fill="#dc3545">outlier</text>
+  </g>
+</svg>

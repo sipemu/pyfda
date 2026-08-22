@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Basis representation: project a curve onto basis functions">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Basis Representation: Curve to Coefficients</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Project onto a finite basis, then reconstruct with a handful of numbers</text>
+
+  <!-- Panel 1: a curve -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">One Curve</text>
+  <text class="sm" x="122" y="112" text-anchor="middle">200 grid points</text>
+  <g transform="translate(44,120)">
+    <line x1="0" y1="110" x2="156" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 92 C30 30 52 118 80 60 C104 20 128 96 156 54" stroke="#495057" stroke-width="2.4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#eafaf1" stroke="#198754" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#198754">fdata_to_basis_1d</text>
+  <text class="sm" x="360" y="116" text-anchor="middle">B-spline / Fourier</text>
+  <!-- basis bells -->
+  <g transform="translate(288,132)">
+    <line x1="0" y1="82" x2="144" y2="82" stroke="#adb5bd" stroke-width="1"/>
+    <path d="M0 82 C14 82 18 40 32 40 C46 40 50 82 64 82" stroke="#198754" stroke-width="1.6"/>
+    <path d="M28 82 C42 82 46 34 60 34 C74 34 78 82 92 82" stroke="#198754" stroke-opacity=".7" stroke-width="1.6"/>
+    <path d="M56 82 C70 82 74 40 88 40 C102 40 106 82 120 82" stroke="#198754" stroke-opacity=".55" stroke-width="1.6"/>
+    <path d="M84 82 C98 82 102 36 116 36 C130 36 134 82 144 82" stroke="#198754" stroke-opacity=".4" stroke-width="1.6"/>
+    <text class="sm" x="72" y="98" text-anchor="middle" font-size="9">basis functions</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: output -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#eafaf1" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#198754">Coeffs + Rebuild</text>
+  <!-- coefficient bars -->
+  <g transform="translate(520,108)">
+    <line x1="0" y1="52" x2="152" y2="52" stroke="#adb5bd" stroke-width="1"/>
+    <rect x="6" y="20" width="14" height="32" fill="#198754" fill-opacity=".85"/>
+    <rect x="28" y="8" width="14" height="44" fill="#198754" fill-opacity=".85"/>
+    <rect x="50" y="30" width="14" height="22" fill="#198754" fill-opacity=".85"/>
+    <rect x="72" y="14" width="14" height="38" fill="#198754" fill-opacity=".85"/>
+    <rect x="94" y="34" width="14" height="18" fill="#198754" fill-opacity=".85"/>
+    <rect x="116" y="24" width="14" height="28" fill="#198754" fill-opacity=".85"/>
+    <text class="sm" x="72" y="68" text-anchor="middle" font-size="9">15 coefficients</text>
+  </g>
+  <!-- reconstruction -->
+  <g transform="translate(520,190)">
+    <line x1="0" y1="52" x2="152" y2="52" stroke="#adb5bd" stroke-width="1"/>
+    <path d="M0 40 C30 4 52 56 78 26 C102 -2 126 42 152 22" stroke="#6c757d" stroke-width="2.4" stroke-opacity=".4"/>
+    <path d="M0 40 C30 6 52 54 78 28 C102 2 126 40 152 24" stroke="#198754" stroke-width="1.8"/>
+    <text class="sm" x="72" y="66" text-anchor="middle" font-size="9">reconstruction</text>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Simulation">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 108 C90 96 150 62 210 48 C245 40 275 58 298 40" stroke="#0d6efd" stroke-opacity=".3" stroke-width="1.5"/>
+  <path d="M30 108 C90 118 150 138 210 118 C245 106 275 132 298 120" stroke="#0d6efd" stroke-opacity=".3" stroke-width="1.5"/>
+  <path d="M30 108 C90 80 150 118 210 82 C245 60 275 104 298 78" stroke="#0d6efd" stroke-opacity=".3" stroke-width="1.5"/>
+  <path d="M30 108 C90 132 150 92 210 132 C245 148 275 106 298 138" stroke="#0d6efd" stroke-opacity=".3" stroke-width="1.5"/>
+  <path d="M30 108 C90 100 150 88 210 70 C245 56 275 82 298 62" stroke="#0d6efd" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="30" cy="108" r="4" fill="#fff" stroke="#0d6efd" stroke-width="2.5"/>
+</svg>

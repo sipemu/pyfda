@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Differentiating curves into velocity and acceleration">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Derivatives: When and How Fast a Curve Changes</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">The first derivative is velocity; the second is acceleration</text>
+
+  <!-- Panel 1: a curve -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Curve x(t)</text>
+  <text class="sm" x="122" y="112" text-anchor="middle">the observed level</text>
+  <g transform="translate(44,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 112 C40 108 70 96 90 66 C110 36 130 24 156 20" stroke="#6c757d" stroke-width="2.6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#0d6efd">fd.deriv(nderiv)</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">finite differences</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="16">nderiv=1 → velocity</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="48">nderiv=2 → accel.</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="80">deriv_1d · deriv_2d</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: derivative curves -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#0d6efd">Velocity / Acceleration</text>
+  <g transform="translate(520,116)">
+    <line x1="0" y1="52" x2="156" y2="52" stroke="#adb5bd" stroke-width="1.1"/>
+    <path d="M0 40 C40 34 60 20 90 14 C110 10 130 30 156 44" stroke="#0d6efd" stroke-width="2.6" stroke-linecap="round"/>
+    <text class="sm" x="0" y="14" fill="#0d6efd">x'(t) velocity</text>
+  </g>
+  <g transform="translate(520,184)">
+    <line x1="0" y1="30" x2="156" y2="30" stroke="#adb5bd" stroke-width="1.1"/>
+    <path d="M0 8 C30 22 46 46 70 40 C96 33 120 8 156 20" stroke="#0d6efd" stroke-opacity=".55" stroke-width="2.2" stroke-linecap="round"/>
+    <text class="sm" x="0" y="60" fill="#6c757d">x''(t) acceleration</text>
+  </g>
+</svg>

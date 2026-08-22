@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Permutation Test — observed statistic vs permutation null distribution">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Permutation Test — Null Distribution vs Observed Statistic</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Pool labels → reshuffle → recompute statistic → tail mass = p-value</text>
+
+  <!-- Axis background panel -->
+  <rect x="50" y="58" width="620" height="190" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+
+  <!-- Histogram bars (permutation null distribution — symmetric, centred ~175) -->
+  <!-- Bars from x=70 to x=500, representing null distribution histogram -->
+  <!-- Heights chosen to look like a bell-shaped null distribution -->
+  <rect x="72"  y="218" width="18" height="12"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="92"  y="210" width="18" height="20"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="112" y="200" width="18" height="30"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="132" y="186" width="18" height="44"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="152" y="170" width="18" height="60"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="172" y="152" width="18" height="78"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="192" y="138" width="18" height="92"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="212" y="124" width="18" height="106" fill="#3f51b5" opacity="0.6"/>
+  <rect x="232" y="116" width="18" height="114" fill="#3f51b5" opacity="0.6"/>
+  <rect x="252" y="112" width="18" height="118" fill="#3f51b5" opacity="0.6"/>
+  <rect x="272" y="118" width="18" height="112" fill="#3f51b5" opacity="0.6"/>
+  <rect x="292" y="128" width="18" height="102" fill="#3f51b5" opacity="0.6"/>
+  <rect x="312" y="142" width="18" height="88"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="332" y="158" width="18" height="72"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="352" y="172" width="18" height="58"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="372" y="184" width="18" height="46"  fill="#3f51b5" opacity="0.6"/>
+  <rect x="392" y="196" width="18" height="34"  fill="#3f51b5" opacity="0.6"/>
+
+  <!-- Tail region (shaded red — p-value area beyond observed statistic) -->
+  <rect x="412" y="212" width="18" height="18"  fill="#dc3545" opacity="0.75"/>
+  <rect x="432" y="218" width="18" height="12"  fill="#dc3545" opacity="0.75"/>
+  <rect x="452" y="220" width="18" height="10"  fill="#dc3545" opacity="0.75"/>
+  <rect x="472" y="222" width="18" height="8"   fill="#dc3545" opacity="0.75"/>
+  <rect x="492" y="224" width="18" height="6"   fill="#dc3545" opacity="0.75"/>
+  <rect x="512" y="225" width="18" height="5"   fill="#dc3545" opacity="0.75"/>
+  <rect x="532" y="226" width="18" height="4"   fill="#dc3545" opacity="0.75"/>
+  <rect x="552" y="226" width="18" height="4"   fill="#dc3545" opacity="0.75"/>
+
+  <!-- x-axis baseline -->
+  <line x1="62" y1="230" x2="648" y2="230" stroke="#495057" stroke-width="1.2"/>
+
+  <!-- y-axis -->
+  <line x1="62" y1="62" x2="62" y2="230" stroke="#495057" stroke-width="1.2"/>
+
+  <!-- Observed statistic vertical marker -->
+  <line x1="412" y1="62" x2="412" y2="230" stroke="#dc3545" stroke-width="2.2" stroke-dasharray="6 3"/>
+
+  <!-- Label: observed statistic -->
+  <text class="mono" x="416" y="80" fill="#dc3545" font-size="11">T_obs</text>
+  <text class="sm" x="416" y="94" fill="#dc3545">observed</text>
+  <text class="sm" x="416" y="107" fill="#dc3545">statistic</text>
+
+  <!-- p-value brace label -->
+  <text class="lab" x="500" y="170" text-anchor="middle" fill="#dc3545">p-value</text>
+  <text class="sm"  x="500" y="184" text-anchor="middle" fill="#dc3545">(tail mass)</text>
+
+  <!-- Null distribution label -->
+  <text class="lab" x="240" y="96" text-anchor="middle" fill="#3f51b5">Permutation null</text>
+  <text class="sm"  x="240" y="110" text-anchor="middle" fill="#3f51b5">T&#x22c6; from reshuffled labels</text>
+
+  <!-- x-axis label -->
+  <text class="sm" x="355" y="254" text-anchor="middle">Test statistic</text>
+
+  <!-- y-axis label -->
+  <text class="sm" x="22" y="155" text-anchor="middle" transform="rotate(-90,22,155)">Count</text>
+</svg>
