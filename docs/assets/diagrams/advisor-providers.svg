@@ -30,7 +30,7 @@
 
   <!-- Arrow from resolve_provider to providers -->
   <line x1="360" y1="254" x2="360" y2="282" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
-  <text class="sm" x="316" y="272" text-anchor="middle" fill="#6c757d">3. default: anthropic</text>
+  <text class="sm" x="348" y="272" text-anchor="end" fill="#6c757d">3. default: anthropic</text>
 
   <!-- ===== Provider protocol ===== -->
   <rect x="240" y="282" width="240" height="34" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
