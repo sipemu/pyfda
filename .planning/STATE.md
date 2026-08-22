@@ -4,17 +4,17 @@ milestone: v7.0
 milestone_name: Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
 current_phase: 47
 current_phase_name: Diagram Coverage — advisor surface pages
-status: planning
-stopped_at: Phase 46 complete, ready to plan Phase 47
-last_updated: "2026-08-22T20:59:58.397Z"
+status: verifying
+stopped_at: Completed 47-01-PLAN.md
+last_updated: "2026-08-22T21:08:58.147Z"
 last_activity: 2026-08-22
-last_activity_desc: Phase 46 complete, transitioned to Phase 47
-state_head: 5637232567baa011251a6c4cba682d4b4686d632
+last_activity_desc: Phase 47 execution started
+state_head: a7b1b09303333c329ce2f647075b7735052fa541
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
   percent: 63
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-22)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 46 — Diagram Coverage — examples pages
+**Current focus:** Phase 47 — Diagram Coverage — advisor surface pages
 
 ## Current Position
 
-Phase: 47 — Diagram Coverage — advisor surface pages
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-22 — Phase 46 complete, transitioned to Phase 47
+Phase: 47 (Diagram Coverage — advisor surface pages) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-08-22 — Phase 47 execution started
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 63%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [█████░░░░░] 50%
 | Phase 45-svg-fix-regression-inference P01 | 159 | 3 tasks | 2 files |
 | Phase 46 P01 | 9m | 3 tasks | 18 files |
 | Phase 46-diagram-coverage-examples P02 | 8 minutes | 3 tasks | 22 files |
+| Phase 47 P01 | 7 minutes | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,9 @@ Recent decisions affecting current work:
 - [Phase 45]: inference-permutation-test.svg byte-unchanged: lone font-size=11 on .mono (class=12) is intentional
 - [Phase 46]: Tracer-first approach: authored ex-canadian-weather.svg end-to-end to prove the per-diagram pipeline before scaling to 8 more diagrams
 - [Phase 46]: SVG height 480 for multi-row workflows (canadian-weather, canadian-seasonal, andrews-wine*, andrews-wine-clustering, andrews-wine-qc); 300 for single-row flows
+- [Phase 47]: All 5 advisor diagrams use 720×480 viewBox — all needed the space for accurate multi-stage flows
+- [Phase 47]: advisor-mcp.svg places Agent/LLM OUTSIDE MCP boundary with 6 _RUNNABLE_METHODS per server.py (not 5 per prose)
+- [Phase 47]: advisor-aspects.svg lists 14 aspects per build_diagnostics._supported (not 12+ per intro prose)
 
 ### Pending Todos
 
@@ -126,8 +130,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-22T20:33:25.918Z
-Stopped at: Phase 46 complete, ready to plan Phase 47
+Last session: 2026-08-22T21:08:58.074Z
+Stopped at: Completed 47-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

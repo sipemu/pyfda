@@ -235,9 +235,9 @@ Plans:
   3. Each new SVG conforms to `STYLE_SPEC.md` and passes the SVGO idempotence + build-determinism CI gate.
   4. Each affected advisor page passes a built-site review.
 
-**Plans**: 1 plan
+**Plans**: 1/1 plans executed
 
-- [ ] 47-01-PLAN.md — Author 5 method-accurate STYLE_SPEC advisor concept SVGs (python-api, mcp, providers, agent-skill, aspects) tracer-first + embed each; mcp/python-api provably LLM-free
+- [x] 47-01-PLAN.md — Author 5 method-accurate STYLE_SPEC advisor concept SVGs (python-api, mcp, providers, agent-skill, aspects) tracer-first + embed each; mcp/python-api provably LLM-free
 
 **UI hint**: yes
 
@@ -283,7 +283,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 | 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 45. SVG Fix — regression/inference | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 46. Diagram Coverage — examples | v7.0 | 2/2 | Complete    | 2026-08-22 |
-| 47. Diagram Coverage — advisor | v7.0 | 0/TBD | Not started | - |
+| 47. Diagram Coverage — advisor | v7.0 | 1/1 | In Progress|  |
 | 48. Page Depth | v7.0 | 0/TBD | Not started | - |
 | 49. Whole-Site Gate & Human Review | v7.0 | 0/TBD | Not started | - |
 
