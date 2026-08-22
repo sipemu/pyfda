@@ -17,6 +17,8 @@ sample, from which a single honest error estimate falls out. This page uses the
 Tecator spectra to predict **fat** and compares three functional regressions on
 that honest footing.
 
+![Cross-Validation: Honest Model Comparison — fregre_cv k-fold OOF predictions, in-sample vs OOF R2, three functional regression methods compared](../assets/diagrams/ex-cross-validation.svg){ .fdars-diagram }
+
 Let $\kappa(i)\in\{1,\dots,K\}$ be the fold holding sample $i$, and let
 $\hat f^{(-\kappa(i))}$ denote the model trained on every fold *except*
 $\kappa(i)$. The out-of-fold prediction for sample $i$ is that held-out model

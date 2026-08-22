@@ -13,6 +13,8 @@ philosophies:
 This page draws both bands on the same sample of temperature curves and shows the
 efficiency-vs-robustness trade-off directly.
 
+![Tolerance Bands vs Conformal Bands — fpca_tolerance_band FPCA bootstrap vs conformal_prediction_band distribution-free, both at 90% coverage on Canadian weather curves, efficiency vs robustness trade-off](../assets/diagrams/ex-tolerance-vs-conformal.svg){ .fdars-diagram }
+
 ## The data
 
 Daily temperature for 35 Canadian weather stations — a moderate sample with a clear mean

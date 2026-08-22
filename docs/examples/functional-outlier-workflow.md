@@ -10,6 +10,8 @@ outliers that hide inside the normal value range.
 This page builds a sample with both kinds of injected outlier and shows each tool
 catching the type it is designed for.
 
+![Functional Outlier-Detection Workflow — simulate normal plus magnitude and shape outliers, magnitude_shape MS-plot, outliergram MBD vs MEI parabola](../assets/diagrams/ex-functional-outlier-workflow.svg){ .fdars-diagram }
+
 ## A sample with two kinds of outlier
 
 Start from 45 well-behaved curves, then inject three **magnitude** outliers (shifted up)

@@ -19,6 +19,8 @@ Distance and clustering scale quadratically, so we work with a balanced subset o
 **10 curves per class** (50 total); the shape-mean and phase diagnostics use the
 full per-class pools.
 
+![Phoneme Spectra: shape distance and when elastic methods help — alignment_quality phase fraction, shape_self_distance_matrix vs lp_self_1d, shape_mean per class, kmedoids_from_distances clustering purity comparison](../assets/diagrams/ex-phoneme-shape.svg){ .fdars-diagram }
+
 ## Log-periodogram spectra
 
 ```python exec="1" html="1" source="above"

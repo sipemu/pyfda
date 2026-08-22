@@ -17,6 +17,8 @@ velocity curves with `fdars.alignment`, quantify how much variation is *phase*
 alignment, and finally read the **warping functions** as per-child timing
 scores that reveal girls mature about two years earlier than boys.
 
+![Growth Curve Alignment — deriv_1d velocity curves, alignment_quality phase-amplitude split, karcher_mean aligns pubertal spurts, FPCA before vs after, warping functions reveal girls mature earlier](../assets/diagrams/ex-growth-alignment.svg){ .fdars-diagram }
+
 ## Growth velocity curves
 
 We differentiate each height curve with `fdars.fdata.deriv_1d` to obtain

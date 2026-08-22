@@ -19,6 +19,8 @@ dependence** curve. Five explanation methods, five independent readings of the
 same model — the reassuring outcome is that they all point at the same chemistry.
 Every wavelength verdict is read off a real binding, not asserted.
 
+![Explainability: Recovering Predictive Regions — fregre_lm beta(t) coefficient curve, bootstrap CI, significant_regions, pointwise_importance, functional_saliency, domain_selection, beta_decomposition, functional_pdp](../assets/diagrams/ex-explainability-regions.svg){ .fdars-diagram }
+
 !!! note "Reading against a ground truth"
     The [R companion to this page](https://sipemu.github.io/fdars-r/) validates
     the explainers on *synthetic* data with a known coefficient function, where
