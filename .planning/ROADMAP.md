@@ -198,7 +198,8 @@ Plans:
   4. This batch's XML source is clean and hand-editable and passes the SVGO idempotence + build-determinism CI gate.
   5. Across Phases 43–45, all concept diagrams on the AUDIT-01 fix list have been corrected — no flagged diagram remains unaddressed.
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 45-01-PLAN.md — Correct the 4 flagged regression/inference diagrams on all four fix axes (functional-glm Gamma-link verified, elastic-multinomial de-cramp, scalar-on-function β(t), permutation-test XML); 15 OK diagrams byte-unchanged
 **UI hint**: yes
 
 ### Phase 46: Diagram Coverage — examples pages
