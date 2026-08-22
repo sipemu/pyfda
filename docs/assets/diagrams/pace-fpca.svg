@@ -9,7 +9,7 @@
 
   <!-- Title -->
   <text class="ttl" x="360" y="28" text-anchor="middle">PACE FPCA — Sparse, Irregular Observations to Smooth Eigenfunctions</text>
-  <text class="sub" x="360" y="46" text-anchor="middle">Left: ragged per-curve observation grids (different t-positions per curve) — Right: smooth eigenfunctions recovered on a common work grid</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Ragged per-curve grids (sparse, irregular) — PACE recovers smooth eigenfunctions on a common grid</text>
 
   <!-- Left panel: sparse irregular observations -->
   <rect x="24" y="58" width="316" height="208" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
