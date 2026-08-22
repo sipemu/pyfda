@@ -56,10 +56,11 @@
     <circle cx="140" cy="22" r="3" fill="#dc3545"/>
     <text class="sm" x="88" y="82" text-anchor="middle">fitted vs. actual</text>
   </g>
-  <!-- beta(t) inset -->
-  <g transform="translate(516,210)">
-    <rect x="0" y="0" width="164" height="40" rx="6" fill="#fff" stroke="#f1c2c8"/>
-    <text class="sm" x="8" y="15" fill="#dc3545">β̂(t)</text>
-    <path d="M40 20 C64 4 92 34 122 12 C140 0 150 22 158 14" stroke="#dc3545" stroke-width="2" fill="none"/>
+  <!-- beta(t) inset — coefficient function (the object of interest per page prose) -->
+  <g transform="translate(516,206)">
+    <rect x="0" y="0" width="164" height="52" rx="6" fill="#fff" stroke="#dc3545" stroke-width="1.5"/>
+    <text class="lab" x="8" y="17" fill="#dc3545">β̂(t)</text>
+    <text class="sm" x="48" y="17" fill="#6c757d">coefficient function</text>
+    <path d="M8 34 C32 18 60 46 90 26 C110 12 138 38 156 22" stroke="#dc3545" stroke-width="2.2" fill="none"/>
   </g>
 </svg>
