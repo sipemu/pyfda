@@ -119,6 +119,32 @@ All functions are imported from `fdars.represent`.
 | `fill_value` | `float` | `0.0` | Replacement value for out-of-domain cells when `policy="fill"` |
 | `order` | `int` | `4` | B-spline order: 1 = linear, 2 = quadratic, 4 = cubic |
 
+## Interpolation vs smoothing
+
+Interpolation and smoothing are both methods for representing functional observations from discrete evaluations, but they answer different questions.
+
+**Interpolation** (`spline_interpolate`, `spline_interpolate_with_policy`) fits a curve that passes *exactly* through every observed value. The data are treated as ground truth — no noise model is assumed. Use interpolation when your measurements are precise (lab instruments, simulation outputs, deliberately chosen design points) and you want to resample or evaluate the same function at a different grid without losing fidelity.
+
+**Smoothing** (e.g. `fdars.basis.pspline_fit_gcv`) fits a curve that trades fidelity to the data for *noise reduction*. The observed values are treated as noisy realisations of a smooth underlying function; the roughness penalty controls how aggressively noise is filtered. Use smoothing when your measurements contain observation error and you want to recover the underlying trend.
+
+| Property | Interpolation | Smoothing (P-spline) |
+|----------|--------------|---------------------|
+| Passes through observed points | Yes (exactly) | No (in general) |
+| Noise model assumed | None | Additive observation error |
+| Bandwidth/penalty tuning | Order $k$ only | Penalty $\lambda$ (or GCV) |
+| Result depends on noise level | No | Yes |
+| Appropriate when | Clean data, known design points | Noisy measurements |
+
+See [Smoothing](../../represent/smoothing.md) for P-spline and kernel smoothing alternatives.
+
+### Caveats
+
+!!! warning "Oscillation risk with high-order splines on noisy data"
+    B-spline interpolation of order $k$ through $m$ points fits a polynomial of degree $k-1$ between knots. For `order=4` (cubic, the default) this is generally well-behaved; higher orders (6, 8+) can produce **Runge-style oscillations** — large spurious excursions between observed points — especially when the data are unevenly spaced or contain measurement error. If you observe oscillating reconstructions, lower the order or switch to smoothing.
+
+!!! warning "Aliasing on coarse or irregular grids"
+    If the observed grid $t_1, \ldots, t_m$ is too coarse relative to the true signal frequency, the B-spline fits a smooth curve through undersampled data. The result is not the true signal — it is a smooth curve consistent with the observations, but it may miss high-frequency features. Inspect the spacing of your argvals relative to the expected frequency content of your curves before interpreting interpolated values.
+
 ## References
 
 - Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.

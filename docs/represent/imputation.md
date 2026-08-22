@@ -120,6 +120,31 @@ Imported from `fdars.represent`.
 | Gap value has a domain-specific default (e.g., sensor zero) | `"constant"` |
 | You want a simple, interpretable fill | `"mean"` |
 
+## Missing-data assumptions: MCAR, MAR, and MNAR
+
+The three imputation strategies are simple and deterministic — they make no explicit statistical model of *why* values are missing. This matters for downstream analysis, because the bias of an imputed estimate depends on the missing-data mechanism.
+
+!!! warning "MCAR assumption: required for unbiased imputation"
+    **Mean imputation and linear imputation are unbiased only under Missing Completely At Random (MCAR)** — the assumption that a cell is missing *independently* of both the observed and unobserved values. Under MCAR, randomly-selected missing cells can be filled with the curve mean or a linear ramp without introducing systematic bias into downstream statistics (mean curves, covariance surfaces, FPCA scores).
+
+    In practice, MCAR is rarely guaranteed. Sensor dropouts may be correlated with extreme values (the sensor saturates and drops; the most extreme observations are missing). In that case the missing mechanism is **MAR** (Missing At Random, where missingness depends on *observed* values) or **MNAR** (Missing Not At Random, where it depends on the *missing* value itself). Both MAR and MNAR cause `"mean"` imputation to underestimate spread and distort covariance estimates.
+
+!!! note "Imputation as a preprocessing convenience, not a statistical model"
+    Treat imputation as a convenience step — a way to complete the data matrix before running an algorithm that requires no NaN. Do not treat imputed values as equivalent to observed measurements.
+
+    **Best practice for validating imputation quality:**
+    1. Artificially mask a subset of observed values (hold-out mask) at random.
+    2. Impute the masked values and compare against the true values.
+    3. If the held-out error is small relative to the signal, imputation is adequate. If it is large, consider collecting more data or using a formal imputation model.
+
+| Missing mechanism | `"linear"` or `"mean"` bias | Recommendation |
+|-------------------|---------------------------|----------------|
+| MCAR | None (unbiased in expectation) | Safe to proceed |
+| MAR | Possible — depends on covariate structure | Validate on held-out mask |
+| MNAR | Likely biased | Do not rely on simple imputation; consult a statistician |
+
+For functional data, the most common acceptable case is MCAR sensor dropout (random channel failure independent of temperature, pressure, or the curve's own values). If dropout is correlated with signal magnitude, simple imputation is inadequate and a dedicated functional imputation approach is required.
+
 ## References
 
 - Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.

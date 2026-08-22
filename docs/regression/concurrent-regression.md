@@ -72,6 +72,38 @@ print(f"beta_curve shape: {beta.shape}  (p=2 predictors × m={m} grid points)")
 print("FDARS_FENCE_OK")
 ```
 
+## Caveats and interpretation
+
+### Bandwidth selection
+
+The bandwidth `h` is the most consequential tuning choice. **There is no built-in cross-validation** in `concurrent_regression` — the user supplies the bandwidth directly.
+
+!!! warning "Bandwidth trades bias for variance"
+    - **Small bandwidth** (e.g. `bandwidth=0.05`): the kernel weights few neighbours at each $t$, so the estimated $\hat\beta(t)$ tracks local fluctuations closely — resulting in *wiggly, high-variance* coefficient curves. On small samples this produces noisy estimates that are hard to interpret.
+    - **Large bandwidth** (e.g. `bandwidth=0.5`): the kernel pools many neighbours, smoothing over local structure — resulting in *over-smoothed, biased* estimates that miss true variation in $\beta(t)$.
+    - **Practical starting point:** try `bandwidth=0.2` (the default) on a normalised argvals grid and inspect the shape of `res["beta_curve"]`. If the curves look spiky, widen; if they look flat when you expect variation, narrow.
+    - **Manual CV:** to select bandwidth systematically, evaluate held-out prediction error (`functional_mse`) over a grid of candidate bandwidths. `fdars` does not provide `fregre_np_cv` for the concurrent model, so this must be coded manually.
+
+### Kernel choice
+
+The three kernels differ in their support and decay:
+
+| Kernel | Support | Decay | When to prefer |
+|--------|---------|-------|----------------|
+| `"gaussian"` (default) | infinite (global) | exponential | Smooth data; all observations contribute with decaying weight |
+| `"epanechnikov"` | compact $[\!-1, 1\!]$ | quadratic | Faster computation; observations beyond bandwidth contribute nothing |
+| `"tricube"` | compact $[\!-1, 1\!]$ | cubic | Similar to Epanechnikov; slightly smoother drop-off |
+
+For most functional datasets with smooth $\beta(t)$, the choice of kernel has less impact than the choice of bandwidth. Start with `"gaussian"`.
+
+### Model scope: local-at-each-t, not global
+
+Concurrent regression is a *varying-coefficient* (local) model — it does **not** fit a single global relationship between predictor and response. At each grid point $t_j$ it runs an independent weighted regression using only the kernel-weighted neighbourhood of $t_j$. This means:
+
+- The model can capture coefficient functions that reverse sign or change shape over the domain.
+- It cannot borrow information across widely separated regions of $t$ (unlike a basis-regression approach).
+- Residuals $\varepsilon_i(t)$ are not assumed uncorrelated across $t$ — the model makes no statement about temporal dependence of errors.
+
 ## References
 
 1. Hastie, T., and Tibshirani, R. (1993). "Varying-coefficient models." *Journal of the Royal Statistical Society, Series B*, 55(4), 757–796. — foundational paper on the varying-coefficient model.
