@@ -158,7 +158,11 @@ Upgraded `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV verifi
   4. This batch's XML source is clean and hand-editable and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
   5. Each section in the batch passes a review on the built site before the batch is considered done.
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 43-01-PLAN.md — Correct all 12 flagged learn/represent/align SVGs on the four fix axes (tracer smoothing.svg → represent/ XML+subtitle batch → align/ + ex-sonar STYLE_SPEC migration); per-diagram SVGO idempotence + per-section PNG review; one commit per section
+
 **UI hint**: yes
 
 ### Phase 44: SVG Fix — analyze / monitoring / advisor
@@ -261,7 +265,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 42. Diagram Audit | v7.0 | 1/1 | Complete    | 2026-08-22 |
-| 43. SVG Fix — learn/represent/align | v7.0 | 0/TBD | Not started | - |
+| 43. SVG Fix — learn/represent/align | v7.0 | 0/1 | Not started | - |
 | 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 0/TBD | Not started | - |
 | 45. SVG Fix — regression/inference | v7.0 | 0/TBD | Not started | - |
 | 46. Diagram Coverage — examples | v7.0 | 0/TBD | Not started | - |
