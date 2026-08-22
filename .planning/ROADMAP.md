@@ -136,7 +136,8 @@ Upgraded `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV verifi
   2. The report groups findings into a ranked, per-section fix list aligned to the docs sections (learn, represent, align, analyze, monitoring, advisor, regression, inference) so each downstream fix phase has an explicit, evidence-backed worklist.
   3. The report confirms which `docs/examples/*.md` pages and which of the 5 advisor surface pages lack a concept SVG (the DIACOV coverage gap).
   4. The report confirms the thin-page extension list — the sub-mature v4–v6 method pages that DEPTH-01/02 must bring to full structure.
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 42-01-PLAN.md — Inventory + 4-axis score all 61 concept diagrams (visual/STYLE_SPEC/XML/method-accuracy), reconcile count, derive ranked per-section fix list (43/44/45), coverage-gap list, and thin-page list → 42-AUDIT.md
 **UI hint**: yes
 
 ### Phase 43: SVG Fix — learn / represent / align
@@ -233,7 +234,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 42. Diagram Audit | v7.0 | 0/TBD | Not started | - |
+| 42. Diagram Audit | v7.0 | 0/1 | Not started | - |
 | 43. SVG Fix — learn/represent/align | v7.0 | 0/TBD | Not started | - |
 | 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 0/TBD | Not started | - |
 | 45. SVG Fix — regression/inference | v7.0 | 0/TBD | Not started | - |
