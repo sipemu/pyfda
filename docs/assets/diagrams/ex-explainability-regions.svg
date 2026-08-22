@@ -9,7 +9,8 @@
 
   <!-- Title -->
   <text class="ttl" x="360" y="28" text-anchor="middle">Explainability: Recovering Predictive Regions</text>
-  <text class="sub" x="360" y="46" text-anchor="middle">fregre_lm β(λ) curve · bootstrap_ci → significant_regions · pointwise_importance · saliency · domain_selection · beta_decomposition</text>
+  <text class="sub" x="360" y="38" text-anchor="middle">fregre_lm β(λ) coefficient curve · bootstrap_ci → significant_regions · pointwise_importance</text>
+  <text class="sub" x="360" y="52" text-anchor="middle">functional_saliency · domain_selection · beta_decomposition · functional_pdp</text>
 
   <!-- Fit panel -->
   <rect x="24" y="62" width="200" height="70" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
@@ -52,7 +53,7 @@
   <text class="lab" x="269" y="196" text-anchor="middle" fill="#fd7e14">functional_saliency</text>
   <text class="sm" x="269" y="211" text-anchor="middle">per-sample sensitivity</text>
   <text class="sm" x="269" y="225" text-anchor="middle">linear: ∂ŷ/∂x = β(λ)</text>
-  <text class="mono" x="269" y="243" text-anchor="middle" fill="#fd7e14">mean|saliency| → 930 nm</text>
+  <text class="mono" x="269" y="243" text-anchor="middle" fill="#fd7e14">saliency peak → 930 nm</text>
 
   <rect x="360" y="176" width="154" height="78" rx="8" fill="#f0fff4" stroke="#198754" stroke-width="1.5"/>
   <text class="lab" x="437" y="196" text-anchor="middle" fill="#198754">domain_selection</text>
@@ -63,14 +64,14 @@
   <rect x="528" y="176" width="168" height="78" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
   <text class="lab" x="612" y="196" text-anchor="middle" fill="#495057">beta_decomposition</text>
   <text class="sm" x="612" y="211" text-anchor="middle">per-FPC contribution curves</text>
-  <text class="sm" x="612" y="225" text-anchor="middle">sum = β(λ); variance_proportion</text>
+  <text class="sm" x="612" y="225" text-anchor="middle">sum = β(λ); variance share</text>
   <text class="mono" x="612" y="243" text-anchor="middle" fill="#495057">PC1–PC2 dominate</text>
 
   <!-- Result converge panel -->
   <rect x="24" y="272" width="672" height="70" rx="8" fill="#198754" stroke="none"/>
   <text class="lab" x="360" y="295" text-anchor="middle" fill="white">All five explainers converge on the same significant bands around 930 nm</text>
   <text class="mono" x="360" y="313" text-anchor="middle" fill="#FFD700">β(λ) + CI · importance · saliency · domain scan · decomposition → 930 nm C–H chemistry</text>
-  <text class="sm" x="360" y="330" text-anchor="middle" fill="white">Convergence across independent methods = trustworthy explanation; agreement with known fat absorption = method validation</text>
+  <text class="sm" x="360" y="330" text-anchor="middle" fill="white">Convergence across independent methods = trustworthy · agreement with known fat absorption = validated</text>
 
   <!-- PDP panel -->
   <rect x="24" y="360" width="672" height="70" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
@@ -79,5 +80,6 @@
   <text class="sm" x="360" y="411" text-anchor="middle">dominant mode of spectral shape maps almost linearly to fat → explains why linear model succeeds</text>
 
   <!-- Bottom note -->
-  <text class="sub" x="360" y="450" text-anchor="middle">significant_regions_from_se(beta, se, z_alpha=1.96): equivalent to CI route from derived se = (upper−lower) / (2×1.96)</text>
+  <text class="sub" x="360" y="444" text-anchor="middle">significant_regions_from_se(beta, se, z_alpha=1.96): CI-route equivalent</text>
+  <text class="sub" x="360" y="460" text-anchor="middle">derived se = (upper − lower) / (2 × 1.96) — same result as bootstrap_ci route</text>
 </svg>

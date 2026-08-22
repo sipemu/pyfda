@@ -70,6 +70,6 @@
   <text class="sm" x="640" y="205" text-anchor="middle" fill="#e8ecff">peripheral</text>
 
   <!-- Bottom caption -->
-  <text class="sm" x="360" y="236" text-anchor="middle">Fraiman–Muniz depth = integral over how close each curve sits to the pointwise median · two depth notions (FM + MBD) give near-identical rankings</text>
-  <text class="sm" x="360" y="252" text-anchor="middle">→ centrality order is a data property, not an artefact of the depth formula chosen</text>
+  <text class="sm" x="360" y="236" text-anchor="middle">FM depth = integral proximity to pointwise median · MBD = fraction of domain inside curve pairs</text>
+  <text class="sm" x="360" y="252" text-anchor="middle">FM vs MBD correlation ≈ 0.99 → centrality order is a data property, not an artefact of the depth formula</text>
 </svg>

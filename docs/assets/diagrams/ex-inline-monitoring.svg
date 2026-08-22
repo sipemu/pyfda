@@ -73,6 +73,6 @@
   <text class="mono" x="537" y="350" text-anchor="middle" fill="#495057">= minimum detectable fault size</text>
 
   <!-- Bottom note -->
-  <text class="sub" x="360" y="402" text-anchor="middle">Deployment insights: (1) below ~1σ neither chart is reliable. (2) in-control FPR exceeds nominal α (finite Phase I sample). (3) Shewhart for sudden faults; EWMA for slow drift.</text>
-  <text class="sub" x="360" y="418" text-anchor="middle">arl1_t2(eigenvalues, ucl, shift) estimates detection delay without faulty data (model-based ARL).</text>
+  <text class="sub" x="360" y="394" text-anchor="middle">Below ~1σ neither chart is reliable · FPR exceeds nominal α · Shewhart for sudden faults; EWMA for drift</text>
+  <text class="sub" x="360" y="410" text-anchor="middle">arl1_t2(eigenvalues, ucl, shift): model-based ARL estimates detection delay without faulty data</text>
 </svg>

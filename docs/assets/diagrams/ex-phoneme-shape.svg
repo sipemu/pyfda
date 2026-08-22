@@ -9,7 +9,8 @@
 
   <!-- Title -->
   <text class="ttl" x="360" y="28" text-anchor="middle">Phoneme Spectra: Shape Distance and When Elastic Methods Help</text>
-  <text class="sub" x="360" y="46" text-anchor="middle">load_phoneme · alignment_quality phase fraction · shape_self_distance_matrix vs lp_self_1d · shape_mean · kmedoids_from_distances purity</text>
+  <text class="sub" x="360" y="38" text-anchor="middle">load_phoneme · alignment_quality phase fraction · shape_self_distance_matrix vs lp_self_1d</text>
+  <text class="sub" x="360" y="52" text-anchor="middle">shape_mean per class · kmedoids_from_distances purity comparison · L² beats elastic here</text>
 
   <!-- Dataset panel -->
   <rect x="24" y="62" width="196" height="72" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
@@ -26,8 +27,8 @@
   <rect x="250" y="62" width="220" height="72" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
   <text class="lab" x="360" y="82" text-anchor="middle" fill="#fd7e14">alignment_quality per class</text>
   <text class="sm" x="360" y="97" text-anchor="middle">phase_amplitude_ratio: 16–28% per class</text>
-  <text class="sm" x="360" y="111" text-anchor="middle">all above 15% threshold → seems to favour elastic</text>
-  <text class="sm" x="360" y="125" text-anchor="middle">BUT: per-class ratio misleads (pooled classes differ)</text>
+  <text class="sm" x="357" y="111" text-anchor="middle">ratio &gt; 15% → seems to favour elastic</text>
+  <text class="sm" x="357" y="125" text-anchor="middle">but per-class ratio misleads at pooled level</text>
 
   <!-- Arrow -->
   <line x1="470" y1="98" x2="496" y2="98" stroke="#fd7e14" stroke-width="1.5"/>
@@ -79,6 +80,6 @@
   <text class="sm" x="596" y="360" text-anchor="middle" fill="white">between, still behind L²</text>
 
   <!-- Bottom note -->
-  <text class="sub" x="360" y="404" text-anchor="middle">Lesson: for spectral data where peak POSITION is the signal, L² wins. Elastic alignment erases the discriminative information. Use phase_amplitude_ratio to decide.</text>
-  <text class="sub" x="360" y="420" text-anchor="middle">High per-class ratio does not mean elastic helps at the pooled level — the between-class variation is amplitude, not phase.</text>
+  <text class="sub" x="360" y="404" text-anchor="middle">Lesson: when peak POSITION is the signal, L² wins — elastic alignment erases that information</text>
+  <text class="sub" x="360" y="420" text-anchor="middle">High per-class ratio ≠ elastic helps pooled — between-class variation here is amplitude, not phase</text>
 </svg>

@@ -80,11 +80,11 @@
 
   <!-- Consensus panel -->
   <rect x="204" y="270" width="492" height="90" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
-  <text class="lab" x="450" y="290" text-anchor="middle" fill="#3f51b5">Consensus: three detectors (depth + MS + outliergram) agree on same handful of atypical bottles</text>
-  <text class="sm" x="450" y="307" text-anchor="middle">Wines 69 + 95 (Grignolino): extreme magnesium → shape anomaly — outliergram + shallow depth + MS-extreme</text>
-  <text class="sm" x="450" y="323" text-anchor="middle">Wine 121 (Grignolino): high flavanoids + colour intensity → magnitude-like shift</text>
-  <text class="sm" x="450" y="340" text-anchor="middle">LRT declines to flag (mildly unusual shape ≠ distributional outlier): disagreement is informative</text>
-  <text class="sm" x="450" y="356" text-anchor="middle">Functional pipeline adds shape axis that Mahalanobis cannot see · magnitude outliers agreed by both</text>
+  <text class="lab" x="450" y="290" text-anchor="middle" fill="#3f51b5">Consensus: three detectors flag the same atypical bottles</text>
+  <text class="sm" x="450" y="307" text-anchor="middle">Wines 69+95: magnesium → shape anomaly; outliergram + depth + MS agree</text>
+  <text class="sm" x="450" y="323" text-anchor="middle">Wine 121: magnitude shift · LRT declines (mild shape ≠ distributional outlier)</text>
+  <text class="sm" x="450" y="340" text-anchor="middle">Functional shape axis catches what Mahalanobis misses · magnitude flags agree</text>
+  <text class="sm" x="450" y="356" text-anchor="middle">Multiple detectors recommended — each mode has its own best detector</text>
 
   <!-- Result strip -->
   <line x1="40" y1="378" x2="680" y2="378" stroke="#ced4da" stroke-width="1.0" stroke-dasharray="4,3"/>

@@ -9,7 +9,8 @@
 
   <!-- Title -->
   <text class="ttl" x="360" y="28" text-anchor="middle">Tecator Spectra: Inline Quality Monitoring</text>
-  <text class="sub" x="360" y="46" text-anchor="middle">spm_phase1 + select_ncomp builds FPCA chart · spm_monitor flags out-of-spec · ewma_scores + run rules + t2_pc_contributions diagnose</text>
+  <text class="sub" x="360" y="38" text-anchor="middle">spm_phase1 + select_ncomp builds FPCA baseline · spm_monitor flags out-of-spec</text>
+  <text class="sub" x="360" y="52" text-anchor="middle">ewma_scores + run rules + t2_pc_contributions diagnose alarm cause</text>
 
   <!-- Dataset panel -->
   <rect x="24" y="62" width="200" height="70" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
@@ -78,5 +79,6 @@
   <text class="sm" x="360" y="366" text-anchor="middle">heatmap of contrib (nobs × ncomp) points engineer toward 930–1000 nm fat-absorption region</text>
 
   <!-- Bottom note -->
-  <text class="sub" x="360" y="422" text-anchor="middle">Pipeline: in-spec baselines → FPCA limits → stream monitoring (Shewhart + run rules + EWMA) → per-PC contribution traces alarm back to spectral region.</text>
+  <text class="sub" x="360" y="416" text-anchor="middle">Pipeline: in-spec baselines → FPCA limits → Shewhart + run rules + EWMA monitoring</text>
+  <text class="sub" x="360" y="432" text-anchor="middle">→ per-PC contributions trace the alarm back to the spectral absorption region</text>
 </svg>

@@ -35,7 +35,7 @@
   <rect x="434" y="62" width="262" height="70" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
   <text class="lab" x="565" y="82" text-anchor="middle" fill="#3f51b5">optimal_k · OOF predictions</text>
   <text class="sm" x="565" y="97" text-anchor="middle">CV error curve: dip marks best k</text>
-  <text class="sm" x="565" y="112" text-anchor="middle">in-sample R² keeps rising · OOF R² peaks then falls</text>
+  <text class="sm" x="565" y="112" text-anchor="middle">in-sample R² rises; OOF R² peaks then falls</text>
 
   <!-- Divider -->
   <line x1="40" y1="148" x2="680" y2="148" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
@@ -58,5 +58,5 @@
 
   <!-- Bottom note -->
   <text class="sub" x="360" y="258" text-anchor="middle">All R² values are out-of-fold (OOF): honest generalisation, not memorisation. NP edges ahead; FPC-LM ≈ PLS.</text>
-  <text class="sub" x="360" y="275" text-anchor="middle">fregre_cv also returns fold_assignments for per-fold stability checks; model_selection_ncomp(gcv) is cheaper than full CV for component selection.</text>
+  <text class="sub" x="360" y="275" text-anchor="middle">fregre_cv returns fold_assignments for stability checks · model_selection_ncomp(gcv) is cheaper for component count</text>
 </svg>

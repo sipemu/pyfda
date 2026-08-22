@@ -9,7 +9,8 @@
 
   <!-- Title -->
   <text class="ttl" x="360" y="28" text-anchor="middle">Growth Curve Alignment</text>
-  <text class="sub" x="360" y="46" text-anchor="middle">deriv_1d velocity · alignment_quality phase/amplitude split · karcher_mean sharpens spurt · warping functions reveal sex-timing difference</text>
+  <text class="sub" x="360" y="38" text-anchor="middle">deriv_1d velocity · alignment_quality phase/amplitude split · karcher_mean sharpens spurt</text>
+  <text class="sub" x="360" y="52" text-anchor="middle">warping functions γ(t) reveal sex-timing difference · equivalence_test confirms 2.1-yr gap</text>
 
   <!-- Dataset panel -->
   <rect x="24" y="62" width="200" height="72" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
@@ -75,6 +76,6 @@
   <text class="mono" x="568" y="334" text-anchor="middle" fill="#dc3545">p = 1.0 · genuine 2.1-yr gap</text>
 
   <!-- Bottom note -->
-  <text class="sub" x="360" y="396" text-anchor="middle">Elastic alignment separates amplitude (how big) from phase (when): Karcher mean sharpens the template; warping functions are biological timing scores.</text>
-  <text class="sub" x="360" y="412" text-anchor="middle">Note: karcher_mean["converged"] stays False on coarse grid; use km["aligned_data"].mean() as sharpened template, not km["mean"] reconstruction.</text>
+  <text class="sub" x="360" y="392" text-anchor="middle">Elastic alignment separates amplitude (how big) from phase (when) · warpings = timing scores</text>
+  <text class="sub" x="360" y="408" text-anchor="middle">karcher_mean["converged"] stays False on coarse grid · use km["aligned_data"].mean() as sharpened template</text>
 </svg>

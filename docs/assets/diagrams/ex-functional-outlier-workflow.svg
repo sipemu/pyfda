@@ -45,7 +45,7 @@
   <text class="lab" x="187" y="182" text-anchor="middle" fill="#dc3545">magnitude_shape → MS-plot</text>
   <text class="sm" x="187" y="197" text-anchor="middle">MO (magnitude outlyingness) vs VO (variation outlyingness)</text>
   <text class="sm" x="187" y="211" text-anchor="middle">magnitude outliers fly out along MO axis (orange, far right)</text>
-  <text class="mono" x="187" y="228" text-anchor="middle" fill="#dc3545">shape outliers: tangled with normal cloud → MISSED</text>
+  <text class="mono" x="187" y="228" text-anchor="middle" fill="#dc3545">shape outliers: mixed in → MISSED</text>
 
   <!-- Outliergram panel -->
   <rect x="370" y="162" width="326" height="78" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
@@ -55,5 +55,5 @@
   <text class="mono" x="533" y="228" text-anchor="middle" fill="#3f51b5">flagged: shape outliers (magnitude: not flagged)</text>
 
   <!-- Bottom note -->
-  <text class="sub" x="360" y="262" text-anchor="middle">Together: MS-plot (amplitude/magnitude) + outliergram (shape) = complete functional outlier screening. Each tool catches what the other misses.</text>
+  <text class="sub" x="360" y="256" text-anchor="middle">Together: MS-plot (magnitude) + outliergram (shape) = complete screening — each catches what the other misses</text>
 </svg>
