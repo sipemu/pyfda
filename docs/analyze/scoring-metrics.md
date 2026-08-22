@@ -121,10 +121,29 @@ print(f"explained_variance:   {ev:.4f}  (1 = perfect; 0 = mean-level)")
 print(f"FDARS_FENCE_OK")
 ```
 
-!!! note "Choosing the right metric"
-    - **General purpose:** `functional_mae` or `functional_mse` — no domain restrictions.
-    - **Relative error, positive data only:** `functional_mape` (raises on |y_true| ≈ 0) or `functional_msle` (requires all values > −1).
-    - **Variance explained:** `functional_explained_variance` — interpretable scale (0 to 1 for non-negative fits); negative values indicate the predictor is worse than the mean.
+## Metric comparison
+
+The five metrics have different units, domain restrictions, and sensitivity profiles. Use this table to select the right metric before fitting a model.
+
+| Metric | Units | Domain restriction | Outlier robustness | Typical use |
+|--------|-------|------------------|--------------------|-------------|
+| `functional_mae` | Same as data | None | **High** — linear in error | General purpose; error reporting in original units; robust baseline |
+| `functional_mse` | Data² | None | Low — squares large errors | Model selection when large deviations matter most; gradient-based optimisation |
+| `functional_explained_variance` | Dimensionless (−∞, 1] | None | Moderate | Variance-explained reporting; comparing models on the same dataset; 1 = perfect |
+| `functional_mape` | Percentage | `\|y_true(t)\| > 0` everywhere | Low — denominator near 0 inflates | Relative error on strictly positive functional data (spectra, counts above zero) |
+| `functional_msle` | Dimensionless | All values > −1 | Moderate | Non-negative counts with exponential growth (log scale); penalises underprediction more than overprediction |
+
+!!! note "Choosing the right metric by use case"
+    - **General purpose / no domain restriction:** `functional_mae` or `functional_mse`. Start here when unsure.
+    - **Reporting error in the original measurement unit:** `functional_mae` — same units as the data, directly interpretable.
+    - **Model selection emphasising large deviations:** `functional_mse` — squared error disproportionately penalises outlier curves.
+    - **Variance-explained reporting:** `functional_explained_variance` — interpretable scale (0 to 1 for non-negative fits); negative values indicate the predictor is worse than predicting the mean.
+    - **Relative error on strictly positive functional data** (NIR spectra, non-negative concentrations, demand curves above zero): `functional_mape` — but only when you can guarantee `|y_true(t)| > 0` everywhere across every curve and every grid point. It raises `ValueError` otherwise.
+    - **Non-negative counts or exponential-scale data:** `functional_msle` — the log transform compresses large values and makes the metric less sensitive to extreme over-predictions. Requires all values > −1.
+    - **Zero-crossing data, oscillating residuals:** avoid `functional_mape` and `functional_msle`; use `functional_mae` or `functional_mse`.
+
+!!! danger "`functional_mape`: the |y_true| ≠ 0 requirement is per cell"
+    `functional_mape` raises `ValueError` when **any single cell** `y_true[i, j]` satisfies `|y_true[i, j]| < ε` — not just the curve average. A functional curve that crosses zero at even one grid point is enough to cause an error. The danger admonition in the metric definition above is not a soft warning; it is an exact constraint enforced at runtime by the library.
 
 ## References
 

@@ -134,6 +134,40 @@ All functions are imported from `fdars.fdata`.
 | `data` | `ndarray (n, m)` | Functional data matrix; rows are observations, columns are grid points |
 | `alpha` | `float ∈ [0, 1)` | Trim fraction for `trim_mean`; at 0 equals the plain mean |
 
+## Caveats and guidance
+
+### Small-n covariance-surface bias
+
+!!! warning "Small-n covariance surface is high-variance and near-singular"
+    The $m \times m$ sample covariance surface is estimated from only $n$ observations. When $n$ is small relative to $m$ (a common situation in functional data — for example $n = 35$ stations and $m = 365$ days in the Canadian weather data), the sample covariance matrix is **high-variance and near-singular**:
+
+    - The $m$ eigenvalues of the sample covariance surface are not reliable estimates of the population eigenvalues; the leading eigenvalue is systematically overestimated and the trailing eigenvalues are systematically underestimated (the spiked-covariance phenomenon).
+    - Downstream FPCA eigenfunctions estimated from a near-singular covariance surface are **unstable** — small perturbations in the data can flip the direction of higher eigenfunctions.
+    - **Rule of thumb:** for reliable FPCA, aim for $n \gg k$ where $k$ is the number of retained components. As a rough guide, $n \geq 5k$ for leading components and $n \geq 10k$ if you need accurate eigenvalues.
+
+    This caveat is **distinct** from the $O(n \cdot m^2)$ performance warning above, which is about *computation time*, not statistical reliability.
+
+    **Practical mitigations:**
+    - **Grid subsampling:** if $m$ is large (e.g. $m = 365$) but functional variation is captured by a coarser grid, subsample `data[:, ::5]` before calling `functional_covariance`. The covariance surface shape is usually robust to moderate coarsening.
+    - **Retain few components:** in FPCA, retain only the leading $k$ eigenfunctions where $k$ is determined by a scree plot or by a cumulative-variance threshold (e.g. 90%). Do not retain many components from a small-$n$ covariance surface.
+    - **Bootstrap uncertainty:** if you need to assess eigenvalue stability, bootstrap the covariance surface over resampled subsets of the $n$ curves and examine the variability of the leading eigenvalues.
+
+### Choosing between depth-based median and geometric median
+
+Both `depth_based_median` and `geometric_median_1d` are robust alternatives to the mean, but they answer different questions and have different properties:
+
+**Use `depth_based_median` when:**
+- You need a *representative curve from the actual dataset* — for example, to select a reference station, a reference patient, or a reference waveform that actually exists in the data.
+- You want an outlier-robust central curve that is interpretable in terms of the original observations.
+- You are running outlier detection: the depth-based median is the curve that maximises Fraiman-Muniz depth, so it is the most "central" observed curve by that criterion.
+
+**Use `geometric_median_1d` when:**
+- A *synthetic L2-central curve* is acceptable (it will generally not be an observed curve).
+- You want the Weiszfeld minimiser of $\sum_i \| X_i - c \|_{L^2}$, which is the $L^2$ analogue of the scalar sample median.
+- You need a smooth, averaged representative rather than selecting a specific observation.
+
+The geometric median is more sensitive to the $L^2$ metric geometry and can differ substantially from the depth-based median when the data contain shape outliers (curves that are different in shape but not in amplitude). The depth-based median weights curves by how "centrally" they rank at every grid point — it is more sensitive to pointwise rank than to integrated distance.
+
 ## References
 
 - Fraiman, R., Muniz, G. (2001). Trimmed means for functional data. *Test*, 10(2), 419–440.
