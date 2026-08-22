@@ -56,28 +56,28 @@ Deferred, tracked but not in the current roadmap.
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | TBD | Pending |
-| SVGFIX-01 | TBD | Pending |
-| SVGFIX-02 | TBD | Pending |
-| SVGFIX-03 | TBD | Pending |
-| SVGFIX-04 | TBD | Pending |
-| DIACOV-01 | TBD | Pending |
-| DIACOV-02 | TBD | Pending |
-| DEPTH-01 | TBD | Pending |
-| DEPTH-02 | TBD | Pending |
-| DEPTH-03 | TBD | Pending |
-| GATE-01 | TBD | Pending |
-| GATE-02 | TBD | Pending |
+| AUDIT-01 | Phase 42 | Pending |
+| SVGFIX-01 | Phases 43, 44, 45 | Pending |
+| SVGFIX-02 | Phases 43, 44, 45 | Pending |
+| SVGFIX-03 | Phases 43, 44, 45 | Pending |
+| SVGFIX-04 | Phases 43, 44, 45 | Pending |
+| DIACOV-01 | Phase 46 | Pending |
+| DIACOV-02 | Phase 47 | Pending |
+| DEPTH-01 | Phase 48 | Pending |
+| DEPTH-02 | Phase 48 | Pending |
+| DEPTH-03 | Phase 48 | Pending |
+| GATE-01 | Phase 49 | Pending |
+| GATE-02 | Phase 49 | Pending |
 
 **Coverage:**
 - v7.0 requirements: 12 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12 ✓
+- Unmapped: 0
+
+**Note on SVGFIX-01..04:** These four quality axes are applied per diagram across the three section-batched fix phases (43 learn/represent/align, 44 analyze/monitoring/advisor, 45 regression/inference). Each fix phase delivers all four axes for its batch; the requirements are jointly completed once all three batches pass. No diagram is fixed in more than one phase (each diagram belongs to exactly one section batch).
 
 ---
 *Requirements defined: 2026-08-22*
-*Last updated: 2026-08-22 after initial definition*
+*Last updated: 2026-08-22 — traceability populated during v7.0 roadmap creation (12/12 mapped)*
