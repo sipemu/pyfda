@@ -81,20 +81,38 @@ n, m = 30, 60
 t = np.linspace(0, 1, m)
 X = np.array([np.sin(2 * np.pi * t * (1 + 0.3 * rng.normal())) + rng.normal(0, 0.1, m)
               for _ in range(n)])
-# Binary response (Binomial)
+
+# --- Family 1: Binomial (binary response) ---
 logit_true = X @ np.sin(2 * np.pi * t) / m
 prob_true = 1 / (1 + np.exp(-3 * logit_true))
-y = rng.binomial(1, prob_true).astype(float)
+y_bin = rng.binomial(1, prob_true).astype(float)
 
-res = reg.functional_glm(X, y, family="binomial", n_comp=3)
-beta_t = np.asarray(res["beta_t"])
+res_bin = reg.functional_glm(X, y_bin, family="binomial", n_comp=3)
+beta_bin = np.asarray(res_bin["beta_t"])
 
-f, ax = fig(figsize=(8.0, 3.6))
-ax.plot(t, beta_t, color="#3f51b5", lw=2.2)
-ax.set(title="Functional GLM (binomial) — coefficient function β(t)",
+# --- Family 2: Poisson (count response, y >= 0) ---
+# True log-rate is a linear functional of X; exp() ensures y >= 0.
+log_rate_true = X @ np.cos(2 * np.pi * t) / m
+y_poi = rng.poisson(np.exp(1.5 * log_rate_true)).astype(float)
+
+res_poi = reg.functional_glm(X, y_poi, family="poisson", n_comp=3)
+beta_poi = np.asarray(res_poi["beta_t"])
+
+f, (a0, a1) = fig(1, 2, figsize=(12.0, 3.8))
+
+a0.plot(t, beta_bin, color="#3f51b5", lw=2.2)
+a0.set(title="Functional GLM (binomial) — β(t)",
        xlabel="t", ylabel="β(t)")
+
+a1.plot(t, beta_poi, color="#e8710a", lw=2.2)
+a1.set(title="Functional GLM (poisson) — β(t)",
+       xlabel="t", ylabel="β(t)")
+
 print(render(f))
-print(f"deviance={res['deviance']:.3f}  aic={res['aic']:.3f}  family={res['family']}")
+print(f"binomial  deviance={res_bin['deviance']:.3f}  aic={res_bin['aic']:.3f}  "
+      f"family={res_bin['family']}")
+print(f"poisson   deviance={res_poi['deviance']:.3f}  aic={res_poi['aic']:.3f}  "
+      f"family={res_poi['family']}")
 print("FDARS_FENCE_OK")
 ```
 
