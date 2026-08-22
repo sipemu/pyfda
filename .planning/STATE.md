@@ -2,14 +2,19 @@
 gsd_state_version: 1.0
 milestone: v7.0
 milestone_name: Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
-status: planning
-last_updated: "2026-08-22T16:00:00.000Z"
+current_phase: 42
+current_phase_name: Diagram Audit
+status: verifying
+stopped_at: Completed 42-01-PLAN.md (42-AUDIT.md deliverable)
+last_updated: "2026-08-22T15:04:44.315Z"
 last_activity: 2026-08-22
+last_activity_desc: Phase 42 execution started
+state_head: 2f5c40385a2d1237f393880fbe0cc5f6a080f8a4
 progress:
   total_phases: 8
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 1
+  completed_plans: 1
   percent: 0
 ---
 
@@ -20,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-22)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 42 — Diagram Audit (gates all downstream v7.0 fix/coverage/depth work)
+**Current focus:** Phase 42 — Diagram Audit
 
 ## Current Position
 
-Phase: 42 of 8 milestone phases (42–49) — Diagram Audit
-Plan: — (ready to plan Phase 42)
-Status: Ready to plan
-Last activity: 2026-08-22 — v7.0 roadmap created (8 phases, 42–49; 12/12 requirements mapped)
+Phase: 42 (Diagram Audit) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-08-22 — Phase 42 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -51,6 +56,11 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 42 P01 | 9m | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -66,6 +76,9 @@ Recent decisions affecting current work:
 - [v7.0 roadmap]: Phase 49 (GATE-01/02) depends on ALL of 43–48 — it is the whole-site strict build + per-section review + blocking human diagram method-accuracy review before close
 - [standing v6.0]: Docs phases run sequentially on `main`, NOT in worktrees — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path (`use_worktrees: false` in config)
 - [standing v6.0]: Blocking human diagram method-accuracy review before milestone close — the v6.0 lesson (inverted hypograph/epigraph asymmetry slipped past executors + verifier, caught only by human review)
+- [Phase 42]: Canonical diagram count is 61 (not 68); ex-sonar-tsrvf.svg assigned to Phase 43 bucket
+- [Phase 42]: conformal-prediction.svg confirmed accurate for scalar-response API; v1.0 misleading finding resolved
+- [Phase 42]: spm.svg confirmed fully redrawn (R-era content removed); was Phase 44 Major, now OK
 
 ### Pending Todos
 
@@ -92,8 +105,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-22T16:00:00.000Z
-Stopped at: v7.0 roadmap + STATE created; requirements traceability updated (12/12 mapped)
+Last session: 2026-08-22T15:04:44.306Z
+Stopped at: Completed 42-01-PLAN.md (42-AUDIT.md deliverable)
 Resume file: None
 
 ## Operator Next Steps

@@ -128,102 +128,128 @@ Upgraded `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV verifi
 ## Phase Details
 
 ### Phase 42: Diagram Audit
+
 **Goal**: A ranked, per-section diagram fix list — every concept diagram in `docs/assets/diagrams/` scored on the four fix axes — plus a confirmed diagram-coverage gap list and thin-page extension list, so the downstream fix/coverage/depth phases execute against evidence rather than guesswork.
 **Depends on**: Nothing (first phase of milestone; gates all downstream v7.0 work)
 **Requirements**: AUDIT-01
 **Success Criteria** (what must be TRUE):
+
   1. The audit report inventories every concept diagram in `docs/assets/diagrams/` (cards/ and thumb/ excluded), each scored on all four axes — visual/layout quality, STYLE_SPEC conformance, XML source formatting, and method-accuracy against the shipped `fdars` bindings.
   2. The report groups findings into a ranked, per-section fix list aligned to the docs sections (learn, represent, align, analyze, monitoring, advisor, regression, inference) so each downstream fix phase has an explicit, evidence-backed worklist.
   3. The report confirms which `docs/examples/*.md` pages and which of the 5 advisor surface pages lack a concept SVG (the DIACOV coverage gap).
   4. The report confirms the thin-page extension list — the sub-mature v4–v6 method pages that DEPTH-01/02 must bring to full structure.
-**Plans**: 1 plan
-- [ ] 42-01-PLAN.md — Inventory + 4-axis score all 61 concept diagrams (visual/STYLE_SPEC/XML/method-accuracy), reconcile count, derive ranked per-section fix list (43/44/45), coverage-gap list, and thin-page list → 42-AUDIT.md
+
+**Plans**: 1/1 plans executed
+
+- [x] 42-01-PLAN.md — Inventory + 4-axis score all 61 concept diagrams (visual/STYLE_SPEC/XML/method-accuracy), reconcile count, derive ranked per-section fix list (43/44/45), coverage-gap list, and thin-page list → 42-AUDIT.md
+
 **UI hint**: yes
 
 ### Phase 43: SVG Fix — learn / represent / align
+
 **Goal**: Every concept diagram in the learn, represent, and align sections is corrected on all four fix axes and verified on the built site, so this batch meets the consistently-high, method-accurate bar.
 **Depends on**: Phase 42
 **Requirements**: SVGFIX-01, SVGFIX-02, SVGFIX-03, SVGFIX-04 (learn/represent/align batch)
 **Success Criteria** (what must be TRUE):
+
   1. Every flagged diagram in learn/represent/align renders on the built site with no overlapping labels and consistent spacing, alignment, and sizing (rendered PNG check).
   2. Every diagram in this batch conforms to `STYLE_SPEC.md` — palette, system-ui fonts, `viewBox`, the `.ttl/.sub/.lab/.sm/.mono` CSS classes, and `role="img"` + `aria-label`.
   3. Every diagram in this batch is method-accurate against the shipped `fdars` bindings — no diagram misdepicts what its method does.
   4. This batch's XML source is clean and hand-editable and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
   5. Each section in the batch passes a review on the built site before the batch is considered done.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 44: SVG Fix — analyze / monitoring / advisor
+
 **Goal**: Every concept diagram in the analyze, monitoring, and advisor sections is corrected on all four fix axes and verified on the built site.
 **Depends on**: Phase 43
 **Requirements**: SVGFIX-01, SVGFIX-02, SVGFIX-03, SVGFIX-04 (analyze/monitoring/advisor batch)
 **Success Criteria** (what must be TRUE):
+
   1. Every flagged diagram in analyze/monitoring/advisor renders on the built site with no overlapping labels and consistent spacing, alignment, and sizing (rendered PNG check).
   2. Every diagram in this batch conforms to `STYLE_SPEC.md` (palette, fonts, `viewBox`, CSS classes, `role="img"` + `aria-label`).
   3. Every diagram in this batch is method-accurate against the shipped `fdars` bindings.
   4. This batch's XML source is clean and hand-editable and passes the SVGO idempotence + build-determinism CI gate.
   5. Each section in the batch passes a built-site review before the batch is considered done.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 45: SVG Fix — regression / inference
+
 **Goal**: Every concept diagram in the regression and inference sections is corrected on all four fix axes and verified on the built site, completing the full-set SVG fix sweep across all concept diagrams.
 **Depends on**: Phase 44
 **Requirements**: SVGFIX-01, SVGFIX-02, SVGFIX-03, SVGFIX-04 (regression/inference batch)
 **Success Criteria** (what must be TRUE):
+
   1. Every flagged diagram in regression/inference renders on the built site with no overlapping labels and consistent spacing, alignment, and sizing (rendered PNG check).
   2. Every diagram in this batch conforms to `STYLE_SPEC.md` (palette, fonts, `viewBox`, CSS classes, `role="img"` + `aria-label`).
   3. Every diagram in this batch is method-accurate against the shipped `fdars` bindings (special care on the depth/interval-inference diagrams per the v6.0 hypograph/epigraph lesson).
   4. This batch's XML source is clean and hand-editable and passes the SVGO idempotence + build-determinism CI gate.
   5. Across Phases 43–45, all concept diagrams on the AUDIT-01 fix list have been corrected — no flagged diagram remains unaddressed.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 46: Diagram Coverage — examples pages
+
 **Goal**: Each `docs/examples/*.md` worked-example page carries a method-accurate, STYLE_SPEC-conformant hand-authored inline concept SVG wired into the page, closing the examples half of the coverage gap.
 **Depends on**: Phase 42
 **Requirements**: DIACOV-01
 **Success Criteria** (what must be TRUE):
+
   1. Every `docs/examples/*.md` page identified by the AUDIT-01 gap list now references a hand-authored inline concept SVG that renders on the built site.
   2. Each new example-page diagram is method-accurate against what that example demonstrates and conforms to `STYLE_SPEC.md` (palette, fonts, `viewBox`, CSS classes, `role="img"` + `aria-label`).
   3. Each new SVG passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
   4. Each affected examples page passes a built-site review.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 47: Diagram Coverage — advisor surface pages
+
 **Goal**: Each of the 5 advisor surface pages (`python-api`, `mcp`, `providers`, `agent-skill`, `aspects`) carries a method-accurate, STYLE_SPEC-conformant hand-authored inline concept SVG, reversing the v2.1 choice to leave those pages diagram-free.
 **Depends on**: Phase 42
 **Requirements**: DIACOV-02
 **Success Criteria** (what must be TRUE):
+
   1. Each of the 5 advisor surface pages now references a hand-authored inline concept SVG that renders on the built site.
   2. Each new advisor-page diagram is method-accurate against the shipped advisor surface it depicts (`python/fdars/advisor/`, `python/fdars/mcp/`, `.claude/skills/fdars-advisor/`) and preserves the grounding-invariant framing where relevant.
   3. Each new SVG conforms to `STYLE_SPEC.md` and passes the SVGO idempotence + build-determinism CI gate.
   4. Each affected advisor page passes a built-site review.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 48: Page Depth
+
 **Goal**: The thin v4–v6 method pages are extended to the mature-page structure (intro, method explanation, worked example, parameters, caveats/interpretation) with new offline worked examples and cross-links where they add value, so page depth is consistent across the site.
 **Depends on**: Phase 42
 **Requirements**: DEPTH-01, DEPTH-02, DEPTH-03
 **Success Criteria** (what must be TRUE):
+
   1. The thin v6.0 method pages (`regression/concurrent-regression`, `regression/functional-glm`, `represent/pace-fpca`, `inference/interval-inference`) each follow the mature structure — intro, method explanation, worked example, parameters, caveats/interpretation.
   2. The thin v4/v5 method pages (`represent/interpolation`, `represent/imputation`, `analyze/scoring-metrics`, `analyze/functional-statistics`, plus any other sub-~200-line method page surfaced by AUDIT-01) each follow the mature structure.
   3. Extended pages gain new worked examples and/or cross-links where they add value, and every worked example runs offline against the current `fdars` API emitting `FDARS_FENCE_OK`, with fence data kept small (synthetic `n ≤ 20`; subsampled datasets).
   4. Each extended page passes a built-site review.
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 49: Whole-Site Gate & Human Review
+
 **Goal**: The whole documentation site passes its final quality gate — a green offline `mkdocs build --strict`, a per-section built-site review, and a blocking human diagram method-accuracy review before milestone close — so the site is shippable at the consistently-high bar.
 **Depends on**: Phase 43, Phase 44, Phase 45, Phase 46, Phase 47, Phase 48
 **Requirements**: GATE-01, GATE-02
 **Success Criteria** (what must be TRUE):
+
   1. Whole-site `mkdocs build --strict` exits 0 offline after all changes, with every worked-example fence emitting `FDARS_FENCE_OK`.
   2. The SVGO idempotence + build-determinism CI gate is green across all changed and added diagrams.
   3. A per-section review has been held on the built site across all touched sections.
   4. A blocking human diagram method-accuracy review passes — no diagram misdepicts its method — before the milestone is closed.
+
 **Plans**: TBD
 **UI hint**: yes
 
@@ -234,7 +260,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 42. Diagram Audit | v7.0 | 0/1 | Not started | - |
+| 42. Diagram Audit | v7.0 | 1/1 | In Progress|  |
 | 43. SVG Fix — learn/represent/align | v7.0 | 0/TBD | Not started | - |
 | 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 0/TBD | Not started | - |
 | 45. SVG Fix — regression/inference | v7.0 | 0/TBD | Not started | - |

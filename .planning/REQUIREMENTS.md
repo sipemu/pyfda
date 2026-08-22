@@ -9,7 +9,7 @@ Documentation-only quality milestone. No `fdars-core` bump, no new bindings. Req
 
 ### Audit
 
-- [ ] **AUDIT-01**: A diagram audit report inventories all 68 concept diagrams in `docs/assets/diagrams/` (cards/ and thumb/ excluded), each scored on the four fix axes — visual/layout quality, STYLE_SPEC conformance, XML source formatting, method-accuracy — producing a ranked, per-section fix list that gates the fix phases. Report also confirms the per-page diagram-coverage gap (which `examples/` and advisor pages lack a concept SVG) and the thin-page extension list.
+- [x] **AUDIT-01**: A diagram audit report inventories all 68 concept diagrams in `docs/assets/diagrams/` (cards/ and thumb/ excluded), each scored on the four fix axes — visual/layout quality, STYLE_SPEC conformance, XML source formatting, method-accuracy — producing a ranked, per-section fix list that gates the fix phases. Report also confirms the per-page diagram-coverage gap (which `examples/` and advisor pages lack a concept SVG) and the thin-page extension list.
 
 ### SVG Fix
 
@@ -58,7 +58,7 @@ Deferred, tracked but not in the current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | Phase 42 | Pending |
+| AUDIT-01 | Phase 42 | Complete |
 | SVGFIX-01 | Phases 43, 44, 45 | Pending |
 | SVGFIX-02 | Phases 43, 44, 45 | Pending |
 | SVGFIX-03 | Phases 43, 44, 45 | Pending |
@@ -72,6 +72,7 @@ Deferred, tracked but not in the current roadmap.
 | GATE-02 | Phase 49 | Pending |
 
 **Coverage:**
+
 - v7.0 requirements: 12 total
 - Mapped to phases: 12 ✓
 - Unmapped: 0
