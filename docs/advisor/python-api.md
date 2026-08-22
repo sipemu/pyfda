@@ -7,6 +7,8 @@ a schema-validated `Advice` object with `interpretation`, `recommendations`, and
 `caveats`. The API returns `Advice` and stops — it does not re-run fdars or
 compute a before/after delta. See the [overview](index.md) for the full picture.
 
+![Recommend-only advisor Python API: build_diagnostics then advise returns an Advice object](../assets/diagrams/advisor-python-api.svg){ .fdars-diagram }
+
 ## Worked example
 
 The fence below loads the Canadian Weather dataset, clusters the 35 daily

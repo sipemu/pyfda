@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Recommend-only Python API: build_diagnostics computes offline diagnostics; advise interprets and returns an Advice object with interpretation, recommendations, and caveats">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Python API — Recommend-Only Surface</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">build_diagnostics (offline) → advise (LLM) → Advice — returns and stops</text>
+
+  <!-- ===== Stage 1: build_diagnostics (left panel) ===== -->
+  <rect x="24" y="62" width="290" height="164" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="169" y="84" text-anchor="middle" fill="#495057">Stage 1 — offline · deterministic</text>
+
+  <!-- fdars result input -->
+  <rect x="46" y="96" width="246" height="40" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="169" y="113" text-anchor="middle">fdars result dict</text>
+  <text class="sm" x="169" y="128" text-anchor="middle">(clustering, FPCA, alignment, …)</text>
+
+  <!-- Arrow down -->
+  <line x1="169" y1="136" x2="169" y2="153" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- build_diagnostics box -->
+  <rect x="46" y="153" width="246" height="56" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="mono" x="169" y="174" text-anchor="middle" fill="#1a1a2e">build_diagnostics(result,</text>
+  <text class="mono" x="169" y="191" text-anchor="middle" fill="#1a1a2e">  method, argvals=…)</text>
+  <text class="sm" x="169" y="208" text-anchor="middle">no network · no RNG · no LLM</text>
+
+  <!-- Stage 1 output label -->
+  <text class="sm" x="169" y="234" text-anchor="middle" fill="#6c757d">→ plain-Python diagnostics dict</text>
+
+  <!-- Divider -->
+  <line x1="356" y1="62" x2="356" y2="400" stroke="#ced4da" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text class="sm" x="356" y="57" text-anchor="middle">boundary</text>
+
+  <!-- Arrow from Stage 1 to Stage 2 -->
+  <line x1="314" y1="175" x2="368" y2="175" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+  <text class="sm" x="341" y="168" text-anchor="middle" fill="#fd7e14">cites</text>
+
+  <!-- ===== Stage 2: advise (right panel top) ===== -->
+  <rect x="368" y="62" width="328" height="120" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="532" y="84" text-anchor="middle" fill="#fd7e14">Stage 2 — LLM interprets and cites</text>
+
+  <rect x="388" y="96" width="288" height="56" rx="8" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="mono" x="532" y="117" text-anchor="middle" fill="#1a1a2e">advise(diagnostics, task=…,</text>
+  <text class="mono" x="532" y="133" text-anchor="middle" fill="#1a1a2e">  domain_context=…)</text>
+  <text class="sm" x="532" y="152" text-anchor="middle" fill="#495057">requires ANTHROPIC_API_KEY</text>
+  <text class="sm" x="532" y="167" text-anchor="middle" fill="#495057">interprets · cites · never fabricates</text>
+
+  <!-- Arrow down from advise -->
+  <line x1="532" y1="182" x2="532" y2="202" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+
+  <!-- ===== Advice struct (right panel bottom) ===== -->
+  <rect x="368" y="202" width="328" height="198" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="532" y="224" text-anchor="middle" fill="#fd7e14">Advice (schema-validated)</text>
+
+  <rect x="388" y="234" width="288" height="148" rx="8" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="mono" x="532" y="254" text-anchor="middle" fill="#1a1a2e">Advice</text>
+  <text class="sm" x="400" y="274">interpretation  — plain-language summary</text>
+  <text class="sm" x="400" y="292">recommendations  — list of Recommendation</text>
+  <text class="sm" x="412" y="308">· action        — what to do</text>
+  <text class="sm" x="412" y="324">· kind          — parameter / method / none</text>
+  <text class="sm" x="412" y="340">· rationale     — why</text>
+  <text class="sm" x="412" y="356">· expected_effect — predicted outcome</text>
+  <text class="mono" x="412" y="372" fill="#fd7e14">· evidence      — cites diagnostic values</text>
+  <text class="sm" x="400" y="370"/>
+
+  <!-- Recommend-only stop marker -->
+  <rect x="24" y="408" width="672" height="52" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="360" y="430" text-anchor="middle" fill="#495057">Returns Advice and STOPS</text>
+  <text class="sm" x="360" y="448" text-anchor="middle">does not re-run fdars · does not compute before/after delta · no fabricated numbers</text>
+
+  <!-- Defs: arrowheads -->
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arrorange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+  </defs>
+</svg>
