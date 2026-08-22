@@ -4,17 +4,17 @@ milestone: v7.0
 milestone_name: Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
 current_phase: 45
 current_phase_name: SVG Fix — regression / inference
-status: planning
-stopped_at: Phase 44 complete, ready to plan Phase 45
-last_updated: "2026-08-22T16:43:10.210Z"
+status: verifying
+stopped_at: Completed 45-01-PLAN.md — regression/inference SVG fix phase
+last_updated: "2026-08-22T16:54:49.241Z"
 last_activity: 2026-08-22
-last_activity_desc: Phase 44 complete, transitioned to Phase 45
-state_head: a4686f52c88449ed5f9c8b15f520607d3d4856aa
+last_activity_desc: Phase 45 execution started
+state_head: d2fb3e990cb7cc9803505bced1e55eed51e92659
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
   percent: 38
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-22)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 44 — SVG Fix — analyze / monitoring / advisor
+**Current focus:** Phase 45 — SVG Fix — regression / inference
 
 ## Current Position
 
-Phase: 45 — SVG Fix — regression / inference
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-22 — Phase 44 complete, transitioned to Phase 45
+Phase: 45 (SVG Fix — regression / inference) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-08-22 — Phase 45 execution started
 
-Progress: [███░░░░░░░] 25%
+Progress: [████░░░░░░] 38%
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [███░░░░░░░] 25%
 | Phase 42 P01 | 9m | 3 tasks | 1 files |
 | Phase 43 P01 | 4m | 3 tasks | 4 files |
 | Phase 44 P01 | 507 | 3 tasks | 4 files |
+| Phase 45-svg-fix-regression-inference P01 | 159 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,10 @@ Recent decisions affecting current work:
 - [Phase 44]: KEEP Amplitude taxonomy in outlier-detection.svg (confirmed canonical against docs + src)
 - [Phase 44]: REPLACE conformal_prediction_band() with magnitude_shape() (real binding at src/outliers_mod.rs:93)
 - [Phase 44]: DEFER elastic-clustering function-name sub-label to Phase 49 (140px box too narrow)
+- [Phase 45]: elastic-multinomial.svg height bumped 300→480; OvR rows re-spaced to h=74 each; method content preserved
+- [Phase 45]: scalar-on-function.svg β̂(t) inset enlarged conservatively and surfaced for Phase 49 human review
+- [Phase 45]: functional-glm.svg byte-unchanged: Gamma inverse g(μ)=1/μ confirmed correct vs src/regression_mod.rs:1091,1143 and docs md:34,36-37
+- [Phase 45]: inference-permutation-test.svg byte-unchanged: lone font-size=11 on .mono (class=12) is intentional
 
 ### Pending Todos
 
@@ -115,8 +120,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-22T16:37:20.750Z
-Stopped at: Phase 44 complete, ready to plan Phase 45
+Last session: 2026-08-22T16:54:49.202Z
+Stopped at: Completed 45-01-PLAN.md — regression/inference SVG fix phase
 Resume file: None
 
 ## Operator Next Steps

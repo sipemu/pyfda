@@ -198,8 +198,10 @@ Plans:
   4. This batch's XML source is clean and hand-editable and passes the SVGO idempotence + build-determinism CI gate.
   5. Across Phases 43–45, all concept diagrams on the AUDIT-01 fix list have been corrected — no flagged diagram remains unaddressed.
 
-**Plans**: 1 plan
-- [ ] 45-01-PLAN.md — Correct the 4 flagged regression/inference diagrams on all four fix axes (functional-glm Gamma-link verified, elastic-multinomial de-cramp, scalar-on-function β(t), permutation-test XML); 15 OK diagrams byte-unchanged
+**Plans**: 1/1 plans executed
+
+- [x] 45-01-PLAN.md — Correct the 4 flagged regression/inference diagrams on all four fix axes (functional-glm Gamma-link verified, elastic-multinomial de-cramp, scalar-on-function β(t), permutation-test XML); 15 OK diagrams byte-unchanged
+
 **UI hint**: yes
 
 ### Phase 46: Diagram Coverage — examples pages
@@ -272,7 +274,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 | 42. Diagram Audit | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 43. SVG Fix — learn/represent/align | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 1/1 | Complete    | 2026-08-22 |
-| 45. SVG Fix — regression/inference | v7.0 | 0/TBD | Not started | - |
+| 45. SVG Fix — regression/inference | v7.0 | 1/1 | In Progress|  |
 | 46. Diagram Coverage — examples | v7.0 | 0/TBD | Not started | - |
 | 47. Diagram Coverage — advisor | v7.0 | 0/TBD | Not started | - |
 | 48. Page Depth | v7.0 | 0/TBD | Not started | - |
