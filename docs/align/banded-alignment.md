@@ -20,6 +20,33 @@ Inside the band the algorithm is identical to the unconstrained version: it accu
 
 When `band_frac=None`, the full $m \times m$ grid is searched and the result is mathematically identical to calling `karcher_mean` directly.
 
+### Complexity justification: why O(m·B) vs O(m²)
+
+The full, unconstrained DP fills all $m \times m$ cells of the cost table — one cell per pair of grid indices $(i, j)$. For a single pair of curves, this is $O(m^2)$ work; for $n$ curves (pairwise Karcher iteration) the per-iteration cost scales as $O(n \cdot m^2)$.
+
+The Sakoe–Chiba band evaluates only the cells satisfying $|i - j| \leq B$. At each of the $m$ rows, the band spans at most $2B + 1$ columns, so the total number of evaluated cells is $\approx m \cdot (2B + 1) = O(m \cdot B)$. With $B = \text{band\_frac} \times m$, the per-pair cost becomes $O(m^2 \cdot \text{band\_frac})$ — linear in the band width.
+
+For `band_frac=0.2` on a 365-point grid, this is roughly $365 \times 73 \approx 26{,000}$ cells vs $365^2 \approx 133{,000}$ cells — about a 5× reduction, matching the observed 4–6× speedup. The key assumption is that the optimal monotone warp path stays within $|i - j| \leq B$; this holds for smooth data with moderate phase variation but breaks down for long-range phase shifts.
+
+### Band caveat: long-range phase shifts
+
+!!! warning "Narrow band_frac clips the warp path for long-range phase shifts"
+    If a feature in your functional data is displaced by more than $B = \text{band\_frac} \times m$ grid points from its corresponding position in the Karcher mean (a *long-range phase shift*), the optimal warp path runs outside the band. In that case:
+
+    - The banded DP backtracks along the nearest-feasible path inside the band — a suboptimal warp.
+    - The Karcher mean is computed from curves that were not fully aligned, producing a **biased mean** that blurs the true feature location.
+    - Downstream distance matrices computed with the band will underestimate the true elastic distances between curves with large phase shifts.
+
+    **Signs of band clipping:**
+    - `pairwise_correlation_score` is noticeably lower for the banded result than for a small-sample unbanded reference.
+    - The Karcher mean looks smeared compared to the unbanded mean.
+    - Warping functions `gammas` hit or cluster near the band boundary.
+
+    **Remedies:**
+    - Increase `band_frac` (e.g. from 0.2 to 0.4 or 0.5).
+    - Use `band_frac=None` for datasets where the phase variation exceeds a third of the domain length.
+    - Pre-align curves using `least_squares_shift_registration` to remove the bulk of the rigid-shift component before running banded elastic alignment.
+
 ---
 
 ## API reference

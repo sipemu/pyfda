@@ -93,6 +93,30 @@ print(f"Sobolev score (lower = better):     {sob:.4f}")
 
 A `pairwise_corr_score` below 0.7 after shift registration suggests that the phase variation is **not purely rigid** — elastic alignment (`karcher_mean`) will likely produce a better result.
 
+### Interpreting quality score values
+
+The scores have different scales and directions, and absolute thresholds must be interpreted relative to the data. The following guidance is approximate — calibrate against an unbanded elastic alignment result on your specific dataset.
+
+**`pairwise_correlation_score` (higher = better, range approximately [−1, 1]):**
+
+| Value | Interpretation |
+|-------|----------------|
+| ≥ 0.9 | Well aligned — rigid shifts explain most of the phase spread; elastic alignment unlikely to improve much |
+| 0.7 – 0.9 | Grey zone — some non-rigid phase variation may remain; consider comparing against elastic alignment |
+| < 0.7 | Rigid shifts are insufficient — non-rigid phase variation dominates; move to `karcher_mean` or `karcher_mean_with_band` |
+
+Note that `pairwise_correlation_score` measures the *mean pairwise cosine similarity* in the centered $L^2$ sense. A score near 1.0 means the registered curves point in the same direction in function space; a score near 0 means they are pairwise uncorrelated after registration.
+
+**`least_squares_score` and `sobolev_least_squares_score` (lower = better, ≥ 0):**
+
+These are absolute residual scores — they depend on the amplitude scale of your data and are only meaningful when compared to:
+- The pre-registration score (to assess improvement from shifting), or
+- The elastic alignment score on the same data (to quantify the rigid-vs-elastic tradeoff).
+
+There is no universal threshold. Compute both before and after registration: a large proportional drop (e.g. `ls_score` reduced by > 50 %) indicates shift registration was beneficial.
+
+The `sobolev_least_squares_score` adds a $\lambda \cdot \int (\dot{\tilde X})^2\,dt$ derivative penalty. At `lambda_=0` it equals `least_squares_score` exactly. It requires a **uniform grid** when `lambda_ > 0`. Use it to penalise rough post-registration curves when smoothness is important.
+
 ---
 
 ## Worked example
@@ -141,6 +165,28 @@ print("FDARS_FENCE_OK")
 The shifts are positive for stations whose annual temperature cycle starts late (shifted right) and negative for early-peaking stations. The `pairwise_corr_score` near 1.0 confirms that the registered station curves are well aligned — the phase variation in this subset is predominantly rigid. The `least_squares_score` reflects absolute L2 spread after alignment; compare it against an elastic-alignment result (see [Elastic Alignment](elastic-alignment.md)) to quantify the rigid-vs-elastic tradeoff.
 
 ---
+
+## Comparison with landmark registration
+
+[Landmark registration](landmark-registration.md) (`fdars.alignment.register`) uses identified feature points (landmarks) to construct a piecewise-linear monotone warp between corresponding features. It sits between shift registration and full elastic alignment in the space of methods:
+
+| Method | Warp type | Flexibility | Requirement |
+|--------|-----------|-------------|-------------|
+| Shift registration | Rigid translation $\gamma(t)=t+\delta$ | Lowest | None (automatic) |
+| Landmark registration | Piecewise-linear monotone | Moderate | User-identified landmark locations |
+| Elastic alignment | Full diffeomorphism (Karcher / Fisher-Rao) | Highest | None (automatic) |
+
+**When to prefer shift registration over landmark registration:**
+- Phase variation is a constant time offset across the whole domain (a seasonal lag, a reaction delay, an age offset).
+- No clear anatomical or functional landmarks exist in the curves.
+- Speed is paramount — shift registration runs in $O(n \cdot m)$; landmark registration requires manually specifying landmark locations.
+
+**When to prefer landmark registration over shift registration:**
+- Curves have clearly identifiable features (peaks, inflection points, onsets) at identifiable but variable locations.
+- Phase variation is *not* a uniform shift — different parts of the domain shift by different amounts (e.g. the rising phase starts early but the falling phase ends late).
+- You want a more flexible warp than a rigid shift but do not need the full diffeomorphism group.
+
+Use shift registration as a **diagnostic first step**: if `pairwise_corr_score` is high (≥ 0.9) after shifting, you likely do not need landmark or elastic alignment. If it is in the grey zone (0.7 – 0.9) and identifiable landmarks exist, try landmark registration next. If it is low (< 0.7) with no clear landmarks, go directly to elastic alignment (`karcher_mean`).
 
 ## Mathematical note: rigid vs. elastic registration
 
