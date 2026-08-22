@@ -196,9 +196,8 @@
   <text class="sm" x="263" y="200" text-anchor="middle" transform="rotate(-90,263,200)">i (query curve time index)</text>
 
   <!-- Band label annotations -->
-  <text class="sm" x="180" y="180" text-anchor="end" fill="#fd7e14">&#8593; upper</text>
-  <text class="sm" x="180" y="196" text-anchor="end" fill="#fd7e14">band edge</text>
-  <path d="M186 182 l6 16" stroke="#fd7e14" stroke-width="1"/>
+  <text class="sm" x="230" y="94" text-anchor="middle" fill="#fd7e14">upper band edge</text>
+  <path d="M254 95 l6 6" stroke="#fd7e14" stroke-width="1"/>
 
   <text class="sm" x="648" y="228" fill="#fd7e14">lower</text>
   <text class="sm" x="648" y="244" fill="#fd7e14">band edge</text>
