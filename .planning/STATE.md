@@ -4,17 +4,17 @@ milestone: v7.0
 milestone_name: Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
 current_phase: 44
 current_phase_name: SVG Fix — analyze / monitoring / advisor
-status: planning
-stopped_at: Phase 43 complete, ready to plan Phase 44
-last_updated: "2026-08-22T16:17:50.358Z"
+status: verifying
+stopped_at: Completed 44-01-PLAN.md (analyze/ SVG fixes)
+last_updated: "2026-08-22T16:37:20.788Z"
 last_activity: 2026-08-22
-last_activity_desc: Phase 43 complete, transitioned to Phase 44
-state_head: 3adae8e1fb8674600a453022ed0d1f016f8fc9e5
+last_activity_desc: Phase 44 execution started
+state_head: b6e384bc81ba31ace85baa68acbff83731276ec8
 progress:
   total_phases: 8
   completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 3
+  completed_plans: 3
   percent: 25
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-22)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 43 — SVG Fix — learn / represent / align
+**Current focus:** Phase 44 — SVG Fix — analyze / monitoring / advisor
 
 ## Current Position
 
-Phase: 44 — SVG Fix — analyze / monitoring / advisor
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-22 — Phase 43 complete, transitioned to Phase 44
+Phase: 44 (SVG Fix — analyze / monitoring / advisor) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-08-22 — Phase 44 execution started
 
-Progress: [█░░░░░░░░░] 13%
+Progress: [███░░░░░░░] 25%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [█░░░░░░░░░] 13%
 |------|----------|-------|-------|
 | Phase 42 P01 | 9m | 3 tasks | 1 files |
 | Phase 43 P01 | 4m | 3 tasks | 4 files |
+| Phase 44 P01 | 507 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,9 @@ Recent decisions affecting current work:
 - [Phase 43]: depth-functions.svg: functional_boxplot confirmed exported at src/depth_mod.rs:625 — diagram reference correct
 - [Phase 43]: 5 represent/ XML-cleanup files left byte-unchanged: inline font-size= are intentional size reductions, not CSS-class-size duplicates
 - [Phase 43]: ex-sonar-tsrvf.svg migrated to viewBox 0 0 720 480 with canonical STYLE_SPEC five-class block
+- [Phase 44]: KEEP Amplitude taxonomy in outlier-detection.svg (confirmed canonical against docs + src)
+- [Phase 44]: REPLACE conformal_prediction_band() with magnitude_shape() (real binding at src/outliers_mod.rs:93)
+- [Phase 44]: DEFER elastic-clustering function-name sub-label to Phase 49 (140px box too narrow)
 
 ### Pending Todos
 
@@ -110,8 +114,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-22T15:33:45.683Z
-Stopped at: Phase 43 complete, ready to plan Phase 44
+Last session: 2026-08-22T16:37:20.750Z
+Stopped at: Completed 44-01-PLAN.md (analyze/ SVG fixes)
 Resume file: None
 
 ## Operator Next Steps

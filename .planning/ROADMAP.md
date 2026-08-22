@@ -179,8 +179,10 @@ Plans:
   4. This batch's XML source is clean and hand-editable and passes the SVGO idempotence + build-determinism CI gate.
   5. Each section in the batch passes a built-site review before the batch is considered done.
 
-**Plans**: 1 plan
-- [ ] 44-01-PLAN.md — correct the 6 flagged analyze/ diagrams (outlier-detection method-accuracy + bottom-row overflow, scoring-metrics label re-spacing, redundant-override cleanup); monitoring/ + advisor/ have no flagged diagrams
+**Plans**: 1/1 plans executed
+
+- [x] 44-01-PLAN.md — correct the 6 flagged analyze/ diagrams (outlier-detection method-accuracy + bottom-row overflow, scoring-metrics label re-spacing, redundant-override cleanup); monitoring/ + advisor/ have no flagged diagrams
+
 **UI hint**: yes
 
 ### Phase 45: SVG Fix — regression / inference
@@ -268,7 +270,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 |-------|-----------|----------------|--------|-----------|
 | 42. Diagram Audit | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 43. SVG Fix — learn/represent/align | v7.0 | 1/1 | Complete    | 2026-08-22 |
-| 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 0/TBD | Not started | - |
+| 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 1/1 | In Progress|  |
 | 45. SVG Fix — regression/inference | v7.0 | 0/TBD | Not started | - |
 | 46. Diagram Coverage — examples | v7.0 | 0/TBD | Not started | - |
 | 47. Diagram Coverage — advisor | v7.0 | 0/TBD | Not started | - |
