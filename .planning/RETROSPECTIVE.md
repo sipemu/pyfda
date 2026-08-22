@@ -107,6 +107,38 @@ Upgraded `fdars-core` 0.14.0 → 0.17.0 and bound the new upstream surface: `fda
 
 ---
 
+## Milestone: v6.0 — fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference
+
+**Shipped:** 2026-08-22
+**Phases:** 6 (36–41) | **Plans:** 11
+
+### What Was Built
+Bumped `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no linalg) and exposed the new surface across three groups: Group A regression (`concurrent_regression`, `functional_glm`), Group B PACE-FPCA over a novel sparse/irregular `IrregFdata` input + `elastic_multinomial`, Group C 9 depth methods + 4 outlier detectors + 3 interval-wise ITP tests. Extended four advisor aspects with grounded scalars, and documented everything with 6 method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` fences. 23/23 requirements; 772 passed / 4 skipped; whole-site strict build green.
+
+### What Worked
+- The now-standard shape (crate bump + regression gate → independent binding groups → advisor → docs) held for the third milestone running.
+- The **blocking human diagram review** earned its keep: it caught an inverted hypograph/epigraph asymmetry in the functional-outliers diagram *and* the depth-functions prose that both the executor and the goal verifier had passed. Ground truth was settled by running the shipped `fdars` bindings directly rather than trusting the plan text.
+- Resuming a partially-executed plan (41-02, salvaged from a prior stalled session) worked cleanly via the executor's per-task git-history skip.
+
+### What Was Inefficient
+- A prior stalled session left ~2 cores of orphaned `mkdocs` builds running for 4.5 hours; they silently slowed the active build until reaped. Docs builds detach past the 2-min tool timeout, so orphan hygiene between waves matters.
+- The full whole-site strict build (~22 min, all fences at full size) dominated Phase 41 wall-clock; two of them were needed (initial gate + re-verify after the diagram fix).
+- The ITP closure direction was mis-stated in RESEARCH/PLAN (adjusted ≤ raw); corrected to adjusted ≥ raw only via empirical API testing.
+
+### Patterns Established
+- **Worktree isolation off for docs phases:** doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path, so executors must run sequentially on main — a worktree builds the wrong tree.
+- **Build discipline for long docs builds:** one build at a time, backgrounded to a log and polled; finish all edits before launching the verifying build (MkDocs snapshots file content at build start).
+
+### Key Lessons
+- Automated verification + a goal verifier are necessary but not sufficient for *method-accuracy* — a human (or empirical ground-truth check against the shipped library) remains the backstop for "does this diagram actually depict what the method does."
+
+### Cost Observations
+- Model mix: orchestrator opus; executors/verifier/integration sonnet.
+- Sessions: 1 autonomous `/gsd-autonomous --from 41` run (Phase 41 + full milestone lifecycle).
+- Notable: two ~22-min whole-site builds dominated wall-clock; orphaned-build reaping recovered ~2 cores mid-run.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution

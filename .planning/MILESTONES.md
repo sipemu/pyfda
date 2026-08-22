@@ -1,5 +1,15 @@
 # Milestones
 
+## v6.0 fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference (Shipped: 2026-08-22)
+
+**Phases completed:** 6 phases, 11 plans, 16 tasks
+
+**Key accomplishments:**
+
+- (none recorded)
+
+---
+
 ## v5.0 fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing (Shipped: 2026-08-18)
 
 **Phases completed:** 6 phases, 11 plans, 17 tasks

@@ -4,6 +4,10 @@ phase: 03-learn-diagrams
 source: [03-VERIFICATION.md]
 started: 2026-08-08
 updated: 2026-08-08
+audit_acknowledged:
+  milestone: v6.0
+  at: 2026-08-22
+  gap_snapshot: "passed::scenarios=0"
 ---
 
 ## Current Test
@@ -19,6 +23,7 @@ awaiting: none — phase ready to seal
 ## Tests
 
 ### 1. Smoothing ghost visual distinctness (Plan 01, Task 3)
+
 expected: |
   On /learn/smoothing/, Panel 3's faint blue "before" ghost is a genuinely distinct
   jagged shape from Panel 1's noisy input (not a copy shifted down); the bold smooth
@@ -33,6 +38,7 @@ note: |
   confirmed pass on the freshly-rendered image.
 
 ### 2. Section-wide learn/ diagram accuracy (Plan 02, Task 4)
+
 expected: |
   Open all 6 learn/ pages — /learn/introduction/, /learn/custom-plotting/,
   /learn/simulation/, /learn/smoothing/, /learn/derivatives/, /learn/irregular-sampling/.
@@ -53,6 +59,7 @@ blocked: 0
 ## Gaps
 
 ### GAP-03-UAT-01: Smooth curve does not thread the redrawn Panel 3 ghost — RESOLVED (dfc925a)
+
 status: resolved
 severity: medium
 source_test: 1

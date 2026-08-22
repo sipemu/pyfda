@@ -17,12 +17,19 @@ The documentation — diagrams first, examples second — must make functional d
 - ✅ **v3.0 — Provider-Agnostic Advisor, Full-Library Coverage** (Phases 19–24): a custom `Provider` protocol with Anthropic/OpenAI(-compatible)/Gemini/Ollama adapters (per-provider optional extras) and a centralized validate-and-retry + `_check_grounding` guard, deterministic offline `build_diagnostics` for all 12 fdars aspects through one shared schema/prompt, MCP + Agent Skill surface updates (MCP stays LLM-free), a Python 3.9–3.14 CI matrix with version-gated extras + bare-venv smoke proof, and a provider-setup + per-aspect docs section. 28/28 requirements complete; suite 259 passed / 4 skipped.
 - ✅ **v4.0 — fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs** (Phases 25–29): upgraded `fdars-core` 0.14.0 → 0.17.0 (parallel-only, no linalg; zero FPCA drift) and exposed the new upstream surface — `fdars.represent` (interpolation/extrapolation-policy/imputation), functional statistics + `depth_based_median`/`trim_mean` in `fdars.fdata` with six new `Fdata` methods, a new `fdars.scoring` submodule (5 metrics), and `fdars.alignment` shift registration (+ `fd.shift_register()`) / registration-quality scores / banded elastic alignment. Extended the advisor with a `scoring` aspect (#13) + imputation/registration diagnostics (grounding invariant + MCP guard-sync preserved), and documented it all with 6 new dedicated pages + 6 method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples (whole-site `mkdocs build --strict` green). 16/16 requirements complete; suite 426 passed / 4 skipped.
 - ✅ **v5.0 — fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing** (Phases 30–35): upgraded `fdars-core` 0.17.0 → 0.20.0 (parallel-only, zero drift; `CvCriterion` wildcard arm) and exposed a new `fdars.inference` submodule (two-sample permutation tests, Degras SCB bands, FLM post-hoc inference, one-way ANOVA — `TestResult`→PyDict, deterministic seed), `functional_depth`/`functional_boxplot` in `fdars.depth`, and AIC model selection + `constant_basis` in `fdars.basis`/`fdars.smoothing`. Added an `inference` advisor aspect (#14) and documented it all with new pages + 4 method-accurate SVGs + offline `FDARS_FENCE_OK` worked examples (whole-site `mkdocs build --strict` green). 21/21 requirements validated; suite 560 passed / 4 skipped.
+- ✅ **v6.0 — fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference** (Phases 36–41): upgraded `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no linalg; MSRV verified 1.81 ≤ 1.83) and exposed the new upstream surface across three groups — Group A `concurrent_regression`/`functional_glm` (`fdars.regression`), Group B `pace_fpca` over a new sparse/irregular `IrregFdata` input + `elastic_multinomial` (`fdars.classification`), Group C 9 new depth methods + 4 outlier detectors (`fdars.outliers`) + 3 interval-wise ITP tests (`fdars.inference`). Extended the advisor's `outliers`/`regression`/`classification`/`fpca` aspects with grounded scalars (closing the v5.0 Phase-34 boxplot-outlier deferral; ITP deferred as vector-valued), and documented everything with new pages + 6 method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples. Blocking human diagram review caught and corrected an inverted hypograph/epigraph asymmetry (verified against shipped bindings). 23/23 requirements validated; suite 772 passed / 4 skipped; whole-site `mkdocs build --strict` green offline.
 
 **Grounding invariant (v2.0):** every recommendation cites computed diagnostics and states an expected effect; the LLM never fabricates numbers.
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v6.0 fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference
+## Next Milestone
+
+_Planning next milestone — run `/gsd-new-milestone`._
+
+## Last Shipped Milestone: v6.0 fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference (shipped 2026-08-22)
+
+_All 23 requirements validated; suite 772 passed / 4 skipped; whole-site `mkdocs build --strict` green offline; blocking human diagram review approved (caught + fixed inverted hypograph/epigraph asymmetry). Full detail: `.planning/milestones/v6.0-ROADMAP.md`._
 
 **Goal:** Bump `fdars-core` 0.20.0 → 0.23.0, expose the new upstream surface through PyO3 bindings and the Python API across three capability groups, extend the AI advisor where relevant (grounding invariant preserved), and document everything to the project's method-accurate standard (hand-authored inline SVG diagrams + runnable offline worked examples). Same shape as v4.0/v5.0.
 
@@ -122,14 +129,18 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- v6.0 in progress — fdars-core 0.23 upgrade: regression + PACE-FPCA/classification + depth/outliers/interval-inference bindings + advisor extension + docs. Requirements defined in REQUIREMENTS.md. -->
+<!-- No active milestone — v6.0 shipped 2026-08-22. Run /gsd-new-milestone to define the next one; REQUIREMENTS.md is created fresh there. -->
+
+_None — v6.0 shipped. Planning next milestone (`/gsd-new-milestone`)._
+
+**v6.0 — fdars-core 0.23 Upgrade (Phases 36–41, shipped 2026-08-22):**
 
 - [x] Crate bump `fdars-core 0.20.0 → 0.23.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate — ✓ Phase 36 (600 passed / 4 skipped / 0 failed; zero drift; zero wildcard arms needed — existing CvCriterion/ProjectionBasisType arms already present)
 - [x] Group A — Regression: `concurrent_regression` + `functional_glm` extending `fdars.regression` — ✓ Phase 37 (2 bindings + 2 PyDict converters; `beta_curve (p,m)` transposition-guarded at p=3,n=10; 4 GLM families via `#[non_exhaustive]` `GlmFamily` string dispatch; embedded `fpca` excluded; `functional_glm` takes no argvals per core; 620 passed / 4 skipped)
 - [x] Group B — FPCA & Classification: `pace_fpca` (sparse/PACE FPCA) + `elastic_multinomial` extending `fdars.classification` — ✓ Phase 38 (pyfda's first `#[pyclass]` `PyIrregFdata` + `fdars.pace_fpca` submodule with dtype-agnostic ragged-list guards + 10-key dict / transposition-guarded eigenfunctions·scores; `elastic_multinomial` with CR-01 label guard, `class_models` omitted; 643 passed / 4 skipped)
 - [x] Group C — Depth / Outliers / Interval Inference: new depth methods + outlier detectors (`tvdmss`/`muod`/`sequential_transform`/depthgram) + interval-wise testing (`itp_*`) extending `fdars.depth`/`fdars.outliers`/`fdars.inference` — ✓ Phase 39 (3 plans: 9 new `functional_depth` variants →13 total; 4 deterministic outlier detectors with `list[int]`/`list[dict]` results; 3 ITP tests via new `itp_result_to_pydict` with `ProjectionBasisType` dispatch + seed determinism; 681 passed / 4 skipped)
 - [x] Advisor extension (where relevant) — grounded diagnostics for new aspects; grounding invariant + MCP guard-sync (single atomic commit) preserved — ✓ Phase 40 (extended 4 existing aspects: `outliers` for tvdmss/muod/sequential_transform/depthgram closing the Phase-34 deferral, `regression` for functional_glm/concurrent_regression, plus Group B `classification` elastic_multinomial + `fpca` pace_fpca; ITP deferred; all diagnostics native float/int, MCP guard-sync a no-op; 772 passed / 4 skipped)
-- [ ] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green
+- [x] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; `mkdocs build --strict` green — ✓ Phase 41 (DOCS-08..11: new Regression / PACE-FPCA + elastic-multinomial / depth-outliers-inference pages + 6 hand-authored SVGs; advisor aspects.md; whole-site strict build green; blocking human diagram review caught + fixed inverted hypograph/epigraph asymmetry; 772 passed / 4 skipped)
 
 **v5.0 — fdars-core 0.20 Upgrade (Phases 30–35, shipped):**
 - ✓ Crate bump 0.17.0 → 0.20.0 (parallel-only, no linalg); 426-test regression gate green, zero drift; `CvCriterion` wildcard arm — Phase 30
@@ -179,6 +190,8 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 | Only the Python API page carries an executed offline fence; MCP/Skill fences illustrative | The docs build must not depend on the `[mcp]`/`[advisor]` extras, Python 3.10+, or an API key | ✓ Good — build stays offline; fence execution proven via `FDARS_FENCE_OK` sentinel (v2.1) |
 | Per-page human review gate on the built site, self-served during the autonomous run | User authorized a fully-autonomous run; orchestrator self-reviewed each page against source + rendered diagrams | ✓ Good — caught a diagram label-overlap and 7 stale cross-refs, fixed inline (v2.1) |
 | Bump `fdars-core` to 0.17.0 as an isolated regression gate before any new bindings | Isolate the sole numeric change (faer FPCA SVD drift) on a green baseline so binding-correctness issues can't hide behind an upgrade regression | ✓ Good — suite green with zero test changes; drift never exceeded existing tolerances (v4.0 Phase 25) |
+| Blocking human diagram method-accuracy review before milestone close | Method-accuracy is the docs' core value; a diagram that misdepicts the method is worse than none | ✓ Good — v6.0 review caught an inverted hypograph/epigraph asymmetry the executors + verifier missed; corrected against shipped-binding ground truth (v6.0 Phase 41) |
+| Disable worktree isolation for docs phases; run executors sequentially on main | Doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path — a worktree executor would build the wrong tree and fail verification | ✓ Good — sequential execution kept the ~22-min whole-site fences building against the real tree (v6.0 Phase 41) |
 
 ## Evolution
 
@@ -198,4 +211,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-21 after Phase 40 — advisor extension (4 aspects: outliers/regression/classification/fpca; ITP deferred); 772 passed / 4 skipped*
+*Last updated: 2026-08-22 after v6.0 milestone completion — fdars-core 0.23 upgrade (regression, PACE-FPCA/classification, depth/outliers/interval-inference) + advisor extension + docs; 23/23 requirements validated; 772 passed / 4 skipped; whole-site `mkdocs build --strict` green.*

@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v6.0
 milestone_name: fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference
-current_phase: 41
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 41 complete — all phases complete
-last_updated: "2026-08-21T22:38:56.908Z"
+last_updated: "2026-08-22T11:54:23.663Z"
 last_activity: 2026-08-22
-last_activity_desc: Phase 41 complete
-state_head: b1a4799499cde00110cb4179ee9ef06ff198eef6
+last_activity_desc: Milestone v6.0 completed and archived
+state_head: ef6041bd3fce0d0c584839729dc3e409962a8612
 progress:
   total_phases: 6
   completed_phases: 6
   total_plans: 11
   completed_plans: 11
   percent: 100
+current_phase: 41
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-08-20)
 
 ## Current Position
 
-Phase: 41
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-08-22 — Phase 41 complete
+Phase: Milestone v6.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-22 — Milestone v6.0 completed and archived
 
 ## Performance Metrics
 
@@ -114,6 +114,8 @@ None yet.
 | Transport | HTTP-01 / FUT-01: HTTP/SSE MCP transport for the fdars-advisor server (stdio shipped in v2.0) | v3.x | v2.0 close |
 | Advisor | PACE-ADV / MULTINOM-ADV: dedicated advisor aspects for PACE-FPCA and elastic multinomial, if ADV-05's plan-time feasibility check defers them | future | v6.0 init |
 | Core | `linalg`-gated `ridge_regression_fit` (Rust 1.84+ > MSRV 1.83) + HEAD 0.24-bound work (FAM, mixed models, FoF-RE) — not in published 0.23.0 | out of scope | v6.0 init |
+| uat_gaps | Phase 03 (archived v1.0)/03-UAT.md | acknowledged (passed, 0 pending) | 2026-08-22 (v6.0 close) |
+| context_questions | Phase 12 (archived v2.0)/12-CONTEXT.md | acknowledged (4 questions, superseded by shipped v2.0 MCP) | 2026-08-22 (v6.0 close) |
 
 ## Session Continuity
 
@@ -123,4 +125,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Plan the first phase with `/gsd-plan-phase 36`
+- Start the next milestone with /gsd-new-milestone
