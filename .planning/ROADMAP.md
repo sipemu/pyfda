@@ -253,7 +253,11 @@ Plans:
   3. Extended pages gain new worked examples and/or cross-links where they add value, and every worked example runs offline against the current `fdars` API emitting `FDARS_FENCE_OK`, with fence data kept small (synthetic `n ≤ 20`; subsampled datasets).
   4. Each extended page passes a built-site review.
 
-**Plans**: TBD
+**Plans**: 1/2 plans executed
+
+- [x] 48-01-PLAN.md — new-fence pages (functional-glm multi-family, pace-fpca vs standard FPCA, interval-inference vs permutation) with per-page fence gate
+- [ ] 48-02-PLAN.md — reuse-fence prose depth (concurrent-regression, interpolation, imputation, scoring-metrics, functional-statistics, banded-alignment, shift-registration)
+
 **UI hint**: yes
 
 ### Phase 49: Whole-Site Gate & Human Review
@@ -284,7 +288,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 | 45. SVG Fix — regression/inference | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 46. Diagram Coverage — examples | v7.0 | 2/2 | Complete    | 2026-08-22 |
 | 47. Diagram Coverage — advisor | v7.0 | 1/1 | Complete    | 2026-08-22 |
-| 48. Page Depth | v7.0 | 0/TBD | Not started | - |
+| 48. Page Depth | v7.0 | 1/2 | In Progress|  |
 | 49. Whole-Site Gate & Human Review | v7.0 | 0/TBD | Not started | - |
 
 ---

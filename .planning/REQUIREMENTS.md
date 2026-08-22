@@ -25,9 +25,9 @@ Documentation-only quality milestone. No `fdars-core` bump, no new bindings. Req
 
 ### Page Depth
 
-- [ ] **DEPTH-01**: The thin v6.0 method pages (`regression/concurrent-regression`, `regression/functional-glm`, `represent/pace-fpca`, `inference/interval-inference`) are extended to mature-page structure — intro, method explanation, worked example, parameters, caveats/interpretation.
+- [x] **DEPTH-01**: The thin v6.0 method pages (`regression/concurrent-regression`, `regression/functional-glm`, `represent/pace-fpca`, `inference/interval-inference`) are extended to mature-page structure — intro, method explanation, worked example, parameters, caveats/interpretation.
 - [ ] **DEPTH-02**: The thin v4/v5 method pages (`represent/interpolation`, `represent/imputation`, `analyze/scoring-metrics`, `analyze/functional-statistics`, and any other sub-~200-line method page surfaced by AUDIT-01) are extended to mature-page structure.
-- [ ] **DEPTH-03**: Extended pages gain new worked examples and/or cross-links where they add value; every worked example runs offline against the current `fdars` API and emits `FDARS_FENCE_OK`, with fence data kept small (synthetic `n ≤ 20`; subsampled datasets).
+- [x] **DEPTH-03**: Extended pages gain new worked examples and/or cross-links where they add value; every worked example runs offline against the current `fdars` API and emits `FDARS_FENCE_OK`, with fence data kept small (synthetic `n ≤ 20`; subsampled datasets).
 
 ### Site Gate
 
@@ -65,9 +65,9 @@ Deferred, tracked but not in the current roadmap.
 | SVGFIX-04 | Phases 43, 44, 45 | Complete |
 | DIACOV-01 | Phase 46 | Complete |
 | DIACOV-02 | Phase 47 | Complete |
-| DEPTH-01 | Phase 48 | Pending |
+| DEPTH-01 | Phase 48 | Complete |
 | DEPTH-02 | Phase 48 | Pending |
-| DEPTH-03 | Phase 48 | Pending |
+| DEPTH-03 | Phase 48 | Complete |
 | GATE-01 | Phase 49 | Pending |
 | GATE-02 | Phase 49 | Pending |
 

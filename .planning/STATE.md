@@ -4,17 +4,17 @@ milestone: v7.0
 milestone_name: Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
 current_phase: 48
 current_phase_name: Page Depth
-status: planning
-stopped_at: Phase 47 complete, ready to plan Phase 48
-last_updated: "2026-08-22T21:22:33.376Z"
+status: executing
+stopped_at: Completed 48-01-PLAN.md
+last_updated: "2026-08-22T21:37:50.328Z"
 last_activity: 2026-08-22
-last_activity_desc: Phase 47 complete, transitioned to Phase 48
-state_head: 33321558d7e7e551c18b799194fa3b194e70e0bf
+last_activity_desc: Phase 48 execution started
+state_head: ea3b2c1b12c8b2cd75faeca4cc6a18e6bb051379
 progress:
   total_phases: 8
   completed_phases: 6
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 9
+  completed_plans: 8
   percent: 75
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-22)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 47 — Diagram Coverage — advisor surface pages
+**Current focus:** Phase 48 — Page Depth
 
 ## Current Position
 
-Phase: 48 — Page Depth
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-22 — Phase 47 complete, transitioned to Phase 48
+Phase: 48 (Page Depth) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-08-22 — Phase 48 execution started
 
-Progress: [██████░░░░] 63%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [██████░░░░] 63%
 | Phase 46 P01 | 9m | 3 tasks | 18 files |
 | Phase 46-diagram-coverage-examples P02 | 8 minutes | 3 tasks | 22 files |
 | Phase 47 P01 | 7 minutes | 2 tasks | 11 files |
+| Phase 48 P01 | 4 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,9 @@ Recent decisions affecting current work:
 - [Phase 47]: All 5 advisor diagrams use 720×480 viewBox — all needed the space for accurate multi-stage flows
 - [Phase 47]: advisor-mcp.svg places Agent/LLM OUTSIDE MCP boundary with 6 _RUNNABLE_METHODS per server.py (not 5 per prose)
 - [Phase 47]: advisor-aspects.svg lists 14 aspects per build_diagnostics._supported (not 12+ per intro prose)
+- [Phase 48]: Task 1: Added Poisson as second GLM family (preferred over Gamma; no positivity trick)
+- [Phase 48]: Task 2: PACE vs standard FPCA comparison section + new fence verifies eigenfunction consistency from sparse data
+- [Phase 48]: Task 3: ITP-vs-t_perm_test fence demonstrates localisation (WHERE) vs detection (WHETHER) on same synthetic data
 
 ### Pending Todos
 
@@ -131,8 +135,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-22T21:08:58.074Z
-Stopped at: Phase 47 complete, ready to plan Phase 48
+Last session: 2026-08-22T21:37:50.204Z
+Stopped at: Completed 48-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
