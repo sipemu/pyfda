@@ -17,6 +17,8 @@ See the [overview](index.md) for the grounding invariant and the three-surface
 architecture. The [Agent Skill](agent-skill.md) page
 documents the packaged skill that orchestrates these tools automatically.
 
+![MCP server by-reference handle model: agent outside stdio boundary; tools and HandleRegistry inside; only opaque handles and scalar diagnostics cross the boundary](../assets/diagrams/advisor-mcp.svg){ .fdars-diagram }
+
 ---
 
 ## Handle model

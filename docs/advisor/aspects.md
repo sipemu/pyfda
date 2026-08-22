@@ -13,6 +13,8 @@ The three task families available for every aspect are:
 | `"parameter"` | Concrete suggestions for changing hyperparameters |
 | `"method"` | Recommendations for switching or combining fdars methods |
 
+![Per-aspect taxonomy: 14 fdars aspects flow through one shared build_diagnostics then advise pipeline crossed with three task families](../assets/diagrams/advisor-aspects.svg){ .fdars-diagram }
+
 ## Coverage Table
 
 | Aspect (`method=`) | fdars source(s) | Key diagnostics (count) | Offline fence |

@@ -10,6 +10,8 @@ OpenAI-compatible endpoints), **Google Gemini**, and **local Ollama**. The
 backend is selected at call time via explicit parameters or environment
 variables; no configuration file is required.
 
+![Provider selection: advise() routes through Provider protocol to Anthropic, OpenAI, Gemini, or Ollama via explicit arg then env var then default precedence](../assets/diagrams/advisor-providers.svg){ .fdars-diagram }
+
 ---
 
 ## Backends

@@ -17,6 +17,8 @@ adjusted parameters via `compare_run`, and prints the observable before/after de
 all in a single, self-contained walkthrough script. See the [overview](index.md) for the
 grounding invariant and the three-surface architecture.
 
+![Agent Skill execution flow: git-URL install then interpret, recommend (API-key gated), re-run, compare loop; contrasted with recommend-only Python API](../assets/diagrams/advisor-agent-skill.svg){ .fdars-diagram }
+
 ---
 
 ## Setup

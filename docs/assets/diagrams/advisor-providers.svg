@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Provider selection: advise() is the only entry point; routes through Provider protocol to four backends via explicit arg then env var then anthropic default precedence">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Provider Setup — Selection and Precedence</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">advise() is the only entry point · MCP tools are compute-only and never call advise()</text>
+
+  <!-- ===== Entry point: advise() ===== -->
+  <rect x="240" y="60" width="240" height="56" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="mono" x="360" y="82" text-anchor="middle" fill="#1a1a2e">advise(diagnostics, task=…,</text>
+  <text class="mono" x="360" y="100" text-anchor="middle" fill="#1a1a2e">  provider=…, model=…)</text>
+
+  <!-- Precedence arrow down to resolve_provider -->
+  <line x1="360" y1="116" x2="360" y2="138" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+
+  <!-- ===== Precedence chain ===== -->
+  <rect x="140" y="138" width="440" height="116" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="360" y="160" text-anchor="middle" fill="#495057">resolve_provider() — precedence (highest to lowest)</text>
+  <rect x="156" y="170" width="408" height="32" rx="6" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="163" y="191">1. Explicit  advise(provider=…, model=…)  arg — overrides everything</text>
+  <rect x="156" y="208" width="408" height="32" rx="6" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="163" y="221">2. Env vars  FDARS_ADVISOR_PROVIDER / FDARS_ADVISOR_MODEL</text>
+  <text class="sm" x="163" y="235">   (also FDARS_ADVISOR_BASE_URL for custom endpoints)</text>
+
+  <!-- Arrow from resolve_provider to providers -->
+  <line x1="360" y1="254" x2="360" y2="282" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
+  <text class="sm" x="316" y="272" text-anchor="middle" fill="#6c757d">3. default: anthropic</text>
+
+  <!-- ===== Provider protocol ===== -->
+  <rect x="240" y="282" width="240" height="34" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="360" y="304" text-anchor="middle" fill="#495057">Provider protocol</text>
+
+  <!-- Fan-out arrows to 4 adapters -->
+  <line x1="270" y1="316" x2="80" y2="354" stroke="#495057" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="320" y1="316" x2="246" y2="354" stroke="#495057" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="400" y1="316" x2="474" y2="354" stroke="#495057" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="450" y1="316" x2="640" y2="354" stroke="#495057" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ===== 4 Adapter boxes ===== -->
+
+  <!-- Anthropic (default) -->
+  <rect x="16" y="354" width="148" height="100" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="90" y="374" text-anchor="middle" fill="#fd7e14">Anthropic</text>
+  <text class="sm" x="90" y="390" text-anchor="middle" fill="#fd7e14">(default)</text>
+  <text class="mono" x="90" y="410" text-anchor="middle" fill="#1a1a2e">fdars[advisor]</text>
+  <text class="sm" x="90" y="428" text-anchor="middle">ANTHROPIC_API_KEY</text>
+  <text class="sm" x="90" y="444" text-anchor="middle">claude-opus-4-8</text>
+
+  <!-- OpenAI -->
+  <rect x="180" y="354" width="148" height="100" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="254" y="374" text-anchor="middle" fill="#495057">OpenAI</text>
+  <text class="sm" x="254" y="390" text-anchor="middle">(+ compatible)</text>
+  <text class="mono" x="254" y="410" text-anchor="middle" fill="#1a1a2e">fdars[openai]</text>
+  <text class="sm" x="254" y="428" text-anchor="middle">OPENAI_API_KEY</text>
+  <text class="sm" x="254" y="444" text-anchor="middle">gpt-4o</text>
+
+  <!-- Gemini -->
+  <rect x="344" y="354" width="148" height="100" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="418" y="374" text-anchor="middle" fill="#495057">Gemini</text>
+  <text class="sm" x="418" y="390" text-anchor="middle">Python 3.10+</text>
+  <text class="mono" x="418" y="410" text-anchor="middle" fill="#1a1a2e">fdars[gemini]</text>
+  <text class="sm" x="418" y="428" text-anchor="middle">GEMINI_API_KEY</text>
+  <text class="sm" x="418" y="444" text-anchor="middle">gemini-2.0-flash</text>
+
+  <!-- Ollama -->
+  <rect x="508" y="354" width="196" height="100" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="606" y="374" text-anchor="middle" fill="#495057">Ollama</text>
+  <text class="sm" x="606" y="390" text-anchor="middle">local · key-free</text>
+  <text class="mono" x="606" y="410" text-anchor="middle" fill="#1a1a2e">fdars[ollama]</text>
+  <text class="sm" x="606" y="428" text-anchor="middle">no API key required</text>
+  <text class="sm" x="606" y="444" text-anchor="middle">llama3.2 (default)</text>
+
+  <!-- Defs -->
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arrorange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+  </defs>
+</svg>

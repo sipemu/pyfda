@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Per-aspect taxonomy: 14 fdars aspects as caller-specified method= inputs flow through one shared build_diagnostics then advise pipeline crossed with three task families: interpretation, parameter, method">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Per-Aspect Taxonomy</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">14 aspects × 3 task families — one shared build_diagnostics → advise pipeline</text>
+
+  <!-- ===== Left: 14 aspects as caller-specified method= ===== -->
+  <rect x="16" y="60" width="240" height="396" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="136" y="82" text-anchor="middle" fill="#495057">Aspects (caller-specified method=)</text>
+
+  <!-- Aspect rows: 7 per column -->
+  <text class="mono" x="36" y="106" fill="#1a1a2e">alignment</text>
+  <text class="mono" x="36" y="126" fill="#1a1a2e">fpca</text>
+  <text class="mono" x="36" y="146" fill="#1a1a2e">basis</text>
+  <text class="mono" x="36" y="166" fill="#1a1a2e">smoothing</text>
+  <text class="mono" x="36" y="186" fill="#1a1a2e">clustering</text>
+  <text class="mono" x="36" y="206" fill="#1a1a2e">depth</text>
+  <text class="mono" x="36" y="226" fill="#1a1a2e">outliers</text>
+  <text class="mono" x="136" y="106" fill="#1a1a2e">classification</text>
+  <text class="mono" x="136" y="126" fill="#1a1a2e">represent</text>
+  <text class="mono" x="136" y="146" fill="#1a1a2e">regression</text>
+  <text class="mono" x="136" y="166" fill="#1a1a2e">regression_cv</text>
+  <text class="mono" x="136" y="186" fill="#1a1a2e">scoring</text>
+  <text class="mono" x="136" y="206" fill="#1a1a2e">spm</text>
+  <text class="mono" x="136" y="226" fill="#1a1a2e">inference</text>
+
+  <text class="sm" x="136" y="256" text-anchor="middle">auto-detect: never</text>
+  <text class="sm" x="136" y="272" text-anchor="middle">always caller-supplied</text>
+
+  <!-- Separator -->
+  <line x1="16" y1="284" x2="256" y2="284" stroke="#ced4da" stroke-width="1.2"/>
+
+  <!-- Notes on runnable vs diagnostics-only -->
+  <text class="sm" x="136" y="306" text-anchor="middle" fill="#495057">6 runnable aspects:</text>
+  <text class="sm" x="136" y="322" text-anchor="middle">alignment · fpca · basis</text>
+  <text class="sm" x="136" y="338" text-anchor="middle">smoothing · clustering · depth</text>
+  <text class="sm" x="136" y="358" text-anchor="middle" fill="#6c757d">(supported by fdars_run_method)</text>
+  <text class="sm" x="136" y="382" text-anchor="middle" fill="#495057">8 diagnostics-only aspects:</text>
+  <text class="sm" x="136" y="398" text-anchor="middle">outliers · classification · represent</text>
+  <text class="sm" x="136" y="414" text-anchor="middle">regression · regression_cv · spm</text>
+  <text class="sm" x="136" y="430" text-anchor="middle">scoring · inference</text>
+  <text class="sm" x="136" y="448" text-anchor="middle" fill="#6c757d">(caller supplies result dict)</text>
+
+  <!-- Arrow from aspects to pipeline -->
+  <line x1="256" y1="258" x2="296" y2="258" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- ===== Center: shared two-stage pipeline ===== -->
+  <rect x="296" y="60" width="196" height="396" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="394" y="82" text-anchor="middle" fill="#495057">Shared Pipeline</text>
+
+  <!-- Stage 1 -->
+  <rect x="314" y="96" width="160" height="76" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="394" y="116" text-anchor="middle" fill="#495057">Stage 1</text>
+  <text class="mono" x="394" y="136" text-anchor="middle" fill="#1a1a2e">build_diagnostics(</text>
+  <text class="mono" x="394" y="154" text-anchor="middle" fill="#1a1a2e">  result, method)</text>
+  <text class="sm" x="394" y="168" text-anchor="middle">offline · no LLM · deterministic</text>
+
+  <!-- Arrow stage1 → stage2 -->
+  <line x1="394" y1="172" x2="394" y2="198" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+  <text class="sm" x="394" y="194" text-anchor="middle" fill="#fd7e14">cites</text>
+
+  <!-- Stage 2 -->
+  <rect x="314" y="202" width="160" height="76" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="394" y="222" text-anchor="middle" fill="#fd7e14">Stage 2</text>
+  <text class="mono" x="394" y="242" text-anchor="middle" fill="#1a1a2e">advise(diagnostics,</text>
+  <text class="mono" x="394" y="260" text-anchor="middle" fill="#1a1a2e">  task=…)</text>
+  <text class="sm" x="394" y="274" text-anchor="middle">grounded LLM interpretation</text>
+
+  <!-- Arrow stage2 → Advice -->
+  <line x1="394" y1="278" x2="394" y2="308" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+
+  <!-- Advice output -->
+  <rect x="314" y="308" width="160" height="54" rx="10" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.5"/>
+  <text class="lab" x="394" y="328" text-anchor="middle" fill="#fd7e14">Advice</text>
+  <text class="sm" x="394" y="346" text-anchor="middle">interpretation</text>
+  <text class="sm" x="394" y="360" text-anchor="middle">recommendations · caveats</text>
+
+  <!-- Schema note -->
+  <rect x="314" y="376" width="160" height="64" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="394" y="396" text-anchor="middle">one shared schema +</text>
+  <text class="sm" x="394" y="412" text-anchor="middle">system prompt for all</text>
+  <text class="sm" x="394" y="428" text-anchor="middle">aspects and task families</text>
+
+  <!-- Arrow from pipeline to task families -->
+  <line x1="492" y1="258" x2="522" y2="258" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- ===== Right: 3 task families ===== -->
+  <rect x="522" y="60" width="182" height="396" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="613" y="82" text-anchor="middle" fill="#495057">Task Families (task=)</text>
+
+  <rect x="538" y="98" width="150" height="88" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="613" y="118" text-anchor="middle" fill="#495057">interpretation</text>
+  <text class="sm" x="613" y="138" text-anchor="middle">plain-language reading</text>
+  <text class="sm" x="613" y="154" text-anchor="middle">of diagnostic values</text>
+  <text class="sm" x="613" y="170" text-anchor="middle" fill="#6c757d">e.g. "4 clusters show</text>
+  <text class="sm" x="613" y="183" text-anchor="middle" fill="#6c757d">high amplitude separation"</text>
+
+  <rect x="538" y="202" width="150" height="88" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="613" y="222" text-anchor="middle" fill="#495057">parameter</text>
+  <text class="sm" x="613" y="242" text-anchor="middle">concrete suggestions</text>
+  <text class="sm" x="613" y="258" text-anchor="middle">for hyperparameter changes</text>
+  <text class="sm" x="613" y="274" text-anchor="middle" fill="#6c757d">e.g. "increase n_basis</text>
+  <text class="sm" x="613" y="287" text-anchor="middle" fill="#6c757d">from 15 to 25"</text>
+
+  <rect x="538" y="306" width="150" height="88" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="613" y="326" text-anchor="middle" fill="#495057">method</text>
+  <text class="sm" x="613" y="346" text-anchor="middle">recommendations to</text>
+  <text class="sm" x="613" y="362" text-anchor="middle">switch or combine methods</text>
+  <text class="sm" x="613" y="378" text-anchor="middle" fill="#6c757d">e.g. "use elastic FPCA</text>
+  <text class="sm" x="613" y="391" text-anchor="middle" fill="#6c757d">for dense regular data"</text>
+
+  <text class="sm" x="613" y="432" text-anchor="middle">all 3 families available</text>
+  <text class="sm" x="613" y="448" text-anchor="middle">for every aspect</text>
+
+  <!-- Defs -->
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arrorange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+  </defs>
+</svg>
