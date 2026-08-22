@@ -15,6 +15,8 @@ year-to-year **weather noise**. Everything below is then recovered from the raw
 signal by `fdars.seasonal` — the true period, the warming trend, the seasonal
 component, and whether the timing of summer is shifting.
 
+![Canadian Temperature: Annual Cycle Detection and Decomposition — period detectors, STL, SSA, seasonal strength](../assets/diagrams/ex-canadian-seasonal.svg){ .fdars-diagram }
+
 ## Building an eight-year record
 
 ```python exec="1" html="1" source="above"

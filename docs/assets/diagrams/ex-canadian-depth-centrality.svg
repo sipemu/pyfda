@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Ranking Curves by Centrality with Functional Depth — Fraiman-Muniz and modified band depth ordering">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Ranking Curves by Centrality: Functional Depth</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Fraiman–Muniz depth scores each station · deepest = functional median · two depths agree</text>
+
+  <!-- Panel 1: Input -->
+  <rect x="24" y="60" width="148" height="140" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="98" y="80" text-anchor="middle" fill="#495057">Input</text>
+  <text class="sm" x="98" y="96" text-anchor="middle">35 station curves</text>
+  <text class="sm" x="98" y="110" text-anchor="middle">daily temperature (°C)</text>
+  <!-- Mini curves in grey -->
+  <path d="M34 180 Q 54 145 74 138 Q 94 131 114 135 Q 134 139 154 160" stroke="#6c757d" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <path d="M34 190 Q 54 158 74 148 Q 94 140 114 143 Q 134 148 154 168" stroke="#6c757d" stroke-width="1.2" fill="none" opacity="0.4"/>
+  <path d="M34 175 Q 54 148 74 140 Q 94 134 114 137 Q 134 143 154 158" stroke="#6c757d" stroke-width="1.2" fill="none" opacity="0.4"/>
+  <path d="M34 185 Q 54 153 74 144 Q 94 137 114 140 Q 134 146 154 164" stroke="#6c757d" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <text class="sm" x="98" y="210" text-anchor="middle">Fdata(temp, argvals=t)</text>
+
+  <!-- Arrow 1 -->
+  <line x1="172" y1="130" x2="196" y2="130" stroke="#666" stroke-width="1.5"/>
+  <polygon points="192,126 200,130 192,134" fill="#666"/>
+
+  <!-- Panel 2: Depth computation -->
+  <rect x="200" y="60" width="188" height="140" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="294" y="80" text-anchor="middle" fill="#fd7e14">fd.depth(method=...)</text>
+  <text class="sm" x="294" y="97" text-anchor="middle">fraiman_muniz: integrates</text>
+  <text class="sm" x="294" y="111" text-anchor="middle">distance from pointwise median</text>
+  <text class="sm" x="294" y="130" text-anchor="middle">modified_band: fraction of</text>
+  <text class="sm" x="294" y="144" text-anchor="middle">domain inside curve pairs</text>
+  <text class="mono" x="294" y="162" text-anchor="middle" fill="#495057">depth ∈ [0, 1] per station</text>
+  <text class="sm" x="294" y="178" text-anchor="middle">correlation FM vs MBD ≈ 0.99</text>
+
+  <!-- Arrow 2 -->
+  <line x1="388" y1="130" x2="412" y2="130" stroke="#666" stroke-width="1.5"/>
+  <polygon points="408,126 416,130 408,134" fill="#666"/>
+
+  <!-- Panel 3: Depth shading -->
+  <rect x="416" y="60" width="140" height="140" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="486" y="80" text-anchor="middle" fill="#495057">Depth-shaded curves</text>
+  <!-- Fading curves: pale = peripheral, dark = central -->
+  <path d="M424 165 Q 444 135 464 128 Q 484 121 504 125 Q 524 129 544 150" stroke="#bdd7f0" stroke-width="1.4" fill="none"/>
+  <path d="M424 168 Q 444 140 464 132 Q 484 125 504 129 Q 524 134 544 155" stroke="#7fb3e0" stroke-width="1.4" fill="none"/>
+  <path d="M424 163 Q 444 137 464 130 Q 484 123 504 127 Q 524 132 544 152" stroke="#4191cb" stroke-width="2.0" fill="none"/>
+  <!-- Deepest curve in pink/red -->
+  <path d="M424 166 Q 444 138 464 131 Q 484 124 504 128 Q 524 133 544 153" stroke="#d6336c" stroke-width="2.5" fill="none"/>
+  <text class="sm" x="486" y="185" text-anchor="middle">pale = peripheral</text>
+  <text class="sm" x="486" y="199" text-anchor="middle">dark = central</text>
+
+  <!-- Arrow 3 -->
+  <line x1="556" y1="130" x2="580" y2="130" stroke="#666" stroke-width="1.5"/>
+  <polygon points="576,126 584,130 576,134" fill="#666"/>
+
+  <!-- Panel 4: Result -->
+  <rect x="584" y="60" width="112" height="140" rx="8" fill="#3f51b5" stroke="none"/>
+  <text class="lab" x="640" y="82" text-anchor="middle" fill="white">Ranked</text>
+  <text class="lab" x="640" y="97" text-anchor="middle" fill="white">centrality</text>
+  <text class="sm" x="640" y="116" text-anchor="middle" fill="#e8ecff">deepest =</text>
+  <text class="sm" x="640" y="130" text-anchor="middle" fill="#e8ecff">functional</text>
+  <text class="sm" x="640" y="144" text-anchor="middle" fill="#e8ecff">median</text>
+  <text class="sm" x="640" y="163" text-anchor="middle" fill="#FFD700">mid-continental</text>
+  <text class="sm" x="640" y="177" text-anchor="middle" fill="#FFD700">most typical</text>
+  <text class="sm" x="640" y="191" text-anchor="middle" fill="#e8ecff">Arctic/Pacific</text>
+  <text class="sm" x="640" y="205" text-anchor="middle" fill="#e8ecff">peripheral</text>
+
+  <!-- Bottom caption -->
+  <text class="sm" x="360" y="236" text-anchor="middle">Fraiman–Muniz depth = integral over how close each curve sits to the pointwise median · two depth notions (FM + MBD) give near-identical rankings</text>
+  <text class="sm" x="360" y="252" text-anchor="middle">→ centrality order is a data property, not an artefact of the depth formula chosen</text>
+</svg>

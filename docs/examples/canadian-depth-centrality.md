@@ -11,6 +11,8 @@ This page ranks the daily temperature curves of 35 Canadian weather stations by 
 reads off the most and least typical climates, and shows that two different depth
 notions produce essentially the same ordering.
 
+![Ranking Curves by Centrality with Functional Depth — Fraiman-Muniz and modified band depth ordering](../assets/diagrams/ex-canadian-depth-centrality.svg){ .fdars-diagram }
+
 ## The data
 
 Each station contributes one curve: daily temperature across the year. Plotted together

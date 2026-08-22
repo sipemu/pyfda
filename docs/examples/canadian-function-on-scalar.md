@@ -7,6 +7,8 @@ does a Canadian station's entire annual temperature curve depend on its **latitu
 answer is not one number but a **coefficient function** $\beta(t)$: the effect of latitude
 at every day of the year.
 
+![Function-on-Scalar Regression — fosr fits β(t) from latitude, predict_fosr returns full temperature curves](../assets/diagrams/ex-canadian-function-on-scalar.svg){ .fdars-diagram }
+
 ## The data
 
 35 temperature curves, coloured by station latitude. Northern stations are colder — but

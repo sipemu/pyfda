@@ -14,6 +14,8 @@ its shape**. We use `fdars` to smooth the noisy daily curves, then fit
 **functional ANOVA** on region to quantify how geography drives the whole annual
 profile.
 
+![Canadian Precipitation: P-spline Smoothing then FOSR and FANOVA on Geographic Profiles](../assets/diagrams/ex-canadian-precipitation.svg){ .fdars-diagram }
+
 ## The data
 
 Raw daily precipitation (mm/day) has many near-zero days and a long right tail,
