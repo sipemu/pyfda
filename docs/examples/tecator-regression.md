@@ -12,6 +12,8 @@ inspect and pre-process the spectra, fit and compare several functional
 regressions, read the estimated coefficient curve $\beta(\lambda)$, check the
 model's residuals, and finish with a high-vs-low-fat classification.
 
+![Predicting Fat from NIR Spectra — scalar-on-function regression workflow](../assets/diagrams/ex-tecator-regression.svg){ .fdars-diagram }
+
 ## The spectra, colored by fat
 
 ```python exec="1" html="1" source="above"

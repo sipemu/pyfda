@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Predicting Fat from NIR Spectra — scalar-on-function regression workflow">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Predicting Fat from NIR Spectra</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">scalar-on-function regression: deriv_1d preprocessing · fregre_lm / fregre_pls / fregre_np · β(λ) + significant regions</text>
+
+  <!-- Dataset panel -->
+  <rect x="24" y="62" width="152" height="78" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="100" y="82" text-anchor="middle" fill="#495057">Tecator</text>
+  <text class="sm" x="100" y="97" text-anchor="middle">240 NIR spectra</text>
+  <text class="sm" x="100" y="111" text-anchor="middle">100 channels (850–1050 nm)</text>
+  <text class="sm" x="100" y="126" text-anchor="middle">fat %  (2–60%)</text>
+
+  <!-- Arrow to deriv -->
+  <line x1="176" y1="101" x2="202" y2="101" stroke="#666" stroke-width="1.5"/>
+  <polygon points="198,97 206,101 198,105" fill="#666"/>
+
+  <!-- Preprocessing panel -->
+  <rect x="206" y="62" width="164" height="78" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="288" y="82" text-anchor="middle" fill="#fd7e14">deriv_1d</text>
+  <text class="sm" x="288" y="97" text-anchor="middle">nderiv=2 (2nd derivative)</text>
+  <text class="sm" x="288" y="111" text-anchor="middle">removes linear baseline</text>
+  <text class="sm" x="288" y="126" text-anchor="middle">exposes fat-absorption peaks</text>
+
+  <!-- Arrow to split -->
+  <line x1="370" y1="101" x2="396" y2="101" stroke="#fd7e14" stroke-width="1.5"/>
+  <polygon points="392,97 400,101 392,105" fill="#fd7e14"/>
+
+  <!-- Train/test split panel -->
+  <rect x="400" y="62" width="154" height="78" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="477" y="82" text-anchor="middle" fill="#495057">Train / Test Split</text>
+  <text class="sm" x="477" y="97" text-anchor="middle">D2 (2nd-deriv spectra)</text>
+  <text class="sm" x="477" y="111" text-anchor="middle">170 train · 70 test</text>
+  <text class="sm" x="477" y="126" text-anchor="middle">random permutation (seed 42)</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="158" x2="680" y2="158" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+  <text class="sub" x="360" y="174" text-anchor="middle">Three regression methods compared on held-out test set</text>
+
+  <!-- FPC-LM panel -->
+  <rect x="24" y="184" width="200" height="80" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="124" y="204" text-anchor="middle" fill="#3f51b5">fregre_lm</text>
+  <text class="sm" x="124" y="219" text-anchor="middle">FPC linear model</text>
+  <text class="sm" x="124" y="233" text-anchor="middle">n_comp=12 FPC scores → OLS</text>
+  <text class="mono" x="124" y="250" text-anchor="middle" fill="#3f51b5">R² ≈ 0.945</text>
+
+  <!-- PLS panel -->
+  <rect x="260" y="184" width="200" height="80" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="360" y="204" text-anchor="middle" fill="#fd7e14">fregre_pls</text>
+  <text class="sm" x="360" y="219" text-anchor="middle">Functional PLS · n_comp=5</text>
+  <text class="sm" x="360" y="233" text-anchor="middle">components covary with fat</text>
+  <text class="mono" x="360" y="250" text-anchor="middle" fill="#fd7e14">R² ≈ 0.949</text>
+
+  <!-- NP panel -->
+  <rect x="496" y="184" width="200" height="80" rx="8" fill="#f0fff4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="596" y="204" text-anchor="middle" fill="#198754">fregre_np</text>
+  <text class="sm" x="596" y="219" text-anchor="middle">Nonparametric kernel</text>
+  <text class="sm" x="596" y="233" text-anchor="middle">lp_cross_1d distances → N-W</text>
+  <text class="mono" x="596" y="250" text-anchor="middle" fill="#198754">R² ≈ 0.980 ★</text>
+
+  <!-- Arrow from FPC-LM down to beta section -->
+  <line x1="124" y1="264" x2="124" y2="292" stroke="#3f51b5" stroke-width="1.5"/>
+  <polygon points="120,288 124,296 128,288" fill="#3f51b5"/>
+
+  <!-- Arrow from PLS down to beta section -->
+  <line x1="360" y1="264" x2="360" y2="292" stroke="#fd7e14" stroke-width="1.5"/>
+  <polygon points="356,288 360,296 356,292" fill="#fd7e14"/>
+  <polygon points="356,288 360,296 364,288" fill="#fd7e14"/>
+
+  <!-- Beta + significant regions panel -->
+  <rect x="24" y="296" width="436" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="242" y="316" text-anchor="middle" fill="#495057">β(λ) coefficient curve + significant regions</text>
+  <text class="sm" x="242" y="331" text-anchor="middle">fregre_pls → beta_t (where fat shows up in spectrum)</text>
+  <text class="sm" x="242" y="345" text-anchor="middle">FPC-LM + OLS covariance → se(β̂) → significant_regions_from_se</text>
+  <text class="sm" x="242" y="361" text-anchor="middle">|β̂(λ)| > 1.96·se: flags 6 bands (C–H overtone 920–970 nm strongest)</text>
+
+  <!-- Classification panel -->
+  <rect x="496" y="296" width="200" height="80" rx="8" fill="#fff0f5" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="596" y="316" text-anchor="middle" fill="#dc3545">functional_logistic</text>
+  <text class="sm" x="596" y="331" text-anchor="middle">fat > 20% binary label</text>
+  <text class="sm" x="596" y="345" text-anchor="middle">n_comp=5 · beta_t shows</text>
+  <text class="mono" x="596" y="362" text-anchor="middle" fill="#dc3545">100% in-sample acc.</text>
+
+  <!-- Arrow from NP to classification -->
+  <line x1="596" y1="264" x2="596" y2="292" stroke="#198754" stroke-width="1.5"/>
+  <polygon points="592,288 596,296 600,288" fill="#198754"/>
+
+  <!-- Bottom note -->
+  <text class="sub" x="360" y="410" text-anchor="middle">NP (kernel smoother on L² distances) is strongest. PLS β(λ) readable: 930–970 nm C–H band. Logistic β(λ) same region drives go/no-go classification.</text>
+</svg>

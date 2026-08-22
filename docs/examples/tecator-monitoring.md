@@ -20,6 +20,8 @@ differences — particularly in the 930–1000 nm fat-absorption region —
 distinguish them, and the monitor learns those differences from in-spec data
 alone.
 
+![Tecator Spectra Inline Quality Monitoring — SPM Phase I FPCA baseline, Phase II T2 and SPE control charts, EWMA, per-PC contributions](../assets/diagrams/ex-tecator-monitoring.svg){ .fdars-diagram }
+
 ## The data
 
 We work on the **raw absorbance** spectra (as the R reference does), splitting on

@@ -12,6 +12,8 @@ coverage guarantee: for a miscoverage level $\alpha$, the interval covers the tr
 probability at least $1-\alpha$. This page demonstrates the guarantee on the Tecator
 spectra and shows it empirically holding across many random splits.
 
+![The Conformal Coverage Guarantee — split conformal prediction on Tecator NIR spectra](../assets/diagrams/ex-tecator-conformal-coverage.svg){ .fdars-diagram }
+
 ## The data
 
 Tecator records 240 near-infrared absorbance curves (100 wavelengths each); the target is
