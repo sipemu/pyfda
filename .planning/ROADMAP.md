@@ -216,10 +216,10 @@ Plans:
   3. Each new SVG passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
   4. Each affected examples page passes a built-site review.
 
-**Plans**: 1/2 plans executed
+**Plans**: 2/2 plans executed
 
 - [x] 46-01-PLAN.md — Tracer (ex-canadian-weather) + canadian & andrews-wine families (9 diagrams)
-- [ ] 46-02-PLAN.md — Tecator + monitoring + misc groups (11 diagrams)
+- [x] 46-02-PLAN.md — Tecator + monitoring + misc groups (11 diagrams)
 
 **UI hint**: yes
 
@@ -282,7 +282,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 | 43. SVG Fix — learn/represent/align | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 45. SVG Fix — regression/inference | v7.0 | 1/1 | Complete    | 2026-08-22 |
-| 46. Diagram Coverage — examples | v7.0 | 1/2 | In Progress|  |
+| 46. Diagram Coverage — examples | v7.0 | 2/2 | In Progress|  |
 | 47. Diagram Coverage — advisor | v7.0 | 0/TBD | Not started | - |
 | 48. Page Depth | v7.0 | 0/TBD | Not started | - |
 | 49. Whole-Site Gate & Human Review | v7.0 | 0/TBD | Not started | - |
