@@ -1,5 +1,20 @@
 # Milestones
 
+## v7.0 v7.0 (Shipped: 2026-08-23)
+
+**Phases completed:** 8 phases, 9 plans, 9 tasks
+
+**Key accomplishments:**
+
+- Full 61-diagram 4-axis scored inventory — visual/STYLE_SPEC/XML/method-accuracy — with ranked fix list (43=25, 44=17, 45=19), coverage-gap list (20 examples + 5 advisor pages), and thin-page list (8 confirmed + 2 borderline) gate the entire v7.0 milestone.
+- Hand-authored SVG corrections across learn/represent/align batch — Panel-3 ghost removal, PACE subtitle overflow fix, banded-alignment label re-anchor, and full STYLE_SPEC migration of ex-sonar-tsrvf.svg (700→720 viewBox, canonical five CSS classes, role/aria).
+- De-cramped elastic-multinomial.svg to 720×480, improved scalar-on-function β̂(t) inset prominence, and confirmed functional-glm Gamma inverse-link annotation correct; zero redundant overrides across all four diagrams.
+- 9 method-accurate workflow SVGs authored for the canadian-weather tracer + 4 canadian + 4 andrews-wine example pages, all STYLE_SPEC-conformant, svgo-idempotent, and embedded via `.fdars-diagram`.
+- 11 method-accurate workflow SVGs authored across tecator (regression/conformal/monitoring), monitoring (penicillin/inline), and misc (cross-validation/explainability/outliers/growth/phoneme/tolerance) example pages — completing 20/20 DIACOV-01 gap coverage.
+- Extended three method pages with new executable worked examples (binomial+poisson GLM, PACE-vs-standard-FPCA, ITP-vs-t_perm_test) — all fences verified offline under `.venv`.
+
+---
+
 ## v6.0 fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference (Shipped: 2026-08-22)
 
 **Phases completed:** 6 phases, 11 plans, 16 tasks
