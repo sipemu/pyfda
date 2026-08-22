@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v6.0
-milestone_name: fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference
-status: Awaiting next milestone
-stopped_at: Phase 41 complete — all phases complete
-last_updated: "2026-08-22T11:54:23.663Z"
+milestone: v7.0
+milestone_name: Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
+status: planning
+last_updated: "2026-08-22T13:42:45.256Z"
 last_activity: 2026-08-22
-last_activity_desc: Milestone v6.0 completed and archived
-state_head: ef6041bd3fce0d0c584839729dc3e409962a8612
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
-current_phase: 41
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-08-20)
 
 ## Current Position
 
-Phase: Milestone v6.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-22 — Milestone v6.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-08-22 — Milestone v7.0 started
 
 ## Performance Metrics
 

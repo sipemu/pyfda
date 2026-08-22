@@ -2,7 +2,7 @@
 
 ## What This Is
 
-pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-data-analysis library to Python as the `fdars` package (represent, smooth, align, analyze, regress, monitor). This milestone is a **documentation overhaul**: reworking the MkDocs site's hand-authored SVG diagrams and its worked example pages to a consistently high, method-accurate standard.
+pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-data-analysis library to Python as the `fdars` package (represent, smooth, align, analyze, regress, monitor). This milestone is a **documentation quality pass**: auditing and fixing every hand-authored inline SVG diagram, adding concept diagrams to the pages that still lack them, and extending the thin newer method pages to the depth of the mature ones — all against the site's consistently high, method-accurate standard.
 
 ## Core Value
 
@@ -23,9 +23,17 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Next Milestone
+## Current Milestone: v7.0 Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
 
-_Planning next milestone — run `/gsd-new-milestone`._
+**Goal:** Bring the whole docs site to one consistently high bar — audit and fix every hand-authored inline SVG, add concept diagrams to the pages that lack them, and extend the thin newer pages to full parity with the mature ones. Docs-only quality milestone (no crate bump, no new bindings); closest in spirit to v1.0's overhaul.
+
+**Target features:**
+- **SVG audit & fix (all 68 concept diagrams in `docs/assets/diagrams/`)** on four axes: visual/layout quality (overlapping labels, cramped spacing, misalignment, inconsistent sizing), STYLE_SPEC conformance (palette/fonts/viewBox/CSS classes/aria per `docs/assets/diagrams/STYLE_SPEC.md`), XML source formatting (clean, hand-editable markup), and method-accuracy (diagram faithfully depicts what the method does — per the v6.0 hypograph/epigraph lesson). SVGO idempotence + determinism CI gate stays green.
+- **Add concept diagrams to the pages that lack them** — the ~21 `examples/` worked-example pages and the 5 advisor surface pages (`python-api`, `mcp`, `providers`, `agent-skill`, `aspects`); ~26 new method-accurate hand-authored inline SVGs (the advisor overview is the only advisor page with diagrams today — a v2.1 choice now being reversed).
+- **Extend thin/new pages to full parity + new worked examples** — the v4–v6 method pages (`concurrent-regression`, `functional-glm`, `pace-fpca`, `interpolation`, `imputation`, `scoring-metrics`, `functional-statistics`, `interval-inference`, and similar) brought to the structure of the mature pages (intro, method explanation, worked example, parameters, caveats/interpretation), with extra worked examples/cross-links where they add value.
+- **Whole-site gate:** `mkdocs build --strict` green offline; worked examples run against the current `fdars` API (`FDARS_FENCE_OK`); per-section review on the built site with a blocking human diagram method-accuracy review before close.
+
+**Key context:** No `fdars-core` change, no new bindings — purely a docs quality/consistency pass. Same execution shape as v1.0: audit → SVG fixes (batched by section) → new diagrams → page extensions → build/review gate. 127 SVGs on disk (68 concept diagrams + 8 cards + ~59 thumbnails); the audit targets the 68 concept diagrams (cards/thumbs out of scope unless a thumb mirrors a fixed diagram). Docs build is ~19–25 min with executed fences — keep any new fence data small (synthetic `n ≤ 20`; subsampled datasets). Every method page already carries a diagram; the "missing SVG box" gap is the examples + advisor pages.
 
 ## Last Shipped Milestone: v6.0 fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference (shipped 2026-08-22)
 
@@ -129,9 +137,14 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- No active milestone — v6.0 shipped 2026-08-22. Run /gsd-new-milestone to define the next one; REQUIREMENTS.md is created fresh there. -->
+<!-- v7.0 Documentation Quality Pass — active. Full REQ list in .planning/REQUIREMENTS.md; roadmap in .planning/ROADMAP.md. -->
 
-_None — v6.0 shipped. Planning next milestone (`/gsd-new-milestone`)._
+**v7.0 — Documentation Quality Pass (Phases 42+, active):**
+
+- [ ] SVG audit & fix — all 68 concept diagrams in `docs/assets/diagrams/` reviewed and corrected on four axes (visual/layout quality, STYLE_SPEC conformance, XML source formatting, method-accuracy); SVGO idempotence + determinism gate green
+- [ ] Diagram coverage — concept SVG added to the ~21 `examples/` pages and the 5 advisor surface pages (`python-api`/`mcp`/`providers`/`agent-skill`/`aspects`); ~26 new method-accurate hand-authored inline SVGs
+- [ ] Page depth — thin v4–v6 method pages extended to mature-page parity (intro/method/worked example/parameters/caveats) + new worked examples/cross-links
+- [ ] Whole-site gate — `mkdocs build --strict` green offline; worked examples `FDARS_FENCE_OK`; per-section review with a blocking human diagram method-accuracy review before close
 
 **v6.0 — fdars-core 0.23 Upgrade (Phases 36–41, shipped 2026-08-22):**
 
@@ -211,4 +224,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-22 after v6.0 milestone completion — fdars-core 0.23 upgrade (regression, PACE-FPCA/classification, depth/outliers/interval-inference) + advisor extension + docs; 23/23 requirements validated; 772 passed / 4 skipped; whole-site `mkdocs build --strict` green.*
+*Last updated: 2026-08-22 after starting milestone v7.0 — Documentation Quality Pass (SVG audit & fix across all 68 concept diagrams, diagram coverage for examples + advisor pages, page-depth extension for thin v4–v6 method pages). Docs-only quality milestone; no crate bump.*
