@@ -27,6 +27,8 @@ test on the wine curves, cross-checks what they flag, digs into the individual
 flagged bottles, and finally pits the whole functional pipeline against a
 classical **Mahalanobis** baseline.
 
+![Andrews Wine: Outlier Detection — depth, magnitude-shape, outliergram, and likelihood-ratio test on wine Andrews curves](../assets/diagrams/ex-andrews-wine.svg){ .fdars-diagram }
+
 !!! warning "No `andrews` binding in fdars"
     The transform is the same numpy helper introduced on the
     [intro page](andrews-wine-intro.md); `fdars` handles everything after the

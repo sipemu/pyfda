@@ -15,6 +15,8 @@ that resists contamination, a **tolerance band** as a coverage region, an SPC
 control chart on functional PCA scores, and **chemical-level diagnostics** that
 trace a failure back to the offending measurements.
 
+![Andrews Wine: Quality Control — functional boxplot, tolerance band, T2 and SPE control charts, chemical diagnostics](../assets/diagrams/ex-andrews-wine-qc.svg){ .fdars-diagram }
+
 !!! warning "No `andrews` binding in fdars"
     The transform is the numpy helper from the
     [intro page](andrews-wine-intro.md). We z-score the 13 columns first so no

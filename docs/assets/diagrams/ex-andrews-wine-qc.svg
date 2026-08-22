@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Andrews Wine Quality Control — functional boxplot, fpca_tolerance_band, spm_phase1 and spm_monitor T2 and SPE control charts">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Andrews Wine: Quality Control Pipeline</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Barolo reference · functional boxplot spec · tolerance band · T² + SPE control charts · chemical diagnostics</text>
+
+  <!-- === Phase I: Build reference === -->
+
+  <!-- Panel 1: Reference batch -->
+  <rect x="24" y="60" width="134" height="90" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="91" y="79" text-anchor="middle" fill="#495057">Barolo reference</text>
+  <text class="sm" x="91" y="95" text-anchor="middle">59 in-control wines</text>
+  <text class="sm" x="91" y="109" text-anchor="middle">z-scored + Andrews</text>
+  <text class="sm" x="91" y="125" text-anchor="middle">cultivar 1 curves</text>
+  <text class="mono" x="91" y="142" text-anchor="middle" fill="#8B0000">Phase I</text>
+
+  <!-- Arrow right -->
+  <line x1="158" y1="105" x2="182" y2="105" stroke="#666" stroke-width="1.5"/>
+  <polygon points="178,101 186,105 178,109" fill="#666"/>
+
+  <!-- Panel 2: Functional boxplot + modified_band_1d -->
+  <rect x="186" y="60" width="200" height="90" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="286" y="79" text-anchor="middle" fill="#fd7e14">modified_band_1d → boxplot</text>
+  <text class="sm" x="286" y="95" text-anchor="middle">Depth-ranked: median curve</text>
+  <text class="sm" x="286" y="109" text-anchor="middle">central 50% band + 1.5× fences</text>
+  <text class="sm" x="286" y="123" text-anchor="middle">Any wine exiting fence → flagged</text>
+  <text class="sm" x="286" y="140" text-anchor="middle">cultivar spec: per-cultivar envelope</text>
+
+  <!-- Arrow right to tolerance band -->
+  <line x1="386" y1="105" x2="410" y2="105" stroke="#666" stroke-width="1.5"/>
+  <polygon points="406,101 414,105 406,109" fill="#666"/>
+
+  <!-- Panel 3: fpca_tolerance_band -->
+  <rect x="414" y="60" width="282" height="90" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="555" y="79" text-anchor="middle" fill="#3f51b5">fpca_tolerance_band(ref, ncomp=3, nb=800)</text>
+  <text class="sm" x="555" y="95" text-anchor="middle">FPCA decomposition of reference → bootstrap band</text>
+  <text class="sm" x="555" y="109" text-anchor="middle">coverage=0.95: guarantees 95% of good curves inside</text>
+  <text class="sm" x="555" y="123" text-anchor="middle">Barbera wines → nearly all breach the Barolo band</text>
+  <text class="mono" x="555" y="140" text-anchor="middle" fill="#3f51b5">cleaner rejection than per-variable charts</text>
+
+  <!-- === Phase II: SPC monitoring === -->
+
+  <!-- Phase II label -->
+  <text class="sub" x="360" y="172" text-anchor="middle">Phase II: statistical process control</text>
+
+  <!-- Panel 4: spm_phase1 -->
+  <rect x="24" y="180" width="200" height="100" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="124" y="199" text-anchor="middle" fill="#495057">spm_phase1(ref, t, ncomp=3)</text>
+  <text class="sm" x="124" y="215" text-anchor="middle">Fit FPCA model on reference</text>
+  <text class="sm" x="124" y="229" text-anchor="middle">Calibrate T² + SPE control limits</text>
+  <text class="sm" x="124" y="243" text-anchor="middle">at nominal α=0.05 false-alarm rate</text>
+  <text class="sm" x="124" y="257" text-anchor="middle">→ mean, loadings, eigenvalues,</text>
+  <text class="sm" x="124" y="271" text-anchor="middle">t2_limit, spe_limit</text>
+
+  <!-- Arrow right -->
+  <line x1="224" y1="230" x2="248" y2="230" stroke="#666" stroke-width="1.5"/>
+  <polygon points="244,226 252,230 244,234" fill="#666"/>
+
+  <!-- Panel 5: spm_monitor -->
+  <rect x="252" y="180" width="200" height="100" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="352" y="199" text-anchor="middle" fill="#fd7e14">spm_monitor(ph1, new_data)</text>
+  <text class="sm" x="352" y="215" text-anchor="middle">Score each new wine against</text>
+  <text class="sm" x="352" y="229" text-anchor="middle">the calibrated model</text>
+  <text class="mono" x="352" y="246" text-anchor="middle" fill="#fd7e14">T²: in-model deviation</text>
+  <text class="mono" x="352" y="261" text-anchor="middle" fill="#fd7e14">SPE: out-of-model deviation</text>
+  <text class="sm" x="352" y="277" text-anchor="middle">returns t2_alarm, spe_alarm flags</text>
+
+  <!-- Arrow right -->
+  <line x1="452" y1="230" x2="476" y2="230" stroke="#666" stroke-width="1.5"/>
+  <polygon points="472,226 480,230 472,234" fill="#666"/>
+
+  <!-- Panel 6: SPE dominant alarm -->
+  <rect x="480" y="180" width="216" height="100" rx="8" fill="#dc3545" stroke="none"/>
+  <text class="lab" x="588" y="199" text-anchor="middle" fill="white">Off-cultivar alarm</text>
+  <text class="sm" x="588" y="215" text-anchor="middle" fill="white">Barolo reference: ~10% false alarm</text>
+  <text class="sm" x="588" y="229" text-anchor="middle" fill="white">Grignolino: ~100% alarmed</text>
+  <text class="sm" x="588" y="243" text-anchor="middle" fill="white">Barbera: ~100% alarmed</text>
+  <text class="mono" x="588" y="260" text-anchor="middle" fill="#FFD700">SPE most decisive: wrong grape</text>
+  <text class="sm" x="588" y="276" text-anchor="middle" fill="white">varies in new directions (SPE catches)</text>
+
+  <!-- === Chemical diagnostics === -->
+  <line x1="40" y1="300" x2="680" y2="300" stroke="#ced4da" stroke-width="1.0" stroke-dasharray="4,3"/>
+  <text class="sub" x="360" y="318" text-anchor="middle">Chemical diagnostics: tracing the alarm back to measurements</text>
+
+  <!-- Panel 7: t2_pc_contributions + z-scores -->
+  <rect x="24" y="326" width="672" height="100" rx="8" fill="#f0fff4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="360" y="345" text-anchor="middle" fill="#198754">t2_pc_contributions + within-cultivar z-scores</text>
+  <text class="sm" x="360" y="362" text-anchor="middle">spm.t2_pc_contributions: decomposes T² statistic into per-PC contributions → which modes drove the alarm</text>
+  <text class="sm" x="360" y="377" text-anchor="middle">FPCA loadings (= Andrews curves, linear in 13 features) map PC contributions back to individual chemicals</text>
+  <text class="sm" x="360" y="392" text-anchor="middle">within-cultivar z-scores: chemicals beyond ±2 SDs from Barolo mean → named culprit measurements</text>
+  <text class="mono" x="360" y="408" text-anchor="middle" fill="#198754">example: Barbera wine — high flavanoids + colour intensity (z &gt; 3) flagged as offenders</text>
+
+  <!-- Bottom result strip -->
+  <line x1="40" y1="444" x2="680" y2="444" stroke="#ced4da" stroke-width="1.0" stroke-dasharray="4,3"/>
+  <text class="sm" x="360" y="462" text-anchor="middle">One chart (Andrews SPM) replaces 13 separate chemical control charts and identifies the root-cause measurement</text>
+</svg>

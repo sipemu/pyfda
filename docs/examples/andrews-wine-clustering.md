@@ -15,6 +15,8 @@ standardized rows — but routed through the functional API
 (`fdars.clustering`), which also yields interpretable *center curves* and
 functional cluster-validity scores.
 
+![Andrews Wine: Clustering and Variable Importance — kmeans_fd, silhouette/CH validity, fuzzy_cmeans_fd, fanova, fpca](../assets/diagrams/ex-andrews-wine-clustering.svg){ .fdars-diagram }
+
 !!! warning "No `andrews` binding in fdars"
     The transform is the numpy helper from the
     [intro page](andrews-wine-intro.md). We z-score the 13 columns first so no

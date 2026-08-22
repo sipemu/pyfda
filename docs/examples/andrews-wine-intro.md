@@ -22,6 +22,8 @@ then do real analysis: [outlier detection](andrews-wine.md),
 [clustering & variable importance](andrews-wine-clustering.md), and
 [quality control](andrews-wine-qc.md).
 
+![Andrews Wine: Why Andrews Curves — row-to-curve encoding, Parseval distance preservation, mean curve per cultivar](../assets/diagrams/ex-andrews-wine-intro.svg){ .fdars-diagram }
+
 !!! warning "No `andrews` binding in fdars"
     There is **no** Andrews-curve function in `fdars`. The transform is a
     handful of lines of numpy, reproduced below and lifted directly from
