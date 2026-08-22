@@ -138,6 +138,83 @@ print("FDARS_FENCE_OK")
 
 ---
 
+## Caveats and interpretation
+
+### Sample-size requirements
+
+Each sample needs at least $n \ge 2$ observations (`itp_one_pop` requires $n \ge 2$; `itp_two_pop` requires $n_a \ge 2$ and $n_b \ge 2$). With small $n$, the permutation null distribution is **coarse**: the smallest achievable p-value is $1 / (n_{\text{perm}} + 1)$, but the permutation null itself can only take at most $\binom{n_a + n_b}{n_a}$ distinct values for `itp_two_pop`. Small samples also mean the closure adjustment acts on a coarse null, making the adjusted p-values discrete. For reliable conclusions, aim for at least $n \approx 10$ per group; with small $n$, treat the adjusted p-values as ordinal indicators rather than calibrated probabilities.
+
+### Basis sensitivity
+
+The choice of `nbasis` controls how finely the domain is partitioned into testable sub-intervals. Increasing `nbasis` improves spatial resolution (smaller detectable effect regions) but dilutes power per coefficient — each coefficient captures a narrower sub-interval with fewer signal points. Additionally, for `basis_type="bspline"`, the B-spline library clamps the actual basis count to the largest supported by the evaluation grid; always check `n_basis` in the returned dict (see the [clamping note](#returns) above). As a practical guide:
+
+- Start with `nbasis=5` (the default) to identify coarse-scale differences.
+- Increase to `nbasis=8`–`12` only when a finer localisation is needed and $n$ is large enough to support the additional tests.
+- Very large `nbasis` relative to $n$ typically increases all adjusted p-values through the closure step.
+
+---
+
+## ITP vs a global permutation test
+
+ITP and `fi.t_perm_test` answer **different questions** from the same data:
+
+| Aspect | ITP (`itp_two_pop`) | Global permutation test (`t_perm_test`) |
+|--------|--------------------|-----------------------------------------|
+| Question | *Where* do the populations differ? | *Whether* the populations differ? |
+| Output | Per-basis adjusted p-value vector | Single global p-value |
+| Statistic | Max absolute coefficient difference per basis | Integrated L2 distance between means |
+| Localisation | Yes — flags specific basis coefficients | No — integrates over the whole domain |
+| Multiple testing | Closure-based FWER control per coefficient | No multiple-testing issue (single test) |
+| Sensitivity | Higher for local, interval-specific differences | Higher for global, diffuse differences |
+
+**Use ITP when you need to know which region of the domain drives the difference.** Use `t_perm_test` when you only need a yes/no answer about whether two functional populations share the same mean. The global test is more sensitive to diffuse, whole-domain differences; ITP is more sensitive to localised sub-interval differences after closure adjustment.
+
+### Example — ITP vs permutation test on the same small synthetic dataset
+
+The fence below builds two groups that differ only in a middle sub-interval, then runs both tests on the same data. ITP flags only the basis coefficients over the differing interval; the global test returns a single p-value.
+
+```python exec="1" source="above"
+import numpy as np
+from docs_fig import fast
+import fdars.inference as fi
+
+rng = np.random.default_rng(11)
+n_a, n_b, m = 12, 12, 40
+t = np.linspace(0, 1, m)
+
+# Group A: flat + noise; Group B: same but with a local elevation in t ∈ [0.35, 0.65]
+grp_a = rng.normal(0, 0.4, (n_a, m))
+grp_b = rng.normal(0, 0.4, (n_b, m))
+mid = (t >= 0.35) & (t <= 0.65)
+grp_b[:, mid] += 1.2   # local mean shift in the middle interval only
+
+n_perm = fast(299, 29)
+
+# --- ITP two-population test ---
+res_itp = fi.itp_two_pop(grp_a, grp_b, t,
+                         basis_type="bspline", nbasis=7,
+                         n_perm=n_perm, seed=3)
+adj_p = np.asarray(res_itp["adjusted_pvalues"])
+
+# --- Global permutation t-test ---
+res_perm = fi.t_perm_test(grp_a, grp_b, t, n_perm=n_perm, seed=3)
+
+print(f"ITP n_basis (actual)={res_itp['n_basis']}  n_perm={res_itp['n_perm']}")
+print(f"ITP adjusted p-values: {adj_p.round(3).tolist()}")
+print(f"  (basis coefficients with adj_p <= 0.05: indices "
+      f"{[i for i, p in enumerate(adj_p) if p <= 0.05]})")
+print()
+print(f"Global permutation t-test:")
+print(f"  statistic={res_perm['statistic']:.4f}  p_value={res_perm['p_value']:.4f}  "
+      f"n_perm={res_perm['n_perm']}")
+print()
+print("ITP localises WHERE: only the coefficients spanning t∈[0.35,0.65] are flagged.")
+print("t_perm_test reports WHETHER: one global p-value for the integrated L2 distance.")
+print("FDARS_FENCE_OK")
+```
+
+---
+
 ## References
 
 1. Pini, A., and Vantini, S. (2017). "Interval-wise testing for functional data." *Journal of Nonparametric Statistics*, 29(2), 407–424. — the original ITP paper defining the closure-based interval-wise FWER control.
