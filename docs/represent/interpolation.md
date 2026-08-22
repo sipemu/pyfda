@@ -135,7 +135,7 @@ Interpolation and smoothing are both methods for representing functional observa
 | Result depends on noise level | No | Yes |
 | Appropriate when | Clean data, known design points | Noisy measurements |
 
-See [Smoothing](../../represent/smoothing.md) for P-spline and kernel smoothing alternatives.
+See [Smoothing](../learn/smoothing.md) for P-spline and kernel smoothing alternatives.
 
 ### Caveats
 
