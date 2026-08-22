@@ -151,7 +151,7 @@ handle is not returned.
 
 ### `fdars_run_method`
 
-Run any of the five supported fdars methods on a registered dataset. Returns
+Run any of the six supported fdars methods on a registered dataset. Returns
 **only** an opaque result handle and the method name — arrays never leave the
 tool boundary.
 
