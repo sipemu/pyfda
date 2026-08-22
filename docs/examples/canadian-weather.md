@@ -14,6 +14,8 @@ regression** (FOSR). We answer both with `fdars`, then close by predicting the
 temperature curve of a station that does not exist and classifying region from
 shape alone.
 
+![Canadian Weather: Regional Climate Patterns — fanova, FOSR, and region classification workflow](../assets/diagrams/ex-canadian-weather.svg){ .fdars-diagram }
+
 ## Temperature curves by region
 
 ```python exec="1" html="1" source="above"
