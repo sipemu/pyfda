@@ -216,9 +216,9 @@ Plans:
   3. Each new SVG passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
   4. Each affected examples page passes a built-site review.
 
-**Plans**: 2 plans
+**Plans**: 1/2 plans executed
 
-- [ ] 46-01-PLAN.md — Tracer (ex-canadian-weather) + canadian & andrews-wine families (9 diagrams)
+- [x] 46-01-PLAN.md — Tracer (ex-canadian-weather) + canadian & andrews-wine families (9 diagrams)
 - [ ] 46-02-PLAN.md — Tecator + monitoring + misc groups (11 diagrams)
 
 **UI hint**: yes
@@ -235,7 +235,10 @@ Plans:
   3. Each new SVG conforms to `STYLE_SPEC.md` and passes the SVGO idempotence + build-determinism CI gate.
   4. Each affected advisor page passes a built-site review.
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 47-01-PLAN.md — Author 5 method-accurate STYLE_SPEC advisor concept SVGs (python-api, mcp, providers, agent-skill, aspects) tracer-first + embed each; mcp/python-api provably LLM-free
+
 **UI hint**: yes
 
 ### Phase 48: Page Depth
@@ -279,7 +282,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 | 43. SVG Fix — learn/represent/align | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 45. SVG Fix — regression/inference | v7.0 | 1/1 | Complete    | 2026-08-22 |
-| 46. Diagram Coverage — examples | v7.0 | 0/TBD | Not started | - |
+| 46. Diagram Coverage — examples | v7.0 | 1/2 | In Progress|  |
 | 47. Diagram Coverage — advisor | v7.0 | 0/TBD | Not started | - |
 | 48. Page Depth | v7.0 | 0/TBD | Not started | - |
 | 49. Whole-Site Gate & Human Review | v7.0 | 0/TBD | Not started | - |

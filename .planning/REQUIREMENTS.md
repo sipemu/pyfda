@@ -20,7 +20,7 @@ Documentation-only quality milestone. No `fdars-core` bump, no new bindings. Req
 
 ### Diagram Coverage
 
-- [ ] **DIACOV-01**: Each of the ~21 `docs/examples/*.md` worked-example pages carries a method-accurate, STYLE_SPEC-conformant hand-authored inline concept SVG, wired into the page.
+- [x] **DIACOV-01**: Each of the ~21 `docs/examples/*.md` worked-example pages carries a method-accurate, STYLE_SPEC-conformant hand-authored inline concept SVG, wired into the page.
 - [ ] **DIACOV-02**: Each of the 5 advisor surface pages (`python-api`, `mcp`, `providers`, `agent-skill`, `aspects`) carries a method-accurate, STYLE_SPEC-conformant hand-authored inline concept SVG.
 
 ### Page Depth
@@ -63,7 +63,7 @@ Deferred, tracked but not in the current roadmap.
 | SVGFIX-02 | Phases 43, 44, 45 | Complete |
 | SVGFIX-03 | Phases 43, 44, 45 | Complete |
 | SVGFIX-04 | Phases 43, 44, 45 | Complete |
-| DIACOV-01 | Phase 46 | Pending |
+| DIACOV-01 | Phase 46 | Complete |
 | DIACOV-02 | Phase 47 | Pending |
 | DEPTH-01 | Phase 48 | Pending |
 | DEPTH-02 | Phase 48 | Pending |

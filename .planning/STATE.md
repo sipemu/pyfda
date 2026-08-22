@@ -4,17 +4,17 @@ milestone: v7.0
 milestone_name: Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
 current_phase: 46
 current_phase_name: Diagram Coverage — examples pages
-status: planning
-stopped_at: Phase 45 complete, ready to plan Phase 46
-last_updated: "2026-08-22T17:00:11.286Z"
+status: executing
+stopped_at: "Completed 46-01-PLAN.md (9 SVGs: canadian-weather tracer + 4 canadian + 4 andrews-wine)"
+last_updated: "2026-08-22T20:21:05.242Z"
 last_activity: 2026-08-22
-last_activity_desc: Phase 45 complete, transitioned to Phase 46
-state_head: a615b149e7da42e60dc9c6c8024c95b22c6ea6a7
+last_activity_desc: Phase 46 execution started
+state_head: 27647c3abf7539790ab2f74a345669bcb689886b
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 6
-  completed_plans: 4
+  total_plans: 7
+  completed_plans: 5
   percent: 50
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-22)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 45 — SVG Fix — regression / inference
+**Current focus:** Phase 46 — Diagram Coverage — examples pages
 
 ## Current Position
 
-Phase: 46 — Diagram Coverage — examples pages
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-22 — Phase 45 complete, transitioned to Phase 46
+Phase: 46 (Diagram Coverage — examples pages) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-08-22 — Phase 46 execution started
 
-Progress: [████░░░░░░] 38%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [████░░░░░░] 38%
 | Phase 43 P01 | 4m | 3 tasks | 4 files |
 | Phase 44 P01 | 507 | 3 tasks | 4 files |
 | Phase 45-svg-fix-regression-inference P01 | 159 | 3 tasks | 2 files |
+| Phase 46 P01 | 9m | 3 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ Recent decisions affecting current work:
 - [Phase 45]: scalar-on-function.svg β̂(t) inset enlarged conservatively and surfaced for Phase 49 human review
 - [Phase 45]: functional-glm.svg byte-unchanged: Gamma inverse g(μ)=1/μ confirmed correct vs src/regression_mod.rs:1091,1143 and docs md:34,36-37
 - [Phase 45]: inference-permutation-test.svg byte-unchanged: lone font-size=11 on .mono (class=12) is intentional
+- [Phase 46]: Tracer-first approach: authored ex-canadian-weather.svg end-to-end to prove the per-diagram pipeline before scaling to 8 more diagrams
+- [Phase 46]: SVG height 480 for multi-row workflows (canadian-weather, canadian-seasonal, andrews-wine*, andrews-wine-clustering, andrews-wine-qc); 300 for single-row flows
 
 ### Pending Todos
 
@@ -121,8 +124,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-22T16:54:49.202Z
-Stopped at: Phase 45 complete, ready to plan Phase 46
+Last session: 2026-08-22T20:21:05.152Z
+Stopped at: Completed 46-01-PLAN.md (9 SVGs: canadian-weather tracer + 4 canadian + 4 andrews-wine)
 Resume file: None
 
 ## Operator Next Steps
