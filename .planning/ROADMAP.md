@@ -120,7 +120,7 @@ Upgraded `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV verifi
 - [x] **Phase 43: SVG Fix — learn / represent / align** - Correct that batch on all four axes; per-section built-site review (completed 2026-08-22)
 - [x] **Phase 44: SVG Fix — analyze / monitoring / advisor** - Correct that batch on all four axes; per-section built-site review (completed 2026-08-22)
 - [x] **Phase 45: SVG Fix — regression / inference** - Correct that batch on all four axes; per-section built-site review (completed 2026-08-22)
-- [ ] **Phase 46: Diagram Coverage — examples pages** - Add a method-accurate concept SVG to each `examples/` worked-example page
+- [x] **Phase 46: Diagram Coverage — examples pages** - Add a method-accurate concept SVG to each `examples/` worked-example page (completed 2026-08-22)
 - [ ] **Phase 47: Diagram Coverage — advisor surface pages** - Add a method-accurate concept SVG to each of the 5 advisor surface pages
 - [ ] **Phase 48: Page Depth** - Extend thin v4–v6 method pages to mature structure + new offline worked examples/cross-links
 - [ ] **Phase 49: Whole-Site Gate & Human Review** - `mkdocs build --strict` green offline; per-section review + blocking human diagram method-accuracy review before close
@@ -282,7 +282,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 | 43. SVG Fix — learn/represent/align | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 45. SVG Fix — regression/inference | v7.0 | 1/1 | Complete    | 2026-08-22 |
-| 46. Diagram Coverage — examples | v7.0 | 2/2 | In Progress|  |
+| 46. Diagram Coverage — examples | v7.0 | 2/2 | Complete    | 2026-08-22 |
 | 47. Diagram Coverage — advisor | v7.0 | 0/TBD | Not started | - |
 | 48. Page Depth | v7.0 | 0/TBD | Not started | - |
 | 49. Whole-Site Gate & Human Review | v7.0 | 0/TBD | Not started | - |
