@@ -31,8 +31,8 @@ Documentation-only quality milestone. No `fdars-core` bump, no new bindings. Req
 
 ### Site Gate
 
-- [ ] **GATE-01**: Whole-site `mkdocs build --strict` is green offline after all changes.
-- [ ] **GATE-02**: Per-section review is held on the built site, and a blocking human diagram method-accuracy review passes before milestone close.
+- [x] **GATE-01**: Whole-site `mkdocs build --strict` is green offline after all changes.
+- [x] **GATE-02**: Per-section review is held on the built site, and a blocking human diagram method-accuracy review passes before milestone close.
 
 ## Future Requirements
 
@@ -68,8 +68,8 @@ Deferred, tracked but not in the current roadmap.
 | DEPTH-01 | Phase 48 | Complete |
 | DEPTH-02 | Phase 48 | Complete |
 | DEPTH-03 | Phase 48 | Complete |
-| GATE-01 | Phase 49 | Pending |
-| GATE-02 | Phase 49 | Pending |
+| GATE-01 | Phase 49 | Complete |
+| GATE-02 | Phase 49 | Complete |
 
 **Coverage:**
 

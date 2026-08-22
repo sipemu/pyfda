@@ -123,7 +123,7 @@ Upgraded `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV verifi
 - [x] **Phase 46: Diagram Coverage — examples pages** - Add a method-accurate concept SVG to each `examples/` worked-example page (completed 2026-08-22)
 - [x] **Phase 47: Diagram Coverage — advisor surface pages** - Add a method-accurate concept SVG to each of the 5 advisor surface pages (completed 2026-08-22)
 - [x] **Phase 48: Page Depth** - Extend thin v4–v6 method pages to mature structure + new offline worked examples/cross-links (completed 2026-08-22)
-- [ ] **Phase 49: Whole-Site Gate & Human Review** - `mkdocs build --strict` green offline; per-section review + blocking human diagram method-accuracy review before close
+- [x] **Phase 49: Whole-Site Gate & Human Review** - `mkdocs build --strict` green offline; per-section review + blocking human diagram method-accuracy review before close (completed 2026-08-23)
 
 ## Phase Details
 
@@ -289,7 +289,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 | 46. Diagram Coverage — examples | v7.0 | 2/2 | Complete    | 2026-08-22 |
 | 47. Diagram Coverage — advisor | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 48. Page Depth | v7.0 | 2/2 | Complete    | 2026-08-22 |
-| 49. Whole-Site Gate & Human Review | v7.0 | 0/TBD | Not started | - |
+| 49. Whole-Site Gate & Human Review | v7.0 | 0/0 | Complete    | 2026-08-23 |
 
 ---
 
