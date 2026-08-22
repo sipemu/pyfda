@@ -117,7 +117,7 @@ Upgraded `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV verifi
 **Standing constraints every phase inherits:** diagrams stay hand-authored inline SVG; the SVGO idempotence + build-determinism CI gate must stay green; worked-example fences run OFFLINE against the current `fdars` API emitting `FDARS_FENCE_OK` with small data (synthetic `n ≤ 20` / subsampled datasets); the whole-site `mkdocs build --strict` must be green offline; docs phases run sequentially on `main` (NOT in worktrees — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path); a per-section review gate on the built site; a BLOCKING human diagram method-accuracy review before milestone close (the v6.0 hypograph/epigraph lesson).
 
 - [x] **Phase 42: Diagram Audit** - Score all concept diagrams on the four fix axes → ranked per-section fix list; confirm coverage-gap + thin-page lists (completed 2026-08-22)
-- [ ] **Phase 43: SVG Fix — learn / represent / align** - Correct that batch on all four axes; per-section built-site review
+- [x] **Phase 43: SVG Fix — learn / represent / align** - Correct that batch on all four axes; per-section built-site review (completed 2026-08-22)
 - [ ] **Phase 44: SVG Fix — analyze / monitoring / advisor** - Correct that batch on all four axes; per-section built-site review
 - [ ] **Phase 45: SVG Fix — regression / inference** - Correct that batch on all four axes; per-section built-site review
 - [ ] **Phase 46: Diagram Coverage — examples pages** - Add a method-accurate concept SVG to each `examples/` worked-example page
@@ -266,7 +266,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 42. Diagram Audit | v7.0 | 1/1 | Complete    | 2026-08-22 |
-| 43. SVG Fix — learn/represent/align | v7.0 | 1/1 | In Progress|  |
+| 43. SVG Fix — learn/represent/align | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 0/TBD | Not started | - |
 | 45. SVG Fix — regression/inference | v7.0 | 0/TBD | Not started | - |
 | 46. Diagram Coverage — examples | v7.0 | 0/TBD | Not started | - |
