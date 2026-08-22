@@ -75,14 +75,14 @@
 
   <text class="lab" x="300" y="238" text-anchor="middle" font-size="12.5" style="fill:#555">Detection Methods</text>
 
-  <rect x="20" y="248" width="170" height="24" rx="4" fill="#FFF3E0" stroke="#E6A020" stroke-width="0.8"/>
-  <text class="lab" x="105" y="264" text-anchor="middle" font-size="10" style="fill:#B37700">depth() &#8594; low depth = outlier</text>
+  <rect x="10" y="248" width="185" height="24" rx="4" fill="#FFF3E0" stroke="#E6A020" stroke-width="0.8"/>
+  <text class="lab" x="102" y="264" text-anchor="middle" font-size="10" style="fill:#B37700">depth() &#8594; low depth = outlier</text>
 
-  <rect x="215" y="248" width="170" height="24" rx="4" fill="#F0FAF0" stroke="#2E8B57" stroke-width="0.8"/>
-  <text class="lab" x="300" y="264" text-anchor="middle" font-size="10" style="fill:#2E8B57">detect_outliers_lrt() &#8594; likelihood test</text>
+  <rect x="205" y="248" width="185" height="24" rx="4" fill="#F0FAF0" stroke="#2E8B57" stroke-width="0.8"/>
+  <text class="lab" x="297" y="264" text-anchor="middle" font-size="10" style="fill:#2E8B57">detect_outliers_lrt() &#8594; LRT</text>
 
-  <rect x="410" y="248" width="170" height="24" rx="4" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="0.8"/>
-  <text class="lab" x="495" y="264" text-anchor="middle" font-size="10" style="fill:#7B2D8E">conformal_prediction_band() &#8594; dist-free</text>
+  <rect x="400" y="248" width="185" height="24" rx="4" fill="#F3E8FF" stroke="#7B2D8E" stroke-width="0.8"/>
+  <text class="lab" x="492" y="264" text-anchor="middle" font-size="10" style="fill:#7B2D8E">magnitude_shape() &#8594; M-S plane</text>
 
   </g>
 </svg>

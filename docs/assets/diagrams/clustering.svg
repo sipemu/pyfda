@@ -46,7 +46,7 @@
   <!-- ===== Far right: Model selection ===== -->
   <rect x="504" y="80" width="200" height="260" rx="8" fill="#F0FAF0" stroke="#2E8B57" stroke-width="1.5"/>
   <text class="lab" x="604" y="104" text-anchor="middle" font-size="15" style="fill:#2E8B57">Model Selection</text>
-  <text class="lab" x="524" y="130" font-size="13" style="fill:#2E8B57">Optimal k</text>
+  <text class="lab" x="524" y="130" style="fill:#2E8B57">Optimal k</text>
   <text class="sm" x="524" y="150" font-size="12" style="fill:#555">cluster.optim()</text>
   <text class="sm" x="524" y="174" font-size="12" style="fill:#555">&#x2022; Silhouette score</text>
   <text class="sm" x="524" y="194" font-size="12" style="fill:#555">&#x2022; Calinski-Harabasz</text>
@@ -54,7 +54,7 @@
 
   <line x1="524" y1="230" x2="684" y2="230" stroke="#2E8B57" stroke-width="0.5" opacity="0.3"/>
 
-  <text class="lab" x="524" y="254" font-size="13" style="fill:#2E8B57">Initialization</text>
+  <text class="lab" x="524" y="254" style="fill:#2E8B57">Initialization</text>
   <text class="sm" x="524" y="274" font-size="12" style="fill:#555">cluster.init()</text>
   <text class="sm" x="524" y="294" font-size="12" style="fill:#555">k-means++ for spread-out</text>
   <text class="sm" x="524" y="314" font-size="12" style="fill:#555">starting centroids</text>

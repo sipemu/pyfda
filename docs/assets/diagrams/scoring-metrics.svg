@@ -63,37 +63,37 @@
   <text class="sm" x="567" y="100" text-anchor="middle">each collapses ∫ → single scalar</text>
 
   <!-- Score rows -->
-  <g transform="translate(452, 112)">
+  <g transform="translate(452, 108)">
     <!-- MAE row -->
-    <rect x="0" y="0" width="230" height="26" rx="6" fill="#fff" stroke="#f8d7b8"/>
-    <text class="mono" x="10" y="17" fill="#fd7e14">functional_mae</text>
-    <text class="sm" x="220" y="17" text-anchor="end" fill="#495057">∫|ε| dt / n</text>
+    <rect x="0" y="0" width="230" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="mono" x="10" y="16" fill="#fd7e14">functional_mae</text>
+    <text class="sm" x="220" y="16" text-anchor="end" fill="#495057">∫|ε| dt / n</text>
 
     <!-- MSE row -->
-    <rect x="0" y="34" width="230" height="26" rx="6" fill="#fff" stroke="#f8d7b8"/>
-    <text class="mono" x="10" y="51" fill="#fd7e14">functional_mse</text>
-    <text class="sm" x="220" y="51" text-anchor="end" fill="#495057">∫ε² dt / n</text>
+    <rect x="0" y="28" width="230" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="mono" x="10" y="44" fill="#fd7e14">functional_mse</text>
+    <text class="sm" x="220" y="44" text-anchor="end" fill="#495057">∫ε² dt / n</text>
 
     <!-- EV row -->
-    <rect x="0" y="68" width="230" height="26" rx="6" fill="#fff" stroke="#f8d7b8"/>
-    <text class="mono" x="10" y="85" fill="#fd7e14">explained_variance</text>
-    <text class="sm" x="220" y="85" text-anchor="end" fill="#495057">1 − SS_res/SS_tot</text>
+    <rect x="0" y="56" width="230" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="mono" x="10" y="72" fill="#fd7e14">explained_variance</text>
+    <text class="sm" x="220" y="72" text-anchor="end" fill="#495057">1 − SS_res/SS_tot</text>
 
     <!-- Separator -->
-    <line x1="0" y1="104" x2="230" y2="104" stroke="#f8d7b8" stroke-width="1.2"/>
+    <line x1="0" y1="88" x2="230" y2="88" stroke="#f8d7b8" stroke-width="1.2"/>
 
     <!-- MAPE row — domain restriction warning -->
-    <rect x="0" y="112" width="230" height="26" rx="6" fill="#fff" stroke="#ced4da"/>
-    <text class="mono" x="10" y="129" fill="#6c757d">functional_mape</text>
-    <text class="sm" x="220" y="129" text-anchor="end" fill="#6c757d">∫|ε|/|y| dt</text>
+    <rect x="0" y="94" width="230" height="24" rx="6" fill="#fff" stroke="#ced4da"/>
+    <text class="mono" x="10" y="110" fill="#6c757d">functional_mape</text>
+    <text class="sm" x="220" y="110" text-anchor="end" fill="#6c757d">∫|ε|/|y| dt</text>
 
     <!-- MSLE row — domain restriction warning -->
-    <rect x="0" y="146" width="230" height="26" rx="6" fill="#fff" stroke="#ced4da"/>
-    <text class="mono" x="10" y="163" fill="#6c757d">functional_msle</text>
-    <text class="sm" x="220" y="163" text-anchor="end" fill="#6c757d">∫(log1p diff)² dt</text>
+    <rect x="0" y="122" width="230" height="24" rx="6" fill="#fff" stroke="#ced4da"/>
+    <text class="mono" x="10" y="138" fill="#6c757d">functional_msle</text>
+    <text class="sm" x="220" y="138" text-anchor="end" fill="#6c757d">∫(log1p diff)² dt</text>
 
     <!-- Domain restriction note -->
-    <text class="sm" x="0" y="185" fill="#dc3545">⚠ MAPE: rejects |y_true| ≈ 0</text>
-    <text class="sm" x="0" y="200" fill="#dc3545">⚠ MSLE: rejects values ≤ −1</text>
+    <text class="sm" x="0" y="154" fill="#dc3545">⚠ MAPE: rejects |y_true| ≈ 0</text>
+    <text class="sm" x="0" y="167" fill="#dc3545">⚠ MSLE: rejects values ≤ −1</text>
   </g>
 </svg>
