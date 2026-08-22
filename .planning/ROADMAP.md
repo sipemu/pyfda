@@ -118,7 +118,7 @@ Upgraded `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no `linalg`; MSRV verifi
 
 - [x] **Phase 42: Diagram Audit** - Score all concept diagrams on the four fix axes → ranked per-section fix list; confirm coverage-gap + thin-page lists (completed 2026-08-22)
 - [x] **Phase 43: SVG Fix — learn / represent / align** - Correct that batch on all four axes; per-section built-site review (completed 2026-08-22)
-- [ ] **Phase 44: SVG Fix — analyze / monitoring / advisor** - Correct that batch on all four axes; per-section built-site review
+- [x] **Phase 44: SVG Fix — analyze / monitoring / advisor** - Correct that batch on all four axes; per-section built-site review (completed 2026-08-22)
 - [ ] **Phase 45: SVG Fix — regression / inference** - Correct that batch on all four axes; per-section built-site review
 - [ ] **Phase 46: Diagram Coverage — examples pages** - Add a method-accurate concept SVG to each `examples/` worked-example page
 - [ ] **Phase 47: Diagram Coverage — advisor surface pages** - Add a method-accurate concept SVG to each of the 5 advisor surface pages
@@ -270,7 +270,7 @@ Phases execute in numeric order: 42 → 43 → 44 → 45 → 46 → 47 → 48 �
 |-------|-----------|----------------|--------|-----------|
 | 42. Diagram Audit | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 43. SVG Fix — learn/represent/align | v7.0 | 1/1 | Complete    | 2026-08-22 |
-| 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 1/1 | In Progress|  |
+| 44. SVG Fix — analyze/monitoring/advisor | v7.0 | 1/1 | Complete    | 2026-08-22 |
 | 45. SVG Fix — regression/inference | v7.0 | 0/TBD | Not started | - |
 | 46. Diagram Coverage — examples | v7.0 | 0/TBD | Not started | - |
 | 47. Diagram Coverage — advisor | v7.0 | 0/TBD | Not started | - |
