@@ -156,8 +156,16 @@ A docs-only quality pass (no crate bump, no new bindings, no advisor logic chang
 **Plans**: 3 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 50-01-PLAN.md — Compat pre-flight (isolated first commit): anthropic <1.0 pin, mcp v2 server+3-tool load smoke, version-independent guard-sync test on 3.9 (COMPAT-01..03)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 50-02-PLAN.md — Tracer (ITP detection+localisation) + PACE-FPCA / elastic-multinomial grounded scalars + extended primers, guard-sync no-op (ASPECT-01..04)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 50-03-PLAN.md — Cross-provider grounding: new aspects added to offline aspect×provider matrix + env-gated live coverage (ASPECT-05)
 
 ### Phase 51: Comparative Method-Selection

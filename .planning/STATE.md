@@ -1,14 +1,19 @@
 ---
 gsd_state_version: 1.0
 milestone: v8.0
-milestone_name: Advisor — New Capabilities
-status: planning
-last_updated: "2026-08-23T19:30:00.000Z"
+milestone_name: "Advisor: New Capabilities"
+current_phase: 50
+current_phase_name: Deferred Advisor Aspects (+ compat pre-flight)
+status: executing
+stopped_at: v8.0 roadmap created (Phases 50–54; ROADMAP.md + REQUIREMENTS.md traceability written)
+last_updated: "2026-08-23T21:03:09.120Z"
 last_activity: 2026-08-23
+last_activity_desc: v8.0 roadmap created (Phases 50–54; 27/27 requirements mapped)
+state_head: 8a00960ba02b6e60d19c9ff3a39e1cb8bac14e04
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 3
   completed_plans: 0
   percent: 0
 ---
@@ -24,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 
 ## Current Position
 
-Phase: 50 of 54 (Deferred Advisor Aspects — first v8.0 phase)
+Phase: 50 (Deferred Advisor Aspects (+ compat pre-flight)) — READY TO EXECUTE
 Plan: — (roadmap created; ready to plan Phase 50)
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-08-23 — v8.0 roadmap created (Phases 50–54; 27/27 requirements mapped)
 
 Progress: [░░░░░░░░░░] 0%
