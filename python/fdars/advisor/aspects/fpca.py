@@ -133,7 +133,12 @@ def _build_fpca_diagnostics(raw: dict) -> dict:
         if fl is not None and fu is not None:
             fl_arr = np.asarray(fl, dtype=float)
             fu_arr = np.asarray(fu, dtype=float)
-            diag["pace_mean_prediction_band_width"] = float((fu_arr - fl_arr).mean())
+            # WR-01: guard empty/mismatched arrays — .mean() would yield NaN,
+            # and json.dumps emits bare NaN (invalid JSON) into the LLM prompt.
+            if fl_arr.size == 0 or fl_arr.shape != fu_arr.shape:
+                diag["pace_mean_prediction_band_width"] = None
+            else:
+                diag["pace_mean_prediction_band_width"] = float((fu_arr - fl_arr).mean())
         else:
             diag["pace_mean_prediction_band_width"] = None
 

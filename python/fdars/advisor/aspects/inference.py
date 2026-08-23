@@ -205,17 +205,23 @@ def _build_inference_diagnostics(raw, **kwargs) -> dict:
             diag["itp_detected_at_0.05"] = bool(itp_min_p < _ALPHA)
         else:
             diag["itp_min_adjusted_pvalue"] = None
-            diag["itp_detected_at_0.05"] = False
+            # WR-04: empty p-curve is "not applicable", not "tested, not detected".
+            diag["itp_detected_at_0.05"] = None
 
         # ---- LOCALISATION scalars ----
         sig_indices = [i for i, p in enumerate(pvalues_list) if p < _ALPHA]
         n_sig = int(len(sig_indices))
         diag["itp_n_significant_0.05"] = n_sig
 
-        if n_basis > 0:
-            diag["itp_fraction_significant_0.05"] = float(n_sig / n_basis)
+        # WR-02: derive the fraction denominator from the ACTUAL p-value array
+        # length, not the raw["n_basis"] metadata — they can disagree, producing
+        # a fraction inconsistent with the count (n_basis=0 + non-empty array gave
+        # n_sig>0 alongside fraction=0.0). Emit None when nothing was tested.
+        n_tested = len(pvalues_list)
+        if n_tested > 0:
+            diag["itp_fraction_significant_0.05"] = float(n_sig / n_tested)
         else:
-            diag["itp_fraction_significant_0.05"] = 0.0
+            diag["itp_fraction_significant_0.05"] = None
 
         # First basis index with adjusted p < alpha, or None when none significant
         diag["itp_first_significant_basis"] = int(sig_indices[0]) if sig_indices else None
