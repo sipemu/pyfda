@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v8.0
 milestone_name: "Advisor: New Capabilities"
-current_phase: 50
-current_phase_name: Deferred Advisor Aspects (+ compat pre-flight)
-status: verifying
-stopped_at: Completed 50-03-PLAN.md
-last_updated: "2026-08-23T21:31:23.962Z"
+current_phase: 51
+current_phase_name: Comparative Method-Selection
+status: planning
+stopped_at: Phase 50 complete, ready to plan Phase 51
+last_updated: "2026-08-23T21:46:55.462Z"
 last_activity: 2026-08-23
-last_activity_desc: Phase 50 execution started
-state_head: 725dfb667ae01ee938a77741d318c7ccad30ebb8
+last_activity_desc: Phase 50 complete, transitioned to Phase 51
+state_head: 09972cdafc9ef832cd2f24e44bf2b9afb3777e24
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
   completed_plans: 3
-  percent: 0
+  percent: 20
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 
 ## Current Position
 
-Phase: 50 (Deferred Advisor Aspects (+ compat pre-flight)) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-08-23 — Phase 50 execution started
+Phase: 51 — Comparative Method-Selection
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-23 — Phase 50 complete, transitioned to Phase 51
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -40,7 +40,7 @@ Progress: [░░░░░░░░░░] 0%
 
 **Velocity:**
 
-- Total plans completed: 0 (this milestone); prior: 9 (v7.0), 11 (v6.0), 11 (v5.0), 11 (v4.0), 19 across v1.0–v3.0
+- Total plans completed: 3 (this milestone); prior: 9 (v7.0), 11 (v6.0), 11 (v5.0), 11 (v4.0), 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -48,7 +48,7 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 50 | TBD | - | - |
+| 50 | 3 | - | - |
 | 51 | TBD | - | - |
 | 52 | TBD | - | - |
 | 53 | TBD | - | - |
@@ -121,7 +121,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-08-23T21:31:23.951Z
-Stopped at: Completed 50-03-PLAN.md
+Stopped at: Phase 50 complete, ready to plan Phase 51
 Resume file: None
 
 ## Operator Next Steps
