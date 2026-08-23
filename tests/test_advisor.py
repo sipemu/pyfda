@@ -324,6 +324,10 @@ class TestBuildDiagnosticsOffline:
             "pace_sigma2": None,
             "pace_variance_explained_cumulative": None,
             "pace_variance_explained_first": None,
+            # ASPECT-01 extra PACE scalars (Phase 50) — None for standard FPCA input
+            "pace_noise_signal_ratio": None,
+            "pace_truncated_rank_flagged": None,
+            "pace_mean_prediction_band_width": None,
         }
 
         actual = build_diagnostics(fpca_fixture, method="fpca")
