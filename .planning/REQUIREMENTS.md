@@ -15,10 +15,10 @@ Four new advisor capabilities built on the existing surface (no new runtime deps
 
 ### Deferred Advisor Aspects
 
-- [ ] **ASPECT-01**: the PACE-FPCA aspect emits grounded scalars (noise/signal `sigma2` ratio, truncated-rank flag, mean prediction-band width) computed from fdars `pace_fpca` results
-- [ ] **ASPECT-02**: the elastic-multinomial aspect emits grounded classification scalars (e.g. overfitting gap, class-count flag) computed from fdars results
-- [ ] **ASPECT-03**: the ITP interval-inference aspect reduces the vector-valued p-curve to grounded **detection AND localisation** scalars (min adjusted p-value; count + proportion of significant intervals; first significant basis; detected-at-0.05) — never a single misleading scalar
-- [ ] **ASPECT-04**: `_ASPECT_PRIMERS` extended for the three aspects; grounding invariant + guard-sync preserved in atomic commits; diagnostics offline-deterministic with native float/int (no numpy scalars)
+- [x] **ASPECT-01**: the PACE-FPCA aspect emits grounded scalars (noise/signal `sigma2` ratio, truncated-rank flag, mean prediction-band width) computed from fdars `pace_fpca` results
+- [x] **ASPECT-02**: the elastic-multinomial aspect emits grounded classification scalars (e.g. overfitting gap, class-count flag) computed from fdars results
+- [x] **ASPECT-03**: the ITP interval-inference aspect reduces the vector-valued p-curve to grounded **detection AND localisation** scalars (min adjusted p-value; count + proportion of significant intervals; first significant basis; detected-at-0.05) — never a single misleading scalar
+- [x] **ASPECT-04**: `_ASPECT_PRIMERS` extended for the three aspects; grounding invariant + guard-sync preserved in atomic commits; diagnostics offline-deterministic with native float/int (no numpy scalars)
 - [ ] **ASPECT-05**: `advise()` returns grounded interpretation for each new aspect, verified across providers (offline grounding matrix + env-gated live)
 
 ### Comparative Method-Selection
@@ -88,10 +88,10 @@ Which phases cover which requirements. Populated during roadmap creation.
 | COMPAT-01 | Phase 50 | Complete |
 | COMPAT-02 | Phase 50 | Complete |
 | COMPAT-03 | Phase 50 | Complete |
-| ASPECT-01 | Phase 50 | Pending |
-| ASPECT-02 | Phase 50 | Pending |
-| ASPECT-03 | Phase 50 | Pending |
-| ASPECT-04 | Phase 50 | Pending |
+| ASPECT-01 | Phase 50 | Complete |
+| ASPECT-02 | Phase 50 | Complete |
+| ASPECT-03 | Phase 50 | Complete |
+| ASPECT-04 | Phase 50 | Complete |
 | ASPECT-05 | Phase 50 | Pending |
 | COMPARE-01 | Phase 51 | Pending |
 | COMPARE-02 | Phase 51 | Pending |
