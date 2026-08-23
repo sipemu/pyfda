@@ -1,151 +1,149 @@
 # Project Research Summary
 
-**Project:** pyfda v6.0 — fdars-core 0.20.0 → 0.23.0 upgrade (Regression, PACE-FPCA/Classification, Depth/Outliers/Interval Inference)
-**Domain:** PyO3 binding-layer upgrade (Rust functional-data-analysis crate → Python `fdars` package)
-**Researched:** 2026-08-20
+**Project:** pyfda — Advisor: New Capabilities (v8.0)
+**Domain:** Grounded AI advisor over a functional-data-analysis library (FDA + LLM interpretation)
+**Researched:** 2026-08-23
 **Confidence:** HIGH
 
 ## Executive Summary
 
-pyfda v6.0 is a **binding-layer upgrade** exposing fdars-core 0.23's new capabilities across three independent functional groups, following the exact shape of the v4.0 (0.17) and v5.0 (0.20) upgrade milestones: crate bump as an isolated regression gate → three parallel binding groups → advisor extension → docs. The bump itself is low-risk — `git diff v0.20.0 v0.23.0 -- fdars-core/Cargo.toml` shows only the version string changed, the transitive dependency graph is additive-only, MSRV actually *drops* to 1.81 (below pyfda's own 1.83 pin), and `linalg` stays off and unneeded (it still gates only `ridge_regression_fit` and still wants Rust 1.84+). No new Python extras, no new dataset files, no CI-matrix changes.
+The v8.0 milestone adds four capabilities to the existing, shipped grounded FDA advisor: (1) filling deferred diagnostic aspects (PACE-FPCA, elastic-multinomial, ITP interval-inference), (2) comparative method-selection with deterministic ranking, (3) pipeline diagnostic aggregation across FDA stages, and (4) closed-loop auto-tuning with LLM-proposed parameter changes. All four build entirely on the existing stack — **zero new runtime dependencies**. Everything sits above or extends the existing `build_diagnostics` / `advise` / Provider-protocol surface plus the MCP tool layer.
 
-Risk concentrates in **new-binding correctness**, not the upgrade. The dominant novelty is Group B's `pace_fpca`, which takes `&IrregFdata` — a CSR-layout sparse-observation type with no existing Python binding precedent; it needs a new `src/pace_fpca_mod.rs` and a lists-of-arrays Python builder (a plain 2D numpy array compiles but silently produces wrong results). Everything else extends existing `*_mod.rs` files through the established `numpy2d_to_fdmatrix`/`fdmatrix_to_numpy2d` round-trip. Secondary risks are the familiar pyfda hazards: column-major transposition (esp. `beta_curve` shaped `(p, m)` not `(n_obs, m)`), `#[non_exhaustive]` enums needing wildcard arms plus matching Python string maps, the v5.0 CR-01 negative-label guard recurring in `elastic_multinomial`, and preserving the advisor grounding invariant (reduce ITP p-value curves / outlier index vectors to grounded scalars, never numpy aggregates).
+The build strategy is **foundation-first**: deferred aspects first (they unblock richer, more accurate diagnostics for every later LLM call), then comparative selection and pipeline aggregation (no loop logic — straightforward extensions of the `build_diagnostics` + `advise` pattern), then closed-loop auto-tuning as the capstone (the only structurally novel component: a `_tuning.py` loop core, new schema types, and a new MCP tool). The two hard invariants hold throughout: the **grounding invariant** (fdars computes every number; the LLM only interprets/cites and proposes parameters) and the **MCP-LLM-free compute boundary**.
 
-Two scope gray areas surfaced for planning/discuss to resolve: (1) whether the outlier detectors get a **new** advisor aspect vs extend the existing `outliers` aspect (Architecture said no new aspect keys; Features suggested a new aspect #15) — either way this closes the v5.0 Phase-34 functional-boxplot-outlier deferral; and (2) whether PACE-FPCA gets any advisor treatment or is **bindings + docs only** (Features judged its grounding surface insufficient).
+The primary execution risk is subtle boundary violations rather than missing functionality: LLM text re-entering the numeric path, provenance collapse in aggregated/comparative diagnostic dicts, a misleading scalar reduction of the vector-valued ITP result, and non-terminating/oscillating auto-tune loops. Each has a known, codebase-grounded mitigation (structured `parameter_delta` field, per-stage/namespaced keys, detection+localisation ITP scalars, `max_steps` + convergence/oscillation checks, injectable advisor for offline testability). Two blocking compatibility fixes on the *existing* surface must land before new work: pin `anthropic>=0.72.0,<1.0` (1.0 drops Python 3.9) and fix the `mcp` v2 import path; also make the guard-sync test Python-3.9-independent.
 
 ## Key Findings
 
 ### Recommended Stack
 
-Single-line change: `fdars-core = { version = "0.23.0", features = ["parallel"] }` (from `0.20.0`). Keep `parallel`, do **not** enable `linalg`. Rebuild via maturin; the ~560-test suite is the regression gate. See `STACK.md` for the full verdict.
+No new runtime dependency is justified. All four capabilities are built on the existing Provider protocol (`advisor/providers/`) + Pydantic 2 schemas + plain Python orchestration. An agent framework would break the provider-agnostic + LLM-free-compute invariants and is an explicit anti-add. See `STACK.md`.
 
-**Core technologies (unchanged):**
-- fdars-core 0.23.0 (`parallel` only) — the compute engine; bump is additive/non-breaking
-- PyO3 0.28 (abi3-py39) + numpy 0.28 crate — binding boundary; all new functions bind through it
-- maturin — build backend; no config change
-- MkDocs Material + markdown-exec — docs with executed offline `FDARS_FENCE_OK` fences
+**Core technologies (all already present):**
+- **Provider protocol + 4 adapters** (Anthropic / OpenAI / Gemini / Ollama): the LLM proposal/narration path — reused as-is.
+- **Pydantic 2 `BaseModel`**: structured LLM outputs; add `Optional` fields/schemas (`parameter_delta` on `Recommendation`; `TuneProposal`/`TuneResult`/`TuningTrace`) — backward-compatible only if optional.
+- **`mcp` SDK (stdio)**: new agentic tools follow the existing sync-handler pattern; boundary stays LLM-free.
+- **pytest (offline + env-gated)**: the entire eval strategy — no eval framework, no LLM-judge in CI.
+
+**Blocking compat fixes on the existing surface (do first):**
+- Pin `anthropic>=0.72.0,<1.0` — anthropic 1.0.0 (2026-08-20) drops Python 3.9, renames `output_format`→`output_config`, moves to httpx2. fdars is abi3-py39. Full 1.0 migration deferred out of v8.0.
+- `mcp` v2.0.0 import rename (`mcp.server.fastmcp.FastMCP` → `mcp.server.mcpserver.MCPServer`); decorator API unchanged.
+- Make `test_diagnostics_methods_match_advisor_supported` Python-3.9-independent (currently skipped on the CI baseline, so guard-sync drift can slip through).
 
 ### Expected Features
 
-See `FEATURES.md` for full signatures and result-struct field lists.
+See `FEATURES.md`. Grounding invariant respected in all four: every new scalar is computed from arrays fdars already returns; the LLM never infers a numeric value.
 
-**Group A — Regression (extend `fdars.regression`):**
-- `concurrent_regression` / `ConcurrentRegrResult` — varying-coefficient regression; input `predictors: list[np.ndarray]` (slice-of-matrices); `beta_curve` is `(p, m)`
-- `functional_glm` / `FunctionalGlmResult` (15 fields) — exponential-family GLM (Binomial/Poisson/Gamma/Gaussian) via IRLS over FPC scores; re-fits FPCA internally; Gamma uses inverse canonical link 1/μ (document; AIC not comparable to R `glm()`)
+**Must have (table stakes):**
+- Deferred aspects — grounded scalars for PACE-FPCA (`sigma2_ratio`, `ncomp_truncated`, `mean_band_width`), elastic-multinomial (`overfitting_gap`, `n_classes_flag`), and ITP (see Critical Pitfalls — detection + localisation scalars together).
+- Comparative selection — fdars-computed sort determines the winner; the LLM narrates only.
+- Pipeline report — N `build_diagnostics` calls + one `advise` over stage-prefixed (flat, not nested) diagnostics.
+- Auto-tuning — `max_steps` required; structured `parameter_delta` (not parsed from prose); shared loop core.
 
-**Group B — FPCA & Classification:**
-- `pace_fpca` / `PaceFpcaConfig` / `PaceFpcaResult` (10 fields incl. per-curve confidence bands) — sparse/irregular PACE FPCA; **new `IrregFdata` input** (two lists-of-1D-arrays per curve); no existing dense dataset works → synthetic inline fence data
-- `elastic_multinomial` / `ElasticMultinomialResult` — OvR K-class extension of existing `elastic_logistic`; requires 0-indexed contiguous labels (CR-01 guard); phoneme.csv (subsample to 3 classes, m ≤ 64) drives the fence
+**Should have (differentiators):**
+- Cross-stage signal detection in the pipeline report (e.g. high `imputed_fraction` → caveat for downstream FPCA).
+- Optional guard diagnostics in auto-tuning (watch non-target metrics to catch Goodhart degradation).
 
-**Group C — Depth / Outliers / Interval Inference:**
-- 9 new `DepthMethod` variants (HypographIndex, ModifiedHypographIndex, EpigraphIndex, HalfRegion, ModifiedHalfRegion, Extremal, ExtremeRankLength, LInfinity, TotalVariation) — extend the v5.0 `functional_depth` dispatcher (→ 13 methods total)
-- 4 outlier detectors (`tvdmss`, `muod`, `sequential_transform_outliers`, `depthgram`) extending `fdars.outliers` — closes the v5.0 Phase-34 deferral
-- 3 interval-wise tests (`itp_one_pop`, `itp_two_pop`, `itp_flm`) / `ItpResult` extending `fdars.inference`; returns **vector** (closure-adjusted) p-values → needs a new `itp_result_to_pydict` distinct from `test_result_to_pydict`
-
-**Defer / out of scope:** `linalg`-gated `ridge_regression_fit`; HEAD's 0.24-bound work (FAM, mixed models, FoF-RE) — not in 0.23.
+**Anti-features (explicitly out):**
+- An MCP tool that calls `advise()` internally (breaks LLM-free boundary).
+- LLM-chosen comparative winner or weighted single-score aggregation.
+- LLM text directly setting fdars parameters.
 
 ### Architecture Approach
 
-See `ARCHITECTURE.md`. Mirrors v5.0 exactly. **1 new Rust file** (`src/pace_fpca_mod.rs`) because of the `IrregFdata` input; **6 extended files** (`regression_mod.rs`, `classification_mod.rs`, `depth_mod.rs`, `outliers_mod.rs`, `inference_mod.rs`, `lib.rs`). Five new result-struct→PyDict helpers following the canonical `test_result_to_pydict()` pattern. Four enum dispatch patterns need forward-compatible wildcard arms **and** Python string maps: `DepthMethod` (extend), `GlmFamily`, `SeqTransform`, `ProjectionBasisType`.
+See `ARCHITECTURE.md`. The deferred aspects are nearly done at the diagnostics layer — `fpca.py`/`classification.py` already have detection branches; the genuine gaps are a few PACE-FPCA fields, a new ITP vector→scalar reduction branch in `inference.py`, and two `_ASPECT_PRIMERS` entries. **Guard-sync is a no-op for all four capabilities** — none add a new `build_diagnostics` method slot, so `_DIAGNOSTICS_METHODS` does not change (atomic commits still apply per capability). Comparative + pipeline are new orchestration/aggregation layers over existing primitives. Auto-tuning is the only novel core.
 
 **Major components:**
-1. Crate bump + regression gate — `Cargo.toml` one-liner, `cargo build`, ~560-test suite
-2. Three parallel binding groups (A/B/C) — thin `#[pyfunction]`s + PyDict converters + transposition guards
-3. Advisor extension — existing aspect builders detect new result-dict keys; grounded scalar diagnostics; MCP `_DIAGNOSTICS_METHODS` guard-sync in a single atomic commit
-4. Docs — new pages + method-accurate hand-authored inline SVGs + offline `FDARS_FENCE_OK` fences
+1. **Extended aspect builders** (`fpca.py`, `classification.py`, `inference.py`, `_prompts.py`) — deferred-aspect scalars + primers.
+2. **`compare_methods()` + "comparison" task family + `fdars_compare_methods` MCP tool** — deterministic ranking, labeled candidates.
+3. **`build_pipeline_report()` / `pipeline_report()` + "pipeline" task family + MCP tool** — per-stage isolation, stage-prefixed keys.
+4. **`_tuning.py` loop core (shared) + `auto_tune()` Python API + `fdars_auto_tune` MCP tool** — Python API uses LLM proposal; MCP tool uses heuristic proposal (LLM-free); one core via injectable `proposal_fn`/`advisor_fn`.
 
 ### Critical Pitfalls
 
-Top items from `PITFALLS.md` (20 total: 13 binding + 7 advisor/docs):
+Top items from `PITFALLS.md` (13 total, all codebase-derived):
 
-1. **`beta_curve` transposition** — shape `(p, m)`, not the pyfda-standard `(n_obs, m)`; add a multi-predictor (`p ≥ 2`) transposition guard test (v4.0 Phase 27 pattern).
-2. **`IrregFdata` passed as a 2D array** — compiles but silently wrong; build `irreg_fdata_from_lists(argvals_list, values_list)` before any PACE binding work.
-3. **`elastic_multinomial` negative/non-contiguous labels** — `i64→usize` wraps to `usize::MAX` (v5.0 CR-01); add the label guard → helpful `ValueError`.
-4. **`DepthMethod`/`SeqTransform` dispatcher gaps** — Rust catches missing wildcard arms, but NOT missing Python string mappings for the 9 new depth variants / SeqTransform sequence.
-5. **ITP determinism + numpy-scalar leak** — permutation seed must default to 0 for offline determinism; reduce `ItpResult` vectors to `float()` (not `np.float64`) for JSON/grounding.
-6. **Advisor grounding for new aspects** — store scalar counts / score ranges / p-value extrema, never raw index lists or numpy aggregates; land aspect builder + MCP guard in one atomic commit.
+1. **ITP misleading scalar reduction** — `adjusted_pvalues` is a numpy array (per basis function). Emit detection AND localisation: `min_adjusted_pvalue`, `n_significant_intervals`, `proportion_significant`, `first_significant_basis`, `detected_at_0.05`. A lone `min_p` makes the LLM treat local significance as global. (Phase 50)
+2. **MCP LLM-free boundary violation** — no new MCP tool may call `advise()`. The LLM client orchestrates existing tools; the `fdars_auto_tune` tool uses a heuristic proposal. (Phase 53)
+3. **Provenance collapse in aggregated dicts** — `_check_grounding` does a flat numeric scan and can't tell which stage a value came from. Never `{**diag_a, **diag_b}`; use per-stage `Advice` calls or namespaced keys. (Phases 51 & 52)
+4. **Guard-sync drift + Python-3.9-skipped test** — make the guard-sync test version-independent; keep `_ASPECT_PRIMERS`/`build_diagnostics`/`_DIAGNOSTICS_METHODS` changes atomic. (Phase 50)
+5. **Auto-tune non-termination / oscillation / Goodhart** — `max_steps` required and enforced at the orchestrator; history + convergence check; optional guard diagnostics; injectable advisor so the whole loop is offline-testable without an API key. (Phase 53)
 
 ## Implications for Roadmap
 
-Suggested structure continues numbering from v5.0's Phase 35 → **starts at Phase 36**. Six phases, same shape as v4.0/v5.0.
+Based on research, suggested phase structure (foundation-first; phase numbering continues from v7.0 → starts at **Phase 50**):
 
-### Phase 36: Crate bump + regression gate
-**Rationale:** Isolate the sole (near-zero) numeric change on a green baseline before any new bindings, so binding-correctness issues can't hide behind an upgrade regression (v4.0/v5.0 precedent).
-**Delivers:** `Cargo.toml` 0.20.0 → 0.23.0, maturin rebuild, full ~560-test suite green.
-**Avoids:** enabling `linalg` (still Rust 1.84+); MSRV verified 1.81 ≤ 1.83.
+### Phase 50: Deferred Advisor Aspects (Foundational)
+**Rationale:** Lowest risk; extends existing builders; unblocks richer/accurate diagnostics for every later LLM call. Must not be merged into a later phase. Folds in the blocking compat fixes (anthropic pin, mcp import, version-independent guard-sync test) as a pre-flight.
+**Delivers:** PACE-FPCA scalars, ITP vector→scalar reduction (detection + localisation), elastic-multinomial review + `overfitting_gap`, extended `_ASPECT_PRIMERS`.
+**Addresses:** deferred-aspect table stakes.
+**Avoids:** ITP misleading reduction (count+fraction+min together), guard-sync drift (atomic commit + version-independent test), primer over-claiming.
 
-### Phase 37: Group A — Regression bindings
-**Rationale:** Standard extension of `fdars.regression`; independent of B and C.
-**Delivers:** `concurrent_regression` + `functional_glm` + `GlmFamily` dispatch + PyDict converters.
-**Avoids:** `beta_curve (p,m)` transposition bug; documents Gamma inverse link + AIC caveat.
+### Phase 51: Comparative Method-Selection
+**Rationale:** Builds on Phase 50's stable diagnostics; independent of pipeline/auto-tuning; no loop logic.
+**Delivers:** `compare_methods()` API, deterministic ranking, "comparison" task family, `fdars_compare_methods` MCP tool.
+**Uses:** existing `build_diagnostics` + `advise` + Provider protocol.
+**Avoids:** incommensurable comparison (method-match enforcement), wrong-run citation (labeled-candidate structure).
 
-### Phase 38: Group B — FPCA & Classification bindings
-**Rationale:** Contains the one novel input pattern; do `elastic_multinomial` first, then `pace_fpca` after the `IrregFdata` builder is settled.
-**Delivers:** new `src/pace_fpca_mod.rs` (IrregFdata builder + `pace_fpca`) + `elastic_multinomial` with CR-01 label guard.
-**Research flag:** IrregFdata Python constructor interface — resolve at plan/discuss time.
+### Phase 52: Pipeline Diagnostic Report
+**Rationale:** Extends the Phase 51 pattern to the multi-stage case; proves per-stage isolation — a prerequisite for the capstone.
+**Delivers:** `build_pipeline_report()` aggregator, `pipeline_report()` API, "pipeline" task family, MCP tool.
+**Avoids:** provenance collapse (per-stage `Advice` OR namespaced keys, never flat merge).
 
-### Phase 39: Group C — Depth / Outliers / Interval Inference bindings
-**Rationale:** Largest pitfall surface; extend depth dispatcher (trivial match) → outlier detectors → ITP (new converter).
-**Delivers:** 9 depth variants, 4 outlier detectors, 3 ITP functions + `ProjectionBasisType`/`SeqTransform` dispatch + `itp_result_to_pydict`.
-**Research flag:** audit `outliers_mod.rs` for existing seed parameter.
+### Phase 53: Closed-Loop Auto-Tuning (Capstone)
+**Rationale:** Most complex; depends on Phases 50–52 for stable surfaces; introduces orchestration/convergence/guard logic.
+**Delivers:** `_tuning.py` loop core (shared by Python API + MCP), `auto_tune()` API (LLM proposal), `fdars_auto_tune` MCP tool (heuristic, LLM-free), `TuningTrace`/`TuneProposal`/`TuneResult` schemas + `Recommendation.parameter_delta`, "parameter_proposal" task family.
+**Avoids:** non-termination (`max_steps`), numeric fabrication (structured `parameter_delta` + dedicated loop system prompt), Goodhart (guard diagnostics), oscillation (history+convergence), non-determinism (injectable advisor), MCP boundary (heuristic-only MCP tool).
 
-### Phase 40: Advisor extension
-**Rationale:** Depends on the binding groups; grounded diagnostics need the shipped result dicts.
-**Delivers:** existing aspect builders (regression, fpca, classification, outliers, inference) detect new result keys and emit grounded scalar diagnostics; MCP guard-sync single atomic commit. Closes the Phase-34 boxplot-outlier deferral.
-**Research flag:** finalize outlier scalar spec (n_outliers, fraction, score ranges); resolve the two scope gray areas (new outliers aspect vs extend; PACE advisor treatment or defer).
-
-### Phase 41: Docs
-**Rationale:** Depends on shipped bindings + advisor.
-**Delivers:** new dedicated pages + method-accurate hand-authored inline SVGs (depth asymmetry, PACE irregular observations, ITP closure direction) + offline `FDARS_FENCE_OK` worked examples (canadian_weather, tecator, phoneme, synthetic PACE/ITP data); whole-site `mkdocs build --strict` green.
-**Avoids:** slow build — PACE/ITP fences use n ≤ 20 synthetic data; keep total build under ~25 min.
+### Phase 54: Eval Strategy + Docs Gate
+**Rationale:** Eval signals should be defined alongside the capstone, not after; docs + human review close the milestone (v7.0 standard).
+**Delivers:** deterministic diagnostic-improvement + grounding-pass eval fixtures (env-gated LLM tests only); new docs pages + method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green; blocking human diagram review.
 
 ### Phase Ordering Rationale
-
-- Bump-first isolates numeric risk on a green baseline (proven in v4.0/v5.0).
-- Groups A/B/C are mutually independent (distinct `*_mod.rs` files) → parallelizable, ~3× wall-clock over sequential.
-- Advisor after bindings (needs the result dicts); docs last (needs both).
+- Deferred aspects are foundational — later capabilities target and narrate the diagnostics they add.
+- Comparative → pipeline → auto-tuning is a strict complexity/dependency gradient; each reuses the prior surface. Per-stage isolation proven in pipeline is a prerequisite for the loop.
+- Ordering keeps the two invariants defendable at every step (guard-sync no-op; heuristic MCP tool last).
+- Exact phase count/split (e.g. whether eval is its own phase or folds into 53/54) is the roadmapper's call.
 
 ### Research Flags
-
 Phases likely needing deeper research during planning:
-- **Phase 38:** `IrregFdata` list-of-arrays PyO3 binding pattern — no pyfda precedent.
-- **Phase 40:** advisor outlier scalar spec + the two scope gray areas.
+- **Phase 53 (Auto-tuning):** complex interaction of termination/oscillation/guard conditions; the loop orchestrator is the hardest piece. Recommend `gsd-plan-phase --research-phase` to stress-test convergence guarantees, param-range spec, and the static-allowlist-vs-kwargs MCP param schema decision.
 
-Phases with standard patterns (lighter planning):
-- **Phases 36, 37, 39:** established bump/binding/dispatcher patterns from v4.0/v5.0.
+Phases with standard patterns (skip research-phase):
+- **Phase 50:** follows the proven v6.0 Phase 40 aspect-extension pattern.
+- **Phase 51:** standard champion/candidate leaderboard pattern.
+- **Phase 52:** standard ETL-style aggregation pattern.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Read from `git show v0.23.0:fdars-core/Cargo.toml`; single-field diff; MSRV/linalg verified |
-| Features | HIGH | All signatures, result fields, enum variants read directly from v0.23.0 source |
-| Architecture | HIGH | File-by-file changes mapped; patterns match v5.0 precedents |
-| Pitfalls | HIGH | 20 pitfalls from v0.23.0 source + v4.0/v5.0 code-review reports (CR-01, WR-01, WR-02) |
+| Stack | HIGH | MCP v2.0 import + anthropic 1.0 Python-3.9 removal web-verified; zero-new-deps validated against existing surface |
+| Features | HIGH | Derived from direct codebase read + v6.0 Phase 40 deferral notes; result shapes read from Rust bindings/tests |
+| Architecture | HIGH | Direct source read of all advisor/MCP modules; guard-sync rules from v4/v5/v6 precedents |
+| Pitfalls | HIGH | All 13 from codebase patterns + MEMORY history + direct code inspection (not generic ML advice) |
 
-**Overall confidence:** HIGH. Main risk is execution complexity (IrregFdata + four enum dispatchers + three parallel groups), not research uncertainty.
+**Overall confidence:** HIGH
 
 ### Gaps to Address
-
-- **IrregFdata Python builder interface** (Phase 38): recommend `fdars.irreg_fdata_from_lists(argvals_list, values_list)`; confirm at plan time (MEDIUM — no existing PyO3 precedent in pyfda).
-- **`outliers_mod.rs` seed audit** (Phase 39): confirm whether outlier detectors expose a seed; add for deterministic offline tests.
-- **Advisor outlier scalar spec** (Phase 40): finalize exact grounded diagnostics.
-- **Advisor scope gray areas** (Phase 40): (1) new `outliers` aspect vs extend existing; (2) PACE advisor treatment vs bindings+docs only.
-- **Docs fence performance** (Phase 41): PACE/ITP fences use n ≤ 20 synthetic; keep build < ~25 min.
+- **Auto-tune convergence decision tree** — exact interaction of termination conditions unspecified; handle in Phase 53 planning/research.
+- **Auto-tune param spec** — heuristic proposal grid width/steps per method; static allowlist vs `**kwargs` for the MCP tool; whether the 6 `_RUNNABLE_METHODS` suffice or regression/inference must become runnable; `max_steps` cost ceiling (≈20 suggested — confirm with user).
+- **ITP edge cases** — small-sample (n_basis=2) behavior; handle in Phase 50 via primer note + unit test.
+- **PACE quality scalar** — best scalar beyond `sigma2`/`ncomp` (reconstruction-quality from `fitted`?) — decide in Phase 50 plan.
+- **Comparative common denominator** — whether a shared `fdars.scoring` metric always exists for a fair method-pair comparison.
+- **Entry-point layout** — standalone functions in `advisor/__init__.py` vs a new `advisor/tasks/` sub-layer at 6+ task families.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Local fdars-core checkout `/home/simonm/projects/rust/fdars` at the **`v0.23.0` git tag** — Cargo.toml, `src/{concurrent_regression,pace_fpca,outliers}.rs`, `src/scalar_on_function/glm.rs`, `src/elastic_regression/logistic.rs`, `src/depth/*`, `src/inference/itp.rs`, `lib.rs`
-- pyfda repo — `src/{convert,lib,inference_mod,depth_mod,regression_mod,classification_mod}.rs`, `python/fdars/__init__.py`, `advisor/`, `mcp/server.py`, `Cargo.toml`, `pyproject.toml`
-- pyfda `.planning/milestones/v5.0-*` and `v4.0-*` — prior-upgrade precedent + code-review fix reports (CR-01, WR-01, WR-02)
+- Direct source read: `python/fdars/advisor/` (`__init__.py`, `_prompts.py`, `_schema.py`, aspect builders, `providers/`), `python/fdars/mcp/` (`server.py`, `_runner.py`, `_compare.py`), `src/inference_mod.rs` (`itp_result_to_pydict`).
+- `.planning/PROJECT.md`, v4.0/v5.0/v6.0 guard-sync precedents (Phases 28/34/40), MEMORY history.
+- Detailed research docs: `STACK.md`, `FEATURES.md`, `ARCHITECTURE.md`, `PITFALLS.md`.
 
 ### Secondary (MEDIUM confidence)
-- Advisor scope recommendations — analogical reasoning from v4.0/v5.0 aspect patterns; exact boundaries confirmed at discuss/plan time
-
-### Detailed research files
-- `STACK.md`, `FEATURES.md`, `ARCHITECTURE.md`, `PITFALLS.md` (all committed, v6.0)
+- PyPI + official SDK changelogs/migration guides: anthropic 1.0.0 (Python 3.9 removal, `output_format`→`output_config`), `mcp` 2.0.0 (import rename, decorator continuity).
+- AutoML/hyperparameter-tuning stopping-criteria literature (applied selectively; loop-divergence patterns).
 
 ---
-*Research completed: 2026-08-20*
+*Research completed: 2026-08-23*
 *Ready for roadmap: yes*

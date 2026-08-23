@@ -1,545 +1,354 @@
-# Feature Landscape — v6.0 fdars-core 0.23 New Bindings
+# Feature Research
 
-**Domain:** PyO3 binding layer for functional data analysis (Rust → Python)
-**Researched:** 2026-08-20
-**Source:** fdars-core v0.23.0 git tag — every signature and field enumerated directly from source
+**Domain:** FDA AI advisor — new capabilities (v8.0)
+**Researched:** 2026-08-23
+**Confidence:** MEDIUM (web sources cross-checked against existing codebase)
 
 ---
 
-## Table Stakes
+## Context: What Already Exists (Do Not Rebuild)
 
-Features that complete the expected surface of an existing submodule or close a known gap. Users of the existing `fdars` package would expect these.
+The advisor surface shipped in v2.0-v6.0:
+- `build_diagnostics(result, method)` — offline, deterministic, 14 aspects
+- `advise(diagnostics, task, ...)` — grounded LLM call, 3 task families + `describe_cluster_differences`
+- 4 providers (Anthropic / OpenAI / Gemini / Ollama), provider-agnostic
+- MCP: 3 tools — `fdars_build_diagnostics`, `fdars_run_method` (6 methods), `fdars_compare_run` (before/after delta); provably LLM-free compute path
+- `_ASPECT_PRIMERS` dict + `_system_prompt(task, aspect)` for per-aspect FDA context
+- `HandleRegistry` with opaque result/dataset handles (by-reference invariant)
+
+All four v8.0 capabilities build on this surface. Nothing below requires rebuilding it.
+
+---
+
+## Capability A — Fill Deferred Advisor Aspects
+
+Three methods were deliberately deferred in v6.0 with minimal or no advisor coverage:
+- **PACE-FPCA** (`fpca.py` has stubs: `has_pace_fpca`, `pace_ncomp`, `pace_sigma2`, `pace_variance_explained_cumulative` — but no quality flags, no band-width diagnostics, no noise-ratio signal, no aspect primer)
+- **elastic-multinomial** (`classification.py` has stubs: `has_elastic_multinomial`, `train_accuracy`, `train_error_rate` — but no aspect primer extension, no OvR-class-balance signal)
+- **ITP interval-inference** (the inference aspect uses a scalar `p_value` path — but ITP returns vector `adjusted_pvalues`/`raw_pvalues`; the vector is unreachable through the current inference builder, which only handles `TestResult`-scalar and `ToleranceBand` shapes)
+
+### Table Stakes
+
+Features that must exist for each deferred aspect to be usable:
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| New `DepthMethod` variants in `functional_depth` / `functional_boxplot` dispatcher | v5.0 introduced the dispatcher with 4 variants; 9 new variants are already in the core enum at v0.23 | Low per variant — dispatcher pattern already exists | Wildcard arm already present; just extend the `depth_method_from_str` match |
-| `tvdmss` outlier detector in `fdars.outliers` | Closes the v5.0 Phase-34 deferral: functional boxplot ships but its natural downstream outlier method (TVD-MSS) did not | Medium — two config structs, four-field result dict | Depends on `total_variation_depth_1d` already in `fdars.depth` |
-| `muod` outlier detector in `fdars.outliers` | Natural companion to existing `outliergram` and `magnitude_shape_outlyingness` | Low — single config float, six-field result dict | No upstream depth dependency; pure regression on the pointwise mean |
-| `sequential_transform_outliers` in `fdars.outliers` | Completes the fdaoutlier parity set; documented alongside tvdmss/muod in the upstream module | Medium — `SeqTransform` enum string-dispatch, nested result | Depends on existing `functional_boxplot`; SeqTransform variants must be string-dispatched on the Python side |
-| `depthgram` in `fdars.outliers` | Completes the fdaoutlier parity set | Medium — 12-field result dict, two config floats | Univariate-only at v0.23; three `_d / _t / _t2` field triplets are identical for p=1 |
-| `itp_one_pop`, `itp_two_pop`, `itp_flm` in `fdars.inference` | Interval-wise testing is the natural follow-on to the v5.0 permutation tests; same module | Medium — `ProjectionBasisType` string-dispatch, five-field result dict | Same `TestResult`-to-dict pattern as v5.0, but `ItpResult` is a different struct with `adjusted_pvalues`/`raw_pvalues` arrays instead of scalars |
-| `concurrent_regression` in `fdars.regression` | Varying-coefficient FDA regression is a standard FDA method; no existing equivalent in `fdars.regression` | Medium — slice-of-matrices input (Python: list of 2D arrays), five-field result dict | Most structurally novel input shape: `predictors` is `&[FdMatrix]` -> Python `list[np.ndarray]` |
+| PACE-FPCA: `sigma2_ratio` scalar | Noise-to-signal ratio is the primary PACE quality signal — sigma2/eigenvalues[0] > 0.5 means noise dominates; LLM cannot interpret PACE result without it | LOW | Computed from existing `pace_sigma2` and `eigenvalues[0]` already present in result dict |
+| PACE-FPCA: `ncomp_truncated` flag | When actual `ncomp` < requested, rank deficiency occurred; advisor must flag this | LOW | `ncomp_actual != ncomp_requested`; needs `ncomp_requested` passed via kwargs to `build_diagnostics` |
+| PACE-FPCA: `mean_band_width` scalar | Average (fitted_upper - fitted_lower) width across all n curves on work grid; measures prediction uncertainty | LOW | Computable from `fitted_upper` and `fitted_lower` arrays already in result dict; `np.mean(fitted_upper - fitted_lower)` |
+| PACE-FPCA: aspect primer in `_ASPECT_PRIMERS` | LLM needs FDA context for PACE-specific scalars (sigma2_ratio, BLUP, band width) | LOW | Add "pace_fpca" key to `_ASPECT_PRIMERS` in `_prompts.py` |
+| elastic-multinomial: `n_classes_flag` | OvR schemes scale quadratically; flag when n_classes > 3 as "many-class OvR" | LOW | `n_classes` already emitted; boolean flag |
+| elastic-multinomial: `overfitting_gap` | Gap between train_accuracy and CV accuracy; indicates generalization quality | LOW | `overfitting_gap = train_accuracy - (1 - cv_error_rate)` when both present; else None |
+| elastic-multinomial: aspect primer extension | Current "classification" primer covers elastic_multinomial briefly but lacks OvR-specific context | LOW | Extend existing "classification" entry in `_ASPECT_PRIMERS` |
+| ITP: vector-to-scalar reduction builder | New builder branch in `_build_inference_diagnostics` that handles ITP result shape (keys: `adjusted_pvalues`, `raw_pvalues`, `basis_type`, `n_basis`, `n_perm`) | MEDIUM | Detect ITP shape by presence of `adjusted_pvalues` array key; process as numpy, emit plain Python types |
+| ITP: `min_adjusted_pvalue` scalar | Global detection signal — minimum of adjusted p-value curve; answers "is there any difference?" | LOW | `float(np.min(adjusted_pvalues))` |
+| ITP: `n_significant_intervals` at alpha=0.05 | Localisation count — how many basis intervals are significant; answers "how widespread?" | LOW | `int(np.sum(adjusted_pvalues < 0.05))` |
+| ITP: `proportion_significant` scalar | Fractional localisation — n_significant / n_basis; scale-free across different nbasis choices | LOW | `n_significant_intervals / n_basis` |
+| ITP: `first_significant_basis` index | Onset localisation — index of first significant basis component; answers "where does it start?" | LOW | Index of first element where `adjusted_pvalues < 0.05`; None when none significant |
+| ITP: `detected_at_0.05` boolean | Primary detection flag; answers whether ANY basis interval is significant at alpha=0.05 | LOW | `bool(min_adjusted_pvalue < 0.05)` |
+| ITP: aspect primer for ITP path | Current "inference" primer is calibrated to scalar TestResult, not vector ITP p-curves | LOW | Extend "inference" primer or add "itp" key; explain detection vs localisation distinction |
 
-## Differentiators
-
-Features that require a new submodule or a structurally new approach, distinguishing this milestone from routine extension.
+### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| `pace_fpca` / `PaceFpcaConfig` / `PaceFpcaResult` — new submodule | PACE FPCA is the only FDA method for sparse/irregular data; no existing equivalent in `fdars` | High — `IrregFdata` CSR format must be exposed at the Python boundary (ragged list-of-lists input), two-struct config+result, nine-field result | `IrregFdata` has no prior Python-side representation; creates a new Python input pattern |
-| `functional_glm` in `fdars.regression` | Exponential-family GLM over FPC scores; covers Binomial/Poisson/Gamma/Gaussian responses; closes a gap vs. the existing binary-only `functional_logistic` | Medium-High — family string-dispatch, optional scalar covariates, 15-field result dict + predict function | Internal IRLS, re-fits FPCA internally; the `family` string must dispatch to `GlmFamily` enum |
-| `elastic_multinomial` in `fdars.classification` | OvR multinomial elastic classifier extending the existing binary `elastic_logistic`; completes the classification surface for K >= 2 | Medium — five-field result dict, `class_models` as a Python list of per-class dicts | `class_models: Vec<ElasticLogisticResult>` requires nested dict serialisation; `train_probabilities` FdMatrix -> 2D ndarray |
+| PACE-FPCA: bandwidth sensitivity signal | If sigma2_ratio is high AND mean_band_width is large, both signals jointly indicate poor bandwidth calibration — compound flag | LOW | Derived from two already-computed scalars; no additional fdars call |
+| PACE-FPCA: reconstruction quality via fitted vs raw | Mean L2 norm of (fitted - observed) on work grid as a reconstruction diagnostic | MEDIUM | Requires matching sparse observed points to work-grid positions — non-trivial alignment; low priority for v8.0 |
+| ITP: `max_consecutive_significant` | Length of longest run of consecutive significant basis intervals — distinguishes localised spike from broad region | LOW | Single pass over bool array; high interpretive value for FDA narratives |
+| elastic-multinomial: `class_confidence_gap` | Mean(max per-row probability) - second-highest; measures decision confidence | HIGH | Requires `class_models` which is excluded from binding (Phase 38 CR-01); defer |
 
-## Anti-Features
+### Anti-Features
 
-Features to explicitly not build in v6.0.
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| PACE: reconstruct FVE via numerical integration | Users want same FVE metric as standard FPCA for direct comparison | pace_fpca eigenvalues are pre-scaled; re-deriving FVE via numerical integration in Python would drift from Rust implementation | Use `pace_variance_explained_cumulative` from existing `_eigenvalues_to_variance_cumulative` helper already wired in fpca.py stubs |
+| ITP: report raw_pvalues as primary signal | Raw (pre-closure-adjustment) p-values look more significant | Reporting unadjusted p-values violates the ITP's designed interval-wise error control | Emit `raw_pvalues_min` as a secondary scalar with a clearly labelled "unadjusted" caveat; never present as primary detection signal |
+| ITP: LLM decides which intervals are significant | LLM narrative about specific intervals sounds richer | LLM fabricating specific interval locations violates the grounding invariant | Emit `first_significant_basis` and `n_significant_intervals` as grounded integers; LLM cites these |
+| elastic-multinomial: per-class accuracy breakdown | Detailed per-class report is more informative | Requires `class_models` excluded from binding (Phase 38 CR-01); rebuilding would need a binding change | Use `train_accuracy` + `n_classes` to derive expected per-class accuracy under uniform distribution as a baseline comparison |
 
-| Anti-Feature | Why Avoid | What to Do Instead |
-|--------------|-----------|-------------------|
-| HTTP/SSE MCP transport | Still deferred per PROJECT.md decision | Keep stdio only; not related to v6.0 scope |
-| `predict_pace_fpca` prediction for new sparse curves | Not present in v0.23 API; PACE predicts on the training set only | Document fitted/lower/upper on the training set; defer prediction to a future milestone if upstreamed |
-| Automatic sigma2 estimation in PACE FPCA | Upstream defers auto-estimation: "Automatic sigma2 estimation from the raw-vs-smoothed diagonal is deferred" (pace_fpca.rs doc comment) | Caller supplies `sigma2`; document the choice |
-| `linalg` feature (ridge_regression_fit) | Requires Rust 1.84+ > MSRV 1.83; not WASM-compatible | Keep `parallel`-only at v0.23 |
-| Gamma family AIC comparison to R `glm()` | Module doc explicitly warns AIC magnitudes are not directly comparable (dispersion phi not folded in) | Document the divergence in the worked example |
-| `serde` feature in pyfda builds | Not currently enabled; would add weight with no Python-side benefit | Not needed for PyO3 dict output |
+### Feature Dependencies (Capability A)
+
+```
+ITP vector shape detection (inference.py new branch)
+    +-enables-> min_adjusted_pvalue, n_significant_intervals, proportion_significant
+                    +-enables-> detected_at_0.05, first_significant_basis
+                                    +-enables-> ITP aspect primer (meaningful text)
+
+PACE stubs already present (fpca.py)
+    +-augmented-by-> sigma2_ratio, ncomp_truncated, mean_band_width
+                         +-enables-> PACE aspect primer (meaningful text)
+
+elastic_multinomial stubs already present (classification.py)
+    +-augmented-by-> overfitting_gap, n_classes_flag
+                         +-enables-> extended classification primer
+```
+
+**Existing advisor components used:**
+- `_build_inference_diagnostics` in `inference.py` — add ITP branch; detected by `adjusted_pvalues` key
+- `_build_fpca_diagnostics` in `fpca.py` — augment `has_pace_fpca` branch with new scalars
+- `_build_classification_diagnostics` in `classification.py` — augment `has_elastic_multinomial` branch
+- `_ASPECT_PRIMERS` in `_prompts.py` — extend "inference", "fpca" (PACE), "classification" entries
+- `_DIAGNOSTICS_METHODS` guard in `server.py` — no change needed (ITP uses existing "inference" method)
+
+**Grounding constraint:** all new scalars computed from arrays already returned by fdars (adjusted_pvalues, eigenvalues, fitted_upper/fitted_lower); no LLM inference about specific values.
 
 ---
 
-## Detailed Capability Specifications
+## Capability B — Comparative Method-Selection
 
-### Group A — Regression
+A recommender that runs multiple candidate fdars methods on the same data, builds diagnostics for each, then ranks and picks among them with grounded justification.
 
-#### A1. `concurrent_regression` -> `ConcurrentRegrResult`
+**How comparable tools work:** ML leaderboards and champion/candidate frameworks share: (1) run all candidates on same data, record per-metric scores; (2) rank per metric; (3) pick winner on primary metric; (4) justify by citing the winning value and the margin over the runner-up; (5) flag ties and near-ties; (6) note when no single method dominates.
 
-**Public function at v0.23.0:**
+**LLM role:** narrate WHY the winner is better, citing fdars-computed margins. Winner selection is deterministic (sort on primary metric); the LLM only provides explanation.
 
-```rust
-pub fn concurrent_regression(
-    response: &FdMatrix,       // n x m functional response
-    predictors: &[FdMatrix],   // p matrices each n x m
-    argvals: Option<&[f64]>,   // length m; None -> uniform 0..1
-    bandwidth: f64,            // kernel bandwidth for beta(t) smoothing
-    kernel: &str,              // "gaussian" | "epanechnikov" | "tricube"
-) -> Result<ConcurrentRegrResult, FdarError>
-```
+### Table Stakes
 
-**`ConcurrentRegrResult` fields (all `#[non_exhaustive]`):**
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| `compare_methods(dataset_id, methods, primary_metric, ...)` entry point | Single call orchestrating multi-run comparison; reuses `_runner.run_method` + `build_diagnostics` per candidate | MEDIUM | Returns `{"candidates": [...], "ranking": [...], "winner": str, "margin": float}` |
+| Per-candidate diagnostics dict in result | Each candidate's full diagnostics available for LLM citation and user inspection | LOW | List of `{"method": str, "diagnostics": dict, "primary_metric_value": float, "rank": int}` |
+| Deterministic winner selection on primary_metric | Winner chosen by sort on primary_metric; LLM does NOT choose the winner | LOW | `sorted(candidates, key=lambda c: c["diagnostics"][primary_metric])` with direction flag (lower/higher better) |
+| `margin_to_next` scalar | Margin between each candidate and the next-ranked on primary_metric | LOW | `candidates[i+1][metric] - candidates[i][metric]` after sorting; enables "FPC-LM beats PLS by X" |
+| `advise_comparison(comparison_result, domain_context, ...)` LLM call | Grounded LLM narration of the comparison; passes full comparison result as diagnostics | MEDIUM | Wraps `advise()` with `task="comparison"`; new task family in `_prompts.py` |
+| "comparison" task family in `_system_prompt` | Task clause instructing LLM to cite winner, margin, runner-up; never invent rankings | LOW | Add to `_supported_tasks`; instruct LLM to cite the `winner` field and `margin_to_next` scalar |
+| MCP tool `fdars_compare_methods` | Agentic surface; takes method list + primary_metric; returns comparison result dict; LLM-free compute path | MEDIUM | New tool in `server.py`; restricted to `_RUNNABLE_METHODS`; orchestrates run+diagnostics per candidate |
 
-| Field | Rust type | Meaning |
-|-------|-----------|---------|
-| `beta_curve` | `FdMatrix` (p x m) | Smoothed varying-coefficient curves beta_k(t), one row per predictor |
-| `intercept` | `Vec<f64>` (length m) | Smoothed time-varying intercept beta_0(t) |
-| `fitted` | `FdMatrix` (n x m) | Fitted functional response curves |
-| `residuals` | `FdMatrix` (n x m) | response - fitted |
-| `argvals` | `Vec<f64>` (length m) | Shared grid used (echoed from input or uniform) |
+### Differentiators
 
-**Python dict layout (proposed):**
-- `beta_curve` -> ndarray (p, m)
-- `intercept` -> ndarray (m,)
-- `fitted` -> ndarray (n, m)
-- `residuals` -> ndarray (n, m)
-- `argvals` -> ndarray (m,)
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Multi-metric ranking | Shows per-metric rankings so users see trade-offs (best cv_error may have worse explained_variance) | LOW | Already possible once comparison result includes all diagnostics; just surface per-metric rank |
+| Tie detection threshold | Flag when margin < user-defined threshold as "effectively tied" — prevents overconfident picks | LOW | One comparison against threshold param; emit `is_tie: bool` |
+| No-winner flag | When no single method wins on primary AND all secondary metrics simultaneously | LOW | Check if same method ranks 1st across all; emit `has_clear_winner: bool` |
 
-**Input shape:** Python-side `predictors` will be `list[np.ndarray]` -> convert each element via `numpy2d_to_fdmatrix`, collect into `Vec<FdMatrix>`.
+### Anti-Features
 
-**Validation errors:** n < 2, n <= p (underdetermined), any predictor shape != (n, m), bandwidth <= 0 or non-finite, argvals length mismatch.
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| LLM-chosen winner | "Let the AI pick the best method" | Violates grounding invariant; LLM can hallucinate rankings | Winner always determined by deterministic sort on fdars-computed primary_metric scalar; LLM cites the rank |
+| Multi-objective weighted aggregation into single score | Reduces comparison to one number for simplicity | Weights are user-domain choices; hides trade-offs; creates false confidence | Present per-metric rankings and flag the primary-metric winner; no aggregated score |
+| Comparing diagnostics-only methods | Those methods produce richer diagnostics | Diagnostics-only methods (regression, classification) need caller-supplied inputs (labels, y, reference) that the coordinator cannot supply at run-time | Restrict comparison to `_RUNNABLE_METHODS` (6 methods); diagnostics-only methods can be added by caller as pre-computed diagnostics |
 
-**Category:** Table stakes for `fdars.regression` extension. Adds varying-coefficient regression where both response and predictors are functional (same grid). No new submodule needed.
-
-**Dependency on existing bindings:** None beyond `numpy2d_to_fdmatrix` / `fdmatrix_to_numpy2d` converters already in `convert.rs`.
-
-#### A2. `functional_glm` -> `FunctionalGlmResult`
-
-**Public function at v0.23.0:**
-
-```rust
-pub fn functional_glm(
-    data: &FdMatrix,                         // n x m functional predictors
-    y: &[f64],                               // scalar response length n
-    family: GlmFamily,                       // Binomial | Poisson | Gamma | Gaussian
-    scalar_covariates: Option<&FdMatrix>,    // n x q optional scalar predictors
-    ncomp: usize,                            // FPC components (clamped to min(n-1, m))
-    max_iter: usize,                         // IRLS max iterations
-    tol: f64,                                // IRLS convergence tolerance (deviance-change)
-) -> Result<FunctionalGlmResult, FdarError>
-```
-
-**`GlmFamily` variants (not `#[non_exhaustive]` — exhaustive at v0.23):**
-- `Binomial` — logit link, binary y in {0.0, 1.0}
-- `Poisson` — log link, non-negative integer y
-- `Gamma` — inverse link (canonical, NOT log), y > 0
-- `Gaussian` — identity link, converges in one IRLS step
-
-**`FunctionalGlmResult` fields (all `#[non_exhaustive]`):**
-
-| Field | Rust type | Meaning |
-|-------|-----------|---------|
-| `intercept` | `f64` | Intercept alpha |
-| `beta_t` | `Vec<f64>` (m) | Functional coefficient beta(t) on the original grid |
-| `beta_se` | `Vec<f64>` (m) | Pointwise standard errors of beta(t) |
-| `gamma` | `Vec<f64>` (q) | Scalar covariate coefficients (empty if no scalar_covariates) |
-| `fitted_values` | `Vec<f64>` (n) | Fitted means mu = g^{-1}(eta) |
-| `linear_predictors` | `Vec<f64>` (n) | Linear predictors eta = X*beta |
-| `ncomp` | `usize` | FPC components actually used |
-| `coefficients` | `Vec<f64>` | All regression coefficients [intercept, gamma_1...gamma_K, z_1...z_P] |
-| `std_errors` | `Vec<f64>` | Standard errors of all coefficients |
-| `log_likelihood` | `f64` | Log-likelihood kernel at convergence |
-| `deviance` | `f64` | GLM deviance D = 2(LL_saturated - LL_fitted) |
-| `iterations` | `usize` | IRLS iterations performed |
-| `fpca` | `FpcaResult` | Embedded FPCA for new-data projection (does NOT cross Python boundary) |
-| `aic` | `f64` | -2*log_likelihood + 2*p |
-| `bic` | `f64` | -2*log_likelihood + p*ln(n) |
-| `family` | `GlmFamily` | Family used |
-
-**Python dict layout (proposed):** Keys: `intercept`, `beta_t`, `beta_se`, `gamma`, `fitted_values`, `linear_predictors`, `ncomp`, `coefficients`, `std_errors`, `log_likelihood`, `deviance`, `iterations`, `aic`, `bic`, `family` (as string). The embedded `fpca` is consumed internally for predict and NOT exposed to Python — same pattern as `flm_f_test` / `flm_gof_test` in v5.0 `inference_mod.rs`, where `FregreLmResult` never crosses the Python boundary.
-
-**`family` Python API:** string parameter (`"binomial"`, `"poisson"`, `"gamma"`, `"gaussian"`) dispatched to `GlmFamily` enum in the wrapper, returning `ValueError` on unknown strings.
-
-**Re-fits internally:** Yes — FPCA is re-fit from `data` inside `functional_glm`. No fitted handle needed from the caller. Same internal-refit pattern as `flm_f_test`.
-
-**AIC comparability caveat:** Gamma and Gaussian AIC magnitudes are NOT comparable to R `glm()` because phi is not folded into the log-likelihood kernel. Must be documented in the worked example.
-
-**Category:** Differentiator — closes the gap between binary-only `functional_logistic` (already bound) and full exponential-family GLM. Extends `fdars.regression`.
-
-**Dependency on existing bindings:** Reuses `numpy2d_to_fdmatrix`, `numpy1d_to_vec`. The optional `scalar_covariates` adds a second optional 2D array parameter — same pattern used by `fregre_lm` with `scalar_covariates`.
-
----
-
-### Group B — FPCA & Classification
-
-#### B1. `pace_fpca` / `PaceFpcaConfig` / `PaceFpcaResult`
-
-**Public function at v0.23.0:**
-
-```rust
-pub fn pace_fpca(
-    data: &IrregFdata,
-    config: &PaceFpcaConfig,
-) -> Result<PaceFpcaResult, FdarError>
-```
-
-**`IrregFdata` — how sparse/irregular input works:**
-
-`IrregFdata` is a CSR-like (Compressed Sparse Row) struct with three flat `Vec<f64>` fields and an `offsets: Vec<usize>` of length n+1. Curve i has evaluation points `argvals[offsets[i]..offsets[i+1]]` and values `values[offsets[i]..offsets[i+1]]`. Each curve can have a different number of points (ragged per-curve grids — NOT a shared dense grid). The public constructor is `IrregFdata::from_lists(argvals_list: &[Vec<f64>], values_list: &[Vec<f64>])`.
-
-**Python-side input model:** The Python wrapper must accept two Python lists of 1D ndarrays (one per curve), convert each to a `Vec<f64>`, then call `IrregFdata::from_lists`. This is a new input shape with no prior pyfda precedent — it is NOT a 2D ndarray.
-
-**`PaceFpcaConfig` fields (no `#[non_exhaustive]` — allows struct literal in tests):**
-
-| Field | Type | Default | Meaning |
-|-------|------|---------|---------|
-| `ncomp` | `usize` | 3 | FPC components to extract |
-| `bandwidth` | `f64` | 0.1 | Kernel bandwidth for mean/covariance smoothing |
-| `sigma2` | `f64` | 0.01 | Measurement-error variance (must be > 0; required for Sigma_yi positive-definite) |
-| `work_grid` | `Vec<f64>` | 51 uniform points on [0,1] | Common evaluation grid for all outputs |
-| `alpha` | `f64` | 0.05 | Confidence level for bands (95% pointwise bands) |
-
-**Python constructor:** Config struct is not `#[non_exhaustive]`, so the wrapper exposes it as keyword arguments that are converted field-by-field.
-
-**`PaceFpcaResult` fields (all `#[non_exhaustive]`):**
-
-| Field | Rust type | Python shape | Meaning |
-|-------|-----------|-------------|---------|
-| `mean` | `Vec<f64>` (m) | ndarray (m,) | Kernel-smoothed mean on the work grid |
-| `eigenvalues` | `Vec<f64>` (ncomp) | ndarray (ncomp,) | Variance explained per component |
-| `eigenfunctions` | `FdMatrix` (m x ncomp) | ndarray (m, ncomp) | Orthonormal eigenfunctions on the work grid |
-| `scores` | `FdMatrix` (n x ncomp) | ndarray (n, ncomp) | BLUP (conditional-expectation) FPC scores |
-| `fitted` | `FdMatrix` (n x m) | ndarray (n, m) | Fitted trajectories on the work grid |
-| `fitted_lower` | `FdMatrix` (n x m) | ndarray (n, m) | Lower pointwise confidence band |
-| `fitted_upper` | `FdMatrix` (n x m) | ndarray (n, m) | Upper pointwise confidence band |
-| `argvals` | `Vec<f64>` (m) | ndarray (m,) | Work grid used (echoed from config) |
-| `sigma2` | `f64` | float | Measurement-error variance used |
-| `ncomp` | `usize` | int | Components actually extracted (may be < config.ncomp if fewer positive eigenvalues) |
-
-**Result ncomp note:** `result.ncomp` may be less than `config.ncomp` when the smoothed covariance yields fewer positive eigenvalues than requested — a finite-sample artefact on sparse data. The binding must echo `result.ncomp` in the dict, not assume it matches the input.
-
-**Validation errors:** n=0, any curve has < 2 points, work_grid < 2 points, ncomp=0, bandwidth <= 0 or non-finite, sigma2 <= 0 or non-finite, alpha not in (0,1), work_grid not sorted or contains non-finite values. Computation errors: `mean_irreg` returns non-finite values, no positive eigenvalues, Cholesky solve fails.
-
-**Category:** Differentiator — the only FDA method for sparse/irregular longitudinal data in `fdars`. Requires a new Python input format (`IrregFdata` via list-of-lists). Belongs in a dedicated `fdars.pace_fpca` submodule (separate from `fdars.regression`) given the structurally different input format and the two-struct config+result pattern.
-
-**Dependency on existing bindings:** None directly, but the column-major FdMatrix layout convention applies to `eigenfunctions`, `scores`, `fitted`, `fitted_lower`, `fitted_upper` — each requires `fdmatrix_to_numpy2d` conversion with transposition. The `mean` and `argvals` Vec fields use `vec_to_numpy1d`.
-
-#### B2. `elastic_multinomial` -> `ElasticMultinomialResult`
-
-**Public function at v0.23.0:**
-
-```rust
-pub fn elastic_multinomial(
-    data: &FdMatrix,       // n x m functional data
-    y: &[usize],           // class labels in 0..K (contiguous), length n
-    argvals: &[f64],       // evaluation points, length m
-    ncomp_beta: usize,     // B-spline basis functions for beta per OvR model
-    lambda: f64,           // roughness penalty on beta
-    max_iter: usize,       // IRLS max iterations per OvR model
-    tol: f64,              // convergence tolerance
-) -> Result<ElasticMultinomialResult, FdarError>
-```
-
-**`ElasticMultinomialResult` fields (not `#[non_exhaustive]`):**
-
-| Field | Rust type | Python shape | Meaning |
-|-------|-----------|-------------|---------|
-| `n_classes` | `usize` | int | Number of classes K |
-| `classes` | `Vec<usize>` | list[int] | Sorted distinct class labels (always 0..K) |
-| `class_models` | `Vec<ElasticLogisticResult>` | list[dict] | One OvR binary model per class, with at minimum `alpha` and `beta_t` |
-| `train_probabilities` | `FdMatrix` (n x K) | ndarray (n, K) | Row-normalised OvR posteriors |
-| `predicted_classes` | `Vec<usize>` | ndarray (n,) int | Training predictions |
-| `train_accuracy` | `f64` | float | Fraction correctly classified on training data |
-
-**Label constraint:** Labels must be the contiguous range `0..K`; non-contiguous or non-zero-based labels raise `ValueError`. This must be documented.
-
-**`class_models` serialisation:** Each `ElasticLogisticResult` should be serialised as a Python dict with at minimum `alpha: float`, `beta_t: ndarray (m,)`. Full field list can be expanded in later phases if needed; a partial dict is acceptable for v6.0.
-
-**Prediction:** `predict_elastic_multinomial(fit, new_data, argvals) -> Vec<usize>` exists upstream but can be deferred for v6.0. `predicted_classes` in the training result dict is sufficient for worked examples.
-
-**Category:** Differentiator — extends `fdars.classification` to K >= 2 classes with elastic (SRSF-warping) feature extraction. The existing `elastic_logistic` binary classifier is already bound.
-
-**Dependency on existing bindings:** `numpy2d_to_fdmatrix`, `numpy1d_to_usize_vec`, `fdmatrix_to_numpy2d`. The `class_models` nested structure is new — requires manual field-by-field dict construction.
-
----
-
-### Group C — Depth / Outliers / Interval Inference
-
-#### C1. New `DepthMethod` variants in the existing dispatcher
-
-**At v0.23.0, `DepthMethod` has 9 new variants beyond the 4 already bound:**
-
-| New variant | String key (proposed) | Underlying function | Min-n constraint |
-|-------------|----------------------|---------------------|-----------------|
-| `HypographIndex` | `"hypograph_index"` | `hypograph_index_1d` | n >= 2 |
-| `ModifiedHypographIndex` | `"modified_hypograph_index"` | `modified_hypograph_index_1d` | n >= 1 |
-| `EpigraphIndex` | `"epigraph_index"` | `epigraph_index_1d` | n >= 2 |
-| `HalfRegion` | `"half_region"` | `half_region_depth_1d` | n >= 2 |
-| `ModifiedHalfRegion` | `"modified_half_region"` | `modified_half_region_depth_1d` | n >= 1 |
-| `Extremal` | `"extremal"` | `extremal_depth_1d` | n >= 3 |
-| `ExtremeRankLength` | `"extreme_rank_length"` | `extreme_rank_length_depth_1d` | n >= 2 |
-| `LInfinity` | `"linfinity"` | `linfinity_depth_1d` | n >= 1 |
-| `TotalVariation` | `"total_variation"` | `total_variation_depth_1d` (TVD component only) | n >= 3 |
-
-**How they slot into the dispatcher:** The existing `depth_method_from_str` in `src/depth_mod.rs` is a `match` on a `&str` with a wildcard arm that raises `ValueError`. Adding the 9 new string variants extends that match. `functional_depth` and `functional_boxplot` both use `depth_method_from_str` so both pick up all 9 new methods for free once the match is extended. The error message listing accepted strings must also be updated.
-
-**TotalVariation note:** The dispatcher dispatches only the TVD (magnitude depth) component — not the MSS shape component. The full `TvdMssResult` (both tvd and mss) is returned by the standalone `total_variation_depth_1d` function, which is separate from the dispatcher path.
-
-**No new function parameters needed** for any of the 9 new variants — all take only `data` and `ref_data` (or just `data` for self-depth). The dispatcher already has `scale` and `nproj` for the FM/RP variants; these are unused for the new variants.
-
-**Category:** Table stakes — natural extension of the v5.0 dispatcher pattern. Zero structural change to `functional_depth` / `functional_boxplot` Python signatures.
-
-#### C2. New outlier detectors in `fdars.outliers`
-
-**tvdmss:**
+### Feature Dependencies (Capability B)
 
 ```
-tvdmss(data: &FdMatrix, config: TvdMssConfig) -> Result<TvdMssOutliers, FdarError>
+_runner.run_method (6 runnable methods, existing)
+    +-used-by-> compare_methods() orchestrator (new)
+                    +-uses-> build_diagnostics() per candidate (existing)
+                                 +-aggregates-into-> comparison_result dict (new)
+                                                         +-passed-to-> advise_comparison() (new)
+                                                                            +-uses-> advise() (existing)
+                                                                                     +-uses-> "comparison" task (new)
 ```
 
-`TvdMssConfig` fields: `emp_factor_mss: f64` (default 1.5), `emp_factor_tvd: f64` (default 1.5), `central_region_tvd: f64` (default 0.5, informational only).
-
-`TvdMssOutliers` fields -> Python dict:
-- `magnitude_outliers` -> `list[int]` (row indices)
-- `shape_outliers` -> `list[int]` (row indices)
-- `tvd` -> ndarray (n,) — total variation depth per curve
-- `mss` -> ndarray (n,) — modified shape similarity index per curve
-
-Min-n: 3 curves and >= 1 column.
-
-**muod:**
-
 ```
-muod(data: &FdMatrix, config: MuodConfig) -> Result<MuodResult, FdarError>
-```
-
-`MuodConfig` fields: `factor: f64` (default 1.5, IQR multiplier).
-
-`MuodResult` fields -> Python dict:
-- `shape_outliers` -> `list[int]`
-- `magnitude_outliers` -> `list[int]`
-- `amplitude_outliers` -> `list[int]`
-- `shape_index` -> ndarray (n,) — |corr(X_i, mu) - 1|
-- `magnitude_index` -> ndarray (n,) — |intercept_i|
-- `amplitude_index` -> ndarray (n,) — |slope_i - 1|
-
-Min-n: 3 curves, >= 2 columns.
-
-**sequential_transform_outliers:**
-
-```
-sequential_transform_outliers(
-    data: &FdMatrix,
-    sequence: &[SeqTransform],
-    config: SeqTransformConfig,
-) -> Result<SeqTransformOutliers, FdarError>
-```
-
-`SeqTransform` enum variants (to be string-dispatched on Python side):
-- `T0` -> `"t0"` (identity / raw data)
-- `T1` -> `"t1"` (vertical centering — subtract per-curve mean)
-- `T2` -> `"t2"` (L2 normalisation)
-- `D1` -> `"d1"` (lag-1 first difference)
-- `D2` -> `"d2"` (identical to D1 in this implementation)
-
-`SeqTransformConfig` fields: `depth_method: DepthMethod` (default ModifiedBand), `emp_factor: f64` (default 1.5).
-
-`SeqTransformOutliers` fields -> Python dict:
-- `per_transform_outliers` -> `list[tuple[str, list[int]]]` — (transform_name, indices) per step
-- `union_outliers` -> `list[int]` — sorted deduplicated union across all steps
-
-Python signature: `sequence` should be a `list[str]` of transform names; `depth_method` and `emp_factor` as keyword args.
-
-Note: `SeqTransformConfig` carries a `DepthMethod` (not serde-serializable — not relevant for PyO3); the Python wrapper builds it from `depth_method` string + `emp_factor` float using the existing `depth_method_from_str` helper.
-
-Min-n: 2 curves.
-
-**depthgram:**
-
-```
-depthgram(data: &FdMatrix, config: DepthgramConfig) -> Result<DepthgramResult, FdarError>
-```
-
-`DepthgramConfig` fields: `outliergram_factor: f64` (default 1.5), `boxplot_factor: f64` (default 1.5).
-
-`DepthgramResult` fields -> Python dict:
-- `mbd_mei_d` / `mbd_mei_t` / `mbd_mei_t2` -> ndarray (n,) — all identical for p=1 (univariate)
-- `mei_mbd_d` / `mei_mbd_t` / `mei_mbd_t2` -> ndarray (n,) — all identical for p=1
-- `shape_outliers` -> `list[int]`
-- `magnitude_outliers` -> `list[int]`
-- `mbd` -> ndarray (n,)
-- `mei` -> ndarray (n,)
-
-Total 12 keys. For clarity in docs, the `_d/_t/_t2` triplets can be documented as "all equal for univariate data (p=1); multivariate support is a future upstream addition".
-
-Min-n: 2 curves, >= 1 column.
-
-**Shared `iqr_fence` helper:** The `iqr_fence` function is private in `fdars-core`. It is NOT a public binding target. No Python exposure needed.
-
-**Category:** All four outlier detectors are table stakes (completing the fdaoutlier parity set that includes the already-bound LRT, outliergram, magnitude-shape). `tvdmss` closes the v5.0 Phase-34 deferral explicitly.
-
-#### C3. Interval-wise testing in `fdars.inference`
-
-**Three public functions at v0.23.0:**
-
-```rust
-pub fn itp_one_pop(
-    data: &FdMatrix,                    // n x m
-    argvals: &[f64],                    // length m
-    mu0: Option<&[f64]>,                // optional null-hypothesis mean, length m
-    basis_type: ProjectionBasisType,    // Bspline | Fourier
-    nbasis: usize,                      // >= 2; actual n_basis may differ for B-splines
-    n_perm: usize,                      // >= 1
-    seed: u64,
-) -> Result<ItpResult, FdarError>
-
-pub fn itp_two_pop(
-    data_a: &FdMatrix,                  // n_a x m
-    data_b: &FdMatrix,                  // n_b x m; same m as data_a
-    argvals: &[f64],                    // length m
-    basis_type: ProjectionBasisType,
-    nbasis: usize,
-    n_perm: usize,
-    seed: u64,
-) -> Result<ItpResult, FdarError>
-
-pub fn itp_flm(
-    data: &FdMatrix,                    // n x m functional predictors
-    y: &[f64],                          // scalar response, length n
-    argvals: &[f64],                    // length m
-    basis_type: ProjectionBasisType,
-    nbasis: usize,
-    n_perm: usize,
-    seed: u64,
-) -> Result<ItpResult, FdarError>
-```
-
-**`ItpResult` fields (all `#[non_exhaustive]`):**
-
-| Field | Rust type | Python shape | Meaning |
-|-------|-----------|-------------|---------|
-| `adjusted_pvalues` | `Vec<f64>` (n_basis) | ndarray (n_basis,) | Interval-wise closure-adjusted p-values per basis component |
-| `raw_pvalues` | `Vec<f64>` (n_basis) | ndarray (n_basis,) | Raw per-component permutation p-values (+1 correction) |
-| `basis_type` | `ProjectionBasisType` | str | `"bspline"` or `"fourier"` |
-| `n_basis` | `usize` | int | Actual basis functions used (may differ from requested `nbasis` for B-splines) |
-| `n_perm` | `usize` | int | Permutations used |
-
-**Python dict layout:** `{"adjusted_pvalues": ndarray, "raw_pvalues": ndarray, "basis_type": str, "n_basis": int, "n_perm": int}`.
-
-**`ProjectionBasisType` Python dispatch:** `"bspline"` -> `Bspline`, `"fourier"` -> `Fourier`. Unknown string -> `ValueError`. Default should be `"bspline"` (matches the R `fdatest` default).
-
-**`mu0` in `itp_one_pop`:** Python `None` maps to `Option::None` (test H_0: mu(t) = 0). Python array of length m maps to `Option::Some`.
-
-**Relationship to v5.0 `TestResult` pattern:** `ItpResult` is structurally different from `TestResult`. `TestResult` has three scalar fields (`statistic: f64`, `p_value: f64`, `n_perm: usize`). `ItpResult` has two vector fields (`adjusted_pvalues`, `raw_pvalues`) plus metadata. The mapping function must be `itp_result_to_pydict` — a NEW helper distinct from `test_result_to_pydict`. The `fdars.inference` Python module gains three new functions alongside the existing eight.
-
-**`seed` convention:** Same as v5.0 permutation tests — `seed=None` (Python) resolves to `0` (Rust) for deterministic byte-identical results; explicit integer overrides.
-
-**`itp_flm` does NOT re-fit FPCA:** Unlike `flm_f_test` / `flm_gof_test` which re-fit `fregre_lm` internally, `itp_flm` projects `data` onto a basis, then permutes the scalar response `y`. The functional predictor design matrix (basis coefficients) is computed once and reused. No FPCA re-fit.
-
-**Category:** Table stakes extension of `fdars.inference`. Same module, same PyDict output pattern (though different struct). The interval-wise adjusted p-values are novel output (vectors not scalars) but the pattern mirrors existing TestResult handling.
-
----
-
-## Feature Dependencies
-
-```
-concurrent_regression
-  -> numpy2d_to_fdmatrix (existing)
-  -> fdmatrix_to_numpy2d (existing)
-  -> vec_to_numpy1d (existing)
-
-functional_glm
-  -> numpy2d_to_fdmatrix (existing)
-  -> numpy1d_to_vec (existing)
-  -> GlmFamily string dispatch (new in wrapper)
-
-pace_fpca
-  -> IrregFdata::from_lists (new Python-side input format)
-  -> fdmatrix_to_numpy2d (existing, for eigenfunctions/scores/fitted matrices)
-  -> vec_to_numpy1d (existing)
-
-elastic_multinomial
-  -> numpy2d_to_fdmatrix (existing)
-  -> numpy1d_to_usize_vec (existing)
-  -> fdmatrix_to_numpy2d (existing, for train_probabilities)
-  -> usize_vec_to_numpy1d (existing)
-
-new DepthMethod variants
-  -> depth_method_from_str (existing, extend the match)
-  -> functional_depth / functional_boxplot (existing, unchanged signatures)
-
-tvdmss / muod / sequential_transform_outliers / depthgram
-  -> numpy2d_to_fdmatrix (existing)
-  -> vec_to_numpy1d (existing)
-  -> depth_method_from_str (existing, for SeqTransformConfig.depth_method)
-
-itp_one_pop / itp_two_pop / itp_flm
-  -> numpy2d_to_fdmatrix (existing)
-  -> numpy1d_to_vec (existing)
-  -> vec_to_numpy1d (existing)
-  -> ProjectionBasisType string dispatch (new in wrapper)
-  -> itp_result_to_pydict (new helper, analogous to test_result_to_pydict)
+HandleRegistry (existing)
+    +-used-by-> fdars_compare_methods MCP tool (new)
+                    +-restricted-to-> _RUNNABLE_METHODS
 ```
 
 ---
 
-## Advisor Extension Scope
+## Capability C — Pipeline Diagnostic Report
 
-**Where grounded diagnostics make sense:**
+A multi-aspect narrative report for an end-to-end FDA analysis, aggregating diagnostics across N pipeline stages into one Advice object.
 
-| Capability | Advisor relevance | Rationale |
-|------------|------------------|-----------|
-| `tvdmss` / `muod` / `depthgram` | HIGH — closes v5.0 Phase-34 deferral | Outlier indices + depth scores are directly interpretable grounded diagnostics; `n_outliers`, `shape_vs_magnitude` breakdown; all numbers fdars-computed |
-| `itp_*` tests | HIGH — natural extension of existing `inference` aspect (#14) | `adjusted_pvalues` array summarised as "significant interval count" + "minimum adjusted p-value" — fully grounded |
-| `concurrent_regression` | MEDIUM | Grounded: `beta_curve.argmax()` per predictor as a computed diagnostic |
-| `functional_glm` | MEDIUM | Grounded: `aic`, `deviance`, `iterations` (convergence flag) directly fdars-computed |
-| `pace_fpca` | LOW | Grounded but specialised: `eigenvalues`, `ncomp` actual vs requested; advisor would rarely reach PACE scenarios |
-| `elastic_multinomial` | LOW | `train_accuracy` is grounded but classification accuracy is already covered by existing `fclassif_*` aspects |
+**How comparable tools work:** ML pipeline report patterns include: (1) per-stage diagnostics blocks, ordered by pipeline sequence; (2) inter-stage transition signals (upstream quality affects downstream); (3) aggregated summary with overall health flag and flagged issues; (4) traceability — each cited value traceable to fdars-computed origin.
 
-**Recommended advisor scope for v6.0:** Add outlier detection as a new aspect (#15) covering `tvdmss` / `muod` / `depthgram` (closes the Phase-34 deferral). Extend existing `inference` aspect (#14) to include ITP interval significance counts. Concurrent regression and GLM can be folded into the existing `regression` aspect diagnostics (AIC, deviance as additional fields). Skip PACE and elastic_multinomial from advisor — not enough grounding surface and specialised use-case.
+**Key structural insight:** A pipeline report is N `build_diagnostics` calls (one per stage) plus one `advise` call receiving a dict-of-dicts. The LLM synthesises across stages, not just summarises each independently.
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| `build_pipeline_diagnostics(stages)` offline aggregator | Deterministic aggregation of N stage diagnostics; no LLM | LOW | `stages: list[tuple[str, dict]]` — (stage_name, diagnostics_dict); validates and assembles; preserves input order |
+| Stage ordering preserved | Report must reflect actual pipeline order (represent -> smooth -> fpca -> cluster) | LOW | Preserve input list order; do not sort alphabetically |
+| Per-stage `has_warnings` flag rollup | Boolean derived from stage-level flag scalars (e.g. `phase_leakage_flagged`, `significant_at_0.05`) | LOW | Apply per-aspect flag rules already encoded in each aspect builder |
+| `n_flagged_stages` scalar | How many stages have at least one warning flag; top-level summary scalar | LOW | `sum(s.get("has_warnings", False) for s in assembled)` |
+| `report_pipeline(stages, domain_context, ...)` LLM call | Grounded LLM narration across all stages | MEDIUM | Wraps `advise()` with `task="pipeline"` |
+| "pipeline" task family in `_system_prompt` | Task clause instructing LLM to synthesise cross-stage signals, not repeat per-stage detail | LOW | Add to `_supported_tasks` |
+| Flattened diagnostics schema for LLM context | Pipeline report sends N * 15+ keys; must be flat (not nested) to avoid LLM confusion and context size issues | MEDIUM | Flatten with stage prefixes: `represent_n_points`, `fpca_cumulative_variance_explained`, etc. |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Cross-stage signal detection (offline) | Flag when stage A quality issue likely affects stage B (e.g. high `imputed_fraction` in represent -> caveats for downstream FPCA) | MEDIUM | Hardcoded cross-stage rules; no LLM needed; adds `cross_stage_warnings: list[str]` to pipeline report |
+| Pipeline health score | Integer 0-N counting stages without warnings; quick overview | LOW | `n_stages - n_flagged_stages`; include in pipeline report |
+| MCP tool `fdars_build_pipeline_diagnostics` | Agentic surface; takes list of result_ids with stage names; LLM-free compute | MEDIUM | New tool; orchestrates `build_diagnostics` per stage; parameter schema for list of handles requires care |
+
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| LLM runs intermediate fdars steps | "Let the AI drive the whole pipeline" | Pipeline steps require user data and domain choice (which method, which parameters) that cannot be automated without human judgment | Advisor takes pre-computed stage results; user runs fdars; closed-loop auto-tuning (Capability D) handles the automation layer |
+| Single aggregated "pipeline score" | Summarises everything in one number | Hides which stages are problematic; false confidence | Provide per-stage flags + `n_flagged_stages`; let narrative synthesise |
+| Cross-stage parameter propagation | Automatically adjust downstream parameters based on upstream results | Requires domain judgment; violates LLM-free-compute constraint if applied automatically | Surface the cross-stage signal as a diagnostic; let the LLM recommend and the human apply |
+
+### Feature Dependencies (Capability C)
+
+```
+build_diagnostics (existing, per-method)
+    +-called N times-> build_pipeline_diagnostics() (new aggregator)
+                           +-passed-to-> report_pipeline() LLM call (new)
+                                             +-uses-> advise() (existing)
+                                                      +-uses-> "pipeline" task family (new)
+```
+
+**Requires Capability A first:** If deferred aspects (PACE-FPCA, elastic-multinomial, ITP) appear as pipeline stages, their grounded diagnostics must exist. Do Capability A before Capability C.
 
 ---
 
-## MVP Recommendation
+## Capability D — Closed-Loop Auto-Tuning (Capstone)
 
-**Phase ordering within v6.0:**
+Turns the existing manual recommend -> re-run -> compare loop into an autonomous, bounded loop: the advisor proposes a parameter/method change, applies it, re-runs fdars, compares diagnostics, and iterates until a target diagnostic improves or a step budget is hit. The compute path stays LLM-free; the LLM only proposes and interprets.
 
-1. **Crate bump + regression gate** — bump `fdars-core` 0.20.0 -> 0.23.0, keep `parallel`, verify the ~560-test baseline green; this is the prerequisite for everything else.
+**What applies from AutoML/HPO pattern (Optuna, Ray Tune, SMAC cross-check):**
+- Max steps hard budget (analogous to max_trials)
+- No-improvement window / patience (analogous to early stopping)
+- Oscillation guard (not present in standard HPO — specific to sequential LLM-guided loop)
+- Explicit target threshold (stop when diagnostic crosses goal value)
 
-2. **Bind all three groups in parallel** — Group A (concurrent_regression, functional_glm), Group B (pace_fpca, elastic_multinomial), Group C (depth variants + outlier detectors + ITP tests) can be worked in parallel once the crate bump is green.
+**What does NOT apply:**
+- Bayesian surrogate model (LLM is the proposal mechanism; no surrogate)
+- Parallel trial pruning (loop is sequential)
+- Multi-fidelity resource allocation (ASHA/HyperBand)
+- Surrogate expected improvement / acquisition functions
 
-3. **Advisor extension** — extend outlier detector aspect and ITP inference aspect after bindings are tested.
+### Table Stakes
 
-4. **Docs sweep** — new pages + SVGs + worked examples after advisor is in place.
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| `autotune(dataset_id, method, target_metric, *, max_steps, direction, ...)` Python API | Single call running the bounded loop; returns `AutotuneResult` | HIGH | Orchestrates: propose (LLM) -> apply (run_method) -> measure (build_diagnostics) -> compare -> repeat |
+| `max_steps` hard budget (required param) | Loop must terminate unconditionally | LOW | `step >= max_steps` check at top of each iteration; emit `stop_reason="budget_exhausted"` |
+| `target_metric` + `direction` params | User specifies which diagnostic to optimise and whether lower or higher is better | LOW | e.g. `target_metric="cv_error_rate", direction="minimize"` |
+| `target_value` optional threshold | Loop stops when target_metric reaches/crosses threshold | LOW | e.g. `target_value=0.05` — stop when cv_error_rate <= 0.05 |
+| No-improvement patience stop | Stop when target_metric does not improve by >= `min_delta` for `patience` consecutive steps | LOW | Track per-step delta history; `stop_reason="no_improvement"` |
+| Oscillation guard | Detect alternating-sign consecutive per-step deltas; halt | LOW | Track sign of last K deltas; if alternates for K >= 3 steps, halt; `stop_reason="oscillation_detected"` |
+| LLM-proposed parameter change per step | Each step: send current diagnostics to `advise(task="parameter")`; extract Recommendation with `kind="parameter"`; parse to parameter dict | HIGH | Parameter parsing from Recommendation.action is the fragile component — see pitfalls below |
+| Structured parameter delta in Recommendation schema | To avoid fragile free-text parsing, add `parameter_delta: dict[str, float | int] | None` field to `Recommendation` Pydantic model | MEDIUM | Schema change to `_schema.py`; field is optional (None for kind="none"/"method"); LLM emits structured dict |
+| Apply proposed parameter via existing runner | `run_method(dataset_id, method, **parsed_params)` using `_runner.run_method` | LOW | Reuses existing code exactly; no new compute |
+| Compare before/after via existing delta logic | `build_diagnostics` + delta from `_compare.compare_run` | LOW | Reuses `_compare.compare_run` exactly |
+| `AutotuneResult` schema | `{"history": [...], "best_params": dict, "final_diagnostics": dict, "stop_reason": str, "n_steps": int, "improved": bool}` | LOW | Pydantic or dataclass |
+| Grounding invariant preserved throughout | Every LLM call uses existing `advise()` + `_check_grounding` path; loop only adds orchestration | LOW | Coordinator calls existing code; no new LLM paths outside standard grounding guard |
 
-**Prioritise within each group:**
+### Differentiators
 
-- Group A: `concurrent_regression` before `functional_glm` (simpler result dict, no family dispatch)
-- Group B: `elastic_multinomial` before `pace_fpca` (reuses existing FdMatrix input format; PACE needs the new IrregFdata Python input pattern)
-- Group C: depth dispatcher extension before outlier detectors (one-line match extension); ITP tests after outlier detectors
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| `callback` / `yield_on_each_step` | Human-in-the-loop inspection at each step without stopping the loop | MEDIUM | Generator pattern or `callback(step, diagnostics, proposed_params) -> bool` to continue |
+| History replay in `AutotuneResult` | Full step-by-step trajectory; user can see each parameter tried and its diagnostic outcome | LOW | `history: list[{"step": int, "params": dict, "diagnostics": dict, "delta": float, "stop_signals": list}]` |
+| Best-of-history tracking | Track the best diagnostics across all steps, not just the final; useful when loop oscillates | LOW | `best_params = argmax over history on target_metric`; always returned in `AutotuneResult` |
+| Warm-start from prior result | If user has an existing result_id, skip step 0 compute | LOW | Optional `initial_result_id` param; use as step 0 without re-running |
 
-**Defer:**
-- `predict_elastic_multinomial` as a Python function — `predicted_classes` is already in the training result dict; cross-validated prediction can wait
-- Any PACE "predict on new sparse data" — not in v0.23.0 upstream API
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| LLM computes the comparison delta | "Let the AI decide if the run improved" | Violates LLM-free-compute constraint; LLM fabricating improvement deltas is exactly what grounding invariant prevents | `compare_run` (existing, deterministic) computes the delta; LLM receives the numeric delta in diagnostics |
+| Unbounded loop (no max_steps) | "Keep going until it converges" | A stuck LLM or oscillating parameter loops forever, consuming API credits | `max_steps` is a required parameter; hard-coded upper cap at 20 |
+| Bayesian surrogate model for proposals | Smarter search than asking the LLM | Mixes two proposal mechanisms; requires separate HPO infra (Optuna/SMAC) | LLM-as-proposer is the design; if richer search needed, that is a separate HPO integration milestone |
+| MCP tool `fdars_autotune` with `advise()` inside | Natural implementation puts LLM call inside the tool | Breaks MCP's LLM-free-compute contract; creates unobservable inner loop | The agentic loop over MCP is orchestrated by the LLM client calling existing tools (`fdars_run_method`, `fdars_compare_run`) in sequence; `fdars_autotune` as a single monolithic MCP tool is an anti-feature |
+
+**Critical MCP boundary clarification:** MCP tools must stay LLM-free. This means a monolithic `fdars_autotune` MCP tool cannot internally call `advise()`. The agentic loop over MCP must be orchestrated by the LLM client (the Claude agent), using the existing tools per step. The Python API `autotune()` CAN call `advise()` internally.
+
+### Feature Dependencies (Capability D)
+
+```
+autotune() Python API (new)
+    +-requires-> advise() (existing, for proposals)
+    +-requires-> _runner.run_method() (existing, for applying params)
+    +-requires-> compare_run() (existing, for delta computation)
+    +-requires-> build_diagnostics() (existing, for measuring state)
+    +-requires-> Recommendation.parameter_delta (new schema field)
+    +-produces-> AutotuneResult (new)
+
+MCP agentic loop pattern (documentation only):
+    +-orchestrated-by-> LLM client (external)
+    +-uses-> fdars_run_method (existing tool)
+    +-uses-> fdars_compare_run (existing tool)
+    +-uses-> fdars_build_diagnostics (existing tool)
+```
+
+**Sequencing:** Capability D requires Capabilities A (richer diagnostics to target) and B (awareness of method alternatives). Implement D last.
 
 ---
 
-## Worked Example Data Needs
+## Eval Strategy (Cross-Cutting)
 
-| Capability | Data needed | Available in `docs/data/`? |
-|------------|------------|--------------------------|
-| `concurrent_regression` | Functional response + >= 1 functional predictor, shared dense grid | Yes — canadian_weather (temperature as response, precipitation as predictor, 365-point grid) |
-| `functional_glm` Binomial | Binary scalar y + functional predictor | Yes — tecator (fat content thresholded at 20% -> binary; 100-column spectra) |
-| `functional_glm` Poisson | Integer count y + functional predictor | Not directly. Recommend small synthetic count data inline in the fence |
-| `functional_glm` Gamma | Positive continuous y + functional predictor | Yes — tecator (fat content as continuous positive response) |
-| `functional_glm` Gaussian | Continuous y + functional predictor | Yes — standard FLM example, same as `flm_f_test` in v5.0 docs |
-| `pace_fpca` | Sparse/irregular longitudinal curves (list-of-lists, ragged) | NO — all existing datasets are on a dense shared grid. Must generate small synthetic sparse data inline. Keep n <= 20, <= 8 points per curve so the fence runs fast |
-| `elastic_multinomial` | K >= 3 class labels + functional predictors | Yes — phoneme.csv has 5 classes (aa, ao, dcl, iy, sh) and 256 evaluation points. Subsample to 2-3 classes (e.g. "sh", "aa", "iy") and m <= 64 for fence speed |
-| new depth methods (HI/MHI/EI/HRD/MHRD/Extremal/ERL/LInf/TVD) | Dense functional sample, n >= 3 | Yes — canadian_weather temperature is the standard example |
-| `tvdmss` | Dense functional sample, n >= 3 | Yes — canadian_weather or tecator |
-| `muod` | Dense functional sample, n >= 3, >= 2 columns | Yes — same |
-| `sequential_transform_outliers` | Dense functional sample, n >= 2 | Yes — same |
-| `depthgram` | Dense functional sample, n >= 2 | Yes — same |
-| `itp_one_pop` | One functional sample + optional null mean | Yes — canadian_weather (test if mean temperature == 0, or any group) |
-| `itp_two_pop` | Two functional samples | Yes — canadian_weather split into coast/inland groups (same split used in v5.0 two-sample tests) |
-| `itp_flm` | Functional X + scalar y | Yes — tecator (fat content as scalar y + spectra as X, same as flm_f_test example) |
+### Table Stakes
 
-**Critical data note for PACE:** No existing dataset is sparse/irregular. The fence must use inline-generated synthetic data (e.g. 10 Brownian bridge curves sampled at 3-7 random points each). Keep the fence small enough that the docs build (~19 min) does not regress. The `DOCS_FAST` path must also work.
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Deterministic improvement test for auto-tuning | Given synthetic data with known optimum, verify loop terminates with better-than-initial params | LOW | Offline; no LLM key; fixed seed + known-optimum synthetic data |
+| Grounding pass rate for comparison | Given comparison result, verify winning method in Advice.recommendations matches deterministic rank winner | LOW | Offline check: `advice.recommendations[0].action` must reference the highest-ranked method name |
+| Step-count regression test | Verify auto-tuning loop terminates in <= max_steps for a standard input | LOW | Smoke test; verifies budget hard stop |
+| Oscillation detection unit test | Verify oscillation guard triggers on synthetically alternating delta sequence | LOW | Unit test; no fdars call needed |
 
-**Phoneme for elastic_multinomial:** phoneme.csv has 400 observations x 256 evaluation points x 5 classes. For the fence, subsample to 3 classes (e.g. "sh", "aa", "iy") and m <= 64 to keep SRSF warping tractable in the docs build.
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Aspect x proposal match rate (env-gated) | For each aspect, measure how often LLM's proposed parameter matches expected direction; requires LLM API key | MEDIUM | Env-gated; CI only when ANTHROPIC_API_KEY present; follows `test_aspect_provider_matrix.py` pattern |
+
+---
+
+## Feature Prioritization Matrix
+
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| ITP vector-to-scalar reduction builder | HIGH | MEDIUM | P1 — foundation for ITP advise |
+| ITP grounded scalars (min_p, n_significant, proportion, first_basis, detected_at_0.05) | HIGH | LOW | P1 — all from same vector pass |
+| PACE-FPCA sigma2_ratio + ncomp_truncated + mean_band_width | HIGH | LOW | P1 — fills the most-requested gap |
+| Aspect primer extensions (PACE, ITP, elastic-multinomial) | HIGH | LOW | P1 — required for LLM to interpret new diagnostics |
+| elastic-multinomial overfitting_gap + n_classes_flag | MEDIUM | LOW | P1 — completes the OvR picture |
+| Eval: deterministic improvement + grounding tests | HIGH | LOW | P1 — must ship with capabilities |
+| `compare_methods()` Python API | HIGH | MEDIUM | P2 — core of capability B |
+| Deterministic winner selection + rank table | HIGH | LOW | P2 — grounding constraint |
+| "comparison" task family in system prompt | HIGH | LOW | P2 — LLM narration |
+| `build_pipeline_diagnostics()` aggregator | HIGH | LOW | P2 — straightforward aggregation |
+| "pipeline" task family in system prompt | HIGH | LOW | P2 — multi-stage narration |
+| MCP `fdars_compare_methods` tool | MEDIUM | MEDIUM | P2 — extends MCP surface |
+| `autotune()` Python API core loop | HIGH | HIGH | P3 — capstone; implement last |
+| max_steps + patience + oscillation guard stops | HIGH | LOW | P3 — safety rails for autotune |
+| Recommendation.parameter_delta schema field | HIGH | MEDIUM | P3 — required for autotune param parsing |
+| Cross-stage signal detection (offline) | MEDIUM | MEDIUM | P3 — valuable but not blocking |
+| History replay in AutotuneResult | LOW | LOW | P3 — add once core loop works |
+| MCP autotune agentic orchestration pattern | MEDIUM | HIGH | P3 — complex boundary; document pattern |
+| Tie detection / no-winner flag in comparison | LOW | LOW | P3 — polish |
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| ITP vector reduction | `adjusted_pvalues` is a numpy array in raw dict; existing inference builder casts to float for scalar paths; new branch must guard against the array and keep it as numpy for scalar computations | Detect ITP shape by presence of `adjusted_pvalues` key (not by `p_value` absence alone); compute scalars with numpy, emit plain Python floats and ints |
+| PACE-FPCA ncomp_truncated | `ncomp_requested` is a call-time parameter, not in the result dict; the advisor builder only sees the result dict | Pass via `build_diagnostics(result, "fpca", ncomp_requested=N)` kwargs; emit `ncomp_truncated = bool(diag["pace_ncomp"] < ncomp_requested)` when `ncomp_requested` is present |
+| PACE-FPCA mean_band_width | `fitted_upper` and `fitted_lower` are 2D arrays shape (n, m); mean over all cells is a reasonable scalar but hides per-curve variation | Use `float(np.mean(np.asarray(fitted_upper) - np.asarray(fitted_lower)))` — document as "average pointwise band width across all observations" |
+| compare_methods parameter parsing | Only needed for autotune, not comparison; do not confuse the two | In comparison, the LLM only narrates; it does NOT propose parameters; parameter parsing is autotune-only |
+| autotune parameter parsing from LLM output | Free-text `Recommendation.action` parsing ("increase n_comp to 5") is fragile | Add `parameter_delta: dict[str, float | int] | None` field to `Recommendation` Pydantic model; LLM emits structured dict, not free text |
+| MCP autotune LLM-free boundary | Natural implementation puts `advise()` inside `fdars_autotune` MCP tool — violates LLM-free-compute contract | Do NOT put `advise()` inside a MCP tool; document the agentic pattern: LLM client orchestrates existing tools per step |
+| Pipeline report LLM context size | Full pipeline (6 stages x 15+ diagnostics) = 90+ key-value pairs; approaches context limits for smaller models | Flatten with stage prefixes (`represent_n_points`, `fpca_cumulative_variance_explained`) so LLM sees a flat dict; test with smallest supported model |
+| `_DIAGNOSTICS_METHODS` guard sync | New advisor entry points (compare_methods, report_pipeline, autotune) must stay in sync with MCP server guard | Follow the atomic-commit pattern from v4.0 Phase 28 / v5.0 Phase 34: advisor code + MCP guard update in one commit |
 
 ---
 
 ## Sources
 
-- `fdars-core v0.23.0:fdars-core/src/concurrent_regression.rs` — `ConcurrentRegrResult` fields, `concurrent_regression` signature; verified directly from `git show v0.23.0:`
-- `fdars-core v0.23.0:fdars-core/src/scalar_on_function/mod.rs` — `GlmFamily` enum, `FunctionalGlmResult` struct (all 15 fields confirmed)
-- `fdars-core v0.23.0:fdars-core/src/scalar_on_function/glm.rs` — `functional_glm` signature (7 parameters confirmed)
-- `fdars-core v0.23.0:fdars-core/src/pace_fpca.rs` — `PaceFpcaConfig` (5 fields), `PaceFpcaResult` (10 fields), `pace_fpca` signature; validation errors enumerated from source
-- `fdars-core v0.23.0:fdars-core/src/irreg_fdata/mod.rs` — `IrregFdata` CSR layout, `from_lists` constructor
-- `fdars-core v0.23.0:fdars-core/src/elastic_regression/logistic.rs` — `ElasticMultinomialResult` (6 fields), `elastic_multinomial` signature (7 parameters), label contiguity constraint
-- `fdars-core v0.23.0:fdars-core/src/depth/dispatch.rs` — `DepthMethod` enum with all 13 variants (4 existing + 9 new); `functional_depth` dispatch body
-- `fdars-core v0.23.0:fdars-core/src/depth/mod.rs` — all depth module re-exports confirming which functions are public
-- `fdars-core v0.23.0:fdars-core/src/outliers.rs` — `TvdMssConfig`, `TvdMssOutliers`, `MuodConfig`, `MuodResult`, `SeqTransform`, `SeqTransformConfig`, `SeqTransformOutliers`, `DepthgramConfig`, `DepthgramResult`; all function signatures; `iqr_fence` confirmed private
-- `fdars-core v0.23.0:fdars-core/src/inference/itp.rs` — `ItpResult` (5 fields), `itp_one_pop` / `itp_two_pop` / `itp_flm` signatures; seed convention; itp_flm basis-projection-not-FPCA confirmed
-- `fdars-core v0.23.0:fdars-core/src/inference/mod.rs` — confirmed `itp_*` functions exported from `inference`
-- `fdars-core v0.23.0:fdars-core/src/basis/projection.rs` — `ProjectionBasisType` enum (Bspline, Fourier)
-- `pyfda:src/inference_mod.rs` — `test_result_to_pydict` helper pattern; seed convention (`None -> 0`); existing 8 registered functions
-- `pyfda:src/depth_mod.rs` — `depth_method_from_str` wildcard arm; 4 existing variants; `boxplot_result_to_pydict` pattern
-- `pyfda:python/fdars/__init__.py` — submodule registration pattern; 19 existing submodules
-- `pyfda/docs/data/` — dataset inventory; phoneme classes (aa, ao, dcl, iy, sh) and wine classes (1, 2, 3) confirmed via Python csv parsing
+- Existing codebase: `/python/fdars/advisor/`, `/src/inference_mod.rs`, `/src/pace_fpca_mod.rs`, `/tests/test_pace_fpca.py`
+- PROJECT.md — v6.0 Phase 38/39/40 deferral context and binding output shapes
+- [Pini & Vantini (2016) ITP — Biometrics abstract](https://onlinelibrary.wiley.com/doi/abs/10.1111/biom.12476)
+- [fdapace FPCA documentation — BLUP scores, xiVar, sigma2](https://rdrr.io/cran/fdapace/man/FPCA.html)
+- [IWT fdatest R package — interval-wise testing reference](https://cran.r-project.org/web/packages/fdatest/fdatest.pdf)
+- [Galaxy IWTomics tutorial — localisation vs detection](https://training.galaxyproject.org/archive/2022-04-01/topics/statistics/tutorials/iwtomics/tutorial.html)
+- [Milvus AutoML stopping criteria](https://milvus.io/ai-quick-reference/how-does-automl-determine-stopping-criteria-for-training)
+- [Ray Tune key concepts — HPO stopping patterns](https://docs.ray.io/en/latest/tune/key-concepts.html)
+- [AutoML benchmark with early stopping (2025)](https://arxiv.org/abs/2504.01222)
+- [Medium: The Agent Loop Problem — agentic stopping](https://medium.com/@Modexa/the-agent-loop-problem-when-smart-wont-stop-ccbf8489180f)
+
+---
+
+*Feature research for: fdars AI advisor — v8.0 new capabilities*
+*Researched: 2026-08-23*

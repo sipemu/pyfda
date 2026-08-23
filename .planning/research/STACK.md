@@ -1,219 +1,167 @@
-# Stack Research
+# Stack Research — v8.0 Advisor New Capabilities
 
-**Domain:** PyO3 binding layer — fdars-core 0.20.0 → 0.23.0 upgrade
-**Researched:** 2026-08-20
-**Confidence:** HIGH — all findings read directly from the v0.23.0 git tag in the local fdars-core checkout at `/home/simonm/projects/rust/fdars`; no inference from secondary sources.
+**Domain:** Python AI advisor extension — agentic auto-tuning loop, deferred-aspect coverage, comparative method-selection, pipeline diagnostic report, eval strategy
+**Researched:** 2026-08-23
+**Confidence:** MEDIUM (web-verified; versions confirmed against PyPI and official SDK changelogs)
 
----
-
-## Summary Verdicts
-
-| Question | Verdict | Evidence |
-|----------|---------|----------|
-| MSRV raised above Rust 1.83? | **NO — MSRV is 1.81** | `fdars-core/Cargo.toml` `rust-version = "1.81"` at v0.23.0 tag, unchanged from v0.20.0 |
-| `linalg` feature required for new capabilities? | **NO** | All new 0.21–0.23 functions are in default-feature or `parallel`-only code paths; `linalg` still gates only `ridge_regression_fit` + `faer`/`anofox-regression` (unchanged) |
-| Dependency graph additive? | **YES — zero new direct deps** | `git diff v0.20.0 v0.23.0 -- fdars-core/Cargo.toml` shows only the version field changed; every dependency entry is byte-for-byte identical |
-| New Python extras needed? | **NO** | All new capabilities bind through the existing numpy/FdMatrix boundary; no new Python packages are implied |
-| Pinned version string to use | `fdars-core = { version = "0.23.0", features = ["parallel"] }` | Direct read of v0.23.0 Cargo.toml |
+> **Scope:** This document covers ONLY the stack additions and changes needed for v8.0. The baseline stack (PyO3 0.28, numpy 0.28, fdars-core 0.23.0, mcp>=2.0.0, pydantic>=2, anthropic>=0.72, pytest) is already validated and is not re-researched here.
 
 ---
 
-## Recommended Stack
+## Decision Summary
 
-### Core Technologies — unchanged, bump version pin only
+All four new capabilities can be built on the **existing stack with no new runtime dependencies**. The only justified changes are:
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| fdars-core | **0.23.0** (was 0.20.0) | Upstream FDA computation engine | Single version bump; zero dependency graph change |
-| PyO3 | 0.28 | Rust↔Python bridge, abi3-py39 stable ABI | No change; not touched by the 0.21–0.23 crate series |
-| numpy (crate) | 0.28 | Zero-copy ndarray ↔ FdMatrix conversion | No change |
-| maturin | 1.0–2.0 | Build backend | No change |
-| Rust toolchain | stable / 1.83 MSRV | pyfda's own MSRV (Cargo.toml `rust-version = "1.83"`) | fdars-core dropped to 1.81 at 0.23, so pyfda's 1.83 pin remains the binding constraint and is still satisfied |
-
-### Transitive Rust Dependencies — resolved versions unchanged
-
-The `git diff` between v0.20.0 and v0.23.0 on `fdars-core/Cargo.toml` shows only the `version` field changed.
-Every dependency spec (rayon 1.10, rand 0.8, rand_distr 0.4, rustfft 6.2, num-complex 0.4, nalgebra 0.33, faer 0.23 optional, anofox-regression 0.4 optional) is identical.
-
-Current `Cargo.lock` resolved versions that will carry forward:
-- `nalgebra` 0.33.3
-- `rayon` 1.11.0
-- `rand` 0.8.5
-- `rustfft` 6.4.1
-- `num-complex` 0.4.6
-
-`cargo update` after the version bump may resolve to later patch versions of rayon/rand/etc. within the same SemVer range; that is normal and safe. No major version jumps are introduced.
-
-`faer`/`anofox-regression` remain optional and gated behind `linalg`; they are not activated by pyfda's `parallel`-only build.
-
-### New Rust Modules Added 0.20→0.23
-
-Two new top-level `pub mod` entries appear in `fdars-core/src/lib.rs` at v0.23.0 (absent at v0.20.0):
-
-| Module | Added in | What it provides |
-|--------|----------|-----------------|
-| `concurrent_regression` | 0.21 | `concurrent_regression()` + `ConcurrentRegrResult` |
-| `pace_fpca` | 0.22 | `pace_fpca()` + `PaceFpcaConfig` + `PaceFpcaResult` |
-
-All other new capabilities (elastic_multinomial, functional_glm, depth variants, outlier detectors, ITP inference) are **additions inside existing modules**, not new modules.
-
-### New Public Surface by Capability Group
-
-#### Group A — Regression (extend `fdars.regression` + new concurrent binding)
-
-| Symbol | Module in fdars-core | Type | Notes |
-|--------|---------------------|------|-------|
-| `concurrent_regression` | `concurrent_regression` | fn | `(response: &FdMatrix, predictors: &[FdMatrix], argvals: Option<&[f64]>, bandwidth: f64, kernel: &str) -> Result<ConcurrentRegrResult>` |
-| `ConcurrentRegrResult` | `concurrent_regression` | struct (#[non_exhaustive]) | fields: `beta_curve: FdMatrix`, `intercept: Vec<f64>`, `fitted: FdMatrix`, `residuals: FdMatrix`, `argvals: Vec<f64>` |
-| `functional_glm` | `scalar_on_function` | fn | `(data: &FdMatrix, y: &[f64], family: GlmFamily, scalar_covariates: Option<&FdMatrix>, ncomp: usize, max_iter: usize, tol: f64) -> Result<FunctionalGlmResult>` |
-| `predict_functional_glm` | `scalar_on_function` | fn | takes `fit: &FunctionalGlmResult` + `new_data` + optional `new_scalar`; **uses fitted handle, does NOT re-fit** |
-| `FunctionalGlmResult` | `scalar_on_function` | struct | fields: `intercept`, `beta_t`, `beta_se`, `gamma`, `fitted_values`, `linear_predictors`, `ncomp`, `coefficients`, `std_errors`, `log_likelihood`, `deviance`, `iterations`, `fpca` (embedded FpcaResult), `aic`, `bic` |
-| `GlmFamily` | `scalar_on_function` | enum (#[non_exhaustive]) | variants: `Binomial`, `Poisson`, `Gamma`, `Gaussian` |
-
-`concurrent_regression` is in `fdars_core::concurrent_regression`, not `fdars_core::scalar_on_function`. It extends `fdars.regression` on the Python side (not a new submodule). `functional_glm`/`predict_functional_glm` are in `fdars_core::scalar_on_function` alongside the existing `fregre_lm` etc.; they also extend `fdars.regression`.
-
-#### Group B — FPCA & Classification
-
-| Symbol | Module in fdars-core | Type | Notes |
-|--------|---------------------|------|-------|
-| `pace_fpca` | `pace_fpca` | fn | `(data: &IrregFdata, config: &PaceFpcaConfig) -> Result<PaceFpcaResult>` |
-| `PaceFpcaConfig` | `pace_fpca` | struct (has Default) | fields: `ncomp: usize` (default 3), `bandwidth: f64` (default 0.1), `sigma2: f64` (default 0.01, **must be strictly positive**), `work_grid: Vec<f64>` (default 51-point [0,1]), `alpha: f64` (default 0.05) |
-| `PaceFpcaResult` | `pace_fpca` | struct (#[non_exhaustive]) | fields: `mean: Vec<f64>`, `eigenvalues: Vec<f64>`, `eigenfunctions: FdMatrix` (m×ncomp), `scores: FdMatrix` (n×ncomp), `fitted: FdMatrix` (n×m), `fitted_lower: FdMatrix` (n×m), `fitted_upper: FdMatrix` (n×m), `argvals: Vec<f64>`, `sigma2: f64`, `ncomp: usize` |
-| `IrregFdata` | `irreg_fdata` | struct | CSR-layout sparse functional data; constructed via `IrregFdata::from_lists(argvals_list, values_list)`; **NOT currently exposed in pyfda** — must add Python constructor |
-| `elastic_multinomial` | `elastic_regression` | fn | `(data: &FdMatrix, y: &[usize], argvals: &[f64], ncomp_beta: usize, lambda: f64, max_iter: usize, tol: f64) -> Result<ElasticMultinomialResult>` |
-| `predict_elastic_multinomial` | `elastic_regression` | fn | takes `fit: &ElasticMultinomialResult` + `new_data` + `new_argvals` |
-| `ElasticMultinomialResult` | `elastic_regression` | struct (#[non_exhaustive]) | fields: `n_classes: usize`, `classes: Vec<usize>`, `class_models: Vec<ElasticLogisticResult>`, `train_probabilities: FdMatrix` (n×K), `predicted_classes: Vec<usize>`, `train_accuracy: f64` |
-
-**Key design note on IrregFdata:** `pace_fpca` is the only new function requiring `IrregFdata`. This type uses CSR-style storage with `offsets: Vec<usize>`, `argvals: Vec<f64>`, `values: Vec<f64>`, `rangeval: [f64; 2]`. The Python binding must accept lists-of-arrays (one per observation) and construct `IrregFdata::from_lists`. This is a new binding pattern not present in any existing pyfda module.
-
-#### Group C — Depth / Outliers / Interval Inference
-
-**Depth:** `DepthMethod` enum extended with 10 new variants (was 4 at v0.20.0, is 14 at v0.23.0):
-
-New variants: `HypographIndex`, `ModifiedHypographIndex`, `EpigraphIndex`, `ModifiedEpigraphIndex`, `HalfRegion`, `ModifiedHalfRegion`, `Extremal`, `ExtremeRankLength`, `LInfinity`, `TotalVariation`
-
-New standalone functions added to `depth` module (callable directly, not only via dispatcher):
-- `hypograph_index_1d`, `modified_hypograph_index_1d`
-- `epigraph_index_1d`, `modified_epigraph_index_1d`
-- `half_region_depth_1d`, `modified_half_region_depth_1d`
-- `extremal_depth_1d`, `extreme_rank_length_depth_1d`, `linfinity_depth_1d`
-- `total_variation_depth_1d` — returns `TvdMssResult { tvd: Vec<f64>, mss: Vec<f64> }` (not `Vec<f64>`)
-
-`TvdMssResult` is a new struct type, re-exported from lib.rs at v0.23.0.
-
-The existing `functional_depth` dispatcher in `depth_mod.rs` has a string-matching `parse_depth_method` helper — it must be extended with all 10 new string keys and a `#[non_exhaustive]` wildcard arm. The error message in the fallback must list all 14 variants.
-
-**Outliers:** Four new detectors added to `fdars_core::outliers` (was 3 functions at v0.20.0):
-
-| Symbol | Type | Key fields |
-|--------|------|-----------|
-| `tvdmss(data, TvdMssConfig)` | fn -> `TvdMssOutliers` | config: `emp_factor_mss` (1.5), `emp_factor_tvd` (1.5), `central_region_tvd` (0.5); result: `magnitude_outliers: Vec<usize>`, `shape_outliers: Vec<usize>`, `tvd: Vec<f64>`, `mss: Vec<f64>` |
-| `muod(data, MuodConfig)` | fn -> `MuodResult` | config: `emp_factor` (1.5); result: `shape_outliers`, `magnitude_outliers`, `amplitude_outliers`, `shape_index`, `magnitude_index`, `amplitude_index` (all `Vec<usize>` or `Vec<f64>`) |
-| `sequential_transform_outliers(data, SeqTransformConfig)` | fn -> `SeqTransformOutliers` | `SeqTransform` enum: `T0`, `T1`, `T2`, `T3`; result: `per_transform_outliers: Vec<(SeqTransform, Vec<usize>)>`, `union_outliers: Vec<usize>` |
-| `depthgram(data, DepthgramConfig)` | fn -> `DepthgramResult` | config: `emp_factor` (1.5); result: `mbd_mei_d`, `mei_mbd_d`, `mbd_mei_t`, `mei_mbd_t`, `mbd_mei_t2`, `mei_mbd_t2` (all `Vec<f64>`), `shape_outliers`, `magnitude_outliers`, `mbd`, `mei` |
-
-**ITP Inference** (extend `fdars.inference`):
-
-| Symbol | Signature | Notes |
-|--------|-----------|-------|
-| `itp_one_pop` | `(data, argvals, mu0: Option<&[f64]>, basis_type: ProjectionBasisType, nbasis: usize, n_perm: usize, seed: u64)` | One-sample pointwise interval test |
-| `itp_two_pop` | `(data_a, data_b, argvals, basis_type, nbasis, n_perm, seed)` | Two-sample pointwise interval test |
-| `itp_flm` | `(data, y: &[f64], argvals, basis_type, nbasis, n_perm, seed)` | Functional linear model ITP |
-| `ItpResult` | struct | `adjusted_pvalues: Vec<f64>`, `raw_pvalues: Vec<f64>`, `basis_type: ProjectionBasisType`, `n_basis: usize`, `n_perm: usize` |
-| `ProjectionBasisType` | enum | `Bspline`, `Fourier` — from `basis::projection`, re-exported via inference module |
-
-`ItpResult.basis_type` is a `ProjectionBasisType` enum value. The Python binding should serialize it as a string (`"bspline"` / `"fourier"`). The Python API should accept a `basis_type: str` parameter mapping to the enum, consistent with how `DepthMethod` is handled via string dispatch.
-
-### Python-side Dependencies — no changes
-
-| Package | Current Constraint | Change for v6.0 |
-|---------|-------------------|-----------------|
-| numpy | (pinned in pyproject.toml) | None |
-| pandas | (dependency) | None |
-| scipy | docs only | None — existing datasets/examples sufficient for new capabilities |
-| scikit-learn | docs only | None |
-| matplotlib | `[plot]` extra | None |
-| anthropic | `[advisor]` extra | None |
-
-No new Python extras are added. The new capabilities (PACE FPCA, concurrent regression, GLM, depth variants, outlier detectors, ITP) can all be demonstrated using existing datasets in `docs/data/` (canadian weather, growth, tecator, phoneme). The `pace_fpca` example should use a subsampled irregular form of an existing dataset (e.g., canadian weather with sparse observations per station); no new dataset file is needed.
+1. **`anthropic` pin tightened to `>=0.72.0,<1.0`** — the 1.0 release (2026-08-20) drops Python 3.9; fdars must stay on 3.9+ (abi3-py39 wheel guarantee).
+2. **`mcp` import path fix in `server.py`** — v2.0.0 renamed the module from `mcp.server` to `mcp.server.mcpserver`; the pin stays `>=2.0.0`.
+3. **No new eval library** — the deterministic eval strategy is pure pytest + existing `_check_grounding` pattern + scalar diagnostic comparison.
+4. **No agent framework** — the bounded orchestration loop is 15–25 lines of plain Python; any orchestration framework would break the provider-agnostic + LLM-free-compute invariants.
 
 ---
 
-## Cargo.toml Change
+## Recommended Stack — What Changes
 
-Only one line changes in `/home/simonm/projects/rust/pyfda/Cargo.toml`:
+### Core: MCP SDK — Handle v2 Migration
 
-```toml
-# Before
-fdars-core = { version = "0.20.0", features = ["parallel"] }
+| Change | Current | Target | Reason |
+|--------|---------|--------|--------|
+| `mcp` import path | `from mcp.server import MCPServer` | `from mcp.server.mcpserver import MCPServer` | v2.0.0 renamed the module; the decorator API (`@mcp.tool()`) is unchanged |
+| `mcp` version pin | `mcp>=2.0.0` | `mcp>=2.0.0` | Already targets v2; no bound change needed |
+| `run()` transport arg | `mcp.run(transport="stdio")` | Same | server.py `run_stdio()` already uses this pattern — verify the call site is still correct after import fix |
 
-# After
-fdars-core = { version = "0.23.0", features = ["parallel"] }
-```
+**Why:** `mcp` 2.0.0 was released 2026-07-28 and is now what `pip install mcp` installs. The pyproject.toml already pins `mcp>=2.0.0`, so the pin is correct. The import in `server.py` may need updating to `from mcp.server.mcpserver import MCPServer`. The `@mcp.tool()` decorator signature is unchanged, so all tool handlers (existing and new) require no modification beyond adding the handler function.
 
-Do NOT add `linalg`. Do NOT change pyo3, numpy, or any other dependency.
+**MCP auto-tuning tool:** The new `fdars_auto_tune` tool follows the exact same pattern as `fdars_compare_run` — synchronous handler (`def`, not `async def`), scalar parameters only, returns a JSON-serialisable dict with handles. The loop runs server-side inside the tool handler; no async machinery is needed because fdars Rust calls release the GIL via PyReadonly wrappers and the loop is CPU-bound Python.
 
----
+### Core: Anthropic SDK — Guard the Upper Bound
 
-## Binding Patterns for New Capabilities
+| Pin | Current pyproject.toml | Required v8.0 | Reason |
+|-----|------------------------|---------------|--------|
+| `[advisor]` extra | `anthropic>=0.72.0` | `anthropic>=0.72.0,<1.0` | anthropic 1.0.0 (2026-08-20) drops Python 3.9, raises requirement to >=3.10; fdars MSRV for Python is 3.9 |
+| `output_format` API | Used in `complete_structured` | Keep as-is (0.x) | anthropic 1.0 renames this to `output_config`; the 0.x series API is stable and still available |
 
-### Standard pattern (Groups A partial, C partial)
-All new functions taking `&FdMatrix` inputs follow the existing `numpy2d_to_fdmatrix` / `vec_to_numpy1d` / `fdmatrix_to_numpy2d` round-trip. No new conversion helpers are needed.
+**Why:** The anthropic 0.x series (currently ~0.122.x) remains installable on Python 3.9 and keeps the existing `beta.messages.parse(output_format=...)` / `complete_structured` surface intact. The 1.0 line is a major version bump with Python 3.9 removal; adding `<1.0` now prevents silent breakage when users run `pip install fdars[advisor]` and pip resolves to 1.0. A future milestone can handle the 1.0 migration (which would also require auditing the four provider adapters and the mcp surface, since `fdars[mcp]` is already 3.10+).
 
-### New pattern: IrregFdata constructor (Group B: pace_fpca)
-The Python caller passes `argvals_list: list[np.ndarray]` and `values_list: list[np.ndarray]`. The binding iterates over these, constructs `Vec<Vec<f64>>`, and calls `IrregFdata::from_lists`. This is the only structural binding novelty in v6.0.
+### Supporting Libraries — No Changes
 
-### New pattern: SeqTransform per-step result (Group C: sequential_transform_outliers)
-`SeqTransformOutliers.per_transform_outliers` is `Vec<(SeqTransform, Vec<usize>)>`. The binding should serialize this as a Python list of `(str, list[int])` tuples, with the `SeqTransform` enum serialized as its string name (`"T0"`, `"T1"`, `"T2"`, `"T3"`).
+| Library | Status | Notes |
+|---------|--------|-------|
+| `pydantic>=2.0` | No change | Existing `Advice`/`Recommendation` schema extended with new models; `model_json_schema()` and `model_validate_json()` stay as the validation mechanism |
+| `openai>=1.40,<2.0` | No change | Provider extras unaffected by new capabilities |
+| `google-genai>=1.0,<3.0` | No change | Provider extras unaffected |
+| `ollama>=0.6.2` | No change | Provider extras unaffected |
+| `pytest` + `pytest-asyncio` | No change | Dev extra; pytest-asyncio 1.4.0 supports Python >=3.9; already present |
 
-### Existing pattern extended: DepthMethod string dispatch
-The `parse_depth_method` helper in `depth_mod.rs` currently handles 4 variants. It must be extended to handle 14 variants with new string keys matching the new enum variants. The wildcard `other =>` error arm must be updated to list all valid strings.
+### Dev/Test — No New Additions
 
-### Existing pattern extended: non_exhaustive structs
-`ConcurrentRegrResult`, `PaceFpcaResult`, `ElasticMultinomialResult` are all `#[non_exhaustive]`. Access fields individually; never struct-literal them. This is the same pattern already in use for `FunctionalBoxplotResult`.
+The eval strategy for "good advice" is entirely deterministic and requires no new library:
+
+- **Offline deterministic tests (run in CI, always):**
+  - `Advice` schema validation — already enforced by Pydantic in `complete_structured`
+  - `_check_grounding` guard — already exists in `_validate.py`; tests assert it does not raise on valid advice
+  - Diagnostic improvement metric: `assert diagnostics_after[target_key] > diagnostics_before[target_key]` — pure Python scalar comparison, no network
+  - Step-budget enforcement: `assert result["steps_taken"] <= max_steps` — plain integer check
+  - Loop terminates on improvement: `assert result["improved"]` — boolean flag in the return dict
+
+- **Env-gated tests (skipped in CI without API key, run on merges or manually):**
+  - Full auto-tuning loop end-to-end with a real LLM provider — same pattern as existing `test_advisor_live_integration.py`
+  - Comparative method-selection advice grounding — same env-gated pattern
+
+No external eval framework (DeepEval, MLflow, Braintrust, etc.) is warranted. The existing `pytest.mark.skipif(not os.getenv("ANTHROPIC_API_KEY"))` pattern in the test suite is the correct gating mechanism.
 
 ---
 
 ## What NOT to Add
 
-| Avoid | Reason |
-|-------|--------|
-| `linalg` feature | Requires Rust 1.84+ (faer 0.23 dep), above pyfda MSRV 1.83; gates only `ridge_regression_fit`, nothing in the v6.0 scope |
-| `serde` feature | Optional serialization; not needed for PyO3 dict conversions |
-| New Python runtime dependencies | All new capabilities serialize to numpy arrays + Python dicts; no new packages required |
-| New Python extras | Scope is binding-layer + advisor; existing `[advisor]`, `[mcp]`, `[plot]` extras are sufficient |
-| New dataset files | Existing `docs/data/` datasets cover all new worked-example scenarios |
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| **LangGraph / LangChain** | Framework lock-in; introduces an LLM in the orchestration path by design; incompatible with the provider-agnostic protocol; the framework owns tool-dispatch, displacing the MCP surface | Plain `for step in range(max_steps)` loop in `advisor/_autotuner.py` calling `Provider.complete_structured()` |
+| **AutoGen / CrewAI / Smolagents** | Same framework lock-in; multi-agent abstractions are unnecessary overhead for a single bounded loop with one LLM proposing scalar parameter changes | Same plain loop |
+| **anthropic>=1.0** | Drops Python 3.9 — breaks the fdars abi3-py39 compatibility guarantee; renames `output_format` → `output_config`, requiring all four provider adapters to be updated simultaneously | Pin `anthropic>=0.72.0,<1.0` until a dedicated migration milestone |
+| **Async MCP handlers for auto-tuning** | The existing `fdars_run_method` and `fdars_compare_run` handlers are sync by design (fdars is sync/Rust, GIL released via PyReadonly); switching to async for the new tool would require `asyncio.run_in_executor` with no gain | Keep sync `def` handlers; the bounded loop completes in milliseconds to seconds |
+| **DeepEval / Braintrust / MLflow eval** | Heavyweight eval frameworks with their own LLM-judge pipelines and network dependencies; the fdars eval is "did the target diagnostic improve?" — a scalar comparison | Pure pytest assertions on before/after diagnostic dicts |
+| **httpx / aiohttp direct** | The Provider protocol already wraps the HTTP client inside each adapter; adding a raw HTTP client in the advisor layer would bypass the validate-and-retry + grounding guard chain | Use the existing `Provider.complete_structured()` path |
+| **Any vector store or embedding library** | Comparative method-selection is a ranking over `build_diagnostics` output dicts — structured scalars, not semantic search over text | Pure Python sorting/ranking on diagnostic scalar values |
 
 ---
 
-## Version Compatibility
+## Auto-Tuning Loop Design — Stack Implications
 
-| Component | Constraint | Status |
-|-----------|-----------|--------|
-| fdars-core 0.23.0 MSRV | Rust 1.81 | Satisfied by pyfda's 1.83 toolchain |
-| pyfda MSRV | Rust 1.83 | Unchanged; CI matrix `[stable, "1.83"]` unaffected |
-| PyO3 0.28 + abi3-py39 | Python 3.9–3.14 | Unchanged; fdars-core 0.23 adds no new Python constraints |
-| fdars-core 0.23 parallel feature | rayon 1.10+ | Resolved: rayon 1.11.0 in current Cargo.lock; within the ^1.10 range |
-| fdars-core 0.23 nalgebra | 0.33 | Resolved: nalgebra 0.33.3; within range |
+The closed-loop auto-tuning is a **pure Python orchestration loop** that calls the existing Provider protocol for parameter proposals and fdars/MCP runner for execution. No new library is needed because:
+
+1. **LLM call path** — uses `advise()` / `Provider.complete_structured(TuneProposal, ...)` with a new `TuneProposal` Pydantic schema. Same `_check_grounding` guard applies.
+2. **Execution path** — calls `run_method()` from `mcp/_runner.py` directly (Python API) or dispatches via `fdars_run_method` MCP tool (agentic surface). No new fdars bindings required; the six runnable methods already cover the primary tuning targets.
+3. **Termination** — `for step in range(max_steps)` with an `if diagnostic_improved: break` check. The `max_steps` parameter is a required integer argument to `auto_tune()`.
+4. **State** — carried in a plain Python dict `{"history": [...], "best_result_id": str, "steps_taken": int, "improved": bool}`; no external state store.
+
+**MCP surface for auto-tuning:** A new `fdars_auto_tune` tool in `server.py` with the same flat-scalar parameter design as `fdars_compare_run`. The tool executes the entire bounded loop inside the synchronous handler and returns a summary dict. The LLM that calls this MCP tool is the orchestrating agent — it is NOT inside the compute path. The Provider called inside `auto_tune()` for parameter proposals is in the **Python API path only**; the MCP tool itself stays provably LLM-free (every computation runs fdars; the loop logic is pure Python). This preserves the MCP-LLM-free boundary.
+
+---
+
+## New Pydantic Schemas Required (additions to `_schema.py`)
+
+No new library. Two new Pydantic model classes in `advisor/_schema.py`:
+
+| Schema | Fields | Used By |
+|--------|--------|---------|
+| `TuneProposal` | `param_name: str`, `param_value: float \| int`, `rationale: str`, `expected_effect: str` | `auto_tune()` — LLM returns this as structured output |
+| `TuneResult` | `steps_taken: int`, `improved: bool`, `target_metric_before: float`, `target_metric_after: float`, `history: list[dict]` | Return type of `auto_tune()` — fully JSON-serialisable |
+
+These are additions to the existing `_schema.py`, not replacements of `Advice`/`Recommendation`.
+
+---
+
+## Version Compatibility Matrix
+
+| Package | Current Pin | v8.0 Pin | Python Constraint | Notes |
+|---------|-------------|----------|-------------------|-------|
+| `mcp` | `>=2.0.0` | `>=2.0.0` | `>=3.10` (mcp extra already gated) | One-line import path fix in server.py required |
+| `anthropic` | `>=0.72.0` | `>=0.72.0,<1.0` | `>=3.9` for 0.x; 1.0 requires `>=3.10` | Add `<1.0` upper bound — highest priority change |
+| `pydantic` | `>=2.0` | `>=2.0` | `>=3.9` | No change; new schemas use same BaseModel API |
+| `openai` | `>=1.40,<2.0` | `>=1.40,<2.0` | `>=3.9` | No change |
+| `google-genai` | `>=1.0,<3.0` | `>=1.0,<3.0` | `>=3.10` (already enforced by adapter) | No change |
+| `ollama` | `>=0.6.2` | `>=0.6.2` | `>=3.9` | No change |
+| `pytest-asyncio` | present in dev | no change | `>=3.9` | Already present; latest 1.4.0 |
+
+---
+
+## Installation Delta (pyproject.toml changes only)
+
+```toml
+# Change: tighten anthropic upper bound to prevent 1.0 breakage on Python 3.9
+advisor = ["anthropic>=0.72.0,<1.0", "pydantic>=2.0"]
+
+# No other changes to optional-dependencies.
+# New auto-tuning Python API uses no new extras.
+# New fdars_auto_tune MCP tool reuses the existing [mcp] extra.
+```
+
+---
+
+## Alternatives Considered
+
+| Recommended | Alternative | Why Not |
+|-------------|-------------|---------|
+| Plain `for` loop in `advisor/_autotuner.py` | LangGraph stateful graph | LangGraph owns the tool-dispatch loop, displacing the MCP surface; framework lock-in; cannot guarantee LLM-free compute path |
+| `Provider.complete_structured(TuneProposal, ...)` | Anthropic tool_use with input_schema | Tool_use would embed the parameter-proposal schema in the Anthropic-specific API call and require the Anthropic adapter to be extended without benefiting other providers; the existing `complete_structured` path works across all four providers |
+| Pure pytest assertions for eval | DeepEval / Braintrust | Both require network calls or LLM judges; CI must be offline-capable; the deterministic "did target diagnostic improve" check is sufficient and auditable |
+| `anthropic>=0.72.0,<1.0` | Upgrading to `anthropic>=1.0` | anthropic 1.0 drops Python 3.9, breaking the fdars abi3-py39 guarantee and the full test matrix |
+| Keeping sync MCP handlers | Async `async def` handlers | fdars Rust functions are synchronous; wrapping in executor adds overhead with no benefit; existing sync handlers work correctly |
 
 ---
 
 ## Sources
 
-All findings verified directly from the local fdars-core git repository at `/home/simonm/projects/rust/fdars`:
-
-- `git show v0.23.0:fdars-core/Cargo.toml` — MSRV, features, all dependency specs
-- `git diff v0.20.0 v0.23.0 -- fdars-core/Cargo.toml` — confirmed single-line version-only change
-- `git log --oneline v0.20.0..v0.23.0 -- fdars-core/Cargo.toml` — 3 release commits, none touch deps
-- `git diff v0.20.0 v0.23.0 --name-only -- fdars-core/src/` — new/changed source files
-- `git show v0.23.0:fdars-core/src/lib.rs` — full public API re-export diff
-- `git show v0.23.0:fdars-core/src/{concurrent_regression,pace_fpca,outliers,depth/dispatch,depth/tvd,inference/itp,scalar_on_function/glm,elastic_regression/logistic}.rs` — struct fields and function signatures
-- `/home/simonm/projects/rust/pyfda/Cargo.lock` — resolved transitive dependency versions (nalgebra 0.33.3, rayon 1.11.0, rand 0.8.5, rustfft 6.4.1, num-complex 0.4.6)
-- `/home/simonm/projects/rust/pyfda/src/depth_mod.rs` — existing DepthMethod dispatch pattern to extend
-- `/home/simonm/projects/rust/pyfda/Cargo.toml` — current pyfda dependency declarations and MSRV
-
-Confidence: HIGH — all data read from local source files at the exact tagged version; no web lookups required.
+- MCP Python SDK releases — [github.com/modelcontextprotocol/python-sdk/releases](https://github.com/modelcontextprotocol/python-sdk/releases) — v2.0.0 stable confirmed 2026-07-28 (MEDIUM confidence, web-verified)
+- MCP v2 migration guide — [py.sdk.modelcontextprotocol.io/migration/](https://py.sdk.modelcontextprotocol.io/migration/) — import path changes and decorator continuity confirmed (MEDIUM confidence, webfetch)
+- MCP v2 what's new — [py.sdk.modelcontextprotocol.io/whats-new/](https://py.sdk.modelcontextprotocol.io/whats-new/) — server API and stdio transport confirmed (MEDIUM confidence, webfetch)
+- Anthropic SDK PyPI — [pypi.org/project/anthropic/](https://pypi.org/project/anthropic/) — 1.0.0 released 2026-08-20, Python >=3.10 requirement confirmed (MEDIUM confidence, webfetch)
+- Anthropic SDK 1.0 breaking changes — [github.com/anthropics/anthropic-sdk-python](https://github.com/anthropics/anthropic-sdk-python) — output_format → output_config, Python 3.9 removed (MEDIUM confidence, web-verified via multiple issue trackers)
+- Pydantic PyPI — [pypi.org/project/pydantic/](https://pypi.org/project/pydantic/) — v2.11 current, stable API (MEDIUM confidence, web)
+- Bounded agentic loop patterns — [tinyagents.dev/blog/what-is-the-agent-loop](https://tinyagents.dev/blog/what-is-the-agent-loop) + [medium.com/@oshan.nanayakkara](https://medium.com/@oshan.nanayakkara/agentic-loop-in-python-a-practical-guide-to-multi-turn-ai-agents-111f59909548) — step-budget loop, no framework needed (LOW confidence, web)
+- Deterministic eval — [arxiv.org/pdf/2606.22737](https://arxiv.org/pdf/2606.22737) GroundEval deterministic scoring approach; schema-validity + citation-check as baseline (LOW confidence, web)
 
 ---
-*Stack research for: pyfda v6.0 — fdars-core 0.20.0 → 0.23.0 upgrade*
-*Researched: 2026-08-20*
+
+*Stack research for: fdars v8.0 Advisor — New Capabilities*
+*Researched: 2026-08-23*
