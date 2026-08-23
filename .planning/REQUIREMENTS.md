@@ -9,9 +9,9 @@ Four new advisor capabilities built on the existing surface (no new runtime deps
 
 ### Compatibility (pre-flight)
 
-- [ ] **COMPAT-01**: `anthropic` dependency pinned `>=0.72.0,<1.0` so the existing advisor keeps importing on Python 3.9 (abi3-py39); anthropic 1.0 migration deferred out of v8.0
-- [ ] **COMPAT-02**: MCP server uses the `mcp` v2 import path (`MCPServer`); the existing 3 tools import and run over stdio unchanged
-- [ ] **COMPAT-03**: the guard-sync test (`_DIAGNOSTICS_METHODS` ↔ `build_diagnostics._supported`) runs on all supported Python versions (no longer skipped on the 3.9 CI baseline)
+- [x] **COMPAT-01**: `anthropic` dependency pinned `>=0.72.0,<1.0` so the existing advisor keeps importing on Python 3.9 (abi3-py39); anthropic 1.0 migration deferred out of v8.0
+- [x] **COMPAT-02**: MCP server uses the `mcp` v2 import path (`MCPServer`); the existing 3 tools import and run over stdio unchanged
+- [x] **COMPAT-03**: the guard-sync test (`_DIAGNOSTICS_METHODS` ↔ `build_diagnostics._supported`) runs on all supported Python versions (no longer skipped on the 3.9 CI baseline)
 
 ### Deferred Advisor Aspects
 
@@ -60,9 +60,11 @@ Four new advisor capabilities built on the existing surface (no new runtime deps
 Deferred to a future release. Tracked but not in the current roadmap.
 
 ### Transport
+
 - **HTTP-01 / FUT-01**: HTTP/SSE MCP transport for the fdars-advisor server (stdio shipped in v2.0)
 
 ### SDK
+
 - **ANTHROPIC-1X**: full `anthropic` 1.x migration (drops Python 3.9; `output_config`, httpx2) — its own milestone once Python 3.9 is dropped
 
 ## Out of Scope
@@ -83,9 +85,9 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| COMPAT-01 | Phase 50 | Pending |
-| COMPAT-02 | Phase 50 | Pending |
-| COMPAT-03 | Phase 50 | Pending |
+| COMPAT-01 | Phase 50 | Complete |
+| COMPAT-02 | Phase 50 | Complete |
+| COMPAT-03 | Phase 50 | Complete |
 | ASPECT-01 | Phase 50 | Pending |
 | ASPECT-02 | Phase 50 | Pending |
 | ASPECT-03 | Phase 50 | Pending |
@@ -112,6 +114,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | DOCS-03 | Phase 54 | Pending |
 
 **Coverage:**
+
 - v8.0 requirements: 27 total
 - Mapped to phases: 27 ✓ (Phase 50: COMPAT-01..03 + ASPECT-01..05; Phase 51: COMPARE-01..04; Phase 52: PIPE-01..04; Phase 53: TUNE-01..06; Phase 54: EVAL-01..02 + DOCS-01..03)
 - Unmapped: 0

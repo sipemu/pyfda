@@ -5,16 +5,16 @@ milestone_name: "Advisor: New Capabilities"
 current_phase: 50
 current_phase_name: Deferred Advisor Aspects (+ compat pre-flight)
 status: executing
-stopped_at: v8.0 roadmap created (Phases 50–54; ROADMAP.md + REQUIREMENTS.md traceability written)
-last_updated: "2026-08-23T21:03:09.120Z"
+stopped_at: Completed 50-01-PLAN.md
+last_updated: "2026-08-23T21:10:22.409Z"
 last_activity: 2026-08-23
-last_activity_desc: v8.0 roadmap created (Phases 50–54; 27/27 requirements mapped)
-state_head: 8a00960ba02b6e60d19c9ff3a39e1cb8bac14e04
+last_activity_desc: Phase 50 execution started
+state_head: 2ca96cf498b1db4d0fd66748b59e47cdbb5f347d
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 
 ## Current Position
 
-Phase: 50 (Deferred Advisor Aspects (+ compat pre-flight)) — READY TO EXECUTE
-Plan: — (roadmap created; ready to plan Phase 50)
+Phase: 50 (Deferred Advisor Aspects (+ compat pre-flight)) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-08-23 — v8.0 roadmap created (Phases 50–54; 27/27 requirements mapped)
+Last activity: 2026-08-23 — Phase 50 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -60,6 +60,11 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 50 P01 | 3min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -75,6 +80,9 @@ Recent decisions affecting current work:
 - [v8.0 roadmap]: Phase 53 (auto-tuning) flagged for research-phase during planning — convergence/oscillation/guard interaction + heuristic-proposal param spec + MCP param-schema decision are the milestone's genuine unknowns
 - [standing v6.0]: Docs phase (54) runs sequentially on `main`, NOT in worktrees — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path (`use_worktrees: false` in config)
 - [standing v6.0]: Blocking human diagram method-accuracy review before milestone close (the hypograph/epigraph lesson)
+- [Phase 50]: COMPAT-01: Pin anthropic<1.0 in [advisor] extra; full 1.x migration (which drops Python 3.9) deferred to its own milestone
+- [Phase 50]: COMPAT-02: MCP server.py import already correct (MCPServer from mcp.server); test-only regression test added, no production change
+- [Phase 50]: COMPAT-03: Guard-sync split: primary test uses ValueError parse (no mcp import, runs 3.9+); companion test internally guarded to 3.10+ via importorskip keeps hard-coded literal honest
 
 ### Pending Todos
 
@@ -104,8 +112,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-23T19:30:00.000Z
-Stopped at: v8.0 roadmap created (Phases 50–54; ROADMAP.md + REQUIREMENTS.md traceability written)
+Last session: 2026-08-23T21:10:22.399Z
+Stopped at: Completed 50-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
