@@ -101,10 +101,50 @@ def _build_fpca_diagnostics(raw: dict) -> dict:
         cum_list = _eigenvalues_to_variance_cumulative(ev_raw)
         diag["pace_variance_explained_cumulative"] = cum_list
         diag["pace_variance_explained_first"] = float(cum_list[0]) if cum_list else None
+
+        # ASPECT-01 — three additional grounded PACE scalars: ---------------------
+
+        # 1. pace_noise_signal_ratio: sigma2 / total_signal_variance.
+        #    total_signal_variance = sum of eigenvalues (fdars-computed).
+        #    Guard: emit None when total variance is 0 (degenerate decomposition).
+        pace_sigma2 = diag["pace_sigma2"]
+        ev_arr = np.asarray(ev_raw, dtype=float)
+        total_signal_variance = float(ev_arr.sum())
+        if pace_sigma2 is not None and total_signal_variance > 0.0:
+            diag["pace_noise_signal_ratio"] = float(pace_sigma2 / total_signal_variance)
+        else:
+            diag["pace_noise_signal_ratio"] = None
+
+        # 2. pace_truncated_rank_flagged: True when ncomp < number of available
+        #    eigenvalues, i.e. the decomposition was truncated below full rank.
+        #    Derived only from fdars-computed ncomp and eigenvalue counts.
+        n_eigenvalues = int(len(ev_arr))
+        pace_ncomp = diag["pace_ncomp"]
+        if pace_ncomp is not None:
+            diag["pace_truncated_rank_flagged"] = bool(pace_ncomp < n_eigenvalues)
+        else:
+            diag["pace_truncated_rank_flagged"] = None
+
+        # 3. pace_mean_prediction_band_width: mean over all (n, m) cells of
+        #    (fitted_upper - fitted_lower).  Both are 2-D numpy arrays.
+        #    Reduce to a single native float; emit None when either array absent.
+        fl = raw.get("fitted_lower")
+        fu = raw.get("fitted_upper")
+        if fl is not None and fu is not None:
+            fl_arr = np.asarray(fl, dtype=float)
+            fu_arr = np.asarray(fu, dtype=float)
+            diag["pace_mean_prediction_band_width"] = float((fu_arr - fl_arr).mean())
+        else:
+            diag["pace_mean_prediction_band_width"] = None
+
     else:
         diag["pace_ncomp"] = None
         diag["pace_sigma2"] = None
         diag["pace_variance_explained_cumulative"] = None
         diag["pace_variance_explained_first"] = None
+        # ASPECT-01 extra scalars — None in the non-pace path (stable key set)
+        diag["pace_noise_signal_ratio"] = None
+        diag["pace_truncated_rank_flagged"] = None
+        diag["pace_mean_prediction_band_width"] = None
 
     return diag

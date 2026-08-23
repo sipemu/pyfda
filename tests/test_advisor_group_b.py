@@ -259,6 +259,91 @@ class TestPaceFpca:
             f"pace_ncomp={ncomp_str} not discoverable in diagnostics json"
         )
 
+    # -- ASPECT-01 new scalars -----------------------------------------------
+
+    def test_pace_noise_signal_ratio_is_float(self, pace_result):
+        """pace_noise_signal_ratio must be a native float (sigma2 / total eigenvalue sum)."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(pace_result, method="fpca")
+        assert type(diag["pace_noise_signal_ratio"]) is float, (
+            f"pace_noise_signal_ratio must be native float, got {type(diag['pace_noise_signal_ratio'])}"
+        )
+
+    def test_pace_noise_signal_ratio_nonnegative(self, pace_result):
+        """pace_noise_signal_ratio must be >= 0 (both sigma2 and eigenvalues >= 0)."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(pace_result, method="fpca")
+        assert diag["pace_noise_signal_ratio"] >= 0.0
+
+    def test_pace_noise_signal_ratio_matches_formula(self, pace_result):
+        """pace_noise_signal_ratio must equal sigma2 / sum(eigenvalues)."""
+        import numpy as _np
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(pace_result, method="fpca")
+        sigma2 = float(pace_result["sigma2"])
+        eigenvalues = _np.asarray(pace_result["eigenvalues"], dtype=float)
+        total_var = float(eigenvalues.sum())
+        if total_var > 0:
+            expected = sigma2 / total_var
+            assert abs(diag["pace_noise_signal_ratio"] - expected) < 1e-10
+
+    def test_pace_truncated_rank_flagged_is_bool(self, pace_result):
+        """pace_truncated_rank_flagged must be a native bool."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(pace_result, method="fpca")
+        assert type(diag["pace_truncated_rank_flagged"]) is bool, (
+            f"pace_truncated_rank_flagged must be native bool, got {type(diag['pace_truncated_rank_flagged'])}"
+        )
+
+    def test_pace_truncated_rank_flagged_matches_formula(self, pace_result):
+        """pace_truncated_rank_flagged is True when ncomp < len(eigenvalues)."""
+        import numpy as _np
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(pace_result, method="fpca")
+        ncomp = int(pace_result["ncomp"])
+        n_eigenvalues = len(_np.asarray(pace_result["eigenvalues"]))
+        expected = ncomp < n_eigenvalues
+        assert diag["pace_truncated_rank_flagged"] == expected
+
+    def test_pace_mean_prediction_band_width_is_float(self, pace_result):
+        """pace_mean_prediction_band_width must be a native float when band arrays present."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(pace_result, method="fpca")
+        assert type(diag["pace_mean_prediction_band_width"]) is float, (
+            f"pace_mean_prediction_band_width must be native float, got {type(diag['pace_mean_prediction_band_width'])}"
+        )
+
+    def test_pace_mean_prediction_band_width_positive(self, pace_result):
+        """pace_mean_prediction_band_width must be >= 0 (upper >= lower everywhere)."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(pace_result, method="fpca")
+        assert diag["pace_mean_prediction_band_width"] >= 0.0
+
+    def test_pace_new_scalars_json_serialisable(self, pace_result):
+        """All three new ASPECT-01 scalars must be JSON-serialisable (no numpy scalar)."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(pace_result, method="fpca")
+        # json.dumps with only the three new keys to isolate
+        subset = {
+            "pace_noise_signal_ratio": diag["pace_noise_signal_ratio"],
+            "pace_truncated_rank_flagged": diag["pace_truncated_rank_flagged"],
+            "pace_mean_prediction_band_width": diag["pace_mean_prediction_band_width"],
+        }
+        json.dumps(subset)
+        check_no_numpy(subset)
+
+    def test_pace_new_scalars_none_for_standard_fpca(self):
+        """Standard FPCA (singular_values path) leaves all three new scalars None."""
+        from fdars.advisor import build_diagnostics
+        standard_result = {
+            "singular_values": [2.1, 1.5, 0.8],
+            "scores": [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]],
+        }
+        diag = build_diagnostics(standard_result, method="fpca")
+        assert diag["pace_noise_signal_ratio"] is None
+        assert diag["pace_truncated_rank_flagged"] is None
+        assert diag["pace_mean_prediction_band_width"] is None
+
 
 # ---------------------------------------------------------------------------
 # TestDeterminism — combined across both branches
