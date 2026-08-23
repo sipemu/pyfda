@@ -153,7 +153,12 @@ A docs-only quality pass (no crate bump, no new bindings, no advisor logic chang
   3. The ITP aspect reduces the vector-valued adjusted-p-curve to grounded **detection AND localisation** scalars together (min adjusted p-value; count + proportion of significant intervals; first significant basis; detected-at-0.05) — never a single misleading global scalar.
   4. `_ASPECT_PRIMERS` is extended for the three aspects and `advise()` returns grounded interpretation for each, verified across providers (offline grounding matrix + env-gated live); the grounding invariant and guard-sync are preserved in atomic commits (guard-sync a no-op — no new method slot).
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 50-01-PLAN.md — Compat pre-flight (isolated first commit): anthropic <1.0 pin, mcp v2 server+3-tool load smoke, version-independent guard-sync test on 3.9 (COMPAT-01..03)
+- [ ] 50-02-PLAN.md — Tracer (ITP detection+localisation) + PACE-FPCA / elastic-multinomial grounded scalars + extended primers, guard-sync no-op (ASPECT-01..04)
+- [ ] 50-03-PLAN.md — Cross-provider grounding: new aspects added to offline aspect×provider matrix + env-gated live coverage (ASPECT-05)
 
 ### Phase 51: Comparative Method-Selection
 
@@ -219,7 +224,7 @@ Phases execute in numeric order: 50 → 51 → 52 → 53 → 54
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 50. Deferred Advisor Aspects (+ compat pre-flight) | v8.0 | 0/TBD | Not started | - |
+| 50. Deferred Advisor Aspects (+ compat pre-flight) | v8.0 | 0/3 | Not started | - |
 | 51. Comparative Method-Selection | v8.0 | 0/TBD | Not started | - |
 | 52. Pipeline Diagnostic Report | v8.0 | 0/TBD | Not started | - |
 | 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 0/TBD | Not started | - |
