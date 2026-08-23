@@ -83,19 +83,39 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| COMPAT-01..03 | TBD | Pending |
-| ASPECT-01..05 | TBD | Pending |
-| COMPARE-01..04 | TBD | Pending |
-| PIPE-01..04 | TBD | Pending |
-| TUNE-01..06 | TBD | Pending |
-| EVAL-01..02 | TBD | Pending |
-| DOCS-01..03 | TBD | Pending |
+| COMPAT-01 | Phase 50 | Pending |
+| COMPAT-02 | Phase 50 | Pending |
+| COMPAT-03 | Phase 50 | Pending |
+| ASPECT-01 | Phase 50 | Pending |
+| ASPECT-02 | Phase 50 | Pending |
+| ASPECT-03 | Phase 50 | Pending |
+| ASPECT-04 | Phase 50 | Pending |
+| ASPECT-05 | Phase 50 | Pending |
+| COMPARE-01 | Phase 51 | Pending |
+| COMPARE-02 | Phase 51 | Pending |
+| COMPARE-03 | Phase 51 | Pending |
+| COMPARE-04 | Phase 51 | Pending |
+| PIPE-01 | Phase 52 | Pending |
+| PIPE-02 | Phase 52 | Pending |
+| PIPE-03 | Phase 52 | Pending |
+| PIPE-04 | Phase 52 | Pending |
+| TUNE-01 | Phase 53 | Pending |
+| TUNE-02 | Phase 53 | Pending |
+| TUNE-03 | Phase 53 | Pending |
+| TUNE-04 | Phase 53 | Pending |
+| TUNE-05 | Phase 53 | Pending |
+| TUNE-06 | Phase 53 | Pending |
+| EVAL-01 | Phase 54 | Pending |
+| EVAL-02 | Phase 54 | Pending |
+| DOCS-01 | Phase 54 | Pending |
+| DOCS-02 | Phase 54 | Pending |
+| DOCS-03 | Phase 54 | Pending |
 
 **Coverage:**
 - v8.0 requirements: 27 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 27 ⚠️
+- Mapped to phases: 27 ✓ (Phase 50: COMPAT-01..03 + ASPECT-01..05; Phase 51: COMPARE-01..04; Phase 52: PIPE-01..04; Phase 53: TUNE-01..06; Phase 54: EVAL-01..02 + DOCS-01..03)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-08-23*
-*Last updated: 2026-08-23 after initial definition*
+*Last updated: 2026-08-23 after roadmap creation (traceability populated; 27/27 mapped across Phases 50–54)*

@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v8.0
 milestone_name: Advisor — New Capabilities
 status: planning
-last_updated: "2026-08-23T18:58:47.158Z"
+last_updated: "2026-08-23T19:30:00.000Z"
 last_activity: 2026-08-23
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,23 +17,25 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-22)
+See: .planning/PROJECT.md (updated 2026-08-23)
 
-**Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 49 — Whole-Site Gate & Human Review
+**Core value:** Extend the fdars AI advisor with new agentic capabilities while holding the grounding invariant (fdars computes every number; the LLM only interprets/cites) and the MCP-LLM-free compute boundary as hard constraints.
+**Current focus:** Phase 50 — Deferred Advisor Aspects (+ compat pre-flight)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-08-23 — Milestone v8.0 started
+Phase: 50 of 54 (Deferred Advisor Aspects — first v8.0 phase)
+Plan: — (roadmap created; ready to plan Phase 50)
+Status: Ready to plan
+Last activity: 2026-08-23 — v8.0 roadmap created (Phases 50–54; 27/27 requirements mapped)
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9 (this milestone); prior: 11 (v6.0), 11 (v5.0), 11 (v4.0), 19 across v1.0–v3.0
+- Total plans completed: 0 (this milestone); prior: 9 (v7.0), 11 (v6.0), 11 (v5.0), 11 (v4.0), 19 across v1.0–v3.0
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -41,14 +43,11 @@ Last activity: 2026-08-23 — Milestone v8.0 started
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 42 | 1 | - | - |
-| 43 | 1 | - | - |
-| 44 | 1 | - | - |
-| 45 | 1 | - | - |
-| 46 | 2 | - | - |
-| 47 | 1 | - | - |
-| 48 | 2 | - | - |
-| 49 | 0 | - | - |
+| 50 | TBD | - | - |
+| 51 | TBD | - | - |
+| 52 | TBD | - | - |
+| 53 | TBD | - | - |
+| 54 | TBD | - | - |
 
 **Recent Trend:**
 
@@ -56,19 +55,6 @@ Last activity: 2026-08-23 — Milestone v8.0 started
 - Trend: -
 
 *Updated after each plan completion*
-**Per-Plan Metrics:**
-
-| Plan | Duration | Tasks | Files |
-|------|----------|-------|-------|
-| Phase 42 P01 | 9m | 3 tasks | 1 files |
-| Phase 43 P01 | 4m | 3 tasks | 4 files |
-| Phase 44 P01 | 507 | 3 tasks | 4 files |
-| Phase 45-svg-fix-regression-inference P01 | 159 | 3 tasks | 2 files |
-| Phase 46 P01 | 9m | 3 tasks | 18 files |
-| Phase 46-diagram-coverage-examples P02 | 8 minutes | 3 tasks | 22 files |
-| Phase 47 P01 | 7 minutes | 2 tasks | 11 files |
-| Phase 48 P01 | 4 | 3 tasks | 3 files |
-| Phase 48-page-depth P02 | 4 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -77,36 +63,13 @@ Last activity: 2026-08-23 — Milestone v8.0 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v7.0 roadmap]: Phase numbering CONTINUES from v6.0 (starts at Phase 42; v6.0 ended at Phase 41) — no reset
-- [v7.0 roadmap]: Same shape as the v1.0 overhaul — AUDIT first (Phase 42, AUDIT-01, gates everything), then SVG fixes batched by docs section (Phases 43–45), then new-diagram coverage (Phases 46–47), then page depth (Phase 48), then a whole-site + human review gate LAST (Phase 49)
-- [v7.0 roadmap]: SVG fix batched into three balanced section groups per built-site review cadence + fine granularity — Phase 43 learn/represent/align (~24 diagrams), Phase 44 analyze/monitoring/advisor (~17), Phase 45 regression/inference (~19); each batch applies all four fix axes (SVGFIX-01..04) to its diagrams
-- [v7.0 roadmap]: DIACOV split into two coverage phases — Phase 46 examples pages (DIACOV-01), Phase 47 advisor surface pages (DIACOV-02, reversing the v2.1 diagram-free choice); both depend only on the audit (Phase 42), not on the fix phases
-- [v7.0 roadmap]: Phase 49 (GATE-01/02) depends on ALL of 43–48 — it is the whole-site strict build + per-section review + blocking human diagram method-accuracy review before close
-- [standing v6.0]: Docs phases run sequentially on `main`, NOT in worktrees — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path (`use_worktrees: false` in config)
-- [standing v6.0]: Blocking human diagram method-accuracy review before milestone close — the v6.0 lesson (inverted hypograph/epigraph asymmetry slipped past executors + verifier, caught only by human review)
-- [Phase 42]: Canonical diagram count is 61 (not 68); ex-sonar-tsrvf.svg assigned to Phase 43 bucket
-- [Phase 42]: conformal-prediction.svg confirmed accurate for scalar-response API; v1.0 misleading finding resolved
-- [Phase 42]: spm.svg confirmed fully redrawn (R-era content removed); was Phase 44 Major, now OK
-- [Phase 43]: depth-functions.svg: functional_boxplot confirmed exported at src/depth_mod.rs:625 — diagram reference correct
-- [Phase 43]: 5 represent/ XML-cleanup files left byte-unchanged: inline font-size= are intentional size reductions, not CSS-class-size duplicates
-- [Phase 43]: ex-sonar-tsrvf.svg migrated to viewBox 0 0 720 480 with canonical STYLE_SPEC five-class block
-- [Phase 44]: KEEP Amplitude taxonomy in outlier-detection.svg (confirmed canonical against docs + src)
-- [Phase 44]: REPLACE conformal_prediction_band() with magnitude_shape() (real binding at src/outliers_mod.rs:93)
-- [Phase 44]: DEFER elastic-clustering function-name sub-label to Phase 49 (140px box too narrow)
-- [Phase 45]: elastic-multinomial.svg height bumped 300→480; OvR rows re-spaced to h=74 each; method content preserved
-- [Phase 45]: scalar-on-function.svg β̂(t) inset enlarged conservatively and surfaced for Phase 49 human review
-- [Phase 45]: functional-glm.svg byte-unchanged: Gamma inverse g(μ)=1/μ confirmed correct vs src/regression_mod.rs:1091,1143 and docs md:34,36-37
-- [Phase 45]: inference-permutation-test.svg byte-unchanged: lone font-size=11 on .mono (class=12) is intentional
-- [Phase 46]: Tracer-first approach: authored ex-canadian-weather.svg end-to-end to prove the per-diagram pipeline before scaling to 8 more diagrams
-- [Phase 46]: SVG height 480 for multi-row workflows (canadian-weather, canadian-seasonal, andrews-wine*, andrews-wine-clustering, andrews-wine-qc); 300 for single-row flows
-- [Phase 47]: All 5 advisor diagrams use 720×480 viewBox — all needed the space for accurate multi-stage flows
-- [Phase 47]: advisor-mcp.svg places Agent/LLM OUTSIDE MCP boundary with 6 _RUNNABLE_METHODS per server.py (not 5 per prose)
-- [Phase 47]: advisor-aspects.svg lists 14 aspects per build_diagnostics._supported (not 12+ per intro prose)
-- [Phase 48]: Task 1: Added Poisson as second GLM family (preferred over Gamma; no positivity trick)
-- [Phase 48]: Task 2: PACE vs standard FPCA comparison section + new fence verifies eigenfunction consistency from sparse data
-- [Phase 48]: Task 3: ITP-vs-t_perm_test fence demonstrates localisation (WHERE) vs detection (WHETHER) on same synthetic data
-- [Phase 48]: All 7 existing-fence pages got prose/caveats/comparison additions with fences byte-identical and no SVG touched
-- [Phase 48]: Quality-score thresholds (pairwise_correlation_score ~0.7/~0.9) stated as approximate guidance, grounded in existing page text
+- [v8.0 roadmap]: Phase numbering CONTINUES from v7.0 (starts at Phase 50; v7.0 ended at Phase 49) — no reset
+- [v8.0 roadmap]: Foundation-first 5-phase structure per research — deferred aspects FIRST (Phase 50, unblocks accurate diagnostics for every later LLM call), then comparative → pipeline (Phases 51–52, strict complexity/dependency gradient; pipeline proves per-stage isolation), auto-tuning capstone (Phase 53), eval + docs gate LAST (Phase 54)
+- [v8.0 roadmap]: COMPAT-01..03 folded into Phase 50 as a pre-flight (anthropic pin >=0.72,<1.0; mcp v2 MCPServer import; version-independent guard-sync test) — blocking fixes on the existing surface must land before new aspect work
+- [v8.0 roadmap]: EVAL-01..02 folded into the Phase 54 docs gate — eval signals defined alongside the capstone/close, not a standalone thin phase
+- [v8.0 roadmap]: Phase 53 (auto-tuning) flagged for research-phase during planning — convergence/oscillation/guard interaction + heuristic-proposal param spec + MCP param-schema decision are the milestone's genuine unknowns
+- [standing v6.0]: Docs phase (54) runs sequentially on `main`, NOT in worktrees — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path (`use_worktrees: false` in config)
+- [standing v6.0]: Blocking human diagram method-accuracy review before milestone close (the hypograph/epigraph lesson)
 
 ### Pending Todos
 
@@ -114,29 +77,32 @@ None yet.
 
 ### Blockers/Concerns
 
-- [milestone-wide]: Every phase inherits the hard constraints — diagrams stay hand-authored inline SVG; SVGO idempotence + build-determinism CI gate must stay green; worked-example fences run OFFLINE against the current `fdars` API emitting `FDARS_FENCE_OK` with small data (synthetic `n ≤ 20` / subsampled datasets); whole-site `mkdocs build --strict` green offline
-- [build time]: docs build is ~19–25 min with executed fences (real compute) — keep any NEW fence data small to hold total build time down (DEPTH-03)
-- [Phase 42]: the milestone framing cites 68 concept diagrams; the working tree currently has 61 top-level concept SVGs in `docs/assets/diagrams/` — the audit produces the authoritative inventory and reconciles the count (cards/ and thumb/ excluded)
-- [scope]: cards/ and thumb/ SVGs are OUT of audit scope unless a fixed concept diagram's thumb visibly diverges (→ DIAG-FUT-02)
+- [milestone-wide]: Grounding invariant is a hard constraint on every phase — every emitted scalar must be fdars-computed native `float`/`int` (no numpy scalars, no fabricated numbers); the LLM only interprets/cites and (in auto-tune) proposes via a schema-validated numeric `parameter_delta`
+- [milestone-wide]: MCP boundary must stay provably LLM-free — no new MCP tool (`fdars_compare_methods`, `fdars_build_pipeline_report`, `fdars_auto_tune`) may call `advise()`; MCP proposals are heuristic; guard-sync (`_DIAGNOSTICS_METHODS` ↔ `build_diagnostics._supported`) edits stay atomic (a no-op for all four capabilities — no new method slot)
+- [Phase 50]: ITP vector→scalar reduction must emit detection AND localisation scalars together (min adjusted p; count + proportion significant; first significant basis; detected-at-0.05) — a lone `min_p` misleads the LLM into treating local significance as global
+- [Phase 50 unknowns]: best PACE quality scalar beyond sigma2/ncomp (reconstruction-quality from `fitted`?); ITP small-sample (n_basis=2) behavior — resolve in Phase 50 plan
+- [Phase 53 unknowns]: heuristic proposal grid width/steps per method; static allowlist vs `**kwargs` for the MCP tool; whether the 6 `_RUNNABLE_METHODS` suffice or regression/inference must become runnable; `max_steps` cost ceiling (~20 suggested — confirm with user)
+- [build time]: docs build is ~19–25 min with executed fences — keep any NEW auto-tune/comparison/pipeline fence data small and use the offline/injectable path (no network in docs build)
+- [packaging]: package currently 0.7.0; a code milestone bumps it (semver `vX.Y.Z` tag triggers PyPI publish) — decide the bump at close; full anthropic 1.x migration deferred out of v8.0 (drops Python 3.9)
 
 ## Deferred Items
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
+| SDK | ANTHROPIC-1X: full `anthropic` 1.x migration (drops Python 3.9; `output_config`, httpx2) — its own milestone once Python 3.9 is dropped | future | v8.0 init |
+| Transport | HTTP-01 / FUT-01: HTTP/SSE MCP transport for the fdars-advisor server (stdio shipped in v2.0) | v3.x/future | v2.0 close |
 | Diagrams | DIAG-FUT-01 (A11Y-01): Long-form `<title>`/`<desc>` + aria-labelledby for complex diagrams | future | v7.0 init |
-| Diagrams | DIAG-FUT-02: Regenerate thumb/ & cards/ SVGs to mirror any materially-changed concept diagram (only if a thumb visibly diverges) | future | v7.0 init |
-| Plotting | PLOT-01: `fdars.plot.plot_functional_boxplot()` helper rendering the `functional_boxplot` numeric result | v2/future | v5.0 init |
+| Diagrams | DIAG-FUT-02: Regenerate thumb/ & cards/ SVGs to mirror any materially-changed concept diagram | future | v7.0 init |
+| Plotting | PLOT-01: `fdars.plot.plot_functional_boxplot()` helper | v2/future | v5.0 init |
 | Examples | EX2-01: Editorial consolidation (sonar-tsrvf vs phoneme-shape; Andrews-wine series) | v2 | Init |
-| Transport | HTTP-01 / FUT-01: HTTP/SSE MCP transport for the fdars-advisor server (stdio shipped in v2.0) | v3.x | v2.0 close |
-| Advisor | PACE-ADV / MULTINOM-ADV: dedicated advisor aspects for PACE-FPCA and elastic multinomial | future | v6.0 init |
 | Core | `linalg`-gated `ridge_regression_fit` (Rust 1.84+ > MSRV 1.83) + HEAD 0.24-bound work | out of scope | v6.0 init |
 
 ## Session Continuity
 
-Last session: 2026-08-22T21:44:19.286Z
-Stopped at: Phase 49 complete — all phases complete
+Last session: 2026-08-23T19:30:00.000Z
+Stopped at: v8.0 roadmap created (Phases 50–54; ROADMAP.md + REQUIREMENTS.md traceability written)
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Plan the first phase with /gsd-plan-phase 50
