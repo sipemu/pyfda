@@ -80,6 +80,7 @@ def build_diagnostics(
     *,
     argvals=None,
     n_classes: "int | None" = None,
+    holdout_accuracy: "float | None" = None,
     **kwargs,
 ) -> dict:
     """Build a deterministic, JSON-serialisable diagnostics dict from an fdars result.
@@ -108,6 +109,13 @@ def build_diagnostics(
         Ground-truth class count for the ``"classification"`` aspect; cannot be
         inferred from a result dict (which contains only predicted labels), so
         the caller supplies it.  Ignored by all other methods.
+    holdout_accuracy : float, optional
+        Caller-supplied holdout or CV accuracy for the ``"classification"`` aspect.
+        Used by the ``elastic_multinomial`` branch to compute the overfitting gap
+        (train_accuracy minus holdout_accuracy).  The ``elastic_multinomial`` result
+        has no holdout accuracy of its own; passing this value enables the gap.
+        When ``None`` (default) the gap is ``None`` (not fabricated).
+        Ignored by all other methods (ASPECT-02).
     **kwargs
         Reserved for future per-method options.
 
@@ -184,7 +192,9 @@ def build_diagnostics(
 
     if method_lc == "classification":
         from fdars.advisor.aspects.classification import _build_classification_diagnostics  # noqa: PLC0415
-        return _build_classification_diagnostics(raw, n_classes=n_classes, **kwargs)
+        return _build_classification_diagnostics(
+            raw, n_classes=n_classes, holdout_accuracy=holdout_accuracy, **kwargs
+        )
 
     if method_lc == "represent":
         from fdars.advisor.aspects.represent import _build_represent_diagnostics  # noqa: PLC0415

@@ -37,6 +37,7 @@ def _build_classification_diagnostics(
     raw: dict,
     *,
     n_classes: "int | None" = None,
+    holdout_accuracy: "float | None" = None,
     **kwargs,
 ) -> dict:
     """Compute classification diagnostics from an fdars classification result dict.
@@ -58,6 +59,14 @@ def _build_classification_diagnostics(
         Ground-truth class count.  Cannot be inferred from the result dict;
         caller supplies it via ``build_diagnostics(..., n_classes=K)``.  When
         ``None`` (default), the ``n_classes`` field in the output is ``None``.
+    holdout_accuracy : float, optional
+        Caller-supplied holdout or CV accuracy against which to compute the
+        overfitting gap.  The ``elastic_multinomial`` result dict carries ONLY
+        ``train_accuracy`` — there is NO holdout/CV accuracy in the result, so
+        the gap can only be computed when the caller supplies this value (ASPECT-02,
+        grounding invariant: the gap MUST come from a real fdars/caller-measured
+        value, never fabricated).  When ``None`` (default) the
+        ``overfitting_gap`` field is ``None`` (not fabricated).
     **kwargs
         Reserved for future per-method options (ignored).
 
@@ -144,8 +153,36 @@ def _build_classification_diagnostics(
         # Override caller-supplied n_classes with the fdars-computed count
         if "n_classes" in raw:
             diag["n_classes"] = int(raw["n_classes"])
+
+        # ASPECT-02 — overfitting gap + class-count flag ----------------------
+
+        # overfitting_gap: train_accuracy minus caller-supplied holdout_accuracy.
+        # GROUNDING INVARIANT: the elastic_multinomial result has NO holdout/CV
+        # accuracy — it is a caller-measured value.  Emit None when not supplied
+        # rather than fabricating a value (T-50B-03).
+        train_acc = diag["train_accuracy"]
+        if holdout_accuracy is not None:
+            diag["overfitting_gap"] = float(train_acc - float(holdout_accuracy))
+            diag["overfitting_gap_holdout_source"] = "holdout_accuracy"
+        else:
+            diag["overfitting_gap"] = None
+            diag["overfitting_gap_holdout_source"] = None
+
+        # n_classes_flagged: True when n_classes > 2 (multiclass vs binary).
+        # Derived only from the fdars-computed n_classes count; no invented
+        # numeric threshold beyond the binary/multiclass structural split.
+        n_classes_val = diag["n_classes"]
+        if n_classes_val is not None:
+            diag["n_classes_flagged"] = bool(n_classes_val > 2)
+        else:
+            diag["n_classes_flagged"] = None
+
     else:
         diag["train_accuracy"] = None
         diag["train_error_rate"] = None
+        # ASPECT-02 — stable None fields for non-elastic paths
+        diag["overfitting_gap"] = None
+        diag["overfitting_gap_holdout_source"] = None
+        diag["n_classes_flagged"] = None
 
     return diag

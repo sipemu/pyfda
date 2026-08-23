@@ -136,6 +136,116 @@ class TestElasticMultinomial:
             f"n_classes={n_classes_str} not discoverable in diagnostics json"
         )
 
+    # -- ASPECT-02 new scalars -----------------------------------------------
+
+    def test_overfitting_gap_with_holdout(self, multinomial_result):
+        """overfitting_gap = train_accuracy - holdout_accuracy when holdout supplied."""
+        from fdars.advisor import build_diagnostics
+        diag_no_holdout = build_diagnostics(multinomial_result, method="classification")
+        train_acc = diag_no_holdout["train_accuracy"]
+        holdout_acc = 0.72
+        diag = build_diagnostics(
+            multinomial_result, method="classification", holdout_accuracy=holdout_acc
+        )
+        expected_gap = train_acc - holdout_acc
+        assert abs(diag["overfitting_gap"] - expected_gap) < 1e-10
+
+    def test_overfitting_gap_is_native_float(self, multinomial_result):
+        """overfitting_gap must be a native float when holdout supplied."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(
+            multinomial_result, method="classification", holdout_accuracy=0.72
+        )
+        assert type(diag["overfitting_gap"]) is float
+
+    def test_overfitting_gap_none_when_no_holdout(self, multinomial_result):
+        """overfitting_gap must be None when no holdout_accuracy supplied (not fabricated)."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(multinomial_result, method="classification")
+        assert diag["overfitting_gap"] is None, (
+            "overfitting_gap must be None when holdout_accuracy is not supplied "
+            "— grounding invariant: do not fabricate a holdout"
+        )
+
+    def test_overfitting_gap_holdout_source_provenance(self, multinomial_result):
+        """overfitting_gap_holdout_source must be 'holdout_accuracy' when supplied."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(
+            multinomial_result, method="classification", holdout_accuracy=0.70
+        )
+        assert diag["overfitting_gap_holdout_source"] == "holdout_accuracy"
+
+    def test_overfitting_gap_holdout_source_none(self, multinomial_result):
+        """overfitting_gap_holdout_source must be None when no holdout supplied."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(multinomial_result, method="classification")
+        assert diag["overfitting_gap_holdout_source"] is None
+
+    def test_n_classes_flagged_is_bool(self, multinomial_result):
+        """n_classes_flagged must be a native bool."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(multinomial_result, method="classification")
+        assert type(diag["n_classes_flagged"]) is bool
+
+    def test_n_classes_flagged_true_for_multiclass(self, multinomial_result):
+        """n_classes_flagged must be True when n_classes == 3 (multiclass, > 2)."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(multinomial_result, method="classification")
+        # K=3 in the fixture, so multiclass -> flagged True
+        assert diag["n_classes"] == 3
+        assert diag["n_classes_flagged"] is True
+
+    def test_n_classes_flagged_false_for_binary(self):
+        """n_classes_flagged must be False when n_classes == 2 (binary)."""
+        from fdars.advisor import build_diagnostics
+        # Synthesise a minimal elastic_multinomial result with n_classes=2
+        binary_result = {
+            "train_accuracy": 0.90,
+            "n_classes": 2,
+            "classes": [0, 1],
+            "predicted_classes": [0, 1, 0, 1],
+            "train_probabilities": [[0.9, 0.1], [0.1, 0.9], [0.8, 0.2], [0.2, 0.8]],
+        }
+        diag = build_diagnostics(binary_result, method="classification")
+        assert diag["n_classes_flagged"] is False
+
+    def test_new_scalars_json_serialisable(self, multinomial_result):
+        """All three new ASPECT-02 scalars must be JSON-serialisable."""
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(
+            multinomial_result, method="classification", holdout_accuracy=0.72
+        )
+        subset = {
+            "overfitting_gap": diag["overfitting_gap"],
+            "overfitting_gap_holdout_source": diag["overfitting_gap_holdout_source"],
+            "n_classes_flagged": diag["n_classes_flagged"],
+        }
+        json.dumps(subset)
+        check_no_numpy(subset)
+
+    def test_new_scalars_none_for_plain_fclassif(self):
+        """A plain fclassif (accuracy path) result leaves overfitting_gap None."""
+        from fdars.advisor import build_diagnostics
+        plain_result = {"accuracy": 0.85, "predicted": [0, 1, 0, 1, 0]}
+        diag = build_diagnostics(plain_result, method="classification")
+        assert diag["overfitting_gap"] is None
+        assert diag["n_classes_flagged"] is None
+
+    def test_overfitting_gap_exact_with_fixtures(self):
+        """Direct arithmetic check: train=0.95, holdout=0.72 -> gap=0.23."""
+        from fdars.advisor import build_diagnostics
+        result = {
+            "train_accuracy": 0.95,
+            "n_classes": 3,
+            "classes": [0, 1, 2],
+            "predicted_classes": [],
+            "train_probabilities": [],
+        }
+        diag = build_diagnostics(
+            result, method="classification", holdout_accuracy=0.72
+        )
+        assert abs(diag["overfitting_gap"] - 0.23) < 1e-10
+
 
 # ---------------------------------------------------------------------------
 # TestPaceFpca
