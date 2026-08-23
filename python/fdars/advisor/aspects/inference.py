@@ -27,6 +27,22 @@ ToleranceBand / SCB (secondary shape, tolerated but not deeply summarised):
     the builder echoes basic summary scalars and leaves all significance fields
     ``None``.
 
+ITP interval-wise testing result (ASPECT-03):
+    * ``adjusted_pvalues`` — numpy array of shape (n_basis,), one p-value per basis
+    * ``raw_pvalues``      — numpy array of shape (n_basis,), unadjusted p-values
+    * ``basis_type``       — str identifying the projection basis
+    * ``n_basis``          — int, number of projection basis functions
+    * ``n_perm``           — int, number of permutations used
+
+    The raw array is REDUCED to grounded DETECTION + LOCALISATION scalars (ASPECT-03,
+    PITFALLS #8 — emitting a lone global scalar would mislead the LLM into treating
+    local significance as global significance):
+      Detection:    itp_min_adjusted_pvalue, itp_detected_at_0.05
+      Localisation: itp_n_significant_0.05, itp_fraction_significant_0.05,
+                    itp_first_significant_basis
+    The raw ``adjusted_pvalues``/``raw_pvalues`` arrays are NEVER stored in the
+    returned dict (breaks JSON serialisation + grounding invariant).
+
 All returned values are native Python types (float, int, str, bool, None).
 No NumPy scalars.  Two calls on the same input always return an equal,
 JSON-serialisable dict.  No network, no RNG, no wall-clock dependency.
@@ -122,18 +138,89 @@ def _build_inference_diagnostics(raw, **kwargs) -> dict:
 
     has_test_result_keys = "p_value" in raw or "statistic" in raw
     has_tolerance_band_keys = "half_width" in raw and "center" in raw
+    # ITP result is uniquely identified by "adjusted_pvalues" — the vector-valued
+    # per-basis p-value array.  TestResult uses "p_value"/"statistic" (scalar);
+    # ToleranceBand uses "half_width"/"center".  These are disjoint fdars outputs.
+    has_itp_keys = "adjusted_pvalues" in raw
     # Routing precedence: TestResult wins when both key sets are present (a dict
     # mixing p_value and half_width/center is pathological in practice — fdars
     # TestResult and ToleranceBand are disjoint outputs — so half_width is silently
     # ignored on the TestResult path rather than raising an ambiguity error.
 
-    if not has_test_result_keys and not has_tolerance_band_keys:
+    if not has_test_result_keys and not has_tolerance_band_keys and not has_itp_keys:
         raise ValueError(
             "build_diagnostics(method='inference'): raw dict contains neither "
             "TestResult keys ('statistic', 'p_value', 'n_perm') nor ToleranceBand "
-            "keys ('half_width', 'center').  Pass the dict returned by an "
-            "fdars.inference function directly."
+            "keys ('half_width', 'center') nor ITP keys ('adjusted_pvalues').  "
+            "Pass the dict returned by an fdars.inference function directly."
         )
+
+    # ------------------------------------------------------------------
+    # ITP (interval-wise testing procedure) path  — ASPECT-03
+    # ------------------------------------------------------------------
+    # Detected by the presence of "adjusted_pvalues" (a numpy array, shape (n_basis,))
+    # which is unique to the fdars ITP result dict (TestResult uses scalar p_value,
+    # ToleranceBand uses half_width/center).
+    #
+    # PITFALLS #8: emit DETECTION AND LOCALISATION scalars together.  A lone
+    # itp_min_adjusted_pvalue would mislead the LLM into treating local
+    # significance as global significance.
+    # Detection:    itp_min_adjusted_pvalue, itp_detected_at_0.05
+    # Localisation: itp_n_significant_0.05, itp_fraction_significant_0.05,
+    #               itp_first_significant_basis
+
+    if has_itp_keys and not has_test_result_keys:
+        diag = {"method": "inference"}
+
+        # Stable None-valued fields from the other paths (stable key set)
+        diag["statistic"] = None
+        diag["p_value"] = None
+        diag["n_perm"] = None
+        diag["significant_at_0.01"] = None
+        diag["significant_at_0.05"] = None
+        diag["significant_at_0.10"] = None
+        diag["strongest_significance_level"] = None
+        diag["is_permutation_test"] = None
+
+        # Signal that this is an ITP result
+        diag["itp_result_present"] = True
+
+        # Reduce the vector-valued adjusted_pvalues array to native scalars.
+        # Iterate over the array (any array-like); cast each element to float()
+        # so no numpy scalar leaks into the output (grounding invariant: only
+        # native Python types in the diagnostics dict).
+        pvalues_list = [float(v) for v in raw["adjusted_pvalues"]]
+        n_basis = int(raw["n_basis"]) if "n_basis" in raw else len(pvalues_list)
+        n_perm_itp = int(raw["n_perm"]) if "n_perm" in raw else None
+
+        diag["itp_n_basis"] = n_basis
+        diag["itp_n_perm"] = n_perm_itp
+
+        _ALPHA = 0.05  # fixed significance threshold (CONTEXT.md decision)
+
+        # ---- DETECTION scalars ----
+        if pvalues_list:
+            itp_min_p = float(min(pvalues_list))
+            diag["itp_min_adjusted_pvalue"] = itp_min_p
+            diag["itp_detected_at_0.05"] = bool(itp_min_p < _ALPHA)
+        else:
+            diag["itp_min_adjusted_pvalue"] = None
+            diag["itp_detected_at_0.05"] = False
+
+        # ---- LOCALISATION scalars ----
+        sig_indices = [i for i, p in enumerate(pvalues_list) if p < _ALPHA]
+        n_sig = int(len(sig_indices))
+        diag["itp_n_significant_0.05"] = n_sig
+
+        if n_basis > 0:
+            diag["itp_fraction_significant_0.05"] = float(n_sig / n_basis)
+        else:
+            diag["itp_fraction_significant_0.05"] = 0.0
+
+        # First basis index with adjusted p < alpha, or None when none significant
+        diag["itp_first_significant_basis"] = int(sig_indices[0]) if sig_indices else None
+
+        return diag
 
     # ------------------------------------------------------------------
     # ToleranceBand / SCB path
@@ -163,6 +250,16 @@ def _build_inference_diagnostics(raw, **kwargs) -> dict:
                 diag["half_width"] = float(hw_raw)
         else:
             diag["half_width"] = None
+
+        # Stable ITP fields — None in the ToleranceBand path
+        diag["itp_result_present"] = False
+        diag["itp_min_adjusted_pvalue"] = None
+        diag["itp_detected_at_0.05"] = None
+        diag["itp_n_significant_0.05"] = None
+        diag["itp_fraction_significant_0.05"] = None
+        diag["itp_first_significant_basis"] = None
+        diag["itp_n_basis"] = None
+        diag["itp_n_perm"] = None
 
         return diag
 
@@ -217,5 +314,15 @@ def _build_inference_diagnostics(raw, **kwargs) -> dict:
         diag["is_permutation_test"] = bool(n_perm > 0)
     else:
         diag["is_permutation_test"] = None
+
+    # Stable ITP fields — None in the TestResult path
+    diag["itp_result_present"] = False
+    diag["itp_min_adjusted_pvalue"] = None
+    diag["itp_detected_at_0.05"] = None
+    diag["itp_n_significant_0.05"] = None
+    diag["itp_fraction_significant_0.05"] = None
+    diag["itp_first_significant_basis"] = None
+    diag["itp_n_basis"] = None
+    diag["itp_n_perm"] = None
 
     return diag
