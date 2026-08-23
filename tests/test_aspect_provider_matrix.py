@@ -169,6 +169,43 @@ _SMOOTHING_RESULT = {
     "edf": np.array([10.0, 8.0, 5.0, 3.0]),
 }
 
+# ---------------------------------------------------------------------------
+# NEW: ASPECT-05 fixtures — PACE-FPCA, elastic-multinomial, ITP
+# All synthetic, offline, no RNG, no network.
+# ---------------------------------------------------------------------------
+
+# PACE-FPCA (aspect_id="fpca_pace", method="fpca")
+# Trigger in fpca.py: "eigenvalues" in raw (unambiguous — standard FPCA uses "singular_values").
+# ncomp=2 < len(eigenvalues)=3 → pace_truncated_rank_flagged=True.
+# sigma2=0.05, total_signal=5.0 → pace_noise_signal_ratio=0.01.
+# fitted_lower/upper are (2,3) 2-D lists → pace_mean_prediction_band_width is a real float.
+_PACE_FPCA_RESULT = {
+    "eigenvalues": [3.0, 1.5, 0.5],
+    "ncomp": 2,
+    "sigma2": 0.05,
+    "fitted_lower": [[0.1, 0.2, 0.15], [0.05, 0.1, 0.08]],
+    "fitted_upper": [[0.5, 0.6, 0.55], [0.45, 0.5, 0.48]],
+}
+
+# elastic-multinomial (aspect_id="classification_elastic", method="classification")
+# Trigger in classification.py: "train_accuracy" in raw.
+# n_classes=3 → n_classes_flagged=True; holdout_accuracy=0.72 supplied → overfitting_gap=0.23.
+_ELASTIC_RESULT = {
+    "train_accuracy": 0.95,
+    "n_classes": 3,
+}
+
+# ITP (aspect_id="inference_itp", method="inference")
+# Trigger in inference.py: "adjusted_pvalues" in raw.
+# adjusted_pvalues: first element 0.02 < 0.05 → itp_detected_at_0.05=True, itp_min=0.02.
+# 1 of 5 significant → itp_n_significant_0.05=1, itp_fraction=0.2.
+_ITP_RESULT = {
+    "adjusted_pvalues": [0.02, 0.8, 0.9, 0.85, 0.6],
+    "raw_pvalues": [0.01, 0.6, 0.7, 0.65, 0.4],
+    "n_basis": 5,
+    "n_perm": 99,
+}
+
 
 # ---------------------------------------------------------------------------
 # Build the evidence_value from real diagnostics for each aspect so that the
@@ -228,6 +265,12 @@ _ASPECT_FIXTURES = [
     ("fpca", _FPCA_RESULT, {}),
     ("basis", _BASIS_RESULT, {}),
     ("smoothing", _SMOOTHING_RESULT, {}),
+    # ASPECT-05: three new aspects — PACE-FPCA, elastic-multinomial, ITP.
+    # aspect_id is a unique label distinct from the method name (which is the same
+    # base method but a different result shape / diagnostic branch).
+    ("fpca_pace", _PACE_FPCA_RESULT, {}),
+    ("classification_elastic", _ELASTIC_RESULT, {"holdout_accuracy": 0.72}),
+    ("inference_itp", _ITP_RESULT, {}),
 ]
 
 _ASPECT_IDS = [t[0] for t in _ASPECT_FIXTURES]
@@ -262,20 +305,38 @@ def test_aspect_provider_matrix(aspect, result, build_kwargs, provider_kind):
     """
     from fdars.advisor import Advice, advise, build_diagnostics
 
+    # Mapping from aspect_id to the method string accepted by build_diagnostics.
+    # For the original 12 aspects, aspect_id == method.  For the three new
+    # ASPECT-05 fixtures, the id is more specific (e.g. "fpca_pace") but the
+    # underlying method dispatch key is the base method name.
+    _ASPECT_ID_TO_METHOD = {
+        "fpca_pace": "fpca",
+        "classification_elastic": "classification",
+        "inference_itp": "inference",
+    }
+    method = _ASPECT_ID_TO_METHOD.get(aspect, aspect)
+
     # Step 1: build diagnostics offline (no network, no RNG)
     if aspect == "alignment":
         # alignment uses argvals as a positional-ish named arg
         argvals = build_kwargs.get("argvals")
-        diag = build_diagnostics(result, method=aspect, argvals=argvals)
-    elif aspect == "classification":
+        diag = build_diagnostics(result, method=method, argvals=argvals)
+    elif aspect in ("classification", "classification_elastic"):
+        # classification_elastic: forward holdout_accuracy so overfitting_gap is populated
         n_classes = build_kwargs.get("n_classes")
-        diag = build_diagnostics(result, method=aspect, n_classes=n_classes)
+        holdout_accuracy = build_kwargs.get("holdout_accuracy")
+        diag = build_diagnostics(
+            result, method=method,
+            n_classes=n_classes,
+            holdout_accuracy=holdout_accuracy,
+        )
     else:
-        diag = build_diagnostics(result, method=aspect)
+        diag = build_diagnostics(result, method=method)
 
     assert isinstance(diag, dict), f"build_diagnostics({aspect!r}) must return a dict"
-    assert diag.get("method") == aspect, (
-        f"diag['method'] must be {aspect!r}, got {diag.get('method')!r}"
+    assert diag.get("method") == method, (
+        f"diag['method'] must be {method!r} (aspect_id={aspect!r}), "
+        f"got {diag.get('method')!r}"
     )
 
     # Step 2: build a grounded advice_dict using a REAL value from diag
