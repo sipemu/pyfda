@@ -1,84 +1,101 @@
-# Requirements: pyfda — v7.0 Documentation Quality Pass
+# Requirements: pyfda — v8.0 Advisor: New Capabilities
 
-**Defined:** 2026-08-22
-**Core Value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
+**Defined:** 2026-08-23
+**Core Value:** Extend the fdars AI advisor with new agentic capabilities while holding the grounding invariant (fdars computes every number; the LLM only interprets/cites) and the MCP-LLM-free compute boundary as hard constraints.
 
-## v7.0 Requirements
+## v8.0 Requirements
 
-Documentation-only quality milestone. No `fdars-core` bump, no new bindings. Requirements map to roadmap phases (continue numbering from Phase 41 → start at Phase 42).
+Four new advisor capabilities built on the existing surface (no new runtime deps), foundation-first. Requirements map to roadmap phases (continue numbering from Phase 49 → start at Phase 50).
 
-### Audit
+### Compatibility (pre-flight)
 
-- [x] **AUDIT-01**: A diagram audit report inventories all 68 concept diagrams in `docs/assets/diagrams/` (cards/ and thumb/ excluded), each scored on the four fix axes — visual/layout quality, STYLE_SPEC conformance, XML source formatting, method-accuracy — producing a ranked, per-section fix list that gates the fix phases. Report also confirms the per-page diagram-coverage gap (which `examples/` and advisor pages lack a concept SVG) and the thin-page extension list.
+- [ ] **COMPAT-01**: `anthropic` dependency pinned `>=0.72.0,<1.0` so the existing advisor keeps importing on Python 3.9 (abi3-py39); anthropic 1.0 migration deferred out of v8.0
+- [ ] **COMPAT-02**: MCP server uses the `mcp` v2 import path (`MCPServer`); the existing 3 tools import and run over stdio unchanged
+- [ ] **COMPAT-03**: the guard-sync test (`_DIAGNOSTICS_METHODS` ↔ `build_diagnostics._supported`) runs on all supported Python versions (no longer skipped on the 3.9 CI baseline)
 
-### SVG Fix
+### Deferred Advisor Aspects
 
-- [x] **SVGFIX-01**: Every concept diagram flagged for visual/layout issues is corrected — no overlapping labels, consistent spacing, alignment, and sizing — verified on the built site (rendered PNG check).
-- [x] **SVGFIX-02**: Every concept diagram conforms to `docs/assets/diagrams/STYLE_SPEC.md` — palette, system-ui fonts, `viewBox`, the `.ttl/.sub/.lab/.sm/.mono` CSS classes, and `role="img"` + `aria-label`.
-- [x] **SVGFIX-03**: Every concept diagram's XML source is clean and hand-editable and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds for deterministic content).
-- [x] **SVGFIX-04**: Every concept diagram is method-accurate against the shipped `fdars` bindings — no diagram misdepicts what its method does (per the v6.0 hypograph/epigraph lesson).
+- [ ] **ASPECT-01**: the PACE-FPCA aspect emits grounded scalars (noise/signal `sigma2` ratio, truncated-rank flag, mean prediction-band width) computed from fdars `pace_fpca` results
+- [ ] **ASPECT-02**: the elastic-multinomial aspect emits grounded classification scalars (e.g. overfitting gap, class-count flag) computed from fdars results
+- [ ] **ASPECT-03**: the ITP interval-inference aspect reduces the vector-valued p-curve to grounded **detection AND localisation** scalars (min adjusted p-value; count + proportion of significant intervals; first significant basis; detected-at-0.05) — never a single misleading scalar
+- [ ] **ASPECT-04**: `_ASPECT_PRIMERS` extended for the three aspects; grounding invariant + guard-sync preserved in atomic commits; diagnostics offline-deterministic with native float/int (no numpy scalars)
+- [ ] **ASPECT-05**: `advise()` returns grounded interpretation for each new aspect, verified across providers (offline grounding matrix + env-gated live)
 
-### Diagram Coverage
+### Comparative Method-Selection
 
-- [x] **DIACOV-01**: Each of the ~21 `docs/examples/*.md` worked-example pages carries a method-accurate, STYLE_SPEC-conformant hand-authored inline concept SVG, wired into the page.
-- [x] **DIACOV-02**: Each of the 5 advisor surface pages (`python-api`, `mcp`, `providers`, `agent-skill`, `aspects`) carries a method-accurate, STYLE_SPEC-conformant hand-authored inline concept SVG.
+- [ ] **COMPARE-01**: `compare_methods()` runs `build_diagnostics` over N candidate methods and returns a deterministic, **fdars-computed** ranking (the LLM does not choose the winner)
+- [ ] **COMPARE-02**: a "comparison" advise task family narrates the ranking, citing each candidate's grounded diagnostics with correct per-candidate provenance (labeled candidates, never flat-merged dicts)
+- [ ] **COMPARE-03**: comparison guards against incommensurable comparisons — only comparable candidates are ranked, on a shared metric
+- [ ] **COMPARE-04**: an `fdars_compare_methods` MCP tool exposes the comparison and stays provably LLM-free (re-runs via existing runnable methods)
 
-### Page Depth
+### Pipeline Diagnostic Report
 
-- [x] **DEPTH-01**: The thin v6.0 method pages (`regression/concurrent-regression`, `regression/functional-glm`, `represent/pace-fpca`, `inference/interval-inference`) are extended to mature-page structure — intro, method explanation, worked example, parameters, caveats/interpretation.
-- [x] **DEPTH-02**: The thin v4/v5 method pages (`represent/interpolation`, `represent/imputation`, `analyze/scoring-metrics`, `analyze/functional-statistics`, and any other sub-~200-line method page surfaced by AUDIT-01) are extended to mature-page structure.
-- [x] **DEPTH-03**: Extended pages gain new worked examples and/or cross-links where they add value; every worked example runs offline against the current `fdars` API and emits `FDARS_FENCE_OK`, with fence data kept small (synthetic `n ≤ 20`; subsampled datasets).
+- [ ] **PIPE-01**: `build_pipeline_report()` aggregates diagnostics across end-to-end stages (represent → smooth → cluster/regress → monitor) with per-stage provenance (stage-prefixed keys / per-stage objects, never flat-merged)
+- [ ] **PIPE-02**: `pipeline_report()` produces a grounded multi-aspect narrative report over the aggregated stages
+- [ ] **PIPE-03**: cross-stage signal detection surfaces downstream caveats (e.g. high imputed fraction → FPCA caveat)
+- [ ] **PIPE-04**: an `fdars_build_pipeline_report` MCP tool exposes the report and stays LLM-free
 
-### Site Gate
+### Closed-Loop Auto-Tuning (capstone)
 
-- [x] **GATE-01**: Whole-site `mkdocs build --strict` is green offline after all changes.
-- [x] **GATE-02**: Per-section review is held on the built site, and a blocking human diagram method-accuracy review passes before milestone close.
+- [ ] **TUNE-01**: a shared `_tuning.py` loop core (propose → apply → re-run fdars → compare → check target-vs-budget → iterate) with an injectable proposal/advisor function, fully offline-testable without an API key
+- [ ] **TUNE-02**: bounded termination — required `max_steps`, plus convergence and oscillation detection; the loop never runs unbounded
+- [ ] **TUNE-03**: `auto_tune()` Python API uses the LLM for proposals via a structured, schema-validated numeric `parameter_delta` — never parsed from prose; the LLM never sets a number directly in the numeric path
+- [ ] **TUNE-04**: an `fdars_auto_tune` MCP tool uses a **heuristic (LLM-free)** proposal, preserving the provably-LLM-free MCP boundary
+- [ ] **TUNE-05**: optional guard diagnostics detect off-target degradation (Goodhart) during tuning
+- [ ] **TUNE-06**: `TuningTrace` / `TuneProposal` / `TuneResult` schemas + an optional `Recommendation.parameter_delta` field, backward-compatible with the 3 existing task families
+
+### Evaluation
+
+- [ ] **EVAL-01**: deterministic eval fixtures where the correct comparative ranking or auto-tune convergence direction is known from the data; assert diagnostic improvement + grounding-pass
+- [ ] **EVAL-02**: no LLM-as-judge in CI; live LLM eval is env-gated (skips without a key; CI stays network-free)
+
+### Docs & Gate
+
+- [ ] **DOCS-01**: new/updated docs pages for the four capabilities with method-accurate hand-authored inline SVG diagrams (v7.0 STYLE_SPEC standard)
+- [ ] **DOCS-02**: runnable offline `FDARS_FENCE_OK` worked examples (small/synthetic data; the auto-tune example uses the offline/injectable path — no network in the docs build)
+- [ ] **DOCS-03**: whole-site `mkdocs build --strict` green offline; blocking human diagram method-accuracy review before close
 
 ## Future Requirements
 
-Deferred, tracked but not in the current roadmap.
+Deferred to a future release. Tracked but not in the current roadmap.
 
-### Diagrams
+### Transport
+- **HTTP-01 / FUT-01**: HTTP/SSE MCP transport for the fdars-advisor server (stdio shipped in v2.0)
 
-- **DIAG-FUT-01**: Long-form `<title>`/`<desc>` + `aria-labelledby` accessibility pass for complex diagrams (carried over: A11Y-01).
-- **DIAG-FUT-02**: Regenerate `thumb/` and `cards/` SVGs to mirror any concept diagram whose composition changed materially during the audit (only if a thumb visibly diverges).
+### SDK
+- **ANTHROPIC-1X**: full `anthropic` 1.x migration (drops Python 3.9; `output_config`, httpx2) — its own milestone once Python 3.9 is dropped
 
 ## Out of Scope
 
+Explicitly excluded. Documented to prevent scope creep.
+
 | Feature | Reason |
 |---------|--------|
-| Programmatic / tool-generated diagrams | Diagrams stay hand-authored inline SVG — standing project decision |
-| `cards/` and `thumb/` SVG audit | Audit targets the 68 concept diagrams; cards/thumbs are decorative, revisited only if a fixed diagram's thumb visibly diverges (→ DIAG-FUT-02) |
-| Dark-mode / theming rework of SVGs | Not part of this milestone's intent — standing exclusion |
-| `fdars-core` bump / new bindings / advisor logic changes | Docs-only quality milestone; no code-behavior change |
-| Reference-API pages (`docs/reference/*`) content | Auto-derived stubs; not concept pages — out of the depth/diagram scope |
-| New method pages for unbound capabilities | No new bindings this milestone; nothing new to document |
+| Any agent-framework dependency (LangChain/LangGraph/etc.) | Would break the provider-agnostic + LLM-free-compute invariants; a plain loop on the Provider protocol suffices |
+| An LLM anywhere in the MCP compute path | Violates the provably-LLM-free MCP boundary; the MCP auto-tune tool uses a heuristic proposal |
+| LLM-chosen comparative winner or weighted single-score aggregation | Breaks the grounding invariant; fdars-computed sort determines the winner |
+| LLM text directly setting fdars parameters | Grounding-invariant breach; proposals must flow through a schema-validated numeric `parameter_delta` |
+| `fdars-core` bump / new Rust bindings | v8.0 is an advisor-capability milestone on the existing 0.23.0 surface |
 
 ## Traceability
 
+Which phases cover which requirements. Populated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | Phase 42 | Complete |
-| SVGFIX-01 | Phases 43, 44, 45 | Complete |
-| SVGFIX-02 | Phases 43, 44, 45 | Complete |
-| SVGFIX-03 | Phases 43, 44, 45 | Complete |
-| SVGFIX-04 | Phases 43, 44, 45 | Complete |
-| DIACOV-01 | Phase 46 | Complete |
-| DIACOV-02 | Phase 47 | Complete |
-| DEPTH-01 | Phase 48 | Complete |
-| DEPTH-02 | Phase 48 | Complete |
-| DEPTH-03 | Phase 48 | Complete |
-| GATE-01 | Phase 49 | Complete |
-| GATE-02 | Phase 49 | Complete |
+| COMPAT-01..03 | TBD | Pending |
+| ASPECT-01..05 | TBD | Pending |
+| COMPARE-01..04 | TBD | Pending |
+| PIPE-01..04 | TBD | Pending |
+| TUNE-01..06 | TBD | Pending |
+| EVAL-01..02 | TBD | Pending |
+| DOCS-01..03 | TBD | Pending |
 
 **Coverage:**
-
-- v7.0 requirements: 12 total
-- Mapped to phases: 12 ✓
-- Unmapped: 0
-
-**Note on SVGFIX-01..04:** These four quality axes are applied per diagram across the three section-batched fix phases (43 learn/represent/align, 44 analyze/monitoring/advisor, 45 regression/inference). Each fix phase delivers all four axes for its batch; the requirements are jointly completed once all three batches pass. No diagram is fixed in more than one phase (each diagram belongs to exactly one section batch).
+- v8.0 requirements: 27 total
+- Mapped to phases: 0 (roadmap pending)
+- Unmapped: 27 ⚠️
 
 ---
-*Requirements defined: 2026-08-22*
-*Last updated: 2026-08-22 — traceability populated during v7.0 roadmap creation (12/12 mapped)*
+*Requirements defined: 2026-08-23*
+*Last updated: 2026-08-23 after initial definition*
