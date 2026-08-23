@@ -4,17 +4,17 @@ milestone: v8.0
 milestone_name: "Advisor: New Capabilities"
 current_phase: 50
 current_phase_name: Deferred Advisor Aspects (+ compat pre-flight)
-status: executing
-stopped_at: Completed 50-02-PLAN.md
-last_updated: "2026-08-23T21:25:11.601Z"
+status: verifying
+stopped_at: Completed 50-03-PLAN.md
+last_updated: "2026-08-23T21:31:23.962Z"
 last_activity: 2026-08-23
 last_activity_desc: Phase 50 execution started
-state_head: 8a0166f075a45c0c061a11e910859ce6ab59fcbc
+state_head: 725dfb667ae01ee938a77741d318c7ccad30ebb8
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 
 Phase: 50 (Deferred Advisor Aspects (+ compat pre-flight)) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-23 — Phase 50 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -66,6 +66,7 @@ Progress: [░░░░░░░░░░] 0%
 |------|----------|-------|-------|
 | Phase 50 P01 | 3min | 3 tasks | 3 files |
 | Phase 50-deferred-advisor-aspects-compat-pre-flight P02 | 10min | 4 tasks | 6 files |
+| Phase 50 P03 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Recent decisions affecting current work:
 - [Phase 50]: ASPECT-02: overfitting_gap is None when holdout_accuracy not supplied (grounding invariant, T-50B-03)
 - [Phase 50]: ASPECT-04: fpca added as new _ASPECT_PRIMERS key (absent from 10-key dict); len=11 <= 14 gate passes
 - [Phase 50]: Guard-sync no-op: no new _DIAGNOSTICS_METHODS or _supported key — confirmed empty git diff
+- [Phase 50]: ASPECT-05: Live aspect tests named test_aspect_live_* (not test_live_*) to preserve QUAL-02 contract asserting exactly 3 test_live_* provider tests
+- [Phase 50]: ASPECT-05: holdout_accuracy=0.72 forwarded in elastic fixture so overfitting_gap is non-None and citable by the grounding scanner
 
 ### Pending Todos
 
@@ -117,8 +120,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-23T21:25:11.582Z
-Stopped at: Completed 50-02-PLAN.md
+Last session: 2026-08-23T21:31:23.951Z
+Stopped at: Completed 50-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
