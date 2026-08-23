@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v7.0
-milestone_name: Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
-status: Awaiting next milestone
-stopped_at: Phase 49 complete — all phases complete
-last_updated: "2026-08-22T22:43:34.151Z"
+milestone: v8.0
+milestone_name: Advisor — New Capabilities
+status: planning
+last_updated: "2026-08-23T18:58:47.158Z"
 last_activity: 2026-08-23
-last_activity_desc: Milestone v7.0 completed and archived
-state_head: 829726fea54cb9040635740521769dc6cb56de28
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
-current_phase: 49
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-08-22)
 
 ## Current Position
 
-Phase: Milestone v7.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-23 — Milestone v7.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-08-23 — Milestone v8.0 started
 
 ## Performance Metrics
 

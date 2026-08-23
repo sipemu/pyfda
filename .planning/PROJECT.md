@@ -2,7 +2,7 @@
 
 ## What This Is
 
-pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-data-analysis library to Python as the `fdars` package (represent, smooth, align, analyze, regress, monitor). This milestone is a **documentation quality pass**: auditing and fixing every hand-authored inline SVG diagram, adding concept diagrams to the pages that still lack them, and extending the thin newer method pages to the depth of the mature ones — all against the site's consistently high, method-accurate standard.
+pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-data-analysis library to Python as the `fdars` package (represent, smooth, align, analyze, regress, monitor). This milestone **extends the fdars AI advisor** beyond its single-shot, recommend-only, per-result surface with four new capabilities — closed-loop auto-tuning, deferred-aspect coverage, comparative method-selection, and pipeline diagnostic reports — while holding the **grounding invariant** (fdars computes every number; the LLM only interprets/cites) and the **MCP-LLM-free boundary** as hard constraints throughout.
 
 ## Core Value
 
@@ -18,22 +18,32 @@ The documentation — diagrams first, examples second — must make functional d
 - ✅ **v4.0 — fdars-core 0.17 Upgrade — New Bindings, Advisor & Docs** (Phases 25–29): upgraded `fdars-core` 0.14.0 → 0.17.0 (parallel-only, no linalg; zero FPCA drift) and exposed the new upstream surface — `fdars.represent` (interpolation/extrapolation-policy/imputation), functional statistics + `depth_based_median`/`trim_mean` in `fdars.fdata` with six new `Fdata` methods, a new `fdars.scoring` submodule (5 metrics), and `fdars.alignment` shift registration (+ `fd.shift_register()`) / registration-quality scores / banded elastic alignment. Extended the advisor with a `scoring` aspect (#13) + imputation/registration diagnostics (grounding invariant + MCP guard-sync preserved), and documented it all with 6 new dedicated pages + 6 method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples (whole-site `mkdocs build --strict` green). 16/16 requirements complete; suite 426 passed / 4 skipped.
 - ✅ **v5.0 — fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing** (Phases 30–35): upgraded `fdars-core` 0.17.0 → 0.20.0 (parallel-only, zero drift; `CvCriterion` wildcard arm) and exposed a new `fdars.inference` submodule (two-sample permutation tests, Degras SCB bands, FLM post-hoc inference, one-way ANOVA — `TestResult`→PyDict, deterministic seed), `functional_depth`/`functional_boxplot` in `fdars.depth`, and AIC model selection + `constant_basis` in `fdars.basis`/`fdars.smoothing`. Added an `inference` advisor aspect (#14) and documented it all with new pages + 4 method-accurate SVGs + offline `FDARS_FENCE_OK` worked examples (whole-site `mkdocs build --strict` green). 21/21 requirements validated; suite 560 passed / 4 skipped.
 - ✅ **v6.0 — fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference** (Phases 36–41): upgraded `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no linalg; MSRV verified 1.81 ≤ 1.83) and exposed the new upstream surface across three groups — Group A `concurrent_regression`/`functional_glm` (`fdars.regression`), Group B `pace_fpca` over a new sparse/irregular `IrregFdata` input + `elastic_multinomial` (`fdars.classification`), Group C 9 new depth methods + 4 outlier detectors (`fdars.outliers`) + 3 interval-wise ITP tests (`fdars.inference`). Extended the advisor's `outliers`/`regression`/`classification`/`fpca` aspects with grounded scalars (closing the v5.0 Phase-34 boxplot-outlier deferral; ITP deferred as vector-valued), and documented everything with new pages + 6 method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples. Blocking human diagram review caught and corrected an inverted hypograph/epigraph asymmetry (verified against shipped bindings). 23/23 requirements validated; suite 772 passed / 4 skipped; whole-site `mkdocs build --strict` green offline.
+- ✅ **v7.0 — Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth** (Phases 42–49): a docs-only quality pass (no crate bump, no new bindings). A full 61-diagram 4-axis scored inventory (visual/STYLE_SPEC/XML/method-accuracy) gated the milestone; hand-authored SVG corrections were batched by section (learn/represent/align, analyze/monitoring/advisor, regression/inference); 20 new method-accurate workflow SVGs closed the examples-page coverage gap and 5 new advisor-surface SVGs reversed the v2.1 diagram-free choice; thin v4–v6 method pages were extended with new executable worked examples (binomial+poisson GLM, PACE-vs-standard-FPCA, ITP-vs-t_perm_test). Whole-site `mkdocs build --strict` green offline; blocking human diagram review approved. 12/12 requirements validated; 8 phases, 9 plans.
 
 **Grounding invariant (v2.0):** every recommendation cites computed diagnostics and states an expected effect; the LLM never fabricates numbers.
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v7.0 Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth
+## Current Milestone: v8.0 Advisor — New Capabilities
 
-**Goal:** Bring the whole docs site to one consistently high bar — audit and fix every hand-authored inline SVG, add concept diagrams to the pages that lack them, and extend the thin newer pages to full parity with the mature ones. Docs-only quality milestone (no crate bump, no new bindings); closest in spirit to v1.0's overhaul.
+**Goal:** Extend the fdars AI advisor beyond its current single-shot, recommend-only, per-result interpretation surface with four new capabilities — with the grounding invariant (fdars computes every number; the LLM only interprets/cites) and the MCP-LLM-free compute boundary held as hard constraints throughout.
 
 **Target features:**
-- **SVG audit & fix (all 68 concept diagrams in `docs/assets/diagrams/`)** on four axes: visual/layout quality (overlapping labels, cramped spacing, misalignment, inconsistent sizing), STYLE_SPEC conformance (palette/fonts/viewBox/CSS classes/aria per `docs/assets/diagrams/STYLE_SPEC.md`), XML source formatting (clean, hand-editable markup), and method-accuracy (diagram faithfully depicts what the method does — per the v6.0 hypograph/epigraph lesson). SVGO idempotence + determinism CI gate stays green.
-- **Add concept diagrams to the pages that lack them** — the ~21 `examples/` worked-example pages and the 5 advisor surface pages (`python-api`, `mcp`, `providers`, `agent-skill`, `aspects`); ~26 new method-accurate hand-authored inline SVGs (the advisor overview is the only advisor page with diagrams today — a v2.1 choice now being reversed).
-- **Extend thin/new pages to full parity + new worked examples** — the v4–v6 method pages (`concurrent-regression`, `functional-glm`, `pace-fpca`, `interpolation`, `imputation`, `scoring-metrics`, `functional-statistics`, `interval-inference`, and similar) brought to the structure of the mature pages (intro, method explanation, worked example, parameters, caveats/interpretation), with extra worked examples/cross-links where they add value.
-- **Whole-site gate:** `mkdocs build --strict` green offline; worked examples run against the current `fdars` API (`FDARS_FENCE_OK`); per-section review on the built site with a blocking human diagram method-accuracy review before close.
+- **Fill deferred advisor aspects** — dedicated grounded coverage for **PACE-FPCA** and **elastic-multinomial** (both deferred at v6.0 init as `PACE-ADV`/`MULTINOM-ADV`) and **ITP interval-inference** (deferred at v6.0 as vector-valued; needs a grounded-scalar reduction for the vector-valued ITP p-curves). Extends the existing `_ASPECT_PRIMERS` / `build_diagnostics` pattern. Foundational — do early.
+- **Comparative method-selection** — a recommender that ranks/picks among candidate methods from comparative diagnostics (e.g. scalar-on-function: FPC-LM vs PLS vs kernel; which clustering method fits best), not just per-result advice on one method. Likely a new task family / entry point over multiple `build_diagnostics` runs.
+- **Pipeline diagnostic report** — generate a multi-aspect narrative report for an end-to-end analysis (represent → smooth → cluster/regress → monitor …), aggregating diagnostics across stages instead of single-result interpretation.
+- **Closed-loop auto-tuning (capstone)** — turn today's manual recommend → re-run → compare into an autonomous, bounded loop: advisor proposes a parameter/method change, applies it, re-runs, compares, and iterates until a target diagnostic improves or a step budget is hit. Exposed **both as a Python API and as an MCP agentic surface**; the compute path stays LLM-free (fdars runs every computation; the loop only orchestrates).
+- **Eval + docs gate:** an eval strategy for "good advice" (auto-tuning + comparative selection); new pages + method-accurate hand-authored inline SVG diagrams (v7.0 standard) + offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green; blocking human diagram review before close.
 
-**Key context:** No `fdars-core` change, no new bindings — purely a docs quality/consistency pass. Same execution shape as v1.0: audit → SVG fixes (batched by section) → new diagrams → page extensions → build/review gate. 127 SVGs on disk (68 concept diagrams + 8 cards + ~59 thumbnails); the audit targets the 68 concept diagrams (cards/thumbs out of scope unless a thumb mirrors a fixed diagram). Docs build is ~19–25 min with executed fences — keep any new fence data small (synthetic `n ≤ 20`; subsampled datasets). Every method page already carries a diagram; the "missing SVG box" gap is the examples + advisor pages.
+**Key context:** First advisor-capability milestone since v3.0 — crosses `python/fdars/advisor/` (`__init__.py`, `_prompts.py`, `_schema.py`, `providers/`), `python/fdars/mcp/`, tests, and `docs/`. Build on the shipped surface, do NOT re-build it: `build_diagnostics` (14 aspects), `advise` (3 task families + `describe_cluster_differences`), 4 providers, MCP (3 tools, provably LLM-free, stdio), Agent Skill. All four capabilities selected for this one milestone (foundation-first roadmap; auto-tuning capstone last). Genuine unknowns → research warranted: agentic-loop design, eval strategy for "good advice", and the exact grounded-scalar reduction for vector-valued ITP interval inference. Package currently `0.7.0`; a code milestone bumps it (semver `vX.Y.Z` tag triggers PyPI publish) — decide the bump at close.
+
+## Last Shipped Milestone: v7.0 Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth (shipped 2026-08-23)
+
+_Docs-only quality milestone (no crate bump, no new bindings). 12/12 requirements validated; 8 phases, 9 plans; whole-site `mkdocs build --strict` green offline; blocking human diagram review approved. Full detail: `.planning/milestones/v7.0-ROADMAP.md`._
+
+**Goal:** Bring the whole docs site to one consistently high bar — audit and fix every hand-authored inline SVG, add concept diagrams to the pages that lacked them, and extend the thin newer pages to full parity with the mature ones. Closest in spirit to v1.0's overhaul.
+
+**Delivered:** a full 61-diagram 4-axis scored inventory (visual/STYLE_SPEC/XML/method-accuracy) gated the milestone; SVG corrections batched by section (learn/represent/align, analyze/monitoring/advisor, regression/inference); 20 new example-page workflow SVGs + 5 new advisor-surface SVGs (reversing the v2.1 diagram-free choice); thin v4–v6 method pages extended with new executable worked examples (binomial+poisson GLM, PACE-vs-standard-FPCA, ITP-vs-t_perm_test).
 
 ## Last Shipped Milestone: v6.0 fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference (shipped 2026-08-22)
 
@@ -137,14 +147,23 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- v7.0 Documentation Quality Pass — active. Full REQ list in .planning/REQUIREMENTS.md; roadmap in .planning/ROADMAP.md. -->
+<!-- v8.0 Advisor — New Capabilities — active. Full REQ list in .planning/REQUIREMENTS.md; roadmap in .planning/ROADMAP.md. -->
 
-**v7.0 — Documentation Quality Pass (Phases 42+, active):**
+**v8.0 — Advisor: New Capabilities (Phases 50+, active):**
 
-- [ ] SVG audit & fix — all 68 concept diagrams in `docs/assets/diagrams/` reviewed and corrected on four axes (visual/layout quality, STYLE_SPEC conformance, XML source formatting, method-accuracy); SVGO idempotence + determinism gate green
-- [ ] Diagram coverage — concept SVG added to the ~21 `examples/` pages and the 5 advisor surface pages (`python-api`/`mcp`/`providers`/`agent-skill`/`aspects`); ~26 new method-accurate hand-authored inline SVGs
-- [ ] Page depth — thin v4–v6 method pages extended to mature-page parity (intro/method/worked example/parameters/caveats) + new worked examples/cross-links
-- [ ] Whole-site gate — `mkdocs build --strict` green offline; worked examples `FDARS_FENCE_OK`; per-section review with a blocking human diagram method-accuracy review before close
+- [ ] Deferred advisor aspects — grounded coverage for PACE-FPCA, elastic-multinomial, and ITP interval-inference (grounded-scalar reduction for the vector-valued ITP p-curves); extends `_ASPECT_PRIMERS` / `build_diagnostics`
+- [ ] Comparative method-selection — recommender that ranks/picks among candidate methods from comparative diagnostics (new task family / entry point over multiple `build_diagnostics` runs)
+- [ ] Pipeline diagnostic report — multi-aspect narrative report aggregating diagnostics across an end-to-end analysis (represent → smooth → cluster/regress → monitor)
+- [ ] Closed-loop auto-tuning (capstone) — autonomous, bounded recommend → apply → re-run → compare loop to a target diagnostic or step budget; Python-API + MCP agentic surface; compute path stays LLM-free
+- [ ] Eval strategy — measure "good advice" for auto-tuning + comparative selection (offline/deterministic where possible; env-gated LLM tests)
+- [ ] Docs + gate — new pages + method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green; blocking human diagram review before close
+
+**v7.0 — Documentation Quality Pass (Phases 42–49, shipped 2026-08-23):**
+
+- [x] SVG audit & fix — full 61-diagram 4-axis scored inventory (visual/STYLE_SPEC/XML/method-accuracy); corrections batched by section; SVGO idempotence + determinism gate green — Phases 42–45
+- [x] Diagram coverage — 20 new example-page workflow SVGs + 5 new advisor-surface SVGs (reversing the v2.1 diagram-free choice) — Phases 46–47
+- [x] Page depth — thin v4–v6 method pages extended to mature-page parity + new executable worked examples (binomial+poisson GLM, PACE-vs-standard-FPCA, ITP-vs-t_perm_test) — Phase 48
+- [x] Whole-site gate — `mkdocs build --strict` green offline; worked examples `FDARS_FENCE_OK`; blocking human diagram review approved — Phase 49
 
 **v6.0 — fdars-core 0.23 Upgrade (Phases 36–41, shipped 2026-08-22):**
 
@@ -224,4 +243,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-22 after starting milestone v7.0 — Documentation Quality Pass (SVG audit & fix across all 68 concept diagrams, diagram coverage for examples + advisor pages, page-depth extension for thin v4–v6 method pages). Docs-only quality milestone; no crate bump.*
+*Last updated: 2026-08-23 after starting milestone v8.0 — Advisor: New Capabilities (deferred-aspect coverage, comparative method-selection, pipeline diagnostic report, closed-loop auto-tuning capstone). All four selected for one milestone; grounding invariant + MCP-LLM-free boundary held as hard constraints; research-first.*
