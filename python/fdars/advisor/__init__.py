@@ -65,9 +65,12 @@ __all__ = [
     "build_diagnostics",
     "advise",
     "describe_cluster_differences",
+    "compare_methods",
     "Advice",
     "Recommendation",
 ]
+
+from fdars.advisor._compare_methods import compare_methods  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
