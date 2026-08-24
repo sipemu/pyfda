@@ -15,11 +15,12 @@ Usage (in-process test)::
         tools = await client.list_tools()
         result = await client.call_tool("fdars_build_diagnostics", {...})
 
-Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02):
+Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03):
 
 - ``fdars_build_diagnostics`` — deterministic offline diagnostics (TOOL-01/02)
 - ``fdars_run_method`` — run any of six fdars methods; returns result handle (TOOL-01)
 - ``fdars_compare_run`` — re-run with new params; return before/after delta (TOOL-03)
+- ``fdars_compare_methods`` — deterministic multi-candidate ranking by-reference (COMPARE-04)
 """
 
 from __future__ import annotations
@@ -416,6 +417,94 @@ def fdars_compare_run(
 
     # Delegate to _compare — no inline delta logic here (Single Responsibility)
     return compare_run(dataset_id, method_lc, before_result_id, params_after)
+
+
+# ---------------------------------------------------------------------------
+# Tool: fdars_compare_methods (COMPARE-04)
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def fdars_compare_methods(
+    dataset_id: str,
+    method: str,
+    candidate_params: list,
+    metric: str | None = None,
+) -> dict:
+    """Re-run multiple candidates and return the deterministic ranking by-reference.
+
+    For each entry in ``candidate_params``, re-runs the fdars method via
+    ``_compare_methods.compare_methods_mcp``, builds diagnostics, and delegates
+    ranking to the deterministic offline core (``compare_methods(run_llm=False)``).
+    The compute path is **fully deterministic and LLM-free** — no
+    ``ANTHROPIC_API_KEY`` is required; no network connection is made
+    (COMPARE-04, T-51-09).
+
+    Parameters
+    ----------
+    dataset_id : str
+        Opaque handle ID for the dataset stored in the handle registry.
+        Obtain via ``registry.store_dataset(data, argvals)``.
+    method : str
+        One of the six runnable methods: ``'alignment'``, ``'fpca'``,
+        ``'basis'``, ``'smoothing'``, ``'clustering'``, ``'depth'``.
+        Case-insensitive.  Raises :exc:`ValueError` for any method outside
+        the six ``_RUNNABLE_METHODS`` (T-51-10 guard).
+    candidate_params : list[dict]
+        List of flat scalar-param dicts — one per candidate.  Each dict's
+        keys must be a subset of
+        ``{'lambda_', 'n_basis', 'n_comp', 'k', 'seed'}``; unknown keys
+        raise :exc:`ValueError` before any run is attempted.
+        An empty dict runs the method with all defaults.
+    metric : str, optional
+        Ranking metric key.  When omitted the per-family default is used.
+
+    Returns
+    -------
+    dict
+        JSON-serialisable ranking dict (see ``_compare_methods.compare_methods_mcp``
+        for full key descriptions):
+
+        ``ranking_id`` : str
+            Handle ID for the full ranking dict stored in the registry.
+        ``method`` : str
+            Normalised (lowercase) method name.
+        ``metric`` : str
+            Ranking metric key used.
+        ``winner`` : str
+            Label of the best candidate (deterministic fdars sort).
+        ``ranking`` : list[dict]
+            Ordered list (best → worst), each entry containing
+            ``{"label": str, "result_id": str, "metric_value": float|None}``.
+
+    Raises
+    ------
+    ValueError
+        If ``method`` is not in ``_RUNNABLE_METHODS`` (naming the supported set),
+        or if any candidate-params dict contains an unsupported key.
+    KeyError
+        If ``dataset_id`` is not in the registry.
+
+    Notes
+    -----
+    The handler is **synchronous** (``def``, not ``async def``) because fdars
+    methods are synchronous Rust calls (Pitfall 2).  No provider or model
+    argument is exposed — the MCP layer is provably LLM-free (Anti-Pattern 3).
+    Adding this tool does **not** expand ``_RUNNABLE_METHODS`` or
+    ``_DIAGNOSTICS_METHODS`` (guard-sync no-op — T-51-12).
+    """
+    # T-51-10: validate method at the tool boundary before any run (fail fast)
+    method_lc = method.lower()
+    if method_lc not in _RUNNABLE_METHODS:
+        raise ValueError(
+            f"fdars_compare_methods: unsupported method {method!r}. "
+            f"Supported: {sorted(_RUNNABLE_METHODS)!r}."
+        )
+
+    from fdars.mcp._compare_methods import compare_methods_mcp
+
+    # Delegate all re-run + ranking logic to the helper (Single Responsibility)
+    return compare_methods_mcp(dataset_id, method_lc, candidate_params, metric=metric)
 
 
 # ---------------------------------------------------------------------------
