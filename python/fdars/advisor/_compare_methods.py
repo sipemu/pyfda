@@ -396,12 +396,14 @@ def compare_methods(
     Raises
     ------
     ValueError
+        * ``candidates`` is empty (no candidates to compare).
         * No registered default metric for the resolved task family.
         * Metric key not in ``_METRIC_REGISTRY``.
         * Candidates span more than one task family (COMPARE-03).
         * Any candidate is missing the ranking metric (COMPARE-03).
-    NotImplementedError
-        When ``run_llm=True`` (Plan 02 not yet implemented).
+    GroundingViolationError
+        When ``run_llm=True`` and the LLM narration cites a numeric value
+        absent from any candidate's diagnostics (fabrication detected).
     """
     # --- 1. Normalise candidates to labeled blocks ---
     blocks = _normalize_candidates(candidates, method, argvals=argvals, **kwargs)
