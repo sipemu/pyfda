@@ -287,7 +287,12 @@ def _rank(blocks: list[dict], metric: str) -> tuple[list[dict], str]:
     def sort_key(item: tuple[int, dict]) -> tuple[float, int]:
         idx, block = item
         val = _extract_metric_value(block["diagnostics"], metric)
-        assert val is not None  # guard already ran; this must hold
+        if val is None:
+            raise ValueError(
+                f"compare_methods: internal error — metric {metric!r} became None "
+                f"for candidate {block['label']!r} during sort. "
+                "Do not mutate diagnostics dicts while compare_methods() is running."
+            )
         # For descending sort (higher), negate the value so Python's default
         # ascending sort puts the best candidate first.
         sort_val = -val if reverse else val
