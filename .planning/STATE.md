@@ -5,16 +5,16 @@ milestone_name: "Advisor: New Capabilities"
 current_phase: 51
 current_phase_name: Comparative Method-Selection
 status: executing
-stopped_at: Phase 50 complete, ready to plan Phase 51
-last_updated: "2026-08-24T06:49:50.179Z"
-last_activity: 2026-08-23
-last_activity_desc: Phase 50 complete, transitioned to Phase 51
-state_head: e35225842ead9f5bd321315326fac16f2d563322
+stopped_at: Phase 51 Plan 01 complete
+last_updated: "2026-08-24T06:58:40.113Z"
+last_activity: 2026-08-24
+last_activity_desc: Phase 51 execution started
+state_head: 07435b82211e0b704639a97df52cc8811cc0959d
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 4
   percent: 20
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-23)
 
 **Core value:** Extend the fdars AI advisor with new agentic capabilities while holding the grounding invariant (fdars computes every number; the LLM only interprets/cites) and the MCP-LLM-free compute boundary as hard constraints.
-**Current focus:** Phase 50 — Deferred Advisor Aspects (+ compat pre-flight)
+**Current focus:** Phase 51 — Comparative Method-Selection
 
 ## Current Position
 
-Phase: 51 (Comparative Method-Selection) — READY TO EXECUTE
-Plan: Not started
+Phase: 51 (Comparative Method-Selection) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-08-23 — Phase 50 complete, transitioned to Phase 51
+Last activity: 2026-08-24 — Phase 51 execution started
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 50 P01 | 3min | 3 tasks | 3 files |
 | Phase 50-deferred-advisor-aspects-compat-pre-flight P02 | 10min | 4 tasks | 6 files |
 | Phase 50 P03 | 3min | 2 tasks | 2 files |
+| Phase 51 P01 | 362 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,7 @@ Recent decisions affecting current work:
 - [Phase 50]: Guard-sync no-op: no new _DIAGNOSTICS_METHODS or _supported key — confirmed empty git diff
 - [Phase 50]: ASPECT-05: Live aspect tests named test_aspect_live_* (not test_live_*) to preserve QUAL-02 contract asserting exactly 3 test_live_* provider tests
 - [Phase 50]: ASPECT-05: holdout_accuracy=0.72 forwarded in elastic fixture so overfitting_gap is non-None and citable by the grounding scanner
+- [Phase 51]: compare_methods offline core: metric registry + dual-input normalizer + fail-closed guard + stable deterministic sort (COMPARE-01, COMPARE-03)
 
 ### Pending Todos
 
@@ -120,8 +122,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-23T21:31:23.951Z
-Stopped at: Phase 50 complete, ready to plan Phase 51
+Last session: 2026-08-24T06:58:40.089Z
+Stopped at: Phase 51 Plan 01 complete
 Resume file: None
 
 ## Operator Next Steps

@@ -180,10 +180,10 @@ Plans:
   3. Comparison guards against incommensurable comparisons — only comparable candidates on a shared metric are ranked; incommensurable inputs are rejected rather than silently mis-ranked.
   4. An `fdars_compare_methods` MCP tool exposes the comparison and stays provably LLM-free — it re-runs via existing runnable methods and never calls `advise()`.
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 **Wave 1**
 
-- [ ] 51-01-PLAN.md — Deterministic ranking core (metric registry, dual-input, fail-closed guard, winner-is-sort) [TRACER; COMPARE-01, COMPARE-03]
+- [x] 51-01-PLAN.md — Deterministic ranking core (metric registry, dual-input, fail-closed guard, winner-is-sort) [TRACER; COMPARE-01, COMPARE-03]
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -241,7 +241,7 @@ Phases execute in numeric order: 50 → 51 → 52 → 53 → 54
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 50. Deferred Advisor Aspects (+ compat pre-flight) | v8.0 | 3/3 | Complete    | 2026-08-23 |
-| 51. Comparative Method-Selection | v8.0 | 0/TBD | Not started | - |
+| 51. Comparative Method-Selection | v8.0 | 1/3 | In Progress|  |
 | 52. Pipeline Diagnostic Report | v8.0 | 0/TBD | Not started | - |
 | 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 0/TBD | Not started | - |
 | 54. Eval Strategy + Docs Gate | v8.0 | 0/TBD | Not started | - |
