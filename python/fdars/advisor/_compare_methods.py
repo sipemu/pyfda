@@ -352,8 +352,9 @@ def compare_methods(
     provider : str or Provider or None, optional
         LLM provider (``run_llm=True`` only).
     run_llm : bool, optional
-        When ``True`` (default), call the LLM to narrate the ranking (Plan 02
-        — not yet implemented in this plan; stub raises NotImplementedError).
+        When ``True`` (default), call the LLM to narrate the ranking via the
+        "comparison" task family; the fdars-computed winner is fixed before the
+        call and never overridden by the narration.
         When ``False``, return the raw deterministic ranking dict offline.
     argvals : array_like, optional
         Reserved; forwarded to ``build_diagnostics`` when building diagnostics
