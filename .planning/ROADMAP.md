@@ -180,7 +180,10 @@ Plans:
   3. Comparison guards against incommensurable comparisons — only comparable candidates on a shared metric are ranked; incommensurable inputs are rejected rather than silently mis-ranked.
   4. An `fdars_compare_methods` MCP tool exposes the comparison and stays provably LLM-free — it re-runs via existing runnable methods and never calls `advise()`.
 
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 51-01-PLAN.md — Deterministic ranking core (metric registry, dual-input, fail-closed guard, winner-is-sort) [TRACER; COMPARE-01, COMPARE-03]
+- [ ] 51-02-PLAN.md — "comparison" task family: per-candidate provenance + winner authority narration [COMPARE-01, COMPARE-02]
+- [ ] 51-03-PLAN.md — `fdars_compare_methods` MCP tool, LLM-free, by-reference ranking [COMPARE-04]
 
 ### Phase 52: Pipeline Diagnostic Report
 
