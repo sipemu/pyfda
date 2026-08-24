@@ -447,8 +447,58 @@ def compare_methods(
     if not run_llm:
         return result
 
-    # run_llm=True: Plan 02 will implement the LLM narration path.
-    raise NotImplementedError(
-        "compare_methods(run_llm=True) is not yet implemented. "
-        "Use run_llm=False for the deterministic offline ranking."
+    # --- 7. LLM narration path (COMPARE-01, COMPARE-02) ---
+    # The winner is already decided (step 5); the LLM only narrates the ranking.
+    # Deferred imports: keep module import side-effect-free.
+    import json as _json  # noqa: PLC0415
+
+    from fdars.advisor._prompts import _system_prompt  # noqa: PLC0415
+    from fdars.advisor._schema import Advice  # noqa: PLC0415
+    from fdars.advisor.providers._factory import resolve_provider  # noqa: PLC0415
+    from fdars.advisor.providers._validate import _check_grounding  # noqa: PLC0415
+
+    p = resolve_provider(provider=provider, model=model)
+    system = _system_prompt("comparison", aspect=family)
+
+    # Build per-candidate labeled provenance payload (COMPARE-02, PITFALLS 7 & 13).
+    # Each block is {"label": ..., "diagnostics": ...} — NEVER a flat-merged dict.
+    provenance_blocks = [
+        {"label": r["label"], "diagnostics": r["diagnostics"]}
+        for r in ranking
+    ]
+
+    # Build the user message carrying:
+    #   - domain context
+    #   - winner (fdars-determined)
+    #   - per-candidate labeled diagnostics blocks (preserving provenance)
+    candidates_json = _json.dumps(provenance_blocks, sort_keys=True, indent=2)
+    user_content = (
+        f"Domain context: {domain_context}\n\n"
+        f"Task: comparison\n\n"
+        f"fdars-computed winner: {winner!r}\n\n"
+        f"fdars-computed ranking (best to worst):\n"
+        + _json.dumps(
+            [{"rank": i + 1, "label": r["label"], "metric": resolved_metric,
+              "metric_value": r["metric_value"]}
+             for i, r in enumerate(ranking)],
+            indent=2,
+        )
+        + "\n\nPer-candidate diagnostics (one labeled block per candidate):\n"
+        + candidates_json
     )
+
+    messages = [{"role": "user", "content": user_content}]
+    advice = p.complete_structured(Advice, messages, system)
+
+    # GROUND-03 (per-candidate): run _check_grounding once per candidate block
+    # so every cited value is traced to its correct candidate's own diagnostics.
+    # A value present only in candidate A's block is NOT a valid citation for a
+    # claim grounded in candidate B's block (PITFALLS 7 & 13, COMPARE-02).
+    for block in provenance_blocks:
+        _check_grounding(advice, block["diagnostics"])
+
+    # Re-assert winner from the fdars sort: the LLM narration cannot override it
+    # (COMPARE-01, T-51-05).  The result always carries the pre-computed winner.
+    result["advice"] = advice
+
+    return result

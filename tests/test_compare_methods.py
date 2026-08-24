@@ -379,10 +379,14 @@ class TestLLMFreeAndTieBreak:
         _anthr_token = "anth" + "ropic"
         _providers_token = "provi" + "ders"
 
-        # Check for module-level imports (import lines, not inside functions).
+        # Check for module-level imports (import lines NOT inside functions/classes).
+        # A module-level import has no leading whitespace on the import keyword.
+        # Deferred local imports inside the run_llm=True branch are intentional
+        # and allowed — they keep the module load side-effect-free; only the
+        # top-level (column-0) imports must remain LLM/provider-free.
         import_lines = [
             line for line in source.splitlines()
-            if line.strip().startswith(("import ", "from "))
+            if line.startswith(("import ", "from "))  # column-0 only (no strip)
         ]
         for line in import_lines:
             assert _anthr_token not in line, (

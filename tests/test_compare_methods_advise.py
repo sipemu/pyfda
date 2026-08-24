@@ -134,7 +134,7 @@ def test_winner_set_before_llm_and_preserved():
     candidate_B: sep=0.30 (worst)
     Mock narration says "candidate_B is the winner" — must be ignored.
     """
-    from fdars.advisor.compare_methods import compare_methods
+    from fdars.advisor import compare_methods
 
     diag_a = _clustering_diag(mean_amplitude_separation=0.80)
     diag_b = _clustering_diag(mean_amplitude_separation=0.30)
@@ -161,7 +161,7 @@ def test_winner_set_before_llm_and_preserved():
 
 def test_llm_cannot_override_winner():
     """winner field == deterministic sort winner regardless of LLM content."""
-    from fdars.advisor.compare_methods import compare_methods
+    from fdars.advisor import compare_methods
 
     # lower-is-better metric: regression_cv (min_cv_error)
     diag_low = {
@@ -209,7 +209,7 @@ def test_provenance_is_per_candidate_not_flat_merged():
     diagnostic keys.  The per-candidate structure must be preserved so
     grounding can be attributed to the right candidate.
     """
-    from fdars.advisor.compare_methods import compare_methods
+    from fdars.advisor import compare_methods
 
     # candidate_X: mean_amplitude_separation=0.80, mean_phase_separation=0.50
     diag_x = {
@@ -280,7 +280,7 @@ def test_grounding_runs_per_candidate():
     Mock recommendation about candidate_B cites '0.91' (candidate_A's value).
     The per-candidate grounding check should detect this mismatch.
     """
-    from fdars.advisor.compare_methods import compare_methods
+    from fdars.advisor import compare_methods
     from fdars.advisor.providers._validate import GroundingViolationError
 
     diag_a = _clustering_diag(mean_amplitude_separation=0.91)
@@ -314,7 +314,7 @@ def test_grounding_runs_per_candidate():
 
 def test_result_shape_run_llm_true():
     """compare_methods(run_llm=True) result carries winner, ranking, and advice."""
-    from fdars.advisor.compare_methods import compare_methods
+    from fdars.advisor import compare_methods
 
     diag_a = _clustering_diag(mean_amplitude_separation=0.75)
     diag_b = _clustering_diag(mean_amplitude_separation=0.40)
@@ -358,7 +358,7 @@ def test_live_comparison_narration():
       - narration/advice is non-empty
       - grounding passes (no GroundingViolationError)
     """
-    from fdars.advisor.compare_methods import compare_methods
+    from fdars.advisor import compare_methods
 
     # Two small clustering candidates with different amplitude separations.
     diag_hi = _clustering_diag(mean_amplitude_separation=0.78)
