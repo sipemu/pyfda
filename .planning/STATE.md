@@ -5,16 +5,16 @@ milestone_name: "Advisor: New Capabilities"
 current_phase: 51
 current_phase_name: Comparative Method-Selection
 status: executing
-stopped_at: Phase 51 Plan 01 complete
-last_updated: "2026-08-24T06:58:40.113Z"
+stopped_at: Completed 51-02-PLAN.md
+last_updated: "2026-08-24T09:00:07.050Z"
 last_activity: 2026-08-24
 last_activity_desc: Phase 51 execution started
-state_head: 07435b82211e0b704639a97df52cc8811cc0959d
+state_head: 8147d412bfacb9824dc65c6f30e7dee2b5e7ad82
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 20
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 ## Current Position
 
 Phase: 51 (Comparative Method-Selection) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-08-24 — Phase 51 execution started
 
@@ -68,6 +68,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 50-deferred-advisor-aspects-compat-pre-flight P02 | 10min | 4 tasks | 6 files |
 | Phase 50 P03 | 3min | 2 tasks | 2 files |
 | Phase 51 P01 | 362 | 3 tasks | 3 files |
+| Phase 51-comparative-method-selection P02 | 10min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,8 @@ Recent decisions affecting current work:
 - [Phase 50]: ASPECT-05: Live aspect tests named test_aspect_live_* (not test_live_*) to preserve QUAL-02 contract asserting exactly 3 test_live_* provider tests
 - [Phase 50]: ASPECT-05: holdout_accuracy=0.72 forwarded in elastic fixture so overfitting_gap is non-None and citable by the grounding scanner
 - [Phase 51]: compare_methods offline core: metric registry + dual-input normalizer + fail-closed guard + stable deterministic sort (COMPARE-01, COMPARE-03)
+- [Phase 51]: Per-candidate grounding: _check_grounding(advice, block_diagnostics) per labeled block — cross-candidate citation raises GroundingViolationError (COMPARE-02)
+- [Phase 51]: compare_methods(run_llm=True): result['winner'] always from fdars sort (pre-LLM); result['advice'] carries LLM Advice object; LLM cannot override winner (T-51-05, COMPARE-01)
 
 ### Pending Todos
 
@@ -122,8 +125,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-24T06:58:40.089Z
-Stopped at: Phase 51 Plan 01 complete
+Last session: 2026-08-24T09:00:07.027Z
+Stopped at: Completed 51-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
