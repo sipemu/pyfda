@@ -161,16 +161,35 @@ def compare_methods_mcp(
     for i, params in enumerate(candidate_params):
         raw_labels.append(_make_label(method_lc, params, i))
 
-    # Uniquify labels: append _[index] if two candidates share the same label.
+    # Uniquify labels using a two-pass approach that guarantees no collisions
+    # even when a raw label already contains bracket suffixes (e.g. "a[0]"
+    # produced by _make_label when params are empty).  The naive count-based
+    # O(n²) loop can produce duplicate labels like ["a[0]","a[0]","a[1]"]
+    # when raw_labels = ["a[0]", "a", "a"] — silently overwriting result_id
+    # entries and corrupting the ranking.
+    from collections import Counter  # noqa: PLC0415 — stdlib, always available
+
+    count_per_raw = Counter(raw_labels)
     seen: dict[str, int] = {}
+    used: set[str] = set()
     labels: list[str] = []
     for raw in raw_labels:
-        if raw_labels.count(raw) > 1:
-            count = seen.get(raw, 0)
-            seen[raw] = count + 1
-            labels.append(f"{raw}[{count}]")
+        if count_per_raw[raw] > 1:
+            n = seen.get(raw, 0)
+            seen[raw] = n + 1
+            candidate = f"{raw}[{n}]"
         else:
-            labels.append(raw)
+            candidate = raw
+        # Collision-safe: if the derived label is already taken (e.g. because a
+        # different raw label happened to produce the same string), keep
+        # incrementing a disambiguating counter until we find a free slot.
+        base = candidate
+        extra = 0
+        while candidate in used:
+            extra += 1
+            candidate = f"{base}_dup{extra}"
+        used.add(candidate)
+        labels.append(candidate)
 
     for label, params in zip(labels, candidate_params):
         raw_result = run_method(dataset_id, method_lc, **params)
