@@ -461,3 +461,50 @@ class TestLLMFreeAndTieBreak:
         # This test confirms the test module runs in the absence of an API key.
         # The test itself is the evidence — if we reach here, we're offline.
         assert os.environ.get("ANTHROPIC_API_KEY") is None or True  # always passes
+
+
+# ===========================================================================
+# CR-01 — argvals/kwargs forwarded through _normalize_candidates
+# ===========================================================================
+
+class TestArgvalsForwarding:
+    """CR-01: argvals and **kwargs are forwarded to build_diagnostics for raw result dicts."""
+
+    def test_raw_clustering_dict_with_argvals_produces_metric(self):
+        """Raw clustering result dict + argvals yields a non-None mean_amplitude_separation.
+
+        Before CR-01 fix, _normalize_candidates called build_diagnostics without
+        argvals, producing None for mean_amplitude_separation (the default ranking
+        metric for clustering).  After the fix, argvals is forwarded and the metric
+        is computed, so compare_methods succeeds instead of triggering the
+        incommensurability guard.
+        """
+        import numpy as np
+        from fdars.advisor import compare_methods
+
+        # Two clusters: clearly separated so amplitude separation is non-None.
+        centers_a = np.array([[3.0, 3.0, 3.0], [-3.0, -3.0, -3.0]])
+        centers_b = np.array([[2.0, 2.0, 2.0], [-2.0, -2.0, -2.0]])
+        argvals = np.linspace(0.0, 1.0, 3)
+
+        # Raw clustering result dicts — no "method" key, so _normalize_candidates
+        # must call build_diagnostics(value, method, argvals=argvals).
+        raw_a = {"centers": centers_a.tolist(), "cluster": [0, 0, 1, 1], "k": 2}
+        raw_b = {"centers": centers_b.tolist(), "cluster": [0, 0, 1, 1], "k": 2}
+
+        # Without the fix this raises ValueError (metric absent); with the fix it ranks.
+        result = compare_methods(
+            {"candidate_a": raw_a, "candidate_b": raw_b},
+            method="clustering",
+            argvals=argvals,
+            run_llm=False,
+        )
+
+        assert result["metric"] == "mean_amplitude_separation"
+        assert result["winner"] in ("candidate_a", "candidate_b")
+        # Both candidates must have a non-None metric value.
+        for entry in result["ranking"]:
+            assert entry["metric_value"] is not None, (
+                f"metric_value is None for {entry['label']!r} — "
+                "argvals was not forwarded to build_diagnostics (CR-01 regression)"
+            )

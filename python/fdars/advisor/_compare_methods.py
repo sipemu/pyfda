@@ -107,6 +107,8 @@ def _detect_family(diagnostics: dict) -> "str | None":
 def _normalize_candidates(
     candidates: "dict | list",
     method: "str | None",
+    argvals=None,
+    **kwargs,
 ) -> "list[dict]":
     """Normalise the diverse candidate input into a uniform list of labeled blocks.
 
@@ -131,6 +133,13 @@ def _normalize_candidates(
     method : str or None
         The task family string passed to ``compare_methods``.  Required when
         any candidate value is a raw result dict (lacking ``"method"``).
+    argvals : array_like, optional
+        Forwarded to ``build_diagnostics`` when building diagnostics from raw
+        result dicts.  Required by clustering/alignment aspects to compute
+        distance-based metrics (e.g. ``mean_amplitude_separation``).
+    **kwargs
+        Additional keyword arguments forwarded to ``build_diagnostics`` when
+        building diagnostics from raw result dicts.
 
     Returns
     -------
@@ -179,7 +188,7 @@ def _normalize_candidates(
                     "Pass method='clustering' (or the relevant family) or supply "
                     "pre-built diagnostics dicts."
                 )
-            diag = build_diagnostics(value, method)
+            diag = build_diagnostics(value, method, argvals=argvals, **kwargs)
         family = _detect_family(diag) or method or ""
         blocks.append({"label": label, "method": family, "diagnostics": diag})
 
@@ -390,7 +399,7 @@ def compare_methods(
         When ``run_llm=True`` (Plan 02 not yet implemented).
     """
     # --- 1. Normalise candidates to labeled blocks ---
-    blocks = _normalize_candidates(candidates, method)
+    blocks = _normalize_candidates(candidates, method, argvals=argvals, **kwargs)
 
     # --- 2. Resolve the task family (from blocks or caller-supplied method) ---
     # All blocks have their family in the "method" field (set by _normalize_candidates).
