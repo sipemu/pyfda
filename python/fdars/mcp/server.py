@@ -428,7 +428,7 @@ def fdars_compare_run(
 def fdars_compare_methods(
     dataset_id: str,
     method: str,
-    candidate_params: list,
+    candidate_params: list[dict],
     metric: str | None = None,
 ) -> dict:
     """Re-run multiple candidates and return the deterministic ranking by-reference.
