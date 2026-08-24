@@ -514,12 +514,26 @@ def compare_methods(
     messages = [{"role": "user", "content": user_content}]
     advice = p.complete_structured(Advice, messages, system)
 
-    # GROUND-03 (per-candidate): run _check_grounding once per candidate block
-    # so every cited value is traced to its correct candidate's own diagnostics.
-    # A value present only in candidate A's block is NOT a valid citation for a
-    # claim grounded in candidate B's block (PITFALLS 7 & 13, COMPARE-02).
-    for block in provenance_blocks:
-        _check_grounding(advice, block["diagnostics"])
+    # GROUND-03 (union grounding): check grounding ONCE against the union of all
+    # candidates' diagnostics.  This upholds the hard grounding invariant — every
+    # cited number must exist in SOME candidate's real fdars-computed diagnostics
+    # (fabrication is caught) — while allowing legitimate cross-candidate narration
+    # that cites values from more than one candidate.
+    #
+    # Implementation: wrap all per-candidate dicts in a single list under a
+    # synthetic key.  _flatten_diagnostics_numbers recurses into lists, so it
+    # collects every numeric value from every candidate without any key-collision
+    # (a plain dict.update() would silently drop same-keyed values from earlier
+    # candidates — e.g. candidate_A's mean_amplitude_separation=0.91 would be
+    # overwritten by candidate_B's 0.30, making 0.91 ungroundable).
+    #
+    # NOTE: the per-candidate LABELED blocks sent to the LLM (above) are NOT
+    # flat-merged — per-candidate structure is preserved for provenance tracking
+    # (COMPARE-02).  Only the grounding CHECK uses the union, not the LLM prompt.
+    union_diagnostics: dict = {
+        "_candidates": [block["diagnostics"] for block in provenance_blocks]
+    }
+    _check_grounding(advice, union_diagnostics)
 
     # Re-assert winner from the fdars sort: the LLM narration cannot override it
     # (COMPARE-01, T-51-05).  The result always carries the pre-computed winner.

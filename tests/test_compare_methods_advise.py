@@ -271,14 +271,20 @@ def test_provenance_is_per_candidate_not_flat_merged():
     )
 
 
-def test_grounding_runs_per_candidate():
-    """A mock narration citing candidate_A's value for a claim about candidate_B
-    raises GroundingViolationError when grounding is checked per-candidate.
+def test_grounding_catches_fabricated_values():
+    """Union grounding: a fabricated value absent from ALL candidates raises
+    GroundingViolationError.
 
     candidate_A: mean_amplitude_separation=0.91
     candidate_B: mean_amplitude_separation=0.30
-    Mock recommendation about candidate_B cites '0.91' (candidate_A's value).
-    The per-candidate grounding check should detect this mismatch.
+    Mock narration cites '0.99' — a value present in NEITHER candidate's
+    diagnostics.  The union grounding check must detect this fabrication and
+    raise GroundingViolationError.
+
+    Corrected semantics (WR-03): grounding is checked against the union of all
+    candidates' diagnostics; a value is grounded if it appears in ANY candidate.
+    A cross-candidate narration citing 0.91 (from A) in the context of A is valid.
+    A citation of 0.99 (present in no candidate) is always fabrication.
     """
     from fdars.advisor import compare_methods
     from fdars.advisor.providers._validate import GroundingViolationError
@@ -286,7 +292,8 @@ def test_grounding_runs_per_candidate():
     diag_a = _clustering_diag(mean_amplitude_separation=0.91)
     diag_b = _clustering_diag(mean_amplitude_separation=0.30)
 
-    # Mock narration: a recommendation about candidate_B cites candidate_A's value.
+    # Mock narration cites 0.99 — a value that does not appear in either candidate's
+    # diagnostics.  This is genuine fabrication and must be rejected.
     from fdars.advisor._schema import Advice, Recommendation
     bad_advice = Advice(
         interpretation="candidate_A ranks first.",
@@ -294,9 +301,9 @@ def test_grounding_runs_per_candidate():
             Recommendation(
                 action="Prefer candidate_A",
                 kind="none",
-                rationale="candidate_B has amplitude separation 0.91",  # fabricated for B
+                rationale="candidate_A has amplitude separation 0.99",  # fabricated
                 expected_effect="Better clustering",
-                evidence=["candidate_B amplitude separation = 0.91"],  # wrong provenance
+                evidence=["candidate_A amplitude separation = 0.99"],  # fabricated
             )
         ],
         caveats=[],
@@ -310,6 +317,55 @@ def test_grounding_runs_per_candidate():
             provider=mock_provider,
             domain_context="test",
         )
+
+
+def test_grounding_allows_cross_candidate_narration():
+    """Union grounding: a narration citing real values from two different candidates
+    must PASS grounding (WR-03 corrected semantics).
+
+    candidate_A: mean_amplitude_separation=0.91
+    candidate_B: mean_amplitude_separation=0.30
+    A legitimate comparative narration may cite both 0.91 and 0.30 in a single
+    recommendation evidence string.  Under per-candidate checking this always
+    raised GroundingViolationError (0.91 is absent from B's block when checking B).
+    Under union grounding, both values are present in the merged dict, so the
+    narration passes.
+    """
+    from fdars.advisor import compare_methods
+    from fdars.advisor.providers._validate import GroundingViolationError
+
+    diag_a = _clustering_diag(mean_amplitude_separation=0.91)
+    diag_b = _clustering_diag(mean_amplitude_separation=0.30)
+
+    from fdars.advisor._schema import Advice, Recommendation
+    # Cross-candidate narration citing real values from both candidates.
+    cross_advice = Advice(
+        interpretation="candidate_A (separation=0.91) outperforms candidate_B (separation=0.30).",
+        recommendations=[
+            Recommendation(
+                action="Prefer candidate_A",
+                kind="none",
+                rationale="candidate_A has superior amplitude separation.",
+                expected_effect="Better clustering quality.",
+                evidence=[
+                    "candidate_A amplitude separation = 0.91",  # from A — real
+                    "candidate_B amplitude separation = 0.30",  # from B — real
+                ],
+            )
+        ],
+        caveats=[],
+    )
+    mock_provider = _MockProvider(advice_to_return=cross_advice)
+
+    # Must NOT raise GroundingViolationError — both cited values are real.
+    result = compare_methods(
+        {"candidate_A": diag_a, "candidate_B": diag_b},
+        run_llm=True,
+        provider=mock_provider,
+        domain_context="test",
+    )
+    assert result["winner"] == "candidate_A"
+    assert "advice" in result
 
 
 def test_result_shape_run_llm_true():
