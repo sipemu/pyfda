@@ -134,7 +134,7 @@ A docs-only quality pass (no crate bump, no new bindings, no advisor logic chang
 **Standing constraints every phase inherits:** grounding invariant (every emitted scalar is fdars-computed native `float`/`int`, no numpy scalars, no fabricated numbers); MCP boundary provably LLM-free (new MCP tools re-run via existing runnable methods / heuristic proposals; no MCP tool calls `advise()`); guard-sync (`_DIAGNOSTICS_METHODS` ↔ `build_diagnostics._supported`) changes stay atomic (a no-op for all four capabilities per research — no new method slot — but primer/`_supported` edits still commit atomically); provider-agnostic, offline-deterministic core with env-gated LLM tests and NO network in CI; docs stay hand-authored inline SVG (STYLE_SPEC), worked-example fences run OFFLINE emitting `FDARS_FENCE_OK` with small/synthetic data; whole-site `mkdocs build --strict` green offline; docs phase runs sequentially on `main` (NOT in worktrees — fences hardcode the main-tree `.venv/bin/mkdocs` path); a BLOCKING human diagram method-accuracy review before milestone close (the v6.0 lesson).
 
 - [x] **Phase 50: Deferred Advisor Aspects (+ compat pre-flight)** - Land the blocking compat fixes, then add grounded PACE-FPCA / elastic-multinomial / ITP scalars + primers (completed 2026-08-23)
-- [ ] **Phase 51: Comparative Method-Selection** - Deterministic fdars-computed ranking over N candidate methods + "comparison" task family + MCP tool
+- [x] **Phase 51: Comparative Method-Selection** - Deterministic fdars-computed ranking over N candidate methods + "comparison" task family + MCP tool (completed 2026-08-24)
 - [ ] **Phase 52: Pipeline Diagnostic Report** - Multi-stage diagnostic aggregation with per-stage provenance + "pipeline" task family + MCP tool
 - [ ] **Phase 53: Closed-Loop Auto-Tuning (capstone)** - Bounded propose→apply→re-run→compare loop; Python-API (LLM proposal) + MCP (heuristic, LLM-free) surfaces
 - [ ] **Phase 54: Eval Strategy + Docs Gate** - Deterministic eval fixtures + new pages + method-accurate SVGs + offline fences + whole-site strict build + blocking human diagram review
@@ -241,7 +241,7 @@ Phases execute in numeric order: 50 → 51 → 52 → 53 → 54
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 50. Deferred Advisor Aspects (+ compat pre-flight) | v8.0 | 3/3 | Complete    | 2026-08-23 |
-| 51. Comparative Method-Selection | v8.0 | 3/3 | In Progress|  |
+| 51. Comparative Method-Selection | v8.0 | 3/3 | Complete    | 2026-08-24 |
 | 52. Pipeline Diagnostic Report | v8.0 | 0/TBD | Not started | - |
 | 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 0/TBD | Not started | - |
 | 54. Eval Strategy + Docs Gate | v8.0 | 0/TBD | Not started | - |
