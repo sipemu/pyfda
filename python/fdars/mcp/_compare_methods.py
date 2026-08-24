@@ -9,7 +9,7 @@ list of per-candidate scalar-param dicts for a single runnable method, it:
 3. Stores each raw result in the handle registry.
 4. Builds diagnostics for each candidate via ``advisor.build_diagnostics``.
 5. Delegates ranking to ``fdars.advisor._compare_methods.compare_methods``
-   with ``run_llm=False`` (the deterministic offline core — never calls advise).
+   with ``run_llm=False`` (the deterministic offline core — LLM-free path).
 6. Returns a by-reference ranking dict: only handles + scalar metric values
    cross the MCP boundary (no arrays — Anti-Pattern 4).
 
@@ -74,7 +74,7 @@ def compare_methods_mcp(
     ``compare_methods(run_llm=False)``.
 
     This function is **provably LLM-free** — it never imports or calls
-    ``advise()`` or any provider (COMPARE-04, T-51-09).
+    the advisor entrypoint or any LLM provider (COMPARE-04, T-51-09).
 
     Parameters
     ----------
