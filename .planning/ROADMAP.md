@@ -181,7 +181,12 @@ Plans:
   4. An `fdars_compare_methods` MCP tool exposes the comparison and stays provably LLM-free — it re-runs via existing runnable methods and never calls `advise()`.
 
 **Plans**: 3 plans
+**Wave 1**
+
 - [ ] 51-01-PLAN.md — Deterministic ranking core (metric registry, dual-input, fail-closed guard, winner-is-sort) [TRACER; COMPARE-01, COMPARE-03]
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 51-02-PLAN.md — "comparison" task family: per-candidate provenance + winner authority narration [COMPARE-01, COMPARE-02]
 - [ ] 51-03-PLAN.md — `fdars_compare_methods` MCP tool, LLM-free, by-reference ranking [COMPARE-04]
 
