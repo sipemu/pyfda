@@ -266,6 +266,34 @@ class TestTracer:
 # Task 2 — Fail-closed incommensurability guard (COMPARE-03)
 # ===========================================================================
 
+class TestEmptyCandidatesGuard:
+    """CR-03: empty candidates raise a clear ValueError before any IndexError."""
+
+    def test_empty_dict_raises_value_error(self):
+        """compare_methods({}) raises ValueError naming empty candidates (not IndexError)."""
+        import pytest
+        from fdars.advisor import compare_methods
+
+        with pytest.raises(ValueError, match="empty"):
+            compare_methods({}, method="clustering", run_llm=False)
+
+    def test_empty_dict_with_explicit_metric_raises_value_error(self):
+        """compare_methods({}, metric=...) must raise ValueError before ranking[0] IndexError."""
+        import pytest
+        from fdars.advisor import compare_methods
+
+        with pytest.raises(ValueError, match="empty"):
+            compare_methods({}, metric="mean_amplitude_separation", run_llm=False)
+
+    def test_empty_list_raises_value_error(self):
+        """compare_methods([], method=...) raises ValueError for empty list input."""
+        import pytest
+        from fdars.advisor import compare_methods
+
+        with pytest.raises(ValueError, match="empty"):
+            compare_methods([], method="clustering", run_llm=False)
+
+
 class TestIncommensurabilityGuard:
     """Task 2: guard tests — mixed families and missing metrics."""
 

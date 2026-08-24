@@ -406,6 +406,13 @@ def compare_methods(
     # --- 1. Normalise candidates to labeled blocks ---
     blocks = _normalize_candidates(candidates, method, argvals=argvals, **kwargs)
 
+    # --- 1a. Fail fast on empty candidate set (avoids IndexError at ranking[0]) ---
+    if not blocks:
+        raise ValueError(
+            "compare_methods: 'candidates' is empty. "
+            "Pass at least two candidates for a valid comparison."
+        )
+
     # --- 2. Resolve the task family (from blocks or caller-supplied method) ---
     # All blocks have their family in the "method" field (set by _normalize_candidates).
     # Use the caller-supplied method as a hint; then verify after the guard.
