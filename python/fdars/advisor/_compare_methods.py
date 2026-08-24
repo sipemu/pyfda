@@ -219,6 +219,12 @@ def _assert_commensurable(blocks: list[dict], metric: str) -> None:
         missing the metric.
     """
     # Guard 1: mixed task families.
+    # NOTE: compare_methods() performs an identical mixed-family check before
+    # calling _assert_commensurable, so this guard is unreachable from the
+    # current call site.  It is kept as a defense-in-depth safety net: if
+    # _assert_commensurable is ever called from a future code path that skips
+    # the upstream check, Guard 1 ensures the correct error fires before Guard 2
+    # (metric absence) could produce a more confusing message.
     families = {b["method"] for b in blocks}
     if len(families) > 1:
         sorted_families = sorted(families)
