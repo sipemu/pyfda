@@ -4,17 +4,17 @@ milestone: v8.0
 milestone_name: "Advisor: New Capabilities"
 current_phase: 51
 current_phase_name: Comparative Method-Selection
-status: executing
-stopped_at: Completed 51-02-PLAN.md
-last_updated: "2026-08-24T09:00:07.050Z"
+status: verifying
+stopped_at: Completed 51-comparative-method-selection/51-03-PLAN.md
+last_updated: "2026-08-24T09:37:33.280Z"
 last_activity: 2026-08-24
 last_activity_desc: Phase 51 execution started
-state_head: 8147d412bfacb9824dc65c6f30e7dee2b5e7ad82
+state_head: adaab72f1685b8639479ad9f346704ebfa643f7a
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 20
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 
 Phase: 51 (Comparative Method-Selection) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-24 — Phase 51 execution started
 
 Progress: [██░░░░░░░░] 20%
@@ -69,6 +69,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 50 P03 | 3min | 2 tasks | 2 files |
 | Phase 51 P01 | 362 | 3 tasks | 3 files |
 | Phase 51-comparative-method-selection P02 | 10min | 3 tasks | 4 files |
+| Phase 51-comparative-method-selection P03 | 12 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Recent decisions affecting current work:
 - [Phase 51]: compare_methods offline core: metric registry + dual-input normalizer + fail-closed guard + stable deterministic sort (COMPARE-01, COMPARE-03)
 - [Phase 51]: Per-candidate grounding: _check_grounding(advice, block_diagnostics) per labeled block — cross-candidate citation raises GroundingViolationError (COMPARE-02)
 - [Phase 51]: compare_methods(run_llm=True): result['winner'] always from fdars sort (pre-LLM); result['advice'] carries LLM Advice object; LLM cannot override winner (T-51-05, COMPARE-01)
+- [Phase 51]: fdars_compare_methods validates method at tool boundary before delegating to helper — fail fast with clear ValueError naming _RUNNABLE_METHODS
+- [Phase 51]: No ranking logic inlined in server.py — 3-line handler delegates entirely to compare_methods_mcp (Anti-Pattern 5 / Single Responsibility)
+- [Phase 51]: guard-sync no-op confirmed: _RUNNABLE_METHODS=6, _DIAGNOSTICS_METHODS=14 unchanged by adding fdars_compare_methods
 
 ### Pending Todos
 
@@ -125,8 +129,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-24T09:00:07.027Z
-Stopped at: Completed 51-02-PLAN.md
+Last session: 2026-08-24T09:37:33.252Z
+Stopped at: Completed 51-comparative-method-selection/51-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

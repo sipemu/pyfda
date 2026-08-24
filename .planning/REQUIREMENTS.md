@@ -26,7 +26,7 @@ Four new advisor capabilities built on the existing surface (no new runtime deps
 - [x] **COMPARE-01**: `compare_methods()` runs `build_diagnostics` over N candidate methods and returns a deterministic, **fdars-computed** ranking (the LLM does not choose the winner)
 - [x] **COMPARE-02**: a "comparison" advise task family narrates the ranking, citing each candidate's grounded diagnostics with correct per-candidate provenance (labeled candidates, never flat-merged dicts)
 - [x] **COMPARE-03**: comparison guards against incommensurable comparisons — only comparable candidates are ranked, on a shared metric
-- [ ] **COMPARE-04**: an `fdars_compare_methods` MCP tool exposes the comparison and stays provably LLM-free (re-runs via existing runnable methods)
+- [x] **COMPARE-04**: an `fdars_compare_methods` MCP tool exposes the comparison and stays provably LLM-free (re-runs via existing runnable methods)
 
 ### Pipeline Diagnostic Report
 
@@ -96,7 +96,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | COMPARE-01 | Phase 51 | Complete |
 | COMPARE-02 | Phase 51 | Complete |
 | COMPARE-03 | Phase 51 | Complete |
-| COMPARE-04 | Phase 51 | Pending |
+| COMPARE-04 | Phase 51 | Complete |
 | PIPE-01 | Phase 52 | Pending |
 | PIPE-02 | Phase 52 | Pending |
 | PIPE-03 | Phase 52 | Pending |
