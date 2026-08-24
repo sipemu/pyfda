@@ -281,7 +281,7 @@ def _system_prompt(task: str, aspect: str = "") -> str:
     base = base + aspect_primer
 
     # -- Task-family clause -------------------------------------------------
-    _supported_tasks = {"interpretation", "parameter", "method"}
+    _supported_tasks = {"interpretation", "parameter", "method", "comparison"}
     if task_lc not in _supported_tasks:
         raise ValueError(
             f"_system_prompt: unsupported task {task!r}. "
@@ -352,6 +352,30 @@ def _system_prompt(task: str, aspect: str = "") -> str:
             "poor-fit signal (e.g. phase_leakage_indicator value, "
             "cumulative variance pattern, cluster separation). "
             "Only flag a method mismatch when the diagnostics clearly support it."
+        )
+
+    elif task_lc == "comparison":
+        # COMPARE-02: comparison task family — narrates the fdars-computed ranking.
+        # The winner and ranking are ALREADY DECIDED by fdars; the model explains,
+        # it does NOT select the winner.
+        task_clause = (
+            "Task: comparison.\n"
+            "The ranking and winner supplied in the user message are already "
+            "decided by fdars deterministic computation — you narrate and explain "
+            "the ranking, you do NOT choose or re-rank the candidates. "
+            "For each candidate in the ranking, explain WHY it ranks where it does "
+            "by citing that candidate's own diagnostic values from the labeled "
+            "diagnostics block provided for it. "
+            "Reference each candidate by its explicit label exactly as supplied. "
+            "When discussing a candidate, cite only values present in that "
+            "candidate's own diagnostics block — do not cite a value from one "
+            "candidate's block as evidence for a claim about a different candidate. "
+            "The winner field in the user message identifies the best candidate "
+            "per the fdars sort; do not claim any other candidate is the winner. "
+            "Set recommendation kind to 'none' unless a concrete follow-up action "
+            "is clearly warranted by one candidate's diagnostics. "
+            "Only cite values present in the candidate's own diagnostics; do not "
+            "supply thresholds or reference values not present in the diagnostics."
         )
 
     return base + "\n" + task_clause
