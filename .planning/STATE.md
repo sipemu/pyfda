@@ -5,16 +5,16 @@ milestone_name: "Advisor: New Capabilities"
 current_phase: 54
 current_phase_name: Eval Strategy + Docs Gate
 status: executing
-stopped_at: Completed 54-01-PLAN.md
-last_updated: "2026-08-30T21:30:36.070Z"
+stopped_at: Completed 54-02-PLAN.md
+last_updated: "2026-08-30T21:36:40.653Z"
 last_activity: 2026-08-30
 last_activity_desc: Phase 54 execution started
-state_head: 4e4213c30614ca92ee2a548b2a9c193ffcac2e67
+state_head: 8dae38904de630c5f8fe56707a8a5fd03f1d2cd6
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 16
-  completed_plans: 13
+  completed_plans: 14
   percent: 60
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 ## Current Position
 
 Phase: 54 (Eval Strategy + Docs Gate) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-08-30 — Phase 54 execution started
 
@@ -77,6 +77,7 @@ Progress: [██████░░░░] 60%
 | Phase 53 P02 | 18m | 2 tasks | 4 files |
 | Phase 53 P03 | 12m | 3 tasks | 3 files |
 | Phase 54-eval-strategy-docs-gate P01 | 3min | 3 tasks | 1 files |
+| Phase 54-eval-strategy-docs-gate P02 | 3min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -124,6 +125,7 @@ Recent decisions affecting current work:
 - [Phase 53]: Heuristic step: factor=10/2^n_reversals for log-scale, (hi-lo)/(10*2^n_reversals) for linear; floors prevent stuck at boundary
 - [Phase 53]: final_target_value from final_diagnostics via _extract_target, not step trace (handles list-valued metrics)
 - [Phase 54-eval-strategy-docs-gate]: Deterministic eval fixtures: constructed candidate set with known-best winner; FakeProvider with qualitative-only evidence passes grounding check offline — Eval correctness requires known-from-data answers; grounding requires no numeric tokens in fake evidence
+- [Phase 54]: viewBox 480 for all three advisor SVGs; winner in green, Goodhart guard in red; oscillation-revisit before re-run noted separately
 
 ### Pending Todos
 
@@ -153,8 +155,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-30T21:30:36.004Z
-Stopped at: Completed 54-01-PLAN.md
+Last session: 2026-08-30T21:36:40.590Z
+Stopped at: Completed 54-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

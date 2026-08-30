@@ -251,11 +251,11 @@ Plans:
   3. Each capability page carries a runnable offline `FDARS_FENCE_OK` worked example on small/synthetic data (the auto-tune example uses the offline/injectable path — no network in the docs build).
   4. Whole-site `mkdocs build --strict` is green offline and a blocking human diagram method-accuracy review passes before the milestone is closed.
 
-**Plans**: 1/4 plans executed
+**Plans**: 2/4 plans executed
 **Wave 1**
 
 - [x] 54-01-PLAN.md — Deterministic offline eval fixtures (comparative winner + auto-tune improving direction), env-gated live, no LLM-judge
-- [ ] 54-02-PLAN.md — 3 method-accurate hand-authored SVGs (comparative / pipeline / auto-tune), STYLE_SPEC + SVGO-idempotent
+- [x] 54-02-PLAN.md — 3 method-accurate hand-authored SVGs (comparative / pipeline / auto-tune), STYLE_SPEC + SVGO-idempotent
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -278,7 +278,7 @@ Phases execute in numeric order: 50 → 51 → 52 → 53 → 54
 | 51. Comparative Method-Selection | v8.0 | 3/3 | Complete    | 2026-08-24 |
 | 52. Pipeline Diagnostic Report | v8.0 | 3/3 | Complete    | 2026-08-30 |
 | 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 3/3 | Complete    | 2026-08-30 |
-| 54. Eval Strategy + Docs Gate | v8.0 | 1/4 | In Progress|  |
+| 54. Eval Strategy + Docs Gate | v8.0 | 2/4 | In Progress|  |
 
 ---
 
