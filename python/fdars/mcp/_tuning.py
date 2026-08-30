@@ -299,7 +299,7 @@ def run_tuning_loop_mcp(
     # or we can derive from the accepted steps.
     # We need to re-extract from the trace's final_diagnostics and initial run.
     # Use trace fields directly.
-    target_direction = _METRIC_REGISTRY.get(target_metric, "higher")
+    target_direction = _METRIC_REGISTRY[target_metric]  # already validated in run_tuning_loop
 
     # Reconstruct initial target from first step's target_before (if steps exist)
     initial_target_value: float | None = None
