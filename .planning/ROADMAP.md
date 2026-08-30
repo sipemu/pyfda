@@ -226,7 +226,10 @@ Plans:
   3. An `fdars_auto_tune` MCP tool uses a heuristic (LLM-free) proposal, preserving the provably-LLM-free MCP boundary; optional guard diagnostics detect off-target (Goodhart) degradation during tuning.
   4. `TuningTrace` / `TuneProposal` / `TuneResult` schemas plus an optional `Recommendation.parameter_delta` field are added, backward-compatible with the 3 existing task families.
 
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 53-01-PLAN.md — TRACER: bounded loop core + _PARAM_REGISTRY + tuning schemas, offline mock-propose_fn (TUNE-01/02/05/06)
+- [ ] 53-02-PLAN.md — LLM proposal path: auto_tune() + parameter_proposal prompt clause, schema-validated clamped delta (TUNE-03)
+- [ ] 53-03-PLAN.md — fdars_auto_tune MCP tool + LLM-free heuristic propose_fn, by-reference (TUNE-04)
 
 ### Phase 54: Eval Strategy + Docs Gate
 
