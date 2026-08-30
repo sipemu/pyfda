@@ -231,7 +231,7 @@ None beyond the deviation documented above.
 - Auto-tuning (Phase 53) can consume `pipeline_report()` caveats as cross-stage signals — the per-stage isolation and Python-authoritative caveat properties are the load-bearing abstractions it needs.
 - Guard-sync confirmed no-op: no new `_DIAGNOSTICS_METHODS` / `build_diagnostics._supported` key.
 
-## Self-Check: PASSED
+## Self-Check: PASSED (verified post-SUMMARY)
 
 | Check | Result |
 |-------|--------|
