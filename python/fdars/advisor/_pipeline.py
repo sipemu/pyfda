@@ -356,7 +356,11 @@ def _compute_cross_stage_caveats(
                     raw_value = int(n_union)
 
             if fraction_value is not None and fraction_value > outlier_thresh:
-                assert raw_value is not None  # guaranteed by the logic above
+                if raw_value is None:  # pragma: no cover — structural invariant; unreachable by construction
+                    raise AssertionError(
+                        "_compute_cross_stage_caveats: raw_value is None despite "
+                        "fraction_value being set. This is a logic bug in the fallback chain."
+                    )
                 caveats.append({
                     "stage": stage,
                     "aspect": aspect,
