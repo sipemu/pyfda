@@ -372,8 +372,10 @@ def run_tuning_loop(
         Diagnostic metric key to optimise (must be in ``_METRIC_REGISTRY``).
     propose_fn : callable
         ``propose_fn(current_params: dict, history: list[dict]) -> dict``.
-        Returns a dict with the same key set as ``initial_params`` and a new
-        scalar value.  Raise ``_UnparseableProposalError`` on failure.
+        Returns a dict with exactly one key — the tunable parameter name —
+        mapped to the proposed new scalar value.  Extra keys (e.g. ``seed``)
+        are silently ignored so callers do not need to strip them.  Raise
+        ``_UnparseableProposalError`` on failure.
     max_steps : int
         Maximum number of loop iterations (hard cap; budget check is FIRST).
     eps : float
@@ -540,9 +542,10 @@ def run_tuning_loop(
 
         # -------------------------------------------------------------------
         # TERMINATION 2b: Key-set validation (Pitfall 8)
+        # WR-03 fix: require the tunable param key; ignore extra keys (e.g.
+        # seed) so propose_fn implementations do not need to strip them.
         # -------------------------------------------------------------------
-        expected_keys = {param_name}
-        if set(new_params.keys()) != expected_keys:
+        if param_name not in new_params:
             stop_reason = "parse_failure"
             steps_recorded.append(TuningStep(
                 step=step,

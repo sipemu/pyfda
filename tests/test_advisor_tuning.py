@@ -601,6 +601,38 @@ def test_round_param_float_sig_figs():
 
 
 # ===========================================================================
+# Test: WR-03 propose_fn returning extra keys (e.g. seed) is accepted
+# ===========================================================================
+
+
+def test_propose_fn_extra_keys_ignored():
+    """WR-03: a propose_fn returning {param_name, seed} must be accepted (not parse_failure).
+
+    The key-set validation must require the tunable param key and silently
+    ignore extra keys — callers should not need to strip fixed params like seed.
+    """
+    env = _SmoothingImproveEnv()
+
+    step_count = [0]
+
+    def propose_fn_with_seed(current_params, history):
+        step_count[0] += 1
+        n_basis = current_params.get("n_basis", 15)
+        # Return both the tunable param AND an extra seed key
+        return {"n_basis": n_basis + 2, "seed": 99}
+
+    trace = _run_smoothing_loop(propose_fn_with_seed, env=env, max_steps=3)
+
+    # Must NOT exit with parse_failure — the extra "seed" key must be ignored
+    assert trace.stop_reason != "parse_failure", (
+        f"WR-03: propose_fn returning extra 'seed' key triggered parse_failure; "
+        f"stop_reason={trace.stop_reason!r}. Extra keys must be silently ignored."
+    )
+    # Must have executed at least one step
+    assert len(trace.steps) >= 1
+
+
+# ===========================================================================
 # Test 12: Untuneable methods raise ValueError
 # ===========================================================================
 
