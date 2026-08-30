@@ -202,7 +202,12 @@ Plans:
   3. Cross-stage signal detection surfaces downstream caveats (e.g. a high imputed fraction in the represent stage raises an FPCA caveat downstream).
   4. An `fdars_build_pipeline_report` MCP tool exposes the report and stays LLM-free (never calls `advise()`).
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 52-01-PLAN.md — TRACER: build_pipeline_report() offline aggregation core (per-stage list-of-blocks + {"_stages":[...]} union payload) (PIPE-01)
+- [ ] 52-02-PLAN.md — deterministic cross-stage caveat rule table + PipelineReport schema + "pipeline" task family narrative under union grounding (PIPE-02, PIPE-03)
+- [ ] 52-03-PLAN.md — fdars_build_pipeline_report LLM-free MCP tool (by-reference, guard-sync no-op) (PIPE-04)
 
 ### Phase 53: Closed-Loop Auto-Tuning (capstone)
 
