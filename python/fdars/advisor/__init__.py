@@ -68,6 +68,7 @@ __all__ = [
     "compare_methods",
     "build_pipeline_report",
     "pipeline_report",
+    "auto_tune",
     "Advice",
     "Recommendation",
     "PipelineReport",
@@ -593,6 +594,293 @@ def describe_cluster_differences(
         domain_context=domain_context,
         model=model,
         provider=provider,
+    )
+
+
+# ---------------------------------------------------------------------------
+# auto_tune — LLM-backed closed-loop parameter tuning (TUNE-03)
+# ---------------------------------------------------------------------------
+
+
+def auto_tune(
+    dataset_id: str,
+    method: str,
+    *,
+    target_metric: "str | None" = None,
+    max_steps: int = 10,
+    domain_context: str = "",
+    model: str = "claude-opus-4-8",
+    provider: "str | object | None" = None,
+    guard: bool = True,
+    # Test seams: injectable run_method and build_diagnostics (same as run_tuning_loop)
+    _run_method: "callable | None" = None,
+    _build_diagnostics: "callable | None" = None,
+    **initial_params,
+) -> "TuneResult":  # noqa: F821
+    """Run the closed-loop tuning orchestrator with an LLM-backed propose_fn.
+
+    The LLM proposes a SINGLE parameter change per iteration via the
+    ``parameter_proposal`` task clause.  The proposal is read ONLY from the
+    schema-validated ``Recommendation.parameter_delta`` field — never from prose.
+    The orchestrator clamps ``parameter_delta.new_value`` to the declared range
+    before it enters the numeric path.  A missing/wrong-param ``parameter_delta``
+    exits the loop with ``stop_reason='parse_failure'`` and NO second LLM call
+    (the LLM never re-enters the numeric path).
+
+    Grounding-invariant hard boundary (TUNE-03, T-53B-01)
+    -------------------------------------------------------
+    The LLM's ONLY numeric contribution is ``TuneProposal.new_value``, which is:
+
+    1. Read from ``Recommendation.parameter_delta.new_value`` (schema-validated).
+    2. Clamped to the param's declared range (never rejected for out-of-range).
+    3. Int-cast when ``param_type`` is ``int``.
+    4. The single number from the LLM that ever enters the fdars numeric path.
+
+    Prose is never parsed.  A bad proposal (no ``parameter_delta``, wrong param
+    name) exits the loop immediately with ``parse_failure`` — no retry.
+
+    Parameters
+    ----------
+    dataset_id : str
+        Opaque dataset handle registered in the MCP registry.  May be any
+        string when ``_run_method`` and ``_build_diagnostics`` are injected.
+    method : str
+        The fdars method to tune (``"smoothing"``, ``"basis"``, ``"fpca"``,
+        ``"clustering"``).  Raises ``ValueError`` for non-tuneable methods
+        (``"alignment"``, ``"depth"``).
+    target_metric : str or None, optional
+        Diagnostic metric key to optimise.  When ``None``, the default for the
+        method is read from ``_PARAM_REGISTRY``.
+    max_steps : int, optional
+        Maximum number of loop iterations (hard cap; default 10, max 20).
+    domain_context : str, optional
+        Free-text description of the problem domain passed to ``advise()``.
+    model : str, optional
+        LLM model identifier (default ``"claude-opus-4-8"``).
+    provider : str or Provider or None, optional
+        LLM provider forwarded to ``advise()``.  ``None`` uses the Anthropic
+        default.  Pass a fake ``Provider`` instance for offline testing — no
+        API key required.
+    guard : bool, optional
+        When ``True`` (default), guard thresholds from ``_PARAM_REGISTRY`` are
+        applied.  When ``False``, no guard check is performed.
+    _run_method : callable or None
+        Test seam: replaces the real fdars run_method (same seam as
+        ``run_tuning_loop``).  Allows offline testing without the MCP registry.
+    _build_diagnostics : callable or None
+        Test seam: replaces the real ``build_diagnostics``.
+    **initial_params
+        Starting param values.  When omitted the default from ``_PARAM_REGISTRY``
+        is used for the tunable scalar (e.g. ``n_basis=15`` for smoothing).
+
+    Returns
+    -------
+    TuneResult
+        Complete result including the ``TuningTrace`` (all steps) and summary
+        fields: ``improved``, ``initial_target_value``, ``final_target_value``,
+        ``improvement_pct``.
+
+    Raises
+    ------
+    ValueError
+        When ``method`` is not in ``_PARAM_REGISTRY`` or is not tuneable
+        (e.g. ``"alignment"`` or ``"depth"``).
+    """
+    # Deferred imports — LLM-free at module load (TUNE-01, T-53A-04)
+    from fdars.advisor._tuning import (  # noqa: PLC0415
+        _PARAM_REGISTRY,
+        _UnparseableProposalError,
+        _is_improvement,
+        run_tuning_loop,
+    )
+    from fdars.advisor._schema import TuneResult  # noqa: PLC0415
+
+    method_lc = method.lower().strip()
+
+    # ------------------------------------------------------------------
+    # Validate method and resolve spec
+    # ------------------------------------------------------------------
+    if method_lc not in _PARAM_REGISTRY:
+        raise ValueError(
+            f"auto_tune: method {method!r} not in _PARAM_REGISTRY. "
+            f"Supported: {sorted(_PARAM_REGISTRY)!r}."
+        )
+    spec = _PARAM_REGISTRY[method_lc]
+    if not spec.get("tuneable", False):
+        raise ValueError(
+            f"auto_tune: {method!r} is not tuneable. "
+            f"Reason: {spec.get('reason', 'no reason given')}."
+        )
+
+    # ------------------------------------------------------------------
+    # Resolve target_metric and guard_thresholds from spec
+    # ------------------------------------------------------------------
+    if target_metric is None:
+        target_metric = spec["target_metric"]
+
+    guard_thresholds = spec.get("guard_metrics") if guard else None
+
+    # ------------------------------------------------------------------
+    # Resolve initial_params (caller override or spec default)
+    # ------------------------------------------------------------------
+    param_name = spec["param"]
+    if param_name not in initial_params:
+        initial_params = {param_name: spec["default"], **initial_params}
+
+    # ------------------------------------------------------------------
+    # Build intercepting build_diagnostics to share current_diag with
+    # the LLM propose_fn closure (avoids a double fdars call each step).
+    # ------------------------------------------------------------------
+    _current_diag_holder: "list" = [None]
+
+    if _build_diagnostics is not None:
+        _real_build_diagnostics = _build_diagnostics
+    else:
+        # deferred import — offline tests inject _build_diagnostics instead
+        _real_build_diagnostics = build_diagnostics
+
+    def _intercepting_build(result, _method, argvals=None, **kwargs):
+        diag = _real_build_diagnostics(result, _method, argvals=argvals, **kwargs)
+        _current_diag_holder[0] = diag
+        return diag
+
+    # ------------------------------------------------------------------
+    # Build the LLM propose_fn closure (grounding-invariant hard boundary)
+    # ------------------------------------------------------------------
+    param_range = spec["range"]
+    param_type = spec["param_type"]
+
+    def _llm_propose_fn(current_params, history):
+        """LLM propose_fn: calls advise(task='parameter_proposal'), extracts +
+        clamps Recommendation.parameter_delta.new_value.
+
+        Raises _UnparseableProposalError when:
+          - no Recommendation has a non-None parameter_delta
+          - parameter_delta.param does not match spec['param']
+          - parameter_delta.new_value is not numeric (TypeError/ValueError)
+
+        On out-of-range new_value: clamps to spec['range'], does NOT exit.
+        The LLM is called exactly once per step — no retry on bad proposal.
+        """
+        current_diag = _current_diag_holder[0]
+        if current_diag is None:
+            raise _UnparseableProposalError(
+                "auto_tune: current diagnostics not available for LLM proposal."
+            )
+
+        # Build user content: current diagnostics ONLY in the Diagnostics block
+        # (Pitfall 1: history is outside the Diagnostics block so _check_grounding
+        # only sees current_diag numbers)
+        current_val = current_params.get(param_name, spec["default"])
+        lo, hi = param_range
+        user_history_section = ""
+        if history:
+            import json as _json  # noqa: PLC0415
+            user_history_section = (
+                "\n\nTuning history (reference only — do NOT cite these values "
+                "as evidence; cite only values from the Diagnostics section below):\n"
+                + _json.dumps(history, indent=2)
+            )
+        user_addendum = (
+            f"\n\nTuning context: adjusting parameter '{param_name}' for method '{method_lc}'.\n"
+            f"Current value: {current_val}. Valid range: [{lo}, {hi}].\n"
+            f"Target metric: '{target_metric}'."
+            + user_history_section
+        )
+
+        # advise() builds the user message as:
+        #   f"Domain context: {domain_context}\n\nTask: {task}\n\n"
+        #   "Diagnostics (reason only from these values):\n" + json.dumps(diagnostics)
+        # Our addendum goes into domain_context so it appears BEFORE the diagnostics
+        # block — this keeps the history numbers outside the Diagnostics section
+        # that _check_grounding reads.
+        effective_domain_context = (
+            domain_context + user_addendum if domain_context
+            else user_addendum.lstrip()
+        )
+
+        advice = advise(
+            current_diag,
+            task="parameter_proposal",
+            domain_context=effective_domain_context,
+            model=model,
+            provider=provider,
+            aspect=method_lc,
+        )
+
+        # Extract the first Recommendation with a valid parameter_delta for our param
+        for rec in advice.recommendations:
+            if rec.parameter_delta is None:
+                continue
+            pd = rec.parameter_delta
+            if pd.param != param_name:
+                # Wrong param name — exit with parse_failure (no retry)
+                raise _UnparseableProposalError(
+                    f"auto_tune: LLM proposed param {pd.param!r} "
+                    f"but expected {param_name!r}. Exiting with parse_failure."
+                )
+            # Validate new_value is numeric
+            try:
+                raw_val = float(pd.new_value)
+            except (TypeError, ValueError) as exc:
+                raise _UnparseableProposalError(
+                    f"auto_tune: parameter_delta.new_value is not numeric: "
+                    f"{pd.new_value!r}. Exiting with parse_failure."
+                ) from exc
+
+            # Clamp to declared range (T-53B-02: out-of-range → clamp, not reject)
+            clamped = max(lo, min(hi, raw_val))
+            if param_type is int:
+                clamped = int(round(clamped))
+
+            return {param_name: clamped}
+
+        # No usable parameter_delta found — exit with parse_failure (no retry)
+        raise _UnparseableProposalError(
+            "auto_tune: LLM returned no usable parameter_delta. "
+            "Exiting with parse_failure."
+        )
+
+    # ------------------------------------------------------------------
+    # Run the loop core
+    # ------------------------------------------------------------------
+    trace = run_tuning_loop(
+        dataset_id=dataset_id,
+        method=method_lc,
+        initial_params=initial_params,
+        target_metric=target_metric,
+        propose_fn=_llm_propose_fn,
+        max_steps=max_steps,
+        guard_thresholds=guard_thresholds,
+        _run_method=_run_method,
+        _build_diagnostics=_intercepting_build,
+    )
+
+    # ------------------------------------------------------------------
+    # Assemble TuneResult
+    # ------------------------------------------------------------------
+    initial_target = trace.steps[0].target_before if trace.steps else (
+        trace.final_diagnostics.get(target_metric, 0.0)
+    )
+    final_target = trace.final_diagnostics.get(target_metric, initial_target)
+    # For list-valued metrics (e.g. cumulative_variance_explained), extract scalar
+    if isinstance(final_target, list):
+        final_target = final_target[-1] if final_target else initial_target
+
+    from fdars.advisor._compare_methods import _METRIC_REGISTRY  # noqa: PLC0415
+    target_direction = _METRIC_REGISTRY.get(target_metric, "lower")
+    improved = _is_improvement(final_target, initial_target, target_direction)
+
+    improvement_pct: "float | None" = None
+    if initial_target != 0.0:
+        improvement_pct = (final_target - initial_target) / abs(initial_target) * 100.0
+
+    return TuneResult(
+        trace=trace,
+        improved=improved,
+        initial_target_value=float(initial_target),
+        final_target_value=float(final_target),
+        improvement_pct=improvement_pct,
     )
 
 

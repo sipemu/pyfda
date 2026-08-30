@@ -34,7 +34,17 @@ from unittest.mock import patch, MagicMock
 
 
 class FakeProvider:
-    """Minimal Provider that delegates to a caller-supplied response factory."""
+    """Minimal Provider that satisfies the Provider protocol for offline testing.
+
+    Delegates to a caller-supplied response factory without any network call.
+    The protocol attributes (name, model, supports_native_structured_output)
+    are required so that resolve_provider's isinstance(provider, _ProviderProtocol)
+    check recognises the fake as a valid Provider instance.
+    """
+
+    name: str = "fake"
+    model: str = "fake-model"
+    supports_native_structured_output: bool = True  # skip ValidateAndRetry schema repair
 
     def __init__(self, response_fn):
         self._response_fn = response_fn
@@ -44,7 +54,12 @@ class FakeProvider:
 
 
 def _make_parameter_delta_recommendation(param: str, new_value: float, rationale: str = "qualitative reason"):
-    """Build a fake Advice object with one Recommendation carrying a parameter_delta."""
+    """Build a fake Advice object with one Recommendation carrying a parameter_delta.
+
+    Evidence items use qualitative-only text (no numeric tokens) so that
+    _check_grounding never fires on the fake advice, regardless of the
+    synthetic diagnostics dict the test uses.
+    """
     from fdars.advisor._schema import Advice, Recommendation, TuneProposal
     return Advice(
         interpretation="test interpretation",
@@ -54,7 +69,8 @@ def _make_parameter_delta_recommendation(param: str, new_value: float, rationale
                 kind="parameter",
                 rationale=rationale,
                 expected_effect="should improve",
-                evidence=["test_value=1.0"],
+                # No numeric tokens here — avoids GroundingViolationError in tests
+                evidence=["the diagnostic value indicates adjustment is warranted"],
                 parameter_delta=TuneProposal(
                     param=param,
                     new_value=new_value,
@@ -77,7 +93,8 @@ def _make_no_parameter_delta_advice():
                 kind="none",
                 rationale="qualitative reason",
                 expected_effect="should improve",
-                evidence=["test_value=1.0"],
+                # No numeric tokens — avoids GroundingViolationError in tests
+                evidence=["the current diagnostics do not indicate a clear parameter change"],
                 parameter_delta=None,
             )
         ],
