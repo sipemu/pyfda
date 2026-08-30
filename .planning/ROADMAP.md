@@ -136,7 +136,7 @@ A docs-only quality pass (no crate bump, no new bindings, no advisor logic chang
 - [x] **Phase 50: Deferred Advisor Aspects (+ compat pre-flight)** - Land the blocking compat fixes, then add grounded PACE-FPCA / elastic-multinomial / ITP scalars + primers (completed 2026-08-23)
 - [x] **Phase 51: Comparative Method-Selection** - Deterministic fdars-computed ranking over N candidate methods + "comparison" task family + MCP tool (completed 2026-08-24)
 - [x] **Phase 52: Pipeline Diagnostic Report** - Multi-stage diagnostic aggregation with per-stage provenance + "pipeline" task family + MCP tool (completed 2026-08-30)
-- [ ] **Phase 53: Closed-Loop Auto-Tuning (capstone)** - Bounded propose→apply→re-run→compare loop; Python-API (LLM proposal) + MCP (heuristic, LLM-free) surfaces
+- [x] **Phase 53: Closed-Loop Auto-Tuning (capstone)** - Bounded propose→apply→re-run→compare loop; Python-API (LLM proposal) + MCP (heuristic, LLM-free) surfaces (completed 2026-08-30)
 - [ ] **Phase 54: Eval Strategy + Docs Gate** - Deterministic eval fixtures + new pages + method-accurate SVGs + offline fences + whole-site strict build + blocking human diagram review
 
 ## Phase Details
@@ -264,7 +264,7 @@ Phases execute in numeric order: 50 → 51 → 52 → 53 → 54
 | 50. Deferred Advisor Aspects (+ compat pre-flight) | v8.0 | 3/3 | Complete    | 2026-08-23 |
 | 51. Comparative Method-Selection | v8.0 | 3/3 | Complete    | 2026-08-24 |
 | 52. Pipeline Diagnostic Report | v8.0 | 3/3 | Complete    | 2026-08-30 |
-| 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 3/3 | In Progress|  |
+| 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 3/3 | Complete    | 2026-08-30 |
 | 54. Eval Strategy + Docs Gate | v8.0 | 0/TBD | Not started | - |
 
 ---
