@@ -33,7 +33,7 @@ Four new advisor capabilities built on the existing surface (no new runtime deps
 - [x] **PIPE-01**: `build_pipeline_report()` aggregates diagnostics across end-to-end stages (represent → smooth → cluster/regress → monitor) with per-stage provenance (stage-prefixed keys / per-stage objects, never flat-merged)
 - [x] **PIPE-02**: `pipeline_report()` produces a grounded multi-aspect narrative report over the aggregated stages
 - [x] **PIPE-03**: cross-stage signal detection surfaces downstream caveats (e.g. high imputed fraction → FPCA caveat)
-- [ ] **PIPE-04**: an `fdars_build_pipeline_report` MCP tool exposes the report and stays LLM-free
+- [x] **PIPE-04**: an `fdars_build_pipeline_report` MCP tool exposes the report and stays LLM-free
 
 ### Closed-Loop Auto-Tuning (capstone)
 
@@ -100,7 +100,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | PIPE-01 | Phase 52 | Complete |
 | PIPE-02 | Phase 52 | Complete |
 | PIPE-03 | Phase 52 | Complete |
-| PIPE-04 | Phase 52 | Pending |
+| PIPE-04 | Phase 52 | Complete |
 | TUNE-01 | Phase 53 | Pending |
 | TUNE-02 | Phase 53 | Pending |
 | TUNE-03 | Phase 53 | Pending |

@@ -4,17 +4,17 @@ milestone: v8.0
 milestone_name: "Advisor: New Capabilities"
 current_phase: 52
 current_phase_name: Pipeline Diagnostic Report
-status: executing
-stopped_at: Completed 52-02-PLAN.md
-last_updated: "2026-08-30T19:00:41.585Z"
+status: verifying
+stopped_at: Completed 52-03-PLAN.md
+last_updated: "2026-08-30T19:14:30.033Z"
 last_activity: 2026-08-30
 last_activity_desc: Phase 52 execution started
-state_head: e407592b0514e56302644a1a38a0d3ffc69171f0
+state_head: b4a656ee02c55f06d77705c94209598f27c6a712
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 40
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 
 Phase: 52 (Pipeline Diagnostic Report) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-30 — Phase 52 execution started
 
 Progress: [████░░░░░░] 40%
@@ -72,6 +72,7 @@ Progress: [████░░░░░░] 40%
 | Phase 51-comparative-method-selection P03 | 12 | 3 tasks | 3 files |
 | Phase 52-pipeline-diagnostic-report P01 | 6min | 3 tasks | 3 files |
 | Phase 52-pipeline-diagnostic-report P02 | 13 min | 3 tasks | 6 files |
+| Phase 52-pipeline-diagnostic-report P03 | 11 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,9 @@ Recent decisions affecting current work:
 - [Phase 52]: Deferred local import of build_diagnostics inside _normalize_stages() — _pipeline.py stays LLM-free at module load (T-52-03)
 - [Phase 52]: Caveats computed BEFORE LLM call; Python-authoritative, LLM narrates only — T-52-04: LLM inventing caveats is the primary threat; computing first then re-attaching eliminates the risk
 - [Phase 52]: Union grounding ONCE against {'_stages':[...]}; no per-stage-strict checks — Phase-51 WR-03 lesson: per-stage-strict over-rejects legitimate cross-stage narration
+- [Phase 52]: Validate ALL stages before running ANY — fail-closed allowlist prevents partial state from accumulating in the registry (T-52-09)
+- [Phase 52]: Subprocess-based module-load isolation test — avoids false positives from providers already loaded by prior tests in the shared pytest run
+- [Phase 52]: Guard-sync no-op confirmed: _RUNNABLE_METHODS (6) + _DIAGNOSTICS_METHODS (14) unchanged by adding fdars_build_pipeline_report (T-52-11)
 
 ### Pending Todos
 
@@ -136,8 +140,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-30T19:00:41.543Z
-Stopped at: Completed 52-02-PLAN.md
+Last session: 2026-08-30T19:14:29.997Z
+Stopped at: Completed 52-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
