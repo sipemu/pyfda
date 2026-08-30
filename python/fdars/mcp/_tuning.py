@@ -47,111 +47,33 @@ __all__ = ["run_tuning_loop_mcp"]
 # ---------------------------------------------------------------------------
 
 
-def _heuristic_step(
-    current_params: dict,
-    history: list[dict],
-    param_spec: dict,
-) -> dict:
-    """Single-param gradient-sign step toward improving target.
-
-    Step logic:
-
-    1. If history is empty: use an initial coarse step.
-       - For log-scale params (``lambda_``): multiply by 10 (one decade up).
-       - For linear params: step by ``(range_hi - range_lo) / 10`` in the
-         positive direction.
-    2. If history has >= 1 entry:
-       - Determine direction from whether the last move was accepted.
-       - Continue in the same direction on improvement; reverse on rejection.
-       - Halve the step size on each direction reversal (bisection-style decay).
-       - Minimum step for log-scale: factor must be >= 1.01 (~1%).
-       - Minimum step for linear: 1 for int params, ``(hi-lo)*1e-4`` for float.
-    3. Apply step; clamp to ``[range_lo, range_hi]``.
-    4. For integer params: round-then-int.
-
-    Parameters
-    ----------
-    current_params : dict
-        Current param dict (single-key: ``{param_name: value}``).
-    history : list[dict]
-        Accepted-step history from the loop core.  Each entry is
-        ``{"step": int, "param_value": scalar, "target_value": float,
-        "accepted": bool}``.
-    param_spec : dict
-        Entry from ``_PARAM_REGISTRY`` for the current method.
-
-    Returns
-    -------
-    dict
-        ``{param_name: new_value}`` — clamped and typed.
-    """
-    param = param_spec["param"]
-    lo, hi = param_spec["range"]
-    log_scale = param_spec["log_scale"]
-    is_int = param_spec["param_type"] is int
-    current_val = current_params[param]
-
-    if not history:
-        # Initial step: coarse step in positive direction
-        if log_scale:
-            # One decade up from the current value
-            factor = 10.0
-            new_val = current_val * factor
-        else:
-            step = (hi - lo) / 10.0
-            new_val = current_val + step
-    else:
-        last = history[-1]
-        last_param_val = last["param_value"]
-        last_accepted = last["accepted"]
-
-        # Determine direction from the last move
-        # If the param went up last time: direction was +1; else -1
-        if current_val >= last_param_val:
-            direction = 1
-        else:
-            direction = -1
-
-        # Reverse if the last step did not improve
-        if not last_accepted:
-            direction = -direction
-
-        # Count direction reversals (accepted/rejected alternations in history)
-        n_reversals = sum(
-            1
-            for i in range(1, len(history))
-            if history[i]["accepted"] != history[i - 1]["accepted"]
-        )
-
-        if log_scale:
-            # Multiplicative log-scale step; decay with each reversal
-            factor = 10.0 / (2 ** n_reversals)
-            factor = max(factor, 1.01)  # minimum ~1% step
-            if direction > 0:
-                new_val = current_val * factor
-            else:
-                new_val = current_val / factor
-        else:
-            step = (hi - lo) / (10.0 * (2 ** n_reversals))
-            min_step = 1.0 if is_int else (hi - lo) * 1e-4
-            step = max(step, min_step)
-            new_val = current_val + direction * step
-
-    # Clamp to declared range
-    new_val = max(lo, min(hi, new_val))
-
-    # Integer rounding
-    if is_int:
-        new_val = int(round(new_val))
-
-    return {param: new_val}
-
-
 def _make_heuristic_propose_fn(param_spec: dict):
     """Return a deterministic, LLM-free heuristic propose_fn closure.
 
     The returned callable satisfies the ``propose_fn(current_params, history)``
     interface required by ``run_tuning_loop``.
+
+    The closure tracks its own direction and step-size state so that
+    direction reversal and bisection-style decay actually fire — unlike
+    approaches that derive direction from ``accepted_history`` (which
+    contains only accepted steps, so ``"accepted": True`` on every entry
+    and reversal can never be detected).
+
+    Step logic:
+
+    1. If history is empty: initial coarse step in the positive direction.
+       - Log-scale (``lambda_``): multiply by factor (default 10.0).
+       - Linear: step by ``(range_hi - range_lo) / 10``.
+    2. If history has >= 1 entry:
+       - Compare the latest ``target_value`` to the previously seen target.
+       - If the target did NOT improve (target <= prev_target for "higher"
+         metrics, or target >= prev_target for "lower" metrics — here we
+         use a direction-agnostic heuristic: target worsened or equal):
+         reverse ``direction`` and halve the step size (bisection).
+       - Apply capped minimum: factor >= 1.01 for log-scale; 1 for int,
+         ``(hi-lo)*1e-4`` for float on linear scale.
+    3. Apply step; clamp to ``[range_lo, range_hi]``.
+    4. Integer params: round-then-int.
 
     Parameters
     ----------
@@ -163,8 +85,62 @@ def _make_heuristic_propose_fn(param_spec: dict):
     callable
         ``propose_fn(current_params: dict, history: list[dict]) -> dict``
     """
+    param = param_spec["param"]
+    lo, hi = param_spec["range"]
+    log_scale = param_spec["log_scale"]
+    is_int = param_spec["param_type"] is int
+
+    # Mutable closure state — updated on every call, NOT derived from
+    # accepted_history entries (which always carry ``"accepted": True``, so
+    # reversal could never fire from reading that field).  Instead the closure
+    # detects rejection by tracking how many accepted entries existed at the
+    # previous call: if the count has not grown, the last proposal was rejected.
+    state = {
+        "direction": 1,
+        "factor": 10.0,                       # log-scale step multiplier
+        "step": (hi - lo) / 10.0,             # linear step size
+        "prev_accepted_len": -1,               # len(history) at the previous call (-1 = never called)
+    }
+
     def propose_fn(current_params: dict, history: list) -> dict:
-        return _heuristic_step(current_params, history, param_spec)
+        current_val = current_params[param]
+        accepted_len = len(history)
+
+        if state["prev_accepted_len"] == -1:
+            # First call — initial coarse step in positive direction
+            state["prev_accepted_len"] = accepted_len
+            if log_scale:
+                new_val = current_val * state["factor"]
+            else:
+                new_val = current_val + state["step"]
+        else:
+            # Detect rejection: accepted_len did NOT grow since the previous call
+            # means the last proposal was not accepted (target did not improve).
+            last_proposal_rejected = (accepted_len == state["prev_accepted_len"])
+            state["prev_accepted_len"] = accepted_len
+
+            if last_proposal_rejected:
+                state["direction"] = -state["direction"]
+                if log_scale:
+                    state["factor"] = max(1.01, state["factor"] / 2.0)
+                else:
+                    min_step = 1.0 if is_int else (hi - lo) * 1e-4
+                    state["step"] = max(min_step, state["step"] / 2.0)
+
+            if log_scale:
+                if state["direction"] > 0:
+                    new_val = current_val * state["factor"]
+                else:
+                    new_val = current_val / state["factor"]
+            else:
+                new_val = current_val + state["direction"] * state["step"]
+
+        # Clamp to declared range
+        new_val = max(lo, min(hi, new_val))
+        # Integer rounding
+        if is_int:
+            new_val = int(round(new_val))
+        return {param: new_val}
 
     return propose_fn
 

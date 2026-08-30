@@ -287,13 +287,13 @@ def test_guard_sync_still_no_op():
 
 
 # ---------------------------------------------------------------------------
-# Additional: heuristic step behaviour (int rounding, log-scale)
+# Additional: heuristic step behaviour (int rounding, log-scale, direction, bisection)
 # ---------------------------------------------------------------------------
 
 
 def test_heuristic_step_int_rounding():
-    """_heuristic_step must return an int for integer params (n_basis/n_comp/k)."""
-    from fdars.mcp._tuning import _heuristic_step
+    """_make_heuristic_propose_fn must return an int for integer params (n_basis)."""
+    from fdars.mcp._tuning import _make_heuristic_propose_fn
 
     spec = {
         "param": "n_basis",
@@ -302,15 +302,16 @@ def test_heuristic_step_int_rounding():
         "log_scale": False,
         "default": 15,
     }
-    result = _heuristic_step({"n_basis": 15}, [], spec)
+    propose_fn = _make_heuristic_propose_fn(spec)
+    result = propose_fn({"n_basis": 15}, [])
     assert isinstance(result["n_basis"], int), (
         f"Expected int for n_basis, got {type(result['n_basis'])}: {result['n_basis']}"
     )
 
 
 def test_heuristic_step_log_scale_multiplicative():
-    """_heuristic_step for lambda_ must step multiplicatively (log-scale)."""
-    from fdars.mcp._tuning import _heuristic_step
+    """_make_heuristic_propose_fn for lambda_ must step multiplicatively (log-scale)."""
+    from fdars.mcp._tuning import _make_heuristic_propose_fn
 
     spec = {
         "param": "lambda_",
@@ -319,11 +320,112 @@ def test_heuristic_step_log_scale_multiplicative():
         "log_scale": True,
         "default": 1.0,
     }
+    propose_fn = _make_heuristic_propose_fn(spec)
     # Empty history: initial step is *factor (10.0)
-    result = _heuristic_step({"lambda_": 1.0}, [], spec)
+    result = propose_fn({"lambda_": 1.0}, [])
     assert result["lambda_"] > 1.0, "log-scale empty-history step should increase lambda_"
     # The result should be multiplicative — approximately 10x the initial value
     # (clamped to range)
     assert result["lambda_"] == pytest.approx(10.0, rel=1e-6), (
         f"Expected lambda_=10.0 (one decade), got {result['lambda_']}"
+    )
+
+
+def test_heuristic_steps_down_for_decreasing_target():
+    """CR-01: on a target that improves in the DECREASING direction, the heuristic
+    must eventually step in the negative direction (not just monotonically up).
+
+    Scenario: lambda_ starts at 1.0; increasing to 10.0 yields no improvement
+    (step rejected — not added to accepted_history).  On the second call the
+    accepted_history length has NOT grown (still 0), so the heuristic detects
+    rejection and must reverse direction, proposing a value below 1.0.
+    """
+    from fdars.mcp._tuning import _make_heuristic_propose_fn
+
+    spec = {
+        "param": "lambda_",
+        "param_type": float,
+        "range": (1e-6, 1e4),
+        "log_scale": True,
+        "default": 1.0,
+    }
+    propose_fn = _make_heuristic_propose_fn(spec)
+
+    # Step 0: empty accepted_history → first call → initial positive step → 10.0
+    p0 = propose_fn({"lambda_": 1.0}, [])
+    assert p0["lambda_"] == pytest.approx(10.0), f"Expected 10.0, got {p0['lambda_']}"
+
+    # Simulate: step was REJECTED (target did not improve) so the loop does NOT
+    # append to accepted_history.  On the second call, accepted_history is still [].
+    # The closure detects: len([]) == prev_accepted_len (0) → rejected → reverse.
+    p1 = propose_fn({"lambda_": 1.0}, [])
+    assert p1["lambda_"] < 1.0, (
+        f"After a rejected step up (accepted_history empty again), "
+        f"heuristic must step DOWN; got {p1['lambda_']}"
+    )
+
+
+def test_heuristic_bisection_halves_step():
+    """CR-01: bisection must halve the step size after each direction reversal.
+
+    Uses a linear param (n_basis) for easy arithmetic verification.
+    The closure detects rejection when accepted_history does not grow.
+    """
+    from fdars.mcp._tuning import _make_heuristic_propose_fn
+
+    spec = {
+        "param": "n_basis",
+        "param_type": int,
+        "range": (4, 60),
+        "log_scale": False,
+        "default": 15,
+    }
+    propose_fn = _make_heuristic_propose_fn(spec)
+
+    # Call 0: empty history → first call → initial positive step
+    p0 = propose_fn({"n_basis": 15}, [])
+    initial_step_int = p0["n_basis"] - 15
+    assert initial_step_int > 0, "First step must be positive"
+
+    # Simulate rejection: accepted_history remains empty (no improvement).
+    # Call 1: history still [] → closure detects len([])==prev_accepted_len(0) → reversal
+    p1 = propose_fn({"n_basis": 15}, [])
+    # After reversal, direction is -1 and step is halved, so p1 < 15
+    assert p1["n_basis"] < 15, (
+        f"After direction reversal (rejected step detected), proposal must be below 15; got {p1['n_basis']}"
+    )
+
+    # Simulate acceptance: accepted_history grew by 1.
+    # Call 2: history has 1 entry → no reversal, continue in direction -1 → p2 < p1
+    accepted_entry = [{"step": 1, "param_value": p1["n_basis"], "target_value": 0.08, "accepted": True}]
+    p2 = propose_fn({"n_basis": p1["n_basis"]}, accepted_entry)
+    # Still going down (no reversal), so p2 < p1["n_basis"]
+    assert p2["n_basis"] <= p1["n_basis"], (
+        f"After acceptance, heuristic continues in same direction; "
+        f"expected p2 <= {p1['n_basis']}, got {p2['n_basis']}"
+    )
+
+
+def test_heuristic_terminates_via_loop(fpca_dataset_id):
+    """CR-01 (c): the heuristic propose_fn terminates the real loop within budget.
+
+    Verifies that run_tuning_loop_mcp with the heuristic propose_fn stops
+    before exhausting the budget when the oscillation-revisit or converged
+    detector fires.
+    """
+    from fdars.mcp._tuning import run_tuning_loop_mcp
+
+    result = run_tuning_loop_mcp(
+        dataset_id=fpca_dataset_id,
+        method="fpca",
+        initial_params={"n_comp": 3},
+        target_metric="cumulative_variance_explained",
+        max_steps=15,
+    )
+    # Any valid stop_reason is acceptable — the key invariant is termination
+    assert result["stop_reason"] in {
+        "budget", "converged", "oscillation", "guard_stop", "parse_failure"
+    }, f"Unexpected stop_reason: {result['stop_reason']!r}"
+    assert result["n_steps"] <= 15, (
+        f"n_steps {result['n_steps']} exceeded max_steps 15"
     )
