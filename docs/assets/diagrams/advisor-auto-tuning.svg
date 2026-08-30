@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Auto-tuning loop: LLM proposes parameter_delta, new_value clamped to range, fdars re-run, compare target, Goodhart guard, bounded termination">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="26" text-anchor="middle">Auto-Tuning Loop</text>
+  <text class="sub" x="360" y="44" text-anchor="middle">propose (parameter_delta) → clamp → re-run fdars → compare → Goodhart guard → iterate</text>
+
+  <!-- ===== Budget check — FIRST, before propose ===== -->
+  <rect x="20" y="60" width="680" height="36" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="360" y="78" text-anchor="middle" fill="#495057">Budget check FIRST each iteration — step ≥ max_steps → stop_reason="budget" (prevents wasted LLM call)</text>
+
+  <!-- ===== Main loop row ===== -->
+
+  <!-- Node 1: Propose (LLM, orange accent) -->
+  <rect x="20" y="118" width="154" height="100" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="97" y="138" text-anchor="middle" fill="#fd7e14">LLM propose</text>
+  <text class="mono" x="97" y="158" text-anchor="middle" fill="#1a1a2e">parameter_delta</text>
+  <text class="sm" x="97" y="176" text-anchor="middle">schema-validated</text>
+  <text class="sm" x="97" y="190" text-anchor="middle">ONE param change only</text>
+  <text class="sm" x="97" y="204" text-anchor="middle">no numeric prediction</text>
+
+  <!-- Arrow: propose → clamp -->
+  <line x1="174" y1="168" x2="200" y2="168" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+
+  <!-- Node 2: Apply / clamp -->
+  <rect x="200" y="118" width="148" height="100" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="274" y="138" text-anchor="middle" fill="#495057">Apply / clamp</text>
+  <text class="mono" x="274" y="158" text-anchor="middle" fill="#1a1a2e">new_value =</text>
+  <text class="mono" x="274" y="174" text-anchor="middle" fill="#1a1a2e">clamp(lo, hi, raw)</text>
+  <text class="sm" x="274" y="192" text-anchor="middle">out-of-range clamped,</text>
+  <text class="sm" x="274" y="206" text-anchor="middle">never rejected</text>
+
+  <!-- Arrow: clamp → re-run fdars -->
+  <line x1="348" y1="168" x2="374" y2="168" stroke="#495057" stroke-width="2" marker-end="url(#arrdark)"/>
+
+  <!-- Node 3: re-run fdars -->
+  <rect x="374" y="118" width="160" height="100" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="454" y="138" text-anchor="middle" fill="#495057">re-run fdars</text>
+  <text class="mono" x="454" y="158" text-anchor="middle" fill="#1a1a2e">run_method(</text>
+  <text class="mono" x="454" y="174" text-anchor="middle" fill="#1a1a2e">  new_params)</text>
+  <text class="sm" x="454" y="192" text-anchor="middle">build_diagnostics →</text>
+  <text class="sm" x="454" y="206" text-anchor="middle">target_after</text>
+
+  <!-- Arrow: re-run → compare -->
+  <line x1="534" y1="168" x2="560" y2="168" stroke="#495057" stroke-width="2" marker-end="url(#arrdark)"/>
+
+  <!-- Node 4: Compare target -->
+  <rect x="560" y="118" width="140" height="100" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="630" y="138" text-anchor="middle" fill="#495057">Compare target</text>
+  <text class="mono" x="630" y="158" text-anchor="middle" fill="#1a1a2e">_is_improvement</text>
+  <text class="sm" x="630" y="176" text-anchor="middle">target_before →</text>
+  <text class="sm" x="630" y="190" text-anchor="middle">target_after</text>
+  <text class="sm" x="630" y="204" text-anchor="middle">convergence K=3</text>
+
+  <!-- ===== Goodhart guard — AFTER fdars re-run ===== -->
+  <rect x="374" y="240" width="326" height="68" rx="10" fill="#f8f9fa" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="537" y="260" text-anchor="middle" fill="#dc3545">Goodhart guard — AFTER fdars re-run</text>
+  <text class="mono" x="537" y="279" text-anchor="middle" fill="#1a1a2e">_check_guards(diagnostics)</text>
+  <text class="sm" x="537" y="296" text-anchor="middle">guard violation stops even if target improving</text>
+
+  <!-- Arrow: re-run → guard -->
+  <line x1="454" y1="218" x2="454" y2="238" stroke="#dc3545" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrred)"/>
+
+  <!-- ===== Bounded termination panel ===== -->
+  <rect x="20" y="332" width="680" height="128" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="360" y="352" text-anchor="middle" fill="#495057">Bounded termination — 5 stop reasons (loop exits on any)</text>
+
+  <!-- Stop: budget -->
+  <rect x="36" y="362" width="112" height="78" rx="8" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="mono" x="92" y="381" text-anchor="middle" fill="#fd7e14">budget</text>
+  <text class="sm" x="92" y="397" text-anchor="middle">step ≥</text>
+  <text class="sm" x="92" y="411" text-anchor="middle">max_steps</text>
+  <text class="sm" x="92" y="425" text-anchor="middle">(checked first)</text>
+
+  <!-- Stop: converged -->
+  <rect x="160" y="362" width="112" height="78" rx="8" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="mono" x="216" y="381" text-anchor="middle" fill="#fd7e14">converged</text>
+  <text class="sm" x="216" y="397" text-anchor="middle">K=3 consec.</text>
+  <text class="sm" x="216" y="411" text-anchor="middle">non-improve</text>
+
+  <!-- Stop: oscillation -->
+  <rect x="284" y="362" width="116" height="78" rx="8" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="mono" x="342" y="381" text-anchor="middle" fill="#fd7e14">oscillation</text>
+  <text class="sm" x="342" y="397" text-anchor="middle">param revisited</text>
+  <text class="sm" x="342" y="411" text-anchor="middle">(4-sig-fig set)</text>
+  <text class="sm" x="342" y="425" text-anchor="middle">or ping-pong</text>
+
+  <!-- Stop: guard_stop -->
+  <rect x="412" y="362" width="116" height="78" rx="8" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="mono" x="470" y="381" text-anchor="middle" fill="#fd7e14">guard_stop</text>
+  <text class="sm" x="470" y="397" text-anchor="middle">Goodhart rule</text>
+  <text class="sm" x="470" y="411" text-anchor="middle">triggered after</text>
+  <text class="sm" x="470" y="425" text-anchor="middle">fdars re-run</text>
+
+  <!-- Stop: parse_failure -->
+  <rect x="540" y="362" width="144" height="78" rx="8" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="mono" x="612" y="381" text-anchor="middle" fill="#fd7e14">parse_failure</text>
+  <text class="sm" x="612" y="397" text-anchor="middle">absent/wrong</text>
+  <text class="sm" x="612" y="411" text-anchor="middle">parameter_delta</text>
+  <text class="sm" x="612" y="425" text-anchor="middle">no retry</text>
+
+  <!-- Loop-back arrow: compare → propose (bottom path) -->
+  <path d="M630 218 Q630 310 360 322 Q200 322 97 322 Q20 322 20 218 Q20 218 20 168" stroke="#fd7e14" stroke-width="2" fill="none" stroke-dasharray="6 3" marker-end="url(#arrorange)"/>
+  <text class="sm" x="340" y="318" text-anchor="middle" fill="#fd7e14">iterate (if no stop reason)</text>
+
+  <!-- Oscillation-revisit note (before re-run, separate from guard) -->
+  <text class="sm" x="200" y="237" text-anchor="middle" fill="#6c757d">oscillation-revisit checked</text>
+  <text class="sm" x="200" y="250" text-anchor="middle" fill="#6c757d">BEFORE re-run (saves fdars call)</text>
+
+  <!-- ===== Defs ===== -->
+  <defs>
+    <marker id="arrorange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+    <marker id="arrdark" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arrred" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#dc3545"/>
+    </marker>
+  </defs>
+</svg>
