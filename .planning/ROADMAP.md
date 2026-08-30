@@ -227,8 +227,16 @@ Plans:
   4. `TuningTrace` / `TuneProposal` / `TuneResult` schemas plus an optional `Recommendation.parameter_delta` field are added, backward-compatible with the 3 existing task families.
 
 **Plans**: 3 plans
+**Wave 1**
+
 - [ ] 53-01-PLAN.md — TRACER: bounded loop core + _PARAM_REGISTRY + tuning schemas, offline mock-propose_fn (TUNE-01/02/05/06)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 53-02-PLAN.md — LLM proposal path: auto_tune() + parameter_proposal prompt clause, schema-validated clamped delta (TUNE-03)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 53-03-PLAN.md — fdars_auto_tune MCP tool + LLM-free heuristic propose_fn, by-reference (TUNE-04)
 
 ### Phase 54: Eval Strategy + Docs Gate
