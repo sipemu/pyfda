@@ -151,6 +151,9 @@ nav:
   - AI Advisor:
     - advisor/index.md
     - Python API: advisor/python-api.md
+    - Comparative Selection: advisor/comparative-selection.md
+    - Pipeline Report: advisor/pipeline-report.md
+    - Auto-Tuning: advisor/auto-tuning.md
     - Provider Setup: advisor/providers.md
     - Per-Aspect Coverage: advisor/aspects.md
     - MCP Server: advisor/mcp.md
