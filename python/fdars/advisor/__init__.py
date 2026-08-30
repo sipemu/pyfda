@@ -66,11 +66,13 @@ __all__ = [
     "advise",
     "describe_cluster_differences",
     "compare_methods",
+    "build_pipeline_report",
     "Advice",
     "Recommendation",
 ]
 
 from fdars.advisor._compare_methods import compare_methods  # noqa: E402
+from fdars.advisor._pipeline import build_pipeline_report  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
