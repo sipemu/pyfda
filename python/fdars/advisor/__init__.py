@@ -868,12 +868,16 @@ def auto_tune(
         final_target = final_target[-1] if final_target else initial_target
 
     from fdars.advisor._compare_methods import _METRIC_REGISTRY  # noqa: PLC0415
-    target_direction = _METRIC_REGISTRY.get(target_metric, "lower")
+    target_direction = _METRIC_REGISTRY[target_metric]  # already validated in run_tuning_loop
     improved = _is_improvement(final_target, initial_target, target_direction)
 
+    # WR-01 fix: improvement_pct is sign-aware — positive always means improvement.
+    # For "lower"-direction metrics a real improvement means final < initial, so the
+    # raw arithmetic difference is negative; we negate to make positive = better.
     improvement_pct: "float | None" = None
     if initial_target != 0.0:
-        improvement_pct = (final_target - initial_target) / abs(initial_target) * 100.0
+        raw_pct = (final_target - initial_target) / abs(initial_target) * 100.0
+        improvement_pct = raw_pct if target_direction == "higher" else -raw_pct
 
     return TuneResult(
         trace=trace,

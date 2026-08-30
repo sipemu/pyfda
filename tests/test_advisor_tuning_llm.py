@@ -504,3 +504,76 @@ class TestAutoTuneSuccessfulRun:
         assert result.improved is True
         assert result.initial_target_value == pytest.approx(0.1)
         assert result.final_target_value == pytest.approx(0.05)
+
+
+class TestAutoTuneImprovementPctSignAware:
+    """WR-01: improvement_pct must be positive for genuine improvements
+    regardless of whether the metric is higher-is-better or lower-is-better.
+    """
+
+    def test_lower_is_better_positive_pct(self):
+        """For GCV (lower-is-better), a real improvement must yield positive pct.
+
+        smoothing: initial_gcv=0.10, final_gcv=0.08 → 20% improvement.
+        Without the WR-01 fix, raw pct would be -20.0 (negative for lower-is-better).
+        """
+        from fdars.advisor import auto_tune
+
+        call_count = [0]
+
+        def response_fn(model_cls, messages, system):
+            call_count[0] += 1
+            if call_count[0] == 1:
+                return _make_parameter_delta_recommendation("n_basis", 20)
+            return _make_no_parameter_delta_advice()
+
+        fake_provider = FakeProvider(response_fn)
+        # initial_gcv=0.10; after change: gcv=0.08 (genuine 20% improvement)
+        fake_build = _make_fake_build_diagnostics("optimal_gcv", [0.1, 0.08])
+
+        result = auto_tune(
+            "fake_dataset",
+            "smoothing",
+            provider=fake_provider,
+            max_steps=5,
+            _run_method=_fake_run_method,
+            _build_diagnostics=fake_build,
+        )
+
+        assert result.improvement_pct is not None
+        assert result.improvement_pct > 0.0, (
+            f"WR-01: lower-is-better GCV improvement must yield positive improvement_pct, "
+            f"got {result.improvement_pct}"
+        )
+
+    def test_higher_is_better_positive_pct(self):
+        """For clustering separation (higher-is-better), improvement also yields positive pct."""
+        from fdars.advisor import auto_tune
+
+        call_count = [0]
+
+        def response_fn(model_cls, messages, system):
+            call_count[0] += 1
+            if call_count[0] == 1:
+                return _make_parameter_delta_recommendation("k", 5)
+            return _make_no_parameter_delta_advice()
+
+        fake_provider = FakeProvider(response_fn)
+        # clustering: mean_amplitude_separation is higher-is-better
+        # initial=0.5, after change=0.65 (30% improvement)
+        fake_build = _make_fake_build_diagnostics("mean_amplitude_separation", [0.5, 0.65])
+
+        result = auto_tune(
+            "fake_dataset",
+            "clustering",
+            provider=fake_provider,
+            max_steps=5,
+            _run_method=_fake_run_method,
+            _build_diagnostics=fake_build,
+        )
+
+        assert result.improvement_pct is not None
+        assert result.improvement_pct > 0.0, (
+            f"WR-01: higher-is-better metric improvement must yield positive improvement_pct, "
+            f"got {result.improvement_pct}"
+        )
