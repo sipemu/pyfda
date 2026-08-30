@@ -230,7 +230,8 @@ def _system_prompt(task: str, aspect: str = "") -> str:
     ----------
     task : str
         Task family identifier (case-insensitive).  Supported:
-        ``"interpretation"``, ``"parameter"``, ``"method"``.
+        ``"interpretation"``, ``"parameter"``, ``"method"``,
+        ``"comparison"``, ``"pipeline"``, ``"parameter_proposal"``.
     aspect : str, optional
         Selects the per-aspect FDA primer clause from ``_ASPECT_PRIMERS``
         (e.g. ``"depth"``, ``"outliers"``).  Default ``""`` reproduces
@@ -281,7 +282,10 @@ def _system_prompt(task: str, aspect: str = "") -> str:
     base = base + aspect_primer
 
     # -- Task-family clause -------------------------------------------------
-    _supported_tasks = {"interpretation", "parameter", "method", "comparison", "pipeline"}
+    _supported_tasks = {
+        "interpretation", "parameter", "method", "comparison", "pipeline",
+        "parameter_proposal",
+    }
     if task_lc not in _supported_tasks:
         raise ValueError(
             f"_system_prompt: unsupported task {task!r}. "
@@ -405,6 +409,39 @@ def _system_prompt(task: str, aspect: str = "") -> str:
             "but the caveat content itself is fixed.\n"
             "Only cite values present in the supplied diagnostics; do not "
             "supply thresholds or reference values not present in the diagnostics."
+        )
+
+    elif task_lc == "parameter_proposal":
+        # TUNE-03: parameter_proposal task family — LLM proposes a SINGLE
+        # structured numeric parameter change via parameter_delta.
+        #
+        # Grounding-invariant hard boundary (T-53B-01, T-53B-03):
+        # - The LLM's ONLY numeric contribution is parameter_delta.new_value.
+        # - expected_effect and rationale must be QUALITATIVE ONLY.
+        # - The LLM must NOT predict the numeric value of the target metric.
+        # - No digits-bearing numeric prediction in expected_effect is permitted.
+        task_clause = (
+            "Task: parameter_proposal.\n"
+            "You are proposing a SINGLE parameter change for an fdars tuning step. "
+            "The user message identifies the tunable parameter, its current value, "
+            "and the valid range. The current diagnostics are provided.\n\n"
+            "Populate the parameter_delta field of exactly ONE Recommendation:\n"
+            "  parameter_delta.param: the exact parameter name as stated in the user message.\n"
+            "  parameter_delta.new_value: a single numeric value within the valid range stated "
+            "in the user message. Choose a value grounded in the diagnostic evidence.\n"
+            "  parameter_delta.rationale: a QUALITATIVE reason citing only values present "
+            "in the current diagnostics — do not cite values absent from the input.\n\n"
+            "STRICT PROHIBITION — expected_effect and rationale must be qualitative direction only. "
+            "Do NOT predict the numeric value of the target metric after your proposed change — "
+            "the actual result will be observed in the next iteration by fdars. "
+            "Write expected_effect as a qualitative direction such as: "
+            "'should decrease', 'should increase', 'likely to improve', or "
+            "'expected to reduce overfitting'. "
+            "Do not write a numeric prediction (e.g. do not write 'should drop to 0.031' "
+            "or 'expected value around 15'). "
+            "Cite only values present in the supplied diagnostics; do not invent or "
+            "assume values not given. "
+            "Set recommendation kind to 'parameter'."
         )
 
     return base + "\n" + task_clause
