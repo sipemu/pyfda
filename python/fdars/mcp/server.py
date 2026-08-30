@@ -15,13 +15,14 @@ Usage (in-process test)::
         tools = await client.list_tools()
         result = await client.call_tool("fdars_build_diagnostics", {...})
 
-Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03 + 52-03):
+Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03 + 52-03 + 53-03):
 
 - ``fdars_build_diagnostics`` — deterministic offline diagnostics (TOOL-01/02)
 - ``fdars_run_method`` — run any of six fdars methods; returns result handle (TOOL-01)
 - ``fdars_compare_run`` — re-run with new params; return before/after delta (TOOL-03)
 - ``fdars_compare_methods`` — deterministic multi-candidate ranking by-reference (COMPARE-04)
 - ``fdars_build_pipeline_report`` — LLM-free multi-stage pipeline diagnostic report by-reference (PIPE-04)
+- ``fdars_auto_tune`` — LLM-free closed-loop heuristic auto-tuning by-reference (TUNE-04)
 """
 
 from __future__ import annotations
@@ -578,6 +579,161 @@ def fdars_build_pipeline_report(
 
     # Delegate all re-run + aggregation logic to the helper (Single Responsibility)
     return build_pipeline_report_mcp(dataset_id, stages)
+
+
+# ---------------------------------------------------------------------------
+# Tool: fdars_auto_tune (TUNE-04)
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def fdars_auto_tune(
+    dataset_id: str,
+    method: str,
+    target_metric: str | None = None,
+    max_steps: int = 10,
+    lambda_: float | None = None,
+    n_basis: int | None = None,
+    n_comp: int | None = None,
+    k: int | None = None,
+    seed: int | None = None,
+) -> dict:
+    """Closed-loop auto-tuning via deterministic heuristic proposal.
+
+    Drives the shared ``advisor._tuning.run_tuning_loop`` core with a
+    deterministic, LLM-free heuristic ``propose_fn`` (gradient-sign line
+    search + bisection-style step-size decay on direction reversal).  The
+    compute path is **fully deterministic and LLM-free** — no
+    ``ANTHROPIC_API_KEY`` is required; no network connection is made
+    (TUNE-04, T-53C-01).
+
+    The heuristic stepper:
+
+    - Steps log-scale params (``lambda_``) multiplicatively (factor = 10 /
+      2^reversals; minimum factor 1.01).
+    - Steps linear integer params (``n_basis``, ``n_comp``, ``k``) additively
+      ((hi - lo) / (10 * 2^reversals); minimum step 1).
+    - Reverses direction on each rejected step; halves step size per reversal.
+    - Clamps all proposals to the declared valid range; rounds integer params.
+
+    Parameters
+    ----------
+    dataset_id : str
+        Opaque handle ID for the dataset stored in the handle registry.
+        Obtain via ``registry.store_dataset(data, argvals)``.
+    method : str
+        One of the four tuneable runnable methods: ``'fpca'``, ``'basis'``,
+        ``'smoothing'``, ``'clustering'``.  Case-insensitive.  Raises
+        :exc:`ValueError` for non-runnable methods (T-12-02) or non-tuneable
+        methods (``'alignment'``, ``'depth'``).
+    target_metric : str, optional
+        Diagnostic metric to optimise (must be in the metric registry).
+        When omitted, the per-method default is used (e.g.
+        ``'optimal_gcv'`` for smoothing).
+    max_steps : int, optional
+        Maximum loop iterations.  Default 10; **hard cap 20** — raises
+        :exc:`ValueError` when ``max_steps > 20`` (T-53C-02).
+    lambda_ : float, optional
+        Initial regularisation strength for ``'basis'``.  Defaults to the
+        registry default (1.0) when omitted.  Ignored for other methods.
+    n_basis : int, optional
+        Initial basis count for ``'smoothing'``.  Defaults to 15.  Ignored
+        for other methods.
+    n_comp : int, optional
+        Initial FPCA component count for ``'fpca'``.  Defaults to 3.
+        Ignored for other methods.
+    k : int, optional
+        Initial cluster count for ``'clustering'``.  Defaults to 3.
+        Ignored for other methods.
+    seed : int, optional
+        Fixed RNG seed for ``'clustering'`` (held constant across all loop
+        steps for reproducibility — Pitfall 7).  Defaults to 42.
+
+    Returns
+    -------
+    dict
+        JSON-serialisable, by-reference result with keys:
+
+        ``trace_id`` : str
+            Opaque handle to the full ``TuningTrace`` stored in the registry.
+        ``method`` : str
+            Normalised (lowercase) method name.
+        ``param`` : str
+            The tunable parameter name (e.g. ``"n_basis"``).
+        ``target_metric`` : str
+            The metric being optimised.
+        ``stop_reason`` : str
+            One of ``"budget"``, ``"converged"``, ``"oscillation"``,
+            ``"guard_stop"``, ``"parse_failure"``.
+        ``n_steps`` : int
+            Number of loop iterations executed.
+        ``steps_used`` : int
+            Same as ``n_steps`` (alias for consistency).
+        ``budget_remaining`` : int
+            ``max_steps - n_steps``.
+        ``initial_target_value`` : float
+            Target metric value at loop start.
+        ``final_target_value`` : float
+            Target metric value at loop end.
+        ``improved`` : bool
+            ``True`` iff final target is strictly better than initial
+            (direction-aware).
+
+    Raises
+    ------
+    ValueError
+        If ``method`` is not in ``_RUNNABLE_METHODS`` (naming the supported
+        set), or if ``method`` is not tuneable (``'alignment'``, ``'depth'``),
+        or if ``max_steps > 20`` (hard cap).
+    KeyError
+        If ``dataset_id`` is not in the registry.
+
+    Notes
+    -----
+    The handler is **synchronous** (``def``, not ``async def``) because fdars
+    methods are synchronous Rust calls (Pitfall 2).  No provider or model
+    argument is exposed — the MCP layer is provably LLM-free (T-53C-01).
+    Adding this tool does **not** expand ``_RUNNABLE_METHODS`` or
+    ``_DIAGNOSTICS_METHODS`` (guard-sync no-op — T-53C-03).
+    """
+    # V5: validate method at tool boundary (T-12-02; fail fast)
+    method_lc = method.lower()
+    if method_lc not in _RUNNABLE_METHODS:
+        raise ValueError(
+            f"fdars_auto_tune: unsupported method {method!r}. "
+            f"Supported: {sorted(_RUNNABLE_METHODS)!r}."
+        )
+
+    # T-53C-02: hard cap on max_steps (DoS protection)
+    if max_steps > 20:
+        raise ValueError(
+            f"fdars_auto_tune: max_steps={max_steps} exceeds the hard cap of 20. "
+            "Reduce max_steps to at most 20."
+        )
+
+    # Assemble initial_params from non-None flat scalars (Pitfall 6: flat schema)
+    initial_params: dict = {}
+    if lambda_ is not None:
+        initial_params["lambda_"] = lambda_
+    if n_basis is not None:
+        initial_params["n_basis"] = n_basis
+    if n_comp is not None:
+        initial_params["n_comp"] = n_comp
+    if k is not None:
+        initial_params["k"] = k
+    if seed is not None:
+        initial_params["seed"] = seed
+
+    from fdars.mcp._tuning import run_tuning_loop_mcp  # no LLM import here
+
+    # Delegate all loop + heuristic logic to the helper (Single Responsibility)
+    return run_tuning_loop_mcp(
+        dataset_id,
+        method_lc,
+        initial_params,
+        target_metric=target_metric,
+        max_steps=max_steps,
+    )
 
 
 # ---------------------------------------------------------------------------
