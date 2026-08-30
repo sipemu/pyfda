@@ -29,6 +29,7 @@ from typing import List, Literal
 
 try:
     from pydantic import BaseModel as _PydanticBaseModel
+    from typing import Any as _Any
 
     class Recommendation(_PydanticBaseModel):
         """A single actionable recommendation grounded in fdars diagnostics.
@@ -69,6 +70,34 @@ try:
         interpretation: str
         recommendations: List[Recommendation]
         caveats: List[str]
+
+    class PipelineReport(_PydanticBaseModel):
+        """Schema-validated pipeline diagnostic report returned by :func:`pipeline_report`.
+
+        Contains a per-stage narrative summary, an overall narrative, and the
+        DETERMINISTIC cross-stage caveats computed by Python (not the LLM).
+        The LLM narrates the report but never generates the caveats.
+
+        Attributes
+        ----------
+        stages : list
+            Per-stage narrative sections.  Each element is a short string
+            summarising one pipeline stage's diagnostic findings in narrative
+            form.  The order matches the caller-declared stage order.
+        narrative : str
+            Overall pipeline narrative integrating all stages into a coherent
+            summary of the functional data analysis pipeline.
+        caveats : list
+            Structured cross-stage caveats computed by Python (PIPE-03).
+            Each element is a dict with keys ``stage``, ``aspect``, ``rule``,
+            ``value``, and ``message`` — exactly as produced by
+            ``_compute_cross_stage_caveats``.  This field is authoritative;
+            the LLM narrates caveats but never generates them.
+        """
+
+        stages: List[str]
+        narrative: str
+        caveats: List[_Any]
 
 except ImportError:
     # pydantic is absent — define minimal stand-ins so importing advisor and
@@ -131,5 +160,34 @@ except ImportError:
 
         def __eq__(self, other: object) -> bool:
             if not isinstance(other, Advice):
+                return NotImplemented
+            return self.__dict__ == other.__dict__
+
+    class PipelineReport:  # type: ignore[no-redef]
+        """Minimal stand-in for the Pydantic PipelineReport model.
+
+        Has the same fields; not schema-validated.  pipeline_report() requires
+        pydantic and will fail with a clear error before this class is used
+        in that path.
+        """
+
+        def __init__(
+            self,
+            stages: List,
+            narrative: str,
+            caveats: List,
+        ):
+            self.stages = stages
+            self.narrative = narrative
+            self.caveats = caveats
+
+        def __repr__(self) -> str:
+            return (
+                f"PipelineReport(stages={len(self.stages)}, "
+                f"narrative=..., caveats={len(self.caveats)})"
+            )
+
+        def __eq__(self, other: object) -> bool:
+            if not isinstance(other, PipelineReport):
                 return NotImplemented
             return self.__dict__ == other.__dict__

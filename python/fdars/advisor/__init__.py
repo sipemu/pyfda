@@ -58,7 +58,7 @@ ADVISOR_OLLAMA_MIN_VERSION = "0.6.2"
 # Schema — re-exported from advisor._schema
 # ---------------------------------------------------------------------------
 
-from fdars.advisor._schema import Advice, Recommendation  # noqa: E402
+from fdars.advisor._schema import Advice, Recommendation, PipelineReport  # noqa: E402
 
 
 __all__ = [
@@ -67,12 +67,14 @@ __all__ = [
     "describe_cluster_differences",
     "compare_methods",
     "build_pipeline_report",
+    "pipeline_report",
     "Advice",
     "Recommendation",
+    "PipelineReport",
 ]
 
 from fdars.advisor._compare_methods import compare_methods  # noqa: E402
-from fdars.advisor._pipeline import build_pipeline_report  # noqa: E402
+from fdars.advisor._pipeline import build_pipeline_report, pipeline_report  # noqa: E402
 
 
 # ---------------------------------------------------------------------------

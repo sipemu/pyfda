@@ -350,16 +350,32 @@ class TestCoreLLMFree:
         assert isinstance(result, dict)
         assert "stages" in result
 
-    def test_run_llm_true_raises_not_implemented(self):
-        """build_pipeline_report(run_llm=True) raises NotImplementedError (Plan 02 hook)."""
-        import pytest
+    def test_run_llm_true_requires_provider(self):
+        """build_pipeline_report(run_llm=True) delegates to pipeline_report() — Plan 02 implemented.
+
+        Without a provider configured (and without ANTHROPIC_API_KEY), this will
+        raise ImportError (anthropic not installed) or a provider error, NOT
+        NotImplementedError (the Plan 01 hook has been replaced by the real
+        implementation in Plan 02).
+        """
         from fdars.advisor import build_pipeline_report
 
         stages = [
             {"stage_name": "represent", "aspect": "represent", "result": _represent_diag()},
         ]
-        with pytest.raises(NotImplementedError):
+        # Should NOT raise NotImplementedError — Plan 02 is implemented.
+        # Will raise ImportError or similar (no provider configured in offline CI).
+        try:
             build_pipeline_report(stages, run_llm=True)
+        except NotImplementedError:
+            raise AssertionError(
+                "build_pipeline_report(run_llm=True) raised NotImplementedError; "
+                "Plan 02 (pipeline_report) is implemented — this hook should be gone."
+            )
+        except Exception:
+            # Any other exception (ImportError, provider error, etc.) is acceptable —
+            # the important thing is that NotImplementedError is NOT raised.
+            pass
 
 
 class TestFullSuiteOfflineNoApiKey:

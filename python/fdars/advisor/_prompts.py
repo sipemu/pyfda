@@ -281,7 +281,7 @@ def _system_prompt(task: str, aspect: str = "") -> str:
     base = base + aspect_primer
 
     # -- Task-family clause -------------------------------------------------
-    _supported_tasks = {"interpretation", "parameter", "method", "comparison"}
+    _supported_tasks = {"interpretation", "parameter", "method", "comparison", "pipeline"}
     if task_lc not in _supported_tasks:
         raise ValueError(
             f"_system_prompt: unsupported task {task!r}. "
@@ -375,6 +375,35 @@ def _system_prompt(task: str, aspect: str = "") -> str:
             "Set recommendation kind to 'none' unless a concrete follow-up action "
             "is clearly warranted by one candidate's diagnostics. "
             "Only cite values present in the candidate's own diagnostics; do not "
+            "supply thresholds or reference values not present in the diagnostics."
+        )
+
+    elif task_lc == "pipeline":
+        # PIPE-02: pipeline task family — narrates the per-stage pipeline report
+        # and the SUPPLIED (Python-computed) cross-stage caveats.
+        # The caveats are ALREADY DECIDED by fdars-side deterministic computation;
+        # the model narrates them, it does NOT invent or modify caveats.
+        task_clause = (
+            "Task: pipeline.\n"
+            "You are narrating a multi-stage functional data analysis pipeline "
+            "diagnostic report. The per-stage diagnostics and cross-stage caveats "
+            "supplied in the user message are already computed by fdars — you "
+            "narrate and explain them, you do NOT invent new caveats or alter "
+            "the supplied ones.\n"
+            "For each stage in the supplied per-stage blocks, summarise the key "
+            "diagnostic findings by referencing that stage by its explicit stage "
+            "name exactly as supplied. "
+            "When discussing a stage, cite only values present in that stage's "
+            "own diagnostics block — a value from one stage's block is not evidence "
+            "for a claim about a different stage (though a cross-stage observation "
+            "is valid if the cited value is present in SOME stage's block).\n"
+            "The cross-stage caveats in the user message are authoritative: they "
+            "were computed by fdars Python code from real diagnostic values. "
+            "Do NOT generate additional caveats beyond those supplied. "
+            "Do NOT alter, remove, or reorder the supplied caveats. "
+            "You may explain WHY each supplied caveat matters in domain terms, "
+            "but the caveat content itself is fixed.\n"
+            "Only cite values present in the supplied diagnostics; do not "
             "supply thresholds or reference values not present in the diagnostics."
         )
 
