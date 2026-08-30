@@ -480,17 +480,14 @@ def build_pipeline_report(
             "Pass at least one stage entry."
         )
 
-    # --- 2. Normalise stages to labeled blocks (IN CALLER ORDER) ---
-    blocks = _normalize_stages(stages, argvals=argvals, **kwargs)
-
-    # --- 3. Assemble the offline result ---
-    result: dict = {"stages": blocks}
-
-    # --- 4. Offline vs. LLM path ---
+    # --- 2. Offline vs. LLM path ---
     if not run_llm:
-        return result
+        # --- 3. Normalise stages to labeled blocks (IN CALLER ORDER) ---
+        blocks = _normalize_stages(stages, argvals=argvals, **kwargs)
+        return {"stages": blocks}
 
-    # --- 5. LLM narrative path — delegate to pipeline_report() (Plan 02) ---
+    # --- 4. LLM narrative path — delegate to pipeline_report() (Plan 02) ---
+    # _normalize_stages is called exactly once, inside pipeline_report().
     return pipeline_report(
         stages,
         argvals=argvals,
