@@ -347,6 +347,7 @@ def run_tuning_loop(
     guard_thresholds: Optional[Dict[str, str]] = None,
     argvals=None,
     seed: Optional[int] = None,
+    propose_fn_label: str = "mock",
     # Test seams: injectable run_method and build_diagnostics
     _run_method: Optional[Callable] = None,
     _build_diagnostics: Optional[Callable] = None,
@@ -392,6 +393,12 @@ def run_tuning_loop(
     seed : int or None
         Fixed random seed forwarded to every ``run_method`` call (for
         clustering reproducibility — Pitfall 7).
+    propose_fn_label : str
+        Label threaded into every ``TuningStep.proposal_source`` field so the
+        trace distinguishes the proposer type in post-hoc analysis.  Callers
+        should pass ``"llm"`` (``auto_tune``), ``"heuristic"``
+        (``run_tuning_loop_mcp``), or ``"mock"`` (tests).  Defaults to
+        ``"mock"`` for backward compatibility.
     _run_method : callable or None
         Test seam: replaces the real fdars run_method.
     _build_diagnostics : callable or None
@@ -544,7 +551,7 @@ def run_tuning_loop(
                 accepted=False,
                 stop_reason="parse_failure",
                 guard_violations=[],
-                proposal_source="unknown",
+                proposal_source=propose_fn_label,
             ))
             break
 
@@ -564,7 +571,7 @@ def run_tuning_loop(
                 accepted=False,
                 stop_reason="parse_failure",
                 guard_violations=[],
-                proposal_source="mock",
+                proposal_source=propose_fn_label,
             ))
             break
 
@@ -589,7 +596,7 @@ def run_tuning_loop(
                 accepted=False,
                 stop_reason="oscillation",
                 guard_violations=[],
-                proposal_source="mock",
+                proposal_source=propose_fn_label,
             ))
             break
 
@@ -623,7 +630,7 @@ def run_tuning_loop(
                     accepted=False,
                     stop_reason="guard_stop",
                     guard_violations=guard_violations,
-                    proposal_source="mock",
+                    proposal_source=propose_fn_label,
                 ))
                 break
 
@@ -667,7 +674,7 @@ def run_tuning_loop(
                     accepted=True,
                     stop_reason="oscillation",
                     guard_violations=[],
-                    proposal_source="mock",
+                    proposal_source=propose_fn_label,
                 ))
                 step += 1
                 break
@@ -683,7 +690,7 @@ def run_tuning_loop(
                 accepted=True,
                 stop_reason=None,
                 guard_violations=[],
-                proposal_source="mock",
+                proposal_source=propose_fn_label,
             ))
         else:
             no_improve_count += 1
@@ -697,7 +704,7 @@ def run_tuning_loop(
                 accepted=False,
                 stop_reason=None,
                 guard_violations=[],
-                proposal_source="mock",
+                proposal_source=propose_fn_label,
             ))
 
             # -------------------------------------------------------------------

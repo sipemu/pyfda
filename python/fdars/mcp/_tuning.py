@@ -281,6 +281,7 @@ def run_tuning_loop_mcp(
         propose_fn=propose_fn,
         max_steps=max_steps,
         guard_thresholds=guard_thresholds,
+        propose_fn_label="heuristic",
         argvals=argvals,
         seed=seed,
     )

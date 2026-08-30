@@ -860,6 +860,7 @@ def auto_tune(
         propose_fn=_llm_propose_fn,
         max_steps=max_steps,
         guard_thresholds=guard_thresholds,
+        propose_fn_label="llm",
         _run_method=_run_method,
         _build_diagnostics=_intercepting_build,
     )
