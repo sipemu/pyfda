@@ -205,7 +205,12 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 52-01-PLAN.md — TRACER: build_pipeline_report() offline aggregation core (per-stage list-of-blocks + {"_stages":[...]} union payload) (PIPE-01)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 52-02-PLAN.md — deterministic cross-stage caveat rule table + PipelineReport schema + "pipeline" task family narrative under union grounding (PIPE-02, PIPE-03)
 - [ ] 52-03-PLAN.md — fdars_build_pipeline_report LLM-free MCP tool (by-reference, guard-sync no-op) (PIPE-04)
 
