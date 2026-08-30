@@ -708,6 +708,13 @@ def run_tuning_loop(
     final_param_val = current_params.get(param_name, param_spec["default"])
     final_params_out = {param_name: final_param_val}
 
+    # Use len(steps_recorded) as the authoritative step count — covers all
+    # stop paths consistently.  The loop variable ``step`` is 0-indexed and
+    # is NOT incremented before break for parse_failure, oscillation-revisit,
+    # guard_stop, and converged stops, making ``step`` one short of the true
+    # count for those paths.  len(steps_recorded) is always exact.
+    n_steps_actual = len(steps_recorded)
+
     return TuningTrace(
         method=method,
         param=param_name,
@@ -718,7 +725,7 @@ def run_tuning_loop(
         final_diagnostics=dict(current_diag),
         converged=(stop_reason == "converged"),
         stop_reason=stop_reason,
-        n_steps=step,
-        steps_used=step,
-        budget_remaining=max(0, max_steps - step),
+        n_steps=n_steps_actual,
+        steps_used=n_steps_actual,
+        budget_remaining=max(0, max_steps - n_steps_actual),
     )

@@ -342,7 +342,9 @@ def test_oscillation_ping_pong():
 def test_parse_failure():
     """A propose_fn raising _UnparseableProposalError exits immediately.
 
-    n_steps=0 (the loop exits before advancing the counter).
+    n_steps=1 (the loop records the failed step before breaking — CR-02 fix:
+    n_steps == len(steps_recorded), which is 1 for parse_failure because
+    the rejected step entry is recorded before break).
     The proposer is called exactly once (no retry — TUNE-01).
     """
     call_counter = [0]
@@ -357,7 +359,11 @@ def test_parse_failure():
     assert trace.stop_reason == "parse_failure", (
         f"Expected 'parse_failure', got {trace.stop_reason!r}"
     )
-    assert trace.n_steps == 0, f"Expected n_steps=0, got {trace.n_steps}"
+    # CR-02 fix: n_steps == len(trace.steps) == 1 (the failed step is recorded)
+    assert trace.n_steps == 1, f"Expected n_steps=1, got {trace.n_steps}"
+    assert len(trace.steps) == trace.n_steps, (
+        f"n_steps ({trace.n_steps}) must equal len(trace.steps) ({len(trace.steps)})"
+    )
     assert call_counter[0] == 1, (
         f"Proposer should be called exactly once; called {call_counter[0]} times"
     )
@@ -645,3 +651,65 @@ def test_is_ping_pong_not_detected_when_target_improves():
 def test_is_ping_pong_requires_3_points():
     """_is_ping_pong returns False with fewer than 3 points."""
     assert not _is_ping_pong([10, 13], [0.05, 0.05], eps=1e-4)
+
+
+# ===========================================================================
+# Test 14: CR-02 n_steps == len(trace.steps) authoritative invariant
+# ===========================================================================
+
+
+def test_n_steps_equals_steps_recorded_budget():
+    """CR-02: n_steps == len(trace.steps) for budget stop."""
+    env = _SmoothingImproveEnv()
+    trace = _run_smoothing_loop(_make_mock_propose_fn([2, 2, 2]), env=env, max_steps=2)
+    assert trace.stop_reason == "budget"
+    assert trace.n_steps == len(trace.steps), (
+        f"n_steps ({trace.n_steps}) != len(trace.steps) ({len(trace.steps)}) for budget stop"
+    )
+    assert trace.budget_remaining == 0
+
+
+def test_n_steps_equals_steps_recorded_converged():
+    """CR-02: n_steps == len(trace.steps) for converged stop."""
+    env = _SmoothingNoImprovEnv(fixed_gcv=0.10)
+    trace = _run_smoothing_loop(
+        _make_mock_propose_fn([1, 1, 1, 1, 1]), env=env, no_improve_window=3, max_steps=10
+    )
+    assert trace.stop_reason == "converged"
+    assert trace.n_steps == len(trace.steps), (
+        f"n_steps ({trace.n_steps}) != len(trace.steps) ({len(trace.steps)}) for converged stop"
+    )
+
+
+def test_n_steps_equals_steps_recorded_guard_stop():
+    """CR-02: n_steps == len(trace.steps) for guard_stop."""
+    env = _ClusteringGuardEnv(initial_k=3, n_obs=30)
+    trace = run_tuning_loop(
+        dataset_id="mock",
+        method="clustering",
+        initial_params={"k": 3},
+        target_metric="mean_amplitude_separation",
+        propose_fn=_make_mock_propose_fn([1, 1, 1, 1]),
+        max_steps=10,
+        guard_thresholds={"cluster_sizes": "min_cluster_size_ge_2"},
+        _run_method=env.run_method,
+        _build_diagnostics=env.build_diagnostics,
+    )
+    assert trace.stop_reason == "guard_stop"
+    assert trace.n_steps == len(trace.steps), (
+        f"n_steps ({trace.n_steps}) != len(trace.steps) ({len(trace.steps)}) for guard_stop"
+    )
+
+
+def test_budget_remaining_consistent():
+    """CR-02: budget_remaining == max_steps - n_steps for all stop paths."""
+    for max_steps in (2, 5, 10):
+        env = _SmoothingImproveEnv()
+        trace = _run_smoothing_loop(
+            _make_mock_propose_fn([2] * max_steps), env=env, max_steps=max_steps
+        )
+        expected_remaining = max(0, max_steps - trace.n_steps)
+        assert trace.budget_remaining == expected_remaining, (
+            f"budget_remaining ({trace.budget_remaining}) != max_steps - n_steps "
+            f"({max_steps} - {trace.n_steps} = {expected_remaining})"
+        )
