@@ -22,10 +22,12 @@ stage's numbers without key-collision loss.
 
 LLM path
 ---------
-``run_llm=True`` is reserved for Plan 02 (narrative + schema).  It raises
-``NotImplementedError`` here so the Plan 02 hook is explicit.  No
+``run_llm=True`` produces a grounded narrative report via the "pipeline"
+advise task family (see :func:`pipeline_report`): deterministic Python
+caveats are computed first, per-stage labeled blocks are sent to the LLM,
+and grounding is checked once against the ``{"_stages": [...]}`` union.  No
 ``anthropic`` / provider package is imported at module load time; those
-imports are deferred into the ``run_llm=True`` path when Plan 02 lands.
+imports are deferred into the ``run_llm=True`` path.
 """
 
 from __future__ import annotations
@@ -393,8 +395,9 @@ def build_pipeline_report(
 
     The offline path (``run_llm=False``) runs ``build_diagnostics`` per stage
     (or accepts pre-built diagnostics dicts) and returns an ordered list of
-    per-stage labeled blocks.  The LLM narrative path is reserved for Plan 02
-    and raises ``NotImplementedError`` when ``run_llm=True``.
+    per-stage labeled blocks.  With ``run_llm=True`` it delegates to
+    :func:`pipeline_report` for a grounded narrative report over the same
+    per-stage blocks.
 
     Parameters
     ----------
@@ -420,15 +423,15 @@ def build_pipeline_report(
         separation).
     run_llm : bool, optional
         When ``False`` (offline), return the raw aggregated dict of per-stage
-        blocks.  When ``True``, call the LLM to narrate the pipeline report —
-        **not yet implemented** (Plan 02 hook); raises ``NotImplementedError``.
+        blocks.  When ``True``, delegate to :func:`pipeline_report` for a
+        grounded narrative report (deterministic caveats + union grounding).
     domain_context : str, optional
         Free-text domain description forwarded to the LLM narration
-        (``run_llm=True`` only — Plan 02).
+        (``run_llm=True`` only).
     model : str, optional
-        LLM model identifier (``run_llm=True`` only — Plan 02).
+        LLM model identifier (``run_llm=True`` only).
     provider : str or Provider or None, optional
-        LLM provider (``run_llm=True`` only — Plan 02).
+        LLM provider (``run_llm=True`` only).
     **kwargs
         Forwarded to ``build_diagnostics`` for raw result dicts.
 
@@ -444,15 +447,17 @@ def build_pipeline_report(
                 ]
             }
 
-        When ``run_llm=True``: raises ``NotImplementedError`` (Plan 02 hook).
+        When ``run_llm=True``: returns the :func:`pipeline_report` result
+        (a validated ``PipelineReport`` with narrative + deterministic caveats).
 
     Raises
     ------
     ValueError
         * ``stages`` is empty.
         * A stage entry is missing ``"stage_name"`` or ``"aspect"``.
-    NotImplementedError
-        When ``run_llm=True`` (LLM narrative path reserved for Plan 02).
+    GroundingViolationError
+        When ``run_llm=True`` and the narration cites a value absent from every
+        stage's diagnostics (fabrication).
 
     Notes
     -----
