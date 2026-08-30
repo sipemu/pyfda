@@ -51,8 +51,6 @@ _ALLOWED_PARAMS = frozenset({"lambda_", "n_basis", "n_comp", "k", "seed"})
 def build_pipeline_report_mcp(
     dataset_id: str,
     stages: list[dict],
-    *,
-    argvals_from_dataset: bool = True,
 ) -> dict:
     """Re-run each stage and return the deterministic pipeline report by-reference.
 
@@ -80,9 +78,6 @@ def build_pipeline_report_mcp(
         * ``"params"`` (dict, optional) — flat scalar-param dict whose keys
           must be a subset of ``{'lambda_', 'n_basis', 'n_comp', 'k', 'seed'}``.
           Any unknown key raises :exc:`ValueError` before any run (T-52-09).
-    argvals_from_dataset : bool, optional
-        When ``True`` (default), pass the dataset's ``argvals`` array to
-        ``build_diagnostics`` for distance metrics.
 
     Returns
     -------
