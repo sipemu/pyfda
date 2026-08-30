@@ -307,7 +307,7 @@ def run_tuning_loop_mcp(
 
     steps = trace.steps if hasattr(trace, "steps") else trace_dict.get("steps", [])
     if steps:
-        first_step = steps[0] if hasattr(steps[0], "target_before") else steps[0]
+        first_step = steps[0]
         if hasattr(first_step, "target_before"):
             initial_target_value = first_step.target_before
         else:
