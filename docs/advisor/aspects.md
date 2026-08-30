@@ -176,6 +176,15 @@ are derived as `singular_values² / (n−1)`, matching `FPCAResult.explained_var
 | `pace_sigma2` | Measurement-noise variance estimate from PACE (raw key `"sigma2"`) |
 | `pace_variance_explained_cumulative` | Running cumulative variance explained by PACE eigenvalues |
 | `pace_variance_explained_first` | Fraction of variance explained by the leading PACE component |
+| `pace_noise_signal_ratio` | `sigma2 / sum(eigenvalues)`: ratio of measurement-noise variance to total signal variance; `None` when total variance is zero (degenerate case) |
+| `pace_truncated_rank_flagged` | `True` when the number of PACE components actually returned (`pace_ncomp`) is less than the number of raw eigenvalues — indicates the eigenvalue spectrum was truncated |
+| `pace_mean_prediction_band_width` | Mean of `fitted_upper - fitted_lower` over the full `(n, m)` prediction grid; quantifies average pointwise uncertainty in the PACE fitted curves; `None` when confidence bands are absent |
+
+!!! tip "PACE noise-to-signal interpretation"
+    `pace_noise_signal_ratio > 0.30` suggests that measurement noise is substantial relative
+    to the signal — consider increasing `sigma2` or using fewer components. A
+    `pace_truncated_rank_flagged=True` result means the returned component count is smaller
+    than expected; increase `ncomp` if the scree suggests more components are meaningful.
 
 **Task families:** `"interpretation"` (read scree / phase leakage; PACE: assess noise level and component count) · `"parameter"` (change n_comp; PACE: adjust bandwidth or sigma2)
 · `"method"` (use elastic FPCA for dense regular data; use PACE for sparse irregular observations)
@@ -403,6 +412,20 @@ diag = build_diagnostics(result, method="classification", n_classes=K)
 | `has_elastic_multinomial` | `True` when `"train_accuracy"` key is present |
 | `train_accuracy` | Training-set proportion correctly classified (float) |
 | `train_error_rate` | `1 - train_accuracy` |
+| `overfitting_gap` | `train_accuracy - holdout_accuracy`: difference between training accuracy and caller-supplied holdout or cross-validation accuracy. **`None` unless `holdout_accuracy` is passed to `build_diagnostics`** — the `elastic_multinomial` result has no holdout accuracy of its own and this gap is never fabricated (grounding invariant). A positive gap indicates overfitting |
+| `n_classes_flagged` | `True` when `n_classes > 2` (multiclass problem — elastic multinomial scales to K classes via a one-vs-rest structure; flag helps the LLM contextualise `train_accuracy` correctly); `None` when `n_classes` is not supplied |
+
+!!! warning "overfitting_gap requires holdout_accuracy"
+    `overfitting_gap` is `None` unless you pass `holdout_accuracy=<float>` to
+    `build_diagnostics`. The `elastic_multinomial` result dict contains only training
+    accuracy — the gap cannot be computed without an externally supplied holdout or
+    cross-validation accuracy. Do not pass `holdout_accuracy` from the same training
+    run used to fit the model; use a held-out test split or a CV error rate.
+
+    ```python
+    diag = build_diagnostics(result, method="classification",
+                             n_classes=K, holdout_accuracy=cv_accuracy)
+    ```
 
 **Task families:** `"interpretation"` (read classification accuracy and CV stability) · `"parameter"` (tune k / n_comp)
 · `"method"` (switch classifier; use `elastic_multinomial` for K-class problems in the elastic SRSF domain)
@@ -618,7 +641,41 @@ Two input shapes are handled:
 | `band_present` | `True` for the ToleranceBand path; absent from the TestResult path |
 | `half_width` | Mean SCB half-width (float); present only for the ToleranceBand path |
 
-**Task families:** `"interpretation"` (read significance level and test path) · `"parameter"` (adjust `n_perm` or significance threshold)
+**ITP (Interval-wise Testing Procedure) keys** (trigger: `"adjusted_pvalues"` in raw):
+
+ITP results from `fdars.inference` functions that return an `adjusted_pvalues` vector (e.g.
+`flm_f_test`, `flm_gof_test`) expose two complementary scalar families: **detection** (is the
+effect globally significant?) and **localisation** (where on the domain is it significant?).
+Both families are always emitted together — citing only detection without localisation (or
+vice versa) would give the LLM a misleadingly incomplete picture (PITFALLS #8).
+
+*Detection scalars (whether the effect is present):*
+
+| Key | Meaning |
+|---|---|
+| `itp_result_present` | `True` when an ITP `adjusted_pvalues` vector was detected |
+| `itp_min_adjusted_pvalue` | Minimum adjusted p-value across all basis functions (scalar `float`); small value → at least one basis function's contribution is globally significant |
+| `itp_detected_at_0.05` | `True` when `itp_min_adjusted_pvalue < 0.05`; overall detection flag at the conventional 5 % level |
+| `itp_n_basis` | Number of basis functions tested (length of `adjusted_pvalues` array) |
+| `itp_n_perm` | Number of permutations used in the ITP test |
+
+*Localisation scalars (where the effect is located):*
+
+| Key | Meaning |
+|---|---|
+| `itp_n_significant_0.05` | Count of basis functions with adjusted p-value `< 0.05`; measures the breadth of the significant region |
+| `itp_fraction_significant_0.05` | `itp_n_significant_0.05 / itp_n_basis`; proportion of the basis functions in the significant region |
+| `itp_first_significant_basis` | Zero-based index of the first basis function with adjusted p-value `< 0.05`; `None` when no basis function is significant; localises the onset of significance |
+
+!!! tip "Detection vs. localisation"
+    `itp_detected_at_0.05` answers *whether* an effect is present.
+    `itp_n_significant_0.05`, `itp_fraction_significant_0.05`, and `itp_first_significant_basis`
+    answer *where* on the evaluation domain the effect is localised.
+    Both families are needed for a complete ITP interpretation — a significant detection
+    with low `itp_fraction_significant_0.05` points to a narrow localised effect; a high
+    fraction points to broad significance.
+
+**Task families:** `"interpretation"` (read significance level and test path; ITP: detect and localise) · `"parameter"` (adjust `n_perm` or significance threshold)
 · `"method"` (switch between permutation test and asymptotic test; consider SCB for continuous inference)
 
 The fence below constructs a small synthetic TestResult dict (no API key, no real permutation compute) and builds the offline diagnostics report — mirroring the offline precedent of the `fpca` and `depth` fences above.
