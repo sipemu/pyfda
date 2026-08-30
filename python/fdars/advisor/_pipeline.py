@@ -162,6 +162,13 @@ def _normalize_stages(
         aspect: str = str(entry["aspect"])
         value = _resolve_result(entry, stage_name)
 
+        if value is None:
+            raise ValueError(
+                f"build_pipeline_report: stage entry at index {i} "
+                f"(stage_name={stage_name!r}) has no result value. "
+                "Provide one of the keys: 'diagnostics', 'result', or 'value'."
+            )
+
         # Detect whether this is already a built diagnostics dict.
         # build_diagnostics always sets diag["method"] = <aspect string>.
         if isinstance(value, dict) and "method" in value:

@@ -307,6 +307,32 @@ class TestEmptyStagesRaises:
         with pytest.raises(ValueError):
             build_pipeline_report(stages, run_llm=False)
 
+    def test_missing_result_key_raises_value_error_not_type_error(self):
+        """Stage entry with no 'diagnostics', 'result', or 'value' key raises ValueError.
+
+        WR-06: previously _resolve_result returned None which was forwarded to
+        build_diagnostics, producing an opaque TypeError.  The fix raises a
+        clear ValueError naming the offending stage.
+        """
+        import pytest
+        from fdars.advisor import build_pipeline_report
+
+        # Stage entry has stage_name + aspect but NO result key
+        stages = [{"stage_name": "foo", "aspect": "fpca"}]
+        with pytest.raises(ValueError, match="foo"):
+            build_pipeline_report(stages, run_llm=False)
+
+    def test_missing_result_key_error_names_stage_index(self):
+        """ValueError for missing result key names the stage_name (not just index)."""
+        import pytest
+        from fdars.advisor import build_pipeline_report
+
+        stages = [{"stage_name": "mystery_stage", "aspect": "represent"}]
+        exc = pytest.raises(ValueError, build_pipeline_report, stages, run_llm=False)
+        assert "mystery_stage" in str(exc.value), (
+            f"ValueError must name the stage; got: {exc.value}"
+        )
+
 
 class TestCoreLLMFree:
     """No module-level anthropic/providers import in _pipeline.py."""
