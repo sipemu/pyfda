@@ -161,6 +161,27 @@ def test_heuristic_deterministic(fpca_dataset_id):
 
 
 # ---------------------------------------------------------------------------
+# WR-02: seed defaults to 42 (determinism for clustering)
+# ---------------------------------------------------------------------------
+
+
+def test_seed_defaults_to_42_in_signature():
+    """WR-02: fdars_auto_tune seed parameter must default to 42, not None.
+
+    A default of None makes clustering runs non-deterministic by default.
+    """
+    import inspect
+    from fdars.mcp.server import fdars_auto_tune
+
+    sig = inspect.signature(fdars_auto_tune)
+    seed_default = sig.parameters["seed"].default
+    assert seed_default == 42, (
+        f"WR-02: fdars_auto_tune seed must default to 42 for clustering "
+        f"reproducibility (Pitfall 7); got default={seed_default!r}"
+    )
+
+
+# ---------------------------------------------------------------------------
 # max_steps hard cap (TUNE-04, T-53C-02)
 # ---------------------------------------------------------------------------
 

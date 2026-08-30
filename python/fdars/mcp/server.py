@@ -596,7 +596,7 @@ def fdars_auto_tune(
     n_basis: int | None = None,
     n_comp: int | None = None,
     k: int | None = None,
-    seed: int | None = None,
+    seed: int | None = 42,
 ) -> dict:
     """Closed-loop auto-tuning via deterministic heuristic proposal.
 
