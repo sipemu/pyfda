@@ -14,7 +14,7 @@ method, and optional initial params, it:
    no arrays across the MCP boundary).
 
 The compute path is **fully deterministic and LLM-free** — this module never
-imports or calls the LLM advisor, ``anthropic``, or any provider package.
+imports or calls the LLM advisor or any provider package.
 ``ANTHROPIC_API_KEY`` is never required here (TUNE-04, T-53C-01).
 
 Requires the ``fdars[mcp]`` optional extra (Python >=3.10).
