@@ -5,16 +5,16 @@ milestone_name: "Advisor: New Capabilities"
 current_phase: 54
 current_phase_name: Eval Strategy + Docs Gate
 status: executing
-stopped_at: Phase 53 complete, ready to plan Phase 54
-last_updated: "2026-08-30T21:25:16.292Z"
+stopped_at: Completed 54-01-PLAN.md
+last_updated: "2026-08-30T21:30:36.070Z"
 last_activity: 2026-08-30
-last_activity_desc: Phase 53 complete, transitioned to Phase 54
-state_head: 6b0a320baa74ce2d93662fdf6b9c3634022ad9e6
+last_activity_desc: Phase 54 execution started
+state_head: 4e4213c30614ca92ee2a548b2a9c193ffcac2e67
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 16
-  completed_plans: 12
+  completed_plans: 13
   percent: 60
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-23)
 
 **Core value:** Extend the fdars AI advisor with new agentic capabilities while holding the grounding invariant (fdars computes every number; the LLM only interprets/cites) and the MCP-LLM-free compute boundary as hard constraints.
-**Current focus:** Phase 53 — Closed-Loop Auto-Tuning (capstone)
+**Current focus:** Phase 54 — Eval Strategy + Docs Gate
 
 ## Current Position
 
-Phase: 54 (Eval Strategy + Docs Gate) — READY TO EXECUTE
-Plan: Not started
+Phase: 54 (Eval Strategy + Docs Gate) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-08-30 — Phase 53 complete, transitioned to Phase 54
+Last activity: 2026-08-30 — Phase 54 execution started
 
-Progress: [████░░░░░░] 40%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
@@ -76,6 +76,7 @@ Progress: [████░░░░░░] 40%
 | Phase 53 P01 | 7min | 3 tasks | 4 files |
 | Phase 53 P02 | 18m | 2 tasks | 4 files |
 | Phase 53 P03 | 12m | 3 tasks | 3 files |
+| Phase 54-eval-strategy-docs-gate P01 | 3min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,7 @@ Recent decisions affecting current work:
 - [Phase 53]: _intercepting_build wrapper shares current_diag with LLM propose_fn closure without double fdars re-run
 - [Phase 53]: Heuristic step: factor=10/2^n_reversals for log-scale, (hi-lo)/(10*2^n_reversals) for linear; floors prevent stuck at boundary
 - [Phase 53]: final_target_value from final_diagnostics via _extract_target, not step trace (handles list-valued metrics)
+- [Phase 54-eval-strategy-docs-gate]: Deterministic eval fixtures: constructed candidate set with known-best winner; FakeProvider with qualitative-only evidence passes grounding check offline — Eval correctness requires known-from-data answers; grounding requires no numeric tokens in fake evidence
 
 ### Pending Todos
 
@@ -151,8 +153,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-30T20:40:50.989Z
-Stopped at: Phase 53 complete, ready to plan Phase 54
+Last session: 2026-08-30T21:30:36.004Z
+Stopped at: Completed 54-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

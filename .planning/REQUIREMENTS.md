@@ -46,8 +46,8 @@ Four new advisor capabilities built on the existing surface (no new runtime deps
 
 ### Evaluation
 
-- [ ] **EVAL-01**: deterministic eval fixtures where the correct comparative ranking or auto-tune convergence direction is known from the data; assert diagnostic improvement + grounding-pass
-- [ ] **EVAL-02**: no LLM-as-judge in CI; live LLM eval is env-gated (skips without a key; CI stays network-free)
+- [x] **EVAL-01**: deterministic eval fixtures where the correct comparative ranking or auto-tune convergence direction is known from the data; assert diagnostic improvement + grounding-pass
+- [x] **EVAL-02**: no LLM-as-judge in CI; live LLM eval is env-gated (skips without a key; CI stays network-free)
 
 ### Docs & Gate
 
@@ -107,8 +107,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | TUNE-04 | Phase 53 | Complete |
 | TUNE-05 | Phase 53 | Complete |
 | TUNE-06 | Phase 53 | Complete |
-| EVAL-01 | Phase 54 | Pending |
-| EVAL-02 | Phase 54 | Pending |
+| EVAL-01 | Phase 54 | Complete |
+| EVAL-02 | Phase 54 | Complete |
 | DOCS-01 | Phase 54 | Pending |
 | DOCS-02 | Phase 54 | Pending |
 | DOCS-03 | Phase 54 | Pending |
