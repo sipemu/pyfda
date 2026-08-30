@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Comparative selection: per-candidate build_diagnostics blocks feed a fdars-computed deterministic sort that picks the winner; LLM narrates only">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="26" text-anchor="middle">Comparative Selection</text>
+  <text class="sub" x="360" y="44" text-anchor="middle">N candidates → per-candidate build_diagnostics → fdars-computed sort picks winner → LLM narrates only</text>
+
+  <!-- ===== Candidates column ===== -->
+  <!-- Candidate A -->
+  <rect x="24" y="64" width="130" height="44" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="89" y="83" text-anchor="middle" fill="#3f51b5">Candidate A</text>
+  <text class="mono" x="89" y="100" text-anchor="middle" fill="#495057">method=smoothing</text>
+
+  <!-- Candidate B -->
+  <rect x="24" y="124" width="130" height="44" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="89" y="143" text-anchor="middle" fill="#3f51b5">Candidate B</text>
+  <text class="mono" x="89" y="160" text-anchor="middle" fill="#495057">method=basis</text>
+
+  <!-- Candidate N -->
+  <rect x="24" y="184" width="130" height="44" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="89" y="203" text-anchor="middle" fill="#3f51b5">Candidate N</text>
+  <text class="mono" x="89" y="220" text-anchor="middle" fill="#495057">method=fpca</text>
+  <!-- ellipsis between B and N -->
+  <text class="sm" x="89" y="177" text-anchor="middle">…</text>
+
+  <!-- ===== build_diagnostics column (per-candidate, never merged) ===== -->
+  <!-- Label above the column -->
+  <text class="lab" x="310" y="58" text-anchor="middle" fill="#495057">build_diagnostics (per-candidate)</text>
+
+  <!-- Block A -->
+  <rect x="196" y="64" width="228" height="44" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="mono" x="310" y="83" text-anchor="middle" fill="#1a1a2e">build_diagnostics(A)</text>
+  <text class="sm" x="310" y="100" text-anchor="middle">{label:"A", diagnostics:{…}}</text>
+
+  <!-- Block B -->
+  <rect x="196" y="124" width="228" height="44" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="mono" x="310" y="143" text-anchor="middle" fill="#1a1a2e">build_diagnostics(B)</text>
+  <text class="sm" x="310" y="160" text-anchor="middle">{label:"B", diagnostics:{…}}</text>
+
+  <!-- Block N -->
+  <rect x="196" y="184" width="228" height="44" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="mono" x="310" y="203" text-anchor="middle" fill="#1a1a2e">build_diagnostics(N)</text>
+  <text class="sm" x="310" y="220" text-anchor="middle">{label:"N", diagnostics:{…}}</text>
+
+  <!-- ellipsis -->
+  <text class="sm" x="310" y="177" text-anchor="middle">…</text>
+
+  <!-- Arrows: candidates → build_diagnostics -->
+  <line x1="154" y1="86" x2="194" y2="86" stroke="#6c757d" stroke-width="1.5" marker-end="url(#arrgrey)"/>
+  <line x1="154" y1="146" x2="194" y2="146" stroke="#6c757d" stroke-width="1.5" marker-end="url(#arrgrey)"/>
+  <line x1="154" y1="206" x2="194" y2="206" stroke="#6c757d" stroke-width="1.5" marker-end="url(#arrgrey)"/>
+
+  <!-- ===== fdars deterministic sort ===== -->
+  <!-- Converging arrows from build_diagnostics blocks to sort box -->
+  <line x1="424" y1="86" x2="468" y2="148" stroke="#495057" stroke-width="1.5" marker-end="url(#arrdark)"/>
+  <line x1="424" y1="146" x2="468" y2="158" stroke="#495057" stroke-width="1.5" marker-end="url(#arrdark)"/>
+  <line x1="424" y1="206" x2="468" y2="170" stroke="#495057" stroke-width="1.5" marker-end="url(#arrdark)"/>
+
+  <!-- Sort box -->
+  <rect x="468" y="110" width="148" height="80" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="542" y="133" text-anchor="middle" fill="#495057">fdars sort</text>
+  <text class="mono" x="542" y="151" text-anchor="middle" fill="#1a1a2e">_normalize_candidates</text>
+  <text class="mono" x="542" y="167" text-anchor="middle" fill="#1a1a2e">+ _rank (deterministic)</text>
+  <text class="sm" x="542" y="183" text-anchor="middle">computed BEFORE LLM call</text>
+
+  <!-- ===== Winner banner ===== -->
+  <rect x="468" y="220" width="148" height="52" rx="8" fill="#e8f5e9" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="542" y="241" text-anchor="middle" fill="#198754">Winner</text>
+  <text class="mono" x="542" y="259" text-anchor="middle" fill="#1a1a2e">result["winner"]</text>
+  <text class="sm" x="542" y="273" text-anchor="middle">fdars-authoritative</text>
+  <!-- Arrow: sort → winner -->
+  <line x1="542" y1="190" x2="542" y2="220" stroke="#198754" stroke-width="2" marker-end="url(#arrgreen)"/>
+
+  <!-- ===== LLM narration-only panel (orange accent) ===== -->
+  <rect x="24" y="316" width="672" height="128" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="38" y="336" fill="#fd7e14">LLM — narration only (cannot choose or override the winner)</text>
+
+  <!-- LLM receives: per-candidate labeled blocks + winner -->
+  <rect x="40" y="348" width="220" height="52" rx="8" fill="#f8f9fa" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="lab" x="150" y="369" text-anchor="middle" fill="#495057">Input to LLM</text>
+  <text class="sm" x="150" y="385" text-anchor="middle">per-candidate labeled blocks</text>
+  <text class="sm" x="150" y="398" text-anchor="middle">+ pre-computed winner</text>
+
+  <!-- LLM call -->
+  <rect x="290" y="348" width="160" height="52" rx="8" fill="#f8f9fa" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="lab" x="370" y="369" text-anchor="middle" fill="#495057">LLM call</text>
+  <text class="mono" x="370" y="387" text-anchor="middle" fill="#fd7e14">_system_prompt</text>
+  <text class="sm" x="370" y="400" text-anchor="middle">("comparison")</text>
+
+  <!-- Advice output -->
+  <rect x="480" y="348" width="192" height="52" rx="8" fill="#f8f9fa" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="lab" x="576" y="369" text-anchor="middle" fill="#495057">Advice (narration)</text>
+  <text class="sm" x="576" y="385" text-anchor="middle">result["advice"] — narrates why</text>
+  <text class="sm" x="576" y="398" text-anchor="middle">winner is best; cannot override</text>
+
+  <!-- Arrows within LLM panel -->
+  <line x1="260" y1="374" x2="288" y2="374" stroke="#fd7e14" stroke-width="1.5" marker-end="url(#arrorange)"/>
+  <line x1="450" y1="374" x2="478" y2="374" stroke="#fd7e14" stroke-width="1.5" marker-end="url(#arrorange)"/>
+
+  <!-- Arrow: winner → LLM input -->
+  <line x1="542" y1="290" x2="542" y2="310" stroke="#495057" stroke-width="1.5"/>
+  <line x1="542" y1="310" x2="150" y2="310" stroke="#495057" stroke-width="1.5"/>
+  <line x1="150" y1="310" x2="150" y2="346" stroke="#495057" stroke-width="1.5" marker-end="url(#arrdark)"/>
+
+  <!-- Also arrow from build_diagnostics blocks into LLM input -->
+  <line x1="310" y1="228" x2="310" y2="305" stroke="#6c757d" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <line x1="310" y1="305" x2="200" y2="305" stroke="#6c757d" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <line x1="200" y1="305" x2="200" y2="346" stroke="#6c757d" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrgrey)"/>
+
+  <!-- ===== Defs ===== -->
+  <defs>
+    <marker id="arrorange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+    <marker id="arrgrey" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#6c757d"/>
+    </marker>
+    <marker id="arrdark" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arrgreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#198754"/>
+    </marker>
+  </defs>
+</svg>
