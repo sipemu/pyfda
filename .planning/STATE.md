@@ -4,17 +4,17 @@ milestone: v8.0
 milestone_name: "Advisor: New Capabilities"
 current_phase: 53
 current_phase_name: Closed-Loop Auto-Tuning (capstone)
-status: executing
-stopped_at: Completed 53-02-PLAN.md
-last_updated: "2026-08-30T20:29:44.392Z"
+status: verifying
+stopped_at: Completed 53-03-PLAN.md (fdars_auto_tune MCP tool + heuristic)
+last_updated: "2026-08-30T20:40:51.046Z"
 last_activity: 2026-08-30
 last_activity_desc: Phase 53 execution started
-state_head: f56c9e744e7e20886e076cba19f4cbb509b75ca2
+state_head: 5460528c0e19fdc423dc713223eb7b93412432b2
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
   percent: 40
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 
 Phase: 53 (Closed-Loop Auto-Tuning (capstone)) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-30 — Phase 53 execution started
 
 Progress: [████░░░░░░] 40%
@@ -75,6 +75,7 @@ Progress: [████░░░░░░] 40%
 | Phase 52-pipeline-diagnostic-report P03 | 11 | 3 tasks | 3 files |
 | Phase 53 P01 | 7min | 3 tasks | 4 files |
 | Phase 53 P02 | 18m | 2 tasks | 4 files |
+| Phase 53 P03 | 12m | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Recent decisions affecting current work:
 - [Phase 53]: auto_tune passes history outside Diagnostics block via domain_context to keep _check_grounding bounded to current-step numbers (Pitfall 1)
 - [Phase 53]: Out-of-range parameter_delta.new_value CLAMPED (not rejected); wrong param name exits parse_failure — same path as absent parameter_delta (no numeric-path retry)
 - [Phase 53]: _intercepting_build wrapper shares current_diag with LLM propose_fn closure without double fdars re-run
+- [Phase 53]: Heuristic step: factor=10/2^n_reversals for log-scale, (hi-lo)/(10*2^n_reversals) for linear; floors prevent stuck at boundary
+- [Phase 53]: final_target_value from final_diagnostics via _extract_target, not step trace (handles list-valued metrics)
 
 ### Pending Todos
 
@@ -148,8 +151,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-30T20:29:44.336Z
-Stopped at: Completed 53-02-PLAN.md
+Last session: 2026-08-30T20:40:50.989Z
+Stopped at: Completed 53-03-PLAN.md (fdars_auto_tune MCP tool + heuristic)
 Resume file: None
 
 ## Operator Next Steps
