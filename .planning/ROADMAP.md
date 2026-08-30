@@ -202,7 +202,7 @@ Plans:
   3. Cross-stage signal detection surfaces downstream caveats (e.g. a high imputed fraction in the represent stage raises an FPCA caveat downstream).
   4. An `fdars_build_pipeline_report` MCP tool exposes the report and stays LLM-free (never calls `advise()`).
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 
 Plans:
 **Wave 1**
@@ -211,7 +211,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 52-02-PLAN.md — deterministic cross-stage caveat rule table + PipelineReport schema + "pipeline" task family narrative under union grounding (PIPE-02, PIPE-03)
+- [x] 52-02-PLAN.md — deterministic cross-stage caveat rule table + PipelineReport schema + "pipeline" task family narrative under union grounding (PIPE-02, PIPE-03)
 - [ ] 52-03-PLAN.md — fdars_build_pipeline_report LLM-free MCP tool (by-reference, guard-sync no-op) (PIPE-04)
 
 ### Phase 53: Closed-Loop Auto-Tuning (capstone)
@@ -252,7 +252,7 @@ Phases execute in numeric order: 50 → 51 → 52 → 53 → 54
 |-------|-----------|----------------|--------|-----------|
 | 50. Deferred Advisor Aspects (+ compat pre-flight) | v8.0 | 3/3 | Complete    | 2026-08-23 |
 | 51. Comparative Method-Selection | v8.0 | 3/3 | Complete    | 2026-08-24 |
-| 52. Pipeline Diagnostic Report | v8.0 | 1/3 | In Progress|  |
+| 52. Pipeline Diagnostic Report | v8.0 | 2/3 | In Progress|  |
 | 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 0/TBD | Not started | - |
 | 54. Eval Strategy + Docs Gate | v8.0 | 0/TBD | Not started | - |
 

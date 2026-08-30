@@ -5,16 +5,16 @@ milestone_name: "Advisor: New Capabilities"
 current_phase: 52
 current_phase_name: Pipeline Diagnostic Report
 status: executing
-stopped_at: Completed 52-01-PLAN.md
-last_updated: "2026-08-30T18:43:54.445Z"
+stopped_at: Completed 52-02-PLAN.md
+last_updated: "2026-08-30T19:00:41.585Z"
 last_activity: 2026-08-30
 last_activity_desc: Phase 52 execution started
-state_head: a43f188ac5561545a6e46209673ccf7f91770c66
+state_head: e407592b0514e56302644a1a38a0d3ffc69171f0
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 40
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 ## Current Position
 
 Phase: 52 (Pipeline Diagnostic Report) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-08-30 — Phase 52 execution started
 
@@ -71,6 +71,7 @@ Progress: [████░░░░░░] 40%
 | Phase 51-comparative-method-selection P02 | 10min | 3 tasks | 4 files |
 | Phase 51-comparative-method-selection P03 | 12 | 3 tasks | 3 files |
 | Phase 52-pipeline-diagnostic-report P01 | 6min | 3 tasks | 3 files |
+| Phase 52-pipeline-diagnostic-report P02 | 13 min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,8 @@ Recent decisions affecting current work:
 - [Phase 52]: Aggregate as LIST of per-stage blocks (not dict) — preserves caller-declared order and prevents same-keyed key collision (T-52-01)
 - [Phase 52]: {'_stages':[...]} union-grounding payload mirrors Phase-51 {'_candidates':[...]} — _flatten_diagnostics_numbers recurses lists, no key-collision (T-52-02)
 - [Phase 52]: Deferred local import of build_diagnostics inside _normalize_stages() — _pipeline.py stays LLM-free at module load (T-52-03)
+- [Phase 52]: Caveats computed BEFORE LLM call; Python-authoritative, LLM narrates only — T-52-04: LLM inventing caveats is the primary threat; computing first then re-attaching eliminates the risk
+- [Phase 52]: Union grounding ONCE against {'_stages':[...]}; no per-stage-strict checks — Phase-51 WR-03 lesson: per-stage-strict over-rejects legitimate cross-stage narration
 
 ### Pending Todos
 
@@ -133,8 +136,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-30T18:43:54.408Z
-Stopped at: Completed 52-01-PLAN.md
+Last session: 2026-08-30T19:00:41.543Z
+Stopped at: Completed 52-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
