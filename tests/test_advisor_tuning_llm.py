@@ -129,6 +129,38 @@ def _make_fake_build_diagnostics(target_key, target_values):
 # ---------------------------------------------------------------------------
 
 
+class TestAutoTuneMaxStepsValidation:
+    """WR-04: auto_tune must raise ValueError for max_steps < 1."""
+
+    def test_max_steps_zero_raises(self):
+        """auto_tune with max_steps=0 must raise ValueError before any fdars call."""
+        from fdars.advisor import auto_tune
+
+        with pytest.raises(ValueError, match="max_steps"):
+            auto_tune(
+                "fake_dataset",
+                "smoothing",
+                provider=FakeProvider(lambda *a: None),
+                max_steps=0,
+                _run_method=_fake_run_method,
+                _build_diagnostics=_make_fake_build_diagnostics("optimal_gcv", [0.1]),
+            )
+
+    def test_max_steps_negative_raises(self):
+        """auto_tune with max_steps=-5 must raise ValueError."""
+        from fdars.advisor import auto_tune
+
+        with pytest.raises(ValueError, match="max_steps"):
+            auto_tune(
+                "fake_dataset",
+                "smoothing",
+                provider=FakeProvider(lambda *a: None),
+                max_steps=-5,
+                _run_method=_fake_run_method,
+                _build_diagnostics=_make_fake_build_diagnostics("optimal_gcv", [0.1]),
+            )
+
+
 class TestAutoTuneRejectsNonTuneable:
     """auto_tune for non-tuneable methods must raise ValueError immediately."""
 

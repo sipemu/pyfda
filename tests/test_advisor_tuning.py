@@ -633,6 +633,51 @@ def test_propose_fn_extra_keys_ignored():
 
 
 # ===========================================================================
+# Test: WR-04 max_steps < 1 raises ValueError
+# ===========================================================================
+
+
+def test_max_steps_zero_raises_value_error():
+    """WR-04: run_tuning_loop with max_steps=0 must raise ValueError (not TypeError)."""
+    env = _SmoothingImproveEnv()
+
+    def propose_fn(cp, h):
+        return {"n_basis": cp["n_basis"] + 1}
+
+    with pytest.raises(ValueError, match="max_steps"):
+        run_tuning_loop(
+            dataset_id="mock",
+            method="smoothing",
+            initial_params={"n_basis": 15},
+            target_metric="optimal_gcv",
+            propose_fn=propose_fn,
+            max_steps=0,
+            _run_method=env.run_method,
+            _build_diagnostics=env.build_diagnostics,
+        )
+
+
+def test_max_steps_negative_raises_value_error():
+    """WR-04: run_tuning_loop with max_steps=-1 must also raise ValueError."""
+    env = _SmoothingImproveEnv()
+
+    def propose_fn(cp, h):
+        return {"n_basis": cp["n_basis"] + 1}
+
+    with pytest.raises(ValueError, match="max_steps"):
+        run_tuning_loop(
+            dataset_id="mock",
+            method="smoothing",
+            initial_params={"n_basis": 15},
+            target_metric="optimal_gcv",
+            propose_fn=propose_fn,
+            max_steps=-1,
+            _run_method=env.run_method,
+            _build_diagnostics=env.build_diagnostics,
+        )
+
+
+# ===========================================================================
 # Test 12: Untuneable methods raise ValueError
 # ===========================================================================
 

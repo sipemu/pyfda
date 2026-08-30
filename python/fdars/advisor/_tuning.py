@@ -411,6 +411,14 @@ def run_tuning_loop(
     from fdars.advisor._schema import TuningStep, TuningTrace  # local: LLM-free path
 
     # -----------------------------------------------------------------------
+    # Validate max_steps (WR-04: must be >= 1 to avoid zero-step edge cases)
+    # -----------------------------------------------------------------------
+    if max_steps < 1:
+        raise ValueError(
+            f"run_tuning_loop: max_steps must be >= 1, got {max_steps}."
+        )
+
+    # -----------------------------------------------------------------------
     # Validate method and target_metric
     # -----------------------------------------------------------------------
     if method not in _PARAM_REGISTRY:

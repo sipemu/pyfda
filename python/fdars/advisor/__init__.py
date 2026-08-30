@@ -697,6 +697,14 @@ def auto_tune(
 
     method_lc = method.lower().strip()
 
+    # WR-04: validate max_steps before any fdars call (max_steps=0 would
+    # produce zero steps and then hit a TypeError on list-valued metrics in
+    # the initial_target fallback path).
+    if max_steps < 1:
+        raise ValueError(
+            f"auto_tune: max_steps must be >= 1, got {max_steps}."
+        )
+
     # ------------------------------------------------------------------
     # Validate method and resolve spec
     # ------------------------------------------------------------------
@@ -859,9 +867,17 @@ def auto_tune(
     # ------------------------------------------------------------------
     # Assemble TuneResult
     # ------------------------------------------------------------------
-    initial_target = trace.steps[0].target_before if trace.steps else (
-        trace.final_diagnostics.get(target_metric, 0.0)
-    )
+    if trace.steps:
+        initial_target = trace.steps[0].target_before
+    else:
+        # WR-04 fix: fallback when no steps were recorded (e.g. max_steps=0
+        # path — validated below but guard here defensively).  For list-valued
+        # metrics (fpca cumulative_variance_explained) extract the last element
+        # before arithmetic so we don't hit TypeError.
+        raw = trace.final_diagnostics.get(target_metric, 0.0)
+        if isinstance(raw, (list, tuple)):
+            raw = raw[-1] if raw else 0.0
+        initial_target = float(raw)
     final_target = trace.final_diagnostics.get(target_metric, initial_target)
     # For list-valued metrics (e.g. cumulative_variance_explained), extract scalar
     if isinstance(final_target, list):
