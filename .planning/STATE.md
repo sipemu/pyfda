@@ -5,16 +5,16 @@ milestone_name: "Advisor: New Capabilities"
 current_phase: 52
 current_phase_name: Pipeline Diagnostic Report
 status: executing
-stopped_at: Phase 51 complete, ready to plan Phase 52
-last_updated: "2026-08-30T18:35:09.942Z"
-last_activity: 2026-08-24
-last_activity_desc: Phase 51 complete, transitioned to Phase 52
-state_head: 5e314545402e1d1ca7441917e812c113eefd0950
+stopped_at: Completed 52-01-PLAN.md
+last_updated: "2026-08-30T18:43:54.445Z"
+last_activity: 2026-08-30
+last_activity_desc: Phase 52 execution started
+state_head: a43f188ac5561545a6e46209673ccf7f91770c66
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 7
   percent: 40
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-23)
 
 **Core value:** Extend the fdars AI advisor with new agentic capabilities while holding the grounding invariant (fdars computes every number; the LLM only interprets/cites) and the MCP-LLM-free compute boundary as hard constraints.
-**Current focus:** Phase 51 — Comparative Method-Selection
+**Current focus:** Phase 52 — Pipeline Diagnostic Report
 
 ## Current Position
 
-Phase: 52 (Pipeline Diagnostic Report) — READY TO EXECUTE
-Plan: Not started
+Phase: 52 (Pipeline Diagnostic Report) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-08-24 — Phase 51 complete, transitioned to Phase 52
+Last activity: 2026-08-30 — Phase 52 execution started
 
-Progress: [██░░░░░░░░] 20%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 51 P01 | 362 | 3 tasks | 3 files |
 | Phase 51-comparative-method-selection P02 | 10min | 3 tasks | 4 files |
 | Phase 51-comparative-method-selection P03 | 12 | 3 tasks | 3 files |
+| Phase 52-pipeline-diagnostic-report P01 | 6min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,9 @@ Recent decisions affecting current work:
 - [Phase 51]: fdars_compare_methods validates method at tool boundary before delegating to helper — fail fast with clear ValueError naming _RUNNABLE_METHODS
 - [Phase 51]: No ranking logic inlined in server.py — 3-line handler delegates entirely to compare_methods_mcp (Anti-Pattern 5 / Single Responsibility)
 - [Phase 51]: guard-sync no-op confirmed: _RUNNABLE_METHODS=6, _DIAGNOSTICS_METHODS=14 unchanged by adding fdars_compare_methods
+- [Phase 52]: Aggregate as LIST of per-stage blocks (not dict) — preserves caller-declared order and prevents same-keyed key collision (T-52-01)
+- [Phase 52]: {'_stages':[...]} union-grounding payload mirrors Phase-51 {'_candidates':[...]} — _flatten_diagnostics_numbers recurses lists, no key-collision (T-52-02)
+- [Phase 52]: Deferred local import of build_diagnostics inside _normalize_stages() — _pipeline.py stays LLM-free at module load (T-52-03)
 
 ### Pending Todos
 
@@ -129,8 +133,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-24T09:37:33.252Z
-Stopped at: Phase 51 complete, ready to plan Phase 52
+Last session: 2026-08-30T18:43:54.408Z
+Stopped at: Completed 52-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
