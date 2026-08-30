@@ -663,7 +663,6 @@ def pipeline_report(
     from fdars.advisor._prompts import _system_prompt  # noqa: PLC0415
     from fdars.advisor._schema import PipelineReport  # noqa: PLC0415
     from fdars.advisor.providers._factory import resolve_provider  # noqa: PLC0415
-    from fdars.advisor.providers._validate import _check_grounding  # noqa: PLC0415
 
     p = resolve_provider(provider=provider, model=model)
     system = _system_prompt("pipeline")
