@@ -15,12 +15,13 @@ Usage (in-process test)::
         tools = await client.list_tools()
         result = await client.call_tool("fdars_build_diagnostics", {...})
 
-Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03):
+Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03 + 52-03):
 
 - ``fdars_build_diagnostics`` — deterministic offline diagnostics (TOOL-01/02)
 - ``fdars_run_method`` — run any of six fdars methods; returns result handle (TOOL-01)
 - ``fdars_compare_run`` — re-run with new params; return before/after delta (TOOL-03)
 - ``fdars_compare_methods`` — deterministic multi-candidate ranking by-reference (COMPARE-04)
+- ``fdars_build_pipeline_report`` — LLM-free multi-stage pipeline diagnostic report by-reference (PIPE-04)
 """
 
 from __future__ import annotations
@@ -505,6 +506,78 @@ def fdars_compare_methods(
 
     # Delegate all re-run + ranking logic to the helper (Single Responsibility)
     return compare_methods_mcp(dataset_id, method_lc, candidate_params, metric=metric)
+
+
+# ---------------------------------------------------------------------------
+# Tool: fdars_build_pipeline_report (PIPE-04)
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def fdars_build_pipeline_report(
+    dataset_id: str,
+    stages: list[dict],
+) -> dict:
+    """Re-run each pipeline stage and return the deterministic report by-reference.
+
+    For each entry in ``stages``, re-runs the fdars method via
+    ``_pipeline.build_pipeline_report_mcp``, builds diagnostics, and delegates
+    aggregation to the deterministic offline core
+    (``build_pipeline_report(run_llm=False)``).  The compute path is **fully
+    deterministic and LLM-free** — no ``ANTHROPIC_API_KEY`` is required; no
+    network connection is made (PIPE-04, T-52-08).
+
+    Parameters
+    ----------
+    dataset_id : str
+        Opaque handle ID for the dataset stored in the handle registry.
+        Obtain via ``registry.store_dataset(data, argvals)``.
+    stages : list[dict]
+        Ordered list of stage-spec dicts.  Each dict must contain:
+
+        * ``"stage_name"`` (str) — human label for this pipeline stage.
+        * ``"aspect"`` (str) — one of the six runnable methods:
+          ``'alignment'``, ``'fpca'``, ``'basis'``, ``'smoothing'``,
+          ``'clustering'``, ``'depth'``.  Case-insensitive.  Raises
+          :exc:`ValueError` for any aspect outside the six
+          ``_RUNNABLE_METHODS`` (T-52-09 guard).
+        * ``"params"`` (dict, optional) — flat scalar-param dict whose keys
+          must be a subset of ``{'lambda_', 'n_basis', 'n_comp', 'k', 'seed'}``;
+          unknown keys raise :exc:`ValueError` before any run is attempted.
+          An empty dict runs the method with all defaults.
+
+    Returns
+    -------
+    dict
+        JSON-serialisable by-reference report dict with keys:
+
+        ``report_id`` : str
+            Handle ID for the full aggregate report stored in the registry.
+        ``stages`` : list[dict]
+            Ordered list (one entry per input stage), each containing:
+            ``{"stage": str, "aspect": str, "result_id": str}``.
+
+    Raises
+    ------
+    ValueError
+        If any stage-params dict contains a key outside the allowlist (T-52-09),
+        or if any stage's ``aspect`` is not in ``_RUNNABLE_METHODS``, naming
+        the supported set.
+    KeyError
+        If ``dataset_id`` is not in the registry.
+
+    Notes
+    -----
+    The handler is **synchronous** (``def``, not ``async def``) because fdars
+    methods are synchronous Rust calls (Pitfall 2).  No provider or model
+    argument is exposed — the MCP layer is provably LLM-free (Anti-Pattern 3).
+    Adding this tool does **not** expand ``_RUNNABLE_METHODS`` or
+    ``_DIAGNOSTICS_METHODS`` (guard-sync no-op — T-52-11).
+    """
+    from fdars.mcp._pipeline import build_pipeline_report_mcp
+
+    # Delegate all re-run + aggregation logic to the helper (Single Responsibility)
+    return build_pipeline_report_mcp(dataset_id, stages)
 
 
 # ---------------------------------------------------------------------------

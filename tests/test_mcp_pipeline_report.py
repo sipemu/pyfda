@@ -321,10 +321,15 @@ def test_tool_no_provider_model_argument():
 
 
 def test_tool_is_registered_as_mcp_tool():
-    """fdars_build_pipeline_report must be registered in the MCP server tool list."""
+    """fdars_build_pipeline_report must be registered in the MCP server tool list.
+
+    Uses the internal _tool_manager._tools dict for synchronous inspection
+    (mcp.list_tools() is an async coroutine; async client usage is tested in
+    test_mcp_server.py via pytest-asyncio for the full async path).
+    """
     from fdars.mcp.server import mcp
 
-    tool_names = [t.name for t in mcp.list_tools()]
+    tool_names = list(mcp._tool_manager._tools.keys())
     assert "fdars_build_pipeline_report" in tool_names, (
         f"fdars_build_pipeline_report not in tool list: {tool_names}"
     )
@@ -365,34 +370,30 @@ def test_tool_never_imports_advise():
 def test_importing_pipeline_module_does_not_import_advise():
     """Importing mcp/_pipeline.py must not pull in the advise module.
 
-    After importing build_pipeline_report_mcp, checks that
-    'fdars.advisor.providers' (the LLM path) is NOT in sys.modules.
-    This verifies the deferred-import pattern keeps the module LLM-free at
-    load time (T-52-08 mitigated — same check as Phase-51 pattern).
+    Verifies the deferred-import pattern keeps the module LLM-free at load
+    time by running a subprocess with a fresh interpreter — this guarantees
+    isolation from prior test imports (T-52-08 mitigated).
     """
-    import importlib
+    import subprocess
     import sys as _sys
 
-    # Clean up any prior import to get a fresh module load
-    mod_key = "fdars.mcp._pipeline"
-    saved = _sys.modules.pop(mod_key, None)
-    # Also remove provider sub-modules that may linger from other tests
-    provider_key = "fdars.advisor.providers"
-
-    try:
-        # Import the module fresh
-        importlib.import_module(mod_key)
-        # The advisor provider (LLM path) must NOT be imported as a side effect
-        assert provider_key not in _sys.modules, (
-            f"Importing mcp/_pipeline.py triggered import of {provider_key!r} "
-            "(LLM-free module-load invariant violated — T-52-08)"
-        )
-    finally:
-        # Restore any module state removed above
-        if saved is not None:
-            _sys.modules[mod_key] = saved
-        elif mod_key in _sys.modules:
-            del _sys.modules[mod_key]
+    # Subprocess check: a fresh Python process imports mcp/_pipeline.py and
+    # asserts that fdars.advisor.providers was NOT pulled in as a side effect.
+    code = (
+        "import sys; "
+        "import fdars.mcp._pipeline; "
+        "assert 'fdars.advisor.providers' not in sys.modules, "
+        "'providers imported at module load — LLM-free invariant violated'"
+    )
+    result = subprocess.run(
+        [_sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, (
+        f"Importing mcp/_pipeline.py pulled in 'fdars.advisor.providers' (T-52-08):\n"
+        f"stdout: {result.stdout}\nstderr: {result.stderr}"
+    )
 
 
 def test_guard_sync_still_no_op():
