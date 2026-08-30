@@ -252,10 +252,19 @@ Plans:
   4. Whole-site `mkdocs build --strict` is green offline and a blocking human diagram method-accuracy review passes before the milestone is closed.
 
 **Plans**: 4 plans
+**Wave 1**
+
 - [ ] 54-01-PLAN.md — Deterministic offline eval fixtures (comparative winner + auto-tune improving direction), env-gated live, no LLM-judge
 - [ ] 54-02-PLAN.md — 3 method-accurate hand-authored SVGs (comparative / pipeline / auto-tune), STYLE_SPEC + SVGO-idempotent
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 54-03-PLAN.md — 3 new advisor pages + aspects.md deferred-scalar update + offline FDARS_FENCE_OK fences + nav wiring
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 54-04-PLAN.md — SVGO gate + whole-site `mkdocs build --strict` offline + BLOCKING human diagram review
+
 **UI hint**: yes
 
 ## Progress
