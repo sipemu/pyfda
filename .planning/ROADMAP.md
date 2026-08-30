@@ -226,14 +226,14 @@ Plans:
   3. An `fdars_auto_tune` MCP tool uses a heuristic (LLM-free) proposal, preserving the provably-LLM-free MCP boundary; optional guard diagnostics detect off-target (Goodhart) degradation during tuning.
   4. `TuningTrace` / `TuneProposal` / `TuneResult` schemas plus an optional `Recommendation.parameter_delta` field are added, backward-compatible with the 3 existing task families.
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 **Wave 1**
 
 - [x] 53-01-PLAN.md — TRACER: bounded loop core + _PARAM_REGISTRY + tuning schemas, offline mock-propose_fn (TUNE-01/02/05/06)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 53-02-PLAN.md — LLM proposal path: auto_tune() + parameter_proposal prompt clause, schema-validated clamped delta (TUNE-03)
+- [x] 53-02-PLAN.md — LLM proposal path: auto_tune() + parameter_proposal prompt clause, schema-validated clamped delta (TUNE-03)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -264,7 +264,7 @@ Phases execute in numeric order: 50 → 51 → 52 → 53 → 54
 | 50. Deferred Advisor Aspects (+ compat pre-flight) | v8.0 | 3/3 | Complete    | 2026-08-23 |
 | 51. Comparative Method-Selection | v8.0 | 3/3 | Complete    | 2026-08-24 |
 | 52. Pipeline Diagnostic Report | v8.0 | 3/3 | Complete    | 2026-08-30 |
-| 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 1/3 | In Progress|  |
+| 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 2/3 | In Progress|  |
 | 54. Eval Strategy + Docs Gate | v8.0 | 0/TBD | Not started | - |
 
 ---

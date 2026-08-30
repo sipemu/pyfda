@@ -39,7 +39,7 @@ Four new advisor capabilities built on the existing surface (no new runtime deps
 
 - [x] **TUNE-01**: a shared `_tuning.py` loop core (propose → apply → re-run fdars → compare → check target-vs-budget → iterate) with an injectable proposal/advisor function, fully offline-testable without an API key
 - [x] **TUNE-02**: bounded termination — required `max_steps`, plus convergence and oscillation detection; the loop never runs unbounded
-- [ ] **TUNE-03**: `auto_tune()` Python API uses the LLM for proposals via a structured, schema-validated numeric `parameter_delta` — never parsed from prose; the LLM never sets a number directly in the numeric path
+- [x] **TUNE-03**: `auto_tune()` Python API uses the LLM for proposals via a structured, schema-validated numeric `parameter_delta` — never parsed from prose; the LLM never sets a number directly in the numeric path
 - [ ] **TUNE-04**: an `fdars_auto_tune` MCP tool uses a **heuristic (LLM-free)** proposal, preserving the provably-LLM-free MCP boundary
 - [x] **TUNE-05**: optional guard diagnostics detect off-target degradation (Goodhart) during tuning
 - [x] **TUNE-06**: `TuningTrace` / `TuneProposal` / `TuneResult` schemas + an optional `Recommendation.parameter_delta` field, backward-compatible with the 3 existing task families
@@ -103,7 +103,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | PIPE-04 | Phase 52 | Complete |
 | TUNE-01 | Phase 53 | Complete |
 | TUNE-02 | Phase 53 | Complete |
-| TUNE-03 | Phase 53 | Pending |
+| TUNE-03 | Phase 53 | Complete |
 | TUNE-04 | Phase 53 | Pending |
 | TUNE-05 | Phase 53 | Complete |
 | TUNE-06 | Phase 53 | Complete |

@@ -5,16 +5,16 @@ milestone_name: "Advisor: New Capabilities"
 current_phase: 53
 current_phase_name: Closed-Loop Auto-Tuning (capstone)
 status: executing
-stopped_at: Completed 53-01-PLAN.md
-last_updated: "2026-08-30T20:20:39.357Z"
+stopped_at: Completed 53-02-PLAN.md
+last_updated: "2026-08-30T20:29:44.392Z"
 last_activity: 2026-08-30
 last_activity_desc: Phase 53 execution started
-state_head: a7a288787b5011bfd2f512490cd1075aaa045aa6
+state_head: f56c9e744e7e20886e076cba19f4cbb509b75ca2
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
   percent: 40
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 ## Current Position
 
 Phase: 53 (Closed-Loop Auto-Tuning (capstone)) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-08-30 — Phase 53 execution started
 
@@ -74,6 +74,7 @@ Progress: [████░░░░░░] 40%
 | Phase 52-pipeline-diagnostic-report P02 | 13 min | 3 tasks | 6 files |
 | Phase 52-pipeline-diagnostic-report P03 | 11 | 3 tasks | 3 files |
 | Phase 53 P01 | 7min | 3 tasks | 4 files |
+| Phase 53 P02 | 18m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,9 @@ Recent decisions affecting current work:
 - [Phase 53]: Budget check is FIRST each iteration (before propose_fn) — prevents one wasted LLM/fdars call on the step that hits the cap (Pitfall 3)
 - [Phase 53]: Recommendation.parameter_delta added as LAST field defaulting None — backward-compatible; all existing five-field constructions valid
 - [Phase 53]: cluster_sizes guard uses isinstance-list check + min() to prevent silent TypeError (Pitfall 4 / T-53A-03)
+- [Phase 53]: auto_tune passes history outside Diagnostics block via domain_context to keep _check_grounding bounded to current-step numbers (Pitfall 1)
+- [Phase 53]: Out-of-range parameter_delta.new_value CLAMPED (not rejected); wrong param name exits parse_failure — same path as absent parameter_delta (no numeric-path retry)
+- [Phase 53]: _intercepting_build wrapper shares current_diag with LLM propose_fn closure without double fdars re-run
 
 ### Pending Todos
 
@@ -144,8 +148,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-30T20:20:31.500Z
-Stopped at: Completed 53-01-PLAN.md
+Last session: 2026-08-30T20:29:44.336Z
+Stopped at: Completed 53-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
