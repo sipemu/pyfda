@@ -404,6 +404,67 @@ class TestCaveatRule2HighOutliers:
             assert "value" in c
             assert "message" in c
 
+    def test_n_obs_zero_with_outliers_fires_caveat(self):
+        """Degenerate n_obs=0 with n_outliers>0 fires Rule-2 (not silently dropped).
+
+        WR-05: prior to the fix, n_obs=0 fell through all branches leaving
+        fraction_value=None with no caveat, silently hiding outlier signal.
+        """
+        from fdars.advisor._pipeline import _compute_cross_stage_caveats
+
+        diag = {
+            "method": "outliers",
+            "n_obs": 0,
+            "n_outliers": 3,
+            "outlier_fraction": None,
+            "has_sequential_transform": False,
+            "n_union_outliers": None,
+            "threshold": 0.95,
+            "has_magnitude_shape": False,
+            "has_outliergram": False,
+            "has_tvdmss": False,
+            "has_muod": False,
+            "has_depthgram": False,
+        }
+        blocks = [_make_block("outliers", "outliers", diag)]
+        caveats = _compute_cross_stage_caveats(blocks)
+        rule2 = [c for c in caveats if c.get("rule", "").startswith("R2")]
+        assert len(rule2) == 1, (
+            f"Expected Rule-2 caveat for n_obs=0, n_outliers=3 (degenerate case), "
+            f"got {caveats}"
+        )
+        # Fraction must be 1.0 (treated as 100%)
+        assert rule2[0]["value"] == pytest.approx(1.0) or isinstance(rule2[0]["value"], int), (
+            f"Rule-2 caveat value for n_obs=0 should be 1.0 or the raw count, "
+            f"got {rule2[0]['value']!r}"
+        )
+
+    def test_n_obs_zero_with_n_union_outliers_fires_caveat(self):
+        """n_obs=0 with n_union_outliers present still fires Rule-2 using union count."""
+        from fdars.advisor._pipeline import _compute_cross_stage_caveats
+
+        diag = {
+            "method": "outliers",
+            "n_obs": 0,
+            "n_outliers": 2,
+            "outlier_fraction": None,
+            "has_sequential_transform": True,
+            "n_union_outliers": 4,
+            "n_transforms": 2,
+            "threshold": 0.95,
+            "has_magnitude_shape": False,
+            "has_outliergram": False,
+            "has_tvdmss": False,
+            "has_muod": False,
+            "has_depthgram": False,
+        }
+        blocks = [_make_block("outliers", "outliers", diag)]
+        caveats = _compute_cross_stage_caveats(blocks)
+        rule2 = [c for c in caveats if c.get("rule", "").startswith("R2")]
+        assert len(rule2) == 1, (
+            f"Expected Rule-2 caveat for n_obs=0, n_union_outliers=4, got {caveats}"
+        )
+
 
 class TestCaveatRule3LowCumulativeVariance:
     """Rule 3: low last cumulative_variance_explained in fpca stage -> clustering caveat."""

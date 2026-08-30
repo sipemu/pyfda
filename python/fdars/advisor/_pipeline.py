@@ -317,6 +317,18 @@ def _compute_cross_stage_caveats(
                 if n_out is not None and n_obs is not None and n_obs > 0:
                     fraction_value = float(n_out) / float(n_obs)
                     raw_value = fraction_value
+                elif n_out is not None and n_obs is not None and n_obs == 0 and int(n_out) > 0:
+                    # Degenerate: n_obs=0 with outliers flagged — treat as 100% outlier
+                    # fraction rather than silently dropping a real outlier signal.
+                    # Use n_union_outliers as the count fallback when present, otherwise
+                    # fall through to n_out itself.
+                    n_union = diag.get("n_union_outliers")
+                    if n_union is not None:
+                        fraction_value = 1.0
+                        raw_value = int(n_union)
+                    else:
+                        fraction_value = 1.0
+                        raw_value = int(n_out)
                 elif n_out is not None and n_obs is None:
                     # Only count available — use union count
                     n_union = diag.get("n_union_outliers")
