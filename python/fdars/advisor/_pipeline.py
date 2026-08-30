@@ -325,7 +325,7 @@ def _compute_cross_stage_caveats(
                         # proportionally above the threshold at a typical N=100 study
                         fraction_value = float(n_union) / 100.0
                         raw_value = int(n_union)
-                    elif n_out is not None:
+                    else:  # n_union absent; use n_out count (n_out is not None per outer elif)
                         fraction_value = float(n_out) / 100.0
                         raw_value = int(n_out)
 
