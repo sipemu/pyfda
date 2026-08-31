@@ -28,6 +28,7 @@ import numpy as np
 import pytest
 from sklearn.pipeline import Pipeline
 
+from fdars.sklearn._base import _BaseFdarsEstimator
 from fdars.sklearn._skeletons import (
     BasisRepresentation,
     BSplineSmoother,
@@ -157,12 +158,72 @@ def test_transformers_never_construct_fdata(cls):
     * Source contains ``_native`` (routes through the native layer).
     """
     source = inspect.getsource(cls)
+    # Also check the shared base class so that Fdata( cannot creep into
+    # _BaseFdarsEstimator helpers like _resolve_argvals or _sign_canonicalize.
+    base_source = inspect.getsource(_BaseFdarsEstimator)
 
     assert "Fdata(" not in source, (
         f"{cls.__name__} contains an 'Fdata(' call — estimators must call "
         "fdars._native.* directly and NEVER construct an Fdata object."
     )
+    assert "Fdata(" not in base_source, (
+        "_BaseFdarsEstimator contains an 'Fdata(' call — shared base helpers "
+        "must NEVER construct an Fdata object."
+    )
     assert "_native" in source, (
         f"{cls.__name__} does not reference '_native' — estimators must route "
         "compute through fdars._native.*."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Task 3 — Pipeline with Imputer at composition boundary
+# ---------------------------------------------------------------------------
+
+
+def test_imputer_basis_pipeline_roundtrip():
+    """Pipeline([Imputer, BasisRepresentation]) with NaN input -- IN-02.
+
+    Exercises the Imputer at the composition boundary: NaN values must be
+    filled before BasisRepresentation projects to coefficients.
+
+    Asserts:
+    * Output shape equals input shape (BasisRepresentation is shape-preserving).
+    * All output values are finite (Imputer removed all NaNs before projection).
+    * ``fit_transform`` is consistent with ``fit`` then ``transform``.
+    """
+    X = _make_X()
+    # Inject a sparse NaN pattern that Imputer (linear interpolation) can fill.
+    X_nan = X.copy()
+    X_nan[::5, ::7] = np.nan
+
+    pipe = Pipeline([
+        ("imputer", Imputer()),
+        ("basis", BasisRepresentation(n_basis=3)),
+    ])
+
+    # fit then transform
+    pipe.fit(X_nan)
+    X_out = pipe.transform(X_nan)
+
+    assert X_out.shape == X_nan.shape, (
+        f"Expected shape {X_nan.shape}, got {X_out.shape}"
+    )
+    assert np.all(np.isfinite(X_out)), (
+        "Pipeline output contains non-finite values (NaN or Inf) -- "
+        "Imputer may not have filled all NaNs before BasisRepresentation."
+    )
+
+    # fit_transform must be consistent with fit + transform
+    pipe2 = Pipeline([
+        ("imputer", Imputer()),
+        ("basis", BasisRepresentation(n_basis=3)),
+    ])
+    X_fit_transform = pipe2.fit_transform(X_nan)
+
+    assert X_fit_transform.shape == X_nan.shape, (
+        f"fit_transform shape mismatch: {X_fit_transform.shape}"
+    )
+    assert np.all(np.isfinite(X_fit_transform)), (
+        "fit_transform output contains non-finite values."
     )
