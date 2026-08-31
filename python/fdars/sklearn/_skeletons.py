@@ -43,6 +43,8 @@ Phase plan
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 from sklearn.base import (
     ClassifierMixin,
@@ -62,6 +64,38 @@ from fdars import _native
 # ---------------------------------------------------------------------------
 # Module-level helpers
 # ---------------------------------------------------------------------------
+
+
+def _validate_allow_nan(estimator, X, *, reset: bool):
+    """Cross-version shim: validate X while allowing NaN values.
+
+    Tries ``ensure_all_finite="allow-nan"`` (sklearn 1.6+) first and falls back
+    to ``force_all_finite="allow-nan"`` (sklearn 1.3-1.5) when sklearn raises a
+    ``TypeError`` for the unknown keyword argument.
+
+    Only the "unexpected keyword argument" ``TypeError`` that old sklearn emits is
+    caught — both ``"unexpected keyword argument"`` AND ``"ensure_all_finite"``
+    must appear in the message, so genuine TypeErrors (dtype mismatch, etc.)
+    propagate unchanged.
+    """
+    try:
+        return _validate(
+            estimator, X, reset=reset, dtype="numeric", ensure_2d=True,
+            accept_sparse=False, ensure_all_finite="allow-nan",
+        )
+    except TypeError as exc:
+        msg = str(exc)
+        # Only swallow the "unknown keyword" TypeError from old sklearn.
+        # Any other TypeError (dtype conversion, sparse rejection, etc.) must
+        # propagate so it isn't silently masked by the fallback call.
+        if "unexpected keyword argument" not in msg or (
+            "ensure_all_finite" not in msg and "force_all_finite" not in msg
+        ):
+            raise
+        return _validate(
+            estimator, X, reset=reset, dtype="numeric", ensure_2d=True,
+            accept_sparse=False, force_all_finite="allow-nan",
+        )
 
 
 def _pairwise_l2(A: np.ndarray, B: np.ndarray) -> np.ndarray:
@@ -459,9 +493,14 @@ class BasisRepresentation(TransformerMixin, _BaseFdarsEstimator):
                 f"(features); got n_features=1."
             )
         self.argvals_ = self._resolve_argvals(n_pts)
-        # Determine actual n_basis used (capped by data dimensions)
+        # Determine actual n_basis used (capped by data dimensions).
+        # We project the training data here solely to learn the effective
+        # n_basis that the native layer will use (it may reduce n_basis when
+        # the gram matrix is rank-deficient).  The coefficient array is
+        # intentionally discarded -- transform always re-projects its own
+        # input so coefficients are never reused from fit time.
         n_basis = min(self.n_basis, n_pts)
-        _, actual_n_basis = _native.basis.fdata_to_basis_1d(
+        _coeffs_fit, actual_n_basis = _native.basis.fdata_to_basis_1d(
             X, self.argvals_, n_basis, self.basis_type
         )
         self.n_basis_ = actual_n_basis
@@ -526,25 +565,8 @@ class Imputer(TransformerMixin, _BaseFdarsEstimator):
         self
         """
         # allow_nan=True: Imputer by design handles NaN inputs.
-        # accept_sparse=False: Imputer requires dense input; reject sparse with
-        # the sklearn-convention TypeError before any native call.
-        # Cross-version shim: sklearn 1.6+ uses ensure_all_finite="allow-nan";
-        # sklearn 1.3-1.5 uses force_all_finite="allow-nan".
-        # We try the new name first. Only catch the TypeError emitted by sklearn
-        # when "ensure_all_finite" is an unknown keyword (old sklearn); all other
-        # TypeErrors (e.g. dtype conversion, sparse rejection) must propagate.
-        try:
-            X = _validate(
-                self, X, reset=True, dtype="numeric", ensure_2d=True,
-                accept_sparse=False, ensure_all_finite="allow-nan"
-            )
-        except TypeError as exc:
-            if "ensure_all_finite" not in str(exc):
-                raise
-            X = _validate(
-                self, X, reset=True, dtype="numeric", ensure_2d=True,
-                accept_sparse=False, force_all_finite="allow-nan"
-            )
+        # Cross-version shim handled by _validate_allow_nan (see module helpers).
+        X = _validate_allow_nan(self, X, reset=True)
         X = X.astype(np.float64)
         n_obs, n_pts = X.shape
         if n_obs < self._min_samples:
@@ -567,19 +589,8 @@ class Imputer(TransformerMixin, _BaseFdarsEstimator):
         X_imputed : ndarray of shape (n_obs, n_points), no NaN
         """
         check_is_fitted(self)
-        # Same cross-version shim as fit; same accept_sparse=False + narrow except.
-        try:
-            X = _validate(
-                self, X, reset=False, dtype="numeric", ensure_2d=True,
-                accept_sparse=False, ensure_all_finite="allow-nan"
-            )
-        except TypeError as exc:
-            if "ensure_all_finite" not in str(exc):
-                raise
-            X = _validate(
-                self, X, reset=False, dtype="numeric", ensure_2d=True,
-                accept_sparse=False, force_all_finite="allow-nan"
-            )
+        # Same cross-version shim as fit; handled by _validate_allow_nan.
+        X = _validate_allow_nan(self, X, reset=False)
         X = X.astype(np.float64)
         return np.array(
             _native.represent.impute_missing_values(
@@ -623,8 +634,10 @@ class SplineInterpolator(TransformerMixin, _BaseFdarsEstimator):
 
     order : int, optional
         B-spline order: 1=linear, 2=quadratic, 3=cubic (default 3).
-        Must satisfy ``1 <= order < n_points``; a ``ValueError`` is raised
-        in ``fit`` when the order is out of range for the input grid size.
+        Non-integer values are truncated to ``int`` (e.g. 2.9 → 2); this is
+        intentional so ``clone()`` round-trips cleanly.  Values < 1 raise a
+        ``ValueError`` in ``fit``.  When ``order > n_points - 1`` the order is
+        clamped to ``n_points - 1`` and a ``UserWarning`` is emitted.
     """
 
     _min_samples: int = 2
@@ -675,20 +688,28 @@ class SplineInterpolator(TransformerMixin, _BaseFdarsEstimator):
                 f"(features); got n_features=1."
             )
         # Spline-order validation and clamping -- BEFORE native call.
-        # Native spline_interpolate enforces order in [1, n_pts).  Reject
-        # explicitly invalid orders (< 1); silently clamp order to n_pts-1
-        # when the grid is smaller than the requested order so the estimator
-        # works correctly across sklearn's battery dataset sizes (n_pts varies
-        # from 3 to 10+).  This is the sklearn-idiomatic approach for
-        # data-dependent parameter constraints.
-        if self.order < 1:
+        # Cast to int first so that float values like 2.9 are truncated
+        # deterministically before any comparison (documented in docstring).
+        # Non-positive orders are rejected; data-induced clamping emits a
+        # UserWarning (sklearn idiom for data-dependent parameter changes)
+        # so users are not silently given a lower-order spline than requested.
+        order = int(self.order)
+        if order < 1:
             raise ValueError(
                 f"SplineInterpolator order must be >= 1; got order={self.order}."
             )
         # Clamp to the native [1, n_pts) window; store as fitted attribute so
         # transform uses the same effective order regardless of which subset
         # of rows is passed.
-        self.order_ = min(int(self.order), n_pts - 1)
+        effective_order = min(order, n_pts - 1)
+        if effective_order < order:
+            warnings.warn(
+                f"SplineInterpolator: requested order={self.order} exceeds "
+                f"n_pts-1={n_pts - 1}; clamping to order_={effective_order}.",
+                UserWarning,
+                stacklevel=2,
+            )
+        self.order_ = effective_order
         self.argvals_ = self._resolve_argvals(n_pts)
         if self.output_argvals is None:
             self.output_argvals_ = self.argvals_
