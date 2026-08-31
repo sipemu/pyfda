@@ -1416,7 +1416,7 @@ class ElasticMultinomialClassifier(_BaseFdarsClassifier):
     argvals : array-like or None, optional
     ncomp_beta : int, optional
         Number of B-spline basis functions per OvR model (default 5).
-    lambda_ : float, optional
+    lambda_penalty : float, optional
         Roughness penalty on beta (default 0.1).
     max_iter : int, optional
         IRLS max iterations per OvR binary fit (default 100).
@@ -1424,17 +1424,17 @@ class ElasticMultinomialClassifier(_BaseFdarsClassifier):
         Convergence tolerance (default 1e-4).
     """
 
-    def __init__(self, argvals=None, ncomp_beta=5, lambda_=0.1, max_iter=100, tol=1e-4):
+    def __init__(self, argvals=None, ncomp_beta=5, lambda_penalty=0.1, max_iter=100, tol=1e-4):
         super().__init__(argvals=argvals)
         self.ncomp_beta = ncomp_beta
-        self.lambda_ = lambda_
+        self.lambda_penalty = lambda_penalty
         self.max_iter = max_iter
         self.tol = tol
 
     def _call_native(self, X, y):
         return _native.classification.elastic_multinomial(
             X, y, self.argvals_,
-            ncomp_beta=self.ncomp_beta, lambda_=self.lambda_,
+            ncomp_beta=self.ncomp_beta, lambda_=self.lambda_penalty,
             max_iter=self.max_iter, tol=self.tol
         )
 
