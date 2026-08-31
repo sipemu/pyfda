@@ -5,16 +5,16 @@ milestone_name: scikit-learn API Compatibility
 current_phase: 57
 current_phase_name: Regressors & Classifiers
 status: executing
-stopped_at: Completed 57-01-PLAN.md
-last_updated: "2026-08-31T20:26:26.977Z"
+stopped_at: Completed 57-02-PLAN.md
+last_updated: "2026-08-31T20:55:35.132Z"
 last_activity: 2026-08-31
 last_activity_desc: Phase 57 execution started
-state_head: ffbe7519950b390ecc05142dd0c14e30ae65f97a
+state_head: fb0dc637fdf66c7d2e2e857aab4c92299154f1ed
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 40
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-08-31)
 ## Current Position
 
 Phase: 57 (Regressors & Classifiers) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-08-31 — Phase 57 execution started
 
@@ -71,6 +71,7 @@ Progress: [████░░░░░░] 40%
 | Phase 56 P02 | 679 | 3 tasks | 3 files |
 | Phase 56 P03 | 10m | 2 tasks | 1 files |
 | Phase 57 P01 | 264 | 3 tasks | 3 files |
+| Phase 57-regressors-classifiers P02 | 1536 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,10 @@ Recent decisions affecting current work:
 - [Phase 56]: inspect.getsource source-level contract check over all 8 transformers — simpler and faster than behavioral patching
 - [Phase 57]: Raise FPCRegressor n_components default 3→10: clears check_regressors_train R2>0.5 on battery data while min() cap keeps small-sample cases safe
 - [Phase 57]: Shared _require_y guard raises ValueError with sklearn-required substring 'requires y to be passed, but the target y is None' — called before _validate in every regressor/classifier fit
+- [Phase 57]: GLMRegressor predict uses FPCA + numpy OLS coef_ (not beta_t trapezoidal): GLM beta_t has 2x internal scaling; lstsq on training FPC scores is exact and subset-invariant
+- [Phase 57]: NonparametricRegressor median-heuristic bandwidth (median_distance/5): native h_func too large for battery data; self-weight dominance achieves R2>0.99 on train
+- [Phase 57]: LogisticFPCClassifier __sklearn_tags__(multi_class=False): binary guard needed, but requires tag to avoid cascade failures on multiclass battery checks
+- [Phase 57]: ElasticMultinomialClassifier Option A chosen (FPC + sklearn OvR LogisticRegression): native elastic_multinomial is transductive; sklearn 1.8 removed multi_class kwarg
 
 ### Pending Todos
 
@@ -134,8 +139,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-31T20:26:26.932Z
-Stopped at: Completed 57-01-PLAN.md
+Last session: 2026-08-31T20:55:35.088Z
+Stopped at: Completed 57-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
