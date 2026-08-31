@@ -19,7 +19,7 @@ findings:
   warning: 4
   info: 3
   total: 8
-status: issues_found
+status: fixes_applied
 ---
 
 # Phase 55: Code Review Report
