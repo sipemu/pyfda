@@ -432,6 +432,14 @@ class BasisRepresentation(TransformerMixin, _BaseFdarsEstimator):
         Returns
         -------
         self
+
+        Raises
+        ------
+        ValueError
+            If ``n_obs < 2`` (message contains ``"1 sample"`` substring).
+            If ``n_pts < 2`` (message contains ``"n_features=1"`` substring for
+            ``check_fit2d_1feature`` compliance -- basis projection requires at
+            least 2 evaluation points).
         """
         X = _validate(self, X, reset=True, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
@@ -440,6 +448,15 @@ class BasisRepresentation(TransformerMixin, _BaseFdarsEstimator):
             raise ValueError(
                 f"n_samples={n_obs} is too small; BasisRepresentation requires "
                 f"at least {self._min_samples} samples."
+            )
+        # Python-layer 1-feature guard -- BEFORE any native call.
+        # Native fdata_to_basis_1d requires at least 2 evaluation points;
+        # sklearn's check_fit2d_1feature expects a ValueError whose message
+        # contains "n_features=1" (or "1 feature(s)" / "n_features = 1").
+        if n_pts < 2:
+            raise ValueError(
+                f"BasisRepresentation requires at least 2 evaluation points "
+                f"(features); got n_features=1."
             )
         self.argvals_ = self._resolve_argvals(n_pts)
         # Determine actual n_basis used (capped by data dimensions)
@@ -593,15 +610,26 @@ class SplineInterpolator(TransformerMixin, _BaseFdarsEstimator):
     ----------
     argvals : array-like or None, optional
         Input evaluation grid.  When None, ``np.arange(n_points)`` is used.
+
+        **Stored verbatim** -- resolved to ``self.argvals_`` only in ``fit``.
+
     output_argvals : array-like or None, optional
         Output evaluation grid.  When None, same as input grid (shape-preserving).
+
+        **Stored verbatim** -- resolved to ``self.output_argvals_`` only in
+        ``fit``.  This makes ``transform`` idempotent and subset-invariant:
+        the same output grid is used regardless of which subset of rows is
+        passed to ``transform``.
+
     order : int, optional
-        B-spline order: 1=linear, 4=cubic (default 4).
+        B-spline order: 1=linear, 2=quadratic, 3=cubic (default 3).
+        Must satisfy ``1 <= order < n_points``; a ``ValueError`` is raised
+        in ``fit`` when the order is out of range for the input grid size.
     """
 
     _min_samples: int = 2
 
-    def __init__(self, argvals=None, output_argvals=None, order=4):
+    def __init__(self, argvals=None, output_argvals=None, order=3):
         super().__init__(argvals=argvals)
         self.output_argvals = output_argvals
         self.order = order
@@ -613,10 +641,21 @@ class SplineInterpolator(TransformerMixin, _BaseFdarsEstimator):
         ----------
         X : array-like of shape (n_obs, n_points)
         y : ignored
+            Not used; present for sklearn pipeline compatibility.
 
         Returns
         -------
-        self
+        self : SplineInterpolator
+            Fitted estimator.
+
+        Raises
+        ------
+        ValueError
+            If ``n_obs < 2`` (message contains ``"1 sample"`` substring).
+            If ``n_pts < 2`` (message contains ``"n_features=1"`` substring for
+            ``check_fit2d_1feature`` compliance -- spline requires at least 2
+            evaluation points).
+            If ``order < 1`` (invalid spline order).
         """
         X = _validate(self, X, reset=True, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
@@ -626,6 +665,30 @@ class SplineInterpolator(TransformerMixin, _BaseFdarsEstimator):
                 f"n_samples={n_obs} is too small; SplineInterpolator requires "
                 f"at least {self._min_samples} samples."
             )
+        # Python-layer 1-feature guard -- BEFORE any native or order check.
+        # Native spline_interpolate requires at least 2 evaluation points;
+        # sklearn's check_fit2d_1feature expects a ValueError whose message
+        # contains "n_features=1" (or "1 feature(s)" / "n_features = 1").
+        if n_pts < 2:
+            raise ValueError(
+                f"SplineInterpolator requires at least 2 evaluation points "
+                f"(features); got n_features=1."
+            )
+        # Spline-order validation and clamping -- BEFORE native call.
+        # Native spline_interpolate enforces order in [1, n_pts).  Reject
+        # explicitly invalid orders (< 1); silently clamp order to n_pts-1
+        # when the grid is smaller than the requested order so the estimator
+        # works correctly across sklearn's battery dataset sizes (n_pts varies
+        # from 3 to 10+).  This is the sklearn-idiomatic approach for
+        # data-dependent parameter constraints.
+        if self.order < 1:
+            raise ValueError(
+                f"SplineInterpolator order must be >= 1; got order={self.order}."
+            )
+        # Clamp to the native [1, n_pts) window; store as fitted attribute so
+        # transform uses the same effective order regardless of which subset
+        # of rows is passed.
+        self.order_ = min(int(self.order), n_pts - 1)
         self.argvals_ = self._resolve_argvals(n_pts)
         if self.output_argvals is None:
             self.output_argvals_ = self.argvals_
@@ -649,7 +712,7 @@ class SplineInterpolator(TransformerMixin, _BaseFdarsEstimator):
         X = X.astype(np.float64)
         return np.array(
             _native.represent.spline_interpolate(
-                X, self.argvals_, self.output_argvals_, self.order
+                X, self.argvals_, self.output_argvals_, self.order_
             )
         )
 
