@@ -1261,25 +1261,46 @@ class RobustFPCRegressor(RegressorMixin, _BaseFdarsEstimator):
 
 
 class GLMRegressor(RegressorMixin, _BaseFdarsEstimator):
-    """Functional GLM regression (Gaussian family only for sklearn compliance).
+    """Functional GLM regression (Gaussian family, OLS on FPC scores).
 
-    Wraps ``fdars._native.regression.functional_glm`` with ``family="gaussian"``.
-    Non-Gaussian families require constrained response domains (y in {0,1} for
-    binomial, y >= 0 for Poisson) that sklearn's check_estimator violates.
+    Implements the Gaussian functional GLM as OLS regression on functional
+    principal component scores — mathematically equivalent to the Gaussian
+    GLM with identity link.  A single FPCA fit is used for both training
+    diagnostics and prediction, so all stored attributes (``intercept_``,
+    ``coef_``, ``fitted_values_``, ``r_squared_``) and ``predict()`` /
+    ``score()`` are consistent with one another.
 
     Parameters
     ----------
     argvals : array-like or None, optional
         Evaluation grid.  When None, ``np.arange(n_points)`` is used.
     n_components : int, optional
-        Number of FPC components (default 3).
+        Number of FPC components (default 10).
     max_iter : int, optional
-        Maximum IRLS iterations (default 25).
+        Kept for API compatibility; not used (OLS has no iterations).
     tol : float, optional
-        Convergence tolerance (default 1e-6).
+        Kept for API compatibility; not used (OLS has no iterations).
+
+    Attributes
+    ----------
+    components_ : ndarray of shape (n_components_, n_points)
+        Sign-canonicalized FPC basis vectors.
+    mean_ : ndarray of shape (n_points,)
+        Training-set mean curve.
+    coef_ : ndarray of shape (1 + n_components_,)
+        OLS coefficients ``[intercept, beta_1, ..., beta_K]``.
+    intercept_ : float
+        OLS intercept; equals ``coef_[0]``.
+    fitted_values_ : ndarray of shape (n_obs,)
+        In-sample predictions from the OLS model (same as ``predict(X_train)``).
+    r_squared_ : float
+        Coefficient of determination on training data; consistent with
+        ``score(X_train, y_train)``.
+    n_iter_ : int
+        Always 1 (OLS has no iterations).
     """
 
-    _min_samples: int = 3  # functional_glm requires n >= 3
+    _min_samples: int = 3  # need at least 3 to fit intercept + ≥1 FPC component
 
     def __init__(self, argvals=None, n_components=10, max_iter=25, tol=1e-6):
         super().__init__(argvals=argvals)
@@ -1288,11 +1309,11 @@ class GLMRegressor(RegressorMixin, _BaseFdarsEstimator):
         self.tol = tol
 
     def fit(self, X, y):
-        """Fit Gaussian functional GLM.
+        """Fit Gaussian functional GLM (OLS on FPC scores).
 
-        Runs ``functional_glm`` for the native fit, then stores the FPCA
-        decomposition and OLS regression coefficients on the FPC scores.
-        Predict uses only stored state — no re-fit, no vstack.
+        Computes one FPCA decomposition, projects training data onto
+        sign-canonicalized FPC components, and fits OLS.  All stored
+        attributes and ``predict()`` use the same model — no secondary fit.
 
         Parameters
         ----------
@@ -1313,7 +1334,7 @@ class GLMRegressor(RegressorMixin, _BaseFdarsEstimator):
                 f"n_samples={n_obs} is too small; GLMRegressor requires "
                 f"at least {self._min_samples} samples."
             )
-        # 1-feature guard: functional_glm requires argvals length >= 2
+        # 1-feature guard: fpca requires argvals length >= 2
         if n_pts < 2:
             raise ValueError(
                 "GLMRegressor requires at least 2 evaluation points; "
@@ -1321,26 +1342,25 @@ class GLMRegressor(RegressorMixin, _BaseFdarsEstimator):
             )
         n_comp = min(self.n_components, n_obs - 1, n_pts)
         self.argvals_ = self._resolve_argvals(n_pts)
-        result = _native.regression.functional_glm(
-            X, y, family="gaussian", n_comp=n_comp,
-            max_iter=self.max_iter, tol=self.tol
-        )
-        self.fitted_values_ = np.array(result["fitted_values"])
-        self.intercept_ = float(result["intercept"])
-        self.beta_t_ = np.array(result["beta_t"])
-        self.n_iter_ = int(result["iterations"])
         self.n_components_ = n_comp
-        # Store FPCA decomposition and OLS score-regression coefficients for
-        # a stored-model predict that is subset-invariant (no re-fit).
+        # Single FPCA fit — used for both stored diagnostics and predict().
         fpca_result = _native.regression.fpca(X, self.argvals_, n_comp)
         components = np.array(fpca_result["rotation"]).T  # (n_comp, n_pts)
-        scores = np.array(fpca_result["scores"])          # (n_obs, n_comp)
-        components, scores = self._sign_canonicalize(components, scores)
+        scores_native = np.array(fpca_result["scores"])   # (n_obs, n_comp)
+        components, scores_native = self._sign_canonicalize(components, scores_native)
         self.components_ = components
         self.mean_ = np.array(fpca_result["mean"])        # (n_pts,)
         # OLS on FPC scores: coef_ = [intercept, beta_1, ..., beta_K]
-        S = np.column_stack([np.ones(n_obs), scores])
+        S = np.column_stack([np.ones(n_obs), scores_native])
         self.coef_, _, _, _ = np.linalg.lstsq(S, y, rcond=None)
+        self.intercept_ = float(self.coef_[0])
+        # Diagnostics use the same projection path as predict() so that
+        # score(X_train, y_train) == r_squared_ (subset-invariant projection).
+        self.fitted_values_ = self.predict(X)
+        ss_res = np.sum((y - self.fitted_values_) ** 2)
+        ss_tot = np.sum((y - y.mean()) ** 2)
+        self.r_squared_ = 1.0 - ss_res / ss_tot if ss_tot > 0 else 1.0
+        self.n_iter_ = 1  # OLS has no iterations
         return self
 
     def predict(self, X):
