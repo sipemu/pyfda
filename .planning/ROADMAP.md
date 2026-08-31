@@ -137,7 +137,7 @@ A docs-only quality pass (no crate bump, no new bindings, no advisor logic chang
 - [x] **Phase 51: Comparative Method-Selection** - Deterministic fdars-computed ranking over N candidate methods + "comparison" task family + MCP tool (completed 2026-08-24)
 - [x] **Phase 52: Pipeline Diagnostic Report** - Multi-stage diagnostic aggregation with per-stage provenance + "pipeline" task family + MCP tool (completed 2026-08-30)
 - [x] **Phase 53: Closed-Loop Auto-Tuning (capstone)** - Bounded propose→apply→re-run→compare loop; Python-API (LLM proposal) + MCP (heuristic, LLM-free) surfaces (completed 2026-08-30)
-- [ ] **Phase 54: Eval Strategy + Docs Gate** - Deterministic eval fixtures + new pages + method-accurate SVGs + offline fences + whole-site strict build + blocking human diagram review
+- [x] **Phase 54: Eval Strategy + Docs Gate** - Deterministic eval fixtures + new pages + method-accurate SVGs + offline fences + whole-site strict build + blocking human diagram review (completed 2026-08-31)
 
 ## Phase Details
 
@@ -263,7 +263,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 54-04-PLAN.md — SVGO gate + whole-site `mkdocs build --strict` offline + BLOCKING human diagram review
+- [x] 54-04-PLAN.md — SVGO gate + whole-site `mkdocs build --strict` offline + BLOCKING human diagram review
 
 **UI hint**: yes
 
@@ -278,7 +278,7 @@ Phases execute in numeric order: 50 → 51 → 52 → 53 → 54
 | 51. Comparative Method-Selection | v8.0 | 3/3 | Complete    | 2026-08-24 |
 | 52. Pipeline Diagnostic Report | v8.0 | 3/3 | Complete    | 2026-08-30 |
 | 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 3/3 | Complete    | 2026-08-30 |
-| 54. Eval Strategy + Docs Gate | v8.0 | 3/4 | In Progress|  |
+| 54. Eval Strategy + Docs Gate | v8.0 | 4/4 | Complete    | 2026-08-31 |
 
 ---
 

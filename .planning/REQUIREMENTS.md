@@ -53,7 +53,7 @@ Four new advisor capabilities built on the existing surface (no new runtime deps
 
 - [x] **DOCS-01**: new/updated docs pages for the four capabilities with method-accurate hand-authored inline SVG diagrams (v7.0 STYLE_SPEC standard)
 - [x] **DOCS-02**: runnable offline `FDARS_FENCE_OK` worked examples (small/synthetic data; the auto-tune example uses the offline/injectable path — no network in the docs build)
-- [ ] **DOCS-03**: whole-site `mkdocs build --strict` green offline; blocking human diagram method-accuracy review before close
+- [x] **DOCS-03**: whole-site `mkdocs build --strict` green offline; blocking human diagram method-accuracy review before close
 
 ## Future Requirements
 
@@ -111,7 +111,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | EVAL-02 | Phase 54 | Complete |
 | DOCS-01 | Phase 54 | Complete |
 | DOCS-02 | Phase 54 | Complete |
-| DOCS-03 | Phase 54 | Pending |
+| DOCS-03 | Phase 54 | Complete |
 
 **Coverage:**
 
