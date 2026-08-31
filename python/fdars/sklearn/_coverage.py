@@ -16,15 +16,10 @@ verdict after the Phase 55 triage run.  Populated in Plan 03 from
 ``triage_results.txt`` (sklearn 1.8.0 / Python 3.14, 1379 checks,
 1272 PASS / 107 FAIL across 28 estimators).
 
-Final verdict tally after reclassification:
-  PASS:            6  (zero failing checks, as of Phase 55)
-  PASS-WITH-FIXES: 22 (fixable with guard/wrapper/attribute add in Phases 56-58)
+Final verdict tally after reclassification + Phase 56 fixes:
+  PASS:            9  (8 transformers + FunctionalKMeans)
+  PASS-WITH-FIXES: 19 (fixable with guard/wrapper/attribute add in Phases 57-58)
   EXCLUDE:          0  (among the 28 skeletoned candidates)
-
-After Phase 56 Plan 01 (Imputer):
-  PASS:            7  PASS-WITH-FIXES: 21
-After Phase 56 Plan 02 (BasisRepresentation, SplineInterpolator):
-  PASS:            9  PASS-WITH-FIXES: 19  (all 8 transformers PASS)
 
 Reason codes (used in EXCLUDED_METHODS only)
 ---------------------------------------------
