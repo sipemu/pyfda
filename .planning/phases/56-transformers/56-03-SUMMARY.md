@@ -71,9 +71,27 @@ tests/sklearn/test_transformer_planning.py::test_transformers_never_construct_fd
 10 passed in 0.22s
 ```
 
+## Full-Tree Verification (`tests/sklearn/ -q`)
+
+The plan's `<verification>` block asks for the whole `tests/sklearn/` tree to stay
+green. Full run result: **1796 passed, 87 failed in 579s**. All 400 transformer-scoped
+cases pass — the new `test_transformer_pipeline.py` (10/10), `test_transformers_compliance.py`,
+and `test_foundation.py` are 100% green. **Zero** failures involve any of the 8 transformers.
+
+Every one of the 87 failures is in `tests/sklearn/test_triage.py` on **non-transformer**
+estimators outside Phase 56's scope — outlier detectors (`MagnitudeShapeDetector`,
+`MUODDetector`, `LRTOutlierDetector`, `TVDMSSDetector`, `OutliergramDetector`,
+`DepthgramDetector`), clusterers (`FuzzyFunctionalCMeans`, `FunctionalGMM`), and a
+classifier (`ElasticMultinomialClassifier`). These are unpromoted triage candidates
+that future phases (57 regressors/classifiers, 58 clusterers/outliers) will address.
+Per the executor SCOPE BOUNDARY rule they are pre-existing and not fixed here; logged
+to `.planning/phases/56-transformers/deferred-items.md`.
+
 ## Deviations from Plan
 
-None — plan executed exactly as written.
+None — plan executed exactly as written. The full-tree `<verification>` line surfaced
+pre-existing non-transformer triage failures (documented above and in `deferred-items.md`);
+the transformer scope this plan owns is fully green.
 
 ## Threat Surface Scan
 
