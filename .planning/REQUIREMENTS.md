@@ -29,7 +29,7 @@
 
 ### Regressors & Classifiers
 
-- [ ] **REG-01**: FPC-based functional regression and PLS regression wrapped as `RegressorMixin` estimators with a `score()` method.
+- [x] **REG-01**: FPC-based functional regression and PLS regression wrapped as `RegressorMixin` estimators with a `score()` method.
 - [ ] **REG-02**: Differentiator regressors that pass triage (robust FPC regression, Gaussian-only GLM, nonparametric regression) wrapped as `RegressorMixin` estimators.
 - [ ] **CLF-01**: FPC-based classifiers (logistic, LDA, QDA, KNN) wrapped as `ClassifierMixin` estimators, each using `LabelEncoder` in `fit` and storing `X_fit_`/`y_fit_` where the underlying method re-fits at predict time.
 - [ ] **CLF-02**: Differentiator classifiers that pass triage (DD-classifier, elastic-multinomial) wrapped as `ClassifierMixin` estimators.
@@ -97,7 +97,7 @@ Explicitly excluded. Documented to prevent scope creep.
 | XFORM-04 | Phase 56 | Complete |
 | XFORM-05 | Phase 56 | Complete |
 | XFORM-06 | Phase 56 | Complete |
-| REG-01 | Phase 57 | Pending |
+| REG-01 | Phase 57 | Complete |
 | REG-02 | Phase 57 | Pending |
 | CLF-01 | Phase 57 | Pending |
 | CLF-02 | Phase 57 | Pending |

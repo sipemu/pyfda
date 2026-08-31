@@ -4,17 +4,17 @@ milestone: v9.0
 milestone_name: scikit-learn API Compatibility
 current_phase: 57
 current_phase_name: Regressors & Classifiers
-status: planning
-stopped_at: Phase 56 complete, ready to plan Phase 57
-last_updated: "2026-08-31T19:59:55.160Z"
+status: executing
+stopped_at: Completed 57-01-PLAN.md
+last_updated: "2026-08-31T20:26:26.977Z"
 last_activity: 2026-08-31
-last_activity_desc: Phase 56 complete, transitioned to Phase 57
-state_head: 390c98e65801e2378026d170d8f2583a83ea6143
+last_activity_desc: Phase 57 execution started
+state_head: ffbe7519950b390ecc05142dd0c14e30ae65f97a
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 9
+  completed_plans: 7
   percent: 40
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-31)
 
 **Core value:** Functional-data methods in `fdars` plug natively into scikit-learn's `Pipeline`/`GridSearchCV`/`cross_val_score`, interoperate with native sklearn estimators, and offer familiar `fit`/`transform`/`predict` ergonomics — every wrapped estimator passing the full `check_estimator` battery, no exemptions.
-**Current focus:** Phase 56 — Transformers
+**Current focus:** Phase 57 — Regressors & Classifiers
 
 ## Current Position
 
-Phase: 57 — Regressors & Classifiers
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-31 — Phase 56 complete, transitioned to Phase 57
+Phase: 57 (Regressors & Classifiers) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-08-31 — Phase 57 execution started
 
-Progress: [██░░░░░░░░] 20%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 56 P01 | 245s | 3 tasks | 3 files |
 | Phase 56 P02 | 679 | 3 tasks | 3 files |
 | Phase 56 P03 | 10m | 2 tasks | 1 files |
+| Phase 57 P01 | 264 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,8 @@ Recent decisions affecting current work:
 - [Phase 56]: BasisRepresentation 1-feature guard fires before native call with n_features=1 substring matching check_fit2d_1feature
 - [Phase 56]: Combine pipeline round-trip + FPCA idempotence + Fdata-free contract into a single test file as logical capstone
 - [Phase 56]: inspect.getsource source-level contract check over all 8 transformers — simpler and faster than behavioral patching
+- [Phase 57]: Raise FPCRegressor n_components default 3→10: clears check_regressors_train R2>0.5 on battery data while min() cap keeps small-sample cases safe
+- [Phase 57]: Shared _require_y guard raises ValueError with sklearn-required substring 'requires y to be passed, but the target y is None' — called before _validate in every regressor/classifier fit
 
 ### Pending Todos
 
@@ -131,8 +134,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-31T19:38:50.758Z
-Stopped at: Phase 56 complete, ready to plan Phase 57
+Last session: 2026-08-31T20:26:26.932Z
+Stopped at: Completed 57-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
