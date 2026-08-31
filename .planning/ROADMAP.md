@@ -165,14 +165,14 @@ Extended the fdars AI advisor with four new capabilities — deferred-aspect cov
   4. `sklearn/_coverage.py` `EXCLUDED_METHODS` lists every excluded fdars method with its failing-check / structural reason; each excluded method is confirmed still callable through the existing functional API.
   5. The go/no-go gate confirms a viable core PASSes (≈1 FPCA, 2 smoothers, 2 regressors, 2 classifiers, 1 clusterer, 2 outlier detectors) before any family implementation begins.
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 **Notes**: Mandatory-first — under the no-exemptions rule, scope is DISCOVERED by triage, not assumed. Flag for a research-phase during `/gsd-plan-phase` if the tags-API compat shim (`sklearn-compat` vs hand-rolled try/import guard) or the triage harness needs it. Guards for the 1-sample / 1-feature error-substring contracts (`"1 sample"`, `"1 feature(s)"`, etc.) and FPCA SVD sign canonicalization live in the base class / per-estimator wrappers.
 
 Plans:
 
 - [x] 55-01-PLAN.md — Tracer: [sklearn] extra + gated subpackage + _BaseFdarsEstimator (compat shim) + FPCATransformer passing parametrize_with_checks end-to-end
 - [x] 55-02-PLAN.md — Skeleton the remaining ~30 candidates across all five families + run the full parametrize_with_checks battery (triage_results.txt)
-- [ ] 55-03-PLAN.md — Populate _coverage.py verdicts + EXCLUDED_METHODS, verify excluded-still-callable, assert the go/no-go viable-core gate
+- [x] 55-03-PLAN.md — Populate _coverage.py verdicts + EXCLUDED_METHODS, verify excluded-still-callable, assert the go/no-go viable-core gate
 
 #### Phase 56: Transformers
 
@@ -259,7 +259,7 @@ Phases execute in numeric order: 55 → 56 → 57 → 58 → 59
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 55. Compliance-Triage & Foundation | v9.0 | 2/3 | In Progress|  |
+| 55. Compliance-Triage & Foundation | v9.0 | 3/3 | In Progress|  |
 | 56. Transformers | v9.0 | 0/TBD | Not started | - |
 | 57. Regressors & Classifiers | v9.0 | 0/TBD | Not started | - |
 | 58. Clusterers & Outlier Detectors + Compliance Gate | v9.0 | 0/TBD | Not started | - |

@@ -15,7 +15,7 @@
 ### Compliance Triage & Coverage
 
 - [x] **TRIAGE-01**: Every candidate estimator (~30 across the five families) is skeletoned and run through `check_estimator`/`parametrize_with_checks`, producing a definitive PASS / PASS-WITH-FIXES / EXCLUDE verdict per estimator before full implementation.
-- [ ] **TRIAGE-02**: A reason-coded `_coverage.py` `EXCLUDED_METHODS` registry records every fdars method excluded from the sklearn layer (with the failing check / structural reason); excluded methods remain available through the existing functional API.
+- [x] **TRIAGE-02**: A reason-coded `_coverage.py` `EXCLUDED_METHODS` registry records every fdars method excluded from the sklearn layer (with the failing check / structural reason); excluded methods remain available through the existing functional API.
 - [x] **TRIAGE-03**: A go/no-go gate confirms a viable core passes before proceeding (≈1 FPCA, 2 smoothers, 2 regressors, 2 classifiers, 1 clusterer, 2 outlier detectors).
 
 ### Transformers
@@ -89,7 +89,7 @@ Explicitly excluded. Documented to prevent scope creep.
 | FND-03 | Phase 55 | Complete |
 | FND-04 | Phase 55 | Complete |
 | TRIAGE-01 | Phase 55 | Complete |
-| TRIAGE-02 | Phase 55 | Pending |
+| TRIAGE-02 | Phase 55 | Complete |
 | TRIAGE-03 | Phase 55 | Complete |
 | XFORM-01 | Phase 56 | Pending |
 | XFORM-02 | Phase 56 | Pending |
