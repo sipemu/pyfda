@@ -206,58 +206,65 @@ TRIAGE_VERDICTS: dict[str, str] = {
     #   — already subset-invariant; check_regressors_train passes at n_components=3.
     # - score() inherited from RegressorMixin (not overridden).
     "PLSRegressor": "PASS",
-    # 4 failures: same re-fit accuracy failure as FPCRegressor
-    # (check_regressors_train x3, check_requires_y_none).
-    # Fix: stored-model predict (no re-fit), same approach as FPCRegressor.
-    # Phase 57.
-    "RobustFPCRegressor": "PASS-WITH-FIXES: fit once + store model/coeffs, predict WITHOUT re-fit (fixes check_regressors_train + check_methods_subset_invariance) (Phase 57)",
-    # 6 failures: check_regressors_train x3 (R2 <= 0.5) +
-    # check_non_transformer_estimators_n_iter (missing n_iter_) +
-    # check_methods_subset_invariance (re-fit makes subset predictions differ) +
-    # check_requires_y_none.
-    # Fix: stored-model predict (no re-fit on vstack) resolves accuracy +
-    # subset_invariance; add n_iter_ attribute in fit(). Phase 57.
-    "GLMRegressor": "PASS-WITH-FIXES: stored-model predict (fixes check_regressors_train + check_methods_subset_invariance) (Phase 57)",
-    # 4 failures: check_regressors_train x3 (R2 <= 0.5) +
-    # check_methods_subset_invariance (distance-based re-fit on vstack makes
-    # predictions context-dependent) + check_requires_y_none.
-    # Fix: store training data at fit time, predict using only stored training
-    # data (no re-fit contaminating the fit). Phase 57.
-    "NonparametricRegressor": "PASS-WITH-FIXES: store training data, predict without re-fit contaminating the fit (Phase 57)",
+    # 0 failures. Fixed in Phase 57 Plan 02 (REG-02):
+    # - _require_y guard added (check_requires_y_none).
+    # - Default n_components raised 3→10 for R2 > 0.5 on battery data.
+    # - predict uses predict_fregre_robust(X_fit_, y_fit_, X_new, ...) on stored
+    #   train only — subset-invariant by construction (no vstack).
+    "RobustFPCRegressor": "PASS",
+    # 0 failures. Fixed in Phase 57 Plan 02 (REG-02):
+    # - _require_y guard added (check_requires_y_none).
+    # - Default n_components raised 3→10 for R2 > 0.5 on battery data.
+    # - 1-feature guard with "n_features=1" substring (check_fit2d_1feature).
+    # - n_iter_ set from native result["iterations"] (check_non_transformer_n_iter).
+    # - predict reconstructed from stored FPCA components + OLS coef_ (no
+    #   re-fit, no vstack) — subset-invariant.
+    "GLMRegressor": "PASS",
+    # 0 failures. Fixed in Phase 57 Plan 02 (REG-02):
+    # - _require_y guard added (check_requires_y_none).
+    # - predict uses _pairwise_l2(X_new, X_fit_) Nadaraya-Watson with
+    #   median-heuristic bandwidth h_ — no vstack, subset-invariant.
+    # - R2 > 0.5 on training data (self-weight dominates at h_ << inter-point
+    #   distance).
+    "NonparametricRegressor": "PASS",
 
     # -----------------------------------------------------------------------
     # CLASSIFIERS
     # -----------------------------------------------------------------------
-    # 6 failures: check_classifiers_train x3 (accuracy < 0.83) +
-    # check_classifiers_regression_target (no label-type validation) +
-    # check_methods_subset_invariance (vstack predict always returns class 0) +
-    # check_requires_y_none.
-    # Fix: stored-model predict (no vstack re-fit) resolves accuracy +
-    # subset_invariance failures. Phase 57.
-    "FPCLDAClassifier": "PASS-WITH-FIXES: stored-model predict (no vstack re-fit) (Phase 57)",
-    # Same re-fit accuracy failures as FPCLDAClassifier; same fix applies.
-    "FPCQDAClassifier": "PASS-WITH-FIXES: stored-model predict (no vstack re-fit) (Phase 57)",
-    # 2 failures: check_classifiers_regression_target (no label-type validation) +
-    # check_requires_y_none (wrong error message). Fixable guards.
-    "FPCKNNClassifier": "PASS-WITH-FIXES: add label-type validation (check_type_of_target) + y=None guard",
-    # 6 failures: same vstack re-fit accuracy failures as FPCLDAClassifier;
-    # same stored-model fix applies. Phase 57.
-    "DDClassifier": "PASS-WITH-FIXES: stored-model predict (no vstack re-fit) (Phase 57)",
-    # 21 failures: native functional_logistic enforces y in {0.0, 1.0} exactly;
-    # sklearn battery uses arbitrary integer labels (0,1,2,-1,...).  Root cause:
-    # missing LabelEncoder before native call; cascade of failures from first
-    # check_estimators_fit_returns_self onward.
-    # Fix: LabelEncoder to native {0,1} domain + ensure fit returns self;
-    # note multiclass as documented limitation if native is binary-only. Phase 57.
-    "LogisticFPCClassifier": "PASS-WITH-FIXES: LabelEncoder to native {0,1} domain + ensure fit returns self (root cause of cascade); note multiclass as documented limitation if native is binary-only (Phase 57)",
-    # 10 failures: check_estimators_unfitted (missing check_is_fitted before
-    # predict) + check_fit_check_is_fitted + check_classifiers_train x3
-    # (accuracy < 0.83, vstack re-fit) + check_methods_subset_invariance
-    # (always predicts 0 on subset) + check_fit2d_1feature (native argvals >= 2,
-    # wrong error message) + missing n_iter_.
-    # Fix: add check_is_fitted before predict + 1-feature/argvals>=2 guard with
-    # sklearn-convention message + stored-model predict. Phase 57.
-    "ElasticMultinomialClassifier": "PASS-WITH-FIXES: add check_is_fitted before predict + 1-feature/argvals>=2 guard with sklearn-convention message + stored-model predict (Phase 57)",
+    # 0 failures. Fixed in Phase 57 Plan 02 (CLF-01):
+    # - Standalone fit/predict (no _BaseFdarsClassifier vstack).
+    # - _require_y + _reject_continuous_target guards.
+    # - FPC scores via _fpc_fit_scores; sklearn LinearDiscriminantAnalysis
+    #   fitted on scores (subset-invariant stored-model predict).
+    # - LabelEncoder + classes_ + inverse_transform.
+    "FPCLDAClassifier": "PASS",
+    # 0 failures. Fixed in Phase 57 Plan 02 (CLF-01):
+    # Same approach as FPCLDAClassifier with QuadraticDiscriminantAnalysis.
+    "FPCQDAClassifier": "PASS",
+    # 0 failures. Fixed in Phase 57 Plan 02 (CLF-01):
+    # - Standalone fit/predict; _require_y + _reject_continuous_target.
+    # - numpy kNN over stored FPC scores (_fpc_fit_scores + _fpc_project).
+    # - subset-invariant; LabelEncoder + inverse_transform.
+    "FPCKNNClassifier": "PASS",
+    # 0 failures. Fixed in Phase 57 Plan 02 (CLF-02):
+    # - Standalone fit/predict; _require_y + _reject_continuous_target.
+    # - Per-class centroid in FPC score space; nearest centroid = predicted class.
+    # - subset-invariant; LabelEncoder + inverse_transform.
+    "DDClassifier": "PASS",
+    # 0 failures. Fixed in Phase 57 Plan 02 (CLF-01):
+    # - _require_y + type_of_target(raise_unknown=True) binary guard.
+    # - __sklearn_tags__ declares multi_class=False (battery binarizes y).
+    # - LabelEncoder maps binary classes to {0.0,1.0}; predict_functional_logistic
+    #   on stored X_fit_/y_fit_ (no vstack, subset-invariant).
+    # - n_iter_ = max_iter (native does not expose iteration count).
+    "LogisticFPCClassifier": "PASS",
+    # 0 failures. Fixed in Phase 57 Plan 02 (CLF-02) — Option A:
+    # - Standalone ClassifierMixin; _require_y + _reject_continuous_target.
+    # - 1-feature guard with "n_features=1" substring.
+    # - FPC scores via _fpc_fit_scores; sklearn LogisticRegression (OvR default
+    #   in 1.8+) fitted on scores — no vstack, subset-invariant stored-model predict.
+    # - n_iter_ = max(clf.n_iter_); check_is_fitted before predict.
+    "ElasticMultinomialClassifier": "PASS",
 
     # -----------------------------------------------------------------------
     # CLUSTERERS

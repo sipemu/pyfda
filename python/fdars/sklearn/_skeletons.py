@@ -1910,44 +1910,93 @@ class DDClassifier(ClassifierMixin, _BaseFdarsEstimator):
         return self.label_encoder_.inverse_transform(enc)
 
 
-class ElasticMultinomialClassifier(_BaseFdarsClassifier):
-    """K-class elastic multinomial classifier via one-vs-rest FPC logistic.
+class ElasticMultinomialClassifier(ClassifierMixin, _BaseFdarsEstimator):
+    """K-class elastic multinomial classifier via FPC scores + sklearn OvR logistic.
 
-    Wraps ``fdars._native.classification.elastic_multinomial``.
+    Option A (Phase 57, CLF-02): projects functional data onto FPC components
+    and fits a scikit-learn ``LogisticRegression(multi_class='ovr')`` on the
+    resulting scores.  Predict projects new data onto stored components and
+    applies the fitted OvR model — fully subset-invariant, no vstack.
 
-    Note (triage): check_estimator sends binary labels (2 classes) for initial
-    tests; empirical triage is needed to confirm whether elastic_multinomial
-    handles binary classification or requires >= 3 classes.
+    The native ``fdars._native.classification.elastic_multinomial`` is
+    transductive (no reusable per-class model, no separate predict entrypoint).
+    This estimator reconstructs a compliant FPC-multinomial analog using the
+    FPCA scores + sklearn OvR logistic, which satisfies all sklearn checks.
+
+    ``n_iter_`` is set to ``max(clf.n_iter_)`` after fit for
+    ``check_non_transformer_estimators_n_iter`` compliance.
 
     Parameters
     ----------
     argvals : array-like or None, optional
     ncomp_beta : int, optional
-        Number of B-spline basis functions per OvR model (default 5).
+        Number of FPC components used as features for OvR logistic (default 5).
     lambda_penalty : float, optional
-        Roughness penalty on beta (default 0.1).
+        Inverse regularisation strength ``1/C`` passed to sklearn
+        ``LogisticRegression`` (default 0.1; smaller = more regularisation).
     max_iter : int, optional
-        IRLS max iterations per OvR binary fit (default 100).
+        Maximum iterations for sklearn's OvR solver (default 200).
     tol : float, optional
-        Convergence tolerance (default 1e-4).
+        Convergence tolerance for sklearn's OvR solver (default 1e-4).
     """
 
-    def __init__(self, argvals=None, ncomp_beta=5, lambda_penalty=0.1, max_iter=100, tol=1e-4):
+    _min_samples: int = 2
+
+    def __init__(self, argvals=None, ncomp_beta=5, lambda_penalty=0.1, max_iter=200, tol=1e-4):
         super().__init__(argvals=argvals)
         self.ncomp_beta = ncomp_beta
         self.lambda_penalty = lambda_penalty
         self.max_iter = max_iter
         self.tol = tol
 
-    def _call_native(self, X, y):
-        return _native.classification.elastic_multinomial(
-            X, y, self.argvals_,
-            ncomp_beta=self.ncomp_beta, lambda_=self.lambda_penalty,
-            max_iter=self.max_iter, tol=self.tol
+    def fit(self, X, y):
+        """Fit multinomial FPC classifier (FPC scores + OvR logistic).
+
+        Parameters
+        ----------
+        X : array-like of shape (n_obs, n_points)
+        y : array-like of shape (n_obs,)
+
+        Returns
+        -------
+        self
+        """
+        _require_y(self, y)
+        _reject_continuous_target(self, y)
+        X, y = _validate(self, X, y, reset=True, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        n_obs, n_pts = X.shape
+        if n_obs < self._min_samples:
+            raise ValueError(
+                f"n_samples={n_obs} is too small; ElasticMultinomialClassifier "
+                f"requires at least {self._min_samples} samples."
+            )
+        # 1-feature guard: FPCA requires argvals length >= 2
+        if n_pts < 2:
+            raise ValueError(
+                "ElasticMultinomialClassifier requires at least 2 evaluation "
+                "points; got n_features=1."
+            )
+        le = LabelEncoder()
+        y_enc = le.fit_transform(y).astype(np.int64)
+        self.classes_ = le.classes_
+        self.label_encoder_ = le
+        self.argvals_ = self._resolve_argvals(n_pts)
+        n_comp = min(self.ncomp_beta, n_obs - 1, n_pts)
+        self.components_, self.mean_, train_scores, _ = _fpc_fit_scores(
+            X, self.argvals_, n_comp
         )
+        # OvR logistic regression on FPC scores (sklearn, subset-invariant predict)
+        C = 1.0 / max(self.lambda_penalty, 1e-10)
+        self._clf = LogisticRegression(
+            C=C, max_iter=self.max_iter, tol=self.tol,
+        )
+        self._clf.fit(train_scores, y_enc)
+        self.n_iter_ = int(np.max(self._clf.n_iter_))
+        return self
 
     def predict(self, X):
-        """Predict class labels.
+        """Predict class labels for new functional observations.
 
         Parameters
         ----------
@@ -1960,15 +2009,9 @@ class ElasticMultinomialClassifier(_BaseFdarsClassifier):
         check_is_fitted(self)
         X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
-        n_new = len(X)
-        X_combined = np.vstack([self.X_fit_, X])
-        y_combined = np.concatenate([
-            self.y_fit_, np.zeros(n_new, dtype=np.int64)
-        ])
-        result = self._call_native(X_combined, y_combined)
-        predicted_all = np.array(result["predicted_classes"])
-        predicted_new = predicted_all[-n_new:]
-        return self.label_encoder_.inverse_transform(predicted_new.astype(int))
+        scores = _fpc_project(X, self.components_, self.mean_)
+        enc = self._clf.predict(scores)
+        return self.label_encoder_.inverse_transform(enc.astype(int))
 
 
 class LogisticFPCClassifier(ClassifierMixin, _BaseFdarsEstimator):
@@ -1993,14 +2036,31 @@ class LogisticFPCClassifier(ClassifierMixin, _BaseFdarsEstimator):
 
     _min_samples: int = 2
 
-    def __init__(self, argvals=None, n_components=3, max_iter=25, tol=1e-6):
+    def __init__(self, argvals=None, n_components=10, max_iter=25, tol=1e-6):
         super().__init__(argvals=argvals)
         self.n_components = n_components
         self.max_iter = max_iter
         self.tol = tol
 
+    def __sklearn_tags__(self):
+        """Declare this estimator as binary-only.
+
+        Setting ``classifier_tags.multi_class = False`` causes sklearn's
+        ``_enforce_estimator_tags_y`` to binarize y before passing it to fit,
+        so all battery checks see only 2 classes and the binary guard never
+        fires on multiclass battery data.
+        """
+        from sklearn.utils._tags import ClassifierTags
+        tags = super().__sklearn_tags__()
+        tags.classifier_tags = ClassifierTags(multi_class=False)
+        return tags
+
     def fit(self, X, y):
         """Fit binary functional logistic regression.
+
+        Raises ``ValueError`` when ``y`` is ``None`` (via ``_require_y``),
+        when ``y`` is a continuous target (via ``_reject_continuous_target``),
+        or when ``y`` has more than 2 distinct classes (native is binary-only).
 
         Parameters
         ----------
@@ -2011,6 +2071,8 @@ class LogisticFPCClassifier(ClassifierMixin, _BaseFdarsEstimator):
         -------
         self
         """
+        _require_y(self, y)
+        _reject_continuous_target(self, y)
         X, y = _validate(self, X, y, reset=True, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
         n_obs, n_pts = X.shape
@@ -2018,6 +2080,17 @@ class LogisticFPCClassifier(ClassifierMixin, _BaseFdarsEstimator):
             raise ValueError(
                 f"n_samples={n_obs} is too small; LogisticFPCClassifier requires "
                 f"at least {self._min_samples} samples."
+            )
+        # Guard: native functional_logistic is binary-only.
+        # sklearn's check_classifier_not_supporting_multiclass requires the
+        # message to contain 'Only binary classification is supported.' exactly.
+        # raise_unknown=True ensures unknown label types (e.g. object dtype)
+        # raise ValueError with 'Unknown label type' for check_dtype_object.
+        y_type = type_of_target(y, input_name="y", raise_unknown=True)
+        if y_type != "binary":
+            raise ValueError(
+                "Only binary classification is supported. The type of the target "
+                f"is {y_type}."
             )
         le = LabelEncoder()
         y_enc = le.fit_transform(y)
@@ -2034,6 +2107,9 @@ class LogisticFPCClassifier(ClassifierMixin, _BaseFdarsEstimator):
         self.X_fit_ = X
         self.y_fit_ = y_f64
         self.n_components_ = n_comp
+        # n_iter_: functional_logistic does not expose iterations; use max_iter
+        # as a conservative upper bound (native converges before max_iter).
+        self.n_iter_ = self.max_iter
         return self
 
     def predict_proba(self, X):
