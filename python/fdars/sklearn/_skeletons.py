@@ -1747,15 +1747,13 @@ class FuzzyFunctionalCMeans(ClusterMixin, _BaseFdarsEstimator):
 
 
 class FunctionalGMM(ClusterMixin, _BaseFdarsEstimator):
-    """GMM clustering for functional data (triage candidate -- EXCLUDE predicted).
+    """GMM clustering for functional data.
 
     Wraps ``fdars._native.clustering.gmm_cluster``.
     Native function takes ``k_range: list[int]``; this skeleton passes
     ``k_range=[n_clusters]`` to force a fixed K.
 
-    Note: This estimator is included empirically in triage to confirm whether
-    the k_range->n_clusters workaround satisfies check_estimator's clone/
-    set_params contract.  Predicted EXCLUDE (RESEARCH A4).
+    Triage verdict: PASS-WITH-FIXES (add n_iter_ attribute to fit()).
 
     Parameters
     ----------
@@ -2135,15 +2133,15 @@ class MagnitudeShapeDetector(_BaseFdarsOutlierDetector):
 
 
 class TVDMSSDetector(_BaseFdarsOutlierDetector):
-    """TVD-MSS functional outlier detector (triage candidate -- EXCLUDE predicted).
+    """TVD-MSS functional outlier detector.
 
     Wraps ``fdars._native.outliers.tvdmss``.
     Score synthesis: uses TVD score directly as continuous anomaly score
     (lower TVD = more outlying).
 
     Note: tvdmss returns typed categorical flags; this skeleton synthesizes a
-    continuous score from the raw tvd values.  Triage confirms whether this
-    satisfies ``check_outliers_train``.
+    continuous score from the raw tvd values.
+    Triage verdict: PASS-WITH-FIXES.
 
     Parameters
     ----------
@@ -2234,7 +2232,7 @@ class TVDMSSDetector(_BaseFdarsOutlierDetector):
 
 
 class MUODDetector(_BaseFdarsOutlierDetector):
-    """MUOD functional outlier detector (triage candidate -- EXCLUDE predicted).
+    """MUOD functional outlier detector.
 
     Wraps ``fdars._native.outliers.muod``.
     Score synthesis: uses the mean of shape/magnitude/amplitude indices as
@@ -2313,7 +2311,7 @@ class MUODDetector(_BaseFdarsOutlierDetector):
 
 
 class DepthgramDetector(_BaseFdarsOutlierDetector):
-    """Depthgram functional outlier detector (triage candidate -- EXCLUDE predicted).
+    """Depthgram functional outlier detector.
 
     Wraps ``fdars._native.outliers.depthgram``.
     Score synthesis: uses MBD score as primary continuous anomaly measure.
