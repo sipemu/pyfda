@@ -59,6 +59,23 @@ from fdars.sklearn._base import _BaseFdarsEstimator, _validate, _HAS_TAGS_DATACL
 from fdars import _native
 
 
+# ---------------------------------------------------------------------------
+# Module-level helpers
+# ---------------------------------------------------------------------------
+
+
+def _pairwise_l2(A: np.ndarray, B: np.ndarray) -> np.ndarray:
+    """Compute pairwise L2 distances between rows of A and rows of B.
+
+    Uses the identity ``||a-b||^2 = ||a||^2 + ||b||^2 - 2a·bᵀ`` for
+    efficiency and clamps negative values from floating-point rounding to 0.
+    """
+    a2 = np.sum(A ** 2, axis=1, keepdims=True)
+    b2 = np.sum(B ** 2, axis=1, keepdims=True)
+    dist2 = a2 + b2.T - 2.0 * (A @ B.T)
+    return np.sqrt(np.maximum(dist2, 0.0))
+
+
 # ===========================================================================
 # TRANSFORMERS
 # ===========================================================================
@@ -1166,22 +1183,13 @@ class NonparametricRegressor(RegressorMixin, _BaseFdarsEstimator):
             )
         self.argvals_ = self._resolve_argvals(n_pts)
         # Fit using distance matrix computed from training data
-        dist_train = self._pairwise_l2(X, X)
+        dist_train = _pairwise_l2(X, X)
         result = _native.regression.fregre_np(dist_train, y, h=self.bandwidth)
         self.fitted_values_ = np.array(result["fitted_values"])
         self.h_func_ = result["h_func"]
         self.X_fit_ = X
         self.y_fit_ = y
         return self
-
-    @staticmethod
-    def _pairwise_l2(A, B):
-        """Compute pairwise L2 distances between rows of A and B."""
-        # ||a - b||^2 = ||a||^2 + ||b||^2 - 2 a.b^T
-        a2 = np.sum(A ** 2, axis=1, keepdims=True)
-        b2 = np.sum(B ** 2, axis=1, keepdims=True)
-        dist2 = a2 + b2.T - 2.0 * (A @ B.T)
-        return np.sqrt(np.maximum(dist2, 0.0))
 
     def predict(self, X):
         """Predict scalar response for new functional observations.
@@ -1200,7 +1208,7 @@ class NonparametricRegressor(RegressorMixin, _BaseFdarsEstimator):
         n_new = len(X)
         # Build augmented distance matrix: (n_train + n_new, n_train + n_new)
         X_aug = np.vstack([self.X_fit_, X])
-        dist_aug = self._pairwise_l2(X_aug, X_aug)
+        dist_aug = _pairwise_l2(X_aug, X_aug)
         y_aug = np.concatenate([self.y_fit_, np.zeros(n_new)])
         result = _native.regression.fregre_np(dist_aug, y_aug, h=self.bandwidth)
         all_fitted = np.array(result["fitted_values"])
@@ -1646,16 +1654,8 @@ class FunctionalKMeans(ClusterMixin, _BaseFdarsEstimator):
         X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
         # Assign to nearest cluster center (L2 distance in function space)
-        dists = self._pairwise_l2(X, self.cluster_centers_)  # (n_obs, n_clusters)
+        dists = _pairwise_l2(X, self.cluster_centers_)  # (n_obs, n_clusters)
         return np.argmin(dists, axis=1).astype(np.intp)
-
-    @staticmethod
-    def _pairwise_l2(A, B):
-        """Compute pairwise L2 distances between rows of A and B."""
-        a2 = np.sum(A ** 2, axis=1, keepdims=True)
-        b2 = np.sum(B ** 2, axis=1, keepdims=True)
-        dist2 = a2 + b2.T - 2.0 * (A @ B.T)
-        return np.sqrt(np.maximum(dist2, 0.0))
 
 
 class FuzzyFunctionalCMeans(ClusterMixin, _BaseFdarsEstimator):
@@ -1742,15 +1742,8 @@ class FuzzyFunctionalCMeans(ClusterMixin, _BaseFdarsEstimator):
         X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
         # Assign to nearest cluster center
-        dists = self._pairwise_l2(X, self.cluster_centers_)
+        dists = _pairwise_l2(X, self.cluster_centers_)
         return np.argmin(dists, axis=1).astype(np.intp)
-
-    @staticmethod
-    def _pairwise_l2(A, B):
-        a2 = np.sum(A ** 2, axis=1, keepdims=True)
-        b2 = np.sum(B ** 2, axis=1, keepdims=True)
-        dist2 = a2 + b2.T - 2.0 * (A @ B.T)
-        return np.sqrt(np.maximum(dist2, 0.0))
 
 
 class FunctionalGMM(ClusterMixin, _BaseFdarsEstimator):
@@ -1851,16 +1844,8 @@ class FunctionalGMM(ClusterMixin, _BaseFdarsEstimator):
         row_sums = self.membership_.sum(axis=0, keepdims=True).T  # (n_clusters, 1)
         centers = centers / np.maximum(row_sums, 1e-10)
         # Assign each new curve to the nearest cluster center
-        dists = self._pairwise_l2(X, centers)  # (n_new, n_clusters)
+        dists = _pairwise_l2(X, centers)  # (n_new, n_clusters)
         return np.argmin(dists, axis=1).astype(np.intp)
-
-    @staticmethod
-    def _pairwise_l2(A, B):
-        """Compute pairwise L2 distances between rows of A and B."""
-        a2 = np.sum(A ** 2, axis=1, keepdims=True)
-        b2 = np.sum(B ** 2, axis=1, keepdims=True)
-        dist2 = a2 + b2.T - 2.0 * (A @ B.T)
-        return np.sqrt(np.maximum(dist2, 0.0))
 
 
 # ===========================================================================
