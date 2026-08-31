@@ -153,7 +153,7 @@ EXCLUDED_METHODS: dict[str, dict] = {
 #                      order-dependent by nature); NOT used for any of the 28
 #                      skeleton candidates after reclassification
 #
-# Final tally: 6 PASS + 22 PASS-WITH-FIXES + 0 EXCLUDE (28 total)
+# Final tally: 7 PASS + 21 PASS-WITH-FIXES + 0 EXCLUDE (28 total)
 #
 # Format: "ClassName": "<VERDICT>[: <note>]"
 # ---------------------------------------------------------------------------
@@ -172,13 +172,9 @@ TRIAGE_VERDICTS: dict[str, str] = {
     # fixable by adding a Python-layer 1-feature guard with sklearn-convention
     # message ("1 feature(s)" substring required).
     "BasisRepresentation": "PASS-WITH-FIXES: add 1-feature guard emitting sklearn-convention message",
-    # 4 failures: check_dtype_object + 3 sparse checks (check_estimator_sparse_tag,
-    # check_estimator_sparse_array, check_estimator_sparse_matrix).
-    # Root cause: ensure_all_finite / force_all_finite compat shim is incomplete
-    # for the NaN-path when dtype=object or sparse input arrives.
-    # Fixable: extend shim to use ensure_all_finite="allow-nan" (1.8+) in
-    # both fit branches; add accept_sparse=False to validate_data call.
-    "Imputer": "PASS-WITH-FIXES: complete ensure_all_finite compat shim + accept_sparse=False",
+    # 0 failures (46/46 checks) -- fixed in Phase 56 Plan 01 (XFORM-03):
+    # narrowed except TypeError to shim-keyword-only, added accept_sparse=False.
+    "Imputer": "PASS",
     # 13 failures: check_fit_score_takes_y, check_n_features_in,
     # check_methods_subset_invariance, check_transformer_general x2,
     # check_dtype_object, check_pipeline_consistency, check_estimators_pickle,
