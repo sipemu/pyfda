@@ -241,6 +241,8 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 | Bump `fdars-core` to 0.17.0 as an isolated regression gate before any new bindings | Isolate the sole numeric change (faer FPCA SVD drift) on a green baseline so binding-correctness issues can't hide behind an upgrade regression | ✓ Good — suite green with zero test changes; drift never exceeded existing tolerances (v4.0 Phase 25) |
 | Blocking human diagram method-accuracy review before milestone close | Method-accuracy is the docs' core value; a diagram that misdepicts the method is worse than none | ✓ Good — v6.0 review caught an inverted hypograph/epigraph asymmetry the executors + verifier missed; corrected against shipped-binding ground truth (v6.0 Phase 41) |
 | Disable worktree isolation for docs phases; run executors sequentially on main | Doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path — a worktree executor would build the wrong tree and fail verification | ✓ Good — sequential execution kept the ~22-min whole-site fences building against the real tree (v6.0 Phase 41) |
+| sklearn tags/validate compat shim spans 1.3→1.8 (not just 1.3–1.6); `[sklearn]` extra pinned with a `python_version` marker | Dev/CI runs sklearn 1.8 on Python ≥3.10 (where `_more_tags` is removed); the `<1.7` cap only applies to the Python-3.9 wheel. Feature-detect, never version-compare | ✓ Good — FPCATransformer passed 47/47 check_estimator on sklearn 1.8 (v9.0 Phase 55) |
+| Triage EXCLUDE reserved for genuinely-structural mismatch; skeleton predict-quality failures are PASS-WITH-FIXES deferred to the family phase | Under no-exemptions "full coverage", a naive skeleton failing `check_regressors_train` is an implementation-quality signal (fix = stored-model predict in Phase 57), not a reason to drop the family | ✓ Good — reclassified 12 EXCLUDE→PASS-WITH-FIXES; go/no-go GO on all 6 families (v9.0 Phase 55, user-approved) |
 
 ## Evolution
 
@@ -260,4 +262,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-31 — started milestone v9.0 scikit-learn API Compatibility (sklearn-compatible estimator layer over the current bindings; full check_estimator compliance, no exemptions; no fdars-core bump, no advisor changes). Prior: v8.0 — Advisor: New Capabilities shipped 2026-08-31 (27/27 requirements; package 0.7.0 → 0.8.0).*
+*Last updated: 2026-08-31 after Phase 55 (Compliance-Triage & Foundation) — `[sklearn]` extra + gated `fdars.sklearn` subpackage + `_BaseFdarsEstimator` (1.3→1.8 compat shim) shipped; 28 candidates triaged on sklearn 1.8 → 6 PASS + 22 PASS-WITH-FIXES + 0 EXCLUDE (structural EXCLUDEs stay in the functional API); go/no-go GO. FND-01..04 + TRIAGE-01..03 validated. Next: Phase 56 (Transformers). Milestone v9.0 scikit-learn API Compatibility; prior v8.0 shipped 2026-08-31 (pkg 0.8.0).*
