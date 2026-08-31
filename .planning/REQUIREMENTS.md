@@ -20,11 +20,11 @@
 
 ### Transformers
 
-- [ ] **XFORM-01**: `FPCATransformer` (`TransformerMixin`) maps `(n_obs, n_points)` → `(n_obs, n_components)` scores with SVD sign canonicalization (idempotent fit); passes full `check_estimator`.
-- [ ] **XFORM-02**: Smoothing transformers (B-spline and local-polynomial) wrapped as `TransformerMixin` estimators.
-- [ ] **XFORM-03**: Imputation and spline-interpolation transformers wrapped as `TransformerMixin` estimators.
+- [x] **XFORM-01**: `FPCATransformer` (`TransformerMixin`) maps `(n_obs, n_points)` → `(n_obs, n_components)` scores with SVD sign canonicalization (idempotent fit); passes full `check_estimator`.
+- [x] **XFORM-02**: Smoothing transformers (B-spline and local-polynomial) wrapped as `TransformerMixin` estimators.
+- [x] **XFORM-03**: Imputation and spline-interpolation transformers wrapped as `TransformerMixin` estimators.
 - [ ] **XFORM-04**: Basis-representation transformer wrapped as a `TransformerMixin` estimator.
-- [ ] **XFORM-05**: Depth transformer wrapped as a `TransformerMixin` estimator.
+- [x] **XFORM-05**: Depth transformer wrapped as a `TransformerMixin` estimator.
 - [ ] **XFORM-06**: A `Pipeline([smoother, fpca])` end-to-end test passes (grid-changing chain works).
 
 ### Regressors & Classifiers
@@ -91,11 +91,11 @@ Explicitly excluded. Documented to prevent scope creep.
 | TRIAGE-01 | Phase 55 | Complete |
 | TRIAGE-02 | Phase 55 | Complete |
 | TRIAGE-03 | Phase 55 | Complete |
-| XFORM-01 | Phase 56 | Pending |
-| XFORM-02 | Phase 56 | Pending |
-| XFORM-03 | Phase 56 | Pending |
+| XFORM-01 | Phase 56 | Complete |
+| XFORM-02 | Phase 56 | Complete |
+| XFORM-03 | Phase 56 | Complete |
 | XFORM-04 | Phase 56 | Pending |
-| XFORM-05 | Phase 56 | Pending |
+| XFORM-05 | Phase 56 | Complete |
 | XFORM-06 | Phase 56 | Pending |
 | REG-01 | Phase 57 | Pending |
 | REG-02 | Phase 57 | Pending |
