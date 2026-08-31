@@ -110,6 +110,33 @@ def _pairwise_l2(A: np.ndarray, B: np.ndarray) -> np.ndarray:
     return np.sqrt(np.maximum(dist2, 0.0))
 
 
+def _require_y(estimator, y) -> None:
+    """Guard: raise ValueError when y is None.
+
+    Shared by every regressor and classifier in this module.  Called as the
+    first statement in ``fit`` so the error fires before any array coercion.
+
+    Parameters
+    ----------
+    estimator : object
+        The calling estimator instance (used for the class name in the message).
+    y : object
+        The target passed to fit.  Raises when ``y is None``.
+
+    Raises
+    ------
+    ValueError
+        When ``y is None``, with a message that contains the substring
+        ``"requires y to be passed, but the target y is None"`` as required by
+        sklearn's ``check_requires_y_none`` check.
+    """
+    if y is None:
+        raise ValueError(
+            f"{type(estimator).__name__} requires y to be passed, "
+            "but the target y is None."
+        )
+
+
 # ===========================================================================
 # TRANSFORMERS
 # ===========================================================================
@@ -932,7 +959,7 @@ class FPCRegressor(RegressorMixin, _BaseFdarsEstimator):
 
     _min_samples: int = 2
 
-    def __init__(self, argvals=None, n_components=3):
+    def __init__(self, argvals=None, n_components=10):
         super().__init__(argvals=argvals)
         self.n_components = n_components
 
@@ -948,6 +975,7 @@ class FPCRegressor(RegressorMixin, _BaseFdarsEstimator):
         -------
         self
         """
+        _require_y(self, y)
         X, y = _validate(self, X, y, reset=True, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
         y = np.asarray(y, dtype=np.float64)
