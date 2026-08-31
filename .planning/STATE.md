@@ -4,17 +4,17 @@ milestone: v9.0
 milestone_name: scikit-learn API Compatibility
 current_phase: 57
 current_phase_name: Regressors & Classifiers
-status: executing
-stopped_at: Completed 57-02-PLAN.md
-last_updated: "2026-08-31T20:55:35.132Z"
+status: verifying
+stopped_at: Completed 57-03-PLAN.md (PRED-01 capstone)
+last_updated: "2026-08-31T21:01:26.055Z"
 last_activity: 2026-08-31
 last_activity_desc: Phase 57 execution started
-state_head: fb0dc637fdf66c7d2e2e857aab4c92299154f1ed
+state_head: 65eae1d30b12ec4a3031adb8a3e5c792b37b462f
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 40
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-08-31)
 
 Phase: 57 (Regressors & Classifiers) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-31 — Phase 57 execution started
 
 Progress: [████░░░░░░] 40%
@@ -72,6 +72,7 @@ Progress: [████░░░░░░] 40%
 | Phase 56 P03 | 10m | 2 tasks | 1 files |
 | Phase 57 P01 | 264 | 3 tasks | 3 files |
 | Phase 57-regressors-classifiers P02 | 1536 | 3 tasks | 4 files |
+| Phase 57 P03 | 208 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,8 @@ Recent decisions affecting current work:
 - [Phase 57]: NonparametricRegressor median-heuristic bandwidth (median_distance/5): native h_func too large for battery data; self-weight dominance achieves R2>0.99 on train
 - [Phase 57]: LogisticFPCClassifier __sklearn_tags__(multi_class=False): binary guard needed, but requires tag to avoid cascade failures on multiclass battery checks
 - [Phase 57]: ElasticMultinomialClassifier Option A chosen (FPC + sklearn OvR LogisticRegression): native elastic_multinomial is transductive; sklearn 1.8 removed multi_class kwarg
+- [Phase 57]: FPCLDAClassifier consumed FPCA scores (n_obs, n_comp) as X: its internal FPCA is capped by min(ncomp, n_obs-1, n_comp), so clf__ncomp=[1,2] is safe when fpca__n_components>=2 and n_train>=3.
+- [Phase 57]: FPCRegressor receives (n_obs, n_components) FPCA scores as X, applies its own FPC regression on the score matrix treating score columns as evaluation points.
 
 ### Pending Todos
 
@@ -139,8 +142,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-31T20:55:35.088Z
-Stopped at: Completed 57-02-PLAN.md
+Last session: 2026-08-31T21:01:26.016Z
+Stopped at: Completed 57-03-PLAN.md (PRED-01 capstone)
 Resume file: None
 
 ## Operator Next Steps

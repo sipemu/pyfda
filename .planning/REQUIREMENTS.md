@@ -30,10 +30,10 @@
 ### Regressors & Classifiers
 
 - [x] **REG-01**: FPC-based functional regression and PLS regression wrapped as `RegressorMixin` estimators with a `score()` method.
-- [ ] **REG-02**: Differentiator regressors that pass triage (robust FPC regression, Gaussian-only GLM, nonparametric regression) wrapped as `RegressorMixin` estimators.
-- [ ] **CLF-01**: FPC-based classifiers (logistic, LDA, QDA, KNN) wrapped as `ClassifierMixin` estimators, each using `LabelEncoder` in `fit` and storing `X_fit_`/`y_fit_` where the underlying method re-fits at predict time.
-- [ ] **CLF-02**: Differentiator classifiers that pass triage (DD-classifier, elastic-multinomial) wrapped as `ClassifierMixin` estimators.
-- [ ] **PRED-01**: A `Pipeline([imputer, smoother, fpca, classifier])` + `GridSearchCV` end-to-end test passes.
+- [x] **REG-02**: Differentiator regressors that pass triage (robust FPC regression, Gaussian-only GLM, nonparametric regression) wrapped as `RegressorMixin` estimators.
+- [x] **CLF-01**: FPC-based classifiers (logistic, LDA, QDA, KNN) wrapped as `ClassifierMixin` estimators, each using `LabelEncoder` in `fit` and storing `X_fit_`/`y_fit_` where the underlying method re-fits at predict time.
+- [x] **CLF-02**: Differentiator classifiers that pass triage (DD-classifier, elastic-multinomial) wrapped as `ClassifierMixin` estimators.
+- [x] **PRED-01**: A `Pipeline([imputer, smoother, fpca, classifier])` + `GridSearchCV` end-to-end test passes.
 
 ### Clusterers & Outlier Detectors
 
@@ -98,10 +98,10 @@ Explicitly excluded. Documented to prevent scope creep.
 | XFORM-05 | Phase 56 | Complete |
 | XFORM-06 | Phase 56 | Complete |
 | REG-01 | Phase 57 | Complete |
-| REG-02 | Phase 57 | Pending |
-| CLF-01 | Phase 57 | Pending |
-| CLF-02 | Phase 57 | Pending |
-| PRED-01 | Phase 57 | Pending |
+| REG-02 | Phase 57 | Complete |
+| CLF-01 | Phase 57 | Complete |
+| CLF-02 | Phase 57 | Complete |
+| PRED-01 | Phase 57 | Complete |
 | CLUS-01 | Phase 58 | Pending |
 | CLUS-02 | Phase 58 | Pending |
 | OUT-01 | Phase 58 | Pending |
