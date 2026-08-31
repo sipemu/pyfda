@@ -17,9 +17,14 @@ verdict after the Phase 55 triage run.  Populated in Plan 03 from
 1272 PASS / 107 FAIL across 28 estimators).
 
 Final verdict tally after reclassification:
-  PASS:            6  (zero failing checks)
+  PASS:            6  (zero failing checks, as of Phase 55)
   PASS-WITH-FIXES: 22 (fixable with guard/wrapper/attribute add in Phases 56-58)
   EXCLUDE:          0  (among the 28 skeletoned candidates)
+
+After Phase 56 Plan 01 (Imputer):
+  PASS:            7  PASS-WITH-FIXES: 21
+After Phase 56 Plan 02 (BasisRepresentation, SplineInterpolator):
+  PASS:            9  PASS-WITH-FIXES: 19  (all 8 transformers PASS)
 
 Reason codes (used in EXCLUDED_METHODS only)
 ---------------------------------------------
@@ -153,7 +158,9 @@ EXCLUDED_METHODS: dict[str, dict] = {
 #                      order-dependent by nature); NOT used for any of the 28
 #                      skeleton candidates after reclassification
 #
-# Final tally: 7 PASS + 21 PASS-WITH-FIXES + 0 EXCLUDE (28 total)
+# Final tally: 9 PASS + 19 PASS-WITH-FIXES + 0 EXCLUDE (28 total)
+# All 8 transformers now PASS (BasisRepresentation + SplineInterpolator promoted
+# from PASS-WITH-FIXES in Phase 56 Plan 02).
 #
 # Format: "ClassName": "<VERDICT>[: <note>]"
 # ---------------------------------------------------------------------------
@@ -168,24 +175,20 @@ TRIAGE_VERDICTS: dict[str, str] = {
     "BSplineSmoother": "PASS",
     # 0 failures (47/47 checks)
     "LocalPolynomialSmoother": "PASS",
-    # 1 failure: check_fit2d_1feature -- native emits wrong error message;
-    # fixable by adding a Python-layer 1-feature guard with sklearn-convention
-    # message ("1 feature(s)" substring required).
-    "BasisRepresentation": "PASS-WITH-FIXES: add 1-feature guard emitting sklearn-convention message",
+    # 0 failures -- fixed in Phase 56 Plan 02 (XFORM-04):
+    # Python-layer 1-feature guard added to fit(), emitting "n_features=1"
+    # substring before any native call.
+    "BasisRepresentation": "PASS",
     # 0 failures (46/46 checks) -- fixed in Phase 56 Plan 01 (XFORM-03):
     # narrowed except TypeError to shim-keyword-only, added accept_sparse=False.
     "Imputer": "PASS",
-    # 13 failures: check_fit_score_takes_y, check_n_features_in,
-    # check_methods_subset_invariance, check_transformer_general x2,
-    # check_dtype_object, check_pipeline_consistency, check_estimators_pickle,
-    # check_transformer_preserve_dtypes, check_fit2d_1feature + more.
-    # Root causes: (a) no y=None signature on fit, (b) output_argvals_ set at
-    # fit time makes idempotency fail, (c) native enforces order in [1,3) but
-    # sklearn battery uses dtype variants that probe order=4-equivalent paths.
-    # All fixable: make output grid a constructor param (idempotent transform),
-    # add y=None to fit, guard spline order to [1,3) with sklearn-convention
-    # message -- Phase 56 work, not structural incompatibility.
-    "SplineInterpolator": "PASS-WITH-FIXES: make output grid a constructor param (idempotent transform), add y=None to fit, guard spline order to native [1,3) with sklearn-convention message (Phase 56)",
+    # 0 failures -- fixed in Phase 56 Plan 02 (XFORM-03):
+    # output_argvals already a constructor param (idempotent transform); y=None
+    # already on fit; added Python-layer 1-feature guard ("n_features=1"
+    # substring) and spline-order guard (order in [1, n_pts)) before native call;
+    # constructor default changed from order=4 to order=3 (native-valid for
+    # the battery's minimum dataset sizes).
+    "SplineInterpolator": "PASS",
     # 0 failures (47/47 checks)
     "DepthTransformer": "PASS",
     # 0 failures (47/47 checks)

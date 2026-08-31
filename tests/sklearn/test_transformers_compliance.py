@@ -14,10 +14,10 @@ Scope (Plan 01 — Wave 1)
 * ``test_depth_transformer_compliance``    — DepthTransformer regression guard (XFORM-05)
 * ``test_norm_transformer_compliance``     — NormTransformer regression guard (XFORM-05)
 
-Scope (Plan 02 — Wave 2, add below this comment block)
--------------------------------------------------------
-* ``test_basis_representation_compliance`` — BasisRepresentation (XFORM-04)
-* ``test_spline_interpolator_compliance``  — SplineInterpolator (XFORM-04)
+Scope (Plan 02 — Wave 2)
+------------------------
+* ``test_basis_representation_compliance`` — BasisRepresentation promoted to PASS (XFORM-04)
+* ``test_spline_interpolator_compliance``  — SplineInterpolator promoted to PASS (XFORM-03)
 
 Usage
 -----
@@ -36,15 +36,14 @@ import pytest
 from sklearn.utils.estimator_checks import parametrize_with_checks
 
 from fdars.sklearn._skeletons import (
+    BasisRepresentation,
     BSplineSmoother,
     DepthTransformer,
     FPCATransformer,
     Imputer,
     LocalPolynomialSmoother,
     NormTransformer,
-    # Plan 02 imports (add when wave-2 tasks are promoted to PASS):
-    # BasisRepresentation,
-    # SplineInterpolator,
+    SplineInterpolator,
 )
 
 
@@ -110,16 +109,32 @@ def test_norm_transformer_compliance(estimator, check):
 
 
 # ---------------------------------------------------------------------------
-# Plan 02 placeholders — add test functions here when BasisRepresentation
-# and SplineInterpolator are promoted from PASS-WITH-FIXES to PASS.
-#
-# @parametrize_with_checks([BasisRepresentation(n_basis=3)])
-# def test_basis_representation_compliance(estimator, check):
-#     """Full parametrize_with_checks battery for BasisRepresentation (XFORM-04)."""
-#     check(estimator)
-#
-# @parametrize_with_checks([SplineInterpolator()])
-# def test_spline_interpolator_compliance(estimator, check):
-#     """Full parametrize_with_checks battery for SplineInterpolator (XFORM-04)."""
-#     check(estimator)
+# Wave-2 compliance tests (Plan 02)
 # ---------------------------------------------------------------------------
+
+
+@parametrize_with_checks([BasisRepresentation(n_basis=3)])
+def test_basis_representation_compliance(estimator, check):
+    """Full parametrize_with_checks battery for BasisRepresentation (XFORM-04).
+
+    Verifies the 1-feature guard emits a sklearn-convention message
+    (``"n_features=1"`` substring) so ``check_fit2d_1feature`` passes.
+    """
+    check(estimator)
+
+
+@parametrize_with_checks([SplineInterpolator()])
+def test_spline_interpolator_compliance(estimator, check):
+    """Full parametrize_with_checks battery for SplineInterpolator (XFORM-03).
+
+    Verifies:
+    - ``check_fit_score_takes_y``: ``fit`` accepts ``y=None``.
+    - ``check_methods_subset_invariance`` + ``check_transformer_general``:
+      output grid is a constructor param (resolved in ``fit``), making
+      ``transform`` idempotent and subset-invariant.
+    - ``check_fit2d_1feature``: 1-feature guard fires before any native call
+      with a ``"n_features=1"`` sklearn-convention message.
+    - Order guard: spline order outside ``[1, n_pts)`` raises ``ValueError``
+      with a descriptive message.
+    """
+    check(estimator)
