@@ -208,12 +208,14 @@ Plans:
   3. FPC-based classifiers (logistic, LDA, QDA, KNN) are `check_estimator`-green `ClassifierMixin` estimators, each using `LabelEncoder` in `fit` and storing `X_fit_`/`y_fit_` where the underlying method re-fits at predict time; DD-classifier and elastic-multinomial are wrapped where triage passed.
   4. A `Pipeline([imputer, smoother, fpca, classifier])` wrapped in `GridSearchCV` fits and predicts end-to-end.
 
-**Plans**: TBD
+**Plans**: 3 plans
 **Notes**: Standard patterns established in Phases 55–56 — skip research-phase. Non-Gaussian GLM / list-of-matrices / IrregFdata-input methods that triage marked EXCLUDE stay in `_coverage.py`.
 
 Plans:
 
-- [ ] 57-01: TBD
+- [ ] 57-01-PLAN.md — Tracer: FPCRegressor stored-model predict + PLSRegressor y=None guard → full parametrize_with_checks green (REG-01)
+- [ ] 57-02-PLAN.md — Differentiator regressors (Robust/GLM/Nonparametric) + FPC classifiers (LDA/QDA/KNN/DD/Logistic/Elastic) stored-model predict → green (REG-02, CLF-01, CLF-02)
+- [ ] 57-03-PLAN.md — GridSearchCV over Pipeline([imputer, smoother, fpca, classifier]) fits+predicts end-to-end + whole-suite regression guard (PRED-01)
 
 #### Phase 58: Clusterers & Outlier Detectors + Compliance Gate
 
@@ -263,6 +265,6 @@ Phases execute in numeric order: 55 → 56 → 57 → 58 → 59
 |-------|-----------|----------------|--------|-----------|
 | 55. Compliance-Triage & Foundation | v9.0 | 3/3 | Complete    | 2026-08-31 |
 | 56. Transformers | v9.0 | 3/3 | Complete    | 2026-08-31 |
-| 57. Regressors & Classifiers | v9.0 | 0/TBD | Not started | - |
+| 57. Regressors & Classifiers | v9.0 | 0/3 | Planned | - |
 | 58. Clusterers & Outlier Detectors + Compliance Gate | v9.0 | 0/TBD | Not started | - |
 | 59. Documentation & Docs Gate | v9.0 | 0/TBD | Not started | - |
