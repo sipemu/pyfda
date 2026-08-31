@@ -509,17 +509,24 @@ class Imputer(TransformerMixin, _BaseFdarsEstimator):
         self
         """
         # allow_nan=True: Imputer by design handles NaN inputs.
-        # sklearn 1.6+ uses ensure_all_finite="allow-nan"; 1.3-1.5 uses
-        # force_all_finite="allow-nan". Try the new name first.
+        # accept_sparse=False: Imputer requires dense input; reject sparse with
+        # the sklearn-convention TypeError before any native call.
+        # Cross-version shim: sklearn 1.6+ uses ensure_all_finite="allow-nan";
+        # sklearn 1.3-1.5 uses force_all_finite="allow-nan".
+        # We try the new name first. Only catch the TypeError emitted by sklearn
+        # when "ensure_all_finite" is an unknown keyword (old sklearn); all other
+        # TypeErrors (e.g. dtype conversion, sparse rejection) must propagate.
         try:
             X = _validate(
                 self, X, reset=True, dtype="numeric", ensure_2d=True,
-                ensure_all_finite="allow-nan"
+                accept_sparse=False, ensure_all_finite="allow-nan"
             )
-        except TypeError:
+        except TypeError as exc:
+            if "ensure_all_finite" not in str(exc):
+                raise
             X = _validate(
                 self, X, reset=True, dtype="numeric", ensure_2d=True,
-                force_all_finite="allow-nan"
+                accept_sparse=False, force_all_finite="allow-nan"
             )
         X = X.astype(np.float64)
         n_obs, n_pts = X.shape
@@ -543,15 +550,18 @@ class Imputer(TransformerMixin, _BaseFdarsEstimator):
         X_imputed : ndarray of shape (n_obs, n_points), no NaN
         """
         check_is_fitted(self)
+        # Same cross-version shim as fit; same accept_sparse=False + narrow except.
         try:
             X = _validate(
                 self, X, reset=False, dtype="numeric", ensure_2d=True,
-                ensure_all_finite="allow-nan"
+                accept_sparse=False, ensure_all_finite="allow-nan"
             )
-        except TypeError:
+        except TypeError as exc:
+            if "ensure_all_finite" not in str(exc):
+                raise
             X = _validate(
                 self, X, reset=False, dtype="numeric", ensure_2d=True,
-                force_all_finite="allow-nan"
+                accept_sparse=False, force_all_finite="allow-nan"
             )
         X = X.astype(np.float64)
         return np.array(
