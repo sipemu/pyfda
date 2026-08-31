@@ -1048,6 +1048,7 @@ class PLSRegressor(RegressorMixin, _BaseFdarsEstimator):
         -------
         self
         """
+        _require_y(self, y)
         X, y = _validate(self, X, y, reset=True, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
         y = np.asarray(y, dtype=np.float64)
