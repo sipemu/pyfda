@@ -82,17 +82,49 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (filled by roadmapper) | | |
+| FND-01 | Phase 55 | Pending |
+| FND-02 | Phase 55 | Pending |
+| FND-03 | Phase 55 | Pending |
+| FND-04 | Phase 55 | Pending |
+| TRIAGE-01 | Phase 55 | Pending |
+| TRIAGE-02 | Phase 55 | Pending |
+| TRIAGE-03 | Phase 55 | Pending |
+| XFORM-01 | Phase 56 | Pending |
+| XFORM-02 | Phase 56 | Pending |
+| XFORM-03 | Phase 56 | Pending |
+| XFORM-04 | Phase 56 | Pending |
+| XFORM-05 | Phase 56 | Pending |
+| XFORM-06 | Phase 56 | Pending |
+| REG-01 | Phase 57 | Pending |
+| REG-02 | Phase 57 | Pending |
+| CLF-01 | Phase 57 | Pending |
+| CLF-02 | Phase 57 | Pending |
+| PRED-01 | Phase 57 | Pending |
+| CLUS-01 | Phase 58 | Pending |
+| CLUS-02 | Phase 58 | Pending |
+| OUT-01 | Phase 58 | Pending |
+| OUT-02 | Phase 58 | Pending |
+| COMPLY-01 | Phase 58 | Pending |
+| COMPLY-02 | Phase 58 | Pending |
+| DOCS-01 | Phase 59 | Pending |
+| DOCS-02 | Phase 59 | Pending |
+| DOCS-03 | Phase 59 | Pending |
+| REL-01 | Phase 59 | Pending |
 
 **Coverage:**
 - v9.0 requirements: 24 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 24 ⚠️
+- Mapped to phases: 24 ✓
+- Unmapped: 0
+
+**Per-phase distribution:**
+- Phase 55 (Compliance-Triage & Foundation): FND-01..04, TRIAGE-01..03 (7)
+- Phase 56 (Transformers): XFORM-01..06 (6)
+- Phase 57 (Regressors & Classifiers): REG-01/02, CLF-01/02, PRED-01 (5)
+- Phase 58 (Clusterers & Outlier Detectors + Compliance Gate): CLUS-01/02, OUT-01/02, COMPLY-01/02 (6)
+- Phase 59 (Documentation & Docs Gate): DOCS-01..03, REL-01 (4)
 
 ---
 *Requirements defined: 2026-08-31*
-*Last updated: 2026-08-31 after initial definition*
+*Last updated: 2026-08-31 — roadmap created; all 24 requirements mapped across Phases 55–59*
