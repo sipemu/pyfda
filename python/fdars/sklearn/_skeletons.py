@@ -1719,6 +1719,10 @@ class FPCKNNClassifier(ClassifierMixin, _BaseFdarsEstimator):
         X, y = _validate(self, X, y, reset=True, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
         n_obs, n_pts = X.shape
+        if self.k < 1:
+            raise ValueError(
+                f"FPCKNNClassifier requires k >= 1; got k={self.k}."
+            )
         if n_obs < self._min_samples:
             raise ValueError(
                 f"n_samples={n_obs} is too small; FPCKNNClassifier requires "
