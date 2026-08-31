@@ -1820,10 +1820,14 @@ class FunctionalGMM(ClusterMixin, _BaseFdarsEstimator):
         )
         self.labels_ = np.array(result["cluster"], dtype=np.intp)
         self.membership_ = np.array(result["membership"])
+        self.X_fit_ = X  # stored for predict (center computation)
         return self
 
     def predict(self, X):
-        """Assign cluster labels (hard from fit membership).
+        """Assign cluster labels (nearest center by L2 distance).
+
+        GMM does not store cluster centers directly; they are recovered from
+        the membership matrix and training data as weighted centroids.
 
         Parameters
         ----------
@@ -1836,28 +1840,22 @@ class FunctionalGMM(ClusterMixin, _BaseFdarsEstimator):
         check_is_fitted(self)
         X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
-        # Re-fit on augmented data (no stored model in GMM)
-        n_new = len(X)
-        X_aug = np.vstack([
-            X[np.argmin(np.sum((X[:, np.newaxis] - X[np.newaxis]) ** 2, axis=2), axis=1)]
-            if False else X,  # placeholder
-        ])
-        # Simple fallback: assign each new curve to nearest training cluster label
-        # using the stored argvals_ -- re-run on combined data to get labels
-        try:
-            X_combined = np.vstack([self._get_training_centers(), X])
-        except AttributeError:
-            # No stored centers -- return all cluster 0
-            return np.zeros(n_new, dtype=np.intp)
-        dists = np.array([
-            [np.linalg.norm(x - c) for c in self._get_training_centers()]
-            for x in X
-        ])
+        # Recover cluster centers from membership matrix and training data
+        # membership_: (n_train, n_clusters) -- soft assignments
+        centers = self.membership_.T @ self.X_fit_  # (n_clusters, n_pts)
+        row_sums = self.membership_.sum(axis=0, keepdims=True).T  # (n_clusters, 1)
+        centers = centers / np.maximum(row_sums, 1e-10)
+        # Assign each new curve to the nearest cluster center
+        dists = self._pairwise_l2(X, centers)  # (n_new, n_clusters)
         return np.argmin(dists, axis=1).astype(np.intp)
 
-    def _get_training_centers(self):
-        """Extract cluster centers from membership and X_fit_ (not stored directly)."""
-        raise AttributeError("FunctionalGMM does not store cluster centers")
+    @staticmethod
+    def _pairwise_l2(A, B):
+        """Compute pairwise L2 distances between rows of A and B."""
+        a2 = np.sum(A ** 2, axis=1, keepdims=True)
+        b2 = np.sum(B ** 2, axis=1, keepdims=True)
+        dist2 = a2 + b2.T - 2.0 * (A @ B.T)
+        return np.sqrt(np.maximum(dist2, 0.0))
 
 
 # ===========================================================================
