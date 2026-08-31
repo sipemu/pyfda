@@ -262,4 +262,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-31 after Phase 55 (Compliance-Triage & Foundation) — `[sklearn]` extra + gated `fdars.sklearn` subpackage + `_BaseFdarsEstimator` (1.3→1.8 compat shim) shipped; 28 candidates triaged on sklearn 1.8 → 6 PASS + 22 PASS-WITH-FIXES + 0 EXCLUDE (structural EXCLUDEs stay in the functional API); go/no-go GO. FND-01..04 + TRIAGE-01..03 validated. Next: Phase 56 (Transformers). Milestone v9.0 scikit-learn API Compatibility; prior v8.0 shipped 2026-08-31 (pkg 0.8.0).*
+*Last updated: 2026-08-31 after Phase 56 (Transformers) — all 8 TransformerMixin estimators (FPCATransformer hub + smoothers/imputer/basis/interpolation/depth/norm) pass full check_estimator on sklearn 1.8; Pipeline([smoother, fpca]) round-trips; Fdata-free contract enforced. XFORM-01..06 validated. Next: Phase 57 (Regressors & Classifiers). Milestone v9.0.*
