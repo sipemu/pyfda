@@ -1980,6 +1980,13 @@ class LogisticFPCClassifier(ClassifierMixin, _BaseFdarsEstimator):
         Maximum IRLS iterations (default 25).
     tol : float, optional
         Convergence tolerance (default 1e-6).
+
+    Attributes
+    ----------
+    n_iter_ : int
+        Set to ``max_iter``.  The native ``functional_logistic`` solver does
+        not expose the actual iteration count; this is a conservative upper
+        bound.  Early convergence is not reflected here.
     """
 
     _min_samples: int = 2
