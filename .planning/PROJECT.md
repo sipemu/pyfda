@@ -2,11 +2,25 @@
 
 ## What This Is
 
-pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-data-analysis library to Python as the `fdars` package (represent, smooth, align, analyze, regress, monitor). This milestone **extends the fdars AI advisor** beyond its single-shot, recommend-only, per-result surface with four new capabilities — closed-loop auto-tuning, deferred-aspect coverage, comparative method-selection, and pipeline diagnostic reports — while holding the **grounding invariant** (fdars computes every number; the LLM only interprets/cites) and the **MCP-LLM-free boundary** as hard constraints throughout.
+pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-data-analysis library to Python as the `fdars` package (represent, smooth, align, analyze, regress, monitor). This milestone adds a **scikit-learn-compatible estimator layer** over the existing bindings so functional-data methods plug natively into sklearn's `Pipeline`, `GridSearchCV`, and `cross_val_score`, interoperate with native sklearn estimators, and offer the familiar `fit`/`transform`/`predict` ergonomics — with every wrapped estimator passing the full `check_estimator` battery, no exemptions.
 
 ## Core Value
 
 The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
+
+## Current Milestone: v9.0 scikit-learn API Compatibility
+
+**Goal:** Add a scikit-learn-compatible estimator layer over `fdars` so functional-data methods plug natively into `Pipeline`, `GridSearchCV`, and `cross_val_score`, interoperate with native sklearn estimators, and offer the familiar `fit`/`transform`/`predict` ergonomics — with every wrapped estimator passing the full `sklearn.utils.estimator_checks.check_estimator` battery, no exemptions.
+
+**Target features:**
+- **Transformers** — smoothing, basis representation, FPCA, interpolation/imputation, depth, and (where compliant) registration/alignment wrapped as `TransformerMixin` estimators.
+- **Predictors** — functional regression (`RegressorMixin`), classification (`ClassifierMixin`), clustering (`ClusterMixin`), outlier detection (`OutlierMixin`).
+- **sklearn contract** — `BaseEstimator` + `get_params`/`set_params`, `clone`-safe, `argvals` as a constructor param defaulting to `np.arange(n_features)`; estimators operate on plain `(n_obs, n_points)` ndarrays.
+- **Compliance gate (no exemptions)** — `check_estimator` green for every wrapped estimator; any fdars method that cannot comply is **excluded** from the sklearn layer (it remains available through the existing functional API) and recorded in the coverage list — never exempted.
+- **Packaging** — `scikit-learn` as an optional extra (`[sklearn]`); base package stays sklearn-free, matching the provider/mcp extras pattern.
+- **Docs gate** — new "scikit-learn API" section: concept page + method-accurate hand-authored inline SVG(s) + offline `FDARS_FENCE_OK` worked examples (incl. a `Pipeline` + `GridSearchCV` example); whole-site `mkdocs build --strict` green; blocking human diagram review before close.
+
+**Key context:** First non-advisor code-capability milestone since the v4–v6 upgrade line — a new pure-Python surface (likely `python/fdars/sklearn/`) over the *current* bindings, with **no `fdars-core` bump and no advisor changes**. Not everything in fdars is estimator-shaped: inference tests (permutation/SCB/ANOVA), SPM monitoring, and the advisor itself are naturally out of scope for a fit/predict API. Package is a code milestone → bump at close (0.8.0 → likely 0.9.0; a semver `vX.Y.Z` tag triggers PyPI publish). Genuine unknowns → research warranted: which fdars methods can pass full `check_estimator` vs. must be excluded; how FPCA/regression survive the tiny-sample & dtype-cast checks; grid-as-constructor-param `clone` semantics; whether to depend on / mirror scikit-fda conventions.
 
 ## Current State
 
@@ -149,7 +163,9 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- v8.0 Advisor — New Capabilities — active. Full REQ list in .planning/REQUIREMENTS.md; roadmap in .planning/ROADMAP.md. -->
+<!-- v9.0 scikit-learn API Compatibility — active. Full REQ list in .planning/REQUIREMENTS.md; roadmap in .planning/ROADMAP.md. -->
+
+**v9.0 — scikit-learn API Compatibility (in progress):** sklearn-compatible estimator layer over the current bindings — transformers + predictors, `argvals` as constructor param, full `check_estimator` compliance (no exemptions; non-compliant methods excluded), `[sklearn]` optional extra, new docs section. No `fdars-core` bump, no advisor changes.
 
 **v8.0 — Advisor: New Capabilities (Phases 50–54, shipped 2026-08-31):**
 
@@ -244,4 +260,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-31 after shipping milestone v8.0 — Advisor: New Capabilities (deferred aspects, comparative selection, pipeline report, closed-loop auto-tuning capstone + eval/docs). 27/27 requirements validated; package 0.7.0 → 0.8.0; grounding invariant + MCP-LLM-free boundary held throughout. Next milestone: TBD via /gsd-new-milestone.*
+*Last updated: 2026-08-31 — started milestone v9.0 scikit-learn API Compatibility (sklearn-compatible estimator layer over the current bindings; full check_estimator compliance, no exemptions; no fdars-core bump, no advisor changes). Prior: v8.0 — Advisor: New Capabilities shipped 2026-08-31 (27/27 requirements; package 0.7.0 → 0.8.0).*

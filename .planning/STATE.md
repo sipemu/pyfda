@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v8.0
-milestone_name: "Advisor: New Capabilities"
-status: Awaiting next milestone
-stopped_at: Phase 54 complete — all phases complete
-last_updated: "2026-08-31T06:27:16.038Z"
+milestone: v9.0
+milestone_name: scikit-learn API Compatibility
+status: planning
+last_updated: "2026-08-31T07:57:51.707Z"
 last_activity: 2026-08-31
-last_activity_desc: Milestone v8.0 completed and archived
-state_head: 6036fd7390c9029f65bed69900939ece1fb3731c
 progress:
-  total_phases: 5
-  completed_phases: 4
-  total_plans: 16
-  completed_plans: 16
-  percent: 80
-current_phase: 54
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 
 ## Current Position
 
-Phase: Milestone v8.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-31 — Milestone v8.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-08-31 — Milestone v9.0 started
 
 ## Performance Metrics
 
