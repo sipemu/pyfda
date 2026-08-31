@@ -55,7 +55,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
-from fdars.sklearn._base import _BaseFdarsEstimator, _validate
+from fdars.sklearn._base import _BaseFdarsEstimator, _validate, _HAS_TAGS_DATACLASS
 from fdars import _native
 
 
@@ -543,11 +543,16 @@ class Imputer(TransformerMixin, _BaseFdarsEstimator):
             )
         )
 
-    def __sklearn_tags__(self):
-        """Override tags to declare NaN input is allowed."""
-        tags = super().__sklearn_tags__()
-        tags.input_tags.allow_nan = True
-        return tags
+    if _HAS_TAGS_DATACLASS:
+        def __sklearn_tags__(self):
+            """Override tags to declare NaN input is allowed (sklearn 1.6+)."""
+            tags = super().__sklearn_tags__()
+            tags.input_tags.allow_nan = True
+            return tags
+    else:
+        def _more_tags(self):  # type: ignore[override]
+            """Override tags to declare NaN input is allowed (sklearn 1.3-1.5)."""
+            return {"allow_nan": True}
 
 
 class SplineInterpolator(TransformerMixin, _BaseFdarsEstimator):
