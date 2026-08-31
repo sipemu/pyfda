@@ -212,6 +212,7 @@ class _BaseFdarsEstimator(BaseEstimator):
         """
         max_abs_idx = np.argmax(np.abs(components), axis=1)  # (n_components,)
         signs = np.sign(components[np.arange(len(components)), max_abs_idx])
+        signs = np.where(signs == 0, 1.0, signs)  # keep unflipped if all-zero component
         components = components * signs[:, np.newaxis]
         scores = scores * signs[np.newaxis, :]
         return components, scores
