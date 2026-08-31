@@ -1,537 +1,587 @@
 # Pitfalls Research
 
-**Domain:** Agentic auto-tuning advisor + comparative/aggregated grounded advice on top of a
-grounded, provider-agnostic, LLM-free-compute FDA advisor (fdars v8.0)
-**Researched:** 2026-08-23
-**Confidence:** HIGH — all pitfalls derived directly from the shipped codebase
-(`python/fdars/advisor/`, `python/fdars/mcp/`, `src/inference_mod.rs`) and from the
-documented failure history in `.planning/` and `MEMORY.md`.
+**Domain:** scikit-learn-compatible estimator layer over a PyO3 functional-data library (fdars v9.0)
+**Researched:** 2026-08-31
+**Confidence:** MEDIUM — derived from sklearn source, official developer docs, sklearn 1.3–1.6 changelogs,
+scikit-fda library analysis, and cross-checked against `check_estimator` issue tracker.
+
+---
+
+## Scope
+
+This file covers pitfalls specific to v9.0's constraint: every wrapped fdars estimator must pass the
+**full** `check_estimator` battery with **no exemptions**. Methods that cannot comply are excluded from
+the sklearn layer (not exempted). The roadmap should sequence a compliance-triage phase first.
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Auto-Tuning Loop Non-Termination — Budget Enforcement at the Wrong Layer
+### Pitfall 1: Mutating Constructor Parameters in `fit` — Breaks `clone` and `get_params` Round-Trip
 
 **What goes wrong:**
-The loop runs `build_diagnostics` → `advise` → `apply_change` → `re-run` repeatedly. If the
-budget cap is checked only inside `advise()` (the LLM call), a slow-converging target
-diagnostic can exhaust the LLM token budget or wall-clock time before the Python-layer step
-counter fires. Conversely, if the budget is checked only at the Python layer but not also at
-the MCP tool level, an agentic LLM driving `fdars_compare_run` in a tool-call loop has no
-hard stop and can issue unbounded calls.
+`check_estimator` calls `clone(estimator)` before each test. `clone` works by calling `get_params()`
+and passing the returned dict back into the constructor. If `__init__` stores its arguments verbatim
+but `fit()` modifies them (e.g. derives `self.argvals_` from the constructor's `self.argvals` by
+appending, normalising, or replacing it with a computed value), the round-trip breaks: `clone()` of
+the fitted estimator re-runs `__init__` with the MODIFIED value, not the original.
+
+Concrete case: `FdarsSmoother(argvals=None)` stores `self.argvals = None`. In `fit(X)`, the code does
+`self.argvals = np.linspace(0, 1, X.shape[1])`. Now `get_params()` returns `{"argvals": array([...])}`.
+`clone()` passes that array back into `__init__`, which stores the array — but the constructor default
+was `None`. The `check_estimator` test `check_get_params_invariance` catches this because the cloned
+estimator has different constructor state than the original.
+
+Second case: mutable default — `FdarsEstimator(argvals=np.arange(10))`. Multiple instances share
+the same default array object. If any instance modifies `self.argvals` in-place during `fit`, all
+instances are corrupted.
 
 **Why it happens:**
-The existing `fdars_compare_run` tool is designed for one-shot before/after comparisons, not
-multi-step loops. There is no step counter in the current MCP layer. Developers add a Python
-`max_steps` guard but forget to surface it as a MCP tool return field, so the orchestrating
-agent cannot observe that the budget is near and keeps issuing calls.
+FDA estimators naturally compute an effective grid in `fit` (because the input array dimension
+determines it). Developers store this computed grid on `self.argvals` (overwriting the constructor
+value) for reuse in `transform`/`predict`, not realising this corrupts the `get_params` round-trip.
 
 **How to avoid:**
-- Define `max_steps: int` as a mandatory parameter of the auto-tune loop (both Python API and
-  MCP tool). Enforce it in the Python orchestrator BEFORE each LLM call, not inside `advise`.
-- Return `{"steps_used": int, "budget_remaining": int, "stopped_by": "budget"|"target"|"no_improvement"}` in every loop response, even partial ones. The MCP tool must include
-  this in its return dict so the LLM agent can observe loop termination state.
-- The LLM is shown the budget-remaining value in its context at each step, making it
-  observable. The Python orchestrator is the authority on whether to continue; the LLM only
-  proposes.
-- Never allow the LLM to extend its own budget (no "I need more steps" instruction following).
+- The rule: constructor arguments are stored verbatim in `__init__`, never modified. The rule holds
+  even for `None`-defaulted arguments.
+- In `fit(X)`, derive the effective grid and store it with a TRAILING UNDERSCORE:
+  `self.argvals_ = self.argvals if self.argvals is not None else np.arange(X.shape[1])`.
+- `transform`/`predict` use `self.argvals_` (fitted attribute), never `self.argvals` (constructor param).
+- For mutable defaults, use `None` as the default and build the actual value in `fit`. Never use a
+  numpy array or list as a default argument value.
+- After `fit`, `get_params()` must still return `{"argvals": None}` (or the original user-supplied
+  value), not the derived array.
 
 **Warning signs:**
-- Auto-tune Python API has `max_steps` only as a keyword-only default, not a required param.
-- MCP tool return dict omits `steps_used` or `stopped_by`.
-- Unit tests for the loop use `max_steps=100` (permissive) rather than `max_steps=2` (tight).
+- `fit()` contains `self.argvals = ...` (no trailing underscore).
+- Constructor default is a list or numpy array literal (e.g. `def __init__(self, argvals=np.arange(100))`).
+- `check_get_params_invariance` or `check_estimators_pickle` fails.
 
 **Phase to address:**
-Closed-loop auto-tuning implementation phase (capstone). Define the termination contract
-in the spec/plan before any code is written.
+Compliance-triage phase (phase 1) — establish the trailing-underscore / constructor-verbatim pattern
+in the base class or a shared mixin before any individual estimator is written.
 
 ---
 
-### Pitfall 2: LLM Silently Re-Entering the Numeric Path Inside the Loop
+### Pitfall 2: Missing or Wrong `n_features_in_` — Breaks All Feature-Count Checks
 
 **What goes wrong:**
-The grounding invariant requires that fdars computes every number. In a multi-step loop, the
-LLM proposes the NEXT parameter value (e.g. `n_basis=18`). If the system prompt or the loop
-scaffolding asks the LLM to "estimate the expected new diagnostic value" or "predict the
-improvement", the LLM is now fabricating a diagnostic, not proposing a parameter. This
-fabricated number then gets cited in the next step's evidence and passes `_check_grounding`
-because it looks like a parameter integer rather than a diagnostic scalar.
+Every `check_estimator` run exercises `check_n_features_in`, which calls `fit(X_train)` and then
+`predict(X_test_wrong_shape)` expecting a `ValueError` with a specific message. If `n_features_in_`
+is not set during `fit`, or if it is set to the wrong value (e.g. number of argvals instead of
+`X.shape[1]`), the check either raises `AttributeError` or fails to raise the expected error on
+mismatched input.
+
+For fdars estimators where `argvals` is a constructor parameter and `X` is `(n_obs, n_points)`:
+`n_features_in_` must equal `n_points` — the second dimension of `X`. This is always `X.shape[1]`,
+regardless of whether `argvals` is supplied.
 
 **Why it happens:**
-Loop prompts are written to elicit forward-looking rationale ("what improvement do you expect?")
-which is good for recommendations but dangerous for numeric prediction. The LLM conflates "I
-expect X to improve" with "the new value will be Y". The existing `_check_grounding` guard
-extracts numbers from evidence strings but does not distinguish between cited-diagnostic values
-and predicted-future values.
+FDA estimators think of "features" as "grid points" and may store `len(self.argvals_)` separately.
+Developers forget that sklearn's `n_features_in_` must be set via `validate_data()` (which reads
+`X.shape[1]`), not manually.
 
 **How to avoid:**
-- The loop system prompt must be explicit: "Propose one parameter change. Do NOT predict the
-  numeric outcome — you will observe the actual diagnostic in the next step." Structure the
-  Advice schema so `expected_effect` is free-text qualitative ("should decrease", "should
-  increase") and `evidence` cites only the CURRENT step's diagnostics, not a predicted future
-  value.
-- After each fdars re-run, the new diagnostics dict is the authoritative source. The LLM
-  never computes a diagnostic value — it only reads the dict that the orchestrator supplies.
-- In tests: assert that `advice.recommendations[*].expected_effect` contains no numeric
-  literals that are absent from the current step's diagnostics dict.
+- Call `validate_data(self, X, ...)` at the start of `fit`. This automatically sets `n_features_in_`.
+  Use `sklearn.utils.validation.validate_data` (the public function introduced in sklearn 1.6;
+  `self._validate_data(X)` works but is deprecated on the path to 1.8).
+- In `transform`/`predict`, call `validate_data(self, X, reset=False)` to trigger the feature-count
+  consistency check automatically.
+- Never set `self.n_features_in_` manually — use `validate_data()` and let sklearn set it.
 
 **Warning signs:**
-- Loop prompts contain phrases like "predict the new GCV value" or "estimate the improvement".
-- `expected_effect` strings in loop advice cite specific numbers like "GCV will drop to 0.12".
-- `_check_grounding` passes because the LLM-fabricated future value happens to round to a
-  real diagnostic in the current dict.
+- `fit()` sets `self.n_features_in_` manually.
+- `transform()` calls `check_array(X)` but not `validate_data(self, X, reset=False)`.
+- `check_n_features_in` raises `AttributeError: 'FdarsSmoother' object has no attribute 'n_features_in_'`.
 
 **Phase to address:**
-Closed-loop auto-tuning — specifically the system prompt design. Write a dedicated
-`_loop_system_prompt()` distinct from the existing `_system_prompt()` to enforce this.
+Compliance-triage phase (phase 1) — build into the base class `fit` skeleton so all estimators
+inherit the correct pattern.
 
 ---
 
-### Pitfall 3: Goodhart's Law — Optimising One Diagnostic Degrades Others
+### Pitfall 3: Missing Trailing-Underscore Fitted Attributes — `check_is_fitted` Fails
 
 **What goes wrong:**
-The loop targets a single scalar diagnostic (e.g. minimise `gcv_min` for smoothing or
-maximise `accuracy` for classification). At each step, `advise` correctly proposes a change
-that improves the target. After several iterations, the target improves but a structurally
-important diagnostic degrades silently — e.g. `n_basis` is tuned so aggressively that
-`edf` grows to near `n_obs` (overfitting the basis), or `lambda_` is driven so low that
-`phase_leakage_indicator` spikes but the convergence target never checks it.
+`check_estimator` calls `check_is_fitted()` on unfitted instances and expects `NotFittedError`.
+Then it fits the estimator and calls `check_is_fitted()` again expecting no error. By default,
+`check_is_fitted` detects fitted state by scanning for any attribute ending in `_`. If `fit()`
+stores results in attributes WITHOUT trailing underscores (e.g. `self.components`, `self.mean`,
+`self.bandwidth`), the estimator appears unfitted even after `fit`, and `predict`/`transform`
+calls raise `NotFittedError` unexpectedly.
 
 **Why it happens:**
-`build_diagnostics` returns a rich dict but the loop only checks one scalar for its stopping
-criterion. The LLM advisor does not see a "guard rails" set of secondary diagnostics to
-respect, and the system prompt for the loop task does not explicitly forbid degrading them.
+fdars result dicts use names like `components`, `eigenvalues`, `scores` without trailing underscores.
+It is natural to copy the key name from the dict directly into a `self` attribute.
 
 **How to avoid:**
-- Define a `target_diagnostic: str` (primary) AND an optional `guard_diagnostics: dict[str, tuple[float, float]]` (secondary — name to acceptable range). The loop terminates or refuses the
-  proposed step if any guard diagnostic moves outside its range.
-- Surface both the target and all guard values in the per-step context that `advise` sees.
-- The loop's stop-or-continue decision is made by the Python orchestrator (deterministic range
-  check), not by the LLM.
-- Default guard diagnostics per method: smoothing — `edf` <= 0.9 x n_obs; fpca — `n_components`
-  <= n_obs // 2; clustering — `min_cluster_size` >= 2.
+- All attributes learned during `fit` must end with `_`: `self.components_`, `self.eigenvalues_`,
+  `self.bandwidth_`, `self.labels_`, etc.
+- Constructor parameters are stored without underscore (`self.n_components`, `self.argvals`).
+- If using a custom `__sklearn_is_fitted__` method, implement it explicitly and test it separately.
+- Add a lint/convention check: grep for `self\.\w[^_\s]+ =` inside `fit()` methods to catch
+  non-underscore-suffixed assignments.
 
 **Warning signs:**
-- Loop spec defines only `target_diagnostic` with no guard concept.
-- Test assertions only check that the target improved, not that guards held.
-- After the loop, `edf` or `n_components` or `fold_error_std` is at a physically implausible
-  extreme.
+- `check_is_fitted(estimator)` raises `NotFittedError` after `fit(X)` has been called.
+- `predict` or `transform` raises `NotFittedError` in production even after fitting.
+- `estimator_checks.check_estimators_pickle` fails because pickle state is incomplete.
 
 **Phase to address:**
-Closed-loop auto-tuning — the loop contract design (spec phase) and the guard-check unit tests.
+Compliance-triage phase (phase 1) — enforce in the base class and in code review.
 
 ---
 
-### Pitfall 4: Divergent / Oscillating Auto-Tuning Loop
+### Pitfall 4: `check_fit2d_1sample` and `check_fit2d_1feature` — Error Message Substring Contract
 
 **What goes wrong:**
-The loop proposes `n_basis=20` (up from 15) at step 1. GCV improves. At step 2, `advise` sees
-higher EDF and proposes `n_basis=12` (down). At step 3, GCV is worse again and it proposes
-`n_basis=22`. The loop oscillates between overshooting and undershooting without converging.
-This can also happen with `lambda_` in alignment/smoothing where the diagnostic surface is
-nearly flat and small perturbations cause the advisor to flip direction repeatedly.
+`check_estimator` feeds the estimator a `(1, n_features)` array (one sample) and a `(n_samples, 1)`
+array (one feature). If the estimator cannot handle these inputs, it MUST raise `ValueError` with
+a message containing specific substrings — or the check fails even if the error is legitimate.
+
+Required substrings for 1-sample rejection: `"1 sample"`, `"n_samples = 1"`, `"n_samples=1"`,
+`"one sample"`, `"1 class"`, or `"one class"`.
+
+Required substrings for 1-feature rejection: `"1 feature(s)"`, `"n_features = 1"`, or `"n_features=1"`.
+
+If the estimator raises a different error (e.g. Rust panic, `LinAlgError`, or a generic "cannot
+compute" message), the check fails. If the estimator silently produces garbage output (e.g.
+all-zeros components), the check may pass but correctness is violated.
+
+For functional data, ALL estimators have a minimum sample requirement (you need at least as many
+samples as components/clusters/basis functions), and the 1-sample / 1-feature case almost always
+falls below the minimum. This means these checks will exercise the error-message contract
+frequently.
 
 **Why it happens:**
-The LLM's parameter proposal is based only on the current step's diagnostics, not the full
-history of (parameter, diagnostic) pairs. Without seeing that `n_basis=20->12->22` is an
-oscillation, it makes the same directional inference each time.
+fdars-core raises `FdarError` with domain-specific messages ("matrix is singular", "not enough
+curves for FPCA"). The PyO3 wrapper converts these to `PyValueError` but with the fdars-core
+message text, which does not match the sklearn substring requirements.
 
 **How to avoid:**
-- Pass the full loop history (all previous steps: parameter value and diagnostic value) in the
-  per-step context so `advise` can observe the trajectory. Include a `history: list[dict]`
-  in the user content, one entry per step.
-- Add a convergence check in the Python orchestrator: if the last two proposed parameter values
-  bracket the current value AND the diagnostic improvement is below a threshold (e.g. 0.1%),
-  stop the loop with `stopped_by="converged"`.
-- Keep the history compact — store only the target diagnostic and the changed parameter, not
-  the full diagnostics dict, to avoid bloating the LLM context.
+- In the Python wrapper's `fit()`, validate `n_samples` and `n_features` BEFORE calling fdars-core,
+  and raise `ValueError` with sklearn-compliant messages:
+  ```python
+  if X.shape[0] < self._min_samples:
+      raise ValueError(
+          f"n_samples={X.shape[0]} is too small; this estimator requires "
+          f"at least {self._min_samples} samples."
+      )
+  ```
+- Define `_min_samples` as a class-level property so each estimator can declare its minimum.
+- For FPCA/basis estimators: `_min_samples = self.n_components + 1` (must exceed component count).
+- For clustering: `_min_samples = self.n_clusters * 2` (need enough samples per cluster).
+- These Python-layer guards run BEFORE the fdars-core call, preventing the harder-to-interpret
+  Rust error from propagating.
 
 **Warning signs:**
-- Loop implementation passes only the latest diagnostics to `advise`, not the history.
-- Integration tests do not include an oscillation test case.
-- No monotonicity check in the convergence criterion.
+- `check_fit2d_1sample` fails with "AssertionError: expected ValueError with '1 sample' substring".
+- The error message that appears is in German or uses fdars-internal terminology.
+- Any `ValueError` from fdars-core that propagates with the raw Rust error text.
 
 **Phase to address:**
-Closed-loop auto-tuning — orchestrator design. Write an oscillation test with a mock advisor
-that alternates direction.
+Compliance-triage phase (phase 1) and per-estimator implementation. Every estimator needs explicit
+input guards. The minimum-sample logic determines which methods can be compliant vs. excluded.
 
 ---
 
-### Pitfall 5: Non-Deterministic Loop — Untestable Offline
+### Pitfall 5: `check_fit_idempotent` — SVD Sign Ambiguity in FPCA
 
 **What goes wrong:**
-The auto-tuning loop calls `advise()` at each step, which calls the LLM. In CI without an API
-key, the entire loop test is skipped. When the loop IS run manually, the LLM may propose
-different parameter changes each run, making the loop non-reproducible for debugging. This
-means bugs in the orchestrator (wrong termination, wrong guard check) only surface during
-expensive real-LLM runs.
+`check_estimator` runs `fit(X)` twice and checks that the results are identical (comparing
+`transform(X)` output). Truncated SVD (used in FPCA/PCA variants) has sign ambiguity: each
+singular vector can be negated without changing the mathematical result. If the SVD implementation
+returns different sign conventions across runs (common when using LAPACK with different random
+seeding or thread scheduling), `components_[0]` may be `[+0.7, +0.3]` in the first fit and
+`[-0.7, -0.3]` in the second. The test sees different `transform(X)` values and fails.
+
+fdars-core's `fpca_1d` and related functions use SVD internally. The sign convention is not
+guaranteed to be deterministic across fits unless explicitly enforced.
 
 **Why it happens:**
-The existing advisor test pattern (env-gated `FDARS_INTEGRATION=1` + `ANTHROPIC_API_KEY`) is
-correct for single-shot `advise()` tests. But a multi-step loop has more orchestration
-surface (step counter, history accumulation, guard checks, termination logic) than a single
-call. If all of this is only testable with a live LLM, the orchestrator bugs go untested in CI.
+FPCA over Rust/LAPACK does not canonicalise sign by default. The rayon parallel feature makes
+this more likely because thread scheduling affects numerical precision of intermediate sums.
 
 **How to avoid:**
-- Design the loop to accept an injectable `advisor_fn: Callable[[dict, ...], Advice]` parameter
-  (default: `advise`). In tests, inject a deterministic mock advisor that always proposes
-  `n_basis += 2` or returns a hardcoded `Advice`. This makes the orchestrator testable with
-  `pytest -q` and no API key.
-- Unit-test ALL of: step counter increment, history accumulation, guard-check firing, target
-  improvement detection, budget exhaustion, oscillation detection — all using the mock advisor.
-- Keep the live-LLM integration test to one end-to-end smoke test (env-gated) that exercises
-  a real `advise()` call inside the loop.
+- After extracting components from fdars-core, apply a deterministic sign convention in the
+  Python wrapper: flip each component so its element with the largest absolute value is positive.
+  This is the same approach used in sklearn's `PCA._fit_full`.
+  ```python
+  max_abs_cols = np.argmax(np.abs(self.components_), axis=1)
+  signs = np.sign(self.components_[range(n_comp), max_abs_cols])
+  self.components_ *= signs[:, np.newaxis]
+  ```
+- Apply the same sign flip to `self.scores_` (the projected data) so `transform` is consistent.
+- Test with two consecutive `fit(X)` calls and assert `np.allclose(t1, t2)`.
 
 **Warning signs:**
-- Loop function signature has no `advisor_fn` injection point.
-- The only loop tests are `skipif(not ANTHROPIC_API_KEY)`.
-- Orchestrator logic (step counter, guard check) is inside `advise()` rather than outside it.
+- `check_fit_idempotent` fails intermittently (sign ambiguity is non-deterministic by nature).
+- The test passes on one machine but fails on another (different LAPACK implementation).
+- `fit` twice produces `components_` that differ only in sign.
 
 **Phase to address:**
-Closed-loop auto-tuning — the loop must be designed for testability from day one. The injectable
-advisor pattern should be in the plan before implementation starts.
+Per-estimator implementation phase for FPCA transformers. Sign canonicalisation must be in the
+initial implementation, not added later.
 
 ---
 
-### Pitfall 6: Comparing Incommensurable Diagnostics Across Method Changes
+### Pitfall 6: Grid-Changing Transformers Break Downstream `n_features_in_` in Pipeline
 
 **What goes wrong:**
-The auto-tuning loop compares diagnostics from run N (method: `basis`, `n_basis=15`) with run
-N+1 (method: `smoothing`, `n_basis=20`). The `gcv_min` key exists in both result dicts but
-means different things for the two methods (one is basis selection, the other is a GCV curve
-minimum). The loop's before/after delta computation subtracts them and reports an apparent
-improvement that is actually a comparison of different quantities.
+A smoothing or FPCA transformer changes the number of "features" that downstream estimators see:
 
-This also applies to comparative method-selection: comparing FPCA's `explained_variance_ratio`
-with PLS's regression CV error is comparing an unsupervised decomposition quality with a
-supervised prediction quality — they are on incompatible scales.
+- `FdarsSmoother.transform(X)` may return `X_smoothed` with the same shape `(n_obs, n_points)` —
+  the grid is unchanged, so `n_features_in_` flows through correctly.
+- `FdarsFPCA.transform(X)` returns scores `(n_obs, n_components)` — the grid is gone, replaced
+  by component indices. A downstream sklearn estimator (e.g. `LogisticRegression`) fits on the
+  scores and its `n_features_in_` is `n_components`, not `n_points`.
+- `FdarsBasisTransformer.transform(X)` returns basis coefficients `(n_obs, n_basis)` — again, the
+  grid is replaced.
+
+The `check_estimator` Pipeline tests (`check_pipeline_consistency`) fit a
+`Pipeline([('transform', estimator), ('final', LinearRegression())])` and verify that the pipeline
+survives `clone`, `fit`, `predict`. If the transformer's `transform` output has a different number
+of columns than the input, and the pipeline's clone tries to re-validate with the original input
+shape, the downstream `LinearRegression` may reject the input.
+
+More subtly: the `argvals` constructor parameter of the DOWNSTREAM fdars estimator in a pipeline
+is derived from the upstream transformer's OUTPUT — but the user may supply `argvals` expecting
+the original grid. After `fit`, the downstream estimator's `argvals_` is `np.arange(n_components)`,
+not the user-supplied grid.
 
 **Why it happens:**
-`fdars_compare_run` in the current MCP layer validates that the METHOD is the same across
-before/after (it requires `method` to be unchanged). But the auto-tuning loop may propose a
-method CHANGE, not just a parameter change. If the loop does not distinguish between
-"tune this method" and "switch to a different method", it will try to compare incommensurable
-diagnostic dicts.
+Standard sklearn transformers (PCA, StandardScaler) either preserve shape or reduce features in a
+well-understood way that sklearn pipelines handle. FDA transformers add a conceptual layer where
+"grid" and "features" are the same thing — but after FPCA, the "features" are component indices,
+not grid points. Users expect `argvals` to mean grid points throughout, but FPCA destroys the grid.
 
 **How to avoid:**
-- The auto-tuning loop must enforce: within a single loop run, the method is FIXED. Parameter
-  changes only. Method changes require a new comparative-selection call, not a loop iteration.
-- For comparative method-selection: define a `MethodComparison` schema with
-  `method_a`, `method_b`, `common_diagnostic`, `a_value`, `b_value`, `recommendation`.
-  Never subtract diagnostics that are not semantically equivalent across methods.
-- The comparison function must verify that both diagnostic dicts carry the same `method` field
-  before computing any delta. If they differ, raise `ValueError` rather than silently
-  subtracting incommensurable quantities.
-- For the `comparative_select` entry point, use a purpose-built comparison diagnostic (e.g.
-  a shared scoring metric from `fdars.scoring`) rather than per-method internal diagnostics.
+- Shape-preserving transformers (smoothers, interpolation, imputation) are safe in pipelines.
+  Their `transform` output has the same `n_features` as input.
+- Dimensionality-reducing transformers (FPCA, basis expansion) must document explicitly that they
+  change `n_features`. Their output is NOT functional data — it is a score matrix suitable for
+  downstream sklearn estimators, not for downstream fdars estimators.
+- Do NOT wrap FPCA as a `TransformerMixin` that outputs scores AND claim the output is still
+  functional data with grid interpretation. Instead, clearly name it `FdarsFPCAScores` or similar
+  to signal that downstream estimators receive score matrices, not functional data.
+- For Pipeline compatibility: the FPCA transformer's `transform` output must be a plain numpy array
+  with no `argvals` metadata attached (sklearn does not pass metadata through pipeline steps unless
+  using the metadata routing API).
 
 **Warning signs:**
-- Loop or comparison code uses `after[key] - before[key]` without first asserting
-  `after["method"] == before["method"]`.
-- Comparative selection advice cites FPCA `explained_variance_ratio` alongside PLS CV error
-  in the same recommendation.
+- A `Pipeline([FdarsFPCA(), FdarsSmoother()])` fails because `FdarsSmoother` checks `argvals` length
+  against `n_features_in_` which is now `n_components`, not `n_points`.
+- Users report that `Pipeline([FdarsFPCA(), LinearRegression()])` works but
+  `Pipeline([FdarsFPCA(), FdarsBasisTransformer()])` fails with a shape mismatch.
+- `check_pipeline_consistency` fails on any fdars transformer that changes output shape.
 
 **Phase to address:**
-Comparative method-selection (its own phase) and closed-loop auto-tuning. Both need explicit
-incommensurability guards in their contracts.
+Compliance-triage phase (phase 1) — categorise transformers as shape-preserving vs. dimensionality-
+reducing during the triage scan. This determines which can be composed in pipelines with other
+fdars estimators vs. only with standard sklearn estimators.
 
 ---
 
-### Pitfall 7: Grounding Violation in Aggregated Pipeline Reports — Wrong-Run Citation
+### Pitfall 7: Sklearn Version Drift — `_get_tags` / `_more_tags` → `__sklearn_tags__` Migration
 
 **What goes wrong:**
-The pipeline diagnostic report aggregates diagnostics across multiple stages:
-`represent -> smooth -> cluster -> monitor`. Each stage has its own diagnostics dict. The
-aggregated report is passed to `advise()` as a flat merged dict. The LLM cites a value
-(e.g. `gcv_min=0.23`) in a recommendation about the smoothing stage. But `_check_grounding`
-looks up `0.23` in the merged dict and finds it — even though it actually came from the
-clustering stage's `mean_amplitude_separation=0.23`. The citation is technically grounded
-(the value exists in the diagnostics) but its provenance is wrong.
+The sklearn estimator tags API changed significantly across the 1.3–1.6 range:
+
+- **sklearn 1.3–1.5**: Tags set via `_more_tags()` returning a dict; `_get_tags()` aggregates.
+  Tags like `"no_validation"`, `"poor_score"`, `"non_deterministic"` are dict string keys.
+- **sklearn 1.6**: `__sklearn_tags__()` introduced as the public API, returns a `Tags` dataclass.
+  `_more_tags`, `_get_tags`, `_safe_tags` raise `DeprecationWarning` (to be removed in 1.8).
+  `_estimator_type` class attribute deprecated — use `ClassifierMixin`/`RegressorMixin` etc.
+  `_xfail_checks` tag deprecated — use `expected_failed_checks` parameter in `check_estimator()`.
+  `_validate_data()` deprecated in favour of `validate_data()` (public function).
+  `assert_all_finite` parameter renamed to `ensure_all_finite`.
+- **sklearn 1.7**: Python 3.10 minimum. Python 3.9 support dropped.
+- **sklearn 1.8**: Removal of `_more_tags`, `_get_tags`, `_safe_tags`, `_estimator_type`,
+  `_xfail_checks`, `assert_all_finite`.
+- **sklearn 1.9**: Python 3.11 minimum.
+
+The fdars [sklearn] extra must declare a minimum sklearn version. If it targets `sklearn>=1.3` (to
+support Python 3.9), it cannot use `__sklearn_tags__` (1.6+) exclusively. If it targets `sklearn>=1.6`,
+Python 3.9 with only sklearn 1.5 available cannot install the extra.
 
 **Why it happens:**
-`_check_grounding` does a flat numeric-equality scan across all diagnostic values. It cannot
-distinguish "value X came from stage A" from "value X appears in the merged dict because it
-happened to equal a value from stage B". Merging dicts from multiple stages collapses
-provenance.
+The sklearn developer API changes faster than user expectations. Third-party libraries (catboost,
+xgboost) have been caught by this exact transition; catboost hit AttributeError on `__sklearn_tags__`
+in sklearn 1.8.x (confirmed from GitHub issues). Libraries that support a wide Python/sklearn matrix
+must handle both the old and new API.
 
 **How to avoid:**
-- Never pass a flat-merged multi-stage dict to `advise()`. Instead, structure the pipeline
-  report as `{"stages": {"represent": {...}, "smooth": {...}, "cluster": {...}}}` and send
-  each stage's diagnostics to `advise()` independently, producing per-stage advice objects.
-- The pipeline report is then an aggregation of per-stage `Advice` objects, not a single
-  `advise()` call on a merged dict.
-- If a single unified narrative is needed, assemble it from the per-stage `Advice.interpretation`
-  strings — which are themselves grounded — rather than by calling `advise()` on the merged dict.
-- Alternative for a true "single call" design: namespace keys (`"smooth.gcv_min"`,
-  `"cluster.mean_amplitude_separation"`) so the LLM can cite provenance, and update
-  `_check_grounding` to strip the namespace prefix before numeric lookup.
+- Set `scikit-learn>=1.4` as the minimum for the `[sklearn]` extra. This covers Python 3.9–3.12
+  (sklearn 1.4–1.5 support Python 3.9+). sklearn 1.7 drops Python 3.9, so the extra must work
+  across sklearn 1.4–1.9 (the realistic range for Python 3.9–3.14).
+- For cross-version compatibility, implement BOTH `_more_tags` (for sklearn 1.3–1.5 compat) AND
+  `__sklearn_tags__` (for 1.6+). Use a try/import to detect which API is present:
+  ```python
+  try:
+      from sklearn.utils import Tags  # sklearn 1.6+
+      def __sklearn_tags__(self):
+          tags = super().__sklearn_tags__()
+          tags.non_deterministic = True
+          return tags
+  except ImportError:
+      def _more_tags(self):
+          return {"non_deterministic": True}
+  ```
+  The `sklearn-compat` PyPI package (noted in search results) provides a compatibility shim.
+- In CI: test with BOTH sklearn 1.4 (Python 3.9) and sklearn 1.6+ (Python 3.10+) to catch both
+  API paths. The `[sklearn]` optional extra tests must run on the full Python 3.9–3.14 matrix.
+- For `check_estimator()`: in sklearn 1.6+, use `expected_failed_checks={}` parameter; in 1.3–1.5,
+  use `_xfail_checks` tag. The compliance goal is NO expected failures — but the mechanism for
+  running the suite must be version-aware.
 
 **Warning signs:**
-- Pipeline report code contains `merged = {**stage1_diag, **stage2_diag, **stage3_diag}` and
-  then calls `advise(merged, ...)`.
-- Two pipeline stages coincidentally share a numeric value that appears in both dicts.
-- `_check_grounding` passes on a pipeline report that contains provenance-incorrect citations.
+- CI runs only one sklearn version.
+- `DeprecationWarning: _more_tags is deprecated` appears on sklearn 1.6.
+- `AttributeError: 'FdarsFPCA' object has no attribute '__sklearn_tags__'` appears on sklearn 1.8.
+- The `[sklearn]` extra declares `scikit-learn>=1.6` but the fdars base supports Python 3.9 (which
+  can only install sklearn up to 1.6 while sklearn 1.7+ requires Python 3.10).
 
 **Phase to address:**
-Pipeline diagnostic report phase. Design the aggregation architecture (per-stage advice vs.
-namespaced merged dict) before implementing.
+Compliance-triage phase (phase 1) — establish the version compatibility strategy before writing
+any estimator code. This is a cross-cutting concern affecting every estimator.
 
 ---
 
-### Pitfall 8: ITP Grounded-Scalar Reduction Loses Localisation — Misleading Summary
+### Pitfall 8: Stochastic Estimators — `check_methods_sample_order_invariance` Fails Without Proper Seeding
 
 **What goes wrong:**
-`itp_one_pop` / `itp_two_pop` / `itp_flm` return `{"adjusted_pvalues": ndarray(n_basis,),
-"raw_pvalues": ndarray(n_basis,), "n_basis": int, "n_perm": int}`. The p-values are a
-VECTOR — one per basis function. To ground the advisor, the vector must be reduced to scalars.
-The obvious reduction is `min(adjusted_pvalues)` (the most significant interval). But
-`min(adjusted_pvalues)` loses localisation: if 1 of 5 intervals is significant and the other 4
-are not, reporting only the minimum creates a misleading impression that "the test is
-significant" when it is significant only locally.
+`check_estimator` includes `check_methods_sample_order_invariance` and `check_methods_subset_invariance`.
+These checks shuffle the input data and verify that `fit(X).transform(X)` and
+`fit(X_shuffled).transform(X_shuffled_back)` yield the same result. Any estimator whose result
+depends on sample order (e.g. K-means initialisation, greedy clustering, elastic alignment order)
+will fail this check.
 
-A second trap: using `mean(adjusted_pvalues)` as the grounded scalar. If 4/5 intervals are
-p=0.80 and 1 interval is p=0.02, the mean (approx 0.66) gives a non-significant summary for a
-locally significant result — the opposite of the min trap, equally misleading.
+For fdars clustering estimators that wrap `fdars.clustering.cluster_kmeans`: the Rust code uses
+rayon for parallelism. Even with a fixed `random_state` in the Python wrapper, if rayon's thread
+scheduling affects the result, the estimator is effectively non-deterministic regardless of
+`random_state`. This would make the check fail.
+
+For FPCA: the SVD is deterministic given the same input, so order invariance holds IF sign
+canonicalisation is applied (see Pitfall 5). Without sign canonicalisation, FPCA also fails.
 
 **Why it happens:**
-The existing `_build_inference_diagnostics` was designed for scalar-valued `TestResult` dicts
-(`statistic`, `p_value`, `n_perm`). When extending to ITP, developers reach for the same
-grounded-scalar pattern and pick either `min` or `mean` without considering what the
-interpretation means.
+Clustering is inherently sensitive to initialisation. fdars-core's clustering may use a seed
+internally but the parallelism makes the seed insufficient for full order invariance.
 
 **How to avoid:**
-Expose MULTIPLE grounded scalars from `ItpResult`, each with a clear semantic:
-- `itp_n_significant_0.05` (int): number of basis intervals significant at 0.05 after
-  adjustment. This is a count, grounded, and captures localisation.
-- `itp_min_adjusted_pvalue` (float): the most significant adjusted p-value. Useful as a
-  "is there ANY significant interval?" flag but must be accompanied by `itp_n_significant_0.05`
-  to avoid the misleading impression.
-- `itp_fraction_significant_0.05` (float): fraction of intervals significant. Ranges 0-1.
-  When this is 0.2 (1/5), the LLM can cite "only 1 of 5 intervals significant at 0.05" rather
-  than inferring broad significance from `min_p` alone.
-- `itp_n_basis` (int): total number of intervals tested (denominator for the above).
-- Do NOT store the full p-value vector in the diagnostics dict — only the four scalars above.
-- Update `_ASPECT_PRIMERS["inference"]` to explain these ITP-specific fields separately from
-  the existing global-test fields.
+- For estimators with `random_state` that can be made fully deterministic: accept `random_state`
+  as a constructor parameter, use `sklearn.utils.check_random_state(self.random_state)` to get
+  a `RandomState` instance, and pass a derived seed to the fdars function. Verify with a test
+  that `random_state=42` produces identical results on two calls with different sample ordering.
+- If full order invariance CANNOT be achieved (e.g. rayon non-determinism persists despite seeding):
+  set `non_deterministic=True` in tags. This skips both order/subset invariance checks. But this
+  means the estimator will be tagged as non-deterministic, which is visible to users.
+- Recommendation: functional clustering (k-means on curves) should expose `random_state` and use
+  it to seed the Rust random state. If rayon still causes non-determinism, disable parallelism
+  during sklearn-wrapped fitting (add a `parallel=False` path in fdars-core binding) OR set the
+  non_deterministic tag.
+- Elastic alignment (registration) is inherently order-sensitive. If wrapping as a transformer,
+  test whether order invariance holds. If it does not, either exclude it or set non_deterministic.
 
 **Warning signs:**
-- `_build_inference_diagnostics` stores only `itp_min_adjusted_pvalue` with no count.
-- LLM evidence strings cite `itp_min_adjusted_pvalue = 0.02` without also citing
-  `itp_n_significant_0.05`.
-- The inference aspect primer does not explain ITP scalars separately from global-test scalars.
+- `check_methods_sample_order_invariance` fails intermittently.
+- The estimator passes the check with `random_state=42` but fails without it.
+- rayon thread count changes affect the result.
 
 **Phase to address:**
-Deferred advisor aspects phase (fill ITP). The scalar reduction design must be agreed in the
-plan before implementing the diagnostics builder update.
+Per-estimator implementation phase for stochastic methods (clustering, elastic alignment).
+Determinism testing must be done as part of compliance-triage.
 
 ---
 
-### Pitfall 9: MCP LLM-Free Boundary Violated by Auto-Tune Tool
+### Pitfall 9: Minimum Sample / Grid-Point Requirements — The Category That Forces Exclusion
 
 **What goes wrong:**
-A new MCP tool `fdars_auto_tune` is added that internally calls `advise()`. Because `advise()`
-imports the provider, makes an LLM call, and may consume an API key, the MCP server — which is
-supposed to be provably LLM-free — now has a tool that imports and calls the LLM layer. The
-`test_mcp_does_not_import_advise` test catches this for existing tools, but a new tool in a
-new commit bypasses this test if the test only checks existing tool names.
+`check_estimator` uses test data of approximately 40 samples and 3–10 features by default for most
+checks. The `check_fit2d_1sample` check uses 1 sample. The `check_fit2d_1feature` check uses 1
+feature (grid point). Many fdars methods have HARD minimum requirements that cannot be satisfied
+by these small inputs:
 
-**Why it happens:**
-The auto-tuning loop is conceptually agentic and developers think of it as naturally living in
-the MCP layer. But the existing MCP design intentionally keeps the server LLM-free: the agent
-(LLM) drives the tools, the tools run fdars, the agent synthesises. Adding an `fdars_auto_tune`
-tool that calls `advise()` collapses this separation — the MCP tool becomes an LLM caller.
+| Method Category | Minimum Requirement | check_estimator Behavior |
+|-----------------|--------------------|--------------------|
+| FPCA (n_components=k) | n_samples > n_components; n_points > n_components | Auto-adjusts n_components=1; passes IF 1-component FPCA works on 3-point grid |
+| Smoothing (df parameter) | n_points >> df (spline degrees of freedom) | May fail on 1-feature (1-point grid cannot be smoothed) |
+| Clustering (n_clusters=k) | n_samples >= n_clusters | Auto-adjusts n_clusters=1; passes if 1-cluster trivially assigns all samples to 1 cluster |
+| Basis expansion (n_basis) | n_points >= n_basis | May fail on 1-feature grid |
+| Elastic alignment | n_samples >= 2 (need at least two curves to align) | check_fit2d_1sample will fail if n_samples=1 raises wrong error |
+| Functional depth (reference set) | n_reference >= 2 | Fails on 1-sample reference |
+| Functional regression (FLM) | n_samples > n_basis | Underdetermined system on tiny samples |
+
+`check_estimator` automatically adjusts `n_components` to 1 and `n_clusters` to 1 before running
+checks (confirmed from sklearn source: the checking framework inspects the estimator's parameters
+and sets them to minimum-safe values). This means estimators with `n_components` attribute may
+survive the tiny-sample checks IF 1-component operation is valid.
+
+The FPCA case: `check_estimator` sets `n_components=1`. With 1 component and ~40 samples, standard
+FPCA should work. With `check_fit2d_1sample` (1 sample, n_components=1), FPCA must raise a
+sklearn-compliant `ValueError`. With `check_fit2d_1feature` (1 feature, n_components=1), a 1-point
+grid cannot be smoothed to extract a component — this likely raises a hard Rust error.
+
+Methods that predictably FAIL full check_estimator and should be EXCLUDED from the sklearn layer:
+- **Elastic alignment / registration**: requires n_samples >= 2; `check_fit2d_1sample` is
+  unpassable without special-casing that makes the result meaningless.
+- **Functional depth (as transformer outputting scalar depth values)**: the OutlierMixin contract
+  requires `predict` to return +1/-1 integers. fdars depth functions return float depth values,
+  not binary labels. Wrapping as `OutlierMixin` requires a thresholding step, which is stateful
+  and complicates the contract significantly.
+- **Basis smoothing with cross-validated df**: the CV process requires enough samples for
+  cross-validation folds; 1-sample input is structurally impossible for CV. The error path is
+  not trivially sklearn-compliant.
+- **Functional GLM (exponential family)**: requires n_samples >> n_parameters; 1-feature check
+  creates a degenerate system that triggers hard Rust-level linear algebra errors.
+- **Elastic multinomial classification**: multi-class check needs >= 3 classes; with tiny samples
+  this is structurally infeasible.
+
+Methods that predictably PASS full check_estimator with correct implementation:
+- **FdarsSmoother (fixed bandwidth)**: shape-preserving, works on any n_points >= 1 (kernel
+  smoothing with bandwidth handles edge cases gracefully), returns same shape.
+- **FdarsFPCA (scores transformer)**: passes IF sign canonicalisation applied and n_components=1
+  works on small grids.
+- **FdarsBasisTransformer (fixed basis)**: shape-changing but predictable; n_basis=1 (auto-adjusted)
+  should work.
+- **FdarsMean (as transformer that centers)**: shape-preserving, trivially handles 1 sample.
+- **FdarsFunctionalRegressor (scalar-on-function)**: RegressorMixin; with n_components=1 and ~40
+  samples, should pass. Needs explicit 1-sample guard.
+- **FdarsFunctionalClassifier (supervised classification)**: ClassifierMixin; with n_clusters=1 and
+  2 classes, should pass with correct guards.
 
 **How to avoid:**
-- Keep the MCP tool layer LLM-free. The auto-tuning loop at the MCP level is implemented as:
-  the LLM agent calls `fdars_run_method` then `fdars_build_diagnostics` then `fdars_run_method`
-  repeatedly, observing diagnostics at each step. The LLM IS the orchestrator; the tools only
-  run fdars and return diagnostics. No new `fdars_auto_tune` MCP tool that calls `advise()`.
-- If a convenience auto-tune tool is needed at the MCP level, it must call `run_method` and
-  `build_diagnostics` only (no `advise`), returning a history of (params, diagnostics) pairs.
-  The LLM interprets the history.
-- Extend `test_mcp_does_not_import_advise` to also assert that no module under `fdars.mcp`
-  imports `fdars.advisor.advise` — make the test import-graph-aware, not just
-  `inspect.getmembers`-based.
+- Run compliance triage BEFORE building the full estimator layer. For each candidate method:
+  1. Write a minimal wrapper with the correct Mixin.
+  2. Run `check_estimator()` and record which checks pass and which fail.
+  3. Classify as PASS, PASS-WITH-FIXES (guards needed), or EXCLUDE.
+- The earliest detection strategy: a triage script that runs `check_estimator()` on skeleton
+  estimators (minimal `fit`/`transform` calling fdars) and captures the failing check names.
+  This can be done in 1–2 days and determines the entire scope of the sklearn layer.
+- For the EXCLUDE list: document the specific failing check name and reason in the coverage list
+  (a required v9.0 deliverable).
 
 **Warning signs:**
-- A new MCP tool imports `from fdars.advisor import advise` anywhere in its body.
-- `fdars.mcp.server` imports `advise` at module level.
-- The `test_mcp_does_not_import_advise` test only checks the existing tool names but not new ones.
+- A method's `fit` raises `ValueError` or `LinAlgError` when called with n_samples=40 (the
+  standard test size) during initial triage — it will certainly fail on 1-sample check.
+- The method has a non-trivial "minimum samples" requirement that cannot be expressed as a
+  simple `n_samples=1` guard with a compliant error message.
 
 **Phase to address:**
-Closed-loop auto-tuning capstone. Define the MCP auto-tune surface as "the LLM is the
-orchestrator via existing tools" BEFORE writing code — this prevents the anti-pattern from
-being implemented and then having to be refactored.
+Phase 1 MUST be a compliance-triage phase. Do NOT build all estimators and then discover exclusions
+late. The triage determines which methods are in scope for implementation phases.
 
 ---
 
-### Pitfall 10: Guard-Sync Drift — `_DIAGNOSTICS_METHODS` Diverges from `build_diagnostics._supported`
+### Pitfall 10: `check_estimators_nan_inf` — Non-Finite Input Rejection Without Compliant Path
 
 **What goes wrong:**
-When adding PACE-FPCA, elastic-multinomial, and ITP deferred aspects, the developer adds the
-new aspect string to `build_diagnostics._supported` in `advisor/__init__.py` (so the Python
-API works) but forgets to add it to `_DIAGNOSTICS_METHODS` in `mcp/server.py`. The MCP tool
-then rejects the aspect with "unsupported method". Or the reverse: the developer adds it to
-`_DIAGNOSTICS_METHODS` first (so MCP works) but the `build_diagnostics` branch handler is
-not yet written, causing a `ValueError` from `build_diagnostics` after the MCP guard passes.
+`check_estimator` feeds `X` arrays containing `np.inf` and `np.nan` to `fit()`. By default, the
+check expects the estimator to REJECT non-finite input with a `ValueError`. If the estimator
+passes non-finite data to fdars-core, the Rust code may panic, produce NaN outputs silently, or
+raise an opaque error. None of these are compliant — only a `ValueError` is.
+
+If an estimator sets `allow_nan=True` in tags (to indicate it handles NaN), then the check tests
+that it actually handles NaN without raising an error. For fdars methods, imputation is the only
+category that legitimately handles NaN (by design).
 
 **Why it happens:**
-The guard-sync has been identified as a recurring risk (the v4.0 Phase 28 note "guard-sync
-a no-op" and v5.0/v6.0 equivalents describe it each time). The two sets are defined in
-different files and the test that checks their equivalence
-(`test_diagnostics_methods_match_advisor_supported`) only runs if the mcp extra is installed.
-On Python 3.9 CI (where mcp is unavailable), this test is skipped and the drift goes undetected
-until a human runs the full suite on Python 3.10+.
+fdars-core assumes well-formed input. The PyO3 bindings do not validate for non-finite values
+before passing arrays to Rust. A panic in Rust code propagates as a Python `RuntimeError`
+(not `ValueError`) or as a process abort in some configurations.
 
 **How to avoid:**
-- The atomic-commit rule: `_supported` and `_DIAGNOSTICS_METHODS` must be updated in the SAME
-  commit. Add a CI check (not just a test) that imports both sets on Python 3.10+ and asserts
-  equality. This check must also run in the pre-commit lint step.
-- For deferred aspects, if the Python API support is added before MCP support (or vice versa),
-  use a placeholder comment, not a silent omission.
-- The existing `test_diagnostics_methods_match_advisor_supported` test is the correct
-  verification — make it not-skippable by extracting the `_supported` set to a module-level
-  constant that can be imported without the mcp extra.
+- In the Python-layer `fit()`, call `validate_data(self, X, ensure_all_finite=True)` (not
+  `assert_all_finite` — that parameter name was deprecated in sklearn 1.6). This raises a
+  compliant `ValueError` with the standard message before any fdars-core call.
+- The FdarsImputer/FdarsMissingValueTransformer should set `allow_nan=True` in its tags AND
+  implement NaN handling correctly. All other estimators should NOT set `allow_nan=True`.
+- Use `ensure_all_finite` not `force_all_finite` (the newer parameter name from sklearn 1.6+).
 
 **Warning signs:**
-- A commit message says "add X to build_diagnostics" without mentioning `_DIAGNOSTICS_METHODS`.
-- The test `test_diagnostics_methods_match_advisor_supported` is skipped on Python 3.9 (the
-  primary CI runner in this project's matrix).
-- `build_diagnostics._supported` and `_DIAGNOSTICS_METHODS` differ by more than zero elements
-  after any commit that touches either file.
+- `check_estimators_nan_inf` fails with `RuntimeError` or process abort (Rust panic propagation).
+- An estimator sets `allow_nan=True` but silently ignores NaN in computation instead of handling it.
+- `validate_data(self, X, ensure_all_finite=True)` is not called before fdars-core dispatch.
 
 **Phase to address:**
-Deferred advisor aspects phase (foundational). This is the first phase in v8.0 and the
-guard-sync must be part of each deferred-aspect acceptance criterion.
+Compliance-triage phase (phase 1) — add the `validate_data(ensure_all_finite=True)` call to the
+base class `fit` skeleton so all estimators inherit it. The imputer is the only exception.
 
 ---
 
-### Pitfall 11: `_ASPECT_PRIMERS` Extension Without Grounding-Aware Wording
+### Pitfall 11: `check_dtype_object` and Float32/Float64 Casting
 
 **What goes wrong:**
-When adding `_ASPECT_PRIMERS` entries for PACE-FPCA or elastic-multinomial, or updating the
-`inference` entry for ITP, the primer clause describes the semantics of the new diagnostic
-fields. If the primer uses vague wording like "higher pace_ncomp is better" without tying it
-to a specific fdars-computed value, the LLM may invent a threshold ("typically >= 5") and cite
-that invented threshold in `evidence`. This passes `_check_grounding` only if the invented
-value happens to numerically equal something in the diagnostics dict.
+`check_estimator` runs `check_dtype_object` which passes `X` with dtype `object` (Python objects
+array) and expects a `ValueError`. It also runs dtype-casting checks with `float32` input.
+fdars-core expects `float64` arrays. If the PyO3 binding receives `float32` input, it may:
+1. Accept it silently and produce wrong results (silent precision loss), or
+2. Raise a Rust `TypeError` that propagates as a non-compliant Python error.
 
-**Why it happens:**
-Primer authors write natural-language explanations without realising that every claim the
-primer enables the LLM to make must be backed by a cited diagnostic value. The primer is not
-itself a cited value — it is framing. Framing that implies a threshold ("a high sigma2 indicates
-noise") causes the LLM to generate evidence like "sigma2=0.05 indicates high noise" — which
-is grounded (0.05 is in the dict) — but also "noise level exceeds the typical 0.02 threshold"
-— which is fabricated (no 0.02 in the diagnostics dict).
+The sklearn convention is that `float32` input should be preserved as `float32` if the estimator
+supports it. If the estimator only supports `float64`, `validate_data` with `dtype="numeric"`
+will cast `float32` to `float64` automatically — BUT this means the estimator accepts `float32`
+input and silently upcasts it, which is the CORRECT behavior (not a failure).
+
+Object-dtype arrays must raise `ValueError`. The fdars-core binding will raise some error, but it
+may not be a `ValueError` with the right message.
 
 **How to avoid:**
-- Primer clauses must describe WHAT the diagnostic measures and WHAT DIRECTION is better,
-  without numeric thresholds. The existing `inference` primer ends with: "Interpret these values
-  in the context of the study design and sample size — do not claim significance or non-significance
-  beyond the p_value and alpha levels already provided." This explicit prohibition is the
-  correct pattern.
-- Add a similar prohibition to all new primers: "Only cite values from the diagnostics dict.
-  Do not supply thresholds or reference values not present in the diagnostics."
-- Test by running the primer through `advise()` with a mock diagnostics dict and asserting that
-  `_check_grounding` passes and no invented numbers appear.
+- Use `validate_data(self, X, dtype="numeric")` which handles both object-dtype rejection (raises
+  `ValueError`) and float32/float64 casting (upcasts float32 to float64 if needed).
+- Do NOT use `dtype=np.float64` explicitly — this rejects float32 input with a non-compliant error
+  instead of upcasting it.
+- After `validate_data`, the array is guaranteed to be numeric and contiguous — safe to pass to fdars.
 
 **Warning signs:**
-- New primer clause contains phrases like "typically", "usually >= N", "standard threshold".
-- `_check_grounding` starts raising `GroundingViolationError` on advice that was previously
-  clean, after a primer extension.
-- Evidence strings cite numeric values that are not in the diagnostics dict but look like
-  domain thresholds (0.05 for p-values, 0.9 for variance explained).
+- `check_dtype_object` fails with a Rust `TypeError` instead of `ValueError`.
+- Passing `float32` arrays to an fdars estimator raises `TypeError` instead of silently upcasting.
+- Tests pass with `float64` input only.
 
 **Phase to address:**
-Deferred advisor aspects phase and any phase that extends `_ASPECT_PRIMERS`. Include a
-primer-wording review in each phase's acceptance criteria.
+Compliance-triage phase (phase 1) — add `dtype="numeric"` to `validate_data` in the base class skeleton.
 
 ---
 
-### Pitfall 12: Evaluating "Good Advice" with LLM-as-Judge — Non-Determinism and CI Cost
+### Pitfall 12: `OutlierMixin` — `predict` Must Return +1/-1, Not Float Depths
 
 **What goes wrong:**
-The eval strategy uses a second LLM call to judge whether the advice from `advise()` is "good"
-— e.g. a rubric-graded judge that scores the advice on a 1-5 scale. This creates: (a) a second
-LLM call in the eval path, doubling cost; (b) non-determinism (the judge itself may score
-differently each run, making eval results unreproducible); (c) network dependency in what
-should be a deterministic test suite; and (d) the judge's own hallucination risk (it may score
-a grounded-but-wrong recommendation as "good" because the prose sounds confident).
+fdars outlier detection methods (`tvdmss`, `muod`, `sequential_transform`, depthgram) return
+outlier INDICES or depth-based scores, not binary +1/-1 arrays. The `OutlierMixin` contract
+requires:
+- `predict(X)` returns `ndarray` of shape `(n_samples,)` with values in `{-1, +1}` only
+  (-1 = outlier, +1 = inlier).
+- `fit_predict(X)` does the same (provided by `OutlierMixin.fit_predict` which calls `fit` then
+  `predict`).
+- `score_samples(X)` may return a float score (lower = more anomalous) — but only if implemented.
+
+If `predict()` returns a float array (depth scores), the check `check_outliers_train` fails
+because it asserts the values are in `{-1, +1}`.
 
 **Why it happens:**
-LLM-as-judge is a common pattern in LLM system evaluation. Developers import it without
-considering that this project has a clean offline/online split enforced by env-gating, and that
-the grounding invariant already provides a deterministic quality signal.
+fdars outlier methods return indices of outliers, not binary membership. Converting to +1/-1
+requires choosing a threshold, which is a stateful decision made during `fit`. Developers may
+expose the raw fdars output directly.
 
 **How to avoid:**
-The primary eval signal for this system should be deterministic and LLM-free:
-
-1. Grounding pass rate: `_check_grounding` already enforces that every cited value is in the
-   diagnostics. A recommendation that passes `_check_grounding` is "groundedly correct".
-   Track the pass rate across the aspect x provider matrix (already in `test_aspect_provider_matrix.py`).
-
-2. Auto-tuning improvement rate: In the loop, the target diagnostic either improves or it does
-   not. This is a deterministic fdars-computed comparison. For a fixed (dataset, starting
-   params, target) triple with a mock advisor that proposes a known-good change, the correct
-   outcome is deterministic. Assert it in CI without any LLM call.
-
-3. Comparative selection accuracy: When both methods are run on a synthetic dataset where the
-   ground truth is known (e.g. one method fits the data-generating process perfectly), assert
-   that `comparative_select` returns the correct method. Entirely deterministic.
-
-4. Aspect coverage: Assert that `build_diagnostics` emits all expected scalar keys for each
-   aspect. If a key is missing or None when it should be populated, that is a measurable failure.
-
-Use LLM-as-judge only as an optional, offline, manually-run quality audit — never in CI and
-never as an acceptance criterion.
+- During `fit(X)`: compute outlier flags (using the fdars method) and store the THRESHOLD
+  or decision boundary as `self.threshold_` (a fitted attribute).
+- During `predict(X)`: compute outlier scores for new data, apply `self.threshold_`, and return
+  `np.where(scores < self.threshold_, -1, +1)`.
+- The `decision_function(X)` method can return float scores.
+- Verify: `np.unique(estimator.predict(X))` must be a subset of `[-1, 1]`.
+- Note: this requires fdars outlier methods to produce a continuous score for NEW data (not
+  just flags on training data). Methods that only flag training outliers (non-transductive)
+  cannot implement `predict(X_new)` — these must be EXCLUDED from the OutlierMixin layer.
 
 **Warning signs:**
-- Eval test file imports a `judge` that calls `advise()` or any LLM provider.
-- Eval tests are env-gated on `FDARS_INTEGRATION=1` AND listed as required for CI green.
-- The eval acceptance criterion is "judge scores >= 4/5" rather than "grounding pass rate = 100%".
+- `check_outliers_train` fails with "ValueError: predict did not return +1/-1 labels".
+- `predict(X)` returns a float array (depth values or distance scores).
+- The method only flags training outliers and cannot score new samples.
 
 **Phase to address:**
-Eval strategy phase. Define the eval approach before any implementation so it does not
-retroactively constrain the system design.
-
----
-
-### Pitfall 13: Comparative Method-Selection — Advice Cites the Wrong Run's Diagnostics
-
-**What goes wrong:**
-Comparative selection calls `build_diagnostics` twice (once per candidate method) and passes
-both dicts to `advise()`. The merged dict contains `{"method_a": {...}, "method_b": {...}}`.
-The LLM cites "method_b's r_squared=0.89" in evidence. But in the merged dict, 0.89 also
-appears in method_a's diagnostics (as, say, `cumulative_variance_explained[-1]`). The
-`_check_grounding` guard finds 0.89 in the flat-merged numbers and passes — but the
-citation is provenance-incorrect.
-
-**Why it happens:**
-The same root cause as Pitfall 7 (aggregated provenance), but in the specific context of
-comparative selection where two diagnostic dicts for DIFFERENT methods are combined. The guard
-scans all numeric values in the merged dict without tracking which sub-dict they came from.
-
-**How to avoid:**
-- Structure the comparative selection input to `advise()` with namespaced keys:
-  `{"fpca.explained_variance_ratio": [...], "pls.cv_error_rate": 0.12}` — never a flat merge
-  of two different-method dicts.
-- Alternatively, call `advise()` once per method to get per-method interpretation, then call
-  a separate `compare_methods(advice_a, advice_b)` function that takes the two `Advice` objects
-  and returns a `MethodComparison` object. This avoids combining raw numeric dicts entirely.
-- If a single `advise()` call is used, add a `provenance_check` step after `_check_grounding`:
-  for each evidence citation, verify that the cited value came from the diagnostics sub-dict
-  labeled with the method the citation names.
-
-**Warning signs:**
-- Comparative selection passes `{**diag_a, **diag_b}` to `advise()`.
-- Two method dicts have coincidentally equal values (very likely in FDA where 0.9, 0.95, 0.05
-  appear frequently as explained-variance and p-value thresholds).
-- After comparative selection, the LLM cites method A's value in a recommendation about method B.
-
-**Phase to address:**
-Comparative method-selection phase. The architecture decision (namespaced vs. per-method calls)
-must be made in the plan, not during implementation.
+Compliance-triage phase (phase 1) — check whether each fdars outlier method supports scoring
+new samples vs. only flagging training samples. Non-transductive methods are EXCLUDED.
 
 ---
 
@@ -539,11 +589,12 @@ must be made in the plan, not during implementation.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Single system prompt for all loop steps | Simpler to implement | LLM forward-predicts numeric outcomes; grounding violations accumulate over steps | Never — write a dedicated `_loop_system_prompt()` |
-| Flat-merged multi-stage diagnostics dict | One `advise()` call for the whole pipeline | Provenance collapse; `_check_grounding` passes on wrong-run citations (Pitfall 7) | Never — use per-stage advice or namespaced keys |
-| Auto-tune loop budget checked inside `advise()` | No new orchestrator code | LLM cost and time can exhaust before Python-layer enforcement | Never — enforce budget in the Python orchestrator |
-| Skip guard-sync test on Python 3.9 | Faster CI on 3.9 | Drift between `_DIAGNOSTICS_METHODS` and `_supported` undetected until 3.10+ run | Acceptable only if a non-skippable lint check covers it |
-| `min(adjusted_pvalues)` as the sole ITP scalar | Simple single-value reduction | Misleads the LLM into treating local significance as global (Pitfall 8) | Never — emit at minimum `n_significant` and `fraction_significant` alongside `min_p` |
+| Using `_more_tags()` only (no `__sklearn_tags__`) | Works on sklearn 1.3–1.5, less code | DeprecationWarning on 1.6, AttributeError on 1.8 | Never — implement both or use sklearn-compat shim |
+| Setting `n_features_in_` manually instead of via `validate_data` | Avoids sklearn import in `fit` | Breaks `check_n_features_in`; inconsistent with feature name tracking | Never |
+| Not applying SVD sign canonicalisation | Simpler code | `check_fit_idempotent` fails intermittently | Never for FPCA transformers |
+| Skipping `check_fit2d_1sample` guard | Less boilerplate | Propagates Rust panics or non-compliant errors; test fails | Never |
+| Wrapping every fdars method regardless of compliance | Maximum API surface | Compliance failures cascade; excluded methods poison the battery for the whole module | Never — triage first, implement only compliant subset |
+| Using `np.arange(n_features)` as default `argvals` without None sentinel | Fewer conditionals | Constructor parameter is computed, not verbatim; breaks `clone` round-trip | Never — use `None` as default, derive in `fit` |
 
 ---
 
@@ -551,11 +602,12 @@ must be made in the plan, not during implementation.
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| `_check_grounding` + loop history | Passing the full history as part of the diagnostics dict; `_check_grounding` then accepts any historical value as "grounded" for the current step | Pass history in a separate `history:` section of the user content, outside the diagnostics block that `_check_grounding` reads |
-| `fdars_compare_run` + auto-tune | Calling `fdars_compare_run` with different methods in `method` field across before/after | The before/after method must be identical; method change requires a new comparative-selection call, not a compare_run call |
-| Provider-agnostic loop | Different providers format `expected_effect` differently (Ollama may be brief, Anthropic verbose) | Loop convergence must not parse `expected_effect` text; use only the fdars-computed diagnostic delta for convergence |
-| Pipeline report + docs build | Pipeline report's worked example must not call `advise()` (network dependency); only the `build_diagnostics` stage of each pipeline step can execute in the docs fence | Keep all pipeline-report fences in `FDARS_FENCE_OK` mode using `run_llm=False` equivalents; the LLM step is illustrative only |
-| ITP `adjusted_pvalues` array + grounding | `adjusted_pvalues` is a numpy array; putting it directly into the diagnostics dict breaks `_check_grounding` (which iterates `_flatten_diagnostics_numbers` on dict values) | Reduce to scalar diagnostics in `_build_inference_diagnostics` before the dict is returned; never put the raw array in the grounding-checked dict |
+| `validate_data()` in sklearn 1.3 vs 1.6+ | `validate_data(self, X)` is public in 1.6; `self._validate_data(X)` works in 1.3–1.5 but is deprecated | Use `validate_data(self, X)` from `sklearn.utils.validation` in 1.6+; fall back to `self._validate_data(X)` if not available |
+| `check_estimator` with `expected_failed_checks` | Available in sklearn 1.6+; using it in 1.5 raises TypeError | Use `try/except` around the parameter or version-check `sklearn.__version__` |
+| `ensure_all_finite` vs `force_all_finite` vs `assert_all_finite` | Three different parameter names across versions | Use `ensure_all_finite` (valid 1.6+); `force_all_finite` for 1.0–1.5 compatibility |
+| `_validate_data` deprecation | Calling `self._validate_data()` on sklearn 1.6+ raises DeprecationWarning | Import and use `sklearn.utils.validation.validate_data(self, X)` |
+| sklearn `Tags` dataclass fields | Tags fields changed between pre-1.6 dict keys and 1.6+ dataclass fields | Never hard-code field names; always call `super().__sklearn_tags__()` first and modify fields |
+| fdars PyO3 numpy array dtype | fdars-core expects `float64`; passing `float32` may succeed silently or cause type mismatch in Rust | Always call `validate_data(self, X, dtype="numeric")` which upcasts; never pass raw arrays to fdars before validation |
 
 ---
 
@@ -563,22 +615,24 @@ must be made in the plan, not during implementation.
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Re-running fdars at every loop step without caching the dataset | Loop re-reads and re-validates the same dataset arrays from the registry at every step | Cache the resolved `(data, argvals)` tuple at loop start; pass it directly to each step's `run_method` call | At > 10 steps on a dataset with n > 500 curves |
-| Accumulating full diagnostics dicts in the loop history | Context window bloats after 5+ steps; LLM context truncation causes the advisor to lose early history | Store only `{step: int, param_changed: str, param_value: scalar, target_diagnostic: float}` per history entry | At > 7 steps or if diagnostics dicts are large (outliers or regression with many keys) |
-| Building the full pipeline report by calling `build_diagnostics` on all stages sequentially | Each call re-imports the aspect module | All imports are lazy (existing pattern); no action needed unless profiling shows otherwise | Effectively never at typical pipeline depth (3-6 stages) |
+| Calling `validate_data` then converting to fdars format (two copies) | Slow fit for large n_obs | Accept the two copies as necessary; document the copy overhead in docstring | Above n_obs=10,000 (measurable overhead) |
+| Re-deriving argvals in every `transform` call | Redundant work per call | Derive in `fit`, store as `self.argvals_`, reuse in `transform` | On any repeated `transform` call |
+| sklearn cross-validation with fdars estimator that has high per-fit cost | CV with 5 folds × GridSearchCV × parameter grid is very slow | Provide fast `__init__` defaults; warn in docs that CV on large grids is expensive | With n_obs > 1000, grid > 100 points |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **ITP grounded-scalar reduction:** `adjusted_pvalues` array is stored as scalar count+fraction+min, not as a numpy array — verify `json.dumps(build_diagnostics(itp_result, "inference"))` succeeds without TypeError.
-- [ ] **MCP LLM-free boundary:** No import of `fdars.advisor.advise` anywhere under `fdars.mcp` — verify with `grep -r "from fdars.advisor import advise" python/fdars/mcp/`.
-- [ ] **Guard-sync atomic commit:** After any change to `build_diagnostics._supported`, the corresponding `_DIAGNOSTICS_METHODS` change is in the same commit — verify with `git diff HEAD --stat | grep -E "advisor.*__init__|mcp.*server"`.
-- [ ] **Loop non-determinism:** The loop orchestrator unit tests run with a mock advisor and pass without `ANTHROPIC_API_KEY` — verify by running `pytest tests/test_advisor_loop.py -q` in a bare venv.
-- [ ] **Comparative diagnostics provenance:** The comparative-selection advice has no evidence item that cites a value shared between method_a and method_b dicts — verify by constructing a synthetic case where the two dicts have no overlapping numeric values and asserting `_check_grounding` passes.
-- [ ] **Pipeline report per-stage isolation:** The pipeline report never calls `advise()` on a flat-merged dict — verify by grepping for `{**` followed by `advise(` in the pipeline report implementation.
-- [ ] **Goodhart guard diagnostics:** The auto-tune loop's acceptance test verifies that `edf` does not exceed 0.9 x n_obs even when `gcv_min` is successfully minimised.
-- [ ] **Primer wording:** All new `_ASPECT_PRIMERS` entries end with a prohibition on inventing thresholds — verify by reading the new primer clause before merging.
+- [ ] **Constructor verbatim storage:** Every constructor parameter is stored verbatim as `self.param = param` in `__init__` with NO computation — verify that `estimator.get_params() == constructor_kwargs` after `__init__` (before `fit`).
+- [ ] **Trailing underscore discipline:** Every attribute set in `fit()` ends with `_` — grep for `self\.\w+[^_] =` inside all `fit` methods.
+- [ ] **`n_features_in_` via validate_data:** All `fit()` methods call `validate_data(self, X, ...)` not `self.n_features_in_ = X.shape[1]` — grep for `self.n_features_in_` to catch manual sets.
+- [ ] **Sign canonicalisation for FPCA:** After extracting components, the sign-flip step (`components_ *= signs[:, np.newaxis]`) is applied — run `fit(X); fit(X)` twice and assert `np.allclose(transform(X_v1), transform(X_v2))`.
+- [ ] **Error message substrings:** Every `n_samples` guard raises `ValueError` with "1 sample" or "n_samples=N" — run `check_estimator` on a minimal instance and check that `check_fit2d_1sample` passes.
+- [ ] **Non-finite rejection:** `validate_data(ensure_all_finite=True)` is called before fdars dispatch — pass `np.array([[np.inf, 1.0]])` to `fit` and verify `ValueError` (not `RuntimeError` or panic).
+- [ ] **Tags dual-API:** Both `_more_tags()` (for sklearn 1.3–1.5) and `__sklearn_tags__()` (for 1.6+) are implemented or a compat shim is used — test with both sklearn versions in CI.
+- [ ] **OutlierMixin predict returns +1/-1:** `np.unique(estimator.fit(X).predict(X))` is a subset of `[-1, 1]` with integer dtype.
+- [ ] **Pipeline n_features flow:** A `Pipeline([FdarsSmoother(), LinearRegression()])` survives `clone(pipeline)`, `pipeline.fit(X, y)`, `pipeline.predict(X)` end-to-end.
+- [ ] **Exclusion list documented:** Every fdars method that fails compliance triage is recorded in `python/fdars/sklearn/COVERAGE.md` with the failing check name — verified by the triage phase's acceptance criterion.
 
 ---
 
@@ -586,11 +640,11 @@ must be made in the plan, not during implementation.
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Loop non-termination discovered in production | HIGH | Kill the loop process; add `max_steps` enforcement; add the injectable-advisor test pattern; re-release |
-| Grounding violation from wrong-run citation in pipeline report | MEDIUM | Refactor to per-stage `advise()` calls; existing `_check_grounding` continues to work correctly |
-| Guard-sync drift discovered after release | LOW | Add the missing aspect to the lagging set in a patch commit; add the atomic-commit CI check so it cannot recur |
-| LLM fabricates forward-looking numeric values in loop | MEDIUM | Add "do not predict numeric outcomes" to `_loop_system_prompt`; add the `expected_effect` numeric-literal assertion to tests |
-| ITP min-only scalar misleads LLM | LOW | Add `n_significant` and `fraction_significant` fields to `_build_inference_diagnostics`; update the inference primer |
+| Constructor mutation discovered after estimators are built | HIGH | Rename derived attributes to trailing-underscore variants across all estimators; audit all `get_params` round-trips |
+| Tags API mismatch on sklearn upgrade | MEDIUM | Add `__sklearn_tags__` alongside `_more_tags`; test on new sklearn version; release patch |
+| SVD sign ambiguity discovered in production | MEDIUM | Add sign canonicalisation step; bump minor version; the fix is isolated to FPCA estimator |
+| Exclusion of a method discovered late (after docs are written) | HIGH | Revise coverage list, docs, and tests; cost scales with how much surrounding code was built for the excluded method |
+| `check_fit2d_1sample` fails with Rust panic | LOW | Add Python-layer guard before fdars-core call; Rust error never reaches check |
 
 ---
 
@@ -598,34 +652,66 @@ must be made in the plan, not during implementation.
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| P1: Loop non-termination | Auto-tuning capstone — contract spec | Assert `stopped_by` field present in all loop return dicts; unit test with `max_steps=2` |
-| P2: LLM re-enters numeric path | Auto-tuning capstone — `_loop_system_prompt` | Assert `expected_effect` in loop advice contains no numerics absent from current diagnostics |
-| P3: Goodhart degradation | Auto-tuning capstone — guard-diagnostic contract | Assert guard diagnostics hold at every step in the acceptance test |
-| P4: Oscillating loop | Auto-tuning capstone — history and convergence check | Unit test with mock advisor that alternates direction; assert loop terminates with `stopped_by="converged"` |
-| P5: Non-deterministic loop (untestable) | Auto-tuning capstone — injectable advisor | All orchestrator tests pass with `pytest -q` in bare venv; no `ANTHROPIC_API_KEY` needed |
-| P6: Incommensurable comparison | Comparative method-selection and auto-tuning capstone | Assert `ValueError` raised when `before["method"] != after["method"]` in compare |
-| P7: Pipeline wrong-run citation | Pipeline diagnostic report phase | Assert `advise()` is never called on a flat-merged dict; per-stage isolation enforced |
-| P8: ITP misleading scalar | Deferred advisor aspects phase (ITP) | Assert `n_significant`, `fraction_significant`, `min_adjusted_pvalue` all present; `json.dumps` succeeds |
-| P9: MCP LLM-free boundary violated | Auto-tuning capstone — MCP surface design | `test_mcp_does_not_import_advise` passes; grep for `import advise` under `fdars.mcp` returns nothing |
-| P10: Guard-sync drift | Deferred advisor aspects phase (foundational) | `test_diagnostics_methods_match_advisor_supported` passes without mcp extra; CI script enforces |
-| P11: Primer wording enables fabrication | Deferred aspects + every `_ASPECT_PRIMERS` extension | `_check_grounding` passes on mock diagnostics after primer is added; no invented thresholds in evidence |
-| P12: LLM-as-judge eval | Eval strategy phase | Eval acceptance criteria are grounding pass rate + deterministic improvement rate; no LLM judge in CI |
-| P13: Comparative wrong-run citation | Comparative method-selection phase | Construct synthetic case with no overlapping values; assert `_check_grounding` correctly rejects wrong-run citations |
+| P1: Constructor mutation | Phase 1 (compliance-triage): base class pattern | `get_params()` round-trip test before any other estimator |
+| P2: Missing `n_features_in_` | Phase 1: base class fit skeleton | `check_n_features_in` passes on all estimators |
+| P3: Missing trailing underscore | Phase 1: base class + code review | `check_is_fitted` passes on unfitted and fitted instances |
+| P4: Error message substring contract | Phase 1 (triage) + per-estimator | `check_fit2d_1sample` and `check_fit2d_1feature` pass |
+| P5: SVD sign ambiguity | Per-estimator (FPCA phase) | `check_fit_idempotent` passes; two consecutive fits give identical transform output |
+| P6: Grid-changing transformers in Pipeline | Phase 1 (triage): categorise as shape-preserving vs. reducing | `check_pipeline_consistency` passes for shape-preserving; documented as "not pipeline-composable" for reducing |
+| P7: Sklearn version drift | Phase 1: version compat strategy | CI runs sklearn 1.4 (Python 3.9) AND sklearn 1.6+ (Python 3.10+) |
+| P8: Stochastic estimator order invariance | Per-estimator (clustering/alignment phase) | `check_methods_sample_order_invariance` passes OR `non_deterministic=True` tag set |
+| P9: Minimum sample/grid exclusions | Phase 1 (triage): compliance scan | Triage script produces PASS/EXCLUDE list before implementation begins |
+| P10: Non-finite rejection | Phase 1: base class validation | `check_estimators_nan_inf` passes |
+| P11: Object dtype / float32 casting | Phase 1: `dtype="numeric"` in base | `check_dtype_object` passes |
+| P12: OutlierMixin +1/-1 contract | Phase 1 (triage) + per-estimator | `check_outliers_train` passes; `np.unique(predict(X))` subset of `[-1, 1]` |
+
+---
+
+## Predictable PASS vs. EXCLUDE Classification
+
+Based on research against sklearn source, scikit-fda patterns, and fdars method categories:
+
+### Predictable PASS (with correct implementation)
+
+| Method Category | Key Implementation Requirements |
+|-----------------|----------------------------------|
+| Functional smoother (fixed bandwidth/lambda) | Shape-preserving; `validate_data` handles 1-feature; compliant ValueError for 1-sample |
+| FPCA scorer (outputs scores, not functional data) | Sign canonicalisation; n_components=1 must work; 1-sample guard with compliant message |
+| Basis representation (fixed basis, fixed n_basis) | n_basis=1 auto-adjust; 1-sample guard; shape-change documented |
+| Functional normalisation / centering (mean subtraction) | Shape-preserving; trivially handles 1 sample |
+| Interpolation / imputation | `allow_nan=True` tag for imputer; shape-preserving |
+| Scalar-on-function regression (FPC-LM, PLS) | RegressorMixin; n_components=1; compliant guards |
+| Functional classifier (supervised) | ClassifierMixin; n_clusters=1 equiv; multi-class tag set correctly |
+
+### Predictable EXCLUDE (with expected failing check)
+
+| Method Category | Failing Check | Reason |
+|-----------------|--------------|--------|
+| Elastic alignment / registration | `check_fit2d_1sample` | Requires n_samples >= 2; 1-sample fit is structurally impossible and cannot be made compliant without making the method meaningless |
+| Basis smoothing with CV (AIC/GCV selection) | `check_fit2d_1sample` | CV requires multiple samples; 1-sample path is not implementable with compliant error |
+| Functional depth as OutlierMixin | `check_outliers_train` | fdars depth methods return float scores, not +1/-1; transductive-only methods cannot `predict(X_new)` |
+| Functional GLM (exponential family) | `check_fit2d_1sample` | Degenerate linear system; Rust-level error on tiny inputs; non-compliant error path |
+| Elastic multinomial classifier | `check_estimators_nan_inf` OR `check_fit2d_1sample` | Multi-class requires >= 3 classes; tiny sample path triggers hard numerical failures |
+| Inference tests (t_perm_test, ANOVA) | Does not fit the fit/predict/transform paradigm | These are statistical tests, not estimators; excluded by design |
+| SPM monitoring | Does not fit fit/predict paradigm | Monitoring is sequential, not batch; excluded by design |
 
 ---
 
 ## Sources
 
-- Codebase: `python/fdars/advisor/__init__.py`, `_prompts.py`, `_schema.py`, `providers/_validate.py`
-- Codebase: `python/fdars/mcp/server.py`, `_runner.py`, `_compare.py`
-- Codebase: `python/fdars/advisor/aspects/inference.py`, `fpca.py`, `classification.py`
-- Codebase: `src/inference_mod.rs` — `itp_result_to_pydict` and the vector-valued `adjusted_pvalues`/`raw_pvalues` fields confirming the ITP vector-valued problem
-- Project history: `.planning/PROJECT.md` — v6.0 Phase 40 ITP deferral ("ITP deferred as vector-valued")
-- Project history: `.planning/PROJECT.md` — v4.0 Phase 28 "guard-synced atomic commit" pattern
-- Project history: `MEMORY.md` — `advisor-grounding-guard-false-positives` (resolved false-positive classes inform the limits of the current guard)
-- Project history: `MEMORY.md` — `v6-autonomous-run-state` (loop isolation lessons from doc-phase sequential execution)
-- Design: `.planning/design/llm-cluster-narration.md` — recommend-only vs. agentic tuning split decision
+- [scikit-learn Developer Guide — Developing Estimators](https://scikit-learn.org/stable/developers/develop.html) — contracts for get_params, n_features_in_, Tags, clone
+- [scikit-learn 1.6 Changelog](https://scikit-learn.org/stable/whats_new/v1.6.html) — __sklearn_tags__ introduction, _more_tags deprecation, _xfail_checks deprecation, validate_data public API
+- [sklearn Tags documentation](https://scikit-learn.org/stable/modules/generated/sklearn.utils.Tags.html) — Tags dataclass fields
+- [check_estimator documentation](https://scikit-learn.org/stable/modules/generated/sklearn.utils.estimator_checks.check_estimator.html) — expected_failed_checks parameter
+- [sklearn issue #12734 — check_fit2d_1sample error message substrings](https://github.com/scikit-learn/scikit-learn/issues/12734) — exact substring requirements
+- [sklearn PR #12328 — check_fit_idempotent](https://github.com/scikit-learn/scikit-learn/pull/12328) — idempotency check rationale
+- [sklearn PR #17598 — check_methods_sample_order_invariance](https://github.com/scikit-learn/scikit-learn/pull/17598) — order invariance check
+- [sklearn PR #29677 — __sklearn_tags__ API revamp](https://github.com/scikit-learn/scikit-learn/pull/29677) — tags migration rationale
+- [catboost issue #2955 — __sklearn_tags__ AttributeError on sklearn 1.8](https://github.com/catboost/catboost/issues/2955) — real-world version drift failure
+- [scikit-fda GitHub — functional data sklearn compatibility](https://github.com/GAA-UAM/scikit-fda) — reference implementation for FDA+sklearn
+- [sklearn SLEP010 — n_features_in_ attribute](https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep010/proposal.html) — n_features_in_ specification
+- [sklearn SLEP018 — set_output API](https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep018/proposal.html) — DataFrame output requirements
 
 ---
-*Pitfalls research for: fdars v8.0 Advisor — New Capabilities (agentic auto-tuning, comparative selection, pipeline reports, deferred aspects)*
-*Researched: 2026-08-23*
+*Pitfalls research for: fdars v9.0 scikit-learn API Compatibility (sklearn estimator layer over PyO3 functional-data bindings)*
+*Researched: 2026-08-31*
