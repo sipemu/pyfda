@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v8.0
 milestone_name: "Advisor: New Capabilities"
-current_phase: 54
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 54 complete — all phases complete
-last_updated: "2026-08-31T05:58:23.499Z"
+last_updated: "2026-08-31T06:27:16.038Z"
 last_activity: 2026-08-31
-last_activity_desc: Phase 54 complete
-state_head: ae49aec863e944595b4ff6b3858f3cf19d5b85e1
+last_activity_desc: Milestone v8.0 completed and archived
+state_head: 6036fd7390c9029f65bed69900939ece1fb3731c
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 16
   completed_plans: 16
   percent: 80
+current_phase: 54
 ---
 
 # Project State
@@ -28,12 +28,10 @@ See: .planning/PROJECT.md (updated 2026-08-23)
 
 ## Current Position
 
-Phase: 54
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-08-31 — Phase 54 complete
-
-Progress: [██████░░░░] 60%
+Phase: Milestone v8.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-31 — Milestone v8.0 completed and archived
 
 ## Performance Metrics
 
@@ -161,4 +159,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Plan the first phase with /gsd-plan-phase 50
+- Start the next milestone with /gsd-new-milestone

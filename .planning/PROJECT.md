@@ -24,7 +24,9 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v8.0 Advisor — New Capabilities
+## Last Shipped Milestone: v8.0 Advisor — New Capabilities (shipped 2026-08-31)
+
+_All 27 requirements validated; 5 phases, 16 plans, 41 tasks; suite 1045 passed / 10 skipped; whole-site `mkdocs build --strict` green offline; blocking human diagram review approved. Package bumped 0.7.0 → 0.8.0. Full detail: `.planning/milestones/v8.0-ROADMAP.md`. Next milestone: TBD via `/gsd-new-milestone`._
 
 **Goal:** Extend the fdars AI advisor beyond its current single-shot, recommend-only, per-result interpretation surface with four new capabilities — with the grounding invariant (fdars computes every number; the LLM only interprets/cites) and the MCP-LLM-free compute boundary held as hard constraints throughout.
 
@@ -149,14 +151,13 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 <!-- v8.0 Advisor — New Capabilities — active. Full REQ list in .planning/REQUIREMENTS.md; roadmap in .planning/ROADMAP.md. -->
 
-**v8.0 — Advisor: New Capabilities (Phases 50+, active):**
+**v8.0 — Advisor: New Capabilities (Phases 50–54, shipped 2026-08-31):**
 
-- [ ] Deferred advisor aspects — grounded coverage for PACE-FPCA, elastic-multinomial, and ITP interval-inference (grounded-scalar reduction for the vector-valued ITP p-curves); extends `_ASPECT_PRIMERS` / `build_diagnostics`
-- [ ] Comparative method-selection — recommender that ranks/picks among candidate methods from comparative diagnostics (new task family / entry point over multiple `build_diagnostics` runs)
-- [ ] Pipeline diagnostic report — multi-aspect narrative report aggregating diagnostics across an end-to-end analysis (represent → smooth → cluster/regress → monitor)
-- [ ] Closed-loop auto-tuning (capstone) — autonomous, bounded recommend → apply → re-run → compare loop to a target diagnostic or step budget; Python-API + MCP agentic surface; compute path stays LLM-free
-- [ ] Eval strategy — measure "good advice" for auto-tuning + comparative selection (offline/deterministic where possible; env-gated LLM tests)
-- [ ] Docs + gate — new pages + method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green; blocking human diagram review before close
+- [x] Deferred advisor aspects — grounded PACE-FPCA / elastic-multinomial / ITP (detection+localisation) scalars + extended primers — Phase 50 (ASPECT-01..05, COMPAT-01..03)
+- [x] Comparative method-selection — `compare_methods()` deterministic fdars winner + "comparison" task family + LLM-free `fdars_compare_methods` MCP tool — Phase 51 (COMPARE-01..04)
+- [x] Pipeline diagnostic report — per-stage provenance + deterministic Python cross-stage caveats + LLM-free `fdars_build_pipeline_report` MCP tool — Phase 52 (PIPE-01..04)
+- [x] Closed-loop auto-tuning (capstone) — bounded loop; Python `auto_tune()` (schema-validated numeric delta) + LLM-free heuristic `fdars_auto_tune` MCP tool; Goodhart guard — Phase 53 (TUNE-01..06)
+- [x] Eval strategy + docs — deterministic offline eval (no LLM-judge) + 3 pages/SVGs + offline fences + `--strict` green + human diagram review — Phase 54 (EVAL-01/02, DOCS-01..03)
 
 **v7.0 — Documentation Quality Pass (Phases 42–49, shipped 2026-08-23):**
 
@@ -243,4 +244,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-23 after starting milestone v8.0 — Advisor: New Capabilities (deferred-aspect coverage, comparative method-selection, pipeline diagnostic report, closed-loop auto-tuning capstone). All four selected for one milestone; grounding invariant + MCP-LLM-free boundary held as hard constraints; research-first.*
+*Last updated: 2026-08-31 after shipping milestone v8.0 — Advisor: New Capabilities (deferred aspects, comparative selection, pipeline report, closed-loop auto-tuning capstone + eval/docs). 27/27 requirements validated; package 0.7.0 → 0.8.0; grounding invariant + MCP-LLM-free boundary held throughout. Next milestone: TBD via /gsd-new-milestone.*

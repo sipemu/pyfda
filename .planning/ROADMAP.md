@@ -10,7 +10,7 @@
 - ✅ **v5.0 — fdars-core 0.20 Upgrade — Functional Inference + Depth/Boxplot + Basis/Smoothing** — Phases 30–35 (shipped 2026-08-18)
 - ✅ **v6.0 — fdars-core 0.23 Upgrade — Regression, PACE-FPCA, Depth/Outliers/Interval Inference** — Phases 36–41 (shipped 2026-08-22)
 - ✅ **v7.0 — Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth** — Phases 42–49 (shipped 2026-08-23)
-- 🚧 **v8.0 — Advisor: New Capabilities** — Phases 50–54 (in progress)
+- ✅ **v8.0 — Advisor: New Capabilities** — Phases 50–54 (shipped 2026-08-31)
 
 ## Phases
 
@@ -127,159 +127,15 @@ A docs-only quality pass (no crate bump, no new bindings, no advisor logic chang
 
 </details>
 
-### 🚧 v8.0 Advisor: New Capabilities (In Progress)
+<details>
+<summary>✅ v8.0 Advisor: New Capabilities (Phases 50–54) — SHIPPED 2026-08-31</summary>
 
-**Milestone Goal:** Extend the fdars AI advisor beyond its current single-shot, recommend-only, per-result interpretation surface with four new capabilities — deferred-aspect coverage, comparative method-selection, pipeline diagnostic reports, and a closed-loop auto-tuning capstone — while holding the two hard invariants throughout: the **grounding invariant** (fdars computes every number; the LLM only interprets/cites and proposes parameters via a schema-validated numeric field) and the **MCP-LLM-free compute boundary** (no new MCP tool calls `advise()`; MCP proposals are heuristic). Zero new runtime dependencies — everything extends the shipped `build_diagnostics` / `advise` / Provider-protocol / MCP surface. Foundation-first: deferred aspects first (they unblock accurate diagnostics for every later LLM call), then comparative → pipeline (a strict complexity/dependency gradient proving per-stage isolation), then the auto-tuning capstone, then eval + docs gate last.
+Extended the fdars AI advisor with four new capabilities — deferred-aspect coverage (PACE-FPCA / elastic-multinomial / ITP), comparative method-selection, pipeline diagnostic reports, and a closed-loop auto-tuning capstone — plus a deterministic eval strategy and docs, holding the grounding invariant + MCP-LLM-free boundary throughout. 27/27 requirements; 5 phases, 16 plans, 41 tasks; suite 1045 passed / 10 skipped; whole-site `mkdocs build --strict` green; blocking human diagram review approved. Full detail: `.planning/milestones/v8.0-ROADMAP.md`.
 
-**Standing constraints every phase inherits:** grounding invariant (every emitted scalar is fdars-computed native `float`/`int`, no numpy scalars, no fabricated numbers); MCP boundary provably LLM-free (new MCP tools re-run via existing runnable methods / heuristic proposals; no MCP tool calls `advise()`); guard-sync (`_DIAGNOSTICS_METHODS` ↔ `build_diagnostics._supported`) changes stay atomic (a no-op for all four capabilities per research — no new method slot — but primer/`_supported` edits still commit atomically); provider-agnostic, offline-deterministic core with env-gated LLM tests and NO network in CI; docs stay hand-authored inline SVG (STYLE_SPEC), worked-example fences run OFFLINE emitting `FDARS_FENCE_OK` with small/synthetic data; whole-site `mkdocs build --strict` green offline; docs phase runs sequentially on `main` (NOT in worktrees — fences hardcode the main-tree `.venv/bin/mkdocs` path); a BLOCKING human diagram method-accuracy review before milestone close (the v6.0 lesson).
+- [x] Phase 50: Deferred Advisor Aspects (+ compat pre-flight) — grounded PACE-FPCA/elastic-multinomial/ITP scalars + primers; `anthropic<1.0` pin; version-independent guard-sync test (completed 2026-08-23)
+- [x] Phase 51: Comparative Method-Selection — deterministic fdars winner + "comparison" task family + LLM-free MCP tool (completed 2026-08-24)
+- [x] Phase 52: Pipeline Diagnostic Report — per-stage provenance + Python cross-stage caveats + LLM-free MCP tool (completed 2026-08-30)
+- [x] Phase 53: Closed-Loop Auto-Tuning (capstone) — bounded propose→apply→re-run→compare loop; Python-API (LLM delta) + LLM-free heuristic MCP tool (completed 2026-08-30)
+- [x] Phase 54: Eval Strategy + Docs Gate — deterministic eval + 3 pages/SVGs + offline fences + `--strict` green + blocking human diagram review (completed 2026-08-31)
 
-- [x] **Phase 50: Deferred Advisor Aspects (+ compat pre-flight)** - Land the blocking compat fixes, then add grounded PACE-FPCA / elastic-multinomial / ITP scalars + primers (completed 2026-08-23)
-- [x] **Phase 51: Comparative Method-Selection** - Deterministic fdars-computed ranking over N candidate methods + "comparison" task family + MCP tool (completed 2026-08-24)
-- [x] **Phase 52: Pipeline Diagnostic Report** - Multi-stage diagnostic aggregation with per-stage provenance + "pipeline" task family + MCP tool (completed 2026-08-30)
-- [x] **Phase 53: Closed-Loop Auto-Tuning (capstone)** - Bounded propose→apply→re-run→compare loop; Python-API (LLM proposal) + MCP (heuristic, LLM-free) surfaces (completed 2026-08-30)
-- [x] **Phase 54: Eval Strategy + Docs Gate** - Deterministic eval fixtures + new pages + method-accurate SVGs + offline fences + whole-site strict build + blocking human diagram review (completed 2026-08-31)
-
-## Phase Details
-
-### Phase 50: Deferred Advisor Aspects (+ compat pre-flight)
-
-**Goal**: The three deferred advisor aspects — PACE-FPCA, elastic-multinomial, and ITP interval-inference — emit grounded, fdars-computed scalars with extended primers, so every later LLM call in this milestone targets richer, more accurate diagnostics. Blocking compatibility fixes on the *existing* surface land first as a pre-flight so the advisor keeps importing and the guard-sync test runs on every Python version.
-**Depends on**: Nothing (first phase of milestone; foundational — must not be merged into a later phase)
-**Requirements**: COMPAT-01, COMPAT-02, COMPAT-03, ASPECT-01, ASPECT-02, ASPECT-03, ASPECT-04, ASPECT-05
-**Success Criteria** (what must be TRUE):
-
-  1. The existing advisor imports and runs on Python 3.9 (abi3-py39) with `anthropic` pinned `>=0.72.0,<1.0`, the MCP server's 3 existing tools import and run over stdio via the `mcp` v2 `MCPServer` path unchanged, and the guard-sync test (`_DIAGNOSTICS_METHODS` ↔ `build_diagnostics._supported`) runs on all supported Python versions (no longer skipped on the 3.9 baseline).
-  2. `build_diagnostics` emits grounded PACE-FPCA scalars (noise/signal `sigma2` ratio, truncated-rank flag, mean prediction-band width) and elastic-multinomial classification scalars (overfitting gap, class-count flag), each computed from the fdars result as native `float`/`int` (no numpy scalars), offline-deterministic.
-  3. The ITP aspect reduces the vector-valued adjusted-p-curve to grounded **detection AND localisation** scalars together (min adjusted p-value; count + proportion of significant intervals; first significant basis; detected-at-0.05) — never a single misleading global scalar.
-  4. `_ASPECT_PRIMERS` is extended for the three aspects and `advise()` returns grounded interpretation for each, verified across providers (offline grounding matrix + env-gated live); the grounding invariant and guard-sync are preserved in atomic commits (guard-sync a no-op — no new method slot).
-
-**Plans**: 3/3 plans executed
-
-Plans:
-**Wave 1**
-
-- [x] 50-01-PLAN.md — Compat pre-flight (isolated first commit): anthropic <1.0 pin, mcp v2 server+3-tool load smoke, version-independent guard-sync test on 3.9 (COMPAT-01..03)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 50-02-PLAN.md — Tracer (ITP detection+localisation) + PACE-FPCA / elastic-multinomial grounded scalars + extended primers, guard-sync no-op (ASPECT-01..04)
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 50-03-PLAN.md — Cross-provider grounding: new aspects added to offline aspect×provider matrix + env-gated live coverage (ASPECT-05)
-
-### Phase 51: Comparative Method-Selection
-
-**Goal**: A user can ask the advisor to rank/pick among candidate methods for a task, and the *winner is chosen by an fdars-computed deterministic sort* (never by the LLM) with the LLM narrating the ranking from each candidate's grounded, correctly-attributed diagnostics.
-**Depends on**: Phase 50
-**Requirements**: COMPARE-01, COMPARE-02, COMPARE-03, COMPARE-04
-**Success Criteria** (what must be TRUE):
-
-  1. `compare_methods()` runs `build_diagnostics` over N candidate methods and returns a deterministic, fdars-computed ranking on a shared metric — the same inputs always yield the same winner, and the LLM never chooses it.
-  2. A "comparison" advise task family narrates the ranking, citing each candidate's grounded diagnostics with correct per-candidate provenance (labeled candidates, never flat-merged dicts that `_check_grounding` cannot attribute).
-  3. Comparison guards against incommensurable comparisons — only comparable candidates on a shared metric are ranked; incommensurable inputs are rejected rather than silently mis-ranked.
-  4. An `fdars_compare_methods` MCP tool exposes the comparison and stays provably LLM-free — it re-runs via existing runnable methods and never calls `advise()`.
-
-**Plans**: 3/3 plans executed
-**Wave 1**
-
-- [x] 51-01-PLAN.md — Deterministic ranking core (metric registry, dual-input, fail-closed guard, winner-is-sort) [TRACER; COMPARE-01, COMPARE-03]
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 51-02-PLAN.md — "comparison" task family: per-candidate provenance + winner authority narration [COMPARE-01, COMPARE-02]
-- [x] 51-03-PLAN.md — `fdars_compare_methods` MCP tool, LLM-free, by-reference ranking [COMPARE-04]
-
-### Phase 52: Pipeline Diagnostic Report
-
-**Goal**: A user can generate one grounded multi-aspect narrative report for an end-to-end analysis (represent → smooth → cluster/regress → monitor), with diagnostics aggregated across stages under strict per-stage provenance and cross-stage caveats surfaced — proving the per-stage isolation the auto-tuning capstone depends on.
-**Depends on**: Phase 51
-**Requirements**: PIPE-01, PIPE-02, PIPE-03, PIPE-04
-**Success Criteria** (what must be TRUE):
-
-  1. `build_pipeline_report()` aggregates diagnostics across the end-to-end stages with per-stage provenance (stage-prefixed keys / per-stage objects, never a flat `{**diag_a, **diag_b}` merge).
-  2. `pipeline_report()` produces a grounded multi-aspect narrative report over the aggregated stages, each cited value correctly attributed to its stage.
-  3. Cross-stage signal detection surfaces downstream caveats (e.g. a high imputed fraction in the represent stage raises an FPCA caveat downstream).
-  4. An `fdars_build_pipeline_report` MCP tool exposes the report and stays LLM-free (never calls `advise()`).
-
-**Plans**: 3/3 plans executed
-
-Plans:
-**Wave 1**
-
-- [x] 52-01-PLAN.md — TRACER: build_pipeline_report() offline aggregation core (per-stage list-of-blocks + {"_stages":[...]} union payload) (PIPE-01)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 52-02-PLAN.md — deterministic cross-stage caveat rule table + PipelineReport schema + "pipeline" task family narrative under union grounding (PIPE-02, PIPE-03)
-- [x] 52-03-PLAN.md — fdars_build_pipeline_report LLM-free MCP tool (by-reference, guard-sync no-op) (PIPE-04)
-
-### Phase 53: Closed-Loop Auto-Tuning (capstone)
-
-**Goal**: The manual recommend → re-run → compare workflow becomes an autonomous, bounded loop — the advisor proposes a parameter change, applies it, re-runs fdars, compares diagnostics, and iterates until a target diagnostic improves or a step budget is hit — exposed both as a Python API (LLM proposal via a schema-validated numeric delta) and as an MCP agentic tool (heuristic, LLM-free proposal), with the compute path staying LLM-free throughout (fdars runs every computation; the loop only orchestrates).
-**Depends on**: Phase 52
-**Requirements**: TUNE-01, TUNE-02, TUNE-03, TUNE-04, TUNE-05, TUNE-06
-**Success Criteria** (what must be TRUE):
-
-  1. A shared `_tuning.py` loop core (propose → apply → re-run fdars → compare → check target-vs-budget → iterate) with an injectable proposal/advisor function is fully offline-testable without an API key, and terminates boundedly — required `max_steps` plus convergence and oscillation detection mean the loop never runs unbounded.
-  2. `auto_tune()` (Python API) uses the LLM for proposals via a structured, schema-validated numeric `parameter_delta` — never parsed from prose; the LLM never sets a number directly in the numeric path.
-  3. An `fdars_auto_tune` MCP tool uses a heuristic (LLM-free) proposal, preserving the provably-LLM-free MCP boundary; optional guard diagnostics detect off-target (Goodhart) degradation during tuning.
-  4. `TuningTrace` / `TuneProposal` / `TuneResult` schemas plus an optional `Recommendation.parameter_delta` field are added, backward-compatible with the 3 existing task families.
-
-**Plans**: 3/3 plans executed
-**Wave 1**
-
-- [x] 53-01-PLAN.md — TRACER: bounded loop core + _PARAM_REGISTRY + tuning schemas, offline mock-propose_fn (TUNE-01/02/05/06)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 53-02-PLAN.md — LLM proposal path: auto_tune() + parameter_proposal prompt clause, schema-validated clamped delta (TUNE-03)
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 53-03-PLAN.md — fdars_auto_tune MCP tool + LLM-free heuristic propose_fn, by-reference (TUNE-04)
-
-### Phase 54: Eval Strategy + Docs Gate
-
-**Goal**: The milestone closes on a proven quality bar — a deterministic eval strategy that measures "good advice" for auto-tuning + comparative selection (no LLM-as-judge in CI), plus new/updated docs pages for the four capabilities with method-accurate hand-authored SVGs and offline worked examples, gated by a green whole-site strict build and a blocking human diagram review.
-**Depends on**: Phase 50, Phase 51, Phase 52, Phase 53
-**Requirements**: EVAL-01, EVAL-02, DOCS-01, DOCS-02, DOCS-03
-**Success Criteria** (what must be TRUE):
-
-  1. Deterministic eval fixtures — where the correct comparative ranking or auto-tune convergence direction is known from the data — assert diagnostic improvement + grounding-pass; there is no LLM-as-judge in CI and live LLM eval is env-gated (skips without a key; CI stays network-free).
-  2. New/updated docs pages cover the four capabilities with method-accurate hand-authored inline SVG diagrams at the v7.0 STYLE_SPEC standard.
-  3. Each capability page carries a runnable offline `FDARS_FENCE_OK` worked example on small/synthetic data (the auto-tune example uses the offline/injectable path — no network in the docs build).
-  4. Whole-site `mkdocs build --strict` is green offline and a blocking human diagram method-accuracy review passes before the milestone is closed.
-
-**Plans**: 3/4 plans executed
-**Wave 1**
-
-- [x] 54-01-PLAN.md — Deterministic offline eval fixtures (comparative winner + auto-tune improving direction), env-gated live, no LLM-judge
-- [x] 54-02-PLAN.md — 3 method-accurate hand-authored SVGs (comparative / pipeline / auto-tune), STYLE_SPEC + SVGO-idempotent
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 54-03-PLAN.md — 3 new advisor pages + aspects.md deferred-scalar update + offline FDARS_FENCE_OK fences + nav wiring
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 54-04-PLAN.md — SVGO gate + whole-site `mkdocs build --strict` offline + BLOCKING human diagram review
-
-**UI hint**: yes
-
-## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 50 → 51 → 52 → 53 → 54
-
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 50. Deferred Advisor Aspects (+ compat pre-flight) | v8.0 | 3/3 | Complete    | 2026-08-23 |
-| 51. Comparative Method-Selection | v8.0 | 3/3 | Complete    | 2026-08-24 |
-| 52. Pipeline Diagnostic Report | v8.0 | 3/3 | Complete    | 2026-08-30 |
-| 53. Closed-Loop Auto-Tuning (capstone) | v8.0 | 3/3 | Complete    | 2026-08-30 |
-| 54. Eval Strategy + Docs Gate | v8.0 | 4/4 | Complete    | 2026-08-31 |
-
----
-
-_Full phase detail for shipped milestones is archived under `.planning/milestones/` (`v1.0-ROADMAP.md` … `v7.0-ROADMAP.md`). Phase directories are archived under `.planning/milestones/v{1.0,2.0,2.1,3.0,4.0,5.0,6.0,7.0}-phases/`._
+</details>

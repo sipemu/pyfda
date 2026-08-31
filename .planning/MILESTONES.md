@@ -1,5 +1,29 @@
 # Milestones
 
+## v8.0 Advisor: New Capabilities (Shipped: 2026-08-31)
+
+**Phases completed:** 5 phases, 16 plans, 41 tasks
+
+**Key accomplishments:**
+
+- Three blocking compatibility fixes: anthropic pinned below 1.0, MCP v2 server + 3 tools regression-tested, and guard-sync assertion split into a version-independent test that runs on Python 3.9 without importing mcp.
+- ITP vector-to-scalar reduction (detection+localisation), PACE-FPCA noise/signal and band-width scalars, elastic-multinomial overfitting gap, and extended primers for all three — all grounded native float/int, json.dumps clean, guard-sync unchanged.
+- Offline aspect×provider matrix extended with PACE-FPCA/elastic-multinomial/ITP fixtures (6 new cases all passing _check_grounding); env-gated live coverage added for all three, CI stays network-free
+- compare_methods(run_llm=True) path with fdars-authoritative winner and per-candidate labeled provenance blocks passed to the LLM; grounding checked per candidate (not against merged dict) so cross-candidate citation raises GroundingViolationError.
+- fdars_compare_methods MCP tool — LLM-free multi-candidate deterministic ranking via re-run + compare_methods(run_llm=False), returning opaque handles only
+- Per-stage list-of-blocks offline aggregation core for `build_pipeline_report()` with `{"_stages":[...]}` union-grounding payload, mirroring Phase-51's `{"_candidates":[...]}` provenance pattern
+- Deterministic Python cross-stage caveat rule table (PIPE-03) + PipelineReport schema (PIPE-02) + pipeline_report() LLM narrative path under union grounding — caveats are Python-authoritative, LLM narrates, never invents
+- `fdars_build_pipeline_report` LLM-free MCP tool: re-runs each pipeline stage, aggregates by-reference via the offline core, stays provably LLM-free, guard-sync no-op
+- Bounded tuning loop state machine with injectable propose_fn, 5-mode termination (budget/converged/oscillation/guard_stop/parse_failure), TuneProposal/TuningTrace schemas, and an offline test suite proving all safety guarantees without API key or network.
+- LLM-backed closed-loop tuning: auto_tune() drives the wave-1 loop core via a schema-validated, clamped propose_fn; the 'parameter_proposal' prompt clause forbids numeric predictions; all behavior proven offline with an injected FakeProvider.
+- LLM-free `fdars_auto_tune` MCP tool driving the wave-1 loop core with a deterministic gradient-sign heuristic (bisection step decay; log-scale lambda_; int rounding); file-scan + determinism + by-reference + guard-sync confirmed offline.
+- Deterministic eval fixtures for 'good advice' — known-from-data comparative winner and auto-tune improving-direction assertions, fully offline via FakeProvider and injectable seams (EVAL-01, EVAL-02)
+- Three method-accurate, STYLE_SPEC-conformant, SVGO-idempotent inline SVGs for comparative selection (fdars-authoritative winner), pipeline report (per-stage provenance + Python caveats), and auto-tuning (bounded propose→clamp→re-run→compare loop) — all three grounded in shipped 50–53 code semantics.
+- Three mature-structure pages (comparative-selection, pipeline-report, auto-tuning) with embedded Plan-02 SVGs and offline FDARS_FENCE_OK worked examples; aspects.md updated with PACE-FPCA noise/signal, ITP detection+localisation, and elastic-multinomial overfitting scalars; AI Advisor nav wired in mkdocs.yml.
+- 2026-08-31 (orchestrator-driven gate; the human-review task is `autonomous: false`)
+
+---
+
 ## v7.0 v7.0 (Shipped: 2026-08-23)
 
 **Phases completed:** 8 phases, 9 plans, 9 tasks
