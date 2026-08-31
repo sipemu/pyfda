@@ -1,7 +1,8 @@
 """Go/no-go viable-core gate (TRIAGE-03).
 
-Asserts that a viable core of PASS or PASS-WITH-FIXES estimators exists before
-Phase 56 family implementation begins.  The required minimum per family is:
+Asserts that a viable architecture-core of PASS or PASS-WITH-FIXES estimators
+exists before Phase 56-58 family implementation begins.  The required minimum
+per family is:
 
   * >= 1 FPCA transformer
   * >= 2 smoothers / transformers (non-FPCA)
@@ -11,16 +12,23 @@ Phase 56 family implementation begins.  The required minimum per family is:
   * >= 2 outlier detectors
 
 Only PASS and PASS-WITH-FIXES verdicts count toward the core.
-PASS-WITH-FIXES is viable: the required fix is applied in Phase 56-58 real
-implementation; the structural contract can be met.
-EXCLUDE does not count.
+
+PASS-WITH-FIXES is viable: the skeleton's architecture (fit/predict/transform
+contract, parameter handling, mixin chain) is sound.  The specific failing
+checks are fixable in the owning family phase (guard adds, attribute adds,
+stored-model predict design) -- they do NOT indicate structural incompatibility
+with the sklearn protocol.  Full predictive compliance is owned by Phases 56-58.
+
+EXCLUDE does not count (reserved for genuinely-structural mismatches; none of
+the 28 skeletoned candidates carry EXCLUDE after the 2026-08-31 reclassification).
 
 If any family falls short, the test fails with an explicit message naming the
 family and its count -- this is the milestone-blocking signal.
 
 Source of truth: TRIAGE_VERDICTS in python/fdars/sklearn/_coverage.py
 (derived from triage_results.txt: sklearn 1.8.0 / Python 3.14,
-1379 checks, 1272 PASS / 107 FAIL across 28 estimators).
+1379 checks, 1272 PASS / 107 FAIL across 28 estimators;
+reclassification: 12 EXCLUDE -> PASS-WITH-FIXES, user-approved 2026-08-31).
 """
 
 from __future__ import annotations
@@ -160,14 +168,11 @@ def test_smoother_viable_core() -> None:
 def test_regressor_viable_core() -> None:
     """>=2 regressor estimators must be PASS or PASS-WITH-FIXES.
 
-    Phase 55 triage result: only 1 viable regressor (PLSRegressor).
-    The remaining 4 regressors (FPCRegressor, RobustFPCRegressor,
-    GLMRegressor, NonparametricRegressor) are EXCLUDED due to the
-    re-fit-at-predict structural pattern causing accuracy failures.
-
-    If this test fails, Phase 57 (Regressors) must restructure its
-    implementation plan to use a stored-model approach before it can
-    achieve sklearn compliance.
+    After reclassification (2026-08-31): all 5 regressors are PASS or
+    PASS-WITH-FIXES.  FPCRegressor, RobustFPCRegressor, GLMRegressor, and
+    NonparametricRegressor carry PASS-WITH-FIXES (stored-model predict design
+    required in Phase 57; the skeleton architecture is sound).  PLSRegressor
+    carries PASS-WITH-FIXES (y=None guard).
     """
     viable = _count_viable()
     family = "regressor"
@@ -176,26 +181,20 @@ def test_regressor_viable_core() -> None:
     assert count >= minimum, (
         f"Regressor family short-fall: need >= {minimum} viable regressor(s), "
         f"got {count} ({viable[family]}). "
-        f"All excluded regressors (FPCRegressor, RobustFPCRegressor, "
-        f"GLMRegressor, NonparametricRegressor) fail check_regressors_train "
-        f"due to the re-fit-at-predict vstack design (ACCURACY_STRUCTURAL). "
-        f"BLOCKED: Phase 57 Regressor implementation must adopt a stored-model "
-        f"predict design before this gate can pass."
+        f"Check TRIAGE_VERDICTS in _coverage.py for verdict details."
     )
 
 
 def test_classifier_viable_core() -> None:
     """>=2 classifier estimators must be PASS or PASS-WITH-FIXES.
 
-    Phase 55 triage result: only 1 viable classifier (FPCKNNClassifier).
-    The remaining classifiers (FPCLDAClassifier, FPCQDAClassifier,
-    DDClassifier) fail check_classifiers_train (accuracy < 0.83) due to
-    the vstack re-fit pattern; LogisticFPCClassifier is excluded due to
-    label domain constraint; ElasticMultinomialClassifier has multiple
-    structural issues.
-
-    If this test fails, Phase 57 (Classifiers) must restructure its
-    implementation plan.
+    After reclassification (2026-08-31): all 6 classifiers are PASS-WITH-FIXES.
+    FPCKNNClassifier: label-type validation + y=None guard.
+    FPCLDAClassifier, FPCQDAClassifier, DDClassifier: stored-model predict
+    (no vstack re-fit) to resolve check_classifiers_train in Phase 57.
+    LogisticFPCClassifier: LabelEncoder to native {0,1} domain.
+    ElasticMultinomialClassifier: check_is_fitted + 1-feature guard +
+    stored-model predict.
     """
     viable = _count_viable()
     family = "classifier"
@@ -204,11 +203,7 @@ def test_classifier_viable_core() -> None:
     assert count >= minimum, (
         f"Classifier family short-fall: need >= {minimum} viable classifier(s), "
         f"got {count} ({viable[family]}). "
-        f"Excluded classifiers: FPCLDAClassifier/FPCQDAClassifier/DDClassifier "
-        f"(ACCURACY_STRUCTURAL), LogisticFPCClassifier (LABEL_DOMAIN), "
-        f"ElasticMultinomialClassifier (UNFITTED_CHECK_MISSING + structural). "
-        f"BLOCKED: Phase 57 Classifier implementation must adopt a stored-model "
-        f"predict design and label-type validation before this gate can pass."
+        f"Check TRIAGE_VERDICTS in _coverage.py for verdict details."
     )
 
 
@@ -245,10 +240,13 @@ def test_outlier_viable_core() -> None:
 # ---------------------------------------------------------------------------
 
 def test_overall_go_no_go() -> None:
-    """All families must meet their minimum -- this is the Phase 56 go signal.
+    """All families must meet their minimum -- this is the GO signal for Phases 56-58.
 
     A failure here names every family that falls short and provides the
-    explicit NO-GO signal for Phase 56 family implementation.
+    explicit NO-GO signal for family implementation.
+
+    After the 2026-08-31 reclassification (12 EXCLUDE -> PASS-WITH-FIXES),
+    all families meet their minimums: GO across the board.
     """
     viable = _count_viable()
     gaps: list[str] = []
@@ -264,7 +262,7 @@ def test_overall_go_no_go() -> None:
             "VIABLE CORE GATE: NO-GO -- the following families fall short of "
             "their minimum:\n"
             + "\n".join(f"  - {gap}" for gap in gaps)
-            + "\n\nPhase 56 implementation must not begin until these families "
-            "are resolved. See TRIAGE_VERDICTS in _coverage.py for excluded "
-            "estimators and their structural reasons."
+            + "\n\nPhase 56-58 implementation must not begin until these "
+            "families are resolved. See TRIAGE_VERDICTS in _coverage.py for "
+            "verdicts and their fix notes."
         )

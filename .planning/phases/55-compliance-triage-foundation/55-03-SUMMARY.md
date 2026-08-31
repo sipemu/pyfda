@@ -211,6 +211,58 @@ Based on PASS + PASS-WITH-FIXES verdicts:
 | `pytest test_foundation.py` | PASS (15/15, unchanged) |
 | `python/fdars/__init__.py` unchanged | PASS |
 
+## Correction (user-approved, 2026-08-31)
+
+The original triage over-labeled 12 fixable skeleton-quality failures as structural EXCLUDE. All 12 have been reclassified to PASS-WITH-FIXES with the fix deferred to the owning family phase (56 = Transformers, 57 = Regressors + Classifiers, 58 = Outlier Detectors).
+
+### Reclassified Candidates
+
+| Estimator | Old Verdict | New Verdict | Fix | Phase |
+|-----------|-------------|-------------|-----|-------|
+| SplineInterpolator | EXCLUDE | PASS-WITH-FIXES | Make output grid a constructor param (idempotent transform), add y=None to fit, guard spline order to [1,3) with sklearn-convention message | 56 |
+| FPCRegressor | EXCLUDE | PASS-WITH-FIXES | Fit once + store model/coeffs, predict WITHOUT re-fit | 57 |
+| RobustFPCRegressor | EXCLUDE | PASS-WITH-FIXES | Stored-model predict (no re-fit) | 57 |
+| GLMRegressor | EXCLUDE | PASS-WITH-FIXES | Stored-model predict (fixes accuracy + subset_invariance) | 57 |
+| NonparametricRegressor | EXCLUDE | PASS-WITH-FIXES | Store training data, predict without re-fit contaminating fit | 57 |
+| FPCLDAClassifier | EXCLUDE | PASS-WITH-FIXES | Stored-model predict (no vstack re-fit) | 57 |
+| FPCQDAClassifier | EXCLUDE | PASS-WITH-FIXES | Stored-model predict (no vstack re-fit) | 57 |
+| DDClassifier | EXCLUDE | PASS-WITH-FIXES | Stored-model predict (no vstack re-fit) | 57 |
+| LogisticFPCClassifier | EXCLUDE | PASS-WITH-FIXES | LabelEncoder to native {0,1} domain + ensure fit returns self | 57 |
+| ElasticMultinomialClassifier | EXCLUDE | PASS-WITH-FIXES | check_is_fitted + 1-feature/argvals>=2 guard + stored-model predict | 57 |
+| LRTOutlierDetector | EXCLUDE | PASS-WITH-FIXES | Proper continuous decision_function + contamination param | 58 |
+| MagnitudeShapeDetector | EXCLUDE | PASS-WITH-FIXES | Proper decision_function + contamination param | 58 |
+
+### EXCLUDED_METHODS Reconciled
+
+The 13 triage-discovered EXCLUDED_METHODS entries (represent.spline_interpolate, regression.functional_logistic, classification.elastic_multinomial, outliers.detect_outliers_lrt_with_dist, outliers.muod, regression.functional_glm, regression.fregre_np, regression.fregre_lm, regression.fregre_l1, classification.fclassif_lda, classification.fclassif_qda, classification.fclassif_dd, outliers.magnitude_shape) have been removed. EXCLUDED_METHODS now contains only the 13 genuine design-time structural exclusions (alignment, pace_fpca, non-Gaussian GLM, concurrent_regression, fosr, cluster_optim, inference tests, spm_monitor).
+
+### Updated Verdict Tally
+
+| Verdict | Count | Change |
+|---------|-------|--------|
+| PASS | 6 | (unchanged) |
+| PASS-WITH-FIXES | 22 | +12 (from EXCLUDE) |
+| EXCLUDE | 0 | -12 |
+
+### Go/No-Go Gate Retuned
+
+The go/no-go gate now applies a skeleton-appropriate architecture-core bar: PASS-WITH-FIXES counts as viable because the skeleton's architecture is sound -- full predictive compliance is owned by Phases 56-58. Docstrings for `test_regressor_viable_core` and `test_classifier_viable_core` updated to reflect the corrected counts and GO status.
+
+**Corrected overall gate: GO** -- all families meet their minimums.
+
+| Family | Viable (PASS + PASS-WITH-FIXES) | Minimum | Status |
+|--------|--------------------------------|---------|--------|
+| fpca | 1 | 1 | GO |
+| smoother | 8 (SplineInterpolator now PASS-WITH-FIXES) | 2 | GO |
+| regressor | 5 | 2 | GO |
+| classifier | 6 | 2 | GO |
+| clusterer | 3 | 1 | GO |
+| outlier | 6 (LRTOutlierDetector + MagnitudeShapeDetector now PASS-WITH-FIXES) | 2 | GO |
+
+### Test Results After Correction
+
+`pytest tests/sklearn/test_coverage.py tests/sklearn/test_go_no_go.py -q`: 103 passed, 1 skipped (0 failures).
+
 ## Threat Flags
 
 No new network endpoints, auth paths, or trust boundary crossings. T-55-03 (verdict provenance) mitigated: all 28 TRIAGE_VERDICTS entries trace to `triage_results.txt` failure lines. T-55-04 (excluded method reachability) mitigated: `test_coverage.py` confirms all 26 EXCLUDED_METHODS functional_api paths are callable.
