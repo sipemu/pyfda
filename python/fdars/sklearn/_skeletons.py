@@ -1893,9 +1893,7 @@ class _BaseFdarsOutlierDetector(OutlierMixin, _BaseFdarsEstimator):
             +1 for inliers, -1 for outliers.
         """
         check_is_fitted(self)
-        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
-        X = X.astype(np.float64)
-        scores = self.score_samples(X)
+        scores = self.score_samples(X)  # score_samples handles validation internally
         return np.where(scores >= 0, 1, -1).astype(np.int64)
 
     def score_samples(self, X):
