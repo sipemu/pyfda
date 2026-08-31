@@ -98,36 +98,23 @@ class TestVerdictDomain:
 _all_excluded_fdars_methods: set[str] = set(EXCLUDED_METHODS)
 
 
-class TestExcludeConsistency:
-    """Every EXCLUDE verdict must have at least one matching EXCLUDED_METHODS entry."""
+def test_exclude_consistency_registry_vs_verdicts() -> None:
+    """EXCLUDED_METHODS count must be >= EXCLUDE verdict count (structural shape check).
 
-    @pytest.mark.parametrize(
-        "cls_name",
-        [k for k, v in TRIAGE_VERDICTS.items() if v.startswith("EXCLUDE")],
+    This replaces the parametrized TestExcludeConsistency class which generates
+    zero test cases when all verdicts are PASS or PASS-WITH-FIXES (as after the
+    2026-08-31 reclassification). This standalone test always runs and validates
+    the structural relationship between the two registries regardless of whether
+    any EXCLUDE verdicts currently exist.
+    """
+    exclude_verdict_count = sum(
+        1 for v in TRIAGE_VERDICTS.values() if v.startswith("EXCLUDE")
     )
-    def test_excluded_class_has_excluded_methods_entry(self, cls_name: str) -> None:
-        # We do not require a 1:1 class-to-method mapping; an excluded class
-        # is covered if any EXCLUDED_METHODS key references the underlying
-        # fdars method it wraps.  The coverage registry is method-centric, not
-        # class-centric, because one fdars method may map to multiple possible
-        # classes (or vice versa).
-        #
-        # Verify: there exists at least one EXCLUDED_METHODS key whose entry's
-        # functional_api refers to an fdars.* callable -- this is a weaker but
-        # sound check that the registry is non-empty and that excluded classes
-        # are accompanied by excluded-method documentation.
-        assert len(EXCLUDED_METHODS) > 0, (
-            "EXCLUDED_METHODS is empty, but EXCLUDE verdicts exist"
-        )
-        # Additionally verify that the EXCLUDED_METHODS count is plausible
-        # relative to the number of EXCLUDE verdicts.
-        exclude_count = sum(
-            1 for v in TRIAGE_VERDICTS.values() if v.startswith("EXCLUDE")
-        )
-        assert len(EXCLUDED_METHODS) >= exclude_count, (
-            f"EXCLUDED_METHODS ({len(EXCLUDED_METHODS)} entries) should have at "
-            f"least as many entries as EXCLUDE verdicts ({exclude_count})"
-        )
+    assert len(EXCLUDED_METHODS) >= max(exclude_verdict_count, 1), (
+        f"EXCLUDED_METHODS must have at least 1 entry (design-time exclusions "
+        f"exist); currently has {len(EXCLUDED_METHODS)} entries vs "
+        f"{exclude_verdict_count} EXCLUDE verdict(s)."
+    )
 
 
 def test_excluded_methods_nonempty() -> None:
