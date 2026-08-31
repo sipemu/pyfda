@@ -7,16 +7,16 @@
 
 ### Foundation & Packaging
 
-- [ ] **FND-01**: `scikit-learn` is an optional extra (`[sklearn]`, pinned `>=1.3,<1.7`); the base package imports with zero sklearn installed, and importing `fdars.sklearn` without it raises an actionable `ImportError` (mirrors the `advisor`/`mcp` extras pattern).
-- [ ] **FND-02**: A new `python/fdars/sklearn/` subpackage is gated exactly like `advisor`/`mcp` (deferred import in its own `__init__.py`); `python/fdars/__init__.py` is not modified.
-- [ ] **FND-03**: A shared `_BaseFdarsEstimator(BaseEstimator)` enforces the sklearn contract: `argvals` (and all constructor args) stored verbatim in `__init__`, resolved to `self.argvals_` (defaulting to `np.arange(n_features)`) in `fit`, `n_features_in_` set via `validate_data`, float32→float64 casting before native calls, and a tags-API compat shim spanning sklearn 1.3–1.6.
-- [ ] **FND-04**: Estimators call `fdars._native.*` directly with validated numpy arrays — they never construct an `Fdata` internally (avoids dtype side-effects that break check_estimator).
+- [x] **FND-01**: `scikit-learn` is an optional extra (`[sklearn]`, pinned `>=1.3,<1.7`); the base package imports with zero sklearn installed, and importing `fdars.sklearn` without it raises an actionable `ImportError` (mirrors the `advisor`/`mcp` extras pattern).
+- [x] **FND-02**: A new `python/fdars/sklearn/` subpackage is gated exactly like `advisor`/`mcp` (deferred import in its own `__init__.py`); `python/fdars/__init__.py` is not modified.
+- [x] **FND-03**: A shared `_BaseFdarsEstimator(BaseEstimator)` enforces the sklearn contract: `argvals` (and all constructor args) stored verbatim in `__init__`, resolved to `self.argvals_` (defaulting to `np.arange(n_features)`) in `fit`, `n_features_in_` set via `validate_data`, float32→float64 casting before native calls, and a tags-API compat shim spanning sklearn 1.3–1.6.
+- [x] **FND-04**: Estimators call `fdars._native.*` directly with validated numpy arrays — they never construct an `Fdata` internally (avoids dtype side-effects that break check_estimator).
 
 ### Compliance Triage & Coverage
 
-- [ ] **TRIAGE-01**: Every candidate estimator (~30 across the five families) is skeletoned and run through `check_estimator`/`parametrize_with_checks`, producing a definitive PASS / PASS-WITH-FIXES / EXCLUDE verdict per estimator before full implementation.
+- [x] **TRIAGE-01**: Every candidate estimator (~30 across the five families) is skeletoned and run through `check_estimator`/`parametrize_with_checks`, producing a definitive PASS / PASS-WITH-FIXES / EXCLUDE verdict per estimator before full implementation.
 - [ ] **TRIAGE-02**: A reason-coded `_coverage.py` `EXCLUDED_METHODS` registry records every fdars method excluded from the sklearn layer (with the failing check / structural reason); excluded methods remain available through the existing functional API.
-- [ ] **TRIAGE-03**: A go/no-go gate confirms a viable core passes before proceeding (≈1 FPCA, 2 smoothers, 2 regressors, 2 classifiers, 1 clusterer, 2 outlier detectors).
+- [x] **TRIAGE-03**: A go/no-go gate confirms a viable core passes before proceeding (≈1 FPCA, 2 smoothers, 2 regressors, 2 classifiers, 1 clusterer, 2 outlier detectors).
 
 ### Transformers
 
@@ -84,13 +84,13 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FND-01 | Phase 55 | Pending |
-| FND-02 | Phase 55 | Pending |
-| FND-03 | Phase 55 | Pending |
-| FND-04 | Phase 55 | Pending |
-| TRIAGE-01 | Phase 55 | Pending |
+| FND-01 | Phase 55 | Complete |
+| FND-02 | Phase 55 | Complete |
+| FND-03 | Phase 55 | Complete |
+| FND-04 | Phase 55 | Complete |
+| TRIAGE-01 | Phase 55 | Complete |
 | TRIAGE-02 | Phase 55 | Pending |
-| TRIAGE-03 | Phase 55 | Pending |
+| TRIAGE-03 | Phase 55 | Complete |
 | XFORM-01 | Phase 56 | Pending |
 | XFORM-02 | Phase 56 | Pending |
 | XFORM-03 | Phase 56 | Pending |
@@ -114,11 +114,13 @@ Explicitly excluded. Documented to prevent scope creep.
 | REL-01 | Phase 59 | Pending |
 
 **Coverage:**
+
 - v9.0 requirements: 24 total
 - Mapped to phases: 24 ✓
 - Unmapped: 0
 
 **Per-phase distribution:**
+
 - Phase 55 (Compliance-Triage & Foundation): FND-01..04, TRIAGE-01..03 (7)
 - Phase 56 (Transformers): XFORM-01..06 (6)
 - Phase 57 (Regressors & Classifiers): REG-01/02, CLF-01/02, PRED-01 (5)
