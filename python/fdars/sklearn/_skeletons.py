@@ -1639,6 +1639,14 @@ class FPCLDAClassifier(ClassifierMixin, _BaseFdarsEstimator):
             )
         le = LabelEncoder()
         y_enc = le.fit_transform(y).astype(np.int64)
+        n_classes = len(le.classes_)
+        # LDA requires n_samples > n_classes; guard before fitting the
+        # sub-estimator to avoid a cryptic sklearn error at the boundary.
+        if n_obs <= n_classes:
+            raise ValueError(
+                f"FPCLDAClassifier requires n_samples > n_classes; "
+                f"got n_samples={n_obs}, n_classes={n_classes}."
+            )
         self.classes_ = le.classes_
         self.label_encoder_ = le
         self.y_encoded_ = y_enc
@@ -1719,6 +1727,15 @@ class FPCQDAClassifier(ClassifierMixin, _BaseFdarsEstimator):
             )
         le = LabelEncoder()
         y_enc = le.fit_transform(y).astype(np.int64)
+        n_classes = len(le.classes_)
+        # QDA requires at least 2 samples per class for covariance estimation;
+        # guard before fitting the sub-estimator to avoid cryptic sklearn errors.
+        min_per_class = int(np.bincount(y_enc.astype(int)).min()) if n_obs > 0 else 0
+        if min_per_class < 2:
+            raise ValueError(
+                f"FPCQDAClassifier requires at least 2 samples per class for QDA "
+                f"covariance estimation; smallest class has {min_per_class} sample(s)."
+            )
         self.classes_ = le.classes_
         self.label_encoder_ = le
         self.y_encoded_ = y_enc
