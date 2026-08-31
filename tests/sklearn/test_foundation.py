@@ -54,17 +54,22 @@ def test_fdars_imports_without_sklearn():
 # ---------------------------------------------------------------------------
 
 def test_fdars_init_unchanged():
-    """python/fdars/__init__.py must have zero diff (FND-02).
+    """python/fdars/__init__.py must be unchanged since the Phase 55 base (FND-02).
 
     Verifies that Phase 55 did not modify the main fdars entry point.
-    Uses git diff --quiet to check working-tree + staged changes.
+    Diffs HEAD against the pre-Phase-55 base commit (parent of the first
+    Phase 55 commit) so committed changes are also detected, not just
+    uncommitted ones.
     """
+    # Commit hash of the parent of the first Phase 55 commit (pre-Phase-55 HEAD).
+    PHASE_55_BASE = "bf1a60638c0330c3909721dd900e704deeb82e8b"
     result = subprocess.run(
-        ["git", "diff", "--quiet", "--", "python/fdars/__init__.py"],
+        ["git", "diff", "--quiet", PHASE_55_BASE, "HEAD", "--", "python/fdars/__init__.py"],
         capture_output=True,
     )
     assert result.returncode == 0, (
-        "python/fdars/__init__.py has uncommitted changes -- FND-02 violation."
+        "python/fdars/__init__.py was modified between the Phase 55 base and HEAD "
+        "(FND-02 violation)."
     )
 
 
