@@ -53,8 +53,14 @@ from sklearn.base import (
     RegressorMixin,
     TransformerMixin,
 )
+from sklearn.discriminant_analysis import (
+    LinearDiscriminantAnalysis,
+    QuadraticDiscriminantAnalysis,
+)
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 from sklearn.utils import check_random_state
+from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.validation import check_is_fitted
 
 from fdars.sklearn._base import _BaseFdarsEstimator, _validate, _HAS_TAGS_DATACLASS
@@ -108,6 +114,91 @@ def _pairwise_l2(A: np.ndarray, B: np.ndarray) -> np.ndarray:
     b2 = np.sum(B ** 2, axis=1, keepdims=True)
     dist2 = a2 + b2.T - 2.0 * (A @ B.T)
     return np.sqrt(np.maximum(dist2, 0.0))
+
+
+def _reject_continuous_target(estimator, y) -> None:
+    """Raise ValueError when y is a continuous (regression) target.
+
+    Called after ``_require_y`` and before ``_validate`` in classifier fit.
+    Satisfies ``check_classifiers_regression_target``, which expects a
+    ValueError whose message contains either ``'Unknown label type: '``
+    or the word ``'continuous'``.
+
+    Parameters
+    ----------
+    estimator : object
+    y : object
+        Must not be None (guard: call ``_require_y`` first).
+    """
+    if y is not None:
+        target_type = type_of_target(y)
+        if target_type in {"continuous", "continuous-multioutput"}:
+            raise ValueError(
+                f"{type(estimator).__name__} does not support continuous "
+                f"targets; got type_of_target={target_type!r}. Pass discrete "
+                f"class labels for classification."
+            )
+
+
+def _fpc_fit_scores(X: np.ndarray, argvals: np.ndarray, n_comp: int):
+    """Compute FPCA and return sign-canonicalized components + scores.
+
+    Wraps ``fdars._native.regression.fpca`` and applies the same
+    sign-canonicalization that ``FPCATransformer`` uses so that repeated
+    calls on the same data are deterministic (satisfying
+    ``check_fit_idempotent``).
+
+    Parameters
+    ----------
+    X : ndarray of shape (n_obs, n_pts), float64
+        Training functional observations.
+    argvals : ndarray of shape (n_pts,), float64
+        Evaluation grid.
+    n_comp : int
+        Number of FPC components.
+
+    Returns
+    -------
+    components : ndarray of shape (n_comp, n_pts)
+        Sign-canonicalized loadings (rows = components).
+    mean : ndarray of shape (n_pts,)
+        Per-point training mean.
+    scores : ndarray of shape (n_obs, n_comp)
+        Sign-canonicalized FPC scores for training data.
+    n_comp : int
+        Effective number of components (same as input; returned for
+        convenience so callers can store it directly).
+    """
+    result = _native.regression.fpca(X, argvals, n_comp)
+    # rotation from native is (n_pts, n_comp); transpose to (n_comp, n_pts)
+    components = np.array(result["rotation"]).T
+    scores = np.array(result["scores"])  # (n_obs, n_comp)
+    components, scores = _BaseFdarsEstimator._sign_canonicalize(components, scores)
+    mean = np.array(result["mean"])      # (n_pts,)
+    return components, mean, scores, n_comp
+
+
+def _fpc_project(X: np.ndarray, components: np.ndarray, mean: np.ndarray) -> np.ndarray:
+    """Project functional observations onto stored FPC components.
+
+    Mirrors ``FPCATransformer.transform``: mean-centers X then dot-products
+    with the transposed component matrix.
+
+    Parameters
+    ----------
+    X : ndarray of shape (n_obs, n_pts), float64
+        New functional observations.
+    components : ndarray of shape (n_comp, n_pts)
+        Stored sign-canonicalized FPC loadings (rows = components).
+    mean : ndarray of shape (n_pts,)
+        Training mean (used for centering).
+
+    Returns
+    -------
+    scores : ndarray of shape (n_obs, n_comp)
+        FPC projections for the new observations.
+    """
+    return (X - mean[np.newaxis, :]) @ components.T
 
 
 def _require_y(estimator, y) -> None:
@@ -1477,10 +1568,19 @@ class _BaseFdarsClassifier(ClassifierMixin, _BaseFdarsEstimator):
         raise NotImplementedError
 
 
-class FPCLDAClassifier(_BaseFdarsClassifier):
+class FPCLDAClassifier(ClassifierMixin, _BaseFdarsEstimator):
     """LDA classifier for functional data via FPC scores.
 
-    Wraps ``fdars._native.classification.fclassif_lda``.
+    Projects functional observations onto FPC components (via
+    ``_fpc_fit_scores``) and fits a scikit-learn
+    ``LinearDiscriminantAnalysis`` on the resulting scores.  Predict
+    projects new data onto stored components and applies the fitted
+    discriminant — fully subset-invariant, no vstack.
+
+    The native ``fdars._native.classification.fclassif_lda`` is
+    transductive (fit+predict in one batch); this estimator reconstructs
+    an equivalent model using the FPCA scores + sklearn LDA so that a
+    reusable ``predict`` entrypoint is available.
 
     Parameters
     ----------
@@ -1489,20 +1589,78 @@ class FPCLDAClassifier(_BaseFdarsClassifier):
         Number of FPC components (default 3).
     """
 
+    _min_samples: int = 2
+
     def __init__(self, argvals=None, ncomp=3):
         super().__init__(argvals=argvals)
         self.ncomp = ncomp
 
-    def _call_native(self, X, y):
-        n_obs = len(X)
-        ncomp = min(self.ncomp, n_obs - 1, X.shape[1])
-        return _native.classification.fclassif_lda(X, y, ncomp=ncomp)
+    def fit(self, X, y):
+        """Fit FPC-LDA classifier.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_obs, n_points)
+        y : array-like of shape (n_obs,)
+
+        Returns
+        -------
+        self
+        """
+        _require_y(self, y)
+        _reject_continuous_target(self, y)
+        X, y = _validate(self, X, y, reset=True, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        n_obs, n_pts = X.shape
+        if n_obs < self._min_samples:
+            raise ValueError(
+                f"n_samples={n_obs} is too small; FPCLDAClassifier requires "
+                f"at least {self._min_samples} samples."
+            )
+        le = LabelEncoder()
+        y_enc = le.fit_transform(y).astype(np.int64)
+        self.classes_ = le.classes_
+        self.label_encoder_ = le
+        self.y_encoded_ = y_enc
+        self.argvals_ = self._resolve_argvals(n_pts)
+        n_comp = min(self.ncomp, n_obs - 1, n_pts)
+        self.components_, self.mean_, train_scores, _ = _fpc_fit_scores(
+            X, self.argvals_, n_comp
+        )
+        self._discriminant = LinearDiscriminantAnalysis()
+        self._discriminant.fit(train_scores, y_enc)
+        return self
+
+    def predict(self, X):
+        """Predict class labels for new functional observations.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_obs, n_points)
+
+        Returns
+        -------
+        y_pred : ndarray of shape (n_obs,)
+        """
+        check_is_fitted(self)
+        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        scores = _fpc_project(X, self.components_, self.mean_)
+        enc = self._discriminant.predict(scores)
+        return self.label_encoder_.inverse_transform(enc.astype(int))
 
 
-class FPCQDAClassifier(_BaseFdarsClassifier):
+class FPCQDAClassifier(ClassifierMixin, _BaseFdarsEstimator):
     """QDA classifier for functional data via FPC scores.
 
-    Wraps ``fdars._native.classification.fclassif_qda``.
+    Projects functional observations onto FPC components and fits a
+    scikit-learn ``QuadraticDiscriminantAnalysis`` on the resulting
+    scores.  Predict projects new data onto stored components and applies
+    the fitted discriminant — fully subset-invariant, no vstack.
+
+    The native ``fdars._native.classification.fclassif_qda`` is
+    transductive; this estimator reconstructs an equivalent model using
+    the FPCA scores + sklearn QDA.
 
     Parameters
     ----------
@@ -1511,20 +1669,78 @@ class FPCQDAClassifier(_BaseFdarsClassifier):
         Number of FPC components (default 3).
     """
 
+    _min_samples: int = 2
+
     def __init__(self, argvals=None, ncomp=3):
         super().__init__(argvals=argvals)
         self.ncomp = ncomp
 
-    def _call_native(self, X, y):
-        n_obs = len(X)
-        ncomp = min(self.ncomp, n_obs - 1, X.shape[1])
-        return _native.classification.fclassif_qda(X, y, ncomp=ncomp)
+    def fit(self, X, y):
+        """Fit FPC-QDA classifier.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_obs, n_points)
+        y : array-like of shape (n_obs,)
+
+        Returns
+        -------
+        self
+        """
+        _require_y(self, y)
+        _reject_continuous_target(self, y)
+        X, y = _validate(self, X, y, reset=True, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        n_obs, n_pts = X.shape
+        if n_obs < self._min_samples:
+            raise ValueError(
+                f"n_samples={n_obs} is too small; FPCQDAClassifier requires "
+                f"at least {self._min_samples} samples."
+            )
+        le = LabelEncoder()
+        y_enc = le.fit_transform(y).astype(np.int64)
+        self.classes_ = le.classes_
+        self.label_encoder_ = le
+        self.y_encoded_ = y_enc
+        self.argvals_ = self._resolve_argvals(n_pts)
+        n_comp = min(self.ncomp, n_obs - 1, n_pts)
+        self.components_, self.mean_, train_scores, _ = _fpc_fit_scores(
+            X, self.argvals_, n_comp
+        )
+        self._discriminant = QuadraticDiscriminantAnalysis()
+        self._discriminant.fit(train_scores, y_enc)
+        return self
+
+    def predict(self, X):
+        """Predict class labels for new functional observations.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_obs, n_points)
+
+        Returns
+        -------
+        y_pred : ndarray of shape (n_obs,)
+        """
+        check_is_fitted(self)
+        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        scores = _fpc_project(X, self.components_, self.mean_)
+        enc = self._discriminant.predict(scores)
+        return self.label_encoder_.inverse_transform(enc.astype(int))
 
 
-class FPCKNNClassifier(_BaseFdarsClassifier):
+class FPCKNNClassifier(ClassifierMixin, _BaseFdarsEstimator):
     """k-NN classifier for functional data via FPC scores.
 
-    Wraps ``fdars._native.classification.fclassif_knn``.
+    Projects functional observations onto FPC components and performs
+    k-nearest-neighbour majority vote in FPC score space.  Predict
+    computes distances from new data scores to stored training scores —
+    fully subset-invariant, no vstack.
+
+    The native ``fdars._native.classification.fclassif_knn`` is
+    transductive; this estimator reconstructs an equivalent model using
+    the FPCA scores + numpy kNN.
 
     Parameters
     ----------
@@ -1535,34 +1751,163 @@ class FPCKNNClassifier(_BaseFdarsClassifier):
         Number of nearest neighbours (default 3).
     """
 
+    _min_samples: int = 2
+
     def __init__(self, argvals=None, ncomp=3, k=3):
         super().__init__(argvals=argvals)
         self.ncomp = ncomp
         self.k = k
 
-    def _call_native(self, X, y):
-        n_obs = len(X)
-        ncomp = min(self.ncomp, n_obs - 1, X.shape[1])
-        k = min(self.k, n_obs - 1)
-        return _native.classification.fclassif_knn(X, y, ncomp=ncomp, k=k)
+    def fit(self, X, y):
+        """Fit FPC-KNN classifier.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_obs, n_points)
+        y : array-like of shape (n_obs,)
+
+        Returns
+        -------
+        self
+        """
+        _require_y(self, y)
+        _reject_continuous_target(self, y)
+        X, y = _validate(self, X, y, reset=True, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        n_obs, n_pts = X.shape
+        if n_obs < self._min_samples:
+            raise ValueError(
+                f"n_samples={n_obs} is too small; FPCKNNClassifier requires "
+                f"at least {self._min_samples} samples."
+            )
+        le = LabelEncoder()
+        y_enc = le.fit_transform(y).astype(np.int64)
+        self.classes_ = le.classes_
+        self.label_encoder_ = le
+        self.y_encoded_ = y_enc
+        self.argvals_ = self._resolve_argvals(n_pts)
+        n_comp = min(self.ncomp, n_obs - 1, n_pts)
+        self.components_, self.mean_, self.train_scores_, _ = _fpc_fit_scores(
+            X, self.argvals_, n_comp
+        )
+        self.k_ = min(self.k, n_obs - 1)
+        return self
+
+    def predict(self, X):
+        """Predict class labels for new functional observations.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_obs, n_points)
+
+        Returns
+        -------
+        y_pred : ndarray of shape (n_obs,)
+        """
+        check_is_fitted(self)
+        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        test_scores = _fpc_project(X, self.components_, self.mean_)
+        # Pairwise L2 distances in FPC score space: (n_new, n_train)
+        d = _pairwise_l2(test_scores, self.train_scores_)
+        # k nearest neighbours per test point
+        knn_idx = np.argsort(d, axis=1)[:, : self.k_]
+        # Majority vote per test point
+        n_classes = len(self.classes_)
+        y_pred_enc = np.empty(len(X), dtype=np.int64)
+        for i, idx in enumerate(knn_idx):
+            counts = np.bincount(self.y_encoded_[idx].astype(int), minlength=n_classes)
+            y_pred_enc[i] = np.argmax(counts)
+        return self.label_encoder_.inverse_transform(y_pred_enc)
 
 
-class DDClassifier(_BaseFdarsClassifier):
-    """Depth-based DD classifier for functional data.
+class DDClassifier(ClassifierMixin, _BaseFdarsEstimator):
+    """Depth-based DD classifier for functional data (nearest FPC centroid).
 
-    Wraps ``fdars._native.classification.fclassif_dd``.
-    No hyperparameters; uses depth-based discrimination.
+    Projects functional observations onto FPC components and assigns each
+    test point to the class whose training FPC-score centroid is nearest
+    (a depth analog: the observation is "deepest" w.r.t. the class whose
+    centroid it is closest to in FPC space).  This is a stored-model
+    predict — fully subset-invariant, no vstack.
+
+    The native ``fdars._native.classification.fclassif_dd`` is
+    transductive (returns only predicted labels + accuracy for the whole
+    batch with no reusable per-class model).  This estimator reconstructs
+    a compliant equivalent using per-class FPC-score centroids.
+
+    No hyperparameters; uses 3 FPC components (or fewer if data is small).
 
     Parameters
     ----------
     argvals : array-like or None, optional
     """
 
+    _min_samples: int = 2
+
     def __init__(self, argvals=None):
         super().__init__(argvals=argvals)
 
-    def _call_native(self, X, y):
-        return _native.classification.fclassif_dd(X, y)
+    def fit(self, X, y):
+        """Fit DD classifier (stores FPC basis + per-class centroids).
+
+        Parameters
+        ----------
+        X : array-like of shape (n_obs, n_points)
+        y : array-like of shape (n_obs,)
+
+        Returns
+        -------
+        self
+        """
+        _require_y(self, y)
+        _reject_continuous_target(self, y)
+        X, y = _validate(self, X, y, reset=True, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        n_obs, n_pts = X.shape
+        if n_obs < self._min_samples:
+            raise ValueError(
+                f"n_samples={n_obs} is too small; DDClassifier requires "
+                f"at least {self._min_samples} samples."
+            )
+        le = LabelEncoder()
+        y_enc = le.fit_transform(y).astype(np.int64)
+        self.classes_ = le.classes_
+        self.label_encoder_ = le
+        self.argvals_ = self._resolve_argvals(n_pts)
+        n_comp = min(3, n_obs - 1, n_pts)
+        self.components_, self.mean_, train_scores, _ = _fpc_fit_scores(
+            X, self.argvals_, n_comp
+        )
+        # Per-class centroids in FPC score space
+        n_classes = len(self.classes_)
+        self.class_centroids_ = np.array([
+            train_scores[y_enc == c].mean(axis=0)
+            for c in range(n_classes)
+        ])  # (n_classes, n_comp)
+        return self
+
+    def predict(self, X):
+        """Predict class labels for new functional observations.
+
+        Each test point is assigned to the class whose stored FPC-score
+        centroid is nearest in Euclidean distance.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_obs, n_points)
+
+        Returns
+        -------
+        y_pred : ndarray of shape (n_obs,)
+        """
+        check_is_fitted(self)
+        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        scores = _fpc_project(X, self.components_, self.mean_)  # (n_new, n_comp)
+        # Distances from each test score to each class centroid: (n_new, n_classes)
+        d = _pairwise_l2(scores, self.class_centroids_)
+        enc = np.argmin(d, axis=1)
+        return self.label_encoder_.inverse_transform(enc)
 
 
 class ElasticMultinomialClassifier(_BaseFdarsClassifier):
