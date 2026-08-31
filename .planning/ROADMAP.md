@@ -161,11 +161,13 @@ Extended the fdars AI advisor with four new capabilities — deferred-aspect cov
   3. Every one of the ~30 candidate estimators has a skeleton run through `parametrize_with_checks` yielding a recorded PASS / PASS-WITH-FIXES / EXCLUDE verdict.
   4. `sklearn/_coverage.py` `EXCLUDED_METHODS` lists every excluded fdars method with its failing-check / structural reason; each excluded method is confirmed still callable through the existing functional API.
   5. The go/no-go gate confirms a viable core PASSes (≈1 FPCA, 2 smoothers, 2 regressors, 2 classifiers, 1 clusterer, 2 outlier detectors) before any family implementation begins.
-**Plans**: TBD
+**Plans**: 3 plans
 **Notes**: Mandatory-first — under the no-exemptions rule, scope is DISCOVERED by triage, not assumed. Flag for a research-phase during `/gsd-plan-phase` if the tags-API compat shim (`sklearn-compat` vs hand-rolled try/import guard) or the triage harness needs it. Guards for the 1-sample / 1-feature error-substring contracts (`"1 sample"`, `"1 feature(s)"`, etc.) and FPCA SVD sign canonicalization live in the base class / per-estimator wrappers.
 
 Plans:
-- [ ] 55-01: TBD
+- [ ] 55-01-PLAN.md — Tracer: [sklearn] extra + gated subpackage + _BaseFdarsEstimator (compat shim) + FPCATransformer passing parametrize_with_checks end-to-end
+- [ ] 55-02-PLAN.md — Skeleton the remaining ~30 candidates across all five families + run the full parametrize_with_checks battery (triage_results.txt)
+- [ ] 55-03-PLAN.md — Populate _coverage.py verdicts + EXCLUDED_METHODS, verify excluded-still-callable, assert the go/no-go viable-core gate
 
 #### Phase 56: Transformers
 **Goal**: Ship the transformer family — with `FPCATransformer` (the central grid-changing hub the predictors consume) built and validated first — as fully `check_estimator`-compliant `TransformerMixin` estimators.
