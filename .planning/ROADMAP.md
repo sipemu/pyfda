@@ -186,7 +186,7 @@ Plans:
   3. A `Pipeline([smoother, fpca])` round-trips fit → transform end-to-end (the grid-changing chain works).
   4. Every transformer calls `fdars._native.*` directly with validated ndarrays and never constructs an `Fdata`.
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 **Notes**: FPCATransformer first (unlocks the whole Pipeline story). Only estimators the Phase-55 triage marked PASS / PASS-WITH-FIXES are wrapped; anything EXCLUDE stays in `_coverage.py`. Research flag: if the PASS-WITH-FIXES list is large, a short targeted check for exact per-sklearn-version error-message substrings may be warranted.
 **UI hint**: no
 
@@ -194,7 +194,7 @@ Plans:
 
 - [x] 56-01-PLAN.md — Promote Imputer to full green (tracer) + regression-guard the 5 already-PASS transformers + fast per-transformer compliance harness
 - [x] 56-02-PLAN.md — Promote BasisRepresentation (1-feature guard) + SplineInterpolator (idempotent grid, y=None, order guard) to full green; flip verdicts to PASS
-- [ ] 56-03-PLAN.md — Pipeline([smoother, fpca]) round-trip (XFORM-06) + FPCA idempotence guard (XFORM-01) + Fdata-free contract test
+- [x] 56-03-PLAN.md — Pipeline([smoother, fpca]) round-trip (XFORM-06) + FPCA idempotence guard (XFORM-01) + Fdata-free contract test
 
 #### Phase 57: Regressors & Classifiers
 
@@ -262,7 +262,7 @@ Phases execute in numeric order: 55 → 56 → 57 → 58 → 59
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 55. Compliance-Triage & Foundation | v9.0 | 3/3 | Complete    | 2026-08-31 |
-| 56. Transformers | v9.0 | 2/3 | In Progress|  |
+| 56. Transformers | v9.0 | 3/3 | In Progress|  |
 | 57. Regressors & Classifiers | v9.0 | 0/TBD | Not started | - |
 | 58. Clusterers & Outlier Detectors + Compliance Gate | v9.0 | 0/TBD | Not started | - |
 | 59. Documentation & Docs Gate | v9.0 | 0/TBD | Not started | - |
