@@ -1,149 +1,134 @@
 # Project Research Summary
 
-**Project:** pyfda — Advisor: New Capabilities (v8.0)
-**Domain:** Grounded AI advisor over a functional-data-analysis library (FDA + LLM interpretation)
-**Researched:** 2026-08-23
+**Project:** pyfda — scikit-learn API Compatibility (v9.0)
+**Domain:** scikit-learn-compatible estimator layer over a functional-data-analysis library (PyO3 bindings)
+**Researched:** 2026-08-31
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The v8.0 milestone adds four capabilities to the existing, shipped grounded FDA advisor: (1) filling deferred diagnostic aspects (PACE-FPCA, elastic-multinomial, ITP interval-inference), (2) comparative method-selection with deterministic ranking, (3) pipeline diagnostic aggregation across FDA stages, and (4) closed-loop auto-tuning with LLM-proposed parameter changes. All four build entirely on the existing stack — **zero new runtime dependencies**. Everything sits above or extends the existing `build_diagnostics` / `advise` / Provider-protocol surface plus the MCP tool layer.
+v9.0 adds a new pure-Python `fdars.sklearn` estimator layer that wraps existing functional-data algorithms as scikit-learn `BaseEstimator` subclasses for seamless `Pipeline` / `GridSearchCV` / `cross_val_score` integration and interop with native sklearn estimators. The layer operates on plain `(n_obs, n_points)` ndarrays with `argvals` as a constructor parameter (defaulting to `np.arange(n_features)`), and calls `fdars._native.*` functions directly — never constructing an `Fdata` inside an estimator (the `Fdata` wrapper introduces dtype side-effects that break `check_estimator`'s dtype-casting checks). It is gated as an optional `[sklearn]` extra exactly like `advisor/` and `mcp/`; no `fdars-core` bump and no advisor changes.
 
-The build strategy is **foundation-first**: deferred aspects first (they unblock richer, more accurate diagnostics for every later LLM call), then comparative selection and pipeline aggregation (no loop logic — straightforward extensions of the `build_diagnostics` + `advise` pattern), then closed-loop auto-tuning as the capstone (the only structurally novel component: a `_tuning.py` loop core, new schema types, and a new MCP tool). The two hard invariants hold throughout: the **grounding invariant** (fdars computes every number; the LLM only interprets/cites and proposes parameters) and the **MCP-LLM-free compute boundary**.
+The defining constraint is **full `check_estimator` compliance with no exemptions**: any fdars method that cannot pass the full battery is *excluded* from the sklearn layer (it remains available through the existing functional API) and recorded in a coverage registry — never exempted. The single most important research finding is that this makes a **compliance-triage phase mandatory and first**: skeleton every candidate estimator, run `parametrize_with_checks` per estimator, and record PASS / PASS-WITH-FIXES / EXCLUDE before committing to real implementation. Researchers converged on a consolidated EXCLUDE list of ~9 method categories that predictably fail due to structural incompatibilities.
 
-The primary execution risk is subtle boundary violations rather than missing functionality: LLM text re-entering the numeric path, provenance collapse in aggregated/comparative diagnostic dicts, a misleading scalar reduction of the vector-valued ITP result, and non-terminating/oscillating auto-tune loops. Each has a known, codebase-grounded mitigation (structured `parameter_delta` field, per-stage/namespaced keys, detection+localisation ITP scalars, `max_steps` + convergence/oscillation checks, injectable advisor for offline testability). Two blocking compatibility fixes on the *existing* surface must land before new work: pin `anthropic>=0.72.0,<1.0` (1.0 drops Python 3.9) and fix the `mcp` v2 import path; also make the guard-sync test Python-3.9-independent.
+Key risks and mitigations: (1) **sklearn version/Python-matrix skew** — pin `scikit-learn>=1.3,<1.7` (1.7 drops Python 3.9; floor 1.3 for `validate_data`/`n_features_in_`), bridge the 1.3→1.6 tags-API change with a try/import shim; (2) **the classic sklearn-contract traps** (constructor-param mutation, missing trailing-underscore attrs, `clone` round-trips) — centralize in a shared base class; (3) **functional-data-specific check failures** (tiny-sample, 1-feature, dtype-cast, FPCA SVD sign non-idempotence) — Python-layer guards + sign canonicalization, surfaced early by triage.
 
 ## Key Findings
 
 ### Recommended Stack
 
-No new runtime dependency is justified. All four capabilities are built on the existing Provider protocol (`advisor/providers/`) + Pydantic 2 schemas + plain Python orchestration. An agent framework would break the provider-agnostic + LLM-free-compute invariants and is an explicit anti-add. See `STACK.md`.
+Pin `scikit-learn>=1.3,<1.7` as the `[sklearn]` optional extra. sklearn 1.7 (2026) requires Python 3.10+, which would break the fdars ABI3-py39 guarantee, so 1.6 is the hard ceiling for the 3.9–3.14 matrix; 1.3 is the floor for the public `validate_data` / `n_features_in_` conventions. Three breaking API changes land at 1.6 and must be bridged: `_validate_data` → public `validate_data`; `_more_tags`/`_get_tags` → `__sklearn_tags__()` dataclass; `_xfail_checks` → `expected_failed_checks`. Handle via a small try/import compat guard (or the `sklearn-compat` shim) rather than version-string comparisons. Use `parametrize_with_checks` (built into sklearn) as the CI compliance gate — it surfaces each check as a named pytest case and continues past failures, unlike `check_estimator` which aborts.
 
-**Core technologies (all already present):**
-- **Provider protocol + 4 adapters** (Anthropic / OpenAI / Gemini / Ollama): the LLM proposal/narration path — reused as-is.
-- **Pydantic 2 `BaseModel`**: structured LLM outputs; add `Optional` fields/schemas (`parameter_delta` on `Recommendation`; `TuneProposal`/`TuneResult`/`TuningTrace`) — backward-compatible only if optional.
-- **`mcp` SDK (stdio)**: new agentic tools follow the existing sync-handler pattern; boundary stays LLM-free.
-- **pytest (offline + env-gated)**: the entire eval strategy — no eval framework, no LLM-judge in CI.
+**Core technologies:**
+- `scikit-learn>=1.3,<1.7`: the estimator contract + `check_estimator`/`parametrize_with_checks` battery — the only new runtime dep; version-capped for the Python 3.9 floor.
+- `parametrize_with_checks` (in-tree): per-estimator CI compliance gate — fail-per-check, not fail-fast.
+- try/import tags-API compat shim (or `sklearn-compat`): bridge 1.3–1.5 vs 1.6 tags/validation API without version branching.
+- scikit-fda: **design reference only, not a dependency** — its `FDataGrid` input contract is the opposite of this milestone's plain-ndarray requirement.
 
-**Blocking compat fixes on the existing surface (do first):**
-- Pin `anthropic>=0.72.0,<1.0` — anthropic 1.0.0 (2026-08-20) drops Python 3.9, renames `output_format`→`output_config`, moves to httpx2. fdars is abi3-py39. Full 1.0 migration deferred out of v8.0.
-- `mcp` v2.0.0 import rename (`mcp.server.fastmcp.FastMCP` → `mcp.server.mcpserver.MCPServer`); decorator API unchanged.
-- Make `test_diagnostics_methods_match_advisor_supported` Python-3.9-independent (currently skipped on the CI baseline, so guard-sync drift can slip through).
+**What NOT to add:** no scikit-fda dependency; no new numerical deps (sklearn wraps the existing `_native` compute); no fdars-core bump.
 
 ### Expected Features
 
-See `FEATURES.md`. Grounding invariant respected in all four: every new scalar is computed from arrays fdars already returns; the LLM never infers a numeric value.
+~30 candidate estimator classes across five categories map cleanly onto sklearn mixins (final counts pending triage): Transformers (~9), Regressors (~6), Classifiers (~6), Clusterers (~3), Outlier detectors (~6). `FPCATransformer` is the central grid-changing hub — it converts `(n_obs, n_points)` functional data to `(n_obs, n_components)` scores, unlocking the whole Pipeline story; build and validate it first.
 
 **Must have (table stakes):**
-- Deferred aspects — grounded scalars for PACE-FPCA (`sigma2_ratio`, `ncomp_truncated`, `mean_band_width`), elastic-multinomial (`overfitting_gap`, `n_classes_flag`), and ITP (see Critical Pitfalls — detection + localisation scalars together).
-- Comparative selection — fdars-computed sort determines the winner; the LLM narrates only.
-- Pipeline report — N `build_diagnostics` calls + one `advise` over stage-prefixed (flat, not nested) diagnostics.
-- Auto-tuning — `max_steps` required; structured `parameter_delta` (not parsed from prose); shared loop core.
+- `FPCATransformer` — grid-changing FPCA scores; central Pipeline dependency (needs SVD sign canonicalization for `check_fit_idempotent`).
+- Smoothing transformers (B-spline / local-polynomial), imputation, basis representation, depth transform.
+- Core predictors: FPC-based regression + PLS; FPC-based classifiers (logistic / LDA / QDA / KNN) — all needing `LabelEncoder` in `fit` for check_estimator's arbitrary labels.
+- `FunctionalKMeans` clusterer; the classic outlier trio (LRT / outliergram / magnitude-shape).
 
-**Should have (differentiators):**
-- Cross-stage signal detection in the pipeline report (e.g. high `imputed_fraction` → caveat for downstream FPCA).
-- Optional guard diagnostics in auto-tuning (watch non-target metrics to catch Goodhart degradation).
+**Should have (competitive / differentiators over scikit-fda):**
+- Robust FPC regression, Gaussian-only GLM regressor, DD-classifier, elastic-multinomial classifier, nonparametric regression.
+- Fuzzy c-means / functional GMM clusterers; newer outlier detectors (tvdmss, muod, depthgram) — these return typed index lists, so a continuous `decision_function` must be synthesized for `OutlierMixin`.
 
-**Anti-features (explicitly out):**
-- An MCP tool that calls `advise()` internally (breaks LLM-free boundary).
-- LLM-chosen comparative winner or weighted single-score aggregation.
-- LLM text directly setting fdars parameters.
+**Defer / EXCLUDE (not exempt — stays in functional API):**
+- Registration/alignment (order-sensitive, needs template), CV-based smoothing (self-tuning), `pace_fpca` (IrregFdata input), `functional_glm` non-Gaussian, `elastic_multinomial` where non-compliant, `concurrent_regression` (list-of-matrices input), `cluster_optim` (is itself a hyperparameter search), inference tests (no fit/predict contract), SPM monitoring.
 
 ### Architecture Approach
 
-See `ARCHITECTURE.md`. The deferred aspects are nearly done at the diagnostics layer — `fpca.py`/`classification.py` already have detection branches; the genuine gaps are a few PACE-FPCA fields, a new ITP vector→scalar reduction branch in `inference.py`, and two `_ASPECT_PRIMERS` entries. **Guard-sync is a no-op for all four capabilities** — none add a new `build_diagnostics` method slot, so `_DIAGNOSTICS_METHODS` does not change (atomic commits still apply per capability). Comparative + pipeline are new orchestration/aggregation layers over existing primitives. Auto-tuning is the only novel core.
+New optional subpackage `python/fdars/sklearn/` mirroring the `advisor/`/`mcp/` pattern: gated in its own `__init__.py` with a `try: from sklearn.base import BaseEstimator` guard; `fdars/__init__.py` is **not** modified. A shared `_BaseFdarsEstimator(BaseEstimator)` centralizes the contract; per-aspect subclasses compose the sklearn mixins and call `fdars._native.*` directly with validated numpy arrays.
 
 **Major components:**
-1. **Extended aspect builders** (`fpca.py`, `classification.py`, `inference.py`, `_prompts.py`) — deferred-aspect scalars + primers.
-2. **`compare_methods()` + "comparison" task family + `fdars_compare_methods` MCP tool** — deterministic ranking, labeled candidates.
-3. **`build_pipeline_report()` / `pipeline_report()` + "pipeline" task family + MCP tool** — per-stage isolation, stage-prefixed keys.
-4. **`_tuning.py` loop core (shared) + `auto_tune()` Python API + `fdars_auto_tune` MCP tool** — Python API uses LLM proposal; MCP tool uses heuristic proposal (LLM-free); one core via injectable `proposal_fn`/`advisor_fn`.
+1. `sklearn/_base.py` — `_BaseFdarsEstimator`: stores `argvals` verbatim in `__init__`, resolves to `self.argvals_` in `fit`, sets `n_features_in_` via `validate_data`, casts float32→float64 before native calls, hosts the tags-API compat shim.
+2. `sklearn/_transformers.py`, `_regressors.py`, `_classifiers.py`, `_clusterers.py`, `_outliers.py` — the estimator families.
+3. `sklearn/_coverage.py` — the EXCLUDED_METHODS registry (reason-coded), populated by triage and finalized as families are implemented.
+4. Docs section under `docs/sklearn/` wired into MkDocs nav with offline `markdown-exec` fences.
 
 ### Critical Pitfalls
 
-Top items from `PITFALLS.md` (13 total, all codebase-derived):
-
-1. **ITP misleading scalar reduction** — `adjusted_pvalues` is a numpy array (per basis function). Emit detection AND localisation: `min_adjusted_pvalue`, `n_significant_intervals`, `proportion_significant`, `first_significant_basis`, `detected_at_0.05`. A lone `min_p` makes the LLM treat local significance as global. (Phase 50)
-2. **MCP LLM-free boundary violation** — no new MCP tool may call `advise()`. The LLM client orchestrates existing tools; the `fdars_auto_tune` tool uses a heuristic proposal. (Phase 53)
-3. **Provenance collapse in aggregated dicts** — `_check_grounding` does a flat numeric scan and can't tell which stage a value came from. Never `{**diag_a, **diag_b}`; use per-stage `Advice` calls or namespaced keys. (Phases 51 & 52)
-4. **Guard-sync drift + Python-3.9-skipped test** — make the guard-sync test version-independent; keep `_ASPECT_PRIMERS`/`build_diagnostics`/`_DIAGNOSTICS_METHODS` changes atomic. (Phase 50)
-5. **Auto-tune non-termination / oscillation / Goodhart** — `max_steps` required and enforced at the orchestrator; history + convergence check; optional guard diagnostics; injectable advisor so the whole loop is offline-testable without an API key. (Phase 53)
+1. **Constructor-param mutation / non-verbatim storage** — every `__init__` arg (esp. `argvals`) must be stored exactly as received; resolve the effective grid only in `fit` → `self.argvals_`. Writing back to `self.argvals` breaks `clone`/`get_params` round-trips, which `check_estimator` catches immediately.
+2. **1-sample / 1-feature error-message substrings are a contract** — `check_fit2d_1sample` needs one of `"1 sample"`/`"n_samples=1"`/`"one sample"`/`"1 class"`; `check_fit2d_1feature` needs `"1 feature(s)"`/`"n_features=1"`. Raw Rust/fdars-core error text won't satisfy these — add Python-layer guards before any native call.
+3. **FPCA SVD sign ambiguity** — canonicalize component sign (largest-abs element positive) in the Python wrapper, or `check_fit_idempotent` fails intermittently.
+4. **Minimum sample/grid requirements** — methods needing a minimum n_samples/n_points/k/df (FPCA n_components, smoothing df, clustering k) are the ones that force EXCLUSION; detect via triage, guard with compliant messages where fixable.
+5. **sklearn 1.3→1.6 tags/validation API drift + Python 3.9–3.14 skew** — bridge with the try/import shim; CI must exercise both API paths across the matrix.
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure (foundation-first; phase numbering continues from v7.0 → starts at **Phase 50**):
+Suggested 5-phase structure (continues numbering from v8.0 which ended at Phase 54 → this milestone starts at Phase 55):
 
-### Phase 50: Deferred Advisor Aspects (Foundational)
-**Rationale:** Lowest risk; extends existing builders; unblocks richer/accurate diagnostics for every later LLM call. Must not be merged into a later phase. Folds in the blocking compat fixes (anthropic pin, mcp import, version-independent guard-sync test) as a pre-flight.
-**Delivers:** PACE-FPCA scalars, ITP vector→scalar reduction (detection + localisation), elastic-multinomial review + `overfitting_gap`, extended `_ASPECT_PRIMERS`.
-**Addresses:** deferred-aspect table stakes.
-**Avoids:** ITP misleading reduction (count+fraction+min together), guard-sync drift (atomic commit + version-independent test), primer over-claiming.
+### Phase 1 (55): Compliance-Triage & Foundation
+**Rationale:** The no-exemptions constraint means scope is *discovered*, not assumed. Skeletoning every candidate and running the check battery first prevents implementing then discarding non-compliant estimators.
+**Delivers:** `_BaseFdarsEstimator` base class + `[sklearn]` extra pin + `_coverage.py` registry + a PASS/PASS-WITH-FIXES/EXCLUDE list for all ~30 candidates.
+**Addresses:** the shared base-class contract; the definitive coverage list.
+**Avoids:** Pitfalls 1–5 (centralized in the base class); late discovery of structural non-compliance.
+**Go/No-Go gate:** at least a viable core PASSes (≈1 FPCA, 2 smoothers, 2 regressors, 2 classifiers, 1 clusterer, 2 outliers).
 
-### Phase 51: Comparative Method-Selection
-**Rationale:** Builds on Phase 50's stable diagnostics; independent of pipeline/auto-tuning; no loop logic.
-**Delivers:** `compare_methods()` API, deterministic ranking, "comparison" task family, `fdars_compare_methods` MCP tool.
-**Uses:** existing `build_diagnostics` + `advise` + Provider protocol.
-**Avoids:** incommensurable comparison (method-match enforcement), wrong-run citation (labeled-candidate structure).
+### Phase 2 (56): Transformers (incl. FPCA)
+**Rationale:** FPCATransformer is the central grid-changing hub the predictors depend on; transformers also carry the strictest dtype/shape checks.
+**Delivers:** FPCATransformer (sign-canonicalized), smoothers, imputer, basis representation, depth transform + a `Pipeline([smoother, fpca])` end-to-end test.
+**Uses:** `parametrize_with_checks` gate; direct `_native.*` calls.
+**Implements:** `sklearn/_transformers.py`.
 
-### Phase 52: Pipeline Diagnostic Report
-**Rationale:** Extends the Phase 51 pattern to the multi-stage case; proves per-stage isolation — a prerequisite for the capstone.
-**Delivers:** `build_pipeline_report()` aggregator, `pipeline_report()` API, "pipeline" task family, MCP tool.
-**Avoids:** provenance collapse (per-stage `Advice` OR namespaced keys, never flat merge).
+### Phase 3 (57): Regressors & Classifiers
+**Rationale:** Straightforward once FPCATransformer + base patterns exist; all classifiers reuse the `X_fit_` + `LabelEncoder` patterns.
+**Delivers:** FPC/PLS regressors; logistic/LDA/QDA/KNN classifiers (+ differentiators that pass) + a `Pipeline([imputer, smoother, fpca, classifier])` end-to-end test.
 
-### Phase 53: Closed-Loop Auto-Tuning (Capstone)
-**Rationale:** Most complex; depends on Phases 50–52 for stable surfaces; introduces orchestration/convergence/guard logic.
-**Delivers:** `_tuning.py` loop core (shared by Python API + MCP), `auto_tune()` API (LLM proposal), `fdars_auto_tune` MCP tool (heuristic, LLM-free), `TuningTrace`/`TuneProposal`/`TuneResult` schemas + `Recommendation.parameter_delta`, "parameter_proposal" task family.
-**Avoids:** non-termination (`max_steps`), numeric fabrication (structured `parameter_delta` + dedicated loop system prompt), Goodhart (guard diagnostics), oscillation (history+convergence), non-determinism (injectable advisor), MCP boundary (heuristic-only MCP tool).
+### Phase 4 (58): Clusterers & Outlier Detectors
+**Rationale:** Distinct concerns (determinism/seeding for clustering; synthesized `decision_function` for outliers) warrant their own phase.
+**Delivers:** FunctionalKMeans (+ fuzzy c-means/GMM if compliant); LRT/outliergram/magnitude-shape (+ tvdmss/muod/depthgram if compliant).
 
-### Phase 54: Eval Strategy + Docs Gate
-**Rationale:** Eval signals should be defined alongside the capstone, not after; docs + human review close the milestone (v7.0 standard).
-**Delivers:** deterministic diagnostic-improvement + grounding-pass eval fixtures (env-gated LLM tests only); new docs pages + method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green; blocking human diagram review.
+### Phase 5 (59): Documentation & Docs Gate
+**Rationale:** Fence examples depend on working estimators, so docs come last.
+**Delivers:** `docs/sklearn/` section + per-category pages + Pipeline & GridSearchCV worked examples (offline `FDARS_FENCE_OK`) + method-accurate hand-authored SVG(s) + the published coverage/EXCLUDE list; whole-site `mkdocs build --strict` green; blocking human diagram review.
 
 ### Phase Ordering Rationale
-- Deferred aspects are foundational — later capabilities target and narrate the diagnostics they add.
-- Comparative → pipeline → auto-tuning is a strict complexity/dependency gradient; each reuses the prior surface. Per-stage isolation proven in pipeline is a prerequisite for the loop.
-- Ordering keeps the two invariants defendable at every step (guard-sync no-op; heuristic MCP tool last).
-- Exact phase count/split (e.g. whether eval is its own phase or folds into 53/54) is the roadmapper's call.
+- Triage first because scope is discovered under the no-exemptions rule (dependency: everything downstream needs the PASS/EXCLUDE verdict).
+- Transformers before predictors because FPCATransformer is the Pipeline hub the predictors consume.
+- Clusterers/outliers separated for their determinism and decision_function specifics.
+- Docs last because offline fences require working estimators (standing v6.0 rule: docs phase runs sequentially on `main`, not in worktrees).
 
 ### Research Flags
-Phases likely needing deeper research during planning:
-- **Phase 53 (Auto-tuning):** complex interaction of termination/oscillation/guard conditions; the loop orchestrator is the hardest piece. Recommend `gsd-plan-phase --research-phase` to stress-test convergence guarantees, param-range spec, and the static-allowlist-vs-kwargs MCP param schema decision.
-
-Phases with standard patterns (skip research-phase):
-- **Phase 50:** follows the proven v6.0 Phase 40 aspect-extension pattern.
-- **Phase 51:** standard champion/candidate leaderboard pattern.
-- **Phase 52:** standard ETL-style aggregation pattern.
+- **Phase 2 (56):** may need a short targeted check if the PASS-WITH-FIXES list is large — exact error-message substrings per sklearn version; determinism of rayon-parallel paths under fixed `random_state`.
+- **Phases 3–5:** standard patterns established in Phases 1–2 — skip research-phase.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | MCP v2.0 import + anthropic 1.0 Python-3.9 removal web-verified; zero-new-deps validated against existing surface |
-| Features | HIGH | Derived from direct codebase read + v6.0 Phase 40 deferral notes; result shapes read from Rust bindings/tests |
-| Architecture | HIGH | Direct source read of all advisor/MCP modules; guard-sync rules from v4/v5/v6 precedents |
-| Pitfalls | HIGH | All 13 from codebase patterns + MEMORY history + direct code inspection (not generic ML advice) |
+| Stack | HIGH | Official sklearn docs/release notes verified current (2026-08-31); version drift validated against a real-world case. |
+| Features | HIGH | Direct fdars source inspection + scikit-fda reference + sklearn contracts; EXCLUDE list from check_estimator behavior. PASS-WITH-FIXES boundary refinable by triage. |
+| Architecture | HIGH | Full fdars codebase read; BaseEstimator contract verified against the developer guide. |
+| Pitfalls | MEDIUM | sklearn source + docs + issue tracker; some specifics (exact error substrings, tags dataclass fields) are version-specific and confirmed at triage. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
-- **Auto-tune convergence decision tree** — exact interaction of termination conditions unspecified; handle in Phase 53 planning/research.
-- **Auto-tune param spec** — heuristic proposal grid width/steps per method; static allowlist vs `**kwargs` for the MCP tool; whether the 6 `_RUNNABLE_METHODS` suffice or regression/inference must become runnable; `max_steps` cost ceiling (≈20 suggested — confirm with user).
-- **ITP edge cases** — small-sample (n_basis=2) behavior; handle in Phase 50 via primer note + unit test.
-- **PACE quality scalar** — best scalar beyond `sigma2`/`ncomp` (reconstruction-quality from `fitted`?) — decide in Phase 50 plan.
-- **Comparative common denominator** — whether a shared `fdars.scoring` metric always exists for a fair method-pair comparison.
-- **Entry-point layout** — standalone functions in `advisor/__init__.py` vs a new `advisor/tasks/` sub-layer at 6+ task families.
+- Exact PASS/EXCLUDE boundary for borderline estimators (ShiftRegistration on n=2; GLMRegressor tags for response domain; the newer outlier detectors' `decision_function`) — resolved by the Phase-1 triage scan.
+- Determinism of rayon-parallel clustering under fixed `random_state` (drives the `non_deterministic` tag decision) — confirm in Phase 4.
+- Whether `sklearn-compat` fully covers the 1.4–1.6 tags API vs. a hand-rolled try/import guard — decide in Phase 1.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Direct source read: `python/fdars/advisor/` (`__init__.py`, `_prompts.py`, `_schema.py`, aspect builders, `providers/`), `python/fdars/mcp/` (`server.py`, `_runner.py`, `_compare.py`), `src/inference_mod.rs` (`itp_result_to_pydict`).
-- `.planning/PROJECT.md`, v4.0/v5.0/v6.0 guard-sync precedents (Phases 28/34/40), MEMORY history.
-- Detailed research docs: `STACK.md`, `FEATURES.md`, `ARCHITECTURE.md`, `PITFALLS.md`.
+- scikit-learn "Developing scikit-learn estimators" developer guide — BaseEstimator contract, tags API, validate_data/n_features_in_.
+- scikit-learn install page + 1.6 release highlights — Python support matrix, `validate_data`/`__sklearn_tags__`/`expected_failed_checks` changes.
+- scikit-learn `check_estimator` / `parametrize_with_checks` API docs — the compliance battery.
+- fdars source (`python/fdars/__init__.py`, `fdata_class.py`, `advisor/`, `mcp/`) — registration/gating pattern, native boundary.
 
 ### Secondary (MEDIUM confidence)
-- PyPI + official SDK changelogs/migration guides: anthropic 1.0.0 (Python 3.9 removal, `output_format`→`output_config`), `mcp` 2.0.0 (import rename, decorator continuity).
-- AutoML/hyperparameter-tuning stopping-criteria literature (applied selectively; loop-divergence patterns).
+- scikit-fda docs (0.10.x) + arXiv paper — FDA estimator API shape as a design reference.
+- sklearn issue tracker / PR history — error-message-substring contracts, version-drift failure reports.
 
 ---
-*Research completed: 2026-08-23*
+*Research completed: 2026-08-31*
 *Ready for roadmap: yes*
