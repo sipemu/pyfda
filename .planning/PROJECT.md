@@ -262,4 +262,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-31 after Phase 56 (Transformers) — all 8 TransformerMixin estimators (FPCATransformer hub + smoothers/imputer/basis/interpolation/depth/norm) pass full check_estimator on sklearn 1.8; Pipeline([smoother, fpca]) round-trips; Fdata-free contract enforced. XFORM-01..06 validated. Next: Phase 57 (Regressors & Classifiers). Milestone v9.0.*
+*Last updated: 2026-08-31 after Phase 57 (Regressors & Classifiers) — all 11 predictors (FPC/PLS/Robust/GLM/Nonparametric regressors + LDA/QDA/KNN/DD/Logistic/ElasticMultinomial classifiers) pass full check_estimator via stored-model/reconstructed predict (native predict_fregre_* entrypoints + numpy/sklearn reconstruction over stored FPC scores); GridSearchCV over Pipeline([imputer,smoother,fpca,classifier]) works. REG/CLF/PRED validated. Next: Phase 58 (Clusterers & Outlier Detectors + Compliance Gate; carries deferred CR-03/WR-03). Milestone v9.0.*
