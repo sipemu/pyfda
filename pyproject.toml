@@ -38,8 +38,22 @@ Issues = "https://github.com/sipemu/pyfda/issues"
 
 [project.optional-dependencies]
 plot = ["matplotlib>=3.6"]
-dev = ["pytest", "pytest-asyncio", "pyyaml", "matplotlib>=3.6"]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pyyaml",
+    "matplotlib>=3.6",
+    # scikit-learn for sklearn compliance tests (see [sklearn] extra below)
+    "scikit-learn>=1.3,<1.7; python_version < '3.10'",
+    "scikit-learn>=1.3; python_version >= '3.10'",
+]
 advisor = ["anthropic>=0.72.0,<1.0", "pydantic>=2.0"]
+# Note: sklearn 1.7 dropped Python 3.9 support. The marker below keeps the
+# 3.9 wheel valid (pinned <1.7) while allowing current sklearn on Python >=3.10.
+sklearn = [
+    "scikit-learn>=1.3,<1.7; python_version < '3.10'",
+    "scikit-learn>=1.3; python_version >= '3.10'",
+]
 # Note: mcp requires Python >=3.10. This extra is not compatible with Python 3.9.
 mcp = ["mcp>=2.0.0"]
 
