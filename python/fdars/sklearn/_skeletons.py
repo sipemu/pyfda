@@ -2489,20 +2489,28 @@ class _BaseFdarsOutlierDetector(OutlierMixin, _BaseFdarsEstimator):
 class LRTOutlierDetector(_BaseFdarsOutlierDetector):
     """LRT-based functional outlier detector.
 
-    Wraps ``fdars._native.outliers.detect_outliers_lrt_with_dist``.
-    At predict time, applies the stored threshold from the bootstrap null
-    distribution to new data.
+    Wraps ``fdars._native.outliers.detect_outliers_lrt_with_dist`` at fit time
+    to compute the bootstrap null distribution (stored as ``threshold_`` and
+    ``null_distribution_`` for provenance).  The sklearn-facing continuous score
+    is modified band depth of each new curve vs the STORED training reference
+    (``_native.depth.modified_band_1d(X_new, X_fit_)``).
 
-    Score synthesis: the score for each observation is
-    ``threshold_ - lrt_statistic(obs)``.  Positive = inlier, negative = outlier.
+    **Rationale:** the LRT statistic is a whole-sample quantity and cannot be
+    decomposed into a per-row score that is subset-invariant.  Depth-vs-stored-
+    reference is the subset-invariant surrogate that satisfies
+    ``check_methods_subset_invariance`` while keeping the detector's centality-
+    ranking semantics intact (higher depth = more normal = more inlier).
 
     Parameters
     ----------
     argvals : array-like or None, optional
+    contamination : float, optional
+        Expected fraction of outliers in training data, in (0, 0.5].
+        Default 0.1 (sklearn OutlierMixin convention).
     alpha : float, optional
-        Significance level (default 0.05).
+        Significance level for the LRT bootstrap fence (default 0.05).
     n_bootstrap : int, optional
-        Number of bootstrap samples (default 200).
+        Number of bootstrap samples for the LRT fence (default 200).
     trim : float, optional
         Trimming proportion (default 0.1).
     smo : float, optional
@@ -2511,9 +2519,10 @@ class LRTOutlierDetector(_BaseFdarsOutlierDetector):
         Seed (default 42).
     """
 
-    def __init__(self, argvals=None, alpha=0.05, n_bootstrap=200, trim=0.1,
-                 smo=0.02, random_state=42):
+    def __init__(self, argvals=None, contamination=0.1, alpha=0.05,
+                 n_bootstrap=200, trim=0.1, smo=0.02, random_state=42):
         super().__init__(argvals=argvals)
+        self.contamination = contamination
         self.alpha = alpha
         self.n_bootstrap = n_bootstrap
         self.trim = trim
@@ -2522,6 +2531,10 @@ class LRTOutlierDetector(_BaseFdarsOutlierDetector):
 
     def fit(self, X, y=None):
         """Fit LRT outlier detector.
+
+        Stores training curves as ``X_fit_``, computes the LRT bootstrap fence
+        (stored as ``threshold_`` / ``null_distribution_`` for provenance), and
+        sets ``offset_`` from the contamination-derived training depth percentile.
 
         Parameters
         ----------
@@ -2543,17 +2556,26 @@ class LRTOutlierDetector(_BaseFdarsOutlierDetector):
         self.argvals_ = self._resolve_argvals(n_pts)
         rs = check_random_state(self.random_state)
         seed = int(rs.randint(0, 2 ** 31))
+        # Retain LRT bootstrap fence as provenance attributes.
         result = _native.outliers.detect_outliers_lrt_with_dist(
             X, alpha=self.alpha, n_bootstrap=self.n_bootstrap,
             trim=self.trim, smo=self.smo, seed=seed
         )
         self.threshold_ = float(result["threshold"])
         self.null_distribution_ = np.array(result["null_distribution"])
+        # Store training reference for subset-invariant scoring.
         self.X_fit_ = X
+        # Training depth: self-depth of the training population.
+        train_scores = np.asarray(_native.depth.modified_band_1d(X, X))
+        self._set_offset(train_scores)
         return self
 
     def score_samples(self, X):
-        """Compute continuous anomaly score (threshold - per-sample LRT stat).
+        """Compute depth-based anomaly score (higher = more normal / inlier).
+
+        Scores each row of ``X`` against the STORED training reference
+        ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  This is
+        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
 
         Parameters
         ----------
@@ -2561,47 +2583,50 @@ class LRTOutlierDetector(_BaseFdarsOutlierDetector):
 
         Returns
         -------
-        scores : ndarray of shape (n_obs,)
-            Positive values indicate inliers; negative values indicate outliers.
+        scores : ndarray of shape (n_obs,), float64
+            Modified band depth of each new curve vs training set.
+            Higher = more central = more inlier.
         """
         check_is_fitted(self)
         X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
-        n_new = len(X)
-        scores = np.empty(n_new, dtype=np.float64)
-        for i, obs in enumerate(X):
-            # Augment training data with this single observation and re-detect
-            X_aug = np.vstack([self.X_fit_, obs.reshape(1, -1)])
-            result = _native.outliers.detect_outliers_lrt_with_dist(
-                X_aug, alpha=self.alpha, n_bootstrap=max(10, self.n_bootstrap // 10),
-                trim=self.trim, smo=self.smo, seed=0
-            )
-            threshold_aug = float(result["threshold"])
-            # Score: positive if threshold difference suggests inlier
-            is_outlier = bool(np.array(result["outliers"])[-1])
-            scores[i] = -1.0 if is_outlier else 1.0
-        return scores
+        return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
 
 
 class OutliergramDetector(_BaseFdarsOutlierDetector):
     """Outliergram (MEI vs MBD) functional outlier detector.
 
-    Wraps ``fdars._native.outliers.outliergram``.
-    Score: MBD score (higher = more central = more normal).
+    Scores each new curve against the STORED training population via
+    ``_native.depth.modified_band_1d(X_new, X_fit_)`` — modified band depth,
+    higher = more central = more normal.  This is subset-invariant by
+    construction.
+
+    The outliergram MEI/MBD arrays computed at fit are stored as
+    ``mbd_train_`` / ``mei_train_`` for provenance (the graphical decision
+    boundary).  The sklearn-facing continuous score is depth-vs-stored-reference
+    via the shared contamination → offset_ pattern.
 
     Parameters
     ----------
     argvals : array-like or None, optional
+    contamination : float, optional
+        Expected fraction of outliers in training data, in (0, 0.5].
+        Default 0.1 (sklearn OutlierMixin convention).
     factor : float, optional
-        Outlier factor (default 1.5).
+        Outlier factor for the outliergram graphical threshold (default 1.5).
     """
 
-    def __init__(self, argvals=None, factor=1.5):
+    def __init__(self, argvals=None, contamination=0.1, factor=1.5):
         super().__init__(argvals=argvals)
+        self.contamination = contamination
         self.factor = factor
 
     def fit(self, X, y=None):
         """Fit outliergram detector.
+
+        Stores training curves as ``X_fit_``, retains MEI/MBD arrays as
+        provenance attributes, and sets ``offset_`` from the contamination-
+        derived training depth percentile.
 
         Parameters
         ----------
@@ -2621,18 +2646,23 @@ class OutliergramDetector(_BaseFdarsOutlierDetector):
                 f"at least {self._min_samples} samples."
             )
         self.argvals_ = self._resolve_argvals(n_pts)
+        # Retain outliergram MEI/MBD arrays as provenance.
         result = _native.outliers.outliergram(X, factor=self.factor)
         self.mbd_train_ = np.array(result["mbd"])   # (n_obs,)
         self.mei_train_ = np.array(result["mei"])   # (n_obs,)
-        # Threshold: minimum MBD of non-outliers from training
-        outlier_mask = np.array(result["outliers"])
-        non_outlier_mbd = self.mbd_train_[~outlier_mask]
-        self.mbd_threshold_ = float(np.min(non_outlier_mbd)) if len(non_outlier_mbd) > 0 else 0.0
+        # Store training reference for subset-invariant scoring.
         self.X_fit_ = X
+        # Training depth: self-depth of the training population.
+        train_scores = np.asarray(_native.depth.modified_band_1d(X, X))
+        self._set_offset(train_scores)
         return self
 
     def score_samples(self, X):
-        """Compute MBD score (higher = more central = more normal).
+        """Compute depth-based anomaly score (higher = more normal / inlier).
+
+        Scores each row of ``X`` against the STORED training reference
+        ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  This is
+        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
 
         Parameters
         ----------
@@ -2640,19 +2670,14 @@ class OutliergramDetector(_BaseFdarsOutlierDetector):
 
         Returns
         -------
-        scores : ndarray of shape (n_obs,)
+        scores : ndarray of shape (n_obs,), float64
+            Modified band depth of each new curve vs training set.
+            Higher = more central = more inlier.
         """
         check_is_fitted(self)
         X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
-        # Compute depth of new observations w.r.t. training sample
-        mbd_new = np.array(
-            _native.depth.modified_band_1d(X, self.X_fit_)
-            if hasattr(_native.depth, "modified_band_1d")
-            else _native.depth.fraiman_muniz_1d(X, self.X_fit_)
-        )
-        # Score = MBD - threshold: positive = inlier, negative = outlier
-        return mbd_new - self.mbd_threshold_
+        return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
 
 
 class MagnitudeShapeDetector(_BaseFdarsOutlierDetector):
@@ -2928,25 +2953,41 @@ class MUODDetector(_BaseFdarsOutlierDetector):
 class DepthgramDetector(_BaseFdarsOutlierDetector):
     """Depthgram functional outlier detector.
 
-    Wraps ``fdars._native.outliers.depthgram``.
-    Score synthesis: uses MBD score as primary continuous anomaly measure.
+    Scores each new curve against the STORED training population via
+    ``_native.depth.modified_band_1d(X_new, X_fit_)`` — modified band depth,
+    higher = more central = more normal.  This is subset-invariant by
+    construction.
+
+    The depthgram shape/magnitude outlier index lists computed at fit are stored
+    as ``shape_outliers_train_`` / ``magnitude_outliers_train_`` for provenance.
+    The sklearn-facing continuous score is depth-vs-stored-reference via the
+    shared contamination → offset_ pattern.
 
     Parameters
     ----------
     argvals : array-like or None, optional
+    contamination : float, optional
+        Expected fraction of outliers in training data, in (0, 0.5].
+        Default 0.1 (sklearn OutlierMixin convention).
     outliergram_factor : float, optional
         Outliergram threshold factor (default 1.5).
     boxplot_factor : float, optional
         Boxplot threshold factor (default 1.5).
     """
 
-    def __init__(self, argvals=None, outliergram_factor=1.5, boxplot_factor=1.5):
+    def __init__(self, argvals=None, contamination=0.1, outliergram_factor=1.5,
+                 boxplot_factor=1.5):
         super().__init__(argvals=argvals)
+        self.contamination = contamination
         self.outliergram_factor = outliergram_factor
         self.boxplot_factor = boxplot_factor
 
     def fit(self, X, y=None):
         """Fit depthgram outlier detector.
+
+        Stores training curves as ``X_fit_``, retains shape/magnitude outlier
+        index lists as provenance attributes, and sets ``offset_`` from the
+        contamination-derived training depth percentile.
 
         Parameters
         ----------
@@ -2966,23 +3007,27 @@ class DepthgramDetector(_BaseFdarsOutlierDetector):
                 f"at least {self._min_samples} samples."
             )
         self.argvals_ = self._resolve_argvals(n_pts)
+        # Retain depthgram outlier index lists as provenance.
         result = _native.outliers.depthgram(
             X,
             outliergram_factor=self.outliergram_factor,
             boxplot_factor=self.boxplot_factor,
         )
-        mbd = np.array(result["mbd"])  # (n_obs,)
-        # Threshold: minimum MBD among non-outliers
-        shape_out = set(result["shape_outliers"])
-        mag_out = set(result["magnitude_outliers"])
-        all_out = shape_out | mag_out
-        inlier_mbd = [mbd[i] for i in range(n_obs) if i not in all_out]
-        self.mbd_threshold_ = float(min(inlier_mbd)) if inlier_mbd else 0.0
+        self.shape_outliers_train_ = list(result["shape_outliers"])
+        self.magnitude_outliers_train_ = list(result["magnitude_outliers"])
+        # Store training reference for subset-invariant scoring.
         self.X_fit_ = X
+        # Training depth: self-depth of the training population.
+        train_scores = np.asarray(_native.depth.modified_band_1d(X, X))
+        self._set_offset(train_scores)
         return self
 
     def score_samples(self, X):
-        """Compute continuous score using depth w.r.t. training data.
+        """Compute depth-based anomaly score (higher = more normal / inlier).
+
+        Scores each row of ``X`` against the STORED training reference
+        ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  This is
+        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
 
         Parameters
         ----------
@@ -2990,11 +3035,11 @@ class DepthgramDetector(_BaseFdarsOutlierDetector):
 
         Returns
         -------
-        scores : ndarray of shape (n_obs,)
+        scores : ndarray of shape (n_obs,), float64
+            Modified band depth of each new curve vs training set.
+            Higher = more central = more inlier.
         """
         check_is_fitted(self)
         X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
-        # Use fraiman-muniz depth as proxy for MBD-based score
-        mbd_new = np.array(_native.depth.fraiman_muniz_1d(X, self.X_fit_))
-        return mbd_new - self.mbd_threshold_
+        return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
