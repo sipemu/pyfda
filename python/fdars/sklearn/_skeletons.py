@@ -2359,7 +2359,15 @@ class FunctionalGMM(ClusterMixin, _BaseFdarsEstimator):
         )
         self.labels_ = np.array(result["cluster"], dtype=np.intp)
         self.membership_ = np.array(result["membership"])
-        self.X_fit_ = X  # stored for predict (center computation)
+        # Compute cluster centers once at fit time from the soft membership
+        # matrix and training data (weighted centroids).
+        # membership_: (n_train, n_clusters) — soft GMM responsibilities.
+        # Each column sums to the total weight for that cluster; dividing by
+        # that sum recovers the weighted centroid (not a hard-assignment mean).
+        _row_sums = self.membership_.sum(axis=0, keepdims=True).T  # (n_clusters, 1)
+        self.cluster_centers_ = (
+            (self.membership_.T @ X) / np.maximum(_row_sums, 1e-10)
+        )  # (n_clusters, n_pts)
         # n_iter_: gmm_cluster result exposes bic/icl but no iteration count;
         # use max_iter as a conservative upper bound (same convention as
         # LogisticFPCClassifier, resolves deferred review WR-03).
@@ -2367,10 +2375,11 @@ class FunctionalGMM(ClusterMixin, _BaseFdarsEstimator):
         return self
 
     def predict(self, X):
-        """Assign cluster labels (nearest center by L2 distance).
+        """Assign cluster labels (nearest stored center by L2 distance).
 
-        GMM does not store cluster centers directly; they are recovered from
-        the membership matrix and training data as weighted centroids.
+        Uses ``cluster_centers_`` computed once at fit time (weighted centroids
+        from the GMM soft membership matrix) — consistent with
+        ``FunctionalKMeans`` and ``FuzzyFunctionalCMeans``.
 
         Parameters
         ----------
@@ -2383,13 +2392,8 @@ class FunctionalGMM(ClusterMixin, _BaseFdarsEstimator):
         check_is_fitted(self)
         X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
-        # Recover cluster centers from membership matrix and training data
-        # membership_: (n_train, n_clusters) -- soft assignments
-        centers = self.membership_.T @ self.X_fit_  # (n_clusters, n_pts)
-        row_sums = self.membership_.sum(axis=0, keepdims=True).T  # (n_clusters, 1)
-        centers = centers / np.maximum(row_sums, 1e-10)
-        # Assign each new curve to the nearest cluster center
-        dists = _pairwise_l2(X, centers)  # (n_new, n_clusters)
+        # Assign each new curve to the nearest stored cluster center
+        dists = _pairwise_l2(X, self.cluster_centers_)  # (n_new, n_clusters)
         return np.argmin(dists, axis=1).astype(np.intp)
 
 
@@ -2401,8 +2405,12 @@ class FunctionalGMM(ClusterMixin, _BaseFdarsEstimator):
 class _BaseFdarsOutlierDetector(OutlierMixin, _BaseFdarsEstimator):
     """Shared base for fdars outlier detectors.
 
-    Subclasses implement ``score_samples(X)`` returning a continuous score
-    (higher = more normal/inlier).
+    Subclasses implement ``_score_samples_validated(X)`` returning a continuous
+    score (higher = more normal/inlier) for a pre-validated float64 ndarray.
+    The public ``score_samples`` validates once and delegates; ``decision_function``
+    also validates once then calls ``_score_samples_validated`` directly — avoiding
+    the double-validation that would occur if ``decision_function`` called the
+    public ``score_samples``.
 
     The shared contamination → offset_ → decision_function → predict pattern:
 
@@ -2410,21 +2418,24 @@ class _BaseFdarsOutlierDetector(OutlierMixin, _BaseFdarsEstimator):
       expected to be outliers.  Default is sklearn convention: 0.1.
       A fixed float (not "auto") guarantees ``check_outliers_train`` sees both
       {-1, +1} even on the battery's small datasets.
-    * ``_set_offset(train_scores)`` — call at the end of ``fit``; sets
+    * ``_set_offset(train_scores)`` — call at the end of ``fit``; validates
+      ``contamination`` ∈ (0, 0.5] and sets
       ``self.offset_ = float(np.percentile(train_scores, 100.0 * contamination))``.
       Higher score = more inlier, so the lowest contamination fraction fall
       below offset_ and predict as -1.
-    * ``decision_function(X)`` — returns ``score_samples(X) - offset_``
-      (continuous; required by OutlierMixin contract).
+    * ``decision_function(X)`` — validates X once, then returns
+      ``_score_samples_validated(X) - offset_`` (continuous; required by
+      OutlierMixin contract).
     * ``predict(X)`` — returns ``np.where(decision_function(X) >= 0, 1, -1)``
       as int64.  Positive decision scores = inlier (+1), negative = outlier (-1).
 
     Subclasses MUST:
     1. Accept ``contamination`` in ``__init__`` and store it verbatim.
     2. Call ``self._set_offset(train_scores)`` at the end of ``fit``.
-    3. Implement ``score_samples(X)`` scoring each new row against the
-       **stored** training reference (``self.X_fit_``), not against batch
-       statistics — this guarantees ``check_methods_subset_invariance``.
+    3. Implement ``_score_samples_validated(X: np.ndarray) -> np.ndarray``
+       scoring each new pre-validated float64 row against the **stored**
+       training reference, not against batch statistics — this guarantees
+       ``check_methods_subset_invariance``.
     """
 
     _min_samples: int = 2
@@ -2432,20 +2443,47 @@ class _BaseFdarsOutlierDetector(OutlierMixin, _BaseFdarsEstimator):
     def _set_offset(self, train_scores: np.ndarray) -> None:
         """Set ``offset_`` from training scores and ``contamination``.
 
+        Raises ``ValueError`` if ``contamination`` is not in (0, 0.5] (sklearn
+        OutlierMixin convention).
+
         Parameters
         ----------
         train_scores : ndarray of shape (n_obs,)
             Per-training-sample continuous anomaly scores (higher = more normal).
         """
+        if not (0 < self.contamination <= 0.5):
+            raise ValueError(
+                f"contamination must be in (0, 0.5]; got {self.contamination!r}."
+            )
         self.offset_ = float(
             np.percentile(train_scores, 100.0 * self.contamination)
         )
 
-    def decision_function(self, X):
-        """Compute the shifted anomaly score (continuous).
+    def _score_samples_validated(self, X: np.ndarray) -> np.ndarray:
+        """Compute anomaly scores for a pre-validated float64 array.
 
-        Equal to ``score_samples(X) - offset_``.  Positive = inlier,
-        negative = outlier.  Required by the sklearn OutlierMixin contract.
+        Must be implemented by subclasses.  ``X`` is already a float64 ndarray
+        (validated and upcast by the caller).  Each row MUST be scored against
+        the stored training reference, not against batch statistics, to satisfy
+        ``check_methods_subset_invariance``.
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_obs, n_points), float64
+
+        Returns
+        -------
+        scores : ndarray of shape (n_obs,), float64
+        """
+        raise NotImplementedError
+
+    def score_samples(self, X):
+        """Compute continuous anomaly score (higher = more normal / inlier).
+
+        Validates ``X`` once, upcasts to float64, and delegates to
+        ``_score_samples_validated``.  Each row is scored against the stored
+        training reference so that
+        ``score_samples(X[mask]) == score_samples(X)[mask]`` (subset-invariant).
 
         Parameters
         ----------
@@ -2456,7 +2494,30 @@ class _BaseFdarsOutlierDetector(OutlierMixin, _BaseFdarsEstimator):
         scores : ndarray of shape (n_obs,), float64
         """
         check_is_fitted(self)
-        return self.score_samples(X) - self.offset_
+        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        return self._score_samples_validated(X)
+
+    def decision_function(self, X):
+        """Compute the shifted anomaly score (continuous).
+
+        Validates ``X`` once and returns ``_score_samples_validated(X) - offset_``.
+        Positive = inlier, negative = outlier.  Required by the sklearn
+        OutlierMixin contract.  Validation happens exactly once (not twice as
+        would occur if this called the public ``score_samples``).
+
+        Parameters
+        ----------
+        X : array-like of shape (n_obs, n_points)
+
+        Returns
+        -------
+        scores : ndarray of shape (n_obs,), float64
+        """
+        check_is_fitted(self)
+        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
+        X = X.astype(np.float64)
+        return self._score_samples_validated(X) - self.offset_
 
     def predict(self, X):
         """Predict outlier labels (+1 inlier, -1 outlier).
@@ -2475,23 +2536,6 @@ class _BaseFdarsOutlierDetector(OutlierMixin, _BaseFdarsEstimator):
         """
         check_is_fitted(self)
         return np.where(self.decision_function(X) >= 0, 1, -1).astype(np.int64)
-
-    def score_samples(self, X):
-        """Compute continuous anomaly score (higher = more normal).
-
-        Must be implemented by subclasses.  Each row of ``X`` MUST be scored
-        against the stored training reference (``self.X_fit_``), not against
-        the current batch, to satisfy ``check_methods_subset_invariance``.
-
-        Parameters
-        ----------
-        X : array-like of shape (n_obs, n_points)
-
-        Returns
-        -------
-        scores : ndarray of shape (n_obs,), float64
-        """
-        raise NotImplementedError
 
 
 class LRTOutlierDetector(_BaseFdarsOutlierDetector):
@@ -2578,16 +2622,24 @@ class LRTOutlierDetector(_BaseFdarsOutlierDetector):
         self._set_offset(train_scores)
         return self
 
-    def score_samples(self, X):
-        """Compute depth-based anomaly score (higher = more normal / inlier).
+    def _score_samples_validated(self, X: np.ndarray) -> np.ndarray:
+        """Compute depth-based anomaly score for a pre-validated float64 array.
 
         Scores each row of ``X`` against the STORED training reference
         ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  This is
-        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
+        subset-invariant: each row is scored independently against the fixed
+        training reference.
+
+        **Note:** the sklearn-facing score is modified band depth vs the stored
+        training reference (a subset-invariant surrogate).  The LRT statistic
+        itself is a whole-sample quantity and cannot be decomposed into a
+        per-row score that is subset-invariant; the fit-time ``threshold_`` and
+        ``null_distribution_`` attributes remain available for the true
+        batch-relative LRT method.
 
         Parameters
         ----------
-        X : array-like of shape (n_obs, n_points)
+        X : ndarray of shape (n_obs, n_points), float64
 
         Returns
         -------
@@ -2595,9 +2647,6 @@ class LRTOutlierDetector(_BaseFdarsOutlierDetector):
             Modified band depth of each new curve vs training set.
             Higher = more central = more inlier.
         """
-        check_is_fitted(self)
-        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
-        X = X.astype(np.float64)
         return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
 
 
@@ -2665,16 +2714,23 @@ class OutliergramDetector(_BaseFdarsOutlierDetector):
         self._set_offset(train_scores)
         return self
 
-    def score_samples(self, X):
-        """Compute depth-based anomaly score (higher = more normal / inlier).
+    def _score_samples_validated(self, X: np.ndarray) -> np.ndarray:
+        """Compute depth-based anomaly score for a pre-validated float64 array.
 
         Scores each row of ``X`` against the STORED training reference
         ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  This is
-        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
+        subset-invariant: each row is scored independently against the fixed
+        training reference.
+
+        **Note:** the sklearn-facing score is modified band depth vs the stored
+        training reference (a subset-invariant surrogate).  The outliergram
+        method (MEI vs MBD graphical boundary) is a whole-sample diagnostic;
+        the fit-time ``mbd_train_`` and ``mei_train_`` attributes remain
+        available for the true batch-relative outliergram analysis.
 
         Parameters
         ----------
-        X : array-like of shape (n_obs, n_points)
+        X : ndarray of shape (n_obs, n_points), float64
 
         Returns
         -------
@@ -2682,24 +2738,39 @@ class OutliergramDetector(_BaseFdarsOutlierDetector):
             Modified band depth of each new curve vs training set.
             Higher = more central = more inlier.
         """
-        check_is_fitted(self)
-        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
-        X = X.astype(np.float64)
         return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
 
 
 class MagnitudeShapeDetector(_BaseFdarsOutlierDetector):
-    """Magnitude-shape outlyingness detector.
+    """Magnitude-shape (MS) outlyingness detector.
 
-    Scores each new curve against the STORED training population via
-    ``_native.depth.modified_band_1d(X_new, X_fit_)`` — modified band depth,
-    higher = more central = more normal.  This is subset-invariant by
-    construction (each row is scored independently vs the fixed training
-    reference), resolving Phase-57 review CR-03.
+    Implements a method-faithful, subset-invariant magnitude-shape score:
+    each new curve is scored against the **stored training population statistics**
+    (pointwise mean and variance), not against the current test batch.
 
-    The contamination → offset_ pattern (from ``_BaseFdarsOutlierDetector``):
-    ``offset_ = percentile(training_scores, 100 * contamination)``; the
-    lowest-depth ``contamination`` fraction of training curves predict as -1.
+    **Score definition (subset-invariant MS outlyingness):**
+
+    Given training curves ``X_fit_`` with pointwise mean ``mu_`` and pointwise
+    variance ``var_``, the magnitude outlyingness of a new curve ``x`` is::
+
+        MO(x) = mean_t( |x(t) - mu_(t)| )                 # avg abs deviation
+
+    and the shape outlyingness is::
+
+        VO(x) = mean_t( |(x(t) - mu_(t))^2 - var_(t)| )   # avg variance deviation
+
+    The combined score (higher = more inlier) is::
+
+        score(x) = -(MO(x)^2 + VO(x)^2)
+
+    Both MO and VO are computed vs the **fixed** stored training statistics
+    ``mu_`` / ``var_``, so scoring a subset of test rows returns the same values
+    as scoring them individually — ``check_methods_subset_invariance`` passes.
+
+    This makes ``MagnitudeShapeDetector`` the only detector in this module with
+    a genuinely method-faithful characteristic score.  All other detectors use
+    modified band depth as a subset-invariant surrogate because their eponymous
+    native methods are whole-batch statistics with no per-row decomposition.
 
     Parameters
     ----------
@@ -2711,21 +2782,52 @@ class MagnitudeShapeDetector(_BaseFdarsOutlierDetector):
         Default 0.1 (sklearn OutlierMixin convention).  A fixed float (not
         "auto") guarantees ``check_outliers_train`` sees both {-1, +1} on the
         battery's small datasets.
-    depth_method : str, optional
-        Depth method for scoring.  Default "modified_band" (uses
-        ``_native.depth.modified_band_1d``).  Reserved for future extension.
+
+    Attributes
+    ----------
+    mu_ : ndarray of shape (n_points,)
+        Pointwise training mean curve stored at fit time (reference for MO).
+    var_ : ndarray of shape (n_points,)
+        Pointwise training variance curve stored at fit time (reference for VO).
+    offset_ : float
+        Threshold derived from the contamination-fraction of training MS scores.
     """
 
-    def __init__(self, argvals=None, contamination=0.1, depth_method="modified_band"):
+    def __init__(self, argvals=None, contamination=0.1):
         super().__init__(argvals=argvals)
         self.contamination = contamination
-        self.depth_method = depth_method
+
+    @staticmethod
+    def _ms_score(X: np.ndarray, mu: np.ndarray, var: np.ndarray) -> np.ndarray:
+        """Compute negated combined MS outlyingness for each row of X.
+
+        Each row is scored vs the fixed pointwise mean ``mu`` and variance
+        ``var`` (computed from the training set at fit time).  This is
+        subset-invariant by construction: each row's score depends only on that
+        row and the stored training statistics, not on the other rows in X.
+
+        Parameters
+        ----------
+        X : ndarray of shape (n_obs, n_points), float64
+        mu : ndarray of shape (n_points,)
+        var : ndarray of shape (n_points,)
+
+        Returns
+        -------
+        scores : ndarray of shape (n_obs,), float64
+            Negated combined MS outlyingness.  Higher = more inlier.
+        """
+        mo = np.mean(np.abs(X - mu), axis=1)               # (n_obs,)
+        residual_sq = (X - mu) ** 2                         # (n_obs, n_pts)
+        vo = np.mean(np.abs(residual_sq - var), axis=1)     # (n_obs,)
+        return -(mo ** 2 + vo ** 2)
 
     def fit(self, X, y=None):
         """Fit magnitude-shape detector.
 
-        Stores training curves as ``X_fit_`` and computes ``offset_`` from the
-        training depth scores (modified band depth of training set vs itself).
+        Stores the training pointwise mean ``mu_`` and variance ``var_`` as the
+        fixed reference for subset-invariant scoring.  Sets ``offset_`` from the
+        contamination-fraction of training MS scores.
 
         Parameters
         ----------
@@ -2742,42 +2844,42 @@ class MagnitudeShapeDetector(_BaseFdarsOutlierDetector):
         if n_obs < self._min_samples:
             raise ValueError(
                 f"n_samples={n_obs} is too small; MagnitudeShapeDetector requires "
-                f"at least {self._min_samples} samples. (1 sample is not enough)"
+                f"at least {self._min_samples} samples."
             )
         self.argvals_ = self._resolve_argvals(n_pts)
-        # Store training reference for subset-invariant scoring.
-        self.X_fit_ = X
-        # Training depth: self-depth of the training population.
-        # Higher depth = more central = more inlier (matches offset_ convention).
-        train_scores = np.asarray(
-            _native.depth.modified_band_1d(X, X)
-        )
-        # Set offset_ so the lowest contamination fraction predict as -1.
+        # Store pointwise training statistics as the fixed scoring reference.
+        self.mu_ = X.mean(axis=0)    # (n_pts,) pointwise mean
+        self.var_ = X.var(axis=0)    # (n_pts,) pointwise variance
+        # Compute training MS scores to calibrate offset_.
+        train_scores = self._ms_score(X, self.mu_, self.var_)
         self._set_offset(train_scores)
         return self
 
-    def score_samples(self, X):
-        """Compute depth-based anomaly score (higher = more normal / inlier).
+    def _score_samples_validated(self, X: np.ndarray) -> np.ndarray:
+        """Compute negated MS outlyingness for a pre-validated float64 array.
 
-        Scores each row of ``X`` against the STORED training reference
-        ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  Because each
-        row is scored independently vs a fixed reference, this is
-        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
+        Each row is scored against the **stored** training pointwise mean
+        ``self.mu_`` and variance ``self.var_``.  Because the reference
+        statistics are fixed at fit time, this is subset-invariant:
+        ``score_samples(X[mask]) == score_samples(X)[mask]``.
+
+        The score is ``-(MO^2 + VO^2)`` (higher = more inlier), where MO is
+        the mean absolute deviation from the training mean and VO is the mean
+        absolute deviation of squared residuals from the training variance.
+        This is a genuinely method-faithful MS outlyingness score, distinct from
+        the modified-band-depth surrogate used by all other detectors in this
+        module.
 
         Parameters
         ----------
-        X : array-like of shape (n_obs, n_points)
+        X : ndarray of shape (n_obs, n_points), float64
 
         Returns
         -------
         scores : ndarray of shape (n_obs,), float64
-            Modified band depth of each new curve vs training set.
-            Higher = more central = more inlier.
+            Negated MS outlyingness.  Higher = more inlier.
         """
-        check_is_fitted(self)
-        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
-        X = X.astype(np.float64)
-        return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
+        return self._ms_score(X, self.mu_, self.var_)
 
 
 class TVDMSSDetector(_BaseFdarsOutlierDetector):
@@ -2860,16 +2962,24 @@ class TVDMSSDetector(_BaseFdarsOutlierDetector):
         self._set_offset(train_scores)
         return self
 
-    def score_samples(self, X):
-        """Compute depth-based anomaly score (higher = more normal / inlier).
+    def _score_samples_validated(self, X: np.ndarray) -> np.ndarray:
+        """Compute depth-based anomaly score for a pre-validated float64 array.
 
         Scores each row of ``X`` against the STORED training reference
         ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  This is
-        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
+        subset-invariant: each row is scored independently against the fixed
+        training reference.
+
+        **Note:** the sklearn-facing score is modified band depth vs the stored
+        training reference (a subset-invariant surrogate).  The TVD-MSS method
+        produces batch-relative magnitude/shape statistics (``tvd_train_``,
+        ``mss_train_``) that cannot be decomposed into a per-row subset-invariant
+        score; those fit-time provenance arrays remain available for the true
+        batch-relative TVD-MSS analysis.
 
         Parameters
         ----------
-        X : array-like of shape (n_obs, n_points)
+        X : ndarray of shape (n_obs, n_points), float64
 
         Returns
         -------
@@ -2877,9 +2987,6 @@ class TVDMSSDetector(_BaseFdarsOutlierDetector):
             Modified band depth of each new curve vs training set.
             Higher = more central = more inlier.
         """
-        check_is_fitted(self)
-        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
-        X = X.astype(np.float64)
         return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
 
 
@@ -2966,16 +3073,25 @@ class MUODDetector(_BaseFdarsOutlierDetector):
         self._set_offset(train_scores)
         return self
 
-    def score_samples(self, X):
-        """Compute depth-based anomaly score (higher = more normal / inlier).
+    def _score_samples_validated(self, X: np.ndarray) -> np.ndarray:
+        """Compute depth-based anomaly score for a pre-validated float64 array.
 
         Scores each row of ``X`` against the STORED training reference
         ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  This is
-        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
+        subset-invariant: each row is scored independently against the fixed
+        training reference.
+
+        **Note:** the sklearn-facing score is modified band depth vs the stored
+        training reference (a subset-invariant surrogate).  The native MUOD
+        shape/magnitude/amplitude indices are batch-relative population statistics
+        and cannot be decomposed into a per-row subset-invariant score; the fit-
+        time provenance arrays (``shape_index_train_``, ``magnitude_index_train_``,
+        ``amplitude_index_train_``) remain available for the true batch-relative
+        MUOD analysis.
 
         Parameters
         ----------
-        X : array-like of shape (n_obs, n_points)
+        X : ndarray of shape (n_obs, n_points), float64
 
         Returns
         -------
@@ -2983,9 +3099,6 @@ class MUODDetector(_BaseFdarsOutlierDetector):
             Modified band depth of each new curve vs training set.
             Higher = more central = more inlier.
         """
-        check_is_fitted(self)
-        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
-        X = X.astype(np.float64)
         return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
 
 
@@ -3061,16 +3174,24 @@ class DepthgramDetector(_BaseFdarsOutlierDetector):
         self._set_offset(train_scores)
         return self
 
-    def score_samples(self, X):
-        """Compute depth-based anomaly score (higher = more normal / inlier).
+    def _score_samples_validated(self, X: np.ndarray) -> np.ndarray:
+        """Compute depth-based anomaly score for a pre-validated float64 array.
 
         Scores each row of ``X`` against the STORED training reference
         ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  This is
-        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
+        subset-invariant: each row is scored independently against the fixed
+        training reference.
+
+        **Note:** the sklearn-facing score is modified band depth vs the stored
+        training reference (a subset-invariant surrogate).  The depthgram method
+        (shape/magnitude outlier classification via graphical depth bands) is a
+        whole-sample diagnostic; the fit-time ``shape_outliers_train_`` and
+        ``magnitude_outliers_train_`` provenance lists remain available for the
+        true batch-relative depthgram analysis.
 
         Parameters
         ----------
-        X : array-like of shape (n_obs, n_points)
+        X : ndarray of shape (n_obs, n_points), float64
 
         Returns
         -------
@@ -3078,7 +3199,4 @@ class DepthgramDetector(_BaseFdarsOutlierDetector):
             Modified band depth of each new curve vs training set.
             Higher = more central = more inlier.
         """
-        check_is_fitted(self)
-        X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
-        X = X.astype(np.float64)
         return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
