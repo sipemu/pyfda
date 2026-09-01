@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional sklearn Pipeline data flow: (n_obs, n_points) ndarray through transformer stages to FPC scores to predictor">
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Functional sklearn Pipeline</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">plain ndarray in — FPC scores — prediction out; every stage is a standard sklearn estimator</text>
+
+  <!-- ===== Outer Pipeline frame ===== -->
+  <rect x="12" y="58" width="696" height="212" rx="14" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text class="sm" x="26" y="74" fill="#6c757d">sklearn Pipeline</text>
+
+  <!-- ===== Stage 1: Input ndarray ===== -->
+  <rect x="24" y="88" width="118" height="72" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="83" y="110" text-anchor="middle" fill="#495057">Input</text>
+  <text class="mono" x="83" y="128" text-anchor="middle" fill="#1a1a2e">X ndarray</text>
+  <text class="sm" x="83" y="145" text-anchor="middle">(n_obs, n_points)</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="142" y1="124" x2="162" y2="124" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- ===== Stage 2: Imputer ===== -->
+  <rect x="162" y="88" width="118" height="72" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="221" y="110" text-anchor="middle" fill="#495057">Imputer</text>
+  <text class="mono" x="221" y="128" text-anchor="middle" fill="#1a1a2e">Imputer()</text>
+  <text class="sm" x="221" y="145" text-anchor="middle">fills NaN values</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="280" y1="124" x2="300" y2="124" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- ===== Stage 3: BSplineSmoother ===== -->
+  <rect x="300" y="88" width="118" height="72" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="359" y="107" text-anchor="middle" fill="#495057">Smoother</text>
+  <text class="mono" x="359" y="124" text-anchor="middle" fill="#1a1a2e">BSpline</text>
+  <text class="mono" x="359" y="139" text-anchor="middle" fill="#1a1a2e">Smoother()</text>
+  <text class="sm" x="359" y="153" text-anchor="middle">removes noise</text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="418" y1="124" x2="438" y2="124" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- ===== Stage 4: FPCATransformer (orange = method/computation) ===== -->
+  <rect x="438" y="78" width="130" height="92" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="503" y="98" text-anchor="middle" fill="#fd7e14">FPCA</text>
+  <text class="mono" x="503" y="115" text-anchor="middle" fill="#1a1a2e">FPCATransformer</text>
+  <text class="sm" x="503" y="132" text-anchor="middle">(n_obs, n_points)</text>
+  <text class="sm" x="503" y="146" text-anchor="middle">→ FPC scores</text>
+  <text class="sm" x="503" y="160" text-anchor="middle">(n_obs, n_components)</text>
+
+  <!-- Arrow 4→5 -->
+  <line x1="568" y1="124" x2="588" y2="124" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+
+  <!-- ===== Stage 5: Predictor (orange = method/computation) ===== -->
+  <rect x="588" y="78" width="110" height="92" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="643" y="98" text-anchor="middle" fill="#fd7e14">Predictor</text>
+  <text class="mono" x="643" y="115" text-anchor="middle" fill="#1a1a2e">FPCLDAClassifier</text>
+  <text class="sm" x="643" y="132" text-anchor="middle">or FPCRegressor</text>
+  <text class="sm" x="643" y="149" text-anchor="middle">consumes scores</text>
+  <text class="sm" x="643" y="165" text-anchor="middle">→ labels / ŷ</text>
+
+  <!-- ===== Bottom annotations row ===== -->
+  <!-- Annotation 1: transform chain -->
+  <line x1="83" y1="168" x2="83" y2="192" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="83" y="208" text-anchor="middle">raw curves</text>
+  <text class="sm" x="83" y="221" text-anchor="middle">with NaN</text>
+
+  <line x1="221" y1="168" x2="221" y2="192" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="221" y="208" text-anchor="middle">imputed</text>
+  <text class="sm" x="221" y="221" text-anchor="middle">curves</text>
+
+  <line x1="359" y1="168" x2="359" y2="192" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="359" y="208" text-anchor="middle">smoothed</text>
+  <text class="sm" x="359" y="221" text-anchor="middle">curves</text>
+
+  <line x1="503" y1="178" x2="503" y2="192" stroke="#fd7e14" stroke-width="1.2"/>
+  <text class="sm" x="503" y="208" text-anchor="middle" fill="#fd7e14">score matrix</text>
+  <text class="sm" x="503" y="221" text-anchor="middle" fill="#fd7e14">(n_obs, k)</text>
+
+  <line x1="643" y1="178" x2="643" y2="192" stroke="#fd7e14" stroke-width="1.2"/>
+  <text class="sm" x="643" y="208" text-anchor="middle" fill="#fd7e14">prediction</text>
+  <text class="sm" x="643" y="221" text-anchor="middle" fill="#fd7e14">labels / ŷ</text>
+
+  <!-- ===== GridSearchCV brace label ===== -->
+  <line x1="162" y1="248" x2="696" y2="248" stroke="#ced4da" stroke-width="1.2"/>
+  <line x1="162" y1="244" x2="162" y2="252" stroke="#ced4da" stroke-width="1.2"/>
+  <line x1="696" y1="244" x2="696" y2="252" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="429" y="267" text-anchor="middle">GridSearchCV searches over stage__param keys (e.g. fpca__n_components, clf__ncomp)</text>
+  <text class="sm" x="429" y="282" text-anchor="middle">check_estimator passes with zero exemptions on all 28 wrapped estimators</text>
+
+  <!-- Defs: arrowheads -->
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arrorange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+  </defs>
+</svg>

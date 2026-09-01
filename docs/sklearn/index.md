@@ -70,6 +70,10 @@ documented on the [coverage / EXCLUDE list](coverage.md) (added in Plan 02).
 
 **Verified on:** sklearn 1.8.0 / Python 3.14 — 28 estimators, 1 379 checks total.
 
+## Pipeline Data Flow
+
+![functional sklearn Pipeline data flow: ndarray → transformer → FPC scores → predictor](../assets/diagrams/sklearn-pipeline-dataflow.svg){ .fdars-diagram }
+
 ## Five Estimator Families
 
 `fdars.sklearn` organises its 28 wrapped estimators into five scikit-learn
