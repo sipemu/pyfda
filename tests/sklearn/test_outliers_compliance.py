@@ -164,3 +164,65 @@ def test_depthgram_compliance(estimator, check):
     - ``check_outliers_fit_predict``: fit_predict consistent with predict.
     """
     check(estimator)
+
+
+# ---------------------------------------------------------------------------
+# Method-fidelity regression guard (Phase 58 CR-01 fix)
+# ---------------------------------------------------------------------------
+
+
+def test_magnitude_shape_distinct_from_band_depth():
+    """MagnitudeShapeDetector scores must differ from pure band-depth on outliers.
+
+    MagnitudeShapeDetector now uses a method-faithful MS outlyingness score
+    (negated MO^2 + VO^2 vs stored training statistics) rather than modified
+    band depth.  On a dataset where shape outliers are present, its predictions
+    must differ from a pure band-depth (DepthgramDetector) baseline — otherwise
+    the fidelity improvement has regressed to the shared surrogate.
+
+    This is a regression guard: if MagnitudeShapeDetector silently falls back to
+    band-depth scoring the assertions below will fail.
+    """
+    import numpy as np
+    from fdars.sklearn._skeletons import MagnitudeShapeDetector, DepthgramDetector
+
+    rng = np.random.default_rng(42)
+    n_pts = 30
+
+    # Training: smooth sinusoidal curves (normal population)
+    t = np.linspace(0, 2 * np.pi, n_pts)
+    X_train = np.stack(
+        [np.sin(t) + rng.normal(0, 0.1, n_pts) for _ in range(40)]
+    )
+
+    # Test: mix of normal curves and magnitude outliers (very high amplitude)
+    X_normal = np.stack(
+        [np.sin(t) + rng.normal(0, 0.1, n_pts) for _ in range(10)]
+    )
+    X_outlier = np.stack(
+        [np.sin(t) * 8.0 + rng.normal(0, 0.1, n_pts) for _ in range(5)]
+    )
+    X_test = np.vstack([X_normal, X_outlier])
+
+    ms_det = MagnitudeShapeDetector(contamination=0.1)
+    ms_det.fit(X_train)
+    ms_scores = ms_det.score_samples(X_test)
+
+    dg_det = DepthgramDetector(contamination=0.1)
+    dg_det.fit(X_train)
+    dg_scores = dg_det.score_samples(X_test)
+
+    # Scores must not be identical (the MS score is a different quantity from MBD)
+    assert not np.allclose(ms_scores, dg_scores), (
+        "MagnitudeShapeDetector.score_samples returned identical results to "
+        "DepthgramDetector — the method-faithful MS scoring has regressed to "
+        "the shared band-depth surrogate."
+    )
+
+    # The MS score must correctly rank the magnitude outliers below normal curves
+    ms_outlier_scores = ms_scores[10:]   # last 5 are outliers
+    ms_normal_scores = ms_scores[:10]    # first 10 are normal
+    assert np.median(ms_outlier_scores) < np.median(ms_normal_scores), (
+        "MagnitudeShapeDetector MS score failed to rank magnitude outliers "
+        "below normal curves — scoring may be inverted or degenerate."
+    )
