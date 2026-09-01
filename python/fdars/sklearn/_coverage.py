@@ -271,12 +271,18 @@ TRIAGE_VERDICTS: dict[str, str] = {
     # -----------------------------------------------------------------------
     # 0 failures (47/47 checks)
     "FunctionalKMeans": "PASS",
-    # 1 failure: check_non_transformer_estimators_n_iter (missing n_iter_ attr).
-    # Fixable: add self.n_iter_ = 1 (or actual iteration count) in fit().
-    "FuzzyFunctionalCMeans": "PASS-WITH-FIXES: add n_iter_ attribute to fit()",
-    # 1 failure: check_non_transformer_estimators_n_iter (missing n_iter_ attr).
-    # Fixable: add self.n_iter_ = 1 in fit().
-    "FunctionalGMM": "PASS-WITH-FIXES: add n_iter_ attribute to fit()",
+    # 0 failures. Fixed in Phase 58 Plan 03 (CLUS-02, WR-03 resolved):
+    # - self.n_iter_ = self.max_iter added in fit() after native call.
+    # - fuzzy_cmeans_fd exposes no iteration count; max_iter is the conservative
+    #   upper bound (same convention as LogisticFPCClassifier).
+    # - check_non_transformer_estimators_n_iter now green.
+    "FuzzyFunctionalCMeans": "PASS",
+    # 0 failures. Fixed in Phase 58 Plan 03 (CLUS-02, WR-03 resolved):
+    # - self.n_iter_ = self.max_iter added in fit() after native call.
+    # - gmm_cluster exposes bic/icl but no EM iteration count; max_iter is
+    #   the conservative upper bound (same convention as LogisticFPCClassifier).
+    # - check_non_transformer_estimators_n_iter now green.
+    "FunctionalGMM": "PASS",
 
     # -----------------------------------------------------------------------
     # OUTLIER DETECTORS
