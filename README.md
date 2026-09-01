@@ -95,6 +95,24 @@ The package exposes 16 submodules wrapping 130+ functions with zero-copy NumPy c
 
 **[Documentation](https://sipemu.github.io/pyfda/)**
 
+## Optional extras
+
+The base package imports with zero optional dependencies. Feature layers install as extras:
+
+```sh
+pip install "fdars[sklearn]"   # scikit-learn estimator layer (fit/transform/predict)
+pip install "fdars[advisor]"   # grounded parameter advisor (pydantic + Anthropic)
+pip install "fdars[plot]"      # matplotlib plotting helpers
+```
+
+- **`[sklearn]`** installs scikit-learn (`>=1.3,<1.7` on Python 3.9, `>=1.3` on 3.10+) and
+  enables the `fdars.sklearn` layer: 28 estimators that pass the full `check_estimator`
+  battery and plug into `Pipeline` / `GridSearchCV` / `cross_val_score`. The base package
+  still imports with zero scikit-learn installed. See the
+  [scikit-learn API docs](https://sipemu.github.io/pyfda/sklearn/).
+- **`[advisor]`** enables the offline diagnostics + grounded `advise()` layer; provider
+  extras (`[openai]`, `[gemini]`, `[ollama]`) swap the LLM backend.
+
 ## Development
 
 ```sh
