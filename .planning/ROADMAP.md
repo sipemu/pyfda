@@ -251,13 +251,16 @@ Plans:
   3. Method-accurate hand-authored inline SVG diagram(s) (layer architecture / data flow) meet the v7.0 STYLE_SPEC + SVGO-idempotence bar and pass a blocking human diagram review before close.
   4. Package version is bumped 0.8.0 → 0.9.0 and the `[sklearn]` extra is documented in packaging.
 
-**Plans**: TBD
+**Plans**: 4 plans
 **Notes**: Docs last — offline fences require working estimators. MUST run sequentially on `main`, NOT in worktrees (standing v6.0 rule: doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path; `use_worktrees: false`). Docs build is ~19–25 min with executed fences — keep new fence data small and use the offline path (no network in the docs build). Package bump at close; a semver `vX.Y.Z` tag triggers PyPI publish.
 **UI hint**: no
 
 Plans:
 
-- [ ] 59-01: TBD
+- [ ] 59-01-PLAN.md — Concept/overview page + nav wiring + one offline Pipeline fence (docs tracer; DOCS-01, DOCS-02)
+- [ ] 59-02-PLAN.md — Per-family reference pages + coverage/EXCLUDE page from _coverage.py (DOCS-01)
+- [ ] 59-03-PLAN.md — GridSearchCV offline worked example + hand-authored data-flow SVG (DOCS-02, DOCS-03)
+- [ ] 59-04-PLAN.md — Whole-site --strict gate + blocking human diagram review + version bump 0.9.0 (DOCS-02, DOCS-03, REL-01)
 
 ## Progress
 
