@@ -89,9 +89,12 @@ def test_fdars_sklearn_import_path():
     # First, confirm it imports normally when sklearn is present.
     import fdars.sklearn  # noqa: F401
     from fdars.sklearn import _BaseFdarsEstimator, EXCLUDED_METHODS, TRIAGE_VERDICTS
+    import collections.abc
     assert _BaseFdarsEstimator is not None
-    assert isinstance(EXCLUDED_METHODS, dict)
-    assert isinstance(TRIAGE_VERDICTS, dict)
+    # EXCLUDED_METHODS and TRIAGE_VERDICTS are read-only MappingProxyType objects;
+    # check Mapping (not dict) so the assertion survives the read-only wrapping.
+    assert isinstance(EXCLUDED_METHODS, collections.abc.Mapping)
+    assert isinstance(TRIAGE_VERDICTS, collections.abc.Mapping)
 
 
 def test_actionable_import_error_message(tmp_path):

@@ -1,5 +1,13 @@
 """Coverage registry for the fdars sklearn layer.
 
+.. note::
+    ``TRIAGE_VERDICTS`` and ``EXCLUDED_METHODS`` are read-only
+    ``types.MappingProxyType`` objects.  They are Mapping-compatible (support
+    iteration, ``[]``, ``.keys()``, ``.values()``, ``.items()``) but cannot be
+    mutated at runtime, preventing stray writes from silently corrupting the
+    compliance audit trail.
+
+
 ``EXCLUDED_METHODS`` records fdars methods that are NOT wrapped as sklearn
 estimators because they have a genuine structural mismatch with the sklearn
 contract (irregular input, non-standard output, hyperparameter search, not an
@@ -50,6 +58,8 @@ SEQUENTIAL_STREAMING
     stateless batch fit/transform pattern.
 """
 
+import types as _types  # for MappingProxyType
+
 # ---------------------------------------------------------------------------
 # Structurally-excluded methods (no skeleton written; design-time exclusions)
 # These have genuine structural mismatches with the sklearn estimator contract.
@@ -58,7 +68,7 @@ SEQUENTIAL_STREAMING
 # rationale (user-approved correction, 2026-08-31).
 # ---------------------------------------------------------------------------
 
-EXCLUDED_METHODS: dict[str, dict] = {
+EXCLUDED_METHODS: _types.MappingProxyType = _types.MappingProxyType({
     # --- Alignment (registration) ---
     # elastic_registration does not exist as a standalone function; the elastic
     # registration workflow uses elastic_align_pair / karcher_mean separately.
@@ -133,7 +143,7 @@ EXCLUDED_METHODS: dict[str, dict] = {
         "failing_check": None,  # stateful streaming; cannot be batch fit/transform
         "functional_api": "fdars.spm.spm_monitor",
     },
-}
+})  # MappingProxyType — read-only; prevents stray runtime mutation of the registry
 
 # ---------------------------------------------------------------------------
 # Triage verdicts (populated after Phase 55 Plan 03 -- triage_results.txt)
@@ -160,7 +170,7 @@ EXCLUDED_METHODS: dict[str, dict] = {
 # Format: "ClassName": "<VERDICT>[: <note>]"
 # ---------------------------------------------------------------------------
 
-TRIAGE_VERDICTS: dict[str, str] = {
+TRIAGE_VERDICTS: _types.MappingProxyType = _types.MappingProxyType({
     # -----------------------------------------------------------------------
     # TRANSFORMERS
     # -----------------------------------------------------------------------
@@ -318,4 +328,4 @@ TRIAGE_VERDICTS: dict[str, str] = {
     # Shape/magnitude outlier index lists retained as provenance; per-obs
     # augment loop removed; 47/47 parametrize_with_checks checks pass.
     "DepthgramDetector": "PASS",
-}
+})  # MappingProxyType — read-only; prevents stray runtime mutation of the registry
