@@ -2775,17 +2775,24 @@ class MagnitudeShapeDetector(_BaseFdarsOutlierDetector):
 class TVDMSSDetector(_BaseFdarsOutlierDetector):
     """TVD-MSS functional outlier detector.
 
-    Wraps ``fdars._native.outliers.tvdmss``.
-    Score synthesis: uses TVD score directly as continuous anomaly score
-    (lower TVD = more outlying).
+    Scores each new curve against the STORED training population via
+    ``_native.depth.modified_band_1d(X_new, X_fit_)`` — modified band depth,
+    higher = more central = more normal.  This is subset-invariant by
+    construction.
 
-    Note: tvdmss returns typed categorical flags; this skeleton synthesizes a
-    continuous score from the raw tvd values.
-    Triage verdict: PASS-WITH-FIXES.
+    **Rationale:** the native ``tvdmss`` TVD/MSS magnitudes are batch-relative
+    population statistics; the only per-row subset-invariant continuous score is
+    depth-of-each-row-vs-stored-training-population.  The TVD/MSS centrality
+    semantics are preserved (central curves have high MBD).  The native
+    magnitude/shape index lists are computed at fit and stored as
+    ``tvd_train_`` / ``mss_train_`` for provenance.
 
     Parameters
     ----------
     argvals : array-like or None, optional
+    contamination : float, optional
+        Expected fraction of outliers in training data, in (0, 0.5].
+        Default 0.1 (sklearn OutlierMixin convention).
     emp_factor_mss : float, optional
         MSS outlier threshold factor (default 1.5).
     emp_factor_tvd : float, optional
@@ -2796,15 +2803,20 @@ class TVDMSSDetector(_BaseFdarsOutlierDetector):
 
     _min_samples: int = 3  # tvdmss requires n >= 3
 
-    def __init__(self, argvals=None, emp_factor_mss=1.5, emp_factor_tvd=1.5,
-                 central_region_tvd=0.5):
+    def __init__(self, argvals=None, contamination=0.1, emp_factor_mss=1.5,
+                 emp_factor_tvd=1.5, central_region_tvd=0.5):
         super().__init__(argvals=argvals)
+        self.contamination = contamination
         self.emp_factor_mss = emp_factor_mss
         self.emp_factor_tvd = emp_factor_tvd
         self.central_region_tvd = central_region_tvd
 
     def fit(self, X, y=None):
         """Fit TVD-MSS outlier detector.
+
+        Stores training curves as ``X_fit_``, retains TVD/MSS arrays as
+        provenance attributes, and sets ``offset_`` from the contamination-
+        derived training depth percentile.
 
         Parameters
         ----------
@@ -2824,23 +2836,28 @@ class TVDMSSDetector(_BaseFdarsOutlierDetector):
                 f"at least {self._min_samples} samples."
             )
         self.argvals_ = self._resolve_argvals(n_pts)
+        # Retain tvdmss TVD/MSS arrays as provenance.
         result = _native.outliers.tvdmss(
             X,
             emp_factor_mss=self.emp_factor_mss,
             emp_factor_tvd=self.emp_factor_tvd,
             central_region_tvd=self.central_region_tvd,
         )
-        tvd = np.array(result["tvd"])   # (n_obs,)
-        mss = np.array(result["mss"])   # (n_obs,)
-        # Synthesize continuous score: higher TVD and MSS = more normal
-        combined = tvd + mss
-        q75, q25 = np.percentile(combined, [75, 25])
-        self.score_threshold_ = float(np.median(combined) - 1.5 * (q75 - q25))
+        self.tvd_train_ = np.array(result["tvd"])   # (n_obs,)
+        self.mss_train_ = np.array(result["mss"])   # (n_obs,)
+        # Store training reference for subset-invariant scoring.
         self.X_fit_ = X
+        # Training depth: self-depth of the training population.
+        train_scores = np.asarray(_native.depth.modified_band_1d(X, X))
+        self._set_offset(train_scores)
         return self
 
     def score_samples(self, X):
-        """Compute continuous score (higher = more normal).
+        """Compute depth-based anomaly score (higher = more normal / inlier).
+
+        Scores each row of ``X`` against the STORED training reference
+        ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  This is
+        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
 
         Parameters
         ----------
@@ -2848,55 +2865,65 @@ class TVDMSSDetector(_BaseFdarsOutlierDetector):
 
         Returns
         -------
-        scores : ndarray of shape (n_obs,)
+        scores : ndarray of shape (n_obs,), float64
+            Modified band depth of each new curve vs training set.
+            Higher = more central = more inlier.
         """
         check_is_fitted(self)
         X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
-        n_new = len(X)
-        scores = np.empty(n_new, dtype=np.float64)
-        # Compute score for each new observation by augmenting training data
-        for i, obs in enumerate(X):
-            X_aug = np.vstack([self.X_fit_, obs.reshape(1, -1)])
-            result = _native.outliers.tvdmss(
-                X_aug,
-                emp_factor_mss=self.emp_factor_mss,
-                emp_factor_tvd=self.emp_factor_tvd,
-                central_region_tvd=self.central_region_tvd,
-            )
-            tvd_aug = np.array(result["tvd"])
-            mss_aug = np.array(result["mss"])
-            combined_last = float(tvd_aug[-1]) + float(mss_aug[-1])
-            scores[i] = combined_last - self.score_threshold_
-        return scores
+        return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
 
 
 class MUODDetector(_BaseFdarsOutlierDetector):
     """MUOD functional outlier detector.
 
-    Wraps ``fdars._native.outliers.muod``.
-    Score synthesis: uses the mean of shape/magnitude/amplitude indices as
-    a continuous outlyingness measure.
+    Scores each new curve against the STORED training population via
+    ``_native.depth.modified_band_1d(X_new, X_fit_)`` — modified band depth,
+    higher = more central = more normal.  This is subset-invariant by
+    construction.
+
+    **Rationale:** the native ``muod`` shape/magnitude/amplitude indices are
+    batch-relative population statistics; the only per-row subset-invariant
+    continuous score is depth-of-each-row-vs-stored-training-population.  The
+    native index arrays are computed at fit and stored as ``shape_index_train_``,
+    ``magnitude_index_train_``, ``amplitude_index_train_`` for provenance.
+
+    **1-feature guard:** MUOD requires at least 2 features (evaluation points).
+    Fit raises ``ValueError`` with the message ``"n_features=1"`` before any
+    native call so that ``check_fit2d_1feature`` passes.
 
     Parameters
     ----------
     argvals : array-like or None, optional
+    contamination : float, optional
+        Expected fraction of outliers in training data, in (0, 0.5].
+        Default 0.1 (sklearn OutlierMixin convention).
     factor : float, optional
         Outlier threshold factor (default 1.5).
     """
 
     _min_samples: int = 3  # muod requires n >= 3
 
-    def __init__(self, argvals=None, factor=1.5):
+    def __init__(self, argvals=None, contamination=0.1, factor=1.5):
         super().__init__(argvals=argvals)
+        self.contamination = contamination
         self.factor = factor
 
     def fit(self, X, y=None):
         """Fit MUOD outlier detector.
 
+        Stores training curves as ``X_fit_``, retains shape/magnitude/amplitude
+        index arrays as provenance attributes, and sets ``offset_`` from the
+        contamination-derived training depth percentile.
+
+        Raises ``ValueError`` if ``n_features == 1`` (the native muod requires
+        at least 2 evaluation points); the message contains ``"n_features=1"``
+        so that ``check_fit2d_1feature`` passes.
+
         Parameters
         ----------
-        X : array-like of shape (n_obs, n_points), n_obs >= 3
+        X : array-like of shape (n_obs, n_points), n_obs >= 3, n_points >= 2
         y : ignored
 
         Returns
@@ -2906,24 +2933,37 @@ class MUODDetector(_BaseFdarsOutlierDetector):
         X = _validate(self, X, reset=True, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
         n_obs, n_pts = X.shape
+        # 1-feature guard — MUST come before any native call (muod panics on m<2).
+        if n_pts == 1:
+            raise ValueError(
+                f"MUODDetector requires n_features > 1 (got n_features=1); "
+                f"MUOD needs at least 2 evaluation points to compute "
+                f"shape/magnitude/amplitude indices."
+            )
         if n_obs < self._min_samples:
             raise ValueError(
                 f"n_samples={n_obs} is too small; MUODDetector requires "
                 f"at least {self._min_samples} samples."
             )
         self.argvals_ = self._resolve_argvals(n_pts)
+        # Retain muod index arrays as provenance.
         result = _native.outliers.muod(X, factor=self.factor)
-        shape_idx = np.array(result["shape_index"])
-        mag_idx = np.array(result["magnitude_index"])
-        amp_idx = np.array(result["amplitude_index"])
-        combined = (shape_idx + mag_idx + amp_idx) / 3.0
-        q75, q25 = np.percentile(combined, [75, 25])
-        self.score_threshold_ = float(np.median(combined) + 1.5 * (q75 - q25))
+        self.shape_index_train_ = np.array(result["shape_index"])
+        self.magnitude_index_train_ = np.array(result["magnitude_index"])
+        self.amplitude_index_train_ = np.array(result["amplitude_index"])
+        # Store training reference for subset-invariant scoring.
         self.X_fit_ = X
+        # Training depth: self-depth of the training population.
+        train_scores = np.asarray(_native.depth.modified_band_1d(X, X))
+        self._set_offset(train_scores)
         return self
 
     def score_samples(self, X):
-        """Compute continuous score (higher = more normal).
+        """Compute depth-based anomaly score (higher = more normal / inlier).
+
+        Scores each row of ``X`` against the STORED training reference
+        ``self.X_fit_`` via ``modified_band_1d(X, X_fit_)``.  This is
+        subset-invariant: ``score_samples(X[mask]) == score_samples(X)[mask]``.
 
         Parameters
         ----------
@@ -2931,23 +2971,14 @@ class MUODDetector(_BaseFdarsOutlierDetector):
 
         Returns
         -------
-        scores : ndarray of shape (n_obs,)
+        scores : ndarray of shape (n_obs,), float64
+            Modified band depth of each new curve vs training set.
+            Higher = more central = more inlier.
         """
         check_is_fitted(self)
         X = _validate(self, X, reset=False, dtype="numeric", ensure_2d=True)
         X = X.astype(np.float64)
-        n_new = len(X)
-        scores = np.empty(n_new, dtype=np.float64)
-        for i, obs in enumerate(X):
-            X_aug = np.vstack([self.X_fit_, obs.reshape(1, -1)])
-            result = _native.outliers.muod(X_aug, factor=self.factor)
-            shape_aug = float(np.array(result["shape_index"])[-1])
-            mag_aug = float(np.array(result["magnitude_index"])[-1])
-            amp_aug = float(np.array(result["amplitude_index"])[-1])
-            combined_last = (shape_aug + mag_aug + amp_aug) / 3.0
-            # score > 0 = inlier, < 0 = outlier
-            scores[i] = self.score_threshold_ - combined_last
-        return scores
+        return np.asarray(_native.depth.modified_band_1d(X, self.X_fit_))
 
 
 class DepthgramDetector(_BaseFdarsOutlierDetector):
