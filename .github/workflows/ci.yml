@@ -113,6 +113,14 @@ jobs:
           source .venv/bin/activate
           maturin develop --release
       - name: Install sklearn extra
+        # Two-step pattern is intentional: `maturin develop --release` builds
+        # and installs the native extension in editable mode (Rust compiled
+        # once, release-optimised).  The subsequent `pip install -e ".[sklearn]"`
+        # only resolves and installs the pure-Python extras declared under
+        # [project.optional-dependencies.sklearn] (scikit-learn, etc.) — it does
+        # NOT re-trigger a Rust rebuild because the native extension is already
+        # installed in the venv and maturin's build backend is a no-op for an
+        # already-built, up-to-date extension.
         run: |
           source .venv/bin/activate
           pip install -e ".[sklearn]"
