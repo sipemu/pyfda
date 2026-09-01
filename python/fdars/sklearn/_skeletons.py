@@ -2264,6 +2264,10 @@ class FuzzyFunctionalCMeans(ClusterMixin, _BaseFdarsEstimator):
         self.labels_ = np.array(result["cluster"], dtype=np.intp)
         self.membership_ = np.array(result["membership"])  # (n_obs, n_clusters)
         self.cluster_centers_ = np.array(result["centers"])
+        # n_iter_: fuzzy_cmeans_fd exposes no iteration count; use max_iter as a
+        # conservative upper bound (same convention as LogisticFPCClassifier,
+        # resolves deferred review WR-03).
+        self.n_iter_ = self.max_iter
         return self
 
     def predict(self, X):
@@ -2356,6 +2360,10 @@ class FunctionalGMM(ClusterMixin, _BaseFdarsEstimator):
         self.labels_ = np.array(result["cluster"], dtype=np.intp)
         self.membership_ = np.array(result["membership"])
         self.X_fit_ = X  # stored for predict (center computation)
+        # n_iter_: gmm_cluster result exposes bic/icl but no iteration count;
+        # use max_iter as a conservative upper bound (same convention as
+        # LogisticFPCClassifier, resolves deferred review WR-03).
+        self.n_iter_ = self.max_iter
         return self
 
     def predict(self, X):
