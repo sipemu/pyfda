@@ -82,11 +82,11 @@ No forward references to unwritten pages — `--strict` stays green for the new 
 
 ## Verification
 
-**Fence code verified offline:**
+**Whole-site `mkdocs build --strict` exited 0** (`PYTHONPATH=scripts DOCS_FAST=1`). The rendered `sklearn/index.html` contains:
 ```
 Predicted labels: {0, 1}  FDARS_FENCE_OK
 ```
-The fence Python code was executed directly against `.venv` (sklearn 1.8.0) and confirmed correct output. A whole-site `mkdocs build --strict` was launched during task execution and was still running at commit time (~20 minute full build). The fence mechanism is verified at code level; HTML output verification (`FDARS_FENCE_OK` in `sklearn/index.html`) completes when the background build finishes.
+plus 14 inline `<svg>` elements including the FPC score scatter figure from the fence. The tracer is confirmed end-to-end: nav → new page → offline live fence → strict build. The forward `coverage.md` link did not fail the strict build (relative link resolves at nav level; the page arrives in Plan 02).
 
 **Nav verified:**
 ```
@@ -110,3 +110,6 @@ None. The page is a fully authored concept/overview with a live fence. The forwa
 - [x] Commit 2af7099 exists (Task 1)
 - [x] Commit a7e9c0e exists (Task 2)
 - [x] Fence code outputs FDARS_FENCE_OK when executed against .venv
+- [x] Whole-site `mkdocs build --strict` exits 0; `sklearn/index.html` contains FDARS_FENCE_OK + rendered SVG
+
+## Self-Check: PASSED
