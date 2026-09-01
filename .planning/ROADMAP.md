@@ -237,7 +237,7 @@ Plans:
 - [x] 58-01-PLAN.md — Tracer: MagnitudeShapeDetector → subset-invariant OutlierMixin (stored-reference depth + contamination/offset_/decision_function); resolves CR-03 (OUT-01)
 - [x] 58-02-PLAN.md — Remaining 5 detectors (LRT/Outliergram/TVDMSS/MUOD/Depthgram) → stored-reference + decision_function + contamination; MUOD 1-feature guard (OUT-01, OUT-02)
 - [x] 58-03-PLAN.md — Clusterers: FunctionalKMeans determinism test + FuzzyCMeans/GMM n_iter_ (resolves WR-03) (CLUS-01, CLUS-02)
-- [ ] 58-04-PLAN.md — Capstone: full-matrix compliance gate + test_triage reconcile + _coverage finalize + interop (FPCATransformer→RandomForest) + CI job (COMPLY-01, COMPLY-02)
+- [x] 58-04-PLAN.md — Capstone: full-matrix compliance gate + test_triage reconcile + _coverage finalize + interop (FPCATransformer→RandomForest) + CI job (COMPLY-01, COMPLY-02)
 
 #### Phase 59: Documentation & Docs Gate
 
@@ -269,5 +269,5 @@ Phases execute in numeric order: 55 → 56 → 57 → 58 → 59
 | 55. Compliance-Triage & Foundation | v9.0 | 3/3 | Complete    | 2026-08-31 |
 | 56. Transformers | v9.0 | 3/3 | Complete    | 2026-08-31 |
 | 57. Regressors & Classifiers | v9.0 | 3/3 | Complete    | 2026-08-31 |
-| 58. Clusterers & Outlier Detectors + Compliance Gate | v9.0 | 3/4 | In Progress|  |
+| 58. Clusterers & Outlier Detectors + Compliance Gate | v9.0 | 4/4 | Complete    | 2026-09-01 |
 | 59. Documentation & Docs Gate | v9.0 | 0/TBD | Not started | - |

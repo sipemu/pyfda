@@ -44,8 +44,8 @@
 
 ### Compliance Gate & Interop
 
-- [ ] **COMPLY-01**: Every wrapped estimator passes the full `check_estimator` battery with zero exemptions, run as a `parametrize_with_checks` CI job across the Python 3.9–3.14 matrix (sklearn 1.3–1.6 API paths both exercised).
-- [ ] **COMPLY-02**: Interop is proven — an fdars transformer feeds a native sklearn estimator (e.g. `FPCATransformer` scores → `RandomForestClassifier`) inside one `Pipeline`.
+- [x] **COMPLY-01**: Every wrapped estimator passes the full `check_estimator` battery with zero exemptions, run as a `parametrize_with_checks` CI job across the Python 3.9–3.14 matrix (sklearn 1.3–1.6 API paths both exercised).
+- [x] **COMPLY-02**: Interop is proven — an fdars transformer feeds a native sklearn estimator (e.g. `FPCATransformer` scores → `RandomForestClassifier`) inside one `Pipeline`.
 
 ### Documentation
 
@@ -106,8 +106,8 @@ Explicitly excluded. Documented to prevent scope creep.
 | CLUS-02 | Phase 58 | Complete |
 | OUT-01 | Phase 58 | Complete |
 | OUT-02 | Phase 58 | Complete |
-| COMPLY-01 | Phase 58 | Pending |
-| COMPLY-02 | Phase 58 | Pending |
+| COMPLY-01 | Phase 58 | Complete |
+| COMPLY-02 | Phase 58 | Complete |
 | DOCS-01 | Phase 59 | Pending |
 | DOCS-02 | Phase 59 | Pending |
 | DOCS-03 | Phase 59 | Pending |
