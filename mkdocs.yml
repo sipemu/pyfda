@@ -164,6 +164,7 @@ nav:
     - Regressors & Classifiers: sklearn/regressors-classifiers.md
     - Clusterers & Outlier Detectors: sklearn/clusterers-outliers.md
     - Coverage & Exclusions: sklearn/coverage.md
+    - GridSearchCV Example: sklearn/gridsearch-example.md
   - Examples:
     - examples/index.md
     - Growth — Elastic Alignment: examples/growth-alignment.md
