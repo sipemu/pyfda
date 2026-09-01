@@ -290,12 +290,12 @@ TRIAGE_VERDICTS: dict[str, str] = {
     # 2 failures: check_outliers_train x2 (missing decision_function).
     # Fixable: add decision_function = score_samples alias.
     "OutliergramDetector": "PASS-WITH-FIXES: add decision_function = score_samples alias",
-    # 4 failures: check_outliers_fit_predict + check_outliers_train x2
-    # (always +1) + check_methods_subset_invariance (1-sample crash native).
-    # Root cause: score synthesis never produces -1 on small battery data.
-    # Fix: proper decision_function + contamination param so predict yields
-    # both {-1, +1} based on threshold from fit(). Phase 58.
-    "MagnitudeShapeDetector": "PASS-WITH-FIXES: proper decision_function + contamination (Phase 58)",
+    # Phase 58 Plan 01: CR-03 subset-invariance fix landed.
+    # score_samples now uses stored-reference modified_band_1d(X, X_fit_)
+    # so score_samples(X[mask]) == score_samples(X)[mask] (subset-invariant).
+    # contamination=0.1 → offset_ → decision_function → predict {-1,+1} green.
+    # 47/47 parametrize_with_checks checks pass; zero exemptions.
+    "MagnitudeShapeDetector": "PASS",
     # 2 failures: check_outliers_train x2 (missing decision_function).
     # Fixable: add decision_function = score_samples alias.
     "TVDMSSDetector": "PASS-WITH-FIXES: add decision_function = score_samples alias",
