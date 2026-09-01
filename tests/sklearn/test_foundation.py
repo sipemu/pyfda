@@ -63,6 +63,19 @@ def test_fdars_init_unchanged():
     """
     # Commit hash of the parent of the first Phase 55 commit (pre-Phase-55 HEAD).
     PHASE_55_BASE = "bf1a60638c0330c3909721dd900e704deeb82e8b"
+    # The base commit must be reachable in the clone. A shallow checkout
+    # (CI default fetch-depth: 1) omits it, and `git diff` against a missing
+    # commit exits 128 — a harness/CI setup issue, not a real modification.
+    # Distinguish it so the failure message is actionable.
+    base_present = subprocess.run(
+        ["git", "cat-file", "-e", f"{PHASE_55_BASE}^{{commit}}"],
+        capture_output=True,
+    )
+    assert base_present.returncode == 0, (
+        f"Phase 55 base commit {PHASE_55_BASE} is not present in the clone — "
+        "run with full git history (set fetch-depth: 0 for this job in CI). "
+        "This is a test-harness/CI setup issue, not an FND-02 violation."
+    )
     result = subprocess.run(
         ["git", "diff", "--quiet", PHASE_55_BASE, "HEAD", "--", "python/fdars/__init__.py"],
         capture_output=True,

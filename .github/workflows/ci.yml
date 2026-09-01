@@ -96,6 +96,11 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: the FND-02 guard (test_fdars_init_unchanged) diffs HEAD
+          # against the pre-Phase-55 base commit, which a shallow clone omits
+          # (git then exits 128 instead of 0/1, tripping a false failure).
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
