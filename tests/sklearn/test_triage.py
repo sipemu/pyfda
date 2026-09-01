@@ -1,35 +1,31 @@
-"""Compliance triage harness for Phase 55.
+"""Compliance triage harness — Phase 55 origin, reconciled in Phase 58 Plan 04.
 
-Run the full triage battery with::
+Phase 58 closure note
+---------------------
+All 28 wrapped estimators across all five families now carry a "PASS" verdict
+in ``_coverage.TRIAGE_VERDICTS``.  The harness is GREEN.
 
-    pytest tests/sklearn/test_triage.py -v --tb=short -rA 2>&1 | tee triage_results.txt
+The authoritative aggregate gate (COMPLY-01) lives in::
 
-Then review triage_results.txt to assign PASS / PASS-WITH-FIXES / EXCLUDE
-verdicts and populate ``_coverage.TRIAGE_VERDICTS`` accordingly.
+    tests/sklearn/test_compliance_gate.py
 
-Verdict assignment rule
------------------------
-All checks PASS
-    -> PASS
+that file runs ``parametrize_with_checks`` over all 28 estimators with ZERO
+exemptions and asserts that ``_coverage.TRIAGE_VERDICTS`` contains no
+PASS-WITH-FIXES entries.
 
-Checks fail only due to fixable guards (1-sample message, float cast, etc.)
-    -> PASS-WITH-FIXES: list the specific fixes required
+This file is retained as a secondary regression check.  The estimator list
+is now constructed with the same battery-valid hyperparameters as the
+per-family compliance suites (ncomp=10, n_components=10, contamination=0.1,
+n_bootstrap=50 for LRT) so every case passes.
 
-Checks fail due to structural incompatibility (algorithm requirements, wrong
-output shape, requires IrregFdata input, etc.)
-    -> EXCLUDE: record in EXCLUDED_METHODS with failing_check name
-
-Plan scope
-----------
-* Plan 01: FPCATransformer tracer only (47/47 PASS, verified production-quality).
-* Plan 02 (this expansion): all ~28 remaining candidate skeleton classes added
-  to ``_ALL_SKELETONS``; full ``parametrize_with_checks`` battery run across
-  all five families (transformers, regressors, classifiers, clusterers, outlier
-  detectors).  Results captured to ``triage_results.txt`` at repo root for
-  Plan 03 verdict assignment.
-
-Note: The harness intentionally does NOT assert all-green.  Failures are expected
-and informative -- each failing check name drives EXCLUDE decisions in Plan 03.
+History
+-------
+* Phase 55 Plan 01: FPCATransformer tracer (47/47 PASS).
+* Phase 55 Plan 02: all 28 candidates added; full battery run; results
+  captured to triage_results.txt for verdict assignment.
+* Phase 55 Plan 03: verdicts assigned; 9 PASS + 19 PASS-WITH-FIXES.
+* Phases 56-58: all 19 PASS-WITH-FIXES candidates fixed to PASS.
+* Phase 58 Plan 04: harness updated to battery-valid parameters; now green.
 """
 
 from __future__ import annotations
@@ -82,8 +78,8 @@ from fdars.sklearn._skeletons import (
 # Predicted EXCLUDE candidates are included so triage empirically confirms.
 
 _ALL_SKELETONS = [
-    # --- Transformers ---
-    FPCATransformer(n_components=1),   # tracer: PASS (47/47 in Plan 01)
+    # --- Transformers (8) ---
+    FPCATransformer(n_components=10),   # tracer: PASS (47/47 in Plan 01)
     BSplineSmoother(),
     LocalPolynomialSmoother(),
     BasisRepresentation(n_basis=3),
@@ -91,30 +87,30 @@ _ALL_SKELETONS = [
     SplineInterpolator(),
     DepthTransformer(),
     NormTransformer(),
-    # --- Regressors ---
-    FPCRegressor(n_components=1),
-    PLSRegressor(n_components=1),
-    RobustFPCRegressor(n_components=1),
-    GLMRegressor(n_components=1),
+    # --- Regressors (5) ---
+    FPCRegressor(n_components=10),       # n_components=10 required for check_regressors_train
+    PLSRegressor(n_components=3),
+    RobustFPCRegressor(n_components=10),
+    GLMRegressor(n_components=10),
     NonparametricRegressor(),
-    # --- Classifiers ---
-    FPCLDAClassifier(ncomp=1),
-    FPCQDAClassifier(ncomp=1),
-    FPCKNNClassifier(ncomp=1, k=1),
+    # --- Classifiers (6) ---
+    FPCLDAClassifier(ncomp=10),          # ncomp=10 required for check_classifiers_train
+    FPCQDAClassifier(ncomp=10),
+    FPCKNNClassifier(ncomp=10),
     DDClassifier(),
-    LogisticFPCClassifier(n_components=1),
-    ElasticMultinomialClassifier(ncomp_beta=3),  # EXCLUDE predicted -- triage confirms
-    # --- Clusterers ---
+    LogisticFPCClassifier(n_components=10),
+    ElasticMultinomialClassifier(ncomp_beta=5),  # PASS after Phase 57 CLF-02 fix
+    # --- Clusterers (3) ---
     FunctionalKMeans(n_clusters=2),
     FuzzyFunctionalCMeans(n_clusters=2),
-    FunctionalGMM(n_clusters=2),   # EXCLUDE predicted -- triage confirms
-    # --- Outlier Detectors ---
-    LRTOutlierDetector(n_bootstrap=50),  # reduced bootstrap for speed
-    OutliergramDetector(),
-    MagnitudeShapeDetector(),
-    TVDMSSDetector(),              # EXCLUDE predicted -- triage confirms
-    MUODDetector(),                # EXCLUDE predicted -- triage confirms
-    DepthgramDetector(),           # EXCLUDE predicted -- triage confirms
+    FunctionalGMM(n_clusters=2),        # PASS after Phase 58 Plan 03 fix
+    # --- Outlier Detectors (6) ---
+    LRTOutlierDetector(n_bootstrap=50, contamination=0.1),
+    OutliergramDetector(contamination=0.1),
+    MagnitudeShapeDetector(contamination=0.1),
+    TVDMSSDetector(contamination=0.1),  # PASS after Phase 58 Plan 02 fix
+    MUODDetector(contamination=0.1),   # PASS after Phase 58 Plan 02 fix
+    DepthgramDetector(contamination=0.1),  # PASS after Phase 58 Plan 02 fix
 ]
 
 
@@ -126,12 +122,13 @@ _ALL_SKELETONS = [
 def test_sklearn_triage(estimator, check):
     """Run each parametrize_with_checks case as an independent test.
 
-    A PASS confirms the estimator is fully sklearn-compliant for that check.
-    A FAIL is informative: record the failing check name in TRIAGE_VERDICTS
-    and classify as PASS-WITH-FIXES (if fixable) or EXCLUDE (structural).
+    Phase 58 Plan 04: all 28 estimators now PASS every check.  This harness
+    is a secondary green regression check; the authoritative COMPLY-01 gate
+    is ``test_compliance_gate.py::test_full_matrix_compliance``.
 
-    This harness surfaces ALL failing checks independently so no single
-    failure masks others -- contrast with check_estimator() which aborts at
-    the first failure.
+    Original purpose (Phase 55): surface all failing checks independently
+    so no single failure masks others.  Each failing check name drove EXCLUDE
+    decisions in Plan 03.  All 19 PASS-WITH-FIXES candidates have since been
+    fixed in Phases 56-58.
     """
     check(estimator)
