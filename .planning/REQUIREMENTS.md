@@ -49,8 +49,8 @@
 
 ### Documentation
 
-- [ ] **DOCS-01**: A new "scikit-learn API" docs section is wired into MkDocs nav: a concept/overview page + per-family reference pages, plus the published coverage/EXCLUDE list.
-- [ ] **DOCS-02**: Offline `FDARS_FENCE_OK` worked examples (including a `Pipeline` example and a `GridSearchCV` example); whole-site `mkdocs build --strict` green offline.
+- [x] **DOCS-01**: A new "scikit-learn API" docs section is wired into MkDocs nav: a concept/overview page + per-family reference pages, plus the published coverage/EXCLUDE list.
+- [x] **DOCS-02**: Offline `FDARS_FENCE_OK` worked examples (including a `Pipeline` example and a `GridSearchCV` example); whole-site `mkdocs build --strict` green offline.
 - [ ] **DOCS-03**: Method-accurate hand-authored inline SVG diagram(s) (layer architecture / data flow) meeting the v7.0 STYLE_SPEC + SVGO-idempotence bar; blocking human diagram review before close.
 
 ### Release
@@ -108,8 +108,8 @@ Explicitly excluded. Documented to prevent scope creep.
 | OUT-02 | Phase 58 | Complete |
 | COMPLY-01 | Phase 58 | Complete |
 | COMPLY-02 | Phase 58 | Complete |
-| DOCS-01 | Phase 59 | Pending |
-| DOCS-02 | Phase 59 | Pending |
+| DOCS-01 | Phase 59 | Complete |
+| DOCS-02 | Phase 59 | Complete |
 | DOCS-03 | Phase 59 | Pending |
 | REL-01 | Phase 59 | Pending |
 
