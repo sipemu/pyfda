@@ -5,16 +5,16 @@ milestone_name: scikit-learn API Compatibility
 current_phase: 58
 current_phase_name: Clusterers & Outlier Detectors + Compliance Gate
 status: executing
-stopped_at: Completed 58-01-PLAN.md
-last_updated: "2026-09-01T18:25:30.581Z"
+stopped_at: Completed 58-02-PLAN.md (all five detectors PASS)
+last_updated: "2026-09-01T18:34:47.591Z"
 last_activity: 2026-09-01
 last_activity_desc: Phase 58 execution started
-state_head: bdf4a2353d44fd50221fb890a1a309404a1452b6
+state_head: 8fcee0fddc22da3acb46b9f0cd038b6937959537
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 60
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-08-31)
 ## Current Position
 
 Phase: 58 (Clusterers & Outlier Detectors + Compliance Gate) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-09-01 — Phase 58 execution started
 
@@ -74,6 +74,7 @@ Progress: [██████░░░░] 60%
 | Phase 57-regressors-classifiers P02 | 1536 | 3 tasks | 4 files |
 | Phase 57 P03 | 208 | 2 tasks | 1 files |
 | Phase 58-clusterers-outlier-detectors-compliance-gate P01 | 271 | 2 tasks | 3 files |
+| Phase 58-clusterers-outlier-detectors-compliance-gate P02 | 394 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,8 @@ Recent decisions affecting current work:
 - [Phase 57]: FPCRegressor receives (n_obs, n_components) FPCA scores as X, applies its own FPC regression on the score matrix treating score columns as evaluation points.
 - [Phase 58]: contamination=0.1 fixed float (not auto) guarantees check_outliers_train sees both classes on small battery datasets
 - [Phase 58]: stored-reference modified_band_1d(X, X_fit_) over batch magnitude_shape — functional depth is naturally subset-invariant (CR-03)
+- [Phase 58]: stored-reference modified_band_1d(X, X_fit_) as universal subset-invariant surrogate for all 5 detectors; provenance attributes pattern for native index arrays
+- [Phase 58]: MUODDetector 1-feature guard as FIRST check in fit before any native call — prevents native panic, passes check_fit2d_1feature
 
 ### Pending Todos
 
@@ -145,8 +148,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-01T18:25:30.526Z
-Stopped at: Completed 58-01-PLAN.md
+Last session: 2026-09-01T18:34:47.513Z
+Stopped at: Completed 58-02-PLAN.md (all five detectors PASS)
 Resume file: None
 
 ## Operator Next Steps

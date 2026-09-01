@@ -229,13 +229,13 @@ Plans:
   3. `parametrize_with_checks` is green for every wrapped estimator across all five families with zero exemptions, run as a CI job across the Python 3.9–3.14 matrix exercising both the sklearn 1.3–1.5 and 1.6 API paths.
   4. Interop is proven: an fdars transformer feeds a native sklearn estimator (e.g. `FPCATransformer` scores → `RandomForestClassifier`) inside one `Pipeline`.
 
-**Plans**: 1/4 plans executed
+**Plans**: 2/4 plans executed
 **Notes**: Clusterers/outliers separated for their determinism (fixed-`random_state` reproducibility of rayon-parallel paths — CONFIRMED deterministic in planning; no `non_deterministic` tag needed) and synthesized-`decision_function` specifics. Subset-invariance solved via stored-reference depth scoring: `_native.depth.modified_band_1d(X_new, X_fit_)` scores each row against the STORED training set (empirically subset-invariant). The full-matrix `parametrize_with_checks` gate + `test_triage.py` reconcile + interop + CI wiring land in the Plan-04 capstone; `_coverage.py` finalized to 0 PASS-WITH-FIXES.
 
 Plans:
 
 - [x] 58-01-PLAN.md — Tracer: MagnitudeShapeDetector → subset-invariant OutlierMixin (stored-reference depth + contamination/offset_/decision_function); resolves CR-03 (OUT-01)
-- [ ] 58-02-PLAN.md — Remaining 5 detectors (LRT/Outliergram/TVDMSS/MUOD/Depthgram) → stored-reference + decision_function + contamination; MUOD 1-feature guard (OUT-01, OUT-02)
+- [x] 58-02-PLAN.md — Remaining 5 detectors (LRT/Outliergram/TVDMSS/MUOD/Depthgram) → stored-reference + decision_function + contamination; MUOD 1-feature guard (OUT-01, OUT-02)
 - [ ] 58-03-PLAN.md — Clusterers: FunctionalKMeans determinism test + FuzzyCMeans/GMM n_iter_ (resolves WR-03) (CLUS-01, CLUS-02)
 - [ ] 58-04-PLAN.md — Capstone: full-matrix compliance gate + test_triage reconcile + _coverage finalize + interop (FPCATransformer→RandomForest) + CI job (COMPLY-01, COMPLY-02)
 
@@ -269,5 +269,5 @@ Phases execute in numeric order: 55 → 56 → 57 → 58 → 59
 | 55. Compliance-Triage & Foundation | v9.0 | 3/3 | Complete    | 2026-08-31 |
 | 56. Transformers | v9.0 | 3/3 | Complete    | 2026-08-31 |
 | 57. Regressors & Classifiers | v9.0 | 3/3 | Complete    | 2026-08-31 |
-| 58. Clusterers & Outlier Detectors + Compliance Gate | v9.0 | 1/4 | In Progress|  |
+| 58. Clusterers & Outlier Detectors + Compliance Gate | v9.0 | 2/4 | In Progress|  |
 | 59. Documentation & Docs Gate | v9.0 | 0/TBD | Not started | - |
