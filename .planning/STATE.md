@@ -4,17 +4,17 @@ milestone: v9.0
 milestone_name: scikit-learn API Compatibility
 current_phase: 58
 current_phase_name: Clusterers & Outlier Detectors + Compliance Gate
-status: planning
-stopped_at: Phase 57 complete, ready to plan Phase 58
-last_updated: "2026-08-31T21:26:30.788Z"
-last_activity: 2026-08-31
-last_activity_desc: Phase 57 complete, transitioned to Phase 58
-state_head: 43a7912e781e1fe98e01d53b0f44122401e47aaf
+status: executing
+stopped_at: Completed 58-01-PLAN.md
+last_updated: "2026-09-01T18:25:30.581Z"
+last_activity: 2026-09-01
+last_activity_desc: Phase 58 execution started
+state_head: bdf4a2353d44fd50221fb890a1a309404a1452b6
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 13
+  completed_plans: 10
   percent: 60
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-31)
 
 **Core value:** Functional-data methods in `fdars` plug natively into scikit-learn's `Pipeline`/`GridSearchCV`/`cross_val_score`, interoperate with native sklearn estimators, and offer familiar `fit`/`transform`/`predict` ergonomics — every wrapped estimator passing the full `check_estimator` battery, no exemptions.
-**Current focus:** Phase 57 — Regressors & Classifiers
+**Current focus:** Phase 58 — Clusterers & Outlier Detectors + Compliance Gate
 
 ## Current Position
 
-Phase: 58 — Clusterers & Outlier Detectors + Compliance Gate
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-31 — Phase 57 complete, transitioned to Phase 58
+Phase: 58 (Clusterers & Outlier Detectors + Compliance Gate) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-09-01 — Phase 58 execution started
 
-Progress: [████░░░░░░] 40%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [████░░░░░░] 40%
 | Phase 57 P01 | 264 | 3 tasks | 3 files |
 | Phase 57-regressors-classifiers P02 | 1536 | 3 tasks | 4 files |
 | Phase 57 P03 | 208 | 2 tasks | 1 files |
+| Phase 58-clusterers-outlier-detectors-compliance-gate P01 | 271 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,8 @@ Recent decisions affecting current work:
 - [Phase 57]: ElasticMultinomialClassifier Option A chosen (FPC + sklearn OvR LogisticRegression): native elastic_multinomial is transductive; sklearn 1.8 removed multi_class kwarg
 - [Phase 57]: FPCLDAClassifier consumed FPCA scores (n_obs, n_comp) as X: its internal FPCA is capped by min(ncomp, n_obs-1, n_comp), so clf__ncomp=[1,2] is safe when fpca__n_components>=2 and n_train>=3.
 - [Phase 57]: FPCRegressor receives (n_obs, n_components) FPCA scores as X, applies its own FPC regression on the score matrix treating score columns as evaluation points.
+- [Phase 58]: contamination=0.1 fixed float (not auto) guarantees check_outliers_train sees both classes on small battery datasets
+- [Phase 58]: stored-reference modified_band_1d(X, X_fit_) over batch magnitude_shape — functional depth is naturally subset-invariant (CR-03)
 
 ### Pending Todos
 
@@ -142,8 +145,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-31T21:01:26.016Z
-Stopped at: Phase 57 complete, ready to plan Phase 58
+Last session: 2026-09-01T18:25:30.526Z
+Stopped at: Completed 58-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

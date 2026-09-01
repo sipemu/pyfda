@@ -39,7 +39,7 @@
 
 - [ ] **CLUS-01**: `FunctionalKMeans` wrapped as a `ClusterMixin` estimator, deterministic under a fixed `random_state`.
 - [ ] **CLUS-02**: Differentiator clusterers that pass triage (fuzzy c-means, functional GMM) wrapped as `ClusterMixin` estimators.
-- [ ] **OUT-01**: The classic outlier trio (LRT, outliergram, magnitude-shape) wrapped as `OutlierMixin` estimators with a continuous `decision_function` and `predict`.
+- [x] **OUT-01**: The classic outlier trio (LRT, outliergram, magnitude-shape) wrapped as `OutlierMixin` estimators with a continuous `decision_function` and `predict`.
 - [ ] **OUT-02**: Newer outlier detectors (tvdmss, muod, depthgram) that pass triage wrapped as `OutlierMixin` estimators, synthesizing a continuous `decision_function` from the underlying method.
 
 ### Compliance Gate & Interop
@@ -104,7 +104,7 @@ Explicitly excluded. Documented to prevent scope creep.
 | PRED-01 | Phase 57 | Complete |
 | CLUS-01 | Phase 58 | Pending |
 | CLUS-02 | Phase 58 | Pending |
-| OUT-01 | Phase 58 | Pending |
+| OUT-01 | Phase 58 | Complete |
 | OUT-02 | Phase 58 | Pending |
 | COMPLY-01 | Phase 58 | Pending |
 | COMPLY-02 | Phase 58 | Pending |
