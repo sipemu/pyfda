@@ -5,16 +5,16 @@ milestone_name: scikit-learn API Compatibility
 current_phase: 59
 current_phase_name: Documentation & Docs Gate
 status: executing
-stopped_at: Completed 59-01-PLAN.md
-last_updated: "2026-09-01T20:17:30.774Z"
+stopped_at: Completed 59-02-PLAN.md
+last_updated: "2026-09-01T20:26:57.085Z"
 last_activity: 2026-09-01
 last_activity_desc: Phase 59 execution started
-state_head: a7e9c0e9155f78bc385b8e57c7cad5e87bf7d972
+state_head: 9ddf01337a75e8390fcbbebcd9110b55d5caee14
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 17
-  completed_plans: 14
+  completed_plans: 15
   percent: 80
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-08-31)
 ## Current Position
 
 Phase: 59 (Documentation & Docs Gate) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-09-01 — Phase 59 execution started
 
@@ -77,6 +77,7 @@ Progress: [████████░░] 80%
 | Phase 58-clusterers-outlier-detectors-compliance-gate P02 | 394 | 3 tasks | 3 files |
 | Phase 58 P03 | 165 | 2 tasks | 3 files |
 | Phase 59 P01 | 1140 | 2 tasks | 2 files |
+| Phase 59-documentation-docs-gate P02 | 391 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Recent decisions affecting current work:
 - [Phase 58]: stored-reference modified_band_1d(X, X_fit_) as universal subset-invariant surrogate for all 5 detectors; provenance attributes pattern for native index arrays
 - [Phase 58]: MUODDetector 1-feature guard as FIRST check in fit before any native call — prevents native panic, passes check_fit2d_1feature
 - [Phase 58]: n_iter_ = max_iter for fuzzy/GMM: native exposes no iteration count; conservative upper bound matches LogisticFPCClassifier precedent (WR-03)
+- [Phase 59]: Coverage page derived from _coverage.py (TRIAGE_VERDICTS + EXCLUDED_METHODS) with automated verify to prevent drift
+- [Phase 59]: Method-accuracy honesty: MagnitudeShapeDetector is MS-plot-faithful; other 5 detectors use modified-band-depth surrogate in sklearn layer
 
 ### Pending Todos
 
@@ -151,8 +154,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-01T20:17:30.685Z
-Stopped at: Completed 59-01-PLAN.md
+Last session: 2026-09-01T20:26:47.431Z
+Stopped at: Completed 59-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
