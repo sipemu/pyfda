@@ -174,7 +174,7 @@ Full detail: `.planning/milestones/v10.0-ROADMAP.md`
 **Milestone Goal:** Bump `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg), expose the new upstream surface as PyO3 bindings + Python API, extend the AI advisor where relevant (grounding invariant preserved), and document it to the method-accurate standard. Isolated-bump → parallel-binding-groups → advisor → docs shape, same as v4.0/v5.0/v6.0. Phase numbering continues from v10.0's Phase 65 — this milestone starts at Phase 66.
 
 - [x] **Phase 66: Isolated Crate Bump + Regression Gate** — Bump 0.23.0 → 0.33.0, gate on the full ~772-test suite, record the 0.24–0.33 changelog/match-arm audit (completed 2026-09-02)
-- [ ] **Phase 67: Functional Time Series (`fdars.fts`)** — New `fdars.fts` submodule: FTSM fit/forecast, ACF/PACF/stationarity/long-run-covariance, fPLSR/DPCA
+- [x] **Phase 67: Functional Time Series (`fdars.fts`)** — New `fdars.fts` submodule: FTSM fit/forecast, ACF/PACF/stationarity/long-run-covariance, fPLSR/DPCA (completed 2026-09-02)
 - [ ] **Phase 68: Function-on-Function & Scalar-on-Function Regression** — `fof_regression` + random effects extending `fdars.regression`; additive/generalized SoF models + variable/model selection extending `fdars.scalar_on_function`
 - [ ] **Phase 69: Fréchet Regression & Density FDA** — `convert.rs` ragged-list refactor, then new `fdars.frechet` and `fdars.density_fda` submodules
 - [ ] **Phase 70: Multi-Domain Data, FAMM & Advanced Clustering** — `PyMultiFunData` handle → mixed-model FAMM → multivariate SPM (sequential) + advanced clustering
@@ -317,7 +317,7 @@ Phases execute in numeric order: 66 → 67 → 68 → 69 → 70 → 71 → 72 �
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 66. Isolated Crate Bump + Regression Gate | v11.0 | 1/1 | Complete    | 2026-09-02 |
-| 67. Functional Time Series (`fdars.fts`) | v11.0 | 5/5 | In Progress|  |
+| 67. Functional Time Series (`fdars.fts`) | v11.0 | 5/5 | Complete    | 2026-09-02 |
 | 68. Function-on-Function & Scalar-on-Function Regression | v11.0 | 0/TBD | Not started | - |
 | 69. Fréchet Regression & Density FDA | v11.0 | 0/TBD | Not started | - |
 | 70. Multi-Domain Data, FAMM & Advanced Clustering | v11.0 | 0/TBD | Not started | - |

@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
-current_phase: 67
-current_phase_name: Functional Time Series (fdars.fts)
-status: verifying
-stopped_at: Completed 67-05-PLAN.md
-last_updated: "2026-09-02T20:36:08.650Z"
+current_phase: 68
+current_phase_name: Function-on-Function & Scalar-on-Function Regression
+status: planning
+stopped_at: Phase 67 complete, ready to plan Phase 68
+last_updated: "2026-09-02T20:39:41.156Z"
 last_activity: 2026-09-02
-last_activity_desc: Phase 67 execution started
-state_head: 4d2a0ccd61381ec5c3ff487d0d3e661e7a1d02ab
+last_activity_desc: Phase 67 complete, transitioned to Phase 68
+state_head: 827bdf117c88055640cdaab1f7f39d3a29c7dab8
 progress:
   total_phases: 8
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
   completed_plans: 6
-  percent: 13
+  percent: 25
 ---
 
 # Project State
@@ -29,16 +29,16 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 
 ## Current Position
 
-Phase: 67 (Functional Time Series (fdars.fts)) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-09-02 — Phase 67 execution started
+Phase: 68 — Function-on-Function & Scalar-on-Function Regression
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-02 — Phase 67 complete, transitioned to Phase 68
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 1 (this milestone); prior: 7 (v10.0), 17 (v9.0), 16 (v8.0), 11 (v6.0)
+- Total plans completed: 6 (this milestone); prior: 7 (v10.0), 17 (v9.0), 16 (v8.0), 11 (v6.0)
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -47,7 +47,7 @@ Last activity: 2026-09-02 — Phase 67 execution started
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 66 | 1 | - | - |
-| 67 | TBD | - | - |
+| 67 | 5 | - | - |
 | 68 | TBD | - | - |
 | 69 | TBD | - | - |
 | 70 | TBD | - | - |
@@ -129,7 +129,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-02T20:36:08.585Z
-Stopped at: Completed 67-05-PLAN.md
+Stopped at: Phase 67 complete, ready to plan Phase 68
 Resume file: None
 
 ## Operator Next Steps
