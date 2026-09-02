@@ -184,10 +184,10 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
   3. The report identifies the coverage gap — the pages/methods that still lack a concept diagram — driving the COVER-01 scope for Phase 64.
   4. The report identifies which of the 58 thumbnails and 8 cards have drifted from their current concept diagrams, driving the SYNC-01/SYNC-02 scope for Phase 64.
 
-**Plans**: 1/2 plans executed
+**Plans**: 2/2 plans executed
 
 - [x] 60-01-PLAN.md — Skeleton + score all 90 concept diagrams (4 axes, render-backed) + section/61-62-63 bucket map
-- [ ] 60-02-PLAN.md — Score 8 cards + 58 thumbs with drift detection; COVER-01 gap list, SYNC-01/02 drift list, ranked 61/62/63 fix worklists, self-check
+- [x] 60-02-PLAN.md — Score 8 cards + 58 thumbs with drift detection; COVER-01 gap list, SYNC-01/02 drift list, ranked 61/62/63 fix worklists, self-check
 
 **UI hint**: yes
 
@@ -273,7 +273,7 @@ Phases execute in numeric order: 60 → 61 → 62 → 63 → 64 → 65
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 60. Diagram Quality Audit | v10.0 | 1/2 | In Progress|  |
+| 60. Diagram Quality Audit | v10.0 | 2/2 | In Progress|  |
 | 61. SVG Corrections — learn / represent / align | v10.0 | 0/0 | Not started | - |
 | 62. SVG Corrections — analyze / monitoring / advisor | v10.0 | 0/0 | Not started | - |
 | 63. SVG Corrections — regression / inference / examples | v10.0 | 0/0 | Not started | - |
