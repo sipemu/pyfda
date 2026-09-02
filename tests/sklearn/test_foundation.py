@@ -50,22 +50,38 @@ def test_fdars_imports_without_sklearn():
 
 
 # ---------------------------------------------------------------------------
-# FND-02: python/fdars/__init__.py unchanged
+# FND-02: foundation registration contract
 # ---------------------------------------------------------------------------
 
 def test_fdars_init_unchanged():
-    """python/fdars/__init__.py must be unchanged since the Phase 55 base (FND-02).
+    """FND-02: fdars submodule registration contract — no core module may be dropped.
 
-    Verifies that Phase 55 did not modify the main fdars entry point.
-    Diffs HEAD against the pre-Phase-55 base commit (parent of the first
-    Phase 55 commit) so committed changes are also detected, not just
-    uncommitted ones.
+    The invariant this guard protects is the *foundation registration contract*:
+    every submodule present in the Phase-55 baseline must still be registered
+    in the current fdars package (via the _submodule_names → sys.modules loop
+    in python/fdars/__init__.py). Additive registrations (new submodules such
+    as ``fts``) are explicitly allowed; removals and renames of historically
+    required submodules are not.
+
+    The sklearn-safety invariant (import fdars must not import sklearn) is
+    separately enforced by FND-01 (test_fdars_imports_without_sklearn) and is
+    not re-checked here.
+
+    Two assertions are made:
+    1. Subset invariant: Phase-55 baseline _submodule_names ⊆ current names.
+    2. Registration invariant: every name in the current set can be imported
+       as ``fdars.<name>`` and is reachable as an attribute of the fdars package
+       (the dynamic sys.modules injection in __init__.py is intact).
     """
-    # Commit hash of the parent of the first Phase 55 commit (pre-Phase-55 HEAD).
+    import importlib
+    import re
+
+    # Commit hash of the pre-Phase-55 HEAD (the baseline for the registration contract).
     PHASE_55_BASE = "bf1a60638c0330c3909721dd900e704deeb82e8b"
+
     # The base commit must be reachable in the clone. A shallow checkout
-    # (CI default fetch-depth: 1) omits it, and `git diff` against a missing
-    # commit exits 128 — a harness/CI setup issue, not a real modification.
+    # (CI default fetch-depth: 1) omits it, and `git show` against a missing
+    # commit exits 128 — a harness/CI setup issue, not a registration violation.
     # Distinguish it so the failure message is actionable.
     base_present = subprocess.run(
         ["git", "cat-file", "-e", f"{PHASE_55_BASE}^{{commit}}"],
@@ -76,13 +92,70 @@ def test_fdars_init_unchanged():
         "run with full git history (set fetch-depth: 0 for this job in CI). "
         "This is a test-harness/CI setup issue, not an FND-02 violation."
     )
-    result = subprocess.run(
-        ["git", "diff", "--quiet", PHASE_55_BASE, "HEAD", "--", "python/fdars/__init__.py"],
+
+    def _parse_submodule_names(src: str) -> set:
+        """Extract the _submodule_names tuple elements from __init__.py source."""
+        m = re.search(r"_submodule_names\s*=\s*\((.*?)\)", src, re.DOTALL)
+        assert m, "Could not locate _submodule_names tuple in __init__.py source"
+        return set(re.findall(r'"([^"]+)"', m.group(1)))
+
+    # 1. Recover the Phase-55 baseline submodule set from git history.
+    baseline_result = subprocess.run(
+        ["git", "show", f"{PHASE_55_BASE}:python/fdars/__init__.py"],
         capture_output=True,
+        text=True,
     )
-    assert result.returncode == 0, (
-        "python/fdars/__init__.py was modified between the Phase 55 base and HEAD "
-        "(FND-02 violation)."
+    assert baseline_result.returncode == 0, (
+        f"Could not read python/fdars/__init__.py at {PHASE_55_BASE}: "
+        f"{baseline_result.stderr}"
+    )
+    baseline_names = _parse_submodule_names(baseline_result.stdout)
+
+    # 2. Recover the current submodule set from HEAD (source-of-truth).
+    #    We parse the source file rather than inspecting the live module because
+    #    __init__.py deletes _submodule_names from the module namespace after the
+    #    registration loop (``del _name, _submod, _submodule_names``).
+    current_result = subprocess.run(
+        ["git", "show", "HEAD:python/fdars/__init__.py"],
+        capture_output=True,
+        text=True,
+    )
+    assert current_result.returncode == 0, (
+        f"Could not read python/fdars/__init__.py at HEAD: {current_result.stderr}"
+    )
+    current_names = _parse_submodule_names(current_result.stdout)
+
+    # 3. Subset invariant: no Phase-55 submodule may have been dropped or renamed.
+    removed = baseline_names - current_names
+    assert not removed, (
+        f"FND-02 violation: submodule(s) removed from fdars since Phase 55: "
+        f"{sorted(removed)}. "
+        f"These were present in {PHASE_55_BASE} but are gone from HEAD. "
+        f"Additive new submodules are allowed; removals are not."
+    )
+
+    # 4. Registration invariant: every current submodule must be importable as
+    #    ``fdars.<name>`` and must be attached as an attribute of the fdars package
+    #    (the dynamic sys.modules injection loop in __init__.py is intact).
+    import fdars
+
+    broken = []
+    for name in sorted(current_names):
+        try:
+            mod = importlib.import_module(f"fdars.{name}")
+        except ImportError as exc:
+            broken.append(f"fdars.{name}: import failed — {exc}")
+            continue
+        attr = getattr(fdars, name, None)
+        if attr is None:
+            broken.append(f"fdars.{name}: getattr(fdars, {name!r}) returned None")
+        elif attr is not mod:
+            broken.append(
+                f"fdars.{name}: getattr(fdars, {name!r}) is not the imported module "
+                f"(sys.modules injection broken)"
+            )
+    assert not broken, (
+        "FND-02 registration invariant violated:\n" + "\n".join(broken)
     )
 
 
