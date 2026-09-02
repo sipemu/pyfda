@@ -17,6 +17,7 @@ High-performance functional data analysis toolkit providing:
 - Conformal prediction (split, jackknife+)
 - Simulation (Karhunen-Loeve, Gaussian processes)
 - Explainability (SHAP, PDP, permutation importance, significant regions)
+- Functional time series (FTSM fit/forecast, ACF, stationarity, DPCA)
 
 All computations are performed in Rust via fdars-core for maximum performance.
 """
@@ -52,6 +53,7 @@ _submodule_names = (
     "scoring",
     "inference",
     "pace_fpca",  # Phase 38 — PACE FPCA + IrregFdata opaque handle
+    "fts",        # Phase 67 — Functional Time Series (FTSM fit/forecast, ACF, stationarity, DPCA)
 )
 
 for _name in _submodule_names:

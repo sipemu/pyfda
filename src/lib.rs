@@ -26,6 +26,7 @@ mod seasonal_mod;
 mod simulation_mod;
 mod smoothing_mod;
 mod spm_mod;
+mod fts_mod;
 mod tolerance_mod;
 
 /// Create a submodule, register its contents, and attach it to a parent module.
@@ -60,6 +61,7 @@ fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     register_submodule!(m, "scoring", scoring_mod::register);
     register_submodule!(m, "inference", inference_mod::register);
     register_submodule!(m, "pace_fpca", pace_fpca_mod::register);
+    register_submodule!(m, "fts", fts_mod::register);
 
     Ok(())
 }
