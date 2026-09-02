@@ -55,7 +55,7 @@
 
 ### Release
 
-- [ ] **REL-01**: Package version bumped at close (0.8.0 → 0.9.0); `[sklearn]` extra documented in packaging.
+- [x] **REL-01**: Package version bumped at close (0.8.0 → 0.9.0); `[sklearn]` extra documented in packaging.
 
 ## Future Requirements
 
@@ -111,7 +111,7 @@ Explicitly excluded. Documented to prevent scope creep.
 | DOCS-01 | Phase 59 | Complete |
 | DOCS-02 | Phase 59 | Complete |
 | DOCS-03 | Phase 59 | Complete |
-| REL-01 | Phase 59 | Pending |
+| REL-01 | Phase 59 | Complete |
 
 **Coverage:**
 
