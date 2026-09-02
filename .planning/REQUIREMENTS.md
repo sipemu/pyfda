@@ -9,8 +9,8 @@ Docs-only diagram quality pass over all 156 hand-authored inline SVGs (90 concep
 
 ### Audit & Inventory
 
-- [ ] **AUDIT-01**: A scored inventory of all 156 SVGs is produced as the milestone-gating artifact, scoring each on design/geometry quality, STYLE_SPEC conformance, accessibility, and thumb/card sync
-- [ ] **AUDIT-02**: The inventory flags each diagram with defect severity and identifies coverage gaps (pages/methods that lack a diagram), driving the DEFECT/COVER scope
+- [x] **AUDIT-01**: A scored inventory of all 156 SVGs is produced as the milestone-gating artifact, scoring each on design/geometry quality, STYLE_SPEC conformance, accessibility, and thumb/card sync
+- [x] **AUDIT-02**: The inventory flags each diagram with defect severity and identifies coverage gaps (pages/methods that lack a diagram), driving the DEFECT/COVER scope
 
 ### Design-Quality Defects
 
@@ -72,8 +72,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | Phase 60 | Pending |
-| AUDIT-02 | Phase 60 | Pending |
+| AUDIT-01 | Phase 60 | Complete |
+| AUDIT-02 | Phase 60 | Complete |
 | DEFECT-01 | Phases 61, 62, 63 | Pending |
 | DEFECT-02 | Phases 61, 62, 63 | Pending |
 | DEFECT-03 | Phases 61, 62, 63 | Pending |
@@ -92,6 +92,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 **Note on batched requirements:** DEFECT-01/02/03, A11Y-01/02, and SPEC-01 are cross-cutting correction requirements delivered incrementally across the three section-batched correction phases (61 learn/represent/align, 62 analyze/monitoring/advisor, 63 regression/inference/examples). Each requirement is fully satisfied only once all three batches are complete (verified at the Phase 63 completion criterion + the Phase 65 whole-site gate). This is the same section-batching pattern used for SVGFIX-* across v7.0 Phases 43–45.
 
 **Coverage:**
+
 - v10.0 requirements: 16 total
 - Mapped to phases: 16 ✓
 - Unmapped: 0 ✓
