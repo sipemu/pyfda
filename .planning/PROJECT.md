@@ -24,6 +24,21 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
+## Current Milestone: v10.0 Diagram Quality & Accessibility Pass
+
+**Goal:** Bring all 156 hand-authored inline SVGs to one consistently high, defect-free, accessible bar — every diagram well-made (no mismatched lines / misaligned geometry), STYLE_SPEC-conformant, accessible, and with cards/thumbs synced to their concept diagrams. Diagram-focused successor to v7.0's Documentation Quality Pass.
+
+**Target features:**
+- **Design-quality defect audit + fix** — catch and correct badly-drawn diagrams (mismatched lines, misaligned geometry, layout) across all 156 SVGs. Every diagram checked. (User's core concern.)
+- **Accessibility (A11Y-01)** — long-form `<title>`/`<desc>` + `aria-labelledby` on complex diagrams; close the basic `role`/`aria-label` gaps (STYLE_SPEC's "34 of 43" note is stale against the 90 concept diagrams that exist today).
+- **Cards/thumbs sync (DIAG-FUT-02)** — 8 section cards + 58 gallery thumbnails audited and brought in line with their concept diagrams.
+- **New diagram coverage** — add method-accurate diagrams to pages/methods that still lack them (scope discovered via the audit, v7.0-style scored inventory).
+- **STYLE_SPEC conformance** — every diagram conforms to the current spec; refresh the spec's stale status/counts.
+
+**Scope decisions:** consistency + defect-fix depth (NO palette/typography change); dark-mode stays out of scope; audit covers all 156 SVGs (90 concept + 8 cards + 58 thumbs).
+
+**Key context:** Docs-only — NO `fdars-core` bump, NO bindings, NO advisor/MCP changes, NO package version bump (v7.0 precedent). Diagrams stay hand-authored inline SVG (locked constraint). Gates: SVGO idempotence + build-determinism, whole-site `mkdocs build --strict` green offline, and the standing blocking human diagram review before close. Phase numbering continues from v9.0's Phase 59 → starts at Phase 60.
+
 ## Last Shipped Milestone: v9.0 scikit-learn API Compatibility (shipped 2026-09-02)
 
 _All 28 requirements validated (Phase 59 docs closed via a documented override — deliverables shipped, formal VERIFICATION.md skipped); 5 phases, 17 plans; `tests/sklearn/` suite 4294 passed / 0 failed; whole-site `mkdocs build --strict` green offline. Package bumped 0.8.0 → 0.9.0 and released to PyPI (tag `v0.9.0`). Full detail: `.planning/milestones/v9.0-ROADMAP.md`. Next milestone: TBD via `/gsd-new-milestone`._
@@ -157,9 +172,16 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- No active milestone — v9.0 shipped 2026-09-02. Next milestone TBD via /gsd-new-milestone. -->
+<!-- v10.0 — Diagram Quality & Accessibility Pass. REQ-IDs defined in .planning/REQUIREMENTS.md; phases in .planning/ROADMAP.md. -->
 
-_No active milestone. Define the next one with `/gsd-new-milestone`._
+**v10.0 — Diagram Quality & Accessibility Pass (Phases 60+, in planning):**
+
+- [ ] Design-quality defect audit + fix across all 156 SVGs (mismatched lines, misaligned geometry, layout)
+- [ ] Accessibility (A11Y-01) — long-form `<title>`/`<desc>` + `aria-labelledby`; close basic `role`/`aria-label` gaps
+- [ ] Cards/thumbs sync (DIAG-FUT-02) — 8 cards + 58 thumbs brought in line with concept diagrams
+- [ ] New diagram coverage — diagrams added to pages/methods still lacking them (audit-derived)
+- [ ] STYLE_SPEC conformance — all diagrams conform; spec status/counts refreshed
+- [ ] Whole-site `mkdocs build --strict` green offline; SVGO/determinism gate green; blocking human diagram review approved
 
 **v9.0 — scikit-learn API Compatibility (Phases 55–59, shipped 2026-09-02):**
 
@@ -268,4 +290,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-02 after v9.0 milestone (scikit-learn API Compatibility) — SHIPPED. All 28 wrapped estimators PASS full check_estimator (whole tests/sklearn/ suite 4294 green, zero exemptions); pkg 0.8.0 → 0.9.0 released to PyPI (tag v0.9.0); docs "scikit-learn API" section live, --strict green. Phase 59 (docs) closed via a documented verification override (deliverables shipped, formal VERIFICATION.md skipped). v9.0 requirements moved to shipped; next milestone TBD via /gsd-new-milestone.*
+*Last updated: 2026-09-02 after starting v10.0 milestone (Diagram Quality & Accessibility Pass). Docs-only diagram-focused successor to v7.0: full defect/accessibility/coverage/conformance audit of all 156 hand-authored SVGs (90 concept + 8 cards + 58 thumbs). Scope locked: consistency + defect-fix (no palette/typography change), dark-mode out of scope, all 156 in audit. No crate bump, no bindings, no package version bump. Requirements defined in REQUIREMENTS.md; phases start at Phase 60.*
