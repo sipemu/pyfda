@@ -181,7 +181,9 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
   2. The report flags each diagram with a defect severity and groups the concept-diagram findings into a ranked, per-section fix list aligned to the docs sections (learn, represent, align, analyze, monitoring, advisor, regression, inference, examples) so each downstream correction phase (61/62/63) has an explicit, evidence-backed worklist.
   3. The report identifies the coverage gap — the pages/methods that still lack a concept diagram — driving the COVER-01 scope for Phase 64.
   4. The report identifies which of the 58 thumbnails and 8 cards have drifted from their current concept diagrams, driving the SYNC-01/SYNC-02 scope for Phase 64.
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 60-01-PLAN.md — Skeleton + score all 90 concept diagrams (4 axes, render-backed) + section/61-62-63 bucket map
+- [ ] 60-02-PLAN.md — Score 8 cards + 58 thumbs with drift detection; COVER-01 gap list, SYNC-01/02 drift list, ranked 61/62/63 fix worklists, self-check
 **UI hint**: yes
 
 ### Phase 61: SVG Corrections — learn / represent / align
