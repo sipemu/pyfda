@@ -9,9 +9,9 @@ Requirements for this milestone. Each maps to a roadmap phase (Phases 66+, conti
 
 ### Crate Bump & Regression Gate
 
-- [ ] **DEP-01**: `fdars-core` pinned at `0.33.0` (from `0.23.0`) with the `parallel` feature only (no `linalg`); `Cargo.toml` + `Cargo.lock` updated; maturin `develop` build green
-- [ ] **DEP-02**: The full existing Python suite (~772 tests) passes against the bumped crate with zero new failures; any numeric-tolerance change is documented; MSRV 1.83 unchanged
-- [ ] **DEP-03**: A 0.24→0.33 changelog + API audit is recorded — every existing `match`-arm/enum-variant string in `src/*_mod.rs` is verified to still exist at 0.33, and the four 0.30-deprecated 2D depth functions are noted for migration
+- [x] **DEP-01**: `fdars-core` pinned at `0.33.0` (from `0.23.0`) with the `parallel` feature only (no `linalg`); `Cargo.toml` + `Cargo.lock` updated; maturin `develop` build green
+- [x] **DEP-02**: The full existing Python suite (~772 tests) passes against the bumped crate with zero new failures; any numeric-tolerance change is documented; MSRV 1.83 unchanged
+- [x] **DEP-03**: A 0.24→0.33 changelog + API audit is recorded — every existing `match`-arm/enum-variant string in `src/*_mod.rs` is verified to still exist at 0.33, and the four 0.30-deprecated 2D depth functions are noted for migration
 
 ### Functional Time Series (`fdars.fts`)
 
@@ -88,9 +88,9 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEP-01 | Phase 66 | Pending |
-| DEP-02 | Phase 66 | Pending |
-| DEP-03 | Phase 66 | Pending |
+| DEP-01 | Phase 66 | Complete |
+| DEP-02 | Phase 66 | Complete |
+| DEP-03 | Phase 66 | Complete |
 | FTS-01 | Phase 67 | Pending |
 | FTS-02 | Phase 67 | Pending |
 | FTS-03 | Phase 67 | Pending |
@@ -114,6 +114,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | REL-01 | Phase 73 | Pending |
 
 **Coverage:**
+
 - v11.0 requirements: 24 total
 - Mapped to phases: 24 ✓
 - Unmapped: 0
