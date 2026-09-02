@@ -169,6 +169,16 @@ None — no external service configuration required.
 - Phases 67–71 (binding groups) can now fork from this proven 0.33.0 baseline — the upgrade isolation guarantee holds
 - The six deprecated call sites are documented in 66-AUDIT.md; their migration should be included in whichever binding phase touches depth/fdata/regression
 
+## Self-Check: PASSED
+
+- 66-01-SUMMARY.md: EXISTS on disk
+- 66-AUDIT.md: EXISTS on disk
+- Cargo.toml: EXISTS on disk with fdars-core = 0.33.0
+- Task commit 1cce589: FOUND in git log
+- Task commit e32878f: FOUND in git log
+- Task commit 6fe0f62: FOUND in git log
+- Plan metadata commit 67d949f: FOUND in git log
+
 ---
 *Phase: 66-isolated-crate-bump-regression-gate*
 *Completed: 2026-09-02*
