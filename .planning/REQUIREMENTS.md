@@ -14,14 +14,14 @@ Docs-only diagram quality pass over all 156 hand-authored inline SVGs (90 concep
 
 ### Design-Quality Defects
 
-- [ ] **DEFECT-01**: Every diagram flagged with geometry/line defects (mismatched lines, misaligned endpoints, overlapping or misplaced elements) is corrected
-- [ ] **DEFECT-02**: Every diagram flagged with layout defects (spacing, alignment, label overlap, panel sizing) is corrected
-- [ ] **DEFECT-03**: Every defect fix preserves method-accuracy — a correction never makes the diagram misdepict the method
+- [x] **DEFECT-01**: Every diagram flagged with geometry/line defects (mismatched lines, misaligned endpoints, overlapping or misplaced elements) is corrected
+- [x] **DEFECT-02**: Every diagram flagged with layout defects (spacing, alignment, label overlap, panel sizing) is corrected
+- [x] **DEFECT-03**: Every defect fix preserves method-accuracy — a correction never makes the diagram misdepict the method
 
 ### Accessibility (A11Y-01)
 
-- [ ] **A11Y-01**: Every concept diagram has `role="img"` and an `aria-label` matching its title text (closes the basic gaps left stale in STYLE_SPEC)
-- [ ] **A11Y-02**: Complex/multi-panel diagrams carry a long-form `<title>` + `<desc>` wired via `aria-labelledby` so screen readers convey what the diagram depicts
+- [x] **A11Y-01**: Every concept diagram has `role="img"` and an `aria-label` matching its title text (closes the basic gaps left stale in STYLE_SPEC)
+- [x] **A11Y-02**: Complex/multi-panel diagrams carry a long-form `<title>` + `<desc>` wired via `aria-labelledby` so screen readers convey what the diagram depicts
 - [ ] **A11Y-03**: Decorative gallery thumbnails use correct non-announcing semantics (empty `alt` / `aria-hidden`) consistently
 
 ### Cards / Thumbs Sync (DIAG-FUT-02)
@@ -35,7 +35,7 @@ Docs-only diagram quality pass over all 156 hand-authored inline SVGs (90 concep
 
 ### STYLE_SPEC Conformance
 
-- [ ] **SPEC-01**: All 156 SVGs conform to the current STYLE_SPEC (viewBox conventions, canonical `<style>` block, colour palette, stroke weights, panel patterns)
+- [x] **SPEC-01**: All 156 SVGs conform to the current STYLE_SPEC (viewBox conventions, canonical `<style>` block, colour palette, stroke weights, panel patterns)
 - [ ] **SPEC-02**: STYLE_SPEC.md is updated — stale status/counts refreshed and the accessibility pattern finalized to match the shipped diagram set
 
 ### Gate
@@ -74,16 +74,16 @@ Which phases cover which requirements. Populated during roadmap creation.
 |-------------|-------|--------|
 | AUDIT-01 | Phase 60 | Complete |
 | AUDIT-02 | Phase 60 | Complete |
-| DEFECT-01 | Phases 61, 62, 63 | Pending |
-| DEFECT-02 | Phases 61, 62, 63 | Pending |
-| DEFECT-03 | Phases 61, 62, 63 | Pending |
-| A11Y-01 | Phases 61, 62, 63 | Pending |
-| A11Y-02 | Phases 61, 62, 63 | Pending |
+| DEFECT-01 | Phases 61, 62, 63 | Complete |
+| DEFECT-02 | Phases 61, 62, 63 | Complete |
+| DEFECT-03 | Phases 61, 62, 63 | Complete |
+| A11Y-01 | Phases 61, 62, 63 | Complete |
+| A11Y-02 | Phases 61, 62, 63 | Complete |
 | A11Y-03 | Phase 64 | Pending |
 | SYNC-01 | Phase 64 | Pending |
 | SYNC-02 | Phase 64 | Pending |
 | COVER-01 | Phase 64 | Pending |
-| SPEC-01 | Phases 61, 62, 63 | Pending |
+| SPEC-01 | Phases 61, 62, 63 | Complete |
 | SPEC-02 | Phase 65 | Pending |
 | GATE-01 | Phase 65 | Pending |
 | GATE-02 | Phase 65 | Pending |

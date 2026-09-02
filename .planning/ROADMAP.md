@@ -164,9 +164,9 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
 **Standing constraints every phase inherits:** docs-only — NO `fdars-core` bump, NO bindings, NO advisor/MCP changes, NO package version bump (v7.0 precedent); diagrams stay hand-authored inline SVG (locked constraint — no programmatic generation); the SVGO idempotence + build-determinism CI gate must stay green; the whole-site `mkdocs build --strict` must be green offline (run at close — this milestone changes static SVGs, not fences, so most work needs no full rebuild); docs phases run SEQUENTIALLY on `main` (NOT in worktrees — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path; `use_worktrees: false`); per-section review on the built site; a BLOCKING human diagram method-accuracy review before milestone close (the v6.0 hypograph/epigraph lesson).
 
 - [x] **Phase 60: Diagram Quality Audit** - Scored inventory of all 156 SVGs (design/geometry, STYLE_SPEC, accessibility, thumb/card sync) → milestone-gating fix list + coverage-gap list (completed 2026-09-02)
-- [ ] **Phase 61: SVG Corrections — learn / represent / align** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review
-- [ ] **Phase 62: SVG Corrections — analyze / monitoring / advisor** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review
-- [ ] **Phase 63: SVG Corrections — regression / inference / examples** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review
+- [x] **Phase 61: SVG Corrections — learn / represent / align** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review (completed 2026-09-02)
+- [x] **Phase 62: SVG Corrections — analyze / monitoring / advisor** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review (completed 2026-09-02)
+- [x] **Phase 63: SVG Corrections — regression / inference / examples** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review (completed 2026-09-02)
 - [ ] **Phase 64: Cards & Thumbnails Sync + New Coverage** - Sync 8 cards + 58 thumbs to their corrected concept diagrams; add method-accurate diagrams to audit-identified gap pages
 - [ ] **Phase 65: STYLE_SPEC Refresh, Whole-Site Gate & Human Review** - Refresh STYLE_SPEC status/counts + accessibility pattern; `--strict` green offline; SVGO/determinism gate; blocking human diagram review
 
@@ -205,7 +205,7 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
 
 **Plans**: 1 plan
 
-- [ ] 61-01-PLAN.md — Correct all 24 learn/represent/align concept SVGs: A11Y-01 (aria-label matches title) + A11Y-02 (long-form title/desc/aria-labelledby) on every diagram; fix shift-registration "elastic warp" method-accuracy + crowding, banded-alignment edge crowding, pace-fpca subtitle overflow; STYLE_SPEC preserved; render-verified via rsvg-convert
+- [x] 61-01-PLAN.md — Correct all 24 learn/represent/align concept SVGs: A11Y-01 (aria-label matches title) + A11Y-02 (long-form title/desc/aria-labelledby) on every diagram; fix shift-registration "elastic warp" method-accuracy + crowding, banded-alignment edge crowding, pace-fpca subtitle overflow; STYLE_SPEC preserved; render-verified via rsvg-convert
 
 **UI hint**: yes
 
@@ -222,7 +222,9 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
   4. Every correction in this batch preserves method-accuracy, and each section passes a built-site review before the batch is done.
 
 **Plans**: 1 plan
-- [ ] 62-01-PLAN.md — A11Y (title/desc/aria-labelledby) on all 26 analyze/monitoring/advisor/sklearn diagrams + elastic-clustering redraw + outlier taxonomy hold + 3 Minor geometry fixes
+
+- [x] 62-01-PLAN.md — A11Y (title/desc/aria-labelledby) on all 26 analyze/monitoring/advisor/sklearn diagrams + elastic-clustering redraw + outlier taxonomy hold + 3 Minor geometry fixes
+
 **UI hint**: yes
 
 ### Phase 63: SVG Corrections — regression / inference / examples
@@ -238,7 +240,9 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
   4. Across Phases 61–63, every flagged concept diagram on the Phase-60 fix list has been corrected and no diagram misdepicts its method — the full concept-diagram set (all 90) now meets the DEFECT-01/02/03, A11Y-01/02, and SPEC-01 bar.
 
 **Plans**: 1 plan
-- [ ] 63-01-PLAN.md — Correct all 40 regression/inference/examples concept SVGs (4 Major layout fixes + universal A11Y title/desc/aria-labelledby + Minor geometry), render-verified via rsvg-convert
+
+- [x] 63-01-PLAN.md — Correct all 40 regression/inference/examples concept SVGs (4 Major layout fixes + universal A11Y title/desc/aria-labelledby + Minor geometry), render-verified via rsvg-convert
+
 **UI hint**: yes
 
 ### Phase 64: Cards & Thumbnails Sync + New Coverage
@@ -279,9 +283,9 @@ Phases execute in numeric order: 60 → 61 → 62 → 63 → 64 → 65
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 60. Diagram Quality Audit | v10.0 | 2/2 | Complete    | 2026-09-02 |
-| 61. SVG Corrections — learn / represent / align | v10.0 | 0/0 | Not started | - |
-| 62. SVG Corrections — analyze / monitoring / advisor | v10.0 | 0/0 | Not started | - |
-| 63. SVG Corrections — regression / inference / examples | v10.0 | 0/0 | Not started | - |
+| 61. SVG Corrections — learn / represent / align | v10.0 | 1/1 | Complete    | 2026-09-02 |
+| 62. SVG Corrections — analyze / monitoring / advisor | v10.0 | 1/1 | Complete    | 2026-09-02 |
+| 63. SVG Corrections — regression / inference / examples | v10.0 | 1/1 | Complete    | 2026-09-02 |
 | 64. Cards & Thumbnails Sync + New Coverage | v10.0 | 0/0 | Not started | - |
 | 65. STYLE_SPEC Refresh, Whole-Site Gate & Human Review | v10.0 | 0/0 | Not started | - |
 
