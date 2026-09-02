@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="TSRVF: linearizing elastic analysis into a flat tangent space">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="TSRVF: Linearizing Elastic Analysis"
+     aria-labelledby="tsrvf-title tsrvf-desc">
+  <title id="tsrvf-title">TSRVF: Linearizing Elastic Analysis</title>
+  <desc id="tsrvf-desc">Illustrates how tsrvf_transform() maps curves from the curved shape manifold to a flat tangent space at the Karcher-mean base point via SRVF representation and parallel transport, enabling linear statistics (means, PCA) that would be invalid on the original non-Euclidean manifold.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

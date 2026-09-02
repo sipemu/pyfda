@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Smoothing a noisy curve into a smooth functional representation">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Smoothing: Recovering the Signal Behind the Noise"
+     aria-labelledby="smoothing-title smoothing-desc">
+  <title id="smoothing-title">Smoothing: Recovering the Signal Behind the Noise</title>
+  <desc id="smoothing-desc">Shows how nadaraya_watson() and related kernel/P-spline smoothers convert a noisy discrete signal into a smooth functional representation, separating measurement error from the underlying signal for downstream operations like derivatives and distances.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

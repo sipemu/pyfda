@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="PACE FPCA — sparse irregular observations recovered as smooth eigenfunctions">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="PACE FPCA — Sparse, Irregular Observations to Smooth Eigenfunctions"
+     aria-labelledby="pace-fpca-title pace-fpca-desc">
+  <title id="pace-fpca-title">PACE FPCA — Sparse, Irregular Observations to Smooth Eigenfunctions</title>
+  <desc id="pace-fpca-desc">Shows how PACE (Principal Analysis by Conditional Expectation) recovers smooth eigenfunctions on a common grid from sparse, ragged per-curve observations — each curve contributes only a few irregularly-spaced points yet the method estimates the full covariance surface and principal components.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -9,7 +13,7 @@
 
   <!-- Title -->
   <text class="ttl" x="360" y="28" text-anchor="middle">PACE FPCA — Sparse, Irregular Observations to Smooth Eigenfunctions</text>
-  <text class="sub" x="360" y="46" text-anchor="middle">Ragged per-curve grids (sparse, irregular) — PACE recovers smooth eigenfunctions on a common grid</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">PACE recovers smooth eigenfunctions from sparse, irregular per-curve grids</text>
 
   <!-- Left panel: sparse irregular observations -->
   <rect x="24" y="58" width="316" height="208" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>

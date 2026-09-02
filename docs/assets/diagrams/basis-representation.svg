@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Basis representation: project a curve onto basis functions">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Basis Representation: Curve to Coefficients"
+     aria-labelledby="basis-representation-title basis-representation-desc">
+  <title id="basis-representation-title">Basis Representation: Curve to Coefficients</title>
+  <desc id="basis-representation-desc">Shows how fdata_to_basis_1d() projects a curve onto a finite B-spline or Fourier basis, replacing 200 grid-point values with a compact set of coefficients, then reconstructs the curve from those coefficients to verify fidelity.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

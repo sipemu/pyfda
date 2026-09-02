@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="From raw measurements to a functional-data object">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="From Raw Measurements to a Functional-Data Object"
+     aria-labelledby="introduction-title introduction-desc">
+  <title id="introduction-title">From Raw Measurements to a Functional-Data Object</title>
+  <desc id="introduction-desc">Shows how discrete per-subject measurement points are bundled with their evaluation grid via the Fdata constructor to form a functional-data object — a single observation carrying data, argvals, and access to all fdars operations.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

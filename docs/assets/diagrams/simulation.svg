@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Simulating functional data from Karhunen-Loeve parameters">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Simulation: Synthetic Curves with Known Ground Truth"
+     aria-labelledby="simulation-title simulation-desc">
+  <title id="simulation-title">Simulation: Synthetic Curves with Known Ground Truth</title>
+  <desc id="simulation-desc">Demonstrates how simulate() generates synthetic functional data by drawing random Karhunen–Loève scores from prescribed eigenfunctions and a variance-decay profile, producing a curve family with fully known mean, modes, and noise structure.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

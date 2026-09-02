@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Shift Registration: rigid horizontal translation to the cross-sectional mean">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Shift Registration: Rigid Horizontal Translation"
+     aria-labelledby="shift-registration-title shift-registration-desc">
+  <title id="shift-registration-title">Shift Registration: Rigid Horizontal Translation</title>
+  <desc id="shift-registration-desc">Illustrates shift_register(), which aligns each curve to the cross-sectional mean by a single rigid scalar horizontal shift δ — the argmin of an L2 objective — leaving curve shape unchanged. This is a purely rigid translation; curve shapes are preserved and no time-axis deformation is applied.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -44,13 +48,10 @@
   <!-- L2-to-mean shaded area -->
   <path d="M310 195 C316 192 322 183 328 170 C332 161 338 148 346 145 C352 142 356 146 360 154 C364 164 370 184 382 193 C390 195 406 195 420 195 Z" fill="#fd7e14" fill-opacity="0.10"/>
   <text class="sm" x="360" y="215" text-anchor="middle" fill="#fd7e14">L2 objective</text>
-  <!-- Contrast key: rigid vs elastic -->
+  <!-- Key: rigid shift only -->
   <line x1="278" y1="248" x2="302" y2="248" stroke="#3f51b5" stroke-width="2"/>
   <path d="M302 248 l-7 -4 v8 z" fill="#3f51b5"/>
   <text class="sm" x="310" y="252" fill="#3f51b5">shift (rigid)</text>
-  <path d="M360 244 Q378 240 388 248 Q398 255 408 248" stroke="#6c757d" stroke-width="1.6" fill="none" stroke-dasharray="3 2"/>
-  <path d="M408 248 l-7 -3 v7 z" fill="#6c757d"/>
-  <text class="sm" x="384" y="263" text-anchor="middle" fill="#6c757d">elastic warp</text>
 
   <!-- Arrow between panels 2 and 3 -->
   <path d="M470 158 h30" stroke="#adb5bd" stroke-width="2"/>

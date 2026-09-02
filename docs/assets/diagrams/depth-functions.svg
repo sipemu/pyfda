@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" fill="none" role="img" aria-label="Functional Depth: Ranking Curves by Centrality">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" fill="none" role="img"
+     aria-label="Functional Depth: Ranking Curves by Centrality"
+     aria-labelledby="depth-functions-title depth-functions-desc">
+  <title id="depth-functions-title">Functional Depth: Ranking Curves by Centrality</title>
+  <desc id="depth-functions-desc">A multi-panel diagram showing fd.depth(method) assigning a [0,1] centrality score to each curve in a sample — deep curves (blue) are typical and central while shallow curves (red) are peripheral outliers — with a Depth-Based Tools grid below illustrating downstream applications: outlier detection (outliergram, magnitude_shape), functional boxplot, robust statistics (geometric_median, trimmed mean), tolerance bands, and O(T log N) streaming depth.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

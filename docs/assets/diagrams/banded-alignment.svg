@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Banded elastic alignment: Sakoe-Chiba diagonal corridor constrains the dynamic programming warp path">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img"
+     aria-label="Banded Elastic Alignment: Sakoe&#8211;Chiba Corridor"
+     aria-labelledby="banded-alignment-title banded-alignment-desc">
+  <title id="banded-alignment-title">Banded Elastic Alignment: Sakoe&#8211;Chiba Corridor</title>
+  <desc id="banded-alignment-desc">Shows how the Sakoe–Chiba band constrains the dynamic-programming warp path to a diagonal corridor |i−j| ≤ B (blue-tinted cells), reducing O(m²) cost-table computation to O(m·B); the bottom panels compare unregistered curves (blurred mean) to the output after banded alignment (sharp mean).</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -173,17 +177,17 @@
   <text class="sm" x="279" y="182" text-anchor="middle" transform="rotate(-90,279,182)">i (query curve time index)</text>
 
   <!-- Band label annotations -->
-  <!-- upper band edge label: above grid, right side — clear of title at y=78 -->
-  <text class="sm" x="490" y="100" text-anchor="start" fill="#fd7e14">upper band edge</text>
-  <path d="M490 98 L445 112" stroke="#fd7e14" stroke-width="1"/>
+  <!-- upper band edge label: right of grid, moved right to avoid band_frac label -->
+  <text class="sm" x="466" y="116" text-anchor="start" fill="#fd7e14">upper band edge</text>
+  <path d="M466 114 L432 116" stroke="#fd7e14" stroke-width="1"/>
 
   <!-- lower band edge label: right of grid -->
   <text class="sm" x="462" y="218" fill="#fd7e14">lower</text>
   <text class="sm" x="462" y="232" fill="#fd7e14">band edge</text>
   <path d="M461 222 l-8 -8" stroke="#fd7e14" stroke-width="1"/>
 
-  <!-- band_frac annotation: placed below title, above grid, right half — no overlap -->
-  <text class="mono" x="590" y="92" text-anchor="middle" fill="#3f51b5">band_frac &#215; m = B</text>
+  <!-- band_frac annotation: placed above grid top-right, with vertical clearance from upper-band-edge label -->
+  <text class="mono" x="590" y="88" text-anchor="middle" fill="#3f51b5">band_frac &#215; m = B</text>
 
   <!-- Legend: top-left of panel, x=30 y=68 -->
   <rect x="30" y="68" width="140" height="80" rx="8" fill="#fff" stroke="#ced4da" stroke-width="1"/>

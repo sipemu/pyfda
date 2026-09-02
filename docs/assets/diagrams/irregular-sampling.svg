@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Regridding sparse irregular curves onto a common grid">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Irregular Sampling: Recovering a Common Grid"
+     aria-labelledby="irregular-sampling-title irregular-sampling-desc">
+  <title id="irregular-sampling-title">Irregular Sampling: Recovering a Common Grid</title>
+  <desc id="irregular-sampling-desc">Shows how curves observed on ragged per-subject grids (sparse, uneven points) are smoothed and re-evaluated on a common grid, producing the tidy (n_obs, n_points) matrix required by all fdars operations such as means, distances, depth, and FPCA.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

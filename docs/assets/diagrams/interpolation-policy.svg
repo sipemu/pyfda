@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Spline interpolation and extrapolation policy: four policy variants on a single curve">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Spline Interpolation — Extrapolation Policy"
+     aria-labelledby="interpolation-policy-title interpolation-policy-desc">
+  <title id="interpolation-policy-title">Spline Interpolation — Extrapolation Policy</title>
+  <desc id="interpolation-policy-desc">Shows four policies governing queries outside the curve's domain: Boundary (clamp to the boundary value), Exception (raise ValueError — no silent extrapolation), Fill (return a user-specified constant), and Periodic (wrap modulo the domain length L), illustrating how fdars explicitly controls out-of-domain behaviour.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
