@@ -72,28 +72,30 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | TBD | Pending |
-| AUDIT-02 | TBD | Pending |
-| DEFECT-01 | TBD | Pending |
-| DEFECT-02 | TBD | Pending |
-| DEFECT-03 | TBD | Pending |
-| A11Y-01 | TBD | Pending |
-| A11Y-02 | TBD | Pending |
-| A11Y-03 | TBD | Pending |
-| SYNC-01 | TBD | Pending |
-| SYNC-02 | TBD | Pending |
-| COVER-01 | TBD | Pending |
-| SPEC-01 | TBD | Pending |
-| SPEC-02 | TBD | Pending |
-| GATE-01 | TBD | Pending |
-| GATE-02 | TBD | Pending |
-| GATE-03 | TBD | Pending |
+| AUDIT-01 | Phase 60 | Pending |
+| AUDIT-02 | Phase 60 | Pending |
+| DEFECT-01 | Phases 61, 62, 63 | Pending |
+| DEFECT-02 | Phases 61, 62, 63 | Pending |
+| DEFECT-03 | Phases 61, 62, 63 | Pending |
+| A11Y-01 | Phases 61, 62, 63 | Pending |
+| A11Y-02 | Phases 61, 62, 63 | Pending |
+| A11Y-03 | Phase 64 | Pending |
+| SYNC-01 | Phase 64 | Pending |
+| SYNC-02 | Phase 64 | Pending |
+| COVER-01 | Phase 64 | Pending |
+| SPEC-01 | Phases 61, 62, 63 | Pending |
+| SPEC-02 | Phase 65 | Pending |
+| GATE-01 | Phase 65 | Pending |
+| GATE-02 | Phase 65 | Pending |
+| GATE-03 | Phase 65 | Pending |
+
+**Note on batched requirements:** DEFECT-01/02/03, A11Y-01/02, and SPEC-01 are cross-cutting correction requirements delivered incrementally across the three section-batched correction phases (61 learn/represent/align, 62 analyze/monitoring/advisor, 63 regression/inference/examples). Each requirement is fully satisfied only once all three batches are complete (verified at the Phase 63 completion criterion + the Phase 65 whole-site gate). This is the same section-batching pattern used for SVGFIX-* across v7.0 Phases 43–45.
 
 **Coverage:**
 - v10.0 requirements: 16 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 16 ⚠️
+- Mapped to phases: 16 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-09-02*
-*Last updated: 2026-09-02 after initial definition*
+*Last updated: 2026-09-02 after roadmap creation (Phases 60–65 mapped; 16/16 covered)*
