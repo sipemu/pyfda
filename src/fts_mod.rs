@@ -497,6 +497,228 @@ pub fn long_run_covariance<'py>(
 }
 
 // ---------------------------------------------------------------------------
+// Group C: Spectral / dimension-reduction functions
+// ---------------------------------------------------------------------------
+
+/// Estimate the spectral density operator of a functional time series.
+///
+/// Uses the Bartlett kernel smoother applied to the periodogram operator.
+/// Returns the real and imaginary parts of the estimated spectral density
+/// at each Fourier frequency.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Time-ordered functional data, shape (n_obs, n_points).
+/// argvals : numpy.ndarray
+///     Evaluation grid, length n_points.
+/// bandwidth : int or None, optional
+///     Bartlett kernel bandwidth (default None → max(1, ⌊N^{1/3}⌋)).
+///     bandwidth=0 raises ValueError (rejected by upstream, unlike long_run_covariance).
+///
+/// Returns
+/// -------
+/// dict
+///     freqs : numpy 1D (N,) — Fourier frequencies θ_j = 2πj/N.
+///     re : list of N numpy 2D (n_points, n_points) — real parts per frequency.
+///     im : list of N numpy 2D (n_points, n_points) — imaginary parts per frequency.
+///     m : int — grid dimension.
+///     n_curves : int — number of curves N.
+///     bandwidth : int — Bartlett bandwidth used.
+///
+/// Notes
+/// -----
+/// To get a 3D array: ``np.stack(result["re"])`` yields shape (N, n_points, n_points).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If bandwidth=0 or argvals length mismatch.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, bandwidth=None))]
+pub fn spectral_density<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    bandwidth: Option<usize>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = to_pyresult(fdars_core::fts::spectral_density(&mat, &av, bandwidth))?;
+
+    let m = result.m;
+
+    // re[k] and im[k] are flat column-major m×m buffers (one per Fourier frequency).
+    // Reshape each via FdMatrix::from_column_major to get a correct (m, m) numpy 2D.
+    let re_list = PyList::empty(py);
+    for freq_re in &result.re {
+        let fd_re = fdars_core::matrix::FdMatrix::from_column_major(freq_re.clone(), m, m)
+            .map_err(to_pyerr)?;
+        re_list.append(fdmatrix_to_numpy2d(py, &fd_re))?;
+    }
+
+    let im_list = PyList::empty(py);
+    for freq_im in &result.im {
+        let fd_im = fdars_core::matrix::FdMatrix::from_column_major(freq_im.clone(), m, m)
+            .map_err(to_pyerr)?;
+        im_list.append(fdmatrix_to_numpy2d(py, &fd_im))?;
+    }
+
+    let dict = PyDict::new(py);
+    dict.set_item("freqs", vec_to_numpy1d(py, result.freqs))?;
+    dict.set_item("re", re_list)?;
+    dict.set_item("im", im_list)?;
+    dict.set_item("m", result.m)?;
+    dict.set_item("n_curves", result.n_curves)?;
+    dict.set_item("bandwidth", result.bandwidth)?;
+    Ok(dict)
+}
+
+// ---------------------------------------------------------------------------
+// Private helper: convert DpcaResult to PyDict (reused by dpca_reconstruct)
+// ---------------------------------------------------------------------------
+
+fn dpca_result_to_dict<'py>(
+    py: Python<'py>,
+    result: &fdars_core::fts::DpcaResult,
+) -> PyResult<Bound<'py, PyDict>> {
+    // filters: Vec<FdMatrix> — each is a (2L+1) × m matrix → list of numpy 2D
+    let filters_list = PyList::empty(py);
+    for f in &result.filters {
+        filters_list.append(fdmatrix_to_numpy2d(py, f))?;
+    }
+
+    // eigenvalues: Vec<Vec<f64>> — per-component trajectory → list of numpy 1D
+    let ev_list = PyList::empty(py);
+    for ev in &result.eigenvalues {
+        ev_list.append(vec_to_numpy1d(py, ev.clone()))?;
+    }
+
+    let dict = PyDict::new(py);
+    dict.set_item("filters", filters_list)?;
+    dict.set_item("scores", fdmatrix_to_numpy2d(py, &result.scores))?;
+    dict.set_item("eigenvalues", ev_list)?;
+    dict.set_item("n_freqs", result.n_freqs)?;
+    dict.set_item("filter_lag", result.filter_lag)?;
+    dict.set_item("ncomp", result.ncomp)?;
+    // valid_range: (usize, usize) → Python 2-tuple (int, int)
+    dict.set_item("valid_range", (result.valid_range.0, result.valid_range.1))?;
+    Ok(dict)
+}
+
+/// Fit Dynamic Functional Principal Components Analysis (DPCA).
+///
+/// Decomposes the functional time series into dynamic principal components
+/// using the spectral density operator. Returns filters, dynamic scores,
+/// and per-component eigenvalue trajectories.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Time-ordered functional data, shape (n_obs, n_points).
+/// argvals : numpy.ndarray
+///     Evaluation grid, length n_points.
+/// ncomp : int, optional
+///     Number of dynamic components to retain (default 3). Must be in 1..=n_points.
+/// bandwidth : int or None, optional
+///     Bandwidth for the internal spectral density estimate (default None → auto).
+///     bandwidth=0 raises ValueError.
+/// filter_lag : int or None, optional
+///     Filter half-width L (default None → uses resolved bandwidth).
+///     filter_lag >= N/2 raises ValueError.
+///
+/// Returns
+/// -------
+/// dict
+///     filters : list of ncomp numpy 2D (2L+1, n_points) — dynamic eigen-filters.
+///     scores : numpy 2D (N-2L, ncomp) — dynamic score series.
+///     eigenvalues : list of ncomp numpy 1D (N,) — per-component eigenvalue trajectory.
+///     n_freqs : int — number of Fourier frequencies.
+///     filter_lag : int — filter half-width L used.
+///     ncomp : int — retained dynamic components.
+///     valid_range : tuple (int, int) — interior time range (L, N-1-L).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If ncomp out of range, bandwidth=0, or filter_lag >= N/2.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, ncomp=3, bandwidth=None, filter_lag=None))]
+pub fn dpca<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    ncomp: usize,
+    bandwidth: Option<usize>,
+    filter_lag: Option<usize>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = to_pyresult(fdars_core::fts::dpca(&mat, &av, ncomp, bandwidth, filter_lag))?;
+    dpca_result_to_dict(py, &result)
+}
+
+/// Fit DPCA and reconstruct the functional time series from dynamic components.
+///
+/// Uses the combined-function pattern: fits `dpca` internally, then calls
+/// `dpca_reconstruct`. Python cannot pass a Rust `DpcaResult` directly.
+/// Returns a merged dict with all DPCA fields plus the reconstruction.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Time-ordered functional data, shape (n_obs, n_points).
+/// argvals : numpy.ndarray
+///     Evaluation grid, length n_points.
+/// ncomp : int, optional
+///     Number of dynamic components (default 3). Must be in 1..=n_points.
+/// bandwidth : int or None, optional
+///     Bandwidth forwarded to spectral density (default None → auto).
+/// filter_lag : int or None, optional
+///     Filter half-width L (default None → uses resolved bandwidth).
+///
+/// Returns
+/// -------
+/// dict
+///     All keys from `dpca` (filters, scores, eigenvalues, n_freqs, filter_lag,
+///     ncomp, valid_range) plus:
+///     fitted_reconstruction : numpy 2D (N-2L, n_points) — reconstructed curves.
+///     reconstruction_error : numpy 1D (ncomp,) — per-K integrated-L2 error
+///         (monotone non-increasing: adding components reduces reconstruction error).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If ncomp out of range, bandwidth=0, or filter_lag >= N/2.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, ncomp=3, bandwidth=None, filter_lag=None))]
+pub fn dpca_reconstruct<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    ncomp: usize,
+    bandwidth: Option<usize>,
+    filter_lag: Option<usize>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+
+    // Combined-function pattern: fit dpca internally, then reconstruct.
+    // Python cannot pass &DpcaResult, so we fit it here.
+    let dp = to_pyresult(fdars_core::fts::dpca(&mat, &av, ncomp, bandwidth, filter_lag))?;
+    let recon = to_pyresult(fdars_core::fts::dpca_reconstruct(&mat, &av, &dp))?;
+
+    // Build the merged dict: start with all DpcaResult fields, then add reconstruction
+    let dict = dpca_result_to_dict(py, &dp)?;
+    dict.set_item("fitted_reconstruction", fdmatrix_to_numpy2d(py, &recon.fitted))?;
+    dict.set_item(
+        "reconstruction_error",
+        vec_to_numpy1d(py, recon.reconstruction_error),
+    )?;
+    Ok(dict)
+}
+
+// ---------------------------------------------------------------------------
 // Module registration
 // ---------------------------------------------------------------------------
 
@@ -506,11 +728,13 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ftsm_forecast_multistep, m)?)?;
     m.add_function(wrap_pyfunction!(ftsm_update, m)?)?;
     m.add_function(wrap_pyfunction!(fplsr, m)?)?;
+    m.add_function(wrap_pyfunction!(spectral_density, m)?)?;
+    m.add_function(wrap_pyfunction!(dpca, m)?)?;
+    m.add_function(wrap_pyfunction!(dpca_reconstruct, m)?)?;
     m.add_function(wrap_pyfunction!(functional_acf, m)?)?;
     m.add_function(wrap_pyfunction!(functional_pacf, m)?)?;
     m.add_function(wrap_pyfunction!(functional_difference, m)?)?;
     m.add_function(wrap_pyfunction!(stationarity_test, m)?)?;
     m.add_function(wrap_pyfunction!(long_run_covariance, m)?)?;
-    // Plan 67-04 will append: spectral_density, dpca, dpca_reconstruct
     Ok(())
 }
