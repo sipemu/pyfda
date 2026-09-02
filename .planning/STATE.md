@@ -4,17 +4,17 @@ milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 68
 current_phase_name: Function-on-Function & Scalar-on-Function Regression
-status: executing
-stopped_at: Completed 68-02-PLAN.md
-last_updated: "2026-09-02T21:12:24.046Z"
+status: verifying
+stopped_at: Completed 68-03-PLAN.md
+last_updated: "2026-09-02T21:19:21.998Z"
 last_activity: 2026-09-02
 last_activity_desc: Phase 68 execution started
-state_head: 35f11d4f8c9fb6c8d6143282b7a6825779ea13a9
+state_head: 04b4d3222b4a404b4dd3c0e5155f4a4071de86f9
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 25
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 
 Phase: 68 (Function-on-Function & Scalar-on-Function Regression) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-02 — Phase 68 execution started
 
 ## Performance Metrics
@@ -74,6 +74,7 @@ Last activity: 2026-09-02 — Phase 68 execution started
 | Phase 67-functional-time-series-fts P67-05 | 8min | 1 tasks | 1 files |
 | Phase 68-function-on-function-scalar-on-function-regression P01 | 2min | 2 tasks | 2 files |
 | Phase 68-function-on-function-scalar-on-function-regression P02 | 3min | 3 tasks | 2 files |
+| Phase 68-function-on-function-scalar-on-function-regression P03 | 4 min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,7 @@ Recent decisions affecting current work:
 - [Phase 67]: spectral_density re/im returned as Python lists of (m,m) arrays rather than 3D numpy — users can np.stack() for the 3D form
 - [Phase 67-functional-time-series-fts]: FND-02 refactored to subset+registration invariant — parse _submodule_names from git source (not live module), assert Phase-55 baseline subset of current, assert per-name import/attribute registration intact
 - [Phase 68-01]: Exclude fpca_x/fpca_y from fof_regression PyDict — internal FPCA state; test asserts key-set
+- [Phase 68]: All 5 sof bindings in single file; VarSelectResult.coefficients len relaxed (P+1 upstream); model_selection_ncomp copied verbatim from regression_mod.rs
 
 ### Pending Todos
 
@@ -131,8 +133,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-02T21:12:23.996Z
-Stopped at: Completed 68-02-PLAN.md
+Last session: 2026-09-02T21:19:21.944Z
+Stopped at: Completed 68-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
