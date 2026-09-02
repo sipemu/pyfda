@@ -5,16 +5,16 @@ milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 67
 current_phase_name: Functional Time Series (fdars.fts)
 status: verifying
-stopped_at: Completed 67-04-PLAN.md
-last_updated: "2026-09-02T18:45:51.126Z"
+stopped_at: Completed 67-05-PLAN.md
+last_updated: "2026-09-02T20:36:08.650Z"
 last_activity: 2026-09-02
 last_activity_desc: Phase 67 execution started
-state_head: 5585a3cfe9887c4449748550dd9ead9d394c2789
+state_head: 4d2a0ccd61381ec5c3ff487d0d3e661e7a1d02ab
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 6
+  completed_plans: 6
   percent: 13
 ---
 
@@ -71,6 +71,7 @@ Last activity: 2026-09-02 — Phase 67 execution started
 | Phase 67-functional-time-series-fts P02 | 3 min | 2 tasks | 2 files |
 | Phase 67-functional-time-series-fts P03 | 3min | 2 tasks | 2 files |
 | Phase 67-functional-time-series-fts P04 | 2min | 2 tasks | 2 files |
+| Phase 67-functional-time-series-fts P67-05 | 8min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,7 @@ Recent decisions affecting current work:
 - [Phase 67]: 67-02: Combined-function pattern for &FtsmResult inputs — re-fit ftsm internally; private ftsm_result_to_dict helper factored for ftsm+ftsm_update consistency
 - [Phase 67]: 67-03: Vec<u32> lags cast to i64; functional_difference returns naked array; col-major cov_matrix reshaped via FdMatrix::from_column_major; FTS-02 complete with 21 passing tests
 - [Phase 67]: spectral_density re/im returned as Python lists of (m,m) arrays rather than 3D numpy — users can np.stack() for the 3D form
+- [Phase 67-functional-time-series-fts]: FND-02 refactored to subset+registration invariant — parse _submodule_names from git source (not live module), assert Phase-55 baseline subset of current, assert per-name import/attribute registration intact
 
 ### Pending Todos
 
@@ -126,8 +128,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-02T18:45:46.740Z
-Stopped at: Completed 67-04-PLAN.md
+Last session: 2026-09-02T20:36:08.585Z
+Stopped at: Completed 67-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

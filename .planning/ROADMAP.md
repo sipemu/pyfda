@@ -211,7 +211,9 @@ Full detail: `.planning/milestones/v10.0-ROADMAP.md`
   2. Users can compute `functional_acf` / `functional_pacf`, run a stationarity test, and compute a long-run covariance, with deterministic results where the upstream function accepts a seed
   3. Users can call the dimension-reduction/forecasting extras available at 0.33 (`fplsr` and/or `dpca`), each returning a documented PyDict
 
-**Plans**: 4/4 plans executed (tracer-first; 4 sequential waves — all touch `src/fts_mod.rs` + `tests/test_fts.py`)
+**Plans**: 5/5 plans executed (tracer-first; 4 sequential waves — all touch `src/fts_mod.rs` + `tests/test_fts.py`)
+
+- [x] 67-05-PLAN.md
 
 - [x] 67-01-PLAN.md — TRACER: register `fdars.fts` submodule + bind `ftsm` end-to-end (lib.rs + __init__.py + fts_mod.rs), non-square (40×25) ftsm test green
 - [x] 67-02-PLAN.md — Forecasting family: `ftsm_forecast`, `ftsm_forecast_multistep`, `ftsm_update` (combined-function pattern) + `fplsr`
@@ -315,7 +317,7 @@ Phases execute in numeric order: 66 → 67 → 68 → 69 → 70 → 71 → 72 �
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 66. Isolated Crate Bump + Regression Gate | v11.0 | 1/1 | Complete    | 2026-09-02 |
-| 67. Functional Time Series (`fdars.fts`) | v11.0 | 4/4 | In Progress|  |
+| 67. Functional Time Series (`fdars.fts`) | v11.0 | 5/5 | In Progress|  |
 | 68. Function-on-Function & Scalar-on-Function Regression | v11.0 | 0/TBD | Not started | - |
 | 69. Fréchet Regression & Density FDA | v11.0 | 0/TBD | Not started | - |
 | 70. Multi-Domain Data, FAMM & Advanced Clustering | v11.0 | 0/TBD | Not started | - |
