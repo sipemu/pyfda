@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional PCA: mean plus modes of variation">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Functional PCA: Mean + Modes of Variation"
+     aria-labelledby="fpca-title fpca-desc">
+  <title id="fpca-title">Functional PCA: Mean + Modes of Variation</title>
+  <desc id="fpca-desc">Shows how fpca() decomposes a curve sample into a mean function μ̂(t) plus orthogonal eigenfunctions φₖ via the Karhunen–Loève expansion, with Panel 3 depicting mode-of-variation envelopes (μ ± 2√λₖ · φₖ) and a score scatter plot for the first two PCs.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

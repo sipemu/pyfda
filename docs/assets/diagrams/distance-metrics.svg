@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Distance metrics: curve pairs to a distance matrix">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Distance Metrics: Curves to a Distance Matrix"
+     aria-labelledby="distance-metrics-title distance-metrics-desc">
+  <title id="distance-metrics-title">Distance Metrics: Curves to a Distance Matrix</title>
+  <desc id="distance-metrics-desc">Illustrates how lp_self_1d(), dtw_self_1d(), and hausdorff_self_1d() convert a curve sample into a symmetric pairwise distance matrix, with different metrics inducing different geometries on the same data — the green heatmap in Panel 3 shows the resulting (n×n) distance structure.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

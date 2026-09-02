@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Elastic FPCA: separating amplitude and phase variation">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Elastic FPCA: Splitting Amplitude from Phase"
+     aria-labelledby="elastic-fpca-title elastic-fpca-desc">
+  <title id="elastic-fpca-title">Elastic FPCA: Splitting Amplitude from Phase</title>
+  <desc id="elastic-fpca-desc">Illustrates how vert_fpca(), horiz_fpca(), and joint_fpca() use the square-root-slope framework to separately extract amplitude modes (vertical shape variation) and phase modes (time-warp variation) from curves whose peaks are shifted in time.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
