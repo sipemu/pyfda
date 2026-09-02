@@ -102,3 +102,83 @@ def test_ftsm_ncomp_zero_raises() -> None:
 
     with pytest.raises(ValueError):
         fts.ftsm(_data, _argvals, ncomp=0)
+
+
+# ---------------------------------------------------------------------------
+# Plan 67-02: forecasting family tests
+# ---------------------------------------------------------------------------
+
+def test_ftsm_forecast_shapes() -> None:
+    """ftsm_forecast returns {forecast (h, M), h} with correct shapes."""
+    import fdars.fts as fts
+
+    # h=1 default
+    r1 = fts.ftsm_forecast(_data, _argvals, h=1, ncomp=3)
+    assert set(r1.keys()) == {"forecast", "h"}
+    assert r1["forecast"].shape == (1, M), f"forecast shape {r1['forecast'].shape} != (1, {M})"
+    assert r1["h"] == 1
+
+    # h=3
+    r3 = fts.ftsm_forecast(_data, _argvals, h=3, ncomp=3)
+    assert r3["forecast"].shape == (3, M), f"forecast shape {r3['forecast'].shape} != (3, {M})"
+    assert r3["h"] == 3
+
+
+def test_ftsm_forecast_multistep_shapes() -> None:
+    """ftsm_forecast_multistep returns {forecast (h, M), h} with correct shapes."""
+    import fdars.fts as fts
+
+    # h=1
+    rm1 = fts.ftsm_forecast_multistep(_data, _argvals, h=1, ncomp=3)
+    assert set(rm1.keys()) == {"forecast", "h"}
+    assert rm1["forecast"].shape == (1, M), f"forecast shape {rm1['forecast'].shape} != (1, {M})"
+    assert rm1["h"] == 1
+
+    # h=3
+    rm3 = fts.ftsm_forecast_multistep(_data, _argvals, h=3, ncomp=3)
+    assert rm3["forecast"].shape == (3, M), f"forecast shape {rm3['forecast'].shape} != (3, {M})"
+    assert rm3["h"] == 3
+
+
+def test_ftsm_forecast_h1_identity() -> None:
+    """ftsm_forecast and ftsm_forecast_multistep produce bit-identical output at h=1."""
+    import fdars.fts as fts
+
+    r1 = fts.ftsm_forecast(_data, _argvals, h=1, ncomp=3)
+    rm1 = fts.ftsm_forecast_multistep(_data, _argvals, h=1, ncomp=3)
+    np.testing.assert_array_equal(r1["forecast"], rm1["forecast"])
+
+
+def test_ftsm_update_extends_scores() -> None:
+    """ftsm_update with one new curve extends scores by 1 row."""
+    import fdars.fts as fts
+
+    # Build a new curve: last row of data scaled slightly
+    new_curve = _data[-1:] * 1.01  # shape (1, M)
+    assert new_curve.shape == (1, M)
+
+    upd = fts.ftsm_update(_data, new_curve, _argvals, ncomp=3)
+
+    # Must have the same 7 keys as ftsm
+    assert set(upd.keys()) == {"mean", "rotation", "scores", "fitted", "weights", "ncomp", "ar_models"}
+
+    # scores must have N+1 rows
+    assert upd["scores"].shape[0] == N + 1, (
+        f"scores.shape[0] = {upd['scores'].shape[0]} != {N + 1}"
+    )
+    assert upd["scores"].shape[1] == 3
+
+
+def test_fplsr_shapes() -> None:
+    """fplsr returns {forecast (1, M), fitted (N-1, M), ncomp} on the non-square fixture."""
+    import fdars.fts as fts
+
+    # N=40 >= 3, satisfies fplsr constraint
+    r = fts.fplsr(_data, _argvals, ncomp=3)
+
+    assert set(r.keys()) == {"forecast", "fitted", "ncomp"}
+    assert r["forecast"].shape == (1, M), f"forecast shape {r['forecast'].shape} != (1, {M})"
+    assert r["fitted"].shape == (N - 1, M), (
+        f"fitted shape {r['fitted'].shape} != ({N - 1}, {M})"
+    )
+    assert isinstance(r["ncomp"], int)

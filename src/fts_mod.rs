@@ -218,6 +218,49 @@ pub fn ftsm_update<'py>(
     ftsm_result_to_dict(py, &result)
 }
 
+/// Functional Partial Least Squares Regression (fPLSR) one-step-ahead forecast.
+///
+/// Fits a PLS model on lag-1 pairs from the time-ordered functional data and
+/// produces a one-step-ahead forecast plus the in-sample lag-1 fitted curves.
+/// Requires n_obs >= 3 (needs at least 2 training pairs + 1 forecast origin).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Time-ordered functional data, shape (n_obs, n_points). n_obs >= 3.
+/// argvals : numpy.ndarray
+///     Evaluation grid, length n_points.
+/// ncomp : int, optional
+///     Number of PLS components (default 3). Clamped to min(ncomp, n_obs-1, n_points).
+///
+/// Returns
+/// -------
+/// dict
+///     forecast (1, n_points), fitted (n_obs-1, n_points), ncomp (int).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n_obs < 3, ncomp < 1, or argvals length mismatch.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, ncomp=3))]
+pub fn fplsr<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    ncomp: usize,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = to_pyresult(fdars_core::fts::fplsr(&mat, ncomp, &av))?;
+
+    let dict = PyDict::new(py);
+    dict.set_item("forecast", fdmatrix_to_numpy2d(py, &result.forecast))?;
+    dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
+    dict.set_item("ncomp", result.ncomp)?;
+    Ok(dict)
+}
+
 // ---------------------------------------------------------------------------
 // Module registration
 // ---------------------------------------------------------------------------
@@ -227,8 +270,9 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ftsm_forecast, m)?)?;
     m.add_function(wrap_pyfunction!(ftsm_forecast_multistep, m)?)?;
     m.add_function(wrap_pyfunction!(ftsm_update, m)?)?;
+    m.add_function(wrap_pyfunction!(fplsr, m)?)?;
     // Plans 67-03/04 will append remaining wrap_pyfunction! lines here:
-    //   fplsr, spectral_density, dpca, dpca_reconstruct,
+    //   spectral_density, dpca, dpca_reconstruct,
     //   functional_acf, functional_pacf, functional_difference,
     //   stationarity_test, long_run_covariance
     Ok(())
