@@ -24,6 +24,18 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
+## Current Milestone: v11.0 fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
+
+**Goal:** Bump `fdars-core` 0.23.0 → 0.33.0, expose the new upstream surface through PyO3 bindings and the Python API, extend the AI advisor where relevant (grounding invariant preserved), and document everything to the project's method-accurate standard (hand-authored inline SVG diagrams + runnable offline worked examples). Same shape as v4.0/v5.0/v6.0.
+
+**Target features:**
+- **Crate bump `fdars-core 0.23.0 → 0.33.0`** as an isolated regression gate on the ~772-test baseline; keep `parallel`, do NOT enable `linalg` (research still notes MSRV/linalg status at 0.33); rebuild via maturin.
+- **New bindings** — expose the capabilities added across 0.24–0.33 through PyO3 + the Python API, grouped by capability family (exact surface confirmed during research); layout-correct column-major round-trips, `Result`/dict conversions, `#[non_exhaustive]` fallback arms.
+- **Advisor extension (where relevant)** — grounded diagnostics for new aspects; grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync held as hard constraints (single atomic commits, as v4.0 Phase 28 / v5.0 Phase 34 / v6.0 Phase 40).
+- **Docs** — new dedicated pages + method-accurate hand-authored inline SVGs + runnable offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green; blocking human diagram review before close.
+
+**Key context:** Large jump (10 minors) — unlike the prior additive-only waves (v4/v5/v6 each moved 3 minors), 0.24→0.33 may include **breaking changes**; research must map the full changelog, flag any breaking signature changes to existing bindings, and confirm a clean bump path. Crosses binding + advisor + docs code (`Cargo.toml`, `src/*_mod.rs`, `src/lib.rs`, `python/fdars/`, `python/fdars/advisor`, `python/fdars/mcp`, `docs/`). Genuine unknowns → research warranted: exact 0.24–0.33 changelog + new function signatures + result-struct field names, any breaking changes to existing bindings, MSRV/linalg status at 0.33, advisor scope per new capability, worked-example datasets. Package currently `0.9.0`; a code milestone bumps it (semver `vX.Y.Z` tag triggers PyPI publish) — decide the exact bump (likely `0.10.0`) at close. Docs build is ~19–25 min (executed fences run real compute) — keep fence data small. Large scope — the roadmap phases it (bump → binding groups ∥ → advisor → docs), same as v4.0/v5.0/v6.0.
+
 ## Last Shipped Milestone: v10.0 Diagram Quality & Accessibility Pass (shipped 2026-09-02)
 
 _All 16 requirements validated; 6 phases (60–65), 8 plans; whole-site `mkdocs build --strict` green offline (~1267s); SVGO idempotence green across all 159 SVGs; blocking human diagram review APPROVED. Docs-only — no crate/binding/advisor/package changes. Full detail: `.planning/milestones/v10.0-ROADMAP.md`. Next milestone: TBD via `/gsd-new-milestone`._
@@ -165,9 +177,14 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- No active milestone — v10.0 shipped 2026-09-02. Next milestone TBD via /gsd-new-milestone. -->
+<!-- v11.0 — fdars-core 0.33 Upgrade. Requirements scoped in REQUIREMENTS.md; refined by the roadmapper. -->
 
-_No active milestone. Define the next one with `/gsd-new-milestone`._
+**v11.0 — fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs (in progress):**
+
+- [ ] Crate bump `fdars-core 0.23.0 → 0.33.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate; any breaking changes to existing bindings absorbed
+- [ ] New PyO3 bindings + Python API for the capabilities added across 0.24–0.33 (grouped by capability family; exact surface derived from research)
+- [ ] Advisor extension (where relevant) — grounded diagnostics for new aspects; grounding invariant + MCP guard-sync preserved
+- [ ] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green; blocking human diagram review
 
 **v10.0 — Diagram Quality & Accessibility Pass (Phases 60–65, shipped 2026-09-02):**
 
@@ -286,4 +303,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-02 after v10.0 milestone (Diagram Quality & Accessibility Pass) — SHIPPED. All 16 requirements validated; 6 phases (60–65), 8 plans; 90 concept diagrams corrected (universal long-form a11y + 5 Major geometry/method-accuracy fixes) + 3 new sklearn diagrams + thumb/card sync + STYLE_SPEC refresh; SVGO idempotence green across 159 SVGs; whole-site `mkdocs build --strict` green offline; blocking human diagram review approved. Docs-only — no crate/binding/advisor/package changes. v10.0 requirements moved to Validated; next milestone TBD via /gsd-new-milestone.*
+*Last updated: 2026-09-02 — started milestone v11.0 (fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs). Bump 0.23.0 → 0.33.0 (parallel-only, no linalg), expose the new upstream surface via PyO3 bindings + Python API, extend the advisor where relevant (grounding invariant preserved), document to the method-accurate standard. Same shape as v4.0/v5.0/v6.0; 10-minor jump may carry breaking changes (research to confirm). Phases continue from Phase 66. Next: research → requirements → roadmap.*

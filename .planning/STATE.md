@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v10.0
-milestone_name: Diagram Quality & Accessibility Pass
-status: Awaiting next milestone
-stopped_at: Phase 65 complete — all phases complete
-last_updated: "2026-09-02T12:18:13.859Z"
+milestone: v11.0
+milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
+status: planning
+last_updated: "2026-09-02T12:44:04.265Z"
 last_activity: 2026-09-02
-last_activity_desc: Milestone v10.0 completed and archived
-state_head: 3c269084fb4237fac6bdcf49c329d3fa311bd1d5
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
-current_phase: 65
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 
 ## Current Position
 
-Phase: Milestone v10.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-02 — Milestone v10.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-09-02 — Milestone v11.0 started
 
 ## Performance Metrics
 
