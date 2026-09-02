@@ -21,8 +21,8 @@ Requirements for this milestone. Each maps to a roadmap phase (Phases 66+, conti
 
 ### Regression — Function-on-Function & Scalar-on-Function (`fdars.regression`, `fdars.scalar_on_function`)
 
-- [ ] **REG-01**: Function-on-function regression bound — `fof_regression` (+ `predict`) extending `fdars.regression`, returning a `beta`-surface/result PyDict; transposition- and `argvals`-guarded
-- [ ] **REG-02**: Function-on-function random-effects regression bound — `fof_re_regression` (+ `predict_fof_re`) with subject-id validation
+- [x] **REG-01**: Function-on-function regression bound — `fof_regression` (+ `predict`) extending `fdars.regression`, returning a `beta`-surface/result PyDict; transposition- and `argvals`-guarded
+- [x] **REG-02**: Function-on-function random-effects regression bound — `fof_re_regression` (+ `predict_fof_re`) with subject-id validation
 - [ ] **REG-03**: Scalar-on-function extensions bound — additive/generalized models (`fam`, `fregre_gkam`, `fregre_gsam`) and variable/model selection (`variable_selection`, `model_selection_ncomp`) extending `fdars.scalar_on_function`
 
 ### Fréchet Regression & Density FDA (`fdars.frechet`, `fdars.density_fda`)
@@ -94,8 +94,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | FTS-01 | Phase 67 | Complete |
 | FTS-02 | Phase 67 | Complete |
 | FTS-03 | Phase 67 | Complete |
-| REG-01 | Phase 68 | Pending |
-| REG-02 | Phase 68 | Pending |
+| REG-01 | Phase 68 | Complete |
+| REG-02 | Phase 68 | Complete |
 | REG-03 | Phase 68 | Pending |
 | FRE-01 | Phase 69 | Pending |
 | FRE-02 | Phase 69 | Pending |
