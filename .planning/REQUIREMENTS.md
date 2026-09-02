@@ -88,36 +88,36 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEP-01 | TBD | Pending |
-| DEP-02 | TBD | Pending |
-| DEP-03 | TBD | Pending |
-| FTS-01 | TBD | Pending |
-| FTS-02 | TBD | Pending |
-| FTS-03 | TBD | Pending |
-| REG-01 | TBD | Pending |
-| REG-02 | TBD | Pending |
-| REG-03 | TBD | Pending |
-| FRE-01 | TBD | Pending |
-| FRE-02 | TBD | Pending |
-| FRE-03 | TBD | Pending |
-| MULTI-01 | TBD | Pending |
-| MULTI-02 | TBD | Pending |
-| MULTI-03 | TBD | Pending |
-| MULTI-04 | TBD | Pending |
-| SHAPE-01 | TBD | Pending |
-| SHAPE-02 | TBD | Pending |
-| ADV-01 | TBD | Pending |
-| ADV-02 | TBD | Pending |
-| DOCS-01 | TBD | Pending |
-| DOCS-02 | TBD | Pending |
-| DOCS-03 | TBD | Pending |
-| REL-01 | TBD | Pending |
+| DEP-01 | Phase 66 | Pending |
+| DEP-02 | Phase 66 | Pending |
+| DEP-03 | Phase 66 | Pending |
+| FTS-01 | Phase 67 | Pending |
+| FTS-02 | Phase 67 | Pending |
+| FTS-03 | Phase 67 | Pending |
+| REG-01 | Phase 68 | Pending |
+| REG-02 | Phase 68 | Pending |
+| REG-03 | Phase 68 | Pending |
+| FRE-01 | Phase 69 | Pending |
+| FRE-02 | Phase 69 | Pending |
+| FRE-03 | Phase 69 | Pending |
+| MULTI-01 | Phase 70 | Pending |
+| MULTI-02 | Phase 70 | Pending |
+| MULTI-03 | Phase 70 | Pending |
+| MULTI-04 | Phase 70 | Pending |
+| SHAPE-01 | Phase 71 | Pending |
+| SHAPE-02 | Phase 71 | Pending |
+| ADV-01 | Phase 72 | Pending |
+| ADV-02 | Phase 72 | Pending |
+| DOCS-01 | Phase 73 | Pending |
+| DOCS-02 | Phase 73 | Pending |
+| DOCS-03 | Phase 73 | Pending |
+| REL-01 | Phase 73 | Pending |
 
 **Coverage:**
 - v11.0 requirements: 24 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 24 ⚠️
+- Mapped to phases: 24 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-09-02*
-*Last updated: 2026-09-02 after initial definition*
+*Last updated: 2026-09-02 — traceability populated by roadmap (Phases 66–73; all 24 mapped, 0 unmapped)*

@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 status: planning
-last_updated: "2026-09-02T12:44:04.265Z"
+last_updated: "2026-09-02T13:00:00.000Z"
 last_activity: 2026-09-02
 progress:
-  total_phases: 0
+  total_phases: 8
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,20 +20,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-02)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 60 — Diagram Quality Audit
+**Current focus:** Phase 66 — Isolated Crate Bump + Regression Gate
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (roadmap complete; ready to plan Phase 66)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-09-02 — Milestone v11.0 started
+Status: Roadmap created — 8 phases (66–73), 24/24 requirements mapped
+Last activity: 2026-09-02 — Milestone v11.0 roadmap created
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 7 (this milestone); prior: 17 (v9.0), 16 (v8.0), 9 (v7.0), 11 (v6.0)
+- Total plans completed: 0 (this milestone); prior: 7 (v10.0), 17 (v9.0), 16 (v8.0), 11 (v6.0)
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -41,12 +41,14 @@ Last activity: 2026-09-02 — Milestone v11.0 started
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 60 | 2 | - | - |
-| 61 | 1 | - | - |
-| 62 | 1 | - | - |
-| 63 | 1 | - | - |
-| 64 | 1 | - | - |
-| 65 | 1 | - | - |
+| 66 | TBD | - | - |
+| 67 | TBD | - | - |
+| 68 | TBD | - | - |
+| 69 | TBD | - | - |
+| 70 | TBD | - | - |
+| 71 | TBD | - | - |
+| 72 | TBD | - | - |
+| 73 | TBD | - | - |
 
 **Recent Trend:**
 
@@ -58,8 +60,7 @@ Last activity: 2026-09-02 — Milestone v11.0 started
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
-| Phase 60 P01 | -5973 | 3 tasks | 1 files |
-| Phase 60-diagram-quality-audit P02 | 25 | 3 tasks | 1 files |
+| — | - | - | - |
 
 ## Accumulated Context
 
@@ -68,22 +69,16 @@ Last activity: 2026-09-02 — Milestone v11.0 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v10.0 roadmap]: Phase numbering CONTINUES from v9.0 (starts at Phase 60; v9.0 ended at Phase 59) — no reset
-- [v10.0 roadmap]: Audit-first, 6-phase structure mirroring v7.0's docs-quality shape scaled to this scope — Phase 60 scored-inventory audit of all 156 SVGs GATES the milestone (discovers DEFECT + COVER + SYNC scope); corrections batched by section across Phases 61/62/63 (learn/represent/align · analyze/monitoring/advisor · regression/inference/examples), NOT one phase per diagram
-- [v10.0 roadmap]: Accessibility (A11Y-01/02) and STYLE_SPEC conformance (SPEC-01) FOLDED INTO the section-correction phases (61/62/63) — they touch the same SVG files as the defect fixes, so batching them is cheaper than a separate cross-cutting pass
-- [v10.0 roadmap]: DEFECT-01/02/03 + A11Y-01/02 + SPEC-01 are cross-cutting requirements delivered incrementally across Phases 61–63; each is fully satisfied only when all three batches complete (verified at Phase 63 + the Phase 65 whole-site gate)
-- [v10.0 roadmap]: SYNC (cards/thumbs) + COVER (new diagrams) + A11Y-03 (thumb decorative semantics) folded into Phase 64 — thumbs must mirror their CORRECTED concept diagram, so SYNC depends on the concept-diagram corrections (61–63) being done first
-- [v10.0 roadmap]: GATE-01 (SVGO/determinism) + GATE-02 (whole-site --strict) + GATE-03 (blocking human diagram review) + SPEC-02 (STYLE_SPEC refresh) fold into the FINAL Phase 65, exactly as every prior docs milestone closed
-- [standing v6.0]: Docs phases run SEQUENTIALLY on `main`, NOT in worktrees — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path (`use_worktrees: false` in config)
+- [v11.0 roadmap]: Phase numbering CONTINUES from v10.0 (starts at Phase 66; v10.0 ended at Phase 65) — no reset
+- [v11.0 roadmap]: Isolated-bump → parallel-binding-groups → advisor → docs shape, mirroring v4.0/v5.0/v6.0 scaled to 5 binding families; 8 phases (66–73), 24 requirements, fine granularity
+- [v11.0 roadmap]: Phase 66 is an ISOLATED crate bump + regression gate (DEP-01/02/03) — NO new bindings; gates on the full ~772-test suite for 10-minor numeric-drift detection; only Cargo.toml + Cargo.lock change
+- [v11.0 roadmap]: Five binding families in separate phases — 67 fts, 68 fof/sof regression, 69 frechet+density, 70 multi-domain/FAMM/clustering, 71 shapelet+GAK; each maps its requirement family 1:1
+- [v11.0 roadmap]: Phase 70 (multi-domain/FAMM/SPM) is the ONLY group touching `spm_mod.rs` and has an internal sequential dependency (PyMultiFunData builder MUST precede SPM multivariate extensions) — never share a worktree with another binding phase
+- [v11.0 roadmap]: Phase 69 sequences the `extract_ragged_vecs` `convert.rs` refactor (FRE-03) FIRST within the phase, as a prerequisite for the density/Fréchet ragged inputs
+- [v11.0 roadmap]: Phases 67/68/69/71 are worktree-parallelizable after 66 lands (disjoint module sets); annotated per-phase in ROADMAP so the executor knows
+- [v11.0 roadmap]: Advisor (Phase 72, ADV-01/02) comes AFTER all binding phases — needs the new functions callable; grounding invariant + atomic MCP guard-sync are hard constraints; `frechet` stays diagnostics-only (not `_RUNNABLE_METHODS`)
+- [v11.0 roadmap]: Docs (Phase 73, DOCS-01/02/03) is LAST and SEQUENTIAL on `main` (`use_worktrees: false`) — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path; REL-01 (pkg 0.9.0 → 0.10.0 + tag v0.10.0) folds into this close phase
 - [standing v6.0]: Blocking human diagram method-accuracy review before milestone close (the hypograph/epigraph lesson)
-- [Phase 60]: All 90 concept diagrams now STYLE_SPEC-conformant — 4 formerly non-720 diagrams migrated in prior phases; STYLE_SPEC axis clean in v10.0
-- [Phase 60]: 5 Major design/geometry defects found: elastic-clustering (non-standard style), concurrent-regression (inter-panel overlap), 3 ex-canadian/seasonal examples (viewBox text clipping)
-- [Phase 60]: Universal Minor A11Y: all 90 aria-labels are paraphrases (A11Y-01) + no long-form title/desc on any diagram (A11Y-02) — systematic gap for Phases 61–63
-- [Phase 60]: sklearn-pipeline-dataflow.svg assigned to Phase 62 bucket (closest surface-family fit; predates CONTEXT bucket list)
-- [Phase 60]: [Phase 60-02]: Thumbs/cards are a distinct canvas class (320x180) — STYLE_SPEC axis N/A; only role/aria, geometry, and Sync assessed
-- [Phase 60]: [Phase 60-02]: elastic-clustering.svg thumb is Major sync drift (shows alignment curves; concept is flow-box chart) — both need replacement in Phases 62/64
-- [Phase 60]: [Phase 60-02]: A11Y-03: all 58 thumbs carry role='img' but gallery <img> uses alt='' — batch fix (remove role=img from thumbs) in Phase 64
-- [Phase 60]: [Phase 60-02]: COVER-01 gap: only sklearn/transformers + regressors-classifiers + clusterers-outliers sub-pages warrant new diagrams; all other sections fully covered
 
 ### Pending Todos
 
@@ -91,12 +86,14 @@ None yet.
 
 ### Blockers/Concerns
 
-- [milestone-wide]: Docs-only — NO `fdars-core` bump, NO bindings, NO advisor/MCP changes, NO package version bump (v7.0 precedent). Purely SVG/STYLE_SPEC edits over the current shipped tree.
-- [milestone-wide]: Diagrams stay hand-authored inline SVG (locked constraint — no programmatic generation)
-- [milestone-wide]: Scope locked to consistency + defect-fix depth ONLY — NO palette/typography change (deferred DIAG-FUT-03); dark-mode OUT of scope (deferred DIAG-FUT-01b)
-- [milestone-wide]: Audit covers all 156 SVGs — 90 concept (`docs/assets/diagrams/`) + 8 cards (`docs/assets/cards/`) + 58 thumbs (`docs/assets/thumb/`)
-- [STYLE_SPEC staleness]: STYLE_SPEC's "34 of 43" accessibility note is stale against the 90 concept diagrams that exist today — refresh at Phase 65 (SPEC-02)
-- [build time]: whole-site `mkdocs build --strict` is ~19–25 min with executed fences — but this milestone changes STATIC SVGs, not fences, so most work needs no full rebuild; the `--strict` gate runs only at the Phase-65 close. Per-diagram verification uses SVGO idempotence + rendered PNG checks (see MEMORY: docs-diagram-verify-workflow — venv+PYTHONPATH+DOCS_FAST, rsvg-convert for visual SVG checks).
+- [milestone-wide]: This is a CODE milestone — `fdars-core` bump + new PyO3 bindings + advisor + docs + package bump (v4/v5/v6 precedent), NOT docs-only. Crosses `Cargo.toml`, `src/*_mod.rs`, `src/lib.rs`, `python/fdars/`, `advisor`, `mcp`, `docs/`.
+- [numeric drift]: 10-minor jump (0.23→0.33, vs prior 3-minor waves) triples silent-drift risk — Phase 66 isolates the bump and gates on the full ~772-test suite before any binding work; `cargo build` alone is insufficient.
+- [research gap]: 0.31/0.32 changelog absent from published CHANGELOG + some 0.33 config-struct fields returned docs.rs 404 — confirm result-struct/config field names against 0.33 source per binding group before writing PyDict converters (research flagged this).
+- [transposition]: every new 2D binding needs a non-square (`n_obs ≠ n_points`) fixture — square fixtures hide row-major↔column-major bugs; route all 2D args through `numpy2d_to_fdmatrix`.
+- [enum arms]: new `#[non_exhaustive]` enums (`QualityMeasure`, `ShapeletClassifier`, Fréchet metric-space) need an `Err`-returning wildcard arm from day one that raises `ValueError` listing valid variants.
+- [grounding invariant]: advisor diagnostics must be fdars-computed native `float`/`int` only (no Python-derived / numpy scalars into `json.dumps`); atomic guard-sync commit; `test_guard_sync_version_independent.py` must pass; MCP compute path stays provably LLM-free.
+- [linalg]: stay `parallel`-only (no `linalg`) — user decision; no v11.0 capability needs it (LINALG-01 deferred to Future).
+- [build time]: whole-site `mkdocs build --strict` is ~19–25 min with executed fences (5 new submodules add ~10 min) — keep fence datasets small; `--strict` gate runs only at the Phase-73 close.
 
 ## Deferred Items
 
@@ -116,9 +113,9 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-02T08:22:28.123Z
-Stopped at: Phase 65 complete — all phases complete
+Stopped at: v11.0 roadmap created — 8 phases (66–73), 24/24 requirements mapped
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Plan Phase 66 (isolated crate bump) with /gsd-plan-phase 66
