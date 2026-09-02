@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Scalar-on-function regression: predictor curves map to a scalar response">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Scalar-on-Function Regression" aria-labelledby="scalar-on-function-title scalar-on-function-desc">
+  <title id="scalar-on-function-title">Scalar-on-Function Regression</title>
+  <desc id="scalar-on-function-desc">Scalar-on-function regression maps functional predictors X(t) to a scalar response ŷ using FPC, PLS, or kernel regression, with the coefficient function β̂(t) revealing which time regions drive the response.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

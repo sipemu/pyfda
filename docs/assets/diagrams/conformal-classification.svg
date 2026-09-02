@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Conformal classification: prediction sets of labels with a coverage guarantee">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Conformal Classification: Prediction Sets" aria-labelledby="conformal-classification-title conformal-classification-desc">
+  <title id="conformal-classification-title">Conformal Classification: Prediction Sets</title>
+  <desc id="conformal-classification-desc">Conformal classification returns a prediction set of labels (e.g. {A} or {A, B}) calibrated to contain the true class with coverage guarantee; ambiguous inputs get larger sets reflecting model uncertainty.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

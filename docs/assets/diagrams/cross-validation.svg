@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Cross-validation: split data into K folds, score out of fold, and pick the best number of components">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Cross-Validation for Functional Data" aria-labelledby="cross-validation-title cross-validation-desc">
+  <title id="cross-validation-title">Cross-Validation for Functional Data</title>
+  <desc id="cross-validation-desc">K-fold cross-validation scores out-of-fold predictions across candidate numbers of components and selects the best k* at the CV error minimum, avoiding over-fitting and under-fitting.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

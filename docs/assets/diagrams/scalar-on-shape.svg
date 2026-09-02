@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Scalar-on-shape regression: shape features drive a scalar response via a shape distance">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Scalar-on-Shape Regression" aria-labelledby="scalar-on-shape-title scalar-on-shape-desc">
+  <title id="scalar-on-shape-title">Scalar-on-Shape Regression</title>
+  <desc id="scalar-on-shape-desc">Scalar-on-shape regression uses elastic shape distances between curves as predictors, enabling regression on curve shape independently of amplitude and phase variation.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
