@@ -221,7 +221,8 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
   3. Every diagram in this batch conforms to `STYLE_SPEC.md` and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
   4. Every correction in this batch preserves method-accuracy, and each section passes a built-site review before the batch is done.
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 62-01-PLAN.md — A11Y (title/desc/aria-labelledby) on all 26 analyze/monitoring/advisor/sklearn diagrams + elastic-clustering redraw + outlier taxonomy hold + 3 Minor geometry fixes
 **UI hint**: yes
 
 ### Phase 63: SVG Corrections — regression / inference / examples
