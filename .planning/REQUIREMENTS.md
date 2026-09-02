@@ -22,16 +22,16 @@ Docs-only diagram quality pass over all 156 hand-authored inline SVGs (90 concep
 
 - [x] **A11Y-01**: Every concept diagram has `role="img"` and an `aria-label` matching its title text (closes the basic gaps left stale in STYLE_SPEC)
 - [x] **A11Y-02**: Complex/multi-panel diagrams carry a long-form `<title>` + `<desc>` wired via `aria-labelledby` so screen readers convey what the diagram depicts
-- [ ] **A11Y-03**: Decorative gallery thumbnails use correct non-announcing semantics (empty `alt` / `aria-hidden`) consistently
+- [x] **A11Y-03**: Decorative gallery thumbnails use correct non-announcing semantics (empty `alt` / `aria-hidden`) consistently
 
 ### Cards / Thumbs Sync (DIAG-FUT-02)
 
-- [ ] **SYNC-01**: All 58 gallery thumbnails reflect their current concept diagrams — redrawn/regenerated where they have drifted
-- [ ] **SYNC-02**: All 8 section cards are reviewed and brought to the same quality and consistency bar as the concept diagrams
+- [x] **SYNC-01**: All 58 gallery thumbnails reflect their current concept diagrams — redrawn/regenerated where they have drifted
+- [x] **SYNC-02**: All 8 section cards are reviewed and brought to the same quality and consistency bar as the concept diagrams
 
 ### New Coverage
 
-- [ ] **COVER-01**: Diagrams are added for the audit-identified pages/methods that lack one, each method-accurate and STYLE_SPEC-conformant
+- [x] **COVER-01**: Diagrams are added for the audit-identified pages/methods that lack one, each method-accurate and STYLE_SPEC-conformant
 
 ### STYLE_SPEC Conformance
 
@@ -79,10 +79,10 @@ Which phases cover which requirements. Populated during roadmap creation.
 | DEFECT-03 | Phases 61, 62, 63 | Complete |
 | A11Y-01 | Phases 61, 62, 63 | Complete |
 | A11Y-02 | Phases 61, 62, 63 | Complete |
-| A11Y-03 | Phase 64 | Pending |
-| SYNC-01 | Phase 64 | Pending |
-| SYNC-02 | Phase 64 | Pending |
-| COVER-01 | Phase 64 | Pending |
+| A11Y-03 | Phase 64 | Complete |
+| SYNC-01 | Phase 64 | Complete |
+| SYNC-02 | Phase 64 | Complete |
+| COVER-01 | Phase 64 | Complete |
 | SPEC-01 | Phases 61, 62, 63 | Complete |
 | SPEC-02 | Phase 65 | Pending |
 | GATE-01 | Phase 65 | Pending |
