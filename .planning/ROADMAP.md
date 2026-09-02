@@ -175,7 +175,7 @@ Full detail: `.planning/milestones/v10.0-ROADMAP.md`
 
 - [x] **Phase 66: Isolated Crate Bump + Regression Gate** — Bump 0.23.0 → 0.33.0, gate on the full ~772-test suite, record the 0.24–0.33 changelog/match-arm audit (completed 2026-09-02)
 - [x] **Phase 67: Functional Time Series (`fdars.fts`)** — New `fdars.fts` submodule: FTSM fit/forecast, ACF/PACF/stationarity/long-run-covariance, fPLSR/DPCA (completed 2026-09-02)
-- [ ] **Phase 68: Function-on-Function & Scalar-on-Function Regression** — `fof_regression` + random effects extending `fdars.regression`; additive/generalized SoF models + variable/model selection extending `fdars.scalar_on_function`
+- [x] **Phase 68: Function-on-Function & Scalar-on-Function Regression** — `fof_regression` + random effects extending `fdars.regression`; additive/generalized SoF models + variable/model selection extending `fdars.scalar_on_function` (completed 2026-09-02)
 - [ ] **Phase 69: Fréchet Regression & Density FDA** — `convert.rs` ragged-list refactor, then new `fdars.frechet` and `fdars.density_fda` submodules
 - [ ] **Phase 70: Multi-Domain Data, FAMM & Advanced Clustering** — `PyMultiFunData` handle → mixed-model FAMM → multivariate SPM (sequential) + advanced clustering
 - [ ] **Phase 71: Shapelets & GAK Metric** — New `fdars.shapelet` submodule (`PyShapeletFit` + 2 enums) + Global-Alignment-Kernel metric extending `fdars.metric`
@@ -323,7 +323,7 @@ Phases execute in numeric order: 66 → 67 → 68 → 69 → 70 → 71 → 72 �
 |-------|-----------|----------------|--------|-----------|
 | 66. Isolated Crate Bump + Regression Gate | v11.0 | 1/1 | Complete    | 2026-09-02 |
 | 67. Functional Time Series (`fdars.fts`) | v11.0 | 5/5 | Complete    | 2026-09-02 |
-| 68. Function-on-Function & Scalar-on-Function Regression | v11.0 | 3/3 | In Progress|  |
+| 68. Function-on-Function & Scalar-on-Function Regression | v11.0 | 3/3 | Complete    | 2026-09-02 |
 | 69. Fréchet Regression & Density FDA | v11.0 | 0/TBD | Not started | - |
 | 70. Multi-Domain Data, FAMM & Advanced Clustering | v11.0 | 0/TBD | Not started | - |
 | 71. Shapelets & GAK Metric | v11.0 | 0/TBD | Not started | - |
