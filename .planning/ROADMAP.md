@@ -237,7 +237,8 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
   3. Every diagram in this batch conforms to `STYLE_SPEC.md` and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
   4. Across Phases 61–63, every flagged concept diagram on the Phase-60 fix list has been corrected and no diagram misdepicts its method — the full concept-diagram set (all 90) now meets the DEFECT-01/02/03, A11Y-01/02, and SPEC-01 bar.
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 63-01-PLAN.md — Correct all 40 regression/inference/examples concept SVGs (4 Major layout fixes + universal A11Y title/desc/aria-labelledby + Minor geometry), render-verified via rsvg-convert
 **UI hint**: yes
 
 ### Phase 64: Cards & Thumbnails Sync + New Coverage
