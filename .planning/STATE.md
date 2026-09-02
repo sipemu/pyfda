@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 67
-current_phase_name: Functional Time Series (`fdars.fts`)
-status: planning
-stopped_at: Phase 66 complete, ready to plan Phase 67
-last_updated: "2026-09-02T14:15:20.171Z"
+current_phase_name: Functional Time Series (fdars.fts)
+status: executing
+stopped_at: Completed 67-01-PLAN.md
+last_updated: "2026-09-02T18:30:06.589Z"
 last_activity: 2026-09-02
-last_activity_desc: Phase 66 complete, transitioned to Phase 67
-state_head: 22ba06fe773bd3cf998797facfcb3983c83c84db
+last_activity_desc: Phase 67 execution started
+state_head: 6e19fca30eaa5dbf129daaa3ed4b5b890c7cf89f
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 5
+  completed_plans: 2
   percent: 13
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-02)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 66 — Isolated Crate Bump + Regression Gate
+**Current focus:** Phase 67 — Functional Time Series (fdars.fts)
 
 ## Current Position
 
-Phase: 67 — Functional Time Series (`fdars.fts`)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-02 — Phase 66 complete, transitioned to Phase 67
+Phase: 67 (Functional Time Series (fdars.fts)) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-09-02 — Phase 67 execution started
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Last activity: 2026-09-02 — Phase 66 complete, transitioned to Phase 67
 |------|----------|-------|-------|
 | — | - | - | - |
 | Phase 66-isolated-crate-bump-regression-gate P01 | 9min | 4 tasks | 5 files |
+| Phase 67-functional-time-series-fts P01 | 3 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,7 @@ Recent decisions affecting current work:
 - [v11.0 roadmap]: Advisor (Phase 72, ADV-01/02) comes AFTER all binding phases — needs the new functions callable; grounding invariant + atomic MCP guard-sync are hard constraints; `frechet` stays diagnostics-only (not `_RUNNABLE_METHODS`)
 - [v11.0 roadmap]: Docs (Phase 73, DOCS-01/02/03) is LAST and SEQUENTIAL on `main` (`use_worktrees: false`) — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path; REL-01 (pkg 0.9.0 → 0.10.0 + tag v0.10.0) folds into this close phase
 - [standing v6.0]: Blocking human diagram method-accuracy review before milestone close (the hypograph/epigraph lesson)
+- [Phase 67-01]: argvals is required positional param in all fts bindings (not Option<...> with default_grid) — upstream validates argvals.len() == n_points — Matches fdars-core fts API contract; avoids silent wrong-grid bugs
 
 ### Pending Todos
 
@@ -118,8 +120,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-02T14:09:05.052Z
-Stopped at: Phase 66 complete, ready to plan Phase 67
+Last session: 2026-09-02T18:30:06.557Z
+Stopped at: Completed 67-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
