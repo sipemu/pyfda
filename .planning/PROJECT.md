@@ -24,20 +24,13 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v10.0 Diagram Quality & Accessibility Pass
+## Last Shipped Milestone: v10.0 Diagram Quality & Accessibility Pass (shipped 2026-09-02)
 
-**Goal:** Bring all 156 hand-authored inline SVGs to one consistently high, defect-free, accessible bar — every diagram well-made (no mismatched lines / misaligned geometry), STYLE_SPEC-conformant, accessible, and with cards/thumbs synced to their concept diagrams. Diagram-focused successor to v7.0's Documentation Quality Pass.
+_All 16 requirements validated; 6 phases (60–65), 8 plans; whole-site `mkdocs build --strict` green offline (~1267s); SVGO idempotence green across all 159 SVGs; blocking human diagram review APPROVED. Docs-only — no crate/binding/advisor/package changes. Full detail: `.planning/milestones/v10.0-ROADMAP.md`. Next milestone: TBD via `/gsd-new-milestone`._
 
-**Target features:**
-- **Design-quality defect audit + fix** — catch and correct badly-drawn diagrams (mismatched lines, misaligned geometry, layout) across all 156 SVGs. Every diagram checked. (User's core concern.)
-- **Accessibility (A11Y-01)** — long-form `<title>`/`<desc>` + `aria-labelledby` on complex diagrams; close the basic `role`/`aria-label` gaps (STYLE_SPEC's "34 of 43" note is stale against the 90 concept diagrams that exist today).
-- **Cards/thumbs sync (DIAG-FUT-02)** — 8 section cards + 58 gallery thumbnails audited and brought in line with their concept diagrams.
-- **New diagram coverage** — add method-accurate diagrams to pages/methods that still lack them (scope discovered via the audit, v7.0-style scored inventory).
-- **STYLE_SPEC conformance** — every diagram conforms to the current spec; refresh the spec's stale status/counts.
+**Goal:** Bring all hand-authored inline SVGs to one consistently high, defect-free, accessible bar — every diagram well-made (no mismatched lines / misaligned geometry), STYLE_SPEC-conformant, accessible, with cards/thumbs synced to their concept diagrams. Diagram-focused successor to v7.0's Documentation Quality Pass.
 
-**Scope decisions:** consistency + defect-fix depth (NO palette/typography change); dark-mode stays out of scope; audit covers all 156 SVGs (90 concept + 8 cards + 58 thumbs).
-
-**Key context:** Docs-only — NO `fdars-core` bump, NO bindings, NO advisor/MCP changes, NO package version bump (v7.0 precedent). Diagrams stay hand-authored inline SVG (locked constraint). Gates: SVGO idempotence + build-determinism, whole-site `mkdocs build --strict` green offline, and the standing blocking human diagram review before close. Phase numbering continues from v9.0's Phase 59 → starts at Phase 60.
+**Delivered:** a scored 156-SVG audit (`60-AUDIT.md`) gating the milestone; 90 concept diagrams corrected across three parallel worktree-isolated section batches (learn/represent/align ∥ analyze/monitoring/advisor ∥ regression/inference/examples) — universal long-form `<title>`/`<desc>`/`aria-labelledby` + title-matching `aria-label`, 5 Major geometry/method-accuracy fixes (elastic-clustering full redraw; concurrent-regression label overflow; 3 ex-canadian panel clipping; shift-registration "elastic warp" removed → rigid-only); method-accuracy win keeping the canonical Magnitude/Shape/Amplitude outlier taxonomy (audit's "→Phase?" speculation refuted against docs prose); 3 new sklearn concept diagrams (COVER-01); elastic-clustering thumbnail re-synced + 58 gallery thumbs made decorative-accessible (`aria-hidden`); STYLE_SPEC.md refreshed to the current 93-diagram reality; whole-site `--strict` + SVGO/determinism gates green; human diagram review approved.
 
 ## Last Shipped Milestone: v9.0 scikit-learn API Compatibility (shipped 2026-09-02)
 
@@ -172,16 +165,16 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- v10.0 — Diagram Quality & Accessibility Pass. REQ-IDs defined in .planning/REQUIREMENTS.md; phases in .planning/ROADMAP.md. -->
+<!-- No active milestone — v10.0 shipped 2026-09-02. Next milestone TBD via /gsd-new-milestone. -->
 
-**v10.0 — Diagram Quality & Accessibility Pass (Phases 60+, in planning):**
+_No active milestone. Define the next one with `/gsd-new-milestone`._
 
-- [ ] Design-quality defect audit + fix across all 156 SVGs (mismatched lines, misaligned geometry, layout)
-- [ ] Accessibility (A11Y-01) — long-form `<title>`/`<desc>` + `aria-labelledby`; close basic `role`/`aria-label` gaps
-- [ ] Cards/thumbs sync (DIAG-FUT-02) — 8 cards + 58 thumbs brought in line with concept diagrams
-- [ ] New diagram coverage — diagrams added to pages/methods still lacking them (audit-derived)
-- [ ] STYLE_SPEC conformance — all diagrams conform; spec status/counts refreshed
-- [ ] Whole-site `mkdocs build --strict` green offline; SVGO/determinism gate green; blocking human diagram review approved
+**v10.0 — Diagram Quality & Accessibility Pass (Phases 60–65, shipped 2026-09-02):**
+
+- [x] Diagram quality audit — scored inventory of all 156 SVGs on 4 axes (design/geometry, STYLE_SPEC, accessibility, sync) → ranked worklists + COVER/SYNC lists — Phase 60 (AUDIT-01/02)
+- [x] Concept-diagram corrections — 90 diagrams across 3 parallel section batches: universal long-form a11y + 5 Major geometry/method-accuracy fixes + STYLE_SPEC conformance — Phases 61/62/63 (DEFECT-01/02/03, A11Y-01/02, SPEC-01)
+- [x] Cards/thumbs sync + new coverage — elastic-clustering thumb re-sync, 58 thumbs `aria-hidden`, 3 new sklearn concept diagrams — Phase 64 (SYNC-01/02, A11Y-03, COVER-01)
+- [x] STYLE_SPEC refresh + gates + human review — spec refreshed to 93-diagram reality; SVGO/determinism + whole-site `--strict` green; blocking human diagram review approved — Phase 65 (SPEC-02, GATE-01/02/03)
 
 **v9.0 — scikit-learn API Compatibility (Phases 55–59, shipped 2026-09-02):**
 
@@ -271,6 +264,9 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 | Full 28-estimator `parametrize_with_checks` gate as the milestone lock; zero exemptions, non-compliant methods EXCLUDED not exempted | The milestone bar is provable sklearn compliance; an exemption would hollow out the guarantee | ✓ Good — all 28 PASS (1387 gate checks), 0 PASS-WITH-FIXES; excluded methods stay in the functional API (v9.0 Phase 58) |
 | Outlier detectors score via stored-reference `modified_band_1d(X, X_fit_)` depth | `check_methods_subset_invariance` requires `score_samples(X[mask]) == score_samples(X)[mask]`; re-fitting per call violates it | ✓ Good — all 6 detectors subset-invariant; 283/283 outlier checks pass (v9.0 Phase 58) |
 | Close v9.0 with a documented Phase-59 verification override rather than back-filling a VERIFICATION.md | Docs deliverables demonstrably shipped (live site, `--strict` green, PyPI release); a retroactive verification doc adds ceremony without new signal | — Pending — override recorded in MILESTONES.md/STATE.md; revisit if docs drift (v9.0 close) |
+| Run the three SVG-correction phases (61/62/63) in parallel via isolated git worktrees, not sequentially on main | The three section batches edit disjoint concept-SVG sets and run no doc build during correction (that's Phase 65 only), so the v6.0 "sequential-on-main" reason does not apply; parallelism cut wall-clock ~3× | ✓ Good — disjoint sets merged to main with zero conflicts; all 90 corrected concurrently (v10.0, user-approved) |
+| Consolidate the blocking human diagram review into the final gate phase (65) rather than per-correction-phase | Per-phase verifiers flag visual items for diagram work by nature; one whole-set review over the corrected site is stronger and avoids fragmenting the human gate | ✓ Good — 61/63 visual items carried forward to GATE-03; single review approved the full set (v10.0) |
+| Complete Phase 64–65 inline (orchestrator) when the account hit a session-quota limit mid-run, instead of spawning executor/verifier subagents | Remaining work was small, concrete, and fully checkable (doc edit + SVGO/build gates); the one irreducible human gate (GATE-03) was preserved | ✓ Good — gates run directly, milestone closed cleanly without waiting on quota reset (v10.0) |
 
 ## Evolution
 
@@ -290,4 +286,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-02 after starting v10.0 milestone (Diagram Quality & Accessibility Pass). Docs-only diagram-focused successor to v7.0: full defect/accessibility/coverage/conformance audit of all 156 hand-authored SVGs (90 concept + 8 cards + 58 thumbs). Scope locked: consistency + defect-fix (no palette/typography change), dark-mode out of scope, all 156 in audit. No crate bump, no bindings, no package version bump. Requirements defined in REQUIREMENTS.md; phases start at Phase 60.*
+*Last updated: 2026-09-02 after v10.0 milestone (Diagram Quality & Accessibility Pass) — SHIPPED. All 16 requirements validated; 6 phases (60–65), 8 plans; 90 concept diagrams corrected (universal long-form a11y + 5 Major geometry/method-accuracy fixes) + 3 new sklearn diagrams + thumb/card sync + STYLE_SPEC refresh; SVGO idempotence green across 159 SVGs; whole-site `mkdocs build --strict` green offline; blocking human diagram review approved. Docs-only — no crate/binding/advisor/package changes. v10.0 requirements moved to Validated; next milestone TBD via /gsd-new-milestone.*

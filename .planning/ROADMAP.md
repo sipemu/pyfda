@@ -12,7 +12,7 @@
 - ✅ **v7.0 — Documentation Quality Pass — SVG Audit, Diagram Coverage & Page Depth** — Phases 42–49 (shipped 2026-08-23)
 - ✅ **v8.0 — Advisor: New Capabilities** — Phases 50–54 (shipped 2026-08-31)
 - ✅ **v9.0 — scikit-learn API Compatibility** — Phases 55–59 (shipped 2026-09-02)
-- 🚧 **v10.0 — Diagram Quality & Accessibility Pass** — Phases 60–65 (in progress)
+- ✅ **v10.0 — Diagram Quality & Accessibility Pass** — Phases 60–65 (shipped 2026-09-02)
 
 ## Phases
 
@@ -155,146 +155,19 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
 
 </details>
 
-### 🚧 v10.0 Diagram Quality & Accessibility Pass (In Progress)
+<details>
+<summary>✅ v10.0 Diagram Quality & Accessibility Pass (Phases 60–65) — SHIPPED 2026-09-02</summary>
 
-**Milestone Goal:** Bring all 156 hand-authored inline SVGs to one consistently high, defect-free, accessible bar — every diagram well-made (no mismatched lines / misaligned geometry / layout defects), STYLE_SPEC-conformant, accessible (`role`/`aria-label` + long-form `<title>`/`<desc>`/`aria-labelledby` on complex diagrams), and with cards/thumbs synced to their concept diagrams, plus method-accurate diagrams added to the audit-identified pages that still lack one. Docs-only, diagram-focused successor to v7.0's Documentation Quality Pass. Same shape: scored-inventory audit → section-batched corrections (defect + accessibility + STYLE_SPEC) → cards/thumbs sync + new coverage → whole-site build/review gate.
+- [x] Phase 60: Diagram Quality Audit (2/2 plans) — completed 2026-09-02
+- [x] Phase 61: SVG Corrections — learn / represent / align (1/1) — completed 2026-09-02
+- [x] Phase 62: SVG Corrections — analyze / monitoring / advisor (1/1) — completed 2026-09-02
+- [x] Phase 63: SVG Corrections — regression / inference / examples (1/1) — completed 2026-09-02
+- [x] Phase 64: Cards & Thumbnails Sync + New Coverage (1/1) — completed 2026-09-02
+- [x] Phase 65: STYLE_SPEC Refresh, Whole-Site Gate & Human Review (1/1) — completed 2026-09-02
 
-**Scope decisions (locked):** consistency + defect-fix depth ONLY — NO palette/typography change (deferred DIAG-FUT-03); dark-mode OUT of scope (deferred DIAG-FUT-01b); audit covers all 156 SVGs (90 concept in `docs/assets/diagrams/`, 8 cards in `docs/assets/cards/`, 58 thumbs in `docs/assets/thumb/`).
-
-**Standing constraints every phase inherits:** docs-only — NO `fdars-core` bump, NO bindings, NO advisor/MCP changes, NO package version bump (v7.0 precedent); diagrams stay hand-authored inline SVG (locked constraint — no programmatic generation); the SVGO idempotence + build-determinism CI gate must stay green; the whole-site `mkdocs build --strict` must be green offline (run at close — this milestone changes static SVGs, not fences, so most work needs no full rebuild); docs phases run SEQUENTIALLY on `main` (NOT in worktrees — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path; `use_worktrees: false`); per-section review on the built site; a BLOCKING human diagram method-accuracy review before milestone close (the v6.0 hypograph/epigraph lesson).
-
-- [x] **Phase 60: Diagram Quality Audit** - Scored inventory of all 156 SVGs (design/geometry, STYLE_SPEC, accessibility, thumb/card sync) → milestone-gating fix list + coverage-gap list (completed 2026-09-02)
-- [x] **Phase 61: SVG Corrections — learn / represent / align** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review (completed 2026-09-02)
-- [x] **Phase 62: SVG Corrections — analyze / monitoring / advisor** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review (completed 2026-09-02)
-- [x] **Phase 63: SVG Corrections — regression / inference / examples** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review (completed 2026-09-02)
-- [x] **Phase 64: Cards & Thumbnails Sync + New Coverage** - Sync 8 cards + 58 thumbs to their corrected concept diagrams; add method-accurate diagrams to audit-identified gap pages (completed 2026-09-02)
-- [x] **Phase 65: STYLE_SPEC Refresh, Whole-Site Gate & Human Review** - Refresh STYLE_SPEC status/counts + accessibility pattern; `--strict` green offline; SVGO/determinism gate; blocking human diagram review (completed 2026-09-02)
-
-## Phase Details
-
-### Phase 60: Diagram Quality Audit
-
-**Goal**: A scored inventory of all 156 hand-authored SVGs — 90 concept (`docs/assets/diagrams/`), 8 cards (`docs/assets/cards/`), 58 thumbs (`docs/assets/thumb/`) — is produced as the milestone-gating artifact, each scored on design/geometry quality, STYLE_SPEC conformance, accessibility, and thumb/card sync, so every downstream correction, sync, and coverage phase executes against evidence rather than guesswork.
-**Depends on**: Nothing (first phase of milestone; gates all downstream v10.0 work)
-**Requirements**: AUDIT-01, AUDIT-02
-**Success Criteria** (what must be TRUE):
-
-  1. The audit report inventories all 156 SVGs (90 concept + 8 cards + 58 thumbs), each scored on four axes — design/geometry quality (mismatched lines, misaligned endpoints, overlapping/misplaced elements, layout), STYLE_SPEC conformance, accessibility (`role`/`aria-label`/`<title>`/`<desc>`), and thumb-to-concept / card-to-concept sync.
-  2. The report flags each diagram with a defect severity and groups the concept-diagram findings into a ranked, per-section fix list aligned to the docs sections (learn, represent, align, analyze, monitoring, advisor, regression, inference, examples) so each downstream correction phase (61/62/63) has an explicit, evidence-backed worklist.
-  3. The report identifies the coverage gap — the pages/methods that still lack a concept diagram — driving the COVER-01 scope for Phase 64.
-  4. The report identifies which of the 58 thumbnails and 8 cards have drifted from their current concept diagrams, driving the SYNC-01/SYNC-02 scope for Phase 64.
-
-**Plans**: 2/2 plans executed
-
-- [x] 60-01-PLAN.md — Skeleton + score all 90 concept diagrams (4 axes, render-backed) + section/61-62-63 bucket map
-- [x] 60-02-PLAN.md — Score 8 cards + 58 thumbs with drift detection; COVER-01 gap list, SYNC-01/02 drift list, ranked 61/62/63 fix worklists, self-check
-
-**UI hint**: yes
-
-### Phase 61: SVG Corrections — learn / represent / align
-
-**Goal**: Every concept diagram in the learn, represent, and align sections is corrected on the defect, accessibility, and STYLE_SPEC axes and verified on the built site, so this batch meets the consistently-high, defect-free, accessible bar without ever misdepicting the method.
-**Depends on**: Phase 60
-**Requirements**: DEFECT-01, DEFECT-02, DEFECT-03, A11Y-01, A11Y-02, SPEC-01 (learn/represent/align batch)
-**Success Criteria** (what must be TRUE):
-
-  1. Every diagram flagged with geometry/line defects (mismatched lines, misaligned endpoints, overlapping/misplaced elements) or layout defects (spacing, alignment, label overlap, panel sizing) in learn/represent/align renders correctly on the built site with those defects gone (rendered PNG check).
-  2. Every concept diagram in this batch carries `role="img"` + an `aria-label` matching its title text, and every complex/multi-panel diagram in this batch carries a long-form `<title>` + `<desc>` wired via `aria-labelledby`.
-  3. Every diagram in this batch conforms to `STYLE_SPEC.md` (viewBox conventions, canonical `<style>` block, palette, stroke weights, panel patterns) and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
-  4. Every correction in this batch preserves method-accuracy — no diagram misdepicts what its method does after the fix — and each section passes a built-site review before the batch is done.
-
-**Plans**: 1 plan
-
-- [x] 61-01-PLAN.md — Correct all 24 learn/represent/align concept SVGs: A11Y-01 (aria-label matches title) + A11Y-02 (long-form title/desc/aria-labelledby) on every diagram; fix shift-registration "elastic warp" method-accuracy + crowding, banded-alignment edge crowding, pace-fpca subtitle overflow; STYLE_SPEC preserved; render-verified via rsvg-convert
-
-**UI hint**: yes
-
-### Phase 62: SVG Corrections — analyze / monitoring / advisor
-
-**Goal**: Every concept diagram in the analyze, monitoring, and advisor sections is corrected on the defect, accessibility, and STYLE_SPEC axes and verified on the built site.
-**Depends on**: Phase 61
-**Requirements**: DEFECT-01, DEFECT-02, DEFECT-03, A11Y-01, A11Y-02, SPEC-01 (analyze/monitoring/advisor batch)
-**Success Criteria** (what must be TRUE):
-
-  1. Every diagram flagged with geometry/line or layout defects in analyze/monitoring/advisor renders correctly on the built site with those defects gone (rendered PNG check).
-  2. Every concept diagram in this batch carries `role="img"` + an `aria-label` matching its title text, and every complex/multi-panel diagram carries a long-form `<title>` + `<desc>` wired via `aria-labelledby`.
-  3. Every diagram in this batch conforms to `STYLE_SPEC.md` and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
-  4. Every correction in this batch preserves method-accuracy, and each section passes a built-site review before the batch is done.
-
-**Plans**: 1 plan
-
-- [x] 62-01-PLAN.md — A11Y (title/desc/aria-labelledby) on all 26 analyze/monitoring/advisor/sklearn diagrams + elastic-clustering redraw + outlier taxonomy hold + 3 Minor geometry fixes
-
-**UI hint**: yes
-
-### Phase 63: SVG Corrections — regression / inference / examples
-
-**Goal**: Every concept diagram in the regression, inference, and examples sections is corrected on the defect, accessibility, and STYLE_SPEC axes and verified on the built site, completing the full-set concept-diagram correction sweep across all sections.
-**Depends on**: Phase 62
-**Requirements**: DEFECT-01, DEFECT-02, DEFECT-03, A11Y-01, A11Y-02, SPEC-01 (regression/inference/examples batch)
-**Success Criteria** (what must be TRUE):
-
-  1. Every diagram flagged with geometry/line or layout defects in regression/inference/examples renders correctly on the built site with those defects gone (rendered PNG check), with special care on the depth/interval-inference diagrams per the v6.0 hypograph/epigraph lesson.
-  2. Every concept diagram in this batch carries `role="img"` + an `aria-label` matching its title text, and every complex/multi-panel diagram carries a long-form `<title>` + `<desc>` wired via `aria-labelledby`.
-  3. Every diagram in this batch conforms to `STYLE_SPEC.md` and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
-  4. Across Phases 61–63, every flagged concept diagram on the Phase-60 fix list has been corrected and no diagram misdepicts its method — the full concept-diagram set (all 90) now meets the DEFECT-01/02/03, A11Y-01/02, and SPEC-01 bar.
-
-**Plans**: 1 plan
-
-- [x] 63-01-PLAN.md — Correct all 40 regression/inference/examples concept SVGs (4 Major layout fixes + universal A11Y title/desc/aria-labelledby + Minor geometry), render-verified via rsvg-convert
-
-**UI hint**: yes
-
-### Phase 64: Cards & Thumbnails Sync + New Coverage
-
-**Goal**: The 8 section cards and 58 gallery thumbnails are brought in line with their now-corrected concept diagrams (using correct decorative semantics for the thumbs), and method-accurate concept diagrams are added to the audit-identified pages/methods that still lack one — closing the sync and coverage gaps against the corrected concept-diagram set.
-**Depends on**: Phase 63
-**Requirements**: SYNC-01, SYNC-02, A11Y-03, COVER-01
-**Success Criteria** (what must be TRUE):
-
-  1. All 58 gallery thumbnails reflect their current (corrected) concept diagrams — redrawn/regenerated where the Phase-60 audit flagged drift — and render correctly on the built site.
-  2. All 8 section cards are reviewed and brought to the same quality and consistency bar as the concept diagrams (STYLE_SPEC-conformant, defect-free).
-  3. Decorative gallery thumbnails use correct non-announcing semantics (empty `alt` / `aria-hidden`) consistently, so screen readers do not announce redundant decorative images.
-  4. Every audit-identified page/method that lacked a concept diagram now references a hand-authored inline concept SVG that renders on the built site, is method-accurate, STYLE_SPEC-conformant, accessible, and passes the SVGO idempotence + build-determinism gate.
-
-**Plans**: 1/1 plans complete
-
-- [x] 64-01-PLAN.md — Redraw elastic-clustering thumb + review 8 cards (SYNC-01/02), aria-hidden on decorative gallery thumbs (A11Y-03), 3 new sklearn concept diagrams wired into their pages (COVER-01)
-
-**UI hint**: yes
-
-### Phase 65: STYLE_SPEC Refresh, Whole-Site Gate & Human Review
-
-**Goal**: `STYLE_SPEC.md` is refreshed to match the shipped diagram set (stale status/counts corrected, accessibility pattern finalized), and the whole documentation site passes its final quality gate — a green offline `mkdocs build --strict`, a green SVGO/determinism gate across all diagrams, and a blocking human diagram method-accuracy review before milestone close.
-**Depends on**: Phase 61, Phase 62, Phase 63, Phase 64
-**Requirements**: SPEC-02, GATE-01, GATE-02, GATE-03
-**Success Criteria** (what must be TRUE):
-
-  1. `STYLE_SPEC.md` is updated so its status/counts match the shipped diagram set (the stale "34 of 43" accessibility note is corrected against the 90 concept diagrams that exist today) and the accessibility pattern (`role`/`aria-label` + `<title>`/`<desc>`/`aria-labelledby`) is finalized to match the corrected set.
-  2. The SVGO idempotence + build-determinism gate is green across all 156 SVGs — no drift on re-run.
-  3. Whole-site `mkdocs build --strict` exits 0 offline after all changes.
-  4. A blocking human diagram method-accuracy review passes — no diagram misdepicts its method — before the milestone is closed.
-
-**Plans**: TBD
-
-- [x] 65-01-PLAN.md
-
-**UI hint**: yes
-
-## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 60 → 61 → 62 → 63 → 64 → 65
-
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 60. Diagram Quality Audit | v10.0 | 2/2 | Complete    | 2026-09-02 |
-| 61. SVG Corrections — learn / represent / align | v10.0 | 1/1 | Complete    | 2026-09-02 |
-| 62. SVG Corrections — analyze / monitoring / advisor | v10.0 | 1/1 | Complete    | 2026-09-02 |
-| 63. SVG Corrections — regression / inference / examples | v10.0 | 1/1 | Complete    | 2026-09-02 |
-| 64. Cards & Thumbnails Sync + New Coverage | v10.0 | 1/1 | Complete    | 2026-09-02 |
-| 65. STYLE_SPEC Refresh, Whole-Site Gate & Human Review | v10.0 | 1/1 | Complete    | 2026-09-02 |
+Full detail: `.planning/milestones/v10.0-ROADMAP.md`
+</details>
 
 ---
 
-_Full phase detail for shipped milestones is archived under `.planning/milestones/` (`v1.0-ROADMAP.md` … `v9.0-ROADMAP.md`). Phase directories are archived under `.planning/milestones/v{...}-phases/`._
+_Full phase detail for shipped milestones is archived under `.planning/milestones/` (`v1.0-ROADMAP.md` … `v10.0-ROADMAP.md`). Phase directories are archived under `.planning/milestones/v{...}-phases/`._

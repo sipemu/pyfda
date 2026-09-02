@@ -1,5 +1,17 @@
 # Milestones
 
+## v10.0 Diagram Quality & Accessibility Pass (Shipped: 2026-09-02)
+
+**Phases completed:** 6 phases, 7 plans, 9 tasks
+
+**Key accomplishments:**
+
+- 90 concept SVGs scored on 4 axes (design/geometry rsvg-render-backed, STYLE_SPEC grep-verified, accessibility text-matched, sync deferred) — 5 Major geometry defects found, STYLE_SPEC universally clean, A11Y gap universal Minor.
+- 60-AUDIT.md completed: all 156 SVGs scored (90 concept + 8 cards + 58 thumbs); 1 Major thumb drift (elastic-clustering), 3 sklearn COVER-01 gaps, ranked 61/62/63 worklists + Phase-64 SYNC/COVER/A11Y-03 lists ready.
+- Fixed 4 Major layout defects + 4 Minor geometry issues + applied A11Y-02 accessibility pattern to all 40 concept diagrams in regression/, inference/, and examples/ documentation buckets
+
+---
+
 ## v9.0 scikit-learn API Compatibility (Shipped: 2026-09-02)
 
 **Phases completed:** 5 phases, 17 plans, 24 tasks
