@@ -21,6 +21,10 @@ gathered here so the Phase-65 human review covers them explicitly.
 8. **ex-canadian-depth-centrality.svg** — "Ranked centrality" panel labels fully visible.
 9. **ex-canadian-seasonal.svg** — both badge lines ("peak day stable;" / "mean level rises") visible, method-accurate conclusion preserved.
 
+## From Phase 64 (cards / thumbs sync + new coverage)
+10. **3 new sklearn concept diagrams** — confirm method-accuracy against the page prose: `sklearn-transformers.svg` (transformer output shapes), `sklearn-regressors-classifiers.svg` (stored-FPC-score, no re-fit at predict), `sklearn-clusterers-outliers.svg` (MS-plot-faithful vs modified-band-depth surrogate honesty).
+11. **elastic-clustering.svg thumbnail** — confirm the redrawn thumb (clusters of curve families) faithfully abstracts the redrawn concept diagram.
+
 ## Whole-set review (standard GATE-03 scope)
 - Visually review all 90 corrected concept diagrams on the built site for method-accuracy and design quality (the milestone's core value).
 - Confirm no diagram regressed visually from the A11Y/geometry edits.
