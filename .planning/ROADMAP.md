@@ -257,7 +257,8 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
   3. Decorative gallery thumbnails use correct non-announcing semantics (empty `alt` / `aria-hidden`) consistently, so screen readers do not announce redundant decorative images.
   4. Every audit-identified page/method that lacked a concept diagram now references a hand-authored inline concept SVG that renders on the built site, is method-accurate, STYLE_SPEC-conformant, accessible, and passes the SVGO idempotence + build-determinism gate.
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 64-01-PLAN.md — Redraw elastic-clustering thumb + review 8 cards (SYNC-01/02), aria-hidden on decorative gallery thumbs (A11Y-03), 3 new sklearn concept diagrams wired into their pages (COVER-01)
 **UI hint**: yes
 
 ### Phase 65: STYLE_SPEC Refresh, Whole-Site Gate & Human Review
