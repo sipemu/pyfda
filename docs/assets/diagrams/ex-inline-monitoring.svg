@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Inline Quality Monitoring: Detection Power and False-Alarm Analysis — simulate KL curves, spm_phase1, spm_monitor, ewma_scores, power curve, F1 vs fault magnitude">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Inline Monitoring: Detection Power &amp; False-Alarm Analysis" aria-labelledby="ex-inline-monitoring-title ex-inline-monitoring-desc">
+  <title id="ex-inline-monitoring-title">Inline Monitoring: Detection Power &amp; False-Alarm Analysis</title>
+  <desc id="ex-inline-monitoring-desc">Simulated KL functional data with injected faults is monitored with Shewhart and EWMA spm_monitor charts; detection power curves and F1 scores across fault magnitudes quantify how quickly each chart detects the fault while controlling false alarms.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

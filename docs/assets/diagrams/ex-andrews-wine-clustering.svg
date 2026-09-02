@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Andrews Wine Clustering — kmeans_fd, validity scores, fuzzy_cmeans_fd, fanova, and fpca variable importance">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Andrews Wine: Clustering &amp; Variable Importance" aria-labelledby="ex-andrews-wine-clustering-title ex-andrews-wine-clustering-desc">
+  <title id="ex-andrews-wine-clustering-title">Andrews Wine: Clustering &amp; Variable Importance</title>
+  <desc id="ex-andrews-wine-clustering-desc">kmeans_fd and fuzzy_cmeans_fd cluster the wine Andrews curves; fanova tests whether cluster means differ; FPCA variable importance then identifies which chemical features most drive the cluster separation.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

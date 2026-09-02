@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Canadian Weather: Multi-Method Overview — fanova, FOSR, and region classification workflow">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Canadian Weather: Multi-Method Overview" aria-labelledby="ex-canadian-weather-title ex-canadian-weather-desc">
+  <title id="ex-canadian-weather-title">Canadian Weather: Multi-Method Overview</title>
+  <desc id="ex-canadian-weather-desc">The Canadian weather example applies a multi-method pipeline: FOSR fits coefficient curves for geographic predictors, fanova tests regional differences, and functional classification assigns each station to a climate region.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

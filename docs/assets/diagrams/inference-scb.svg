@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Simultaneous Confidence Band — SCB is wider than pointwise CI">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Simultaneous Confidence Band vs Pointwise CI" aria-labelledby="inference-scb-title inference-scb-desc">
+  <title id="inference-scb-title">Simultaneous Confidence Band vs Pointwise CI</title>
+  <desc id="inference-scb-desc">The simultaneous confidence band (SCB) is wider than the pointwise CI because it controls coverage jointly over all time points; a curve that exits the SCB at any point is statistically significant, unlike a pointwise band.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Permutation Test — observed statistic vs permutation null distribution">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Permutation Test — Null Distribution vs Observed Statistic" aria-labelledby="inference-permutation-test-title inference-permutation-test-desc">
+  <title id="inference-permutation-test-title">Permutation Test — Null Distribution vs Observed Statistic</title>
+  <desc id="inference-permutation-test-desc">The permutation test generates a null distribution by randomly reshuffling group labels many times; the observed test statistic T_obs is compared to this null, and the p-value is the tail probability mass beyond T_obs.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

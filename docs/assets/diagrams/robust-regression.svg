@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Robust regression: down-weighting outliers to recover an unaffected coefficient">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Robust Regression: Resisting Contamination" aria-labelledby="robust-regression-title robust-regression-desc">
+  <title id="robust-regression-title">Robust Regression: Resisting Contamination</title>
+  <desc id="robust-regression-desc">Robust regression down-weights outlier curves iteratively so that contaminating observations have reduced influence; the resulting coefficient function is closer to the true β(t) than ordinary least squares.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

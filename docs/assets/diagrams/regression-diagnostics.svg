@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Regression diagnostics: finding influential observations">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Regression Diagnostics: Finding Influential Points" aria-labelledby="regression-diagnostics-title regression-diagnostics-desc">
+  <title id="regression-diagnostics-title">Regression Diagnostics: Finding Influential Points</title>
+  <desc id="regression-diagnostics-desc">Regression diagnostics identify influential observations via Cook's distance and leverage; points exceeding the 4/n threshold are flagged for inspection or removal to improve model robustness.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

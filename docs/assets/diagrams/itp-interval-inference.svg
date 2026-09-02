@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Interval-wise Testing Procedure — per-basis p-value vector with closure adjustment">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Interval-wise Testing Procedure (ITP)" aria-labelledby="itp-interval-inference-title itp-interval-inference-desc">
+  <title id="itp-interval-inference-title">Interval-wise Testing Procedure (ITP)</title>
+  <desc id="itp-interval-inference-desc">The Interval-wise Testing Procedure tests each basis coefficient individually and applies a closure adjustment so closure-adjusted p-values are always ≥ raw p-values, controlling the interval-wise family-wise error rate (FWER).</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -83,11 +85,11 @@
   <rect x="607"  y="219" width="17" height="21"  fill="#3f51b5" opacity="0.80" rx="1"/>
   <rect x="656"  y="88"  width="17" height="152" fill="#3f51b5" opacity="0.80" rx="1"/>
 
-  <!-- Legend -->
-  <rect x="384" y="92" width="12" height="9" fill="#3f51b5" opacity="0.30"/>
-  <text class="sm" x="400" y="101">raw p-value</text>
-  <rect x="384" y="106" width="12" height="9" fill="#3f51b5" opacity="0.80"/>
-  <text class="sm" x="400" y="115">closure-adjusted (≥ raw)</text>
+  <!-- Legend — placed below the axis to avoid overlapping bars -->
+  <rect x="384" y="262" width="12" height="9" fill="#3f51b5" opacity="0.30"/>
+  <text class="sm" x="400" y="271">raw p-value</text>
+  <rect x="490" y="262" width="12" height="9" fill="#3f51b5" opacity="0.80"/>
+  <text class="sm" x="506" y="271">closure-adjusted (≥ raw)</text>
 
   <!-- Annotation arrows showing adjusted above raw for basis 2 -->
   <line x1="471" y1="219" x2="453" y2="239" stroke="#e8710a" stroke-width="1.5" stroke-dasharray="3,3"/>

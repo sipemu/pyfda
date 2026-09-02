@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Biopharmaceutical Batch Monitoring — penicillin SPM Phase I/II with FPCA, spm_phase1, spm_monitor, ewma_scores, fregre_lm yield prediction">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Biopharmaceutical Batch Monitoring: Penicillin Fermentation" aria-labelledby="ex-biopharma-monitoring-title ex-biopharma-monitoring-desc">
+  <title id="ex-biopharma-monitoring-title">Biopharmaceutical Batch Monitoring: Penicillin Fermentation</title>
+  <desc id="ex-biopharma-monitoring-desc">The penicillin fermentation example monitors batch quality with a Phase I FPCA baseline and Phase II spm_monitor T² and EWMA control charts; faulty batches are detected in real time and a fosr model predicts final yield from in-process curves.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

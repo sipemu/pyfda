@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional GLM — FPCA projection to FPC scores, then GLM with family-dependent link function">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Generalized Linear Model" aria-labelledby="functional-glm-title functional-glm-desc">
+  <title id="functional-glm-title">Functional Generalized Linear Model</title>
+  <desc id="functional-glm-desc">The functional GLM projects curves to FPC scores then fits a GLM with a family-specific link function: identity for Gaussian, logit for binomial, log for Poisson, and inverse for Gamma (note: not the log-link R default).</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -62,21 +64,21 @@
   <!-- Gaussian branch -->
   <rect x="424" y="90" width="264" height="30" rx="6" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
   <text class="mono" x="452" y="109" fill="#3f51b5" font-size="10">gaussian</text>
-  <text class="sm" x="558" y="109" text-anchor="middle" fill="#495057">identity   g(μ) = μ</text>
+  <text class="sm" x="516" y="109" text-anchor="start" fill="#495057">identity   g(μ) = μ</text>
 
   <!-- Binomial branch -->
   <rect x="424" y="128" width="264" height="30" rx="6" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
   <text class="mono" x="452" y="147" fill="#e8710a" font-size="10">binomial</text>
-  <text class="sm" x="558" y="147" text-anchor="middle" fill="#495057">logit   g(μ) = log(μ/1−μ)</text>
+  <text class="sm" x="516" y="147" text-anchor="start" fill="#495057">logit   g(μ) = log(μ/1−μ)</text>
 
   <!-- Poisson branch -->
   <rect x="424" y="166" width="264" height="30" rx="6" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
   <text class="mono" x="452" y="185" fill="#198754" font-size="10">poisson</text>
-  <text class="sm" x="558" y="185" text-anchor="middle" fill="#495057">log   g(μ) = log(μ)</text>
+  <text class="sm" x="516" y="185" text-anchor="start" fill="#495057">log   g(μ) = log(μ)</text>
 
   <!-- Gamma branch — HIGHLIGHTED as most important caveat -->
   <rect x="424" y="204" width="264" height="46" rx="6" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.8"/>
   <text class="mono" x="452" y="223" fill="#dc3545" font-size="10">gamma</text>
-  <text class="sm" x="558" y="223" text-anchor="middle" fill="#dc3545">inverse   g(μ) = 1/μ</text>
-  <text class="sm" x="558" y="239" text-anchor="middle" fill="#dc3545">≠ log-link (R default)</text>
+  <text class="sm" x="516" y="223" text-anchor="start" fill="#dc3545">inverse   g(μ) = 1/μ</text>
+  <text class="sm" x="516" y="239" text-anchor="start" fill="#dc3545">≠ log-link (R default)</text>
 </svg>

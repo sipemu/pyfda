@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Tolerance Bands vs Conformal Bands — fpca_tolerance_band FPCA bootstrap vs conformal_prediction_band distribution-free, both at 90% coverage on Canadian weather curves, efficiency vs robustness trade-off">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Tolerance Bands vs Conformal Bands" aria-labelledby="ex-tolerance-vs-conformal-title ex-tolerance-vs-conformal-desc">
+  <title id="ex-tolerance-vs-conformal-title">Tolerance Bands vs Conformal Bands</title>
+  <desc id="ex-tolerance-vs-conformal-desc">FPCA-bootstrap tolerance bands and distribution-free conformal prediction bands are compared at 90% coverage on Canadian weather curves; the FPCA band is tighter (more efficient) while the conformal band is wider but requires no distributional assumption (more robust).</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

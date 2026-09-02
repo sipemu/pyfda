@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Explainability: Recovering Predictive Regions — fregre_lm beta(t) coefficient curve, bootstrap CI, significant_regions, pointwise_importance, functional_saliency, domain_selection, beta_decomposition, functional_pdp">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Explainability: Recovering Predictive Regions" aria-labelledby="ex-explainability-regions-title ex-explainability-regions-desc">
+  <title id="ex-explainability-regions-title">Explainability: Recovering Predictive Regions</title>
+  <desc id="ex-explainability-regions-desc">Five independent explainability methods (β(t) curve, bootstrap CI, pointwise importance, functional saliency, domain selection, and beta decomposition) all converge on the same 930 nm C–H absorption band as the dominant fat predictor in Tecator NIR spectra.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -71,7 +73,7 @@
   <rect x="24" y="272" width="672" height="70" rx="8" fill="#198754" stroke="none"/>
   <text class="lab" x="360" y="295" text-anchor="middle" fill="white">All five explainers converge on the same significant bands around 930 nm</text>
   <text class="mono" x="360" y="313" text-anchor="middle" fill="#FFD700">β(λ) + CI · importance · saliency · domain scan · decomposition → 930 nm C–H chemistry</text>
-  <text class="sm" x="360" y="330" text-anchor="middle" fill="white">Convergence across independent methods = trustworthy · agreement with known fat absorption = validated</text>
+  <text class="sm" x="360" y="330" text-anchor="middle" style="fill:white">Convergence across independent methods = trustworthy · agreement with known fat absorption = validated</text>
 
   <!-- PDP panel -->
   <rect x="24" y="360" width="672" height="70" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>

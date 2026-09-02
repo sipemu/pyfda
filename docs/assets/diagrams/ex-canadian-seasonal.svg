@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Canadian Temperature: Annual Cycle Detection and Decomposition — period detectors, STL and SSA decomposition, seasonal strength classification">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Canadian Temperature: Annual Cycle Detection &amp; Decomposition" aria-labelledby="ex-canadian-seasonal-title ex-canadian-seasonal-desc">
+  <title id="ex-canadian-seasonal-title">Canadian Temperature: Annual Cycle Detection &amp; Decomposition</title>
+  <desc id="ex-canadian-seasonal-desc">The Canadian temperature seasonal example detects the annual 365-day cycle using four period detectors, decomposes it with STL and SSA, and classifies the Edmonton series as StableSeasonal: peak timing is constant while the mean level rises.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -107,9 +109,10 @@
   <text class="lab" x="337" y="372" text-anchor="middle" fill="white">Trend + seasonal isolated</text>
   <text class="mono" x="337" y="388" text-anchor="middle" fill="white">STL recovers +0.3°C/yr</text>
 
-  <rect x="450" y="354" width="246" height="46" rx="6" fill="#198754" stroke="none"/>
+  <rect x="450" y="354" width="246" height="56" rx="6" fill="#198754" stroke="none"/>
   <text class="lab" x="573" y="372" text-anchor="middle" fill="white">StableSeasonal · timing fixed</text>
-  <text class="mono" x="573" y="388" text-anchor="middle" fill="white">summer peak day constant; level rises</text>
+  <text class="mono" x="573" y="387" text-anchor="middle" fill="white">peak day stable;</text>
+  <text class="mono" x="573" y="401" text-anchor="middle" fill="white">mean level rises</text>
 
   <!-- Bottom note -->
   <text class="sm" x="360" y="430" text-anchor="middle">analyze_peak_timing: summer peak day stable at ~214 · rising temperature trend ≠ shifting timing</text>

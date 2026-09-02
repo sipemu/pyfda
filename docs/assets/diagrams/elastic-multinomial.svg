@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Elastic Multinomial Classification — K one-vs-rest binary elastic classifiers combined via softmax">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Elastic Multinomial Classification (K = 3 classes)" aria-labelledby="elastic-multinomial-title elastic-multinomial-desc">
+  <title id="elastic-multinomial-title">Elastic Multinomial Classification (K = 3 classes)</title>
+  <desc id="elastic-multinomial-desc">Elastic multinomial classification trains K one-vs-rest binary elastic classifiers and combines their scores via softmax to assign each input curve to one of K classes.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

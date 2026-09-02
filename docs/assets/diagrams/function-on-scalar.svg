@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Function-on-scalar regression: scalar predictors produce fitted response curves">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Function-on-Scalar Regression" aria-labelledby="function-on-scalar-title function-on-scalar-desc">
+  <title id="function-on-scalar-title">Function-on-Scalar Regression</title>
+  <desc id="function-on-scalar-desc">Function-on-scalar regression uses fosr() to fit a smooth coefficient curve β(t) per scalar predictor, producing one fitted response curve ŷ(t) per group or treatment level.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Model explainability: attributing predictions to regions of the domain">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Model Explainability: Why the Prediction?" aria-labelledby="explainability-title explainability-desc">
+  <title id="explainability-title">Model Explainability: Why the Prediction?</title>
+  <desc id="explainability-desc">Model explainability attributes predictions to specific time-domain regions by highlighting segments where the coefficient function β(t) or SHAP values are largest, revealing which parts of the curve drive the output.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

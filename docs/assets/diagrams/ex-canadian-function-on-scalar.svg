@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Function-on-Scalar Regression — fosr fits a coefficient function β(t) from latitude, predict_fosr returns full curves">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Function-on-Scalar Regression: latitude → β(t)" aria-labelledby="ex-canadian-function-on-scalar-title ex-canadian-function-on-scalar-desc">
+  <title id="ex-canadian-function-on-scalar-title">Function-on-Scalar Regression: latitude → β(t)</title>
+  <desc id="ex-canadian-function-on-scalar-desc">fosr fits a smooth coefficient curve β_lat(t) from station latitude, showing how the latitude effect on temperature varies by season; predict_fosr returns full fitted curves for hypothetical stations at any latitude.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
