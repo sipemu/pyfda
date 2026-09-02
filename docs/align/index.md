@@ -11,32 +11,32 @@ Functional observations often exhibit two fundamentally different sources of var
 
 <div class="fdars-gallery fdars-sec-align">
 <a class="fdars-gallery-item" href="elastic-alignment/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/elastic-alignment.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/elastic-alignment.svg" alt="">
 <div class="fdars-gallery-title">Elastic Alignment</div>
 <div class="fdars-gallery-desc">SRSF registration, Karcher mean, and amplitude/phase separation.</div>
 </a>
 <a class="fdars-gallery-item" href="advanced-alignment/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/advanced-alignment.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/advanced-alignment.svg" alt="">
 <div class="fdars-gallery-title">Advanced Elastic Alignment</div>
 <div class="fdars-gallery-desc">Closed, constrained, penalized, and multi-resolution alignment.</div>
 </a>
 <a class="fdars-gallery-item" href="landmark-registration/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/landmark-registration.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/landmark-registration.svg" alt="">
 <div class="fdars-gallery-title">Landmark Registration</div>
 <div class="fdars-gallery-desc">Align curves by matching landmark locations with monotone warps.</div>
 </a>
 <a class="fdars-gallery-item" href="tsrvf/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/tsrvf.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/tsrvf.svg" alt="">
 <div class="fdars-gallery-title">TSRVF</div>
 <div class="fdars-gallery-desc">Linearized elastic analysis in a transported tangent space.</div>
 </a>
 <a class="fdars-gallery-item" href="alignment-comparison/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/alignment-comparison.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/alignment-comparison.svg" alt="">
 <div class="fdars-gallery-title">Comparing Methods</div>
 <div class="fdars-gallery-desc">No alignment vs elastic vs landmark, side by side.</div>
 </a>
 <a class="fdars-gallery-item" href="shape-analysis/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/shape-analysis.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/shape-analysis.svg" alt="">
 <div class="fdars-gallery-title">Shape Analysis</div>
 <div class="fdars-gallery-desc">Shape-preserving registration and geodesic computations.</div>
 </a>

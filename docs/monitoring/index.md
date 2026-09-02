@@ -11,17 +11,17 @@ Modern manufacturing, sensor networks, and industrial systems produce functional
 
 <div class="fdars-gallery fdars-sec-monitoring">
 <a class="fdars-gallery-item" href="spm/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/process-monitoring.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/process-monitoring.svg" alt="">
 <div class="fdars-gallery-title">Process Monitoring</div>
 <div class="fdars-gallery-desc">Phase I/II control charts with Hotelling T2 and SPE statistics.</div>
 </a>
 <a class="fdars-gallery-item" href="advanced-spm/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/advanced-spm.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/advanced-spm.svg" alt="">
 <div class="fdars-gallery-title">Advanced SPM</div>
 <div class="fdars-gallery-desc">SPE/Q, EWMA, run rules, ARL, and PC-contribution fault diagnosis.</div>
 </a>
 <a class="fdars-gallery-item" href="profile-partial-monitoring/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/profile-partial-monitoring.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/profile-partial-monitoring.svg" alt="">
 <div class="fdars-gallery-title">Profile & Partial-Domain Monitoring</div>
 <div class="fdars-gallery-desc">Monitor a sub-interval where faults are localized.</div>
 </a>

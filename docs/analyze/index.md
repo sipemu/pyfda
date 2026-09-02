@@ -11,42 +11,42 @@ The Analyze module collects the tools you reach for once your curves are represe
 
 <div class="fdars-gallery fdars-sec-analyze">
 <a class="fdars-gallery-item" href="tolerance-bands/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/tolerance-bands.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/tolerance-bands.svg" alt="">
 <div class="fdars-gallery-title">Tolerance Bands</div>
 <div class="fdars-gallery-desc">FPCA-based tolerance bands, conformal bands, and Degras SCBs.</div>
 </a>
 <a class="fdars-gallery-item" href="clustering/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/clustering.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/clustering.svg" alt="">
 <div class="fdars-gallery-title">Clustering</div>
 <div class="fdars-gallery-desc">K-means, fuzzy c-means, and GMM clustering for functional data.</div>
 </a>
 <a class="fdars-gallery-item" href="gmm-clustering/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/gmm-clustering.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/gmm-clustering.svg" alt="">
 <div class="fdars-gallery-title">GMM Clustering</div>
 <div class="fdars-gallery-desc">Model-based clustering with Gaussian mixtures and soft assignments.</div>
 </a>
 <a class="fdars-gallery-item" href="elastic-clustering/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/elastic-clustering.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/elastic-clustering.svg" alt="">
 <div class="fdars-gallery-title">Elastic Clustering</div>
 <div class="fdars-gallery-desc">Cluster by amplitude/phase-invariant elastic distance.</div>
 </a>
 <a class="fdars-gallery-item" href="outlier-detection/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/outlier-detection.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/outlier-detection.svg" alt="">
 <div class="fdars-gallery-title">Outlier Detection</div>
 <div class="fdars-gallery-desc">LRT, outliergram, and magnitude-shape anomaly detection.</div>
 </a>
 <a class="fdars-gallery-item" href="seasonal-analysis/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/seasonal-analysis.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/seasonal-analysis.svg" alt="">
 <div class="fdars-gallery-title">Seasonal Analysis</div>
 <div class="fdars-gallery-desc">SAZED, autoperiod, STL, and peak detection for periodic data.</div>
 </a>
 <a class="fdars-gallery-item" href="equivalence-testing/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/equivalence-testing.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/equivalence-testing.svg" alt="">
 <div class="fdars-gallery-title">Equivalence Testing</div>
 <div class="fdars-gallery-desc">TOST-based equivalence tests for functional means.</div>
 </a>
 <a class="fdars-gallery-item" href="covariance-functions/">
-<img class="fdars-gallery-thumb" src="../assets/thumb/covariance-functions.svg" alt="">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/covariance-functions.svg" alt="">
 <div class="fdars-gallery-title">Covariance Functions</div>
 <div class="fdars-gallery-desc">Gaussian, exponential, Matern, and periodic covariance kernels.</div>
 </a>
