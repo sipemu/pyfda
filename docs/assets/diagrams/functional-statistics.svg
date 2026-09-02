@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Functional summary statistics: pointwise variance band, depth-based median as observed curve, and covariance surface">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Functional Summary Statistics" aria-labelledby="t-fstats d-fstats">
+  <title id="t-fstats">Functional Summary Statistics</title>
+  <desc id="d-fstats">Presents four functional summary statistics in a four-quadrant layout: mean with pointwise variance band, depth-based scores and the depth-based median, a comparison showing median vs mean vs geometric median, and the depth-trimmed mean; illustrates how functional statistics differ from their scalar analogues.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

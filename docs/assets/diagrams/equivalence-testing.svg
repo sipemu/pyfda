@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Equivalence testing: is the mean difference inside a plus-minus delta corridor">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Equivalence Testing: Similar Enough Within ±δ" aria-labelledby="t-equiv d-equiv">
+  <title id="t-equiv">Equivalence Testing: Similar Enough Within ±δ</title>
+  <desc id="d-equiv">Illustrates functional equivalence testing: two curve families are declared equivalent if their pointwise mean difference stays within a ±δ corridor for the entire domain; the diagram shows the observed difference curve, the ±δ bounds, and a confirmation badge when the test passes.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

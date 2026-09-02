@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional scoring metrics: predicted vs true curves with integrated residual region collapsed to scalar scores">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Scoring Metrics" aria-labelledby="t-score d-score">
+  <title id="t-score">Functional Scoring Metrics</title>
+  <desc id="d-score">Illustrates how functional scoring metrics — MSE, MAE, RMSE, R², and others — reduce predicted vs true curve pairs to scalar scores by integrating the residual region; includes warnings for metrics (MAPE, MSLE) that reject near-zero or negative true values.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

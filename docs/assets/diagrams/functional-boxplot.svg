@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Boxplot: median, 50% central region, whiskers/fence, flagged outliers">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Boxplot" aria-labelledby="t-fboxplot d-fboxplot">
+  <title id="t-fboxplot">Functional Boxplot</title>
+  <desc id="d-fboxplot">Illustrates the functional boxplot: the depth-based median curve, the 50% central region (band containing the deepest half of curves), whiskers extending 1.5 times the central region width, and flagged outlier curves that lie outside the fence; a pointwise non-parametric summary of a functional sample.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
