@@ -16,7 +16,7 @@ Requirements for this milestone. Each maps to a roadmap phase (Phases 66+, conti
 ### Functional Time Series (`fdars.fts`)
 
 - [x] **FTS-01**: New `fdars.fts` submodule registered and importable; `ftsm` model fit + `ftsm_forecast` / multistep forecasting exposed with a PyDict result (transposition-guarded on non-square input)
-- [ ] **FTS-02**: Time-series diagnostics exposed — `functional_acf` / `functional_pacf`, `stationarity_test`, `long_run_covariance` — with deterministic seeds where the upstream function takes one
+- [x] **FTS-02**: Time-series diagnostics exposed — `functional_acf` / `functional_pacf`, `stationarity_test`, `long_run_covariance` — with deterministic seeds where the upstream function takes one
 - [ ] **FTS-03**: Dimension-reduction/forecasting extras exposed as available at 0.33 — `fplsr` and/or `dpca` (functional PLS regression / dynamic PCA) — each returning a documented PyDict
 
 ### Regression — Function-on-Function & Scalar-on-Function (`fdars.regression`, `fdars.scalar_on_function`)
@@ -92,7 +92,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | DEP-02 | Phase 66 | Complete |
 | DEP-03 | Phase 66 | Complete |
 | FTS-01 | Phase 67 | Complete |
-| FTS-02 | Phase 67 | Pending |
+| FTS-02 | Phase 67 | Complete |
 | FTS-03 | Phase 67 | Pending |
 | REG-01 | Phase 68 | Pending |
 | REG-02 | Phase 68 | Pending |

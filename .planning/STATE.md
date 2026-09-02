@@ -5,16 +5,16 @@ milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 67
 current_phase_name: Functional Time Series (fdars.fts)
 status: executing
-stopped_at: Completed 67-02-PLAN.md
-last_updated: "2026-09-02T18:35:37.539Z"
+stopped_at: Completed 67-03-PLAN.md
+last_updated: "2026-09-02T18:41:22.439Z"
 last_activity: 2026-09-02
 last_activity_desc: Phase 67 execution started
-state_head: c9b8324ffb4854799609553cf63e3df727dcc7d1
+state_head: 760e8a56de8d24c9b96761c69f7d52ce6697bd09
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
   percent: 13
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 ## Current Position
 
 Phase: 67 (Functional Time Series (fdars.fts)) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-09-02 — Phase 67 execution started
 
@@ -69,6 +69,7 @@ Last activity: 2026-09-02 — Phase 67 execution started
 | Phase 66-isolated-crate-bump-regression-gate P01 | 9min | 4 tasks | 5 files |
 | Phase 67-functional-time-series-fts P01 | 3 min | 2 tasks | 4 files |
 | Phase 67-functional-time-series-fts P02 | 3 min | 2 tasks | 2 files |
+| Phase 67-functional-time-series-fts P03 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,7 @@ Recent decisions affecting current work:
 - [standing v6.0]: Blocking human diagram method-accuracy review before milestone close (the hypograph/epigraph lesson)
 - [Phase 67-01]: argvals is required positional param in all fts bindings (not Option<...> with default_grid) — upstream validates argvals.len() == n_points — Matches fdars-core fts API contract; avoids silent wrong-grid bugs
 - [Phase 67]: 67-02: Combined-function pattern for &FtsmResult inputs — re-fit ftsm internally; private ftsm_result_to_dict helper factored for ftsm+ftsm_update consistency
+- [Phase 67]: 67-03: Vec<u32> lags cast to i64; functional_difference returns naked array; col-major cov_matrix reshaped via FdMatrix::from_column_major; FTS-02 complete with 21 passing tests
 
 ### Pending Todos
 
@@ -122,8 +124,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-02T18:35:37.507Z
-Stopped at: Completed 67-02-PLAN.md
+Last session: 2026-09-02T18:41:22.407Z
+Stopped at: Completed 67-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
