@@ -6,6 +6,8 @@ prediction methods as standard sklearn predictors — accepting `(n_obs, n_point
 curve matrices and predicting scalar targets or class labels via `fit` / `predict`.
 </div>
 
+![sklearn regressors and classifiers: curves to stored FPC scores to scalar y-hat or class labels](../assets/diagrams/sklearn-regressors-classifiers.svg){ .fdars-diagram }
+
 All regressors and classifiers here follow the plain-ndarray contract: input `X` is
 always `(n_obs, n_points)`, `y` is `(n_obs,)`. An `argvals` constructor parameter
 (default `None` → uniform `[0, 1]` grid) sets the evaluation domain once at

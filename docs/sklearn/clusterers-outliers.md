@@ -6,6 +6,8 @@ and anomaly-detection methods as standard sklearn estimators, composing naturall
 in `Pipeline` and `cross_val_score`.
 </div>
 
+![sklearn clusterers and outlier detectors: curves to cluster labels or inlier/outlier flags](../assets/diagrams/sklearn-clusterers-outliers.svg){ .fdars-diagram }
+
 All estimators follow the plain-ndarray contract: input `X` is `(n_obs, n_points)`;
 `argvals` (default `None`) sets the evaluation grid at construction. See the
 [coverage / EXCLUDE list](coverage.md) for excluded functional clustering and outlier
