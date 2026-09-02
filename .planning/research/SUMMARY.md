@@ -1,134 +1,153 @@
 # Project Research Summary
 
-**Project:** pyfda — scikit-learn API Compatibility (v9.0)
-**Domain:** scikit-learn-compatible estimator layer over a functional-data-analysis library (PyO3 bindings)
-**Researched:** 2026-08-31
-**Confidence:** HIGH
+**Project:** pyfda — fdars-core 0.33 Upgrade (v11.0)
+**Domain:** PyO3 binding layer + Python API + AI advisor + MkDocs site over the Rust `fdars-core` functional-data-analysis crate
+**Researched:** 2026-09-02
+**Confidence:** MEDIUM (HIGH on stack + pitfalls; MEDIUM on features + architecture — sourced from crates.io/docs.rs, not an exhaustive fdars-core source audit)
 
 ## Executive Summary
 
-v9.0 adds a new pure-Python `fdars.sklearn` estimator layer that wraps existing functional-data algorithms as scikit-learn `BaseEstimator` subclasses for seamless `Pipeline` / `GridSearchCV` / `cross_val_score` integration and interop with native sklearn estimators. The layer operates on plain `(n_obs, n_points)` ndarrays with `argvals` as a constructor parameter (defaulting to `np.arange(n_features)`), and calls `fdars._native.*` functions directly — never constructing an `Fdata` inside an estimator (the `Fdata` wrapper introduces dtype side-effects that break `check_estimator`'s dtype-casting checks). It is gated as an optional `[sklearn]` extra exactly like `advisor/` and `mcp/`; no `fdars-core` bump and no advisor changes.
+pyfda v11.0 is a **clean, additive-only crate upgrade** (`fdars-core` 0.23.0 → 0.33.0) that exposes the new upstream surface as PyO3 bindings + Python API, extends the AI advisor where relevant (grounding invariant preserved), and documents it — the same shape as v4.0/v5.0/v6.0. The bump itself is trivial (a single `Cargo.toml` line); the binding work is substantive (~35 new functions across ~7 new/extended modules, up to 2 new opaque `#[pyclass]` handles, and up to 4 new/extended advisor aspects).
 
-The defining constraint is **full `check_estimator` compliance with no exemptions**: any fdars method that cannot pass the full battery is *excluded* from the sklearn layer (it remains available through the existing functional API) and recorded in a coverage registry — never exempted. The single most important research finding is that this makes a **compliance-triage phase mandatory and first**: skeleton every candidate estimator, run `parametrize_with_checks` per estimator, and record PASS / PASS-WITH-FIXES / EXCLUDE before committing to real implementation. Researchers converged on a consolidated EXCLUDE list of ~9 method categories that predictably fail due to structural incompatibilities.
+The 10-minor jump (vs. the prior 3-minor additive waves) triples the chance of a **silent numeric drift or a changed default** that `cargo build` won't catch, so the established protocol is non-negotiable: **isolate the bump in its own phase and gate it on the full ~772-test Python suite before any binding work.** Sources converge that MSRV at 0.33.0 is **1.81** (pyfda pins 1.83 — satisfied with headroom), the `parallel`-only build is unchanged, and **no new capability is `linalg`-gated** — so the user decision to stay parallel-only holds with zero cost to coverage. Notably, the original `linalg` deferral reason (faer needing Rust 1.84) is now **obsolete** (faer ^0.23 MSRV is 1.81) — a note for a *future* milestone, not this one.
 
-Key risks and mitigations: (1) **sklearn version/Python-matrix skew** — pin `scikit-learn>=1.3,<1.7` (1.7 drops Python 3.9; floor 1.3 for `validate_data`/`n_features_in_`), bridge the 1.3→1.6 tags-API change with a try/import shim; (2) **the classic sklearn-contract traps** (constructor-param mutation, missing trailing-underscore attrs, `clone` round-trips) — centralize in a shared base class; (3) **functional-data-specific check failures** (tiny-sample, 1-feature, dtype-cast, FPCA SVD sign non-idempotence) — Python-layer guards + sign canonicalization, surfaced early by triage.
+Key risks and mitigations: (1) **numeric drift** across the jump → isolated bump + full regression gate (Phase 66); (2) **row-major↔column-major transposition bugs** in new multi-array bindings → route every 2D arg through `numpy2d_to_fdmatrix`, test with non-square `n_obs ≠ n_points` fixtures; (3) **grounding-invariant / MCP guard-sync** violations in the advisor → only fdars-computed scalars in diagnostic dicts, atomic `_DIAGNOSTICS_METHODS`+`_ASPECT_PRIMERS` commits, `json.dumps` serialization test per aspect; (4) **method-inaccurate diagrams** for unfamiliar new methods → blocking human diagram review as the hard close gate (the v6.0 hypograph/epigraph lesson); (5) **docs build contamination** → docs phase runs sequentially on `main`, never in worktrees (fences hardcode the main-tree `.venv/bin/mkdocs`).
 
 ## Key Findings
 
 ### Recommended Stack
 
-Pin `scikit-learn>=1.3,<1.7` as the `[sklearn]` optional extra. sklearn 1.7 (2026) requires Python 3.10+, which would break the fdars ABI3-py39 guarantee, so 1.6 is the hard ceiling for the 3.9–3.14 matrix; 1.3 is the floor for the public `validate_data` / `n_features_in_` conventions. Three breaking API changes land at 1.6 and must be bridged: `_validate_data` → public `validate_data`; `_more_tags`/`_get_tags` → `__sklearn_tags__()` dataclass; `_xfail_checks` → `expected_failed_checks`. Handle via a small try/import compat guard (or the `sklearn-compat` shim) rather than version-string comparisons. Use `parametrize_with_checks` (built into sklearn) as the CI compliance gate — it surfaces each check as a named pytest case and continues past failures, unlike `check_estimator` which aborts.
+A **single-line `Cargo.toml` change** (`fdars-core = "0.23.0"` → `"0.33.0"`, `parallel` feature retained) is all the bump requires. No forced toolchain, PyO3, numpy, or maturin change; MSRV 1.81 at 0.33.0 is satisfied by pyfda's 1.83 pin. Feature flags are unchanged (`parallel` still the only one needed; a new optional `serde` feature exists but is not needed). Zero transitive-dependency changes under `parallel`-only (nalgebra/rayon/rustfft/rand/rand_distr all identical 0.23↔0.33). One **soft deprecation** at 0.30: four 2D depth functions (`fraiman_muniz_2d`, `modal_2d`, `random_projection_2d`, `random_tukey_2d`) are `#[deprecated]` — warning only, migrate in a binding phase, not the bump phase. See `STACK.md`.
 
-**Core technologies:**
-- `scikit-learn>=1.3,<1.7`: the estimator contract + `check_estimator`/`parametrize_with_checks` battery — the only new runtime dep; version-capped for the Python 3.9 floor.
-- `parametrize_with_checks` (in-tree): per-estimator CI compliance gate — fail-per-check, not fail-fast.
-- try/import tags-API compat shim (or `sklearn-compat`): bridge 1.3–1.5 vs 1.6 tags/validation API without version branching.
-- scikit-fda: **design reference only, not a dependency** — its `FDataGrid` input contract is the opposite of this milestone's plain-ndarray requirement.
-
-**What NOT to add:** no scikit-fda dependency; no new numerical deps (sklearn wraps the existing `_native` compute); no fdars-core bump.
+**Core technologies (all unchanged):**
+- PyO3 0.28 (abi3-py39), numpy 0.28, maturin 1.x — no bump forced by the upgrade
+- Rust MSRV 1.83 (fdars-core 0.33 needs only 1.81) — headroom preserved
+- `fdars-core` `parallel` feature only; `linalg` stays OFF (no new capability needs it)
+- Package version → **`0.10.0`** at close (semver `v0.10.0` tag triggers PyPI publish; decided at close)
 
 ### Expected Features
 
-~30 candidate estimator classes across five categories map cleanly onto sklearn mixins (final counts pending triage): Transformers (~9), Regressors (~6), Classifiers (~6), Clusterers (~3), Outlier detectors (~6). `FPCATransformer` is the central grid-changing hub — it converts `(n_obs, n_points)` functional data to `(n_obs, n_components)` scores, unlocking the whole Pipeline story; build and validate it first.
+~35 new functions across ~7 new/extended upstream modules, all non-`linalg`-gated and bindable with the current build. The four researchers converged on the *surface* but diverged slightly on the exact module grouping (7–13 groups) — the roadmapper should treat the groupings below as candidate binding waves to confirm during phase planning. See `FEATURES.md` / `ARCHITECTURE.md`.
 
-**Must have (table stakes):**
-- `FPCATransformer` — grid-changing FPCA scores; central Pipeline dependency (needs SVD sign canonicalization for `check_fit_idempotent`).
-- Smoothing transformers (B-spline / local-polynomial), imputation, basis representation, depth transform.
-- Core predictors: FPC-based regression + PLS; FPC-based classifiers (logistic / LDA / QDA / KNN) — all needing `LabelEncoder` in `fit` for check_estimator's arbitrary labels.
-- `FunctionalKMeans` clusterer; the classic outlier trio (LRT / outliergram / magnitude-shape).
+**Must have (table stakes — fill obvious gaps in the existing surface):**
+- **Function-on-function regression** (`fof_regression`, `fof_re_regression` + random effects) — extends `fdars.regression`
+- **Advanced clustering** (`dbscan_fd`, `kcfc_cluster`, `funfem_cluster`, `align_cluster_fd`) — new `fdars.clustering_advanced` surface
+- **SoF regression extensions** (`fam`, `fregre_gkam`, `fregre_gsam`, variable/model selection) — extends `fdars.scalar_on_function`
+- **FPCA variants** (`fsvd`, `fpca_der`, `cross_covariance`, `dynamical_correlation`, `ssvd`)
+- **Deprecated-depth migration** — move off the four 0.30-deprecated 2D depth functions
 
-**Should have (competitive / differentiators over scikit-fda):**
-- Robust FPC regression, Gaussian-only GLM regressor, DD-classifier, elastic-multinomial classifier, nonparametric regression.
-- Fuzzy c-means / functional GMM clusterers; newer outlier detectors (tvdmss, muod, depthgram) — these return typed index lists, so a continuous `decision_function` must be synthesized for `OutlierMixin`.
+**Should have (differentiators — new analysis paradigms):**
+- **Functional time series** (`fts`): `ftsm` + forecast/multistep, `functional_acf`/`pacf`, `stationarity_test`, `long_run_covariance`, `fplsr`, `dpca` — new `fdars.fts` submodule
+- **Fréchet regression / metric-space** (`frechet_mean`, `frechet_global_reg`, `frechet_local_reg`, `frechet_anova`) — new `fdars.frechet` submodule
+- **Density FDA** (`lqd_fpca`, `lqd_transform`, `inverse_lqd`, `wasserstein_barycenter`, `normalize_density`) — new `fdars.density_fda` submodule
+- **Multi-domain data + FAMM** (`MultiFunData`/`FdComponent` opaque handle; `dense_flmm`, `fast_fmm`, `multi_famm`; multivariate SPM) — new `PyMultiFunData` `#[pyclass]`
+- **Shapelets + GAK metric** (`discover_shapelets`, `shapelet_*`, `gak`, `gak_gram_*`, `sigma_gak`) — new `fdars.shapelet` + `metric` extension; new `PyShapeletFit` handle + 2 new enums
 
-**Defer / EXCLUDE (not exempt — stays in functional API):**
-- Registration/alignment (order-sensitive, needs template), CV-based smoothing (self-tuning), `pace_fpca` (IrregFdata input), `functional_glm` non-Gaussian, `elastic_multinomial` where non-compliant, `concurrent_regression` (list-of-matrices input), `cluster_optim` (is itself a hyperparameter search), inference tests (no fit/predict contract), SPM monitoring.
+**Defer (out of scope this milestone / candidates for later):**
+- **FEM smoothing** (`fem_smooth`, `fem_smooth_gcv`, `fem_predict`) — non-standard mesh input shape (needs a new triangle-index conversion path); lowest priority
+- **PDA** (`principal_differential_analysis`) — specialized ODE estimation
+- Enabling `linalg` (now MSRV-unblocked) — explicit user decision to stay parallel-only this milestone
 
 ### Architecture Approach
 
-New optional subpackage `python/fdars/sklearn/` mirroring the `advisor/`/`mcp/` pattern: gated in its own `__init__.py` with a `try: from sklearn.base import BaseEstimator` guard; `fdars/__init__.py` is **not** modified. A shared `_BaseFdarsEstimator(BaseEstimator)` centralizes the contract; per-aspect subclasses compose the sklearn mixins and call `fdars._native.*` directly with validated numpy arrays.
+No hard breaking changes to any currently-bound function across 0.24→0.33 — the bump gate should pass all 772 tests with zero test changes (one soft deprecation aside). New capabilities slot into pyfda's existing thin-wrapper architecture: new `src/*_mod.rs` modules registered via `register_submodule!` in `lib.rs`, PyDict result converters in the pattern of `itp_result_to_pydict`, `#[non_exhaustive]`/string-dispatch enums with mandatory `Err`-returning fallback arms, and up to two new opaque `#[pyclass]` handles mirroring the existing `PyIrregFdata`. See `ARCHITECTURE.md`.
 
 **Major components:**
-1. `sklearn/_base.py` — `_BaseFdarsEstimator`: stores `argvals` verbatim in `__init__`, resolves to `self.argvals_` in `fit`, sets `n_features_in_` via `validate_data`, casts float32→float64 before native calls, hosts the tags-API compat shim.
-2. `sklearn/_transformers.py`, `_regressors.py`, `_classifiers.py`, `_clusterers.py`, `_outliers.py` — the estimator families.
-3. `sklearn/_coverage.py` — the EXCLUDED_METHODS registry (reason-coded), populated by triage and finalized as families are implemented.
-4. Docs section under `docs/sklearn/` wired into MkDocs nav with offline `markdown-exec` fences.
+1. **Isolated bump gate** (Phase 66) — one-line `Cargo.toml` change + full 772-test regression run + changelog/match-arm audit
+2. **New binding modules** — `fts`, `frechet`, `density_fda`, `multi_fdata`, `shapelet` submodules + `regression`/`clustering`/`scalar_on_function`/`metric`/`famm`/`spm` extensions
+3. **Conversion-layer additions** — factor `extract_ragged_vecs` out of `pace_fpca_mod.rs` into `convert.rs` (ragged density/Fréchet inputs); add an i64→usize path for FEM mesh indices (only if FEM is bound)
+4. **Advisor extension** — new `fts`/`frechet` aspects + extended `regression`/`classification`/`spm` aspects; grounding invariant + atomic MCP guard-sync
+5. **Docs** — new pages + hand-authored SVGs + offline `FDARS_FENCE_OK` fences; sequential on `main`
 
 ### Critical Pitfalls
 
-1. **Constructor-param mutation / non-verbatim storage** — every `__init__` arg (esp. `argvals`) must be stored exactly as received; resolve the effective grid only in `fit` → `self.argvals_`. Writing back to `self.argvals` breaks `clone`/`get_params` round-trips, which `check_estimator` catches immediately.
-2. **1-sample / 1-feature error-message substrings are a contract** — `check_fit2d_1sample` needs one of `"1 sample"`/`"n_samples=1"`/`"one sample"`/`"1 class"`; `check_fit2d_1feature` needs `"1 feature(s)"`/`"n_features=1"`. Raw Rust/fdars-core error text won't satisfy these — add Python-layer guards before any native call.
-3. **FPCA SVD sign ambiguity** — canonicalize component sign (largest-abs element positive) in the Python wrapper, or `check_fit_idempotent` fails intermittently.
-4. **Minimum sample/grid requirements** — methods needing a minimum n_samples/n_points/k/df (FPCA n_components, smoothing df, clustering k) are the ones that force EXCLUSION; detect via triage, guard with compliant messages where fixable.
-5. **sklearn 1.3→1.6 tags/validation API drift + Python 3.9–3.14 skew** — bridge with the try/import shim; CI must exercise both API paths across the matrix.
+1. **Silent numeric drift across the 10-minor jump** (HIGH — v4.0 faer-SVD precedent) → isolate the bump; gate on the full ~772-test Python suite, not `cargo test` alone; document any tolerance change.
+2. **Row-major↔column-major transposition on non-square inputs** → route every 2D argument through `numpy2d_to_fdmatrix`; every new binding needs a fixture with `n_obs ≠ n_points` (square fixtures hide the bug).
+3. **`argvals` omission/duplication** → annotate each binding `// argvals: mandatory | optional | absent`; test both paths (wrong default grid silently corrupts non-uniform data).
+4. **Missing `Err` arm on new enum dispatch** (`QualityMeasure`, `ShapeletClassifier`) → wildcard arm must return `PyValueError` listing valid variants, not `Ok(None)`; test asserts `ValueError` on invalid input.
+5. **Grounding-invariant / guard-sync violation in the advisor** → only fdars-computed scalars in diagnostic dicts (no Python-derived numbers, no numpy scalars into `json.dumps`); atomic commit of aspect + `_DIAGNOSTICS_METHODS` + `_ASPECT_PRIMERS`; `test_guard_sync_version_independent.py` must pass.
+6. **Method-inaccurate diagrams + docs-build contamination** → blocking human diagram review before close (v6.0 lesson); docs phase sequential on `main` with `use_worktrees=false`; keep fences small (build is ~19–25 min).
 
 ## Implications for Roadmap
 
-Suggested 5-phase structure (continues numbering from v8.0 which ended at Phase 54 → this milestone starts at Phase 55):
+Suggested shape mirrors v4/v5/v6 exactly: **isolated bump → parallel binding groups → advisor → docs.** Phase numbering continues from Phase 66 (v10.0 ended at 65). The exact number and boundaries of the binding phases should be set by the roadmapper against the requirement scope selected in REQUIREMENTS.md — the grouping below is the researchers' recommendation, not a fixed contract.
 
-### Phase 1 (55): Compliance-Triage & Foundation
-**Rationale:** The no-exemptions constraint means scope is *discovered*, not assumed. Skeletoning every candidate and running the check battery first prevents implementing then discarding non-compliant estimators.
-**Delivers:** `_BaseFdarsEstimator` base class + `[sklearn]` extra pin + `_coverage.py` registry + a PASS/PASS-WITH-FIXES/EXCLUDE list for all ~30 candidates.
-**Addresses:** the shared base-class contract; the definitive coverage list.
-**Avoids:** Pitfalls 1–5 (centralized in the base class); late discovery of structural non-compliance.
-**Go/No-Go gate:** at least a viable core PASSes (≈1 FPCA, 2 smoothers, 2 regressors, 2 classifiers, 1 clusterer, 2 outliers).
+### Phase 66: Isolated Crate Bump + Regression Gate
+**Rationale:** Numeric-drift detection is the highest-risk failure in a 10-minor jump; isolate it from all binding work.
+**Delivers:** `Cargo.toml` 0.23.0 → 0.33.0; maturin rebuild; full 772-test suite green; changelog audit (0.24–0.33, incl. the 0.31/0.32 gap) + grep of every existing `match str_arg { … }` block against the 0.33 API.
+**Avoids:** Pitfalls #1 (drift), #4 (removed/renamed enum variants).
 
-### Phase 2 (56): Transformers (incl. FPCA)
-**Rationale:** FPCATransformer is the central grid-changing hub the predictors depend on; transformers also carry the strictest dtype/shape checks.
-**Delivers:** FPCATransformer (sign-canonicalized), smoothers, imputer, basis representation, depth transform + a `Pipeline([smoother, fpca])` end-to-end test.
-**Uses:** `parametrize_with_checks` gate; direct `_native.*` calls.
-**Implements:** `sklearn/_transformers.py`.
+### Phases 67–71: New Binding Groups (parallelizable after 66, except as noted)
+**Rationale:** Additive, disjoint module sets — parallel worktrees cut wall-clock (v10.0 precedent), except groups sharing `spm_mod.rs` must be sequential.
+**Delivers (candidate grouping):**
+- **FTS** — `fdars.fts` submodule (~8–13 fns, forecast/ACF/PACF/stationarity/dpca/fplsr)
+- **Function-on-function regression** — extend `fdars.regression` (fof + random effects)
+- **Fréchet + Density FDA** — two new submodules; needs the `extract_ragged_vecs` `convert.rs` refactor first
+- **Multi-domain data + FAMM + advanced clustering** — `PyMultiFunData` handle → SPM multivariate extensions → clustering; **sequential within the phase** (multi_fdata before spm), and the only group touching `spm_mod.rs`
+- **Shapelet + GAK metric** — `fdars.shapelet` submodule (`PyShapeletFit` + 2 enums) + `metric` GAK extension
+**Uses:** existing `register_submodule!`, PyDict-converter, opaque-`#[pyclass]` patterns.
+**Avoids:** Pitfalls #2 (transposition), #3 (argvals), #4 (enum arms).
 
-### Phase 3 (57): Regressors & Classifiers
-**Rationale:** Straightforward once FPCATransformer + base patterns exist; all classifiers reuse the `X_fit_` + `LabelEncoder` patterns.
-**Delivers:** FPC/PLS regressors; logistic/LDA/QDA/KNN classifiers (+ differentiators that pass) + a `Pipeline([imputer, smoother, fpca, classifier])` end-to-end test.
+### Phase 72: Advisor Extension
+**Rationale:** Depends on all new bindings being live and callable.
+**Delivers:** new `fts`/`frechet` aspects + extended `regression`/`classification`/`spm` aspects; grounded fdars-computed scalars; atomic guard-sync; `json.dumps` test per aspect. Keep `frechet` diagnostics-only initially (defer from `_RUNNABLE_METHODS` until a density-dataset registration protocol is designed).
+**Avoids:** Pitfalls #5 (grounding/guard-sync).
 
-### Phase 4 (58): Clusterers & Outlier Detectors
-**Rationale:** Distinct concerns (determinism/seeding for clustering; synthesized `decision_function` for outliers) warrant their own phase.
-**Delivers:** FunctionalKMeans (+ fuzzy c-means/GMM if compliant); LRT/outliergram/magnitude-shape (+ tvdmss/muod/depthgram if compliant).
-
-### Phase 5 (59): Documentation & Docs Gate
-**Rationale:** Fence examples depend on working estimators, so docs come last.
-**Delivers:** `docs/sklearn/` section + per-category pages + Pipeline & GridSearchCV worked examples (offline `FDARS_FENCE_OK`) + method-accurate hand-authored SVG(s) + the published coverage/EXCLUDE list; whole-site `mkdocs build --strict` green; blocking human diagram review.
+### Phase 73: Documentation
+**Rationale:** Docs build runs real compute against the main tree; must be last and sequential.
+**Delivers:** new pages (fts / fof-regression / frechet / density-fda or multi-fdata / shapelet) each with a method-accurate hand-authored inline SVG + offline `FDARS_FENCE_OK` worked example; whole-site `mkdocs build --strict` green; blocking human diagram review.
+**Avoids:** Pitfalls #6 (method-inaccuracy, worktree contamination, slow fences, stale cross-refs).
 
 ### Phase Ordering Rationale
-- Triage first because scope is discovered under the no-exemptions rule (dependency: everything downstream needs the PASS/EXCLUDE verdict).
-- Transformers before predictors because FPCATransformer is the Pipeline hub the predictors consume.
-- Clusterers/outliers separated for their determinism and decision_function specifics.
-- Docs last because offline fences require working estimators (standing v6.0 rule: docs phase runs sequentially on `main`, not in worktrees).
+- Bump gates everything (drift detection before binding work builds on a shifted baseline).
+- Binding groups are additive + mostly disjoint → parallel worktrees, except the multi-domain/SPM group (shared `spm_mod.rs`, internal sequential dependency).
+- Advisor after bindings (needs callable functions); docs last + sequential on `main` (real-compute fences, `use_worktrees=false`).
 
 ### Research Flags
-- **Phase 2 (56):** may need a short targeted check if the PASS-WITH-FIXES list is large — exact error-message substrings per sklearn version; determinism of rayon-parallel paths under fixed `random_state`.
-- **Phases 3–5:** standard patterns established in Phases 1–2 — skip research-phase.
+Phases likely needing deeper research during planning:
+- **Bump phase (66):** confirm the 0.31/0.32 changelog (missing from published CHANGELOG — check GitHub source tags/diff.rs) and cross-check result-struct field names against 0.33 source before the binding phases.
+- **FTS phase:** FTSM AR-order selection + forecast strategy (iterated vs. direct h-step); stationarity-test null.
+- **Fréchet + Density phase:** LQD transform vs. R `fda` reference; Wasserstein formula; ragged-input conversion.
+- **Multi-domain/FAMM phase:** `MultiFunData` same-obs-count validation; `dense_flmm` REML stopping criterion; exact struct fields.
+- **Shapelet/GAK phase:** exact `ShapeletDiscoveryConfig`/`GakConfig` fields (docs.rs 404 at 0.33 — read source); z-norm divide-by-zero; GAK Gram PSD + sklearn precomputed-kernel integration.
+
+Phases with standard patterns (lighter research):
+- **Function-on-function regression:** closes a visible gap; established v4–v6 binding pattern.
+- **Advisor + docs:** well-worn project protocols (guard-sync, `FDARS_FENCE_OK`, human diagram review).
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Official sklearn docs/release notes verified current (2026-08-31); version drift validated against a real-world case. |
-| Features | HIGH | Direct fdars source inspection + scikit-fda reference + sklearn contracts; EXCLUDE list from check_estimator behavior. PASS-WITH-FIXES boundary refinable by triage. |
-| Architecture | HIGH | Full fdars codebase read; BaseEstimator contract verified against the developer guide. |
-| Pitfalls | MEDIUM | sklearn source + docs + issue tracker; some specifics (exact error substrings, tags dataclass fields) are version-specific and confirmed at triage. |
+| Stack | HIGH | crates.io/docs.rs: MSRV 1.81, clean deps, no forced toolchain bump, `parallel`-only unchanged |
+| Features | MEDIUM | Capability inventory + signatures from docs.rs; some config-struct fields returned 404 at 0.33 (inferred from CHANGELOG) |
+| Architecture | MEDIUM | "Additive/non-breaking" converges across 6 release notes + CHANGELOG; struct-field stability inferred from docs.rs, not source |
+| Pitfalls | HIGH | Every pitfall derives from verified project history (v4–v6 Key Decisions) or direct codebase inspection |
 
-**Overall confidence:** HIGH
+**Overall confidence:** MEDIUM
 
 ### Gaps to Address
-- Exact PASS/EXCLUDE boundary for borderline estimators (ShiftRegistration on n=2; GLMRegressor tags for response domain; the newer outlier detectors' `decision_function`) — resolved by the Phase-1 triage scan.
-- Determinism of rayon-parallel clustering under fixed `random_state` (drives the `non_deterministic` tag decision) — confirm in Phase 4.
-- Whether `sklearn-compat` fully covers the 1.4–1.6 tags API vs. a hand-rolled try/import guard — decide in Phase 1.
+- **0.31/0.32 changelog gap** — not on the published CHANGELOG; confirm no surprise API change via GitHub source tags before finalizing binding scope (bump-phase pre-work). If an internal break exists, the Phase-66 regression gate catches it.
+- **Exact result-struct + config field names** (`density_fda`, `frechet`, `multi_fdata`, `shapelet`, FEM) — cross-check against 0.33 source before implementing each group's PyDict converters.
+- **Per-group advisor scope** — which new groups produce grounded scalar diagnostics worth an aspect vs. diagnostics-only; resolve during Phase 72 planning.
+- **`MetricSpace` (Fréchet) bindability** — a Rust trait, not a concrete type; needs a string-dispatch strategy (like `DepthMethod`) at binding time, not a research blocker.
+- **`funhddC_cluster` / deprecated-2D-depth presence** — verify actual public API at 0.33 during the bump phase.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- scikit-learn "Developing scikit-learn estimators" developer guide — BaseEstimator contract, tags API, validate_data/n_features_in_.
-- scikit-learn install page + 1.6 release highlights — Python support matrix, `validate_data`/`__sklearn_tags__`/`expected_failed_checks` changes.
-- scikit-learn `check_estimator` / `parametrize_with_checks` API docs — the compliance battery.
-- fdars source (`python/fdars/__init__.py`, `fdata_class.py`, `advisor/`, `mcp/`) — registration/gating pattern, native boundary.
+- crates.io API — fdars-core version registry, `rust_version` (MSRV 1.81), Cargo feature manifest, transitive-dep manifests for 0.23.0 vs 0.33.0
+- docs.rs — fdars-core 0.23.0–0.33.0 module indexes, struct/function pages (signatures + fields)
+- pyfda source inspection — `convert.rs`, `lib.rs` `register_submodule!`, existing `*_mod.rs` patterns, advisor `server.py` frozensets + `_validate.py` grounding guard
+- PROJECT.md Key Decisions + MEMORY.md — v4–v6 precedents (faer drift, hypograph/epigraph, worktree-vs-main, guard-sync)
 
 ### Secondary (MEDIUM confidence)
-- scikit-fda docs (0.10.x) + arXiv paper — FDA estimator API shape as a design reference.
-- sklearn issue tracker / PR history — error-message-substring contracts, version-drift failure reports.
+- GitHub release notes — v0.24, v0.27, v0.28, v0.29, v0.32, v0.33
+- fdars-core CHANGELOG.md — additive-only claim (0.31/0.32 entries absent)
+
+### Tertiary (LOW confidence)
+- docs.rs field-access inferences for struct field names (not an exhaustive source-code audit) — cross-check per group before implementation
 
 ---
-*Research completed: 2026-08-31*
+*Research completed: 2026-09-02*
 *Ready for roadmap: yes*
