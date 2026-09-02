@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Validation-First Framework: Three Analysis Paths">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Validation-First Framework: Three Analysis Paths" aria-labelledby="ex-sonar-tsrvf-title ex-sonar-tsrvf-desc">
+  <title id="ex-sonar-tsrvf-title">Validation-First Framework: Three Analysis Paths</title>
+  <desc id="ex-sonar-tsrvf-desc">The sonar TSRVF example uses a validation-first framework: a phase elasticity check routes each signal to one of three paths (standard L²/FPCA, elastic TSRVF, or shape-only), then accuracy badges confirm which path best separates mine from rock sonar returns.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Andrews Wine Quality Control — functional boxplot, fpca_tolerance_band, spm_phase1 and spm_monitor T2 and SPE control charts">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Andrews Wine: Quality Control Pipeline" aria-labelledby="ex-andrews-wine-qc-title ex-andrews-wine-qc-desc">
+  <title id="ex-andrews-wine-qc-title">Andrews Wine: Quality Control Pipeline</title>
+  <desc id="ex-andrews-wine-qc-desc">The Andrews wine QC pipeline builds a Phase I baseline using functional boxplot and FPCA tolerance bands, then monitors new batches in Phase II via spm_monitor T² and SPE control charts to flag off-cultivar contamination.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

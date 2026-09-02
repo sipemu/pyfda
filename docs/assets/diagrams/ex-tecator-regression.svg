@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Predicting Fat from NIR Spectra — scalar-on-function regression workflow">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Predicting Fat from NIR Spectra" aria-labelledby="ex-tecator-regression-title ex-tecator-regression-desc">
+  <title id="ex-tecator-regression-title">Predicting Fat from NIR Spectra</title>
+  <desc id="ex-tecator-regression-desc">The Tecator regression example compares FPC-LM, PLS, and NP kernel regression on NIR spectra; NP achieves the best R², while PLS and logistic β(λ) both highlight the 930–970 nm C–H band as the dominant fat-absorption region.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -92,6 +94,7 @@
   <line x1="596" y1="264" x2="596" y2="292" stroke="#198754" stroke-width="1.5"/>
   <polygon points="592,288 596,296 600,288" fill="#198754"/>
 
-  <!-- Bottom note -->
-  <text class="sub" x="360" y="410" text-anchor="middle">NP (kernel smoother on L² distances) is strongest. PLS β(λ) readable: 930–970 nm C–H band. Logistic β(λ) same region drives go/no-go classification.</text>
+  <!-- Bottom note (split to avoid x=720 overflow) -->
+  <text class="sub" x="360" y="410" text-anchor="middle">NP (kernel smoother on L² distances) is strongest. PLS β(λ) readable: 930–970 nm C–H band.</text>
+  <text class="sub" x="360" y="426" text-anchor="middle">Logistic β(λ): same 930–970 nm region drives go/no-go classification.</text>
 </svg>

@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Tecator Spectra Inline Quality Monitoring — SPM Phase I FPCA baseline, Phase II T2 and SPE control charts, EWMA, per-PC contributions">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Tecator Spectra: Inline Quality Monitoring" aria-labelledby="ex-tecator-monitoring-title ex-tecator-monitoring-desc">
+  <title id="ex-tecator-monitoring-title">Tecator Spectra: Inline Quality Monitoring</title>
+  <desc id="ex-tecator-monitoring-desc">The Tecator spectra monitoring example establishes a Phase I FPCA baseline, then monitors new spectra in Phase II with T² and SPE control charts plus EWMA smoothing; per-PC contribution bars diagnose which spectral components cause control-limit exceedances.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

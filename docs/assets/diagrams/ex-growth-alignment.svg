@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Growth Curve Alignment — deriv_1d velocity curves, alignment_quality phase-amplitude split, karcher_mean aligns pubertal spurts, FPCA before vs after, warping functions reveal girls mature earlier">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Growth Curve Alignment" aria-labelledby="ex-growth-alignment-title ex-growth-alignment-desc">
+  <title id="ex-growth-alignment-title">Growth Curve Alignment</title>
+  <desc id="ex-growth-alignment-desc">Growth curve alignment computes velocity curves via deriv_1d, then uses karcher_mean to align pubertal spurts; FPCA before vs after alignment shows that phase variation between individuals is a dominant source of apparent shape variability, with warping functions revealing sex differences in maturation timing.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

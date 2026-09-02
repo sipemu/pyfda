@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Andrews Wine: Outlier Detection — depth, magnitude-shape, outliergram, and likelihood-ratio test on wine Andrews curves">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Andrews Wine: Outlier Detection Pipeline" aria-labelledby="ex-andrews-wine-title ex-andrews-wine-desc">
+  <title id="ex-andrews-wine-title">Andrews Wine: Outlier Detection Pipeline</title>
+  <desc id="ex-andrews-wine-desc">Four complementary outlier detectors (depth, magnitude-shape MS-plot, outliergram, and likelihood-ratio test) are applied to wine Andrews curves; a consensus rule flags samples flagged by multiple independent methods as reliable outliers.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

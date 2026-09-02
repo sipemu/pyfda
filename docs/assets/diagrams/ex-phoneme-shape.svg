@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Phoneme Spectra: shape distance and when elastic methods help — alignment_quality phase fraction, shape_self_distance_matrix vs lp_self_1d, shape_mean per class, kmedoids_from_distances clustering purity comparison">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Phoneme Spectra: Shape Distance and When Elastic Methods Help" aria-labelledby="ex-phoneme-shape-title ex-phoneme-shape-desc">
+  <title id="ex-phoneme-shape-title">Phoneme Spectra: Shape Distance and When Elastic Methods Help</title>
+  <desc id="ex-phoneme-shape-desc">When alignment_quality reveals high phase variability in phoneme spectra, shape_self_distance_matrix outperforms the L² distance matrix; kmedoids clustering on shape distances achieves higher purity than L²-based clustering, confirming elastic methods help when phase variation is large.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
