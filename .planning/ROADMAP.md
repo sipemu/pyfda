@@ -233,7 +233,10 @@ Full detail: `.planning/milestones/v10.0-ROADMAP.md`
   2. `fof_re_regression` (+ `predict_fof_re`) is callable with subject-id validation for the random-effects structure
   3. Additive/generalized SoF models (`fam`, `fregre_gkam`, `fregre_gsam`) and selection routines (`variable_selection`, `model_selection_ncomp`) are callable via `fdars.scalar_on_function`
 
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 68-01-PLAN.md — Tracer: `fof_regression` bound end-to-end into `fdars.regression` (dual-2D, `beta_surface (m_y,m_x)` shape) [REG-01]
+- [ ] 68-02-PLAN.md — FOF family: `predict_fof`, `fof_cv`, `fof_re_regression` (subject-id validation), `predict_fof_re` [REG-01, REG-02]
+- [ ] 68-03-PLAN.md — New `fdars.scalar_on_function` submodule: `fam`, `fregre_gsam`, `fregre_gkam`, `variable_selection`, `model_selection_ncomp` [REG-03]
 **Parallelizable**: Yes — extends `src/regression_mod.rs` / `scalar_on_function`; disjoint from other groups' module files; can run in a worktree in parallel with Phases 67, 69, 71.
 
 #### Phase 69: Fréchet Regression & Density FDA
