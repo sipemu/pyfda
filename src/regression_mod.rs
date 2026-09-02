@@ -1450,6 +1450,16 @@ fn validate_subject_ids(
             n_obs
         )));
     }
+    // Guard against negative i64 values that silently wrapped to huge usize
+    // via numpy1d_to_usize_vec (casts i64 as usize without sign check).
+    const I64_MAX_AS_USIZE: usize = i64::MAX as usize;
+    if let Some(&bad) = sid.iter().find(|&&v| v > I64_MAX_AS_USIZE) {
+        return Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "subject_ids must be non-negative integers; \
+             a negative value wrapped to {} after i64\u{2192}usize cast",
+            bad
+        )));
+    }
     let n_subjects = {
         let mut sorted = sid.to_vec();
         sorted.sort_unstable();

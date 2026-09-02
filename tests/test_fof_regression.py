@@ -295,6 +295,16 @@ def test_subject_id_validation() -> None:
             _y_argvals,
         )
 
+    # Negative subject id: wraps to usize::MAX without the guard — must be rejected
+    with pytest.raises(ValueError, match="non-negative"):
+        reg.fof_re_regression(
+            _x_data,
+            _y_data,
+            np.array([-1] + [0] * (N - 1), dtype=np.int64),
+            _x_argvals,
+            _y_argvals,
+        )
+
     # predict_fof_re also validates (wrong length)
     with pytest.raises(ValueError, match="subject_ids length"):
         reg.predict_fof_re(
