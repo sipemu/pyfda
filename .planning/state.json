@@ -1,38 +1,43 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v9.0 — scikit-learn API Compatibility",
+  "milestone": "v10.0 — Diagram Quality & Accessibility Pass",
   "phases": [
     {
-      "number": "55",
-      "name": "Compliance-Triage & Foundation",
+      "number": "60",
+      "name": "Diagram Quality Audit",
       "status": "complete"
     },
     {
-      "number": "56",
-      "name": "Transformers",
-      "status": "complete"
+      "number": "61",
+      "name": "SVG Corrections — learn / represent / align",
+      "status": "pending"
     },
     {
-      "number": "57",
-      "name": "Regressors & Classifiers",
-      "status": "complete"
+      "number": "62",
+      "name": "SVG Corrections — analyze / monitoring / advisor",
+      "status": "pending"
     },
     {
-      "number": "58",
-      "name": "Clusterers & Outlier Detectors + Compliance Gate",
-      "status": "complete"
+      "number": "63",
+      "name": "SVG Corrections — regression / inference / examples",
+      "status": "pending"
     },
     {
-      "number": "59",
-      "name": "Documentation & Docs Gate",
-      "status": "in_progress"
+      "number": "64",
+      "name": "Cards & Thumbnails Sync + New Coverage",
+      "status": "pending"
+    },
+    {
+      "number": "65",
+      "name": "STYLE_SPEC Refresh, Whole-Site Gate & Human Review",
+      "status": "pending"
     }
   ],
   "next": {
-    "command": "/gsd:progress",
-    "label": "Show progress",
-    "reason": "Unsure of state — showing progress"
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step (plan phase 61)",
+    "reason": "Phase 61 of 6 — needs a plan"
   },
-  "updated_at": "2026-09-02T06:38:56.276Z"
+  "updated_at": "2026-09-02T08:29:04.536Z"
 }
