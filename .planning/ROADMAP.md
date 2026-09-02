@@ -203,7 +203,10 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
   3. Every diagram in this batch conforms to `STYLE_SPEC.md` (viewBox conventions, canonical `<style>` block, palette, stroke weights, panel patterns) and passes the SVGO idempotence + build-determinism CI gate (byte-identical rebuilds).
   4. Every correction in this batch preserves method-accuracy — no diagram misdepicts what its method does after the fix — and each section passes a built-site review before the batch is done.
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 61-01-PLAN.md — Correct all 24 learn/represent/align concept SVGs: A11Y-01 (aria-label matches title) + A11Y-02 (long-form title/desc/aria-labelledby) on every diagram; fix shift-registration "elastic warp" method-accuracy + crowding, banded-alignment edge crowding, pace-fpca subtitle overflow; STYLE_SPEC preserved; render-verified via rsvg-convert
+
 **UI hint**: yes
 
 ### Phase 62: SVG Corrections — analyze / monitoring / advisor
