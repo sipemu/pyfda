@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Styling a functional sample with matplotlib">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Custom Plotting: Styling a Curve Family"
+     aria-labelledby="custom-plotting-title custom-plotting-desc">
+  <title id="custom-plotting-title">Custom Plotting: Styling a Curve Family</title>
+  <desc id="custom-plotting-desc">Illustrates how fdars provides no built-in plotting layer — users call matplotlib directly (ax.plot) using fd.data rows, applying colour-by-metadata, mean ± sd envelopes, and median highlighting for full aesthetic control.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
