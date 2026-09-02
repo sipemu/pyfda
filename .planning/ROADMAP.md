@@ -191,7 +191,8 @@ Full detail: `.planning/milestones/v10.0-ROADMAP.md`
   2. The full existing Python suite (~772 tests) passes with zero new failures against the bumped crate; any numeric-tolerance change is documented (expected: none)
   3. A recorded 0.24→0.33 changelog + API audit confirms every existing `match`-arm/enum-variant string in `src/*_mod.rs` still exists at 0.33, and flags the four 0.30-deprecated 2D depth functions for later migration
   4. Only `Cargo.toml` and `Cargo.lock` change in this phase — no new bindings, no test edits
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 66-01-PLAN.md — bump fdars-core 0.23→0.33 (Cargo.toml/lock), maturin build gate, full pytest regression gate, and 0.24→0.33 changelog + enum/match-arm API audit (flag 4 deprecated 2D depth fns)
 **Parallelizable**: No — sequential regression gate; must land before any binding phase.
 
 #### Phase 67: Functional Time Series (`fdars.fts`)
