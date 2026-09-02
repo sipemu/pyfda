@@ -22,10 +22,10 @@ current_phase_name: Documentation & Docs Gate
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-31)
+See: .planning/PROJECT.md (updated 2026-09-02)
 
-**Core value:** Functional-data methods in `fdars` plug natively into scikit-learn's `Pipeline`/`GridSearchCV`/`cross_val_score`, interoperate with native sklearn estimators, and offer familiar `fit`/`transform`/`predict` ergonomics — every wrapped estimator passing the full `check_estimator` battery, no exemptions.
-**Current focus:** Phase 59 — Documentation & Docs Gate
+**Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
+**Current focus:** Planning next milestone (v9.0 shipped 2026-09-02) — run `/gsd-new-milestone`
 
 ## Current Position
 
@@ -144,6 +144,8 @@ None yet.
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
+| verification_gap | Phase 59 (Documentation & Docs Gate) closed via override — no formal `59-VERIFICATION.md`; deliverables shipped (docs live, `--strict` green, tag `v0.9.0` on PyPI) | acknowledged | v9.0 close |
+| diagram_review | DOCS-03 blocking human diagram review never explicitly approved — pre-verified method-accurate, now moot (SVG live on published site) | acknowledged | v9.0 close |
 | sklearn | FUT-01: `set_output(transform="pandas")` / DataFrame output API | future | v9.0 init |
 | sklearn | FUT-02: re-evaluate EXCLUDED methods if fdars-core exposes stored-model/template-free variants | future | v9.0 init |
 | sklearn | FUT-03: sklearn 1.7+ support once Python 3.9 is dropped (single tags-API path) | future | v9.0 init |

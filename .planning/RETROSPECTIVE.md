@@ -139,6 +139,39 @@ Bumped `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no linalg) and exposed the
 
 ---
 
+## Milestone: v9.0 — scikit-learn API Compatibility
+
+**Shipped:** 2026-09-02
+**Phases:** 5 (55–59) | **Plans:** 17
+
+### What Was Built
+`fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer over the current bindings: a shared `_BaseFdarsEstimator` (BaseEstimator contract, `argvals` constructor param, float32→64 cast, tags-API 1.3–1.8 feature-detect shim), a reason-coded `EXCLUDED_METHODS` coverage registry, and **28 estimators** across five families (transformers, regressors, classifiers, clusterers, outlier detectors) each passing the full `check_estimator` battery with zero exemptions. Native `Pipeline`/`GridSearchCV`/`cross_val_score` integration + interop with native sklearn estimators. New "scikit-learn API" docs section. Package 0.8.0 → 0.9.0, released to PyPI.
+
+### What Worked
+- **Triage-first scope discovery under a no-exemptions bar.** Phase 55 skeletoned ~30 candidates and ran the full check battery *before* implementing, turning "which methods can comply?" from a guess into a recorded PASS/EXCLUDE verdict. Reclassifying skeleton predict-quality failures as PASS-WITH-FIXES (not EXCLUDE) kept all six families in scope.
+- **Stored-reference depth scoring** (`modified_band_1d(X, X_fit_)`) solved `check_methods_subset_invariance` for all six outlier detectors — a single pattern that unblocked the whole family.
+- **FPCATransformer-first ordering** — building the central grid-changing hub before the predictors that consume it made the Pipeline story fall out naturally.
+- **Feature-detect over version-compare** for the sklearn tags API let one shim span 1.3–1.8 (dev/CI runs 1.8; the `<1.7` cap only bites the Python-3.9 wheel).
+
+### What Was Inefficient
+- **Milestone close ran late and out-of-band.** The user drove straight to ship (docs/PyPI/green-CI) and the GSD lifecycle (audit → complete → cleanup) was skipped, leaving STATE.md at "Phase 59 in_progress / 80%" and no MILESTONES.md entry until a later, separate close pass.
+- **Phase 59 shipped without a VERIFICATION.md**, forcing an override closeout — the deliverables were provably shipped, but the phase record had to be reconstructed from SUMMARYs + the live site.
+- **Stale `deferred-items.md` triage snapshot** (9 Phase-56-era rows) surfaced as "open" at close even though Phases 57–58 had resolved them; the table-row form is un-acknowledgeable via the CLI and had to be resolved by editing the file directly.
+
+### Patterns Established
+- Under a "full compliance, no exemptions" bar, EXCLUDE is reserved for genuinely-structural mismatch; implementation-quality failures are PASS-WITH-FIXES deferred to the owning family phase.
+- A full-matrix `parametrize_with_checks` gate over *all* wrapped estimators (1387 checks) as the milestone lock, with `test_no_pass_with_fixes_remaining` asserting the registry is clean.
+
+### Key Lessons
+- **Close the milestone in-band even when shipping is driven manually.** Skipping audit/complete leaves the planning record inconsistent with reality and forces an expensive reconstruction later. A shipped PyPI release is necessary but not sufficient for a clean GSD close.
+- **Table-form `deferred-items.md` entries can't be CLI-acknowledged** — resolve them in-file with a `Status: Resolved` column (or a `- **Status:** resolved` field bullet) at the source.
+
+### Cost Observations
+- Model mix: orchestrator opus; executors/verifier sonnet.
+- Notable: milestone-close CI/Docs went red on false-failures (advisor fences need pydantic in the docs env; FND-02 guard needs `fetch-depth:0`) — local `--strict` green ≠ CI green when the dev venv is a superset.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -148,6 +181,7 @@ Bumped `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no linalg) and exposed the
 | v1.0 — Documentation Overhaul | ~2 | 1–9 | Section-by-section sweeps with per-section review gates; style/determinism/doc-test guardrails established first |
 | v2.0 — Grounded AI analysis advisor | ~2 | 10–13 | Tracer-first per phase; one deterministic core fanned out to four surfaces; offline-by-default + env-gated LLM tests |
 | v2.1 — Document the AI Advisor | 1 | 14–18 | Fully autonomous run (discuss→…→cleanup); orchestrator self-served per-page review gates; execution-sentinel doc-tests; illustrative-vs-executed fence split |
+| v9.0 — scikit-learn API Compatibility | ~3 | 55–59 | Triage-first scope discovery under a no-exemptions bar; full-matrix `parametrize_with_checks` gate as milestone lock; out-of-band manual ship forced a later in-band close (override for the unverified docs phase) |
 
 ### Cumulative Quality
 
