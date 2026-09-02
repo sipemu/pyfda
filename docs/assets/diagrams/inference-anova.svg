@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="One-way Functional ANOVA — between-group and within-group variation decomposition">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="One-way Functional ANOVA — Variance Decomposition" aria-labelledby="inference-anova-title inference-anova-desc">
+  <title id="inference-anova-title">One-way Functional ANOVA — Variance Decomposition</title>
+  <desc id="inference-anova-desc">One-way functional ANOVA decomposes total curve variation into between-group variation (group means vs grand mean, the signal) and within-group variation (individual curves vs their group mean, the noise); a large between-to-within ratio yields a small p-value.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
