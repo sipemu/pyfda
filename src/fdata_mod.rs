@@ -36,6 +36,7 @@ pub fn mean_1d<'py>(
 /// -------
 /// numpy.ndarray
 ///     1D array of length m1*m2.
+#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 pub fn mean_2d<'py>(
     py: Python<'py>,

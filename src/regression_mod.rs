@@ -391,6 +391,7 @@ pub fn fosr<'py>(
 /// dict
 ///     f_statistic_t (m,), p_value (float), group_means (k, m),
 ///     global_statistic (float).
+#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 #[pyo3(signature = (data, groups, n_perm=999))]
 pub fn fanova<'py>(

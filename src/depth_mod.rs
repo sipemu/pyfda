@@ -37,6 +37,7 @@ pub fn fraiman_muniz_1d<'py>(
 }
 
 /// Fraiman-Muniz depth for 2D functional data.
+#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 #[pyo3(signature = (data, ref_data, scale=true))]
 pub fn fraiman_muniz_2d<'py>(
@@ -81,6 +82,7 @@ pub fn modal_1d<'py>(
 }
 
 /// Modal depth for 2D functional data.
+#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 #[pyo3(signature = (data, ref_data, h=1.0))]
 pub fn modal_2d<'py>(
@@ -125,6 +127,7 @@ pub fn random_projection_1d<'py>(
 }
 
 /// Random projection depth for 2D functional data.
+#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 #[pyo3(signature = (data, ref_data, n_proj=50))]
 pub fn random_projection_2d<'py>(
@@ -169,6 +172,7 @@ pub fn random_tukey_1d<'py>(
 }
 
 /// Random Tukey depth for 2D functional data.
+#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 #[pyo3(signature = (data, ref_data, n_proj=50))]
 pub fn random_tukey_2d<'py>(
