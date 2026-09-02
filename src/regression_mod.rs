@@ -1217,5 +1217,85 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(predict_fosr, m)?)?;
     m.add_function(wrap_pyfunction!(concurrent_regression, m)?)?;
     m.add_function(wrap_pyfunction!(functional_glm, m)?)?;
+    m.add_function(wrap_pyfunction!(fof_regression, m)?)?;
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Function-on-Function Regression (Phase 68, Plan 01)
+// ---------------------------------------------------------------------------
+
+/// Function-on-function linear regression via FPC basis decomposition.
+///
+/// Fits a linear model mapping a functional predictor X(t) to a functional
+/// response Y(s) through the integral equation:
+/// Y(s) = α(s) + ∫ β(s,t) X(t) dt + ε(s).
+///
+/// Parameters
+/// ----------
+/// x_data : numpy.ndarray
+///     Functional predictor, shape (n, m_x). Rows are observations, columns
+///     are evaluation points on the predictor grid.
+/// y_data : numpy.ndarray
+///     Functional response, shape (n, m_y). Rows are observations, columns
+///     are evaluation points on the response grid.
+/// x_argvals : numpy.ndarray
+///     Predictor grid evaluation points, length m_x.
+/// y_argvals : numpy.ndarray
+///     Response grid evaluation points, length m_y.
+/// ncomp_x : int, optional
+///     Number of predictor FPC components (default 3).
+/// ncomp_y : int, optional
+///     Number of response FPC components (default 3).
+///
+/// Returns
+/// -------
+/// dict
+///     intercept (m_y,), beta_surface (m_y, m_x), fitted (n, m_y),
+///     residuals (n, m_y), r_squared_t (m_y,), r_squared (float),
+///     ncomp_x (int), ncomp_y (int), coef_matrix (ncomp_x, ncomp_y).
+///
+/// Notes
+/// -----
+/// ``beta_surface`` has shape ``(m_y, m_x)``: rows index the response grid,
+/// columns index the predictor grid. The embedded ``fpca_x`` and ``fpca_y``
+/// fields of the internal result are intentionally excluded from the returned
+/// dict — they are internal FPCA state not needed by callers.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n_obs mismatch between x_data and y_data, argvals length mismatch,
+///     n < 3, or ncomp_x / ncomp_y is 0.
+#[pyfunction]
+#[pyo3(signature = (x_data, y_data, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3))]
+pub fn fof_regression<'py>(
+    py: Python<'py>,
+    x_data: PyReadonlyArray2<'py, f64>,
+    y_data: PyReadonlyArray2<'py, f64>,
+    x_argvals: PyReadonlyArray1<'py, f64>,
+    y_argvals: PyReadonlyArray1<'py, f64>,
+    ncomp_x: usize,
+    ncomp_y: usize,
+) -> PyResult<Bound<'py, PyAny>> {
+    let x_mat = numpy2d_to_fdmatrix(x_data)?;
+    let y_mat = numpy2d_to_fdmatrix(y_data)?;
+    let ax = numpy1d_to_vec(x_argvals);
+    let ay = numpy1d_to_vec(y_argvals);
+    let result = to_pyresult(fdars_core::fof_regression::fof_regression(
+        &x_mat, &y_mat, &ax, &ay, ncomp_x, ncomp_y,
+    ))?;
+
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("intercept", vec_to_numpy1d(py, result.intercept))?;
+    dict.set_item("beta_surface", fdmatrix_to_numpy2d(py, &result.beta_surface))?;
+    dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
+    dict.set_item("residuals", fdmatrix_to_numpy2d(py, &result.residuals))?;
+    dict.set_item("r_squared_t", vec_to_numpy1d(py, result.r_squared_t))?;
+    dict.set_item("r_squared", result.r_squared)?;
+    dict.set_item("ncomp_x", result.ncomp_x)?;
+    dict.set_item("ncomp_y", result.ncomp_y)?;
+    dict.set_item("coef_matrix", fdmatrix_to_numpy2d(py, &result.coef_matrix))?;
+    // fpca_x and fpca_y are intentionally NOT exposed — internal FPCA state
+    Ok(dict.into_any())
 }
