@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
-current_phase: 66
-current_phase_name: Isolated Crate Bump + Regression Gate
-status: verifying
-stopped_at: Completed 66-01-PLAN.md
-last_updated: "2026-09-02T14:09:05.067Z"
+current_phase: 67
+current_phase_name: Functional Time Series (`fdars.fts`)
+status: planning
+stopped_at: Phase 66 complete, ready to plan Phase 67
+last_updated: "2026-09-02T14:15:20.171Z"
 last_activity: 2026-09-02
-last_activity_desc: Phase 66 execution started
-state_head: 6fe0f6200a56dcf0f96a2f9c35ebd26b92fb24e5
+last_activity_desc: Phase 66 complete, transitioned to Phase 67
+state_head: 22ba06fe773bd3cf998797facfcb3983c83c84db
 progress:
   total_phases: 8
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 1
   completed_plans: 1
-  percent: 0
+  percent: 13
 ---
 
 # Project State
@@ -29,16 +29,16 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 
 ## Current Position
 
-Phase: 66 (Isolated Crate Bump + Regression Gate) — EXECUTING
-Plan: 1 of 1
-Status: Phase complete — ready for verification
-Last activity: 2026-09-02 — Phase 66 execution started
+Phase: 67 — Functional Time Series (`fdars.fts`)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-02 — Phase 66 complete, transitioned to Phase 67
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0 (this milestone); prior: 7 (v10.0), 17 (v9.0), 16 (v8.0), 11 (v6.0)
+- Total plans completed: 1 (this milestone); prior: 7 (v10.0), 17 (v9.0), 16 (v8.0), 11 (v6.0)
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -46,7 +46,7 @@ Last activity: 2026-09-02 — Phase 66 execution started
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 66 | TBD | - | - |
+| 66 | 1 | - | - |
 | 67 | TBD | - | - |
 | 68 | TBD | - | - |
 | 69 | TBD | - | - |
@@ -119,7 +119,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-02T14:09:05.052Z
-Stopped at: Completed 66-01-PLAN.md
+Stopped at: Phase 66 complete, ready to plan Phase 67
 Resume file: None
 
 ## Operator Next Steps
