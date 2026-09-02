@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Auto-tuning loop: LLM proposes parameter_delta, new_value clamped to range, fdars re-run, compare target, Goodhart guard, bounded termination">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Auto-Tuning Loop" aria-labelledby="t-atune d-atune">
+  <title id="t-atune">Auto-Tuning Loop</title>
+  <desc id="d-atune">Shows the fdars auto-tuning cycle: the LLM proposes a parameter_delta, the new value is clamped to the valid range, fdars is re-run, the result is compared against the target metric, a Goodhart guard prevents gaming the metric, and bounded termination stops the loop after a fixed number of iterations.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

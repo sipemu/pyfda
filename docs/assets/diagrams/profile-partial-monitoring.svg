@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Partial-domain monitoring: restrict the model to the sub-interval that matters">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Partial-Domain Monitoring: Watch the Interval That Matters" aria-labelledby="t-pmon d-pmon">
+  <title id="t-pmon">Partial-Domain Monitoring: Watch the Interval That Matters</title>
+  <desc id="d-pmon">Illustrates partial-domain functional monitoring: the Phase I model is fitted on a specific sub-interval of the domain rather than the full curve, and Phase II control limits are applied only to that sub-interval, making the chart more sensitive to deviations in the region that matters most.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

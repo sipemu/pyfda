@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Advisor loop: interpret, recommend, re-run, compare — cyclic agentic workflow with Python API recommend-only exit">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Advisor Loop" aria-labelledby="t-aloop d-aloop">
+  <title id="t-aloop">Advisor Loop</title>
+  <desc id="d-aloop">Depicts the cyclic agentic advisor workflow: interpret diagnostics → recommend parameter changes → re-run fdars → compare results → loop back; the Python API provide a recommend-only exit that bypasses the re-run/compare steps for offline use.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

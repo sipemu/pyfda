@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Provider selection: advise() is the only entry point; routes through Provider protocol to four backends via explicit arg then env var then anthropic default precedence">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Provider Setup — Selection and Precedence" aria-labelledby="t-providers d-providers">
+  <title id="t-providers">Provider Setup — Selection and Precedence</title>
+  <desc id="d-providers">Shows how advise() routes to one of four LLM backends — Anthropic, OpenAI, Gemini, or Ollama — using a precedence chain: explicit provider= argument first, then environment variable, then Anthropic as default; depicts the install extras required for each backend.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

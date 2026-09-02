@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Recommend-only Python API: build_diagnostics computes offline diagnostics; advise interprets and returns an Advice object with interpretation, recommendations, and caveats">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Python API — Recommend-Only Surface" aria-labelledby="t-pyapi d-pyapi">
+  <title id="t-pyapi">Python API — Recommend-Only Surface</title>
+  <desc id="d-pyapi">Shows the two-stage Python API: Stage 1 runs build_diagnostics offline (no API key required) to compute deterministic diagnostics; Stage 2 calls advise() which invokes the LLM to interpret diagnostics and return an Advice object with interpretation, recommendations, and caveats.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

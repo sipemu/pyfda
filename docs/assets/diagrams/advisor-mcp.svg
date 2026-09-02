@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="MCP server architecture: agent calls tools over stdio; HandleRegistry keeps NumPy arrays in-process; only opaque handles and scalar diagnostics cross the boundary">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="MCP Server — By-Reference Handle Model" aria-labelledby="t-mcp d-mcp">
+  <title id="t-mcp">MCP Server — By-Reference Handle Model</title>
+  <desc id="d-mcp">Illustrates the MCP server by-reference handle model: the agent calls tools over stdio, the HandleRegistry keeps NumPy arrays in-process, and only opaque handles and scalar diagnostics cross the stdio boundary — arrays never leave the server process.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -21,9 +23,9 @@
   <text class="sm" x="86" y="166" text-anchor="middle">diagnostics</text>
   <text class="sm" x="86" y="182" text-anchor="middle" fill="#6c757d">(no arrays)</text>
 
-  <!-- stdio boundary label -->
+  <!-- stdio boundary label (moved to y=76 inside diagram, left of boundary line) -->
   <line x1="175" y1="58" x2="175" y2="462" stroke="#fd7e14" stroke-width="2" stroke-dasharray="8 4"/>
-  <text class="lab" x="175" y="54" text-anchor="middle" fill="#fd7e14">stdio</text>
+  <text class="lab" x="163" y="76" text-anchor="end" fill="#fd7e14">stdio</text>
 
   <!-- Crossing arrows: agent ↔ tools (handles and scalars only) -->
   <!-- Call arrow: agent → tools -->
@@ -31,8 +33,8 @@
   <text class="sm" x="178" y="124" text-anchor="middle">call</text>
   <!-- Return arrow: tools → agent -->
   <line x1="200" y1="148" x2="156" y2="148" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
-  <text class="sm" x="178" y="165" text-anchor="middle" fill="#fd7e14">handle +</text>
-  <text class="sm" x="178" y="178" text-anchor="middle" fill="#fd7e14">scalars</text>
+  <text class="sm" x="152" y="165" text-anchor="end" fill="#fd7e14">handle +</text>
+  <text class="sm" x="152" y="178" text-anchor="end" fill="#fd7e14">scalars</text>
 
   <!-- ===== MCP boundary panel ===== -->
   <rect x="198" y="62" width="508" height="400" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>

@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Pipeline report: per-stage diagnostic blocks kept separate, Python-computed cross-stage caveats before LLM call, grounded narration only">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Pipeline Diagnostic Report" aria-labelledby="t-piprep d-piprep">
+  <title id="t-piprep">Pipeline Diagnostic Report</title>
+  <desc id="d-piprep">Illustrates the pipeline diagnostic report: per-stage diagnostic blocks are kept separate and not merged, Python-computed cross-stage caveats are appended before the LLM call, and the LLM produces grounded narration only — never computing diagnostics itself.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

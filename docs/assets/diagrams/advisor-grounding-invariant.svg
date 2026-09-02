@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Grounding invariant: fdars computes every number; the LLM only interprets and cites diagnostic values">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Grounding Invariant" aria-labelledby="t-ground d-ground">
+  <title id="t-ground">Grounding Invariant</title>
+  <desc id="d-ground">Shows the fdars-computes / LLM-explains boundary: all numerical diagnostics are computed deterministically by fdars; the LLM cites these values and explains them but never fabricates numbers, enforcing the grounding invariant that the LLM cannot produce diagnostic values that fdars did not compute.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
