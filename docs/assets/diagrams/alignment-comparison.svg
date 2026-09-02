@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Comparing alignment methods: none, elastic, and landmark">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Comparing Alignment Methods"
+     aria-labelledby="alignment-comparison-title alignment-comparison-desc">
+  <title id="alignment-comparison-title">Comparing Alignment Methods</title>
+  <desc id="alignment-comparison-desc">Compares three alignment strategies run on the same phase-varying curve sample — none (cross-sectional), elastic (karcher_mean), and landmark (interpolation warp) — by overlaying the resulting mean curves in Panel 3 to show how elastic and landmark registration sharpen the mean relative to the unaligned cross-sectional average.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

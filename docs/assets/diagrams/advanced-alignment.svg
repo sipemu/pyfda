@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Advanced alignment: penalized and constrained elastic registration">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Advanced Alignment: Penalized &amp; Constrained Warps"
+     aria-labelledby="advanced-alignment-title advanced-alignment-desc">
+  <title id="advanced-alignment-title">Advanced Alignment: Penalized &amp; Constrained Warps</title>
+  <desc id="advanced-alignment-desc">Illustrates how align(λ, …) regularizes the elastic alignment by introducing a λ penalty on warp roughness — a λ colour-swatch in Panel 3 shows the selected penalty level balancing alignment fidelity against warp smoothness, with robust_karcher_mean and constrained-warp variants also available.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

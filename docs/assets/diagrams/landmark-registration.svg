@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Landmark registration: warping marked features to common targets">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Landmark Registration: Pinning Features to Targets"
+     aria-labelledby="landmark-registration-title landmark-registration-desc">
+  <title id="landmark-registration-title">Landmark Registration: Pinning Features to Targets</title>
+  <desc id="landmark-registration-desc">Shows how register(γ) detects user-marked peak/valley landmarks (orange dots), computes a target time as the mean of landmark times across curves, then applies a monotone interpolation warp to pin each landmark to its common target position.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

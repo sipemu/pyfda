@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Shape analysis: a mean shape in the quotient space">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Shape Analysis: The Mean Shape in Quotient Space"
+     aria-labelledby="shape-analysis-title shape-analysis-desc">
+  <title id="shape-analysis-title">Shape Analysis: The Mean Shape in Quotient Space</title>
+  <desc id="shape-analysis-desc">Shows how shape_mean() computes the Karcher mean in the Fisher-Rao quotient space by factoring out timing, shift, and scale variation — curves that share the same underlying shape but differ in amplitude and phase collapse to a single sharp template, measured by shape_distance.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
