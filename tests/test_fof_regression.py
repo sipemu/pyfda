@@ -327,6 +327,17 @@ def test_subject_id_validation() -> None:
             _y_argvals,
         )
 
+    # predict_fof_re also validates single-group (<2 distinct subjects)
+    with pytest.raises(ValueError, match="at least 2 distinct subjects"):
+        reg.predict_fof_re(
+            _x_data,
+            _y_data,
+            np.zeros(N, dtype=np.int64),  # single group: all zeros
+            _new_x,
+            _x_argvals,
+            _y_argvals,
+        )
+
 
 def test_fof_error_guards() -> None:
     """Error guards: ncomp_x=0 and n_folds > n both raise ValueError."""
