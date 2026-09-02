@@ -1,320 +1,628 @@
-# Feature Research
+# Feature Research: fdars-core 0.24.0 → 0.33.0 New Capabilities
 
-**Domain:** scikit-learn-compatible estimator layer over functional-data library (fdars v9.0)
-**Researched:** 2026-08-31
-**Confidence:** HIGH
-
----
-
-## Scope Note
-
-This file maps the EXISTING fdars functional API onto scikit-learn estimator shapes. It does not re-research how fdars methods work internally — only how to expose them as `BaseEstimator` subclasses. The canonical reference for what a compliant sklearn layer looks like is scikit-fda 0.10.x; the canonical rules for `check_estimator` compliance come from sklearn 1.9's developer docs.
+**Domain:** PyO3 binding layer — functional data analysis (Rust → Python)
+**Researched:** 2026-09-02
+**Confidence:** MEDIUM (docs.rs API pages + CHANGELOG cross-verified; function signatures confirmed from struct pages; linalg gating inferred from docs annotations and Cargo.toml features section)
 
 ---
 
-## Categorized Feature Table
+## Scope
 
-Each row: fdars source function(s), target sklearn mixin, table-stakes vs differentiator, complexity, notes.
+This file covers **only** capabilities added in fdars-core 0.24.0 through 0.33.0. All capabilities present in 0.23.0 are already bound in pyfda and are excluded.
 
-### Category A — Transformers (`TransformerMixin + BaseEstimator`)
+**Version map** (versions that actually exist on crates.io):
 
-Transformers take `(n_obs, n_points)` X in `fit` and `transform`, return a transformed array. `argvals` is a constructor param defaulting to `np.arange(n_features)`. All must set `n_features_in_` via `validate_data` in `fit`.
+| Version | Released | What it added |
+|---------|----------|---------------|
+| 0.24.0 | 2026-08-20 | Clustering advanced + FAMM extensions + SoF extensions + FoF RE |
+| 0.27.0 | 2026-08-22 | Multi-FData + PDA + Density FDA + Frechet + FTS + FPCA variants |
+| 0.28.0 | 2026-08-22 | FEM smoothing |
+| 0.29.0 | 2026-08-30 | No new public modules (internal fixes) |
+| 0.30.0 | 2026-09-01 | No new public modules (internal fixes) |
+| 0.32.0 | 2026-09-02 | GAK metric + kernel k-means (in metric module) |
+| 0.33.0 | 2026-09-02 | Shapelet discovery & classification |
 
-| Estimator class | fdars source function(s) | Mixin | Priority | Complexity | Notes |
-|----------------|--------------------------|-------|----------|------------|-------|
-| `BSplineSmoother` | `smoothing.optim_bandwidth` + `smoothing.nadaraya_watson` (per-curve applied at transform-time) | `TransformerMixin` | **Table stakes** | MEDIUM | Bandwidth is a constructor param; `argvals` for output grid. Output shape `(n_obs, n_points)` — same grid. `fit` finds optimal `h_` via GCV/CV/AIC over training data. Straightforward. |
-| `LocalPolynomialSmoother` | `smoothing.local_polynomial` | `TransformerMixin` | Table stakes | LOW | Wraps per-curve local_polynomial; `degree`, `bandwidth`, `kernel` as constructor params. |
-| `BasisRepresentation` | `basis.fdata_to_basis_1d` + `basis.basis_to_fdata_1d` | `TransformerMixin` | **Table stakes** | MEDIUM | `n_basis`, `basis_type` as constructor params. `transform` returns reconstructed curves at the original `argvals` grid — same output shape, no grid change. Stores `basis_repr_` fitted state. |
-| `FPCATransformer` | `regression.fpca` | `TransformerMixin` | **Table stakes** | MEDIUM | Most important transformer. `n_components` constructor param. `fit` runs FPCA, stores `components_` (eigenfunctions), `mean_`, `explained_variance_ratio_`. `transform` returns scores `(n_obs, n_components)` — this IS a grid-changing transform (functional → scalar scores). Use `ClassNamePrefixFeaturesOutMixin` for `get_feature_names_out`. Enables FPCA → sklearn RandomForest in one Pipeline. |
-| `PACEFPCATransformer` | `pace_fpca.pace_fpca` + `pace_fpca.irreg_fdata_from_lists` | `TransformerMixin` | Differentiator | HIGH | Sparse/irregular PACE FPCA. Input must be dense `(n_obs, n_points)` per the v9.0 constraint (IrregFdata is awkward — see Awkward section). Can still expose for dense regular data. `n_components`, `argvals` params. |
-| `Imputer` | `represent.impute_missing_values` | `TransformerMixin` | Table stakes | LOW | `method` ('linear'/'mean'/'constant'), `constant_value` as constructor params. Same output shape. Used first in Pipeline to fill NaNs before smoothing/FPCA. |
-| `SplineInterpolator` | `represent.spline_interpolate_with_policy` | `TransformerMixin` | Table stakes | MEDIUM | `output_argvals` constructor param (the new grid); `policy`, `fill_value`, `order`. This IS a grid-changing transformer (output shape changes if `output_argvals` has different length). `n_features_in_` is the input grid size; output grid size differs. Must NOT use `validate_data(reset=False)` for grid count — only validate that the feature count matches what was seen at fit. |
-| `DepthTransformer` | `depth.functional_depth` (dispatcher) | `TransformerMixin` | **Table stakes** | LOW | `method` constructor param (e.g. `"fraiman_muniz"`, `"modified_band"`, `"random_projection"`). `transform` returns depth scores `(n_obs, 1)` — functional → scalar. Enables depth → sklearn threshold in Pipeline. Grid-changing: functional → 1D. Use `get_feature_names_out` returning `["depth"]`. |
-| `NormTransformer` | `fdata.norm_lp_1d` | `TransformerMixin` | Differentiator | LOW | `p` param. Transforms each curve to its Lp norm. Output `(n_obs, 1)`. Simple utility. |
+Versions 0.25, 0.26, 0.31 do not exist on crates.io (version numbers skipped).
 
-**Grid-changing transformer convention:** When `transform` changes the number of output features (FPCA scores, depth scalars, Lp norms), `n_features_in_` records the input feature count; `get_feature_names_out()` must be implemented; downstream sklearn estimators see the scalar output naturally. `set_output` API activates automatically when `get_feature_names_out` is present and `TransformerMixin` is inherited.
+**MSRV at 0.33.0:** Rust 1.81 — unchanged from 0.23.0. pyfda's MSRV constraint (1.83) is satisfied.
 
-**Pipeline chaining with grid-changing transforms:**
-
-```
-Pipeline([
-    ("impute", Imputer(method="linear")),          # (n, m) → (n, m)
-    ("smooth", BSplineSmoother(argvals=t)),         # (n, m) → (n, m)
-    ("fpca",   FPCATransformer(n_components=5)),    # (n, m) → (n, 5) scores
-    ("clf",    sklearn.ensemble.RandomForestClassifier()),
-])
-```
-
-FPCA scores feed directly into any sklearn estimator that accepts `(n_obs, n_features)`. The pipeline is seamless because FPCATransformer outputs a plain 2D ndarray.
+**linalg feature at 0.33.0:** Still activates `faer 0.23` and `anofox-regression 0.4`. pyfda does NOT enable linalg. Items gated behind linalg are flagged `[LINALG-GATED]` below; they are **out of scope for this milestone**.
 
 ---
 
-### Category B — Regressors (`RegressorMixin + BaseEstimator`)
+## Capability Inventory by Family
 
-Regressors: `fit(X, y)` where `X` is `(n_obs, n_points)` and `y` is `(n_obs,)` scalar; `predict(X)` returns `(n_obs,)`. `score(X, y)` inherits R² from `RegressorMixin`.
+### Group A — Advanced Clustering (introduced 0.24.0)
 
-| Estimator class | fdars source function(s) | Mixin | Priority | Complexity | Notes |
-|----------------|--------------------------|-------|----------|------------|-------|
-| `FPCRegressor` | `regression.fregre_lm` + `regression.predict_fregre_lm` | `RegressorMixin` | **Table stakes** | LOW | Scalar-on-function via FPC scores. `n_comp` constructor param. `fit` stores the fitted model internals (`coef_`, `intercept_`, `beta_t_`). `predict` calls predict_fregre_lm. Simplest regressor. |
-| `PLSRegressor` | `regression.fregre_pls` + `regression.predict_fregre_pls` | `RegressorMixin` | Table stakes | LOW | Like FPCRegressor but PLS. `n_comp`, `argvals` params. |
-| `RobustFPCRegressor` | `regression.fregre_l1` + `regression.predict_fregre_robust` OR `regression.fregre_huber` + `regression.predict_fregre_robust` | `RegressorMixin` | Differentiator | LOW | `method` ('l1'/'huber'), `n_comp`, `huber_k` params. |
-| `GLMRegressor` | `regression.functional_glm` (family='gaussian'/'poisson'/'gamma') | `RegressorMixin` | Differentiator | MEDIUM | `family`, `n_comp`, `max_iter`, `tol` params. For non-gaussian families, `score()` default R² may be misleading — consider overriding to deviance-based score. Families binomial/poisson/gamma add awkward response-domain constraints check_estimator may fail on random inputs (see Awkward section). |
-| `NonparametricRegressor` | `regression.fregre_np` (from distance matrix) | `RegressorMixin` | Differentiator | HIGH | Requires precomputing a distance matrix internally during fit AND at predict time. `h`, `argvals` params. The fit+predict pattern requires re-computing distances to training data at predict time (stored as `X_fit_`). Awkward but doable. |
-| `FOSRRegressor` | `regression.fosr` + `regression.predict_fosr` | `RegressorMixin` | Differentiator | MEDIUM | Function-on-scalar: `X` is `(n_obs, p)` scalar predictors; `y` is `(n_obs, m)` functional response. Unusual sklearn shape — output of `predict` is `(n_obs, m)`. Works with `MultiOutputRegressor` wrapper. `lambda_` param. |
+**Module:** `fdars_core::clustering_advanced`
 
-**`score()` method:** All regressors inherit `RegressorMixin.score(X, y)` which computes R². For GLM families, R² is still valid for gaussian but odd for poisson/gamma — document clearly but do not override (preserves `check_estimator` compliance).
+Four new paradigms beyond the existing k-means/fuzzy-c-means. All operate on `&FdMatrix` + `&[f64]` argvals + config struct.
 
----
+#### A1. Elastic K-Means with Joint Alignment — `align_cluster_fd`
 
-### Category C — Classifiers (`ClassifierMixin + BaseEstimator`)
+- **What it does:** Jointly aligns and clusters functional curves using Karcher-mean templates and elastic distance. Each iteration re-estimates templates via elastic mean and reassigns curves by elastic distance.
+- **Why table stakes:** Elastic clustering is a standard FDA operation; aligns shape and amplitude simultaneously, unlike plain L2 k-means.
+- **Signature:** `align_cluster_fd(data: &FdMatrix, argvals: &[f64], config: &AlignClusterConfig) -> Result<AlignClusterResult, FdarError>`
+- **Result struct** `AlignClusterResult`:
+  - `cluster: Vec<usize>` — 0-based assignments, length n
+  - `templates: Vec<Vec<f64>>` — per-cluster Karcher-mean curves (k entries, each length m)
+  - `distances: FdMatrix` — n x k elastic-distance matrix
+  - `iterations: usize`
+  - `converged: bool`
+- **Config struct** `AlignClusterConfig` — k, max_iter, tol, seed, alignment sub-config
+- **linalg gated?** No
 
-Classifiers: `fit(X, y)` with integer class labels; `predict(X)` returns labels; `score(X, y)` accuracy. Must set `classes_` in `fit`.
+#### A2. Functional DBSCAN — `dbscan_fd`
 
-| Estimator class | fdars source function(s) | Mixin | Priority | Complexity | Notes |
-|----------------|--------------------------|-------|----------|------------|-------|
-| `FPCLDAClassifier` | `classification.fclassif_lda` + internal predict (re-fit at predict time) | `ClassifierMixin` | **Table stakes** | MEDIUM | LDA via FPC scores. `ncomp` param. Must store training data for predict (no separate predict function in fdars — classification functions re-fit internally). Store `X_fit_` + `y_fit_` → call fclassif_lda(X_new) at predict using stored data. |
-| `FPCQDAClassifier` | `classification.fclassif_qda` | `ClassifierMixin` | Table stakes | MEDIUM | Like LDA. `ncomp` param. |
-| `FPCKNNClassifier` | `classification.fclassif_knn` | `ClassifierMixin` | **Table stakes** | MEDIUM | `ncomp`, `k` params. |
-| `DDClassifier` | `classification.fclassif_dd` | `ClassifierMixin` | Differentiator | MEDIUM | Depth-based DD-classifier. No hyperparams. |
-| `ElasticMultinomialClassifier` | `classification.elastic_multinomial` | `ClassifierMixin` | Differentiator | MEDIUM | `ncomp_beta`, `lambda_`, `max_iter`, `tol`, `argvals` params. Multi-class via OvR. Must handle 0-indexed contiguous labels — add label remapping (like `LabelEncoder`) in `fit` to ensure check_estimator's arbitrary label inputs work. Store `label_encoder_` in fit. |
-| `LogisticFPCClassifier` | `regression.functional_logistic` + `regression.predict_functional_logistic` | `ClassifierMixin` | Table stakes | MEDIUM | Binary only (y in {0,1}). `n_comp`, `max_iter`, `tol` params. `predict_proba` returns `[[1-p, p]]` for check_estimator compliance. |
+- **What it does:** Density-based clustering over functional L2 distances. Discovers clusters of arbitrary shape; labels noise curves as `None`.
+- **Why table stakes:** Completes the clustering family; DBSCAN handles non-convex cluster shapes that k-means misses.
+- **Signature:** `dbscan_fd(data: &FdMatrix, argvals: &[f64], config: &DbscanConfig) -> Result<DbscanResult, FdarError>`
+- **Result struct** `DbscanResult`:
+  - `cluster: Vec<Option<usize>>` — `None` = noise; `Some(c)` = cluster c
+  - `n_clusters: usize`
+  - `n_noise: usize`
+  - `distances: FdMatrix` — precomputed n x n L2 distance matrix
+- **Config struct** `DbscanConfig` — eps (neighborhood radius), min_samples
+- **linalg gated?** No
 
-**Critical check_estimator issue for classifiers:** fdars classification functions that take training+test data together (re-fit at test time) fail the standard split-fit/predict contract. Workaround: in `fit`, store `X_fit_` and `y_fit_` (training arrays). In `predict`, concatenate `[X_fit_, X_new]`, call the fdars function, then slice out only the new predictions. This is the same pattern scikit-fda uses for its distance-based classifiers.
+#### A3. Per-Cluster FPCA Clustering (kCFC) — `kcfc_cluster`
 
-**Label handling:** `check_estimator` sends arbitrary integer labels including negative values. Use `sklearn.preprocessing.LabelEncoder` inside `fit` to remap labels to 0..K, store the encoder as `label_encoder_`, and inverse-transform in `predict`.
+- **What it does:** Assigns curves by reconstruction error under per-cluster FPCA models; iterates until labels stabilize.
+- **Signature:** `kcfc_cluster(data: &FdMatrix, argvals: &[f64], config: &KcfcConfig) -> Result<KcfcResult, FdarError>`
+- **Result struct** `KcfcResult`:
+  - `cluster: Vec<usize>`
+  - `fpca_models: Vec<Option<FpcaResult>>` — per-cluster FPCA (None if cluster empty)
+  - `reconstruction_errors: FdMatrix` — n x k squared L2 errors
+  - `iterations: usize`
+  - `converged: bool`
+- **linalg gated?** No
 
----
+#### A4. Fisher-EM Discriminative-Subspace Clustering — `funfem_cluster`
 
-### Category D — Clusterers (`ClusterMixin + BaseEstimator`)
+- **What it does:** GMM in a discriminative subspace estimated by Fisher's criterion. Produces soft memberships and the discriminative direction matrix.
+- **Signature:** `funfem_cluster(data: &FdMatrix, argvals: &[f64], config: &FunFemConfig) -> Result<FunFemResult, FdarError>`
+- **Result struct** `FunFemResult` (`#[non_exhaustive]`):
+  - `cluster: Vec<usize>`
+  - `membership: FdMatrix` — n x k soft membership
+  - `disc_subspace: FdMatrix` — discriminative directions (ncomp_eff x p_disc_eff)
+  - `log_likelihood: f64`
+  - `iterations: usize`
+  - `converged: bool`
+- **linalg gated?** No (uses nalgebra, which is always available)
 
-Clusterers: `fit(X)` sets `labels_`; `fit_predict(X)` returns labels.
-
-| Estimator class | fdars source function(s) | Mixin | Priority | Complexity | Notes |
-|----------------|--------------------------|-------|----------|------------|-------|
-| `FunctionalKMeans` | `clustering.kmeans_fd` | `ClusterMixin` | **Table stakes** | LOW | `n_clusters`, `argvals`, `max_iter`, `tol`, `random_state` params. Sets `labels_`, `cluster_centers_`, `inertia_`. `random_state` → `seed`. |
-| `FuzzyFunctionalCMeans` | `clustering.fuzzy_cmeans_fd` | `ClusterMixin` | Differentiator | LOW | `n_clusters`, `fuzziness`, `argvals`, `max_iter`, `tol`, `random_state`. Sets `labels_`, `membership_`, `cluster_centers_`. |
-| `FunctionalGMM` | `clustering.gmm_cluster` | `ClusterMixin` | Differentiator | MEDIUM | `k_range` param (list) makes GridSearchCV awkward — `k_range` is not a single int. Wraps as `n_clusters_min`/`n_clusters_max` constructor params internally converted to range. Sets `labels_`, `n_clusters_`. |
-
-**Awkward: `cluster_optim`** — the `_augment.py` `cluster_optim` function is itself a hyperparameter search loop (tries k=2..K, picks best by silhouette). Exposing it as a `ClusterMixin` creates a nested-search problem in GridSearchCV. Better pattern: exclude `cluster_optim` from the sklearn layer; instead expose `FunctionalKMeans` and let users run `GridSearchCV(FunctionalKMeans(), {"n_clusters": range(2, 10)})` which is idiomatically correct sklearn.
-
----
-
-### Category E — Outlier Detectors (`OutlierMixin + BaseEstimator`)
-
-Outlier detectors: `fit(X)` then `predict(X)` returns +1 (inlier) / -1 (outlier). `score_samples(X)` returns per-sample scores (higher = more normal). `OutlierMixin.predict` threshold uses `decision_function`. `fit_predict(X)` is inherited.
-
-| Estimator class | fdars source function(s) | Mixin | Priority | Complexity | Notes |
-|----------------|--------------------------|-------|----------|------------|-------|
-| `LRTOutlierDetector` | `outliers.detect_outliers_lrt_with_dist` | `OutlierMixin` | **Table stakes** | MEDIUM | `alpha`, `n_bootstrap`, `trim`, `smo`, `random_state` params. `fit` stores threshold. `predict` applies threshold. `score_samples` returns negative LRT statistic (higher = more normal for OutlierMixin convention). |
-| `OutliergramDetector` | `outliers.outliergram` | `OutlierMixin` | Table stakes | LOW | `factor` param. `fit` computes MEI/MBD reference distribution. `predict` applies outliergram flags. `score_samples` returns outliergram score. |
-| `MagnitudeShapeDetector` | `outliers.magnitude_shape` | `OutlierMixin` | Table stakes | LOW | No params. Returns dual scores (magnitude + shape); for `score_samples`, use the combined L2-norm of both scores. |
-| `TVDMSSDetector` | `outliers.tvdmss` | `OutlierMixin` | Differentiator | MEDIUM | `emp_factor_mss`, `emp_factor_tvd`, `central_region_tvd` params. Separates magnitude vs shape outliers; combine for `predict` (union flag). |
-| `MUODDetector` | `outliers.muod` | `OutlierMixin` | Differentiator | MEDIUM | `factor` param. Three outlier types (shape/magnitude/amplitude); combine for `predict` (union flag). `score_samples` = min of three scores (most conservative). |
-| `DepthgramDetector` | `outliers.depthgram` | `OutlierMixin` | Differentiator | MEDIUM | `outliergram_factor`, `boxplot_factor` params. Separate shape/magnitude; combine union. |
-
-**OutlierMixin contract:** `OutlierMixin.predict` calls `decision_function` and thresholds at 0 (positive = inlier, negative = outlier). For fdars detectors that return binary flags (not continuous scores), you must synthesize a continuous `decision_function`: use the underlying score (e.g. depth value, MEI distance) so that the threshold is meaningful. The binary-flag-only detectors (tvdmss/muod/depthgram) must store score vectors at fit time, then use scores for `decision_function` and the binary flags for the trained threshold at `predict`.
+**Binding priority for Group A:** Table stakes. Fills the clustering gap that existed up to 0.23. All four are bindable without linalg.
 
 ---
 
-## Awkward-to-Wrap Aspects and Reasons
+### Group B — Scalar-on-Function Regression Extensions (introduced 0.24.0)
 
-| fdars aspect | Awkwardness | Recommended handling |
-|-------------|-------------|---------------------|
-| **PACE FPCA (`pace_fpca`)** | Requires `IrregFdata` opaque handle (ragged lists), not plain ndarray. v9.0 constraint says estimators take plain `(n_obs, n_points)` arrays. | Expose for DENSE regular input only: internally build IrregFdata from the regular grid data. PACE for sparse/irregular data is outside scope of the sklearn layer (keep the raw API). |
-| **Registration/elastic alignment (`alignment.elastic_fpca`, `karcher_mean`)** | Registration requires a TEMPLATE (Karcher mean must be computed from training data). The template IS a fitted attribute (`template_`). But `check_estimator` tests include tiny-sample (n=2,3) checks — elastic FPCA/Karcher mean may fail on n<5. | Expose `ShiftRegistrationTransformer` (least-squares shift, well-behaved on small n). Exclude full elastic FPCA from the sklearn layer unless it passes check_estimator. |
-| **`classification.fclassif_kernel`** | Requires `argvals` AND separate `h_func`/`h_scalar` bandwidth parameters — no automatic bandwidth selection in the binding, so users must supply `h_func`. Not `check_estimator`-safe without a sensible default. | Include with `h_func=1.0` default. Flag in docs that CV-optimal bandwidth requires calling `fregre_np_cv` separately (or via GridSearchCV over h_func). |
-| **`clustering.gmm_cluster` k_range** | `k_range` is a list, not a scalar — GridSearchCV can't vary it cleanly. | Expose `FunctionalGMM(n_clusters_min, n_clusters_max)` instead, internally building the range. |
-| **`regression.concurrent_regression`** | Takes a LIST of predictor matrices (one per predictor), not a single `(n_obs, n_points)` X. Not mappable to standard sklearn regressor shape. | Exclude from sklearn layer. Keep only in the functional API. |
-| **`regression.fosr` (function-on-scalar)** | Output of `predict` is `(n_obs, m)` — a 2D functional response. sklearn's `RegressorMixin.score` assumes scalar y. | Expose as `MultiOutputRegressor`-compatible but do NOT use `RegressorMixin.score` — override `score` to return mean R² across grid points, and document. |
-| **`outliers.*` binary-flag results (tvdmss, muod, depthgram)** | These detectors categorize by TYPE (shape vs magnitude vs amplitude) — no single continuous decision score by design. `OutlierMixin.decision_function` assumes a single score. | Pick the most meaningful continuous score for each detector (e.g., TVD for tvdmss, shape_index for muod) to drive `decision_function`; union flags for `predict`. |
-| **`regression.fregre_np` (nonparametric)** | Needs the training data at predict time to compute distances to new points — must store `X_fit_` (potentially large). | Include but document the memory cost. `n_jobs` parameter for distance computation not available (Rust is parallel internally). |
-| **`inference.*` tests (permutation, SCB, ANOVA)** | Hypothesis tests don't have a fit/predict contract. They answer "is there a difference?" not "what class/value is this?". | Out of scope. Do not wrap as estimators. |
-| **SPM monitoring** | Temporal/sequential monitoring — not a batch fit/predict estimator. | Out of scope. |
-| **`regression.functional_glm` check_estimator** | Non-gaussian families (binomial, poisson, gamma) have response-domain constraints (y > 0, y in {0,1}) that `check_estimator` violates by sending random float inputs. | For `GLMRegressor(family="binomial")`, add sklearn's `__sklearn_tags__` to indicate `requires_positive_y` (poisson/gamma) or binary y constraints, OR exclude non-gaussian families and expose only `family="gaussian"` (Gaussian GLM = standard functional regression). |
-| **`classification` functions re-fit at predict time** | All fclassif_* functions take both training and test data together — no stored model state from fit. To implement predict, store `X_fit_`, `y_fit_` at fit time and concatenate at predict time. | Store training arrays in fit; slice new predictions from concatenated call. Documents as a known overhead (O(n_train + n_test) per predict call). |
+**Module:** `fdars_core::scalar_on_function` — extensions to the existing `fregre_lm`/`functional_logistic` surface.
+
+#### B1. Functional Additive Model (FAM) — `fam`
+
+- **What it does:** Additive nonlinear scalar-on-function regression. Y_i = mu + sum_k f_k(xi_{ik}) + epsilon, where xi_{ik} are FPC scores and f_k are estimated via kernel smoothing (Muller & Yao 2008).
+- **Signature:** `fam(data: &FdMatrix, y: &[f64], argvals: &[f64], scalar_covariates: Option<&FdMatrix>, config: &FamConfig) -> Result<FamResult, FdarError>`
+- **Result struct** `FamResult`:
+  - `fitted_values: Vec<f64>` — length n
+  - `residuals: Vec<f64>`
+  - `component_fits: Vec<Vec<f64>>` — per-FPC component fit
+  - `intercept: f64`
+  - `bandwidths: Vec<f64>`
+  - `ncomp: usize`
+  - `r_squared: f64`
+  - `fpca: FpcaResult`
+- **linalg gated?** No
+
+#### B2. Generalized Kernel Additive Model (GKAM) — `fregre_gkam`
+
+- **What it does:** Backfitting-based nonparametric regression over multiple functional predictors on different grids; allows scalar covariates.
+- **Signature:** `fregre_gkam(predictors: &[&FdMatrix], y: &[f64], argvals_list: &[&[f64]], scalar_covariates: Option<&FdMatrix>, config: &GkamConfig) -> Result<GkamResult, FdarError>`
+- **Result struct** `GkamResult`:
+  - `fitted_values: Vec<f64>`
+  - `residuals: Vec<f64>`
+  - `component_fits: Vec<Vec<f64>>` — q x n
+  - `intercept: f64`
+  - `bandwidths: Vec<f64>`
+  - `iterations: usize`
+  - `converged: bool`
+  - `r_squared: f64`
+- **linalg gated?** No (uses nalgebra)
+
+#### B3. Generalized Spectral Additive Model (GSAM) — `fregre_gsam`
+
+- **What it does:** Additive regression using spectral (Fourier/eigenfunction) decomposition instead of kernel smoothing; single functional predictor with scalar covariates.
+- **Signature:** `fregre_gsam(data: &FdMatrix, y: &[f64], argvals: &[f64], scalar_covariates: Option<&FdMatrix>, config: &GsamConfig) -> Result<GsamResult, FdarError>`
+- **Result struct** `GsamResult`:
+  - `fitted_values: Vec<f64>`, `residuals: Vec<f64>`, `component_fits: Vec<Vec<f64>>`, `intercept: f64`, `bandwidths: Vec<f64>`, `ncomp: usize`, `r_squared: f64`, `fpca: FpcaResult`
+- **linalg gated?** No
+
+#### B4. History-Index Scalar-on-Function Estimator — `history_index`
+
+- **What it does:** Models response as a function of a weighted integral over the recent history of the predictor: Y_i = beta_0 + beta_1 * (sum_l gamma_l * X_i(T-u_l) * Delta_u) + epsilon.
+- **Signature:** `history_index(data: &FdMatrix, y: &[f64], argvals: &[f64], config: &HistoryIndexConfig) -> Result<HistoryIndexResult, FdarError>`
+- **Result struct** `HistoryIndexResult`:
+  - `fitted_values: Vec<f64>`, `residuals: Vec<f64>`, `intercept: f64`, `slope: f64`
+  - `gamma: Vec<f64>` — history weight function
+  - `lag_grid: Vec<f64>` — lag discretisation points
+  - `history_scores: Vec<f64>` — integral scores per observation
+  - `r_squared: f64`
+- **linalg gated?** No
+
+#### B5. Model Selection (AIC/BIC/GCV) — `model_selection_ncomp`
+
+- **What it does:** Selects optimal number of FPC components for `fregre_lm` via AIC, BIC, or GCV.
+- **Result** `ModelSelectionResult`
+- **linalg gated?** No
+
+#### B6. GroupLasso Variable Selection — `variable_selection`
+
+- **What it does:** Selects among multiple functional predictors via GroupLasso coordinate-descent over FPC scores.
+- **Signature:** `variable_selection(predictors: &[&FdMatrix], y: &[f64], argvals_list: &[&[f64]], scalar_covariates: Option<&FdMatrix>, config: &VarSelectConfig) -> Result<VarSelectResult, FdarError>`
+- **Result struct** `VarSelectResult`:
+  - `active_predictors: Vec<bool>`, `coefficients: Vec<Vec<f64>>`, `fitted_values: Vec<f64>`, `residuals: Vec<f64>`, `intercept: f64`, `lambda: f64`, `r_squared: f64`, `iterations: usize`, `converged: bool`, `fpcas: Vec<FpcaResult>`
+- **linalg gated?** No (uses Cholesky via nalgebra)
+
+#### B7. FAM Permutation Test — `permutation_test_fam`
+
+- **What it does:** Permutation significance test for each FAM additive component.
+- **Config** `PermTestConfig`, **result** `PermTestResult`
+- **linalg gated?** No
+
+**Binding priority for Group B:** Table stakes (B1-B4 fill major gaps in the regression surface). B5-B7 are supporting utilities, lower priority.
 
 ---
 
-## sklearn Contract — Pipeline/GridSearchCV Usage Conventions
+### Group C — Functional Mixed Models: FAMM Extensions (introduced 0.24.0)
 
-### `argvals` as a constructor param
+**Module:** `fdars_core::famm` — extensions to existing `fmm`/`fmm_predict`/`fmm_test_fixed`.
 
-```python
-class FPCATransformer(TransformerMixin, BaseEstimator):
-    def __init__(self, n_components=3, argvals=None):
-        self.n_components = n_components
-        self.argvals = argvals  # stored as-is, resolved in fit
+#### C1. Dense Functional Linear Mixed Model — `dense_flmm`
 
-    def fit(self, X, y=None):
-        argvals = np.arange(X.shape[1]) if self.argvals is None else np.asarray(self.argvals)
-        X = validate_data(self, X, dtype=np.float64)  # sets n_features_in_
-        ...
-```
+- **What it does:** FPC-score decomposition of a longitudinal/repeated-measures functional dataset with per-subject random effects (random intercept + optional random slope). Fits REML via EM.
+- **Signature:** `dense_flmm(data: &FdMatrix, subject_ids: &[usize], covariates: Option<&FdMatrix>, config: &DenseFlmmConfig) -> Result<DenseFlmmResult, FdarError>`
+- **Result struct** `DenseFlmmResult` (14 fields):
+  - `mean_function: Vec<f64>`, `beta_functions: FdMatrix` (p x m), `random_effects: FdMatrix` (n_subjects x m)
+  - `fitted: FdMatrix`, `residuals: FdMatrix`
+  - `random_variance: Vec<f64>`, `sigma2_eps: f64`, `sigma2_u: Vec<f64>`, `sigma2_slope: Vec<f64>`
+  - `ncomp: usize`, `n_subjects: usize`, `eigenvalues: Vec<f64>`, `n_iter: usize`, `converged: bool`
+- **linalg gated?** No
 
-`argvals=None` + resolve-in-fit is the correct pattern: it is clone-safe (no ndarray in `__init__` default), `get_params()` returns `None` (or the user-supplied array), and `set_params(argvals=t)` works cleanly in GridSearchCV.
+#### C2. Fast Massively-Univariate Functional Mixed Model — `fast_fmm`
 
-### `n_features_in_` and grid-changing transforms
+- **What it does:** Pointwise mixed model fitting (no FPCA basis step) — scales to large grids where `dense_flmm` is slow; optionally computes pointwise Wald inference.
+- **Signature:** `fast_fmm(data: &FdMatrix, subject_ids: &[usize], covariates: Option<&FdMatrix>, config: &FastFmmConfig) -> Result<FastFmmResult, FdarError>`
+- **Result struct** `FastFmmResult`:
+  - `beta_matrix: FdMatrix` (p x m), `t_stats: FdMatrix` (p x m), `p_values: FdMatrix` (p x m)
+  - `sigma2_eps: Vec<f64>` (length m), `sigma2_u: Vec<f64>` (length m), `n_grid: usize`
+- **linalg gated?** No
 
-- All estimators call `validate_data(self, X, dtype=np.float64)` in `fit` — this automatically sets `n_features_in_` to `X.shape[1]`.
-- For `transform(X)`, call `validate_data(self, X, reset=False)` to verify input shape matches fit-time shape.
-- For grid-changing transformers (FPCA, DepthTransformer, SplineInterpolator with different output grid), `n_features_in_` records the input grid size; a separate attribute records the output size (e.g., `n_components_` for FPCA, `n_output_features_` for interpolator).
-- `get_feature_names_out()` must be implemented for all transformers that change feature count; this enables `set_output(transform="pandas")`.
+#### C3. Multivariate FAMM — `multi_famm`
 
-### `score()` methods
+- **What it does:** Fits a separate `dense_flmm` per response dimension; stacks results. For multivariate functional response (e.g., D-dimensional functional phenotype).
+- **Signature:** `multi_famm(data: &[FdMatrix], subject_ids: &[usize], covariates: Option<&FdMatrix>, config: &MultiFammConfig) -> Result<MultiFammResult, FdarError>`
+- **Result struct** `MultiFammResult` (`#[non_exhaustive]`):
+  - `components: Vec<DenseFlmmResult>` — D per-dimension models
+  - `stacked_fitted: FdMatrix` — (n_total x D) x m
+  - `stacked_residuals: FdMatrix` — (n_total x D) x m
+  - `n_dims: usize`
+- **linalg gated?** No
 
-- Transformers: no `score()` needed.
-- Regressors: `RegressorMixin.score(X, y)` provides R² out of the box — do not override unless the output is non-scalar (FOSRRegressor).
-- Classifiers: `ClassifierMixin.score(X, y)` provides accuracy — standard.
-- Clusterers: `ClusterMixin` has no `score()`; users access `inertia_` or call `silhouette_score` from sklearn separately.
-- Outlier detectors: `OutlierMixin` provides `score_samples(X)` via `decision_function(X)` — implement `decision_function`, inherit `score_samples`.
+**Binding priority for Group C:** Differentiators. Longitudinal/repeated-measures functional data is an important use case not addressed by the existing `fmm`. Dense flmm (C1) is the core capability; fast_fmm (C2) and multi_famm (C3) are enhancements.
 
-### `clone` safety
+---
 
-- `__init__` must assign constructor params with exactly the same name: `self.n_components = n_components`. No transformation.
-- `argvals=None` default is clone-safe (None is immutable); a numpy array default would NOT be clone-safe.
-- `random_state` (not `seed`) should be the sklearn-convention param name; convert to `seed: u64` inside `fit`.
+### Group D — Function-on-Function Regression: Random Effects (introduced 0.24.0)
 
-### `check_estimator` small-sample and dtype checks
+**Module:** `fdars_core::fof_regression` — extension to existing `fof_regression`/`fof_cv`/`predict_fof`.
 
-The most likely failures:
+#### D1. Random-Effects FoF Regression — `fof_re_regression`
 
-1. **n_obs=1 check** — fdars functions that require n >= 2 or n >= 3 (muod, tvdmss, etc.) will raise ValueError on the single-sample test. Solution: add `check_is_fitted` and an explicit `n >= 2` check in `fit` that raises `ValueError("n_samples=1 is insufficient")`.
-2. **dtype cast** — `check_estimator` sends float32 inputs. All fdars functions require float64 (Rust binding). Solution: use `validate_data(self, X, dtype=np.float64)` which handles coercion automatically.
-3. **n_features mismatch** — `validate_data(reset=False)` in `transform`/`predict` enforces this.
-4. **Classes not in `classes_`** — classifiers must store `classes_` via `unique_labels(y)` in `fit`; fdars expects 0-indexed contiguous labels, so wrap with `LabelEncoder`.
-5. **Non-finite input** — fdars functions may panic or produce NaN on non-finite inputs that check_estimator sends. Solution: `validate_data(..., force_all_finite=True)` raises before reaching Rust.
+- **What it does:** Extends plain FoF double-FPCA regression with per-subject random intercept functions; handles repeated-measures functional data.
+- **Signature:** `fof_re_regression(predictors: &FdMatrix, responses: &FdMatrix, subject_ids: &[usize], argvals_x: &[f64], argvals_y: &[f64], config: &FofReConfig) -> Result<FofReResult, FdarError>`
+- **Predict:** `predict_fof_re(result: &FofReResult, new_x: &FdMatrix) -> Result<FdMatrix, FdarError>`
+- **Result struct** `FofReResult` (15 fields):
+  - `intercept: Vec<f64>`, `beta_surface: FdMatrix` (m_y x m_x), `fitted: FdMatrix` (n x m_y), `residuals: FdMatrix`
+  - `r_squared_t: Vec<f64>`, `r_squared: f64`
+  - `ncomp_x: usize`, `ncomp_y: usize`
+  - `fpca_x: FpcaResult`, `fpca_y: FpcaResult`
+  - `coef_matrix: FdMatrix` (ncomp_x x ncomp_y)
+  - `random_effects: FdMatrix` (n_subjects x m_y)
+  - `sigma2_u: Vec<f64>` (length ncomp_y), `sigma2_eps: f64`, `n_subjects: usize`
+- **linalg gated?** No
+
+**Binding priority:** Table stakes. Completes the FoF regression surface (repeated-measures is a common FDA scenario).
+
+---
+
+### Group E — Multivariate Functional Data Container (introduced 0.27.0)
+
+**Module:** `fdars_core::multi_fdata`
+
+#### E1. MultiFunData / FdComponent
+
+- **What it does:** Stores D functional components that may live on different evaluation grids; enforces uniform observation count across components. Mirrors R `funData`.
+- **Key structs:**
+  - `MultiFunData` — methods: `new(components: Vec<FdComponent>) -> Result`, `n_obs()`, `n_components()`
+  - `FdComponent { data: FdMatrix, argvals: Vec<f64> }`
+- **linalg gated?** No
+- **Binding note:** Required by `multi_famm` input and potentially by other multi-domain functions. Expose as a Python class (`FdComponent`) and factory function.
+
+**Binding priority:** Table stakes (dependency for C3 and future multivariate methods).
+
+---
+
+### Group F — Principal Differential Analysis (introduced 0.27.0)
+
+**Module:** `fdars_core::pda`
+
+#### F1. `principal_differential_analysis`
+
+- **What it does:** Estimates coefficient functions beta_k(t) of a linear ODE L*x(t)=0 from observed solution curves (pointwise least squares per grid point). Returns the recovered ODE operator.
+- **Signature:** `principal_differential_analysis(data: &FdMatrix, argvals: &[f64], order: usize, ...) -> Result<PdaResult, FdarError>`
+- **Result struct** `PdaResult` (`#[non_exhaustive]`):
+  - `coefficients: Vec<Vec<f64>>` — length-`order` outer Vec; `coefficients[k]` = beta_k(t) sampled at argvals
+  - `order: usize`
+  - `residuals: Option<FdMatrix>` — currently always None
+- **Struct** `Lfd { coefs: Vec<Vec<f64>> }` — represents the linear differential operator
+- **linalg gated?** No
+
+**Binding priority:** Differentiator. Niche but genuine new capability; no equivalent in existing bindings.
+
+---
+
+### Group G — Density Functional Data Analysis (introduced 0.27.0)
+
+**Module:** `fdars_core::density_fda`
+
+#### G1. Log-Quantile-Density (LQD) FPCA — `lqd_fpca`
+
+- **What it does:** FPCA on density-valued functional data via the LQD embedding (maps densities to unconstrained L^2 space before PCA). Delegates SVD to existing `fdata_to_pc_1d`.
+- **Signature:** `lqd_fpca(density_matrix: &FdMatrix, argvals: &[f64], ncomp: usize, n_quantile_pts: Option<usize>) -> Result<LqdFpcaResult, FdarError>`
+- **Result struct** `LqdFpcaResult`: `fpca: FpcaResult`, `fve: Vec<f64>` (cumulative fraction of variance explained)
+- **linalg gated?** No
+
+#### G2. Supporting transforms
+
+- `normalize_density(density: &[f64], argvals: &[f64]) -> Result<Vec<f64>>` — trapezoidal normalization to unit integral
+- `lqd_transform(density: &[f64], argvals: &[f64], n_grid: Option<usize>) -> Result<Vec<f64>>` — forward LQD mapping
+- `inverse_lqd(psi: &[f64], t_grid: &[f64], target_argvals: &[f64]) -> Result<Vec<f64>>` — inverse LQD
+- `wasserstein_barycenter(densities: &[Vec<f64>], argvals: &[f64], weights: Option<&[f64]>) -> Result<Vec<f64>>` — 1D Wasserstein Frechet mean via quantile averaging
+
+**Binding priority:** Differentiator. Density-on-density FDA is a specialized but growing area; LQD FPCA is the key entry point.
+
+---
+
+### Group H — Frechet Statistics on Metric Spaces (introduced 0.27.0)
+
+**Module:** `fdars_core::frechet`
+
+#### H1. Frechet Regression — `frechet_global_reg`, `frechet_local_reg`
+
+- **What they do:** Regression when the response lives in a metric space (e.g., Wasserstein space of densities). Global = linear predictor weight, local = Gaussian kernel-weighted.
+- **Global signature:** `frechet_global_reg(predictors: &FdMatrix, responses: &FdMatrix, argvals: &[f64], xout: &FdMatrix) -> Result<FrechetGlobalRegResult, FdarError>`
+  - **Result** `FrechetGlobalRegResult`: `predicted: FdMatrix` (n_out x m), `xout: FdMatrix` (n_out x p), `x_bar: Vec<f64>` (length p)
+- **Local signature:** `frechet_local_reg(predictors: &FdMatrix, responses: &FdMatrix, argvals: &[f64], xout: &FdMatrix, bandwidth: f64) -> Result<FrechetLocalRegResult, FdarError>`
+  - **Result** `FrechetLocalRegResult`: `predicted: FdMatrix`, `xout: FdMatrix`, `bandwidth: f64`
+- **linalg gated?** No (uses nalgebra for covariance inversion)
+
+#### H2. Frechet Mean and Variance — `frechet_mean`, `frechet_variance`
+
+- **What they do:** Compute the Frechet mean (weighted barycenter) and mean-squared-distance from objects to the Frechet mean in a metric space.
+- **linalg gated?** No
+
+#### H3. Frechet ANOVA — `frechet_anova`
+
+- **What it does:** Group-difference test for metric-space responses (Dubey-Muller test). Seeded permutation for primary p-value; asymptotic chi-squared secondary.
+- **Signature:** `frechet_anova(groups: &[usize], responses: &FdMatrix, argvals: &[f64], n_perm: usize, seed: u64) -> Result<FrechetAnovaResult, FdarError>`
+- **Result struct** `FrechetAnovaResult`:
+  - `statistic: f64`, `p_value_asymptotic: f64`, `p_value_permutation: f64`, `n_perm: usize`
+  - `group_frechet_variances: Vec<f64>` (length k), `pooled_frechet_variance: f64`
+  - `fn_statistic: f64`, `un_statistic: f64`, `group_labels: Vec<usize>`
+- **linalg gated?** No
+
+#### H4. Wasserstein Distance — `wasserstein2_distance`
+
+- **What it does:** 1D 2-Wasserstein distance between two densities.
+- **Trait** `MetricSpace` — defines distance measurement and weighted-Frechet-mean solving; regression/statistical routines are generic over this trait.
+
+**Binding priority:** Differentiator. Frechet regression and ANOVA on density-valued data are genuinely new analysis capabilities not available in any existing pyfda module.
+
+---
+
+### Group I — Functional Time Series (introduced 0.27.0)
+
+**Module:** `fdars_core::fts`
+
+#### I1. Functional Time Series Model (FPCA-AR) — `ftsm`
+
+- **What it does:** Fits FPCA + per-component AR(p) models to a time-ordered curve series. Supports h-step-ahead forecasting, multi-step iterative forecasting, and online updates.
+- **Core functions:**
+  - `ftsm(data: &FdMatrix, ncomp: usize, argvals: &[f64]) -> Result<FtsmResult>`
+  - `ftsm_forecast(result: &FtsmResult, h: usize) -> Result<FtsmForecastResult>`
+  - `ftsm_forecast_multistep(result: &FtsmResult, h: usize) -> Result<Vec<FtsmForecastResult>>`
+  - `ftsm_update(result: &FtsmResult, new_curve: &[f64]) -> Result<FtsmResult>`
+- **Result structs:**
+  - `FtsmResult` (`#[non_exhaustive]`): `mean: Vec<f64>`, `rotation: FdMatrix` (m x ncomp), `scores: FdMatrix` (n x ncomp), `fitted: FdMatrix`, `weights: Vec<f64>`, `ncomp: usize`, `ar_models: Vec<ArModelResult>`
+  - `FtsmForecastResult`: `forecast: FdMatrix` (h x m), `h: usize`
+  - `ArModelResult` — per-FPC AR diagnostics
+- **linalg gated?** No
+
+#### I2. Functional PLS Forecasting — `fplsr`
+
+- **What it does:** PLS-score-based alternative to FPCA-score AR for curve forecasting.
+- **Result** `FplsrResult`
+- **linalg gated?** No
+
+#### I3. Functional ACF/PACF — `functional_acf`, `functional_pacf`
+
+- **What they do:** Lag-h functional autocorrelation (trace of lag-h functional covariance normalized by lag-0 trace) and partial autocorrelation.
+- **Result** `FacfResult`
+- **linalg gated?** No
+
+#### I4. Long-Run Covariance — `long_run_covariance`
+
+- **What it does:** Bartlett kernel-sandwich estimator of the long-run covariance function; used in stationarity tests.
+- **Result** `LongRunCovResult`
+- **linalg gated?** No
+
+#### I5. Functional Stationarity Test — `stationarity_test`
+
+- **What it does:** KPSS-style partial-sum L2 statistic with Monte-Carlo permutation p-value.
+- **Result struct** `StationarityResult` (`#[non_exhaustive]`): `statistic: f64`, `p_value: f64`, `n_perm: usize`
+- **linalg gated?** No
+
+#### I6. Functional First-Difference — `functional_difference`
+
+- **What it does:** Functional first-difference operator (produces a curve series of length n-1).
+- **linalg gated?** No
+
+**Binding priority:** Differentiator. The complete FTS pipeline (fit -> ACF check -> stationarity test -> forecast) is a genuinely new analysis dimension not covered by existing bindings.
+
+---
+
+### Group J — FPCA Variants (introduced 0.27.0)
+
+**Module:** `fdars_core::fpca_variants`
+
+#### J1. Functional SVD / Cross-FPCA — `fsvd`
+
+- **What it does:** Functional SVD between two paired functional datasets (X, Y on different grids); decomposes cross-covariance into singular functions and scores.
+- **Signature:** `fsvd(x: &FdMatrix, argvals_x: &[f64], y: &FdMatrix, argvals_y: &[f64], ncomp: usize) -> Result<FsvdResult, FdarError>`
+- **Result struct** `FsvdResult`:
+  - `singular_values: Vec<f64>` (length ncomp, non-increasing)
+  - `left_functions: FdMatrix` (p x ncomp, unit L2 norm on argvals_x)
+  - `right_functions: FdMatrix` (q x ncomp, unit L2 norm on argvals_y)
+  - `left_scores: FdMatrix` (n x ncomp)
+  - `right_scores: FdMatrix` (n x ncomp)
+- **linalg gated?** No (docs annotations show no feature gate)
+
+#### J2. FPCA of Derivatives — `fpca_der`
+
+- **What it does:** FPCA applied to the derivatives of a functional sample. Pre-differentiates curves, then runs standard FPCA.
+- **linalg gated?** No
+
+#### J3. Cross-Covariance Surface — `cross_covariance`
+
+- **What it does:** Estimates the cross-covariance surface between two paired functional datasets.
+- **linalg gated?** No
+
+#### J4. Dynamical Correlation — `dynamical_correlation`
+
+- **What it does:** Computes dynamical (functional) correlation between two paired samples (normalized cross-covariance trace).
+- **linalg gated?** No
+
+#### J5. Sandwich-Smoother FPCA — `ssvd`
+
+- **What it does:** Sparse-SVD / sandwich-smoother FPCA path for noisy/sparse data.
+- **linalg gated?** No (no feature annotations)
+
+**Binding priority:** Table stakes (J1 fsvd and J3 cross_covariance) as common FDA operations. J2, J4, J5 are differentiators.
+
+---
+
+### Group K — FEM Surface Smoothing (introduced 0.28.0 / confirmed 0.29.0)
+
+**Module:** `fdars_core::fem_smoothing`
+
+#### K1. FEM/PDE-Regularized Surface Smoothing — `fem_smooth`, `fem_smooth_gcv`
+
+- **What it does:** Laplacian-penalty smoothing over triangulated 2D domains. Assembles mass (M) and stiffness (K) matrices from P1 Lagrange elements; solves (M + lambda*K)c = y. `fem_smooth` takes fixed lambda; `fem_smooth_gcv` selects lambda via GCV on log grid.
+- **Signatures:**
+  - `fem_smooth(nodes: &[[f64;2]], triangles: &[[usize;3]], observations: &[(f64, f64, f64)], lambda: f64) -> Result<FemSmoothResult>`
+  - `fem_smooth_gcv(nodes: &[[f64;2]], triangles: &[[usize;3]], observations: &[(f64, f64, f64)]) -> Result<FemSmoothResult>`
+  - `assemble_fem_matrices(nodes: &[[f64;2]], triangles: &[[usize;3]]) -> (Vec<Vec<f64>>, Vec<Vec<f64>>)` — returns (M, K) mass and stiffness matrices
+  - `fem_basis_eval(nodes, triangles, query_points: &[[f64;2]]) -> Vec<Vec<f64>>` — P1 hat function values
+  - `fem_predict(nodes, triangles, coefficients: &[f64], query_points: &[[f64;2]]) -> Vec<f64>` — interpolate at new points
+- **Result struct** `FemSmoothResult` — fitted surface values, lambda used, GCV score
+- **linalg gated?** No (docs note: "Dense in-house assembly — no new crate dependencies; sparse solvers are deferred")
+
+**Binding priority:** Differentiator. FEM smoothing for 2D surface-valued functional data over irregular triangulated domains is a genuinely advanced capability with no existing pyfda equivalent. Mesh input shape (nodes + triangles arrays) requires custom PyO3 conversion logic.
+
+---
+
+### Group L — GAK Metric + Kernel K-Means (introduced 0.32.0)
+
+**Module:** `fdars_core::metric` (new `gak` submodule added to existing metric module)
+
+#### L1. Global Alignment Kernel (GAK) — `gak`, `gak_gram_matrix`
+
+- **What it does:** Triangular Global Alignment Kernel (Cuturi 2011) — a PSD similarity measure on time-series sequences. Computed via log-domain forward DP. `gak_gram_matrix` builds symmetric n x n PSD Gram matrix (unit diagonal).
+- **Signatures:**
+  - `gak(x: &[f64], y: &[f64], sigma: f64) -> f64` — normalized pairwise similarity [0,1]
+  - `gak_gram_matrix(data: &FdMatrix, config: &GakConfig) -> Result<FdMatrix>`
+  - `sigma_gak(data: &FdMatrix) -> f64` — median-distance bandwidth heuristic
+- **Config struct** `GakConfig { sigma: Option<f64> }` — None = auto via `sigma_gak`
+
+#### L2. GAK Train/Predict Gram (sklearn precomputed-kernel convention) — `gak_gram_train`, `gak_gram_predict`
+
+- **What they do:** Training Gram (with stored self-kernels and resolved sigma) and prediction Gram (n_test x n_train); follows sklearn's precomputed kernel API.
+- **Signatures:**
+  - `gak_gram_train(data: &FdMatrix, config: &GakConfig) -> Result<GakGramTrain>`
+  - `gak_gram_predict(train: &GakGramTrain, new_data: &FdMatrix) -> Result<FdMatrix>`
+- **Result** `GakGramTrain` — stores training data reference and self-kernels
+- **linalg gated?** No
+
+**Binding priority:** Table stakes (GAK is a widely-used kernel for time-series/FDA; enables kernel SVM via `fdars.sklearn`). The train/predict split is critical for sklearn precomputed-kernel integration.
+
+---
+
+### Group M — Shapelet Discovery & Classification (introduced 0.33.0)
+
+**Module:** `fdars_core::shapelet`
+
+#### M1. Shapelet Discovery — `discover_shapelets`
+
+- **What it does:** Finds discriminative subsequences via candidate generation across length ranges, quality scoring (information gain or F-statistic), and self-similarity pruning. Produces a ranked `ShapeletSet`.
+- **Signature:** `discover_shapelets(data: &FdMatrix, labels: &[usize], config: &ShapeletDiscoveryConfig) -> Result<ShapeletSet, FdarError>`
+- **Config struct** `ShapeletDiscoveryConfig` (serde-enabled, sktime-compatible defaults) — min_len, max_len, max_shapelets, quality_measure, seed, n_candidates
+- **Result** `ShapeletSet` — ranked collection of `Shapelet` structs with z-normalized values + provenance
+
+#### M2. Shapelet Transform — `shapelet_transform`, `shapelet_transform_fit`
+
+- **What they do:** Maps curves to an n x K distance-feature matrix using a fitted `ShapeletSet`. `shapelet_transform_fit` discovers + transforms training set in one call; the resulting `ShapeletTransformFit` applies to out-of-sample curves.
+- **Signatures:**
+  - `shapelet_transform(shapelets: &ShapeletSet, data: &FdMatrix) -> Result<FdMatrix>` — n x K distance matrix
+  - `shapelet_transform_fit(data: &FdMatrix, labels: &[usize], config: &ShapeletDiscoveryConfig) -> Result<ShapeletTransformFit>`
+  - `ShapeletTransformFit::transform(data: &FdMatrix) -> Result<FdMatrix>` — out-of-sample
+  - `shapelet_distance(shapelet: &Shapelet, curve: &[f64]) -> f64` — sliding-window z-normalized Euclidean distance
+
+#### M3. Shapelet Classifier — `shapelet_classifier_fit`
+
+- **What it does:** End-to-end discover -> transform -> classify pipeline. Inner classifier: kNN (default) or LDA.
+- **Signature:** `shapelet_classifier_fit(data: &FdMatrix, labels: &[usize], argvals: &[f64], config: &ShapeletClassifierConfig) -> Result<ShapeletClassifierFit, FdarError>`
+- **`ShapeletClassifierFit::predict(new_data: &FdMatrix) -> Result<Vec<usize>>`**
+- **Enums:** `QualityMeasure` (InfoGain | FStatistic)
+- **linalg gated?** No
+
+#### M4. Normalization helpers — `z_normalize_window`, `z_normalize_into`
+
+- **What they do:** Z-score normalization on a windowed segment (in-place and windowed variants).
+
+**Binding priority:** Differentiator. Shapelet-based classification is a genuinely new analysis paradigm in pyfda (time-series/functional data classification via discriminative subsequences).
+
+---
+
+## Feature Classification Summary
+
+### Table Stakes (fills obvious gaps in the existing binding surface)
+
+| Feature | Group | Complexity | Notes |
+|---------|-------|------------|-------|
+| Elastic k-means joint alignment (`align_cluster_fd`) | A1 | MEDIUM | Extends existing clustering surface |
+| Functional DBSCAN (`dbscan_fd`) | A2 | LOW | Simple config, familiar paradigm |
+| kCFC per-cluster FPCA clustering (`kcfc_cluster`) | A3 | MEDIUM | Returns per-cluster FpcaResult |
+| Function-on-function random effects (`fof_re_regression`) | D1 | HIGH | 15-field result struct; subject_ids required |
+| MultiFunData container (`multi_fdata`) | E1 | LOW | Data structure only; dependency for C3 |
+| Functional SVD / cross-FPCA (`fsvd`) | J1 | MEDIUM | 5-field result; cross-grid binding |
+| Cross-covariance surface (`cross_covariance`) | J3 | LOW | Returns FdMatrix |
+| FPCA of derivatives (`fpca_der`) | J2 | LOW | Thin wrapper |
+| GAK gram matrix (`gak_gram_matrix`, `gak_gram_train`, `gak_gram_predict`) | L1/L2 | MEDIUM | sklearn precomputed-kernel convention critical |
+| Model selection AIC/BIC/GCV (`model_selection_ncomp`) | B5 | LOW | Wraps existing `fregre_lm` |
+
+### Differentiators (genuinely new analysis capability)
+
+| Feature | Group | Complexity | Notes |
+|---------|-------|------------|-------|
+| Functional Additive Model (`fam`) | B1 | HIGH | Nonlinear SoF regression; new result struct |
+| GKAM multi-predictor (`fregre_gkam`) | B2 | HIGH | Multiple grids; backfitting; slice-of-slice input |
+| GSAM spectral additive model (`fregre_gsam`) | B3 | MEDIUM | Single-predictor variant of GKAM |
+| History-index estimator (`history_index`) | B4 | MEDIUM | New lag-based model class |
+| GroupLasso variable selection (`variable_selection`) | B6 | HIGH | Coordinate descent; multi-predictor |
+| Dense functional mixed model (`dense_flmm`) | C1 | HIGH | Longitudinal/repeated-measures FDA; 14-field result |
+| Fast pointwise mixed model (`fast_fmm`) | C2 | MEDIUM | Large-grid alternative to C1 |
+| Multivariate FAMM (`multi_famm`) | C3 | HIGH | Depends on C1 + E1 |
+| Principal Differential Analysis (`principal_differential_analysis`) | F1 | MEDIUM | ODE estimation from curves |
+| LQD density FPCA + transforms | G1/G2 | HIGH | Density-valued data new paradigm; new module |
+| Frechet regression + ANOVA | H1-H3 | HIGH | Metric space; new module; FrechetAnovaResult |
+| Functional time series (ftsm + forecast + ACF + stationarity) | I1-I5 | HIGH | Multi-function new module; online update |
+| Functional PLS forecasting (`fplsr`) | I2 | MEDIUM | Part of FTS group |
+| Dynamical correlation (`dynamical_correlation`) | J4 | LOW | Single scalar result |
+| Sandwich-smoother FPCA (`ssvd`) | J5 | MEDIUM | Sparse data path |
+| FEM surface smoothing (`fem_smooth`, `fem_smooth_gcv`) | K | HIGH | Mesh input; no Python precedent in pyfda |
+| Shapelet discovery + transform + classifier | M | HIGH | New classification paradigm; QualityMeasure enum |
+| Fisher-EM discriminative clustering (`funfem_cluster`) | A4 | HIGH | Discriminative subspace; soft memberships |
+
+### Anti-Features (do NOT bind this milestone)
+
+| Anti-Feature | Why | What Instead |
+|--------------|-----|--------------|
+| `fregre_gsam` as first priority | Spectral additive model very niche vs GKAM | Bind `fregre_gkam` (B2) first; defer B3 if needed |
+| FEM mesh helpers as primary surface | `fem_basis_eval` and `assemble_fem_matrices` are internal utilities | Expose only `fem_smooth` / `fem_smooth_gcv` / `fem_predict` |
+| `explain` module additions | No new public items detected 0.23 -> 0.33 in explain | Skip |
+| `function_on_scalar_2d` additions | API unchanged from 0.23 | Skip |
+| Streaming depth additions | API unchanged from 0.23 | Skip |
+| Landmark module additions | API unchanged from 0.23 | Skip |
+
+---
+
+## linalg-Gated Items (OUT OF SCOPE — pyfda does not enable linalg)
+
+Research found **no items explicitly feature-gated behind `linalg`** in 0.24-0.33 based on docs.rs annotations and Cargo.toml inspection. The `linalg` feature enables `faer 0.23` and `anofox-regression 0.4` but the new modules (fts, frechet, density_fda, clustering_advanced, fpca_variants, fem_smoothing, shapelet, metric::gak) all use only nalgebra (always available) or in-house dense assembly.
+
+**Conclusion:** No new capability in 0.24-0.33 is linalg-gated. All groups (A-M) are bindable with the existing `parallel`-only build.
+
+---
+
+## Breaking Changes to Existing Bindings
+
+The CHANGELOG confirms **no breaking changes** in 0.24-0.33 to the public API surface that pyfda binds. Specifically:
+
+- `scalar_on_function::fregre_lm`, `functional_logistic`, `fregre_lm_multi`, and their predict variants: signatures unchanged
+- `fof_regression::fof_regression`, `fof_cv`, `predict_fof`: unchanged (new RE functions added alongside)
+- `famm::fmm`, `fmm_predict`, `fmm_test_fixed`: unchanged (new functions added alongside)
+- `gmm`: unchanged (funhddC_cluster verified present in 0.23)
+- All previously bound modules (depth, inference, alignment, smoothing, classification, outliers, etc.): no signature drift
+
+**Regression gate approach:** Bump `fdars-core` to 0.33.0 in Cargo.toml first as an isolated commit; run the 772-test suite; expect zero failures before adding any new bindings.
 
 ---
 
 ## Feature Dependencies
 
 ```
-Imputer                          (no deps)
-    feeds BSplineSmoother        (no deps, but Imputer should come first in Pipeline)
-    feeds LocalPolynomialSmoother
-
-BSplineSmoother feeds FPCATransformer
-FPCATransformer feeds FPCRegressor (FPCA scores → LM coefficients)
-FPCATransformer feeds any sklearn estimator (scores are plain ndarray)
-
-DepthTransformer requires depth.functional_depth dispatcher (already bound)
-OutliergramDetector requires outliers.outliergram (already bound)
-
-LabelEncoder wrapper required by all Classifiers (for check_estimator label remapping)
-validate_data pattern required by ALL estimators (n_features_in_)
-_resolve_argvals helper required by every estimator calling an fdars argvals-taking function
+MultiFunData (E1) ──required-by──> multi_famm (C3)
+dense_flmm (C1) ──required-by──> multi_famm (C3)
+discover_shapelets (M1) ──feeds──> shapelet_transform_fit (M2) ──feeds──> shapelet_classifier_fit (M3)
+lqd_transform (G2) ──feeds──> lqd_fpca (G1)
+GakGramTrain (L2) ──required-by──> gak_gram_predict (L2)
+ftsm (I1) ──required-by──> ftsm_forecast (I1)
+ftsm (I1) ──required-by──> ftsm_update (I1)
 ```
 
-### Dependency notes
-
-- **FPCATransformer** is the central hub: almost all regression/classification pipelines go through it. Build and validate FPCATransformer first; then regression/classification wrappers are straightforward.
-- **LabelEncoder** dependency in all classifiers: fdars elastic_multinomial requires 0-indexed contiguous labels; other classifiers (fclassif_lda, etc.) expect usize labels. All must go through LabelEncoder in fit to be check_estimator-safe.
-- **`argvals` resolution pattern** (None → arange in fit) is shared by EVERY estimator that calls an fdars function requiring argvals — implement once as a module-level helper `_resolve_argvals(argvals, n_features)`.
-
 ---
 
-## MVP Definition
+## Suggested Binding Groups for Roadmap Phasing
 
-### Phase 1 — Foundation + Core Transformers (build first)
+Based on coupling and complexity, the capabilities cluster into four natural binding groups:
 
-- [ ] Module skeleton `python/fdars/sklearn/` with `__init__.py`, `_base.py` (shared helpers: `_resolve_argvals`, `_validate_fit_data`)
-- [ ] `FPCATransformer` — the central hub; validates the entire Pipeline integration story
-- [ ] `Imputer` — upstream preprocessing, needed for realistic pipelines
-- [ ] `BSplineSmoother` — the primary smoothing transformer
-- [ ] `DepthTransformer` — depth → scalar, tests the grid-changing transformer pattern
+**Group 1 — Regression Depth** (extends existing `fdars.scalar_on_function` and `fdars.fof_regression`):
+B1-B7 (fam, gkam, gsam, history_index, model_selection_ncomp, variable_selection, permutation_test_fam) + D1 (fof_re_regression/predict_fof_re). No new submodule needed; medium result structs.
 
-### Phase 2 — Regression + Classification (core predictors)
+**Group 2 — Clustering + Mixed Models** (new `fdars.clustering_advanced` submodule + FAMM extensions):
+A1-A4 (clustering_advanced) + E1 (multi_fdata) + C1-C3 (dense_flmm/fast_fmm/multi_famm). High complexity; C3 depends on E1; new `fdars.clustering_advanced` submodule required.
 
-- [ ] `FPCRegressor` — simplest and most common regression use case
-- [ ] `PLSRegressor` — PLS alternative
-- [ ] `FPCLDAClassifier`, `FPCQDAClassifier`, `FPCKNNClassifier` — discriminant + kNN
-- [ ] `LogisticFPCClassifier` — binary classification
-- [ ] `FunctionalKMeans` — clustering
+**Group 3 — Time Series + FPCA Variants + Density + Frechet** (four new submodules, shared theme of "new analysis paradigm"):
+I (fts: new `fdars.fts` submodule) + J (fpca_variants: new `fdars.fpca_variants` submodule) + G (density_fda: new `fdars.density_fda` submodule) + H (frechet: new `fdars.frechet` submodule). High complexity; fully self-contained.
 
-### Phase 3 — Outlier Detectors + Differentiators
-
-- [ ] `LRTOutlierDetector`, `OutliergramDetector`, `MagnitudeShapeDetector` — classic three
-- [ ] `BasisRepresentation`, `LocalPolynomialSmoother` — additional transformers
-- [ ] `RobustFPCRegressor` — L1/Huber
-- [ ] `TVDMSSDetector`, `MUODDetector`, `DepthgramDetector` — newer outlier methods
-- [ ] `GLMRegressor` (gaussian family only), `DDClassifier`, `ElasticMultinomialClassifier`
-
-### Defer / Future
-
-- `PACEFPCATransformer` — needs IrregFdata → dense bridge; complex; do after Phase 1 validates
-- `FOSRRegressor` — non-standard output shape; address after core is solid
-- `ShiftRegistrationTransformer` — registration compliant with check_estimator on small n: research needed before planning
-
----
-
-## Competitor Feature Analysis (scikit-fda reference)
-
-| Estimator type | scikit-fda (0.10.x) | fdars sklearn layer (planned) |
-|---------------|---------------------|-------------------------------|
-| Smoothers | `KernelSmoother`, `BasisSmoother` | `BSplineSmoother`, `LocalPolynomialSmoother` |
-| Dimensionality reduction | `FPCA`, `FPLS`, `DiffusionMap` | `FPCATransformer`, `PACEFPCATransformer` (differentiator) |
-| Registration | `LeastSquaresShiftRegistration`, `FisherRaoElasticRegistration` | `ShiftRegistrationTransformer` (elastic: deferred) |
-| Missing values | `MissingValuesInterpolation` | `Imputer` |
-| Classifiers | `KNeighbors`, `NearestCentroid`, `MaximumDepth`, `DDClassifier`, `LogisticRegression`, `QDA` | All of the above + `ElasticMultinomialClassifier` (differentiator) |
-| Regressors | `LinearRegression`, `KNeighbors`, `KernelRegression`, `FPCARegression`, `FPLSRegression` | All of the above + `RobustFPCRegressor`, `GLMRegressor` (differentiators) |
-| Clusterers | `KMeans`, `FuzzyCMeans` | Both + `FunctionalGMM` |
-| Outlier detectors | `BoxplotOutlierDetector`, `MSPlotOutlierDetector` | LRT + outliergram + MS + TVDMSS + MUOD + Depthgram (broader coverage) |
-| Depth transforms | Depth methods exposed as functions | `DepthTransformer` (unified transformer over 13 methods) |
-
----
-
-## Table Stakes vs Differentiators — Summary
-
-### Table Stakes
-
-Missing any of these = the sklearn layer feels incomplete to an FDA practitioner:
-
-1. `BSplineSmoother` / `LocalPolynomialSmoother` — smoothing transformers
-2. `FPCATransformer` — functional PCA → scores; enables the entire sklearn pipeline ecosystem
-3. `Imputer` — NaN handling upstream of smoothers
-4. `FPCRegressor` / `PLSRegressor` — scalar-on-function regression (most common FDA task)
-5. `LogisticFPCClassifier` — binary functional classification
-6. `FPCLDAClassifier` / `FPCKNNClassifier` — functional discriminant / k-NN classifiers
-7. `FunctionalKMeans` — functional clustering (most requested after regression)
-8. `LRTOutlierDetector` / `OutliergramDetector` / `MagnitudeShapeDetector` — the "classic three"
-9. `DepthTransformer` — depth as feature (depth → scalar for downstream models)
-
-### Differentiators
-
-Go beyond scikit-fda's coverage or use fdars' Rust performance advantage:
-
-1. `BasisRepresentation` — basis projection as sklearn transformer (fdars' Rust speed is the differentiator)
-2. `FuzzyFunctionalCMeans` — fuzzy clustering (scikit-fda has it, fdars adds Rust speed)
-3. `TVDMSSDetector` / `MUODDetector` / `DepthgramDetector` — newer outlier methods beyond classic three
-4. `RobustFPCRegressor` (L1/Huber) — robust regression scikit-fda lacks
-5. `GLMRegressor` — functional GLM (binomial/poisson/gamma) — scikit-fda lacks this
-6. `PACEFPCATransformer` — PACE FPCA for dense data (scikit-fda doesn't have PACE)
-7. `DDClassifier` — depth-based DD-classifier
-8. `ElasticMultinomialClassifier` — elastic multinomial OvR
-9. `NormTransformer` — functional norm as scalar feature
-10. `SplineInterpolator` — grid-resampling transformer
-
-### Anti-Features
-
-| Feature | Why Avoid | What to Do Instead |
-|---------|-----------|-------------------|
-| Wrapping `cluster_optim` as ClusterMixin | It is itself a grid search loop — nesting inside GridSearchCV creates double-search confusion | Expose FunctionalKMeans; let users use GridSearchCV over n_clusters |
-| Exposing inference tests (permutation, SCB, ANOVA) as estimators | Hypothesis tests don't have fit/predict contracts | Keep only in the native fdars API |
-| Wrapping `concurrent_regression` as RegressorMixin | Takes a list of predictor matrices — incompatible with sklearn's single-X input contract | Keep in native API only |
-| Exempting any estimator from check_estimator | Any exemption propagates into Pipeline/GridSearchCV failures at user sites | Exclude non-compliant methods, document coverage list |
-| Accepting Fdata objects as estimator input | Fdata is an OOP container, incompatible with sklearn's column slicing, ColumnTransformer, cross_val_score | Accept only plain (n_obs, n_points) ndarrays; argvals is a constructor param |
-| numpy array as default for argvals in __init__ | Mutable default breaks clone() and set_params() | Use argvals=None default, resolve in fit |
+**Group 4 — Advanced Methods** (GAK metric + shapelet + FEM smoothing):
+L (GAK: extends `fdars.metric`) + M (shapelet: new `fdars.shapelet` submodule) + K (FEM: new `fdars.fem_smoothing` submodule). Advanced/deferrable; FEM has non-standard mesh input shape.
 
 ---
 
 ## Sources
 
-- [Scikit-fda and scikit-learn tutorial (0.10.1)](https://fda.readthedocs.io/en/stable/auto_tutorial/plot_skfda_sklearn.html)
-- [scikit-fda API Reference (0.10.2.dev0)](https://fda.readthedocs.io/en/latest/apilist.html)
-- [Developing scikit-learn estimators — sklearn 1.9.0](https://scikit-learn.org/stable/developers/develop.html)
-- [scikit-fda: A Python Package for Functional Data Analysis (arxiv 2022)](https://arxiv.org/pdf/2211.02566)
-- fdars source modules reviewed: `regression_mod.rs`, `classification_mod.rs`, `clustering_mod.rs`, `outliers_mod.rs`, `smoothing_mod.rs`, `basis_mod.rs`, `alignment_mod.rs`, `pace_fpca_mod.rs`, `depth_mod.rs`, `python/fdars/_augment.py`, `python/fdars/fdata_class.py`, `python/fdars/__init__.py`
+- [fdars-core API docs 0.23.0](https://docs.rs/fdars-core/0.23.0/fdars_core/) — baseline confirmation (LOW confidence, webfetch)
+- [fdars-core API docs 0.24.0](https://docs.rs/fdars-core/0.24.0/fdars_core/) — Group A/B/C/D/E attribution (LOW confidence, webfetch)
+- [fdars-core API docs 0.27.0](https://docs.rs/fdars-core/0.27.0/fdars_core/) — Group F/G/H/I/J attribution (LOW confidence, webfetch)
+- [fdars-core API docs 0.28.0](https://docs.rs/fdars-core/0.28.0/fdars_core/) — Group K attribution (LOW confidence, webfetch)
+- [fdars-core API docs 0.32.0](https://docs.rs/fdars-core/0.32.0/fdars_core/) — Group L attribution (LOW confidence, webfetch)
+- [fdars-core API docs 0.33.0](https://docs.rs/fdars-core/0.33.0/fdars_core/) — Group M + MSRV + linalg feature confirmation (LOW confidence, webfetch)
+- [crates.io version list](https://crates.io/api/v1/crates/fdars-core/versions) — version dates/existence confirmation (LOW confidence, webfetch)
+- [CHANGELOG.md source view](https://docs.rs/crate/fdars-core/0.33.0/source/CHANGELOG.md) — breaking-change assessment (LOW confidence, webfetch)
+- Per-struct docs pages (docs.rs) — field names/types for AlignClusterResult, DbscanResult, KcfcResult, FunFemResult, FamResult, GkamResult, GsamResult, HistoryIndexResult, VarSelectResult, DenseFlmmResult, FastFmmResult, MultiFammResult, FofReResult, PdaResult, LqdFpcaResult, FrechetGlobalRegResult, FrechetLocalRegResult, FrechetAnovaResult, FtsmResult, FtsmForecastResult, FsvdResult, FemSmoothResult (LOW confidence, webfetch; cross-verified across struct + module index pages)
 
 ---
-*Feature research for: scikit-learn-compatible estimator layer over fdars (v9.0)*
-*Researched: 2026-08-31*
+
+*Feature research for: pyfda v11.0 — fdars-core 0.33.0 upgrade*
+*Researched: 2026-09-02*
+*Confidence: MEDIUM — function signatures sourced directly from docs.rs struct/function pages; version attribution based on presence/absence checks across per-version index pages; linalg gating based on feature annotations in docs; no items fabricated.*

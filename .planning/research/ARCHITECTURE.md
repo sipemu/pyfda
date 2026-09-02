@@ -1,554 +1,324 @@
-# Architecture Research
-
-**Domain:** sklearn-compatible estimator layer over fdars (functional-data PyO3 bindings)
-**Researched:** 2026-08-31
-**Confidence:** HIGH (architecture derived from reading actual source files; sklearn contracts verified against upstream docs)
-
-## Standard Architecture
-
-### System Overview — With the New sklearn Layer
-
-The new `fdars.sklearn` layer sits entirely inside the Python API layer, parallel to `fdars.advisor` and `fdars.mcp`. It does not touch the Rust FFI layer.
-
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                         Python API Layer                              │
-│                       python/fdars/                                   │
-│                                                                       │
-│  ┌──────────────┐ ┌────────────┐ ┌──────────────┐ ┌──────────────┐  │
-│  │  Fdata OOP   │ │  _augment  │ │    advisor/  │ │   sklearn/   │  │
-│  │ fdata_class  │ │  helpers   │ │  (optional)  │ │  (optional)  │  │
-│  └──────┬───────┘ └─────┬──────┘ └──────┬───────┘ └──────┬───────┘  │
-│         │               │               │                │           │
-│         └───────────────┴───────────────┴────────────────┘           │
-│                                    │                                  │
-│           ALL paths call the same native functions:                   │
-│           fdars._native.{smoothing,basis,regression,...}             │
-└──────────────────────────────────────────────────────────────────────┤
-                                     │ PyO3
-                                     ▼
-┌────────────────────────────────────────────────────────────────────┐
-│              Rust FFI Layer  (src/*_mod.rs)  — UNCHANGED           │
-│              fdars-core  (external crate) — NO BUMP                │
-└────────────────────────────────────────────────────────────────────┘
-```
-
-### Subpackage Location and File Layout
-
-```
-python/fdars/
-├── __init__.py                  # does NOT import fdars.sklearn (stays sklearn-free)
-├── fdata_class.py               # Fdata container — UNCHANGED
-├── advisor/                     # [advisor] optional extra — existing pattern
-├── mcp/                         # [mcp] optional extra — existing pattern
-└── sklearn/                     # [sklearn] optional extra — NEW, mirrors advisor/mcp
-    ├── __init__.py              # gating: ImportError if scikit-learn not installed
-    ├── _base.py                 # _BaseFdarsEstimator shared base class
-    ├── transformers.py          # FdarsSmoother, FdarsBasisTransformer, FdarsFPCA,
-    │                            #   FdarsImputer, FdarsDepthTransformer
-    ├── predictors.py            # FdarsFunctionalRegressor, FdarsClassifier,
-    │                            #   FdarsClustering, FdarsOutlierDetector
-    └── _coverage.py             # EXCLUDED_METHODS registry (declarative documentation)
-```
-
-### Component Responsibilities
-
-| Component | Responsibility | File |
-|-----------|----------------|------|
-| `sklearn/__init__.py` | Import gate: raises `ImportError` when scikit-learn not installed; exports all public estimator classes | `sklearn/__init__.py` |
-| `_BaseFdarsEstimator` | Shared base: stores `argvals` as constructor param; provides `_resolve_argvals()` helper; `_fit_validate()` / `_transform_validate()` call sklearn validation functions | `sklearn/_base.py` |
-| Transformers | `TransformerMixin + _BaseFdarsEstimator` subclasses for smoothing, basis, FPCA, imputation, depth scoring | `sklearn/transformers.py` |
-| Predictors | `RegressorMixin / ClassifierMixin / ClusterMixin / OutlierMixin + _BaseFdarsEstimator` subclasses | `sklearn/predictors.py` |
-| `_coverage.py` | Declarative registry of excluded fdars methods with reason codes | `sklearn/_coverage.py` |
-
-## Recommended Project Structure — Rationale
-
-- **`sklearn/` as subpackage, not a top-level module:** Mirrors `advisor/` and `mcp/`; users do `from fdars.sklearn import FdarsFPCA`; the subpackage is an island with its own `__init__.py` that handles the sklearn import gate.
-- **`_base.py` separate from mixins:** `_BaseFdarsEstimator` is depended on by both `transformers.py` and `predictors.py`; separating it avoids circular imports and makes the dependency graph strictly one-directional (`predictors` → `_base`; `transformers` → `_base`; `_base` → nothing in sklearn/).
-- **`_coverage.py` as a declarative registry:** The excluded-methods list is a milestone deliverable per PROJECT.md. A separate file makes it easy to maintain without cluttering estimator code.
-
-## Gating and Registration — Mirroring `advisor`/`mcp`
-
-### 1. `pyproject.toml` optional extra
-
-Add one entry:
-```toml
-sklearn = ["scikit-learn>=1.3"]
-```
-
-`scikit-learn` must NOT appear in `[project.dependencies]` (base package stays sklearn-free). Floor at 1.3 because `validate_data` (the standalone function form replacing `check_array` in fit/transform) was introduced there. Note: `__sklearn_tags__()` as a dataclass arrived in 1.6; the base class should detect which tags API is available and use `_get_tags()` as a fallback for 1.3–1.5.
-
-### 2. `sklearn/__init__.py` import gate
-
-```python
-# python/fdars/sklearn/__init__.py
-
-# --- import gate (mirrors fdars/mcp/__init__.py) ---
-try:
-    from sklearn.base import BaseEstimator  # noqa: F401 — proves sklearn present
-except ImportError as _e:
-    raise ImportError(
-        "fdars[sklearn] requires scikit-learn. "
-        "Install it with: pip install fdars[sklearn]"
-    ) from _e
-
-from fdars.sklearn._base import _BaseFdarsEstimator            # noqa: E402
-from fdars.sklearn.transformers import (                        # noqa: E402
-    FdarsSmoother, FdarsBasisTransformer, FdarsFPCA,
-    FdarsImputer, FdarsDepthTransformer,
-)
-from fdars.sklearn.predictors import (                          # noqa: E402
-    FdarsFunctionalRegressor, FdarsClassifier,
-    FdarsClustering, FdarsOutlierDetector,
-)
-
-__all__ = [
-    "_BaseFdarsEstimator",
-    "FdarsSmoother", "FdarsBasisTransformer", "FdarsFPCA",
-    "FdarsImputer", "FdarsDepthTransformer",
-    "FdarsFunctionalRegressor", "FdarsClassifier",
-    "FdarsClustering", "FdarsOutlierDetector",
-]
-```
-
-### 3. `fdars/__init__.py` — NOT modified
-
-`fdars.sklearn` is NOT added to `_submodule_names` and is NOT imported in `fdars/__init__.py`. This is identical to how `fdars.mcp` works — its own docstring reads: "not registered in `fdars.__init__` and is never imported by a plain `import fdars`." Users who want the sklearn layer do `from fdars.sklearn import FdarsFPCA` explicitly. `import fdars` never touches scikit-learn.
-
-## Shared Base Class Design — `_BaseFdarsEstimator`
-
-### The Constructor Rule (Hard Constraint from sklearn)
-
-`BaseEstimator.get_params()` introspects `__init__`'s signature via `inspect.signature` and maps each parameter name to the identically-named instance attribute. `clone()` then calls `type(est)(**est.get_params())` to produce an unfitted copy.
-
-This means: **every constructor param must be stored verbatim on `self` with the same name**.
-
-```python
-class _BaseFdarsEstimator(BaseEstimator):
-    def __init__(self, argvals=None):
-        # MUST store exactly as passed:
-        #   - no conversion (np.asarray breaks None round-trip)
-        #   - no copy
-        #   - no None-to-arange substitution here
-        self.argvals = argvals
-```
-
-If `self.argvals = np.asarray(argvals)` were done in `__init__`, then `clone()` would pass a numpy array back into `__init__`, and `check_estimator` would catch the mutation in its parameter round-trip tests.
-
-Subclasses add their own params but must call `super().__init__(argvals=argvals)` and store everything with the same name:
-
-```python
-class FdarsSmoother(TransformerMixin, _BaseFdarsEstimator):
-    def __init__(self, argvals=None, bandwidth=None, kernel="gaussian"):
-        super().__init__(argvals=argvals)
-        self.bandwidth = bandwidth   # stored as-is, no mutation
-        self.kernel = kernel         # stored as-is
-```
-
-### `n_features_in_` and Validation at Fit Time
-
-The fit method follows the sklearn contract exactly:
-
-```python
-def fit(self, X, y=None):
-    from sklearn.utils.validation import validate_data
-    # validate_data with reset=True:
-    #   - converts X to float64 ndarray (or validated dtype)
-    #   - sets self.n_features_in_ = X.shape[1]
-    #   - sets self.feature_names_in_ if X is a DataFrame
-    X = validate_data(self, X, dtype=np.float64, ensure_2d=True, reset=True)
-    # resolve argvals AFTER validation, using fit-time data shape
-    argvals_ = self._resolve_argvals(X.shape[1])
-    # ... functional computation using argvals_ and X ...
-    # store all fit-time state with trailing underscores:
-    self.argvals_ = argvals_      # resolved grid — fit artifact, not cloned
-    self.mean_ = ...              # any other fit-time state
-    return self                   # always return self
-```
-
-Key distinction: `self.argvals` (no trailing underscore) is the constructor param, untouched through the entire object lifetime. `self.argvals_` (trailing underscore) is the resolved grid created at fit time. `clone()` copies `self.argvals` and discards `self.argvals_`.
-
-### `_resolve_argvals` Helper
-
-```python
-def _resolve_argvals(self, n_features: int) -> np.ndarray:
-    """Resolve argvals constructor param to a concrete grid at fit time."""
-    if self.argvals is None:
-        return np.arange(n_features, dtype=np.float64)
-    return np.asarray(self.argvals, dtype=np.float64)
-```
-
-Called only inside `fit()`, never in `__init__`. This keeps the constructor param pure and the resolution lazy (the correct sklearn pattern).
-
-### Validation in Transform/Predict
-
-```python
-def transform(self, X):
-    from sklearn.utils.validation import check_is_fitted, validate_data
-    check_is_fitted(self)          # checks for any trailing-underscore attr
-    # reset=False enforces X.shape[1] == self.n_features_in_
-    X = validate_data(self, X, dtype=np.float64, ensure_2d=True, reset=False)
-    # ... call fdars native functions with X and self.argvals_ ...
-    return result
-```
-
-### Tags Override for Special Contracts
-
-For stochastic or otherwise non-standard estimators:
-
-```python
-def __sklearn_tags__(self):
-    tags = super().__sklearn_tags__()
-    tags.non_deterministic = True   # for k-means-based estimators with random init
-    return tags
-```
-
-For sklearn 1.3–1.5 compatibility, `_base.py` detects the available API:
-```python
-_HAS_SKLEARN_TAGS_DATACLASS = hasattr(BaseEstimator, "__sklearn_tags__")
-```
-
-## numpy↔Fdata Boundary Decision
-
-**Decision: call array-level native functions directly; do NOT construct `Fdata` inside estimator methods.**
-
-Rationale:
-
-1. `check_estimator` passes plain ndarrays. The native functions (`_native.smoothing.nadaraya_watson`, `_native.regression.fpca`, etc.) already accept raw numpy arrays — the same entry points that `Fdata` methods call internally. There is no functional need to wrap in `Fdata`.
-
-2. The existing architecture is: `numpy → PyO3 binding → numpy`. The sklearn layer reuses this exact path, bypassing the Fdata OOP wrapper layer. Constructing `Fdata` would add allocation overhead (IDs, metadata, rangeval) for no benefit.
-
-3. `Fdata` always casts to `float64` and constructs auxiliary data (default IDs, default rangeval). These side effects would interfere with `check_estimator` dtype-casting tests that verify estimators handle e.g. `float32` input by converting to their working dtype internally.
-
-Concrete boundary (correct vs wrong):
-
-```python
-# CORRECT — call native directly with validated raw array and resolved grid
-smoothed = _native.smoothing.nadaraya_watson(X, self.argvals_, bandwidth=self.bandwidth_)
-
-# WRONG — Fdata construction inside transform breaks check_estimator dtype tests
-fd = Fdata(X, argvals=self.argvals_)
-smoothed = fd.something()
-```
-
-The `Fdata` class remains the recommended user-facing API for interactive workflows. Sklearn estimators use the low-level native bindings.
-
-## clone/get_params/set_params Rules
-
-Four hard rules, all derived from `BaseEstimator`:
-
-### Rule 1: Constructor params stored with exact same attribute name
-
-```python
-class FdarsFPCA(TransformerMixin, _BaseFdarsEstimator):
-    def __init__(self, argvals=None, n_components=3):
-        super().__init__(argvals=argvals)
-        self.n_components = n_components  # attribute name == param name — CORRECT
-
-# WRONG: misnamed attribute breaks get_params() introspection
-    def __init__(self, argvals=None, n_components=3):
-        self.n_comp = n_components  # different name — breaks clone()
-```
-
-### Rule 2: No param mutation in `__init__`
-
-```python
-# WRONG — mutation in __init__ breaks clone() round-trip
-def __init__(self, argvals=None, n_components=3):
-    self.argvals = np.asarray(argvals) if argvals is not None else None
-    self.n_components = max(1, n_components)  # mutation — clone passes mutated value back
-
-# CORRECT — store verbatim; derive in fit()
-def __init__(self, argvals=None, n_components=3):
-    self.argvals = argvals
-    self.n_components = n_components
-```
-
-### Rule 3: Mutable args copied before use in fit, not in __init__
-
-```python
-def fit(self, X, y=None):
-    X = validate_data(self, X, dtype=np.float64, reset=True)
-    # argvals may be a user-supplied list or ndarray — resolve/copy at fit time only
-    argvals_ = self._resolve_argvals(X.shape[1])
-    self.argvals_ = argvals_      # trailing underscore — fit artifact
-    # NEVER modify self.argvals here
-    return self
-```
-
-### Rule 4: set_params must work — no __init__-cached derived values
-
-`GridSearchCV` calls `set_params(n_components=k)` between fits without calling `__init__`. If `__init__` had cached a derived value (e.g. `self._adjusted_n = n_components + 1`), `set_params` would not update it. All derived values must be computed inside `fit()`, stored with trailing underscores.
-
-## Data Flow Through fit/transform/predict
-
-### Transformer: FdarsSmoother (concrete example)
-
-```
-User: smoother = FdarsSmoother(argvals=t, bandwidth=0.1)
-      # t stored as self.argvals=t, bandwidth stored as self.bandwidth=0.1
-      # no computation here
-
-User: X_smooth = smoother.fit_transform(X)  # X: (n_obs, n_points)
-  │
-  fit(X):
-  ├─ validate_data(self, X, dtype=float64, reset=True) → X validated; n_features_in_=n_points set
-  ├─ argvals_ = _resolve_argvals(n_points) → t (user's grid)
-  ├─ bandwidth_ = t if self.bandwidth is None else self.bandwidth  (fit-time resolution)
-  ├─ _native.smoothing.nadaraya_watson(X, argvals_, bandwidth_)  ← numpy→Rust→numpy
-  └─ self.argvals_ = argvals_; self.bandwidth_ = bandwidth_; return self
-  │
-  transform(X):
-  ├─ check_is_fitted(self)
-  ├─ validate_data(self, X, reset=False) → shape check vs n_features_in_
-  └─ return _native.smoothing.nadaraya_watson(X, self.argvals_, self.bandwidth_)
-```
-
-### Predictor: FdarsFunctionalRegressor (FPCA + scalar linear model)
-
-```
-User: reg = FdarsFunctionalRegressor(argvals=t, n_components=5)
-User: reg.fit(X, y)        # X: (n, p) curves, y: (n,) scalar targets
-  │
-  ├─ X, y = validate_data(self, X, y, dtype=float64, reset=True)
-  ├─ argvals_ = _resolve_argvals(p)
-  ├─ fpca_result = _native.regression.fpca(X, argvals_, n_comp=self.n_components)
-  │    # numpy→Rust→numpy; returns dict with "scores" (n, n_comp), "rotation" (p, n_comp)
-  ├─ # fit linear model on scores:
-  │    from numpy.linalg import lstsq
-  │    self.coef_, *_ = lstsq(fpca_result["scores"], y, rcond=None)
-  └─ self.fpca_result_ = fpca_result; self.argvals_ = argvals_; return self
-
-User: y_pred = reg.predict(X_new)
-  ├─ check_is_fitted(self); validate_data(self, X_new, reset=False)
-  ├─ scores_new = (X_new - self.fpca_result_["mean"]) @ self.fpca_result_["rotation"]
-  └─ return scores_new @ self.coef_
-```
-
-### Classifier: FdarsClassifier (functional kNN)
-
-```
-User: clf = FdarsClassifier(argvals=t, method="knn", k=5)
-User: clf.fit(X, y)
-  │
-  ├─ X, y = validate_data(self, X, y, dtype=float64, reset=True)
-  ├─ self.classes_ = np.unique(y)        ← required by ClassifierMixin.score()
-  ├─ argvals_ = _resolve_argvals(p)
-  └─ self.X_train_ = X.copy(); self.y_train_ = y.copy(); self.argvals_ = argvals_
-
-User: y_pred = clf.predict(X_new)
-  ├─ check_is_fitted(self); validate_data(self, X_new, reset=False)
-  ├─ labels = _native.classification.knn_classify_1d(
-  │      X_new, self.X_train_, self.argvals_, k=self.k)
-  └─ return self.classes_[labels]
-```
-
-### Clusterer: FdarsClustering (functional k-means)
-
-```
-User: clust = FdarsClustering(argvals=t, k=4, seed=42)
-User: clust.fit(X)       ← y accepted but ignored (ClusterMixin requirement)
-  │
-  ├─ X, _ = validate_data(self, X, None, dtype=float64, reset=True)
-  ├─ argvals_ = _resolve_argvals(p)
-  ├─ result = _native.clustering.kmeans_fd(X, argvals_, k=self.k, seed=self.seed)
-  └─ self.labels_ = np.asarray(result["labels"])    ← required by ClusterMixin
-     self.argvals_ = argvals_; return self
-
-User: clust.fit_predict(X)  → calls fit, returns self.labels_
-```
-
-## Build Order (Dependency Graph)
-
-Build in strict dependency order — each phase's tests must be green before the next begins:
-
-```
-Phase A — Packaging + Shared Base
-│  pyproject.toml: add [sklearn] optional extra
-│  python/fdars/sklearn/__init__.py  (import gate)
-│  python/fdars/sklearn/_base.py     (_BaseFdarsEstimator)
-│  python/fdars/sklearn/_coverage.py (excluded methods registry, populated as B/C build)
-│  tests/test_sklearn_base.py        (check_estimator on a minimal toy estimator)
-│
-Phase B — Transformers  (depends on A; depends on native smoothing/basis/regression)
-│  python/fdars/sklearn/transformers.py
-│  tests/test_sklearn_transformers.py
-│  check_estimator run per transformer: FdarsSmoother, FdarsBasisTransformer,
-│    FdarsFPCA, FdarsImputer, FdarsDepthTransformer
-│
-Phase C — Predictors  (depends on A; depends on native regression/classification/clustering)
-│  python/fdars/sklearn/predictors.py
-│  tests/test_sklearn_predictors.py
-│  check_estimator run per predictor: FdarsFunctionalRegressor, FdarsClassifier,
-│    FdarsClustering, FdarsOutlierDetector
-│
-Phase D — Docs  (depends on B and C being check_estimator green)
-   docs/sklearn/index.md            (concept + layer overview)
-   docs/sklearn/transformers.md     (per-transformer reference)
-   docs/sklearn/predictors.md       (per-predictor reference)
-   docs/sklearn/pipeline-example.md (Pipeline + GridSearchCV worked example)
-   SVG diagrams for the sklearn layer
-   mkdocs.yml: add "scikit-learn API" nav section
-```
-
-`__init__.py` and `pyproject.toml` changes belong to Phase A (no functional dependencies; do them first so `from fdars.sklearn import ...` works throughout B and C).
-
-## Architectural Patterns
-
-### Pattern 1: Lazy sklearn Import Inside Each Module
-
-Each file in `fdars/sklearn/` imports sklearn at module level — safe because the `__init__.py` gate already proved sklearn is present before any submodule is loaded. `fdars/__init__.py` never imports sklearn.
-
-```python
-# python/fdars/sklearn/transformers.py — safe at module level
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils.validation import validate_data, check_is_fitted
-import numpy as np
-from fdars import _native   # same import path as fdata_class.py uses
-```
-
-### Pattern 2: argvals Resolution at Fit Time, Not Construction
-
-`_resolve_argvals(n_features)` converts `None → np.arange` and any array-like `→ np.asarray` inside `fit()` only, storing the result as `self.argvals_`.
-
-This is the mandatory pattern for `clone()` correctness. Users who want `argvals` validated at object construction time will not get it — this is the right trade-off because sklearn's design enforces verbatim constructor param storage.
-
-### Pattern 3: Direct Native Calls (Skip Fdata Wrapper)
-
-Estimators import `from fdars import _native` and call `_native.smoothing.nadaraya_watson`, `_native.regression.fpca`, etc. directly with numpy arrays — the same entry points that `Fdata` methods call internally.
-
-This is the correct approach. The `Fdata` wrapper layer adds nothing here and introduces shape/dtype side effects that conflict with `check_estimator`.
-
-### Pattern 4: Exclude Rather Than Exempt
-
-Any fdars method that cannot pass the full `check_estimator` battery is recorded in `_coverage.py` as `EXCLUDED` with a reason code. It remains accessible via the existing functional API but is not wrapped as an sklearn estimator.
-
-```python
-# python/fdars/sklearn/_coverage.py
-EXCLUDED = {
-    "inference.t_perm_test":      "returns TestResult dict, not per-sample prediction",
-    "inference.f_perm_test":      "same as above",
-    "inference.mean_scb":         "returns confidence band, not estimator-shaped output",
-    "inference.oneway_anova":     "group-level test, not per-sample",
-    "spm.*":                      "stateful Phase I/II monitoring, not fit/predict-shaped",
-    "alignment.karcher_mean":     "group-level operation, output shape changes with n_obs",
-    # ...
-}
-```
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Constructing Fdata Inside Estimator Methods
-
-**What people do:** `fd = Fdata(X, argvals=self.argvals_); return fd.smooth_result()`
-
-**Why it's wrong:** Fdata always casts to float64 and adds allocation overhead (IDs, rangeval, metadata). `check_estimator` passes various dtypes (float32, int) to test estimator dtype handling — Fdata's internal cast would hide failures. The native functions accept numpy directly; Fdata wrapping is never needed inside an sklearn estimator.
-
-**Do this instead:** `result = _native.smoothing.nadaraya_watson(X, self.argvals_, ...)`
-
-### Anti-Pattern 2: Converting argvals in `__init__`
-
-**What people do:** `self.argvals = np.asarray(argvals) if argvals is not None else None`
-
-**Why it's wrong:** `get_params()` returns the stored value. `clone()` passes it back to `__init__`. If the original was `None`, fine. But if the original was a Python list `[0, 0.5, 1.0]`, `get_params()` returns an ndarray (not the original list), breaking the round-trip test that `check_estimator` runs. Any dtype coercion in `__init__` also breaks the test.
-
-**Do this instead:** `self.argvals = argvals` verbatim; convert only in `_resolve_argvals()` at fit time.
-
-### Anti-Pattern 3: Shared State Between `__init__` and `transform`
-
-**What people do:** Computing and caching `self._argvals_array = np.arange(100)` during `__init__` using a hardcoded default, then using it in `transform()`.
-
-**Why it's wrong:** `n_features` is not known at `__init__` time when `argvals=None`. More critically, `GridSearchCV` calls `set_params(n_components=k)` then `fit()` — any `__init__`-cached derived state will be stale. All derived state must be set in `fit()` with trailing underscore names.
-
-**Do this instead:** All derived/resolved state in `fit()`, stored as `self.argvals_`, `self.coef_`, etc.
-
-### Anti-Pattern 4: Registering sklearn in `fdars/__init__.py`
-
-**What people do:** Adding `from fdars import sklearn` or adding `"sklearn"` to `_submodule_names` in `fdars/__init__.py`.
-
-**Why it's wrong:** Makes `import fdars` fail for users without scikit-learn installed, breaking the base-package-stays-sklearn-free constraint (a hard requirement from PROJECT.md).
-
-**Do this instead:** Keep `fdars/__init__.py` unchanged. Users do `from fdars.sklearn import FdarsFPCA` explicitly, same as `from fdars.mcp.server import mcp`.
-
-### Anti-Pattern 5: Storing Fitted State Without Trailing Underscore
-
-**What people do:** `self.coef = coefs` (no underscore) inside `fit()`.
-
-**Why it's wrong:** `check_is_fitted(self)` looks for any attribute with a trailing underscore to determine if the estimator is fitted. If no such attribute exists, it falls back to `__sklearn_is_fitted__`. Having fit-time state stored without trailing underscores means the estimator appears unfitted, causing `check_is_fitted` to raise before `transform` or `predict`.
-
-**Do this instead:** All fit-time state: `self.coef_`, `self.argvals_`, `self.n_components_`, etc.
-
-## Integration Points with Existing Architecture
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| `fdars.sklearn` → `fdars._native` | Direct import: `from fdars import _native` | Same import path used by `fdata_class.py` and `_augment.py`; zero change needed in native layer |
-| `fdars.sklearn` → `fdars.fdata_class` | NOT imported | Estimators bypass the Fdata OOP wrapper; call native functions directly |
-| `fdars.sklearn` → `fdars.advisor` | NOT imported | Parallel optional packages with no cross-dependency |
-| `fdars.__init__` → `fdars.sklearn` | NOT imported (by design) | Base package stays sklearn-free |
-| `fdars.sklearn.transformers` → `fdars.sklearn._base` | Direct import | One-directional; `_base.py` has no deps on transformers |
-| `fdars.sklearn.predictors` → `fdars.sklearn._base` | Direct import | Same one-directional pattern |
-
-### MkDocs Nav Integration
-
-Add a top-level nav section (same pattern as "AI Advisor"):
-
-```yaml
-nav:
-  # ... existing sections ...
-  - scikit-learn API:
-    - sklearn/index.md                       # concept page: layer overview, Pipeline/GridSearchCV
-    - Transformers: sklearn/transformers.md  # per-transformer reference
-    - Predictors: sklearn/predictors.md      # per-predictor reference
-    - Pipeline Example: sklearn/pipeline-example.md
-  # ... Reference, Examples unchanged ...
-```
-
-### Offline Fence Pattern for Docs
-
-The same `FDARS_FENCE_OK` mechanism used in the advisor docs applies. Fences using `fdars.sklearn` run fully offline (sklearn has no network dependency). The docs-build environment must have `scikit-learn` installed. Add `scikit-learn` to the `[dev]` extra or a `[docs]` extra in `pyproject.toml`.
-
-Minimal example fence:
-
-```python
-# exec="1" html="1" source="above"
-import numpy as np
-from fdars.datasets import load_canadian_weather
-from fdars.sklearn import FdarsFPCA
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import Ridge
-
-day, X, meta = load_canadian_weather("temperature")
-pipe = Pipeline([("fpca", FdarsFPCA(argvals=day, n_components=5)), ("ridge", Ridge())])
-y = meta["latitude"].values
-pipe.fit(X, y)
-print(f"R2 = {pipe.score(X, y):.4f}  FDARS_FENCE_OK")
-```
-
-This fence is identical in structure to the existing advisor `python-api.md` fence — online import, offline execution, `FDARS_FENCE_OK` sentinel.
-
-## Scalability Considerations
-
-This is a library layer, not a service. "Scalability" means maintainability as the estimator surface grows.
-
-| Concern | v9.0 initial | Future additions |
-|---------|-------------|-----------------|
-| Adding a new transformer | One class in `transformers.py`, one `check_estimator` test block | O(1); `_BaseFdarsEstimator` handles boilerplate |
-| Adding a new predictor | One class in `predictors.py` | O(1) |
-| 2D (surface) argvals support | Extend `_resolve_argvals` for tuple argvals | Single change point in `_base.py` |
-| sklearn 1.6 `__sklearn_tags__` dataclass | Already handled in `_base.py` via capability detection | No estimator-level changes needed |
-| `set_output` API / `get_feature_names_out` | Add `get_feature_names_out()` to each transformer that outputs interpretable features | Opt-in per estimator; no breaking change |
-
-## Sources
-
-- scikit-learn Developing Estimators guide: https://scikit-learn.org/stable/developers/develop.html (MEDIUM confidence — verified against stable docs 2026-08-31)
-- fdars codebase source files read directly: `python/fdars/__init__.py`, `python/fdars/fdata_class.py`, `python/fdars/advisor/__init__.py`, `python/fdars/mcp/__init__.py`, `pyproject.toml`, `mkdocs.yml` (HIGH confidence — first-party source, read directly)
-- scikit-fda FPCA docs: https://fda.readthedocs.io/en/latest/modules/preprocessing/autosummary/skfda.preprocessing.dim_reduction.FPCA.html (MEDIUM confidence — key insight: scikit-fda takes FDataGrid not plain arrays; fdars takes the opposite approach for check_estimator compliance)
+# Architecture Patterns
+
+**Project:** pyfda — fdars-core 0.23.0 → 0.33.0 Upgrade
+**Researched:** 2026-09-02
+**Confidence:** MEDIUM (breaking-change assessment from CHANGELOG.md confirmed additive + deprecations only; new-module surface from docs.rs cross-checked against GitHub release notes; exact struct field stability inferred from field-access patterns in the docs)
 
 ---
 
-*Architecture research for: fdars v9.0 sklearn-compatible estimator layer*
-*Researched: 2026-08-31*
-*Confidence: HIGH — grounded in direct source reading of all relevant fdars modules and sklearn upstream docs*
+## 1. Breaking Changes: 0.24 → 0.33 against the existing 0.23 surface
+
+**Verdict: No hard breaking changes to any currently-bound function.** The changelog explicitly states every release from 0.24 through 0.33 is "additive and non-breaking — no existing public signature changed." The GitHub release notes for v0.24, v0.27, v0.28, v0.29, v0.32, v0.33 each confirm backward compatibility.
+
+**One soft break introduced in 0.30:** six depth functions were marked `#[deprecated]` in favour of unified dispatchers. They remain functional and will not cause a compile error, but Rust's `#[deprecated]` attribute emits a compiler warning. This affects the following pyfda bindings:
+
+| Deprecated function (depth module) | Used in pyfda file | Status |
+|-------------------------------------|--------------------|--------|
+| `fraiman_muniz_2d` | `src/depth_mod.rs` | Deprecated (0.30); still compiles |
+| `modal_2d` | `src/depth_mod.rs` | Deprecated (0.30); still compiles |
+| `random_projection_2d` | `src/depth_mod.rs` | Deprecated (0.30); still compiles |
+| `random_tukey_2d` | `src/depth_mod.rs` | Deprecated (0.30); still compiles |
+
+The unified replacements accept a `Dim` parameter. **The bump-gate phase (Phase 1) must build cleanly.** Deprecation warnings in Rust are not errors by default, and pyfda's `Cargo.toml` does not set `#![deny(deprecated)]`, so this will not block the build. The deprecation warnings should be addressed in the new-bindings phase (Phase 2) as part of migration, not the bump phase.
+
+**Struct fields accessed by the existing bindings:** All struct fields accessed by the current `*_mod.rs` converters are still present in 0.33.0 per the docs.rs field listings:
+- `ConcurrentRegrResult`: `beta_curve`, `intercept`, `fitted`, `residuals`, `argvals` — confirmed present
+- `GmmClusterResult`: `best`, `bic_values`, `icl_values` — confirmed present
+- `SpmChart` fields: `t2_phase1`, `spe_phase1`, `t2_limit`, `spe_limit` — confirmed present
+- `PaceFpcaResult`: `mean`, `eigenvalues`, `eigenfunctions`, `scores`, `fitted`, `fitted_lower`, `fitted_upper`, `argvals`, `sigma2`, `ncomp` — confirmed present
+
+No rename, no removal.
+
+**Enums:** `GlmFamily` (used in `regression_mod.rs:1120`) and `ProjectionBasisType` (used in `inference_mod.rs:555`) retain their existing variants in 0.33.0. The wildcard fallback arms already present in both files remain sufficient. `CvCriterion` (used in `smoothing_mod.rs`) is unchanged.
+
+**Action for Phase 1 (isolated bump):** Bump `fdars-core = "0.23.0"` to `"0.33.0"` in `Cargo.toml`, run `cargo build` plus full test suite. Expected: green with deprecation warnings for the four 2D depth functions. Zero test changes needed. The deprecation warnings are a known pre-existing risk, not a blocker.
+
+---
+
+## 2. New Capabilities: Integration Patterns
+
+### 2a. Modules new in 0.24 → 0.33 not yet bound in pyfda
+
+Comparison of 0.23.0 module list (confirmed from docs.rs) against 0.33.0:
+
+| New module | First appeared | What it provides | Binding priority |
+|------------|---------------|-----------------|-----------------|
+| `multi_fdata` | 0.27 | `MultiFunData` + `FdComponent` — multi-domain functional data container | HIGH — new input type needed by MFPCA, FAMM |
+| `fts` | 0.27 | Functional time series: FTSM forecast, DPCA, ACF/PACF, stationarity test, long-run covariance | HIGH — new submodule, advisor-relevant |
+| `frechet` | 0.27 | Frechet mean/variance/regression/ANOVA over metric-space backends | MEDIUM — new submodule |
+| `density_fda` | ~0.27 | LQD transform, LQD-FPCA, Wasserstein barycenter for density-valued curves | MEDIUM |
+| `pda` | 0.27 | Principal differential analysis — `Lfd`, `PdaResult`, `principal_differential_analysis` | MEDIUM |
+| `fpca_variants` | 0.27 | Derivative FPCA, functional SVD, cross-covariance, dynamical correlation, SSVD | MEDIUM |
+| `famm` | 0.24 | Functional additive/mixed models — `fmm`, `dense_flmm`, `fast_fmm`, `multi_famm` | MEDIUM |
+| `fof_regression` | 0.24 | Function-on-function regression — `fof_regression`, `fof_re_regression`, predict | HIGH — closes a visible gap |
+| `clustering_advanced` | 0.24 | DBSCAN, funFEM, kCFC, align-cluster — extends `fdars.clustering` | MEDIUM |
+| `fem_smoothing` | ~0.29 | FEM/PDE surface smoothing for 2D domains — `fem_smooth`, `fem_smooth_gcv` | LOW — specialised |
+| `shapelet` | 0.33 | Shapelet discovery, transform, classifier | MEDIUM |
+
+Modules already bound in 0.23 that gained new functions (additive, no signature changes):
+- `spm`: adds `mf_spm_phase1`/`mf_spm_monitor`, `spm_amewma_monitor`, `frcc_phase1`/`frcc_monitor`, `profile_phase1`/`profile_monitor`, partial monitoring, `hotelling_t2_regularized`, ARL metrics. The existing `spm_mod.rs` can be extended without restructuring.
+- `scalar_on_function`: adds FAM, GKAM, GSAM, group-lasso variable selection, bootstrap CI, `history_index`, `fregre_l1`, `fregre_huber`, `model_selection_ncomp`. Extends `regression_mod.rs`.
+- `clustering` / `gmm`: adds `funhddC_cluster` in `gmm` module. Extends `clustering_mod.rs`.
+- `smooth_basis`: adds `smooth_monotone`, `smooth_positive`, `FdPar`. Extends `smoothing_mod.rs`.
+- `alignment`: adds `karcher_median`, `robust_karcher_mean`, `bayesian_align_pair`, `hierarchical_from_distances`, `kmedoids_from_distances`, `shape_confidence_interval`, `peak_persistence`, `phase_boxplot`. Extends `alignment_mod.rs`.
+
+### 2b. Which new capabilities need `#[pyclass]` opaque handles
+
+The precedent is `PyIrregFdata` in `src/pace_fpca_mod.rs`: use a `#[pyclass]` when the Rust type is a non-trivial struct that Python needs to hold across calls (by-reference semantics) and cannot be transparently serialised to a dict.
+
+| Capability | Needs `#[pyclass]`? | Rationale |
+|-----------|--------------------|-----------| 
+| `MultiFunData` | YES — new `PyMultiFunData` | Multi-domain container with per-component grids; too complex for a ragged dict; Python needs to construct once and pass to MFPCA/FAMM/SPM-MF functions. Mirror the `PyIrregFdata` pattern exactly: builder `multifdata_from_components(data_list, argvals_list)` plus `#[pyclass(name="PyMultiFunData")]` wrapper. |
+| `ShapeletClassifierFit` / `ShapeletTransformFit` | YES — new `PyShapeletFit` | Fitted shapelet state that must be passed to `shapelet_transform`/classify. Stateful handle like a trained model; should not be forced through a PyDict. |
+| `FtsmResult` | NO — use PyDict | All fields are `FdMatrix`/`Vec<f64>` — serialisable. Use a 10-key PyDict. No `#[pyclass]` needed. |
+| All other new result types | NO — use PyDict converters | `FtsStationarityResult`, `LongRunCovResult`, `SpectralDensityResult`, `FrechetGlobalRegResult`, `LqdFpcaResult`, `FofResult`, `FemSmoothResult`, etc. all return arrays plus scalars; follow the `itp_result_to_pydict`/`pace_fpca_result_to_pydict` pattern. |
+
+### 2c. New `#[non_exhaustive]` enums requiring forward-compatible fallback arms
+
+| Enum | Module | Status | Binding impact |
+|------|--------|--------|---------------|
+| `GlmFamily` | `scalar_on_function` | No new variants in 0.33 | Existing wildcard arm in `regression_mod.rs:1120` already correct |
+| `ProjectionBasisType` | crate root | No new variants in 0.33 | Existing wildcard arm in `inference_mod.rs:555` already correct |
+| `CvCriterion` | `smooth_basis` | No new variants in 0.33 | Existing wildcard arm already correct |
+| `DepthMethod` | `depth` | May have new variants if new depth algorithms added | Wildcard arm in `depth_mod.rs` must remain; audit when binding |
+| `QualityMeasure` | `shapelet` | New enum in 0.33: `InformationGain`, `FStatistic` | New shapelet binding needs a wildcard arm from day one |
+| `ShapeletClassifier` | `shapelet` | New enum in 0.33: `Knn`, `Lda` | New shapelet binding needs a wildcard arm |
+| `SpdMetric` | `frechet` | New enum in 0.27: Frobenius/Power/LogCholesky | New frechet binding must add wildcard arm |
+
+---
+
+## 3. New Input Types and `src/convert.rs` Extensions
+
+### 3a. `MultiFunData` — the main new input type
+
+`MultiFunData::new(Vec<FdComponent>)` takes components where each `FdComponent` holds an `FdMatrix` plus a `Vec<f64>` grid. The Python-side construction pattern mirrors `PyIrregFdata`:
+
+```
+# Python user:
+comp_a = fdars.multi_fdata.component_from_array(data_a, argvals_a)
+comp_b = fdars.multi_fdata.component_from_array(data_b, argvals_b)
+mfd = fdars.multi_fdata.multifdata_from_components([comp_a, comp_b])
+result = fdars.spm.mf_spm_phase1(mfd, ncomp=3)
+```
+
+Conversion path: each Python `data_i` (numpy 2D row-major) goes through `numpy2d_to_fdmatrix()` (existing) then into `FdComponent { data: mat, argvals: av }` then `Vec<FdComponent>` then `MultiFunData::new()`. No new conversion primitive needed in `src/convert.rs`. The builder function lives in a new `src/multi_fdata_mod.rs`.
+
+### 3b. FEM 2D surface smoothing — irregular mesh input
+
+`fem_smooth(x, y, z, triangles, lambda)` takes coordinate/value vectors handled by `numpy1d_to_vec` (existing), but `triangles` is an integer index matrix. Requires a new conversion: `numpy2d_i64_to_usize_vec` returning a flat `Vec<usize>` with row-major layout. Add to `src/convert.rs` — small addition, reusable.
+
+### 3c. Frechet density responses
+
+`frechet_global_reg(responses, predictors, space)` with `WassersteinDensitySpace` takes density curves as `Vec<Vec<f64>>`. The ragged-list extraction pattern already exists in `pace_fpca_mod.rs` as `extract_list_of_vecs`.
+
+**Recommendation:** Factor `extract_list_of_vecs` from `src/pace_fpca_mod.rs` into `src/convert.rs` as a public helper `extract_ragged_vecs`. Then reuse in both PACE and Frechet density bindings. This is the only non-trivial `convert.rs` refactor in this upgrade.
+
+### 3d. Shapelet discovery — no new conversions
+
+`discover_shapelets(data, min_len, max_len, top_k, config)` takes dense 2D data via `PyReadonlyArray2<f64>` (standard) plus scalar parameters. No new conversion needed.
+
+### 3e. Summary of `src/convert.rs` changes
+
+| Change | Type | Priority |
+|--------|------|----------|
+| Factor `extract_list_of_vecs` into `extract_ragged_vecs` | Refactor (non-breaking) | MEDIUM — needed for frechet and avoids duplication |
+| Add `numpy2d_i64_to_usize_vec` | New function | LOW — needed only for FEM mesh input |
+| All other new bindings | None — use existing primitives | — |
+
+---
+
+## 4. Advisor Integration: Which New Capabilities Are Advisor-Relevant
+
+The grounding invariant requires every diagnostic value to be computed by fdars (not the LLM). New capabilities slot into the advisor only when they produce scalar or bounded-vector outputs diagnosable with a crisp narrative.
+
+### 4a. Strongly advisor-relevant (new aspect or major extension)
+
+| Capability | Proposed advisor slot | Diagnostic scalars |
+|------------|----------------------|-------------------|
+| **Functional time series (`fts`)** | New aspect `"fts"` (#15) | AR order, explained variance ratio, lag-1 autocorrelation magnitude, stationarity p-value, forecast RMSE |
+| **Function-on-function regression (`fof_regression`)** | Extend `"regression"` aspect or new sub-aspect | R-squared, RMSE, cross-validated RMSE from `FofCvResult`, ncomp for both predictor and response |
+| **Frechet regression (`frechet`)** | New aspect `"frechet"` (#16) | Frechet R-squared, ANOVA p-value (where applicable) |
+| **Shapelet classifier (`shapelet`)** | Extend `"classification"` aspect | Accuracy, top-K shapelet lengths, quality measure score |
+
+### 4b. Moderately advisor-relevant (extend existing aspects)
+
+| Capability | Existing aspect | Extension |
+|------------|----------------|-----------|
+| `spm` multivariate monitoring (`mf_spm_*`, `mfpca`) | `"spm"` | Add multivariate T2/SPE scalars; chart-in-control fraction; number of MF components |
+| Advanced scalar-on-function (FAM, GKAM, variable selection) | `"regression"` | Selected-variables count, FAM component count, permutation test p-value |
+| PDA (`principal_differential_analysis`) | `"fpca"` | Differential operator order; residual norm |
+| Density FDA (`lqd_fpca`) | `"fpca"` | Extend with LQD variance-explained, reconstruction error |
+| FPCA variants (`fpca_der`, `fsvd`) | `"fpca"` | Cross-covariance singular values, dynamical correlation |
+
+### 4c. Not advisor-relevant (defer)
+
+- `fem_smoothing` — surface fitting utility; no standard diagnostic scalar applies
+- `clustering_advanced` (DBSCAN, funFEM, kCFC) — defer unless these become primary clustering methods
+- `frechet` SPD/network/sphere metric-space backends — outputs are matrix-valued; no grounded scalar reduction obvious
+- `density_fda` standalone transforms — utility functions, not fit results; `lqd_fpca` is the exception (diagnosable via `"fpca"` aspect)
+
+### 4d. MCP `_DIAGNOSTICS_METHODS` guard-sync protocol
+
+Adding new aspects (`"fts"`, `"frechet"`) requires a **single atomic commit** that simultaneously:
+1. Adds the new `_build_fts_diagnostics` function in `python/fdars/advisor/aspects/fts.py`
+2. Adds `"fts"` to `_DIAGNOSTICS_METHODS` in `python/fdars/mcp/server.py`
+3. Adds the aspect primer in `_ASPECT_PRIMERS` in `python/fdars/advisor/_prompts.py`
+
+Do NOT add new aspects to `_RUNNABLE_METHODS` without confirming the MCP dataset model can supply all required inputs at run time. `"fts"` requires time-ordered data — feasible (time ordering is implicit in row order of a registered dataset handle). `"frechet"` with density responses requires a different data registration protocol — defer `_RUNNABLE_METHODS` addition for `"frechet"` until that protocol is defined.
+
+---
+
+## 5. Recommended Build Order / Phase Grouping
+
+This mirrors the v4.0/v5.0/v6.0 shape: isolated bump → binding groups (parallelisable) → advisor → docs.
+
+### Phase 1 — Isolated Crate Bump (sequential, regression gate)
+
+**Goal:** Bump `fdars-core 0.23.0 → 0.33.0` in `Cargo.toml`. Rebuild. Run all 772 baseline tests.
+
+**Risk:** Deprecation warnings for four 2D depth functions (`fraiman_muniz_2d`, `modal_2d`, `random_projection_2d`, `random_tukey_2d`). Not a compile error; not a test failure. Record the warning count. Do NOT migrate them in this phase — keep the diff minimal.
+
+**Gate:** All 772 tests pass / 0 failures. Only `Cargo.toml` and `Cargo.lock` change.
+
+**Files touched:** `Cargo.toml` (one line bump), `Cargo.lock` (auto-updated).
+
+### Phase 2 — Binding Groups (parallelisable after Phase 1 lands)
+
+Split into independent groups by capability family. Each group produces a new or extended `src/*_mod.rs`, Python-layer wiring in `python/fdars/__init__.py`, and new tests.
+
+**Group A — Functional Time Series (`fts`)** — highest user value, new submodule
+- New file: `src/fts_mod.rs`
+- Binds: `ftsm`, `ftsm_forecast`, `ftsm_forecast_multistep`, `functional_acf`, `functional_pacf`, `stationarity_test`, `long_run_covariance`
+- Result converters: `ftsm_result_to_pydict` (10-key dict), `facf_result_to_pydict`, `stationarity_result_to_pydict`
+- No `#[pyclass]` needed (all results serialisable to dicts)
+- Register in `lib.rs` as `"fts"`
+- Can run in parallel with Groups B, D, E
+
+**Group B — Function-on-Function Regression (`fof_regression`)** — closes a visible gap
+- Extend: `src/regression_mod.rs` (add `fof_regression`, `fof_re_regression`, `fof_cv`, `predict_fof`)
+- Result converters: `fof_result_to_pydict`, `fof_re_result_to_pydict`, `fof_cv_result_to_pydict`
+- No new submodule; extends existing `fdars.regression` Python namespace
+- Can run in parallel with Groups A, D, E
+
+**Group C — Multi-domain Data + MFPCA + Advanced SPM** (sequential within group)
+- New file: `src/multi_fdata_mod.rs` — `PyMultiFunData` `#[pyclass]` plus builder
+- Extend: `src/spm_mod.rs` — add `mf_spm_phase1`, `mf_spm_monitor`, `mfpca` (uses `PyMultiFunData`)
+- Register `multi_fdata` as a new submodule in `lib.rs`
+- Python: add `fdars.multi_fdata` and extend `fdars.spm`
+- Note: Groups C and F both touch `spm_mod.rs` — run C and F sequentially, not in parallel
+
+**Group D — Frechet Regression + Density FDA** (can run in parallel with A/B/E)
+- New file: `src/frechet_mod.rs`
+- Binds: `frechet_mean`, `frechet_global_reg` (Wasserstein backend initially), `frechet_local_reg`, `frechet_anova`
+- New file: `src/density_fda_mod.rs`
+- Binds: `lqd_transform`, `inverse_lqd`, `lqd_fpca`, `wasserstein_barycenter`
+- Factor `extract_list_of_vecs` from `pace_fpca_mod.rs` into `convert.rs` as `extract_ragged_vecs` (prerequisite within this group)
+
+**Group E — Shapelet Classifier** (can run in parallel with A/B/D)
+- New file: `src/shapelet_mod.rs`
+- `PyShapeletFit` `#[pyclass]` for `ShapeletClassifierFit`
+- Binds: `discover_shapelets`, `shapelet_transform_fit`, `shapelet_classifier_fit`, predict
+- New enums: `QualityMeasure`, `ShapeletClassifier` — both need wildcard arms
+- Register as `fdars.shapelet`
+
+**Group F — Depth 2D deprecation migration + alignment/smoothing extensions** (sequential with C; lower priority)
+- Update `src/depth_mod.rs`: migrate four deprecated 2D depth variants to unified Dim-parameterised calls
+- Extend `src/alignment_mod.rs`: add `karcher_median`, `robust_karcher_mean`, `bayesian_align_pair`, `hierarchical_from_distances`, `kmedoids_from_distances`
+- Extend `src/smoothing_mod.rs`: add `smooth_monotone`, `smooth_positive`
+- Extend `src/clustering_mod.rs`: add `clustering_advanced` (DBSCAN, funFEM, kCFC, align-cluster) and `gmm::funhddC_cluster`
+- This group can run after Phase 1; does not block Groups A/B/D/E
+
+### Phase 3 — Advisor Extension (sequential, after all binding groups land)
+
+- Add `"fts"` aspect (#15) in `python/fdars/advisor/aspects/fts.py`
+- Add `"frechet"` aspect (#16) in `python/fdars/advisor/aspects/frechet.py`
+- Extend `"regression"` aspect for `fof_regression` diagnostics
+- Extend `"classification"` aspect for shapelet accuracy/top-K shapelet lengths
+- Extend `"spm"` aspect for multivariate monitoring scalars
+- Atomic MCP guard-sync commit for each new aspect (single commit: aspect file + `_DIAGNOSTICS_METHODS` + `_ASPECT_PRIMERS`)
+
+### Phase 4 — Documentation (sequential, after advisor phase lands)
+
+- New pages: `fts/`, `fof-regression/`, `frechet/`, `multi-fdata/`, `shapelet/`
+- Method-accurate hand-authored inline SVG per new page
+- Runnable offline `FDARS_FENCE_OK` worked examples per page
+- Whole-site `mkdocs build --strict` green
+- Blocking human diagram review before close
+
+---
+
+## 6. Component Boundary Summary
+
+### Existing boundaries — unchanged role, extended content
+
+| Component | File | Role in upgrade |
+|-----------|------|----------------|
+| Conversion layer | `src/convert.rs` | Add `extract_ragged_vecs` (factored from `pace_fpca_mod.rs`); add `numpy2d_i64_to_usize_vec` for FEM mesh indices |
+| Module registry | `src/lib.rs` | Add `register_submodule!` calls for new modules: `fts`, `multi_fdata`, `frechet`, `density_fda`, `shapelet` |
+| Fdata OOP container | `python/fdars/fdata_class.py` | Potentially add `.forecast()` method wrapping `ftsm` + `ftsm_forecast`; decide based on whether time-series fits the Fdata API contract |
+| Advisor aspects | `python/fdars/advisor/aspects/` | New files: `fts.py`, `frechet.py`; extend `regression.py`, `classification.py`, `spm.py` |
+| MCP guard | `python/fdars/mcp/server.py` | Atomic guard-sync for new aspects only |
+
+### New boundaries introduced by this upgrade
+
+| Component | File | What it does |
+|-----------|------|-------------|
+| `PyMultiFunData` opaque handle | `src/multi_fdata_mod.rs` | Multi-domain functional data container; builder `multifdata_from_components(data_list, argvals_list)` validates shapes and wraps `MultiFunData::new()` |
+| `PyShapeletFit` opaque handle | `src/shapelet_mod.rs` | Fitted shapelet classifier/transform state; wraps `ShapeletClassifierFit` for cross-boundary persistence |
+| `fdars.fts` submodule | `src/fts_mod.rs` + `python/fdars/__init__.py` | Functional time series: FTSM, forecast, ACF/PACF, stationarity |
+| `fdars.multi_fdata` submodule | `src/multi_fdata_mod.rs` + `python/fdars/__init__.py` | Multi-domain data construction |
+| `fdars.frechet` submodule | `src/frechet_mod.rs` + `python/fdars/__init__.py` | Frechet regression and ANOVA |
+| `fdars.density_fda` submodule | `src/density_fda_mod.rs` + `python/fdars/__init__.py` | Density-valued functional data (LQD transform, Wasserstein barycenter) |
+| `fdars.shapelet` submodule | `src/shapelet_mod.rs` + `python/fdars/__init__.py` | Shapelet discovery, transform, classification |
+
+---
+
+## 7. Architecture Anti-Patterns to Avoid
+
+### Do not bypass `extract_ragged_vecs` for Frechet density inputs
+
+The `extract_list_of_vecs` function in `pace_fpca_mod.rs` handles dtype-agnostic ragged list input with proper error messages. Factor it into `convert.rs` rather than re-implementing per module. Two implementations of the same ragged-list validation will drift.
+
+### Do not add `MultiFunData` construction to `convert.rs`
+
+`convert.rs` is for primitive type conversions (numpy ↔ FdMatrix, Vec ↔ numpy1d). Higher-level object construction belongs in the module file. The `multifdata_from_components` builder lives in `src/multi_fdata_mod.rs`, not `src/convert.rs`.
+
+### Do not add `#[pyclass]` for `FtsmResult`
+
+Unlike `PyIrregFdata` (which must be created once and passed to a compute function), `FtsmResult` is a pure output type. Convert it to a PyDict immediately — no cross-call persistence needed. The precedent is every other result type in pyfda.
+
+### Do not register `multi_fdata` as an extension of `pace_fpca`
+
+`PyMultiFunData` is a general multi-domain container used by MFPCA in SPM, FAMM, and potentially future modules. It must be its own registered submodule (`fdars.multi_fdata`), not nested under `fdars.pace_fpca`.
+
+### Do not add new aspects to `_RUNNABLE_METHODS` without a dataset model
+
+The `fdars_run_method` MCP tool requires constructing the full input from a pre-registered dataset handle. For `"fts"`, time-ordering is implicit in row order — a registered dataset handle is sufficient. For `"frechet"` with density-valued responses, do NOT add to `_RUNNABLE_METHODS` without first defining a dataset registration protocol for density responses.
+
+### Do not run Groups C and F in parallel worktrees
+
+Both groups extend `src/spm_mod.rs`. Run them sequentially (C first, then F) to avoid merge conflicts, as in the v6.0 sequential-on-main lesson.
+
+---
+
+## 8. Scalability and Build Considerations
+
+| Concern | Impact | Mitigation |
+|---------|--------|------------|
+| Docs build time | Each new submodule adds ~1-2 min of fence execution; 5 new submodules adds ~10 min to the current ~22 min build | Keep fence datasets small (50 obs, 100 grid points); use `DOCS_FAST=1` during development |
+| `linalg` feature flag | Still off at 0.33 (MSRV check needed at bump time); `fem_smoothing` and some `famm` functions may require `linalg` | If `linalg` needed for specific new functions, skip those in initial binding; defer to a later milestone when MSRV resolves |
+| Parallel binding phases | Groups A/B/D/E can run in parallel worktrees after Phase 1 lands | Same pattern as v6.0 Groups A/B/C; do not share worktrees for groups that touch the same `*_mod.rs` |
+| Test suite growth | From 772 tests; each new module should add ~20-40 tests | Target total ~900-1000 tests after all groups |
+| Deprecation warnings at compile | Four `#[deprecated]` depth calls produce Rust warnings | These are expected from Phase 1 onward; suppressed or migrated in Group F |
+
+---
+
+## Sources
+
+- `docs.rs/fdars-core/0.23.0` through `0.33.0` — module lists and public API, webfetch (LOW confidence; cross-checked across multiple versions for convergence)
+- `crates.io/api/v1/crates/fdars-core/versions` — confirmed 0.23–0.33 version sequence, webfetch (LOW)
+- `github.com/sipemu/fdars` release notes for v0.24, v0.27, v0.28, v0.29, v0.32, v0.33 — each confirms "additive and non-breaking", webfetch (LOW; convergent = MEDIUM confidence on no-breaking-changes verdict)
+- `github.com/sipemu/fdars/blob/main/CHANGELOG.md` — explicit "additive and non-breaking" statement for 0.24–0.30; 0.30 deprecations confirmed, webfetch (LOW; convergent with release notes = MEDIUM)
+- `src/convert.rs`, `src/lib.rs`, `src/pace_fpca_mod.rs`, `src/inference_mod.rs`, `src/regression_mod.rs`, `src/clustering_mod.rs`, `src/spm_mod.rs` — current pyfda binding patterns (direct file read, HIGH)
+- `.planning/PROJECT.md` — milestone history, integration constraints, prior upgrade lessons (direct file read, HIGH)
+- `.planning/codebase/ARCHITECTURE.md` — component responsibilities (direct file read, HIGH)

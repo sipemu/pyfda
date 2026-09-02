@@ -1,342 +1,208 @@
-# Stack Research — v9.0 scikit-learn API Compatibility
+# Stack Research
 
-**Domain:** scikit-learn-compatible estimator layer over a PyO3/Rust functional-data library (pure Python)
-**Researched:** 2026-08-31
-**Confidence:** MEDIUM (sklearn version facts verified via official docs and release notes; behavioral details from developer guide and parametrize_with_checks docs)
-
-> **Scope:** This document covers ONLY the stack additions and choices needed for v9.0. The baseline stack (PyO3 0.28, numpy 0.28, fdars-core 0.23.0, pydantic, anthropic, mcp, pytest) is already validated and is not re-researched here.
+**Domain:** PyO3 Rust-to-Python binding layer — fdars-core upgrade (0.23.0 → 0.33.0)
+**Researched:** 2026-09-02
+**Confidence:** MEDIUM (all facts sourced from crates.io API and docs.rs; confidence rating LOW per provider tier, elevated to MEDIUM because primary sources are the authoritative registry and the published documentation, and key claims are cross-checked across multiple API endpoints)
 
 ---
 
-## Decision Summary
+## Upgrade Verdict: Clean Bump Path
 
-1. **`scikit-learn>=1.3,<1.7`** is the correct `[sklearn]` extra pin. sklearn 1.6 is the last release to support Python 3.9; 1.7 requires Python 3.10+. The ABI3-py39 guarantee and the existing 3.9–3.14 CI matrix make `<1.7` a hard upper bound.
-2. **`sklearn-compat`** (optional, dev-time or vendored) smooths the `validate_data`/`__sklearn_tags__` API differences across 1.3–1.6. It is not a mandatory runtime dep — the estimator code can use a small try/import guard instead — but it removes fragile version-detection logic.
-3. **`parametrize_with_checks`** (from `sklearn.utils.estimator_checks`, already inside scikit-learn) is the CI compliance gate. No additional pytest plugin is needed.
-4. **scikit-fda** is a design reference only, not a dependency. Its `FDataGrid`-based input contract is incompatible with the plain-ndarray requirement of this milestone.
-5. **No new runtime deps** beyond `scikit-learn` itself are required. All other tooling is already present.
+**YES — the 0.23.0 → 0.33.0 bump is a clean, additive-only upgrade.** No breaking changes to existing public signatures were found across any of the 10 minor versions (0.24–0.33). The existing `Cargo.toml` one-liner change (`0.23.0` → `0.33.0`) is sufficient to complete the bump; no other toolchain, binding-layer, or Python-stack changes are forced.
 
 ---
 
-## Recommended Stack
+## Q1 — MSRV at 0.33.0
 
-### Core Technologies
+**fdars-core 0.33.0 MSRV: Rust 1.81**
 
-| Technology | Version Constraint | Purpose | Why |
-|------------|-------------------|---------|-----|
-| `scikit-learn` | `>=1.3,<1.7` | Base classes (`BaseEstimator`, `TransformerMixin`, etc.), compliance test harness | 1.6 is the last release supporting Python 3.9 (1.7 requires 3.10+). Lower bound 1.3 covers `n_features_in_` (SLEP010, present since 1.0), `set_output` API (1.2+), and `feature_names_in_` (1.0+). Users on 3.10+ who need sklearn ≥1.7 features can install it separately — the estimator code remains compatible. |
-| `numpy` | (already a base dep) | Array input/output for all estimators | Already present. Estimators operate on `(n_obs, n_points)` float64 ndarrays. No pin change needed. |
+Sourced directly from the crates.io API (`rust_version` field on the 0.33.0 version record, published 2026-09-02). Every release from 0.4.0 through 0.33.0 declares `rust-version = "1.81"`.
 
-### Supporting Libraries
-
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| `sklearn-compat` | `>=0.1` | Cross-version shim for `validate_data`, `get_tags`, and `parametrize_with_checks` `expected_failed_checks` across sklearn 1.2–1.6+ | Use in estimator implementation files if the codebase needs to call both `self._validate_data` (pre-1.6) and `sklearn.utils.validation.validate_data` (1.6+). Maintained alongside sklearn releases; zero transitive deps beyond sklearn itself. Can be vendored if preferred. |
-| `pytest` | (already in `[dev]`) | Test runner for `parametrize_with_checks` compliance gate | Already in `[dev]` extra. No change needed. |
-
-### Development Tools
-
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| `parametrize_with_checks` | Pytest-parametrized compliance gate — one test per (estimator, check) pair | Import from `sklearn.utils.estimator_checks`. Preferred over `check_estimator` in CI because it surfaces each check as a named test case, supports `pytest -k` filtering, and fails fast per check. |
-| `check_estimator` | One-shot inline validation during development | Use interactively with `on_fail="warn"` to see all failures for a single estimator at once. Do not use as the CI gate — `parametrize_with_checks` is better for that. |
+pyfda's current pinned `rust-version = "1.83"` in `Cargo.toml` satisfies this requirement with headroom. **No Rust toolchain change is needed.**
 
 ---
 
-## pyproject.toml Integration
+## Q2 — linalg Feature Status at 0.33.0
 
-### The `[sklearn]` extra
+**linalg is no longer gated on Rust 1.84+. The earlier deferral reason (MSRV mismatch) is obsolete.**
+
+At the time of v6.0 (0.23.0), the `linalg` feature pulled in `faer`, which at that point required Rust 1.84 — above the project's MSRV of 1.83. At 0.33.0, confirmed from the crates.io dependency manifest:
+
+- `faer = "^0.23"` (optional, linalg feature) — faer 0.23's MSRV is 1.81, matching fdars-core's own MSRV
+- `anofox-regression = "^0.4"` (optional, linalg feature) — a standalone regression library providing OLS/GLM/quantile/penalized-spline estimators; MSRV is 1.81
+
+**Consequence for this milestone:** The user decision to keep `parallel`-only and NOT enable `linalg` is upheld. But the technical reason that forced it (MSRV mismatch) is gone. If a future milestone wants `linalg`, there is no toolchain blocker at 0.33.0.
+
+---
+
+## Q3 — Cargo Feature Flags at 0.33.0
+
+Features confirmed from the crates.io API dependency manifest for 0.33.0:
+
+| Feature | Value | Status vs 0.23.0 |
+|---------|-------|-----------------|
+| `default` | `["parallel"]` | Unchanged |
+| `parallel` | `["rayon"]` | Unchanged — still the correct flag to enable |
+| `linalg` | `["faer", "anofox-regression"]` | Flag name unchanged; `anofox-regression` is the dependency alongside faer |
+| `serde` | `["dep:serde", "dep:serde_json"]` | NEW in this series — optional serialization; not needed for pyfda |
+| `dhat-heap` | `[]` | Unchanged — heap profiling only |
+| `js` | `["getrandom/js"]` | Unchanged — WASM only |
+
+**For pyfda `Cargo.toml`:** No change to the `features = ["parallel"]` line. No new feature is required to expose any of the new modules. `clustering_advanced`, `famm` extensions, `multi_fdata`, `density_fda`, `pda`, `fts`, `frechet`, and `shapelet` all sit under the default/no-feature surface and are compiled in unconditionally.
+
+---
+
+## Q4 — Transitive Dependency Changes
+
+Dependencies confirmed from the crates.io API for both 0.23.0 and 0.33.0:
+
+| Dependency | At 0.23.0 | At 0.33.0 | Impact on pyfda |
+|------------|-----------|-----------|-----------------|
+| `nalgebra` | `^0.33` | `^0.33` | No change |
+| `rustfft` | `^6.2` | `^6.2` | No change |
+| `rand` | `^0.8` | `^0.8` | No change |
+| `rand_distr` | `^0.4` | `^0.4` | No change |
+| `num-complex` | `^0.4` | `^0.4` | No change |
+| `getrandom` | `^0.2` | `^0.2` | No change |
+| `rayon` (parallel) | `^1.10` | `^1.10` | No change |
+| `faer` (linalg) | `^0.23` | `^0.23` | No change (linalg not enabled) |
+| `anofox-regression` (linalg) | `^0.4` | `^0.4` | No change (linalg not enabled) |
+| `serde` / `serde_json` (serde) | not present | `^1` optional | Not enabled; no impact |
+
+**Verdict:** Zero transitive dependency changes between 0.23.0 and 0.33.0 under the `parallel`-only feature set. `Cargo.lock` will update automatically on `cargo build`; no manual intervention is needed.
+
+---
+
+## Q5 — PyO3 / numpy / maturin Compatibility
+
+**No forced upgrade to any of these.**
+
+- `pyo3 = "0.28"` with `["extension-module", "abi3-py39"]`: unchanged and compatible. fdars-core 0.33.0 does not list pyo3 or numpy as its own dependencies — those live exclusively in pyfda's `Cargo.toml`. The upgrade only swaps fdars-core's own algorithms; the PyO3 binding surface is entirely pyfda's concern.
+- `numpy = "0.28"`: unchanged. No new fdars-core types require numpy array layout changes beyond the existing column-major pattern already established in `src/convert.rs`.
+- `maturin 1.x`: unchanged. The `cdylib` + `abi3-py39` build path is unaffected.
+- Python 3.9–3.14 CI matrix: unchanged.
+
+---
+
+## Q6 — New Surface Added in 0.24–0.33
+
+All changes are **additive only** — no existing public signatures were removed or altered across the 10 minor versions. The new capabilities require new `*_mod.rs` binding files and Python API additions; they do not require modifying any existing binding.
+
+### New Modules (confirmed absent in 0.23.0 via docs.rs 404)
+
+| Module | Introduced | Key public surface |
+|--------|------------|-------------------|
+| `clustering_advanced` | 0.24.0 | `dbscan_fd`, `kcfc_cluster`, `funfem_cluster`, `align_cluster_fd` + 4 config/result pairs (`DbscanConfig/Result`, `KcfcConfig/Result`, `FunFemConfig/Result`, `AlignClusterConfig/Result`) |
+| `density_fda` | ~0.25.0 | `lqd_transform`, `inverse_lqd`, `lqd_fpca` (`LqdFpcaResult`), `wasserstein_barycenter`, `normalize_density` |
+| `multi_fdata` | ~0.26.0 | `MultiFunData`, `FdComponent` (multi-domain functional data container; same-obs-count constraint) |
+| `pda` | ~0.27.0 | `principal_differential_analysis`, `Lfd`, `PdaResult` (linear differential operators; mirrors R `pda.fd`) |
+| `fts` | 0.27.0–0.28.0 | 13 functions: `ftsm`, `ftsm_forecast`, `ftsm_forecast_multistep`, `ftsm_update`, `fplsr`, `dpca`, `dpca_reconstruct`, `spectral_density`, `functional_acf`, `functional_pacf`, `long_run_covariance`, `stationarity_test`, `functional_difference`; 10 result structs (`ArModelResult`, `DpcaReconstruction`, `DpcaResult`, `FacfResult`, `FplsrResult`, `FtsmForecastResult`, `FtsmResult`, `LongRunCovResult`, `SpectralDensityResult`, `StationarityResult`) |
+| `frechet` | 0.27.0–0.28.0 | `MetricSpace` trait; 6 backends (`WassersteinDensitySpace`, `SpdMatrixSpace`, `SphericalSpace`, `CorrelationMatrixSpace`, `NetworkSpace`, `PointProcessSpace`); 9 functions (`frechet_mean`, `frechet_variance`, `wasserstein2_distance`, `frechet_global_reg`, `frechet_global_reg_space`, `frechet_local_reg`, `frechet_local_reg_space`, `frechet_anova`, `frechet_anova_space`); 3 result structs |
+| `shapelet` | 0.33.0 | `discover_shapelets`, `shapelet_classifier_fit`, `shapelet_transform`, `shapelet_transform_fit`, `shapelet_distance`, `z_normalize_into`, `z_normalize_window`; 8 types (`Shapelet`, `ShapeletSet`, `QualityMeasure`, `ShapeletClassifier`, `ShapeletClassifierConfig`, `ShapeletClassifierFit`, `ShapeletDiscoveryConfig`, `ShapeletTransformFit`) |
+
+Note: `~0.25.0` and `~0.26.0` are approximate (changelog consolidates those into the 0.27.0 entry); `pda` confirmed present by 0.27.0, `multi_fdata` confirmed present by 0.27.0, `density_fda` absent at 0.24.0 (404). The exact introduction minor does not affect binding work — all are absent from 0.23.0 and present at 0.33.0.
+
+### Extended Modules (present in 0.23.0, new items added)
+
+| Module | What was added (not in 0.23.0) |
+|--------|-------------------------------|
+| `famm` | `dense_flmm`, `fast_fmm`, `multi_famm` + 6 new config/result types (`DenseFlmmConfig/Result`, `FastFmmConfig/Result`, `MultiFammConfig/Result`) — all present by 0.24.0 |
+| `seasonal` | ~13 new functions: `analyze_peak_timing`, `autoperiod_fdata`, `cfd_autoperiod`, `cfd_autoperiod_fdata`, `instantaneous_period`, `lomb_scargle_fdata`, `matrix_profile_fdata`, `matrix_profile_seasonality`, `seasonal_strength_spectral`, `seasonal_strength_wavelet`, `seasonal_strength_windowed`, `sazed_fdata`, `ssa_fdata`, `ssa_seasonality`; ~14 new types (`AutoperiodCandidate`, `CfdAutoperiodResult`, `ChangeDetectionResult`, `ChangePoint`, `DetectedPeriod`, `InstantaneousPeriod`, `LombScargleResult`, `MatrixProfileResult`, `PeakDetectionResult`, `PeakTimingResult`, `SazedComponents`, `SazedResult`, `SeasonalityClassification`, `WaveletAmplitudeResult`) |
+| `function_on_scalar` | `fanova_seeded` added (0.30.0, seedable permutation ANOVA); `fanova` deprecated (soft — still callable, not removed) |
+
+### Deprecations
+
+Only one: `fanova` in `function_on_scalar` — deprecated in 0.30.0 in favour of `fanova_seeded` (which takes an explicit `seed: u64`). The deprecated function remains callable; no existing pyfda binding breaks. Existing code in `src/function_on_scalar_mod.rs` continues to compile and work; a new binding for `fanova_seeded` is desirable but not required by the compiler.
+
+### Changelog: Version-by-Version Summary (0.24–0.33)
+
+| Version | Date | Theme | Breaking changes |
+|---------|------|-------|-----------------|
+| 0.24.0 | 2026-08-20 | Advanced clustering + FAMM breadth | None |
+| 0.25.0 | 2026-08-22 | Serial dependence, density FDA, multi-fdata | None |
+| 0.26.0 | 2026-08-22 | FPCA breadth, sparse covariance | None |
+| 0.27.0 | 2026-08-22 | FTS forecasting, Fréchet regression, PDA | None |
+| 0.28.0 | 2026-08-23 | Spectral FTS, object-data Fréchet | None |
+| 0.29.0 | 2026-08-30 | FAMM extensions (dense/fast/multi) | None |
+| 0.30.0 | 2026-09-01 | Performance & consolidation; `fanova` deprecated | None (deprecated, not removed) |
+| 0.31.0 | 2026-09-02 | (details not in changelog; all versions published same day as 0.32/0.33) | None confirmed |
+| 0.32.0 | 2026-09-02 | (details not in changelog) | None confirmed |
+| 0.33.0 | 2026-09-02 | Shapelets (time-series shapelet discovery/classification) | None |
+
+Versions 0.31.0 and 0.32.0 are confirmed to exist (crates.io API) but their changelog entries are not present in the published CHANGELOG.md. Based on the module-level inspection at 0.32.0 (no `shapelet` module), 0.31 and 0.32 are likely internal or performance-only passes. No new breaking signatures are expected.
+
+---
+
+## Q7 — Package Version Bump for pyfda
+
+**Recommended: bump to `0.10.0`.**
+
+Project convention (from `MEMORY.md` and `PROJECT.md`): a semver `vX.Y.Z` tag triggers the PyPI publish workflow. The current package version is `0.9.0` (shipped with v9.0 sklearn milestone). This is a code milestone (new bindings, advisor changes, package change) so a version bump is required at close.
+
+- `0.10.0` is idiomatic — it is the next minor after `0.9.0`, signals a substantial capability addition without a breaking API change, and stays under `1.0.0` which the project has historically reserved.
+- The PyPI publish tag would be `v0.10.0`; the milestone label is `v11.0` (milestone version and package version are intentionally decoupled per project convention).
+
+---
+
+## Recommended Cargo.toml Change
+
+The sole required edit to `Cargo.toml` for the crate bump phase:
 
 ```toml
-[project.optional-dependencies]
-# Note: [sklearn] pins scikit-learn<1.7 to support Python 3.9.
-# sklearn 1.7 requires Python>=3.10 (dropped 3.9 support).
-# On Python 3.10+, users may install scikit-learn>=1.7 separately;
-# the estimator layer is compatible with both ranges.
-sklearn = ["scikit-learn>=1.3,<1.7"]
+[dependencies]
+fdars-core = { version = "0.33.0", features = ["parallel"] }
+pyo3 = { version = "0.28", features = ["extension-module", "abi3-py39"] }
+numpy = "0.28"
 ```
 
-This follows the exact same pattern already established for `[mcp]` (which has a matching Python 3.10+ comment). Users on Python 3.10+ who manually install `scikit-learn>=1.7` will find the estimators still work — the `<1.7` upper bound is a packaging floor for the extra, not a hard runtime cap.
-
-### Dev extra update
-
-```toml
-dev = ["pytest", "pytest-asyncio", "pyyaml", "matplotlib>=3.6", "scikit-learn>=1.3,<1.7"]
-```
-
-Adding `scikit-learn` to `[dev]` ensures the compliance tests run in the development environment without separately installing `[sklearn]`.
-
----
-
-## Version-Specific API Changes to Handle
-
-### Critical: validate_data vs _validate_data
-
-| sklearn version | API |
-|----------------|-----|
-| 1.3–1.5 | `self._validate_data(X, ...)` (private, still present) |
-| 1.6 | `sklearn.utils.validation.validate_data(self, X, ...)` (public) — `_validate_data` will be removed in a future release |
-
-`validate_data` automatically sets `n_features_in_` and `feature_names_in_` on `reset=True` (called in `fit`) and validates against them on `reset=False` (called in `transform`/`predict`).
-
-**Recommended approach:** Use a one-time module-level try/import guard in `python/fdars/sklearn/_base.py`:
-
-```python
-try:
-    from sklearn.utils.validation import validate_data as _sklearn_validate_data
-    def _validate(estimator, X, **kwargs):
-        return _sklearn_validate_data(estimator, X, **kwargs)
-except ImportError:
-    def _validate(estimator, X, **kwargs):
-        return estimator._validate_data(X, **kwargs)
-```
-
-All estimators call `_validate(self, X, ...)` instead of calling either form directly. This is the same pattern `sklearn-compat` provides if preferred.
-
-### Critical: Tags API — __sklearn_tags__ vs _more_tags
-
-| sklearn version | Tag mechanism |
-|----------------|--------------|
-| 1.3–1.5 | `_more_tags()` / `_get_tags()` dict-based |
-| 1.6 | `__sklearn_tags__()` returning `sklearn.utils.Tags` dataclass; old `_more_tags`/`_get_tags`/`_safe_tags` raise `DeprecationWarning` |
-| 1.6 | `_xfail_checks` tag removed; use `expected_failed_checks` in `parametrize_with_checks` |
-| 1.6 | `_estimator_type` attribute deprecated; use mixins or Tags instead |
-
-**Recommended approach:** Inherit from `BaseEstimator` (provides `__sklearn_tags__` from 1.6; `_more_tags` from 1.3–1.5). Do NOT implement `_more_tags` in custom estimators — it warns on 1.6. Use `__sklearn_tags__` for genuine capability flags only:
-
-```python
-def __sklearn_tags__(self):
-    tags = super().__sklearn_tags__()
-    # example: mark as non-deterministic if fdars method uses random init
-    # tags.non_deterministic = True
-    return tags
-```
-
-For reading tags portably, use `sklearn-compat`'s `get_tags()` or guard with a version check.
-
-### Important: check_estimator / parametrize_with_checks API changes
-
-| Feature | 1.3–1.5 | 1.6 |
-|---------|---------|-----|
-| `generate_only=True` | Supported | Deprecated; use `estimator_checks_generator(estimator)` |
-| `expected_failed_checks` param | Not present | Added to `parametrize_with_checks` |
-| `_xfail_checks` tag | Works | Removed |
-| `on_skip`, `on_fail`, `callback` | Not present | Added to `check_estimator` |
-| `legacy` param | Not present | Added to both functions |
-
-**This milestone forbids exemptions.** Therefore `expected_failed_checks` will not be used. The compliance test file targets the 1.3+ API subset that works without deprecation warnings:
-
-```python
-@parametrize_with_checks([MyEstimator()])
-def test_sklearn_compliance(estimator, check):
-    check(estimator)
-```
-
-### Minor: set_output API (TransformerMixin, sklearn 1.2+)
-
-`set_output(transform="pandas")` is available since sklearn 1.2 (already within our `>=1.3` bound). `TransformerMixin` auto-wraps `transform` and `fit_transform` to honour it if `get_feature_names_out()` is defined. For functional transformers that change the feature dimension (e.g., FPCA: n_points → n_components), implement `get_feature_names_out()` returning `np.arange(self.n_components_)` so that `Pipeline(...).set_output(transform="pandas")` works correctly.
-
----
-
-## Compliance Test Harness
-
-### Structure
-
-```
-tests/
-  sklearn/
-    test_compliance.py   # parametrize_with_checks gate
-    conftest.py          # [sklearn] guard: skip if sklearn not installed
-```
-
-```python
-# tests/sklearn/conftest.py
-import pytest
-sklearn = pytest.importorskip("sklearn", reason="[sklearn] extra not installed")
-```
-
-```python
-# tests/sklearn/test_compliance.py
-from sklearn.utils.estimator_checks import parametrize_with_checks
-from fdars.sklearn import (
-    FunctionalSmoother,
-    FPCATransformer,
-    FunctionalDepthTransformer,
-    FunctionalRegressor,
-    FunctionalClassifier,
-    FunctionalClusterer,
-    FunctionalOutlierDetector,
-    # all wrapped estimators...
-)
-
-@parametrize_with_checks([
-    FunctionalSmoother(),
-    FPCATransformer(n_components=1),
-    FunctionalDepthTransformer(),
-    FunctionalRegressor(),
-    FunctionalClassifier(),
-    FunctionalClusterer(n_clusters=2),
-    FunctionalOutlierDetector(),
-])
-def test_sklearn_compliance(estimator, check):
-    check(estimator)
-```
-
-### CI integration
-
-Add a separate CI job:
-
-```yaml
-# .github/workflows/sklearn-compliance.yml
-- name: Install sklearn extra
-  run: pip install -e ".[sklearn,dev]"
-- name: Run compliance gate
-  run: pytest tests/sklearn/ -v --tb=short
-```
-
-This keeps the compliance gate separate from the main test suite, which must remain sklearn-free for the base package.
-
-### Why parametrize_with_checks over check_estimator
-
-- Each check appears as a named pytest test case, enabling `pytest -k check_n_features_in` to debug a specific failure.
-- `check_estimator` stops on the first failure; `parametrize_with_checks` continues, revealing the full failure set in one CI run.
-- Integrates naturally with `--tb=short -x` for fail-fast and with `--tb=long` for full traces.
-- The test IDs are human-readable (estimator class name + check name), making CI reports navigable.
-
----
-
-## Mixin Contract Cheatsheet
-
-Each estimator type has mandatory attributes and methods verified by `check_estimator`:
-
-| Mixin | Must implement | Attributes set in fit | Key check_estimator checks |
-|-------|---------------|----------------------|---------------------------|
-| `TransformerMixin` | `fit(X, y=None)→self`, `transform(X)→array` | `n_features_in_`, trailing-`_` learned params | dtype preservation (float32 in → float32 out), sample count invariance (rows unchanged), `set_output` compat |
-| `RegressorMixin` | `fit(X, y)→self`, `predict(X)→1-D array` | `n_features_in_`, learned params | float output, shape `(n_samples,)`, MSE-compatible |
-| `ClassifierMixin` | `fit(X, y)→self`, `predict(X)→array`, `predict_proba` optional | `classes_`, `n_features_in_` | integer labels, binary minimum, no NaN output |
-| `ClusterMixin` | `fit(X, y=None)→self` | `labels_` (int ndarray, shape `(n_samples,)`) | `fit_predict` provided by mixin; no `predict` required; labels_ non-negative for inliers |
-| `OutlierMixin` | `fit(X, y=None)→self`, `score_samples(X)→array` | `offset_`, `n_features_in_` | `decision_function` derived from `score_samples`; `predict` returns `{+1, -1}` |
-
-**`argvals` constructor parameter:** Because it is a constructor param (not passed to `fit`), `clone()` preserves it correctly via `get_params()`/`set_params()`. Do NOT set `argvals` as a fitted attribute (no trailing `_`). It is a hyper-parameter with default `np.arange(n_features)`, resolved in `fit()` if not supplied. The check_estimator `check_parameters_default_constructible` and `check_get_params_invariance` checks will verify this round-trips correctly.
-
----
-
-## Hardest check_estimator Checks for Functional Data
-
-These checks are most likely to require fdars method exclusions from the sklearn layer:
-
-| Check | Why hard for FDA estimators | Mitigation |
-|-------|---------------------------|-----------|
-| `check_estimators_dtypes` | Tests float32 passthrough; fdars Rust layer operates on float64 | Accept float32; cast to float64 before calling fdars in `fit`/`transform`; return float64. The check verifies the output dtype is preserved — float64 in → float64 out passes; float32 in → float64 out fails. Use `X = X.astype(np.float64)` after `validate_data`. |
-| `check_n_features_in` | Validates estimator raises on wrong feature count at transform/predict time | Call `validate_data(self, X, reset=False)` in `transform`/`predict`. Auto-handled — do not skip. |
-| `check_estimators_nan_inf` | NaN/inf input must raise `ValueError` | Do not set `allow_nan=True` in tags; `validate_data` enforces by default. |
-| `check_pipeline_consistency` | Cloned estimator in pipeline must produce identical result | Ensure `argvals` round-trips through `get_params`/`set_params` without mutation. Keep `argvals` as constructor param only. |
-| `check_methods_subset_invariance` | Same rows in different order → same result | Problematic for order-sensitive algorithms. Registration/alignment methods that depend on sample ordering must be excluded. |
-| `check_n_samples_minimum` (clustering) | Checks run with as few as 2 samples | FPCA with `n_components` > n_samples fails in fdars-core. Default `n_components=1`; guard: `n_components = min(self.n_components, n_samples - 1)` in `fit()`. |
-| `check_fit_score_takes_y` (clusterers) | `fit` must accept `y` even if unused | Accept `y=None` in `fit` signature; silently ignore it. |
-| `check_estimators_pickle` | Estimator must be picklable before and after fit | Pure Python + numpy attributes → picklable by default. Do not store live fdars handles in fitted attributes. |
-
-### Methods that cannot comply and must be excluded
-
-These remain in the existing functional API. They are recorded in the v9.0 coverage list as excluded-by-design:
-
-| fdars method | Reason for exclusion |
-|-------------|---------------------|
-| `least_squares_shift_registration`, elastic alignment | Order-sensitive; `check_methods_subset_invariance` will fail. No deterministic result for permuted samples. |
-| `pace_fpca` | Requires `IrregFdata` sparse/irregular input — not a `(n_obs, n_points)` ndarray. Fundamentally incompatible with the ndarray contract. |
-| `functional_glm` | Requires a pre-fitted FPCA basis handle as input — not a standalone fit/predict cycle compatible with sklearn. |
-| `t_perm_test`, `f_perm_test`, `oneway_anova_vstat`, SCB bands | Hypothesis tests, not estimators. No natural fit/transform structure. |
-| SPM monitoring functions | Stateful streaming pattern (update-per-observation). Cannot be cast to batch fit/transform. |
-| `itp_one_pop`, `itp_two_pop`, `itp_flm` | Interval-wise tests returning p-curve arrays — not a predict output shape sklearn understands. |
-
----
-
-## scikit-fda: Dependency vs Design Reference
-
-**Decision: design reference only, NOT a dependency.**
-
-Rationale:
-- scikit-fda uses `FDataGrid` as its estimator input type, which bypasses sklearn's `check_estimator` array validation. fdars' milestone constraint is the opposite: estimators must accept plain `(n_obs, n_points)` ndarrays and pass the full battery without any array-bypass.
-- scikit-fda's Pipeline examples and `FPCA` class structure are instructive for the API shape — parameter naming, `get_feature_names_out()` implementation, `fit_transform` patterns — but the implementation cannot be reused because the input contract differs.
-- Adding scikit-fda as a dependency pulls in 8+ transitive dependencies and its own array-conversion layer, creating a conflict with the fdars Rust data path.
-
----
-
-## Alternatives Considered
-
-| Recommended | Alternative | Why Not |
-|-------------|-------------|---------|
-| `scikit-learn>=1.3,<1.7` | `>=1.3` (no upper cap) | sklearn 1.7 drops Python 3.9; the `[sklearn]` extra would silently become unusable on 3.9 if 1.7 is resolved |
-| `scikit-learn>=1.3,<1.7` | `>=1.6,<1.7` | Excludes users on 1.3–1.5 who have sklearn pinned (common in older conda/pyenv setups); the extra compat work is small |
-| `parametrize_with_checks` | `check_estimator` in a loop | `check_estimator` aborts on first failure; `parametrize_with_checks` surfaces all failures independently — essential for iterative compliance work |
-| `sklearn-compat` shim (optional) | Hand-rolled `if sklearn.__version__ >= "1.6"` guards | Version-detection logic in third-party libraries is fragile across patch releases; `sklearn-compat` is maintained by the same community |
-| Exclude non-compliant methods | `expected_failed_checks` exemptions | Milestone constraint explicitly forbids exemptions. Any method requiring an exemption is excluded from the sklearn layer, not exempted. |
-| scikit-fda as design reference only | scikit-fda as runtime dep | Different input contract; transitive deps conflict; adds maintenance burden without benefit |
-
----
-
-## What NOT to Add
-
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| `scikit-learn>=1.7` in `[sklearn]` extra | Drops Python 3.9 users silently | `<1.7` upper bound |
-| `scikit-fda` as runtime dep | FDataGrid input contract incompatible with ndarray requirement; 8+ transitive deps | Use as design reference for API shape only |
-| `sktime`, `tslearn` | Time-series-oriented wrappers with different domain models and dependencies | Implement directly on sklearn base classes |
-| `_validate_data` (private sklearn method) | Deprecated in sklearn 1.6, scheduled for removal | `sklearn.utils.validation.validate_data` (1.6+) or try/import guard |
-| `_more_tags()` / `_get_tags()` | Raise `DeprecationWarning` in 1.6 | `__sklearn_tags__()` from `BaseEstimator` |
-| `_xfail_checks` tag | Removed in sklearn 1.6 | `expected_failed_checks` in `parametrize_with_checks` (but milestone forbids exemptions) |
-| `generate_only=True` in `check_estimator` | Deprecated in sklearn 1.6 | `estimator_checks_generator(estimator)` |
-| `_estimator_type` attribute directly | Deprecated in sklearn 1.6 | Inherit from correct mixin (`ClassifierMixin`, `RegressorMixin`, etc.) |
-| Custom `__reduce__` or pickle logic | Unnecessary complexity | Pure Python + numpy attributes pickle by default |
-
----
-
-## Installation
-
-```bash
-# Install fdars with the sklearn extra
-pip install fdars[sklearn]
-
-# Dev environment (adds pytest, sklearn, matplotlib)
-pip install -e ".[sklearn,dev]"
-
-# Run the compliance gate
-pytest tests/sklearn/ -v --tb=short
-
-# Debug a single check interactively
-python -c "
-from sklearn.utils.estimator_checks import check_estimator
-from fdars.sklearn import FPCATransformer
-check_estimator(FPCATransformer(n_components=1), on_fail='warn')
-"
-```
+Only the `fdars-core` version string changes (`0.23.0` → `0.33.0`). Everything else is unchanged.
 
 ---
 
 ## Version Compatibility Matrix
 
-| Package | Constraint | Python | Notes |
-|---------|-----------|--------|-------|
-| `scikit-learn` | `>=1.3,<1.7` | 3.9–3.14 | 1.6 supports 3.9–3.13; 1.7 would require 3.10+. Upper bound protects 3.9. |
-| `numpy` | (base dep, any) | 3.9–3.14 | Already present; estimators consume/return numpy arrays; no new constraint |
-| `pandas` | (base dep, any) | 3.9–3.14 | Already present; `set_output("pandas")` works with sklearn 1.2+ |
-| `sklearn-compat` | `>=0.1` | 3.9+ | Supports sklearn 1.2+ per SPEC0; optional/dev-only use |
-| `pytest` | (dev dep, any) | 3.9–3.14 | Already in `[dev]`; `parametrize_with_checks` requires no extra pytest plugins |
+| Component | Current (0.23.0) | After Bump (0.33.0) | Action |
+|-----------|-----------------|---------------------|--------|
+| `fdars-core` | 0.23.0 | **0.33.0** | Change version string in `Cargo.toml` |
+| `pyo3` | 0.28 | 0.28 | No change |
+| `numpy` (PyO3 binding) | 0.28 | 0.28 | No change |
+| Rust MSRV (`rust-version`) | 1.83 | 1.83 | No change (0.33.0 requires ≥1.81) |
+| maturin | 1.x | 1.x | No change |
+| Python CI matrix | 3.9–3.14 | 3.9–3.14 | No change |
+| pyfda package version | 0.9.0 | **0.10.0** | Bump at milestone close; tag `v0.10.0` |
+
+---
+
+## What NOT to Do
+
+| Avoid | Why | Instead |
+|-------|-----|---------|
+| Enabling `linalg` feature | User decision for this milestone; not needed for any new bindings | Keep `features = ["parallel"]` |
+| Bumping PyO3 or numpy | Not forced; no incompatibility | Leave at 0.28 |
+| Raising Rust MSRV | 0.33.0 requires 1.81; pyfda already pins 1.83 | No `rust-version` change |
+| Enabling `serde` feature | New optional feature; pyfda serializes via PyDict patterns, not serde | Keep disabled |
+| Bumping package to `1.0.0` | Project convention reserves this | Use `0.10.0` |
+| Treating 0.30 `fanova` deprecation as a breaking change | The function is still callable; no compiler error | Add `fanova_seeded` binding alongside existing `fanova` |
 
 ---
 
 ## Sources
 
-- [scikit-learn install page](https://scikit-learn.org/stable/install.html) — Python version support matrix per release (1.3–1.7); confirmed 1.6 is last with Python 3.9 support (LOW confidence / official page, verified)
-- [scikit-learn v1.6 release notes](https://scikit-learn.org/stable/whats_new/v1.6.html) — `__sklearn_tags__`, `validate_data` public API, `parametrize_with_checks` `expected_failed_checks`, `generate_only` deprecation, PyPy support dropped (LOW confidence / official changelog)
-- [scikit-learn developer guide](https://scikit-learn.org/stable/developers/develop.html) — BaseEstimator contract, `validate_data` usage, `check_is_fitted`, Tags, mixin requirements (LOW confidence / official docs)
-- [parametrize_with_checks docs](https://scikit-learn.org/stable/modules/generated/sklearn.utils.estimator_checks.parametrize_with_checks.html) — full signature, `expected_failed_checks` parameter, version history (LOW confidence / official docs)
-- [check_estimator docs](https://scikit-learn.org/stable/modules/generated/sklearn.utils.estimator_checks.check_estimator.html) — `on_skip`/`on_fail`/`callback` parameters, check categories (LOW confidence / official docs)
-- [sklearn-compat docs](https://sklearn-compat.readthedocs.io/) — cross-version utility wrapper, supported sklearn range (1.2+), SPEC0 policy (LOW confidence / project docs)
-- [scikit-fda sklearn tutorial](https://fda.readthedocs.io/en/stable/auto_tutorial/plot_skfda_sklearn.html) — design reference for FDA + sklearn integration patterns (LOW confidence / project docs)
-- [sklearn v1.7 release highlights](https://scikit-learn.org/stable/auto_examples/release_highlights/plot_release_highlights_1_7_0.html) — Python 3.10+ requirement confirmed (LOW confidence / official docs)
+- `https://crates.io/api/v1/crates/fdars-core` — crate metadata, current version 0.33.0 published 2026-09-02
+- `https://crates.io/api/v1/crates/fdars-core/versions` — full version list with `rust_version` field for every release; all 0.4.0+ = 1.81
+- `https://crates.io/api/v1/crates/fdars-core/0.33.0/dependencies` — dependency list at 0.33.0 (nalgebra ^0.33, rayon ^1.10, faer ^0.23, anofox-regression ^0.4, serde new)
+- `https://crates.io/api/v1/crates/fdars-core/0.23.0/dependencies` — dependency list at 0.23.0 (verified all deps match; nalgebra already ^0.33 at 0.23.0)
+- `https://crates.io/api/v1/crates/fdars-core/0.33.0` — features manifest (default=parallel, linalg=faer+anofox-regression, serde new optional)
+- `https://raw.githubusercontent.com/sipemu/fdars/main/CHANGELOG.md` — entries for 0.27.0, 0.28.0, 0.30.0 confirmed; 0.25/0.26 folded into 0.27 entry; 0.31/0.32/0.33 entries absent from document
+- `https://docs.rs/fdars-core/0.33.0/fdars_core/` — full module inventory at 0.33.0
+- `https://docs.rs/fdars-core/0.23.0/fdars_core/` — full module inventory at 0.23.0 (baseline)
+- `https://docs.rs/fdars-core/0.24.0/fdars_core/` — confirmed `clustering_advanced`, `detrend`, `seasonal` (expanded) present; `density_fda`, `multi_fdata`, `pda`, `fts`, `frechet` absent → 404
+- `https://docs.rs/fdars-core/0.27.0/fdars_core/` — confirmed `multi_fdata`, `pda`, `fts`, `frechet` present by 0.27
+- 404 responses on `shapelet` at docs.rs for 0.27/0.28/0.29/0.30/0.32 — confirmed shapelet arrived in 0.33.0 only
+- 404 responses on `pda`, `multi_fdata`, `density_fda` at docs.rs/0.23.0 — confirmed absent from 0.23.0 baseline
+- Module-level API pages for `fts`, `frechet`, `density_fda`, `pda`, `clustering_advanced`, `multi_fdata`, `seasonal`, `detrend`, `famm`, `shapelet`, `streaming_depth` at 0.33.0 — function/type counts and names verified
 
 ---
 
-*Stack research for: fdars v9.0 — scikit-learn API Compatibility estimator layer*
-*Researched: 2026-08-31*
+*Stack research for: pyfda v11.0 — fdars-core 0.23.0 → 0.33.0 upgrade*
+*Researched: 2026-09-02*
