@@ -378,3 +378,150 @@ def test_functional_acf_nsim_zero_raises() -> None:
 
     with pytest.raises(ValueError):
         fts.functional_acf(_data, _argvals, n_sim=0)
+
+
+# ---------------------------------------------------------------------------
+# Plan 67-04: spectral / dimension-reduction family (FTS-03)
+# ---------------------------------------------------------------------------
+
+def test_spectral_density_keys_and_shapes() -> None:
+    """spectral_density returns a 6-key PyDict; freqs (N,), re/im lists of N (M,M) arrays."""
+    import fdars.fts as fts
+
+    r = fts.spectral_density(_data, _argvals)
+
+    assert set(r.keys()) == {"freqs", "re", "im", "m", "n_curves", "bandwidth"}, (
+        f"keys {set(r.keys())} != expected"
+    )
+    assert isinstance(r["m"], int)
+    assert isinstance(r["n_curves"], int)
+    assert isinstance(r["bandwidth"], int)
+    assert r["m"] == M, f"m={r['m']} != M={M}"
+    assert r["n_curves"] == N, f"n_curves={r['n_curves']} != N={N}"
+
+    # freqs: numpy 1D of length N
+    assert r["freqs"].shape == (N,), (
+        f"freqs shape {r['freqs'].shape} != ({N},)"
+    )
+
+    # re and im are Python lists of length N, each element is a (M, M) 2D numpy array
+    assert isinstance(r["re"], list), "re must be a list"
+    assert isinstance(r["im"], list), "im must be a list"
+    assert len(r["re"]) == N, f"len(re) = {len(r['re'])} != N={N}"
+    assert len(r["im"]) == N, f"len(im) = {len(r['im'])} != N={N}"
+
+    # Check a sample of frequency slices for correct shape
+    for k in [0, N // 2, N - 1]:
+        assert r["re"][k].shape == (M, M), (
+            f"re[{k}].shape = {r['re'][k].shape} != ({M}, {M})"
+        )
+        assert r["im"][k].shape == (M, M), (
+            f"im[{k}].shape = {r['im'][k].shape} != ({M}, {M})"
+        )
+
+
+def test_spectral_density_stack() -> None:
+    """np.stack(re) yields (N, M, M); demonstrates the 3D use pattern."""
+    import fdars.fts as fts
+
+    r = fts.spectral_density(_data, _argvals)
+    re_3d = np.stack(r["re"])
+    assert re_3d.shape == (N, M, M), (
+        f"np.stack(re).shape = {re_3d.shape} != ({N}, {M}, {M})"
+    )
+    im_3d = np.stack(r["im"])
+    assert im_3d.shape == (N, M, M)
+
+
+def test_spectral_density_bandwidth_zero_raises() -> None:
+    """bandwidth=0 raises ValueError (spectral_density rejects Some(0), unlike long_run_covariance)."""
+    import fdars.fts as fts
+
+    with pytest.raises(ValueError):
+        fts.spectral_density(_data, _argvals, bandwidth=0)
+
+
+def test_dpca_keys_and_shapes() -> None:
+    """dpca returns a 7-key PyDict with computed interior scores rows and ncomp filters."""
+    import fdars.fts as fts
+
+    r = fts.dpca(_data, _argvals, ncomp=3)
+
+    assert set(r.keys()) == {"filters", "scores", "eigenvalues", "n_freqs", "filter_lag", "ncomp", "valid_range"}, (
+        f"keys {set(r.keys())} != expected"
+    )
+    assert isinstance(r["n_freqs"], int)
+    assert isinstance(r["filter_lag"], int)
+    assert isinstance(r["ncomp"], int)
+    assert r["ncomp"] == 3
+
+    # scores shape: (N - 2*filter_lag, ncomp) — do NOT hardcode the interior count
+    L = r["filter_lag"]
+    expected_n_interior = N - 2 * L
+    assert r["scores"].shape == (expected_n_interior, 3), (
+        f"scores shape {r['scores'].shape} != ({expected_n_interior}, 3) "
+        f"(filter_lag={L}, N={N})"
+    )
+
+    # filters: list of ncomp 2D arrays
+    assert isinstance(r["filters"], list), "filters must be a list"
+    assert len(r["filters"]) == 3, f"len(filters) = {len(r['filters'])} != ncomp=3"
+    for k, f_arr in enumerate(r["filters"]):
+        # Each filter has shape (2L+1, M)
+        assert f_arr.ndim == 2, f"filters[{k}].ndim != 2"
+        assert f_arr.shape[1] == M, f"filters[{k}].shape[1] = {f_arr.shape[1]} != M={M}"
+
+    # eigenvalues: list of ncomp 1D arrays
+    assert isinstance(r["eigenvalues"], list)
+    assert len(r["eigenvalues"]) == 3
+
+    # valid_range: a 2-tuple of ints
+    assert isinstance(r["valid_range"], tuple), "valid_range must be a tuple"
+    assert len(r["valid_range"]) == 2
+    assert isinstance(r["valid_range"][0], int)
+    assert isinstance(r["valid_range"][1], int)
+
+
+def test_dpca_reconstruct_keys_and_shapes() -> None:
+    """dpca_reconstruct returns merged dict: dpca keys + fitted_reconstruction + reconstruction_error."""
+    import fdars.fts as fts
+
+    r = fts.dpca_reconstruct(_data, _argvals, ncomp=3)
+
+    expected_keys = {
+        "filters", "scores", "eigenvalues", "n_freqs", "filter_lag", "ncomp", "valid_range",
+        "fitted_reconstruction", "reconstruction_error",
+    }
+    assert set(r.keys()) == expected_keys, (
+        f"keys {set(r.keys())} != expected"
+    )
+
+    L = r["filter_lag"]
+    n_interior = N - 2 * L
+
+    # fitted_reconstruction: (N-2L, M) 2D array
+    assert r["fitted_reconstruction"].shape == (n_interior, M), (
+        f"fitted_reconstruction shape {r['fitted_reconstruction'].shape} != ({n_interior}, {M})"
+    )
+
+    # reconstruction_error: (ncomp,) 1D array
+    err = r["reconstruction_error"]
+    assert err.shape == (3,), f"reconstruction_error shape {err.shape} != (3,)"
+
+    # Monotone non-increasing: cumulative error decreases as we add components
+    diffs = np.diff(err)
+    assert np.all(diffs <= 1e-12), (
+        f"reconstruction_error is not monotone non-increasing: {err} (diffs={diffs})"
+    )
+
+
+def test_dpca_scores_interior_computed_not_hardcoded() -> None:
+    """dpca with ncomp=2 on non-square fixture: scores rows == N - 2*filter_lag (computed)."""
+    import fdars.fts as fts
+
+    r = fts.dpca(_data, _argvals, ncomp=2)
+    L = r["filter_lag"]
+    expected_rows = N - 2 * L
+    assert r["scores"].shape[0] == expected_rows, (
+        f"scores.shape[0]={r['scores'].shape[0]} != N-2*filter_lag={expected_rows}"
+    )
