@@ -172,6 +172,38 @@ Bumped `fdars-core` 0.20.0 → 0.23.0 (parallel-only, no linalg) and exposed the
 
 ---
 
+## Milestone: v10.0 — Diagram Quality & Accessibility Pass
+
+**Shipped:** 2026-09-02
+**Phases:** 6 (60–65) | **Plans:** 7 | **Tasks:** 9
+
+### What Was Built
+Docs-only diagram-quality successor to v7.0. A scored 156-SVG audit (`60-AUDIT.md`) gated the milestone; 90 concept diagrams were corrected (universal long-form `<title>`/`<desc>`/`aria-labelledby` + title-matching `aria-label`; 5 Major geometry/method-accuracy fixes incl. an elastic-clustering full redraw and shift-registration "elastic warp" removal); 3 new sklearn concept diagrams (COVER-01); elastic-clustering thumb re-synced; 58 gallery thumbs made decorative-accessible; STYLE_SPEC.md refreshed to the 93-diagram reality. Whole-site `--strict` + SVGO/determinism gates green; blocking human diagram review approved.
+
+### What Worked
+- **Audit-first gating.** The scored inventory turned "which diagrams are bad?" into an evidence-backed, per-section worklist — every downstream phase executed against data, not guesswork (same lesson as v7.0, reaffirmed).
+- **Parallel worktree execution for disjoint work.** Running the three correction phases (61/62/63) concurrently in isolated git worktrees — disjoint SVG sets, merged to main with zero conflicts — cut wall-clock ~3× and proved that the v6.0 "sequential-on-main" rule is scoped to doc-build phases, not pure-SVG edits.
+- **Method-accuracy discipline caught an audit error.** The audit speculated the outlier taxonomy should be "Phase"; the planner checked the docs prose, found canonical Magnitude/Shape/Amplitude, and mandated keeping "Amplitude." The verifier-vs-source cross-check works.
+- **Consolidated human review at the final gate.** Per-phase verifiers flag visual items for diagram work by nature; carrying them into one GATE-03 review over the whole corrected set was cleaner than fragmenting the human gate.
+
+### What Was Inefficient
+- **Session-quota interruption mid-Phase-64.** An executor hit the account limit part-way; recovery required reconciling committed-vs-uncommitted work and finishing inline. Cost some orchestration overhead.
+- **Stale STYLE_SPEC status lines** ("34 of 43") had drifted three milestones without being refreshed — SPEC-02 finally corrected them; a periodic spec-freshness check would prevent this.
+
+### Patterns Established
+- **Parallel-worktree correction batches** for disjoint-file docs work: manual `git worktree` off HEAD, one executor per worktree, sequential clean merge back. Reusable whenever phases touch non-overlapping file sets and run no shared build.
+- **Inline quota-fallback close:** when quota blocks subagents, the orchestrator finishes concrete/automated gate work inline while preserving the one irreducible human gate.
+
+### Key Lessons
+- The "sequential-on-main / no-worktrees" docs constraint is really "no-worktrees *for doc-build phases*" — pure-SVG-edit phases parallelize safely. Encode constraints with their actual reason so they can be scoped correctly later.
+- Refresh living spec docs (STYLE_SPEC) as part of any milestone that changes their subject, or the counts rot silently.
+
+### Cost Observations
+- Model mix: planners/verifiers opus+sonnet, executors sonnet, plan-checker haiku.
+- Notable: parallel worktree execution was the single biggest wall-clock saver; the whole-site `--strict` build (~21 min) dominated the Phase-65 automated cost.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
