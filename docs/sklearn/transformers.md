@@ -6,6 +6,8 @@ preprocessed or reduced representations — cleaning, smoothing, re-representing
 projecting curves so downstream predictors receive well-conditioned numeric matrices.
 </div>
 
+![sklearn transformers: raw curves to cleaning/smoothing/reduction to downstream-ready matrix](../assets/diagrams/sklearn-transformers.svg){ .fdars-diagram }
+
 The transformers are the workhorse of any functional-data `Pipeline`. A typical
 chain starts with `Imputer` to fill measurement gaps, follows with a smoother to
 reduce noise, and ends with `FPCATransformer` to project curves onto their leading
