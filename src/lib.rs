@@ -27,6 +27,7 @@ mod simulation_mod;
 mod smoothing_mod;
 mod spm_mod;
 mod fts_mod;
+mod scalar_on_function_mod;
 mod tolerance_mod;
 
 /// Create a submodule, register its contents, and attach it to a parent module.
@@ -62,6 +63,7 @@ fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     register_submodule!(m, "inference", inference_mod::register);
     register_submodule!(m, "pace_fpca", pace_fpca_mod::register);
     register_submodule!(m, "fts", fts_mod::register);
+    register_submodule!(m, "scalar_on_function", scalar_on_function_mod::register);
 
     Ok(())
 }

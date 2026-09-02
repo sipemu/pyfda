@@ -18,6 +18,7 @@ High-performance functional data analysis toolkit providing:
 - Simulation (Karhunen-Loeve, Gaussian processes)
 - Explainability (SHAP, PDP, permutation importance, significant regions)
 - Functional time series (FTSM fit/forecast, ACF, stationarity, DPCA)
+- Scalar-on-function regression (FAM, GKAM, GSAM additive models, variable selection)
 
 All computations are performed in Rust via fdars-core for maximum performance.
 """
@@ -54,6 +55,7 @@ _submodule_names = (
     "inference",
     "pace_fpca",  # Phase 38 — PACE FPCA + IrregFdata opaque handle
     "fts",        # Phase 67 — Functional Time Series (FTSM fit/forecast, ACF, stationarity, DPCA)
+    "scalar_on_function",  # Phase 68 — Scalar-on-Function additive/selection regression
 )
 
 for _name in _submodule_names:
