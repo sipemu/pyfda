@@ -230,6 +230,20 @@ def test_fof_re_regression_shapes() -> None:
     )
     assert isinstance(result, dict), f"fof_re_regression must return dict, got {type(result)}"
 
+    # Exhaustive key-set: exactly 13 keys, no extras (mirrors fof_regression exact-match style)
+    expected_re_keys = {
+        "intercept", "beta_surface", "fitted", "residuals",
+        "r_squared_t", "r_squared", "ncomp_x", "ncomp_y",
+        "coef_matrix", "random_effects", "sigma2_u", "sigma2_eps", "n_subjects",
+    }
+    assert set(result) == expected_re_keys, (
+        f"Key mismatch.\n  Got:      {sorted(result)}\n"
+        f"  Expected: {sorted(expected_re_keys)}"
+    )
+    # Explicitly confirm no FPCA internals leaked
+    assert "fpca_x" not in result, "fpca_x must not appear in fof_re_regression result"
+    assert "fpca_y" not in result, "fpca_y must not appear in fof_re_regression result"
+
     # random_effects: (n_subjects, m_y) = (5, 18)
     assert result["random_effects"].shape == (5, MY), (
         f"random_effects shape must be (5, MY) = (5, {MY}), got {result['random_effects'].shape}"
@@ -252,9 +266,6 @@ def test_fof_re_regression_shapes() -> None:
     assert isinstance(result["sigma2_eps"], float), (
         f"sigma2_eps must be float, got {type(result['sigma2_eps'])}"
     )
-    # fpca internals must NOT be exposed
-    assert "fpca_x" not in result, "fpca_x must not appear in fof_re_regression result"
-    assert "fpca_y" not in result, "fpca_y must not appear in fof_re_regression result"
 
 
 def test_predict_fof_re_shape() -> None:
