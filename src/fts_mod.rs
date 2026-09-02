@@ -6,7 +6,9 @@
 //!
 //! Plan 67-01 (tracer): `ftsm` bound.
 //! Plan 67-02: `ftsm_forecast`, `ftsm_forecast_multistep`, `ftsm_update`, `fplsr` added.
-//! Plans 67-03/04 will extend `register()` with the remaining 8 functions.
+//! Plan 67-03: `functional_acf`, `functional_pacf`, `functional_difference`,
+//!             `stationarity_test`, `long_run_covariance` added.
+//! Plan 67-04 will extend `register()` with spectral density and DPCA functions.
 
 use crate::convert::*;
 use numpy::{PyReadonlyArray1, PyReadonlyArray2};
@@ -262,6 +264,239 @@ pub fn fplsr<'py>(
 }
 
 // ---------------------------------------------------------------------------
+// Group B: Diagnostics functions
+// ---------------------------------------------------------------------------
+
+/// Compute the functional autocorrelation function (ACF) with Monte Carlo bands.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Time-ordered functional data, shape (n_obs, n_points).
+/// argvals : numpy.ndarray
+///     Evaluation grid, length n_points.
+/// max_lag : int or None, optional
+///     Maximum lag to compute (default None → min(20, N/4)). Must be >= 1 if set.
+/// n_sim : int, optional
+///     Monte Carlo replications for white-noise band (default 999). Must be >= 1.
+/// ci : float, optional
+///     Confidence level for the white-noise band (default 0.95). Must be in (0, 1).
+/// seed : int, optional
+///     RNG seed for Monte Carlo band (default 42). Same seed → identical result.
+///
+/// Returns
+/// -------
+/// dict
+///     lags (int64 numpy 1D), acf (numpy 1D), pacf (numpy 1D), upper_band (numpy 1D).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n_sim < 1, ci outside (0,1), max_lag=0, or max_lag >= n_obs.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, max_lag=None, n_sim=999, ci=0.95, seed=42))]
+pub fn functional_acf<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    max_lag: Option<usize>,
+    n_sim: usize,
+    ci: f64,
+    seed: u64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = to_pyresult(fdars_core::fts::functional_acf(&mat, &av, max_lag, n_sim, ci, seed))?;
+
+    // FacfResult.lags is Vec<u32> — cast to i64 for a numpy int array.
+    // Do NOT pass u32 to vec_to_numpy1d (which expects Vec<f64>).
+    let lags_i64: Vec<i64> = result.lags.into_iter().map(|v| v as i64).collect();
+
+    let dict = PyDict::new(py);
+    dict.set_item("lags", numpy::PyArray1::from_vec(py, lags_i64))?;
+    dict.set_item("acf", vec_to_numpy1d(py, result.acf))?;
+    dict.set_item("pacf", vec_to_numpy1d(py, result.pacf))?;
+    dict.set_item("upper_band", vec_to_numpy1d(py, result.upper_band))?;
+    Ok(dict)
+}
+
+/// Compute the functional partial autocorrelation function (PACF) with Monte Carlo bands.
+///
+/// Delegates upstream to `functional_acf` and returns the same `FacfResult` struct
+/// (both acf and pacf fields are populated in the result).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Time-ordered functional data, shape (n_obs, n_points).
+/// argvals : numpy.ndarray
+///     Evaluation grid, length n_points.
+/// max_lag : int or None, optional
+///     Maximum lag to compute (default None → min(20, N/4)). Must be >= 1 if set.
+/// n_sim : int, optional
+///     Monte Carlo replications for white-noise band (default 999). Must be >= 1.
+/// ci : float, optional
+///     Confidence level for the white-noise band (default 0.95). Must be in (0, 1).
+/// seed : int, optional
+///     RNG seed for Monte Carlo band (default 42). Same seed → identical result.
+///
+/// Returns
+/// -------
+/// dict
+///     lags (int64 numpy 1D), acf (numpy 1D), pacf (numpy 1D), upper_band (numpy 1D).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n_sim < 1, ci outside (0,1), max_lag=0, or max_lag >= n_obs.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, max_lag=None, n_sim=999, ci=0.95, seed=42))]
+pub fn functional_pacf<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    max_lag: Option<usize>,
+    n_sim: usize,
+    ci: f64,
+    seed: u64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = to_pyresult(fdars_core::fts::functional_pacf(&mat, &av, max_lag, n_sim, ci, seed))?;
+
+    // FacfResult.lags is Vec<u32> — cast to i64.
+    let lags_i64: Vec<i64> = result.lags.into_iter().map(|v| v as i64).collect();
+
+    let dict = PyDict::new(py);
+    dict.set_item("lags", numpy::PyArray1::from_vec(py, lags_i64))?;
+    dict.set_item("acf", vec_to_numpy1d(py, result.acf))?;
+    dict.set_item("pacf", vec_to_numpy1d(py, result.pacf))?;
+    dict.set_item("upper_band", vec_to_numpy1d(py, result.upper_band))?;
+    Ok(dict)
+}
+
+/// Compute the first-order functional difference (lag-1 differencing).
+///
+/// Takes only data (no argvals). Returns a naked 2D numpy array — NOT a PyDict.
+/// Output shape: (n_obs - 1, n_points).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Time-ordered functional data, shape (n_obs, n_points). n_obs >= 2.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Differenced functional data, shape (n_obs - 1, n_points).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n_obs < 2 (cannot compute lag-1 differences with fewer than 2 curves).
+#[pyfunction]
+pub fn functional_difference<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+) -> PyResult<Bound<'py, numpy::PyArray2<f64>>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let result = to_pyresult(fdars_core::fts::functional_difference(&mat))?;
+    Ok(fdmatrix_to_numpy2d(py, &result))
+}
+
+/// Test stationarity of functional time series via permutation test.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Time-ordered functional data, shape (n_obs, n_points).
+/// argvals : numpy.ndarray
+///     Evaluation grid, length n_points.
+/// n_perm : int, optional
+///     Number of permutations for MC p-value (default 999). Must be >= 1.
+/// seed : int, optional
+///     RNG seed for Fisher-Yates shuffle (default 42). Same seed → identical p_value.
+///
+/// Returns
+/// -------
+/// dict
+///     statistic (float), p_value (float), n_perm (int).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n_perm < 1 or argvals length mismatch.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, n_perm=999, seed=42))]
+pub fn stationarity_test<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    n_perm: usize,
+    seed: u64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = to_pyresult(fdars_core::fts::stationarity_test(&mat, &av, n_perm, seed))?;
+
+    let dict = PyDict::new(py);
+    dict.set_item("statistic", result.statistic)?;
+    dict.set_item("p_value", result.p_value)?;
+    dict.set_item("n_perm", result.n_perm)?;
+    Ok(dict)
+}
+
+/// Estimate the long-run covariance operator of a functional time series.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Time-ordered functional data, shape (n_obs, n_points).
+/// argvals : numpy.ndarray
+///     Evaluation grid, length n_points.
+/// bandwidth : int or None, optional
+///     Bartlett kernel bandwidth (default None → ⌊N^{1/3}⌋).
+///     bandwidth=0 returns the sample covariance C_0 (valid, not rejected).
+///
+/// Returns
+/// -------
+/// dict
+///     cov_matrix (numpy 2D, shape (n_points, n_points)), m (int), bandwidth (int), n_curves (int).
+///     cov_matrix is symmetric within numerical precision.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If argvals length mismatch or data has < 2 curves.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, bandwidth=None))]
+pub fn long_run_covariance<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    bandwidth: Option<usize>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let result = to_pyresult(fdars_core::fts::long_run_covariance(&mat, &av, bandwidth))?;
+
+    // LongRunCovResult.cov_matrix is a flat column-major Vec<f64> of length m×m.
+    // Reshape via FdMatrix::from_column_major then fdmatrix_to_numpy2d (correctly
+    // transposes column-major to row-major). Without this reshape the matrix is
+    // silently transposed.
+    let m = result.m;
+    let fd_cov = fdars_core::matrix::FdMatrix::from_column_major(result.cov_matrix, m, m)
+        .map_err(to_pyerr)?;
+
+    let dict = PyDict::new(py);
+    dict.set_item("cov_matrix", fdmatrix_to_numpy2d(py, &fd_cov))?;
+    dict.set_item("m", result.m)?;
+    dict.set_item("bandwidth", result.bandwidth)?;
+    dict.set_item("n_curves", result.n_curves)?;
+    Ok(dict)
+}
+
+// ---------------------------------------------------------------------------
 // Module registration
 // ---------------------------------------------------------------------------
 
@@ -271,9 +506,11 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ftsm_forecast_multistep, m)?)?;
     m.add_function(wrap_pyfunction!(ftsm_update, m)?)?;
     m.add_function(wrap_pyfunction!(fplsr, m)?)?;
-    // Plans 67-03/04 will append remaining wrap_pyfunction! lines here:
-    //   spectral_density, dpca, dpca_reconstruct,
-    //   functional_acf, functional_pacf, functional_difference,
-    //   stationarity_test, long_run_covariance
+    m.add_function(wrap_pyfunction!(functional_acf, m)?)?;
+    m.add_function(wrap_pyfunction!(functional_pacf, m)?)?;
+    m.add_function(wrap_pyfunction!(functional_difference, m)?)?;
+    m.add_function(wrap_pyfunction!(stationarity_test, m)?)?;
+    m.add_function(wrap_pyfunction!(long_run_covariance, m)?)?;
+    // Plan 67-04 will append: spectral_density, dpca, dpca_reconstruct
     Ok(())
 }
