@@ -168,7 +168,7 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
 - [x] **Phase 62: SVG Corrections — analyze / monitoring / advisor** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review (completed 2026-09-02)
 - [x] **Phase 63: SVG Corrections — regression / inference / examples** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review (completed 2026-09-02)
 - [x] **Phase 64: Cards & Thumbnails Sync + New Coverage** - Sync 8 cards + 58 thumbs to their corrected concept diagrams; add method-accurate diagrams to audit-identified gap pages (completed 2026-09-02)
-- [ ] **Phase 65: STYLE_SPEC Refresh, Whole-Site Gate & Human Review** - Refresh STYLE_SPEC status/counts + accessibility pattern; `--strict` green offline; SVGO/determinism gate; blocking human diagram review
+- [x] **Phase 65: STYLE_SPEC Refresh, Whole-Site Gate & Human Review** - Refresh STYLE_SPEC status/counts + accessibility pattern; `--strict` green offline; SVGO/determinism gate; blocking human diagram review (completed 2026-09-02)
 
 ## Phase Details
 
@@ -276,6 +276,9 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
   4. A blocking human diagram method-accuracy review passes — no diagram misdepicts its method — before the milestone is closed.
 
 **Plans**: TBD
+
+- [x] 65-01-PLAN.md
+
 **UI hint**: yes
 
 ## Progress
@@ -290,7 +293,7 @@ Phases execute in numeric order: 60 → 61 → 62 → 63 → 64 → 65
 | 62. SVG Corrections — analyze / monitoring / advisor | v10.0 | 1/1 | Complete    | 2026-09-02 |
 | 63. SVG Corrections — regression / inference / examples | v10.0 | 1/1 | Complete    | 2026-09-02 |
 | 64. Cards & Thumbnails Sync + New Coverage | v10.0 | 1/1 | Complete    | 2026-09-02 |
-| 65. STYLE_SPEC Refresh, Whole-Site Gate & Human Review | v10.0 | 0/0 | Not started | - |
+| 65. STYLE_SPEC Refresh, Whole-Site Gate & Human Review | v10.0 | 1/1 | Complete    | 2026-09-02 |
 
 ---
 

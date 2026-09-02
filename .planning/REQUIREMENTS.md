@@ -36,13 +36,13 @@ Docs-only diagram quality pass over all 156 hand-authored inline SVGs (90 concep
 ### STYLE_SPEC Conformance
 
 - [x] **SPEC-01**: All 156 SVGs conform to the current STYLE_SPEC (viewBox conventions, canonical `<style>` block, colour palette, stroke weights, panel patterns)
-- [ ] **SPEC-02**: STYLE_SPEC.md is updated — stale status/counts refreshed and the accessibility pattern finalized to match the shipped diagram set
+- [x] **SPEC-02**: STYLE_SPEC.md is updated — stale status/counts refreshed and the accessibility pattern finalized to match the shipped diagram set
 
 ### Gate
 
-- [ ] **GATE-01**: SVGO idempotence + build-determinism gate green across all diagrams (no drift on re-run)
-- [ ] **GATE-02**: Whole-site `mkdocs build --strict` green offline
-- [ ] **GATE-03**: Blocking human diagram review approved before milestone close
+- [x] **GATE-01**: SVGO idempotence + build-determinism gate green across all diagrams (no drift on re-run)
+- [x] **GATE-02**: Whole-site `mkdocs build --strict` green offline
+- [x] **GATE-03**: Blocking human diagram review approved before milestone close
 
 ## Future Requirements
 
@@ -84,10 +84,10 @@ Which phases cover which requirements. Populated during roadmap creation.
 | SYNC-02 | Phase 64 | Complete |
 | COVER-01 | Phase 64 | Complete |
 | SPEC-01 | Phases 61, 62, 63 | Complete |
-| SPEC-02 | Phase 65 | Pending |
-| GATE-01 | Phase 65 | Pending |
-| GATE-02 | Phase 65 | Pending |
-| GATE-03 | Phase 65 | Pending |
+| SPEC-02 | Phase 65 | Complete |
+| GATE-01 | Phase 65 | Complete |
+| GATE-02 | Phase 65 | Complete |
+| GATE-03 | Phase 65 | Complete |
 
 **Note on batched requirements:** DEFECT-01/02/03, A11Y-01/02, and SPEC-01 are cross-cutting correction requirements delivered incrementally across the three section-batched correction phases (61 learn/represent/align, 62 analyze/monitoring/advisor, 63 regression/inference/examples). Each requirement is fully satisfied only once all three batches are complete (verified at the Phase 63 completion criterion + the Phase 65 whole-site gate). This is the same section-batching pattern used for SVGFIX-* across v7.0 Phases 43–45.
 
