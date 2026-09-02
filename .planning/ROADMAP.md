@@ -163,7 +163,7 @@ Added `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer 
 
 **Standing constraints every phase inherits:** docs-only — NO `fdars-core` bump, NO bindings, NO advisor/MCP changes, NO package version bump (v7.0 precedent); diagrams stay hand-authored inline SVG (locked constraint — no programmatic generation); the SVGO idempotence + build-determinism CI gate must stay green; the whole-site `mkdocs build --strict` must be green offline (run at close — this milestone changes static SVGs, not fences, so most work needs no full rebuild); docs phases run SEQUENTIALLY on `main` (NOT in worktrees — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path; `use_worktrees: false`); per-section review on the built site; a BLOCKING human diagram method-accuracy review before milestone close (the v6.0 hypograph/epigraph lesson).
 
-- [ ] **Phase 60: Diagram Quality Audit** - Scored inventory of all 156 SVGs (design/geometry, STYLE_SPEC, accessibility, thumb/card sync) → milestone-gating fix list + coverage-gap list
+- [x] **Phase 60: Diagram Quality Audit** - Scored inventory of all 156 SVGs (design/geometry, STYLE_SPEC, accessibility, thumb/card sync) → milestone-gating fix list + coverage-gap list (completed 2026-09-02)
 - [ ] **Phase 61: SVG Corrections — learn / represent / align** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review
 - [ ] **Phase 62: SVG Corrections — analyze / monitoring / advisor** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review
 - [ ] **Phase 63: SVG Corrections — regression / inference / examples** - Correct that batch on defect + accessibility + STYLE_SPEC axes; per-section built-site review
@@ -273,7 +273,7 @@ Phases execute in numeric order: 60 → 61 → 62 → 63 → 64 → 65
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 60. Diagram Quality Audit | v10.0 | 2/2 | In Progress|  |
+| 60. Diagram Quality Audit | v10.0 | 2/2 | Complete    | 2026-09-02 |
 | 61. SVG Corrections — learn / represent / align | v10.0 | 0/0 | Not started | - |
 | 62. SVG Corrections — analyze / monitoring / advisor | v10.0 | 0/0 | Not started | - |
 | 63. SVG Corrections — regression / inference / examples | v10.0 | 0/0 | Not started | - |
