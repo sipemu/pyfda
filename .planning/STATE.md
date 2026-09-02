@@ -4,17 +4,17 @@ milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 68
 current_phase_name: Function-on-Function & Scalar-on-Function Regression
-status: planning
-stopped_at: Phase 67 complete, ready to plan Phase 68
-last_updated: "2026-09-02T20:39:41.156Z"
+status: executing
+stopped_at: Completed 68-01-PLAN.md
+last_updated: "2026-09-02T21:06:45.113Z"
 last_activity: 2026-09-02
-last_activity_desc: Phase 67 complete, transitioned to Phase 68
-state_head: 827bdf117c88055640cdaab1f7f39d3a29c7dab8
+last_activity_desc: Phase 68 execution started
+state_head: 8b9fb6df2620e32c807c786bc52055bfb27d1f4d
 progress:
   total_phases: 8
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 9
+  completed_plans: 7
   percent: 25
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-02)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 67 — Functional Time Series (fdars.fts)
+**Current focus:** Phase 68 — Function-on-Function & Scalar-on-Function Regression
 
 ## Current Position
 
-Phase: 68 — Function-on-Function & Scalar-on-Function Regression
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-02 — Phase 67 complete, transitioned to Phase 68
+Phase: 68 (Function-on-Function & Scalar-on-Function Regression) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-09-02 — Phase 68 execution started
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Last activity: 2026-09-02 — Phase 67 complete, transitioned to Phase 68
 | Phase 67-functional-time-series-fts P03 | 3min | 2 tasks | 2 files |
 | Phase 67-functional-time-series-fts P04 | 2min | 2 tasks | 2 files |
 | Phase 67-functional-time-series-fts P67-05 | 8min | 1 tasks | 1 files |
+| Phase 68-function-on-function-scalar-on-function-regression P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,7 @@ Recent decisions affecting current work:
 - [Phase 67]: 67-03: Vec<u32> lags cast to i64; functional_difference returns naked array; col-major cov_matrix reshaped via FdMatrix::from_column_major; FTS-02 complete with 21 passing tests
 - [Phase 67]: spectral_density re/im returned as Python lists of (m,m) arrays rather than 3D numpy — users can np.stack() for the 3D form
 - [Phase 67-functional-time-series-fts]: FND-02 refactored to subset+registration invariant — parse _submodule_names from git source (not live module), assert Phase-55 baseline subset of current, assert per-name import/attribute registration intact
+- [Phase 68-01]: Exclude fpca_x/fpca_y from fof_regression PyDict — internal FPCA state; test asserts key-set
 
 ### Pending Todos
 
@@ -128,8 +130,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-02T20:36:08.585Z
-Stopped at: Phase 67 complete, ready to plan Phase 68
+Last session: 2026-09-02T21:06:39.996Z
+Stopped at: Completed 68-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
