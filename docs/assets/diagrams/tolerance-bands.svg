@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Tolerance bands: a region expected to contain most future curves">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Tolerance Bands: Where Future Curves Will Fall" aria-labelledby="t-tbands d-tbands">
+  <title id="t-tbands">Tolerance Bands: Where Future Curves Will Fall</title>
+  <desc id="d-tbands">Illustrates functional tolerance bands: a region constructed via FPCA, bootstrap, or conformal methods that is expected to contain a specified proportion of future curves, distinguishing the tolerance band (coverage guarantee) from ordinary confidence intervals.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

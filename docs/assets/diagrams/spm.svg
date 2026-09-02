@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Statistical Process Monitoring: learn an in-control FPCA model in Phase I, then chart Hotelling T-squared and SPE against control limits in Phase II">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Statistical Process Monitoring" aria-labelledby="t-spm d-spm">
+  <title id="t-spm">Functional Statistical Process Monitoring</title>
+  <desc id="d-spm">Illustrates functional SPM: Phase I learns an in-control FPCA model from baseline curves; Phase II charts Hotelling T-squared and SPE statistics against control limits, raising an alarm when a new curve falls outside the in-control region.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

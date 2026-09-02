@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Covariance Functions: Shape to Sample Path Smoothness">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Covariance Functions: Shape &#8594; Sample Path Smoothness" aria-labelledby="t-covfn d-covfn">
+  <title id="t-covfn">Covariance Functions: Shape &#8594; Sample Path Smoothness</title>
+  <desc id="d-covfn">Shows four covariance kernel families — Gaussian (C∞ smooth), Exponential (continuous only), Matérn (ν controls smoothness), and Periodic (repeating correlation) — each paired with its characteristic sample paths, illustrating how kernel shape determines the regularity of functional data.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

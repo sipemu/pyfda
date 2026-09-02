@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Per-aspect taxonomy: 14 fdars aspects as caller-specified method= inputs flow through one shared build_diagnostics then advise pipeline crossed with three task families: interpretation, parameter, method">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Per-Aspect Taxonomy" aria-labelledby="t-aspects d-aspects">
+  <title id="t-aspects">Per-Aspect Taxonomy</title>
+  <desc id="d-aspects">Maps 14 fdars aspects (caller-specified as method= inputs) through a shared build_diagnostics and advise pipeline, crossed with three task families — interpretation, parameter tuning, and method selection — showing how a single pipeline handles diverse analysis goals.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional outlier depth — hypograph vs epigraph asymmetry">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Outlier Depth — Hypograph vs Epigraph Asymmetry" aria-labelledby="t-foutlier d-foutlier">
+  <title id="t-foutlier">Functional Outlier Depth — Hypograph vs Epigraph Asymmetry</title>
+  <desc id="d-foutlier">Compares hypograph depth (area below the curve relative to the band) and epigraph depth (area above) to detect asymmetric outliers; curves that are extreme in one direction have low depth on the corresponding side, enabling detection of outliers that symmetric depth measures miss.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

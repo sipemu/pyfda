@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Advanced SPM: drift-sensitive charts and fault diagnosis">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Advanced SPM: Catching Drift, Diagnosing the Fault" aria-labelledby="t-aspm d-aspm">
+  <title id="t-aspm">Advanced SPM: Catching Drift, Diagnosing the Fault</title>
+  <desc id="d-aspm">Illustrates advanced functional SPM: EWMA scores for drift-sensitive monitoring, supplementary run rules for pattern detection, and PC contribution bar charts for fault diagnosis — enabling earlier and more specific detection of process deviations beyond the basic Hotelling T² and SPE charts.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

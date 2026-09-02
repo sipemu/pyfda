@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Functional Clustering">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Functional Clustering" aria-labelledby="t-clust d-clust">
+  <title id="t-clust">Functional Clustering</title>
+  <desc id="d-clust">Shows four functional clustering methods in a multi-panel layout: k-means (kmeans_fd), fuzzy c-means (fuzzy_cmeans_fd), model selection criteria for choosing the number of clusters, and supported distance metrics; illustrates how curves are grouped by shape similarity.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

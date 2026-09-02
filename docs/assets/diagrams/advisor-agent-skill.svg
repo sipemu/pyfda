@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Agent Skill execution flow: git-URL install then interpret, recommend (API-key gated), re-run, compare loop; contrasted with recommend-only Python API mode">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Agent Skill — Full Agentic Loop" aria-labelledby="t-agskill d-agskill">
+  <title id="t-agskill">Agent Skill — Full Agentic Loop</title>
+  <desc id="d-agskill">Depicts the full agentic advisor skill: install via git URL, then run a numbered step sequence — interpret diagnostics, recommend (API-key gated LLM call), re-run fdars, compare before/after — cycling until the budget is exhausted; contrasted with the Python API's recommend-only offline mode.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}

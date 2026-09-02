@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Comparative selection: per-candidate build_diagnostics blocks feed a fdars-computed deterministic sort that picks the winner; LLM narrates only">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Comparative Selection" aria-labelledby="t-compsel d-compsel">
+  <title id="t-compsel">Comparative Selection</title>
+  <desc id="d-compsel">Shows N candidates flowing through per-candidate build_diagnostics blocks to a fdars-computed deterministic sort that picks the winner; the LLM receives the pre-computed winner and narrates a comparison — it cannot choose or override the winner determined by fdars.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
