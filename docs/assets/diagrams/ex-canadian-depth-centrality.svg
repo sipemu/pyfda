@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Ranking Curves by Centrality with Functional Depth — Fraiman-Muniz and modified band depth ordering">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Ranking Curves by Centrality: Functional Depth" aria-labelledby="ex-canadian-depth-centrality-title ex-canadian-depth-centrality-desc">
+  <title id="ex-canadian-depth-centrality-title">Ranking Curves by Centrality: Functional Depth</title>
+  <desc id="ex-canadian-depth-centrality-desc">Fraiman–Muniz and modified band depth scores rank 35 Canadian station temperature curves by centrality; the deepest curve is the functional median, with mid-continental stations most typical and Arctic/Pacific stations peripheral.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -54,20 +56,19 @@
   <text class="sm" x="486" y="199" text-anchor="middle">dark = central</text>
 
   <!-- Arrow 3 -->
-  <line x1="556" y1="130" x2="580" y2="130" stroke="#666" stroke-width="1.5"/>
-  <polygon points="576,126 584,130 576,134" fill="#666"/>
+  <line x1="556" y1="130" x2="572" y2="130" stroke="#666" stroke-width="1.5"/>
+  <polygon points="568,126 576,130 568,134" fill="#666"/>
 
   <!-- Panel 4: Result -->
-  <rect x="584" y="60" width="112" height="140" rx="8" fill="#3f51b5" stroke="none"/>
-  <text class="lab" x="640" y="82" text-anchor="middle" fill="white">Ranked</text>
-  <text class="lab" x="640" y="97" text-anchor="middle" fill="white">centrality</text>
-  <text class="sm" x="640" y="116" text-anchor="middle" fill="#e8ecff">deepest =</text>
-  <text class="sm" x="640" y="130" text-anchor="middle" fill="#e8ecff">functional</text>
-  <text class="sm" x="640" y="144" text-anchor="middle" fill="#e8ecff">median</text>
-  <text class="sm" x="640" y="163" text-anchor="middle" fill="#FFD700">mid-continental</text>
-  <text class="sm" x="640" y="177" text-anchor="middle" fill="#FFD700">most typical</text>
-  <text class="sm" x="640" y="191" text-anchor="middle" fill="#e8ecff">Arctic/Pacific</text>
-  <text class="sm" x="640" y="205" text-anchor="middle" fill="#e8ecff">peripheral</text>
+  <rect x="576" y="60" width="120" height="140" rx="8" fill="#3f51b5" stroke="none"/>
+  <text class="lab" x="636" y="82" text-anchor="middle" fill="white">Ranked</text>
+  <text class="lab" x="636" y="97" text-anchor="middle" fill="white">centrality</text>
+  <text x="636" y="116" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">deepest =</text>
+  <text x="636" y="130" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">functional median</text>
+  <text x="636" y="150" text-anchor="middle" fill="#FFD700" style="font:400 10px system-ui,sans-serif">mid-continental</text>
+  <text x="636" y="164" text-anchor="middle" fill="#FFD700" style="font:400 10px system-ui,sans-serif">most typical</text>
+  <text x="636" y="182" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">Arctic/Pacific</text>
+  <text x="636" y="196" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">peripheral</text>
 
   <!-- Bottom caption -->
   <text class="sm" x="360" y="236" text-anchor="middle">FM depth = integral proximity to pointwise median · MBD = fraction of domain inside curve pairs</text>

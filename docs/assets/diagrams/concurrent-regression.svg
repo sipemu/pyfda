@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Concurrent (Varying-Coefficient) Regression — predictor curves and their time-varying coefficient curves">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Concurrent (Varying-Coefficient) Regression" aria-labelledby="concurrent-regression-title concurrent-regression-desc">
+  <title id="concurrent-regression-title">Concurrent (Varying-Coefficient) Regression</title>
+  <desc id="concurrent-regression-desc">Concurrent regression maps predictor curves X(t) to time-varying coefficient curves β(t), where each predictor's effect is a smooth function of time rather than a scalar constant.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -43,10 +45,10 @@
     <text class="sm" x="102" y="152" fill="#e8710a">x₂(t)</text>
   </g>
 
-  <!-- Arrow between panels -->
+  <!-- Arrow between panels; label placed below both panels to avoid overlap in narrow gap -->
   <text class="lab" x="360" y="172" text-anchor="middle" fill="#fd7e14">→</text>
-  <text class="sm" x="360" y="186" text-anchor="middle">concurrent</text>
-  <text class="sm" x="360" y="199" text-anchor="middle">regression</text>
+  <text class="sm" x="360" y="287" text-anchor="middle" font-size="9">concurrent</text>
+  <text class="sm" x="360" y="298" text-anchor="middle" font-size="9">regression</text>
 
   <!-- Right panel: time-varying coefficient curves -->
   <rect x="382" y="56" width="320" height="224" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>

@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Canadian Precipitation: P-spline Smoothing then FOSR and FANOVA on Geographic Precipitation Profiles">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Canadian Precipitation: Smoothing → FOSR + FANOVA" aria-labelledby="ex-canadian-precipitation-title ex-canadian-precipitation-desc">
+  <title id="ex-canadian-precipitation-title">Canadian Precipitation: Smoothing → FOSR + FANOVA</title>
+  <desc id="ex-canadian-precipitation-desc">The Canadian precipitation example applies P-spline smoothing to 35 station daily records, then fits FOSR to quantify geographic drivers (latitude, longitude) and FANOVA to confirm regional differences are significant.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -61,20 +63,20 @@
   <text class="sm" x="470" y="249" text-anchor="middle">Pacific wet-winter most distinct</text>
 
   <!-- Result column -->
-  <rect x="574" y="60" width="122" height="202" rx="8" fill="#3f51b5" stroke="none"/>
-  <text class="lab" x="635" y="80" text-anchor="middle" fill="white">Geographic</text>
-  <text class="lab" x="635" y="95" text-anchor="middle" fill="white">drivers</text>
-  <text class="sm" x="635" y="118" text-anchor="middle" fill="#e8ecff">Pacific: wet-winter</text>
-  <text class="sm" x="635" y="132" text-anchor="middle" fill="#e8ecff">dry-summer</text>
-  <text class="sm" x="635" y="150" text-anchor="middle" fill="#e8ecff">Continental: summer</text>
-  <text class="sm" x="635" y="164" text-anchor="middle" fill="#e8ecff">convective peak</text>
-  <text class="sm" x="635" y="182" text-anchor="middle" fill="#FFD700">Regions confirmed</text>
-  <text class="sm" x="635" y="196" text-anchor="middle" fill="#FFD700">significantly differ</text>
-  <text class="sm" x="635" y="218" text-anchor="middle" fill="#e8ecff">predict_fosr:</text>
-  <text class="sm" x="635" y="232" text-anchor="middle" fill="#e8ecff">hypothetical</text>
-  <text class="sm" x="635" y="246" text-anchor="middle" fill="#e8ecff">station profiles</text>
+  <rect x="562" y="60" width="134" height="202" rx="8" fill="#3f51b5" stroke="none"/>
+  <text class="lab" x="629" y="80" text-anchor="middle" fill="white">Geographic</text>
+  <text class="lab" x="629" y="95" text-anchor="middle" fill="white">drivers</text>
+  <text x="629" y="116" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">Pacific: wet-winter</text>
+  <text x="629" y="130" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">dry-summer</text>
+  <text x="629" y="146" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">Continental: summer</text>
+  <text x="629" y="160" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">convective peak</text>
+  <text x="629" y="178" text-anchor="middle" fill="#FFD700" style="font:400 10px system-ui,sans-serif">Regions confirmed</text>
+  <text x="629" y="192" text-anchor="middle" fill="#FFD700" style="font:400 10px system-ui,sans-serif">significantly differ</text>
+  <text x="629" y="212" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">predict_fosr:</text>
+  <text x="629" y="226" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">hypothetical</text>
+  <text x="629" y="240" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">station profiles</text>
 
   <!-- Arrow to result -->
-  <line x1="550" y1="161" x2="572" y2="161" stroke="#666" stroke-width="1.5"/>
-  <polygon points="568,157 576,161 568,165" fill="#666"/>
+  <line x1="550" y1="161" x2="560" y2="161" stroke="#666" stroke-width="1.5"/>
+  <polygon points="556,157 564,161 556,165" fill="#666"/>
 </svg>
