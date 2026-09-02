@@ -1218,11 +1218,15 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(concurrent_regression, m)?)?;
     m.add_function(wrap_pyfunction!(functional_glm, m)?)?;
     m.add_function(wrap_pyfunction!(fof_regression, m)?)?;
+    m.add_function(wrap_pyfunction!(predict_fof, m)?)?;
+    m.add_function(wrap_pyfunction!(fof_cv, m)?)?;
+    m.add_function(wrap_pyfunction!(fof_re_regression, m)?)?;
+    m.add_function(wrap_pyfunction!(predict_fof_re, m)?)?;
     Ok(())
 }
 
 // ---------------------------------------------------------------------------
-// Function-on-Function Regression (Phase 68, Plan 01)
+// Function-on-Function Regression (Phase 68, Plans 01-02)
 // ---------------------------------------------------------------------------
 
 /// Function-on-function linear regression via FPC basis decomposition.
@@ -1298,4 +1302,334 @@ pub fn fof_regression<'py>(
     dict.set_item("coef_matrix", fdmatrix_to_numpy2d(py, &result.coef_matrix))?;
     // fpca_x and fpca_y are intentionally NOT exposed — internal FPCA state
     Ok(dict.into_any())
+}
+
+/// Predict functional responses for new predictor curves using a function-on-function model.
+///
+/// Uses the combined-refit pattern: the model is re-fitted from training data
+/// internally, then applied to ``new_x``. No opaque model handle is required.
+///
+/// Parameters
+/// ----------
+/// x_data : numpy.ndarray
+///     Training predictor, shape (n, m_x).
+/// y_data : numpy.ndarray
+///     Training response, shape (n, m_y).
+/// new_x : numpy.ndarray
+///     New predictor curves to predict for, shape (n_new, m_x).
+/// x_argvals : numpy.ndarray
+///     Predictor grid evaluation points, length m_x.
+/// y_argvals : numpy.ndarray
+///     Response grid evaluation points, length m_y.
+/// ncomp_x : int, optional
+///     Number of predictor FPC components (default 3).
+/// ncomp_y : int, optional
+///     Number of response FPC components (default 3).
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Predicted response curves, shape (n_new, m_y).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If shape mismatches, n < 3, argvals length mismatch, or ncomp_x/ncomp_y is 0.
+#[pyfunction]
+#[pyo3(signature = (x_data, y_data, new_x, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3))]
+pub fn predict_fof<'py>(
+    py: Python<'py>,
+    x_data: PyReadonlyArray2<'py, f64>,
+    y_data: PyReadonlyArray2<'py, f64>,
+    new_x: PyReadonlyArray2<'py, f64>,
+    x_argvals: PyReadonlyArray1<'py, f64>,
+    y_argvals: PyReadonlyArray1<'py, f64>,
+    ncomp_x: usize,
+    ncomp_y: usize,
+) -> PyResult<Bound<'py, PyAny>> {
+    let x_mat = numpy2d_to_fdmatrix(x_data)?;
+    let y_mat = numpy2d_to_fdmatrix(y_data)?;
+    let new_x_mat = numpy2d_to_fdmatrix(new_x)?;
+    let ax = numpy1d_to_vec(x_argvals);
+    let ay = numpy1d_to_vec(y_argvals);
+    let fit = to_pyresult(fdars_core::fof_regression::fof_regression(
+        &x_mat, &y_mat, &ax, &ay, ncomp_x, ncomp_y,
+    ))?;
+    let predicted = to_pyresult(fdars_core::fof_regression::predict_fof(&fit, &new_x_mat))?;
+    Ok(fdmatrix_to_numpy2d(py, &predicted).into_any())
+}
+
+/// Cross-validated selection of FPC component counts for function-on-function regression.
+///
+/// Performs K-fold CV over a grid of ``(ncomp_x, ncomp_y)`` pairs and returns
+/// the pair that minimises the integrated CV-MSE.
+///
+/// Parameters
+/// ----------
+/// x_data : numpy.ndarray
+///     Functional predictor, shape (n, m_x).
+/// y_data : numpy.ndarray
+///     Functional response, shape (n, m_y).
+/// x_argvals : numpy.ndarray
+///     Predictor grid evaluation points, length m_x.
+/// y_argvals : numpy.ndarray
+///     Response grid evaluation points, length m_y.
+/// ncomp_x_max : int, optional
+///     Maximum predictor FPC components to test (default 5).
+/// ncomp_y_max : int, optional
+///     Maximum response FPC components to test (default 5).
+/// n_folds : int, optional
+///     Number of CV folds (default 5). Must be <= n.
+/// seed : int, optional
+///     Random seed for fold assignment (default 42).
+///
+/// Returns
+/// -------
+/// dict
+///     candidates (list of (int, int)), cv_errors (n_candidates,),
+///     optimal (tuple (int, int)), min_cv_mse (float).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If n < n_folds, or no valid component pair produces CV errors.
+#[pyfunction]
+#[pyo3(signature = (x_data, y_data, x_argvals, y_argvals, ncomp_x_max=5, ncomp_y_max=5, n_folds=5, seed=42))]
+pub fn fof_cv<'py>(
+    py: Python<'py>,
+    x_data: PyReadonlyArray2<'py, f64>,
+    y_data: PyReadonlyArray2<'py, f64>,
+    x_argvals: PyReadonlyArray1<'py, f64>,
+    y_argvals: PyReadonlyArray1<'py, f64>,
+    ncomp_x_max: usize,
+    ncomp_y_max: usize,
+    n_folds: usize,
+    seed: u64,
+) -> PyResult<Bound<'py, PyAny>> {
+    let x_mat = numpy2d_to_fdmatrix(x_data)?;
+    let y_mat = numpy2d_to_fdmatrix(y_data)?;
+    let ax = numpy1d_to_vec(x_argvals);
+    let ay = numpy1d_to_vec(y_argvals);
+    let result = to_pyresult(fdars_core::fof_regression::fof_cv(
+        &x_mat, &y_mat, &ax, &ay, ncomp_x_max, ncomp_y_max, n_folds, seed,
+    ))?;
+
+    let dict = pyo3::types::PyDict::new(py);
+    // candidates: Vec<(usize, usize)> → Vec<(i64, i64)> for Python
+    let candidates_list: Vec<(i64, i64)> = result
+        .candidates
+        .iter()
+        .map(|&(x, y)| (x as i64, y as i64))
+        .collect();
+    dict.set_item("candidates", candidates_list)?;
+    dict.set_item("cv_errors", vec_to_numpy1d(py, result.cv_errors))?;
+    // optimal: (usize, usize) → (i64, i64) tuple
+    dict.set_item(
+        "optimal",
+        (result.optimal.0 as i64, result.optimal.1 as i64),
+    )?;
+    dict.set_item("min_cv_mse", result.min_cv_mse)?;
+    Ok(dict.into_any())
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper: validate subject_ids for fof_re_regression.
+//
+// REG-02 validation: upstream validates length mismatch via FdarError, but does
+// NOT enforce ≥2 distinct groups. The binding adds this check before calling core.
+// ---------------------------------------------------------------------------
+
+fn validate_subject_ids(
+    sid: &[usize],
+    n_obs: usize,
+) -> PyResult<()> {
+    if sid.len() != n_obs {
+        return Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "subject_ids length {} does not match x_data rows {}",
+            sid.len(),
+            n_obs
+        )));
+    }
+    let n_subjects = {
+        let mut sorted = sid.to_vec();
+        sorted.sort_unstable();
+        sorted.dedup();
+        sorted.len()
+    };
+    if n_subjects < 2 {
+        return Err(pyo3::exceptions::PyValueError::new_err(
+            "subject_ids must contain at least 2 distinct subjects for random-effects regression",
+        ));
+    }
+    Ok(())
+}
+
+/// Function-on-function random-effects regression (mixed model).
+///
+/// Fits a mixed-effects FOF model with subject-specific random intercept
+/// functions. Requires ≥ 2 distinct subjects (groups) in ``subject_ids``.
+///
+/// Parameters
+/// ----------
+/// x_data : numpy.ndarray
+///     Functional predictor, shape (n, m_x).
+/// y_data : numpy.ndarray
+///     Functional response, shape (n, m_y).
+/// subject_ids : numpy.ndarray
+///     Integer group label per observation, length n. Must be non-negative
+///     i64 values; at least 2 distinct groups are required.
+/// x_argvals : numpy.ndarray
+///     Predictor grid evaluation points, length m_x.
+/// y_argvals : numpy.ndarray
+///     Response grid evaluation points, length m_y.
+/// ncomp_x : int, optional
+///     Number of predictor FPC components (default 3).
+/// ncomp_y : int, optional
+///     Number of response FPC components (default 3).
+/// max_iter : int, optional
+///     Maximum REML EM iterations (default 50).
+/// tol : float, optional
+///     Convergence tolerance (default 1e-10).
+///
+/// Returns
+/// -------
+/// dict
+///     intercept (m_y,), beta_surface (m_y, m_x), fitted (n, m_y),
+///     residuals (n, m_y), r_squared_t (m_y,), r_squared (float),
+///     ncomp_x (int), ncomp_y (int), coef_matrix (ncomp_x, ncomp_y),
+///     random_effects (n_subjects, m_y), sigma2_u (ncomp_y,),
+///     sigma2_eps (float), n_subjects (int).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If subject_ids length != n, fewer than 2 distinct subjects,
+///     shape mismatches, n < 3, argvals length mismatch, or ncomp is 0.
+#[pyfunction]
+#[pyo3(signature = (x_data, y_data, subject_ids, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3, max_iter=50, tol=1e-10))]
+pub fn fof_re_regression<'py>(
+    py: Python<'py>,
+    x_data: PyReadonlyArray2<'py, f64>,
+    y_data: PyReadonlyArray2<'py, f64>,
+    subject_ids: PyReadonlyArray1<'py, i64>,
+    x_argvals: PyReadonlyArray1<'py, f64>,
+    y_argvals: PyReadonlyArray1<'py, f64>,
+    ncomp_x: usize,
+    ncomp_y: usize,
+    max_iter: usize,
+    tol: f64,
+) -> PyResult<Bound<'py, PyAny>> {
+    let x_mat = numpy2d_to_fdmatrix(x_data)?;
+    let y_mat = numpy2d_to_fdmatrix(y_data)?;
+    let sid = numpy1d_to_usize_vec(subject_ids);
+    let ax = numpy1d_to_vec(x_argvals);
+    let ay = numpy1d_to_vec(y_argvals);
+
+    // REG-02: validate subject_ids before calling upstream
+    validate_subject_ids(&sid, x_mat.nrows())?;
+
+    let config = fdars_core::fof_regression::FofReConfig {
+        ncomp_x,
+        ncomp_y,
+        max_iter,
+        tol,
+    };
+    let result = to_pyresult(fdars_core::fof_regression::fof_re_regression(
+        &x_mat, &y_mat, &sid, &ax, &ay, &config,
+    ))?;
+
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("intercept", vec_to_numpy1d(py, result.intercept))?;
+    dict.set_item("beta_surface", fdmatrix_to_numpy2d(py, &result.beta_surface))?;
+    dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
+    dict.set_item("residuals", fdmatrix_to_numpy2d(py, &result.residuals))?;
+    dict.set_item("r_squared_t", vec_to_numpy1d(py, result.r_squared_t))?;
+    dict.set_item("r_squared", result.r_squared)?;
+    dict.set_item("ncomp_x", result.ncomp_x)?;
+    dict.set_item("ncomp_y", result.ncomp_y)?;
+    dict.set_item("coef_matrix", fdmatrix_to_numpy2d(py, &result.coef_matrix))?;
+    dict.set_item("random_effects", fdmatrix_to_numpy2d(py, &result.random_effects))?;
+    dict.set_item("sigma2_u", vec_to_numpy1d(py, result.sigma2_u))?;
+    dict.set_item("sigma2_eps", result.sigma2_eps)?;
+    dict.set_item("n_subjects", result.n_subjects)?;
+    // fpca_x and fpca_y are intentionally NOT exposed — internal FPCA state
+    Ok(dict.into_any())
+}
+
+/// Predict functional responses using a function-on-function random-effects model.
+///
+/// Uses the combined-refit pattern: the mixed model is re-fitted from training
+/// data internally, then applied to ``new_x``. Unseen subjects (not in
+/// ``subject_ids``) receive population-level (fixed-effect-only) predictions.
+///
+/// Parameters
+/// ----------
+/// x_data : numpy.ndarray
+///     Training predictor, shape (n, m_x).
+/// y_data : numpy.ndarray
+///     Training response, shape (n, m_y).
+/// subject_ids : numpy.ndarray
+///     Integer group label per observation, length n. Must have ≥ 2 distinct
+///     groups.
+/// new_x : numpy.ndarray
+///     New predictor curves to predict for, shape (n_new, m_x).
+/// x_argvals : numpy.ndarray
+///     Predictor grid evaluation points, length m_x.
+/// y_argvals : numpy.ndarray
+///     Response grid evaluation points, length m_y.
+/// ncomp_x : int, optional
+///     Number of predictor FPC components (default 3).
+/// ncomp_y : int, optional
+///     Number of response FPC components (default 3).
+/// max_iter : int, optional
+///     Maximum REML EM iterations (default 50).
+/// tol : float, optional
+///     Convergence tolerance (default 1e-10).
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Predicted response curves, shape (n_new, m_y).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If subject_ids length != n, fewer than 2 distinct subjects,
+///     shape mismatches, n < 3, argvals length mismatch, or ncomp is 0.
+#[pyfunction]
+#[pyo3(signature = (x_data, y_data, subject_ids, new_x, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3, max_iter=50, tol=1e-10))]
+pub fn predict_fof_re<'py>(
+    py: Python<'py>,
+    x_data: PyReadonlyArray2<'py, f64>,
+    y_data: PyReadonlyArray2<'py, f64>,
+    subject_ids: PyReadonlyArray1<'py, i64>,
+    new_x: PyReadonlyArray2<'py, f64>,
+    x_argvals: PyReadonlyArray1<'py, f64>,
+    y_argvals: PyReadonlyArray1<'py, f64>,
+    ncomp_x: usize,
+    ncomp_y: usize,
+    max_iter: usize,
+    tol: f64,
+) -> PyResult<Bound<'py, PyAny>> {
+    let x_mat = numpy2d_to_fdmatrix(x_data)?;
+    let y_mat = numpy2d_to_fdmatrix(y_data)?;
+    let sid = numpy1d_to_usize_vec(subject_ids);
+    let new_x_mat = numpy2d_to_fdmatrix(new_x)?;
+    let ax = numpy1d_to_vec(x_argvals);
+    let ay = numpy1d_to_vec(y_argvals);
+
+    // REG-02: same subject-id validation as fof_re_regression
+    validate_subject_ids(&sid, x_mat.nrows())?;
+
+    let config = fdars_core::fof_regression::FofReConfig {
+        ncomp_x,
+        ncomp_y,
+        max_iter,
+        tol,
+    };
+    let fit = to_pyresult(fdars_core::fof_regression::fof_re_regression(
+        &x_mat, &y_mat, &sid, &ax, &ay, &config,
+    ))?;
+    let predicted = to_pyresult(fdars_core::fof_regression::predict_fof_re(&fit, &new_x_mat))?;
+    Ok(fdmatrix_to_numpy2d(py, &predicted).into_any())
 }
