@@ -109,42 +109,51 @@ Used for plotted functional data curves in order:
 
 | viewBox | Height | When to use |
 |---------|--------|-------------|
-| `0 0 720 300` | 300 | Standard single-row layout (34 of 43 diagrams use this) |
-| `0 0 720 480` | 480 | Tall two-row layouts (4 conforming diagrams) |
-| `0 0 720 520` | 520 | Extra-tall three-row layouts (1 conforming diagram) |
+| `0 0 720 300` | 300 | Standard single-row layout (64 of 93 concept diagrams use this) |
+| `0 0 720 480` | 480 | Tall two-row layouts (28 concept diagrams) |
+| `0 0 720 520` | 520 | Extra-tall three-row layouts (1 concept diagram) |
 
 **SVG root pattern:**
 ```xml
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="[descriptive text matching diagram title]">
 ```
 
-### Legacy Non-Conforming viewBoxes (migration targets)
+### Legacy Non-Conforming viewBoxes — RESOLVED
 
-These 4 diagrams use non-standard widths. They are flagged as migration targets for later
-diagram-sweep phases (DIA-01 through DIA-06). Do **not** migrate them in Phase 1.
-
-| File | viewBox | Target Phase |
-|------|---------|-------------|
-| `elastic-clustering.svg` | `0 0 700 250` | Phase 3 |
-| `outlier-detection.svg` | `0 0 600 350` | Phase 6 |
-| `covariance-functions.svg` | `0 0 600 425` | Phase 5 |
-| `ex-sonar-tsrvf.svg` | `0 0 700 400` | Phase 7 |
+The 4 diagrams formerly flagged as non-standard-width migration targets
+(`elastic-clustering.svg`, `outlier-detection.svg`, `covariance-functions.svg`,
+`ex-sonar-tsrvf.svg`) were all migrated to the canonical `720`-width grid during the
+v7.0 diagram-quality pass and the v10.0 corrections. **All 93 concept diagrams now use a
+`720`-width viewBox** (`720×300`, `720×480`, or `720×520`). No non-conforming viewBoxes remain.
 
 ---
 
 ## Accessibility Pattern
 
-Every conforming diagram must have `role="img"` and `aria-label` on the root `<svg>`:
+Every concept diagram must carry the full accessibility markup on the root `<svg>`:
+`role="img"`, an `aria-label`, and a long-form `<title>` + `<desc>` wired via
+`aria-labelledby`:
 
 ```xml
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none"
-     role="img" aria-label="[descriptive text matching the diagram title]">
+     role="img" aria-label="[text matching the diagram title]"
+     aria-labelledby="NAME-title NAME-desc">
+  <title id="NAME-title">[concise diagram name]</title>
+  <desc id="NAME-desc">[1–2 sentences: what the diagram depicts and the method it illustrates]</desc>
 ```
 
-The `aria-label` must match the diagram's title text (the `.ttl` element content).
+The `aria-label` and `<title>` must match the diagram's visible title text (the `.ttl`
+element content). The `<desc>` gives screen-reader users the method-level meaning that the
+visual conveys. `aria-labelledby` references the in-document `<title>` and `<desc>` ids.
 
-**Status:** 34 of 43 diagrams currently have `role="img"`. The 9 missing are legacy diagrams
-targeted for migration in later phases.
+**Decorative gallery thumbnails** (`docs/assets/thumb/*.svg`, embedded via
+`<img class="fdars-gallery-thumb">` on section index pages) are decorative duplicates of
+their linked titles: they use empty `alt=""` **and** `aria-hidden="true"` so screen readers
+do not double-announce them.
+
+**Status:** All **93 of 93** concept diagrams have `role="img"`, a title-matching
+`aria-label`, and long-form `<title>`/`<desc>`/`aria-labelledby` (universal as of the v10.0
+Diagram Quality & Accessibility Pass). All 58 gallery thumbnails carry `aria-hidden="true"`.
 
 ---
 
@@ -174,27 +183,23 @@ settings; a direct diff against the formatted source always shows cosmetic diffe
 The idempotence check (svgo(svgo(svg)) == svgo(svg)) proves no further semantic transformation
 is applied after the first pass.
 
-**Full-corpus result (Phase 1, Plan 1, Task 3 — verified 2026-08-07):**
+**Full-corpus result (refreshed in the v10.0 Diagram Quality & Accessibility Pass, 2026-09-02):**
 
-All **43 of 43** diagrams in `docs/assets/diagrams/` pass the idempotence gate under
+All **93 of 93** concept diagrams in `docs/assets/diagrams/` pass the idempotence gate under
 `svgo.config.mjs`. No exclusion list is required.
 
 **Excluded diagrams:** none.
 
-**Verified preserved constructs on all 43 diagrams:**
-- `<style>` block with five CSS classes (`.ttl .sub .lab .sm .mono`)
-- `role="img"` and `aria-label` (where present; 34 of 43 have these)
-- `viewBox` attribute
+**Verified preserved constructs on all 93 diagrams:**
+- `<style>` block with five CSS classes (`.ttl .sub .lab .sm .mono`) — present on all 93
+- `role="img"`, title-matching `aria-label`, and `<title>`/`<desc>`/`aria-labelledby` — present on all 93
+- `viewBox` attribute (all `720`-width)
 - Element IDs
-- `<desc>` elements (where present)
+- `<desc>` elements
 
-**Known non-conformances (not gate failures, migration targets):**
-- 8 diagrams have no `<style>` block (use inline `font-size` attributes) — pass gate (no
-  CSS to inline or mangle)
-- 4 diagrams have non-720 viewBox widths — pass gate (viewBox is preserved, not enforced)
-- 9 diagrams missing `role="img"` — pass gate (not enforced by the svgo gate, per D-03)
-
-These are tracked as migration targets for diagram-sweep phases 3–8.
+**Known non-conformances:** none. The v1.0-era gaps (8 diagrams without a `<style>` block,
+4 non-720 viewBoxes, 9 missing `role="img"`) were all resolved across the v7.0 and v10.0
+diagram passes — every concept diagram is now fully conformant and fully accessible.
 
 ---
 
