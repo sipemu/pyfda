@@ -2,25 +2,11 @@
 
 ## What This Is
 
-pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-data-analysis library to Python as the `fdars` package (represent, smooth, align, analyze, regress, monitor). This milestone adds a **scikit-learn-compatible estimator layer** over the existing bindings so functional-data methods plug natively into sklearn's `Pipeline`, `GridSearchCV`, and `cross_val_score`, interoperate with native sklearn estimators, and offer the familiar `fit`/`transform`/`predict` ergonomics — with every wrapped estimator passing the full `check_estimator` battery, no exemptions.
+pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-data-analysis library to Python as the `fdars` package (represent, smooth, align, analyze, regress, monitor). It also ships a **scikit-learn-compatible estimator layer** (`fdars.sklearn`, optional `[sklearn]` extra) so functional-data methods plug natively into sklearn's `Pipeline`, `GridSearchCV`, and `cross_val_score`, interoperate with native sklearn estimators, and offer the familiar `fit`/`transform`/`predict` ergonomics — with all 28 wrapped estimators passing the full `check_estimator` battery, no exemptions.
 
 ## Core Value
 
 The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-
-## Current Milestone: v9.0 scikit-learn API Compatibility
-
-**Goal:** Add a scikit-learn-compatible estimator layer over `fdars` so functional-data methods plug natively into `Pipeline`, `GridSearchCV`, and `cross_val_score`, interoperate with native sklearn estimators, and offer the familiar `fit`/`transform`/`predict` ergonomics — with every wrapped estimator passing the full `sklearn.utils.estimator_checks.check_estimator` battery, no exemptions.
-
-**Target features:**
-- **Transformers** — smoothing, basis representation, FPCA, interpolation/imputation, depth, and (where compliant) registration/alignment wrapped as `TransformerMixin` estimators.
-- **Predictors** — functional regression (`RegressorMixin`), classification (`ClassifierMixin`), clustering (`ClusterMixin`), outlier detection (`OutlierMixin`).
-- **sklearn contract** — `BaseEstimator` + `get_params`/`set_params`, `clone`-safe, `argvals` as a constructor param defaulting to `np.arange(n_features)`; estimators operate on plain `(n_obs, n_points)` ndarrays.
-- **Compliance gate (no exemptions)** — `check_estimator` green for every wrapped estimator; any fdars method that cannot comply is **excluded** from the sklearn layer (it remains available through the existing functional API) and recorded in the coverage list — never exempted.
-- **Packaging** — `scikit-learn` as an optional extra (`[sklearn]`); base package stays sklearn-free, matching the provider/mcp extras pattern.
-- **Docs gate** — new "scikit-learn API" section: concept page + method-accurate hand-authored inline SVG(s) + offline `FDARS_FENCE_OK` worked examples (incl. a `Pipeline` + `GridSearchCV` example); whole-site `mkdocs build --strict` green; blocking human diagram review before close.
-
-**Key context:** First non-advisor code-capability milestone since the v4–v6 upgrade line — a new pure-Python surface (likely `python/fdars/sklearn/`) over the *current* bindings, with **no `fdars-core` bump and no advisor changes**. Not everything in fdars is estimator-shaped: inference tests (permutation/SCB/ANOVA), SPM monitoring, and the advisor itself are naturally out of scope for a fit/predict API. Package is a code milestone → bump at close (0.8.0 → likely 0.9.0; a semver `vX.Y.Z` tag triggers PyPI publish). Genuine unknowns → research warranted: which fdars methods can pass full `check_estimator` vs. must be excluded; how FPCA/regression survive the tiny-sample & dtype-cast checks; grid-as-constructor-param `clone` semantics; whether to depend on / mirror scikit-fda conventions.
 
 ## Current State
 
@@ -37,6 +23,14 @@ The documentation — diagrams first, examples second — must make functional d
 **Grounding invariant (v2.0):** every recommendation cites computed diagnostics and states an expected effect; the LLM never fabricates numbers.
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
+
+## Last Shipped Milestone: v9.0 scikit-learn API Compatibility (shipped 2026-09-02)
+
+_All 28 requirements validated (Phase 59 docs closed via a documented override — deliverables shipped, formal VERIFICATION.md skipped); 5 phases, 17 plans; `tests/sklearn/` suite 4294 passed / 0 failed; whole-site `mkdocs build --strict` green offline. Package bumped 0.8.0 → 0.9.0 and released to PyPI (tag `v0.9.0`). Full detail: `.planning/milestones/v9.0-ROADMAP.md`. Next milestone: TBD via `/gsd-new-milestone`._
+
+**Goal:** Add a scikit-learn-compatible estimator layer (`fdars.sklearn`) over the current bindings so functional-data methods plug natively into `Pipeline`/`GridSearchCV`/`cross_val_score`, interoperate with native sklearn estimators, and offer `fit`/`transform`/`predict` ergonomics — every wrapped estimator passing the full `check_estimator` battery, no exemptions.
+
+**Delivered:** `[sklearn]` optional extra + gated `fdars.sklearn` subpackage + shared `_BaseFdarsEstimator` (BaseEstimator contract, `argvals` constructor param, float32→64 cast, tags-API 1.3–1.8 feature-detect shim); ~30-candidate triage → reason-coded `EXCLUDED_METHODS` registry; **28 estimators** across five families (FPCA/smoother/imputer/interpolator/basis/depth transformers; FPC/PLS/GLM/nonparametric regressors; logistic/LDA/QDA/KNN/DD/elastic-multinomial classifiers; FunctionalKMeans/fuzzy-c-means/GMM clusterers; LRT/outliergram/MS-plot/tvdmss/muod/depthgram outlier detectors via stored-reference depth scoring); full-matrix `parametrize_with_checks` gate over all 28 with zero exemptions (COMPLY-01, 1387 checks) + native-sklearn interop (FPCATransformer → RandomForestClassifier, COMPLY-02); sklearn-compliance CI across Python 3.9–3.14; new "scikit-learn API" docs section (concept + per-family reference + coverage/EXCLUDE list + Pipeline & GridSearchCV worked examples + hand-authored data-flow SVG).
 
 ## Last Shipped Milestone: v8.0 Advisor — New Capabilities (shipped 2026-08-31)
 
@@ -163,9 +157,18 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- v9.0 scikit-learn API Compatibility — active. Full REQ list in .planning/REQUIREMENTS.md; roadmap in .planning/ROADMAP.md. -->
+<!-- No active milestone — v9.0 shipped 2026-09-02. Next milestone TBD via /gsd-new-milestone. -->
 
-**v9.0 — scikit-learn API Compatibility (in progress):** sklearn-compatible estimator layer over the current bindings — transformers + predictors, `argvals` as constructor param, full `check_estimator` compliance (no exemptions; non-compliant methods excluded), `[sklearn]` optional extra, new docs section. No `fdars-core` bump, no advisor changes.
+_No active milestone. Define the next one with `/gsd-new-milestone`._
+
+**v9.0 — scikit-learn API Compatibility (Phases 55–59, shipped 2026-09-02):**
+
+- [x] Foundation & packaging — `[sklearn]` optional extra + gated `fdars.sklearn` subpackage + shared `_BaseFdarsEstimator` (BaseEstimator contract, `argvals` constructor param, float32→64 cast, tags-API 1.3–1.8 feature-detect shim) — Phase 55 (FND-01..04)
+- [x] Compliance triage & coverage — ~30 candidates run through `check_estimator` → PASS/EXCLUDE verdicts + reason-coded `EXCLUDED_METHODS` registry + go/no-go gate — Phase 55 (TRIAGE-01..03)
+- [x] Transformers — FPCA, B-spline/local-poly smoothers, imputer/interpolator, basis, depth as `TransformerMixin`; `Pipeline([smoother, fpca])` — Phase 56 (XFORM-01..06)
+- [x] Regressors & classifiers — FPC/PLS/GLM/nonparametric `RegressorMixin`; logistic/LDA/QDA/KNN/DD/elastic-multinomial `ClassifierMixin`; `Pipeline` + `GridSearchCV` — Phase 57 (REG-01/02, CLF-01/02, PRED-01)
+- [x] Clusterers, outliers & compliance gate — FunctionalKMeans/fuzzy-c-means/GMM `ClusterMixin`; 6 outlier detectors via stored-reference depth scoring `OutlierMixin`; full-matrix `parametrize_with_checks` over all 28 with zero exemptions (COMPLY-01) + native-sklearn interop (COMPLY-02); CI 3.9–3.14 — Phase 58 (CLUS-01/02, OUT-01/02, COMPLY-01/02)
+- [x] Documentation & release — new "scikit-learn API" docs section (concept + per-family + coverage/EXCLUDE list + Pipeline & GridSearchCV worked examples + hand-authored data-flow SVG); pkg 0.8.0 → 0.9.0 released to PyPI (tag `v0.9.0`) — Phase 59 (DOCS-01..03, REL-01) — docs phase closed via documented override (VERIFICATION.md skipped; deliverables shipped, `--strict` green)
 
 **v8.0 — Advisor: New Capabilities (Phases 50–54, shipped 2026-08-31):**
 
@@ -243,6 +246,9 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 | Disable worktree isolation for docs phases; run executors sequentially on main | Doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path — a worktree executor would build the wrong tree and fail verification | ✓ Good — sequential execution kept the ~22-min whole-site fences building against the real tree (v6.0 Phase 41) |
 | sklearn tags/validate compat shim spans 1.3→1.8 (not just 1.3–1.6); `[sklearn]` extra pinned with a `python_version` marker | Dev/CI runs sklearn 1.8 on Python ≥3.10 (where `_more_tags` is removed); the `<1.7` cap only applies to the Python-3.9 wheel. Feature-detect, never version-compare | ✓ Good — FPCATransformer passed 47/47 check_estimator on sklearn 1.8 (v9.0 Phase 55) |
 | Triage EXCLUDE reserved for genuinely-structural mismatch; skeleton predict-quality failures are PASS-WITH-FIXES deferred to the family phase | Under no-exemptions "full coverage", a naive skeleton failing `check_regressors_train` is an implementation-quality signal (fix = stored-model predict in Phase 57), not a reason to drop the family | ✓ Good — reclassified 12 EXCLUDE→PASS-WITH-FIXES; go/no-go GO on all 6 families (v9.0 Phase 55, user-approved) |
+| Full 28-estimator `parametrize_with_checks` gate as the milestone lock; zero exemptions, non-compliant methods EXCLUDED not exempted | The milestone bar is provable sklearn compliance; an exemption would hollow out the guarantee | ✓ Good — all 28 PASS (1387 gate checks), 0 PASS-WITH-FIXES; excluded methods stay in the functional API (v9.0 Phase 58) |
+| Outlier detectors score via stored-reference `modified_band_1d(X, X_fit_)` depth | `check_methods_subset_invariance` requires `score_samples(X[mask]) == score_samples(X)[mask]`; re-fitting per call violates it | ✓ Good — all 6 detectors subset-invariant; 283/283 outlier checks pass (v9.0 Phase 58) |
+| Close v9.0 with a documented Phase-59 verification override rather than back-filling a VERIFICATION.md | Docs deliverables demonstrably shipped (live site, `--strict` green, PyPI release); a retroactive verification doc adds ceremony without new signal | — Pending — override recorded in MILESTONES.md/STATE.md; revisit if docs drift (v9.0 close) |
 
 ## Evolution
 
@@ -262,4 +268,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-01 after Phase 58 (Clusterers & Outlier Detectors + Compliance Gate) — all 28 wrapped estimators PASS full check_estimator (whole tests/sklearn/ suite 4294 green, zero exemptions); MagnitudeShapeDetector is method-faithful (MS-plot MO²+VO²), the other 5 detectors use an honestly-documented subset-invariant band-depth surrogate (true batch methods stay in fdars.outliers); interop (FPCATransformer→RandomForestClassifier) proven; sklearn-compliance CI job wired across 3.9–3.14. CLUS/OUT/COMPLY validated. Next: Phase 59 (Documentation & Docs Gate). Milestone v9.0.* entrypoints + numpy/sklearn reconstruction over stored FPC scores); GridSearchCV over Pipeline([imputer,smoother,fpca,classifier]) works. REG/CLF/PRED validated. Next: Phase 58 (Clusterers & Outlier Detectors + Compliance Gate; carries deferred CR-03/WR-03). Milestone v9.0.*
+*Last updated: 2026-09-02 after v9.0 milestone (scikit-learn API Compatibility) — SHIPPED. All 28 wrapped estimators PASS full check_estimator (whole tests/sklearn/ suite 4294 green, zero exemptions); pkg 0.8.0 → 0.9.0 released to PyPI (tag v0.9.0); docs "scikit-learn API" section live, --strict green. Phase 59 (docs) closed via a documented verification override (deliverables shipped, formal VERIFICATION.md skipped). v9.0 requirements moved to shipped; next milestone TBD via /gsd-new-milestone.*

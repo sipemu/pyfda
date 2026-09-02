@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v9.0
 milestone_name: scikit-learn API Compatibility
-current_phase: 59
-current_phase_name: Documentation & Docs Gate
-status: executing
+status: Awaiting next milestone
 stopped_at: Completed 59-03-PLAN.md
-last_updated: "2026-09-01T20:41:40.645Z"
-last_activity: 2026-09-01
-last_activity_desc: Phase 59 execution started
-state_head: df740b212fab024259fd61cec1f2a7223a1b7db4
+last_updated: "2026-09-02T06:38:56.261Z"
+last_activity: 2026-09-02
+last_activity_desc: Milestone v9.0 completed and archived
+state_head: 98da2d093104e8e1521456d76dd84cbd820c2df2
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 17
   completed_plans: 16
   percent: 80
+current_phase: 59
+current_phase_name: Documentation & Docs Gate
 ---
 
 # Project State
@@ -29,12 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-31)
 
 ## Current Position
 
-Phase: 59 (Documentation & Docs Gate) — EXECUTING
-Plan: 4 of 4
-Status: Ready to execute
-Last activity: 2026-09-01 — Phase 59 execution started
-
-Progress: [████████░░] 80%
+Phase: Milestone v9.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-09-02 — Milestone v9.0 completed and archived
 
 ## Performance Metrics
 
@@ -163,4 +161,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Plan the first phase with /gsd-plan-phase 55 (flag for a research-phase if the tags-API compat shim / triage harness needs it)
+- Start the next milestone with /gsd-new-milestone

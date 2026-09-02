@@ -1,0 +1,38 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": "v9.0 — scikit-learn API Compatibility",
+  "phases": [
+    {
+      "number": "55",
+      "name": "Compliance-Triage & Foundation",
+      "status": "complete"
+    },
+    {
+      "number": "56",
+      "name": "Transformers",
+      "status": "complete"
+    },
+    {
+      "number": "57",
+      "name": "Regressors & Classifiers",
+      "status": "complete"
+    },
+    {
+      "number": "58",
+      "name": "Clusterers & Outlier Detectors + Compliance Gate",
+      "status": "complete"
+    },
+    {
+      "number": "59",
+      "name": "Documentation & Docs Gate",
+      "status": "in_progress"
+    }
+  ],
+  "next": {
+    "command": "/gsd:progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
+  },
+  "updated_at": "2026-09-02T06:38:56.276Z"
+}

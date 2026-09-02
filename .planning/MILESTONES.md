@@ -1,5 +1,28 @@
 # Milestones
 
+## v9.0 scikit-learn API Compatibility (Shipped: 2026-09-02)
+
+**Phases completed:** 5 phases, 17 plans, 24 tasks
+**Git range:** `06d8919` → `98da2d0` (~107 commits, 117 files, +18,453 / −135) · 2026-08-31 → 2026-09-02
+**Delivered:** `fdars.sklearn` — a pure-Python scikit-learn-compatible estimator layer over the current bindings. **28 estimators** across five families pass the full `check_estimator` battery with zero exemptions; native `Pipeline` / `GridSearchCV` / `cross_val_score` integration + proven interop with native sklearn estimators. Package 0.8.0 → 0.9.0, released to PyPI (tag `v0.9.0`).
+
+**Key accomplishments:**
+
+- Foundation & packaging (Phase 55) — `[sklearn]` optional extra + gated `fdars.sklearn` subpackage + shared `_BaseFdarsEstimator` (BaseEstimator contract, `argvals` constructor param, float32→64 cast, tags-API 1.3–1.8 feature-detect shim).
+- Compliance triage (Phase 55) — ~30 candidates run through `check_estimator` → PASS/EXCLUDE verdicts + reason-coded `EXCLUDED_METHODS` registry; go/no-go GO on all six families.
+- Transformers (Phase 56) — FPCA, B-spline/local-poly smoothers, imputer/interpolator, basis, depth as `TransformerMixin`; `Pipeline([smoother, fpca])` grid-changing chain.
+- Regressors & classifiers (Phase 57) — FPC/PLS/GLM/nonparametric `RegressorMixin`; logistic/LDA/QDA/KNN/DD/elastic-multinomial `ClassifierMixin`; `Pipeline` + `GridSearchCV`.
+- MagnitudeShapeDetector promoted to `check_estimator`-green `OutlierMixin` via stored-reference `modified_band_1d(X, X_fit_)` depth scoring (47/47 checks, zero exemptions), resolving Phase-57 CR-03 subset-invariance violation.
+- LRTOutlierDetector, OutliergramDetector, TVDMSSDetector, MUODDetector, and DepthgramDetector promoted to `check_estimator`-green OutlierMixin via stored-reference `modified_band_1d(X, X_fit_)` depth scoring (282/282 checks, zero exemptions), completing OUT-01 and OUT-02.
+- Full-matrix parametrize_with_checks gate over all 28 wrapped estimators locked with zero exemptions (COMPLY-01, 1387 checks); FPCATransformer → RandomForestClassifier Pipeline interop proven (COMPLY-02); sklearn-compliance CI job wired across Python 3.9–3.14.
+- Documentation & release (Phase 59) — new "scikit-learn API" docs section (concept + per-family reference + coverage/EXCLUDE list + Pipeline & GridSearchCV worked examples + hand-authored data-flow SVG); whole-site `mkdocs build --strict` green offline; pkg bump + PyPI release.
+
+**Verification:** Phases 55–58 VERIFICATION.md all `passed` (7/7, 10/10, 9/9, 14/14); whole `tests/sklearn/` suite 4294 passed / 0 failed. Milestone audit PASSED 28/28 (`.planning/milestones/v9.0-MILESTONE-AUDIT.md`).
+
+**Closeout:** `override_closeout`. Phase 59 (Documentation & Docs Gate) shipped its deliverables (docs live, `--strict` green, tag `v0.9.0` on PyPI) but never received a formal `59-VERIFICATION.md` — closed via a user-approved verification override (verification-doc gap, not a deliverable gap). DOCS-03's blocking human diagram review was pre-verified method-accurate but never explicitly approved; now moot since the SVG is live. The 9 Phase-56 triage deferrals were resolved in-file (superseded by Phases 57–58, not exempted). Known verification overrides: 0 newly acknowledged, 2 carried forward from a prior close (see STATE.md Deferred Items).
+
+---
+
 ## v8.0 Advisor: New Capabilities (Shipped: 2026-08-31)
 
 **Phases completed:** 5 phases, 16 plans, 41 tasks
