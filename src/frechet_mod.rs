@@ -304,14 +304,22 @@ fn flat_col_major_to_numpy2d<'py>(
     py: Python<'py>,
     result: Vec<f64>,
     d: usize,
-) -> Bound<'py, PyArray2<f64>> {
-    PyArray2::from_vec2(
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    if result.len() != d * d {
+        return Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "frechet_mean: internal error — expected {d}*{d}={} elements from upstream, \
+             got {}; check that d={d} matches the object dimension",
+            d * d,
+            result.len()
+        )));
+    }
+    Ok(PyArray2::from_vec2(
         py,
         &(0..d)
             .map(|r| (0..d).map(|c| result[r + c * d]).collect())
             .collect::<Vec<_>>(),
     )
-    .unwrap()
+    .unwrap()) // safe: all rows have exactly d elements
 }
 
 /// Fréchet mean over a metric space, dispatched by space name.
@@ -403,7 +411,7 @@ pub fn frechet_mean<'py>(
                 &spd_objects,
                 weights_ref,
             ))?;
-            Ok(flat_col_major_to_numpy2d(py, mean, d).into_any())
+            Ok(flat_col_major_to_numpy2d(py, mean, d)?.into_any())
         }
 
         "spherical" => {
@@ -473,7 +481,7 @@ pub fn frechet_mean<'py>(
                 &corr_objects,
                 weights_ref,
             ))?;
-            Ok(flat_col_major_to_numpy2d(py, mean, d).into_any())
+            Ok(flat_col_major_to_numpy2d(py, mean, d)?.into_any())
         }
 
         _ => Err(PyValueError::new_err(format!(
