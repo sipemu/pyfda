@@ -334,6 +334,14 @@ class TestFrechetMeanCorrelation:
         with pytest.raises(ValueError, match="diagonal"):
             frechet.frechet_mean([bad] + _OBJECTS_COR[1:], space="correlation", d=D_COR)
 
+    def test_non_symmetric_raises(self):
+        """A correlation object with M[i,j] != M[j,i] raises ValueError."""
+        bad = _make_corr(_RNG2, D_COR).copy()
+        bad[0, 1] += 0.5
+        bad[1, 0] -= 0.5   # break symmetry while keeping diagonal at 1
+        with pytest.raises(ValueError, match="symmetric"):
+            frechet.frechet_mean([bad] + _OBJECTS_COR[1:], space="correlation", d=D_COR)
+
 
 class TestFrechetMeanInvalidSpace:
     """Test frechet_mean invalid-space and shape-mismatch negative paths."""
