@@ -73,11 +73,16 @@ pub fn frechet_anova<'py>(
         sorted.dedup();
         let k = sorted.len();
         let contiguous = sorted.iter().enumerate().all(|(i, &v)| v == i);
-        if !contiguous || k == 0 {
+        if k == 0 {
+            return Err(PyValueError::new_err(
+                "frechet_anova: group_labels is empty — at least 2 groups required",
+            ));
+        }
+        if !contiguous {
             return Err(PyValueError::new_err(format!(
                 "frechet_anova: group_labels must be contiguous integers starting at 0 \
-                 (i.e., 0, 1, …, {max}); got labels {sorted:?}",
-                max = k.saturating_sub(1)
+                 (i.e., 0, 1, …, {}); got labels {sorted:?}",
+                k - 1
             )));
         }
     }
