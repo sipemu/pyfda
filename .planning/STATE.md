@@ -5,16 +5,16 @@ milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 70
 current_phase_name: Multi-Domain Data, FAMM & Advanced Clustering
 status: executing
-stopped_at: Completed 70-02-PLAN.md
-last_updated: "2026-09-03T21:22:53.201Z"
+stopped_at: Completed 70-03-PLAN.md
+last_updated: "2026-09-03T21:32:51.293Z"
 last_activity: 2026-09-03
 last_activity_desc: Phase 70 execution started
-state_head: dbf6e502ee1d527456f7fc91d5c822e43edea12a
+state_head: b9387ad4f858bb8af54fc9ca6e83f7da74b93515
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 18
-  completed_plans: 16
+  completed_plans: 17
   percent: 50
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 ## Current Position
 
 Phase: 70 (Multi-Domain Data, FAMM & Advanced Clustering) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-09-03 — Phase 70 execution started
 
@@ -82,6 +82,7 @@ Last activity: 2026-09-03 — Phase 70 execution started
 | Phase 69 P05 | 6 min | 1 tasks | 1 files |
 | Phase 70-multi-domain-data-famm-advanced-clustering P01 | 4 min | 2 tasks | 4 files |
 | Phase 70-multi-domain-data-famm-advanced-clustering P02 | 6min | 3 tasks | 4 files |
+| Phase 70-multi-domain-data-famm-advanced-clustering P03 | 7min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,7 @@ Recent decisions affecting current work:
 - [Phase 70]: PyMultiFunData documented as standalone container — module-level comment records 0 consumers in fdars-core 0.33; MULTI-02 vacuously satisfied
 - [Phase 70]: dense_flmm_result_to_pydict private helper reused by multi_famm for per-dimension component dicts — avoids duplicating 14-key dict construction
 - [Phase 70]: p=0 FdMatrix shape in fdars-core 0.33 is (0,0) not (0,m) when no covariates — test assertions corrected accordingly
+- [Phase 70-multi-domain-data-famm-advanced-clustering]: mfpca + spe_multivariate added to fdars.spm via Vec<FdMatrix>/Vec<&FdMatrix> pattern; pub(super) fields excluded; lifetime-correct argvals conversion
 
 ### Pending Todos
 
@@ -148,8 +150,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-03T21:22:53.099Z
-Stopped at: Completed 70-02-PLAN.md
+Last session: 2026-09-03T21:32:51.190Z
+Stopped at: Completed 70-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
