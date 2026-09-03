@@ -947,6 +947,103 @@ pub fn mfpca<'py>(
     Ok(dict)
 }
 
+/// Multivariate Squared Prediction Error (SPE) monitoring statistic.
+///
+/// Computes per-observation multivariate SPE statistics by integrating the
+/// squared residuals between standardized functional data and their MFPCA
+/// reconstructions over each variable's evaluation grid.
+///
+/// Parameters
+/// ----------
+/// standardized_vars : list of numpy.ndarray
+///     P arrays, each shape (n_obs, n_points_p) — centered and scaled
+///     functional data (as produced by MFPCA standardization).
+/// reconstructed_vars : list of numpy.ndarray
+///     P arrays, each shape (n_obs, n_points_p) — MFPCA reconstructions.
+/// argvals_list : list of numpy.ndarray
+///     P 1-D arrays, each the evaluation grid for variable p.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Per-observation multivariate SPE statistics, shape (n_obs,).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If any input is not the expected numpy array type, or if the
+///     fdars-core SPE computation fails.
+#[pyfunction]
+pub fn spe_multivariate<'py>(
+    py: Python<'py>,
+    standardized_vars: &Bound<'py, PyList>,
+    reconstructed_vars: &Bound<'py, PyList>,
+    argvals_list: &Bound<'py, PyList>,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    // Convert standardized_vars: list of 2-D arrays → Vec<FdMatrix> → Vec<&FdMatrix>
+    let std_mats: Vec<fdars_core::matrix::FdMatrix> = standardized_vars
+        .iter()
+        .enumerate()
+        .map(|(i, item)| {
+            let arr = item
+                .extract::<PyReadonlyArray2<f64>>()
+                .map_err(|_| {
+                    pyo3::exceptions::PyValueError::new_err(format!(
+                        "spe_multivariate: standardized_vars[{i}] must be a 2-D float64 numpy array"
+                    ))
+                })?;
+            numpy2d_to_fdmatrix(arr)
+        })
+        .collect::<PyResult<Vec<_>>>()?;
+    let std_refs: Vec<&fdars_core::matrix::FdMatrix> = std_mats.iter().collect();
+
+    // Convert reconstructed_vars: list of 2-D arrays → Vec<FdMatrix> → Vec<&FdMatrix>
+    let rec_mats: Vec<fdars_core::matrix::FdMatrix> = reconstructed_vars
+        .iter()
+        .enumerate()
+        .map(|(i, item)| {
+            let arr = item
+                .extract::<PyReadonlyArray2<f64>>()
+                .map_err(|_| {
+                    pyo3::exceptions::PyValueError::new_err(format!(
+                        "spe_multivariate: reconstructed_vars[{i}] must be a 2-D float64 numpy array"
+                    ))
+                })?;
+            numpy2d_to_fdmatrix(arr)
+        })
+        .collect::<PyResult<Vec<_>>>()?;
+    let rec_refs: Vec<&fdars_core::matrix::FdMatrix> = rec_mats.iter().collect();
+
+    // Convert argvals_list: list of 1-D arrays → Vec<Vec<f64>>
+    // av_vecs MUST be declared before av_refs so it outlives the references (Pitfall 4).
+    let av_vecs: Vec<Vec<f64>> = argvals_list
+        .iter()
+        .enumerate()
+        .map(|(i, item)| {
+            let arr = item
+                .extract::<PyReadonlyArray1<f64>>()
+                .map_err(|_| {
+                    pyo3::exceptions::PyValueError::new_err(format!(
+                        "spe_multivariate: argvals_list[{i}] must be a 1-D float64 numpy array"
+                    ))
+                })?;
+            Ok(numpy1d_to_vec(arr))
+        })
+        .collect::<PyResult<Vec<_>>>()?;
+
+    // Build &[&[f64]] from references to the owned Vec<Vec<f64>>.
+    let av_refs: Vec<&[f64]> = av_vecs.iter().map(|v| v.as_slice()).collect();
+
+    let result = to_pyresult(fdars_core::spm::stats::spe_multivariate(
+        &std_refs,
+        &rec_refs,
+        &av_refs,
+    ))?;
+
+    // Return naked 1-D numpy array (not a dict).
+    Ok(vec_to_numpy1d(py, result))
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(spm_cusum, m)?)?;
     m.add_function(wrap_pyfunction!(spm_ewma, m)?)?;
@@ -970,5 +1067,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(western_electric_rules, m)?)?;
     m.add_function(wrap_pyfunction!(nelson_rules, m)?)?;
     m.add_function(wrap_pyfunction!(mfpca, m)?)?;
+    m.add_function(wrap_pyfunction!(spe_multivariate, m)?)?;
     Ok(())
 }
