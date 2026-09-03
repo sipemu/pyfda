@@ -60,6 +60,7 @@ _submodule_names = (
     "scalar_on_function",  # Phase 68 — Scalar-on-Function additive/selection regression
     "frechet",             # Phase 69 — Fréchet regression & mean over metric spaces
     "density_fda",         # Phase 69 — Density FDA: LQD transform, Wasserstein barycenter, FPCA
+    "multi_fdata",         # Phase 70 — PyMultiFunData opaque handle + builder (multi-domain container)
 )
 
 for _name in _submodule_names:
