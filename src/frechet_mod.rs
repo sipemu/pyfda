@@ -8,7 +8,7 @@
 //! Plan 69-03: `frechet_mean` (generic dispatch) added.
 
 use crate::convert::{
-    fdmatrix_to_numpy2d, numpy1d_to_vec, numpy2d_to_fdmatrix, to_pyresult,
+    extract_ragged_vecs, fdmatrix_to_numpy2d, numpy1d_to_vec, numpy2d_to_fdmatrix, to_pyresult,
     usize_vec_to_numpy1d, vec_to_numpy1d,
 };
 use numpy::{PyArray2, PyReadonlyArray1, PyReadonlyArray2};
@@ -256,24 +256,6 @@ fn spd_object_from_numpy<'py>(
     Ok(flat)
 }
 
-/// Convert a (d,) numpy 1D array to Vec<f64> for spherical space.
-///
-/// Validates length equals d.
-fn spherical_object_from_numpy<'py>(
-    arr: PyReadonlyArray1<'py, f64>,
-    d: usize,
-    i: usize,
-) -> PyResult<Vec<f64>> {
-    let v = arr.as_array().to_vec();
-    if v.len() != d {
-        return Err(PyValueError::new_err(format!(
-            "frechet_mean(space='spherical'): object [{i}] must have length {d}, got {}",
-            v.len()
-        )));
-    }
-    Ok(v)
-}
-
 /// Flatten a (d, d) numpy 2D array to a column-major Vec<f64> for correlation space.
 ///
 /// Validates shape is (d, d). Identical flattening to SPD.
@@ -415,14 +397,24 @@ pub fn frechet_mean<'py>(
         }
 
         "spherical" => {
-            // Collect and validate spherical objects
-            let sph_objects: Vec<Vec<f64>> = objects
-                .iter()
+            // Extract all objects via the shared ragged-vec helper (each element
+            // must be a 1-D numpy array, list, or tuple of floats).
+            let raw_vecs = extract_ragged_vecs(objects, "frechet_mean")?;
+
+            // Validate dimension consistency and unit-norm for each vector.
+            let sph_objects: Vec<Vec<f64>> = raw_vecs
+                .into_iter()
                 .enumerate()
-                .map(|(i, item)| {
-                    let arr = item.extract::<PyReadonlyArray1<f64>>()?;
-                    let v = spherical_object_from_numpy(arr, d, i)?;
-                    // Validate unit norm
+                .map(|(i, v)| {
+                    // All spherical vectors must have the same dimension d.
+                    if v.len() != d {
+                        return Err(PyValueError::new_err(format!(
+                            "frechet_mean(space='spherical'): object [{i}] must have length {d}, \
+                             got {}",
+                            v.len()
+                        )));
+                    }
+                    // Validate unit norm (tolerance 1e-6).
                     let norm: f64 = v.iter().map(|x| x * x).sum::<f64>().sqrt();
                     if (norm - 1.0).abs() > 1e-6 {
                         return Err(PyValueError::new_err(format!(
