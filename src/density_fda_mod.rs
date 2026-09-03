@@ -39,7 +39,7 @@ use pyo3::types::PyDict;
 ///     effectively zero.
 #[pyfunction]
 #[pyo3(signature = (vals, argvals))]
-fn normalize_density<'py>(
+pub fn normalize_density<'py>(
     py: Python<'py>,
     vals: PyReadonlyArray1<'py, f64>,
     argvals: PyReadonlyArray1<'py, f64>,
@@ -89,7 +89,7 @@ fn normalize_density<'py>(
 ///     array lengths are inconsistent.
 #[pyfunction]
 #[pyo3(signature = (density, argvals, n_quantile_pts=None))]
-fn lqd_transform<'py>(
+pub fn lqd_transform<'py>(
     py: Python<'py>,
     density: PyReadonlyArray1<'py, f64>,
     argvals: PyReadonlyArray1<'py, f64>,
@@ -131,7 +131,7 @@ fn lqd_transform<'py>(
 ///     If array lengths are inconsistent or t_grid is not in [0, 1].
 #[pyfunction]
 #[pyo3(signature = (psi, t_grid, target_argvals))]
-fn inverse_lqd<'py>(
+pub fn inverse_lqd<'py>(
     py: Python<'py>,
     psi: PyReadonlyArray1<'py, f64>,
     t_grid: PyReadonlyArray1<'py, f64>,
@@ -177,7 +177,7 @@ fn inverse_lqd<'py>(
 ///     or weights do not sum to 1.
 #[pyfunction]
 #[pyo3(signature = (density_matrix, argvals, weights=None))]
-fn wasserstein_barycenter<'py>(
+pub fn wasserstein_barycenter<'py>(
     py: Python<'py>,
     density_matrix: PyReadonlyArray2<'py, f64>,
     argvals: PyReadonlyArray1<'py, f64>,
@@ -234,7 +234,7 @@ fn wasserstein_barycenter<'py>(
 ///     rank, or array dimensions are inconsistent.
 #[pyfunction]
 #[pyo3(signature = (density_matrix, argvals, ncomp=3, n_quantile_pts=None))]
-fn lqd_fpca<'py>(
+pub fn lqd_fpca<'py>(
     py: Python<'py>,
     density_matrix: PyReadonlyArray2<'py, f64>,
     argvals: PyReadonlyArray1<'py, f64>,
