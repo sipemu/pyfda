@@ -3,6 +3,7 @@
 use crate::convert::*;
 use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::*;
+use pyo3::types::PyList;
 
 /// SPM Phase I estimation.
 ///
@@ -847,6 +848,105 @@ pub fn spe_limit_robust<'py>(
     Ok(dict)
 }
 
+/// Multivariate Functional Principal Component Analysis (MFPCA).
+///
+/// Performs joint FPCA across multiple functional variables (domains), returning
+/// shared multivariate scores and per-variable eigenfunctions.
+///
+/// Parameters
+/// ----------
+/// variables : list of numpy.ndarray
+///     One 2-D array per variable, each shape (n_obs, n_points_p).  Variables
+///     may have different numbers of evaluation points (non-square fixtures
+///     supported).
+/// ncomp : int, optional
+///     Number of multivariate principal components (default 5).
+/// weighted : bool, optional
+///     If True (default), weight each variable by 1/std-dev before the joint
+///     SVD to equalize scale contributions.
+///
+/// Returns
+/// -------
+/// dict
+///     ``scores`` (n, ncomp), ``eigenfunctions`` (list of P arrays each
+///     (m_p, ncomp)), ``eigenvalues`` (ncomp,), ``means`` (list of P arrays
+///     each (m_p,)), ``scales`` (P,), ``grid_sizes`` (list of P ints).
+///
+/// Raises
+/// ------
+/// ValueError
+///     If any element of `variables` is not a 2-D float64 numpy array, or if
+///     the fdars-core MFPCA computation fails (e.g. mismatched n_obs).
+#[pyfunction]
+#[pyo3(signature = (variables, ncomp=5, weighted=true))]
+pub fn mfpca<'py>(
+    py: Python<'py>,
+    variables: &Bound<'py, PyList>,
+    ncomp: usize,
+    weighted: bool,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    // Convert each Python 2-D array to an FdMatrix (column-major).
+    let mats: Vec<fdars_core::matrix::FdMatrix> = variables
+        .iter()
+        .enumerate()
+        .map(|(i, item)| {
+            let arr = item
+                .extract::<PyReadonlyArray2<f64>>()
+                .map_err(|_| {
+                    pyo3::exceptions::PyValueError::new_err(format!(
+                        "mfpca: variables[{i}] must be a 2-D numpy array of dtype float64"
+                    ))
+                })?;
+            numpy2d_to_fdmatrix(arr)
+        })
+        .collect::<PyResult<Vec<_>>>()?;
+
+    // Build &[&FdMatrix] slice (mats must outlive refs).
+    let refs: Vec<&fdars_core::matrix::FdMatrix> = mats.iter().collect();
+
+    // Build MfpcaConfig via Default + field mutation
+    // (MfpcaConfig is NOT #[non_exhaustive], but the pattern is consistent).
+    let mut config = fdars_core::spm::mfpca::MfpcaConfig::default();
+    config.ncomp = ncomp;
+    config.weighted = weighted;
+
+    let result = to_pyresult(fdars_core::spm::mfpca::mfpca(&refs, &config))?;
+
+    let dict = pyo3::types::PyDict::new(py);
+
+    // scores: (n, ncomp)
+    dict.set_item("scores", fdmatrix_to_numpy2d(py, &result.scores))?;
+
+    // eigenfunctions: list of P arrays, each (m_p, ncomp)
+    let eigenfunctions_list = PyList::empty(py);
+    for ef in &result.eigenfunctions {
+        eigenfunctions_list.append(fdmatrix_to_numpy2d(py, ef))?;
+    }
+    dict.set_item("eigenfunctions", eigenfunctions_list)?;
+
+    // eigenvalues: (ncomp,)
+    dict.set_item("eigenvalues", vec_to_numpy1d(py, result.eigenvalues))?;
+
+    // means: list of P arrays, each (m_p,)
+    let means_list = PyList::empty(py);
+    for m in result.means {
+        means_list.append(vec_to_numpy1d(py, m))?;
+    }
+    dict.set_item("means", means_list)?;
+
+    // scales: (P,) — per-variable std-devs
+    dict.set_item("scales", vec_to_numpy1d(py, result.scales))?;
+
+    // grid_sizes: list of P ints
+    let grid_sizes_list = PyList::empty(py);
+    for &gs in &result.grid_sizes {
+        grid_sizes_list.append(gs)?;
+    }
+    dict.set_item("grid_sizes", grid_sizes_list)?;
+
+    Ok(dict)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(spm_cusum, m)?)?;
     m.add_function(wrap_pyfunction!(spm_ewma, m)?)?;
@@ -869,5 +969,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(arl0_spe, m)?)?;
     m.add_function(wrap_pyfunction!(western_electric_rules, m)?)?;
     m.add_function(wrap_pyfunction!(nelson_rules, m)?)?;
+    m.add_function(wrap_pyfunction!(mfpca, m)?)?;
     Ok(())
 }
