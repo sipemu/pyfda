@@ -61,6 +61,7 @@ _submodule_names = (
     "frechet",             # Phase 69 — Fréchet regression & mean over metric spaces
     "density_fda",         # Phase 69 — Density FDA: LQD transform, Wasserstein barycenter, FPCA
     "multi_fdata",         # Phase 70 — PyMultiFunData opaque handle + builder (multi-domain container)
+    "famm",                # Phase 70 — Functional Additive Mixed Models (dense_flmm, fast_fmm, multi_famm)
 )
 
 for _name in _submodule_names:
