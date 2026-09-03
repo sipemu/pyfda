@@ -11,7 +11,7 @@ use crate::convert::{fdmatrix_to_numpy2d, to_pyresult, vec_to_numpy1d};
 use numpy::PyUntypedArrayMethods;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList, PyTuple};
+use pyo3::types::{PyDict, PyList};
 
 // ---------------------------------------------------------------------------
 // Opaque #[pyclass] handle
@@ -24,44 +24,6 @@ use pyo3::types::{PyDict, PyList, PyTuple};
 #[pyclass(name = "PyIrregFdata")]
 pub struct PyIrregFdata {
     pub inner: fdars_core::irreg_fdata::IrregFdata,
-}
-
-// ---------------------------------------------------------------------------
-// Private helper: extract Vec<Vec<f64>> from a Python list of 1-D arrays
-// ---------------------------------------------------------------------------
-
-fn extract_list_of_vecs(list: &Bound<'_, PyList>) -> PyResult<Vec<Vec<f64>>> {
-    list.iter()
-        .enumerate()
-        .map(|(i, item)| {
-            // Accept a 1-D numpy array — use extract to get a readonly view
-            if let Ok(arr) = item.extract::<numpy::PyReadonlyArray1<f64>>() {
-                Ok(arr.as_array().to_vec())
-            } else if let Ok(seq) = item.cast::<PyList>() {
-                // Accept a plain Python list of floats
-                seq.iter()
-                    .map(|x| x.extract::<f64>())
-                    .collect::<PyResult<Vec<_>>>()
-            } else if let Ok(tup) = item.cast::<PyTuple>() {
-                // Accept a Python tuple of floats (natural alternative to list)
-                tup.iter()
-                    .map(|x| x.extract::<f64>())
-                    .collect::<PyResult<Vec<_>>>()
-            } else {
-                let type_name = item
-                    .get_type()
-                    .name()
-                    .map(|s| s.to_string())
-                    .unwrap_or_else(|_| "?".to_string());
-                Err(PyValueError::new_err(format!(
-                    "irreg_fdata_from_lists: element [{}] is not a 1-D numpy array or list of floats; \
-                     got {}",
-                    i,
-                    type_name
-                )))
-            }
-        })
-        .collect()
 }
 
 // ---------------------------------------------------------------------------
@@ -124,8 +86,8 @@ pub fn irreg_fdata_from_lists<'py>(
         .map_err(|_| PyValueError::new_err("values_list must be a Python list of 1-D arrays"))?;
 
     // Extract ragged vecs
-    let av_vecs = extract_list_of_vecs(av_list)?;
-    let vl_vecs = extract_list_of_vecs(vl_list)?;
+    let av_vecs = crate::convert::extract_ragged_vecs(av_list, "irreg_fdata_from_lists")?;
+    let vl_vecs = crate::convert::extract_ragged_vecs(vl_list, "irreg_fdata_from_lists")?;
 
     // Guard: outer-length mismatch BEFORE from_lists (which would assert_eq! and panic)
     if av_vecs.len() != vl_vecs.len() {

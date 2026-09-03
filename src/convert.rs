@@ -4,6 +4,7 @@ use fdars_core::matrix::FdMatrix;
 use fdars_core::FdarError;
 use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::*;
+use pyo3::types::{PyList, PyTuple};
 
 /// Resolve an optional argvals array to a concrete grid.
 ///
@@ -90,4 +91,48 @@ pub fn to_pyerr(e: FdarError) -> PyErr {
 /// Convert a Result<T, FdarError> to PyResult<T>.
 pub fn to_pyresult<T>(r: Result<T, FdarError>) -> PyResult<T> {
     r.map_err(to_pyerr)
+}
+
+/// Extract a Python list of 1-D arrays / lists / tuples into a Vec<Vec<f64>>.
+///
+/// Accepts each element as:
+/// - A 1-D numpy f64 array (zero-copy via PyReadonlyArray1)
+/// - A plain Python list of floats
+/// - A Python tuple of floats
+///
+/// Error messages use `caller_name` to produce context-specific messages
+/// (e.g. "frechet_mean: element [2] ..." vs "irreg_fdata_from_lists: element [2] ...").
+///
+/// Per-caller length-uniformity validation is the CALLER's responsibility —
+/// this helper intentionally does NOT reject ragged (non-uniform) lengths.
+pub fn extract_ragged_vecs(
+    list: &Bound<'_, PyList>,
+    caller_name: &str,
+) -> PyResult<Vec<Vec<f64>>> {
+    list.iter()
+        .enumerate()
+        .map(|(i, item)| {
+            if let Ok(arr) = item.extract::<numpy::PyReadonlyArray1<f64>>() {
+                Ok(arr.as_array().to_vec())
+            } else if let Ok(seq) = item.cast::<PyList>() {
+                seq.iter()
+                    .map(|x| x.extract::<f64>())
+                    .collect::<PyResult<Vec<_>>>()
+            } else if let Ok(tup) = item.cast::<PyTuple>() {
+                tup.iter()
+                    .map(|x| x.extract::<f64>())
+                    .collect::<PyResult<Vec<_>>>()
+            } else {
+                let type_name = item
+                    .get_type()
+                    .name()
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|_| "?".to_string());
+                Err(pyo3::exceptions::PyValueError::new_err(format!(
+                    "{caller_name}: element [{i}] is not a 1-D numpy array or \
+                     list of floats; got {type_name}"
+                )))
+            }
+        })
+        .collect()
 }
