@@ -19,6 +19,7 @@ High-performance functional data analysis toolkit providing:
 - Explainability (SHAP, PDP, permutation importance, significant regions)
 - Functional time series (FTSM fit/forecast, ACF, stationarity, DPCA)
 - Scalar-on-function regression (FAM, GKAM, GSAM additive models, variable selection)
+- Fréchet regression (global, local, ANOVA) over density/metric spaces
 
 All computations are performed in Rust via fdars-core for maximum performance.
 """
@@ -56,6 +57,7 @@ _submodule_names = (
     "pace_fpca",  # Phase 38 — PACE FPCA + IrregFdata opaque handle
     "fts",        # Phase 67 — Functional Time Series (FTSM fit/forecast, ACF, stationarity, DPCA)
     "scalar_on_function",  # Phase 68 — Scalar-on-Function additive/selection regression
+    "frechet",             # Phase 69 — Fréchet regression & mean over metric spaces
 )
 
 for _name in _submodule_names:
