@@ -33,7 +33,7 @@ Requirements for this milestone. Each maps to a roadmap phase (Phases 66+, conti
 
 ### Multi-Domain Data, FAMM & Advanced Clustering (`fdars.multi_fdata`, `fdars.famm`, `fdars.clustering`)
 
-- [ ] **MULTI-01**: New `PyMultiFunData` opaque `#[pyclass]` handle (mirroring `PyIrregFdata`) + a builder from component curves; registered and constructible from Python
+- [x] **MULTI-01**: New `PyMultiFunData` opaque `#[pyclass]` handle (mirroring `PyIrregFdata`) + a builder from component curves; registered and constructible from Python
 - [ ] **MULTI-02**: Mixed-model bindings exposed — `dense_flmm`, `fast_fmm`, `multi_famm` — consuming `PyMultiFunData` where required, returning documented PyDicts
 - [ ] **MULTI-03**: Multivariate/multi-domain SPM bindings exposed extending `fdars.spm` (e.g. MFPCA / multi-domain monitoring), sequenced after `PyMultiFunData` within the phase
 - [ ] **MULTI-04**: Advanced clustering bound — `dbscan_fd`, `kcfc_cluster`, `funfem_cluster`, `align_cluster_fd` — each returning a labels/result PyDict, transposition-guarded
@@ -100,7 +100,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | FRE-01 | Phase 69 | Complete |
 | FRE-02 | Phase 69 | Complete |
 | FRE-03 | Phase 69 | Complete |
-| MULTI-01 | Phase 70 | Pending |
+| MULTI-01 | Phase 70 | Complete |
 | MULTI-02 | Phase 70 | Pending |
 | MULTI-03 | Phase 70 | Pending |
 | MULTI-04 | Phase 70 | Pending |

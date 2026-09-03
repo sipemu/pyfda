@@ -1,43 +1,53 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v10.0 — Diagram Quality & Accessibility Pass",
+  "milestone": "v11.0 — fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs",
   "phases": [
     {
-      "number": "60",
-      "name": "Diagram Quality Audit",
+      "number": "66",
+      "name": "Isolated Crate Bump + Regression Gate",
       "status": "complete"
     },
     {
-      "number": "61",
-      "name": "SVG Corrections — learn / represent / align",
+      "number": "67",
+      "name": "Functional Time Series (`fdars.fts`)",
       "status": "complete"
     },
     {
-      "number": "62",
-      "name": "SVG Corrections — analyze / monitoring / advisor",
+      "number": "68",
+      "name": "Function-on-Function & Scalar-on-Function Regression",
       "status": "complete"
     },
     {
-      "number": "63",
-      "name": "SVG Corrections — regression / inference / examples",
+      "number": "69",
+      "name": "Fréchet Regression & Density FDA",
       "status": "complete"
     },
     {
-      "number": "64",
-      "name": "Cards & Thumbnails Sync + New Coverage",
-      "status": "complete"
+      "number": "70",
+      "name": "Multi-Domain Data, FAMM & Advanced Clustering",
+      "status": "pending"
     },
     {
-      "number": "65",
-      "name": "STYLE_SPEC Refresh, Whole-Site Gate & Human Review",
-      "status": "complete"
+      "number": "71",
+      "name": "Shapelets & GAK Metric",
+      "status": "pending"
+    },
+    {
+      "number": "72",
+      "name": "Advisor Extension",
+      "status": "pending"
+    },
+    {
+      "number": "73",
+      "name": "Documentation & Release",
+      "status": "pending"
     }
   ],
   "next": {
-    "command": "/gsd:progress",
-    "label": "Show progress",
-    "reason": "Unsure of state — showing progress"
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 70 of 8 · 50% · executing"
   },
-  "updated_at": "2026-09-02T12:18:13.870Z"
+  "updated_at": "2026-09-03T21:13:14.991Z"
 }
