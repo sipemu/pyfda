@@ -1,7 +1,7 @@
 //! Clustering for functional data.
 
 use crate::convert::*;
-use numpy::{PyReadonlyArray1, PyReadonlyArray2};
+use numpy::{IntoPyArray, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::*;
 
 /// K-means clustering for functional data.
@@ -286,6 +286,58 @@ pub fn calinski_harabasz_data(
     Ok(fdars_core::clustering::calinski_harabasz(&mat, &av, &lab))
 }
 
+/// Density-based spatial clustering of functional data (DBSCAN).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// eps : float, optional
+///     Neighbourhood radius in L2 distance units (default 0.5).
+/// min_points : int, optional
+///     Minimum number of curves (including self) for a core point (default 3).
+///
+/// Returns
+/// -------
+/// dict
+///     Dictionary with keys:
+///     - cluster: numpy.ndarray, shape (n,), dtype int64. Cluster label for each
+///       observation; -1 indicates a noise point, 0..n_clusters-1 are cluster ids.
+///     - n_clusters: int. Number of clusters found (excluding noise).
+///     - n_noise: int. Number of noise points.
+///     - distances: numpy.ndarray, shape (n, n). Pairwise L2 distance matrix.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, eps=0.5, min_points=3))]
+pub fn dbscan_fd<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    eps: f64,
+    min_points: usize,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let mut config = fdars_core::clustering_advanced::DbscanConfig::default();
+    config.eps = eps;
+    config.min_points = min_points;
+    let result = to_pyresult(fdars_core::clustering_advanced::dbscan_fd(&mat, &av, &config))?;
+
+    // Map None (noise) -> -1i64, Some(c) -> c as i64
+    let cluster_i64: Vec<i64> = result.cluster.iter().map(|c| match c {
+        None => -1,
+        Some(v) => *v as i64,
+    }).collect();
+
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("cluster", cluster_i64.into_pyarray(py))?;
+    dict.set_item("n_clusters", result.n_clusters)?;
+    dict.set_item("n_noise", result.n_noise)?;
+    dict.set_item("distances", fdmatrix_to_numpy2d(py, &result.distances))?;
+    Ok(dict)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(kmeans_fd, m)?)?;
     m.add_function(wrap_pyfunction!(fuzzy_cmeans_fd, m)?)?;
@@ -294,5 +346,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(calinski_harabasz, m)?)?;
     m.add_function(wrap_pyfunction!(silhouette_score_data, m)?)?;
     m.add_function(wrap_pyfunction!(calinski_harabasz_data, m)?)?;
+    m.add_function(wrap_pyfunction!(dbscan_fd, m)?)?;
     Ok(())
 }
