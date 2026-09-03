@@ -27,7 +27,7 @@ Requirements for this milestone. Each maps to a roadmap phase (Phases 66+, conti
 
 ### Fréchet Regression & Density FDA (`fdars.frechet`, `fdars.density_fda`)
 
-- [ ] **FRE-01**: New `fdars.frechet` submodule — `frechet_mean`, `frechet_global_reg`, `frechet_local_reg`, `frechet_anova` exposed (metric-space backend chosen via string dispatch, `Err` fallback arm), each returning a documented PyDict
+- [x] **FRE-01**: New `fdars.frechet` submodule — `frechet_mean`, `frechet_global_reg`, `frechet_local_reg`, `frechet_anova` exposed (metric-space backend chosen via string dispatch, `Err` fallback arm), each returning a documented PyDict
 - [ ] **FRE-02**: New `fdars.density_fda` submodule — `lqd_transform` / `inverse_lqd`, `lqd_fpca`, `wasserstein_barycenter`, `normalize_density` exposed
 - [x] **FRE-03**: A shared ragged-list input helper (`extract_ragged_vecs`) is factored into `src/convert.rs` (out of `pace_fpca_mod.rs`) and used by the density/Fréchet inputs; validated on non-uniform per-observation lengths
 
@@ -97,7 +97,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | REG-01 | Phase 68 | Complete |
 | REG-02 | Phase 68 | Complete |
 | REG-03 | Phase 68 | Complete |
-| FRE-01 | Phase 69 | Pending |
+| FRE-01 | Phase 69 | Complete |
 | FRE-02 | Phase 69 | Pending |
 | FRE-03 | Phase 69 | Complete |
 | MULTI-01 | Phase 70 | Pending |

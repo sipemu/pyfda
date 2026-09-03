@@ -252,13 +252,13 @@ Full detail: `.planning/milestones/v10.0-ROADMAP.md`
   2. `import fdars.frechet` works; users can compute `frechet_mean`, `frechet_global_reg`, `frechet_local_reg`, and `frechet_anova` (metric-space backend chosen by string dispatch with an `Err` fallback arm), each returning a documented PyDict
   3. `import fdars.density_fda` works; users can run `lqd_transform` / `inverse_lqd`, `lqd_fpca`, `wasserstein_barycenter`, and `normalize_density`
 
-**Plans**: 2/4 plans executed
+**Plans**: 3/4 plans executed
 
 Plans:
 
 - [x] 69-01-PLAN.md — FRE-03: relocate `extract_list_of_vecs` → `convert::extract_ragged_vecs` (caller_name param), rewire pace_fpca (behavior-preserving), ragged-input test [wave 1]
 - [x] 69-02-PLAN.md — FRE-01 (tracer): register `fdars.frechet` + density-default `frechet_anova` (tracer) → `frechet_global_reg` → `frechet_local_reg` [wave 2]
-- [ ] 69-03-PLAN.md — FRE-01: `frechet_mean` monomorphized 3-space dispatch (spd/spherical/correlation) + per-space marshalling/validation + Err wildcard arm [wave 3]
+- [x] 69-03-PLAN.md — FRE-01: `frechet_mean` monomorphized 3-space dispatch (spd/spherical/correlation) + per-space marshalling/validation + Err wildcard arm [wave 3]
 - [ ] 69-04-PLAN.md — FRE-02: register `fdars.density_fda` + `normalize_density` (tracer) → `lqd_transform`/`inverse_lqd`/`wasserstein_barycenter` (naked arrays) → `lqd_fpca` (6-key dict) [wave 4]
 
 **Parallelizable**: Yes at phase level — new `src/frechet_mod.rs` + `src/density_fda_mod.rs`; the `convert.rs` refactor is an internal prerequisite sequenced first WITHIN this phase. Can run in a worktree in parallel with Phases 67, 68, 71. Internally SEQUENTIAL (waves 1→2→3→4): 69-02/03 both write `src/frechet_mod.rs` and all four touch `src/lib.rs`/`__init__.py` + rebuild.
@@ -332,7 +332,7 @@ Phases execute in numeric order: 66 → 67 → 68 → 69 → 70 → 71 → 72 �
 | 66. Isolated Crate Bump + Regression Gate | v11.0 | 1/1 | Complete    | 2026-09-02 |
 | 67. Functional Time Series (`fdars.fts`) | v11.0 | 5/5 | Complete    | 2026-09-02 |
 | 68. Function-on-Function & Scalar-on-Function Regression | v11.0 | 3/3 | Complete    | 2026-09-02 |
-| 69. Fréchet Regression & Density FDA | v11.0 | 2/4 | In Progress|  |
+| 69. Fréchet Regression & Density FDA | v11.0 | 3/4 | In Progress|  |
 | 70. Multi-Domain Data, FAMM & Advanced Clustering | v11.0 | 0/TBD | Not started | - |
 | 71. Shapelets & GAK Metric | v11.0 | 0/TBD | Not started | - |
 | 72. Advisor Extension | v11.0 | 0/TBD | Not started | - |
