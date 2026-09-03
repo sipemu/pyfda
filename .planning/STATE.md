@@ -5,16 +5,16 @@ milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 69
 current_phase_name: Fréchet Regression & Density FDA
 status: verifying
-stopped_at: Completed 69-04-PLAN.md (Phase 69 complete)
-last_updated: "2026-09-03T19:51:35.724Z"
+stopped_at: Completed 69-05-PLAN.md (gap-closure)
+last_updated: "2026-09-03T20:41:46.229Z"
 last_activity: 2026-09-03
 last_activity_desc: Phase 69 execution started
-state_head: 53368744d364d4b0095e8e289b96271e4d5a3790
+state_head: 9167e0b2519eff52fcbd258a4136cff09a971dea
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 14
+  completed_plans: 14
   percent: 38
 ---
 
@@ -79,6 +79,7 @@ Last activity: 2026-09-03 — Phase 69 execution started
 | Phase 69-frechet-regression-density-fda P02 | 3min | 3 tasks | 4 files |
 | Phase 69-frechet-regression-density-fda P03 | 3min | 2 tasks | 2 files |
 | Phase 69-frechet-regression-density-fda P04 | 6min | 3 tasks | 4 files |
+| Phase 69 P05 | 6 min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,7 @@ Recent decisions affecting current work:
 - [Phase 69-frechet-regression-density-fda]: All three density-default Fréchet functions committed together in one atomic commit (tracer + expansion inseparable at file boundary); explicit imports for -D warnings cleanliness
 - [Phase 69]: lqd_fpca exposes rotation as 'loadings' key (not rotation) and excludes centered/weights (internal SVD state) from the 6-key PyDict
 - [Phase 69]: normalize_density, lqd_transform, inverse_lqd, wasserstein_barycenter return naked 1D arrays (not PyDicts) — consistent with single-vector transform convention
+- [Phase 69]: Route frechet_mean spherical extraction through extract_ragged_vecs to satisfy FRE-03 gap-closure requirement
 
 ### Pending Todos
 
@@ -141,8 +143,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-03T19:51:35.593Z
-Stopped at: Completed 69-04-PLAN.md (Phase 69 complete)
+Last session: 2026-09-03T20:41:46.154Z
+Stopped at: Completed 69-05-PLAN.md (gap-closure)
 Resume file: None
 
 ## Operator Next Steps
