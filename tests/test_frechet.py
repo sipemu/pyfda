@@ -215,3 +215,146 @@ class TestFrechetLocalReg:
             frechet.frechet_local_reg(
                 _PREDICTORS, _RESPONSES, _ARGVALS, _XOUT, 0.0
             )
+
+
+# ===========================================================================
+# Plan 69-03: frechet_mean — generic Fréchet mean with 3-space string dispatch
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Per-space fixtures (§10 of 69-RESEARCH.md)
+# ---------------------------------------------------------------------------
+
+_RNG2 = np.random.default_rng(0)  # separate seed so fixtures are independent
+
+D_SPD = 3      # 3×3 SPD matrices
+D_SPH = 4      # unit vectors on S^3
+D_COR = 3      # 3×3 correlation matrices
+
+
+def _make_spd(rng, d):
+    """Make a random d×d SPD matrix (guaranteed PD via A @ A.T + 0.1*I)."""
+    A = rng.standard_normal((d, d))
+    return A @ A.T + np.eye(d) * 0.1
+
+
+def _make_unit_vec(rng, d):
+    """Make a random unit vector of length d."""
+    v = rng.standard_normal(d)
+    return v / np.linalg.norm(v)
+
+
+def _make_corr(rng, d):
+    """Make a random d×d correlation matrix."""
+    A = rng.standard_normal((d, d))
+    C = A @ A.T + np.eye(d) * 0.5
+    D_diag = np.sqrt(np.diag(C))
+    return C / np.outer(D_diag, D_diag)
+
+
+_OBJECTS_SPD = [_make_spd(_RNG2, D_SPD) for _ in range(5)]   # 5 (3,3) SPD matrices
+_OBJECTS_SPH = [_make_unit_vec(_RNG2, D_SPH) for _ in range(6)]  # 6 (4,) unit vecs
+_OBJECTS_COR = [_make_corr(_RNG2, D_COR) for _ in range(4)]   # 4 (3,3) correlation mats
+
+
+class TestFrechetMeanSpd:
+    """Test frechet_mean with space='spd' — returns symmetric (d,d) array."""
+
+    def test_callable(self):
+        assert callable(frechet.frechet_mean)
+
+    def test_result_shape(self):
+        result = frechet.frechet_mean(_OBJECTS_SPD, space="spd", d=D_SPD)
+        assert result.shape == (D_SPD, D_SPD), (
+            f"Expected ({D_SPD}, {D_SPD}), got {result.shape}"
+        )
+
+    def test_result_is_symmetric(self):
+        result = frechet.frechet_mean(_OBJECTS_SPD, space="spd", d=D_SPD)
+        assert np.allclose(result, result.T), "SPD Fréchet mean must be symmetric"
+
+    def test_with_weights(self):
+        """Weighted call (uniform weights) produces the same shape."""
+        weights = np.ones(len(_OBJECTS_SPD)) / len(_OBJECTS_SPD)
+        result = frechet.frechet_mean(_OBJECTS_SPD, space="spd", d=D_SPD, weights=weights)
+        assert result.shape == (D_SPD, D_SPD)
+
+    def test_non_symmetric_raises(self):
+        """An SPD object with |M[i,j]-M[j,i]| > 1e-8 raises ValueError."""
+        bad = _make_spd(_RNG2, D_SPD).copy()
+        bad[0, 1] += 10.0   # break symmetry
+        with pytest.raises(ValueError, match="symmetric"):
+            frechet.frechet_mean([bad] + _OBJECTS_SPD[1:], space="spd", d=D_SPD)
+
+    def test_non_positive_diagonal_raises(self):
+        """An object with a non-positive diagonal raises ValueError."""
+        bad = _make_spd(_RNG2, D_SPD).copy()
+        bad[0, 0] = -1.0
+        bad[1, 0] = bad[0, 1]  # keep symmetric
+        with pytest.raises(ValueError, match="non-positive"):
+            frechet.frechet_mean([bad] + _OBJECTS_SPD[1:], space="spd", d=D_SPD)
+
+
+class TestFrechetMeanSpherical:
+    """Test frechet_mean with space='spherical' — returns (d,) unit-norm vector."""
+
+    def test_result_shape(self):
+        result = frechet.frechet_mean(_OBJECTS_SPH, space="spherical", d=D_SPH)
+        assert result.shape == (D_SPH,), (
+            f"Expected ({D_SPH},), got {result.shape}"
+        )
+
+    def test_result_is_unit_norm(self):
+        result = frechet.frechet_mean(_OBJECTS_SPH, space="spherical", d=D_SPH)
+        assert abs(np.linalg.norm(result) - 1.0) < 1e-4, (
+            f"Spherical Fréchet mean must be unit-norm, got norm={np.linalg.norm(result)}"
+        )
+
+
+class TestFrechetMeanCorrelation:
+    """Test frechet_mean with space='correlation' — returns (d,d) unit-diagonal array."""
+
+    def test_result_shape(self):
+        result = frechet.frechet_mean(_OBJECTS_COR, space="correlation", d=D_COR)
+        assert result.shape == (D_COR, D_COR), (
+            f"Expected ({D_COR}, {D_COR}), got {result.shape}"
+        )
+
+    def test_result_unit_diagonal(self):
+        result = frechet.frechet_mean(_OBJECTS_COR, space="correlation", d=D_COR)
+        for i in range(D_COR):
+            assert abs(result[i, i] - 1.0) < 1e-6, (
+                f"Correlation Fréchet mean diagonal[{i},{i}]={result[i,i]} != 1.0"
+            )
+
+    def test_non_unit_diagonal_raises(self):
+        """A correlation object with diagonal != 1 raises ValueError."""
+        bad = _make_corr(_RNG2, D_COR).copy()
+        bad[0, 0] = 0.5  # break unit diagonal
+        with pytest.raises(ValueError, match="diagonal"):
+            frechet.frechet_mean([bad] + _OBJECTS_COR[1:], space="correlation", d=D_COR)
+
+
+class TestFrechetMeanInvalidSpace:
+    """Test frechet_mean invalid-space and shape-mismatch negative paths."""
+
+    def test_invalid_space_raises_valueerror(self):
+        """An unknown space name raises ValueError listing all valid names."""
+        with pytest.raises(ValueError) as exc_info:
+            frechet.frechet_mean(_OBJECTS_SPD, space="banana", d=D_SPD)
+        msg = str(exc_info.value)
+        assert "spd" in msg
+        assert "spherical" in msg
+        assert "correlation" in msg
+
+    def test_bad_norm_spherical_raises(self):
+        """A non-unit-norm spherical object raises ValueError."""
+        bad_vec = np.array([1.0, 2.0, 0.0, 0.0])   # norm=sqrt(5) != 1
+        with pytest.raises(ValueError, match="norm"):
+            frechet.frechet_mean([bad_vec] + _OBJECTS_SPH[1:], space="spherical", d=D_SPH)
+
+    def test_wrong_shape_spd_raises(self):
+        """An SPD object with shape != (d,d) raises ValueError."""
+        bad = np.eye(D_SPD + 1)  # (4,4) but d=3
+        with pytest.raises(ValueError):
+            frechet.frechet_mean([bad], space="spd", d=D_SPD)
