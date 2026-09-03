@@ -5,16 +5,16 @@ milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 70
 current_phase_name: Multi-Domain Data, FAMM & Advanced Clustering
 status: executing
-stopped_at: Completed 70-01-PLAN.md
-last_updated: "2026-09-03T21:13:53.423Z"
+stopped_at: Completed 70-02-PLAN.md
+last_updated: "2026-09-03T21:22:53.201Z"
 last_activity: 2026-09-03
 last_activity_desc: Phase 70 execution started
-state_head: 806dce88a7b0280f16e9e8d0ac8ae5a6f65ebe97
+state_head: dbf6e502ee1d527456f7fc91d5c822e43edea12a
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 18
-  completed_plans: 15
+  completed_plans: 16
   percent: 50
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 ## Current Position
 
 Phase: 70 (Multi-Domain Data, FAMM & Advanced Clustering) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-09-03 — Phase 70 execution started
 
@@ -81,6 +81,7 @@ Last activity: 2026-09-03 — Phase 70 execution started
 | Phase 69-frechet-regression-density-fda P04 | 6min | 3 tasks | 4 files |
 | Phase 69 P05 | 6 min | 1 tasks | 1 files |
 | Phase 70-multi-domain-data-famm-advanced-clustering P01 | 4 min | 2 tasks | 4 files |
+| Phase 70-multi-domain-data-famm-advanced-clustering P02 | 6min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,8 @@ Recent decisions affecting current work:
 - [Phase 69]: normalize_density, lqd_transform, inverse_lqd, wasserstein_barycenter return naked 1D arrays (not PyDicts) — consistent with single-vector transform convention
 - [Phase 69]: Route frechet_mean spherical extraction through extract_ragged_vecs to satisfy FRE-03 gap-closure requirement
 - [Phase 70]: PyMultiFunData documented as standalone container — module-level comment records 0 consumers in fdars-core 0.33; MULTI-02 vacuously satisfied
+- [Phase 70]: dense_flmm_result_to_pydict private helper reused by multi_famm for per-dimension component dicts — avoids duplicating 14-key dict construction
+- [Phase 70]: p=0 FdMatrix shape in fdars-core 0.33 is (0,0) not (0,m) when no covariates — test assertions corrected accordingly
 
 ### Pending Todos
 
@@ -145,8 +148,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-03T21:13:25.834Z
-Stopped at: Completed 70-01-PLAN.md
+Last session: 2026-09-03T21:22:53.099Z
+Stopped at: Completed 70-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
