@@ -20,6 +20,7 @@ High-performance functional data analysis toolkit providing:
 - Functional time series (FTSM fit/forecast, ACF, stationarity, DPCA)
 - Scalar-on-function regression (FAM, GKAM, GSAM additive models, variable selection)
 - Fréchet regression (global, local, ANOVA) over density/metric spaces
+- Density functional data analysis (LQD transform, Wasserstein barycenter, density FPCA)
 
 All computations are performed in Rust via fdars-core for maximum performance.
 """
@@ -58,6 +59,7 @@ _submodule_names = (
     "fts",        # Phase 67 — Functional Time Series (FTSM fit/forecast, ACF, stationarity, DPCA)
     "scalar_on_function",  # Phase 68 — Scalar-on-Function additive/selection regression
     "frechet",             # Phase 69 — Fréchet regression & mean over metric spaces
+    "density_fda",         # Phase 69 — Density FDA: LQD transform, Wasserstein barycenter, FPCA
 )
 
 for _name in _submodule_names:

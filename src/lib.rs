@@ -30,6 +30,7 @@ mod fts_mod;
 mod scalar_on_function_mod;
 mod tolerance_mod;
 mod frechet_mod;
+mod density_fda_mod;
 
 /// Create a submodule, register its contents, and attach it to a parent module.
 macro_rules! register_submodule {
@@ -66,6 +67,7 @@ fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     register_submodule!(m, "fts", fts_mod::register);
     register_submodule!(m, "scalar_on_function", scalar_on_function_mod::register);
     register_submodule!(m, "frechet", frechet_mod::register);
+    register_submodule!(m, "density_fda", density_fda_mod::register);
 
     Ok(())
 }
