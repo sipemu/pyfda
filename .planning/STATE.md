@@ -4,17 +4,17 @@ milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 69
 current_phase_name: Fréchet Regression & Density FDA
-status: planning
-stopped_at: Phase 68 complete, ready to plan Phase 69
-last_updated: "2026-09-02T21:35:37.143Z"
-last_activity: 2026-09-02
-last_activity_desc: Phase 68 complete, transitioned to Phase 69
-state_head: 84ba2e8c651b0089438e273cbf0ed30bde4feb1e
+status: executing
+stopped_at: Completed 69-01-PLAN.md
+last_updated: "2026-09-03T19:33:11.925Z"
+last_activity: 2026-09-03
+last_activity_desc: Phase 69 execution started
+state_head: 8dc8799c5f15865d1da6a127a1ac5cb8cc42a156
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 13
+  completed_plans: 10
   percent: 38
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-02)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 68 — Function-on-Function & Scalar-on-Function Regression
+**Current focus:** Phase 69 — Fréchet Regression & Density FDA
 
 ## Current Position
 
-Phase: 69 — Fréchet Regression & Density FDA
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-02 — Phase 68 complete, transitioned to Phase 69
+Phase: 69 (Fréchet Regression & Density FDA) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-09-03 — Phase 69 execution started
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Last activity: 2026-09-02 — Phase 68 complete, transitioned to Phase 69
 | Phase 68-function-on-function-scalar-on-function-regression P01 | 2min | 2 tasks | 2 files |
 | Phase 68-function-on-function-scalar-on-function-regression P02 | 3min | 3 tasks | 2 files |
 | Phase 68-function-on-function-scalar-on-function-regression P03 | 4 min | 3 tasks | 4 files |
+| Phase 69-frechet-regression-density-fda P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,7 @@ Recent decisions affecting current work:
 - [Phase 67-functional-time-series-fts]: FND-02 refactored to subset+registration invariant — parse _submodule_names from git source (not live module), assert Phase-55 baseline subset of current, assert per-name import/attribute registration intact
 - [Phase 68-01]: Exclude fpca_x/fpca_y from fof_regression PyDict — internal FPCA state; test asserts key-set
 - [Phase 68]: All 5 sof bindings in single file; VarSelectResult.coefficients len relaxed (P+1 upstream); model_selection_ncomp copied verbatim from regression_mod.rs
+- [Phase 69-01]: No length-uniformity validation inside extract_ragged_vecs — ragged lengths intentional; caller validates per own contract
 
 ### Pending Todos
 
@@ -133,8 +135,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-02T21:19:21.944Z
-Stopped at: Phase 68 complete, ready to plan Phase 69
+Last session: 2026-09-03T19:33:11.844Z
+Stopped at: Completed 69-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
