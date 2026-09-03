@@ -4,17 +4,17 @@ milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 69
 current_phase_name: Fréchet Regression & Density FDA
-status: executing
-stopped_at: Completed 69-03-PLAN.md
-last_updated: "2026-09-03T19:43:09.051Z"
+status: verifying
+stopped_at: Completed 69-04-PLAN.md (Phase 69 complete)
+last_updated: "2026-09-03T19:51:35.724Z"
 last_activity: 2026-09-03
 last_activity_desc: Phase 69 execution started
-state_head: e3be19b2ceeea900733a4520f3ea441f8104473c
+state_head: 53368744d364d4b0095e8e289b96271e4d5a3790
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
   percent: 38
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 
 Phase: 69 (Fréchet Regression & Density FDA) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-03 — Phase 69 execution started
 
 ## Performance Metrics
@@ -78,6 +78,7 @@ Last activity: 2026-09-03 — Phase 69 execution started
 | Phase 69-frechet-regression-density-fda P01 | 2min | 2 tasks | 3 files |
 | Phase 69-frechet-regression-density-fda P02 | 3min | 3 tasks | 4 files |
 | Phase 69-frechet-regression-density-fda P03 | 3min | 2 tasks | 2 files |
+| Phase 69-frechet-regression-density-fda P04 | 6min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,8 @@ Recent decisions affecting current work:
 - [Phase 68]: All 5 sof bindings in single file; VarSelectResult.coefficients len relaxed (P+1 upstream); model_selection_ncomp copied verbatim from regression_mod.rs
 - [Phase 69-01]: No length-uniformity validation inside extract_ragged_vecs — ragged lengths intentional; caller validates per own contract
 - [Phase 69-frechet-regression-density-fda]: All three density-default Fréchet functions committed together in one atomic commit (tracer + expansion inseparable at file boundary); explicit imports for -D warnings cleanliness
+- [Phase 69]: lqd_fpca exposes rotation as 'loadings' key (not rotation) and excludes centered/weights (internal SVD state) from the 6-key PyDict
+- [Phase 69]: normalize_density, lqd_transform, inverse_lqd, wasserstein_barycenter return naked 1D arrays (not PyDicts) — consistent with single-vector transform convention
 
 ### Pending Todos
 
@@ -138,8 +141,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-03T19:43:08.974Z
-Stopped at: Completed 69-03-PLAN.md
+Last session: 2026-09-03T19:51:35.593Z
+Stopped at: Completed 69-04-PLAN.md (Phase 69 complete)
 Resume file: None
 
 ## Operator Next Steps
