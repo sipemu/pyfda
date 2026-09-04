@@ -1,8 +1,201 @@
 //! Distance metrics for functional data.
 
 use crate::convert::*;
+use fdars_core::metric::gak::{
+    gak as core_gak, gak_gram_matrix as core_gak_gram_matrix,
+    gak_gram_predict as core_gak_gram_predict, gak_gram_train as core_gak_gram_train,
+    sigma_gak as core_sigma_gak, GakConfig, GakGramTrain,
+};
+
+/// Build a GakConfig from an optional sigma value.
+///
+/// GakConfig is #[non_exhaustive], so struct literal syntax is not available
+/// from outside the crate.  This helper constructs the config via the provided
+/// public constructors (with_sigma / Default).
+#[inline]
+fn make_gak_config(sigma: Option<f64>) -> GakConfig {
+    match sigma {
+        Some(s) => GakConfig::with_sigma(s),
+        None => GakConfig::default(),
+    }
+}
 use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::*;
+
+// ---------------------------------------------------------------------------
+// Opaque #[pyclass] handle: PyGakGramTrain
+// ---------------------------------------------------------------------------
+
+/// Opaque handle wrapping fdars-core GakGramTrain for incremental GAK Gram computation.
+///
+/// Construct via `fdars.metric.gak_gram_train(data)`.
+/// Use with `fdars.metric.gak_gram_predict(handle, new_data)` for the sklearn
+/// precomputed-kernel workflow.
+///
+/// Exposes:
+///   - `.gram` — (n_train, n_train) numpy array (the training Gram matrix)
+///   - `.sigma` — the resolved bandwidth (float > 0)
+///   - `.n_train` — number of training observations (int)
+#[pyclass(name = "PyGakGramTrain")]
+pub struct PyGakGramTrain {
+    pub inner: GakGramTrain,
+}
+
+#[pymethods]
+impl PyGakGramTrain {
+    /// Training Gram matrix, shape (n_train, n_train).
+    #[getter]
+    pub fn gram<'py>(&self, py: Python<'py>) -> Bound<'py, PyArray2<f64>> {
+        fdmatrix_to_numpy2d(py, &self.inner.gram)
+    }
+
+    /// Resolved GAK bandwidth (sigma > 0).
+    #[getter]
+    pub fn sigma(&self) -> f64 {
+        self.inner.sigma
+    }
+
+    /// Number of training observations.
+    #[getter]
+    pub fn n_train(&self) -> usize {
+        self.inner.gram.nrows()
+    }
+}
+
+// ---------------------------------------------------------------------------
+// GAK scalar functions
+// ---------------------------------------------------------------------------
+
+/// Global Alignment Kernel between two 1-D time series.
+///
+/// Parameters
+/// ----------
+/// x : numpy.ndarray
+///     First series (1D).
+/// y : numpy.ndarray
+///     Second series (1D).
+/// sigma : float
+///     Bandwidth parameter (must be > 0).  Use `sigma_gak` to select
+///     automatically from data.
+///
+/// Returns
+/// -------
+/// float
+///     GAK similarity in [0, 1].  `gak(x, x, sigma)` == 1.0 exactly.
+///     Returns 0.0 if `sigma <= 0` or either series is empty.
+#[pyfunction]
+pub fn gak<'py>(
+    _py: Python<'py>,
+    x: PyReadonlyArray1<'py, f64>,
+    y: PyReadonlyArray1<'py, f64>,
+    sigma: f64,
+) -> PyResult<f64> {
+    Ok(core_gak(x.as_slice()?, y.as_slice()?, sigma))
+}
+
+/// Heuristic GAK bandwidth: median pairwise Euclidean distance, floored at 1e-8.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     2D array of shape (n, m) — rows are observations.
+///
+/// Returns
+/// -------
+/// float
+///     Bandwidth estimate (always > 0).
+#[pyfunction]
+pub fn sigma_gak<'py>(
+    _py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+) -> PyResult<f64> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    Ok(core_sigma_gak(&mat))
+}
+
+/// Global Alignment Kernel Gram matrix (one-shot, symmetric).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     2D array of shape (n, m) — rows are observations.
+/// sigma : float, optional
+///     Bandwidth.  If None (default), selected automatically via `sigma_gak`.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Symmetric PSD Gram matrix of shape (n, n) with unit diagonal.
+///     Directly usable as a precomputed kernel with sklearn.
+#[pyfunction]
+#[pyo3(signature = (data, sigma=None))]
+pub fn gak_gram_matrix<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    sigma: Option<f64>,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let config = make_gak_config(sigma);
+    let result = to_pyresult(core_gak_gram_matrix(&mat, &config))?;
+    Ok(fdmatrix_to_numpy2d(py, &result))
+}
+
+// ---------------------------------------------------------------------------
+// GAK train/predict handle functions
+// ---------------------------------------------------------------------------
+
+/// Fit a GAK Gram handle for incremental train/predict computation.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Training data, shape (n_train, m).
+/// sigma : float, optional
+///     Bandwidth.  If None (default), selected automatically via `sigma_gak`.
+///
+/// Returns
+/// -------
+/// PyGakGramTrain
+///     Opaque handle storing the training Gram, sigma, and auxiliary structures
+///     needed by `gak_gram_predict`.
+#[pyfunction]
+#[pyo3(signature = (data, sigma=None))]
+pub fn gak_gram_train<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    sigma: Option<f64>,
+) -> PyResult<Py<PyGakGramTrain>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let config = make_gak_config(sigma);
+    let inner = to_pyresult(core_gak_gram_train(&mat, &config))?;
+    Py::new(py, PyGakGramTrain { inner })
+}
+
+/// Compute the GAK Gram matrix between new data and the training set.
+///
+/// Parameters
+/// ----------
+/// train : PyGakGramTrain
+///     Handle returned by `gak_gram_train`.
+/// new_data : numpy.ndarray
+///     Test data, shape (n_test, m).  Must have the same number of columns as
+///     the training data.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Gram matrix of shape (n_test, n_train).  Directly usable with sklearn
+///     `SVC(kernel='precomputed').predict(K_test)`.
+#[pyfunction]
+pub fn gak_gram_predict<'py>(
+    py: Python<'py>,
+    train: &PyGakGramTrain,
+    new_data: PyReadonlyArray2<'py, f64>,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let mat = numpy2d_to_fdmatrix(new_data)?;
+    let result = to_pyresult(core_gak_gram_predict(&train.inner, &mat))?;
+    Ok(fdmatrix_to_numpy2d(py, &result))
+}
 
 /// Lp distance matrix (self) for 1D functional data.
 ///
@@ -501,5 +694,12 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fourier_cross_1d, m)?)?;
     m.add_function(wrap_pyfunction!(hshift_self_1d, m)?)?;
     m.add_function(wrap_pyfunction!(hshift_cross_1d, m)?)?;
+    // GAK (Global Alignment Kernel) — SHAPE-02
+    m.add_class::<PyGakGramTrain>()?;
+    m.add_function(wrap_pyfunction!(gak, m)?)?;
+    m.add_function(wrap_pyfunction!(sigma_gak, m)?)?;
+    m.add_function(wrap_pyfunction!(gak_gram_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(gak_gram_train, m)?)?;
+    m.add_function(wrap_pyfunction!(gak_gram_predict, m)?)?;
     Ok(())
 }
