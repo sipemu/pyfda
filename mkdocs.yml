@@ -127,6 +127,9 @@ nav:
     - Robust Regression: regression/robust-regression.md
     - Concurrent Regression: regression/concurrent-regression.md
     - Functional GLM: regression/functional-glm.md
+    - Function-on-Function: regression/function-on-function.md
+    - Additive Scalar-on-Function: regression/additive-sof.md
+    - Fréchet Regression: regression/frechet-regression.md
   - Monitoring:
     - monitoring/index.md
     - Process Monitoring: monitoring/spm.md
