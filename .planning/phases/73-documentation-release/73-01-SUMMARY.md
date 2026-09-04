@@ -84,7 +84,7 @@ coverage:
     human_judgment: false
 
 # Metrics
-duration: ~45min (includes ~15min waiting for full docs build)
+duration: ~30min implementation + 22.5min build wait
 completed: 2026-09-04
 status: complete
 ---
@@ -187,7 +187,11 @@ None — no external service configuration required.
 - SVGO two-pass idempotence: PASS (IDEMPOTENT_OK)
 - STYLE_SPEC compliance (role/aria/title/desc/viewBox/style block): PASS
 
-**Note:** Full DOCS_FAST build + check_docs_figures.py was running during SUMMARY authoring. Direct Python execution of the fence proved correctness; the full build confirms nav integration. No traceback in build output observed.
+**Build confirmation:**
+- DOCS_FAST build completed: exit 0, "Documentation built in 1351.18 seconds"
+- analyze/functional-time-series.md absent from "not in nav" list: PASS
+- check_docs_figures.py site: "OK: no failed figure blocks in site" (exit 0): PASS
+- site/analyze/functional-time-series/index.html: Traceback count=0, FDARS_FENCE_OK count=2: PASS
 
 ---
 *Phase: 73-documentation-release*
