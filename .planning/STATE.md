@@ -4,17 +4,17 @@ milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 71
 current_phase_name: Shapelets & GAK Metric
-status: planning
-stopped_at: Phase 70 complete, ready to plan Phase 71
-last_updated: "2026-09-04T06:15:48.320Z"
+status: executing
+stopped_at: Completed 71-01-PLAN.md
+last_updated: "2026-09-04T07:19:00.632Z"
 last_activity: 2026-09-04
-last_activity_desc: Phase 70 complete, transitioned to Phase 71
-state_head: 8e581e4217f304cd59d9d3c4c56e65664ec85fbd
+last_activity_desc: Phase 71 execution started
+state_head: 8e30bf8327025b3818b66baf8ff0ff3ef340fcfb
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 18
-  completed_plans: 18
+  total_plans: 20
+  completed_plans: 19
   percent: 63
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-02)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 70 — Multi-Domain Data, FAMM & Advanced Clustering
+**Current focus:** Phase 71 — Shapelets & GAK Metric
 
 ## Current Position
 
-Phase: 71 — Shapelets & GAK Metric
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-04 — Phase 70 complete, transitioned to Phase 71
+Phase: 71 (Shapelets & GAK Metric) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-09-04 — Phase 71 execution started
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Last activity: 2026-09-04 — Phase 70 complete, transitioned to Phase 71
 | Phase 70-multi-domain-data-famm-advanced-clustering P02 | 6min | 3 tasks | 4 files |
 | Phase 70-multi-domain-data-famm-advanced-clustering P03 | 7min | 2 tasks | 2 files |
 | Phase 70-multi-domain-data-famm-advanced-clustering P04 | 15 | 3 tasks | 2 files |
+| Phase 71-shapelets-gak-metric P01 | 4min | 4 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,8 @@ Recent decisions affecting current work:
 - [Phase 70-multi-domain-data-famm-advanced-clustering]: mfpca + spe_multivariate added to fdars.spm via Vec<FdMatrix>/Vec<&FdMatrix> pattern; pub(super) fields excluded; lifetime-correct argvals conversion
 - [Phase 70]: fpca_models omitted from KcfcResult PyDict — holds internal FpcaResult Rust structs not exposed as #[pyclass]
 - [Phase 70]: align_cluster_fd templates serialized as PyList of 1D numpy arrays — Vec<Vec<f64>> semantics correct even though all templates share same m
+- [Phase 71-shapelets-gak-metric]: shapelet_classifier_fit takes raw data+labels (independent path), not PyShapeletFit — matches upstream semantics
+- [Phase 71-shapelets-gak-metric]: PyShapeletClassifierFit opaque handle returned (not dict) so predict() is stateful, consistent with all other fitted models in pyfda
 
 ### Pending Todos
 
@@ -153,8 +156,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-04T05:50:03.665Z
-Stopped at: Phase 70 complete, ready to plan Phase 71
+Last session: 2026-09-04T07:19:00.491Z
+Stopped at: Completed 71-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
