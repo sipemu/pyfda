@@ -98,9 +98,9 @@ def test_distance():
     """
     import fdars.shapelet as sh
 
-    # Series with a unique spike motif starting at index 4 (not at 0 to be unambiguous)
+    # Series with a unique spike motif starting at index 5 (not at 0 to be unambiguous)
     # Background is constant 0.0 so z-normalized windows elsewhere have sd≈0 (handled by core)
-    # The spike [0,1,4,1,0] at index 4 is z-normalized uniquely
+    # The spike [1,4,1] at index 5 is z-normalized uniquely
     series = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 4.0, 1.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64)
     window_start = 5  # spike window [1, 4, 1]
     window = series[window_start : window_start + 3].copy()
