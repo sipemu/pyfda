@@ -92,14 +92,19 @@ def test_discover():
 
 
 def test_distance():
-    """shapelet_distance returns (float, int); exact z-normalized window distance ≈ 0."""
+    """shapelet_distance returns (float, int); exact z-normalized window distance ≈ 0.
+
+    Uses a spike motif that appears only at one location so the best offset is unambiguous.
+    """
     import fdars.shapelet as sh
 
-    # Build a series and take a known window as the (z-normalized) shapelet
-    series = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 3.0, 1.0, 2.0, 1.0, 0.5], dtype=np.float64)
-    window_start = 1
-    window = series[window_start : window_start + 4].copy()
-    # z-normalize the window (what the core stores)
+    # Series with a unique spike motif starting at index 4 (not at 0 to be unambiguous)
+    # Background is constant 0.0 so z-normalized windows elsewhere have sd≈0 (handled by core)
+    # The spike [0,1,4,1,0] at index 4 is z-normalized uniquely
+    series = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 4.0, 1.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64)
+    window_start = 5  # spike window [1, 4, 1]
+    window = series[window_start : window_start + 3].copy()
+    # z-normalize the window
     mu = window.mean()
     sd = window.std()
     if sd < 1e-10:
