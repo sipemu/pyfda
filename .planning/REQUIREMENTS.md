@@ -45,8 +45,8 @@ Requirements for this milestone. Each maps to a roadmap phase (Phases 66+, conti
 
 ### Advisor Extension (grounding invariant preserved)
 
-- [ ] **ADV-01**: New/extended advisor aspects for the bound capabilities — at least an `fts` aspect and a `frechet` aspect (diagnostics-only), plus extension of existing `regression`/`classification`/`spm` aspects for the new methods — every diagnostic a real fdars-computed native `float`/`int` scalar (no Python-derived or numpy scalars)
-- [ ] **ADV-02**: MCP `_DIAGNOSTICS_METHODS` / `_RUNNABLE_METHODS` guard-sync stays consistent — updated atomically with each aspect (single commit); `test_guard_sync_version_independent.py` and a per-aspect `json.dumps(build_diagnostics(...))` serialization test pass; MCP compute path stays provably LLM-free
+- [x] **ADV-01**: New/extended advisor aspects for the bound capabilities — at least an `fts` aspect and a `frechet` aspect (diagnostics-only), plus extension of existing `regression`/`classification`/`spm` aspects for the new methods — every diagnostic a real fdars-computed native `float`/`int` scalar (no Python-derived or numpy scalars)
+- [x] **ADV-02**: MCP `_DIAGNOSTICS_METHODS` / `_RUNNABLE_METHODS` guard-sync stays consistent — updated atomically with each aspect (single commit); `test_guard_sync_version_independent.py` and a per-aspect `json.dumps(build_diagnostics(...))` serialization test pass; MCP compute path stays provably LLM-free
 
 ### Documentation
 
@@ -106,8 +106,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | MULTI-04 | Phase 70 | Complete |
 | SHAPE-01 | Phase 71 | Complete |
 | SHAPE-02 | Phase 71 | Complete |
-| ADV-01 | Phase 72 | Pending |
-| ADV-02 | Phase 72 | Pending |
+| ADV-01 | Phase 72 | Complete |
+| ADV-02 | Phase 72 | Complete |
 | DOCS-01 | Phase 73 | Pending |
 | DOCS-02 | Phase 73 | Pending |
 | DOCS-03 | Phase 73 | Pending |
