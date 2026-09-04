@@ -53,6 +53,8 @@ _EXPECTED_DIAGNOSTICS_METHODS: frozenset[str] = frozenset(
         "spm",
         "scoring",
         "inference",
+        "fts",     # ADV-01 Phase 72
+        "frechet", # ADV-01 Phase 72
     }
 )
 

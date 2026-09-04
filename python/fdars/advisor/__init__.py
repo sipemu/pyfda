@@ -148,6 +148,8 @@ def build_diagnostics(
         "spm",                                                      # ASPECT-05 (plan 21-05)
         "scoring",                                                  # ADV-01 (plan 28-01)
         "inference",                                               # ADV-03 (plan 34-01) - diagnostics-only
+        "fts",      # ADV-01 Phase 72 — diagnostics-only
+        "frechet",  # ADV-01 Phase 72 — diagnostics-only
     }
     method_lc = method.lower()
     if method_lc not in _supported:
@@ -227,6 +229,14 @@ def build_diagnostics(
     if method_lc == "inference":
         from fdars.advisor.aspects.inference import _build_inference_diagnostics  # noqa: PLC0415
         return _build_inference_diagnostics(raw, **kwargs)
+
+    if method_lc == "fts":
+        from fdars.advisor.aspects.fts import _build_fts_diagnostics  # noqa: PLC0415
+        return _build_fts_diagnostics(raw, **kwargs)
+
+    if method_lc == "frechet":
+        from fdars.advisor.aspects.frechet import _build_frechet_diagnostics  # noqa: PLC0415
+        return _build_frechet_diagnostics(raw, **kwargs)
 
     # Unreachable given the check above, but kept for safety.
     raise ValueError(f"Unhandled method: {method!r}")

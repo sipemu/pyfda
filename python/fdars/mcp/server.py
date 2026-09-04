@@ -82,6 +82,8 @@ _DIAGNOSTICS_METHODS = frozenset(
         "spm",
         "scoring",    # ADV-01 (plan 28-01) — diagnostics-only; needs caller-supplied metrics
         "inference",  # ADV-03 (plan 34-01) — diagnostics-only; caller supplies TestResult dict
+        "fts",        # ADV-01 Phase 72 — diagnostics-only; fts needs caller-supplied result
+        "frechet",    # ADV-01 Phase 72 — diagnostics-only; frechet must NOT be runnable (SC3)
     }
 )
 
