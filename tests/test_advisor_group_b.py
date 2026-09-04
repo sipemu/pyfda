@@ -495,4 +495,93 @@ class TestDeterminism:
         d1 = build_diagnostics(result, method="fpca")
         d2 = build_diagnostics(result, method="fpca")
         assert json.dumps(d1, sort_keys=True) == json.dumps(d2, sort_keys=True)
-        check_no_numpy(d1)
+
+
+# ---------------------------------------------------------------------------
+# TestShapeletClassifier — shapelet opaque handle branch (ADV-01 Phase 72)
+# ---------------------------------------------------------------------------
+
+class TestShapeletClassifier:
+    """Verify the has_shapelet_classifier branch of _build_classification_diagnostics.
+
+    The shapelet_classifier_fit result is an opaque PyShapeletClassifierFit
+    handle — NOT a dict.  The coercion guard in __init__.py must convert it
+    before dict(raw) is attempted.
+    """
+
+    @pytest.fixture(scope="class")
+    def shapelet_fit(self):
+        """Build a real shapelet_classifier_fit result (opaque handle)."""
+        from fdars import shapelet
+        rng = np.random.default_rng(42)
+        n, m = 30, 20
+        # Binary classification: 15 per class
+        data = rng.standard_normal((n, m))
+        labels = np.array([0] * 15 + [1] * 15, dtype=np.int64)
+        return shapelet.shapelet_classifier_fit(data, labels, min_length=3, max_shapelets=4)
+
+    def test_shapelet_handle_accepted_no_type_error(self, shapelet_fit):
+        """build_diagnostics must not raise TypeError on the opaque handle."""
+        from fdars.advisor import build_diagnostics
+        # Must not raise TypeError: cannot convert 'PyShapeletClassifierFit' to dict
+        diag = build_diagnostics(shapelet_fit, method="classification")
+        assert diag is not None
+
+    def test_shapelet_has_shapelet_classifier_true(self, shapelet_fit):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(shapelet_fit, method="classification")
+        assert diag["has_shapelet_classifier"] is True
+
+    def test_shapelet_n_shapelets_is_int_positive(self, shapelet_fit):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(shapelet_fit, method="classification")
+        assert isinstance(diag["shapelet_n_shapelets"], int)
+        assert diag["shapelet_n_shapelets"] > 0
+
+    def test_shapelet_train_accuracy_is_float_in_01(self, shapelet_fit):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(shapelet_fit, method="classification")
+        assert isinstance(diag["shapelet_train_accuracy"], float)
+        assert 0.0 <= diag["shapelet_train_accuracy"] <= 1.0
+
+    def test_shapelet_n_classes_is_int(self, shapelet_fit):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(shapelet_fit, method="classification")
+        assert isinstance(diag["shapelet_n_classes"], int)
+        assert diag["shapelet_n_classes"] == 2  # binary fixture
+
+    def test_shapelet_method_field(self, shapelet_fit):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(shapelet_fit, method="classification")
+        assert diag["method"] == "classification"
+
+    def test_shapelet_no_numpy(self, shapelet_fit):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(shapelet_fit, method="classification")
+        check_no_numpy(diag)
+
+    def test_shapelet_json_serialisable(self, shapelet_fit):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(shapelet_fit, method="classification")
+        json.dumps(diag, sort_keys=True)
+
+    def test_shapelet_determinism(self, shapelet_fit):
+        from fdars.advisor import build_diagnostics
+        d1 = build_diagnostics(shapelet_fit, method="classification")
+        d2 = build_diagnostics(shapelet_fit, method="classification")
+        assert json.dumps(d1, sort_keys=True) == json.dumps(d2, sort_keys=True)
+
+    def test_existing_point_estimate_path_still_works(self):
+        """Regression guard: existing point-estimate classification path unaffected."""
+        from fdars import classification as cls
+        from fdars.advisor import build_diagnostics
+        rng = np.random.default_rng(42)
+        n, m, K = 20, 16, 2
+        data = rng.standard_normal((n, m))
+        labels = np.array([i % K for i in range(n)], dtype=np.int64)
+        result = cls.fclassif_knn(data, labels, k=3)
+        diag = build_diagnostics(result, method="classification")
+        assert diag["method"] == "classification"
+        assert diag["has_shapelet_classifier"] is False
+        assert isinstance(diag["accuracy"], float)
+        check_no_numpy(diag)

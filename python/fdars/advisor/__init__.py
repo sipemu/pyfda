@@ -160,11 +160,18 @@ def build_diagnostics(
 
     # Unwrap result wrappers (e.g. fdars.results.AlignmentResult).
     raw = getattr(result, "raw", result)
-    # Coerce to dict ONLY when the value is not already a dict, not an
-    # ndarray/array-like (depth returns a score array — `__array__` present),
-    # and not an Fdata-like object (`.data` attribute present — represent branch
-    # in plan 21-03 accepts Fdata directly).  Both array and Fdata inputs must
-    # reach their builder without `dict(raw)` being attempted.
+    # Shapelet classifier opaque-handle coercion (ADV-01 Phase 72).
+    # PyShapeletClassifierFit has no __array__ and no data attributes — the
+    # coercion-to-dict block below would raise TypeError on it.  Extract the
+    # pymethods attributes into a plain dict HERE, before that block runs.
+    # Detection: presence of both train_accuracy and n_shapelets is unique to
+    # this handle among all fdars result types.
+    if hasattr(raw, "train_accuracy") and hasattr(raw, "n_shapelets"):
+        raw = {
+            "train_accuracy": float(raw.train_accuracy),
+            "n_shapelets": int(raw.n_shapelets),
+            "n_classes": int(raw.n_classes) if hasattr(raw, "n_classes") else None,
+        }
     if (
         not isinstance(raw, dict)
         and not hasattr(raw, "__array__")

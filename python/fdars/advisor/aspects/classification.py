@@ -185,4 +185,24 @@ def _build_classification_diagnostics(
         diag["overfitting_gap_holdout_source"] = None
         diag["n_classes_flagged"] = None
 
+    # -- shapelet_classifier branch (ADV-01 Phase 72) -----------------------
+    # Trigger: "n_shapelets" in raw — unique to shapelet_classifier_fit
+    # (converted from opaque PyShapeletClassifierFit handle to dict by the
+    # coercion guard in build_diagnostics.__init__.py before dispatch here).
+    # CONFIRMED attrs from src/shapelet_mod.rs:123-148.
+    has_shapelet_classifier = "n_shapelets" in raw
+    diag["has_shapelet_classifier"] = bool(has_shapelet_classifier)
+    if has_shapelet_classifier:
+        diag["shapelet_n_shapelets"] = int(raw["n_shapelets"])
+        diag["shapelet_train_accuracy"] = (
+            float(raw["train_accuracy"]) if "train_accuracy" in raw else None
+        )
+        diag["shapelet_n_classes"] = (
+            int(raw["n_classes"]) if raw.get("n_classes") is not None else None
+        )
+    else:
+        diag["shapelet_n_shapelets"] = None
+        diag["shapelet_train_accuracy"] = None
+        diag["shapelet_n_classes"] = None
+
     return diag
