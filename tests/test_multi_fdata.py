@@ -59,3 +59,20 @@ def test_reject_nrows_mismatch():
     av_wrong = np.linspace(0, 2, 25)
     with pytest.raises(ValueError):
         mf.multi_fdata_from_components([VAR1, wrong_nrows], [AV1, av_wrong])
+
+
+def test_reject_argvals_length_mismatch():
+    """argvals[k] length != data[k].shape[1] → ValueError (from MultiFunData::new)."""
+    wrong_av = np.linspace(0, 1, 10)  # 10 points, but VAR1 has 30 columns
+    with pytest.raises(ValueError):
+        mf.multi_fdata_from_components([VAR1], [wrong_av])
+
+
+def test_reject_empty_components():
+    """Empty component lists → ValueError (from MultiFunData::new).
+
+    MultiFunData::new([]) raises FdarError::InvalidParameter
+    ('MultiFunData requires at least one component'), surfaced as ValueError.
+    """
+    with pytest.raises(ValueError):
+        mf.multi_fdata_from_components([], [])
