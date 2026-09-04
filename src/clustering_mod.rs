@@ -338,6 +338,219 @@ pub fn dbscan_fd<'py>(
     Ok(dict)
 }
 
+/// K-means with per-cluster FPCA (KCFC) clustering for functional data.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// k : int, optional
+///     Number of clusters (default 2).
+/// ncomp : int, optional
+///     Number of FPC components per cluster (default 3; clamped to min(n_k, m)).
+/// max_iter : int, optional
+///     Maximum iterations (default 50).
+/// seed : int, optional
+///     Random seed (default 42).
+///
+/// Returns
+/// -------
+/// dict
+///     Dictionary with keys:
+///     - cluster: numpy.ndarray, shape (n,), dtype int64. Cluster labels (0-based).
+///     - reconstruction_errors: numpy.ndarray, shape (n, k). Per-observation reconstruction
+///       error for each cluster.
+///     - iterations: int. Number of iterations performed.
+///     - converged: bool. Whether the algorithm converged.
+///
+/// Notes
+/// -----
+/// The internal ``fpca_models`` field is not exposed (internal Rust state).
+#[pyfunction]
+#[pyo3(signature = (data, argvals, k=2, ncomp=3, max_iter=50, seed=42))]
+pub fn kcfc_cluster<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    k: usize,
+    ncomp: usize,
+    max_iter: usize,
+    seed: u64,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let mut config = fdars_core::clustering_advanced::KcfcConfig::default();
+    config.k = k;
+    config.ncomp = ncomp;
+    config.max_iter = max_iter;
+    config.seed = seed;
+    let result =
+        to_pyresult(fdars_core::clustering_advanced::kcfc_cluster(&mat, &av, &config))?;
+
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("cluster", usize_vec_to_numpy1d(py, result.cluster))?;
+    dict.set_item(
+        "reconstruction_errors",
+        fdmatrix_to_numpy2d(py, &result.reconstruction_errors),
+    )?;
+    dict.set_item("iterations", result.iterations)?;
+    dict.set_item("converged", result.converged)?;
+    Ok(dict)
+}
+
+/// Fisher-EM discriminative functional clustering (FunFEM).
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// k : int, optional
+///     Number of clusters (default 2).
+/// ncomp : int, optional
+///     Number of global FPC components (default 10; clamped to min(n, m)).
+/// p_disc : int, optional
+///     Discriminative subspace dimension (default 0 = auto: min(k-1, ncomp_eff)).
+/// max_iter : int, optional
+///     Maximum EM iterations (default 50).
+/// tol : float, optional
+///     Convergence tolerance (default 1e-6).
+/// seed : int, optional
+///     Random seed (default 42).
+///
+/// Returns
+/// -------
+/// dict
+///     Dictionary with keys:
+///     - cluster: numpy.ndarray, shape (n,), dtype int64. Hard cluster labels (0-based).
+///     - membership: numpy.ndarray, shape (n, k). Soft assignment probabilities.
+///     - disc_subspace: numpy.ndarray, shape (ncomp_eff, p_disc_eff). Discriminative
+///       directions in FPC space.
+///     - log_likelihood: float. Final log-likelihood value.
+///     - iterations: int. Number of EM iterations performed.
+///     - converged: bool. Whether the EM algorithm converged.
+///
+/// Notes
+/// -----
+/// ``p_disc=0`` (default) selects the discriminative dimension automatically as
+/// ``min(k-1, ncomp_eff)``.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, k=2, ncomp=10, p_disc=0, max_iter=50, tol=1e-6, seed=42))]
+#[allow(clippy::too_many_arguments)]
+pub fn funfem_cluster<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    k: usize,
+    ncomp: usize,
+    p_disc: usize,
+    max_iter: usize,
+    tol: f64,
+    seed: u64,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let mut config = fdars_core::clustering_advanced::FunFemConfig::default();
+    config.k = k;
+    config.ncomp = ncomp;
+    config.p_disc = p_disc;
+    config.max_iter = max_iter;
+    config.tol = tol;
+    config.seed = seed;
+    let result =
+        to_pyresult(fdars_core::clustering_advanced::funfem_cluster(&mat, &av, &config))?;
+
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("cluster", usize_vec_to_numpy1d(py, result.cluster))?;
+    dict.set_item("membership", fdmatrix_to_numpy2d(py, &result.membership))?;
+    dict.set_item("disc_subspace", fdmatrix_to_numpy2d(py, &result.disc_subspace))?;
+    dict.set_item("log_likelihood", result.log_likelihood)?;
+    dict.set_item("iterations", result.iterations)?;
+    dict.set_item("converged", result.converged)?;
+    Ok(dict)
+}
+
+/// Elastic-alignment functional clustering.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Data, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// k : int, optional
+///     Number of clusters (default 2).
+/// max_iter : int, optional
+///     Maximum iterations (default 20).
+/// seed : int, optional
+///     Random seed (default 42).
+/// use_amplitude_only : bool, optional
+///     If True (default), use amplitude-only (shape-invariant) distance.
+///     If False, use the full elastic distance.
+/// elastic_lambda : float, optional
+///     Penalty weight for the full elastic distance (default 0.0).
+/// karcher_max_iter : int, optional
+///     Maximum Karcher mean iterations (default 15).
+/// karcher_tol : float, optional
+///     Karcher mean convergence tolerance (default 1e-4).
+///
+/// Returns
+/// -------
+/// dict
+///     Dictionary with keys:
+///     - cluster: numpy.ndarray, shape (n,), dtype int64. Cluster labels (0-based).
+///     - templates: list of numpy.ndarray. Length k; each array has shape (m,) and
+///       represents the per-cluster template (Karcher mean) curve.
+///     - distances: numpy.ndarray, shape (n, k). Elastic distance from each observation
+///       to each cluster template.
+///     - iterations: int. Number of iterations performed.
+///     - converged: bool. Whether the algorithm converged.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, k=2, max_iter=20, seed=42, use_amplitude_only=true, elastic_lambda=0.0, karcher_max_iter=15, karcher_tol=1e-4))]
+#[allow(clippy::too_many_arguments)]
+pub fn align_cluster_fd<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    k: usize,
+    max_iter: usize,
+    seed: u64,
+    use_amplitude_only: bool,
+    elastic_lambda: f64,
+    karcher_max_iter: usize,
+    karcher_tol: f64,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let mut config = fdars_core::clustering_advanced::AlignClusterConfig::default();
+    config.k = k;
+    config.max_iter = max_iter;
+    config.seed = seed;
+    config.use_amplitude_only = use_amplitude_only;
+    config.elastic_lambda = elastic_lambda;
+    config.karcher_max_iter = karcher_max_iter;
+    config.karcher_tol = karcher_tol;
+    let result =
+        to_pyresult(fdars_core::clustering_advanced::align_cluster_fd(&mat, &av, &config))?;
+
+    // Convert templates: Vec<Vec<f64>> -> PyList of (m,) numpy arrays
+    let templates_list = pyo3::types::PyList::empty(py);
+    for tmpl in result.templates {
+        templates_list.append(vec_to_numpy1d(py, tmpl))?;
+    }
+
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("cluster", usize_vec_to_numpy1d(py, result.cluster))?;
+    dict.set_item("templates", templates_list)?;
+    dict.set_item("distances", fdmatrix_to_numpy2d(py, &result.distances))?;
+    dict.set_item("iterations", result.iterations)?;
+    dict.set_item("converged", result.converged)?;
+    Ok(dict)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(kmeans_fd, m)?)?;
     m.add_function(wrap_pyfunction!(fuzzy_cmeans_fd, m)?)?;
@@ -347,5 +560,8 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(silhouette_score_data, m)?)?;
     m.add_function(wrap_pyfunction!(calinski_harabasz_data, m)?)?;
     m.add_function(wrap_pyfunction!(dbscan_fd, m)?)?;
+    m.add_function(wrap_pyfunction!(kcfc_cluster, m)?)?;
+    m.add_function(wrap_pyfunction!(funfem_cluster, m)?)?;
+    m.add_function(wrap_pyfunction!(align_cluster_fd, m)?)?;
     Ok(())
 }
