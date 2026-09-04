@@ -114,11 +114,11 @@ def fdars_build_diagnostics(
         Handle to the dataset stored in the registry (data + argvals arrays).
         Obtain via ``registry.store_dataset(data, argvals)``.
     method : str
-        One of the fourteen supported aspects (``_DIAGNOSTICS_METHODS``):
+        One of the sixteen supported aspects (``_DIAGNOSTICS_METHODS``):
         ``'alignment'``, ``'fpca'``, ``'basis'``, ``'smoothing'``,
         ``'clustering'``, ``'depth'``, ``'outliers'``, ``'classification'``,
         ``'represent'``, ``'regression'``, ``'regression_cv'``, ``'spm'``,
-        ``'scoring'``, ``'inference'``.
+        ``'scoring'``, ``'inference'``, ``'fts'``, ``'frechet'``.
         Passed directly to ``build_diagnostics``.
     result_id : str, optional
         Handle to a stored result dict (e.g. from a prior ``fdars_run_method``

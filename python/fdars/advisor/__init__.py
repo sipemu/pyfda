@@ -105,7 +105,7 @@ def build_diagnostics(
         attribute is the underlying dict).
     method : {"alignment", "fpca", "basis", "smoothing", "clustering", "depth", \
 "outliers", "classification", "represent", "regression", "regression_cv", \
-"spm", "scoring", "inference"}
+"spm", "scoring", "inference", "fts", "frechet"}
         The fdars method that produced ``result``.  For ``"represent"``, pass
         the raw data dict (``{"data": ..., "argvals": ...}``) or an Fdata-like
         object with ``.data``/``.argvals`` attributes directly — not an fdars
