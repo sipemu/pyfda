@@ -4,17 +4,17 @@ milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 72
 current_phase_name: Advisor Extension
-status: executing
-stopped_at: Completed 72-03-PLAN.md (extend regression/classification/spm aspects for v11.0 methods)
-last_updated: "2026-09-04T09:15:34.775Z"
+status: verifying
+stopped_at: Completed 72-04-PLAN.md
+last_updated: "2026-09-04T11:23:26.472Z"
 last_activity: 2026-09-04
 last_activity_desc: Phase 72 execution started
-state_head: 0e9d6a2f87679c9e7dfa278bfbcbed6d7106f349
+state_head: 9cff083ae7064ab59890e4d9cad8b974ac223ff7
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 24
-  completed_plans: 23
+  completed_plans: 24
   percent: 75
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 
 Phase: 72 (Advisor Extension) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-04 — Phase 72 execution started
 
 ## Performance Metrics
@@ -89,6 +89,7 @@ Last activity: 2026-09-04 — Phase 72 execution started
 | Phase 72-advisor-extension P01 | 5min | 2 tasks | 6 files |
 | Phase 72-advisor-extension P02 | 2 | 2 tasks | 2 files |
 | Phase 72-advisor-extension P03 | 8 | 3 tasks | 7 files |
+| Phase 72-advisor-extension P04 | 2min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -133,6 +134,7 @@ Recent decisions affecting current work:
 - [Phase 72]: fam/fregre_gsam use single has_fam discriminator (same 7 keys); gkam overlaps but has_fregre_gkam is specific discriminator
 - [Phase 72]: shapelet handle coercion placed in __init__.py before dict(raw) block, not inside classification.py, to prevent TypeError at dispatch level
 - [Phase 72]: spe_multivariate array path checked FIRST in spm builder (returns early) to prevent dict method calls on ndarray (T-72-08)
+- [Phase 72-advisor-extension]: Dual-mode LLM-free assertion pattern: subprocess proof + in-process sys.modules.pop fallback. Both required; neither may silently skip. — Plan explicitly required BOTH proofs to avoid silent failure if subprocess is unavailable
 
 ### Pending Todos
 
@@ -166,8 +168,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-04T09:15:34.573Z
-Stopped at: Completed 72-03-PLAN.md (extend regression/classification/spm aspects for v11.0 methods)
+Last session: 2026-09-04T11:23:26.317Z
+Stopped at: Completed 72-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
