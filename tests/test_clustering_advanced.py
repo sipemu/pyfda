@@ -45,6 +45,13 @@ def test_dbscan_fd(data_and_argvals):
     # n_noise == count of -1 labels
     assert result["n_noise"] == int(np.sum(labels == -1))
 
+    # Explicitly assert the None→-1 encoding path fires for this fixture.
+    # With eps=0.5 on 30-dimensional standard-normal data (L2 distance ≈ 7–10 >> 0.5)
+    # every point is noise, so this is a coded contract — not just statistical luck.
+    assert result["n_noise"] > 0, (
+        "Expected at least one noise point with eps=0.5 on 30-dimensional random data"
+    )
+
 
 # ---------------------------------------------------------------------------
 # kcfc_cluster
