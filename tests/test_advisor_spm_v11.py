@@ -121,6 +121,29 @@ class TestMfpca:
         assert diag.get("t2_max") is None
         assert diag.get("spe_max") is None
 
+    def test_mfpca_ncomp_eigenvalues_spm_phase1_fields_none(self, mfpca_result):
+        """spm_phase1 ncomp and eigenvalues fields must be None for mfpca (WR-01).
+
+        mfpca carries eigenvalue info under mfpca_ncomp / mfpca_eigenvalues.
+        The spm_phase1 sentinel fields diag['ncomp'] and diag['eigenvalues']
+        must be None to avoid duplicating mfpca data in the wrong slots.
+        """
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(mfpca_result, method="spm")
+        assert diag["ncomp"] is None, (
+            "diag['ncomp'] (spm_phase1 field) must be None for mfpca input (WR-01)"
+        )
+        assert diag["eigenvalues"] is None, (
+            "diag['eigenvalues'] (spm_phase1 field) must be None for mfpca input (WR-01)"
+        )
+        assert diag["variance_explained_cumulative"] is None, (
+            "diag['variance_explained_cumulative'] (spm_phase1) must be None for mfpca (WR-01)"
+        )
+        # mfpca-specific fields must still carry the real values
+        assert diag["mfpca_ncomp"] == 3
+        assert isinstance(diag["mfpca_eigenvalues"], list)
+        assert diag["mfpca_variance_explained_cumulative"] is not None
+
 
 # ---------------------------------------------------------------------------
 # TestSpeMultivariate — naked array branch (ADV-01 Phase 72)

@@ -125,6 +125,12 @@ def _build_spm_diagnostics(raw, **kwargs) -> dict:
     # From here raw is guaranteed to be a dict.
     # ------------------------------------------------------------------
 
+    # Compute mfpca discriminator EARLY so spm_phase1 eigenvalue/ncomp
+    # fields can be gated on "not has_mfpca" (WR-01: mfpca input must not
+    # populate spm_phase1-specific ncomp/eigenvalues fields).
+    # Trigger: "eigenfunctions" AND "scales" — unique to mfpca vs spm_phase1.
+    has_mfpca = "eigenfunctions" in raw and "scales" in raw
+
     # -- Observation count + component count ---------------------------------
     t2_raw = raw.get("t2")
     t2_arr = np.asarray(t2_raw, dtype=float) if t2_raw is not None else None
@@ -132,7 +138,8 @@ def _build_spm_diagnostics(raw, **kwargs) -> dict:
 
     eigen_raw = raw.get("eigenvalues")
     eigen_arr = np.asarray(eigen_raw, dtype=float) if eigen_raw is not None else None
-    diag["ncomp"] = int(len(eigen_arr)) if eigen_arr is not None else None
+    # ncomp is a spm_phase1-specific field — None when input is mfpca (WR-01)
+    diag["ncomp"] = int(len(eigen_arr)) if (eigen_arr is not None and not has_mfpca) else None
 
     # -- Control limits (direct scalar floats from spm_phase1) ---------------
     t2_limit_raw = raw.get("t2_limit")
@@ -177,7 +184,10 @@ def _build_spm_diagnostics(raw, **kwargs) -> dict:
     # -- Eigenvalues + cumulative variance via shared helper ------------------
     # SPM returns eigenvalues directly (not singular values), so no sv^2/(n-1)
     # scaling step is needed before calling the helper.
-    if eigen_arr is not None:
+    # Gate on "not has_mfpca": mfpca carries its eigenvalue info under the
+    # mfpca-specific keys (mfpca_eigenvalues, mfpca_variance_explained_cumulative)
+    # only.  The spm_phase1 sentinel fields must be None for mfpca input (WR-01).
+    if eigen_arr is not None and not has_mfpca:
         diag["eigenvalues"] = [float(v) for v in eigen_arr]
         diag["variance_explained_cumulative"] = _eigenvalues_to_variance_cumulative(
             eigen_arr
@@ -215,8 +225,8 @@ def _build_spm_diagnostics(raw, **kwargs) -> dict:
     # Trigger: "eigenfunctions" in raw AND "scales" in raw — unique to
     # mfpca. spm_phase1 has "eigenvalues" but NOT "eigenfunctions" or
     # "scales". CONFIRMED keys from src/spm_mod.rs:918-945.
+    # has_mfpca already computed above (early, before spm_phase1 blocks).
     # ------------------------------------------------------------------
-    has_mfpca = "eigenfunctions" in raw and "scales" in raw
     diag["has_mfpca"] = bool(has_mfpca)
     if has_mfpca:
         eigen_raw = raw.get("eigenvalues")
