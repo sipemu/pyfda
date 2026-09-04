@@ -187,3 +187,17 @@ def test_classifier_err_arm():
     assert "lda" in str(exc_info.value), (
         f"Error message must list 'lda': {exc_info.value}"
     )
+
+
+def test_negative_label_rejected():
+    """Negative labels raise ValueError from labels_i64_to_usize guard."""
+    import fdars.shapelet as sh
+
+    bad_labels = TRAIN_Y.copy()
+    bad_labels[0] = -1
+    with pytest.raises(ValueError, match="negative"):
+        sh.shapelet_transform_fit(TRAIN, bad_labels)
+    with pytest.raises(ValueError, match="negative"):
+        sh.discover_shapelets(TRAIN, bad_labels)
+    with pytest.raises(ValueError, match="negative"):
+        sh.shapelet_classifier_fit(TRAIN, bad_labels)
