@@ -37,8 +37,8 @@ SIGMA = m.sigma_gak(TRAIN_MAT)
 def test_gak_self_similarity():
     """gak(X, X, sigma) == 1.0; gak(X, Z, sigma) in [0, 1]."""
     assert callable(m.gak), "gak must be callable on fdars.metric"
-    val_self = m.gak(X, Y, SIGMA)
-    assert abs(val_self - 1.0) < 1e-9, f"gak(X, X, sigma) should be ~1.0, got {val_self}"
+    val_self = m.gak(X, X, SIGMA)   # same variable — true self-similarity
+    assert abs(val_self - 1.0) < 1e-9, f"gak(X, X, sigma) should be exactly 1.0, got {val_self}"
     val_cross = m.gak(X, Z, SIGMA)
     assert 0.0 <= val_cross <= 1.0, f"gak(X, Z, sigma) must be in [0, 1], got {val_cross}"
 
