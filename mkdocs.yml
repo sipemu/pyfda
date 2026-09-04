@@ -141,6 +141,10 @@ nav:
   - Analyze:
     - analyze/index.md
     - Functional Time Series: analyze/functional-time-series.md
+    - Density FDA: analyze/density-fda.md
+    - Advanced Clustering: analyze/advanced-clustering.md
+    - Multi-Domain FDA: analyze/multi-domain.md
+    - Shapelets: analyze/shapelets.md
     - Tolerance Bands: analyze/tolerance-bands.md
     - Clustering: analyze/clustering.md
     - GMM Clustering: analyze/gmm-clustering.md
