@@ -5,16 +5,16 @@ milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 72
 current_phase_name: Advisor Extension
 status: executing
-stopped_at: Completed 72-02-PLAN.md
-last_updated: "2026-09-04T09:03:49.861Z"
+stopped_at: Completed 72-03-PLAN.md (extend regression/classification/spm aspects for v11.0 methods)
+last_updated: "2026-09-04T09:15:34.775Z"
 last_activity: 2026-09-04
 last_activity_desc: Phase 72 execution started
-state_head: a0473efc2a318497ff671d890c6837790063f892
+state_head: 0e9d6a2f87679c9e7dfa278bfbcbed6d7106f349
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 24
-  completed_plans: 22
+  completed_plans: 23
   percent: 75
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 ## Current Position
 
 Phase: 72 (Advisor Extension) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-09-04 — Phase 72 execution started
 
@@ -88,6 +88,7 @@ Last activity: 2026-09-04 — Phase 72 execution started
 | Phase 71-shapelets-gak-metric P02 | 3min | 3 tasks | 2 files |
 | Phase 72-advisor-extension P01 | 5min | 2 tasks | 6 files |
 | Phase 72-advisor-extension P02 | 2 | 2 tasks | 2 files |
+| Phase 72-advisor-extension P03 | 8 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -129,6 +130,9 @@ Recent decisions affecting current work:
 - [Phase 71-shapelets-gak-metric]: make_gak_config() helper required: GakConfig is #[non_exhaustive] — use GakConfig::with_sigma(s)/default() not struct literals — Rust E0639 prohibits struct literals for non_exhaustive structs from outside the crate; RESEARCH Pitfall 7 analysis was incorrect about this being allowed
 - [Phase 72-advisor-extension]: dpca eigenvalues is a list of 1D arrays (not flat 1D) — summarise as float(np.max(ev)) per component — Actual fdars return shape differs from research assumption; fixed during GREEN phase
 - [Phase 72]: isinstance(raw, dict) first guard for frechet array vs dict split; n_groups from len(np.unique(group_labels)); stable None fallbacks for all keys in all branches
+- [Phase 72]: fam/fregre_gsam use single has_fam discriminator (same 7 keys); gkam overlaps but has_fregre_gkam is specific discriminator
+- [Phase 72]: shapelet handle coercion placed in __init__.py before dict(raw) block, not inside classification.py, to prevent TypeError at dispatch level
+- [Phase 72]: spe_multivariate array path checked FIRST in spm builder (returns early) to prevent dict method calls on ndarray (T-72-08)
 
 ### Pending Todos
 
@@ -162,8 +166,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-04T09:03:49.696Z
-Stopped at: Completed 72-02-PLAN.md
+Last session: 2026-09-04T09:15:34.573Z
+Stopped at: Completed 72-03-PLAN.md (extend regression/classification/spm aspects for v11.0 methods)
 Resume file: None
 
 ## Operator Next Steps

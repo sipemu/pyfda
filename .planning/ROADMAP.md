@@ -315,11 +315,11 @@ Plans:
   2. MCP `_DIAGNOSTICS_METHODS` / `_RUNNABLE_METHODS` guard-sync stays consistent — updated atomically with each aspect in a single commit; `test_guard_sync_version_independent.py` and a per-aspect `json.dumps(build_diagnostics(...))` serialization test pass
   3. The MCP compute path stays provably LLM-free (no LLM in the number path); `frechet` stays diagnostics-only (not added to `_RUNNABLE_METHODS`)
 
-**Plans**: 2/4 plans executed
+**Plans**: 3/4 plans executed
 
 - [x] 72-01-PLAN.md — fts aspect (tracer) + atomic guard-sync registration of fts+frechet across all 3 locations
 - [x] 72-02-PLAN.md — frechet aspect (anova/global_reg/local_reg/mean grounded branches)
-- [ ] 72-03-PLAN.md — extend regression/classification/spm (fof/fam/gkam, shapelet handle, mfpca/spe_multivariate)
+- [x] 72-03-PLAN.md — extend regression/classification/spm (fof/fam/gkam, shapelet handle, mfpca/spe_multivariate)
 - [ ] 72-04-PLAN.md — grounding + LLM-free assertion + full advisor/guard-sync gate
 
 **Parallelizable**: No — sequential; depends on all binding phases landing.
@@ -353,7 +353,7 @@ Phases execute in numeric order: 66 → 67 → 68 → 69 → 70 → 71 → 72 �
 | 69. Fréchet Regression & Density FDA | v11.0 | 5/5 | Complete    | 2026-09-03 |
 | 70. Multi-Domain Data, FAMM & Advanced Clustering | v11.0 | 4/4 | Complete    | 2026-09-04 |
 | 71. Shapelets & GAK Metric | v11.0 | 2/2 | Complete    | 2026-09-04 |
-| 72. Advisor Extension | v11.0 | 2/4 | In Progress|  |
+| 72. Advisor Extension | v11.0 | 3/4 | In Progress|  |
 | 73. Documentation & Release | v11.0 | 0/TBD | Not started | - |
 
 ---
