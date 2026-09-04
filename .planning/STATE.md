@@ -5,17 +5,17 @@ milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 73
 current_phase_name: Documentation & Release
 status: executing
-stopped_at: Completed 73-01-PLAN.md (FTS page+diagram+nav)
-last_updated: "2026-09-04T19:15:29.247Z"
+stopped_at: Completed 73-02-PLAN.md
+last_updated: "2026-09-04T20:04:01.536Z"
 last_activity: 2026-09-04
 last_activity_desc: Phase 73 execution started
-state_head: 6efe67a1e26c357503e3f4e50927ed06d2e108e2
+state_head: f5a5792f3b03fc1933fe95c74f9d51c3af1c000f
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 29
-  completed_plans: 25
-  percent: 86
+  completed_plans: 26
+  percent: 88
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 ## Current Position
 
 Phase: 73 (Documentation & Release) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-09-04 — Phase 73 execution started
 
@@ -91,6 +91,7 @@ Last activity: 2026-09-04 — Phase 73 execution started
 | Phase 72-advisor-extension P03 | 8 | 3 tasks | 7 files |
 | Phase 72-advisor-extension P04 | 2min | 1 tasks | 4 files |
 | Phase 73-documentation-release P01 | 45min | 3 tasks | 3 files |
+| Phase 73-documentation-release P02 | 37min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -137,6 +138,9 @@ Recent decisions affecting current work:
 - [Phase 72]: spe_multivariate array path checked FIRST in spm builder (returns early) to prevent dict method calls on ndarray (T-72-08)
 - [Phase 72-advisor-extension]: Dual-mode LLM-free assertion pattern: subprocess proof + in-process sys.modules.pop fallback. Both required; neither may silently skip. — Plan explicitly required BOTH proofs to avoid silent failure if subprocess is unavailable
 - [Phase 73-documentation-release]: FTS diagram uses 720x480 viewBox (two-row + key functions strip fits the layout)
+- [Phase 73]: frechet_mean returns naked array (not dict) for SPD space — np.asarray() required at call site; documented with warning in page
+- [Phase 73]: SPD fixture constructed via A@A.T+I to guarantee positive-definite matrices in Frechet fence
+- [Phase 73]: Single DOCS_FAST build validates all pages at once — do not run one build per page (29-min runtime)
 
 ### Pending Todos
 
@@ -170,8 +174,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-04T19:15:29.095Z
-Stopped at: Completed 73-01-PLAN.md (FTS page+diagram+nav)
+Last session: 2026-09-04T20:04:01.367Z
+Stopped at: Completed 73-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
