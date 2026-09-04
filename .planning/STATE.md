@@ -4,18 +4,18 @@ milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 73
 current_phase_name: Documentation & Release
-status: planning
-stopped_at: Phase 72 complete, ready to plan Phase 73
-last_updated: "2026-09-04T11:46:19.145Z"
+status: executing
+stopped_at: Completed 73-01-PLAN.md (FTS page+diagram+nav)
+last_updated: "2026-09-04T19:15:29.247Z"
 last_activity: 2026-09-04
-last_activity_desc: Phase 72 complete, transitioned to Phase 73
-state_head: f37f0e706cda05495ad587c16636b7a89a41d710
+last_activity_desc: Phase 73 execution started
+state_head: 6efe67a1e26c357503e3f4e50927ed06d2e108e2
 progress:
   total_phases: 8
   completed_phases: 7
-  total_plans: 24
-  completed_plans: 24
-  percent: 88
+  total_plans: 29
+  completed_plans: 25
+  percent: 86
 ---
 
 # Project State
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-02)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 72 — Advisor Extension
+**Current focus:** Phase 73 — Documentation & Release
 
 ## Current Position
 
-Phase: 73 — Documentation & Release
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-04 — Phase 72 complete, transitioned to Phase 73
+Phase: 73 (Documentation & Release) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-09-04 — Phase 73 execution started
 
 ## Performance Metrics
 
@@ -90,6 +90,7 @@ Last activity: 2026-09-04 — Phase 72 complete, transitioned to Phase 73
 | Phase 72-advisor-extension P02 | 2 | 2 tasks | 2 files |
 | Phase 72-advisor-extension P03 | 8 | 3 tasks | 7 files |
 | Phase 72-advisor-extension P04 | 2min | 1 tasks | 4 files |
+| Phase 73-documentation-release P01 | 45min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,7 @@ Recent decisions affecting current work:
 - [Phase 72]: shapelet handle coercion placed in __init__.py before dict(raw) block, not inside classification.py, to prevent TypeError at dispatch level
 - [Phase 72]: spe_multivariate array path checked FIRST in spm builder (returns early) to prevent dict method calls on ndarray (T-72-08)
 - [Phase 72-advisor-extension]: Dual-mode LLM-free assertion pattern: subprocess proof + in-process sys.modules.pop fallback. Both required; neither may silently skip. — Plan explicitly required BOTH proofs to avoid silent failure if subprocess is unavailable
+- [Phase 73-documentation-release]: FTS diagram uses 720x480 viewBox (two-row + key functions strip fits the layout)
 
 ### Pending Todos
 
@@ -168,8 +170,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-04T11:23:26.317Z
-Stopped at: Phase 72 complete, ready to plan Phase 73
+Last session: 2026-09-04T19:15:29.095Z
+Stopped at: Completed 73-01-PLAN.md (FTS page+diagram+nav)
 Resume file: None
 
 ## Operator Next Steps
