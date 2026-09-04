@@ -140,12 +140,14 @@ def _build_classification_diagnostics(
     diag["best_ncomp"] = int(raw["best_ncomp"]) if "best_ncomp" in raw else None
 
     # -- elastic_multinomial branch (ADV-05 Group B) -------------------------
-    # Trigger: "train_accuracy" in raw — unique to elastic_multinomial.
+    # Trigger: "train_accuracy" in raw AND "n_shapelets" NOT in raw.
+    # The shapelet_classifier coercion dict ALSO carries "train_accuracy", so
+    # we must exclude it here to keep the two discriminators mutually exclusive.
     # Existing point-estimate results use "accuracy" (never "train_accuracy");
     # fclassif_cv uses "error_rate" and "fold_errors".
     # The elastic_multinomial result also carries "n_classes" in the raw dict —
     # override the caller-supplied value with the fdars-computed count.
-    has_elastic_multinomial = "train_accuracy" in raw
+    has_elastic_multinomial = "train_accuracy" in raw and "n_shapelets" not in raw
     diag["has_elastic_multinomial"] = bool(has_elastic_multinomial)
     if has_elastic_multinomial:
         diag["train_accuracy"] = float(raw["train_accuracy"])

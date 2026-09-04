@@ -571,6 +571,33 @@ class TestShapeletClassifier:
         d2 = build_diagnostics(shapelet_fit, method="classification")
         assert json.dumps(d1, sort_keys=True) == json.dumps(d2, sort_keys=True)
 
+    def test_shapelet_has_elastic_multinomial_false(self, shapelet_fit):
+        """has_elastic_multinomial must be False for a shapelet classifier result.
+
+        The shapelet coercion dict carries 'train_accuracy', which would
+        erroneously trigger the elastic_multinomial discriminator unless the
+        'n_shapelets not in raw' guard is present.  CR-01 regression check.
+        """
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(shapelet_fit, method="classification")
+        assert diag["has_elastic_multinomial"] is False, (
+            "has_elastic_multinomial must be False for shapelet — "
+            "the two discriminators must be mutually exclusive (CR-01)"
+        )
+
+    def test_shapelet_and_elastic_mutually_exclusive_synthetic(self):
+        """Synthetic shapelet dict must not fire elastic_multinomial (CR-01)."""
+        from fdars.advisor import build_diagnostics
+        # Minimal shapelet coercion dict (as produced by __init__.py coercion)
+        shapelet_dict = {
+            "train_accuracy": 0.95,
+            "n_shapelets": 8,
+            "n_classes": 2,
+        }
+        diag = build_diagnostics(shapelet_dict, method="classification")
+        assert diag["has_shapelet_classifier"] is True
+        assert diag["has_elastic_multinomial"] is False
+
     def test_existing_point_estimate_path_still_works(self):
         """Regression guard: existing point-estimate classification path unaffected."""
         from fdars import classification as cls
