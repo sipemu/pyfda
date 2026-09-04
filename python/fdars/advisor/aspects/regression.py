@@ -2,7 +2,9 @@
 
 Contains ``_build_regression_diagnostics``.  Accepts any fdars regression
 result dict produced by ``fregre_lm``, ``fregre_pls``, ``fregre_l1``,
-``fregre_huber``, ``fregre_np``, ``fosr``, or ``fosr_fpc``.
+``fregre_huber``, ``fregre_np``, ``fosr``, ``fosr_fpc``,
+``fof_regression``, ``fof_re_regression``, ``fam``, ``fregre_gkam``,
+``fregre_gsam``.
 
 Key corrections applied here (see 21-RESEARCH §2):
 - Correction #3: ``r_squared`` is NOT always present.  ``fregre_l1`` and
@@ -205,5 +207,105 @@ def _build_regression_diagnostics(raw, **kwargs) -> dict:
         diag["concurrent_residual_rms"] = None
         diag["concurrent_residual_max_abs"] = None
         diag["n_predictors"] = None
+
+    # ------------------------------------------------------------------
+    # fof_regression branch (ADV-01 Phase 72)
+    # Trigger: "beta_surface" in raw — unique to fof/fof_re_regression.
+    # Existing regression variants use "beta_t" or "beta", never "beta_surface".
+    # CONFIRMED keys from src/regression_mod.rs:1295-1304.
+    # ------------------------------------------------------------------
+    has_fof_regression = "beta_surface" in raw
+    diag["has_fof_regression"] = bool(has_fof_regression)
+    if has_fof_regression:
+        bs = np.asarray(raw["beta_surface"])
+        diag["beta_surface_shape"] = [int(bs.shape[0]), int(bs.shape[1])]
+        diag["beta_surface_max_abs"] = float(np.max(np.abs(bs)))
+        diag["fof_r_squared"] = (
+            float(raw["r_squared"]) if "r_squared" in raw else None
+        )
+        if "ncomp_x" in raw and "ncomp_y" in raw:
+            diag["fof_ncomp"] = [int(raw["ncomp_x"]), int(raw["ncomp_y"])]
+        else:
+            diag["fof_ncomp"] = None
+    else:
+        diag["beta_surface_shape"] = None
+        diag["beta_surface_max_abs"] = None
+        diag["fof_r_squared"] = None
+        diag["fof_ncomp"] = None
+
+    # ------------------------------------------------------------------
+    # fof_re_regression branch (ADV-01 Phase 72)
+    # Trigger: "random_effects" in raw AND "n_subjects" in raw — unique to
+    # fof_re_regression. CONFIRMED keys from src/regression_mod.rs:1561-1564.
+    # has_fof_regression is also True for fof_re (both share beta_surface).
+    # has_fof_re_regression is the specific discriminator.
+    # ------------------------------------------------------------------
+    has_fof_re_regression = "random_effects" in raw and "n_subjects" in raw
+    diag["has_fof_re_regression"] = bool(has_fof_re_regression)
+    if has_fof_re_regression:
+        diag["n_subjects"] = int(raw["n_subjects"])
+        if "sigma2_u" in raw:
+            diag["sigma2_u_max"] = float(np.max(np.asarray(raw["sigma2_u"])))
+        else:
+            diag["sigma2_u_max"] = None
+        diag["sigma2_eps"] = (
+            float(raw["sigma2_eps"]) if "sigma2_eps" in raw else None
+        )
+        if "random_effects" in raw:
+            re = np.asarray(raw["random_effects"])
+            diag["re_dims"] = [int(re.shape[0]), int(re.shape[1])]
+        else:
+            diag["re_dims"] = None
+    else:
+        diag["n_subjects"] = None
+        diag["sigma2_u_max"] = None
+        diag["sigma2_eps"] = None
+        diag["re_dims"] = None
+
+    # ------------------------------------------------------------------
+    # fam / fregre_gsam branch (ADV-01 Phase 72)
+    # Trigger: "component_fits" in raw AND "fitted_values" in raw — shared
+    # by fam and fregre_gsam (same 7-key dict). CONFIRMED keys from
+    # src/scalar_on_function_mod.rs:107-117 and :188-200.
+    # NOTE: fregre_gkam also has these keys — has_fregre_gkam is the more
+    # specific discriminator for gkam. has_fam will also be True for gkam.
+    # ------------------------------------------------------------------
+    has_fam = "component_fits" in raw and "fitted_values" in raw
+    diag["has_fam"] = bool(has_fam)
+    if has_fam:
+        fv = np.asarray(raw["fitted_values"])
+        diag["fam_n_obs"] = int(fv.shape[0])
+        diag["fam_n_components"] = int(len(raw["component_fits"]))
+        diag["fam_r_squared"] = (
+            float(raw["r_squared"]) if "r_squared" in raw else None
+        )
+        diag["fam_ncomp"] = (
+            int(raw["ncomp"]) if "ncomp" in raw else None
+        )
+    else:
+        diag["fam_n_obs"] = None
+        diag["fam_n_components"] = None
+        diag["fam_r_squared"] = None
+        diag["fam_ncomp"] = None
+
+    # ------------------------------------------------------------------
+    # fregre_gkam branch (ADV-01 Phase 72)
+    # Trigger: "converged" in raw AND "bandwidths" in raw — unique to
+    # fregre_gkam (the multi-predictor kernel additive model).
+    # CONFIRMED keys from src/scalar_on_function_mod.rs:289-291.
+    # Note: gkam also triggers has_fam above (shares component_fits +
+    # fitted_values). has_fregre_gkam is the specific discriminator.
+    # ------------------------------------------------------------------
+    has_fregre_gkam = "converged" in raw and "bandwidths" in raw
+    diag["has_fregre_gkam"] = bool(has_fregre_gkam)
+    if has_fregre_gkam:
+        diag["gkam_converged"] = bool(raw["converged"])
+        bw_arr = np.asarray(raw["bandwidths"])
+        diag["gkam_bandwidths"] = [float(v) for v in bw_arr]
+        diag["gkam_n_predictors"] = int(len(bw_arr))
+    else:
+        diag["gkam_converged"] = None
+        diag["gkam_bandwidths"] = None
+        diag["gkam_n_predictors"] = None
 
     return diag

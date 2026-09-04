@@ -317,3 +317,242 @@ class TestDeterminism:
         d2 = build_diagnostics(result, method="regression")
         assert json.dumps(d1, sort_keys=True) == json.dumps(d2, sort_keys=True)
         check_no_numpy(d1)
+
+
+# ---------------------------------------------------------------------------
+# TestFofRegression — function-on-function regression branch (ADV-01 Phase 72)
+# ---------------------------------------------------------------------------
+
+class TestFofRegression:
+    """Verify the has_fof_regression branch of _build_regression_diagnostics."""
+
+    @pytest.fixture(scope="class")
+    def fof_result(self):
+        """Build a real fof_regression result."""
+        from fdars import regression
+        rng = np.random.default_rng(42)
+        n, m_x, m_y = 15, 10, 8
+        x_data = rng.standard_normal((n, m_x))
+        y_data = rng.standard_normal((n, m_y))
+        x_argvals = np.linspace(0.0, 1.0, m_x)
+        y_argvals = np.linspace(0.0, 1.0, m_y)
+        return regression.fof_regression(x_data, y_data, x_argvals, y_argvals, ncomp_x=2, ncomp_y=2)
+
+    def test_fof_method_field(self, fof_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_result, method="regression")
+        assert diag["method"] == "regression"
+
+    def test_fof_has_fof_regression_true(self, fof_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_result, method="regression")
+        assert diag["has_fof_regression"] is True
+
+    def test_fof_beta_surface_shape_is_list_of_ints(self, fof_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_result, method="regression")
+        shape = diag["beta_surface_shape"]
+        assert isinstance(shape, list) and len(shape) == 2
+        assert all(isinstance(v, int) for v in shape)
+        # (m_y=8, m_x=10)
+        assert shape[0] == 8
+        assert shape[1] == 10
+
+    def test_fof_beta_surface_max_abs_is_float(self, fof_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_result, method="regression")
+        assert isinstance(diag["beta_surface_max_abs"], float)
+        assert diag["beta_surface_max_abs"] >= 0.0
+
+    def test_fof_r_squared_is_float(self, fof_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_result, method="regression")
+        assert isinstance(diag["fof_r_squared"], float)
+
+    def test_fof_ncomp_is_list_of_ints(self, fof_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_result, method="regression")
+        ncomp = diag["fof_ncomp"]
+        assert isinstance(ncomp, list) and len(ncomp) == 2
+        assert all(isinstance(v, int) for v in ncomp)
+
+    def test_fof_no_numpy(self, fof_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_result, method="regression")
+        check_no_numpy(diag)
+
+    def test_fof_json_serialisable(self, fof_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_result, method="regression")
+        json.dumps(diag, sort_keys=True)
+
+    def test_fof_determinism(self, fof_result):
+        from fdars.advisor import build_diagnostics
+        d1 = build_diagnostics(fof_result, method="regression")
+        d2 = build_diagnostics(fof_result, method="regression")
+        assert json.dumps(d1, sort_keys=True) == json.dumps(d2, sort_keys=True)
+
+
+class TestFofReRegression:
+    """Verify the has_fof_re_regression branch."""
+
+    @pytest.fixture(scope="class")
+    def fof_re_result(self):
+        from fdars import regression
+        rng = np.random.default_rng(7)
+        n, m_x, m_y = 20, 10, 8
+        n_subjects = 4
+        x_data = rng.standard_normal((n, m_x))
+        y_data = rng.standard_normal((n, m_y))
+        subject_ids = np.array([i % n_subjects for i in range(n)], dtype=np.int64)
+        x_argvals = np.linspace(0.0, 1.0, m_x)
+        y_argvals = np.linspace(0.0, 1.0, m_y)
+        return regression.fof_re_regression(
+            x_data, y_data, subject_ids, x_argvals, y_argvals, ncomp_x=2, ncomp_y=2
+        )
+
+    def test_fof_re_has_fof_re_regression_true(self, fof_re_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_re_result, method="regression")
+        assert diag["has_fof_re_regression"] is True
+
+    def test_fof_re_n_subjects_is_int(self, fof_re_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_re_result, method="regression")
+        assert isinstance(diag["n_subjects"], int)
+        assert diag["n_subjects"] == 4
+
+    def test_fof_re_sigma2_u_max_is_float(self, fof_re_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_re_result, method="regression")
+        assert isinstance(diag["sigma2_u_max"], float)
+
+    def test_fof_re_re_dims_is_list_of_ints(self, fof_re_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_re_result, method="regression")
+        dims = diag["re_dims"]
+        assert isinstance(dims, list) and len(dims) == 2
+        assert all(isinstance(v, int) for v in dims)
+
+    def test_fof_re_no_numpy(self, fof_re_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_re_result, method="regression")
+        check_no_numpy(diag)
+
+    def test_fof_re_json_serialisable(self, fof_re_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fof_re_result, method="regression")
+        json.dumps(diag, sort_keys=True)
+
+    def test_fof_re_determinism(self, fof_re_result):
+        from fdars.advisor import build_diagnostics
+        d1 = build_diagnostics(fof_re_result, method="regression")
+        d2 = build_diagnostics(fof_re_result, method="regression")
+        assert json.dumps(d1, sort_keys=True) == json.dumps(d2, sort_keys=True)
+
+
+class TestFamGkam:
+    """Verify the has_fam / has_fregre_gkam branches."""
+
+    @pytest.fixture(scope="class")
+    def fam_result(self):
+        from fdars import scalar_on_function
+        rng = np.random.default_rng(42)
+        n, m = 30, 15
+        data = rng.standard_normal((n, m))
+        y = rng.standard_normal(n)
+        argvals = np.linspace(0.0, 1.0, m)
+        return scalar_on_function.fam(data, y, argvals, ncomp=2)
+
+    @pytest.fixture(scope="class")
+    def gkam_result(self):
+        from fdars import scalar_on_function
+        rng = np.random.default_rng(99)
+        n, m = 20, 10
+        p = 2
+        predictors = [rng.standard_normal((n, m)) for _ in range(p)]
+        y = rng.standard_normal(n)
+        argvals_list = [np.linspace(0.0, 1.0, m) for _ in range(p)]
+        return scalar_on_function.fregre_gkam(predictors, y, argvals_list)
+
+    def test_fam_has_fam_true(self, fam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fam_result, method="regression")
+        assert diag["has_fam"] is True
+
+    def test_fam_n_obs_is_int(self, fam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fam_result, method="regression")
+        assert isinstance(diag["fam_n_obs"], int)
+        assert diag["fam_n_obs"] == 30
+
+    def test_fam_n_components_is_int(self, fam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fam_result, method="regression")
+        assert isinstance(diag["fam_n_components"], int)
+        assert diag["fam_n_components"] >= 1
+
+    def test_fam_r_squared_is_float(self, fam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fam_result, method="regression")
+        assert isinstance(diag["fam_r_squared"], float)
+
+    def test_fam_ncomp_is_int(self, fam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fam_result, method="regression")
+        assert isinstance(diag["fam_ncomp"], int)
+
+    def test_gkam_has_fregre_gkam_true(self, gkam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(gkam_result, method="regression")
+        assert diag["has_fregre_gkam"] is True
+
+    def test_gkam_converged_is_bool(self, gkam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(gkam_result, method="regression")
+        assert isinstance(diag["gkam_converged"], bool)
+
+    def test_gkam_bandwidths_is_list_of_float(self, gkam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(gkam_result, method="regression")
+        bw = diag["gkam_bandwidths"]
+        assert isinstance(bw, list)
+        assert all(isinstance(v, float) for v in bw)
+
+    def test_gkam_n_predictors_is_int(self, gkam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(gkam_result, method="regression")
+        assert isinstance(diag["gkam_n_predictors"], int)
+        assert diag["gkam_n_predictors"] == 2
+
+    def test_fam_no_numpy(self, fam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fam_result, method="regression")
+        check_no_numpy(diag)
+
+    def test_fam_json_serialisable(self, fam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(fam_result, method="regression")
+        json.dumps(diag, sort_keys=True)
+
+    def test_fam_determinism(self, fam_result):
+        from fdars.advisor import build_diagnostics
+        d1 = build_diagnostics(fam_result, method="regression")
+        d2 = build_diagnostics(fam_result, method="regression")
+        assert json.dumps(d1, sort_keys=True) == json.dumps(d2, sort_keys=True)
+
+    def test_gkam_no_numpy(self, gkam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(gkam_result, method="regression")
+        check_no_numpy(diag)
+
+    def test_gkam_json_serialisable(self, gkam_result):
+        from fdars.advisor import build_diagnostics
+        diag = build_diagnostics(gkam_result, method="regression")
+        json.dumps(diag, sort_keys=True)
+
+    def test_gkam_determinism(self, gkam_result):
+        from fdars.advisor import build_diagnostics
+        d1 = build_diagnostics(gkam_result, method="regression")
+        d2 = build_diagnostics(gkam_result, method="regression")
+        assert json.dumps(d1, sort_keys=True) == json.dumps(d2, sort_keys=True)
