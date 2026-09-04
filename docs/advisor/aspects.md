@@ -24,14 +24,16 @@ The three task families available for every aspect are:
 | `alignment` | `fdars.alignment.karcher_mean`, `karcher_mean_elastic` | mean curve stats, amplitude/phase distances, convergence, registration-quality scores (17) | — |
 | `basis` | `fdars.basis.basis_nbasis_cv` | n_basis sweep, GCV curve, optimal n_basis (8) | — |
 | `fpca` | `fdars.regression.fpca`, `fdars.pace_fpca` | n_components, eigenvalues, cumulative variance, phase leakage; PACE branch: pace_ncomp, pace_sigma2, pace_variance_explained_cumulative (12) | [this page](#fpca) |
+| `fts` | `fdars.fts.ftsm`, `fdars.fts.stationarity_test`, `fdars.fts.functional_acf`, `fdars.fts.dpca`, `fdars.fts.fplsr` | stationarity branch: has_stationarity, statistic, p_value, n_perm; acf branch: has_acf, n_lags, acf_at_lag1, acf_decay; dpca branch: has_dpca, dpca_ncomp, n_freqs, filter_lag, dpca_eigenvalues; fplsr branch: has_fplsr, fplsr_ncomp, fplsr_fitted_rmse; ftsm branch: has_ftsm, ncomp, n_obs, n_points, n_ar_models, ar_max_order, ar_sigma2_max, fitted_rmse; forecast branch: has_forecast, h, forecast_mean (28) | [this page](#fts) |
+| `frechet` | `fdars.frechet.frechet_mean`, `fdars.frechet.frechet_anova`, `fdars.frechet.frechet_global_reg`, `fdars.frechet.frechet_local_reg` — **diagnostics-only** (not in `_RUNNABLE_METHODS`) | frechet_mean branch: has_frechet_mean, frechet_mean_ndim, frechet_mean_dim, frechet_mean_trace; anova branch: has_anova, anova_p_value_permutation, anova_p_value_asymptotic, n_perm, n_groups, pooled_frechet_variance, group_frechet_variance_max; reg branch: has_global_reg, has_local_reg, predicted_n_obs, bandwidth (15) | — |
 | `represent` | raw `Fdata` or `{"data":…,"argvals":…}` dict | grid stats, data range, imputation-quality diagnostics (13) | — |
 | `depth` | `fdars.depth.*` score arrays | n_obs, depth statistics, histogram (9) | [this page](#depth) |
 | `outliers` | `fdars.outliers.*` result dicts | n_outliers, outlier_fraction, magnitude/shape/outliergram ranges; tvdmss: has_tvdmss + 7 keys; muod: has_muod + 9 keys; sequential_transform: has_sequential_transform + 2 keys; depthgram: has_depthgram + 6 keys (37) | — |
-| `classification` | `fdars.classification.*` result dicts | accuracy, cv_error_rate, fold_error_std, best_ncomp; elastic_multinomial branch: has_elastic_multinomial, train_accuracy, train_error_rate (10) | — |
-| `regression` | `fdars.regression.fregre_*`, `fosr`, `fosr_fpc`, `functional_glm`, `concurrent_regression` | r_squared, residual stats, beta_t_range, has_fosr; GLM branch: has_functional_glm + 7 keys; concurrent branch: has_concurrent_regression + 3 keys (19) | — |
+| `classification` | `fdars.classification.*` result dicts | accuracy, cv_error_rate, fold_error_std, best_ncomp; elastic_multinomial branch: has_elastic_multinomial, train_accuracy, train_error_rate; shapelet_classifier branch: has_shapelet_classifier, shapelet_n_shapelets, shapelet_train_accuracy, shapelet_n_classes (13) | — |
+| `regression` | `fdars.regression.fregre_*`, `fosr`, `fosr_fpc`, `functional_glm`, `concurrent_regression`, `fof_regression`, `fof_re_regression`; `fdars.scalar_on_function.fam`, `fregre_gkam` | r_squared, residual stats, beta_t_range, has_fosr; GLM branch: has_functional_glm + 7 keys; concurrent branch: has_concurrent_regression + 3 keys; FoF branch: has_fof_regression, fof_r_squared, beta_surface_shape, beta_surface_max_abs, fof_ncomp; FoF-RE branch: has_fof_re_regression + 4 keys; FAM/GSAM branch: has_fam + 4 keys; GKAM branch: has_fregre_gkam + 3 keys (34) | — |
 | `regression_cv` | `fdars.regression.fregre_cv`, `model_selection_ncomp` | optimal_k, cv_curve, elbow_present (6) | — |
 | `scoring` | `fdars.scoring.functional_mae/mse/mape/msle/explained_variance` | five integrated prediction-quality scalars (5) | [this page](#scoring) |
-| `spm` | `fdars.spm.spm_phase1` | T², SPE stats, exceedance rates, eigenvalues, kurtosis check (14) | — |
+| `spm` | `fdars.spm.spm_phase1`, `fdars.spm.mfpca`, `fdars.spm.spe_multivariate` | T², SPE stats, exceedance rates, eigenvalues, kurtosis check; mfpca branch: has_mfpca, mfpca_ncomp, mfpca_n_obs, mfpca_n_variables, mfpca_eigenvalues, mfpca_variance_explained_cumulative; spe_multivariate branch: has_spe_multivariate, spe_mv_n_obs, spe_mv_max, spe_mv_mean, spe_mv_all_nonneg (25) | — |
 | `inference` | caller-supplied `TestResult` / `ToleranceBand` dict from `fdars.inference` (diagnostics-only) | statistic, p_value, n_perm, significance flags, is_permutation_test (9) | [this page](#inference) |
 
 ---
@@ -206,6 +208,154 @@ print(f"cumulative_variance_explained[0]:  {diag['cumulative_variance_explained'
 print(f"phase_leakage_indicator:           {diag['phase_leakage_indicator']:.4f}")
 print(f"phase_leakage_flagged:             {diag['phase_leakage_flagged']}")
 ```
+
+---
+
+## fts
+
+**fdars source:** `fdars.fts.ftsm`, `fdars.fts.stationarity_test`, `fdars.fts.functional_acf`,
+`fdars.fts.dpca`, `fdars.fts.fplsr`
+
+Six discriminated result shapes are handled via independent `has_<fn>` booleans. The
+discriminator keys (tested in order, with fplsr tested before the bare forecast branch):
+1. `stationarity_test` — unique key `"n_perm"` (with `"statistic"` and `"p_value"`);
+2. `functional_acf` / `functional_pacf` — unique key `"upper_band"`;
+3. `dpca` — unique keys `"filter_lag"` and `"n_freqs"`;
+4. `fplsr` — `"fitted"` + `"forecast"` + `"ncomp"` + forecast shape[0] == 1;
+5. `ftsm` — unique key `"ar_models"`;
+6. `ftsm_forecast` / `ftsm_forecast_multistep` — `"forecast"` + `"h"`.
+
+**stationarity keys** (trigger: `"n_perm"` + `"statistic"` + `"p_value"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_stationarity` | `True` when result is from `stationarity_test` |
+| `stationarity_statistic` | Test statistic (float); `None` when not stationarity result |
+| `stationarity_p_value` | Permutation p-value in [0,1]; `None` when not stationarity result |
+| `n_perm` | Number of permutations used (int); `None` when not stationarity result |
+
+**acf keys** (trigger: `"acf"` + `"upper_band"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_acf` | `True` when result is from `functional_acf` or `functional_pacf` |
+| `n_lags` | Number of lags computed (int); `None` when not acf result |
+| `acf_at_lag1` | First-lag autocorrelation (float); `None` when not acf result or empty |
+| `acf_decay` | Last-lag value — proxy for ACF tail decay (float); `None` when not acf result |
+
+**dpca keys** (trigger: `"filter_lag"` + `"n_freqs"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_dpca` | `True` when result is from `dpca` |
+| `dpca_ncomp` | Number of dynamic PCA components (int); `None` when not dpca result |
+| `n_freqs` | Frequency count (int); `None` when not dpca result |
+| `filter_lag` | Lag window parameter (int); `None` when not dpca result |
+| `dpca_eigenvalues` | Per-component peak spectral eigenvalue — `float(np.max(ev))` for each component's frequency-domain spectrum (list of floats); `None` when not dpca result |
+
+**fplsr keys** (trigger: `"fitted"` + `"forecast"` + `"ncomp"` + forecast.shape[0] == 1):
+
+| Key | Meaning |
+|---|---|
+| `has_fplsr` | `True` when result is from `fplsr` |
+| `fplsr_ncomp` | Number of PLS components (int); `None` when not fplsr result |
+| `fplsr_fitted_rmse` | RMSE of fitted values over training observations (float); `None` when not fplsr result |
+
+**ftsm keys** (trigger: `"ar_models"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_ftsm` | `True` when result is from `ftsm` |
+| `ncomp` | Number of FTS components fitted (int); `None` when not ftsm result |
+| `n_obs` | Number of training observations — inferred from scores shape[0] (int); `None` when not ftsm result |
+| `n_points` | Evaluation grid size — inferred from mean shape[0] (int); `None` when not ftsm result |
+| `n_ar_models` | Number of AR models fitted (equals ncomp) (int); `None` when not ftsm result |
+| `ar_max_order` | Maximum AR lag order across all component models (int); `None` when not ftsm result or no models |
+| `ar_sigma2_max` | Largest residual variance across all AR models (float); `None` when not ftsm result |
+| `fitted_rmse` | Overall reconstruction RMSE across all fitted observations (float); `None` when not ftsm result |
+
+**ftsm_forecast keys** (trigger: `"forecast"` + `"h"` in raw; only reached when fplsr discriminator is False):
+
+| Key | Meaning |
+|---|---|
+| `has_forecast` | `True` when result is from `ftsm_forecast` or `ftsm_forecast_multistep` |
+| `h` | Forecast horizon — number of steps ahead (int); `None` when not forecast result |
+| `forecast_mean` | Mean value across all forecast points (float); `None` when not forecast result |
+
+**Task families:** `"interpretation"` (read stationarity, ACF decay, ftsm component structure, forecast quality)
+· `"parameter"` (adjust ncomp, n_perm, filter_lag, AR order)
+· `"method"` (switch from ftsm to fplsr for covariate-driven forecasting; use dpca for frequency-domain decomposition)
+
+```python exec="1" source="above"
+import numpy as np
+from fdars.fts import ftsm, ftsm_forecast, stationarity_test
+from fdars.advisor import build_diagnostics
+
+rng = np.random.default_rng(42)
+n, m = 20, 30       # non-square: n != m (transposition guard)
+t = np.linspace(0, 1, m)
+data = np.array([np.sin(2 * np.pi * t + rng.uniform(0, 0.5)) +
+                 0.1 * rng.standard_normal(m) for _ in range(n)])
+
+fit = ftsm(data, t, ncomp=3)
+diag_ftsm = build_diagnostics(fit, method="fts")
+
+st = stationarity_test(data, t, n_perm=19, seed=42)
+diag_stat = build_diagnostics(st, method="fts")
+
+print(f"ftsm ncomp:           {diag_ftsm['ncomp']}")
+print(f"ftsm n_ar_models:     {diag_ftsm['n_ar_models']}")
+print(f"stationarity p_value: {diag_stat['stationarity_p_value']:.3f}  FDARS_FENCE_OK")
+```
+
+---
+
+## frechet
+
+**fdars source:** `fdars.frechet.frechet_mean`, `fdars.frechet.frechet_anova`,
+`fdars.frechet.frechet_global_reg`, `fdars.frechet.frechet_local_reg`
+
+**Diagnostics-only** — `frechet` is NOT in `_RUNNABLE_METHODS` and cannot be invoked
+via the MCP auto-run path. The caller runs the fdars function and passes the result
+directly to `build_diagnostics`. Four result shapes are handled: `frechet_mean` returns
+a **naked numpy array** (not a dict); the other three return dicts detected by key-presence guards.
+
+The `isinstance(raw, dict)` check is applied **first** — before any dict key access —
+so the array path is handled cleanly.
+
+**frechet_mean path** (trigger: raw is a numpy array — not a dict):
+
+| Key | Meaning |
+|---|---|
+| `has_frechet_mean` | `True` when raw is a numpy array (not a dict) |
+| `frechet_mean_ndim` | Number of array dimensions: 1 for spherical/Euclidean, 2 for SPD/correlation (int); `None` when not frechet_mean result |
+| `frechet_mean_dim` | Last dimension size `d` (int); `None` when not frechet_mean result |
+| `frechet_mean_trace` | Matrix trace when ndim==2; `None` for 1-D arrays or non-frechet_mean paths |
+
+**frechet_anova keys** (trigger: `"p_value_permutation"` + `"group_labels"` in raw):
+
+| Key | Meaning |
+|---|---|
+| `has_anova` | `True` when result is from `frechet_anova` |
+| `anova_p_value_permutation` | Permutation p-value in [0,1] (float); `None` when not anova result |
+| `anova_p_value_asymptotic` | Asymptotic p-value in [0,1] (float); `None` when not anova result or absent |
+| `n_perm` | Number of permutations used (int); `None` when not anova result |
+| `n_groups` | Number of distinct groups derived from `group_labels` (int); `None` when not anova result |
+| `pooled_frechet_variance` | Pooled within-group Fréchet variance (float); `None` when not anova result |
+| `group_frechet_variance_max` | Maximum per-group Fréchet variance (float); `None` when not anova result |
+
+**frechet_global_reg and frechet_local_reg keys** (trigger: `"predicted"` + `"x_bar"` in raw for global; `"bandwidth"` in raw for local):
+
+| Key | Meaning |
+|---|---|
+| `has_global_reg` | `True` when result is from `frechet_global_reg` |
+| `has_local_reg` | `True` when result is from `frechet_local_reg` |
+| `predicted_n_obs` | Number of prediction-output objects — shape[0] of the `predicted` array (int); `None` when not a regression result |
+| `bandwidth` | Kernel bandwidth (float); present for `frechet_local_reg` only; `None` for global regression |
+
+**Task families:** `"interpretation"` (read mean geometry, group variance, regression prediction count)
+· `"parameter"` (adjust n_perm for anova; adjust bandwidth for local regression)
+· `"method"` (switch between global and local Fréchet regression; use anova to test group-mean differences)
 
 ---
 
@@ -405,7 +555,7 @@ diag = build_diagnostics(result, method="classification", n_classes=K)
 | `fold_error_std` | Std of per-fold errors (CV path); `None` for point-estimate |
 | `best_ncomp` | Number of FPC components minimising CV error; `None` for point-estimate |
 
-**elastic_multinomial keys** (trigger: `"train_accuracy"` in raw):
+**elastic_multinomial keys** (trigger: `"train_accuracy"` in raw AND `"n_shapelets"` NOT in raw — the shapelet classifier also exposes `train_accuracy`, so the absence of `"n_shapelets"` is required to correctly distinguish `elastic_multinomial` from the shapelet classifier):
 
 | Key | Meaning |
 |---|---|
@@ -427,8 +577,25 @@ diag = build_diagnostics(result, method="classification", n_classes=K)
                              n_classes=K, holdout_accuracy=cv_accuracy)
     ```
 
-**Task families:** `"interpretation"` (read classification accuracy and CV stability) · `"parameter"` (tune k / n_comp)
-· `"method"` (switch classifier; use `elastic_multinomial` for K-class problems in the elastic SRSF domain)
+**shapelet_classifier keys** (trigger: `"n_shapelets"` in raw — unique to `shapelet_classifier_fit`; the coercion guard in `__init__.py` converts the `PyShapeletClassifierFit` opaque handle to a dict before this discriminator runs):
+
+| Key | Meaning |
+|---|---|
+| `has_shapelet_classifier` | `True` when result is from `shapelet_classifier_fit` |
+| `shapelet_n_shapelets` | Number of shapelets discovered and used (int); `None` when not shapelet classifier result |
+| `shapelet_train_accuracy` | Training-set proportion correctly classified — `clf.train_accuracy` (float in [0,1]); `None` when not shapelet classifier result |
+| `shapelet_n_classes` | Number of distinct label classes (int); `None` when not shapelet classifier result |
+
+!!! tip "Opaque handle coercion"
+    `shapelet_classifier_fit` returns a `PyShapeletClassifierFit` opaque PyO3 handle.
+    Pass it directly to `build_diagnostics` — the advisor's `__init__.py` coercion guard
+    (placed before the generic `dict(raw)` block) converts it to a plain dict via
+    `{"n_shapelets": handle.n_shapelets, "train_accuracy": handle.train_accuracy, ...}`
+    before the classification builder runs. No manual conversion is needed.
+
+**Task families:** `"interpretation"` (read classification accuracy and CV stability; shapelet: assess discriminative subsequence count and training accuracy)
+· `"parameter"` (tune k / n_comp; shapelet: adjust n_shapelets, quality, or classifier type)
+· `"method"` (switch classifier; use `elastic_multinomial` for K-class problems in the elastic SRSF domain; use `shapelet_classifier_fit` when discriminative subsequence structure is expected)
 
 ---
 
@@ -437,7 +604,10 @@ diag = build_diagnostics(result, method="classification", n_classes=K)
 **fdars source:** `fdars.regression.fregre_lm`, `fregre_pls`, `fregre_l1`,
 `fregre_huber`, `fregre_np`, `fosr`, `fosr_fpc`,
 `fdars.regression.functional_glm`,
-`fdars.regression.concurrent_regression`
+`fdars.regression.concurrent_regression`,
+`fdars.regression.fof_regression`, `fdars.regression.fof_re_regression`,
+`fdars.scalar_on_function.fam`, `fdars.scalar_on_function.fregre_gsam`,
+`fdars.scalar_on_function.fregre_gkam`
 
 Note that `fregre_l1` and `fregre_huber` do **not** return `r_squared` — that key is
 `None` for robust regression variants. `fosr`/`fosr_fpc` return 2-D residuals (shape
@@ -486,8 +656,48 @@ expose their own sub-tables below.
 | `concurrent_residual_rms` | Root-mean-squared residual over the full `n × m` grid; `None` when residuals absent |
 | `concurrent_residual_max_abs` | Maximum absolute residual over the full grid; `None` when residuals absent |
 
-**Task families:** `"interpretation"` (read model fit and residual behaviour) · `"parameter"` (adjust regularisation or IRLS max_iter)
-· `"method"` (switch between scalar-response, function-on-scalar, GLM, and varying-coefficient regression)
+**fof_regression keys** (trigger: `"beta_surface"` in raw — unique to `fof_regression` and `fof_re_regression`):
+
+| Key | Meaning |
+|---|---|
+| `has_fof_regression` | `True` when `"beta_surface"` key is present AND the fitted array is 2-D (also `True` for `fof_re_regression`) |
+| `fof_r_squared` | Scalar coefficient of determination from `fof_regression` result (float); `None` when key absent |
+| `beta_surface_shape` | Shape of the beta surface as `[ncomp_x, ncomp_y]` (list of 2 ints); `None` when not FoF result |
+| `beta_surface_max_abs` | Maximum absolute value in the beta surface (float); `None` when not FoF result |
+| `fof_ncomp` | `[ncomp_x, ncomp_y]` — number of FPCA components for predictor and response (list of 2 ints); `None` when keys absent |
+
+**fof_re_regression keys** (trigger: `"random_effects"` + `"n_subjects"` in raw — unique to `fof_re_regression`; `has_fof_regression` is also `True` for this result shape):
+
+| Key | Meaning |
+|---|---|
+| `has_fof_re_regression` | `True` when `"random_effects"` and `"n_subjects"` keys are both present |
+| `n_subjects` | Number of subjects in the random-effects model (int); `None` when not FoF-RE result |
+| `sigma2_u_max` | Maximum subject-level random-effects variance — `max(sigma2_u)` (float); `None` when absent |
+| `sigma2_eps` | Residual noise variance (float); `None` when absent |
+| `re_dims` | Shape of the random-effects matrix as `[n_subjects, m_y]` (list of 2 ints); `None` when absent |
+
+**fam / fregre_gsam keys** (trigger: `"component_fits"` + `"fitted_values"` in raw — shared by `fam` and `fregre_gsam`; `has_fregre_gkam` is the more specific discriminator for `gkam` which also has these keys):
+
+| Key | Meaning |
+|---|---|
+| `has_fam` | `True` when `"component_fits"` and `"fitted_values"` keys are both present |
+| `fam_n_obs` | Number of observations from fitted_values shape[0] (int); `None` when not FAM/GSAM result |
+| `fam_n_components` | Number of smooth component fits (int); `None` when not FAM/GSAM result |
+| `fam_r_squared` | Coefficient of determination (float); `None` when absent |
+| `fam_ncomp` | Number of FPCA components (int); `None` when absent |
+
+**fregre_gkam keys** (trigger: `"converged"` + `"bandwidths"` in raw — unique to `fregre_gkam`; `has_fam` is also `True` for gkam):
+
+| Key | Meaning |
+|---|---|
+| `has_fregre_gkam` | `True` when `"converged"` and `"bandwidths"` keys are both present |
+| `gkam_converged` | Whether the GKAM algorithm converged (bool); `None` when not GKAM result |
+| `gkam_bandwidths` | Per-component kernel bandwidths (list of floats); `None` when not GKAM result |
+| `gkam_n_predictors` | Number of functional predictors (int, inferred from bandwidths length); `None` when not GKAM result |
+
+**Task families:** `"interpretation"` (read model fit and residual behaviour; FoF: assess beta-surface shape and R²; GKAM: assess convergence and component bandwidths)
+· `"parameter"` (adjust regularisation or IRLS max_iter; FoF: adjust ncomp_x/ncomp_y via cross-validation)
+· `"method"` (switch between scalar-response, function-on-scalar, GLM, and varying-coefficient regression; use `fof_regression` when both predictor and response are functional; use `fam`/`fregre_gsam` for additive smooth components)
 
 ---
 
@@ -583,7 +793,12 @@ print(f"functional_explained_variance: {diag['functional_explained_variance']:.4
 
 ## spm
 
-**fdars source:** `fdars.spm.spm_phase1`
+**fdars source:** `fdars.spm.spm_phase1`, `fdars.spm.mfpca`, `fdars.spm.spe_multivariate`
+
+Three distinct input shapes are handled. The `spe_multivariate` naked-array path is
+checked **first** (before any dict-key access). When `has_mfpca=True`, the `spm_phase1`
+sentinel fields (`ncomp`, `eigenvalues`, `variance_explained_cumulative`) are set to `None`
+— the mfpca-specific keys carry that information instead.
 
 SPM is the only aspect whose builder makes a live fdars call:
 `fdars.spm.spe_moment_match_diagnostic(spe_values)` — a deterministic pure-moment
@@ -591,11 +806,13 @@ computation with no RNG, fully offline. The call is wrapped in `try/except` so
 `spe_kurtosis_excess` and `spe_moment_match_adequate` degrade to `None` gracefully
 when the compiled extension is unavailable.
 
+**spm_phase1 keys** (from `fdars.spm.spm_phase1`):
+
 | Key | Meaning |
 |---|---|
 | `method` | Always `"spm"` |
 | `n_obs` | Number of observations (from T² array length) |
-| `ncomp` | Number of PCA components retained |
+| `ncomp` | Number of PCA components retained; `None` when `has_mfpca=True` (mfpca input gating) |
 | `t2_limit` | Hotelling T² control limit |
 | `spe_limit` | SPE (Q) control limit |
 | `t2_max` | Maximum T² value across all observations |
@@ -604,13 +821,42 @@ when the compiled extension is unavailable.
 | `spe_max` | Maximum SPE value |
 | `spe_mean` | Mean SPE value |
 | `spe_exceedance_rate` | Fraction of observations exceeding `spe_limit` |
-| `eigenvalues` | PCA eigenvalues (list of floats, length = ncomp) |
-| `variance_explained_cumulative` | Running cumulative variance explained |
+| `eigenvalues` | PCA eigenvalues (list of floats, length = ncomp); `None` when `has_mfpca=True` |
+| `variance_explained_cumulative` | Running cumulative variance explained; `None` when `has_mfpca=True` |
 | `spe_kurtosis_excess` | Excess kurtosis of the SPE distribution (from `spe_moment_match_diagnostic`); `None` when fdars unavailable |
 | `spe_moment_match_adequate` | `True` when the SPE distribution is adequately moment-matched; `None` when fdars unavailable |
 
-**Task families:** `"interpretation"` (read process stability and exceedance rates) · `"parameter"` (adjust ncomp or significance level)
-· `"method"` (add UCL monitoring or switch to functional T² variants)
+**mfpca keys** (trigger: `"eigenfunctions"` + `"scales"` in raw — unique to `mfpca` vs `spm_phase1`; when `has_mfpca=True` the `spm_phase1` ncomp and eigenvalues keys are `None`):
+
+| Key | Meaning |
+|---|---|
+| `has_mfpca` | `True` when `"eigenfunctions"` and `"scales"` keys are both present |
+| `mfpca_ncomp` | Number of MFPCA components — `eigenvalues` array length (int); `None` when not mfpca result |
+| `mfpca_n_obs` | Number of observations from `scores` shape[0] (int); `None` when not mfpca result |
+| `mfpca_n_variables` | Number of multivariate variables — `len(eigenfunctions)` (int); `None` when not mfpca result |
+| `mfpca_eigenvalues` | MFPCA eigenvalues (list of floats); `None` when not mfpca result |
+| `mfpca_variance_explained_cumulative` | Running cumulative variance explained by MFPCA eigenvalues (list of floats); `None` when not mfpca result |
+
+**spe_multivariate keys** (trigger: raw is a naked numpy array — not a dict; `spe_multivariate` returns a 1-D array directly):
+
+| Key | Meaning |
+|---|---|
+| `has_spe_multivariate` | `True` when raw is a numpy array (not a dict) |
+| `spe_mv_n_obs` | Number of SPE values in the array (int); `None` when not spe_multivariate result |
+| `spe_mv_max` | Maximum SPE value (float); `None` when not spe_multivariate result |
+| `spe_mv_mean` | Mean SPE value (float); `None` when not spe_multivariate result |
+| `spe_mv_all_nonneg` | `True` when all SPE values are ≥ 0 (bool); `None` when not spe_multivariate result |
+
+!!! note "mfpca ncomp gating"
+    When `has_mfpca=True`, the `spm_phase1` fields `ncomp`, `eigenvalues`, and
+    `variance_explained_cumulative` are all `None` — the mfpca-specific variants
+    (`mfpca_ncomp`, `mfpca_eigenvalues`, `mfpca_variance_explained_cumulative`) carry
+    the equivalent information. This gating prevents ambiguity when both spm_phase1-style
+    eigenvalue keys and mfpca-style eigenfunctions keys are present.
+
+**Task families:** `"interpretation"` (read process stability and exceedance rates; mfpca: assess multivariate component structure and variance explained; spe_multivariate: assess SPE distribution shape)
+· `"parameter"` (adjust ncomp or significance level; mfpca: adjust n_components per variable)
+· `"method"` (add UCL monitoring or switch to functional T² variants; use `mfpca` for multivariate functional process monitoring)
 
 ---
 
