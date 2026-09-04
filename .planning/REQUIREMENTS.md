@@ -41,7 +41,7 @@ Requirements for this milestone. Each maps to a roadmap phase (Phases 66+, conti
 ### Shapelets & GAK Metric (`fdars.shapelet`, `fdars.metric`)
 
 - [x] **SHAPE-01**: New `fdars.shapelet` submodule — `discover_shapelets`, `shapelet_transform_fit` / `shapelet_transform`, `shapelet_classifier_fit`, `shapelet_distance` — with a `PyShapeletFit` opaque handle and the two new enums (`QualityMeasure`, `ShapeletClassifier`) dispatched by string with an `Err` fallback arm
-- [ ] **SHAPE-02**: Global-Alignment-Kernel metric bound extending `fdars.metric` — `gak`, `gak_gram_matrix`, `gak_gram_train` / `gak_gram_predict`, `sigma_gak` — Gram output usable as a precomputed kernel
+- [x] **SHAPE-02**: Global-Alignment-Kernel metric bound extending `fdars.metric` — `gak`, `gak_gram_matrix`, `gak_gram_train` / `gak_gram_predict`, `sigma_gak` — Gram output usable as a precomputed kernel
 
 ### Advisor Extension (grounding invariant preserved)
 
@@ -105,7 +105,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | MULTI-03 | Phase 70 | Complete |
 | MULTI-04 | Phase 70 | Complete |
 | SHAPE-01 | Phase 71 | Complete |
-| SHAPE-02 | Phase 71 | Pending |
+| SHAPE-02 | Phase 71 | Complete |
 | ADV-01 | Phase 72 | Pending |
 | ADV-02 | Phase 72 | Pending |
 | DOCS-01 | Phase 73 | Pending |

@@ -297,10 +297,10 @@ Plans:
   2. The two new enums (`QualityMeasure`, `ShapeletClassifier`) are dispatched by string, each with an `Err` fallback arm that raises `ValueError` listing valid variants on invalid input
   3. GAK metric functions (`gak`, `gak_gram_matrix`, `gak_gram_train` / `gak_gram_predict`, `sigma_gak`) extend `fdars.metric`, with the Gram output usable as a precomputed kernel
 
-**Plans**: 1/2 plans executed
+**Plans**: 2/2 plans executed
 
 - [x] 71-01-PLAN.md — SHAPE-01: new `fdars.shapelet` submodule (discover/transform_fit→PyShapeletFit/transform/classifier→PyShapeletClassifierFit/distance) + QualityMeasure/ShapeletClassifier string dispatch
-- [ ] 71-02-PLAN.md — SHAPE-02: GAK metric extending `fdars.metric` (gak/sigma_gak/gak_gram_matrix/gak_gram_train→PyGakGramTrain/gak_gram_predict) with precomputed-kernel Gram contract
+- [x] 71-02-PLAN.md — SHAPE-02: GAK metric extending `fdars.metric` (gak/sigma_gak/gak_gram_matrix/gak_gram_train→PyGakGramTrain/gak_gram_predict) with precomputed-kernel Gram contract
 
 **Parallelizable**: Yes — new `src/shapelet_mod.rs` + `metric` extension; disjoint from other groups' module files; can run in a worktree in parallel with Phases 67, 68, 69.
 
@@ -346,7 +346,7 @@ Phases execute in numeric order: 66 → 67 → 68 → 69 → 70 → 71 → 72 �
 | 68. Function-on-Function & Scalar-on-Function Regression | v11.0 | 3/3 | Complete    | 2026-09-02 |
 | 69. Fréchet Regression & Density FDA | v11.0 | 5/5 | Complete    | 2026-09-03 |
 | 70. Multi-Domain Data, FAMM & Advanced Clustering | v11.0 | 4/4 | Complete    | 2026-09-04 |
-| 71. Shapelets & GAK Metric | v11.0 | 1/2 | In Progress|  |
+| 71. Shapelets & GAK Metric | v11.0 | 2/2 | In Progress|  |
 | 72. Advisor Extension | v11.0 | 0/TBD | Not started | - |
 | 73. Documentation & Release | v11.0 | 0/TBD | Not started | - |
 
