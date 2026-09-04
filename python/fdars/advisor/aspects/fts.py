@@ -101,7 +101,10 @@ def _build_fts_diagnostics(raw, **kwargs) -> dict:
     has_acf = "acf" in raw and "upper_band" in raw
     diag["has_acf"] = bool(has_acf)
     if has_acf:
-        lags_arr = np.asarray(raw["lags"])
+        # Guard "lags" — present in all real fdars acf/pacf results, but
+        # guarded here per ASVS V5 to tolerate malformed or future-changed
+        # fdars output without raising KeyError (WR-02).
+        lags_arr = np.asarray(raw["lags"]) if "lags" in raw else np.array([])
         diag["n_lags"] = int(len(lags_arr))
         acf_arr = np.asarray(raw["acf"])
         if acf_arr.size > 0:
@@ -125,12 +128,16 @@ def _build_fts_diagnostics(raw, **kwargs) -> dict:
         diag["dpca_ncomp"] = int(raw["ncomp"])
         diag["n_freqs"] = int(raw["n_freqs"])
         diag["filter_lag"] = int(raw["filter_lag"])
-        # eigenvalues is a list of 1-D arrays (one per component).
-        # Summarise as the max eigenvalue per component (frequency peak).
-        eigenvalues_raw = raw["eigenvalues"]
-        diag["dpca_eigenvalues"] = [
-            float(np.max(np.asarray(ev))) for ev in eigenvalues_raw
-        ]
+        # Guard "eigenvalues" — present in all real fdars dpca results, but
+        # guarded here per ASVS V5 to tolerate malformed or future-changed
+        # fdars output without raising KeyError (WR-02).
+        eigenvalues_raw = raw.get("eigenvalues")
+        if eigenvalues_raw is not None:
+            diag["dpca_eigenvalues"] = [
+                float(np.max(np.asarray(ev))) for ev in eigenvalues_raw
+            ]
+        else:
+            diag["dpca_eigenvalues"] = None
     else:
         diag["dpca_ncomp"] = None
         diag["n_freqs"] = None
