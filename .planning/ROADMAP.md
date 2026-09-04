@@ -178,7 +178,7 @@ Full detail: `.planning/milestones/v10.0-ROADMAP.md`
 - [x] **Phase 68: Function-on-Function & Scalar-on-Function Regression** — `fof_regression` + random effects extending `fdars.regression`; additive/generalized SoF models + variable/model selection extending `fdars.scalar_on_function` (completed 2026-09-02)
 - [x] **Phase 69: Fréchet Regression & Density FDA** — `convert.rs` ragged-list refactor, then new `fdars.frechet` and `fdars.density_fda` submodules (completed 2026-09-03)
 - [x] **Phase 70: Multi-Domain Data, FAMM & Advanced Clustering** — `PyMultiFunData` handle → mixed-model FAMM → multivariate SPM (sequential) + advanced clustering (completed 2026-09-04)
-- [ ] **Phase 71: Shapelets & GAK Metric** — New `fdars.shapelet` submodule (`PyShapeletFit` + 2 enums) + Global-Alignment-Kernel metric extending `fdars.metric`
+- [x] **Phase 71: Shapelets & GAK Metric** — New `fdars.shapelet` submodule (`PyShapeletFit` + 2 enums) + Global-Alignment-Kernel metric extending `fdars.metric` (completed 2026-09-04)
 - [ ] **Phase 72: Advisor Extension** — New `fts`/`frechet` aspects + extended `regression`/`classification`/`spm` aspects; grounding invariant + atomic MCP guard-sync
 - [ ] **Phase 73: Documentation & Release** — One method-accurate page + hand-authored SVG + offline fence per new family; whole-site `--strict` green; human diagram review; package 0.9.0 → 0.10.0 + tag `v0.10.0`
 
@@ -346,7 +346,7 @@ Phases execute in numeric order: 66 → 67 → 68 → 69 → 70 → 71 → 72 �
 | 68. Function-on-Function & Scalar-on-Function Regression | v11.0 | 3/3 | Complete    | 2026-09-02 |
 | 69. Fréchet Regression & Density FDA | v11.0 | 5/5 | Complete    | 2026-09-03 |
 | 70. Multi-Domain Data, FAMM & Advanced Clustering | v11.0 | 4/4 | Complete    | 2026-09-04 |
-| 71. Shapelets & GAK Metric | v11.0 | 2/2 | In Progress|  |
+| 71. Shapelets & GAK Metric | v11.0 | 2/2 | Complete    | 2026-09-04 |
 | 72. Advisor Extension | v11.0 | 0/TBD | Not started | - |
 | 73. Documentation & Release | v11.0 | 0/TBD | Not started | - |
 

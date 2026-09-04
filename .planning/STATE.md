@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
-current_phase: 71
-current_phase_name: Shapelets & GAK Metric
-status: verifying
-stopped_at: Completed 71-02-PLAN.md
-last_updated: "2026-09-04T07:25:24.934Z"
+current_phase: 72
+current_phase_name: Advisor Extension
+status: planning
+stopped_at: Phase 71 complete, ready to plan Phase 72
+last_updated: "2026-09-04T07:46:57.085Z"
 last_activity: 2026-09-04
-last_activity_desc: Phase 71 execution started
-state_head: d315fc9b31508a76a089f6173665c5bd5327b8f4
+last_activity_desc: Phase 71 complete, transitioned to Phase 72
+state_head: 11d0a81c4e4f990937578c5cfddca3a486d25167
 progress:
   total_phases: 8
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 20
   completed_plans: 20
-  percent: 63
+  percent: 75
 ---
 
 # Project State
@@ -29,16 +29,16 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 
 ## Current Position
 
-Phase: 71 (Shapelets & GAK Metric) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-09-04 — Phase 71 execution started
+Phase: 72 — Advisor Extension
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-04 — Phase 71 complete, transitioned to Phase 72
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 18 (this milestone); prior: 7 (v10.0), 17 (v9.0), 16 (v8.0), 11 (v6.0)
+- Total plans completed: 20 (this milestone); prior: 7 (v10.0), 17 (v9.0), 16 (v8.0), 11 (v6.0)
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -51,7 +51,7 @@ Last activity: 2026-09-04 — Phase 71 execution started
 | 68 | 3 | - | - |
 | 69 | 5 | - | - |
 | 70 | 4 | - | - |
-| 71 | TBD | - | - |
+| 71 | 2 | - | - |
 | 72 | TBD | - | - |
 | 73 | TBD | - | - |
 
@@ -159,7 +159,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-04T07:25:10.870Z
-Stopped at: Completed 71-02-PLAN.md
+Stopped at: Phase 71 complete, ready to plan Phase 72
 Resume file: None
 
 ## Operator Next Steps
