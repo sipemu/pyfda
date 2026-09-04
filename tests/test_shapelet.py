@@ -201,3 +201,11 @@ def test_negative_label_rejected():
         sh.discover_shapelets(TRAIN, bad_labels)
     with pytest.raises(ValueError, match="negative"):
         sh.shapelet_classifier_fit(TRAIN, bad_labels)
+
+
+def test_knn_k_zero_rejected():
+    """classifier='knn', k=0 raises ValueError from binding-level guard."""
+    import fdars.shapelet as sh
+
+    with pytest.raises(ValueError, match="k must be >= 1"):
+        sh.shapelet_classifier_fit(TRAIN, TRAIN_Y, classifier="knn", k=0)

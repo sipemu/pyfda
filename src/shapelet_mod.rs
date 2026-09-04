@@ -41,7 +41,14 @@ fn quality_from_str(s: &str) -> PyResult<QualityMeasure> {
 /// Parse classifier string. k is only used for "knn"; Lda is unit variant (RESEARCH 3.2, Pitfall 4).
 fn classifier_from_str(classifier: &str, k: usize) -> PyResult<ShapeletClassifier> {
     match classifier {
-        "knn" => Ok(ShapeletClassifier::Knn { k }),
+        "knn" => {
+            if k == 0 {
+                return Err(PyValueError::new_err(
+                    "k must be >= 1 for the 'knn' classifier",
+                ));
+            }
+            Ok(ShapeletClassifier::Knn { k })
+        }
         "lda" => Ok(ShapeletClassifier::Lda),
         _ => Err(PyValueError::new_err(format!(
             "classifier must be 'knn' or 'lda', got '{classifier}'"
