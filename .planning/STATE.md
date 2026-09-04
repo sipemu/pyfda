@@ -5,16 +5,16 @@ milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 73
 current_phase_name: Documentation & Release
 status: executing
-stopped_at: Completed 73-03-PLAN.md
-last_updated: "2026-09-04T20:45:32.270Z"
+stopped_at: Completed 73-05-PLAN.md — version bump committed; human release checkpoint reached (blocking-human)
+last_updated: "2026-09-04T22:03:12.751Z"
 last_activity: 2026-09-04
 last_activity_desc: Phase 73 execution started
-state_head: dde94e86a32e6541a4cf9d8da534dce482bbcaa1
+state_head: 89f68cd75046114ac40fed67bcf98c2b41b1116f
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 29
-  completed_plans: 27
+  completed_plans: 29
   percent: 88
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 ## Current Position
 
 Phase: 73 (Documentation & Release) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-09-04 — Phase 73 execution started
 
@@ -93,6 +93,7 @@ Last activity: 2026-09-04 — Phase 73 execution started
 | Phase 73-documentation-release P01 | 45min | 3 tasks | 3 files |
 | Phase 73-documentation-release P02 | 37min | 3 tasks | 7 files |
 | Phase 73-documentation-release P03 | 38min | 3 tasks | 9 files |
+| Phase 73 P05 | 1min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -144,6 +145,7 @@ Recent decisions affecting current work:
 - [Phase 73]: Single DOCS_FAST build validates all pages at once — do not run one build per page (29-min runtime)
 - [Phase 73]: lqd_fpca uses ncomp= parameter (not n_comp=) and returns ncomp/fve keys — RESEARCH template corrected
 - [Phase 73]: kcfc_cluster returns 'cluster' key not 'labels'; np.trapezoid preferred over deprecated np.trapz in NumPy 2.x
+- [Phase 73]: REL-01: executor bumps version lines only; tag v0.10.0 and push are unconditionally human-gated (irreversible PyPI publish)
 
 ### Pending Todos
 
@@ -177,8 +179,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-04T20:45:17.752Z
-Stopped at: Completed 73-03-PLAN.md
+Last session: 2026-09-04T22:03:12.543Z
+Stopped at: Completed 73-05-PLAN.md — version bump committed; human release checkpoint reached (blocking-human)
 Resume file: None
 
 ## Operator Next Steps

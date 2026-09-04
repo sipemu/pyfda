@@ -56,7 +56,7 @@ Requirements for this milestone. Each maps to a roadmap phase (Phases 66+, conti
 
 ### Release
 
-- [ ] **REL-01**: Package version bumped `0.9.0 → 0.10.0` in `Cargo.toml` + `pyproject.toml` at close; semver tag `v0.10.0` (triggers PyPI publish) — decided/applied at milestone close
+- [x] **REL-01**: Package version bumped `0.9.0 → 0.10.0` in `Cargo.toml` + `pyproject.toml` at close; semver tag `v0.10.0` (triggers PyPI publish) — decided/applied at milestone close
 
 ## Future Requirements
 
@@ -111,7 +111,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | DOCS-01 | Phase 73 | Complete |
 | DOCS-02 | Phase 73 | Complete |
 | DOCS-03 | Phase 73 | Pending |
-| REL-01 | Phase 73 | Pending |
+| REL-01 | Phase 73 | Complete |
 
 **Coverage:**
 
