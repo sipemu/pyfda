@@ -336,7 +336,12 @@ Plans:
   3. Whole-site `mkdocs build --strict` passes green offline, and the blocking human diagram method-accuracy review is approved before close
   4. Package version is bumped `0.9.0 → 0.10.0` in `Cargo.toml` + `pyproject.toml` and tag `v0.10.0` is applied (triggers PyPI publish)
 
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 73-01-PLAN.md — TRACER: fts page + diagram + Analyze nav (proves page+fence+diagram+nav loop)
+- [ ] 73-02-PLAN.md — Regression pages: function-on-function, additive-sof, frechet-regression + 3 diagrams + nav
+- [ ] 73-03-PLAN.md — Analyze pages: density-fda, advanced-clustering, multi-domain, shapelets (GAK folds in) + 4 diagrams + nav
+- [ ] 73-04-PLAN.md — aspects.md update + ONE whole-site --strict gate + BLOCKING human diagram review
+- [ ] 73-05-PLAN.md — REL-01 version bump 0.9.0→0.10.0 (commit) + human release-tag checkpoint
 **UI hint**: no
 **Parallelizable**: No — runs SEQUENTIALLY on `main` (`use_worktrees: false`); doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path, so a worktree executor would build the wrong tree and fail verification.
 
@@ -354,7 +359,7 @@ Phases execute in numeric order: 66 → 67 → 68 → 69 → 70 → 71 → 72 �
 | 70. Multi-Domain Data, FAMM & Advanced Clustering | v11.0 | 4/4 | Complete    | 2026-09-04 |
 | 71. Shapelets & GAK Metric | v11.0 | 2/2 | Complete    | 2026-09-04 |
 | 72. Advisor Extension | v11.0 | 4/4 | Complete    | 2026-09-04 |
-| 73. Documentation & Release | v11.0 | 0/TBD | Not started | - |
+| 73. Documentation & Release | v11.0 | 0/5 | Not started | - |
 
 ---
 
