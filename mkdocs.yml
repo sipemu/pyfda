@@ -137,6 +137,7 @@ nav:
     - Interval-wise Inference: inference/interval-inference.md
   - Analyze:
     - analyze/index.md
+    - Functional Time Series: analyze/functional-time-series.md
     - Tolerance Bands: analyze/tolerance-bands.md
     - Clustering: analyze/clustering.md
     - GMM Clustering: analyze/gmm-clustering.md
