@@ -4,17 +4,17 @@ milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 72
 current_phase_name: Advisor Extension
-status: planning
-stopped_at: Phase 71 complete, ready to plan Phase 72
-last_updated: "2026-09-04T07:46:57.085Z"
+status: executing
+stopped_at: Completed 72-01-PLAN.md
+last_updated: "2026-09-04T08:58:15.626Z"
 last_activity: 2026-09-04
-last_activity_desc: Phase 71 complete, transitioned to Phase 72
-state_head: 11d0a81c4e4f990937578c5cfddca3a486d25167
+last_activity_desc: Phase 72 execution started
+state_head: 15a8e710d827dc513817ee74e425a509f599b475
 progress:
   total_phases: 8
   completed_phases: 6
-  total_plans: 20
-  completed_plans: 20
+  total_plans: 24
+  completed_plans: 21
   percent: 75
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-02)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 71 — Shapelets & GAK Metric
+**Current focus:** Phase 72 — Advisor Extension
 
 ## Current Position
 
-Phase: 72 — Advisor Extension
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-04 — Phase 71 complete, transitioned to Phase 72
+Phase: 72 (Advisor Extension) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-09-04 — Phase 72 execution started
 
 ## Performance Metrics
 
@@ -86,6 +86,7 @@ Last activity: 2026-09-04 — Phase 71 complete, transitioned to Phase 72
 | Phase 70-multi-domain-data-famm-advanced-clustering P04 | 15 | 3 tasks | 2 files |
 | Phase 71-shapelets-gak-metric P01 | 4min | 4 tasks | 4 files |
 | Phase 71-shapelets-gak-metric P02 | 3min | 3 tasks | 2 files |
+| Phase 72-advisor-extension P01 | 5min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -125,6 +126,7 @@ Recent decisions affecting current work:
 - [Phase 71-shapelets-gak-metric]: shapelet_classifier_fit takes raw data+labels (independent path), not PyShapeletFit — matches upstream semantics
 - [Phase 71-shapelets-gak-metric]: PyShapeletClassifierFit opaque handle returned (not dict) so predict() is stateful, consistent with all other fitted models in pyfda
 - [Phase 71-shapelets-gak-metric]: make_gak_config() helper required: GakConfig is #[non_exhaustive] — use GakConfig::with_sigma(s)/default() not struct literals — Rust E0639 prohibits struct literals for non_exhaustive structs from outside the crate; RESEARCH Pitfall 7 analysis was incorrect about this being allowed
+- [Phase 72-advisor-extension]: dpca eigenvalues is a list of 1D arrays (not flat 1D) — summarise as float(np.max(ev)) per component — Actual fdars return shape differs from research assumption; fixed during GREEN phase
 
 ### Pending Todos
 
@@ -158,8 +160,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-04T07:25:10.870Z
-Stopped at: Phase 71 complete, ready to plan Phase 72
+Last session: 2026-09-04T08:58:15.485Z
+Stopped at: Completed 72-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
