@@ -286,10 +286,12 @@ def test_label_uniquification_no_collision():
 
 
 def test_guard_sync_still_no_op():
-    """_DIAGNOSTICS_METHODS (14) and _RUNNABLE_METHODS (6) unchanged by this phase.
+    """_DIAGNOSTICS_METHODS (16) and _RUNNABLE_METHODS (6) unchanged by this phase.
 
     Asserts that adding fdars_compare_methods added no new entry to either set
     (guard-sync no-op — 51-CONTEXT hard constraint).
+    Count updated 14→16 in Phase 72 when fts+frechet were added to
+    _DIAGNOSTICS_METHODS (ADV-01); fdars_compare_methods remains a no-op.
     """
     from fdars.mcp.server import _DIAGNOSTICS_METHODS, _RUNNABLE_METHODS
 
@@ -297,7 +299,7 @@ def test_guard_sync_still_no_op():
         f"_RUNNABLE_METHODS has {len(_RUNNABLE_METHODS)} entries (expected 6): "
         f"{sorted(_RUNNABLE_METHODS)}"
     )
-    assert len(_DIAGNOSTICS_METHODS) == 14, (
-        f"_DIAGNOSTICS_METHODS has {len(_DIAGNOSTICS_METHODS)} entries (expected 14): "
+    assert len(_DIAGNOSTICS_METHODS) == 16, (
+        f"_DIAGNOSTICS_METHODS has {len(_DIAGNOSTICS_METHODS)} entries (expected 16): "
         f"{sorted(_DIAGNOSTICS_METHODS)}"
     )

@@ -293,7 +293,9 @@ def test_guard_sync_still_no_op():
     """_RUNNABLE_METHODS and _DIAGNOSTICS_METHODS unchanged by adding fdars_auto_tune.
 
     Adding fdars_auto_tune must be a guard-sync no-op: the method-set sizes
-    must stay at 6 and 14 respectively (T-53C-03).
+    must stay at 6 and 16 respectively (T-53C-03).
+    Count updated 14→16 in Phase 72 when fts+frechet were added to
+    _DIAGNOSTICS_METHODS (ADV-01); fdars_auto_tune remains a no-op.
     """
     from fdars.mcp.server import _DIAGNOSTICS_METHODS, _RUNNABLE_METHODS
 
@@ -301,8 +303,8 @@ def test_guard_sync_still_no_op():
         f"_RUNNABLE_METHODS has {len(_RUNNABLE_METHODS)} entries (expected 6): "
         f"{sorted(_RUNNABLE_METHODS)}"
     )
-    assert len(_DIAGNOSTICS_METHODS) == 14, (
-        f"_DIAGNOSTICS_METHODS has {len(_DIAGNOSTICS_METHODS)} entries (expected 14): "
+    assert len(_DIAGNOSTICS_METHODS) == 16, (
+        f"_DIAGNOSTICS_METHODS has {len(_DIAGNOSTICS_METHODS)} entries (expected 16): "
         f"{sorted(_DIAGNOSTICS_METHODS)}"
     )
 
