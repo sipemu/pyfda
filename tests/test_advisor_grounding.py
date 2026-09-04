@@ -395,3 +395,302 @@ class TestGroundingFabricatedValueInValuePositionStillRaises:
         advice = _advice(["the analysis chose k=7 groups"])
         with pytest.raises(GroundingViolationError):
             _check_grounding(advice, SPM_DIAG)
+
+
+# ---------------------------------------------------------------------------
+# Phase 72 additions: grounding coverage for new aspects — fts and frechet.
+#
+# These classes lock ADV-01: every value emitted by build_diagnostics for the
+# new aspects is a native Python scalar (float/int/bool/list/None), accepted
+# by _check_grounding without GroundingViolationError, while fabricated values
+# still raise.
+# ---------------------------------------------------------------------------
+
+import sys  # needed by the LLM-free test at the bottom
+
+
+# Build real fts diagnostics via the shipped aspect builder.
+# The ftsm fixture is representative: it exercises ncomp, n_obs, fitted_rmse,
+# ar_sigma2_max — all converted to native Python types by _build_fts_diagnostics.
+def _make_fts_diag() -> dict:
+    import numpy as np
+    from fdars import fts
+    from fdars.advisor import build_diagnostics
+
+    rng = np.random.default_rng(42)
+    N, M = 40, 25
+    data = rng.standard_normal((N, M))
+    argvals = np.linspace(0.0, 1.0, M)
+    ftsm_result = fts.ftsm(data, argvals, ncomp=3)
+    return build_diagnostics(ftsm_result, method="fts")
+
+
+FTS_DIAG = _make_fts_diag()
+
+
+# Build real frechet diagnostics via the shipped aspect builder.
+# The frechet_mean(spherical) fixture is representative: result is a 1-D
+# numpy array that the builder converts to plain-Python ints/floats.
+def _make_frechet_diag() -> dict:
+    import numpy as np
+    import fdars.frechet as frechet
+    from fdars.advisor import build_diagnostics
+
+    rng = np.random.default_rng(42)
+    n_obs, d = 20, 3
+    data_raw = [rng.standard_normal(d) for _ in range(n_obs)]
+    data_sph = [v / np.linalg.norm(v) for v in data_raw]
+    mean_result = frechet.frechet_mean(data_sph, "spherical", d)
+    return build_diagnostics(mean_result, method="frechet")
+
+
+FRECHET_DIAG = _make_frechet_diag()
+
+
+class TestGroundingFtsAspect:
+    """Grounding harness accepts real fts diagnostics; rejects fabrications.
+
+    Locks ADV-01: build_diagnostics("fts") emits only native-scalar values.
+    The _check_grounding path is the final proof that the grounding discipline
+    holds end-to-end.
+    """
+
+    def test_fts_ncomp_citation_is_grounded(self):
+        """A citation of the real ncomp (3) passes without raising."""
+        advice = _advice([f"the fts model fitted ncomp={FTS_DIAG['ncomp']} components"])
+        _check_grounding(advice, FTS_DIAG)
+
+    def test_fts_n_obs_citation_is_grounded(self):
+        """Citing the real observation count passes without raising."""
+        advice = _advice([f"the dataset contains {FTS_DIAG['n_obs']} observations"])
+        _check_grounding(advice, FTS_DIAG)
+
+    def test_fts_fitted_rmse_citation_is_grounded(self):
+        """Citing the real fitted_rmse (rounded) passes without raising."""
+        # Use 2-decimal rounding — the grounding tolerance accepts this.
+        rmse_cited = round(FTS_DIAG["fitted_rmse"], 2)
+        advice = _advice([f"fitted RMSE is approximately {rmse_cited}"])
+        _check_grounding(advice, FTS_DIAG)
+
+    def test_fts_qualitative_evidence_passes(self):
+        """Evidence with no numeric citations is always grounded."""
+        advice = _advice(["the FTS model captures the dominant temporal patterns"])
+        _check_grounding(advice, FTS_DIAG)
+
+    def test_fts_fabricated_ncomp_raises(self):
+        """A fabricated ncomp (99) not in the diagnostics must raise."""
+        advice = _advice(["the fts model used ncomp=99 components"])
+        with pytest.raises(GroundingViolationError):
+            _check_grounding(advice, FTS_DIAG)
+
+    def test_fts_fabricated_rmse_raises(self):
+        """A fabricated fitted_rmse absent at its cited precision must raise."""
+        advice = _advice(["fitted RMSE is 9.87"])
+        with pytest.raises(GroundingViolationError):
+            _check_grounding(advice, FTS_DIAG)
+
+
+class TestGroundingFrechetAspect:
+    """Grounding harness accepts real frechet diagnostics; rejects fabrications.
+
+    Locks ADV-01: build_diagnostics("frechet") emits only native-scalar values
+    for both the array (frechet_mean) and dict (anova/reg) result shapes.
+    """
+
+    def test_frechet_mean_ndim_citation_is_grounded(self):
+        """Citing the real ndim (1 for spherical) passes without raising."""
+        advice = _advice(
+            [f"the Fréchet mean is a {FTS_DIAG['ncomp']}-component estimate"]  # ncomp from fts — use frechet
+        )
+        # Use frechet_mean_dim for the actual frechet citation.
+        ndim = FRECHET_DIAG["frechet_mean_ndim"]
+        advice = _advice([f"the Fréchet mean has ndim={ndim}"])
+        _check_grounding(advice, FRECHET_DIAG)
+
+    def test_frechet_mean_dim_citation_is_grounded(self):
+        """Citing the real frechet_mean_dim (3) passes without raising."""
+        dim = FRECHET_DIAG["frechet_mean_dim"]
+        advice = _advice([f"the Fréchet mean lies in dimension {dim}"])
+        _check_grounding(advice, FRECHET_DIAG)
+
+    def test_frechet_qualitative_evidence_passes(self):
+        """Evidence with no numbers is always grounded."""
+        advice = _advice(["the Fréchet mean is the geodesic centroid of the sample"])
+        _check_grounding(advice, FRECHET_DIAG)
+
+    def test_frechet_fabricated_dim_raises(self):
+        """A fabricated dimension (99) not in the diagnostics must raise."""
+        advice = _advice(["the Fréchet mean lies in dimension 99"])
+        with pytest.raises(GroundingViolationError):
+            _check_grounding(advice, FRECHET_DIAG)
+
+
+# ---------------------------------------------------------------------------
+# LLM-free assertion for the number path (ADV-02 / SC3).
+#
+# The build_diagnostics number path MUST NOT import any LLM provider module
+# (anthropic, openai, etc.).  The separation is architectural: provider
+# imports are deferred into advise(), which is only called AFTER
+# build_diagnostics returns.
+#
+# Two complementary proofs are required so the LLM-free property is verified
+# regardless of runtime availability:
+#
+# Proof A (subprocess) — spawn a fresh Python interpreter, call
+# build_diagnostics there, and assert "anthropic" is not in sys.modules.
+# A clean interpreter has no pre-loaded modules, so any import triggered by
+# build_diagnostics is immediately visible.
+#
+# Proof B (in-process fallback) — in the current process, pop any provider
+# modules that may have been loaded by other tests earlier in the session,
+# call build_diagnostics, and assert neither "anthropic" nor "openai" is in
+# sys.modules afterward.  This fallback ensures the assertion never silently
+# skips if subprocess is unavailable for any reason.
+# ---------------------------------------------------------------------------
+
+class TestLlmFreeNumberPath:
+    """build_diagnostics never imports an LLM provider on the number path.
+
+    Locks ADV-02 / SC3: the number path is provably LLM-free.  Both the
+    subprocess proof and the in-process fallback must run — neither may
+    silently skip.
+    """
+
+    def test_subprocess_no_anthropic_import(self):
+        """Proof A: build_diagnostics in a fresh subprocess imports no anthropic."""
+        import subprocess
+        code = (
+            "import sys, numpy as np, json\n"
+            "from fdars import fts\n"
+            "from fdars.advisor import build_diagnostics\n"
+            "rng = np.random.default_rng(42)\n"
+            "N, M = 40, 25\n"
+            "data = rng.standard_normal((N, M))\n"
+            "argvals = np.linspace(0.0, 1.0, M)\n"
+            "result = fts.ftsm(data, argvals, ncomp=3)\n"
+            "diag = build_diagnostics(result, method='fts')\n"
+            "providers = ['anthropic', 'openai', 'google.generativeai']\n"
+            "leaked = [p for p in providers if p in sys.modules]\n"
+            "if leaked:\n"
+            "    raise AssertionError(f'provider import leaked into number path: {leaked}')\n"
+            "print('OK')\n"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        assert result.returncode == 0, (
+            f"Subprocess LLM-free check failed.\n"
+            f"stdout: {result.stdout!r}\n"
+            f"stderr: {result.stderr!r}"
+        )
+        assert "OK" in result.stdout
+
+    def test_subprocess_no_anthropic_import_frechet(self):
+        """Proof A (frechet): build_diagnostics in a fresh subprocess imports no anthropic."""
+        import subprocess
+        code = (
+            "import sys, numpy as np, json\n"
+            "import fdars.frechet as frechet\n"
+            "from fdars.advisor import build_diagnostics\n"
+            "rng = np.random.default_rng(42)\n"
+            "n_obs, d = 20, 3\n"
+            "data_raw = [rng.standard_normal(d) for _ in range(n_obs)]\n"
+            "import numpy as _np\n"
+            "data_sph = [v / _np.linalg.norm(v) for v in data_raw]\n"
+            "mean_result = frechet.frechet_mean(data_sph, 'spherical', d)\n"
+            "diag = build_diagnostics(mean_result, method='frechet')\n"
+            "providers = ['anthropic', 'openai', 'google.generativeai']\n"
+            "leaked = [p for p in providers if p in sys.modules]\n"
+            "if leaked:\n"
+            "    raise AssertionError(f'provider import leaked into number path: {leaked}')\n"
+            "print('OK')\n"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        assert result.returncode == 0, (
+            f"Subprocess LLM-free check (frechet) failed.\n"
+            f"stdout: {result.stdout!r}\n"
+            f"stderr: {result.stderr!r}"
+        )
+        assert "OK" in result.stdout
+
+    def test_inprocess_no_provider_import_after_fts(self):
+        """Proof B (in-process fallback): build_diagnostics does not import provider modules.
+
+        Pops any pre-loaded provider modules from sys.modules before calling
+        build_diagnostics, then asserts they are absent afterward.  This proof
+        runs in-process so the LLM-free property is verified even if subprocess
+        is unavailable.
+        """
+        import numpy as np
+        from fdars import fts
+        from fdars.advisor import build_diagnostics
+
+        # Remove any provider modules that earlier tests may have loaded
+        # into the current process's sys.modules.
+        _provider_keys = [
+            k for k in list(sys.modules.keys())
+            if k == "anthropic" or k.startswith("anthropic.")
+            or k == "openai" or k.startswith("openai.")
+            or k == "google.generativeai"
+        ]
+        _saved = {k: sys.modules.pop(k) for k in _provider_keys}
+
+        try:
+            rng = np.random.default_rng(42)
+            N, M = 40, 25
+            data = rng.standard_normal((N, M))
+            argvals = np.linspace(0.0, 1.0, M)
+            result = fts.ftsm(data, argvals, ncomp=3)
+            build_diagnostics(result, method="fts")
+
+            assert "anthropic" not in sys.modules, (
+                "build_diagnostics imported 'anthropic' on the number path"
+            )
+            assert "openai" not in sys.modules, (
+                "build_diagnostics imported 'openai' on the number path"
+            )
+        finally:
+            # Restore previously loaded provider modules (test isolation).
+            sys.modules.update(_saved)
+
+    def test_inprocess_no_provider_import_after_frechet(self):
+        """Proof B (in-process, frechet): build_diagnostics does not import provider modules.
+
+        Same in-process fallback as above, exercising the frechet aspect path.
+        """
+        import numpy as np
+        import fdars.frechet as frechet
+        from fdars.advisor import build_diagnostics
+
+        _provider_keys = [
+            k for k in list(sys.modules.keys())
+            if k == "anthropic" or k.startswith("anthropic.")
+            or k == "openai" or k.startswith("openai.")
+            or k == "google.generativeai"
+        ]
+        _saved = {k: sys.modules.pop(k) for k in _provider_keys}
+
+        try:
+            rng = np.random.default_rng(42)
+            n_obs, d = 20, 3
+            data_raw = [rng.standard_normal(d) for _ in range(n_obs)]
+            data_sph = [v / np.linalg.norm(v) for v in data_raw]
+            mean_result = frechet.frechet_mean(data_sph, "spherical", d)
+            build_diagnostics(mean_result, method="frechet")
+
+            assert "anthropic" not in sys.modules, (
+                "build_diagnostics imported 'anthropic' on the number path (frechet)"
+            )
+            assert "openai" not in sys.modules, (
+                "build_diagnostics imported 'openai' on the number path (frechet)"
+            )
+        finally:
+            sys.modules.update(_saved)
