@@ -21,6 +21,8 @@ High-performance functional data analysis toolkit providing:
 - Scalar-on-function regression (FAM, GKAM, GSAM additive models, variable selection)
 - Fréchet regression (global, local, ANOVA) over density/metric spaces
 - Density functional data analysis (LQD transform, Wasserstein barycenter, density FPCA)
+- Multi-domain data (multi_fdata) — PyMultiFunData handle for multi-domain functional data
+- Functional Additive Mixed Models (famm) — dense_flmm, fast_fmm, multi_famm
 
 All computations are performed in Rust via fdars-core for maximum performance.
 """
