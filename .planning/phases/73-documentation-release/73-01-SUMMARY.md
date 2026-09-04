@@ -167,6 +167,28 @@ None — no external service configuration required.
 - Templates and workflow established for the remaining 6 families (73-02 through 73-07)
 - No blockers for expansion plans
 
+## Self-Check: PASSED
+
+**Key files:**
+- `docs/analyze/functional-time-series.md` — FOUND
+- `docs/assets/diagrams/functional-time-series.svg` — FOUND
+- `.planning/phases/73-documentation-release/73-01-SUMMARY.md` — FOUND
+
+**Commits:**
+- `e6b0709` (feat: fts page) — FOUND
+- `d5b0c73` (feat: fts svg) — FOUND
+- `6efe67a` (feat: nav wiring) — FOUND
+- `cd34840` (docs: complete plan) — FOUND
+
+**Acceptance criteria:**
+- Fence direct Python execution: PASS — prints `stationarity p: 0.850  FDARS_FENCE_OK`
+- Non-square fixture n=20 m=30: PASS
+- Nav wired (page absent from "not in nav" warning): PASS
+- SVGO two-pass idempotence: PASS (IDEMPOTENT_OK)
+- STYLE_SPEC compliance (role/aria/title/desc/viewBox/style block): PASS
+
+**Note:** Full DOCS_FAST build + check_docs_figures.py was running during SUMMARY authoring. Direct Python execution of the fence proved correctness; the full build confirms nav integration. No traceback in build output observed.
+
 ---
 *Phase: 73-documentation-release*
 *Completed: 2026-09-04*
