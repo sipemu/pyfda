@@ -4,17 +4,17 @@ milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
 current_phase: 70
 current_phase_name: Multi-Domain Data, FAMM & Advanced Clustering
-status: executing
-stopped_at: Completed 70-03-PLAN.md
-last_updated: "2026-09-03T21:32:51.293Z"
+status: verifying
+stopped_at: "Completed 70-04-PLAN.md (advanced clustering: kcfc_cluster, funfem_cluster, align_cluster_fd)"
+last_updated: "2026-09-04T05:50:03.761Z"
 last_activity: 2026-09-03
 last_activity_desc: Phase 70 execution started
-state_head: b9387ad4f858bb8af54fc9ca6e83f7da74b93515
+state_head: d995513d944961bd7ea4a9770bbe08f6e930f964
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 18
-  completed_plans: 17
+  completed_plans: 18
   percent: 50
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 
 Phase: 70 (Multi-Domain Data, FAMM & Advanced Clustering) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-03 — Phase 70 execution started
 
 ## Performance Metrics
@@ -83,6 +83,7 @@ Last activity: 2026-09-03 — Phase 70 execution started
 | Phase 70-multi-domain-data-famm-advanced-clustering P01 | 4 min | 2 tasks | 4 files |
 | Phase 70-multi-domain-data-famm-advanced-clustering P02 | 6min | 3 tasks | 4 files |
 | Phase 70-multi-domain-data-famm-advanced-clustering P03 | 7min | 2 tasks | 2 files |
+| Phase 70-multi-domain-data-famm-advanced-clustering P04 | 15 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -117,6 +118,8 @@ Recent decisions affecting current work:
 - [Phase 70]: dense_flmm_result_to_pydict private helper reused by multi_famm for per-dimension component dicts — avoids duplicating 14-key dict construction
 - [Phase 70]: p=0 FdMatrix shape in fdars-core 0.33 is (0,0) not (0,m) when no covariates — test assertions corrected accordingly
 - [Phase 70-multi-domain-data-famm-advanced-clustering]: mfpca + spe_multivariate added to fdars.spm via Vec<FdMatrix>/Vec<&FdMatrix> pattern; pub(super) fields excluded; lifetime-correct argvals conversion
+- [Phase 70]: fpca_models omitted from KcfcResult PyDict — holds internal FpcaResult Rust structs not exposed as #[pyclass]
+- [Phase 70]: align_cluster_fd templates serialized as PyList of 1D numpy arrays — Vec<Vec<f64>> semantics correct even though all templates share same m
 
 ### Pending Todos
 
@@ -150,8 +153,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-03T21:32:51.190Z
-Stopped at: Completed 70-03-PLAN.md
+Last session: 2026-09-04T05:50:03.665Z
+Stopped at: Completed 70-04-PLAN.md (advanced clustering: kcfc_cluster, funfem_cluster, align_cluster_fd)
 Resume file: None
 
 ## Operator Next Steps

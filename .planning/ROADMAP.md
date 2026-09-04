@@ -277,12 +277,12 @@ Plans:
   3. Multivariate/multi-domain SPM bindings (e.g. MFPCA / multi-domain monitoring) extend `fdars.spm`, built AFTER `PyMultiFunData` within this phase (internal sequential dependency)
   4. Advanced clustering (`dbscan_fd`, `kcfc_cluster`, `funfem_cluster`, `align_cluster_fd`) is callable, each returning a labels/result PyDict, transposition-guarded
 
-**Plans**: 3/4 plans executed (tracer-first; 4 sequential waves — worktrees disabled; shared `src/lib.rs`/`__init__.py` + rebuild)
+**Plans**: 4/4 plans executed (tracer-first; 4 sequential waves — worktrees disabled; shared `src/lib.rs`/`__init__.py` + rebuild)
 
 - [x] 70-01-PLAN.md — TRACER: `PyMultiFunData` opaque handle + `multi_fdata_from_components` builder → new `fdars.multi_fdata` submodule (standalone container; not consumed downstream in 0.33) [MULTI-01, wave 1]
 - [x] 70-02-PLAN.md — new `fdars.famm` submodule: `dense_flmm` (tracer, 14-key) → `fast_fmm` (6-key) → `multi_famm` (4-key) — plain 2D inputs, none consume the handle [MULTI-02, wave 2]
 - [x] 70-03-PLAN.md — extend `fdars.spm`: `mfpca` (6 public-field dict) + `spe_multivariate` ((n,) array) — built after PyMultiFunData; only phase touching `spm_mod.rs` [MULTI-03, wave 3]
-- [ ] 70-04-PLAN.md — extend `fdars.clustering`: `dbscan_fd` (int64 -1-noise) → `kcfc_cluster`/`funfem_cluster` → `align_cluster_fd` — transposition-guarded [MULTI-04, wave 4]
+- [x] 70-04-PLAN.md — extend `fdars.clustering`: `dbscan_fd` (int64 -1-noise) → `kcfc_cluster`/`funfem_cluster` → `align_cluster_fd` — transposition-guarded [MULTI-04, wave 4]
 
 **Parallelizable**: No (worktree-sharing) — this is the ONLY group touching `src/spm_mod.rs`, and it carries an internal sequential dependency (`PyMultiFunData` builder MUST precede the SPM multivariate extensions). Run sequentially within itself; never share a worktree with another binding phase. Depends only on Phase 66, so it may still overlap the other binding phases as long as it uses its own isolated worktree.
 
@@ -341,7 +341,7 @@ Phases execute in numeric order: 66 → 67 → 68 → 69 → 70 → 71 → 72 �
 | 67. Functional Time Series (`fdars.fts`) | v11.0 | 5/5 | Complete    | 2026-09-02 |
 | 68. Function-on-Function & Scalar-on-Function Regression | v11.0 | 3/3 | Complete    | 2026-09-02 |
 | 69. Fréchet Regression & Density FDA | v11.0 | 5/5 | Complete    | 2026-09-03 |
-| 70. Multi-Domain Data, FAMM & Advanced Clustering | v11.0 | 3/4 | In Progress|  |
+| 70. Multi-Domain Data, FAMM & Advanced Clustering | v11.0 | 4/4 | In Progress|  |
 | 71. Shapelets & GAK Metric | v11.0 | 0/TBD | Not started | - |
 | 72. Advisor Extension | v11.0 | 0/TBD | Not started | - |
 | 73. Documentation & Release | v11.0 | 0/TBD | Not started | - |
