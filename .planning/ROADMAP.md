@@ -315,7 +315,11 @@ Plans:
   2. MCP `_DIAGNOSTICS_METHODS` / `_RUNNABLE_METHODS` guard-sync stays consistent — updated atomically with each aspect in a single commit; `test_guard_sync_version_independent.py` and a per-aspect `json.dumps(build_diagnostics(...))` serialization test pass
   3. The MCP compute path stays provably LLM-free (no LLM in the number path); `frechet` stays diagnostics-only (not added to `_RUNNABLE_METHODS`)
 
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 72-01-PLAN.md — fts aspect (tracer) + atomic guard-sync registration of fts+frechet across all 3 locations
+- [ ] 72-02-PLAN.md — frechet aspect (anova/global_reg/local_reg/mean grounded branches)
+- [ ] 72-03-PLAN.md — extend regression/classification/spm (fof/fam/gkam, shapelet handle, mfpca/spe_multivariate)
+- [ ] 72-04-PLAN.md — grounding + LLM-free assertion + full advisor/guard-sync gate
 **Parallelizable**: No — sequential; depends on all binding phases landing.
 
 #### Phase 73: Documentation & Release
