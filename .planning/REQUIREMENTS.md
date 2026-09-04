@@ -52,7 +52,7 @@ Requirements for this milestone. Each maps to a roadmap phase (Phases 66+, conti
 
 - [x] **DOCS-01**: One dedicated method-accurate page per new capability family (fts, fof/sof-regression, frechet, density-fda, multi-domain/FAMM, clustering, shapelet) wired into `mkdocs.yml` nav, each with a runnable offline worked example emitting `FDARS_FENCE_OK`
 - [x] **DOCS-02**: One hand-authored, STYLE_SPEC-conformant, SVGO-idempotent inline SVG concept diagram per new family, method-accurate against the shipped binding
-- [ ] **DOCS-03**: Advisor `aspects.md` updated for the new/extended aspects; whole-site `mkdocs build --strict` green offline; blocking human diagram method-accuracy review approved before close
+- [x] **DOCS-03**: Advisor `aspects.md` updated for the new/extended aspects; whole-site `mkdocs build --strict` green offline; blocking human diagram method-accuracy review approved before close
 
 ### Release
 
@@ -110,7 +110,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | ADV-02 | Phase 72 | Complete |
 | DOCS-01 | Phase 73 | Complete |
 | DOCS-02 | Phase 73 | Complete |
-| DOCS-03 | Phase 73 | Pending |
+| DOCS-03 | Phase 73 | Complete |
 | REL-01 | Phase 73 | Complete |
 
 **Coverage:**
