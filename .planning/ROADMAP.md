@@ -297,7 +297,10 @@ Plans:
   2. The two new enums (`QualityMeasure`, `ShapeletClassifier`) are dispatched by string, each with an `Err` fallback arm that raises `ValueError` listing valid variants on invalid input
   3. GAK metric functions (`gak`, `gak_gram_matrix`, `gak_gram_train` / `gak_gram_predict`, `sigma_gak`) extend `fdars.metric`, with the Gram output usable as a precomputed kernel
 
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 71-01-PLAN.md — SHAPE-01: new `fdars.shapelet` submodule (discover/transform_fit→PyShapeletFit/transform/classifier→PyShapeletClassifierFit/distance) + QualityMeasure/ShapeletClassifier string dispatch
+- [ ] 71-02-PLAN.md — SHAPE-02: GAK metric extending `fdars.metric` (gak/sigma_gak/gak_gram_matrix/gak_gram_train→PyGakGramTrain/gak_gram_predict) with precomputed-kernel Gram contract
+
 **Parallelizable**: Yes — new `src/shapelet_mod.rs` + `metric` extension; disjoint from other groups' module files; can run in a worktree in parallel with Phases 67, 68, 69.
 
 #### Phase 72: Advisor Extension
