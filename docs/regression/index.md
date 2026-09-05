@@ -20,6 +20,31 @@ The Regression module covers the full spectrum of supervised learning with funct
 <div class="fdars-gallery-title">Function-on-Scalar</div>
 <div class="fdars-gallery-desc">FOSR and FANOVA for predicting functional responses.</div>
 </a>
+<a class="fdars-gallery-item" href="concurrent-regression/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/concurrent-regression.svg" alt="">
+<div class="fdars-gallery-title">Concurrent Regression</div>
+<div class="fdars-gallery-desc">Point-wise coefficient function links functional predictor and response.</div>
+</a>
+<a class="fdars-gallery-item" href="functional-glm/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/functional-glm.svg" alt="">
+<div class="fdars-gallery-title">Functional GLM</div>
+<div class="fdars-gallery-desc">Project curves onto FPCs, then fit a GLM on the resulting scores.</div>
+</a>
+<a class="fdars-gallery-item" href="function-on-function/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/function-on-function.svg" alt="">
+<div class="fdars-gallery-title">Function-on-Function</div>
+<div class="fdars-gallery-desc">Bivariate coefficient surface links functional predictor to functional response.</div>
+</a>
+<a class="fdars-gallery-item" href="additive-sof/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/additive-sof.svg" alt="">
+<div class="fdars-gallery-title">Additive Scalar-on-Function</div>
+<div class="fdars-gallery-desc">Decompose functional effect into additive smooth component functions.</div>
+</a>
+<a class="fdars-gallery-item" href="frechet-regression/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/frechet-regression.svg" alt="">
+<div class="fdars-gallery-title">Fréchet Regression</div>
+<div class="fdars-gallery-desc">Regress onto a conditional Fréchet mean in a non-Euclidean metric space.</div>
+</a>
 <a class="fdars-gallery-item" href="classification/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/classification.svg" alt="">
 <div class="fdars-gallery-title">Classification</div>
