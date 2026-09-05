@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 Phase: Milestone v11.0 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-09-05 — Milestone v11.0 completed and archived
+Last activity: 2026-09-05 - Completed quick task 260905-htx: Add resample/upsample/downsample convenience methods to Fdata
 
 ## Performance Metrics
 
@@ -160,6 +160,12 @@ None yet.
 - [grounding invariant]: advisor diagnostics must be fdars-computed native `float`/`int` only (no Python-derived / numpy scalars into `json.dumps`); atomic guard-sync commit; `test_guard_sync_version_independent.py` must pass; MCP compute path stays provably LLM-free.
 - [linalg]: stay `parallel`-only (no `linalg`) — user decision; no v11.0 capability needs it (LINALG-01 deferred to Future).
 - [build time]: whole-site `mkdocs build --strict` is ~19–25 min with executed fences (5 new submodules add ~10 min) — keep fence datasets small; `--strict` gate runs only at the Phase-73 close.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260905-htx | Add resample/upsample/downsample convenience methods to the Fdata class that build a target evaluation grid and delegate to the existing interpolate() method, then document them (docstrings + MkDocs docs page) | 2026-09-05 | 364910b | [260905-htx-add-resample-upsample-downsample-conveni](./quick/260905-htx-add-resample-upsample-downsample-conveni/) |
 
 ## Deferred Items
 
