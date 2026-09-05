@@ -195,6 +195,9 @@ loaded through the small helper `docs_data`.
 | [Canadian Weather: Fréchet Regression](frechet-density-regression.md) | Canadian Weather | `frechet_global_reg`, `frechet_local_reg`, `wasserstein_barycenter` |
 | [Canadian Weather: FTS Forecast](fts-forecast.md) | Canadian Weather | `ftsm`, `ftsm_forecast_multistep`, `stationarity_test`, `functional_acf` |
 | [Phoneme: Shapelet Classification](phoneme-shapelets.md) | Phoneme | `discover_shapelets`, `shapelet_transform_fit`, `shapelet_transform`, `shapelet_classifier_fit` |
+| [Functional outlier workflow](functional-outlier-workflow.md) | Synthetic | `depth`, `magnitude_shape`, `outliergram` |
+| [Ranking curves by centrality](canadian-depth-centrality.md) | Canadian Weather | `depth` (`fraiman_muniz`, `modified_band`), `deepest` |
+| [Tolerance vs conformal bands](tolerance-vs-conformal.md) | Canadian Weather | `fpca_tolerance_band`, `conformal_prediction_band` |
 
 !!! tip "Reproducing locally"
     Every dataset is loadable outside the docs too:
