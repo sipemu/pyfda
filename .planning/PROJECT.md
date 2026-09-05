@@ -24,6 +24,19 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
+## Current Milestone: v12.0 Docs Depth, Card Coverage & AI Capability Skill
+
+**Goal:** Bring the recently-added (v11.0-era) functionality up to the documentation bar of the mature pages, complete section-landing card coverage across the focus sections, and give AI agents a way to discover the full fdars capability surface — a docs + skill milestone, no `fdars-core` bump and no new bindings (v7.0/v10.0 precedent).
+
+**Target features:**
+- **Deepen 9–10 thin v11.0 method pages to mature-page parity** (currently 20–35%): `functional-time-series`, `frechet-regression`, `density-fda`, `multi-domain`, `shapelets`, `advanced-clustering`, `function-on-function`, `additive-sof`, `concurrent-regression` (+ `functional-glm`) — add "When to use", "See also", parameter-selection guidance, caution/tip boxes, and more runnable inline `FDARS_FENCE_OK` examples.
+- **2–3 flagship end-to-end `examples/` pages** for marquee new methods (e.g. an FTS forecast walkthrough, a Fréchet-regression walkthrough) against existing `docs/data/` datasets.
+- **Complete section-landing card coverage:** create the 18 missing `assets/thumb/<page>.svg` thumbnails + gallery cards across **align (2), represent (3), regression (5), analyze (8)** and fill the **3 missing examples** cards — bringing those five galleries to 100%.
+- **AI capability-discovery skill across three surfaces:** a standalone **Agent Skill** (`SKILL.md`) mapping the whole fdars surface (every submodule, what it does, when to use it, how to call it); an **LLM-oriented docs page** (llms.txt-style API digest); and an **MCP capability tool** (describe/list capabilities) on the existing server, staying LLM-free.
+- **Gate:** whole-site `mkdocs build --strict` green offline; new/updated SVGs pass the SVGO/determinism gate; blocking human diagram review before close; grounding invariant + MCP LLM-free boundary preserved.
+
+**Key context:** Docs + skill only — no crate bump, no new bindings. Section cards use external thumbnails at `docs/assets/thumb/<page-slug>.svg` referenced from a `fdars-gallery` block in each section `index.md`; all 18 focus-section gaps are missing precisely because their thumbnail SVG is absent. Concept SVGs for the thin pages already exist (strength). Build is ~25 min with executed fences — keep fence datasets small; the `--strict` gate runs at the close phase. Advisor (7) and sklearn (5) landing pages have no gallery at all — deliberately deferred (different pattern). The new capability skill is the first non-advisor skill; it complements, and must not duplicate, the existing narrow `fdars-advisor` skill/MCP surface.
+
 ## Last Shipped Milestone: v11.0 fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs (shipped 2026-09-05)
 
 _All 24 requirements validated; 8 phases (66–73), 29 plans, 65 tasks; suite 5650 passed / 10 skipped; whole-site `mkdocs build --strict` green offline; blocking human diagram review approved (8 new SVGs). Package bumped 0.9.0 → 0.10.0 (PyPI release tag `v0.10.0` handed to user). Full detail: `.planning/milestones/v11.0-ROADMAP.md`. Next milestone: TBD via `/gsd-new-milestone`._
@@ -173,7 +186,15 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- No active milestone — v11.0 shipped 2026-09-05. Next milestone requirements defined via /gsd-new-milestone. -->
+<!-- v12.0 — Docs Depth, Card Coverage & AI Capability Skill. Requirements scoped in .planning/REQUIREMENTS.md; phases in .planning/ROADMAP.md. -->
+
+**v12.0 — Docs Depth, Card Coverage & AI Capability Skill (docs + skill; no crate bump):**
+
+- [ ] Deepen the 9–10 thin v11.0 method pages to mature-page parity (When-to-use, See-also, parameter guidance, caution boxes, more runnable inline `FDARS_FENCE_OK` examples)
+- [ ] Add 2–3 flagship end-to-end `examples/` pages for marquee new methods
+- [ ] Complete section-landing card coverage — 18 focus-section thumbnails + cards (align/represent/regression/analyze) + 3 examples cards
+- [ ] AI capability-discovery skill — Agent Skill (`SKILL.md`) + LLM-oriented docs page + MCP capability tool (LLM-free)
+- [ ] Close gate — whole-site `mkdocs build --strict` green offline, SVGO/determinism green, blocking human diagram review, grounding invariant preserved
 
 **v11.0 — fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs (Phases 66–73, shipped 2026-09-05):**
 
@@ -300,4 +321,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-05 after v11.0 milestone (fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs). Bumped 0.23.0 → 0.33.0 (parallel-only, no linalg) with zero drift, exposed the new upstream surface across 6 capability families (fts / FOF+SoF regression / Fréchet+density / multi-domain+FAMM+clustering / shapelets+GAK), extended the advisor with fts/frechet aspects (grounding invariant preserved), and documented everything with 8 new method-accurate SVGs + offline worked examples. 24/24 requirements validated; suite 5650 passed; pkg 0.9.0 → 0.10.0 (PyPI tag `v0.10.0` handed to user). Phases continue from Phase 74. Next: `/gsd-new-milestone` → research → requirements → roadmap.*
+*Last updated: 2026-09-05 — started milestone v12.0 (Docs Depth, Card Coverage & AI Capability Skill). Docs + skill only, no `fdars-core` bump: deepen the 9–10 thin v11.0 method pages to mature parity + 2–3 flagship `examples/` pages, complete section-landing card coverage (18 focus-section thumbnails/cards + 3 examples cards), and add an AI capability-discovery skill across three surfaces (Agent Skill + LLM-oriented docs page + LLM-free MCP capability tool). Phases continue from Phase 74. Next: research decision → requirements → roadmap.*

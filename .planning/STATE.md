@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v11.0
-milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
-status: Awaiting next milestone
-stopped_at: Phase 73 complete — all phases complete
-last_updated: "2026-09-05T09:16:34.626Z"
+milestone: v12.0
+milestone_name: Docs Depth, Card Coverage & AI Capability Skill
+status: planning
+last_updated: "2026-09-05T13:13:51.027Z"
 last_activity: 2026-09-05
-last_activity_desc: Milestone v11.0 completed and archived
-state_head: a19541b8fd7bf8629ed96ca42b8d19befd25644b
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 29
-  completed_plans: 29
-  percent: 100
-current_phase: 73
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 
 ## Current Position
 
-Phase: Milestone v11.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-05 - Completed quick task 260905-htx: Add resample/upsample/downsample convenience methods to Fdata
+Status: Defining requirements
+Last activity: 2026-09-05 — Milestone v12.0 started
 
 ## Performance Metrics
 
