@@ -20,6 +20,11 @@ Functional observations often exhibit two fundamentally different sources of var
 <div class="fdars-gallery-title">Advanced Elastic Alignment</div>
 <div class="fdars-gallery-desc">Closed, constrained, penalized, and multi-resolution alignment.</div>
 </a>
+<a class="fdars-gallery-item" href="banded-alignment/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/banded-alignment.svg" alt="">
+<div class="fdars-gallery-title">Banded Elastic Alignment</div>
+<div class="fdars-gallery-desc">Fast Karcher mean via a diagonal DP band constraint.</div>
+</a>
 <a class="fdars-gallery-item" href="landmark-registration/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/landmark-registration.svg" alt="">
 <div class="fdars-gallery-title">Landmark Registration</div>
@@ -34,6 +39,11 @@ Functional observations often exhibit two fundamentally different sources of var
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/alignment-comparison.svg" alt="">
 <div class="fdars-gallery-title">Comparing Methods</div>
 <div class="fdars-gallery-desc">No alignment vs elastic vs landmark, side by side.</div>
+</a>
+<a class="fdars-gallery-item" href="shift-registration/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/shift-registration.svg" alt="">
+<div class="fdars-gallery-title">Shift Registration</div>
+<div class="fdars-gallery-desc">Align curves by a single scalar time-shift per observation.</div>
 </a>
 <a class="fdars-gallery-item" href="shape-analysis/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/shape-analysis.svg" alt="">
