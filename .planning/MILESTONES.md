@@ -1,5 +1,45 @@
 # Milestones
 
+## v11.0 fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs (Shipped: 2026-09-05)
+
+**Phases completed:** 8 phases, 29 plans, 65 tasks
+
+**Key accomplishments:**
+
+- fdars-core bumped 0.23.0→0.33.0 (parallel only) with zero numeric drift confirmed by 5339-test green gate; 6 deprecated call sites suppressed via CONTINGENCY #[allow(deprecated)]; full API audit recorded in 66-AUDIT.md
+- fdars.fts PyO3 submodule registered end-to-end with ftsm binding proven transposition-correct on a non-square (40x25) AR(1) fixture — 4 tests pass, build green, no warnings
+- Four fts forecasting bindings via combined-function pattern: ftsm_forecast, ftsm_forecast_multistep, ftsm_update, fplsr — all transposition-correct on the non-square (40x25) fixture with 9/9 tests passing.
+- Five FTS diagnostics functions bound: functional_acf/pacf (seed=42, int64 lags), functional_difference (naked array), stationarity_test (permutation p-value, deterministic), long_run_covariance (col-major reshape, symmetric 1e-10); FTS-02 complete with 21 passing tests
+- `spectral_density` (per-frequency col-major reshape), `dpca`, and `dpca_reconstruct` (combined-function pattern) complete the 13-function `fdars.fts` submodule; all 27 fts tests pass on the non-square (N=40, M=25) fixture
+- FND-02 rewritten to assert Phase-55 baseline _submodule_names ⊆ current set plus per-name import/attribute registration, eliminating the git-diff byte-freeze that broke on every new submodule addition
+- fof_regression bound into fdars.regression via dual numpy2d_to_fdmatrix path, returning a 9-key PyDict with beta_surface shape (m_y, m_x) = (18, 25) proven on a 3-distinct-dim non-square fixture
+- Four FOF functions bound to fdars.regression — combined-refit predict pattern, REG-02 subject-id validation, and 10 passing tests on a 3-distinct-dim (N=30, MX=25, MY=18) non-square fixture
+- New `fdars.scalar_on_function` submodule binding five additive/selection functions (fam, fregre_gkam, fregre_gsam, variable_selection, model_selection_ncomp) via Default::default()+mutation for #[non_exhaustive] config structs and an Err-returning VarSelectPenalty wildcard arm
+- Relocated `extract_list_of_vecs` from `pace_fpca_mod.rs` into `convert.rs` as public `extract_ragged_vecs(list, caller_name)`, rewired both pace_fpca call sites, and proved behavior unchanged via 20 passing tests.
+- New `fdars.frechet` submodule with three density-default Fréchet functions (`frechet_anova` 9-key, `frechet_global_reg` / `frechet_local_reg` 3-key) using `numpy2d_to_fdmatrix` I/O; 21 tests pass on non-square (N=40, M=50, N_OUT=10) fixtures
+- `frechet_mean` bound with monomorphized SPD/spherical/correlation string dispatch, per-space column-major marshalling, structural validation, and a ValueError wildcard arm — 35 tests green
+- `fdars.density_fda` submodule registered with 5 functions: `normalize_density` (naked 1D), `lqd_transform` / `inverse_lqd` (naked 1D, LQD round-trip tested), `wasserstein_barycenter` (naked 1D), and `lqd_fpca` (6-key PyDict with `loadings` key for the rotation matrix).
+- Route frechet_mean's spherical sample through convert::extract_ragged_vecs, closing FRE-03's "used by the Fréchet inputs" gap with zero behavior change
+- PyMultiFunData opaque #[pyclass] handle — pyfda's second opaque Rust type — with a list-of-components builder, n_obs/n_components accessors, and three pre-constructor validation guards, registered as fdars.multi_fdata
+- `fdars.famm` submodule binding `dense_flmm` (14-key REML-EM result), `fast_fmm` (6-key Wald result), and `multi_famm` (4-key multi-variable result with D per-dimension component dicts) from fdars-core 0.33's plain-FdMatrix FAMM API.
+- mfpca (6-key PyDict: scores/eigenfunctions/eigenvalues/means/scales/grid_sizes) and spe_multivariate (naked (n,) array) added to fdars.spm via Vec<FdMatrix>/Vec<&FdMatrix> slice pattern; pub(super) fields excluded; 11 tests on non-square multi-variable fixture all pass
+- Four advanced functional clustering algorithms (DBSCAN, KCFC, FunFEM, elastic-alignment) bound into `fdars.clustering` with documented labels/result PyDicts; all transposition-guarded on non-square fixtures; 4 tests passing.
+- New `fdars.shapelet` submodule binding five shapelet functions + two opaque handles (`PyShapeletFit` wrapping `ShapeletTransformFit`, `PyShapeletClassifierFit` with `predict()`) + two string-dispatched `#[non_exhaustive]` enums with mandatory Err arms; all 24 shapelet+FND-02 tests green.
+- PyGakGramTrain opaque handle + 5 GAK functions (gak, sigma_gak, gak_gram_matrix, gak_gram_train, gak_gram_predict) added to fdars.metric with (n,n) and (n_test,n_train) sklearn precomputed-kernel shape contracts verified
+- fts aspect builder created and registered end-to-end; frechet stub registered; both method strings added atomically across advisor _supported, server _DIAGNOSTICS_METHODS, and guard-sync test literal in ONE commit; 37 offline serialization tests pass
+- Real frechet diagnostics builder with anova/global_reg/local_reg/frechet_mean branches using CONFIRMED PyDict keys from frechet_mod.rs; grounded native-Python scalars; JSON-serialisable; deterministic.
+- Extends three existing advisor aspect builders for the v11.0 new methods (fof/fof_re/fam/gkam/shapelet/mfpca/spe_multivariate) with grounded, JSON-serialisable, numpy-scalar-free diagnostics; shapelet opaque-handle TypeError prevented by coercion guard in __init__.py.
+- Extended test_advisor_grounding.py with fts/frechet native-scalar grounding cases and dual-mode LLM-free subprocess+in-process assertion; combined 273-test advisor/guard-sync gate green
+- FTS page + FDARS_FENCE_OK fence + STYLE_SPEC-conformant 720x480 SVG diagram + Analyze nav wiring, proving the end-to-end docs authoring loop for the remaining 6 families
+- Three Regression-section doc pages (FoF, Additive SoF, Frechet) with offline FDARS_FENCE_OK fences, three STYLE_SPEC 720x480 SVGO-idempotent SVG diagrams, and Regression nav entries — DOCS_FAST build green, check_docs_figures exit 0
+- Four Analyze-section pages with offline FDARS_FENCE_OK fences, four STYLE_SPEC SVGO-idempotent SVGs, and nav entries — completing DOCS-01/DOCS-02 coverage for all Analyze families; API discrepancies from RESEARCH templates corrected via per-fence Python sanity checks.
+- Advisor `aspects.md` updated for the v11.0 methods, whole-site `mkdocs build --strict` gate green, and all 8 new hand-authored SVG diagrams human-approved in the blocking diagram review
+- Version bumped 0.9.0 → 0.10.0 in Cargo.toml + pyproject.toml and committed; PyPI release tag checkpoint handed to user
+
+**Verification:** verified_closeout — all 8 phases (66–73) `phase_complete` + `verification_status: passed`; milestone audit PASSED (5650 tests, 24/24 requirements). Known verification overrides: 0 newly acknowledged, 2 carried forward from a prior close (see STATE.md Deferred Items).
+
+---
+
 ## v10.0 Diagram Quality & Accessibility Pass (Shipped: 2026-09-02)
 
 **Phases completed:** 6 phases, 7 plans, 9 tasks

@@ -41,13 +41,13 @@
     {
       "number": "73",
       "name": "Documentation & Release",
-      "status": "pending"
+      "status": "complete"
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 73 of 8 · 86% · executing"
+    "command": "/gsd:progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
   },
-  "updated_at": "2026-09-04T19:15:11.953Z"
+  "updated_at": "2026-09-05T09:16:34.640Z"
 }

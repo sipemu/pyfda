@@ -24,17 +24,13 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v11.0 fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
+## Last Shipped Milestone: v11.0 fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs (shipped 2026-09-05)
+
+_All 24 requirements validated; 8 phases (66–73), 29 plans, 65 tasks; suite 5650 passed / 10 skipped; whole-site `mkdocs build --strict` green offline; blocking human diagram review approved (8 new SVGs). Package bumped 0.9.0 → 0.10.0 (PyPI release tag `v0.10.0` handed to user). Full detail: `.planning/milestones/v11.0-ROADMAP.md`. Next milestone: TBD via `/gsd-new-milestone`._
 
 **Goal:** Bump `fdars-core` 0.23.0 → 0.33.0, expose the new upstream surface through PyO3 bindings and the Python API, extend the AI advisor where relevant (grounding invariant preserved), and document everything to the project's method-accurate standard (hand-authored inline SVG diagrams + runnable offline worked examples). Same shape as v4.0/v5.0/v6.0.
 
-**Target features:**
-- **Crate bump `fdars-core 0.23.0 → 0.33.0`** as an isolated regression gate on the ~772-test baseline; keep `parallel`, do NOT enable `linalg` (research still notes MSRV/linalg status at 0.33); rebuild via maturin.
-- **New bindings** — expose the capabilities added across 0.24–0.33 through PyO3 + the Python API, grouped by capability family (exact surface confirmed during research); layout-correct column-major round-trips, `Result`/dict conversions, `#[non_exhaustive]` fallback arms.
-- **Advisor extension (where relevant)** — grounded diagnostics for new aspects; grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync held as hard constraints (single atomic commits, as v4.0 Phase 28 / v5.0 Phase 34 / v6.0 Phase 40).
-- **Docs** — new dedicated pages + method-accurate hand-authored inline SVGs + runnable offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green; blocking human diagram review before close.
-
-**Key context:** Large jump (10 minors) — unlike the prior additive-only waves (v4/v5/v6 each moved 3 minors), 0.24→0.33 may include **breaking changes**; research must map the full changelog, flag any breaking signature changes to existing bindings, and confirm a clean bump path. Crosses binding + advisor + docs code (`Cargo.toml`, `src/*_mod.rs`, `src/lib.rs`, `python/fdars/`, `python/fdars/advisor`, `python/fdars/mcp`, `docs/`). Genuine unknowns → research warranted: exact 0.24–0.33 changelog + new function signatures + result-struct field names, any breaking changes to existing bindings, MSRV/linalg status at 0.33, advisor scope per new capability, worked-example datasets. Package currently `0.9.0`; a code milestone bumps it (semver `vX.Y.Z` tag triggers PyPI publish) — decide the exact bump (likely `0.10.0`) at close. Docs build is ~19–25 min (executed fences run real compute) — keep fence data small. Large scope — the roadmap phases it (bump → binding groups ∥ → advisor → docs), same as v4.0/v5.0/v6.0.
+**Delivered:** upgraded `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no `linalg`; zero numeric drift on the ~772-test baseline, 6 deprecated call sites suppressed, full API audit in `66-AUDIT.md`) and exposed the new upstream surface across capability families — a new `fdars.fts` submodule (13 functional-time-series functions: ftsm forecasting/update, fplsr, ACF/PACF, stationarity, long-run covariance, spectral density, DPCA), function-on-function + additive scalar-on-function regression (`fof_regression` + FOF family in `fdars.regression`, new `fdars.scalar_on_function` submodule), Fréchet regression + density FDA (`fdars.frechet` with `frechet_mean` SPD/spherical/correlation dispatch, new `fdars.density_fda` LQD/Wasserstein submodule), multi-domain data + FAMM + advanced clustering (`PyMultiFunData` opaque handle + `fdars.multi_fdata`, `fdars.famm` REML-EM/Wald/multi-variable, `mfpca`/`spe_multivariate` in `fdars.spm`, DBSCAN/KCFC/FunFEM/elastic clustering), and shapelets + GAK metric (`fdars.shapelet` with two opaque fit handles, 5 GAK functions in `fdars.metric` with sklearn precomputed-kernel shapes). Extended the advisor with new `fts`/`frechet` aspects + grounded diagnostics for fof/fam/gkam/shapelet/mfpca/spe_multivariate (grounding invariant + MCP `_DIAGNOSTICS_METHODS` guard-sync held in atomic commits). Documented everything with new FTS/Regression/Analyze-section pages + 8 method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples; whole-site `--strict` green.
 
 ## Last Shipped Milestone: v10.0 Diagram Quality & Accessibility Pass (shipped 2026-09-02)
 
@@ -177,14 +173,14 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- v11.0 — fdars-core 0.33 Upgrade. Requirements scoped in REQUIREMENTS.md; refined by the roadmapper. -->
+<!-- No active milestone — v11.0 shipped 2026-09-05. Next milestone requirements defined via /gsd-new-milestone. -->
 
-**v11.0 — fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs (in progress):**
+**v11.0 — fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs (Phases 66–73, shipped 2026-09-05):**
 
-- [ ] Crate bump `fdars-core 0.23.0 → 0.33.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate; any breaking changes to existing bindings absorbed
-- [ ] New PyO3 bindings + Python API for the capabilities added across 0.24–0.33 (grouped by capability family; exact surface derived from research)
-- [ ] Advisor extension (where relevant) — grounded diagnostics for new aspects; grounding invariant + MCP guard-sync preserved
-- [ ] Docs — new pages + method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green; blocking human diagram review
+- [x] Crate bump `fdars-core 0.23.0 → 0.33.0` (parallel-only, no linalg); full binding + advisor suite green as the regression gate — Phase 66 (5339-test gate green, zero drift, 6 deprecated call sites suppressed, `66-AUDIT.md`)
+- [x] New PyO3 bindings + Python API for the capabilities added across 0.24–0.33, grouped by capability family — Phases 67–71 (`fdars.fts` 13 fns; FOF + `fdars.scalar_on_function`; `fdars.frechet` + `fdars.density_fda`; `PyMultiFunData`/`fdars.multi_fdata` + `fdars.famm` + `mfpca`/`spe_multivariate` + advanced clustering; `fdars.shapelet` + GAK in `fdars.metric`)
+- [x] Advisor extension — new `fts`/`frechet` aspects + grounded diagnostics for fof/fam/gkam/shapelet/mfpca/spe_multivariate; grounding invariant + MCP guard-sync preserved (atomic commits) — Phase 72
+- [x] Docs — new pages + 8 method-accurate hand-authored SVGs + runnable offline `FDARS_FENCE_OK` worked examples; whole-site `mkdocs build --strict` green; blocking human diagram review approved; pkg 0.9.0 → 0.10.0 — Phase 73
 
 **v10.0 — Diagram Quality & Accessibility Pass (Phases 60–65, shipped 2026-09-02):**
 
@@ -284,6 +280,7 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 | Run the three SVG-correction phases (61/62/63) in parallel via isolated git worktrees, not sequentially on main | The three section batches edit disjoint concept-SVG sets and run no doc build during correction (that's Phase 65 only), so the v6.0 "sequential-on-main" reason does not apply; parallelism cut wall-clock ~3× | ✓ Good — disjoint sets merged to main with zero conflicts; all 90 corrected concurrently (v10.0, user-approved) |
 | Consolidate the blocking human diagram review into the final gate phase (65) rather than per-correction-phase | Per-phase verifiers flag visual items for diagram work by nature; one whole-set review over the corrected site is stronger and avoids fragmenting the human gate | ✓ Good — 61/63 visual items carried forward to GATE-03; single review approved the full set (v10.0) |
 | Complete Phase 64–65 inline (orchestrator) when the account hit a session-quota limit mid-run, instead of spawning executor/verifier subagents | Remaining work was small, concrete, and fully checkable (doc edit + SVGO/build gates); the one irreducible human gate (GATE-03) was preserved | ✓ Good — gates run directly, milestone closed cleanly without waiting on quota reset (v10.0) |
+| Absorb the 10-minor `fdars-core` 0.23→0.33 jump as one isolated bump gate despite the breaking-change risk, then fan out binding families in parallel | A single green regression gate isolates the numeric/deprecation surface before any new-binding work, so family correctness can't hide behind an upgrade regression — same play as v4/v5/v6 but over a far larger jump | ✓ Good — zero drift, 6 deprecations suppressed cleanly, 5650 tests green; all 6 binding families landed without disturbing existing bindings (v11.0) |
 
 ## Evolution
 
@@ -303,4 +300,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-02 — started milestone v11.0 (fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs). Bump 0.23.0 → 0.33.0 (parallel-only, no linalg), expose the new upstream surface via PyO3 bindings + Python API, extend the advisor where relevant (grounding invariant preserved), document to the method-accurate standard. Same shape as v4.0/v5.0/v6.0; 10-minor jump may carry breaking changes (research to confirm). Phases continue from Phase 66. Next: research → requirements → roadmap.*
+*Last updated: 2026-09-05 after v11.0 milestone (fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs). Bumped 0.23.0 → 0.33.0 (parallel-only, no linalg) with zero drift, exposed the new upstream surface across 6 capability families (fts / FOF+SoF regression / Fréchet+density / multi-domain+FAMM+clustering / shapelets+GAK), extended the advisor with fts/frechet aspects (grounding invariant preserved), and documented everything with 8 new method-accurate SVGs + offline worked examples. 24/24 requirements validated; suite 5650 passed; pkg 0.9.0 → 0.10.0 (PyPI tag `v0.10.0` handed to user). Phases continue from Phase 74. Next: `/gsd-new-milestone` → research → requirements → roadmap.*

@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v11.0
 milestone_name: fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
-current_phase: 73
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 73 complete — all phases complete
-last_updated: "2026-09-04T22:16:14.133Z"
+last_updated: "2026-09-05T09:16:34.626Z"
 last_activity: 2026-09-05
-last_activity_desc: Phase 73 complete
-state_head: 409f8b265d83ade7d9d9af8234c62bb7424b2540
+last_activity_desc: Milestone v11.0 completed and archived
+state_head: a19541b8fd7bf8629ed96ca42b8d19befd25644b
 progress:
   total_phases: 8
   completed_phases: 8
   total_plans: 29
   completed_plans: 29
   percent: 100
+current_phase: 73
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 
 ## Current Position
 
-Phase: 73
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-09-05 — Phase 73 complete
+Phase: Milestone v11.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-09-05 — Milestone v11.0 completed and archived
 
 ## Performance Metrics
 
@@ -184,4 +184,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Plan Phase 66 (isolated crate bump) with /gsd-plan-phase 66
+- Start the next milestone with /gsd-new-milestone
