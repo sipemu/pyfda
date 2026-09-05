@@ -130,7 +130,7 @@ print("FDARS_FENCE_OK")
 | `rotation` | `(m, ncomp)` | Basis (eigenvector) matrix |
 | `scores` | `(n, ncomp)` | Score matrix |
 | `fitted` | `(n, m)` | Fitted curves |
-| `weights` | `(m,)` | Component weights (explained variance fractions) |
+| `weights` | `(m,)` | Grid quadrature weights over the evaluation grid (not per-component variance) |
 | `ncomp` | `int` | Number of components retained |
 | `ar_models` | `list[dict]` | Per-component AR model; each dict has keys `order (int)`, `phi (ndarray)`, `sigma2 (float)` |
 
