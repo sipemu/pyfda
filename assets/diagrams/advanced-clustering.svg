@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none"
+     role="img" aria-label="Advanced Functional Clustering — DBSCAN and KCFC methods"
+     aria-labelledby="clust-title clust-desc">
+  <title id="clust-title">Advanced Functional Clustering</title>
+  <desc id="clust-desc">Shows four advanced functional clustering methods: DBSCAN-FD (density-based, noise labelled -1), KCFC (per-cluster FPCA), FunFEM (discriminative subspace), and Align-and-Cluster (simultaneous warping and assignment).</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="30" text-anchor="middle">Advanced Functional Clustering</text>
+  <text class="sub" x="360" y="50" text-anchor="middle">Beyond k-means: density-based, per-cluster FPCA, model-based, and alignment-aware methods</text>
+
+  <!-- ===== Input panel ===== -->
+  <rect x="16" y="64" width="140" height="190" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="86" y="84" text-anchor="middle" fill="#1a1a2e">Input</text>
+  <text class="sm" x="86" y="100" text-anchor="middle">Unlabeled curves</text>
+  <!-- mixed sin-like curves in grey -->
+  <path d="M26 160 Q56 120 86 130 Q116 140 150 165" stroke="#6c757d" stroke-width="1.4" fill="none" opacity="0.6"/>
+  <path d="M26 175 Q56 135 86 140 Q116 150 150 178" stroke="#6c757d" stroke-width="1.4" fill="none" opacity="0.5"/>
+  <path d="M26 145 Q56 175 86 185 Q116 175 150 148" stroke="#6c757d" stroke-width="1.4" fill="none" opacity="0.5"/>
+  <path d="M26 190 Q56 145 86 155 Q116 165 150 192" stroke="#6c757d" stroke-width="1.4" fill="none" opacity="0.4"/>
+  <path d="M26 200 Q56 155 86 160 Q116 170 150 202" stroke="#6c757d" stroke-width="1.4" fill="none" opacity="0.3"/>
+  <!-- noise-like outlier -->
+  <path d="M26 128 Q50 230 86 210 Q120 190 150 230" stroke="#dc3545" stroke-width="1.4" fill="none" opacity="0.5"/>
+  <text class="sm" x="86" y="238" text-anchor="middle">n curves</text>
+
+  <!-- Fan arrows to four methods -->
+  <line x1="156" y1="110" x2="188" y2="92" stroke="#495057" stroke-width="1.6" marker-end="url(#arr-cl)"/>
+  <line x1="156" y1="140" x2="188" y2="212" stroke="#495057" stroke-width="1.6" marker-end="url(#arr-cl)"/>
+  <line x1="156" y1="180" x2="188" y2="312" stroke="#495057" stroke-width="1.6" marker-end="url(#arr-cl)"/>
+  <line x1="156" y1="210" x2="188" y2="412" stroke="#495057" stroke-width="1.6" marker-end="url(#arr-cl)"/>
+
+  <!-- ===== DBSCAN-FD panel ===== -->
+  <rect x="192" y="64" width="230" height="130" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="307" y="84" text-anchor="middle" fill="#1a1a2e">DBSCAN-FD</text>
+  <text class="mono" x="307" y="102" text-anchor="middle" fill="#6c757d">dbscan_fd(X, t, eps, min_points)</text>
+  <!-- cluster 1 curves indigo -->
+  <path d="M204 150 Q240 120 280 125 Q320 130 416 155" stroke="#3f51b5" stroke-width="2.0" fill="none"/>
+  <path d="M204 162 Q240 132 280 137 Q320 142 416 167" stroke="#3f51b5" stroke-width="1.6" fill="none" opacity="0.7"/>
+  <!-- cluster 2 curves orange -->
+  <path d="M204 145 Q250 170 290 178 Q330 172 416 148" stroke="#e8710a" stroke-width="2.0" fill="none"/>
+  <!-- noise point red, labelled -1 -->
+  <circle cx="380" cy="95" r="5" fill="#dc3545" opacity="0.8"/>
+  <text class="sm" x="393" y="99" fill="#dc3545">−1 noise</text>
+  <text class="sm" x="307" y="184" text-anchor="middle">No k needed · arbitrary shape · label −1 = noise</text>
+
+  <!-- ===== KCFC panel ===== -->
+  <rect x="192" y="208" width="230" height="130" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="307" y="228" text-anchor="middle" fill="#fd7e14">KCFC</text>
+  <text class="mono" x="307" y="246" text-anchor="middle" fill="#fd7e14">kcfc_cluster(X, t, k, ncomp)</text>
+  <!-- cluster 1 with its own PC line -->
+  <path d="M204 290 Q240 260 280 265 Q320 270 416 295" stroke="#3f51b5" stroke-width="2.0" fill="none"/>
+  <path d="M204 302 Q240 272 280 277 Q320 282 416 307" stroke="#3f51b5" stroke-width="1.4" fill="none" opacity="0.6"/>
+  <!-- cluster 2 with its own PC line -->
+  <path d="M204 285 Q250 308 290 314 Q330 308 416 285" stroke="#198754" stroke-width="2.0" fill="none"/>
+  <path d="M204 278 Q250 302 290 308 Q330 302 416 278" stroke="#198754" stroke-width="1.4" fill="none" opacity="0.6"/>
+  <text class="sm" x="307" y="328" text-anchor="middle">Per-cluster FPCA · different variability structures</text>
+
+  <!-- ===== FunFEM panel ===== -->
+  <rect x="192" y="354" width="230" height="66" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="307" y="374" text-anchor="middle" fill="#1a1a2e">FunFEM</text>
+  <text class="mono" x="307" y="392" text-anchor="middle" fill="#6c757d">funfem_cluster(X, t, k)</text>
+  <text class="sm" x="307" y="410" text-anchor="middle">Model-based · discriminative subspace · EM fitting</text>
+
+  <!-- ===== Align-and-Cluster panel ===== -->
+  <rect x="192" y="430" width="230" height="38" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="307" y="450" text-anchor="middle" fill="#1a1a2e">Align-and-Cluster</text>
+  <text class="mono" x="307" y="462" text-anchor="middle" fill="#6c757d">align_cluster_fd(X, t, k)</text>
+
+  <!-- ===== Output panel ===== -->
+  <rect x="448" y="64" width="256" height="404" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="576" y="84" text-anchor="middle" fill="#1a1a2e">Output Structure</text>
+
+  <!-- DBSCAN output -->
+  <rect x="460" y="92" width="232" height="88" rx="6" fill="#fff" stroke="#ced4da" stroke-width="1.0"/>
+  <text class="lab" x="468" y="110" fill="#1a1a2e">dbscan_fd result</text>
+  <text class="sm" x="468" y="128">cluster  — int array (n,), −1 = noise</text>
+  <text class="sm" x="468" y="144">n_clusters — clusters found</text>
+  <text class="sm" x="468" y="160">n_noise    — noise count</text>
+  <text class="sm" x="468" y="174">distances  — (n, n) L² matrix</text>
+
+  <!-- KCFC output -->
+  <rect x="460" y="192" width="232" height="88" rx="6" fill="#fff" stroke="#ced4da" stroke-width="1.0"/>
+  <text class="lab" x="468" y="210" fill="#fd7e14">kcfc_cluster result</text>
+  <text class="sm" x="468" y="228">cluster              — int array (n,)</text>
+  <text class="sm" x="468" y="244">reconstruction_errors — (n, k)</text>
+  <text class="sm" x="468" y="260">iterations / converged</text>
+  <text class="sm" x="468" y="276">(fpca_models not exposed)</text>
+
+  <!-- separation line -->
+  <line x1="460" y1="292" x2="692" y2="292" stroke="#ced4da" stroke-width="1.0"/>
+
+  <text class="lab" x="576" y="314" text-anchor="middle" fill="#1a1a2e">Common to all methods</text>
+  <text class="sm" x="576" y="334" text-anchor="middle">Integer cluster label per curve</text>
+  <text class="sm" x="576" y="352" text-anchor="middle">No k needed for DBSCAN</text>
+  <text class="sm" x="576" y="370" text-anchor="middle">Import from fdars.clustering</text>
+  <text class="sm" x="576" y="390" text-anchor="middle">Non-square fixtures supported</text>
+  <text class="sm" x="576" y="408" text-anchor="middle">(n ≠ m to guard transposition)</text>
+
+  <!-- Arrows from panels to output -->
+  <line x1="422" y1="130" x2="448" y2="138" stroke="#495057" stroke-width="1.2" marker-end="url(#arr-cl)"/>
+  <line x1="422" y1="273" x2="448" y2="238" stroke="#495057" stroke-width="1.2" marker-end="url(#arr-cl)"/>
+
+  <defs>
+    <marker id="arr-cl" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7" fill="#495057"/>
+    </marker>
+  </defs>
+</svg>

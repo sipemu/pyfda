@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Regression Diagnostics: Finding Influential Points" aria-labelledby="regression-diagnostics-title regression-diagnostics-desc">
+  <title id="regression-diagnostics-title">Regression Diagnostics: Finding Influential Points</title>
+  <desc id="regression-diagnostics-desc">Regression diagnostics identify influential observations via Cook's distance and leverage; points exceeding the 4/n threshold are flagged for inspection or removal to improve model robustness.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Regression Diagnostics: Finding Influential Points</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Which observations dominate the fit — leverage vs. Cook's distance</text>
+
+  <!-- Panel 1: fitted model -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Fitted Model</text>
+  <g transform="translate(44,110)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="0" x2="0" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="6" y1="112" x2="150" y2="30" stroke="#495057" stroke-width="2"/>
+    <circle cx="24" cy="98" r="3" fill="#4a90d9"/>
+    <circle cx="52" cy="82" r="3" fill="#4a90d9"/>
+    <circle cx="80" cy="70" r="3" fill="#4a90d9"/>
+    <circle cx="108" cy="52" r="3" fill="#4a90d9"/>
+    <circle cx="136" cy="38" r="3" fill="#4a90d9"/>
+    <circle cx="140" cy="94" r="4.5" fill="#dc3545"/>
+    <text class="sm" x="30" y="16">y = Zβ + ε</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#dc3545">influence_diagnostics()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Hat-matrix diagnostics</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="16">Leverage · Cook's D</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="48">DFBETAS · DFFITS</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="80">PRESS · VIF</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: influence plot -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">Influence Plot</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">flagged points stand out</text>
+  <g transform="translate(524,124)">
+    <line x1="0" y1="110" x2="150" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="0" x2="0" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="42" x2="150" y2="42" stroke="#6c757d" stroke-dasharray="3 3" stroke-width="1"/>
+    <circle cx="22" cy="96" r="3" fill="#3f51b5"/>
+    <circle cx="44" cy="90" r="3" fill="#3f51b5"/>
+    <circle cx="68" cy="98" r="3" fill="#3f51b5"/>
+    <circle cx="90" cy="84" r="3" fill="#3f51b5"/>
+    <circle cx="118" cy="88" r="3" fill="#3f51b5"/>
+    <circle cx="132" cy="18" r="5" fill="#dc3545" stroke="#1a1a2e" stroke-width="1.2"/>
+    <text class="sm" x="6" y="36" fill="#dc3545">4/n</text>
+    <text class="sm" x="52" y="126">leverage</text>
+  </g>
+</svg>

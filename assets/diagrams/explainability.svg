@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Model Explainability: Why the Prediction?" aria-labelledby="explainability-title explainability-desc">
+  <title id="explainability-title">Model Explainability: Why the Prediction?</title>
+  <desc id="explainability-desc">Model explainability attributes predictions to specific time-domain regions by highlighting segments where the coefficient function β(t) or SHAP values are largest, revealing which parts of the curve drive the output.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Model Explainability: Why the Prediction?</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Attribute the fit to the FPC scores and the regions of t that drive it</text>
+
+  <!-- Panel 1: fitted model -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Fitted Model</text>
+  <g transform="translate(44,116)">
+    <line x1="0" y1="110" x2="156" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 80 C40 40 80 100 120 60 C138 44 150 66 156 58" stroke="#495057" stroke-opacity=".3" stroke-width="1.6"/>
+    <path d="M0 90 C40 54 80 106 120 72 C138 56 150 78 156 70" stroke="#495057" stroke-opacity=".3" stroke-width="1.6"/>
+    <path d="M0 84 C40 48 80 100 120 66 C138 50 150 72 156 62" stroke="#495057" stroke-width="2.4"/>
+    <text class="sm" x="30" y="128">f(X) → ŷ</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#dc3545">shap · pdp · regions</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Score &amp; domain attribution</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="16">SHAP · PDP · ALE</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="48">Pointwise importance</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="80">significant_regions()</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: importance curve -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">Importance Curve</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">highlighted region on t</text>
+  <g transform="translate(524,124)">
+    <line x1="0" y1="110" x2="150" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <rect x="34" y="6" width="34" height="104" fill="#dc3545" fill-opacity=".14"/>
+    <path d="M0 104 C18 100 30 30 50 22 C68 30 78 100 96 96 C114 88 130 96 150 94" stroke="#dc3545" stroke-width="2.4" fill="none"/>
+    <text class="sm" x="30" y="128">important region</text>
+  </g>
+</svg>

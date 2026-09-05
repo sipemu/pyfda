@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Comparing Alignment Methods"
+     aria-labelledby="alignment-comparison-title alignment-comparison-desc">
+  <title id="alignment-comparison-title">Comparing Alignment Methods</title>
+  <desc id="alignment-comparison-desc">Compares three alignment strategies run on the same phase-varying curve sample — none (cross-sectional), elastic (karcher_mean), and landmark (interpolation warp) — by overlaying the resulting mean curves in Panel 3 to show how elastic and landmark registration sharpen the mean relative to the unaligned cross-sectional average.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Comparing Alignment Methods</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Run each strategy on the same sample; compare the sharpened means</text>
+
+  <!-- Panel 1: phase-varying curves -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Phase-Varying Sample</text>
+  <g transform="translate(44,116)">
+    <line x1="0" y1="110" x2="156" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 108 C28 108 38 32 54 32 C70 32 78 108 90 108 C106 108 116 62 130 62 C140 62 150 96 156 96" stroke="#495057" stroke-opacity=".32" stroke-width="1.5"/>
+    <path d="M0 108 C40 108 50 46 66 46 C82 46 90 108 104 108 C120 108 128 76 142 76 C150 76 154 98 156 98" stroke="#495057" stroke-opacity=".32" stroke-width="1.5"/>
+    <path d="M0 108 C22 108 34 24 50 24 C66 24 74 108 86 108 C104 108 112 54 126 54 C138 54 150 94 156 94" stroke="#495057" stroke-opacity=".32" stroke-width="1.5"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method / three strategies -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#fd7e14">compare()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Three strategies</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="16">none (cross-sectional)</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="48">elastic (karcher_mean)</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="80">landmark (interp)</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: three compared means -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#fd7e14">Compared Means</text>
+  <g transform="translate(516,108)">
+    <line x1="0" y1="128" x2="164" y2="128" stroke="#adb5bd" stroke-width="1.2"/>
+    <!-- none: flat/blurred -->
+    <path d="M0 118 C50 116 70 100 90 100 C110 100 130 116 164 118" stroke="#6c757d" stroke-width="2" stroke-dasharray="4 3"/>
+    <text class="sm" x="120" y="112" fill="#6c757d">none</text>
+    <!-- elastic: sharp -->
+    <path d="M0 84 C40 84 54 34 82 34 C110 34 124 84 164 84" stroke="#fd7e14" stroke-width="2.6"/>
+    <text class="sm" x="88" y="30" fill="#fd7e14">elastic</text>
+    <!-- landmark: sharp, slightly different -->
+    <path d="M0 84 C42 84 56 44 82 44 C108 44 122 84 164 84" stroke="#fd7e14" stroke-opacity=".55" stroke-width="2" stroke-dasharray="5 3"/>
+    <text class="sm" x="10" y="66" fill="#fd7e14">landmark</text>
+  </g>
+</svg>

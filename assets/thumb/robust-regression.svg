@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Robust regression">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 96 C90 82 150 74 210 64 C245 58 275 52 298 48" stroke="#dc3545" stroke-opacity=".4" stroke-width="1.8"/>
+  <path d="M30 104 C90 90 150 82 210 70 C245 64 275 58 298 54" stroke="#dc3545" stroke-opacity=".4" stroke-width="1.8"/>
+  <path d="M30 132 C90 118 150 40 210 132 C245 120 275 118 298 116" stroke="#dc3545" stroke-opacity=".3" stroke-width="1.8" stroke-dasharray="5 5"/>
+  <path d="M30 100 C90 86 150 78 210 67 C245 61 275 55 298 51" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="150" cy="40" r="4" fill="#dc3545" fill-opacity=".35"/>
+</svg>

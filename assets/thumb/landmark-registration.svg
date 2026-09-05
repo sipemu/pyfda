@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Landmark registration">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#fd7e14" stroke-opacity=".45" stroke-width="1.4" stroke-dasharray="4 5">
+    <line x1="98" y1="30" x2="98" y2="150"/><line x1="176" y1="30" x2="176" y2="150"/><line x1="254" y1="30" x2="254" y2="150"/>
+  </g>
+  <path d="M30 118 C70 116 84 58 98 58 C124 58 150 122 176 122 C210 122 234 66 254 66 C274 66 288 92 298 96" stroke="#fd7e14" stroke-opacity=".5" stroke-width="2"/>
+  <path d="M30 108 C74 106 88 66 98 66 C122 66 148 114 176 114 C208 114 232 74 254 74 C276 74 288 100 298 104" stroke="#fd7e14" stroke-width="3" stroke-linecap="round"/>
+  <g fill="#fff" stroke="#fd7e14" stroke-width="2.5">
+    <circle cx="98" cy="66" r="4"/><circle cx="176" cy="114" r="4"/><circle cx="254" cy="74" r="4"/>
+  </g>
+</svg>

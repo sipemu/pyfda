@@ -1,0 +1,230 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img"
+     aria-label="Banded Elastic Alignment: Sakoe&#8211;Chiba Corridor"
+     aria-labelledby="banded-alignment-title banded-alignment-desc">
+  <title id="banded-alignment-title">Banded Elastic Alignment: Sakoe&#8211;Chiba Corridor</title>
+  <desc id="banded-alignment-desc">Shows how the Sakoe–Chiba band constrains the dynamic-programming warp path to a diagonal corridor |i−j| ≤ B (blue-tinted cells), reducing O(m²) cost-table computation to O(m·B); the bottom panels compare unregistered curves (blurred mean) to the output after banded alignment (sharp mean).</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="28" text-anchor="middle">Banded Elastic Alignment: Sakoe&#8211;Chiba Corridor</text>
+  <text class="sub" x="360" y="48" text-anchor="middle">The warp path is confined to |i&#8722;j| &#8804; B, cutting O(m&#178;) DP work to O(m&#183;B)</text>
+
+  <!-- ======= Top half: DP grid with Sakoe-Chiba band ======= -->
+  <!-- Panel background: y=58 to y=298, gives 240px height — grid (y=102..262) sits fully inside -->
+  <rect x="24" y="58" width="672" height="240" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <!-- Panel title -->
+  <text class="lab" x="360" y="78" text-anchor="middle" fill="#495057">DP Cost Table &#8212; Sakoe&#8211;Chiba Band (|i&#8722;j| &#8804; B)</text>
+
+  <!-- Grid: 10&#215;10 cells at 16px each; origin at x=296, y=102; 160px&#215;160px total -->
+  <!-- Grid columns: j=0..9 at x=296,312,328,344,360,376,392,408,424,440 -->
+  <!-- Grid rows: i=0..9 at y=102,118,134,150,166,182,198,214,230,246 -->
+  <!-- Band half-width B=2: inside band if |i-j|<=2 -->
+
+  <!-- Row 0 (i=0): grey j=3..9 -->
+  <rect x="344" y="102" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="360" y="102" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="376" y="102" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="392" y="102" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="408" y="102" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="424" y="102" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="440" y="102" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Row 1 (i=1): grey j=4..9 -->
+  <rect x="360" y="118" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="376" y="118" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="392" y="118" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="408" y="118" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="424" y="118" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="440" y="118" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Row 2 (i=2): grey j=5..9 -->
+  <rect x="376" y="134" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="392" y="134" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="408" y="134" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="424" y="134" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="440" y="134" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Row 3 (i=3): grey j=0..0 and j=6..9 -->
+  <rect x="296" y="150" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="392" y="150" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="408" y="150" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="424" y="150" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="440" y="150" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Row 4 (i=4): grey j=0..1 and j=7..9 -->
+  <rect x="296" y="166" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="312" y="166" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="408" y="166" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="424" y="166" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="440" y="166" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Row 5 (i=5): grey j=0..2 and j=8..9 -->
+  <rect x="296" y="182" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="312" y="182" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="328" y="182" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="424" y="182" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="440" y="182" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Row 6 (i=6): grey j=0..3 and j=9 -->
+  <rect x="296" y="198" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="312" y="198" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="328" y="198" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="344" y="198" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="440" y="198" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Row 7 (i=7): grey j=0..4 -->
+  <rect x="296" y="214" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="312" y="214" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="328" y="214" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="344" y="214" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="360" y="214" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Row 8 (i=8): grey j=0..5 -->
+  <rect x="296" y="230" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="312" y="230" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="328" y="230" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="344" y="230" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="360" y="230" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="376" y="230" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Row 9 (i=9): grey j=0..6 -->
+  <rect x="296" y="246" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="312" y="246" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="328" y="246" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="344" y="246" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="360" y="246" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="376" y="246" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="392" y="246" width="16" height="16" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Band fill: blue tint for diagonal band (active cells, |i-j|<=2) -->
+  <!-- i=0: j=0,1,2 -->
+  <rect x="296" y="102" width="16" height="16" fill="#dde5f5" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="312" y="102" width="16" height="16" fill="#c5d3ee" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="328" y="102" width="16" height="16" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+  <!-- i=1: j=0,1,2,3 -->
+  <rect x="296" y="118" width="16" height="16" fill="#dde5f5" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="312" y="118" width="16" height="16" fill="#c5d3ee" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="328" y="118" width="16" height="16" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="344" y="118" width="16" height="16" fill="#a0b2de" stroke="#ced4da" stroke-width="0.5"/>
+  <!-- i=2: j=0,1,2,3,4 -->
+  <rect x="296" y="134" width="16" height="16" fill="#dde5f5" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="312" y="134" width="16" height="16" fill="#c5d3ee" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="328" y="134" width="16" height="16" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="344" y="134" width="16" height="16" fill="#a0b2de" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="360" y="134" width="16" height="16" fill="#95a8d8" stroke="#ced4da" stroke-width="0.5"/>
+  <!-- i=3: j=1,2,3,4,5 -->
+  <rect x="312" y="150" width="16" height="16" fill="#dde5f5" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="328" y="150" width="16" height="16" fill="#c5d3ee" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="344" y="150" width="16" height="16" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="360" y="150" width="16" height="16" fill="#a0b2de" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="376" y="150" width="16" height="16" fill="#95a8d8" stroke="#ced4da" stroke-width="0.5"/>
+  <!-- i=4: j=2,3,4,5,6 -->
+  <rect x="328" y="166" width="16" height="16" fill="#dde5f5" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="344" y="166" width="16" height="16" fill="#c5d3ee" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="360" y="166" width="16" height="16" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="376" y="166" width="16" height="16" fill="#a0b2de" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="392" y="166" width="16" height="16" fill="#95a8d8" stroke="#ced4da" stroke-width="0.5"/>
+  <!-- i=5: j=3,4,5,6,7 -->
+  <rect x="344" y="182" width="16" height="16" fill="#dde5f5" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="360" y="182" width="16" height="16" fill="#c5d3ee" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="376" y="182" width="16" height="16" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="392" y="182" width="16" height="16" fill="#a0b2de" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="408" y="182" width="16" height="16" fill="#95a8d8" stroke="#ced4da" stroke-width="0.5"/>
+  <!-- i=6: j=4,5,6,7,8 -->
+  <rect x="360" y="198" width="16" height="16" fill="#dde5f5" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="376" y="198" width="16" height="16" fill="#c5d3ee" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="392" y="198" width="16" height="16" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="408" y="198" width="16" height="16" fill="#a0b2de" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="424" y="198" width="16" height="16" fill="#95a8d8" stroke="#ced4da" stroke-width="0.5"/>
+  <!-- i=7: j=5,6,7,8,9 -->
+  <rect x="376" y="214" width="16" height="16" fill="#dde5f5" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="392" y="214" width="16" height="16" fill="#c5d3ee" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="408" y="214" width="16" height="16" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="424" y="214" width="16" height="16" fill="#a0b2de" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="440" y="214" width="16" height="16" fill="#95a8d8" stroke="#ced4da" stroke-width="0.5"/>
+  <!-- i=8: j=6,7,8,9 -->
+  <rect x="392" y="230" width="16" height="16" fill="#dde5f5" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="408" y="230" width="16" height="16" fill="#c5d3ee" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="424" y="230" width="16" height="16" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="440" y="230" width="16" height="16" fill="#a0b2de" stroke="#ced4da" stroke-width="0.5"/>
+  <!-- i=9: j=7,8,9 -->
+  <rect x="408" y="246" width="16" height="16" fill="#dde5f5" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="424" y="246" width="16" height="16" fill="#c5d3ee" stroke="#ced4da" stroke-width="0.5"/>
+  <rect x="440" y="246" width="16" height="16" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+
+  <!-- Grid outer border (x=296 y=102, 160x160) -->
+  <rect x="296" y="102" width="160" height="160" fill="none" stroke="#495057" stroke-width="1.5"/>
+
+  <!-- Main diagonal (from top-left to bottom-right of grid) -->
+  <line x1="296" y1="102" x2="456" y2="262" stroke="#3f51b5" stroke-width="1.8" stroke-dasharray="4 3"/>
+
+  <!-- Warp path (thick, monotone, stays inside band): 16px steps -->
+  <!-- Path: (0,0)→(1,0)→(1,1)→(2,1)→(2,2)→(3,2)→(3,3)→(4,3)→(4,5)→(5,5)→(5,6)→(6,6)→(6,7)→(7,7)→(7,9)→(8,9)→(9,9) -->
+  <path d="M296 102 h16 v16 h16 v16 h16 v16 h16 v32 h16 v16 h16 v16 h16 v16 h16 v32 h16 h16" stroke="#3f51b5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Band boundary lines: upper edge (i-j=2 → j=i-2) and lower edge (j-i=2 → j=i+2) -->
+  <!-- Upper band edge: connects (i=2,j=0) top-left corner to (i=9,j=7) bottom-right — in pixel coords: (296,134) to (408+16,262) = (296,134) to (424,262) -->
+  <path d="M296 134 L424 262" stroke="#fd7e14" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <!-- Lower band edge: connects (i=0,j=2) top to (i=7,j=9) — pixel: (328,102) to (456,214+16)=(456,230) -->
+  <path d="M328 102 L456 230" stroke="#fd7e14" stroke-width="1.4" stroke-dasharray="5 3"/>
+
+  <!-- Axis labels: positioned clearly outside the grid, within the panel -->
+  <text class="sm" x="376" y="278" text-anchor="middle">j (reference curve time index)</text>
+  <text class="sm" x="279" y="182" text-anchor="middle" transform="rotate(-90,279,182)">i (query curve time index)</text>
+
+  <!-- Band label annotations -->
+  <!-- upper band edge label: right of grid, moved right to avoid band_frac label -->
+  <text class="sm" x="466" y="116" text-anchor="start" fill="#fd7e14">upper band edge</text>
+  <path d="M466 114 L432 116" stroke="#fd7e14" stroke-width="1"/>
+
+  <!-- lower band edge label: right of grid -->
+  <text class="sm" x="462" y="218" fill="#fd7e14">lower</text>
+  <text class="sm" x="462" y="232" fill="#fd7e14">band edge</text>
+  <path d="M461 222 l-8 -8" stroke="#fd7e14" stroke-width="1"/>
+
+  <!-- band_frac annotation: placed above grid top-right, with vertical clearance from upper-band-edge label -->
+  <text class="mono" x="590" y="88" text-anchor="middle" fill="#3f51b5">band_frac &#215; m = B</text>
+
+  <!-- Legend: top-left of panel, x=30 y=68 -->
+  <rect x="30" y="68" width="140" height="80" rx="8" fill="#fff" stroke="#ced4da" stroke-width="1"/>
+  <rect x="40" y="80" width="14" height="12" fill="#b0c0e6" stroke="#ced4da" stroke-width="0.5"/>
+  <text class="sm" x="60" y="91">inside band (evaluated)</text>
+  <rect x="40" y="99" width="14" height="12" fill="#dee2e6" stroke="#ced4da" stroke-width="0.5"/>
+  <text class="sm" x="60" y="110">outside band (skipped)</text>
+  <line x1="40" y1="123" x2="54" y2="123" stroke="#3f51b5" stroke-width="2.5"/>
+  <text class="sm" x="60" y="127">optimal warp path</text>
+
+  <!-- ======= Bottom half: two panels &#8212; curve alignment ======= -->
+  <!-- Left bottom: unregistered curves panel -->
+  <rect x="24" y="306" width="312" height="150" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="180" y="326" text-anchor="middle" fill="#495057">Unregistered Curves</text>
+  <line x1="42" y1="432" x2="324" y2="432" stroke="#ced4da" stroke-width="1.2"/>
+  <!-- curve 1: shifted left -->
+  <path d="M50 430 C70 430 88 430 102 408 C110 394 114 374 120 358 C124 346 128 342 132 342 C136 342 140 348 146 364 C152 380 158 406 170 426 C180 432 200 432 260 432" stroke="#3f51b5" stroke-width="2" stroke-opacity="0.7"/>
+  <!-- curve 2: shifted right -->
+  <path d="M90 432 C110 432 130 432 152 418 C164 408 170 390 176 370 C180 354 184 346 188 346 C192 346 196 356 202 374 C208 394 214 418 230 428 C242 432 270 432 320 432" stroke="#e8710a" stroke-width="2" stroke-opacity="0.7"/>
+  <!-- mean blurred -->
+  <path d="M50 432 C70 432 90 430 110 418 C122 408 130 390 140 368 C146 354 152 348 160 348 C166 348 172 358 180 376 C188 396 196 418 218 428 C232 432 260 432 320 432" stroke="#dc3545" stroke-width="2" stroke-dasharray="5 3"/>
+  <text class="sm" x="180" y="448" text-anchor="middle" fill="#dc3545">mean (blurred)</text>
+
+  <!-- Right bottom: registered curves panel -->
+  <rect x="384" y="306" width="312" height="150" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="540" y="326" text-anchor="middle" fill="#fd7e14">After Banded Alignment</text>
+  <line x1="402" y1="432" x2="684" y2="432" stroke="#ced4da" stroke-width="1.2"/>
+  <!-- both curves aligned, peaks near center -->
+  <path d="M410 432 C430 432 448 430 462 408 C470 394 474 372 480 356 C484 344 488 340 492 340 C496 340 500 346 506 362 C512 380 518 406 530 426 C540 432 560 432 610 432" stroke="#3f51b5" stroke-width="2" stroke-opacity="0.7"/>
+  <path d="M430 432 C450 432 468 430 482 408 C490 394 494 372 500 356 C504 342 508 340 512 340 C516 340 520 348 526 364 C532 382 538 408 552 426 C562 432 582 432 630 432" stroke="#e8710a" stroke-width="2" stroke-opacity="0.7"/>
+  <!-- sharpened mean -->
+  <path d="M420 432 C440 432 458 430 472 408 C480 392 484 370 490 354 C494 342 498 338 502 338 C506 338 510 346 516 362 C522 380 528 408 542 426 C552 432 572 432 620 432" stroke="#dc3545" stroke-width="2.4" stroke-dasharray="5 3"/>
+  <text class="sm" x="540" y="448" text-anchor="middle" fill="#dc3545">mean (sharp)</text>
+
+  <!-- Arrow between bottom panels -->
+  <path d="M344 382 h32" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M376 382 l-9 -5 v10 z" fill="#adb5bd"/>
+  <text class="sm" x="358" y="376" text-anchor="middle" fill="#fd7e14">band_frac=0.2</text>
+  <text class="sm" x="358" y="392" text-anchor="middle" fill="#fd7e14">4&#8211;6&#215; speedup</text>
+</svg>

@@ -1,0 +1,7246 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="High-performance functional data analysis for Python, powered by Rust">
+      
+      
+      
+        <link rel="canonical" href="https://sipemu.github.io/pyfda/advisor/aspects/">
+      
+      
+        <link rel="prev" href="../providers/">
+      
+      
+        <link rel="next" href="../mcp/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Per-Aspect Coverage - fdars - Functional Data Analysis for Python</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_markdown_exec_pyodide.css">
+    
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&display=swap">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#per-aspect-coverage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="fdars - Functional Data Analysis for Python" class="md-header__button md-logo" aria-label="fdars - Functional Data Analysis for Python" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            fdars - Functional Data Analysis for Python
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Per-Aspect Coverage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="blue"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sipemu/pyfda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sipemu/pyfda
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../learn/" class="md-tabs__link">
+          
+  
+  
+  Learn
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../represent/" class="md-tabs__link">
+          
+  
+  
+  Represent
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../align/" class="md-tabs__link">
+          
+  
+  
+  Align
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../regression/" class="md-tabs__link">
+          
+  
+  
+  Regression
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../monitoring/" class="md-tabs__link">
+          
+  
+  
+  Monitoring
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../inference/functional-inference/" class="md-tabs__link">
+          
+  
+  
+  Inference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../analyze/" class="md-tabs__link">
+          
+  
+  
+  Analyze
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  AI Advisor
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../sklearn/" class="md-tabs__link">
+          
+  
+  
+  scikit-learn API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../examples/" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="fdars - Functional Data Analysis for Python" class="md-nav__button md-logo" aria-label="fdars - Functional Data Analysis for Python" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    fdars - Functional Data Analysis for Python
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sipemu/pyfda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sipemu/pyfda
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/custom-plotting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Plotting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/derivatives/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Derivatives
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learn/irregular-sampling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Irregular Sampling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Represent
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Represent
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Represent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional PCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/elastic-fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Elastic FPCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/pace-fpca/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PACE FPCA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/basis-representation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basis Representation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/interpolation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interpolation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/imputation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Imputation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/andrews-transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Andrews Transformation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/depth-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Depth Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/streaming-depth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming Depth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../represent/distance-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distance Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Align
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Align
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Align
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/shift-registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shift Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/elastic-alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Elastic Alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/advanced-alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Elastic Alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/banded-alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Banded Elastic Alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/landmark-registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Landmark Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/tsrvf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TSRVF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/alignment-comparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparing Methods
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../align/shape-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shape Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Regression
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/scalar-on-function/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scalar-on-Function
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/function-on-scalar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Function-on-Scalar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/classification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/elastic-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Elastic Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/scalar-on-shape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scalar-on-Shape
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cross-Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/regression-diagnostics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regression Diagnostics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/uncertainty-quantification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uncertainty Quantification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/explainability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explainability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/conformal-prediction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conformal Prediction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/conformal-classification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conformal Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/robust-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Robust Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/concurrent-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concurrent Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/functional-glm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional GLM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/function-on-function/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Function-on-Function
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/additive-sof/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Additive Scalar-on-Function
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../regression/frechet-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fréchet Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Monitoring
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/spm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/advanced-spm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced SPM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../monitoring/profile-partial-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profile & Partial-Domain Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Inference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../inference/functional-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional Inference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../inference/interval-inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interval-wise Inference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyze
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Analyze
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/functional-time-series/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional Time Series
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/density-fda/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Density FDA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/advanced-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/multi-domain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Domain FDA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/shapelets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shapelets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/tolerance-bands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tolerance Bands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/gmm-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GMM Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/elastic-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Elastic Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/outlier-detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Outlier Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/functional-boxplot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional Boxplot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/seasonal-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Seasonal Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/equivalence-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Equivalence Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/covariance-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Covariance Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/functional-statistics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional Statistics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyze/scoring-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scoring Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Advisor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    AI Advisor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Advisor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../comparative-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparative Selection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auto-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auto-Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Provider Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Per-Aspect Coverage
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Per-Aspect Coverage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#coverage-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage Table
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clustering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        clustering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smoothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        smoothing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        alignment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fpca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fpca
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frechet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        frechet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#represent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        represent
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        depth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outliers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        outliers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        classification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        regression
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regression_cv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        regression_cv
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scoring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spm
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        inference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-skill/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Skill
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scikit-learn API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    scikit-learn API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sklearn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scikit-learn API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sklearn/transformers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transformers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sklearn/regressors-classifiers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Regressors & Classifiers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sklearn/clusterers-outliers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clusterers & Outlier Detectors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sklearn/coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coverage & Exclusions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sklearn/gridsearch-example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GridSearchCV Example
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/growth-alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth — Elastic Alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/sonar-tsrvf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sonar — Mine vs Rock (TSRVF)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/andrews-wine-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Andrews Wine — Why Curves?
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/andrews-wine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Andrews Wine — Outlier Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/functional-outlier-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Functional Outlier Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/andrews-wine-clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Andrews Wine — Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/andrews-wine-qc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Andrews Wine — Quality Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/tecator-regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tecator — Scalar-on-Function Regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/canadian-function-on-scalar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canadian Weather — Function-on-Scalar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/cross-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tecator — Cross-Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/tecator-conformal-coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tecator — Conformal Coverage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/tolerance-vs-conformal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tolerance Bands vs Conformal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/explainability-regions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tecator — Explainability Regions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/phoneme-shape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phoneme — Shape Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/canadian-weather/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canadian Weather — FPCA & Clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/canadian-depth-centrality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canadian Weather — Depth Centrality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/canadian-seasonal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canadian Temperature — Seasonal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/canadian-precipitation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canadian Precipitation — Geographic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/tecator-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tecator — Inline Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/inline-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring — Detection Power
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/biopharma-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Penicillin — Batch Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/fdata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.fdata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/depth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.depth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metric/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.metric
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/basis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.basis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/clustering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.clustering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/regression/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.regression
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/alignment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/outliers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.outliers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/seasonal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.seasonal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/spm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.spm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/classification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/tolerance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.tolerance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/conformal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.conformal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/explain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fdars.explain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#coverage-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage Table
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clustering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        clustering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smoothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        smoothing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        alignment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fpca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fpca
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frechet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        frechet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#represent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        represent
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        depth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outliers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        outliers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        classification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        regression
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regression_cv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        regression_cv
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scoring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spm
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        inference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="per-aspect-coverage">Per-Aspect Coverage<a class="headerlink" href="#per-aspect-coverage" title="Permanent link">&para;</a></h1>
+<p>Every fdars analysis aspect follows the same two-stage treatment: an offline
+deterministic <code>build_diagnostics(result, method=…)</code> report, then grounded
+<code>advise(…, task=…)</code> task families. The aspect is <strong>always caller-specified</strong> —
+<code>build_diagnostics</code> never auto-detects it from result keys.</p>
+<p>The three task families available for every aspect are:</p>
+<table>
+<thead>
+<tr>
+<th><code>task=</code></th>
+<th>What you get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"interpretation"</code></td>
+<td>Plain-language reading of the diagnostic values</td>
+</tr>
+<tr>
+<td><code>"parameter"</code></td>
+<td>Concrete suggestions for changing hyperparameters</td>
+</tr>
+<tr>
+<td><code>"method"</code></td>
+<td>Recommendations for switching or combining fdars methods</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Per-aspect taxonomy: 14 fdars aspects flow through one shared build_diagnostics then advise pipeline crossed with three task families" class="fdars-diagram" src="../../assets/diagrams/advisor-aspects.svg" /></p>
+<h2 id="coverage-table">Coverage Table<a class="headerlink" href="#coverage-table" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Aspect (<code>method=</code>)</th>
+<th>fdars source(s)</th>
+<th>Key diagnostics (count)</th>
+<th>Offline fence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>clustering</code></td>
+<td><code>fdars.clustering.kmeans_fd</code></td>
+<td>k, cluster_means, cluster_sizes, pairwise distances, separations (7)</td>
+<td><a href="../python-api/">python-api.md</a></td>
+</tr>
+<tr>
+<td><code>smoothing</code></td>
+<td><code>fdars.basis.smooth_basis_gcv</code>, <code>pspline_fit_gcv</code></td>
+<td>lambda sweep or single-fit GCV scalars (8)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>alignment</code></td>
+<td><code>fdars.alignment.karcher_mean</code>, <code>karcher_mean_elastic</code></td>
+<td>mean curve stats, amplitude/phase distances, convergence, registration-quality scores (17)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>basis</code></td>
+<td><code>fdars.basis.basis_nbasis_cv</code></td>
+<td>n_basis sweep, GCV curve, optimal n_basis (8)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>fpca</code></td>
+<td><code>fdars.regression.fpca</code>, <code>fdars.pace_fpca</code></td>
+<td>n_components, eigenvalues, cumulative variance, phase leakage; PACE branch: pace_ncomp, pace_sigma2, pace_variance_explained_cumulative (12)</td>
+<td><a href="#fpca">this page</a></td>
+</tr>
+<tr>
+<td><code>fts</code></td>
+<td><code>fdars.fts.ftsm</code>, <code>fdars.fts.stationarity_test</code>, <code>fdars.fts.functional_acf</code>, <code>fdars.fts.dpca</code>, <code>fdars.fts.fplsr</code></td>
+<td>stationarity branch: has_stationarity, statistic, p_value, n_perm; acf branch: has_acf, n_lags, acf_at_lag1, acf_decay; dpca branch: has_dpca, dpca_ncomp, n_freqs, filter_lag, dpca_eigenvalues; fplsr branch: has_fplsr, fplsr_ncomp, fplsr_fitted_rmse; ftsm branch: has_ftsm, ncomp, n_obs, n_points, n_ar_models, ar_max_order, ar_sigma2_max, fitted_rmse; forecast branch: has_forecast, h, forecast_mean (28)</td>
+<td><a href="#fts">this page</a></td>
+</tr>
+<tr>
+<td><code>frechet</code></td>
+<td><code>fdars.frechet.frechet_mean</code>, <code>fdars.frechet.frechet_anova</code>, <code>fdars.frechet.frechet_global_reg</code>, <code>fdars.frechet.frechet_local_reg</code> — <strong>diagnostics-only</strong> (not in <code>_RUNNABLE_METHODS</code>)</td>
+<td>frechet_mean branch: has_frechet_mean, frechet_mean_ndim, frechet_mean_dim, frechet_mean_trace; anova branch: has_anova, anova_p_value_permutation, anova_p_value_asymptotic, n_perm, n_groups, pooled_frechet_variance, group_frechet_variance_max; reg branch: has_global_reg, has_local_reg, predicted_n_obs, bandwidth (15)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>represent</code></td>
+<td>raw <code>Fdata</code> or <code>{"data":…,"argvals":…}</code> dict</td>
+<td>grid stats, data range, imputation-quality diagnostics (13)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>depth</code></td>
+<td><code>fdars.depth.*</code> score arrays</td>
+<td>n_obs, depth statistics, histogram (9)</td>
+<td><a href="#depth">this page</a></td>
+</tr>
+<tr>
+<td><code>outliers</code></td>
+<td><code>fdars.outliers.*</code> result dicts</td>
+<td>n_outliers, outlier_fraction, magnitude/shape/outliergram ranges; tvdmss: has_tvdmss + 7 keys; muod: has_muod + 9 keys; sequential_transform: has_sequential_transform + 2 keys; depthgram: has_depthgram + 6 keys (37)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>classification</code></td>
+<td><code>fdars.classification.*</code> result dicts</td>
+<td>accuracy, cv_error_rate, fold_error_std, best_ncomp; elastic_multinomial branch: has_elastic_multinomial, train_accuracy, train_error_rate; shapelet_classifier branch: has_shapelet_classifier, shapelet_n_shapelets, shapelet_train_accuracy, shapelet_n_classes (13)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>regression</code></td>
+<td><code>fdars.regression.fregre_*</code>, <code>fosr</code>, <code>fosr_fpc</code>, <code>functional_glm</code>, <code>concurrent_regression</code>, <code>fof_regression</code>, <code>fof_re_regression</code>; <code>fdars.scalar_on_function.fam</code>, <code>fregre_gkam</code></td>
+<td>r_squared, residual stats, beta_t_range, has_fosr; GLM branch: has_functional_glm + 7 keys; concurrent branch: has_concurrent_regression + 3 keys; FoF branch: has_fof_regression, fof_r_squared, beta_surface_shape, beta_surface_max_abs, fof_ncomp; FoF-RE branch: has_fof_re_regression + 4 keys; FAM/GSAM branch: has_fam + 4 keys; GKAM branch: has_fregre_gkam + 3 keys (34)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>regression_cv</code></td>
+<td><code>fdars.regression.fregre_cv</code>, <code>model_selection_ncomp</code></td>
+<td>optimal_k, cv_curve, elbow_present (6)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>scoring</code></td>
+<td><code>fdars.scoring.functional_mae/mse/mape/msle/explained_variance</code></td>
+<td>five integrated prediction-quality scalars (5)</td>
+<td><a href="#scoring">this page</a></td>
+</tr>
+<tr>
+<td><code>spm</code></td>
+<td><code>fdars.spm.spm_phase1</code>, <code>fdars.spm.mfpca</code>, <code>fdars.spm.spe_multivariate</code></td>
+<td>T², SPE stats, exceedance rates, eigenvalues, kurtosis check; mfpca branch: has_mfpca, mfpca_ncomp, mfpca_n_obs, mfpca_n_variables, mfpca_eigenvalues, mfpca_variance_explained_cumulative; spe_multivariate branch: has_spe_multivariate, spe_mv_n_obs, spe_mv_max, spe_mv_mean, spe_mv_all_nonneg (25)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>inference</code></td>
+<td>caller-supplied <code>TestResult</code> / <code>ToleranceBand</code> dict from <code>fdars.inference</code> (diagnostics-only)</td>
+<td>statistic, p_value, n_perm, significance flags, is_permutation_test (9)</td>
+<td><a href="#inference">this page</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="clustering">clustering<a class="headerlink" href="#clustering" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.clustering.kmeans_fd</code></p>
+<p>Returns a dict with <code>centers</code>, <code>cluster</code>, and <code>k</code>. Pass <code>argvals</code> to enable
+amplitude/phase pairwise distances between cluster means.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"clustering"</code></td>
+</tr>
+<tr>
+<td><code>k</code></td>
+<td>Number of clusters</td>
+</tr>
+<tr>
+<td><code>cluster_means</code></td>
+<td>List of k mean curves (each a list of floats)</td>
+</tr>
+<tr>
+<td><code>cluster_sizes</code></td>
+<td>Per-cluster observation counts</td>
+</tr>
+<tr>
+<td><code>pairwise_amplitude_distance</code></td>
+<td>k×k matrix of amplitude distances between cluster means; <code>None</code> when <code>argvals</code> absent</td>
+</tr>
+<tr>
+<td><code>pairwise_phase_distance</code></td>
+<td>k×k matrix of phase distances between cluster means; <code>None</code> when <code>argvals</code> absent</td>
+</tr>
+<tr>
+<td><code>mean_amplitude_separation</code></td>
+<td>Mean off-diagonal amplitude distance; <code>None</code> when <code>argvals</code> absent</td>
+</tr>
+<tr>
+<td><code>mean_phase_separation</code></td>
+<td>Mean off-diagonal phase distance; <code>None</code> when <code>argvals</code> absent</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read cluster structure) · <code>"parameter"</code> (adjust k)
+· <code>"method"</code> (switch to elastic alignment + clustering)</p>
+<hr />
+<h2 id="smoothing">smoothing<a class="headerlink" href="#smoothing" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.basis.smooth_basis_gcv</code>, <code>fdars.basis.pspline_fit_gcv</code></p>
+<p>Two input shapes are handled. A lambda-sweep result (<code>lambda_values</code> + <code>gcv</code> keys in
+the dict) fills the curve keys. A single-fit <code>pspline_fit_gcv</code> result fills only the
+<code>optimal_*</code> scalars and leaves the curve keys <code>None</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"smoothing"</code></td>
+</tr>
+<tr>
+<td><code>lambda_values</code></td>
+<td>Lambda grid evaluated (list of floats); <code>None</code> for single-fit path</td>
+</tr>
+<tr>
+<td><code>gcv_curve</code></td>
+<td>GCV score at each lambda; <code>None</code> for single-fit path</td>
+</tr>
+<tr>
+<td><code>edf</code></td>
+<td>Effective degrees of freedom at each lambda; <code>None</code> for single-fit path</td>
+</tr>
+<tr>
+<td><code>gcv_aic_approx</code></td>
+<td>AIC-approximation curve (<code>n·log(GCV) + 2·edf</code>); <code>None</code> when edf absent</td>
+</tr>
+<tr>
+<td><code>gcv_bic_approx</code></td>
+<td>BIC-approximation curve (<code>n·log(GCV) + log(n)·edf</code>); <code>None</code> when edf absent</td>
+</tr>
+<tr>
+<td><code>optimal_lambda</code></td>
+<td>Lambda minimising GCV; <code>None</code> for single-fit path</td>
+</tr>
+<tr>
+<td><code>optimal_gcv</code></td>
+<td>GCV value at the optimal lambda (or the single-fit GCV)</td>
+</tr>
+<tr>
+<td><code>optimal_edf</code></td>
+<td>EDF at optimal lambda (or the single-fit EDF)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (assess smoothing level) · <code>"parameter"</code> (adjust lambda range)
+· <code>"method"</code> (switch smoother)</p>
+<hr />
+<h2 id="alignment">alignment<a class="headerlink" href="#alignment" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.alignment.karcher_mean</code>, <code>fdars.alignment.karcher_mean_elastic</code></p>
+<p>Pass <code>argvals</code> to enable per-observation amplitude/phase distance computation.
+Without <code>argvals</code>, the distance keys are <code>None</code> but mean-curve stats are always computed.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"alignment"</code></td>
+</tr>
+<tr>
+<td><code>mean_length</code></td>
+<td>Number of evaluation points in the Karcher mean curve</td>
+</tr>
+<tr>
+<td><code>mean_min</code></td>
+<td>Minimum value of the mean curve</td>
+</tr>
+<tr>
+<td><code>mean_max</code></td>
+<td>Maximum value of the mean curve</td>
+</tr>
+<tr>
+<td><code>mean_avg</code></td>
+<td>Mean value of the mean curve</td>
+</tr>
+<tr>
+<td><code>mean_curve</code></td>
+<td>Full Karcher mean curve as a list</td>
+</tr>
+<tr>
+<td><code>n_obs</code></td>
+<td>Number of aligned observations; <code>None</code> when <code>aligned_data</code> absent</td>
+</tr>
+<tr>
+<td><code>amplitude_distances</code></td>
+<td>Per-observation amplitude distances from the mean; <code>None</code> when <code>argvals</code> absent</td>
+</tr>
+<tr>
+<td><code>phase_distances</code></td>
+<td>Per-observation phase distances from the mean; <code>None</code> when <code>argvals</code> absent</td>
+</tr>
+<tr>
+<td><code>amplitude_mean</code></td>
+<td>Mean amplitude distance; <code>None</code> when <code>argvals</code> absent</td>
+</tr>
+<tr>
+<td><code>amplitude_max</code></td>
+<td>Maximum amplitude distance; <code>None</code> when <code>argvals</code> absent</td>
+</tr>
+<tr>
+<td><code>phase_mean</code></td>
+<td>Mean phase distance; <code>None</code> when <code>argvals</code> absent</td>
+</tr>
+<tr>
+<td><code>phase_max</code></td>
+<td>Maximum phase distance; <code>None</code> when <code>argvals</code> absent</td>
+</tr>
+<tr>
+<td><code>converged</code></td>
+<td>Whether the Karcher iteration converged; <code>None</code> if not reported</td>
+</tr>
+<tr>
+<td><code>n_iter</code></td>
+<td>Number of Karcher iterations taken; <code>None</code> if not reported</td>
+</tr>
+<tr>
+<td><code>ls_score</code></td>
+<td><code>least_squares_score</code> on the registered curves — mean <span class="arithmatex">\(L^2\)</span> spread around the mean; lower is better; <code>None</code> when registration inputs absent</td>
+</tr>
+<tr>
+<td><code>pairwise_corr_score</code></td>
+<td><code>pairwise_correlation_score</code> — mean centered functional Pearson correlation across all pairs; range <span class="arithmatex">\([-1,1]\)</span>; higher is better; <code>None</code> when absent</td>
+</tr>
+<tr>
+<td><code>sobolev_score</code></td>
+<td><code>sobolev_least_squares_score</code> at a default <span class="arithmatex">\(\lambda\)</span> — LS score plus derivative penalty; lower is better; <code>None</code> when absent or grid is non-uniform</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Registration-quality interpretation</p>
+<p><code>pairwise_corr_score</code> below 0.7 after shift registration suggests the phase variation is not purely rigid — prefer elastic alignment (<code>karcher_mean</code>). A high <code>ls_score</code> relative to the cross-sectional variance indicates persistent phase spread after alignment, recommending a wider <code>max_shift</code> or more Karcher iterations.</p>
+</div>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (assess phase/amplitude separation, registration quality) · <code>"parameter"</code> (adjust max iterations, tolerance, or max_shift)
+· <code>"method"</code> (switch between elastic and non-elastic alignment; try banded alignment for large datasets)</p>
+<hr />
+<h2 id="basis">basis<a class="headerlink" href="#basis" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.basis.basis_nbasis_cv</code></p>
+<p>Accepts a pre-computed cross-validation result dict (keys <code>n_basis_values</code>, <code>gcv</code>) or
+raw data + <code>argvals</code> kwargs to trigger a live <code>basis_nbasis_cv</code> call.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"basis"</code></td>
+</tr>
+<tr>
+<td><code>n_basis_values</code></td>
+<td>Basis count grid evaluated (list of ints)</td>
+</tr>
+<tr>
+<td><code>gcv_curve</code></td>
+<td>GCV score at each n_basis (list of floats)</td>
+</tr>
+<tr>
+<td><code>edf</code></td>
+<td>Effective degrees of freedom at each n_basis; <code>None</code> when absent</td>
+</tr>
+<tr>
+<td><code>gcv_aic_approx</code></td>
+<td>AIC approximation curve; <code>None</code> when edf or n_obs absent</td>
+</tr>
+<tr>
+<td><code>gcv_bic_approx</code></td>
+<td>BIC approximation curve; <code>None</code> when edf or n_obs absent</td>
+</tr>
+<tr>
+<td><code>optimal_n_basis</code></td>
+<td>n_basis minimising GCV</td>
+</tr>
+<tr>
+<td><code>optimal_gcv</code></td>
+<td>GCV at optimal n_basis</td>
+</tr>
+<tr>
+<td><code>optimal_edf</code></td>
+<td>EDF at optimal n_basis</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (assess basis complexity) · <code>"parameter"</code> (widen/narrow n_basis range)
+· <code>"method"</code> (switch basis family)</p>
+<hr />
+<h2 id="fpca">fpca<a class="headerlink" href="#fpca" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.regression.fpca</code>, <code>fdars.pace_fpca</code></p>
+<p><code>fpca</code> returns a dict with <code>scores</code>, <code>singular_values</code>, <code>rotation</code>, <code>mean</code>. Eigenvalues
+are derived as <code>singular_values² / (n−1)</code>, matching <code>FPCAResult.explained_variance</code>.
+<code>pace_fpca</code> returns pre-scaled <code>eigenvalues</code> directly — detected by the presence of the
+<code>"eigenvalues"</code> key (unique to PACE; standard FPCA uses <code>"singular_values"</code>).</p>
+<p><strong>Standard FPCA keys</strong> (from <code>fdars.regression.fpca</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"fpca"</code></td>
+</tr>
+<tr>
+<td><code>n_components</code></td>
+<td>Number of retained FPC components</td>
+</tr>
+<tr>
+<td><code>n_obs</code></td>
+<td>Number of observations (rows in scores)</td>
+</tr>
+<tr>
+<td><code>eigenvalues</code></td>
+<td>Per-component eigenvalues (list of floats); <code>None</code> when <code>singular_values</code>/<code>scores</code> absent</td>
+</tr>
+<tr>
+<td><code>explained_variance_ratio</code></td>
+<td>Per-component fraction of total variance</td>
+</tr>
+<tr>
+<td><code>cumulative_variance_explained</code></td>
+<td>Running cumulative explained variance</td>
+</tr>
+<tr>
+<td><code>total_variance</code></td>
+<td>Sum of all eigenvalues</td>
+</tr>
+<tr>
+<td><code>phase_leakage_indicator</code></td>
+<td>Fraction of variance NOT explained by the first component; high value (≥ 0.5) suggests phase variation leaking into the amplitude decomposition</td>
+</tr>
+<tr>
+<td><code>phase_leakage_flagged</code></td>
+<td><code>True</code> when <code>phase_leakage_indicator &gt; 0.5</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>pace_fpca keys</strong> (trigger: <code>"eigenvalues"</code> in raw — unique to <code>pace_fpca</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_pace_fpca</code></td>
+<td><code>True</code> when <code>"eigenvalues"</code> key is present in the raw dict</td>
+</tr>
+<tr>
+<td><code>pace_ncomp</code></td>
+<td>Actual number of PACE components returned (raw key <code>"ncomp"</code>); may be less than the requested count</td>
+</tr>
+<tr>
+<td><code>pace_sigma2</code></td>
+<td>Measurement-noise variance estimate from PACE (raw key <code>"sigma2"</code>)</td>
+</tr>
+<tr>
+<td><code>pace_variance_explained_cumulative</code></td>
+<td>Running cumulative variance explained by PACE eigenvalues</td>
+</tr>
+<tr>
+<td><code>pace_variance_explained_first</code></td>
+<td>Fraction of variance explained by the leading PACE component</td>
+</tr>
+<tr>
+<td><code>pace_noise_signal_ratio</code></td>
+<td><code>sigma2 / sum(eigenvalues)</code>: ratio of measurement-noise variance to total signal variance; <code>None</code> when total variance is zero (degenerate case)</td>
+</tr>
+<tr>
+<td><code>pace_truncated_rank_flagged</code></td>
+<td><code>True</code> when the number of PACE components actually returned (<code>pace_ncomp</code>) is less than the number of raw eigenvalues — indicates the eigenvalue spectrum was truncated</td>
+</tr>
+<tr>
+<td><code>pace_mean_prediction_band_width</code></td>
+<td>Mean of <code>fitted_upper - fitted_lower</code> over the full <code>(n, m)</code> prediction grid; quantifies average pointwise uncertainty in the PACE fitted curves; <code>None</code> when confidence bands are absent</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">PACE noise-to-signal interpretation</p>
+<p><code>pace_noise_signal_ratio &gt; 0.30</code> suggests that measurement noise is substantial relative
+to the signal — consider increasing <code>sigma2</code> or using fewer components. A
+<code>pace_truncated_rank_flagged=True</code> result means the returned component count is smaller
+than expected; increase <code>ncomp</code> if the scree suggests more components are meaningful.</p>
+</div>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read scree / phase leakage; PACE: assess noise level and component count) · <code>"parameter"</code> (change n_comp; PACE: adjust bandwidth or sigma2)
+· <code>"method"</code> (use elastic FPCA for dense regular data; use PACE for sparse irregular observations)</p>
+<p>The fence below loads the Canadian Weather dataset, runs <code>fpca</code>, and builds the offline
+diagnostics report. No API key is required — this runs live in the docs build.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">docs_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_canadian_weather</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars</span><span class="w"> </span><span class="kn">import</span> <span class="n">regression</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars.advisor</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_diagnostics</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">day</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">load_canadian_weather</span><span class="p">(</span><span class="s2">"temperature"</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">fp</span> <span class="o">=</span> <span class="n">regression</span><span class="o">.</span><span class="n">fpca</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">n_comp</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">diag</span> <span class="o">=</span> <span class="n">build_diagnostics</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"fpca"</span><span class="p">)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"n_components:                      </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'n_components'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cumulative_variance_explained[0]:  </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'cumulative_variance_explained'</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  FDARS_FENCE_OK"</span><span class="p">)</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"phase_leakage_indicator:           </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'phase_leakage_indicator'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"phase_leakage_flagged:             </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'phase_leakage_flagged'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+n_components:                      4
+cumulative_variance_explained[0]:  0.8881  FDARS_FENCE_OK
+phase_leakage_indicator:           0.1119
+phase_leakage_flagged:             False
+
+<hr />
+<h2 id="fts">fts<a class="headerlink" href="#fts" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.fts.ftsm</code>, <code>fdars.fts.stationarity_test</code>, <code>fdars.fts.functional_acf</code>,
+<code>fdars.fts.dpca</code>, <code>fdars.fts.fplsr</code></p>
+<p>Six discriminated result shapes are handled via independent <code>has_&lt;fn&gt;</code> booleans. The
+discriminator keys (tested in order, with fplsr tested before the bare forecast branch):
+1. <code>stationarity_test</code> — unique key <code>"n_perm"</code> (with <code>"statistic"</code> and <code>"p_value"</code>);
+2. <code>functional_acf</code> / <code>functional_pacf</code> — unique key <code>"upper_band"</code>;
+3. <code>dpca</code> — unique keys <code>"filter_lag"</code> and <code>"n_freqs"</code>;
+4. <code>fplsr</code> — <code>"fitted"</code> + <code>"forecast"</code> + <code>"ncomp"</code> + forecast shape[0] == 1;
+5. <code>ftsm</code> — unique key <code>"ar_models"</code>;
+6. <code>ftsm_forecast</code> / <code>ftsm_forecast_multistep</code> — <code>"forecast"</code> + <code>"h"</code>.</p>
+<p><strong>stationarity keys</strong> (trigger: <code>"n_perm"</code> + <code>"statistic"</code> + <code>"p_value"</code> in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_stationarity</code></td>
+<td><code>True</code> when result is from <code>stationarity_test</code></td>
+</tr>
+<tr>
+<td><code>stationarity_statistic</code></td>
+<td>Test statistic (float); <code>None</code> when not stationarity result</td>
+</tr>
+<tr>
+<td><code>stationarity_p_value</code></td>
+<td>Permutation p-value in [0,1]; <code>None</code> when not stationarity result</td>
+</tr>
+<tr>
+<td><code>n_perm</code></td>
+<td>Number of permutations used (int); <code>None</code> when not stationarity result</td>
+</tr>
+</tbody>
+</table>
+<p><strong>acf keys</strong> (trigger: <code>"acf"</code> + <code>"upper_band"</code> in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_acf</code></td>
+<td><code>True</code> when result is from <code>functional_acf</code> or <code>functional_pacf</code></td>
+</tr>
+<tr>
+<td><code>n_lags</code></td>
+<td>Number of lags computed (int); <code>None</code> when not acf result</td>
+</tr>
+<tr>
+<td><code>acf_at_lag1</code></td>
+<td>First-lag autocorrelation (float); <code>None</code> when not acf result or empty</td>
+</tr>
+<tr>
+<td><code>acf_decay</code></td>
+<td>Last-lag value — proxy for ACF tail decay (float); <code>None</code> when not acf result</td>
+</tr>
+</tbody>
+</table>
+<p><strong>dpca keys</strong> (trigger: <code>"filter_lag"</code> + <code>"n_freqs"</code> in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_dpca</code></td>
+<td><code>True</code> when result is from <code>dpca</code></td>
+</tr>
+<tr>
+<td><code>dpca_ncomp</code></td>
+<td>Number of dynamic PCA components (int); <code>None</code> when not dpca result</td>
+</tr>
+<tr>
+<td><code>n_freqs</code></td>
+<td>Frequency count (int); <code>None</code> when not dpca result</td>
+</tr>
+<tr>
+<td><code>filter_lag</code></td>
+<td>Lag window parameter (int); <code>None</code> when not dpca result</td>
+</tr>
+<tr>
+<td><code>dpca_eigenvalues</code></td>
+<td>Per-component peak spectral eigenvalue — <code>float(np.max(ev))</code> for each component's frequency-domain spectrum (list of floats); <code>None</code> when not dpca result</td>
+</tr>
+</tbody>
+</table>
+<p><strong>fplsr keys</strong> (trigger: <code>"fitted"</code> + <code>"forecast"</code> + <code>"ncomp"</code> + forecast.shape[0] == 1):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_fplsr</code></td>
+<td><code>True</code> when result is from <code>fplsr</code></td>
+</tr>
+<tr>
+<td><code>fplsr_ncomp</code></td>
+<td>Number of PLS components (int); <code>None</code> when not fplsr result</td>
+</tr>
+<tr>
+<td><code>fplsr_fitted_rmse</code></td>
+<td>RMSE of fitted values over training observations (float); <code>None</code> when not fplsr result</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ftsm keys</strong> (trigger: <code>"ar_models"</code> in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_ftsm</code></td>
+<td><code>True</code> when result is from <code>ftsm</code></td>
+</tr>
+<tr>
+<td><code>ncomp</code></td>
+<td>Number of FTS components fitted (int); <code>None</code> when not ftsm result</td>
+</tr>
+<tr>
+<td><code>n_obs</code></td>
+<td>Number of training observations — inferred from scores shape[0] (int); <code>None</code> when not ftsm result</td>
+</tr>
+<tr>
+<td><code>n_points</code></td>
+<td>Evaluation grid size — inferred from mean shape[0] (int); <code>None</code> when not ftsm result</td>
+</tr>
+<tr>
+<td><code>n_ar_models</code></td>
+<td>Number of AR models fitted (equals ncomp) (int); <code>None</code> when not ftsm result</td>
+</tr>
+<tr>
+<td><code>ar_max_order</code></td>
+<td>Maximum AR lag order across all component models (int); <code>None</code> when not ftsm result or no models</td>
+</tr>
+<tr>
+<td><code>ar_sigma2_max</code></td>
+<td>Largest residual variance across all AR models (float); <code>None</code> when not ftsm result</td>
+</tr>
+<tr>
+<td><code>fitted_rmse</code></td>
+<td>Overall reconstruction RMSE across all fitted observations (float); <code>None</code> when not ftsm result</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ftsm_forecast keys</strong> (trigger: <code>"forecast"</code> + <code>"h"</code> in raw; only reached when fplsr discriminator is False):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_forecast</code></td>
+<td><code>True</code> when result is from <code>ftsm_forecast</code> or <code>ftsm_forecast_multistep</code></td>
+</tr>
+<tr>
+<td><code>h</code></td>
+<td>Forecast horizon — number of steps ahead (int); <code>None</code> when not forecast result</td>
+</tr>
+<tr>
+<td><code>forecast_mean</code></td>
+<td>Mean value across all forecast points (float); <code>None</code> when not forecast result</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read stationarity, ACF decay, ftsm component structure, forecast quality)
+· <code>"parameter"</code> (adjust ncomp, n_perm, filter_lag, AR order)
+· <code>"method"</code> (switch from ftsm to fplsr for covariate-driven forecasting; use dpca for frequency-domain decomposition)</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars.fts</span><span class="w"> </span><span class="kn">import</span> <span class="n">ftsm</span><span class="p">,</span> <span class="n">ftsm_forecast</span><span class="p">,</span> <span class="n">stationarity_test</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars.advisor</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_diagnostics</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">n</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span>       <span class="c1"># non-square: n != m (transposition guard)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span> <span class="o">+</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>                 <span class="mf">0.1</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">fit</span> <span class="o">=</span> <span class="n">ftsm</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ncomp</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">diag_ftsm</span> <span class="o">=</span> <span class="n">build_diagnostics</span><span class="p">(</span><span class="n">fit</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"fts"</span><span class="p">)</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">st</span> <span class="o">=</span> <span class="n">stationarity_test</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">n_perm</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">diag_stat</span> <span class="o">=</span> <span class="n">build_diagnostics</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"fts"</span><span class="p">)</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ftsm ncomp:           </span><span class="si">{</span><span class="n">diag_ftsm</span><span class="p">[</span><span class="s1">'ncomp'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ftsm n_ar_models:     </span><span class="si">{</span><span class="n">diag_ftsm</span><span class="p">[</span><span class="s1">'n_ar_models'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"stationarity p_value: </span><span class="si">{</span><span class="n">diag_stat</span><span class="p">[</span><span class="s1">'stationarity_p_value'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  FDARS_FENCE_OK"</span><span class="p">)</span>
+</code></pre></div>
+<p>ftsm ncomp:           3
+ftsm n_ar_models:     3
+stationarity p_value: 0.850  FDARS_FENCE_OK</p>
+<hr />
+<h2 id="frechet">frechet<a class="headerlink" href="#frechet" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.frechet.frechet_mean</code>, <code>fdars.frechet.frechet_anova</code>,
+<code>fdars.frechet.frechet_global_reg</code>, <code>fdars.frechet.frechet_local_reg</code></p>
+<p><strong>Diagnostics-only</strong> — <code>frechet</code> is NOT in <code>_RUNNABLE_METHODS</code> and cannot be invoked
+via the MCP auto-run path. The caller runs the fdars function and passes the result
+directly to <code>build_diagnostics</code>. Four result shapes are handled: <code>frechet_mean</code> returns
+a <strong>naked numpy array</strong> (not a dict); the other three return dicts detected by key-presence guards.</p>
+<p>The <code>isinstance(raw, dict)</code> check is applied <strong>first</strong> — before any dict key access —
+so the array path is handled cleanly.</p>
+<p><strong>frechet_mean path</strong> (trigger: raw is a numpy array — not a dict):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_frechet_mean</code></td>
+<td><code>True</code> when raw is a numpy array (not a dict)</td>
+</tr>
+<tr>
+<td><code>frechet_mean_ndim</code></td>
+<td>Number of array dimensions: 1 for spherical/Euclidean, 2 for SPD/correlation (int); <code>None</code> when not frechet_mean result</td>
+</tr>
+<tr>
+<td><code>frechet_mean_dim</code></td>
+<td>Last dimension size <code>d</code> (int); <code>None</code> when not frechet_mean result</td>
+</tr>
+<tr>
+<td><code>frechet_mean_trace</code></td>
+<td>Matrix trace when ndim==2; <code>None</code> for 1-D arrays or non-frechet_mean paths</td>
+</tr>
+</tbody>
+</table>
+<p><strong>frechet_anova keys</strong> (trigger: <code>"p_value_permutation"</code> + <code>"group_labels"</code> in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_anova</code></td>
+<td><code>True</code> when result is from <code>frechet_anova</code></td>
+</tr>
+<tr>
+<td><code>anova_p_value_permutation</code></td>
+<td>Permutation p-value in [0,1] (float); <code>None</code> when not anova result</td>
+</tr>
+<tr>
+<td><code>anova_p_value_asymptotic</code></td>
+<td>Asymptotic p-value in [0,1] (float); <code>None</code> when not anova result or absent</td>
+</tr>
+<tr>
+<td><code>n_perm</code></td>
+<td>Number of permutations used (int); <code>None</code> when not anova result</td>
+</tr>
+<tr>
+<td><code>n_groups</code></td>
+<td>Number of distinct groups derived from <code>group_labels</code> (int); <code>None</code> when not anova result</td>
+</tr>
+<tr>
+<td><code>pooled_frechet_variance</code></td>
+<td>Pooled within-group Fréchet variance (float); <code>None</code> when not anova result</td>
+</tr>
+<tr>
+<td><code>group_frechet_variance_max</code></td>
+<td>Maximum per-group Fréchet variance (float); <code>None</code> when not anova result</td>
+</tr>
+</tbody>
+</table>
+<p><strong>frechet_global_reg and frechet_local_reg keys</strong> (trigger: <code>"predicted"</code> + <code>"x_bar"</code> in raw for global; <code>"bandwidth"</code> in raw for local):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_global_reg</code></td>
+<td><code>True</code> when result is from <code>frechet_global_reg</code></td>
+</tr>
+<tr>
+<td><code>has_local_reg</code></td>
+<td><code>True</code> when result is from <code>frechet_local_reg</code></td>
+</tr>
+<tr>
+<td><code>predicted_n_obs</code></td>
+<td>Number of prediction-output objects — shape[0] of the <code>predicted</code> array (int); <code>None</code> when not a regression result</td>
+</tr>
+<tr>
+<td><code>bandwidth</code></td>
+<td>Kernel bandwidth (float); present for <code>frechet_local_reg</code> only; <code>None</code> for global regression</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read mean geometry, group variance, regression prediction count)
+· <code>"parameter"</code> (adjust n_perm for anova; adjust bandwidth for local regression)
+· <code>"method"</code> (switch between global and local Fréchet regression; use anova to test group-mean differences)</p>
+<hr />
+<h2 id="represent">represent<a class="headerlink" href="#represent" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> raw <code>Fdata</code> object or <code>{"data": …, "argvals": …}</code> dict (pre-analysis check)</p>
+<p><code>represent</code> is a data-quality check that operates on the <strong>input data</strong>, not on an fdars
+method output. Pass either an <code>Fdata</code> object or a plain dict with <code>"data"</code> and <code>"argvals"</code> keys.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"represent"</code></td>
+</tr>
+<tr>
+<td><code>n_obs</code></td>
+<td>Number of functional observations (rows)</td>
+</tr>
+<tr>
+<td><code>n_points</code></td>
+<td>Number of evaluation grid points (columns)</td>
+</tr>
+<tr>
+<td><code>argvals_min</code></td>
+<td>Minimum grid value</td>
+</tr>
+<tr>
+<td><code>argvals_max</code></td>
+<td>Maximum grid value</td>
+</tr>
+<tr>
+<td><code>argvals_spacing_mean</code></td>
+<td>Mean spacing between adjacent argvals; <code>None</code> when fewer than 2 grid points</td>
+</tr>
+<tr>
+<td><code>argvals_spacing_std</code></td>
+<td>Std of argval spacing; <code>None</code> when fewer than 2 grid points</td>
+</tr>
+<tr>
+<td><code>is_uniform_grid</code></td>
+<td><code>True</code> when <code>spacing_std / spacing_mean &lt; 0.01</code> (or trivially uniform)</td>
+</tr>
+<tr>
+<td><code>data_range_min</code></td>
+<td>Minimum value in the data matrix</td>
+</tr>
+<tr>
+<td><code>data_range_max</code></td>
+<td>Maximum value in the data matrix</td>
+</tr>
+<tr>
+<td><code>data_range_mean</code></td>
+<td>Mean value in the data matrix</td>
+</tr>
+<tr>
+<td><code>nan_frac</code></td>
+<td>Fraction of all data-matrix entries that are NaN; <code>None</code> when no NaN inputs were present</td>
+</tr>
+<tr>
+<td><code>has_boundary_nans</code></td>
+<td><code>True</code> when any NaN appears in the first or last column of the data matrix (boundary NaN requires boundary-extension imputation rather than interpolation); <code>None</code> when no NaN inputs present</td>
+</tr>
+<tr>
+<td><code>imputation_method</code></td>
+<td>The <code>ImputationMethod</code> string used (<code>"linear"</code>, <code>"mean"</code>, or <code>"constant"</code>); <code>None</code> when imputation was not applied</td>
+</tr>
+</tbody>
+</table>
+<p>These three keys default <code>None</code> when the input data contains no NaN values — they populate only after an <code>impute_missing_values</code> call is included in the result.</p>
+<div class="admonition tip">
+<p class="admonition-title">Imputation-quality guidance</p>
+<p><code>nan_frac</code> above 0.30 suggests high missingness — the <code>"mean"</code> or <code>"constant"</code> imputation methods are safer than <code>"linear"</code> when more than a third of values per curve are missing. <code>has_boundary_nans=True</code> means linear imputation will extrapolate from the nearest valid interior point; consider <code>"mean"</code> imputation instead if the boundary values matter for downstream analysis.</p>
+</div>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (assess data quality / grid regularity / missingness) · <code>"parameter"</code> (adjust grid density or range; choose imputation method)
+· <code>"method"</code> (switch to irregular-grid methods if <code>is_uniform_grid=False</code>; use <code>impute_missing_values</code> before smoothing or depth when NaN present)</p>
+<hr />
+<h2 id="depth">depth<a class="headerlink" href="#depth" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> any <code>fdars.depth.*</code> function — <code>fraiman_muniz_1d</code>, <code>modal_1d</code>,
+<code>random_projection_1d</code>, etc. All depth functions return a raw <code>ndarray (n,)</code> score
+array, <strong>not</strong> a dict. Pass the array directly to <code>build_diagnostics</code>.</p>
+<p>The <code>method_name</code> keyword is required: it names the depth variant used.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">diag</span> <span class="o">=</span> <span class="n">build_diagnostics</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"depth"</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">"fraiman_muniz"</span><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"depth"</code></td>
+</tr>
+<tr>
+<td><code>method_name</code></td>
+<td>Caller-supplied depth method name (e.g. <code>"fraiman_muniz"</code>, <code>"modal"</code>)</td>
+</tr>
+<tr>
+<td><code>n_obs</code></td>
+<td>Number of observations</td>
+</tr>
+<tr>
+<td><code>depth_min</code></td>
+<td>Minimum depth score (most peripheral curve)</td>
+</tr>
+<tr>
+<td><code>depth_max</code></td>
+<td>Maximum depth score (most central curve)</td>
+</tr>
+<tr>
+<td><code>depth_mean</code></td>
+<td>Mean depth score</td>
+</tr>
+<tr>
+<td><code>depth_median</code></td>
+<td>Median depth score</td>
+</tr>
+<tr>
+<td><code>depth_q10</code></td>
+<td>10th-percentile depth score (flags peripheral curves)</td>
+</tr>
+<tr>
+<td><code>depth_q90</code></td>
+<td>90th-percentile depth score</td>
+</tr>
+<tr>
+<td><code>depth_histogram</code></td>
+<td>10-bucket histogram of depth scores (list of 10 ints)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read depth distribution) · <code>"parameter"</code> (adjust depth method parameters)
+· <code>"method"</code> (switch depth variant)</p>
+<p>The fence below loads the Canadian Weather dataset, computes Fraiman–Muniz depth scores,
+and builds the offline diagnostics report. No API key is required — this runs live in the
+docs build.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">docs_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_canadian_weather</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars</span><span class="w"> </span><span class="kn">import</span> <span class="n">depth</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars.advisor</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_diagnostics</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">day</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">load_canadian_weather</span><span class="p">(</span><span class="s2">"temperature"</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">scores</span> <span class="o">=</span> <span class="n">depth</span><span class="o">.</span><span class="n">fraiman_muniz_1d</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">diag</span> <span class="o">=</span> <span class="n">build_diagnostics</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"depth"</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">"fraiman_muniz"</span><span class="p">)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"n_obs:       </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'n_obs'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"depth_mean:  </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'depth_mean'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  FDARS_FENCE_OK"</span><span class="p">)</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"depth_q10:   </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'depth_q10'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"depth_q90:   </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'depth_q90'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+n_obs:       35
+depth_mean:  0.4975  FDARS_FENCE_OK
+depth_q10:   0.2151
+depth_q90:   0.7845
+
+<hr />
+<h2 id="outliers">outliers<a class="headerlink" href="#outliers" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.outliers.detect_outliers_lrt</code>,
+<code>fdars.outliers.detect_outliers_lrt_with_dist</code>,
+<code>fdars.outliers.outliergram</code>,
+<code>fdars.outliers.magnitude_shape</code>,
+<code>fdars.outliers.tvdmss</code>,
+<code>fdars.outliers.muod</code>,
+<code>fdars.outliers.sequential_transform_outliers</code>,
+<code>fdars.outliers.depthgram</code></p>
+<p>Eight result shapes are handled by key-presence guards (each detector's result is detected
+by a unique combination of keys). <code>magnitude_shape</code> returns <strong>no</strong> <code>"outliers"</code> key —
+<code>n_outliers</code> and <code>outlier_fraction</code> are <code>None</code> for that variant.
+<code>sequential_transform_outliers</code> does not expose a score array so <code>n_obs</code> is <code>None</code>.</p>
+<p><strong>Base keys (all shapes):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"outliers"</code></td>
+</tr>
+<tr>
+<td><code>n_obs</code></td>
+<td>Number of observations (inferred from the first score array present); <code>None</code> for <code>sequential_transform_outliers</code></td>
+</tr>
+<tr>
+<td><code>n_outliers</code></td>
+<td>Count of flagged outliers; <code>None</code> for <code>magnitude_shape</code> results</td>
+</tr>
+<tr>
+<td><code>outlier_fraction</code></td>
+<td>Fraction flagged; <code>None</code> when <code>"outliers"</code> key absent</td>
+</tr>
+<tr>
+<td><code>threshold</code></td>
+<td>LRT threshold when present; <code>None</code> otherwise</td>
+</tr>
+<tr>
+<td><code>has_magnitude_shape</code></td>
+<td><code>True</code> when <code>"magnitude"</code> and <code>"shape"</code> keys both present</td>
+</tr>
+<tr>
+<td><code>magnitude_range</code></td>
+<td><code>[min, max]</code> of magnitude scores; <code>None</code> when absent</td>
+</tr>
+<tr>
+<td><code>shape_range</code></td>
+<td><code>[min, max]</code> of shape scores; <code>None</code> when absent</td>
+</tr>
+<tr>
+<td><code>has_outliergram</code></td>
+<td><code>True</code> when <code>"mei"</code> and <code>"mbd"</code> keys both present (and result is NOT depthgram)</td>
+</tr>
+<tr>
+<td><code>mei_range</code></td>
+<td><code>[min, max]</code> of MEI scores; <code>None</code> when absent</td>
+</tr>
+<tr>
+<td><code>mbd_range</code></td>
+<td><code>[min, max]</code> of MBD scores; <code>None</code> when absent</td>
+</tr>
+</tbody>
+</table>
+<p><strong>tvdmss keys</strong> (trigger: <code>"tvd"</code> and <code>"mss"</code> both in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_tvdmss</code></td>
+<td><code>True</code> when <code>"tvd"</code> and <code>"mss"</code> keys are present</td>
+</tr>
+<tr>
+<td><code>n_magnitude_outliers</code></td>
+<td>Count of tvdmss magnitude-direction outliers</td>
+</tr>
+<tr>
+<td><code>n_shape_outliers</code></td>
+<td>Count of tvdmss shape-direction outliers</td>
+</tr>
+<tr>
+<td><code>magnitude_outlier_fraction</code></td>
+<td>tvdmss magnitude-direction fraction; <code>None</code> when <code>n_obs == 0</code></td>
+</tr>
+<tr>
+<td><code>shape_outlier_fraction</code></td>
+<td>tvdmss shape-direction fraction; <code>None</code> when <code>n_obs == 0</code></td>
+</tr>
+<tr>
+<td><code>tvd_range</code></td>
+<td><code>[min, max]</code> of TVD scores</td>
+</tr>
+<tr>
+<td><code>mss_range</code></td>
+<td><code>[min, max]</code> of MSS scores</td>
+</tr>
+</tbody>
+</table>
+<p><strong>muod keys</strong> (trigger: <code>"amplitude_outliers"</code> in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_muod</code></td>
+<td><code>True</code> when <code>"amplitude_outliers"</code> key is present</td>
+</tr>
+<tr>
+<td><code>n_muod_magnitude_outliers</code></td>
+<td>muod magnitude-direction count</td>
+</tr>
+<tr>
+<td><code>n_muod_shape_outliers</code></td>
+<td>muod shape-direction count</td>
+</tr>
+<tr>
+<td><code>n_amplitude_outliers</code></td>
+<td>muod amplitude-direction count</td>
+</tr>
+<tr>
+<td><code>muod_magnitude_outlier_fraction</code></td>
+<td>muod magnitude fraction; <code>None</code> when <code>n_obs == 0</code></td>
+</tr>
+<tr>
+<td><code>muod_shape_outlier_fraction</code></td>
+<td>muod shape fraction; <code>None</code> when <code>n_obs == 0</code></td>
+</tr>
+<tr>
+<td><code>amplitude_outlier_fraction</code></td>
+<td>muod amplitude fraction; <code>None</code> when <code>n_obs == 0</code></td>
+</tr>
+<tr>
+<td><code>shape_index_range</code></td>
+<td><code>[min, max]</code> of muod shape scores</td>
+</tr>
+<tr>
+<td><code>magnitude_index_range</code></td>
+<td><code>[min, max]</code> of muod magnitude scores</td>
+</tr>
+<tr>
+<td><code>amplitude_index_range</code></td>
+<td><code>[min, max]</code> of muod amplitude scores</td>
+</tr>
+</tbody>
+</table>
+<p><strong>sequential_transform_outliers keys</strong> (trigger: <code>"union_outliers"</code> in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_sequential_transform</code></td>
+<td><code>True</code> when <code>"union_outliers"</code> key is present</td>
+</tr>
+<tr>
+<td><code>n_union_outliers</code></td>
+<td>Size of the union of outliers across all sequential transform stages</td>
+</tr>
+<tr>
+<td><code>n_transforms</code></td>
+<td>Number of sequential detector stages (length of <code>per_transform_outliers</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>depthgram keys</strong> (trigger: <code>"mbd_mei_d"</code> in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_depthgram</code></td>
+<td><code>True</code> when <code>"mbd_mei_d"</code> key is present</td>
+</tr>
+<tr>
+<td><code>n_depthgram_shape_outliers</code></td>
+<td>depthgram shape-direction count</td>
+</tr>
+<tr>
+<td><code>n_depthgram_magnitude_outliers</code></td>
+<td>depthgram magnitude-direction count</td>
+</tr>
+<tr>
+<td><code>depthgram_shape_outlier_fraction</code></td>
+<td>depthgram shape fraction; <code>None</code> when <code>n_obs == 0</code></td>
+</tr>
+<tr>
+<td><code>depthgram_magnitude_outlier_fraction</code></td>
+<td>depthgram magnitude fraction; <code>None</code> when <code>n_obs == 0</code></td>
+</tr>
+<tr>
+<td><code>depthgram_mbd_range</code></td>
+<td><code>[min, max]</code> of depthgram MBD scores</td>
+</tr>
+<tr>
+<td><code>depthgram_mei_range</code></td>
+<td><code>[min, max]</code> of depthgram MEI scores</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read outlier count and type) · <code>"parameter"</code> (adjust threshold or alpha)
+· <code>"method"</code> (combine detectors; use <code>tvdmss</code>/<code>muod</code>/<code>depthgram</code> for direction-aware outlier analysis)</p>
+<hr />
+<h2 id="classification">classification<a class="headerlink" href="#classification" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.classification.fclassif_lda</code>, <code>fclassif_qda</code>, <code>fclassif_knn</code>,
+<code>fclassif_kernel</code>, <code>fclassif_dd</code>, <code>fclassif_cv</code>,
+<code>fdars.classification.elastic_multinomial</code></p>
+<p>Three result shapes are handled by key-presence guards: point-estimate functions return
+<code>"accuracy"</code>; <code>fclassif_cv</code> returns <code>"error_rate"</code> (emitted as <code>cv_error_rate</code>) and has
+no <code>"accuracy"</code> key; <code>elastic_multinomial</code> returns <code>"train_accuracy"</code> (detected by the
+unique <code>train_accuracy</code> key) and overrides <code>n_classes</code> from the raw dict.</p>
+<p><code>n_classes</code> <strong>cannot be inferred from the result dict for LDA/QDA/KNN variants</strong> —
+supply it explicitly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">diag</span> <span class="o">=</span> <span class="n">build_diagnostics</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span> <span class="n">n_classes</span><span class="o">=</span><span class="n">K</span><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"classification"</code></td>
+</tr>
+<tr>
+<td><code>n_obs</code></td>
+<td>Number of observations (from <code>predicted</code> length); <code>None</code> for CV-only results</td>
+</tr>
+<tr>
+<td><code>n_classes</code></td>
+<td>Caller-supplied ground-truth class count (overridden by <code>elastic_multinomial</code>'s raw <code>n_classes</code>); <code>None</code> when not passed</td>
+</tr>
+<tr>
+<td><code>accuracy</code></td>
+<td>Proportion correctly classified; derived as <code>1 - cv_error_rate</code> when only CV result present</td>
+</tr>
+<tr>
+<td><code>error_rate</code></td>
+<td><code>1 - accuracy</code> for point-estimate results; <code>None</code> for CV-only</td>
+</tr>
+<tr>
+<td><code>cv_error_rate</code></td>
+<td>CV error rate from <code>fclassif_cv</code> (raw key <code>"error_rate"</code>); <code>None</code> for point-estimate</td>
+</tr>
+<tr>
+<td><code>fold_error_std</code></td>
+<td>Std of per-fold errors (CV path); <code>None</code> for point-estimate</td>
+</tr>
+<tr>
+<td><code>best_ncomp</code></td>
+<td>Number of FPC components minimising CV error; <code>None</code> for point-estimate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>elastic_multinomial keys</strong> (trigger: <code>"train_accuracy"</code> in raw AND <code>"n_shapelets"</code> NOT in raw — the shapelet classifier also exposes <code>train_accuracy</code>, so the absence of <code>"n_shapelets"</code> is required to correctly distinguish <code>elastic_multinomial</code> from the shapelet classifier):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_elastic_multinomial</code></td>
+<td><code>True</code> when <code>"train_accuracy"</code> key is present</td>
+</tr>
+<tr>
+<td><code>train_accuracy</code></td>
+<td>Training-set proportion correctly classified (float)</td>
+</tr>
+<tr>
+<td><code>train_error_rate</code></td>
+<td><code>1 - train_accuracy</code></td>
+</tr>
+<tr>
+<td><code>overfitting_gap</code></td>
+<td><code>train_accuracy - holdout_accuracy</code>: difference between training accuracy and caller-supplied holdout or cross-validation accuracy. <strong><code>None</code> unless <code>holdout_accuracy</code> is passed to <code>build_diagnostics</code></strong> — the <code>elastic_multinomial</code> result has no holdout accuracy of its own and this gap is never fabricated (grounding invariant). A positive gap indicates overfitting</td>
+</tr>
+<tr>
+<td><code>n_classes_flagged</code></td>
+<td><code>True</code> when <code>n_classes &gt; 2</code> (multiclass problem — elastic multinomial scales to K classes via a one-vs-rest structure; flag helps the LLM contextualise <code>train_accuracy</code> correctly); <code>None</code> when <code>n_classes</code> is not supplied</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">overfitting_gap requires holdout_accuracy</p>
+<p><code>overfitting_gap</code> is <code>None</code> unless you pass <code>holdout_accuracy=&lt;float&gt;</code> to
+<code>build_diagnostics</code>. The <code>elastic_multinomial</code> result dict contains only training
+accuracy — the gap cannot be computed without an externally supplied holdout or
+cross-validation accuracy. Do not pass <code>holdout_accuracy</code> from the same training
+run used to fit the model; use a held-out test split or a CV error rate.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">diag</span> <span class="o">=</span> <span class="n">build_diagnostics</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"classification"</span><span class="p">,</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                         <span class="n">n_classes</span><span class="o">=</span><span class="n">K</span><span class="p">,</span> <span class="n">holdout_accuracy</span><span class="o">=</span><span class="n">cv_accuracy</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<p><strong>shapelet_classifier keys</strong> (trigger: <code>"n_shapelets"</code> in raw — unique to <code>shapelet_classifier_fit</code>; the coercion guard in <code>__init__.py</code> converts the <code>PyShapeletClassifierFit</code> opaque handle to a dict before this discriminator runs):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_shapelet_classifier</code></td>
+<td><code>True</code> when result is from <code>shapelet_classifier_fit</code></td>
+</tr>
+<tr>
+<td><code>shapelet_n_shapelets</code></td>
+<td>Number of shapelets discovered and used (int); <code>None</code> when not shapelet classifier result</td>
+</tr>
+<tr>
+<td><code>shapelet_train_accuracy</code></td>
+<td>Training-set proportion correctly classified — <code>clf.train_accuracy</code> (float in [0,1]); <code>None</code> when not shapelet classifier result</td>
+</tr>
+<tr>
+<td><code>shapelet_n_classes</code></td>
+<td>Number of distinct label classes (int); <code>None</code> when not shapelet classifier result</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Opaque handle coercion</p>
+<p><code>shapelet_classifier_fit</code> returns a <code>PyShapeletClassifierFit</code> opaque PyO3 handle.
+Pass it directly to <code>build_diagnostics</code> — the advisor's <code>__init__.py</code> coercion guard
+(placed before the generic <code>dict(raw)</code> block) converts it to a plain dict via
+<code>{"n_shapelets": handle.n_shapelets, "train_accuracy": handle.train_accuracy, ...}</code>
+before the classification builder runs. No manual conversion is needed.</p>
+</div>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read classification accuracy and CV stability; shapelet: assess discriminative subsequence count and training accuracy)
+· <code>"parameter"</code> (tune k / n_comp; shapelet: adjust n_shapelets, quality, or classifier type)
+· <code>"method"</code> (switch classifier; use <code>elastic_multinomial</code> for K-class problems in the elastic SRSF domain; use <code>shapelet_classifier_fit</code> when discriminative subsequence structure is expected)</p>
+<hr />
+<h2 id="regression">regression<a class="headerlink" href="#regression" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.regression.fregre_lm</code>, <code>fregre_pls</code>, <code>fregre_l1</code>,
+<code>fregre_huber</code>, <code>fregre_np</code>, <code>fosr</code>, <code>fosr_fpc</code>,
+<code>fdars.regression.functional_glm</code>,
+<code>fdars.regression.concurrent_regression</code>,
+<code>fdars.regression.fof_regression</code>, <code>fdars.regression.fof_re_regression</code>,
+<code>fdars.scalar_on_function.fam</code>, <code>fdars.scalar_on_function.fregre_gsam</code>,
+<code>fdars.scalar_on_function.fregre_gkam</code></p>
+<p>Note that <code>fregre_l1</code> and <code>fregre_huber</code> do <strong>not</strong> return <code>r_squared</code> — that key is
+<code>None</code> for robust regression variants. <code>fosr</code>/<code>fosr_fpc</code> return 2-D residuals (shape
+<code>n × m</code>); residual summary statistics are computed only for 1-D residual arrays.
+<code>functional_glm</code> and <code>concurrent_regression</code> are detected by unique key guards and
+expose their own sub-tables below.</p>
+<p><strong>Base keys (all variants):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"regression"</code></td>
+</tr>
+<tr>
+<td><code>n_obs</code></td>
+<td>Number of observations (inferred from <code>fitted_values</code> or <code>fitted</code>)</td>
+</tr>
+<tr>
+<td><code>r_squared</code></td>
+<td>Coefficient of determination; <code>None</code> for <code>fregre_l1</code> / <code>fregre_huber</code></td>
+</tr>
+<tr>
+<td><code>residual_mean</code></td>
+<td>Mean residual; <code>None</code> for <code>fosr</code>/<code>fosr_fpc</code>/<code>concurrent_regression</code> (2-D residuals)</td>
+</tr>
+<tr>
+<td><code>residual_std</code></td>
+<td>Std of residuals; <code>None</code> for <code>fosr</code>/<code>fosr_fpc</code>/<code>concurrent_regression</code></td>
+</tr>
+<tr>
+<td><code>residual_max_abs</code></td>
+<td>Maximum absolute residual; <code>None</code> for <code>fosr</code>/<code>fosr_fpc</code>/<code>concurrent_regression</code></td>
+</tr>
+<tr>
+<td><code>residual_skew</code></td>
+<td>Pure-NumPy skewness of residuals; <code>None</code> for <code>fosr</code>/<code>fosr_fpc</code>/<code>concurrent_regression</code></td>
+</tr>
+<tr>
+<td><code>beta_t_range</code></td>
+<td><code>[min, max]</code> of <code>beta_t</code>; <code>None</code> for <code>fregre_np</code> and <code>fosr</code>/<code>fosr_fpc</code></td>
+</tr>
+<tr>
+<td><code>has_fosr</code></td>
+<td><code>True</code> only when <code>"fitted"</code> key is present AND the array is 2-D (also <code>True</code> for <code>concurrent_regression</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>functional_glm keys</strong> (trigger: <code>"deviance"</code> in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_functional_glm</code></td>
+<td><code>True</code> when <code>"deviance"</code> key is present (unique to <code>functional_glm</code>)</td>
+</tr>
+<tr>
+<td><code>deviance</code></td>
+<td>Model deviance — residual measure for the exponential-family fit (lower is better)</td>
+</tr>
+<tr>
+<td><code>aic</code></td>
+<td>Akaike Information Criterion from the score-space GLM</td>
+</tr>
+<tr>
+<td><code>bic</code></td>
+<td>Bayesian Information Criterion from the score-space GLM</td>
+</tr>
+<tr>
+<td><code>log_likelihood</code></td>
+<td>Log-likelihood at IRLS convergence</td>
+</tr>
+<tr>
+<td><code>iterations</code></td>
+<td>Number of IRLS iterations to convergence (key <code>"iterations"</code>, NOT <code>"n_iter"</code>)</td>
+</tr>
+<tr>
+<td><code>glm_ncomp</code></td>
+<td>Number of FPC components used in the GLM (raw key <code>"ncomp"</code>)</td>
+</tr>
+<tr>
+<td><code>family</code></td>
+<td>Exponential-family name string (<code>"gaussian"</code>, <code>"binomial"</code>, <code>"poisson"</code>, <code>"gamma"</code>)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gamma AIC is not comparable to R <code>glm()</code> AIC</p>
+<p>The <code>aic</code> value from <code>functional_glm</code> is computed in the FPC score space, not the
+original data space. It is <strong>not</strong> comparable to AIC from R's <code>glm()</code> function, which
+operates in the original response space.</p>
+</div>
+<p><strong>concurrent_regression keys</strong> (trigger: <code>"beta_curve"</code> in raw):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_concurrent_regression</code></td>
+<td><code>True</code> when <code>"beta_curve"</code> key is present (unique to <code>concurrent_regression</code>)</td>
+</tr>
+<tr>
+<td><code>n_predictors</code></td>
+<td>Number of functional predictor curves (rows of <code>beta_curve</code>; shape <code>(p, m)</code>)</td>
+</tr>
+<tr>
+<td><code>concurrent_residual_rms</code></td>
+<td>Root-mean-squared residual over the full <code>n × m</code> grid; <code>None</code> when residuals absent</td>
+</tr>
+<tr>
+<td><code>concurrent_residual_max_abs</code></td>
+<td>Maximum absolute residual over the full grid; <code>None</code> when residuals absent</td>
+</tr>
+</tbody>
+</table>
+<p><strong>fof_regression keys</strong> (trigger: <code>"beta_surface"</code> in raw — unique to <code>fof_regression</code> and <code>fof_re_regression</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_fof_regression</code></td>
+<td><code>True</code> when <code>"beta_surface"</code> key is present AND the fitted array is 2-D (also <code>True</code> for <code>fof_re_regression</code>)</td>
+</tr>
+<tr>
+<td><code>fof_r_squared</code></td>
+<td>Scalar coefficient of determination from <code>fof_regression</code> result (float); <code>None</code> when key absent</td>
+</tr>
+<tr>
+<td><code>beta_surface_shape</code></td>
+<td>Shape of the beta surface as <code>[ncomp_x, ncomp_y]</code> (list of 2 ints); <code>None</code> when not FoF result</td>
+</tr>
+<tr>
+<td><code>beta_surface_max_abs</code></td>
+<td>Maximum absolute value in the beta surface (float); <code>None</code> when not FoF result</td>
+</tr>
+<tr>
+<td><code>fof_ncomp</code></td>
+<td><code>[ncomp_x, ncomp_y]</code> — number of FPCA components for predictor and response (list of 2 ints); <code>None</code> when keys absent</td>
+</tr>
+</tbody>
+</table>
+<p><strong>fof_re_regression keys</strong> (trigger: <code>"random_effects"</code> + <code>"n_subjects"</code> in raw — unique to <code>fof_re_regression</code>; <code>has_fof_regression</code> is also <code>True</code> for this result shape):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_fof_re_regression</code></td>
+<td><code>True</code> when <code>"random_effects"</code> and <code>"n_subjects"</code> keys are both present</td>
+</tr>
+<tr>
+<td><code>n_subjects</code></td>
+<td>Number of subjects in the random-effects model (int); <code>None</code> when not FoF-RE result</td>
+</tr>
+<tr>
+<td><code>sigma2_u_max</code></td>
+<td>Maximum subject-level random-effects variance — <code>max(sigma2_u)</code> (float); <code>None</code> when absent</td>
+</tr>
+<tr>
+<td><code>sigma2_eps</code></td>
+<td>Residual noise variance (float); <code>None</code> when absent</td>
+</tr>
+<tr>
+<td><code>re_dims</code></td>
+<td>Shape of the random-effects matrix as <code>[n_subjects, m_y]</code> (list of 2 ints); <code>None</code> when absent</td>
+</tr>
+</tbody>
+</table>
+<p><strong>fam / fregre_gsam keys</strong> (trigger: <code>"component_fits"</code> + <code>"fitted_values"</code> in raw — shared by <code>fam</code> and <code>fregre_gsam</code>; <code>has_fregre_gkam</code> is the more specific discriminator for <code>gkam</code> which also has these keys):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_fam</code></td>
+<td><code>True</code> when <code>"component_fits"</code> and <code>"fitted_values"</code> keys are both present</td>
+</tr>
+<tr>
+<td><code>fam_n_obs</code></td>
+<td>Number of observations from fitted_values shape[0] (int); <code>None</code> when not FAM/GSAM result</td>
+</tr>
+<tr>
+<td><code>fam_n_components</code></td>
+<td>Number of smooth component fits (int); <code>None</code> when not FAM/GSAM result</td>
+</tr>
+<tr>
+<td><code>fam_r_squared</code></td>
+<td>Coefficient of determination (float); <code>None</code> when absent</td>
+</tr>
+<tr>
+<td><code>fam_ncomp</code></td>
+<td>Number of FPCA components (int); <code>None</code> when absent</td>
+</tr>
+</tbody>
+</table>
+<p><strong>fregre_gkam keys</strong> (trigger: <code>"converged"</code> + <code>"bandwidths"</code> in raw — unique to <code>fregre_gkam</code>; <code>has_fam</code> is also <code>True</code> for gkam):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_fregre_gkam</code></td>
+<td><code>True</code> when <code>"converged"</code> and <code>"bandwidths"</code> keys are both present</td>
+</tr>
+<tr>
+<td><code>gkam_converged</code></td>
+<td>Whether the GKAM algorithm converged (bool); <code>None</code> when not GKAM result</td>
+</tr>
+<tr>
+<td><code>gkam_bandwidths</code></td>
+<td>Per-component kernel bandwidths (list of floats); <code>None</code> when not GKAM result</td>
+</tr>
+<tr>
+<td><code>gkam_n_predictors</code></td>
+<td>Number of functional predictors (int, inferred from bandwidths length); <code>None</code> when not GKAM result</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read model fit and residual behaviour; FoF: assess beta-surface shape and R²; GKAM: assess convergence and component bandwidths)
+· <code>"parameter"</code> (adjust regularisation or IRLS max_iter; FoF: adjust ncomp_x/ncomp_y via cross-validation)
+· <code>"method"</code> (switch between scalar-response, function-on-scalar, GLM, and varying-coefficient regression; use <code>fof_regression</code> when both predictor and response are functional; use <code>fam</code>/<code>fregre_gsam</code> for additive smooth components)</p>
+<hr />
+<h2 id="regression_cv">regression_cv<a class="headerlink" href="#regression_cv" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.regression.fregre_cv</code>, <code>fdars.regression.model_selection_ncomp</code></p>
+<p>Two source functions are detected by key presence: <code>fregre_cv</code> exposes <code>"optimal_k"</code>;
+<code>model_selection_ncomp</code> exposes <code>"best_ncomp"</code> and <code>"criteria"</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"regression_cv"</code></td>
+</tr>
+<tr>
+<td><code>optimal_k</code></td>
+<td>Chosen number of components or nearest neighbours</td>
+</tr>
+<tr>
+<td><code>min_cv_error</code></td>
+<td>Minimum CV error; <code>None</code> for <code>model_selection_ncomp</code></td>
+</tr>
+<tr>
+<td><code>cv_curve</code></td>
+<td>CV error (or GCV) values per k (list of floats)</td>
+</tr>
+<tr>
+<td><code>k_values</code></td>
+<td>Component counts matching <code>cv_curve</code> (list of ints)</td>
+</tr>
+<tr>
+<td><code>cv_curve_range</code></td>
+<td><code>[min, max]</code> of <code>cv_curve</code>; <code>None</code> when curve is empty</td>
+</tr>
+<tr>
+<td><code>elbow_present</code></td>
+<td><code>True</code> when the CV curve has a strict local minimum at an interior index (not at boundary)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read optimal k and curve shape) · <code>"parameter"</code> (widen k range to expose elbow)
+· <code>"method"</code> (switch CV strategy or regression variant)</p>
+<hr />
+<h2 id="scoring">scoring<a class="headerlink" href="#scoring" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.scoring.functional_mae</code>, <code>fdars.scoring.functional_mse</code>,
+<code>fdars.scoring.functional_mape</code>, <code>fdars.scoring.functional_msle</code>,
+<code>fdars.scoring.functional_explained_variance</code></p>
+<p>The <code>scoring</code> aspect reports domain-integrated prediction-quality scalars. Unlike
+column-wise averages, each metric integrates the error (or squared error) over the
+evaluation domain via Simpson's rule. Pass a dict with the computed scalar values directly
+to <code>build_diagnostics</code> — the advisor does not recompute them.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars.advisor</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_diagnostics</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars</span><span class="w"> </span><span class="kn">import</span> <span class="n">scoring</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Assuming y_true, y_pred, argvals are arrays</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="s2">"functional_mae"</span><span class="p">:</span> <span class="n">scoring</span><span class="o">.</span><span class="n">functional_mae</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">argvals</span><span class="p">),</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="s2">"functional_mse"</span><span class="p">:</span> <span class="n">scoring</span><span class="o">.</span><span class="n">functional_mse</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">argvals</span><span class="p">),</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="s2">"functional_explained_variance"</span><span class="p">:</span> <span class="n">scoring</span><span class="o">.</span><span class="n">functional_explained_variance</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">argvals</span><span class="p">),</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">}</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="n">diag</span> <span class="o">=</span> <span class="n">build_diagnostics</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"scoring"</span><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"scoring"</code></td>
+</tr>
+<tr>
+<td><code>functional_mae</code></td>
+<td>Mean absolute integrated error; same units as the data; robust to outlier curves</td>
+</tr>
+<tr>
+<td><code>functional_mse</code></td>
+<td>Mean squared integrated error; penalises large errors more heavily; squared units</td>
+</tr>
+<tr>
+<td><code>functional_mape</code></td>
+<td>Mean absolute percentage integrated error; <code>None</code> when not computed or inputs near zero</td>
+</tr>
+<tr>
+<td><code>functional_msle</code></td>
+<td>Mean squared log-error; <code>None</code> when not computed; requires all values <span class="arithmatex">\(&gt; -1\)</span></td>
+</tr>
+<tr>
+<td><code>functional_explained_variance</code></td>
+<td>Integrated explained variance; range <span class="arithmatex">\((-\infty, 1]\)</span>; 1 = perfect prediction</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">MAPE and MSLE domain restrictions</p>
+<p><code>functional_mape</code> raises <code>ValueError</code> when any <code>|y_true(t)| &lt; ε</code> for any grid point — the library correctly rejects inputs near zero rather than producing numerically undefined results. <code>functional_msle</code> raises <code>ValueError</code> when any value is <span class="arithmatex">\(\leq -1\)</span>. Do not include these keys in the result dict when the data does not satisfy their domain conditions; use <code>functional_mae</code> or <code>functional_mse</code> instead.</p>
+</div>
+<p>The fence below builds a scoring diagnostics report on a synthetic regression prediction.
+No API key is required — this runs live in the docs build.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars.advisor</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_diagnostics</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars</span><span class="w"> </span><span class="kn">import</span> <span class="n">scoring</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">n</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">80</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">y_pred</span> <span class="o">=</span> <span class="n">y_true</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">y_true</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="s2">"functional_mae"</span><span class="p">:</span> <span class="n">scoring</span><span class="o">.</span><span class="n">functional_mae</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="s2">"functional_mse"</span><span class="p">:</span> <span class="n">scoring</span><span class="o">.</span><span class="n">functional_mse</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="s2">"functional_explained_variance"</span><span class="p">:</span> <span class="n">scoring</span><span class="o">.</span><span class="n">functional_explained_variance</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">diag</span> <span class="o">=</span> <span class="n">build_diagnostics</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"scoring"</span><span class="p">)</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"functional_mae:                </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'functional_mae'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"functional_mse:                </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'functional_mse'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"functional_explained_variance: </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'functional_explained_variance'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  FDARS_FENCE_OK"</span><span class="p">)</span>
+</code></pre></div>
+functional_mae:                0.0630
+functional_mse:                0.0063
+functional_explained_variance: 0.9875  FDARS_FENCE_OK
+
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read prediction quality and choose a primary metric for reporting)
+· <code>"parameter"</code> (adjust regularisation or model complexity to improve scores)
+· <code>"method"</code> (switch from scalar to functional regression; use <code>functional_explained_variance</code> as primary quality signal; if MAPE or MSLE are undefined, fall back to MAE/MSE)</p>
+<hr />
+<h2 id="spm">spm<a class="headerlink" href="#spm" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> <code>fdars.spm.spm_phase1</code>, <code>fdars.spm.mfpca</code>, <code>fdars.spm.spe_multivariate</code></p>
+<p>Three distinct input shapes are handled. The <code>spe_multivariate</code> naked-array path is
+checked <strong>first</strong> (before any dict-key access). When <code>has_mfpca=True</code>, the <code>spm_phase1</code>
+sentinel fields (<code>ncomp</code>, <code>eigenvalues</code>, <code>variance_explained_cumulative</code>) are set to <code>None</code>
+— the mfpca-specific keys carry that information instead.</p>
+<p>SPM is the only aspect whose builder makes a live fdars call:
+<code>fdars.spm.spe_moment_match_diagnostic(spe_values)</code> — a deterministic pure-moment
+computation with no RNG, fully offline. The call is wrapped in <code>try/except</code> so
+<code>spe_kurtosis_excess</code> and <code>spe_moment_match_adequate</code> degrade to <code>None</code> gracefully
+when the compiled extension is unavailable.</p>
+<p><strong>spm_phase1 keys</strong> (from <code>fdars.spm.spm_phase1</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"spm"</code></td>
+</tr>
+<tr>
+<td><code>n_obs</code></td>
+<td>Number of observations (from T² array length)</td>
+</tr>
+<tr>
+<td><code>ncomp</code></td>
+<td>Number of PCA components retained; <code>None</code> when <code>has_mfpca=True</code> (mfpca input gating)</td>
+</tr>
+<tr>
+<td><code>t2_limit</code></td>
+<td>Hotelling T² control limit</td>
+</tr>
+<tr>
+<td><code>spe_limit</code></td>
+<td>SPE (Q) control limit</td>
+</tr>
+<tr>
+<td><code>t2_max</code></td>
+<td>Maximum T² value across all observations</td>
+</tr>
+<tr>
+<td><code>t2_mean</code></td>
+<td>Mean T² value</td>
+</tr>
+<tr>
+<td><code>t2_exceedance_rate</code></td>
+<td>Fraction of observations exceeding <code>t2_limit</code></td>
+</tr>
+<tr>
+<td><code>spe_max</code></td>
+<td>Maximum SPE value</td>
+</tr>
+<tr>
+<td><code>spe_mean</code></td>
+<td>Mean SPE value</td>
+</tr>
+<tr>
+<td><code>spe_exceedance_rate</code></td>
+<td>Fraction of observations exceeding <code>spe_limit</code></td>
+</tr>
+<tr>
+<td><code>eigenvalues</code></td>
+<td>PCA eigenvalues (list of floats, length = ncomp); <code>None</code> when <code>has_mfpca=True</code></td>
+</tr>
+<tr>
+<td><code>variance_explained_cumulative</code></td>
+<td>Running cumulative variance explained; <code>None</code> when <code>has_mfpca=True</code></td>
+</tr>
+<tr>
+<td><code>spe_kurtosis_excess</code></td>
+<td>Excess kurtosis of the SPE distribution (from <code>spe_moment_match_diagnostic</code>); <code>None</code> when fdars unavailable</td>
+</tr>
+<tr>
+<td><code>spe_moment_match_adequate</code></td>
+<td><code>True</code> when the SPE distribution is adequately moment-matched; <code>None</code> when fdars unavailable</td>
+</tr>
+</tbody>
+</table>
+<p><strong>mfpca keys</strong> (trigger: <code>"eigenfunctions"</code> + <code>"scales"</code> in raw — unique to <code>mfpca</code> vs <code>spm_phase1</code>; when <code>has_mfpca=True</code> the <code>spm_phase1</code> ncomp and eigenvalues keys are <code>None</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_mfpca</code></td>
+<td><code>True</code> when <code>"eigenfunctions"</code> and <code>"scales"</code> keys are both present</td>
+</tr>
+<tr>
+<td><code>mfpca_ncomp</code></td>
+<td>Number of MFPCA components — <code>eigenvalues</code> array length (int); <code>None</code> when not mfpca result</td>
+</tr>
+<tr>
+<td><code>mfpca_n_obs</code></td>
+<td>Number of observations from <code>scores</code> shape[0] (int); <code>None</code> when not mfpca result</td>
+</tr>
+<tr>
+<td><code>mfpca_n_variables</code></td>
+<td>Number of multivariate variables — <code>len(eigenfunctions)</code> (int); <code>None</code> when not mfpca result</td>
+</tr>
+<tr>
+<td><code>mfpca_eigenvalues</code></td>
+<td>MFPCA eigenvalues (list of floats); <code>None</code> when not mfpca result</td>
+</tr>
+<tr>
+<td><code>mfpca_variance_explained_cumulative</code></td>
+<td>Running cumulative variance explained by MFPCA eigenvalues (list of floats); <code>None</code> when not mfpca result</td>
+</tr>
+</tbody>
+</table>
+<p><strong>spe_multivariate keys</strong> (trigger: raw is a naked numpy array — not a dict; <code>spe_multivariate</code> returns a 1-D array directly):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>has_spe_multivariate</code></td>
+<td><code>True</code> when raw is a numpy array (not a dict)</td>
+</tr>
+<tr>
+<td><code>spe_mv_n_obs</code></td>
+<td>Number of SPE values in the array (int); <code>None</code> when not spe_multivariate result</td>
+</tr>
+<tr>
+<td><code>spe_mv_max</code></td>
+<td>Maximum SPE value (float); <code>None</code> when not spe_multivariate result</td>
+</tr>
+<tr>
+<td><code>spe_mv_mean</code></td>
+<td>Mean SPE value (float); <code>None</code> when not spe_multivariate result</td>
+</tr>
+<tr>
+<td><code>spe_mv_all_nonneg</code></td>
+<td><code>True</code> when all SPE values are ≥ 0 (bool); <code>None</code> when not spe_multivariate result</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">mfpca ncomp gating</p>
+<p>When <code>has_mfpca=True</code>, the <code>spm_phase1</code> fields <code>ncomp</code>, <code>eigenvalues</code>, and
+<code>variance_explained_cumulative</code> are all <code>None</code> — the mfpca-specific variants
+(<code>mfpca_ncomp</code>, <code>mfpca_eigenvalues</code>, <code>mfpca_variance_explained_cumulative</code>) carry
+the equivalent information. This gating prevents ambiguity when both spm_phase1-style
+eigenvalue keys and mfpca-style eigenfunctions keys are present.</p>
+</div>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read process stability and exceedance rates; mfpca: assess multivariate component structure and variance explained; spe_multivariate: assess SPE distribution shape)
+· <code>"parameter"</code> (adjust ncomp or significance level; mfpca: adjust n_components per variable)
+· <code>"method"</code> (add UCL monitoring or switch to functional T² variants; use <code>mfpca</code> for multivariate functional process monitoring)</p>
+<hr />
+<h2 id="inference">inference<a class="headerlink" href="#inference" title="Permanent link">&para;</a></h2>
+<p><strong>fdars source:</strong> caller-supplied <code>TestResult</code> or <code>ToleranceBand</code> dict from <code>fdars.inference</code> — <strong>diagnostics-only</strong></p>
+<p>Unlike every other aspect, <code>inference</code> does <strong>not</strong> call an fdars function internally. The caller runs one of the Phase 31 inference functions (<code>fdars.inference.t_perm_test</code>, <code>f_perm_test</code>, <code>two_sample_mean_test</code>, <code>mean_scb</code>, <code>scb_two_sample_test</code>, <code>oneway_anova_vstat</code>, <code>flm_f_test</code>, <code>flm_gof_test</code>) and passes the returned dict directly to <code>build_diagnostics</code>. This preserves the grounding invariant: the advisor never re-computes inference statistics.</p>
+<p>Two input shapes are handled:</p>
+<p><strong>TestResult</strong> (primary — from permutation or asymptotic tests): keys <code>statistic</code>, <code>p_value</code>, <code>n_perm</code>.
+<code>n_perm == 0</code> is a <strong>legitimate</strong> value indicating the asymptotic path (e.g. Hotelling T² in <code>two_sample_mean_test</code>), not a missing value.</p>
+<p><strong>ToleranceBand / SCB</strong> (secondary — from <code>mean_scb</code>): keys <code>lower</code>, <code>upper</code>, <code>center</code>, <code>half_width</code>. Detected by the presence of <code>half_width</code> + <code>center</code> <strong>without</strong> <code>p_value</code>. All significance fields are set to <code>None</code> for this shape.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>Always <code>"inference"</code></td>
+</tr>
+<tr>
+<td><code>statistic</code></td>
+<td>The fdars-computed test statistic (float); <code>None</code> for ToleranceBand path</td>
+</tr>
+<tr>
+<td><code>p_value</code></td>
+<td>Permutation or asymptotic p-value; <code>None</code> for ToleranceBand path</td>
+</tr>
+<tr>
+<td><code>n_perm</code></td>
+<td>Permutations used; <code>0</code> = asymptotic path; <code>None</code> when key absent</td>
+</tr>
+<tr>
+<td><code>significant_at_0.01</code></td>
+<td><code>p_value &lt; 0.01</code>; <code>None</code> when <code>p_value</code> absent</td>
+</tr>
+<tr>
+<td><code>significant_at_0.05</code></td>
+<td><code>p_value &lt; 0.05</code>; <code>None</code> when <code>p_value</code> absent</td>
+</tr>
+<tr>
+<td><code>significant_at_0.10</code></td>
+<td><code>p_value &lt; 0.10</code>; <code>None</code> when <code>p_value</code> absent</td>
+</tr>
+<tr>
+<td><code>strongest_significance_level</code></td>
+<td>Smallest alpha at which the result is significant (0.01, 0.05, or 0.10); <code>None</code> when not significant at any level</td>
+</tr>
+<tr>
+<td><code>is_permutation_test</code></td>
+<td><code>True</code> when <code>n_perm &gt; 0</code>; <code>False</code> when <code>n_perm == 0</code> (asymptotic); <code>None</code> when <code>n_perm</code> absent</td>
+</tr>
+<tr>
+<td><code>band_present</code></td>
+<td><code>True</code> for the ToleranceBand path; absent from the TestResult path</td>
+</tr>
+<tr>
+<td><code>half_width</code></td>
+<td>Mean SCB half-width (float); present only for the ToleranceBand path</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ITP (Interval-wise Testing Procedure) keys</strong> (trigger: <code>"adjusted_pvalues"</code> in raw):</p>
+<p>ITP results from <code>fdars.inference</code> functions that return an <code>adjusted_pvalues</code> vector (e.g.
+<code>flm_f_test</code>, <code>flm_gof_test</code>) expose two complementary scalar families: <strong>detection</strong> (is the
+effect globally significant?) and <strong>localisation</strong> (where on the domain is it significant?).
+Both families are always emitted together — citing only detection without localisation (or
+vice versa) would give the LLM a misleadingly incomplete picture (PITFALLS #8).</p>
+<p><em>Detection scalars (whether the effect is present):</em></p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>itp_result_present</code></td>
+<td><code>True</code> when an ITP <code>adjusted_pvalues</code> vector was detected</td>
+</tr>
+<tr>
+<td><code>itp_min_adjusted_pvalue</code></td>
+<td>Minimum adjusted p-value across all basis functions (scalar <code>float</code>); small value → at least one basis function's contribution is globally significant</td>
+</tr>
+<tr>
+<td><code>itp_detected_at_0.05</code></td>
+<td><code>True</code> when <code>itp_min_adjusted_pvalue &lt; 0.05</code>; overall detection flag at the conventional 5 % level</td>
+</tr>
+<tr>
+<td><code>itp_n_basis</code></td>
+<td>Number of basis functions tested (length of <code>adjusted_pvalues</code> array)</td>
+</tr>
+<tr>
+<td><code>itp_n_perm</code></td>
+<td>Number of permutations used in the ITP test</td>
+</tr>
+</tbody>
+</table>
+<p><em>Localisation scalars (where the effect is located):</em></p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>itp_n_significant_0.05</code></td>
+<td>Count of basis functions with adjusted p-value <code>&lt; 0.05</code>; measures the breadth of the significant region</td>
+</tr>
+<tr>
+<td><code>itp_fraction_significant_0.05</code></td>
+<td><code>itp_n_significant_0.05 / itp_n_basis</code>; proportion of the basis functions in the significant region</td>
+</tr>
+<tr>
+<td><code>itp_first_significant_basis</code></td>
+<td>Zero-based index of the first basis function with adjusted p-value <code>&lt; 0.05</code>; <code>None</code> when no basis function is significant; localises the onset of significance</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Detection vs. localisation</p>
+<p><code>itp_detected_at_0.05</code> answers <em>whether</em> an effect is present.
+<code>itp_n_significant_0.05</code>, <code>itp_fraction_significant_0.05</code>, and <code>itp_first_significant_basis</code>
+answer <em>where</em> on the evaluation domain the effect is localised.
+Both families are needed for a complete ITP interpretation — a significant detection
+with low <code>itp_fraction_significant_0.05</code> points to a narrow localised effect; a high
+fraction points to broad significance.</p>
+</div>
+<p><strong>Task families:</strong> <code>"interpretation"</code> (read significance level and test path; ITP: detect and localise) · <code>"parameter"</code> (adjust <code>n_perm</code> or significance threshold)
+· <code>"method"</code> (switch between permutation test and asymptotic test; consider SCB for continuous inference)</p>
+<p>The fence below constructs a small synthetic TestResult dict (no API key, no real permutation compute) and builds the offline diagnostics report — mirroring the offline precedent of the <code>fpca</code> and <code>depth</code> fences above.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fdars.advisor</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_diagnostics</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Synthetic TestResult from a (hypothetical) permutation test.</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># No fdars.inference call — grounding invariant preserved offline.</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">test_result</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="s2">"statistic"</span><span class="p">:</span> <span class="mf">3.142</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="s2">"p_value"</span><span class="p">:</span> <span class="mf">0.038</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="s2">"n_perm"</span><span class="p">:</span> <span class="mi">99</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">diag</span> <span class="o">=</span> <span class="n">build_diagnostics</span><span class="p">(</span><span class="n">test_result</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"inference"</span><span class="p">)</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"method:                     </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'method'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"p_value:                    </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'p_value'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"significant_at_0.05:        </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'significant_at_0.05'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"strongest_significance_level: </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'strongest_significance_level'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"is_permutation_test:        </span><span class="si">{</span><span class="n">diag</span><span class="p">[</span><span class="s1">'is_permutation_test'</span><span class="p">]</span><span class="si">}</span><span class="s2">  FDARS_FENCE_OK"</span><span class="p">)</span>
+</code></pre></div>
+method:                     inference
+p_value:                    0.038
+significant_at_0.05:        True
+strongest_significance_level: 0.05
+is_permutation_test:        True  FDARS_FENCE_OK
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/sipemu/pyfda" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../assets/_markdown_exec_pyodide.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+      
+        <script src="../../javascripts/katex.js"></script>
+      
+    
+  </body>
+</html>

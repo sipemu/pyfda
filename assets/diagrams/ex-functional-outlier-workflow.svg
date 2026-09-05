@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Outlier-Detection Workflow" aria-labelledby="ex-functional-outlier-workflow-title ex-functional-outlier-workflow-desc">
+  <title id="ex-functional-outlier-workflow-title">Functional Outlier-Detection Workflow</title>
+  <desc id="ex-functional-outlier-workflow-desc">The functional outlier-detection workflow simulates normal plus injected magnitude and shape outliers, then applies magnitude_shape MS-plot and outliergram (MBD vs MEI parabola) detectors to recover the injected outlier indices.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Functional Outlier-Detection Workflow</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">simulate: 45 normal + 3 magnitude + 3 shape outliers · magnitude_shape MS-plot · outliergram MBD vs MEI parabola</text>
+
+  <!-- Sample construction panel -->
+  <rect x="24" y="62" width="200" height="70" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="124" y="82" text-anchor="middle" fill="#495057">simulate + inject</text>
+  <text class="sm" x="124" y="97" text-anchor="middle">45 normal curves (n_basis=6, seed=5)</text>
+  <text class="sm" x="124" y="111" text-anchor="middle">+3 magnitude: +6 σ shift</text>
+
+  <!-- Arrow right -->
+  <line x1="224" y1="97" x2="250" y2="97" stroke="#666" stroke-width="1.5"/>
+  <polygon points="246,93 254,97 246,101" fill="#666"/>
+
+  <!-- Outlier types mini diagram -->
+  <rect x="254" y="62" width="200" height="70" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="354" y="82" text-anchor="middle" fill="#495057">Two outlier types</text>
+  <text class="sm" x="354" y="97" text-anchor="middle">magnitude: shifted up · same shape</text>
+  <text class="sm" x="354" y="111" text-anchor="middle">shape: +sin(11πt) wiggle · normal level</text>
+
+  <!-- Arrow right -->
+  <line x1="454" y1="97" x2="480" y2="97" stroke="#666" stroke-width="1.5"/>
+  <polygon points="476,93 484,97 476,101" fill="#666"/>
+
+  <!-- Two detectors split -->
+  <rect x="484" y="62" width="212" height="70" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="590" y="82" text-anchor="middle" fill="#fd7e14">Two-detector workflow</text>
+  <text class="sm" x="590" y="97" text-anchor="middle">MS-plot: catches magnitude</text>
+  <text class="sm" x="590" y="111" text-anchor="middle">outliergram: catches shape</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="148" x2="680" y2="148" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- MS-plot panel -->
+  <rect x="24" y="162" width="326" height="78" rx="8" fill="#fff0f5" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="187" y="182" text-anchor="middle" fill="#dc3545">magnitude_shape → MS-plot</text>
+  <text class="sm" x="187" y="197" text-anchor="middle">MO (magnitude outlyingness) vs VO (variation outlyingness)</text>
+  <text class="sm" x="187" y="211" text-anchor="middle">magnitude outliers fly out along MO axis (orange, far right)</text>
+  <text class="mono" x="187" y="228" text-anchor="middle" fill="#dc3545">shape outliers: mixed in → MISSED</text>
+
+  <!-- Outliergram panel -->
+  <rect x="370" y="162" width="326" height="78" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="533" y="182" text-anchor="middle" fill="#3f51b5">outliergram → MBD vs MEI</text>
+  <text class="sm" x="533" y="197" text-anchor="middle">normal curves lie on MBD–MEI parabola</text>
+  <text class="sm" x="533" y="211" text-anchor="middle">shape outliers drop below the parabola</text>
+  <text class="mono" x="533" y="228" text-anchor="middle" fill="#3f51b5">flagged: shape outliers (magnitude: not flagged)</text>
+
+  <!-- Bottom note -->
+  <text class="sub" x="360" y="256" text-anchor="middle">Together: MS-plot (magnitude) + outliergram (shape) = complete screening — each catches what the other misses</text>
+</svg>

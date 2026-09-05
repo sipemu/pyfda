@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Shape Analysis: The Mean Shape in Quotient Space"
+     aria-labelledby="shape-analysis-title shape-analysis-desc">
+  <title id="shape-analysis-title">Shape Analysis: The Mean Shape in Quotient Space</title>
+  <desc id="shape-analysis-desc">Shows how shape_mean() computes the Karcher mean in the Fisher-Rao quotient space by factoring out timing, shift, and scale variation — curves that share the same underlying shape but differ in amplitude and phase collapse to a single sharp template, measured by shape_distance.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Shape Analysis: The Mean Shape in Quotient Space</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Factor out timing, shift, and scale; recover one sharp template</text>
+
+  <!-- Panel 1: curves sharing a shape -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Shared-Shape Sample</text>
+  <g transform="translate(44,110)">
+    <line x1="0" y1="70" x2="156" y2="70" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 70 C30 20 50 20 78 70 C106 120 126 120 156 70" stroke="#495057" stroke-opacity=".32" stroke-width="1.5"/>
+    <path d="M0 70 C34 12 58 12 84 70 C112 128 132 128 156 70" stroke="#495057" stroke-opacity=".32" stroke-width="1.5"/>
+    <path d="M0 70 C26 30 46 30 72 70 C100 112 118 112 156 70" stroke="#495057" stroke-opacity=".32" stroke-width="1.5"/>
+    <path d="M0 70 C32 24 54 24 80 70 C108 116 128 116 156 70" stroke="#495057" stroke-opacity=".32" stroke-width="1.5"/>
+  </g>
+  <text class="sm" x="122" y="242" text-anchor="middle" fill="#6c757d">amplitude + phase vary</text>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#fd7e14">shape_mean()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Karcher mean in quotient</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="16">SRSF / Fisher-Rao</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="48">quotient by warping</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="80">shape_distance</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: mean shape -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#fd7e14">Mean Shape</text>
+  <g transform="translate(516,116)">
+    <line x1="0" y1="70" x2="164" y2="70" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 70 C34 22 58 22 84 70 C112 118 132 118 164 70" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+    <path d="M0 70 C34 24 58 24 84 70 C112 116 132 116 164 70" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+    <path d="M0 70 C34 23 58 23 84 70 C112 117 132 117 164 70" stroke="#fd7e14" stroke-width="2.8" stroke-linecap="round"/>
+  </g>
+  <text class="sm" x="598" y="242" text-anchor="middle" fill="#6c757d">one sharp template</text>
+</svg>

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Scalar-on-Shape Regression" aria-labelledby="scalar-on-shape-title scalar-on-shape-desc">
+  <title id="scalar-on-shape-title">Scalar-on-Shape Regression</title>
+  <desc id="scalar-on-shape-desc">Scalar-on-shape regression uses elastic shape distances between curves as predictors, enabling regression on curve shape independently of amplitude and phase variation.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Scalar-on-Shape Regression</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Quotient out warping, then predict ŷ from curve shape</text>
+
+  <!-- Panel 1: shapes (warping-invariant) -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Curve Shapes</text>
+  <g transform="translate(44,110)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 96 C34 40 60 108 90 60 C118 18 138 90 156 62" stroke="#6c757d" stroke-opacity=".35" stroke-width="1.6"/>
+    <path d="M0 88 C42 34 62 100 96 54 C120 22 140 84 156 56" stroke="#6c757d" stroke-opacity=".35" stroke-width="1.6"/>
+    <path d="M0 92 C38 38 60 104 92 58 C118 20 138 88 156 60" stroke="#495057" stroke-width="2.4" stroke-linecap="round"/>
+    <text class="sm" x="18" y="16">same shape, phase varies</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#dc3545">shape dist → fregre()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">SRSF quotient, then regress</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="16">shape_mean</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="48">shape distance matrix</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="80">fregre_np · fregre_lm</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: scalar response -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">Scalar Response ŷ</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">shape-driven prediction</text>
+  <g transform="translate(520,124)">
+    <line x1="18" y1="112" x2="156" y2="112" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="18" y1="112" x2="18" y2="6" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="28" y1="104" x2="150" y2="20" stroke="#dc3545" stroke-width="2" stroke-dasharray="4 3"/>
+    <circle cx="44" cy="94" r="3" fill="#dc3545"/>
+    <circle cx="70" cy="78" r="3" fill="#dc3545"/>
+    <circle cx="94" cy="62" r="3" fill="#dc3545"/>
+    <circle cx="120" cy="42" r="3" fill="#dc3545"/>
+    <circle cx="142" cy="26" r="3" fill="#dc3545"/>
+    <text class="sm" x="88" y="130" text-anchor="middle">fitted vs. actual</text>
+  </g>
+</svg>

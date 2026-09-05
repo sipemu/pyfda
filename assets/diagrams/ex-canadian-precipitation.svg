@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Canadian Precipitation: Smoothing → FOSR + FANOVA" aria-labelledby="ex-canadian-precipitation-title ex-canadian-precipitation-desc">
+  <title id="ex-canadian-precipitation-title">Canadian Precipitation: Smoothing → FOSR + FANOVA</title>
+  <desc id="ex-canadian-precipitation-desc">The Canadian precipitation example applies P-spline smoothing to 35 station daily records, then fits FOSR to quantify geographic drivers (latitude, longitude) and FANOVA to confirm regional differences are significant.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Canadian Precipitation: Smoothing → FOSR + FANOVA</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">P-spline removes daily noise · fosr fits β(t) per predictor · fanova tests regional differences</text>
+
+  <!-- Panel 1: Raw data -->
+  <rect x="24" y="60" width="136" height="140" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="92" y="80" text-anchor="middle" fill="#495057">Raw precipitation</text>
+  <text class="sm" x="92" y="96" text-anchor="middle">35 stations · 365 days</text>
+  <text class="sm" x="92" y="110" text-anchor="middle">log1p(mm) transform</text>
+  <!-- Jagged raw curves -->
+  <path d="M32 155 Q38 148 44 160 Q50 152 56 165 Q62 158 68 170 Q74 163 80 175 Q86 170 92 162 Q98 155 104 165 Q110 158 116 145 Q122 138 128 148 Q134 140 152 142" stroke="#6c757d" stroke-width="1.0" fill="none" opacity="0.5"/>
+  <path d="M32 145 Q38 138 44 155 Q50 145 56 158 Q62 148 68 162 Q74 153 80 168 Q86 162 92 155 Q98 148 104 158 Q110 150 116 138 Q122 132 128 143 Q134 134 152 136" stroke="#6c757d" stroke-width="1.0" fill="none" opacity="0.4"/>
+  <text class="sm" x="92" y="196" text-anchor="middle">noisy daily signal</text>
+
+  <!-- Arrow 1 -->
+  <line x1="160" y1="130" x2="184" y2="130" stroke="#666" stroke-width="1.5"/>
+  <polygon points="180,126 188,130 180,134" fill="#666"/>
+
+  <!-- Panel 2: pspline_fit_1d -->
+  <rect x="188" y="60" width="176" height="140" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="276" y="80" text-anchor="middle" fill="#fd7e14">pspline_fit_1d</text>
+  <text class="sm" x="276" y="96" text-anchor="middle">Penalised B-spline smoother</text>
+  <text class="mono" x="276" y="113" text-anchor="middle" fill="#495057">n_basis=40  λ_=10.0</text>
+  <text class="sm" x="276" y="130" text-anchor="middle">2nd-deriv penalty controls</text>
+  <text class="sm" x="276" y="144" text-anchor="middle">smoothness continuously</text>
+  <!-- Smooth curve over jagged -->
+  <path d="M196 175 Q210 162 224 154 Q238 146 252 143 Q266 140 280 145 Q294 151 308 162 Q322 174 352 178" stroke="#adb5bd" stroke-width="1.0" fill="none" opacity="0.4"/>
+  <path d="M196 172 Q210 160 224 152 Q238 144 252 141 Q266 138 280 142 Q294 148 308 158 Q322 168 352 174" stroke="#3f51b5" stroke-width="2.2" fill="none"/>
+  <text class="sm" x="276" y="198" text-anchor="middle">→ smoothed curves Xs</text>
+
+  <!-- Arrow 2: splits into two branches below -->
+  <line x1="364" y1="130" x2="386" y2="130" stroke="#666" stroke-width="1.5"/>
+  <polygon points="382,126 390,130 382,134" fill="#666"/>
+
+  <!-- FOSR panel -->
+  <rect x="390" y="60" width="160" height="100" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="470" y="80" text-anchor="middle" fill="#fd7e14">fosr(Xs, [lat,lon], λ_=1.0)</text>
+  <text class="sm" x="470" y="96" text-anchor="middle">β_lat(t): seasonal sign flip</text>
+  <text class="sm" x="470" y="112" text-anchor="middle">β_lon(t): west–east gradient</text>
+  <text class="mono" x="470" y="130" text-anchor="middle" fill="#495057">R² ≈ 0.12 (at λ=1)</text>
+  <text class="sm" x="470" y="146" text-anchor="middle">small λ → R² ≈ 0.47</text>
+
+  <!-- Arrow down to FANOVA -->
+  <line x1="470" y1="160" x2="470" y2="178" stroke="#3f51b5" stroke-width="1.5"/>
+  <polygon points="466,174 470,182 474,174" fill="#3f51b5"/>
+
+  <!-- FANOVA panel -->
+  <rect x="390" y="182" width="160" height="80" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="470" y="200" text-anchor="middle" fill="#3f51b5">fanova(Xs, region_codes)</text>
+  <text class="sm" x="470" y="217" text-anchor="middle">Permutation F-test</text>
+  <text class="mono" x="470" y="233" text-anchor="middle" fill="#3f51b5">p ≈ 0.001 (floor)</text>
+  <text class="sm" x="470" y="249" text-anchor="middle">Pacific wet-winter most distinct</text>
+
+  <!-- Result column -->
+  <rect x="562" y="60" width="134" height="202" rx="8" fill="#3f51b5" stroke="none"/>
+  <text class="lab" x="629" y="80" text-anchor="middle" fill="white">Geographic</text>
+  <text class="lab" x="629" y="95" text-anchor="middle" fill="white">drivers</text>
+  <text x="629" y="116" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">Pacific: wet-winter</text>
+  <text x="629" y="130" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">dry-summer</text>
+  <text x="629" y="146" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">Continental: summer</text>
+  <text x="629" y="160" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">convective peak</text>
+  <text x="629" y="178" text-anchor="middle" fill="#FFD700" style="font:400 10px system-ui,sans-serif">Regions confirmed</text>
+  <text x="629" y="192" text-anchor="middle" fill="#FFD700" style="font:400 10px system-ui,sans-serif">significantly differ</text>
+  <text x="629" y="212" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">predict_fosr:</text>
+  <text x="629" y="226" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">hypothetical</text>
+  <text x="629" y="240" text-anchor="middle" fill="#e8ecff" style="font:400 10px system-ui,sans-serif">station profiles</text>
+
+  <!-- Arrow to result -->
+  <line x1="550" y1="161" x2="560" y2="161" stroke="#666" stroke-width="1.5"/>
+  <polygon points="556,157 564,161 556,165" fill="#666"/>
+</svg>

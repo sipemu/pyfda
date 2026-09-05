@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Interval-wise Testing Procedure (ITP)" aria-labelledby="itp-interval-inference-title itp-interval-inference-desc">
+  <title id="itp-interval-inference-title">Interval-wise Testing Procedure (ITP)</title>
+  <desc id="itp-interval-inference-desc">The Interval-wise Testing Procedure tests each basis coefficient individually and applies a closure adjustment so closure-adjusted p-values are always ≥ raw p-values, controlling the interval-wise family-wise error rate (FWER).</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="26" text-anchor="middle">Interval-wise Testing Procedure (ITP)</text>
+  <text class="sub" x="360" y="43" text-anchor="middle">Basis coefficients tested individually; closure adjustment controls interval-wise FWER</text>
+
+  <!-- ─── LEFT PANEL: test-statistic profile ─── -->
+  <rect x="28" y="56" width="310" height="212" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="183" y="76" text-anchor="middle" fill="#1a1a2e">Test-statistic per basis function</text>
+  <!-- axes -->
+  <line x1="52" y1="240" x2="320" y2="240" stroke="#ced4da" stroke-width="1.2"/>
+  <line x1="52" y1="240" x2="52" y2="82" stroke="#ced4da" stroke-width="1.2"/>
+  <!-- axis labels -->
+  <text class="sm" x="186" y="258" text-anchor="middle">basis function index</text>
+  <text class="sm" x="38" y="165" text-anchor="middle" transform="rotate(-90,38,165)">test statistic T</text>
+  <!-- basis index ticks: k = 1..6 -->
+  <text class="sm" x="89"  y="252" text-anchor="middle">1</text>
+  <text class="sm" x="134" y="252" text-anchor="middle">2</text>
+  <text class="sm" x="179" y="252" text-anchor="middle">3</text>
+  <text class="sm" x="224" y="252" text-anchor="middle">4</text>
+  <text class="sm" x="269" y="252" text-anchor="middle">5</text>
+  <text class="sm" x="314" y="252" text-anchor="middle">6</text>
+  <!-- bar chart of test statistics (large in middle where shift is) -->
+  <!-- heights represent T values: small, large, very large, large, small -->
+  <rect x="71"  y="226" width="28" height="14"  fill="#6c757d" opacity="0.7" rx="2"/>
+  <rect x="116" y="182" width="28" height="58"  fill="#3f51b5" opacity="0.85" rx="2"/>
+  <rect x="161" y="102" width="28" height="138" fill="#3f51b5" opacity="0.85" rx="2"/>
+  <rect x="206" y="116" width="28" height="124" fill="#3f51b5" opacity="0.85" rx="2"/>
+  <rect x="251" y="192" width="28" height="48"  fill="#3f51b5" opacity="0.85" rx="2"/>
+  <rect x="296" y="228" width="28" height="12"  fill="#6c757d" opacity="0.7" rx="2"/>
+  <!-- label -->
+  <text class="sm" x="175" y="96" text-anchor="middle" fill="#3f51b5">local shift detected</text>
+
+  <!-- ─── RIGHT PANEL: raw vs closure-adjusted p-values ─── -->
+  <rect x="356" y="56" width="340" height="212" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="526" y="76" text-anchor="middle" fill="#1a1a2e">Raw vs closure-adjusted p-values</text>
+  <!-- axes -->
+  <line x1="382" y1="240" x2="678" y2="240" stroke="#ced4da" stroke-width="1.2"/>
+  <line x1="382" y1="240" x2="382" y2="82" stroke="#ced4da" stroke-width="1.2"/>
+  <!-- p-value axis: 0 at y=240, 1 at y=88 -->
+  <!-- y(p) = 240 - p*152  so p=1 -> y=88, p=0.05 -> y=232.4, p=0.5 -> y=164 -->
+  <text class="sm" x="368" y="242" text-anchor="end">0</text>
+  <text class="sm" x="368" y="168" text-anchor="end">0.5</text>
+  <text class="sm" x="368" y="92" text-anchor="end">1.0</text>
+  <text class="sm" x="528" y="258" text-anchor="middle">basis function index</text>
+  <text class="sm" x="368" y="165" text-anchor="middle" transform="rotate(-90,368,165)">p-value</text>
+  <!-- dashed 0.05 threshold line: y = 240 - 0.05*152 = 232.4 -->
+  <line x1="382" y1="232" x2="678" y2="232" stroke="#dc3545" stroke-width="1.4" stroke-dasharray="5,4"/>
+  <text class="sm" x="681" y="235" fill="#dc3545">α=0.05</text>
+
+  <!-- basis index ticks -->
+  <text class="sm" x="409"  y="252" text-anchor="middle">1</text>
+  <text class="sm" x="458"  y="252" text-anchor="middle">2</text>
+  <text class="sm" x="507"  y="252" text-anchor="middle">3</text>
+  <text class="sm" x="556"  y="252" text-anchor="middle">4</text>
+  <text class="sm" x="605"  y="252" text-anchor="middle">5</text>
+  <text class="sm" x="654"  y="252" text-anchor="middle">6</text>
+
+  <!-- RAW p-values (lighter shade) — small in middle (significant) -->
+  <!-- raw: [1.0, 0.005, 0.005, 0.005, 0.005, 1.0] -->
+  <!-- y(1.0)=88, y(0.005)=239.24 ≈ 239 -->
+  <rect x="392"  y="88"  width="17" height="152" fill="#3f51b5" opacity="0.30" rx="1"/>
+  <rect x="441"  y="239" width="17" height="1"   fill="#3f51b5" opacity="0.30" rx="1"/>
+  <rect x="490"  y="239" width="17" height="1"   fill="#3f51b5" opacity="0.30" rx="1"/>
+  <rect x="539"  y="239" width="17" height="1"   fill="#3f51b5" opacity="0.30" rx="1"/>
+  <rect x="588"  y="239" width="17" height="1"   fill="#3f51b5" opacity="0.30" rx="1"/>
+  <rect x="637"  y="88"  width="17" height="152" fill="#3f51b5" opacity="0.30" rx="1"/>
+
+  <!-- CLOSURE-ADJUSTED p-values (darker shade, bars floating from top since p is large) -->
+  <!-- adj: [1.0, 0.136, 0.035, 0.040, 0.136, 1.0] -->
+  <!-- y(0.136)=240-0.136*152=219.3, y(0.035)=240-0.035*152=234.7, y(0.04)=240-0.04*152=233.9 -->
+  <rect x="411"  y="88"  width="17" height="152" fill="#3f51b5" opacity="0.80" rx="1"/>
+  <rect x="460"  y="219" width="17" height="21"  fill="#3f51b5" opacity="0.80" rx="1"/>
+  <rect x="509"  y="235" width="17" height="5"   fill="#3f51b5" opacity="0.80" rx="1"/>
+  <rect x="558"  y="234" width="17" height="6"   fill="#3f51b5" opacity="0.80" rx="1"/>
+  <rect x="607"  y="219" width="17" height="21"  fill="#3f51b5" opacity="0.80" rx="1"/>
+  <rect x="656"  y="88"  width="17" height="152" fill="#3f51b5" opacity="0.80" rx="1"/>
+
+  <!-- Legend — placed below the axis to avoid overlapping bars -->
+  <rect x="384" y="262" width="12" height="9" fill="#3f51b5" opacity="0.30"/>
+  <text class="sm" x="400" y="271">raw p-value</text>
+  <rect x="490" y="262" width="12" height="9" fill="#3f51b5" opacity="0.80"/>
+  <text class="sm" x="506" y="271">closure-adjusted (≥ raw)</text>
+
+  <!-- Annotation arrows showing adjusted above raw for basis 2 -->
+  <line x1="471" y1="219" x2="453" y2="239" stroke="#e8710a" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <text class="sm" x="476" y="213" fill="#e8710a">adj ≥ raw</text>
+  <text class="sm" x="476" y="224" fill="#e8710a">(FWER control)</text>
+</svg>

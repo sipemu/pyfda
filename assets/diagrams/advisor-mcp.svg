@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="MCP Server — By-Reference Handle Model" aria-labelledby="t-mcp d-mcp">
+  <title id="t-mcp">MCP Server — By-Reference Handle Model</title>
+  <desc id="d-mcp">Illustrates the MCP server by-reference handle model: the agent calls tools over stdio, the HandleRegistry keeps NumPy arrays in-process, and only opaque handles and scalar diagnostics cross the stdio boundary — arrays never leave the server process.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">MCP Server — By-Reference Handle Model</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">agent calls tools over stdio · arrays stay in-process · only handles + scalars cross the boundary</text>
+
+  <!-- ===== Agent (outside) ===== -->
+  <rect x="16" y="62" width="140" height="144" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="86" y="84" text-anchor="middle" fill="#495057">Agent / LLM</text>
+  <text class="sm" x="86" y="102" text-anchor="middle">orchestrates</text>
+  <text class="sm" x="86" y="118" text-anchor="middle">calls tools</text>
+  <text class="sm" x="86" y="134" text-anchor="middle">interprets results</text>
+  <text class="sm" x="86" y="150" text-anchor="middle">never computes</text>
+  <text class="sm" x="86" y="166" text-anchor="middle">diagnostics</text>
+  <text class="sm" x="86" y="182" text-anchor="middle" fill="#6c757d">(no arrays)</text>
+
+  <!-- stdio boundary label (moved to y=76 inside diagram, left of boundary line) -->
+  <line x1="175" y1="58" x2="175" y2="462" stroke="#fd7e14" stroke-width="2" stroke-dasharray="8 4"/>
+  <text class="lab" x="163" y="76" text-anchor="end" fill="#fd7e14">stdio</text>
+
+  <!-- Crossing arrows: agent ↔ tools (handles and scalars only) -->
+  <!-- Call arrow: agent → tools -->
+  <line x1="156" y1="130" x2="200" y2="130" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
+  <text class="sm" x="178" y="124" text-anchor="middle">call</text>
+  <!-- Return arrow: tools → agent -->
+  <line x1="200" y1="148" x2="156" y2="148" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+  <text class="sm" x="152" y="165" text-anchor="end" fill="#fd7e14">handle +</text>
+  <text class="sm" x="152" y="178" text-anchor="end" fill="#fd7e14">scalars</text>
+
+  <!-- ===== MCP boundary panel ===== -->
+  <rect x="198" y="62" width="508" height="400" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="452" y="84" text-anchor="middle" fill="#fd7e14">MCP Boundary — fdars computes every number</text>
+
+  <!-- ===== HandleRegistry (top-right inside boundary) ===== -->
+  <rect x="460" y="96" width="228" height="100" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="574" y="116" text-anchor="middle" fill="#495057">HandleRegistry (in-process)</text>
+  <text class="mono" x="574" y="136" text-anchor="middle" fill="#1a1a2e">ds-&lt;hex&gt;  → (data, argvals)</text>
+  <text class="sm" x="574" y="154" text-anchor="middle">NumPy arrays stay here</text>
+  <text class="mono" x="574" y="172" text-anchor="middle" fill="#1a1a2e">r-&lt;hex&gt;   → result dict</text>
+  <text class="sm" x="574" y="186" text-anchor="middle">arrays never leave process</text>
+
+  <!-- ===== Three MCP tools ===== -->
+
+  <!-- Tool 1: fdars_build_diagnostics -->
+  <rect x="214" y="96" width="228" height="80" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="328" y="116" text-anchor="middle" fill="#495057">fdars_build_diagnostics</text>
+  <text class="sm" x="328" y="134" text-anchor="middle">dataset_id (ds-&lt;hex&gt;) → diagnostics dict</text>
+  <text class="sm" x="328" y="150" text-anchor="middle">offline · deterministic · no API key</text>
+  <text class="sm" x="328" y="166" text-anchor="middle">14 aspects supported</text>
+
+  <!-- Tool 2: fdars_run_method -->
+  <rect x="214" y="196" width="228" height="96" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="328" y="216" text-anchor="middle" fill="#495057">fdars_run_method</text>
+  <text class="sm" x="328" y="234" text-anchor="middle">dataset_id → {result_id, method}</text>
+  <text class="sm" x="328" y="250" text-anchor="middle">6 runnable methods:</text>
+  <text class="mono" x="328" y="268" text-anchor="middle" fill="#1a1a2e">alignment fpca basis</text>
+  <text class="mono" x="328" y="284" text-anchor="middle" fill="#1a1a2e">smoothing clustering depth</text>
+
+  <!-- Tool 3: fdars_compare_run -->
+  <rect x="214" y="312" width="228" height="96" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="328" y="332" text-anchor="middle" fill="#495057">fdars_compare_run</text>
+  <text class="sm" x="328" y="350" text-anchor="middle">dataset_id + before_result_id</text>
+  <text class="sm" x="328" y="366" text-anchor="middle">→ {before, after, delta}</text>
+  <text class="sm" x="328" y="382" text-anchor="middle">re-runs fdars · builds diagnostics</text>
+  <text class="sm" x="328" y="398" text-anchor="middle">scalar delta = after − before</text>
+
+  <!-- Registry access arrows from tools -->
+  <line x1="442" y1="136" x2="460" y2="136" stroke="#495057" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr)"/>
+  <line x1="442" y1="244" x2="460" y2="150" stroke="#495057" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr)"/>
+  <line x1="442" y1="360" x2="460" y2="180" stroke="#495057" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr)"/>
+
+  <!-- Bottom note: what NEVER crosses the boundary -->
+  <rect x="214" y="428" width="474" height="26" rx="6" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="451" y="445" text-anchor="middle">NumPy arrays NEVER cross the stdio boundary — only opaque handles and scalar diagnostics</text>
+
+  <!-- Defs: arrowheads -->
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arrorange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+  </defs>
+</svg>

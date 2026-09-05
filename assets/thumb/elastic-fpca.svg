@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Elastic FPCA">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#198754" stroke-linecap="round" fill="none">
+    <path d="M34 108 C60 44 84 44 110 108" stroke-width="1.8" stroke-opacity=".45"/>
+    <path d="M34 118 C60 74 84 74 110 118" stroke-width="1.8" stroke-opacity=".45"/>
+    <path d="M34 113 C60 58 84 58 110 113" stroke-width="3"/>
+  </g>
+  <text x="42" y="140" fill="#198754" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">amp</text>
+  <g stroke="#198754" stroke-linecap="round" fill="none">
+    <path d="M176 88 C196 40 214 40 234 88" stroke-width="1.8" stroke-opacity=".45"/>
+    <path d="M204 88 C224 40 242 40 262 88" stroke-width="1.8" stroke-opacity=".45"/>
+    <path d="M190 88 C210 40 228 40 248 88" stroke-width="3"/>
+  </g>
+  <text x="204" y="140" fill="#198754" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">phase</text>
+</svg>

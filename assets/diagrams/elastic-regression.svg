@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Elastic Regression" aria-labelledby="elastic-regression-title elastic-regression-desc">
+  <title id="elastic-regression-title">Elastic Regression</title>
+  <desc id="elastic-regression-desc">Elastic regression iterates Fisher-Rao alignment and scalar-on-function regression, producing a phase-invariant prediction that disentangles amplitude effects from phase variation.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Elastic Regression</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Warp out phase, then regress — the prediction is phase-invariant</text>
+
+  <!-- Panel 1: phase-warped curves -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Phase-Warped X(t)</text>
+  <g transform="translate(44,110)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 110 C28 30 52 30 78 108 C104 30 130 30 156 110" stroke="#6c757d" stroke-opacity=".35" stroke-width="1.6"/>
+    <path d="M0 112 C48 44 66 44 96 104 C118 52 136 52 156 100" stroke="#6c757d" stroke-opacity=".35" stroke-width="1.6"/>
+    <path d="M0 108 C18 48 40 48 62 106 C86 40 116 40 156 112" stroke="#495057" stroke-width="2.4" stroke-linecap="round"/>
+    <text class="sm" x="30" y="16">peaks misaligned →</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#dc3545">elastic_regression()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Fisher–Rao · alternating</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="16">1 · align γᵢ in SRVF</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="48">2 · re-fit α, β(t)</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="80">repeat to converge</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: phase-invariant prediction -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">Prediction ŷ</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">unchanged under time-warping</text>
+  <g transform="translate(520,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="120" x2="0" y2="8" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 108 C40 26 78 26 118 108 C132 88 144 96 156 112" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.6"/>
+    <path d="M0 110 C40 30 78 30 118 110 C132 92 144 100 156 114" stroke="#dc3545" stroke-width="2.6" stroke-linecap="round"/>
+    <text class="sm" x="24" y="18" fill="#dc3545">aligned → same ŷ</text>
+  </g>
+</svg>

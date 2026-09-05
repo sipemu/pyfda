@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Andrews Wine: Clustering &amp; Variable Importance" aria-labelledby="ex-andrews-wine-clustering-title ex-andrews-wine-clustering-desc">
+  <title id="ex-andrews-wine-clustering-title">Andrews Wine: Clustering &amp; Variable Importance</title>
+  <desc id="ex-andrews-wine-clustering-desc">kmeans_fd and fuzzy_cmeans_fd cluster the wine Andrews curves; fanova tests whether cluster means differ; FPCA variable importance then identifies which chemical features most drive the cluster separation.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Andrews Wine: Clustering &amp; Variable Importance</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">kmeans_fd recovers cultivars · validity scores confirm k=3 · fanova + fpca identify key chemicals</text>
+
+  <!-- Panel 1: Input curves -->
+  <rect x="24" y="60" width="136" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="92" y="79" text-anchor="middle" fill="#495057">178 Andrews curves</text>
+  <text class="sm" x="92" y="95" text-anchor="middle">13-D z-scored rows</text>
+  <text class="sm" x="92" y="109" text-anchor="middle">→ f_x(t), t∈[−π,π]</text>
+  <text class="sm" x="92" y="126" text-anchor="middle">labels withheld</text>
+
+  <!-- Arrow right -->
+  <line x1="160" y1="100" x2="184" y2="100" stroke="#666" stroke-width="1.5"/>
+  <polygon points="180,96 188,100 180,104" fill="#666"/>
+
+  <!-- Panel 2: kmeans_fd -->
+  <rect x="188" y="60" width="210" height="80" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="293" y="79" text-anchor="middle" fill="#fd7e14">kmeans_fd(curves, t, k=3)</text>
+  <text class="sm" x="293" y="95" text-anchor="middle">Minimise within-cluster L² sum</text>
+  <text class="sm" x="293" y="109" text-anchor="middle">centroid curves = interpretable fingerprints</text>
+  <text class="mono" x="293" y="126" text-anchor="middle" fill="#fd7e14">accuracy ≈ 0.95 vs true cultivars</text>
+
+  <!-- Arrow right to validity -->
+  <line x1="398" y1="100" x2="422" y2="100" stroke="#666" stroke-width="1.5"/>
+  <polygon points="418,96 426,100 418,104" fill="#666"/>
+
+  <!-- Panel 3: Validity scores -->
+  <rect x="426" y="60" width="270" height="80" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="561" y="79" text-anchor="middle" fill="#3f51b5">silhouette_score + calinski_harabasz</text>
+  <text class="sm" x="561" y="95" text-anchor="middle">Tested k = 2, 3, 4, 5 — no labels needed</text>
+  <text class="sm" x="561" y="109" text-anchor="middle">Both indices peak near k=3 (true cultivar count)</text>
+  <text class="mono" x="561" y="126" text-anchor="middle" fill="#3f51b5">natural 3-cluster structure confirmed</text>
+
+  <!-- Row 2: fuzzy + fanova side by side -->
+  <line x1="92" y1="140" x2="92" y2="172" stroke="#666" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="293" y1="140" x2="293" y2="172" stroke="#666" stroke-width="1.2" stroke-dasharray="4,3"/>
+
+  <!-- Panel 4: fuzzy_cmeans_fd -->
+  <rect x="24" y="172" width="234" height="100" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="141" y="191" text-anchor="middle" fill="#495057">fuzzy_cmeans_fd(curves, t, k=3)</text>
+  <text class="sm" x="141" y="207" text-anchor="middle">Soft membership: each wine in each cluster</text>
+  <text class="sm" x="141" y="221" text-anchor="middle">max_membership &lt; 0.6 → boundary wine</text>
+  <text class="sm" x="141" y="237" text-anchor="middle">flags wines on chemical boundary</text>
+  <text class="sm" x="141" y="253" text-anchor="middle">between two cultivars (possible blends)</text>
+  <text class="sm" x="141" y="267" text-anchor="middle">tool for triage, not hard rejection</text>
+
+  <!-- Panel 5: fanova on curves -->
+  <rect x="272" y="172" width="200" height="100" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="372" y="191" text-anchor="middle" fill="#3f51b5">fanova(curves, cultivar)</text>
+  <text class="sm" x="372" y="207" text-anchor="middle">Permutation F-test on functional curves</text>
+  <text class="mono" x="372" y="224" text-anchor="middle" fill="#3f51b5">p ≈ 0  (999 permutations)</text>
+  <text class="sm" x="372" y="240" text-anchor="middle">F(t) curve shows where along t</text>
+  <text class="sm" x="372" y="254" text-anchor="middle">cultivars separate most</text>
+  <text class="sm" x="372" y="268" text-anchor="middle">peaks ↔ low-harmonic key features</text>
+
+  <!-- Panel 6: fpca variable importance -->
+  <rect x="486" y="172" width="210" height="100" rx="8" fill="#f0fff4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="591" y="191" text-anchor="middle" fill="#198754">fpca(curves, t, n_comp=5)</text>
+  <text class="sm" x="591" y="207" text-anchor="middle">FPCA loadings projected onto 13 features</text>
+  <text class="sm" x="591" y="221" text-anchor="middle">PC1 ≈ 45%  PC2 ≈ 24%  PC3 ≈ 14%</text>
+  <text class="sm" x="591" y="237" text-anchor="middle">ANOVA F per feature → rank chemicals</text>
+  <text class="mono" x="591" y="254" text-anchor="middle" fill="#198754">flavanoids · proline · od280</text>
+  <text class="sm" x="591" y="270" text-anchor="middle">drive cultivar split (top features)</text>
+
+  <!-- Row 3: Spacer line -->
+  <line x1="40" y1="290" x2="680" y2="290" stroke="#ced4da" stroke-width="1.0" stroke-dasharray="4,3"/>
+
+  <!-- Before / After cluster color comparison -->
+  <text class="sub" x="360" y="310" text-anchor="middle">Cluster assignment: before (raw) vs after (coloured by k-means cluster)</text>
+
+  <!-- Before panel: grey curves -->
+  <rect x="24" y="318" width="192" height="100" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="120" y="336" text-anchor="middle" fill="#495057">Before clustering</text>
+  <path d="M32 390 Q52 365 72 358 Q92 351 112 356 Q132 361 152 372 Q172 382 206 394" stroke="#6c757d" stroke-width="0.9" fill="none" opacity="0.4"/>
+  <path d="M32 380 Q52 358 72 349 Q92 340 112 345 Q132 350 152 364 Q172 378 206 390" stroke="#6c757d" stroke-width="0.9" fill="none" opacity="0.4"/>
+  <path d="M32 398 Q52 372 72 363 Q92 354 112 360 Q132 367 152 380 Q172 393 206 402" stroke="#6c757d" stroke-width="0.9" fill="none" opacity="0.4"/>
+  <text class="sm" x="120" y="412" text-anchor="middle">178 curves, undifferentiated</text>
+
+  <!-- After panel: 3-colour curves -->
+  <rect x="226" y="318" width="192" height="100" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="322" y="336" text-anchor="middle" fill="#495057">After kmeans_fd k=3</text>
+  <path d="M234 390 Q254 365 274 358 Q294 351 314 356 Q334 361 354 372 Q374 382 410 394" stroke="#8B0000" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <path d="M234 380 Q254 358 274 349 Q294 340 314 345 Q334 350 354 364 Q374 378 410 390" stroke="#DAA520" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <path d="M234 398 Q254 372 274 363 Q294 354 314 360 Q334 367 354 380 Q374 393 410 402" stroke="#2E8B57" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <!-- Bold centroid curves -->
+  <path d="M234 385 Q254 362 274 354 Q294 346 314 351 Q334 356 354 368 Q374 380 410 392" stroke="#8B0000" stroke-width="2.4" fill="none"/>
+  <path d="M234 395 Q254 368 274 360 Q294 352 314 358 Q334 364 354 376 Q374 388 410 398" stroke="#DAA520" stroke-width="2.4" fill="none"/>
+  <path d="M234 375 Q254 355 274 347 Q294 339 314 344 Q334 350 354 362 Q374 376 410 386" stroke="#2E8B57" stroke-width="2.4" fill="none"/>
+  <text class="sm" x="322" y="412" text-anchor="middle">Bold = centroid curves per cluster</text>
+
+  <!-- Result box -->
+  <rect x="432" y="318" width="264" height="100" rx="8" fill="#fd7e14" stroke="none"/>
+  <text class="lab" x="564" y="338" text-anchor="middle" fill="white">kmeans_fd recovers cultivars</text>
+  <text class="mono" x="564" y="355" text-anchor="middle" fill="white">accuracy ≈ 0.95 (near-diagonal)</text>
+  <text class="sm" x="564" y="372" text-anchor="middle" fill="white">Without labels: silhouette + CH peak at k=3</text>
+  <text class="sm" x="564" y="388" text-anchor="middle" fill="white">Key chemicals: flavanoids, proline, od280</text>
+  <text class="sm" x="564" y="404" text-anchor="middle" fill="#FFD700">FPCA score plot: 3 distinct clouds in PC1–PC2</text>
+</svg>

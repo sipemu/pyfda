@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Classification" aria-labelledby="classification-title classification-desc">
+  <title id="classification-title">Functional Classification</title>
+  <desc id="classification-desc">Functional classification projects labelled curves into FPC score space and fits a classifier (LDA, SVM, or k-NN) that assigns a class label to each new curve.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Functional Classification</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Assign each curve to one of K classes from labelled examples</text>
+
+  <!-- Panel 1: labelled curves (two colours) -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Labelled Curves</text>
+  <g transform="translate(44,110)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 100 C39 40 78 40 117 100 C136 130 148 110 156 118" stroke="#0d6efd" stroke-opacity=".45" stroke-width="1.6"/>
+    <path d="M0 92 C39 32 78 32 117 92 C136 122 148 102 156 110" stroke="#0d6efd" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M0 40 C39 100 78 100 117 40 C136 12 148 30 156 24" stroke="#dc3545" stroke-opacity=".45" stroke-width="1.6"/>
+    <path d="M0 48 C39 108 78 108 117 48 C136 20 148 38 156 32" stroke="#dc3545" stroke-width="2.6" stroke-linecap="round"/>
+    <text class="sm" x="6" y="16" fill="#0d6efd">● class 0</text>
+    <text class="sm" x="90" y="16" fill="#dc3545">● class 1</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#dc3545">fclassif_knn / lda()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Project, then separate</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="16">LDA · QDA on FPCs</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="48">k-NN · logistic</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="80">Depth-vs-depth</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: predicted class -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">Predicted Class</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">decision boundary in FPC space</text>
+  <g transform="translate(520,122)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="120" x2="0" y2="6" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="14" y1="14" x2="150" y2="112" stroke="#dc3545" stroke-width="2" stroke-dasharray="5 3"/>
+    <circle cx="34" cy="30" r="4" fill="#0d6efd"/>
+    <circle cx="52" cy="46" r="4" fill="#0d6efd"/>
+    <circle cx="40" cy="60" r="4" fill="#0d6efd"/>
+    <circle cx="70" cy="38" r="4" fill="#0d6efd"/>
+    <circle cx="104" cy="88" r="4" fill="#dc3545"/>
+    <circle cx="120" cy="72" r="4" fill="#dc3545"/>
+    <circle cx="128" cy="96" r="4" fill="#dc3545"/>
+    <circle cx="108" cy="104" r="4" fill="#dc3545"/>
+  </g>
+</svg>
