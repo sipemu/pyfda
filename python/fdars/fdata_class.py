@@ -6,6 +6,7 @@ single object so users do not have to pass separate arrays to every function.
 
 from __future__ import annotations
 
+import math
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -680,6 +681,170 @@ class Fdata:
             id=self.id.copy(),
             metadata=self.metadata,
         )
+
+    def resample(
+        self,
+        n_points: Optional[int] = None,
+        factor: Optional[float] = None,
+        policy: str = "boundary",
+        **kwargs,
+    ) -> "Fdata":
+        """Resample this functional data onto a uniform grid.
+
+        Builds a uniform evaluation grid over the current ``rangeval`` and
+        delegates to :meth:`interpolate`.  Exactly one of ``n_points`` or
+        ``factor`` must be supplied.
+
+        Parameters
+        ----------
+        n_points : int, optional
+            Target number of evaluation points.  Must be at least 2.
+        factor : float, optional
+            Resampling factor relative to the current grid size.  The target
+            point count is computed as ``round(self.n_points * factor)``.
+            Must be positive.
+        policy : str, optional
+            Extrapolation policy passed to :meth:`interpolate`.  Defaults to
+            ``'boundary'`` because the uniform linspace endpoints coincide
+            with the domain edges and boundary safely clamps any tiny
+            floating-point overruns.
+        **kwargs
+            Additional keyword arguments forwarded to :meth:`interpolate`
+            (e.g. ``fill_value``, ``order``).
+
+        Returns
+        -------
+        Fdata
+            New Fdata object whose argvals are ``np.linspace(rangeval[0],
+            rangeval[1], target)`` and whose data matrix is the interpolated
+            result.
+
+        Raises
+        ------
+        ValueError
+            If both or neither of ``n_points`` / ``factor`` are provided, or
+            if the computed target point count is less than 2.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from fdars import Fdata
+        >>> fd = Fdata(np.random.default_rng(0).standard_normal((3, 11)))
+        >>> fd.resample(n_points=21).n_points
+        21
+        >>> fd.resample(factor=2).n_points
+        22
+        """
+        if (n_points is None) == (factor is None):
+            raise ValueError(
+                "Exactly one of 'n_points' or 'factor' must be provided, "
+                "not both or neither."
+            )
+        if factor is not None:
+            target = round(self.n_points * factor)
+        else:
+            target = int(n_points)  # type: ignore[arg-type]
+        if target < 2:
+            raise ValueError(
+                f"Target point count must be at least 2, got {target}."
+            )
+        grid = np.linspace(self.rangeval[0], self.rangeval[1], target)
+        return self.interpolate(grid, policy=policy, **kwargs)
+
+    def upsample(
+        self,
+        factor: float,
+        policy: str = "boundary",
+        **kwargs,
+    ) -> "Fdata":
+        """Upsample this functional data to a denser uniform grid.
+
+        Convenience wrapper around :meth:`resample` that computes the target
+        point count as ``math.ceil(self.n_points * factor)``, guaranteeing
+        the result has *strictly more* evaluation points than the source.
+
+        Parameters
+        ----------
+        factor : float
+            Density multiplier.  Must be strictly greater than 1.
+        policy : str, optional
+            Extrapolation policy passed to :meth:`interpolate`.  Defaults to
+            ``'boundary'``.
+        **kwargs
+            Additional keyword arguments forwarded to :meth:`interpolate`.
+
+        Returns
+        -------
+        Fdata
+            New Fdata object with more evaluation points than the source.
+
+        Raises
+        ------
+        ValueError
+            If ``factor`` is not greater than 1.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from fdars import Fdata
+        >>> fd = Fdata(np.random.default_rng(0).standard_normal((3, 11)))
+        >>> fd.upsample(2).n_points
+        22
+        """
+        if not (isinstance(factor, (int, float)) and factor > 1):
+            raise ValueError(
+                f"upsample requires factor > 1, got {factor!r}."
+            )
+        target = math.ceil(self.n_points * factor)
+        return self.resample(n_points=target, policy=policy, **kwargs)
+
+    def downsample(
+        self,
+        factor: float,
+        policy: str = "boundary",
+        **kwargs,
+    ) -> "Fdata":
+        """Downsample this functional data to a coarser uniform grid.
+
+        Convenience wrapper around :meth:`resample` that computes the target
+        point count as ``max(2, int(self.n_points / factor))``, guaranteeing
+        at least 2 evaluation points in the result.
+
+        Parameters
+        ----------
+        factor : float
+            Reduction factor.  Must be strictly greater than 1.
+        policy : str, optional
+            Extrapolation policy passed to :meth:`interpolate`.  Defaults to
+            ``'boundary'``.
+        **kwargs
+            Additional keyword arguments forwarded to :meth:`interpolate`.
+
+        Returns
+        -------
+        Fdata
+            New Fdata object with fewer evaluation points than the source
+            (at least 2).
+
+        Raises
+        ------
+        ValueError
+            If ``factor`` is not greater than 1.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from fdars import Fdata
+        >>> fd = Fdata(np.random.default_rng(0).standard_normal((3, 10)))
+        >>> fd.downsample(2).n_points
+        5
+        """
+        if not (isinstance(factor, (int, float)) and factor > 1):
+            raise ValueError(
+                f"downsample requires factor > 1, got {factor!r}."
+            )
+        target = max(2, int(self.n_points / factor))
+        return self.resample(n_points=target, policy=policy, **kwargs)
 
     def impute(
         self,
