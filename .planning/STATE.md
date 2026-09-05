@@ -4,17 +4,17 @@ milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 74
 current_phase_name: Deepen Regression-Family Thin Pages
-status: executing
-stopped_at: Completed 74-04-PLAN.md
-last_updated: "2026-09-05T19:49:00.309Z"
+status: verifying
+stopped_at: Completed 74-05-PLAN.md (Phase 74 complete)
+last_updated: "2026-09-05T19:55:30.504Z"
 last_activity: 2026-09-05
 last_activity_desc: Phase 74 execution started
-state_head: fafe2f19277d2d47eae6922ba062ff47ffbffbb8
+state_head: 734a3014d2caa37c644af40e1f57b3f9df5b0fe1
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 
 Phase: 74 (Deepen Regression-Family Thin Pages) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-05 — Phase 74 execution started
 
 ## Performance Metrics
@@ -67,6 +67,7 @@ Last activity: 2026-09-05 — Phase 74 execution started
 | Phase 74 P02 | 2 | 1 tasks | 1 files |
 | Phase 74 P03 | 214 | 1 tasks | 1 files |
 | Phase 74 P04 | 2 | 1 tasks | 1 files |
+| Phase 74 P05 | 4 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,8 @@ Recent decisions affecting current work:
 - [Phase 74]: predict_fof arg order: new_x is THIRD positional arg (before argvals); fof_cv uses ncomp_x_max/ncomp_y_max; fof_re_regression has max_iter/tol and 13-key return dict
 - [Phase 74]: additive-sof.md rewritten to parity: corrected fam/gsam auto defaults (ncomp=0/bandwidth=0.0), fixed model_selection_ncomp max_comp param, expanded variable_selection to 9-key dict, added GKAM iterations+r_squared
 - [Phase 74]: concurrent-regression.md: manual prediction via beta_curve matrix algebra (no predict_ function); bandwidth-CV must be coded manually (no fregre_np_cv for concurrent model)
+- [Phase 74]: Phase 74 COMPLETE: all 5 regression-family thin pages at full parity (DEPTH-01) — frechet-regression, function-on-function, additive-sof, concurrent-regression, functional-glm; API accuracy corrected; 4+ fences + 3+ admonitions + When-to-use + See-also per page
+- [Phase 74]: functional-glm.md gaussian fence: use FPC-score construction (scores @ phi basis) instead of ad-hoc sin+cos curves to avoid Cholesky singularity in fregre_lm; correlation of fitted values proves equivalence
 
 ### Pending Todos
 
@@ -129,8 +132,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T19:49:00.291Z
-Stopped at: Completed 74-04-PLAN.md
+Last session: 2026-09-05T19:55:30.483Z
+Stopped at: Completed 74-05-PLAN.md (Phase 74 complete)
 Resume file: None
 
 ## Operator Next Steps

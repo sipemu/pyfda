@@ -1,53 +1,43 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v11.0 — fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs",
+  "milestone": "v12.0 — Docs Depth, Card Coverage & AI Capability Skill",
   "phases": [
     {
-      "number": "66",
-      "name": "Isolated Crate Bump + Regression Gate",
-      "status": "complete"
+      "number": "74",
+      "name": "Deepen Regression-Family Thin Pages",
+      "status": "in_progress"
     },
     {
-      "number": "67",
-      "name": "Functional Time Series (`fdars.fts`)",
-      "status": "complete"
+      "number": "75",
+      "name": "Deepen Analyze-Family Thin Pages",
+      "status": "pending"
     },
     {
-      "number": "68",
-      "name": "Function-on-Function & Scalar-on-Function Regression",
-      "status": "complete"
+      "number": "76",
+      "name": "Flagship End-to-End Example Pages",
+      "status": "pending"
     },
     {
-      "number": "69",
-      "name": "Fréchet Regression & Density FDA",
-      "status": "complete"
+      "number": "77",
+      "name": "Section-Landing Card Coverage",
+      "status": "pending"
     },
     {
-      "number": "70",
-      "name": "Multi-Domain Data, FAMM & Advanced Clustering",
-      "status": "complete"
+      "number": "78",
+      "name": "AI Capability-Discovery Skill",
+      "status": "pending"
     },
     {
-      "number": "71",
-      "name": "Shapelets & GAK Metric",
-      "status": "complete"
-    },
-    {
-      "number": "72",
-      "name": "Advisor Extension",
-      "status": "complete"
-    },
-    {
-      "number": "73",
-      "name": "Documentation & Release",
-      "status": "complete"
+      "number": "79",
+      "name": "Close Gate — Strict Build, SVGO/Determinism, Human Review & Release",
+      "status": "pending"
     }
   ],
   "next": {
-    "command": "/gsd:progress",
-    "label": "Show progress",
-    "reason": "Unsure of state — showing progress"
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step (verify)",
+    "reason": "Phase 74 of 6 · 0% · ready to verify"
   },
-  "updated_at": "2026-09-05T09:16:34.640Z"
+  "updated_at": "2026-09-05T19:55:06.170Z"
 }
