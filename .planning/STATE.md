@@ -4,17 +4,17 @@ milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 77
 current_phase_name: Section-Landing Card Coverage
-status: planning
-stopped_at: Phase 76 complete, ready to plan Phase 77
-last_updated: "2026-09-05T22:11:39.945Z"
+status: executing
+stopped_at: "Completed 77-01-PLAN.md (align tracer: 2 thumbnails + 2 cards)"
+last_updated: "2026-09-05T22:44:35.469Z"
 last_activity: 2026-09-06
-last_activity_desc: Phase 76 complete, transitioned to Phase 77
-state_head: 60b423c50d7c3d6e858ec0c1546ae52dbb331ef0
+last_activity_desc: Phase 77 execution started
+state_head: d4143dce5dfa4cb12e946534127ddb63550cffdc
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 18
+  completed_plans: 14
   percent: 50
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-05)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 76 — Flagship End-to-End Example Pages
+**Current focus:** Phase 77 — Section-Landing Card Coverage
 
 ## Current Position
 
-Phase: 77 — Section-Landing Card Coverage
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-06 — Phase 76 complete, transitioned to Phase 77
+Phase: 77 (Section-Landing Card Coverage) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-09-06 — Phase 77 execution started
 
 ## Performance Metrics
 
@@ -76,6 +76,7 @@ Last activity: 2026-09-06 — Phase 76 complete, transitioned to Phase 77
 | Phase 76-flagship-end-to-end-example-pages P01 | 3 | 1 tasks | 3 files |
 | Phase 76-flagship-end-to-end-example-pages P02 | 3 | 1 tasks | 3 files |
 | Phase 76-flagship-end-to-end-example-pages P03 | 180 | 1 tasks | 3 files |
+| Phase 77-section-landing-card-coverage P01 | 12 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,7 @@ Recent decisions affecting current work:
 - [Phase 76]: EXMP-02 tracer complete: all three fences emit FDARS_FENCE_OK offline; np.asarray(result['predicted']) + xout.reshape(-1,1) + np.clip before normalize_density pattern established
 - [Phase 76]: EXMP-01: PVE for FTSM components computed from scores.var(axis=0), not fit['weights'] (quadrature vector) — verified by structural antipattern gate in node check
 - [Phase 76]: 3-class phoneme subset (aa/sh/dcl, 30/class, max_candidates=200) for fast offline fences with honest 72-78% accuracy framing
+- [Phase 77]: Align gallery carded to 100% as tracer: banded-alignment (Sakoe-Chiba band corridor) and shift-registration (dual-offset hump + arrow) thumbnails authored in #fd7e14, both SVGO-idempotent and render clean
 
 ### Pending Todos
 
@@ -152,8 +154,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T21:58:30.414Z
-Stopped at: Phase 76 complete, ready to plan Phase 77
+Last session: 2026-09-05T22:44:35.401Z
+Stopped at: Completed 77-01-PLAN.md (align tracer: 2 thumbnails + 2 cards)
 Resume file: None
 
 ## Operator Next Steps

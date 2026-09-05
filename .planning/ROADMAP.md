@@ -277,9 +277,9 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
   3. The examples landing page shows cards for `functional-outlier-workflow`, `canadian-depth-centrality`, and `tolerance-vs-conformal`.
   4. Each new card has a hand-authored inline SVG thumbnail at `docs/assets/thumb/<page-slug>.svg` that is STYLE_SPEC-conformant and decorative-accessible (matching the existing `aria-hidden` card pattern).
 
-**Plans**: 5 plans
+**Plans**: 1/5 plans executed
 
-- [ ] 77-01-PLAN.md — TRACER: align section fully carded (shift-registration, banded-alignment thumbnails + cards; #fd7e14) end-to-end
+- [x] 77-01-PLAN.md — TRACER: align section fully carded (shift-registration, banded-alignment thumbnails + cards; #fd7e14) end-to-end
 - [ ] 77-02-PLAN.md — represent section carded (pace-fpca, interpolation, imputation; #198754)
 - [ ] 77-03-PLAN.md — regression section carded (concurrent-regression, functional-glm, function-on-function, additive-sof, frechet-regression; #dc3545)
 - [ ] 77-04-PLAN.md — analyze section carded (functional-time-series, density-fda, advanced-clustering, multi-domain, shapelets, functional-boxplot, functional-statistics, scoring-metrics; #6f42c1)
@@ -327,7 +327,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 | 74. Deepen Regression-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
 | 75. Deepen Analyze-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
 | 76. Flagship End-to-End Example Pages | v12.0 | 3/3 | Complete    | 2026-09-06 |
-| 77. Section-Landing Card Coverage | v12.0 | 0/5 | Not started | - |
+| 77. Section-Landing Card Coverage | v12.0 | 1/5 | In Progress|  |
 | 78. AI Capability-Discovery Skill | v12.0 | 0/TBD | Not started | - |
 | 79. Close Gate — Strict Build, SVGO/Determinism, Human Review & Release | v12.0 | 0/TBD | Not started | - |
 
