@@ -5,16 +5,16 @@ milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 77
 current_phase_name: Section-Landing Card Coverage
 status: executing
-stopped_at: Completed 77-02-PLAN.md
-last_updated: "2026-09-05T22:50:16.231Z"
+stopped_at: Completed 77-03-PLAN.md
+last_updated: "2026-09-05T22:55:02.382Z"
 last_activity: 2026-09-06
 last_activity_desc: Phase 77 execution started
-state_head: 4b0882385198c013fa7de322dd8454c472758af7
+state_head: cd61d5064e63f3e5cb4b07c6f41ef7707c5d52d9
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 18
-  completed_plans: 15
+  completed_plans: 16
   percent: 50
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 ## Current Position
 
 Phase: 77 (Section-Landing Card Coverage) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-09-06 — Phase 77 execution started
 
@@ -78,6 +78,7 @@ Last activity: 2026-09-06 — Phase 77 execution started
 | Phase 76-flagship-end-to-end-example-pages P03 | 180 | 1 tasks | 3 files |
 | Phase 77-section-landing-card-coverage P01 | 12 | 1 tasks | 3 files |
 | Phase 77 P02 | 155 | 1 tasks | 4 files |
+| Phase 77 P03 | 2 | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,8 @@ Recent decisions affecting current work:
 - [Phase 76]: 3-class phoneme subset (aa/sh/dcl, 30/class, max_candidates=200) for fast offline fences with honest 72-78% accuracy framing
 - [Phase 77]: Align gallery carded to 100% as tracer: banded-alignment (Sakoe-Chiba band corridor) and shift-registration (dual-offset hump + arrow) thumbnails authored in #fd7e14, both SVGO-idempotent and render clean
 - [Phase 77]: interpolation.svg simplified from 1667 to 1150 bytes: filled circles + vertical tick lines replace separate open-circle + tick-mark elements
+- [Phase 77]: Functional-GLM two-panel split at x=115/168 fits the predictor-arrow-outcome sketch under 1200 bytes
+- [Phase 77]: Function-on-function: contour arcs in bounding rectangle represent bivariate β(s,t) surface with minimal element count
 
 ### Pending Todos
 
@@ -156,8 +159,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T22:50:16.160Z
-Stopped at: Completed 77-02-PLAN.md
+Last session: 2026-09-05T22:55:02.300Z
+Stopped at: Completed 77-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
