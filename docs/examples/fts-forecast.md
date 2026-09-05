@@ -105,7 +105,9 @@ p_val = st["p_value"]
 acf = functional_acf(X_train, t_wk, max_lag=8, n_sim=fast(999, 99), seed=42)
 lags   = np.asarray(acf["lags"])
 avals  = np.asarray(acf["acf"])
-upper  = float(np.asarray(acf["upper_band"])[0])
+# upper_band is the white-noise significance threshold (constant across lags here);
+# take the max as the conservative envelope so a single CI line is correct either way
+upper  = float(np.asarray(acf["upper_band"]).max())
 
 f, ax = fig(figsize=(7.0, 3.8))
 ax.bar(lags, avals, color="#3f51b5", width=0.65, alpha=0.85)
