@@ -4,17 +4,17 @@ milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 76
 current_phase_name: Flagship End-to-End Example Pages
-status: executing
-stopped_at: Completed 76-02-PLAN.md (fts-forecast.md)
-last_updated: "2026-09-05T21:53:40.268Z"
+status: verifying
+stopped_at: Completed 76-03-PLAN.md (EXMP-03)
+last_updated: "2026-09-05T21:58:30.475Z"
 last_activity: 2026-09-05
 last_activity_desc: Phase 76 execution started
-state_head: 149852a6b5e01fcf18072cfc19c09906f98adc24
+state_head: 2ff5f0a7b8164d77cf46500466621910e487c74a
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
   percent: 33
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 
 Phase: 76 (Flagship End-to-End Example Pages) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-05 — Phase 76 execution started
 
 ## Performance Metrics
@@ -75,6 +75,7 @@ Last activity: 2026-09-05 — Phase 76 execution started
 | Phase 75-deepen-analyze-family-thin-pages P05 | 2 | 1 tasks | 1 files |
 | Phase 76-flagship-end-to-end-example-pages P01 | 3 | 1 tasks | 3 files |
 | Phase 76-flagship-end-to-end-example-pages P02 | 3 | 1 tasks | 3 files |
+| Phase 76-flagship-end-to-end-example-pages P03 | 180 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,7 @@ Recent decisions affecting current work:
 - [Phase 76]: wasserstein_barycenter (not frechet_mean) is the correct density unconditional mean — frechet_mean does not support space='density' in the current binding
 - [Phase 76]: EXMP-02 tracer complete: all three fences emit FDARS_FENCE_OK offline; np.asarray(result['predicted']) + xout.reshape(-1,1) + np.clip before normalize_density pattern established
 - [Phase 76]: EXMP-01: PVE for FTSM components computed from scores.var(axis=0), not fit['weights'] (quadrature vector) — verified by structural antipattern gate in node check
+- [Phase 76]: 3-class phoneme subset (aa/sh/dcl, 30/class, max_candidates=200) for fast offline fences with honest 72-78% accuracy framing
 
 ### Pending Todos
 
@@ -150,8 +152,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T21:53:40.186Z
-Stopped at: Completed 76-02-PLAN.md (fts-forecast.md)
+Last session: 2026-09-05T21:58:30.414Z
+Stopped at: Completed 76-03-PLAN.md (EXMP-03)
 Resume file: None
 
 ## Operator Next Steps
