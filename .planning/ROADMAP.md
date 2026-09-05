@@ -210,7 +210,12 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
   2. Each page adds parameter-selection + result-interpretation guidance and ≥3 caution/tip/note admonition boxes.
   3. Each page carries ≥3 runnable inline `FDARS_FENCE_OK` worked examples that emit the sentinel when run offline under `.venv`.
   4. Every method claim on these pages is accurate against the shipped v11.0 bindings (no stale/renamed API, no R-era prose).
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 74-01-PLAN.md — TRACER: frechet-regression.md to full parity (fix frechet_anova/local_reg/xout API) + offline fence verify
+- [ ] 74-02-PLAN.md — function-on-function.md to parity (fix predict_fof arg order + fof_cv params)
+- [ ] 74-03-PLAN.md — additive-sof.md to parity (fix fam/gsam auto-defaults + variable_selection/model_selection keys)
+- [ ] 74-04-PLAN.md — concurrent-regression.md to full parity (manual predict + manual bandwidth-CV + decision/see-also)
+- [ ] 74-05-PLAN.md — functional-glm.md to full parity (gaussian-reduces-to-linear + param selection + decision/see-also)
 **UI hint**: no
 
 ### Phase 75: Deepen Analyze-Family Thin Pages
@@ -280,7 +285,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 74. Deepen Regression-Family Thin Pages | v12.0 | 0/TBD | Not started | - |
+| 74. Deepen Regression-Family Thin Pages | v12.0 | 0/5 | Planned | - |
 | 75. Deepen Analyze-Family Thin Pages | v12.0 | 0/TBD | Not started | - |
 | 76. Flagship End-to-End Example Pages | v12.0 | 0/TBD | Not started | - |
 | 77. Section-Landing Card Coverage | v12.0 | 0/TBD | Not started | - |
