@@ -100,6 +100,63 @@ print(render(f))
 print("Interpolated shape:", X_fine.shape, " FDARS_FENCE_OK")
 ```
 
+## Resampling convenience methods
+
+`Fdata.resample()`, `Fdata.upsample()`, and `Fdata.downsample()` are thin wrappers that build a uniform evaluation grid over the current `rangeval` and delegate to `Fdata.interpolate()` — no new numerics, just grid construction.  The default `policy="boundary"` is chosen because the uniform linspace endpoints coincide with the domain edges, so boundary safely handles floating-point edge cases where the computed endpoint barely overshoots the domain.
+
+| Method | Signature | Effect |
+|--------|-----------|--------|
+| `resample` | `fd.resample(n_points=N)` or `fd.resample(factor=F)` | Resample to exactly N points, or to `round(m × F)` points |
+| `upsample` | `fd.upsample(factor)` | Increase to `ceil(m × factor)` points; `factor` must be > 1 |
+| `downsample` | `fd.downsample(factor)` | Reduce to `max(2, int(m / factor))` points; `factor` must be > 1 |
+
+Exactly one of `n_points` / `factor` must be passed to `resample`; passing both or neither raises `ValueError`.  `upsample` and `downsample` each require `factor > 1`.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from docs_data import load_growth
+from fdars import Fdata
+
+# Load growth data: 93 children × 31 age points (ages 1–18)
+age, X, meta = load_growth()
+
+# Wrap into an Fdata object
+fd = Fdata(X, argvals=age)
+
+# Upsample 4× → 124 points; downsample 3× → 10 points
+fd_up = fd.upsample(4)
+fd_down = fd.downsample(3)
+
+f, (a0, a1) = fig(1, 2, figsize=(11, 4.0))
+
+# Left: upsampled curves
+for i in range(6):
+    a0.plot(fd_up.argvals, fd_up.data[i], lw=1.2, alpha=0.8)
+a0.scatter(
+    np.tile(age, 6),
+    X[:6].ravel(),
+    s=14, zorder=5, color="#1a1a2e", alpha=0.5,
+)
+a0.set(
+    title=f"upsample(4): {fd.n_points} → {fd_up.n_points} points",
+    xlabel="Age (years)", ylabel="Height (cm)",
+)
+
+# Right: downsampled curves
+for i in range(6):
+    a1.plot(fd_down.argvals, fd_down.data[i], lw=1.2, alpha=0.8, marker="o", ms=4)
+a1.set(
+    title=f"downsample(3): {fd.n_points} → {fd_down.n_points} points",
+    xlabel="Age (years)", ylabel="Height (cm)",
+)
+
+print(render(f))
+print(f"upsample(4) n_points = {fd_up.n_points}")
+print(f"downsample(3) n_points = {fd_down.n_points}")
+print("FDARS_FENCE_OK")
+```
+
 ## API summary
 
 | Function | Description |
