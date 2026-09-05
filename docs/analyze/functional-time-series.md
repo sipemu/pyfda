@@ -54,10 +54,12 @@ further), model the differenced series, and back-transform forecasts.
 autocorrelation structure; use `dpca` when you need a full frequency-domain picture.
 
 !!! tip "Choosing `ncomp`"
-    Inspect the `weights` array from `ftsm` — it gives the fraction of variance each
-    component explains (analogous to FVE in standard FPCA). Choose `ncomp` so that the
-    cumulative weights exceed 0.85–0.90. Larger `ncomp` captures more variance but
-    introduces noisier score-AR fits with fewer observations per component.
+    `ftsm` takes `ncomp` as an input, and its `weights` array is the `(m,)` grid
+    quadrature weights — **not** per-component variance. To size `ncomp`, fit with a
+    generous value and inspect how much variance each component's score series carries
+    (`scores[:, k].var()`); keep the smallest `ncomp` whose cumulative score-variance
+    fraction reaches 0.85–0.90. Larger `ncomp` captures more variance but introduces
+    noisier score-AR fits with fewer observations per component.
 
 ---
 
@@ -179,9 +181,9 @@ from fdars.fts import ftsm, ftsm_forecast
 from docs_data import load_canadian_weather
 
 # load_canadian_weather() returns (day, X, meta) where X is (35, 365)
-# Subsample to weekly means: 35 obs × 52 weekly means for build speed
+# Aggregate to 52 weekly means (first 364 days) for build speed
 _day, X_full, _meta = load_canadian_weather()
-data = X_full[:, ::7]   # (35, 52) — weekly means
+data = X_full[:, :364].reshape(35, 52, 7).mean(axis=2)   # (35, 52) — weekly means
 t = np.linspace(0, 1, data.shape[1])
 
 fit = ftsm(data, t, ncomp=3)
@@ -195,9 +197,9 @@ print("FDARS_FENCE_OK")
 ```
 
 !!! info "Subsampling for build speed"
-    The full Canadian weather dataset is 35 × 365 (daily). Using `data[:, ::7]` (weekly
-    means, 35 × 52) keeps fence time well under one second while preserving the seasonal
-    structure. For production analysis use the full daily resolution.
+    The full Canadian weather dataset is 35 × 365 (daily). Aggregating the first 364 days
+    into 52 weekly means (35 × 52) keeps fence time well under one second while preserving
+    the seasonal structure. For production analysis use the full daily resolution.
 
 ---
 
@@ -431,14 +433,17 @@ lrc = long_run_covariance(data, argvals, bandwidth=None)
 
 ### Choosing `ncomp`
 
-For FTSM, inspect the `weights` array returned by `ftsm`. The weights give the fraction
-of variance explained by each component (not cumulative — sum them yourself). Choose the
-smallest `ncomp` where the cumulative sum exceeds 0.85–0.90:
+`ftsm` takes `ncomp` as an input and returns `scores (n, ncomp)` — the score time series
+for each functional principal component. The `weights (m,)` array is the grid quadrature
+weights, **not** per-component variance. Size `ncomp` from the score variances: fit with a
+generous `ncomp`, then keep the smallest count whose cumulative score-variance fraction
+exceeds 0.85–0.90:
 
 ```python
-weights = np.asarray(fit["weights"])
-cumvar  = np.cumsum(weights)
-ncomp_choice = int(np.argmax(cumvar >= 0.90)) + 1
+scores  = np.asarray(fit["scores"])       # (n, ncomp)
+comp_var = scores.var(axis=0)             # variance carried by each component
+fve      = comp_var / comp_var.sum()
+ncomp_choice = int(np.argmax(np.cumsum(fve) >= 0.90)) + 1
 ```
 
 For DPCA, the `eigenvalues` are per-component spectral eigenvalue *functions* (each

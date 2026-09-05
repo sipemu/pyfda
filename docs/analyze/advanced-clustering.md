@@ -107,25 +107,26 @@ X = np.vstack([
 db = dbscan_fd(X, t, eps=0.5, min_points=3)
 dist = np.asarray(db["distances"])
 
-# 4th-NN distance elbow: sort each row, take the 4th-nearest column, then sort globally
-knn_dist = np.sort(dist, axis=1)[:, 4]
+# k-distance elbow for min_points=3: column 0 is the self-distance (0.0), so the
+# 3rd nearest neighbour is column 3. Sort each row, take column 3, then sort globally.
+knn_dist = np.sort(dist, axis=1)[:, 3]
 knn_sorted = np.sort(knn_dist)
 
 f, ax = fig(figsize=(7.0, 3.6))
 ax.plot(knn_sorted, color="#3f51b5", lw=1.8)
 ax.axhline(0.5, color="#e8710a", ls="--", lw=1.4, label="eps=0.5")
-ax.set(title="4th-NN distance (sorted): eps selection guide",
-       xlabel="observation rank", ylabel="4th-NN L² distance")
+ax.set(title="3rd-NN distance (sorted): eps guide for min_points=3",
+       xlabel="observation rank", ylabel="3rd-NN L² distance")
 ax.legend()
 print(render(f))
 print("FDARS_FENCE_OK")
 ```
 
 !!! tip "Choosing eps from the distance matrix"
-    Sort the 4th-nearest-neighbour distances (or $\min\_points$-th NN distances) and look
-    for an elbow — a sharp upward bend. Set `eps` just below that bend. The `distances`
-    matrix returned by `dbscan_fd` provides all the raw pairwise data needed; no separate
-    call is required.
+    Sort each row's $\min\_points$-th nearest-neighbour distance (column `min_points` of the
+    row-sorted matrix, since column 0 is the self-distance) and look for an elbow — a sharp
+    upward bend. Set `eps` just below that bend. The `distances` matrix returned by
+    `dbscan_fd` provides all the raw pairwise data needed; no separate call is required.
 
 ---
 

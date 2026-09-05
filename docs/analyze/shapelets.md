@@ -298,7 +298,7 @@ Pass `sigma=None` to any function to use the automatic `sigma_gak` heuristic.
 
 ```python exec="1" source="above"
 import numpy as np
-from fdars.metric import sigma_gak, gak_gram_matrix
+from fdars.metric import gak_gram_matrix
 
 rng = np.random.default_rng(42)
 m = 40
