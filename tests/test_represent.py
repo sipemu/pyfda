@@ -373,3 +373,127 @@ class TestFdataInterpolateMethods:
         assert not np.isnan(out.data).any()
         # NaN at (0, 2) → -99
         np.testing.assert_allclose(out.data[0, 2], -99.0, atol=1e-12)
+
+
+class TestFdataResampleMethods:
+    """Fdata.resample(), Fdata.upsample(), and Fdata.downsample() convenience methods."""
+
+    @pytest.fixture
+    def fd_11(self):
+        """Two linear curves on [0, 1] with 11 evaluation points."""
+        t = np.linspace(0.0, 1.0, 11, dtype=np.float64)
+        data = np.stack(
+            [(i + 1) * t for i in range(2)],
+            axis=0, dtype=np.float64,
+        )
+        return Fdata(data, argvals=t)
+
+    @pytest.fixture
+    def fd_10(self):
+        """Two linear curves on [0, 1] with 10 evaluation points."""
+        t = np.linspace(0.0, 1.0, 10, dtype=np.float64)
+        data = np.stack(
+            [(i + 1) * t for i in range(2)],
+            axis=0, dtype=np.float64,
+        )
+        return Fdata(data, argvals=t)
+
+    # ---- resample(n_points=...) ----
+
+    def test_resample_n_points_count(self, fd_11):
+        out = fd_11.resample(n_points=5)
+        assert out.n_points == 5
+
+    def test_resample_n_points_argvals_linspace(self, fd_11):
+        out = fd_11.resample(n_points=5)
+        expected = np.linspace(fd_11.rangeval[0], fd_11.rangeval[1], 5)
+        np.testing.assert_allclose(out.argvals, expected, atol=1e-12)
+
+    def test_resample_n_obs_preserved(self, fd_11):
+        out = fd_11.resample(n_points=5)
+        assert out.n_obs == fd_11.n_obs
+
+    def test_resample_returns_new_object(self, fd_11):
+        out = fd_11.resample(n_points=5)
+        assert out is not fd_11
+
+    def test_resample_returns_fdata(self, fd_11):
+        out = fd_11.resample(n_points=5)
+        assert isinstance(out, Fdata)
+
+    # ---- resample(factor=...) ----
+
+    def test_resample_factor_count(self, fd_11):
+        out = fd_11.resample(factor=2)
+        assert out.n_points == 22  # round(11 * 2) = 22
+
+    def test_resample_factor_obs_preserved(self, fd_11):
+        out = fd_11.resample(factor=2)
+        assert out.n_obs == fd_11.n_obs
+
+    # ---- resample error paths ----
+
+    def test_resample_neither_arg_raises(self, fd_11):
+        with pytest.raises(ValueError):
+            fd_11.resample()
+
+    def test_resample_both_args_raises(self, fd_11):
+        with pytest.raises(ValueError):
+            fd_11.resample(n_points=5, factor=2)
+
+    def test_resample_target_less_than_2_raises(self, fd_11):
+        with pytest.raises(ValueError):
+            fd_11.resample(n_points=1)
+
+    # ---- upsample ----
+
+    def test_upsample_count_ceil(self, fd_11):
+        out = fd_11.upsample(2)
+        assert out.n_points == 22  # ceil(11 * 2) = 22
+
+    def test_upsample_strictly_greater(self, fd_11):
+        out = fd_11.upsample(2)
+        assert out.n_points > fd_11.n_points
+
+    def test_upsample_n_obs_preserved(self, fd_11):
+        out = fd_11.upsample(2)
+        assert out.n_obs == fd_11.n_obs
+
+    def test_upsample_returns_fdata(self, fd_11):
+        out = fd_11.upsample(2)
+        assert isinstance(out, Fdata)
+
+    def test_upsample_factor_equal_1_raises(self, fd_11):
+        with pytest.raises(ValueError):
+            fd_11.upsample(1.0)
+
+    def test_upsample_factor_less_than_1_raises(self, fd_11):
+        with pytest.raises(ValueError):
+            fd_11.upsample(0.5)
+
+    # ---- downsample ----
+
+    def test_downsample_count(self, fd_10):
+        out = fd_10.downsample(2)
+        assert out.n_points == 5  # int(10 / 2) = 5
+
+    def test_downsample_strictly_fewer(self, fd_10):
+        out = fd_10.downsample(2)
+        assert out.n_points < fd_10.n_points
+
+    def test_downsample_n_obs_preserved(self, fd_10):
+        out = fd_10.downsample(2)
+        assert out.n_obs == fd_10.n_obs
+
+    def test_downsample_returns_fdata(self, fd_10):
+        out = fd_10.downsample(2)
+        assert isinstance(out, Fdata)
+
+    def test_downsample_factor_equal_1_raises(self, fd_10):
+        with pytest.raises(ValueError):
+            fd_10.downsample(1.0)
+
+    def test_downsample_large_factor_clamps_to_2(self, fd_10):
+        # int(10 / 100) = 0 — clamped to 2
+        out = fd_10.downsample(100)
+        assert out.n_points == 2
