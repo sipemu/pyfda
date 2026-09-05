@@ -6,22 +6,22 @@
     {
       "number": "74",
       "name": "Deepen Regression-Family Thin Pages",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "75",
       "name": "Deepen Analyze-Family Thin Pages",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "76",
       "name": "Flagship End-to-End Example Pages",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "77",
       "name": "Section-Landing Card Coverage",
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "number": "78",
@@ -36,8 +36,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step (verify)",
-    "reason": "Phase 74 of 6 · 0% · ready to verify"
+    "label": "Advance to the next step",
+    "reason": "Phase 77 of 6 · 50% · executing"
   },
-  "updated_at": "2026-09-05T19:55:06.170Z"
+  "updated_at": "2026-09-05T23:03:17.593Z"
 }
