@@ -20,7 +20,7 @@ Bring the thin v11.0-era method pages (currently 20–35% of the mature-page bas
 2–3 flagship end-to-end example pages for marquee new methods, matching the mature `examples/` standard (narrative + real dataset + runnable offline fences), wired into nav and the examples gallery.
 
 - [ ] **EXMP-01**: A flagship Functional Time Series example page (e.g. forecast + evaluation) against a `docs/data/` dataset, runnable offline (`FDARS_FENCE_OK`).
-- [ ] **EXMP-02**: A flagship Fréchet-regression example page (metric-space response walkthrough), runnable offline (`FDARS_FENCE_OK`).
+- [x] **EXMP-02**: A flagship Fréchet-regression example page (metric-space response walkthrough), runnable offline (`FDARS_FENCE_OK`).
 - [ ] **EXMP-03**: A third flagship example page for another marquee new method (e.g. shapelet classification or density FDA) **if a strong dataset fit exists**; otherwise this scope is satisfied by EXMP-01/02 (the "2–3" range).
 
 ### Card Coverage (CARD)
@@ -77,7 +77,7 @@ Deferred; tracked but not in this roadmap.
 | DEPTH-02 | Phase 75 | Complete |
 | DEPTH-03 | Phase 79 | Pending |
 | EXMP-01 | Phase 76 | Pending |
-| EXMP-02 | Phase 76 | Pending |
+| EXMP-02 | Phase 76 | Complete |
 | EXMP-03 | Phase 76 | Pending |
 | CARD-01 | Phase 77 | Pending |
 | CARD-02 | Phase 77 | Pending |

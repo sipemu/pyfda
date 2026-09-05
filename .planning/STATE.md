@@ -4,17 +4,17 @@ milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 76
 current_phase_name: Flagship End-to-End Example Pages
-status: planning
-stopped_at: Phase 75 complete, ready to plan Phase 76
-last_updated: "2026-09-05T21:15:36.666Z"
+status: executing
+stopped_at: Completed 76-01-PLAN.md (EXMP-02 frechet-density-regression.md)
+last_updated: "2026-09-05T21:46:54.366Z"
 last_activity: 2026-09-05
-last_activity_desc: Phase 75 complete, transitioned to Phase 76
-state_head: ca835deff5faf28f55e257970a1dcf47207f9907
+last_activity_desc: Phase 76 execution started
+state_head: c3584f9725507eeead17b2e1e896f32b68cf4a57
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 13
+  completed_plans: 11
   percent: 33
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-05)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 75 — Deepen Analyze-Family Thin Pages
+**Current focus:** Phase 76 — Flagship End-to-End Example Pages
 
 ## Current Position
 
-Phase: 76 — Flagship End-to-End Example Pages
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-05 — Phase 75 complete, transitioned to Phase 76
+Phase: 76 (Flagship End-to-End Example Pages) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-09-05 — Phase 76 execution started
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Last activity: 2026-09-05 — Phase 75 complete, transitioned to Phase 76
 | Phase 75 P03 | 3 | 1 tasks | 1 files |
 | Phase 75-deepen-analyze-family-thin-pages P04 | 2 | 1 tasks | 1 files |
 | Phase 75-deepen-analyze-family-thin-pages P05 | 2 | 1 tasks | 1 files |
+| Phase 76-flagship-end-to-end-example-pages P01 | 3 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,8 @@ Recent decisions affecting current work:
 - [Phase 75]: DBSCAN eps selection via sorted k-NN distances from result distances matrix — the natural visual for advanced clustering
 - [Phase 75]: FunFEM ncomp=10 default (not 3) documented; soft membership rows sum to 1 contrasts with KCFC hard labels
 - [Phase 75]: align_cluster_fd use_amplitude_only=True default and warning on False performance added
+- [Phase 76]: wasserstein_barycenter (not frechet_mean) is the correct density unconditional mean — frechet_mean does not support space='density' in the current binding
+- [Phase 76]: EXMP-02 tracer complete: all three fences emit FDARS_FENCE_OK offline; np.asarray(result['predicted']) + xout.reshape(-1,1) + np.clip before normalize_density pattern established
 
 ### Pending Todos
 
@@ -145,8 +148,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T20:58:04.421Z
-Stopped at: Phase 75 complete, ready to plan Phase 76
+Last session: 2026-09-05T21:46:54.293Z
+Stopped at: Completed 76-01-PLAN.md (EXMP-02 frechet-density-regression.md)
 Resume file: None
 
 ## Operator Next Steps
