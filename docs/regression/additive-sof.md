@@ -390,8 +390,6 @@ result = fam(data, y, t, ncomp=3, bandwidth=0.5)
 
 # Plot partial-effect contributions (component_fits) for the first 3 FPCs
 # sorted by the FPC scores to reveal the smooth function shape
-from fdars.scalar_on_function import fam as _fam
-import fdars.scalar_on_function as _sof
 
 # Compute FPC scores to sort along x-axis
 cfs = result["component_fits"]

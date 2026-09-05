@@ -104,7 +104,8 @@ for _ in range(8):
 
 mean_spd = np.asarray(frechet_mean(spds, space="spd", d=d))
 print(f"Fréchet mean (SPD, d=2): shape {mean_spd.shape}")
-print(f"positive diagonal: {mean_spd[0, 0] > 0} {mean_spd[1, 1] > 0}  FDARS_FENCE_OK")
+print(f"positive diagonal: {mean_spd[0, 0] > 0} {mean_spd[1, 1] > 0}")
+print("FDARS_FENCE_OK")
 ```
 
 !!! warning "Return type: naked array, not a dict"
