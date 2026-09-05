@@ -5,16 +5,16 @@ milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 74
 current_phase_name: Deepen Regression-Family Thin Pages
 status: executing
-stopped_at: Completed 74-01-PLAN.md (frechet-regression.md parity tracer)
-last_updated: "2026-09-05T19:32:01.260Z"
+stopped_at: Completed 74-02-PLAN.md (function-on-function.md parity)
+last_updated: "2026-09-05T19:37:34.269Z"
 last_activity: 2026-09-05
 last_activity_desc: Phase 74 execution started
-state_head: a6bae87da9430617ce026d2d478afd678236288e
+state_head: 9ec44439443891936bd0337932a60a2afc6189d1
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 ## Current Position
 
 Phase: 74 (Deepen Regression-Family Thin Pages) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-09-05 — Phase 74 execution started
 
@@ -64,6 +64,7 @@ Last activity: 2026-09-05 — Phase 74 execution started
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 74 P01 | 3 | 1 tasks | 1 files |
+| Phase 74 P02 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,7 @@ Recent decisions affecting current work:
 - [v12.0 roadmap]: Advisor (7) + sklearn (5) landing-page galleries are DEFERRED (CARD-FUT-01) — deliberate no-gallery text pattern, separate design call
 - [standing v6.0]: Blocking human diagram method-accuracy review before milestone close (the hypograph/epigraph lesson) — consolidated into Phase 79 (GATE-03)
 - [Phase 74]: frechet-regression.md restructured as DEPTH-01 tracer; pattern proven end-to-end: When-to-use + numbered sections + FDARS_FENCE_OK fences + html figure + See-also; all 6 API errors corrected
+- [Phase 74]: predict_fof arg order: new_x is THIRD positional arg (before argvals); fof_cv uses ncomp_x_max/ncomp_y_max; fof_re_regression has max_iter/tol and 13-key return dict
 
 ### Pending Todos
 
@@ -123,8 +125,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T19:32:01.214Z
-Stopped at: Completed 74-01-PLAN.md (frechet-regression.md parity tracer)
+Last session: 2026-09-05T19:37:34.252Z
+Stopped at: Completed 74-02-PLAN.md (function-on-function.md parity)
 Resume file: None
 
 ## Operator Next Steps
