@@ -235,12 +235,14 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
   3. Each page carries ≥3 runnable inline `FDARS_FENCE_OK` worked examples that emit the sentinel when run offline under `.venv`.
   4. Every method claim on these pages is accurate against the shipped v11.0 bindings and existing `docs/data/` datasets.
 
-**Plans**: 5 plans
-- [ ] 75-01-PLAN.md — TRACER: functional-time-series.md to full parity (8 API corrections)
+**Plans**: 1/5 plans executed
+
+- [x] 75-01-PLAN.md — TRACER: functional-time-series.md to full parity (8 API corrections)
 - [ ] 75-02-PLAN.md — density-fda.md to parity (3-arg inverse_lqd, quantile-grid clarification)
 - [ ] 75-03-PLAN.md — multi-domain.md to parity (dense_flmm/multi_famm take plain arrays, not PyMultiFunData)
 - [ ] 75-04-PLAN.md — shapelets.md to parity (discover_shapelets dict, shapelet_distance tuple)
 - [ ] 75-05-PLAN.md — advanced-clustering.md to parity (funfem_cluster/align_cluster_fd full signatures)
+
 **UI hint**: no
 
 ### Phase 76: Flagship End-to-End Example Pages
@@ -311,7 +313,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 74. Deepen Regression-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
-| 75. Deepen Analyze-Family Thin Pages | v12.0 | 0/TBD | Not started | - |
+| 75. Deepen Analyze-Family Thin Pages | v12.0 | 1/5 | In Progress|  |
 | 76. Flagship End-to-End Example Pages | v12.0 | 0/TBD | Not started | - |
 | 77. Section-Landing Card Coverage | v12.0 | 0/TBD | Not started | - |
 | 78. AI Capability-Discovery Skill | v12.0 | 0/TBD | Not started | - |
