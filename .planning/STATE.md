@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
-current_phase: 77
-current_phase_name: Section-Landing Card Coverage
-status: verifying
-stopped_at: Completed 77-05-PLAN.md (last plan of phase 77)
-last_updated: "2026-09-05T23:09:51.417Z"
+current_phase: 78
+current_phase_name: AI Capability-Discovery Skill
+status: planning
+stopped_at: Phase 77 complete, ready to plan Phase 78
+last_updated: "2026-09-05T23:26:22.786Z"
 last_activity: 2026-09-06
-last_activity_desc: Phase 77 execution started
-state_head: 4189895e321a6c90d66e396d2c428a3076b411d9
+last_activity_desc: Phase 77 complete, transitioned to Phase 78
+state_head: ad8c4b4321f99f9b04674ae55f607626c2fc103c
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 18
   completed_plans: 18
-  percent: 50
+  percent: 67
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 
 ## Current Position
 
-Phase: 77 (Section-Landing Card Coverage) — EXECUTING
-Plan: 5 of 5
-Status: Phase complete — ready for verification
-Last activity: 2026-09-06 — Phase 77 execution started
+Phase: 78 — AI Capability-Discovery Skill
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-06 — Phase 77 complete, transitioned to Phase 78
 
 ## Performance Metrics
 
@@ -49,7 +49,7 @@ Last activity: 2026-09-06 — Phase 77 execution started
 | 74 | 5 | - | - |
 | 75 | 5 | - | - |
 | 76 | 3 | - | - |
-| 77 | TBD | - | - |
+| 77 | 5 | - | - |
 | 78 | TBD | - | - |
 | 79 | TBD | - | - |
 
@@ -165,7 +165,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-05T23:09:51.336Z
-Stopped at: Completed 77-05-PLAN.md (last plan of phase 77)
+Stopped at: Phase 77 complete, ready to plan Phase 78
 Resume file: None
 
 ## Operator Next Steps
