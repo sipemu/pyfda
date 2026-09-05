@@ -71,36 +71,34 @@ Deferred; tracked but not in this roadmap.
 
 ## Traceability
 
-Filled during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEPTH-01 | — | Pending |
-| DEPTH-02 | — | Pending |
-| DEPTH-03 | — | Pending |
-| EXMP-01 | — | Pending |
-| EXMP-02 | — | Pending |
-| EXMP-03 | — | Pending |
-| CARD-01 | — | Pending |
-| CARD-02 | — | Pending |
-| CARD-03 | — | Pending |
-| CARD-04 | — | Pending |
-| CARD-05 | — | Pending |
-| CARD-06 | — | Pending |
-| SKILL-01 | — | Pending |
-| SKILL-02 | — | Pending |
-| SKILL-03 | — | Pending |
-| SKILL-04 | — | Pending |
-| GATE-01 | — | Pending |
-| GATE-02 | — | Pending |
-| GATE-03 | — | Pending |
-| GATE-04 | — | Pending |
+| DEPTH-01 | Phase 74 | Pending |
+| DEPTH-02 | Phase 75 | Pending |
+| DEPTH-03 | Phase 79 | Pending |
+| EXMP-01 | Phase 76 | Pending |
+| EXMP-02 | Phase 76 | Pending |
+| EXMP-03 | Phase 76 | Pending |
+| CARD-01 | Phase 77 | Pending |
+| CARD-02 | Phase 77 | Pending |
+| CARD-03 | Phase 77 | Pending |
+| CARD-04 | Phase 77 | Pending |
+| CARD-05 | Phase 77 | Pending |
+| CARD-06 | Phase 77 | Pending |
+| SKILL-01 | Phase 78 | Pending |
+| SKILL-02 | Phase 78 | Pending |
+| SKILL-03 | Phase 78 | Pending |
+| SKILL-04 | Phase 78 | Pending |
+| GATE-01 | Phase 79 | Pending |
+| GATE-02 | Phase 79 | Pending |
+| GATE-03 | Phase 79 | Pending |
+| GATE-04 | Phase 79 | Pending |
 
 **Coverage:**
 - v12.0 requirements: 20 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 20 ⚠️
+- Mapped to phases: 20 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-09-05*
-*Last updated: 2026-09-05 after initial definition*
+*Last updated: 2026-09-05 after roadmap creation (traceability mapped to Phases 74–79)*
