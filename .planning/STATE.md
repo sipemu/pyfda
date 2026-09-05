@@ -2,14 +2,19 @@
 gsd_state_version: 1.0
 milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
-status: planning
-last_updated: "2026-09-05T00:00:00.000Z"
+current_phase: 74
+current_phase_name: Deepen Regression-Family Thin Pages
+status: executing
+stopped_at: Completed 74-01-PLAN.md (frechet-regression.md parity tracer)
+last_updated: "2026-09-05T19:32:01.260Z"
 last_activity: 2026-09-05
+last_activity_desc: Phase 74 execution started
+state_head: a6bae87da9430617ce026d2d478afd678236288e
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 5
+  completed_plans: 1
   percent: 0
 ---
 
@@ -20,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-05)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** v12.0 roadmap created (Phases 74–79) — docs + skill milestone. Next: plan Phase 74 via `/gsd-plan-phase 74`.
+**Current focus:** Phase 74 — Deepen Regression-Family Thin Pages
 
 ## Current Position
 
-Phase: 74 — Deepen Regression-Family Thin Pages (not started)
-Plan: —
-Status: Roadmap created; ready to plan Phase 74
-Last activity: 2026-09-05 — v12.0 roadmap written (6 phases, 20 requirements mapped, 100% coverage)
+Phase: 74 (Deepen Regression-Family Thin Pages) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-09-05 — Phase 74 execution started
 
 ## Performance Metrics
 
@@ -54,6 +59,11 @@ Last activity: 2026-09-05 — v12.0 roadmap written (6 phases, 20 requirements m
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 74 P01 | 3 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -72,6 +82,7 @@ Recent decisions affecting current work:
 - [v12.0 roadmap]: Card gaps are all missing thumbnails — each new card needs a hand-authored inline SVG at `docs/assets/thumb/<page-slug>.svg` + a `fdars-gallery` card entry in the section `index.md`; concept SVGs for the thin pages already exist (thumbnails are the smaller decorative versions)
 - [v12.0 roadmap]: Advisor (7) + sklearn (5) landing-page galleries are DEFERRED (CARD-FUT-01) — deliberate no-gallery text pattern, separate design call
 - [standing v6.0]: Blocking human diagram method-accuracy review before milestone close (the hypograph/epigraph lesson) — consolidated into Phase 79 (GATE-03)
+- [Phase 74]: frechet-regression.md restructured as DEPTH-01 tracer; pattern proven end-to-end: When-to-use + numbered sections + FDARS_FENCE_OK fences + html figure + See-also; all 6 API errors corrected
 
 ### Pending Todos
 
@@ -112,8 +123,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05
-Stopped at: v12.0 roadmap created (Phases 74–79)
+Last session: 2026-09-05T19:32:01.214Z
+Stopped at: Completed 74-01-PLAN.md (frechet-regression.md parity tracer)
 Resume file: None
 
 ## Operator Next Steps

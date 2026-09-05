@@ -11,7 +11,7 @@
 
 Bring the thin v11.0-era method pages (currently 20–35% of the mature-page baseline) up to parity. "Parity" = a "When to use" decision section, a "See also" cross-reference block, parameter-selection + result-interpretation guidance, ≥3 caution/tip/note admonition boxes, and ≥3 runnable inline `FDARS_FENCE_OK` worked examples per page.
 
-- [ ] **DEPTH-01**: The regression-family thin pages — `frechet-regression`, `function-on-function`, `additive-sof`, `concurrent-regression`, `functional-glm` — each reach the parity bar above.
+- [x] **DEPTH-01**: The regression-family thin pages — `frechet-regression`, `function-on-function`, `additive-sof`, `concurrent-regression`, `functional-glm` — each reach the parity bar above.
 - [ ] **DEPTH-02**: The analyze-family thin pages — `functional-time-series`, `density-fda`, `multi-domain`, `shapelets`, `advanced-clustering` — each reach the parity bar above.
 - [ ] **DEPTH-03**: Every new/extended fence on the DEPTH pages runs offline against the current `fdars` API and existing `docs/data/` datasets, emitting `FDARS_FENCE_OK`; method claims are accurate against the shipped bindings.
 
@@ -73,7 +73,7 @@ Deferred; tracked but not in this roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEPTH-01 | Phase 74 | Pending |
+| DEPTH-01 | Phase 74 | Complete |
 | DEPTH-02 | Phase 75 | Pending |
 | DEPTH-03 | Phase 79 | Pending |
 | EXMP-01 | Phase 76 | Pending |
@@ -95,6 +95,7 @@ Deferred; tracked but not in this roadmap.
 | GATE-04 | Phase 79 | Pending |
 
 **Coverage:**
+
 - v12.0 requirements: 20 total
 - Mapped to phases: 20 ✓
 - Unmapped: 0

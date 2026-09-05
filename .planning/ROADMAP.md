@@ -202,80 +202,100 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 ## Phase Details
 
 ### Phase 74: Deepen Regression-Family Thin Pages
+
 **Goal**: The five thin regression-family method pages read like the mature pages — a reader can decide when to use each method, cross-navigate to related methods, choose parameters, interpret results, and copy runnable examples.
 **Depends on**: Nothing (first phase of v12.0; picks up from Phase 73)
 **Requirements**: DEPTH-01
 **Success Criteria** (what must be TRUE):
+
   1. Each of `frechet-regression`, `function-on-function`, `additive-sof`, `concurrent-regression`, `functional-glm` has a "When to use" decision section and a "See also" cross-reference block.
   2. Each page adds parameter-selection + result-interpretation guidance and ≥3 caution/tip/note admonition boxes.
   3. Each page carries ≥3 runnable inline `FDARS_FENCE_OK` worked examples that emit the sentinel when run offline under `.venv`.
   4. Every method claim on these pages is accurate against the shipped v11.0 bindings (no stale/renamed API, no R-era prose).
-**Plans**: 5 plans
-- [ ] 74-01-PLAN.md — TRACER: frechet-regression.md to full parity (fix frechet_anova/local_reg/xout API) + offline fence verify
+
+**Plans**: 1/5 plans executed
+
+- [x] 74-01-PLAN.md — TRACER: frechet-regression.md to full parity (fix frechet_anova/local_reg/xout API) + offline fence verify
 - [ ] 74-02-PLAN.md — function-on-function.md to parity (fix predict_fof arg order + fof_cv params)
 - [ ] 74-03-PLAN.md — additive-sof.md to parity (fix fam/gsam auto-defaults + variable_selection/model_selection keys)
 - [ ] 74-04-PLAN.md — concurrent-regression.md to full parity (manual predict + manual bandwidth-CV + decision/see-also)
 - [ ] 74-05-PLAN.md — functional-glm.md to full parity (gaussian-reduces-to-linear + param selection + decision/see-also)
+
 **UI hint**: no
 
 ### Phase 75: Deepen Analyze-Family Thin Pages
+
 **Goal**: The five thin analyze-family method pages reach the same mature-page parity, so a reader can choose, parameterize, interpret, and run each analyze method with confidence.
 **Depends on**: Phase 74 (sequential on `main`; disjoint page set)
 **Requirements**: DEPTH-02
 **Success Criteria** (what must be TRUE):
+
   1. Each of `functional-time-series`, `density-fda`, `multi-domain`, `shapelets`, `advanced-clustering` has a "When to use" decision section and a "See also" cross-reference block.
   2. Each page adds parameter-selection + result-interpretation guidance and ≥3 caution/tip/note admonition boxes.
   3. Each page carries ≥3 runnable inline `FDARS_FENCE_OK` worked examples that emit the sentinel when run offline under `.venv`.
   4. Every method claim on these pages is accurate against the shipped v11.0 bindings and existing `docs/data/` datasets.
+
 **Plans**: TBD
 **UI hint**: no
 
 ### Phase 76: Flagship End-to-End Example Pages
+
 **Goal**: The examples section gains 2–3 marquee end-to-end walkthroughs for the new methods, matching the mature `examples/` standard (narrative + real dataset + runnable offline fences), wired into nav.
 **Depends on**: Phase 75 (methods documented; sequential on `main`)
 **Requirements**: EXMP-01, EXMP-02, EXMP-03
 **Success Criteria** (what must be TRUE):
+
   1. A flagship Functional Time Series example page (forecast + evaluation) runs end-to-end offline against a `docs/data/` dataset, emitting `FDARS_FENCE_OK`.
   2. A flagship Fréchet-regression example page (metric-space response walkthrough) runs end-to-end offline, emitting `FDARS_FENCE_OK`.
   3. A third flagship example (e.g. shapelet classification or density FDA) is added if a strong `docs/data/` fit exists; otherwise the "2–3" range is satisfied by the first two, with the decision recorded.
   4. Each new example page is wired into the examples nav so a reader reaches it from the site navigation.
+
 **Plans**: TBD
 **UI hint**: no
 
 ### Phase 77: Section-Landing Card Coverage
+
 **Goal**: The align, represent, regression, and analyze landing galleries reach 100% card coverage and the examples gallery gains its three missing cards — every focus-section page is reachable from a section-landing card with a hand-authored thumbnail.
 **Depends on**: Phase 76 (example pages exist before their examples cards; sequential on `main`)
 **Requirements**: CARD-01, CARD-02, CARD-03, CARD-04, CARD-05, CARD-06
 **Success Criteria** (what must be TRUE):
+
   1. Align (`shift-registration`, `banded-alignment`) and represent (`pace-fpca`, `interpolation`, `imputation`) landing galleries show a card for every page.
   2. Regression (5 pages) and analyze (8 pages) landing galleries show a card for every focus-section page.
   3. The examples landing page shows cards for `functional-outlier-workflow`, `canadian-depth-centrality`, and `tolerance-vs-conformal`.
   4. Each new card has a hand-authored inline SVG thumbnail at `docs/assets/thumb/<page-slug>.svg` that is STYLE_SPEC-conformant and decorative-accessible (matching the existing `aria-hidden` card pattern).
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 78: AI Capability-Discovery Skill
+
 **Goal**: AI agents can discover the whole fdars capability surface across the three selected surfaces — a standalone Agent Skill, an LLM-oriented docs page, and an LLM-free MCP capability tool — distinct from and non-duplicating the existing narrow `fdars-advisor` skill/MCP.
 **Depends on**: Nothing new in v12.0 (independent of the DEPTH/CARD content work; scheduled here to keep the final gate phase clean). Runs on `main`, `use_worktrees: false`.
 **Requirements**: SKILL-01, SKILL-02, SKILL-03, SKILL-04
 **Success Criteria** (what must be TRUE):
+
   1. A standalone capability-discovery Agent Skill ships a spec-valid `SKILL.md` mapping every public fdars submodule — what each method does, when to reach for it, and how to call it (signature + minimal usage).
   2. An automated test/harness verifies the skill's capability map against the live package (every documented method exists and is importable; no stale/renamed entries).
   3. An LLM-oriented docs page (llms.txt-style API digest of the whole library) is authored/generated and wired into the site.
   4. An MCP capability tool (e.g. `fdars_list_capabilities` / describe) is added to the existing server, returns the capability surface, stays provably LLM-free, and its guard/tests are updated to cover it.
+
 **Plans**: TBD
 **UI hint**: no
 
 ### Phase 79: Close Gate — Strict Build, SVGO/Determinism, Human Review & Release
+
 **Goal**: The whole milestone is proven correct and shippable in one pass — the site builds strict and offline with every fence green, all new SVGs pass the determinism gates, a human approves the new diagrams for method-accuracy, the advisor/MCP boundaries still hold, and the release handoff is prepared.
 **Depends on**: Phases 74, 75, 76, 77, 78 (all content, cards, and the skill must land before the single whole-site gate). Runs on `main`, `use_worktrees: false`.
 **Requirements**: GATE-01, GATE-02, GATE-03, GATE-04, DEPTH-03
 **Success Criteria** (what must be TRUE):
+
   1. Whole-site `mkdocs build --strict` is green offline and every worked example across the milestone emits `FDARS_FENCE_OK` (satisfying DEPTH-03's offline/method-accuracy sweep for the DEPTH pages).
   2. The SVGO idempotence + build-determinism gate is green across all new/changed SVGs (new thumbnails and any new concept diagrams).
   3. A blocking human diagram/method-accuracy review of the new thumbnails (and any new concept diagrams) is approved before close.
   4. Advisor/MCP tests (including guard-sync) are green after the SKILL-04 tool lands — grounding invariant + MCP LLM-free boundary preserved.
   5. Any package-version tick is committed; any irreversible publish (tag/PyPI) stays human-gated and is handed off, not executed autonomously.
+
 **Plans**: TBD
 **UI hint**: no
 
@@ -285,7 +305,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 74. Deepen Regression-Family Thin Pages | v12.0 | 0/5 | Planned | - |
+| 74. Deepen Regression-Family Thin Pages | v12.0 | 1/5 | In Progress|  |
 | 75. Deepen Analyze-Family Thin Pages | v12.0 | 0/TBD | Not started | - |
 | 76. Flagship End-to-End Example Pages | v12.0 | 0/TBD | Not started | - |
 | 77. Section-Landing Card Coverage | v12.0 | 0/TBD | Not started | - |
