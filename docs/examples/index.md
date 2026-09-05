@@ -94,6 +94,18 @@ loaded through the small helper `docs_data`.
 
 </div>
 
+## Depth &amp; outlier analysis
+
+<div class="fdars-gallery fdars-sec-examples">
+
+<a class="fdars-gallery-item" href="functional-outlier-workflow/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/functional-outlier-workflow.svg" alt="">
+<div class="fdars-gallery-title">Functional outlier workflow</div>
+<div class="fdars-gallery-desc">Combine magnitude and shape scores to flag atypical curves end-to-end.</div>
+</a>
+
+</div>
+
 ## Seasonal &amp; regional analysis
 
 <div class="fdars-gallery fdars-sec-examples">
@@ -114,6 +126,12 @@ loaded through the small helper `docs_data`.
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/ex-canadian-precipitation.svg" alt="">
 <div class="fdars-gallery-title">Geographic effects on rainfall</div>
 <div class="fdars-gallery-desc">Precipitation profiles by region, with FPCA scores tracking latitude across the country.</div>
+</a>
+
+<a class="fdars-gallery-item" href="canadian-depth-centrality/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/canadian-depth-centrality.svg" alt="">
+<div class="fdars-gallery-title">Canadian depth &amp; centrality</div>
+<div class="fdars-gallery-desc">Rank 35 Canadian weather curves from most central to most atypical.</div>
 </a>
 
 </div>
@@ -138,6 +156,18 @@ loaded through the small helper `docs_data`.
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/ex-biopharma-monitoring.svg" alt="">
 <div class="fdars-gallery-title">Penicillin batch monitoring</div>
 <div class="fdars-gallery-desc">Monitor fermentation batches (synthetic) and catch faulty batches as their trajectories drift.</div>
+</a>
+
+</div>
+
+## Tolerance &amp; uncertainty
+
+<div class="fdars-gallery fdars-sec-examples">
+
+<a class="fdars-gallery-item" href="tolerance-vs-conformal/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/tolerance-vs-conformal.svg" alt="">
+<div class="fdars-gallery-title">Tolerance vs conformal</div>
+<div class="fdars-gallery-desc">Two band philosophies — FPCA-based vs distribution-free — compared side by side.</div>
 </a>
 
 </div>

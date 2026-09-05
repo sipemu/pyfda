@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Depth centrality ranking">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 140 C70 100 110 84 150 100 C190 116 230 108 298 138" stroke="#3f51b5" stroke-opacity=".18" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M30 130 C70 88 110 72 150 88 C190 104 230 96 298 128" stroke="#3f51b5" stroke-opacity=".32" stroke-width="2" stroke-linecap="round"/>
+  <path d="M30 120 C70 76 110 60 150 76 C190 92 230 84 298 118" stroke="#3f51b5" stroke-opacity=".5" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M30 108 C70 62 110 46 150 62 C190 78 230 70 298 106" stroke="#3f51b5" stroke-opacity=".72" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M30 96 C70 50 110 34 150 50 C190 66 230 58 298 94" stroke="#3f51b5" stroke-width="3.4" stroke-linecap="round"/>
+</svg>
