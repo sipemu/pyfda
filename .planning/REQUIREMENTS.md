@@ -28,7 +28,7 @@ Bring the thin v11.0-era method pages (currently 20–35% of the mature-page bas
 Complete section-landing card coverage across the focus sections. Each missing card needs a hand-authored inline SVG thumbnail at `docs/assets/thumb/<page-slug>.svg` plus a `fdars-gallery` card entry in the section `index.md`.
 
 - [x] **CARD-01**: Align landing page reaches 100% — thumbnails + cards for `shift-registration`, `banded-alignment`.
-- [ ] **CARD-02**: Represent landing page reaches 100% — thumbnails + cards for `pace-fpca`, `interpolation`, `imputation`.
+- [x] **CARD-02**: Represent landing page reaches 100% — thumbnails + cards for `pace-fpca`, `interpolation`, `imputation`.
 - [ ] **CARD-03**: Regression landing page reaches 100% — thumbnails + cards for `concurrent-regression`, `functional-glm`, `function-on-function`, `additive-sof`, `frechet-regression`.
 - [ ] **CARD-04**: Analyze landing page reaches 100% — thumbnails + cards for `functional-time-series`, `density-fda`, `advanced-clustering`, `multi-domain`, `shapelets`, `functional-boxplot`, `functional-statistics`, `scoring-metrics`.
 - [ ] **CARD-05**: Examples landing page gains cards for the 3 uncarded pages — `functional-outlier-workflow`, `canadian-depth-centrality`, `tolerance-vs-conformal`.
@@ -80,7 +80,7 @@ Deferred; tracked but not in this roadmap.
 | EXMP-02 | Phase 76 | Complete |
 | EXMP-03 | Phase 76 | Complete |
 | CARD-01 | Phase 77 | Complete |
-| CARD-02 | Phase 77 | Pending |
+| CARD-02 | Phase 77 | Complete |
 | CARD-03 | Phase 77 | Pending |
 | CARD-04 | Phase 77 | Pending |
 | CARD-05 | Phase 77 | Pending |
