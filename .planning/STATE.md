@@ -5,16 +5,16 @@ milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 75
 current_phase_name: Deepen Analyze-Family Thin Pages
 status: executing
-stopped_at: Completed 75-03-PLAN.md
-last_updated: "2026-09-05T20:47:02.767Z"
+stopped_at: Completed 75-04-PLAN.md
+last_updated: "2026-09-05T20:52:59.287Z"
 last_activity: 2026-09-05
 last_activity_desc: Phase 75 execution started
-state_head: 7a944eec6fc05b900f33f86a345aa3db2e98e232
+state_head: 903bd31fb973d6c173e03f27530249c0beda9552
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 17
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 ## Current Position
 
 Phase: 75 (Deepen Analyze-Family Thin Pages) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-09-05 — Phase 75 execution started
 
@@ -71,6 +71,7 @@ Last activity: 2026-09-05 — Phase 75 execution started
 | Phase 75-deepen-analyze-family-thin-pages P01 | 203 | 1 tasks | 1 files |
 | Phase 75 P02 | 2 | 1 tasks | 1 files |
 | Phase 75 P03 | 3 | 1 tasks | 1 files |
+| Phase 75-deepen-analyze-family-thin-pages P04 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,7 @@ Recent decisions affecting current work:
 - [Phase 75]: inverse_lqd documented with 3-argument signature (psi, t_grid, target_argvals) — no 2-argument form
 - [Phase 75]: quantile-grid mismatch addressed in warning admonition, prose, and round-trip fence shape print
 - [Phase 75]: multi-domain.md: dense_flmm/multi_famm take plain numpy arrays; PyMultiFunData is standalone container only in fdars-core 0.33
+- [Phase 75]: shapelets.md (DEPTH-02): discover_shapelets returns summary dict {n_shapelets, quality} — NOT a list of arrays; shapelet_distance returns (float, int) tuple (min_distance, best_offset) — NOT scalar; full search-space params documented; ncomp PCA documented for shapelet_classifier_fit
 
 ### Pending Todos
 
@@ -139,8 +141,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T20:47:02.727Z
-Stopped at: Completed 75-03-PLAN.md
+Last session: 2026-09-05T20:52:59.242Z
+Stopped at: Completed 75-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
