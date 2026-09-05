@@ -4,17 +4,17 @@ milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 75
 current_phase_name: Deepen Analyze-Family Thin Pages
-status: executing
-stopped_at: Completed 75-04-PLAN.md
-last_updated: "2026-09-05T20:52:59.287Z"
+status: verifying
+stopped_at: Completed 75-05-PLAN.md (advanced-clustering.md — Phase 75 complete)
+last_updated: "2026-09-05T20:58:04.480Z"
 last_activity: 2026-09-05
 last_activity_desc: Phase 75 execution started
-state_head: 903bd31fb973d6c173e03f27530249c0beda9552
+state_head: 07632d40850bc7bc876bebc80e5fe43205d649b7
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
   percent: 17
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 
 Phase: 75 (Deepen Analyze-Family Thin Pages) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-05 — Phase 75 execution started
 
 ## Performance Metrics
@@ -72,6 +72,7 @@ Last activity: 2026-09-05 — Phase 75 execution started
 | Phase 75 P02 | 2 | 1 tasks | 1 files |
 | Phase 75 P03 | 3 | 1 tasks | 1 files |
 | Phase 75-deepen-analyze-family-thin-pages P04 | 2 | 1 tasks | 1 files |
+| Phase 75-deepen-analyze-family-thin-pages P05 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,9 @@ Recent decisions affecting current work:
 - [Phase 75]: quantile-grid mismatch addressed in warning admonition, prose, and round-trip fence shape print
 - [Phase 75]: multi-domain.md: dense_flmm/multi_famm take plain numpy arrays; PyMultiFunData is standalone container only in fdars-core 0.33
 - [Phase 75]: shapelets.md (DEPTH-02): discover_shapelets returns summary dict {n_shapelets, quality} — NOT a list of arrays; shapelet_distance returns (float, int) tuple (min_distance, best_offset) — NOT scalar; full search-space params documented; ncomp PCA documented for shapelet_classifier_fit
+- [Phase 75]: DBSCAN eps selection via sorted k-NN distances from result distances matrix — the natural visual for advanced clustering
+- [Phase 75]: FunFEM ncomp=10 default (not 3) documented; soft membership rows sum to 1 contrasts with KCFC hard labels
+- [Phase 75]: align_cluster_fd use_amplitude_only=True default and warning on False performance added
 
 ### Pending Todos
 
@@ -141,8 +145,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T20:52:59.242Z
-Stopped at: Completed 75-04-PLAN.md
+Last session: 2026-09-05T20:58:04.421Z
+Stopped at: Completed 75-05-PLAN.md (advanced-clustering.md — Phase 75 complete)
 Resume file: None
 
 ## Operator Next Steps
