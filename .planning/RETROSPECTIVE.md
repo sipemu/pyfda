@@ -204,6 +204,38 @@ Docs-only diagram-quality successor to v7.0. A scored 156-SVG audit (`60-AUDIT.m
 
 ---
 
+## Milestone: v11.0 — fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs
+
+**Shipped:** 2026-09-05
+**Phases:** 8 (66–73) | **Plans:** 29 | **Tasks:** 65
+
+### What Was Built
+The fourth crate-upgrade wave (after v4/v5/v6) and the largest — a 10-minor jump `fdars-core` 0.23.0 → 0.33.0 absorbed as one isolated regression gate (zero numeric drift, 6 deprecated call sites suppressed, full changelog/match-arm audit in `66-AUDIT.md`), then six new binding families exposed through PyO3 + the Python API: `fdars.fts` (13 functional-time-series functions), function-on-function + additive scalar-on-function regression (`fdars.regression` extensions + new `fdars.scalar_on_function`), Fréchet regression + density FDA (`fdars.frechet` + new `fdars.density_fda`), multi-domain data + FAMM + advanced clustering (`PyMultiFunData`/`fdars.multi_fdata`, `fdars.famm`, `mfpca`/`spe_multivariate`, DBSCAN/KCFC/FunFEM/elastic), and shapelets + GAK metric (`fdars.shapelet` + 5 GAK functions in `fdars.metric`). Advisor extended with `fts`/`frechet` aspects + grounded diagnostics for the new methods (grounding invariant + atomic MCP guard-sync). Documented with new pages + 8 method-accurate hand-authored SVGs + offline `FDARS_FENCE_OK` worked examples; whole-site `--strict` green; blocking human diagram review approved. Suite 5650 passed / 10 skipped; package 0.9.0 → 0.10.0.
+
+### What Worked
+- **Isolated-bump gate at 10× the usual jump.** The v4/v5/v6 "bump alone on a green baseline first" play held even across a breaking-change-risk 10-minor jump — the changelog/match-arm audit front-loaded the risk into Phase 66, and every downstream binding family landed without an upgrade regression hiding underneath it.
+- **Parallel worktree fan-out for the binding families.** Phases 67–71 are additive, disjoint-file binding groups; running them in isolated worktrees (with Phase 70 as the sole `spm_mod.rs` writer kept separate) parallelized the bulk of the milestone — the v10.0 disjoint-worktree pattern reused on Rust binding code, not just SVGs.
+- **Atomic advisor guard-sync, again.** Adding `fts`/`frechet` method strings across advisor `_supported`, MCP `_DIAGNOSTICS_METHODS`, and the guard-sync test literal in single commits kept the LLM-free compute boundary provable — the same discipline from v4/v5/v6 Phase-28/34/40.
+- **Transposition-guarded fixtures caught layout bugs early.** Every new binding was proven on a non-square fixture (e.g. 40×25, 30×25×18), so column-major round-trip errors surfaced in-phase rather than at integration.
+
+### What Was Inefficient
+- **Executor deaths mid-run required resume reconciliation.** The autonomous run lost executors part-way and had to reconcile committed-vs-uncommitted work before continuing — recurring autonomous-run overhead (also seen in v10.0's quota interruption).
+- **Long whole-site `--strict` docs build (~22–35 min).** The executed fences run real compute; the single whole-site gate dominates Phase-73 wall-clock. Keeping fence data small helps but the floor is high.
+
+### Patterns Established
+- **Isolated-bump gate scales to large jumps.** A single green regression gate is worth proportionally *more* the bigger the jump — encode it as the standard opening phase for any crate-upgrade milestone regardless of minor-count.
+- **Worktree fan-out for additive binding groups** (extending the v10.0 SVG pattern to `src/*_mod.rs`): one executor per disjoint module set, with any shared-file writer (here `spm_mod.rs`) held to a single phase.
+
+### Key Lessons
+- The breaking-change *risk* of a 10-minor jump turned out to be absorbable with an audit + deprecation-suppression pass — the fear (research flagged possible breaking changes) exceeded the reality (zero drift, only deprecations). Front-load the audit, don't front-load the dread.
+- Autonomous runs need robust executor-death resume; treat mid-run reconciliation as expected, not exceptional.
+
+### Cost Observations
+- Model mix: planners/verifiers opus+sonnet, executors sonnet, plan-checker haiku.
+- Notable: parallel-worktree binding fan-out was the biggest wall-clock saver; the ~22–35 min whole-site `--strict` build dominated Phase-73.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -214,6 +246,8 @@ Docs-only diagram-quality successor to v7.0. A scored 156-SVG audit (`60-AUDIT.m
 | v2.0 — Grounded AI analysis advisor | ~2 | 10–13 | Tracer-first per phase; one deterministic core fanned out to four surfaces; offline-by-default + env-gated LLM tests |
 | v2.1 — Document the AI Advisor | 1 | 14–18 | Fully autonomous run (discuss→…→cleanup); orchestrator self-served per-page review gates; execution-sentinel doc-tests; illustrative-vs-executed fence split |
 | v9.0 — scikit-learn API Compatibility | ~3 | 55–59 | Triage-first scope discovery under a no-exemptions bar; full-matrix `parametrize_with_checks` gate as milestone lock; out-of-band manual ship forced a later in-band close (override for the unverified docs phase) |
+| v10.0 — Diagram Quality & Accessibility Pass | ~2 | 60–65 | Parallel worktree correction batches for disjoint SVG sets; consolidated human review at the final gate; inline quota-fallback close |
+| v11.0 — fdars-core 0.33 Upgrade | autonomous | 66–73 | Isolated-bump gate absorbed a 10-minor jump; parallel-worktree fan-out extended from SVGs to `src/*_mod.rs` binding groups; executor-death resume reconciliation |
 
 ### Cumulative Quality
 
