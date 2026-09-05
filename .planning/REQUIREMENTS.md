@@ -31,7 +31,7 @@ Complete section-landing card coverage across the focus sections. Each missing c
 - [x] **CARD-02**: Represent landing page reaches 100% — thumbnails + cards for `pace-fpca`, `interpolation`, `imputation`.
 - [x] **CARD-03**: Regression landing page reaches 100% — thumbnails + cards for `concurrent-regression`, `functional-glm`, `function-on-function`, `additive-sof`, `frechet-regression`.
 - [x] **CARD-04**: Analyze landing page reaches 100% — thumbnails + cards for `functional-time-series`, `density-fda`, `advanced-clustering`, `multi-domain`, `shapelets`, `functional-boxplot`, `functional-statistics`, `scoring-metrics`.
-- [ ] **CARD-05**: Examples landing page gains cards for the 3 uncarded pages — `functional-outlier-workflow`, `canadian-depth-centrality`, `tolerance-vs-conformal`.
+- [x] **CARD-05**: Examples landing page gains cards for the 3 uncarded pages — `functional-outlier-workflow`, `canadian-depth-centrality`, `tolerance-vs-conformal`.
 - [x] **CARD-06**: All new thumbnails are hand-authored inline SVG, STYLE_SPEC-conformant, decorative-accessible (matching the existing `aria-hidden` card pattern), and pass the SVGO idempotence + build-determinism gate.
 
 ### AI Capability Skill (SKILL)
@@ -83,7 +83,7 @@ Deferred; tracked but not in this roadmap.
 | CARD-02 | Phase 77 | Complete |
 | CARD-03 | Phase 77 | Complete |
 | CARD-04 | Phase 77 | Complete |
-| CARD-05 | Phase 77 | Pending |
+| CARD-05 | Phase 77 | Complete |
 | CARD-06 | Phase 77 | Complete |
 | SKILL-01 | Phase 78 | Pending |
 | SKILL-02 | Phase 78 | Pending |

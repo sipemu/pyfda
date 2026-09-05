@@ -4,17 +4,17 @@ milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 77
 current_phase_name: Section-Landing Card Coverage
-status: executing
-stopped_at: Completed 77-04-PLAN.md (analyze 8 thumbnails + 8 cards)
-last_updated: "2026-09-05T23:03:25.495Z"
+status: verifying
+stopped_at: Completed 77-05-PLAN.md (last plan of phase 77)
+last_updated: "2026-09-05T23:09:51.417Z"
 last_activity: 2026-09-06
 last_activity_desc: Phase 77 execution started
-state_head: 306ed316e9c10a10fdb9c277967c0de5d0584dd0
+state_head: 4189895e321a6c90d66e396d2c428a3076b411d9
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 18
-  completed_plans: 17
+  completed_plans: 18
   percent: 50
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 
 Phase: 77 (Section-Landing Card Coverage) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-06 — Phase 77 execution started
 
 ## Performance Metrics
@@ -80,6 +80,7 @@ Last activity: 2026-09-06 — Phase 77 execution started
 | Phase 77 P02 | 155 | 1 tasks | 4 files |
 | Phase 77 P03 | 2 | 1 tasks | 6 files |
 | Phase 77 P04 | 20 | 1 tasks | 9 files |
+| Phase 77-section-landing-card-coverage P05 | 4 | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,8 @@ Recent decisions affecting current work:
 - [Phase 77]: Functional-GLM two-panel split at x=115/168 fits the predictor-arrow-outcome sketch under 1200 bytes
 - [Phase 77]: Function-on-function: contour arcs in bounding rectangle represent bivariate β(s,t) surface with minimal element count
 - [Phase 77]: functional-boxplot: solid fill-opacity paths instead of linearGradient to stay under 1300 byte limit
+- [Phase 77]: No ex- prefix on 3 new example thumbnails — verified against mkdocs.yml nav slugs
+- [Phase 77]: Used fill-opacity instead of linearGradient in tolerance-vs-conformal.svg to stay under 1300-byte limit
 
 ### Pending Todos
 
@@ -161,8 +164,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T23:03:25.399Z
-Stopped at: Completed 77-04-PLAN.md (analyze 8 thumbnails + 8 cards)
+Last session: 2026-09-05T23:09:51.336Z
+Stopped at: Completed 77-05-PLAN.md (last plan of phase 77)
 Resume file: None
 
 ## Operator Next Steps
