@@ -193,7 +193,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 **Standing execution constraints (all content/doc phases):** run SEQUENTIALLY on `main` with `use_worktrees: false` — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path (v6.0/v11.0 standing decision). Keep fence datasets small (~25-min whole-site executed `--strict` build). The whole-site `mkdocs build --strict` gate, the SVGO/determinism gate, and the blocking human diagram review run ONCE, in the final gate phase (Phase 79) — not per content phase.
 
 - [x] **Phase 74: Deepen Regression-Family Thin Pages** - Bring `frechet-regression`, `function-on-function`, `additive-sof`, `concurrent-regression`, `functional-glm` to mature-page parity (completed 2026-09-05)
-- [ ] **Phase 75: Deepen Analyze-Family Thin Pages** - Bring `functional-time-series`, `density-fda`, `multi-domain`, `shapelets`, `advanced-clustering` to mature-page parity
+- [x] **Phase 75: Deepen Analyze-Family Thin Pages** - Bring `functional-time-series`, `density-fda`, `multi-domain`, `shapelets`, `advanced-clustering` to mature-page parity (completed 2026-09-05)
 - [ ] **Phase 76: Flagship End-to-End Example Pages** - 2–3 marquee worked-example pages (FTS forecast, Fréchet regression, +1 if a strong dataset fit exists)
 - [ ] **Phase 77: Section-Landing Card Coverage** - 18 focus-section thumbnails + gallery cards (align/represent/regression/analyze) + 3 examples cards
 - [ ] **Phase 78: AI Capability-Discovery Skill** - Agent Skill `SKILL.md` + verified capability map + LLM-oriented docs page + LLM-free MCP capability tool
@@ -313,7 +313,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 74. Deepen Regression-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
-| 75. Deepen Analyze-Family Thin Pages | v12.0 | 5/5 | In Progress|  |
+| 75. Deepen Analyze-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
 | 76. Flagship End-to-End Example Pages | v12.0 | 0/TBD | Not started | - |
 | 77. Section-Landing Card Coverage | v12.0 | 0/TBD | Not started | - |
 | 78. AI Capability-Discovery Skill | v12.0 | 0/TBD | Not started | - |
