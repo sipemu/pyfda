@@ -198,6 +198,7 @@ nav:
     - Penicillin — Batch Monitoring: examples/biopharma-monitoring.md
     - Canadian Weather — Fréchet Regression: examples/frechet-density-regression.md
     - Canadian Weather — FTS Forecast: examples/fts-forecast.md
+    - Phoneme — Shapelet Classification: examples/phoneme-shapelets.md
   - Reference:
     - reference/index.md
     - fdars.fdata: reference/fdata.md

@@ -164,6 +164,7 @@ loaded through the small helper `docs_data`.
 | [Penicillin batch monitoring](biopharma-monitoring.md) | Penicillin (synthetic) | `spm_phase1`, `spm_monitor`, `t2_pc_contributions` |
 | [Canadian Weather: Fréchet Regression](frechet-density-regression.md) | Canadian Weather | `frechet_global_reg`, `frechet_local_reg`, `wasserstein_barycenter` |
 | [Canadian Weather: FTS Forecast](fts-forecast.md) | Canadian Weather | `ftsm`, `ftsm_forecast_multistep`, `stationarity_test`, `functional_acf` |
+| [Phoneme: Shapelet Classification](phoneme-shapelets.md) | Phoneme | `discover_shapelets`, `shapelet_transform_fit`, `shapelet_transform`, `shapelet_classifier_fit` |
 
 !!! tip "Reproducing locally"
     Every dataset is loadable outside the docs too:
