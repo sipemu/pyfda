@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Density FDA LQD">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M50 150 C60 148 70 120 90 70 C100 45 110 35 120 35 C130 35 140 45 150 70 C170 120 180 148 190 150" stroke="#6f42c1" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/>
+  <path d="M90 150 C100 148 110 125 130 85 C140 65 152 52 164 52 C176 52 188 65 198 85 C218 125 228 148 238 150" stroke="#6f42c1" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/>
+  <path d="M140 150 C148 148 156 130 172 100 C180 84 190 75 200 75 C210 75 220 84 228 100 C244 130 252 148 260 150" stroke="#6f42c1" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/>
+  <path d="M40 110 C80 100 130 88 180 88 C230 88 270 100 298 105" stroke="#6f42c1" stroke-width="3" stroke-linecap="round"/>
+</svg>

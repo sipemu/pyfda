@@ -30,6 +30,11 @@ The Analyze module collects the tools you reach for once your curves are represe
 <div class="fdars-gallery-title">Elastic Clustering</div>
 <div class="fdars-gallery-desc">Cluster by amplitude/phase-invariant elastic distance.</div>
 </a>
+<a class="fdars-gallery-item" href="advanced-clustering/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/advanced-clustering.svg" alt="">
+<div class="fdars-gallery-title">Advanced Clustering</div>
+<div class="fdars-gallery-desc">Density-based, structure-aware, and alignment-coupled clustering methods.</div>
+</a>
 <a class="fdars-gallery-item" href="outlier-detection/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/outlier-detection.svg" alt="">
 <div class="fdars-gallery-title">Outlier Detection</div>
@@ -49,5 +54,40 @@ The Analyze module collects the tools you reach for once your curves are represe
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/covariance-functions.svg" alt="">
 <div class="fdars-gallery-title">Covariance Functions</div>
 <div class="fdars-gallery-desc">Gaussian, exponential, Matern, and periodic covariance kernels.</div>
+</a>
+<a class="fdars-gallery-item" href="functional-time-series/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/functional-time-series.svg" alt="">
+<div class="fdars-gallery-title">Functional Time Series</div>
+<div class="fdars-gallery-desc">Forecast, test stationarity, and model autocorrelation for curve sequences.</div>
+</a>
+<a class="fdars-gallery-item" href="density-fda/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/density-fda.svg" alt="">
+<div class="fdars-gallery-title">Density FDA</div>
+<div class="fdars-gallery-desc">Analyze probability densities as functional objects via the LQD transform.</div>
+</a>
+<a class="fdars-gallery-item" href="multi-domain/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/multi-domain.svg" alt="">
+<div class="fdars-gallery-title">Multi-Domain FDA</div>
+<div class="fdars-gallery-desc">Joint FPCA across multiple functional variables per subject.</div>
+</a>
+<a class="fdars-gallery-item" href="shapelets/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/shapelets.svg" alt="">
+<div class="fdars-gallery-title">Shapelets</div>
+<div class="fdars-gallery-desc">Discriminative subsequences that separate classes by minimum-distance matching.</div>
+</a>
+<a class="fdars-gallery-item" href="functional-boxplot/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/functional-boxplot.svg" alt="">
+<div class="fdars-gallery-title">Functional Boxplot</div>
+<div class="fdars-gallery-desc">Depth-based central region, fences, and outlier detection for curves.</div>
+</a>
+<a class="fdars-gallery-item" href="functional-statistics/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/functional-statistics.svg" alt="">
+<div class="fdars-gallery-title">Functional Statistics</div>
+<div class="fdars-gallery-desc">Pointwise variance, covariance surface, and depth-based median of curves.</div>
+</a>
+<a class="fdars-gallery-item" href="scoring-metrics/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/scoring-metrics.svg" alt="">
+<div class="fdars-gallery-title">Scoring Metrics</div>
+<div class="fdars-gallery-desc">Integrated prediction-error metrics: MAE, MSE, MAPE, MSLE, explained variance.</div>
 </a>
 </div>

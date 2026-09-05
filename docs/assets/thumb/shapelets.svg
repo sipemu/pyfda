@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Shapelet subsequence match">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 90 C60 88 80 72 100 55 C115 42 125 38 135 42 C145 46 155 60 170 78 C190 100 220 95 260 90 C275 88 288 86 298 84" stroke="#6f42c1" stroke-width="3" stroke-linecap="round"/>
+  <rect x="90" y="32" width="90" height="56" stroke="#6f42c1" stroke-opacity=".6" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <g stroke="#6f42c1" stroke-opacity=".55" stroke-width="1.4">
+    <line x1="115" y1="88" x2="115" y2="108"/>
+    <line x1="155" y1="88" x2="155" y2="108"/>
+    <line x1="115" y1="108" x2="155" y2="108"/>
+    <line x1="108" y1="108" x2="115" y2="108"/>
+    <line x1="155" y1="108" x2="162" y2="108"/>
+  </g>
+</svg>
