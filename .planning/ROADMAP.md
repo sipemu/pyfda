@@ -257,10 +257,10 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
   3. A third flagship example (e.g. shapelet classification or density FDA) is added if a strong `docs/data/` fit exists; otherwise the "2–3" range is satisfied by the first two, with the decision recorded.
   4. Each new example page is wired into the examples nav so a reader reaches it from the site navigation.
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 
 - [x] 76-01-PLAN.md — EXMP-02 Fréchet-regression flagship example (tracer; KDE density response on latitude) + nav
-- [ ] 76-02-PLAN.md — EXMP-01 Functional Time Series flagship example (forecast + RMSE eval) + nav
+- [x] 76-02-PLAN.md — EXMP-01 Functional Time Series flagship example (forecast + RMSE eval) + nav
 - [ ] 76-03-PLAN.md — EXMP-03 shapelet-classification flagship example (phoneme 3-class) + nav
 
 **UI hint**: no
@@ -319,7 +319,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 |-------|-----------|----------------|--------|-----------|
 | 74. Deepen Regression-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
 | 75. Deepen Analyze-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
-| 76. Flagship End-to-End Example Pages | v12.0 | 1/3 | In Progress|  |
+| 76. Flagship End-to-End Example Pages | v12.0 | 2/3 | In Progress|  |
 | 77. Section-Landing Card Coverage | v12.0 | 0/TBD | Not started | - |
 | 78. AI Capability-Discovery Skill | v12.0 | 0/TBD | Not started | - |
 | 79. Close Gate — Strict Build, SVGO/Determinism, Human Review & Release | v12.0 | 0/TBD | Not started | - |

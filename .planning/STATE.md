@@ -5,16 +5,16 @@ milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 76
 current_phase_name: Flagship End-to-End Example Pages
 status: executing
-stopped_at: Completed 76-01-PLAN.md (EXMP-02 frechet-density-regression.md)
-last_updated: "2026-09-05T21:46:54.366Z"
+stopped_at: Completed 76-02-PLAN.md (fts-forecast.md)
+last_updated: "2026-09-05T21:53:40.268Z"
 last_activity: 2026-09-05
 last_activity_desc: Phase 76 execution started
-state_head: c3584f9725507eeead17b2e1e896f32b68cf4a57
+state_head: 149852a6b5e01fcf18072cfc19c09906f98adc24
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
   percent: 33
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 ## Current Position
 
 Phase: 76 (Flagship End-to-End Example Pages) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-09-05 — Phase 76 execution started
 
@@ -74,6 +74,7 @@ Last activity: 2026-09-05 — Phase 76 execution started
 | Phase 75-deepen-analyze-family-thin-pages P04 | 2 | 1 tasks | 1 files |
 | Phase 75-deepen-analyze-family-thin-pages P05 | 2 | 1 tasks | 1 files |
 | Phase 76-flagship-end-to-end-example-pages P01 | 3 | 1 tasks | 3 files |
+| Phase 76-flagship-end-to-end-example-pages P02 | 3 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,7 @@ Recent decisions affecting current work:
 - [Phase 75]: align_cluster_fd use_amplitude_only=True default and warning on False performance added
 - [Phase 76]: wasserstein_barycenter (not frechet_mean) is the correct density unconditional mean — frechet_mean does not support space='density' in the current binding
 - [Phase 76]: EXMP-02 tracer complete: all three fences emit FDARS_FENCE_OK offline; np.asarray(result['predicted']) + xout.reshape(-1,1) + np.clip before normalize_density pattern established
+- [Phase 76]: EXMP-01: PVE for FTSM components computed from scores.var(axis=0), not fit['weights'] (quadrature vector) — verified by structural antipattern gate in node check
 
 ### Pending Todos
 
@@ -148,8 +150,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T21:46:54.293Z
-Stopped at: Completed 76-01-PLAN.md (EXMP-02 frechet-density-regression.md)
+Last session: 2026-09-05T21:53:40.186Z
+Stopped at: Completed 76-02-PLAN.md (fts-forecast.md)
 Resume file: None
 
 ## Operator Next Steps
