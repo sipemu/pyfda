@@ -21,10 +21,10 @@ current_phase: 73
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-09-02)
+See: .planning/PROJECT.md (updated 2026-09-05)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 73 — Documentation & Release
+**Current focus:** Planning next milestone (v11.0 shipped 2026-09-05 — start next via `/gsd-new-milestone`)
 
 ## Current Position
 
