@@ -5,16 +5,16 @@ milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 75
 current_phase_name: Deepen Analyze-Family Thin Pages
 status: executing
-stopped_at: Completed 75-02-PLAN.md
-last_updated: "2026-09-05T20:41:58.528Z"
+stopped_at: Completed 75-03-PLAN.md
+last_updated: "2026-09-05T20:47:02.767Z"
 last_activity: 2026-09-05
 last_activity_desc: Phase 75 execution started
-state_head: 42a233a46cab7b23bc5de6be211e586b1a0681e9
+state_head: 7a944eec6fc05b900f33f86a345aa3db2e98e232
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 10
-  completed_plans: 7
+  completed_plans: 8
   percent: 17
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 ## Current Position
 
 Phase: 75 (Deepen Analyze-Family Thin Pages) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-09-05 — Phase 75 execution started
 
@@ -70,6 +70,7 @@ Last activity: 2026-09-05 — Phase 75 execution started
 | Phase 74 P05 | 4 | 1 tasks | 1 files |
 | Phase 75-deepen-analyze-family-thin-pages P01 | 203 | 1 tasks | 1 files |
 | Phase 75 P02 | 2 | 1 tasks | 1 files |
+| Phase 75 P03 | 3 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,7 @@ Recent decisions affecting current work:
 - [Phase 75]: functional-time-series.md restructured to UNNUMBERED mature analyze template; all 8 FTS API errors corrected (ftsm_update arg order, max_lag, ACF/PACF return dict, ar_models, spectral_density full-spectrum, dpca no-order, long_run_covariance default None); 3 exec fences + 8 admonitions + When-to-use + See-also; both verify gates pass (DEPTH-02 tracer proven)
 - [Phase 75]: inverse_lqd documented with 3-argument signature (psi, t_grid, target_argvals) — no 2-argument form
 - [Phase 75]: quantile-grid mismatch addressed in warning admonition, prose, and round-trip fence shape print
+- [Phase 75]: multi-domain.md: dense_flmm/multi_famm take plain numpy arrays; PyMultiFunData is standalone container only in fdars-core 0.33
 
 ### Pending Todos
 
@@ -137,8 +139,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T20:41:58.478Z
-Stopped at: Completed 75-02-PLAN.md
+Last session: 2026-09-05T20:47:02.727Z
+Stopped at: Completed 75-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
