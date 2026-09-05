@@ -25,6 +25,21 @@ The Represent module brings together the core tools for analyzing functional dat
 <div class="fdars-gallery-title">Basis Representation</div>
 <div class="fdars-gallery-desc">B-spline, Fourier, and P-spline expansions with automatic selection.</div>
 </a>
+<a class="fdars-gallery-item" href="pace-fpca/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/pace-fpca.svg" alt="">
+<div class="fdars-gallery-title">PACE FPCA</div>
+<div class="fdars-gallery-desc">FPCA via conditional expectation for sparse, irregularly sampled curves.</div>
+</a>
+<a class="fdars-gallery-item" href="interpolation/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/interpolation.svg" alt="">
+<div class="fdars-gallery-title">Spline Interpolation</div>
+<div class="fdars-gallery-desc">Resample functional curves onto any grid with B-spline fits.</div>
+</a>
+<a class="fdars-gallery-item" href="imputation/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/imputation.svg" alt="">
+<div class="fdars-gallery-title">Missing Value Imputation</div>
+<div class="fdars-gallery-desc">Fill NaN gaps in functional curves with spline or mean strategies.</div>
+</a>
 <a class="fdars-gallery-item" href="andrews-transformation/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/andrews-transformation.svg" alt="">
 <div class="fdars-gallery-title">Andrews Transformation</div>
