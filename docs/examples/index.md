@@ -162,6 +162,7 @@ loaded through the small helper `docs_data`.
 | [Inline spectra monitoring](tecator-monitoring.md) | Tecator | `spm_phase1`, `spm_monitor`, `hotelling_t2` |
 | [Detection power &amp; false alarms](inline-monitoring.md) | Penicillin (synthetic) | `spm_phase1`, `t2_control_limit`, `arl0_t2` |
 | [Penicillin batch monitoring](biopharma-monitoring.md) | Penicillin (synthetic) | `spm_phase1`, `spm_monitor`, `t2_pc_contributions` |
+| [Canadian Weather: Fréchet Regression](frechet-density-regression.md) | Canadian Weather | `frechet_global_reg`, `frechet_local_reg`, `wasserstein_barycenter` |
 
 !!! tip "Reproducing locally"
     Every dataset is loadable outside the docs too:

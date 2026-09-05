@@ -196,6 +196,7 @@ nav:
     - Tecator — Inline Monitoring: examples/tecator-monitoring.md
     - Monitoring — Detection Power: examples/inline-monitoring.md
     - Penicillin — Batch Monitoring: examples/biopharma-monitoring.md
+    - Canadian Weather — Fréchet Regression: examples/frechet-density-regression.md
   - Reference:
     - reference/index.md
     - fdars.fdata: reference/fdata.md
