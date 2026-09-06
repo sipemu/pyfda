@@ -4,17 +4,17 @@ milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 78
 current_phase_name: AI Capability-Discovery Skill
-status: executing
-stopped_at: "Completed 78-03-PLAN.md (SKILL-03: llms.txt + ai-capability-map.md)"
-last_updated: "2026-09-06T19:23:27.325Z"
+status: verifying
+stopped_at: "Completed 78-04-PLAN.md (SKILL-04: fdars_list_capabilities MCP tool + GATE-04 guard-sync)"
+last_updated: "2026-09-06T19:32:17.907Z"
 last_activity: 2026-09-06
 last_activity_desc: Phase 78 execution started
-state_head: da94fb8abb1c3b513b1b43fee5364a9d5d7b2db9
+state_head: b55464da10a18a60387b146b8f1e2074bf1d986a
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 22
-  completed_plans: 21
+  completed_plans: 22
   percent: 67
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 
 Phase: 78 (AI Capability-Discovery Skill) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-06 — Phase 78 execution started
 
 ## Performance Metrics
@@ -84,6 +84,7 @@ Last activity: 2026-09-06 — Phase 78 execution started
 | Phase 78 P01 | 315 | 3 tasks | 4 files |
 | Phase 78 P02 | 150 | 2 tasks | 1 files |
 | Phase 78 P03 | 5min | 2 tasks | 4 files |
+| Phase 78-ai-capability-discovery-skill P04 | 5 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -131,6 +132,8 @@ Recent decisions affecting current work:
 - [Phase 78]: SKILL.md body avoids fdars.plot / fdars.advisor dotted notation in Optional Extras — verify gate rejects fdars.<mod> tokens not in capability map keys
 - [Phase 78]: docs-emit path reads committed _capability_map.json (no fdars import at build time) — docs build stays independent of compiled extension
 - [Phase 78]: AI Capability Map placed as top-level nav entry adjacent to AI Advisor; llms.txt gets no nav entry (static passthrough only)
+- [Phase 78]: fdars_list_capabilities is LLM-free: loads committed JSON via importlib.resources, no model call, no provider/model keys in return, frozenset allowlist enforced before load (T-78-08)
+- [Phase 78]: GATE-04 three-way literal mirror: server._CAPABILITY_MODULES == JSON submodule keys == test _EXPECTED_CAPABILITY_MODULES, enforced by Py3.9-safe primary guard-sync test
 
 ### Pending Todos
 
@@ -171,8 +174,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-06T19:23:27.208Z
-Stopped at: Completed 78-03-PLAN.md (SKILL-03: llms.txt + ai-capability-map.md)
+Last session: 2026-09-06T19:32:17.804Z
+Stopped at: Completed 78-04-PLAN.md (SKILL-04: fdars_list_capabilities MCP tool + GATE-04 guard-sync)
 Resume file: None
 
 ## Operator Next Steps
