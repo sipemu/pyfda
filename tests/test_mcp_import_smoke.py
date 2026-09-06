@@ -61,8 +61,13 @@ def test_mcp_v2_server_import_and_tools_load():
     assert mcp is not None, "fdars.mcp.server.mcp instance must not be None"
 
     # 3. Assert all tool handler symbols are importable and callable.
+    #    (WR-01/Phase 78) Covers every @mcp.tool() on the server, not just the
+    #    capability tool, so an import-time regression in any of them is caught.
     from fdars.mcp.server import (  # noqa: PLC0415
+        fdars_auto_tune,
         fdars_build_diagnostics,
+        fdars_build_pipeline_report,
+        fdars_compare_methods,
         fdars_compare_run,
         fdars_list_capabilities,
         fdars_run_method,
@@ -72,12 +77,18 @@ def test_mcp_v2_server_import_and_tools_load():
         "fdars_build_diagnostics": fdars_build_diagnostics,
         "fdars_run_method": fdars_run_method,
         "fdars_compare_run": fdars_compare_run,
+        "fdars_compare_methods": fdars_compare_methods,
+        "fdars_build_pipeline_report": fdars_build_pipeline_report,
+        "fdars_auto_tune": fdars_auto_tune,
         "fdars_list_capabilities": fdars_list_capabilities,
     }
     expected_tool_names = {
         "fdars_build_diagnostics",
         "fdars_run_method",
         "fdars_compare_run",
+        "fdars_compare_methods",
+        "fdars_build_pipeline_report",
+        "fdars_auto_tune",
         "fdars_list_capabilities",
     }
     for name in expected_tool_names:

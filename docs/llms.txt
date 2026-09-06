@@ -155,7 +155,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `clustering.fuzzy_cmeans_fd(data, argvals, k, fuzziness=2.0, max_iter=100, tol=1e-06, seed=42)` — Fuzzy C-means clustering for functional data.
 - `clustering.gmm_cluster(data, argvals, k_range, nbasis=5, max_iter=200, tol=1e-06, seed=42)` — GMM clustering for functional data (via basis projection).
 - `clustering.kcfc_cluster(data, argvals, k=2, ncomp=3, max_iter=50, seed=42)` — K-means with per-cluster FPCA (KCFC) clustering for functional data.
-- `clustering.kmeans_fd(data, argvals, k, max_iter=100, tol=1e-06, seed=42)` — K-means clustering for functional data.
+- `clustering.kmeans_fd(data, argvals, k, max_iter=100, tol=1e-06, seed=42)` — K-means clustering for functional data. When: Use for k-means clustering of functional data; returns cluster labels and centroids.
 - `clustering.silhouette_score(dist_matrix, labels)` — Silhouette score for cluster quality assessment (from distance matrix).
 - `clustering.silhouette_score_data(data, argvals, labels)` — Silhouette score for cluster quality assessment (from data and argvals).
 
@@ -286,14 +286,14 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `fdata.depth_based_median(data)` — Return the depth-based median curve of 1D functional data.
 - `fdata.deriv_1d(data, argvals, nderiv=1)` — Compute numerical derivatives of 1D functional data. When: Use to estimate the first or higher-order derivative of a functional dataset on its evaluation grid.
 - `fdata.deriv_2d(data, argvals_s, argvals_t)` — Compute numerical derivatives of 2D functional data.
-- `fdata.functional_covariance(data)` — Compute the Bessel-corrected m×m covariance surface of 1D functional data.
+- `fdata.functional_covariance(data)` — Compute the Bessel-corrected m×m covariance surface of 1D functional data. When: Use to estimate the cross-sectional covariance surface C(s,t) for a functional dataset.
 - `fdata.functional_std(data)` — Compute the Bessel-corrected pointwise standard deviation of 1D functional data.
 - `fdata.functional_variance(data)` — Compute the Bessel-corrected pointwise variance of 1D functional data.
 - `fdata.geometric_median_1d(data, argvals, max_iter=100, tol=1e-08)` — Compute the geometric (L1) median of 1D functional data.
 - `fdata.geometric_median_2d(data, argvals_s, argvals_t, max_iter=100, tol=1e-08)` — Compute the geometric (L1) median of 2D functional data.
 - `fdata.mean_1d(data)` — Compute the pointwise mean of 1D functional data. When: Use to compute the pointwise cross-sectional mean curve of a functional dataset.
 - `fdata.mean_2d(data)` — Compute the pointwise mean of 2D functional data.
-- `fdata.norm_lp_1d(data, argvals, p=2.0)` — Compute Lp norms of 1D functional data.
+- `fdata.norm_lp_1d(data, argvals, p=2.0)` — Compute Lp norms of 1D functional data. When: Use to compute the L2 (or Lp) norm of each functional observation.
 - `fdata.normalize(data, method='center')` — Normalize functional data.
 - `fdata.normalize_with_argvals(data, argvals, method='center', p=2.0)` — Normalize functional data (with argvals for Lp normalization).
 - `fdata.trim_mean(data, alpha=0.0)` — Compute the depth-trimmed mean of 1D functional data.
@@ -310,7 +310,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `fts.dpca(data, argvals, ncomp=3, bandwidth=None, filter_lag=None)` — Fit Dynamic Functional Principal Components Analysis (DPCA).
 - `fts.dpca_reconstruct(data, argvals, ncomp=3, bandwidth=None, filter_lag=None)` — Fit DPCA and reconstruct the functional time series from dynamic components.
 - `fts.fplsr(data, argvals, ncomp=3)` — Functional Partial Least Squares Regression (fPLSR) one-step-ahead forecast.
-- `fts.ftsm(data, argvals, ncomp=3)` — Fit a Functional Time Series Model (FTSM) via FPCA + Yule-Walker AR fitting.
+- `fts.ftsm(data, argvals, ncomp=3)` — Fit a Functional Time Series Model (FTSM) via FPCA + Yule-Walker AR fitting. When: Use to fit a Functional Time Series Model (FTSM) for forecasting seasonal functional data.
 - `fts.ftsm_forecast(data, argvals, h=1, ncomp=3)` — Fit an FTSM and produce a single- or multi-horizon forecast (single-step variant).
 - `fts.ftsm_forecast_multistep(data, argvals, h=5, ncomp=3)` — Fit an FTSM and produce a multi-step forecast (iterative multi-step variant).
 - `fts.ftsm_update(data, new_curve, argvals, ncomp=3)` — Online update of an FTSM with one or more new curves.
@@ -329,7 +329,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `inference.itp_flm(data, response, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` — Interval-wise testing procedure for the functional linear model.
 - `inference.itp_one_pop(data, argvals, mu0=None, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` — Interval-wise testing procedure for a single functional population.
 - `inference.itp_two_pop(data_a, data_b, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` — Interval-wise testing procedure for two functional populations.
-- `inference.mean_scb(data, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` — Simultaneous confidence band for the mean function (Degras).
+- `inference.mean_scb(data, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` — Simultaneous confidence band for the mean function (Degras). When: Use to construct simultaneous confidence bands for a functional population mean.
 - `inference.oneway_anova_vstat(data, groups, argvals)` — One-way functional ANOVA V-statistic (asymptotic scaled-χ² test).
 - `inference.scb_two_sample_test(data_a, data_b, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` — Two-sample mean-equality test via a simultaneous confidence band for the
 - `inference.t_perm_test(data_a, data_b, argvals, n_perm=999, seed=None)` — Functional two-sample permutation *t*-test.
@@ -444,7 +444,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 ### fdars.scoring (5 functions)
 
 - `scoring.functional_explained_variance(y_true, y_pred, argvals)` — Functional Explained Variance Score integrated over `argvals`.
-- `scoring.functional_mae(y_true, y_pred, argvals)` — Functional Mean Absolute Error integrated over `argvals`.
+- `scoring.functional_mae(y_true, y_pred, argvals)` — Functional Mean Absolute Error integrated over `argvals`. When: Use to evaluate predictive accuracy of a functional regression model via mean absolute error.
 - `scoring.functional_mape(y_true, y_pred, argvals)` — Functional Mean Absolute Percentage Error integrated over `argvals`.
 - `scoring.functional_mse(y_true, y_pred, argvals)` — Functional Mean Squared Error integrated over `argvals`.
 - `scoring.functional_msle(y_true, y_pred, argvals)` — Functional Mean Squared Logarithmic Error integrated over `argvals`.
@@ -488,7 +488,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `simulation.eigenfunctions(argvals, n_basis, efun_type='fourier')` — Compute eigenfunctions.
 - `simulation.eigenvalues(n_basis, eval_type='linear')` — Compute eigenvalues.
 - `simulation.gaussian_process(n, argvals, kernel='gaussian', length_scale=0.2, variance=1.0, seed=None)` — Generate Gaussian process samples.
-- `simulation.sim_kl(n, phi, big_m, lambda_, seed=None)` — Simulate functional data via Karhunen-Loeve expansion (low-level).
+- `simulation.sim_kl(n, phi, big_m, lambda_, seed=None)` — Simulate functional data via Karhunen-Loeve expansion (low-level). When: Use to simulate functional data via the Karhunen-Loeve expansion with given eigencomponents.
 - `simulation.simulate(n, argvals, n_basis=5, efun_type='fourier', eval_type='linear', seed=None)` — Simulate functional data via Karhunen-Loeve expansion.
 
 ### fdars.smoothing (10 functions)

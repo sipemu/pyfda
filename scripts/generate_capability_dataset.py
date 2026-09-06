@@ -173,7 +173,11 @@ def generate_capability_dataset() -> dict:
     ``"module.callable"`` key found in the curation file, the corresponding
     map entry gains a ``"when"`` field.  Introspected ``purpose`` and ``sig``
     are always sourced from live code (never overwritten by curation) so a
-    renamed or removed method still fails the accuracy test.
+    renamed or removed *introspected* method still fails the drift/import
+    accuracy tests.  A curation key whose callable was renamed/removed is
+    silently skipped here (it finds no map entry to annotate); that staleness
+    is caught separately by ``test_capability_curation_keys_resolve`` in
+    ``tests/test_capability_accuracy.py``.
     """
     import fdars  # noqa: PLC0415 — lazy import; not needed for --llmstxt path
 

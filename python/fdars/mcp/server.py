@@ -808,6 +808,8 @@ def fdars_list_capabilities(module: str | None = None) -> dict:
     import json  # noqa: PLC0415
     from importlib import resources  # noqa: PLC0415  # stdlib — no mcp dependency
 
+    from fdars import __version__ as _fdars_version  # noqa: PLC0415  # dynamic — single source, no drift
+
     cap_file = resources.files("fdars") / "_capability_map.json"
     data: dict = json.loads(cap_file.read_text(encoding="utf-8"))
 
@@ -818,7 +820,7 @@ def fdars_list_capabilities(module: str | None = None) -> dict:
 
     return {
         "modules": modules,
-        "version": "0.4.0",  # fdars.__version__ at generate time
+        "version": _fdars_version,
         "module_count": len(modules),
         "callable_count": sum(len(v) for v in modules.values()),
     }

@@ -28,9 +28,7 @@ from __future__ import annotations
 
 import inspect
 import json
-import sys
 from importlib import resources
-from pathlib import Path
 
 import pytest
 
@@ -286,4 +284,30 @@ def test_capability_map_all_importable() -> None:
         f"SKILL-02: {len(missing)} documented callables are not importable:\n"
         + "\n".join(f"  {m}" for m in missing[:20])
         + ("\n  ..." if len(missing) > 20 else "")
+    )
+
+
+def test_capability_curation_keys_resolve() -> None:
+    """WR-01 guard: every _capability_curation.json key maps to a live callable.
+
+    The generator silently skips a curation ``"module.callable"`` key whose
+    callable was renamed or removed (it finds no map entry to annotate), so a
+    stale ``when`` note would otherwise accumulate invisibly.  This test fails
+    when a curation key no longer resolves to an entry in the committed
+    ``_capability_map.json`` — the fix is to update or drop the stale key.
+    """
+    committed = _load_committed()
+    curation_file = resources.files("fdars") / "_capability_curation.json"
+    curation: dict = json.loads(curation_file.read_text(encoding="utf-8"))
+
+    stale: list[str] = []
+    for key in curation:
+        mod_name, _, fn_name = key.partition(".")
+        if not fn_name or fn_name not in committed.get(mod_name, {}):
+            stale.append(key)
+
+    assert not stale, (
+        f"{len(stale)} stale curation key(s) resolve to no callable in the "
+        f"capability map — update or remove them in _capability_curation.json:\n"
+        + "\n".join(f"  {k}" for k in stale)
     )

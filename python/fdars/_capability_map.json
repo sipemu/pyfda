@@ -534,7 +534,8 @@
     },
     "kmeans_fd": {
       "purpose": "K-means clustering for functional data.",
-      "sig": "(data, argvals, k, max_iter=100, tol=1e-06, seed=42)"
+      "sig": "(data, argvals, k, max_iter=100, tol=1e-06, seed=42)",
+      "when": "Use for k-means clustering of functional data; returns cluster labels and centroids."
     },
     "silhouette_score": {
       "purpose": "Silhouette score for cluster quality assessment (from distance matrix).",
@@ -982,7 +983,8 @@
     },
     "functional_covariance": {
       "purpose": "Compute the Bessel-corrected m×m covariance surface of 1D functional data.",
-      "sig": "(data)"
+      "sig": "(data)",
+      "when": "Use to estimate the cross-sectional covariance surface C(s,t) for a functional dataset."
     },
     "functional_std": {
       "purpose": "Compute the Bessel-corrected pointwise standard deviation of 1D functional data.",
@@ -1011,7 +1013,8 @@
     },
     "norm_lp_1d": {
       "purpose": "Compute Lp norms of 1D functional data.",
-      "sig": "(data, argvals, p=2.0)"
+      "sig": "(data, argvals, p=2.0)",
+      "when": "Use to compute the L2 (or Lp) norm of each functional observation."
     },
     "normalize": {
       "purpose": "Normalize functional data.",
@@ -1060,7 +1063,8 @@
     },
     "ftsm": {
       "purpose": "Fit a Functional Time Series Model (FTSM) via FPCA + Yule-Walker AR fitting.",
-      "sig": "(data, argvals, ncomp=3)"
+      "sig": "(data, argvals, ncomp=3)",
+      "when": "Use to fit a Functional Time Series Model (FTSM) for forecasting seasonal functional data."
     },
     "ftsm_forecast": {
       "purpose": "Fit an FTSM and produce a single- or multi-horizon forecast (single-step variant).",
@@ -1128,7 +1132,8 @@
     },
     "mean_scb": {
       "purpose": "Simultaneous confidence band for the mean function (Degras).",
-      "sig": "(data, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')"
+      "sig": "(data, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')",
+      "when": "Use to construct simultaneous confidence bands for a functional population mean."
     },
     "oneway_anova_vstat": {
       "purpose": "One-way functional ANOVA V-statistic (asymptotic scaled-χ² test).",
@@ -1500,7 +1505,8 @@
     },
     "functional_mae": {
       "purpose": "Functional Mean Absolute Error integrated over `argvals`.",
-      "sig": "(y_true, y_pred, argvals)"
+      "sig": "(y_true, y_pred, argvals)",
+      "when": "Use to evaluate predictive accuracy of a functional regression model via mean absolute error."
     },
     "functional_mape": {
       "purpose": "Functional Mean Absolute Percentage Error integrated over `argvals`.",
@@ -1646,7 +1652,8 @@
     },
     "sim_kl": {
       "purpose": "Simulate functional data via Karhunen-Loeve expansion (low-level).",
-      "sig": "(n, phi, big_m, lambda_, seed=None)"
+      "sig": "(n, phi, big_m, lambda_, seed=None)",
+      "when": "Use to simulate functional data via the Karhunen-Loeve expansion with given eigencomponents."
     },
     "simulate": {
       "purpose": "Simulate functional data via Karhunen-Loeve expansion.",
