@@ -321,11 +321,11 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
   4. Advisor/MCP tests (including guard-sync) are green after the SKILL-04 tool lands — grounding invariant + MCP LLM-free boundary preserved.
   5. Any package-version tick is committed; any irreversible publish (tag/PyPI) stays human-gated and is handed off, not executed autonomously.
 
-**Plans**: 2/5 plans executed
+**Plans**: 3/5 plans executed
 
 - [x] 79-01-PLAN.md — GATE-02: SVGO two-pass idempotence across the 21 Phase-77 thumbnails + concept diagrams (wave 1)
 - [x] 79-02-PLAN.md — GATE-04: 5 advisor/MCP test files green — grounding invariant + MCP LLM-free boundary (wave 1)
-- [ ] 79-03-PLAN.md — GATE-01 + DEPTH-03: whole-site `mkdocs build --strict` offline + check_docs_figures sweep (wave 2)
+- [x] 79-03-PLAN.md — GATE-01 + DEPTH-03: whole-site `mkdocs build --strict` offline + check_docs_figures sweep (wave 2)
 - [ ] 79-04-PLAN.md — GATE-03: BLOCKING human diagram/method-accuracy review of 21 thumbnails + IN-02/IN-03 (wave 3, autonomous:false)
 - [ ] 79-05-PLAN.md — Version tick to 0.11.0 (reversible) + post-bump GATE-04 confirm + RELEASE-HANDOFF.md (publish stays human-gated) (wave 4)
 
@@ -342,7 +342,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 | 76. Flagship End-to-End Example Pages | v12.0 | 3/3 | Complete    | 2026-09-06 |
 | 77. Section-Landing Card Coverage | v12.0 | 5/5 | Complete    | 2026-09-06 |
 | 78. AI Capability-Discovery Skill | v12.0 | 4/4 | Complete    | 2026-09-06 |
-| 79. Close Gate — Strict Build, SVGO/Determinism, Human Review & Release | v12.0 | 2/5 | In Progress|  |
+| 79. Close Gate — Strict Build, SVGO/Determinism, Human Review & Release | v12.0 | 3/5 | In Progress|  |
 
 ---
 
