@@ -166,6 +166,7 @@ nav:
     - Per-Aspect Coverage: advisor/aspects.md
     - MCP Server: advisor/mcp.md
     - Agent Skill: advisor/agent-skill.md
+  - AI Capability Map: ai-capability-map.md
   - scikit-learn API:
     - sklearn/index.md
     - Transformers: sklearn/transformers.md
