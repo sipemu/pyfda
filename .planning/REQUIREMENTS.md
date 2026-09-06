@@ -39,7 +39,7 @@ Complete section-landing card coverage across the focus sections. Each missing c
 Give AI agents a way to discover the full fdars capability surface, across all three surfaces the user selected. Distinct from — and non-duplicating — the existing narrow `fdars-advisor` skill/MCP.
 
 - [ ] **SKILL-01**: A standalone capability-discovery Agent Skill with a spec-valid `SKILL.md` mapping the whole fdars surface — every public submodule, what each method does, when to reach for it, and how to call it (signature + minimal usage).
-- [ ] **SKILL-02**: The skill's capability map is verified accurate against the live package by an automated test/harness (documented methods exist and are importable; no stale/renamed entries).
+- [x] **SKILL-02**: The skill's capability map is verified accurate against the live package by an automated test/harness (documented methods exist and are importable; no stale/renamed entries).
 - [ ] **SKILL-03**: An LLM-oriented docs page (llms.txt-style API digest of the whole library) authored/generated and wired into the site for agents to read.
 - [ ] **SKILL-04**: An MCP capability tool (e.g. `fdars_list_capabilities` / describe) added to the existing server, returning the capability surface; the MCP compute boundary stays provably LLM-free and the guard/tests are updated to cover it.
 
@@ -86,7 +86,7 @@ Deferred; tracked but not in this roadmap.
 | CARD-05 | Phase 77 | Complete |
 | CARD-06 | Phase 77 | Complete |
 | SKILL-01 | Phase 78 | Pending |
-| SKILL-02 | Phase 78 | Pending |
+| SKILL-02 | Phase 78 | Complete |
 | SKILL-03 | Phase 78 | Pending |
 | SKILL-04 | Phase 78 | Pending |
 | GATE-01 | Phase 79 | Pending |

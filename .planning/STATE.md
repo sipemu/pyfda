@@ -4,17 +4,17 @@ milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 78
 current_phase_name: AI Capability-Discovery Skill
-status: planning
-stopped_at: Phase 77 complete, ready to plan Phase 78
-last_updated: "2026-09-05T23:26:22.786Z"
+status: executing
+stopped_at: Completed 78-01-PLAN.md
+last_updated: "2026-09-06T19:11:35.357Z"
 last_activity: 2026-09-06
-last_activity_desc: Phase 77 complete, transitioned to Phase 78
-state_head: ad8c4b4321f99f9b04674ae55f607626c2fc103c
+last_activity_desc: Phase 78 execution started
+state_head: fdc5c0bc5722a73b4854dec63cebc86520eef569
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 18
-  completed_plans: 18
+  total_plans: 22
+  completed_plans: 19
   percent: 67
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-05)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 77 — Section-Landing Card Coverage
+**Current focus:** Phase 78 — AI Capability-Discovery Skill
 
 ## Current Position
 
-Phase: 78 — AI Capability-Discovery Skill
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-06 — Phase 77 complete, transitioned to Phase 78
+Phase: 78 (AI Capability-Discovery Skill) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-09-06 — Phase 78 execution started
 
 ## Performance Metrics
 
@@ -81,6 +81,7 @@ Last activity: 2026-09-06 — Phase 77 complete, transitioned to Phase 78
 | Phase 77 P03 | 2 | 1 tasks | 6 files |
 | Phase 77 P04 | 20 | 1 tasks | 9 files |
 | Phase 77-section-landing-card-coverage P05 | 4 | 1 tasks | 4 files |
+| Phase 78 P01 | 315 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -124,6 +125,7 @@ Recent decisions affecting current work:
 - [Phase 77]: functional-boxplot: solid fill-opacity paths instead of linearGradient to stay under 1300 byte limit
 - [Phase 77]: No ex- prefix on 3 new example thumbnails — verified against mkdocs.yml nav slugs
 - [Phase 77]: Used fill-opacity instead of linearGradient in tolerance-vs-conformal.svg to stay under 1300-byte limit
+- [Phase 78]: _Fdata entry in capability map uses __init__ key + sorted public methods on fdars.Fdata class; no-drift test strips when curation fields to avoid spurious failures
 
 ### Pending Todos
 
@@ -164,8 +166,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T23:09:51.336Z
-Stopped at: Phase 77 complete, ready to plan Phase 78
+Last session: 2026-09-06T19:11:28.571Z
+Stopped at: Completed 78-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
