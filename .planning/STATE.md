@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 79
-current_phase_name: Close Gate — Strict Build, SVGO/Determinism, Human Review & Release
-status: planning
-stopped_at: Phase 78 complete, ready to plan Phase 79
-last_updated: "2026-09-06T19:54:47.055Z"
+current_phase_name: Close Gate
+status: executing
+stopped_at: Completed 79-01-PLAN.md (GATE-02 SVGO idempotence)
+last_updated: "2026-09-06T20:38:13.963Z"
 last_activity: 2026-09-06
-last_activity_desc: Phase 78 complete, transitioned to Phase 79
-state_head: 9bd2ea71e5d2688dd1172df4f0f81c44d4c47158
+last_activity_desc: Phase 79 execution started
+state_head: 9fb76febf2e1dbabc40b6889f6b0e253e94816f4
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 22
-  completed_plans: 22
+  total_plans: 27
+  completed_plans: 23
   percent: 83
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-05)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 78 — AI Capability-Discovery Skill
+**Current focus:** Phase 79 — Close Gate
 
 ## Current Position
 
-Phase: 79 — Close Gate — Strict Build, SVGO/Determinism, Human Review & Release
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-06 — Phase 78 complete, transitioned to Phase 79
+Phase: 79 (Close Gate) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-09-06 — Phase 79 execution started
 
 ## Performance Metrics
 
@@ -85,6 +85,7 @@ Last activity: 2026-09-06 — Phase 78 complete, transitioned to Phase 79
 | Phase 78 P02 | 150 | 2 tasks | 1 files |
 | Phase 78 P03 | 5min | 2 tasks | 4 files |
 | Phase 78-ai-capability-discovery-skill P04 | 5 | 3 tasks | 3 files |
+| Phase 79-close-gate P01 | 7 | 1 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -134,6 +135,7 @@ Recent decisions affecting current work:
 - [Phase 78]: AI Capability Map placed as top-level nav entry adjacent to AI Advisor; llms.txt gets no nav entry (static passthrough only)
 - [Phase 78]: fdars_list_capabilities is LLM-free: loads committed JSON via importlib.resources, no model call, no provider/model keys in return, frozenset allowlist enforced before load (T-78-08)
 - [Phase 78]: GATE-04 three-way literal mirror: server._CAPABILITY_MODULES == JSON submodule keys == test _EXPECTED_CAPABILITY_MODULES, enforced by Py3.9-safe primary guard-sync test
+- [Phase 79]: GATE-02 PASS: 0/21 thumbnails unstable, 0/101 diagrams unstable under npx svgo@3.3.4 two-pass idempotence check
 
 ### Pending Todos
 
@@ -174,8 +176,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-06T19:32:17.804Z
-Stopped at: Phase 78 complete, ready to plan Phase 79
+Last session: 2026-09-06T20:38:13.818Z
+Stopped at: Completed 79-01-PLAN.md (GATE-02 SVGO idempotence)
 Resume file: None
 
 ## Operator Next Steps
