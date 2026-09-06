@@ -1,0 +1,1812 @@
+{
+  "_Fdata": {
+    "__init__": {
+      "purpose": "Functional data object for 1-D curves or 2-D surfaces.",
+      "sig": "(self, data, argvals=None, rangeval=None, names: 'Optional[Dict[str, str]]' = None, id: 'Optional[Sequence[str]]' = None, metadata=None)"
+    },
+    "center": {
+      "purpose": "Subtract the pointwise mean (centering).",
+      "sig": "(self) -> \"'Fdata'\""
+    },
+    "concat": {
+      "purpose": "Row-bind another :class:`Fdata` onto this one (append observations).",
+      "sig": "(self, other: \"'Fdata'\") -> \"'Fdata'\""
+    },
+    "copy": {
+      "purpose": "Return a deep copy.",
+      "sig": "(self) -> \"'Fdata'\""
+    },
+    "cov": {
+      "purpose": "Bessel-corrected m×m pointwise covariance surface.",
+      "sig": "(self) -> 'np.ndarray'"
+    },
+    "depth": {
+      "purpose": "Compute depth values for each observation.",
+      "sig": "(self, method: 'str' = 'fraiman_muniz', ref: \"Optional['Fdata']\" = None, **kwargs) -> 'np.ndarray'"
+    },
+    "deriv": {
+      "purpose": "Compute numerical derivatives.",
+      "sig": "(self, nderiv: 'int' = 1)"
+    },
+    "distance": {
+      "purpose": "Compute a distance matrix.",
+      "sig": "(self, other: \"Optional['Fdata']\" = None, method: 'str' = 'lp', **kwargs) -> 'np.ndarray'"
+    },
+    "downsample": {
+      "purpose": "Downsample this functional data to a coarser uniform grid.",
+      "sig": "(self, factor: 'float', policy: 'str' = 'boundary', **kwargs) -> \"'Fdata'\""
+    },
+    "from_basis": {
+      "purpose": "Reconstruct an :class:`Fdata` from a :meth:`to_basis` result.",
+      "sig": "(self, basis_repr: 'Dict[str, Any]') -> \"'Fdata'\""
+    },
+    "geometric_median": {
+      "purpose": "Compute the geometric (L1) median curve or surface.",
+      "sig": "(self, max_iter: 'int' = 100, tol: 'float' = 1e-08) -> 'np.ndarray'"
+    },
+    "impute": {
+      "purpose": "Impute NaN values in this functional data object.",
+      "sig": "(self, method: 'str' = 'linear', constant_value: 'float' = 0.0) -> \"'Fdata'\""
+    },
+    "int_simpson": {
+      "purpose": "Integrate each curve over its domain using Simpson's rule.",
+      "sig": "(self) -> 'np.ndarray'"
+    },
+    "interpolate": {
+      "purpose": "Interpolate this functional data object onto a new evaluation grid.",
+      "sig": "(self, query_points, policy: 'str' = 'exception', fill_value: 'float' = 0.0, order: 'int' = 4) -> \"'Fdata'\""
+    },
+    "mean": {
+      "purpose": "Pointwise mean across observations.",
+      "sig": "(self) -> 'np.ndarray'"
+    },
+    "median": {
+      "purpose": "Return the depth-based median curve as a single-observation Fdata.",
+      "sig": "(self) -> \"'Fdata'\""
+    },
+    "norm": {
+      "purpose": "Compute Lp norms.",
+      "sig": "(self, p: 'float' = 2.0) -> 'np.ndarray'"
+    },
+    "normalize": {
+      "purpose": "Normalize functional data.",
+      "sig": "(self, method: 'str' = 'center') -> \"'Fdata'\""
+    },
+    "resample": {
+      "purpose": "Resample this functional data onto a uniform grid.",
+      "sig": "(self, n_points: 'Optional[int]' = None, factor: 'Optional[float]' = None, policy: 'str' = 'boundary', **kwargs) -> \"'Fdata'\""
+    },
+    "scale_minmax": {
+      "purpose": "Rescale every curve to the range ``[lo, hi]`` (per observation).",
+      "sig": "(self, lo: 'float' = 0.0, hi: 'float' = 1.0) -> \"'Fdata'\""
+    },
+    "shift_register": {
+      "purpose": "Register curves by a per-curve rigid horizontal shift (least-squares).",
+      "sig": "(self, max_shift: 'float') -> \"tuple['Fdata', np.ndarray]\""
+    },
+    "stack": {
+      "purpose": "Row-bind a sequence of :class:`Fdata` objects into one.",
+      "sig": "(items: \"Sequence['Fdata']\") -> \"'Fdata'\""
+    },
+    "std": {
+      "purpose": "Bessel-corrected pointwise standard deviation across observations.",
+      "sig": "(self) -> 'np.ndarray'"
+    },
+    "summary": {
+      "purpose": "Print a detailed summary (mirrors R's ``summary.fdata``).",
+      "sig": "(self) -> 'None'"
+    },
+    "to_basis": {
+      "purpose": "Project onto a B-spline or Fourier basis (1-D only).",
+      "sig": "(self, n_basis: 'int', basis_type: 'str' = 'bspline')"
+    },
+    "to_pc": {
+      "purpose": "Functional PCA representation of the curves (1-D only).",
+      "sig": "(self, n_comp: 'int' = 3)"
+    },
+    "upsample": {
+      "purpose": "Upsample this functional data to a denser uniform grid.",
+      "sig": "(self, factor: 'float', policy: 'str' = 'boundary', **kwargs) -> \"'Fdata'\""
+    },
+    "var": {
+      "purpose": "Bessel-corrected pointwise variance across observations.",
+      "sig": "(self) -> 'np.ndarray'"
+    }
+  },
+  "alignment": {
+    "align_to_target": {
+      "purpose": "Align all curves to a single target curve.",
+      "sig": "(data, target, argvals, lambda_=0.0)"
+    },
+    "alignment_quality": {
+      "purpose": "Comprehensive alignment quality metrics.",
+      "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)"
+    },
+    "amplitude_distance": {
+      "purpose": "Amplitude distance between two curves.",
+      "sig": "(curve1, curve2, argvals, lambda_=0.0)"
+    },
+    "amplitude_self_distance_matrix": {
+      "purpose": "Amplitude self distance matrix (same as elastic self distance matrix).",
+      "sig": "(data, argvals, lambda_=0.0)"
+    },
+    "bayesian_align_pair": {
+      "purpose": "Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere.",
+      "sig": "(f1, f2, argvals, n_samples=1000, burn_in=200, step_size=0.1, proposal_variance=1.0, seed=42)"
+    },
+    "compose_warps": {
+      "purpose": "Compose two warping functions.",
+      "sig": "(warp1, warp2, argvals)"
+    },
+    "curve_geodesic": {
+      "purpose": "Compute the geodesic path between two 1-D curves in the elastic metric.",
+      "sig": "(f1, f2, argvals, n_points=10, lambda_=0.0)"
+    },
+    "detect_landmarks": {
+      "purpose": "Detect landmarks (peaks, valleys, zero-crossings, inflections) in a curve.",
+      "sig": "(curve, argvals, kind='peak', min_prominence=0.0)"
+    },
+    "diagnose_alignment": {
+      "purpose": "Diagnose alignment quality for every curve after Karcher mean computation.",
+      "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001, over_alignment_threshold=1.0, under_alignment_threshold=1e-06, max_bending_energy=100.0, min_improvement_ratio=0.5)"
+    },
+    "elastic_align_pair": {
+      "purpose": "Pairwise elastic alignment of two curves.",
+      "sig": "(curve1, curve2, argvals, lambda_=0.0)"
+    },
+    "elastic_align_pair_closed": {
+      "purpose": "Align closed (periodic) curve f2 to f1 with rotation search.",
+      "sig": "(f1, f2, argvals, lambda_=0.0)"
+    },
+    "elastic_align_pair_constrained": {
+      "purpose": "Landmark-constrained elastic alignment.",
+      "sig": "(f1, f2, argvals, landmark_targets, landmark_sources, lambda_=0.0)"
+    },
+    "elastic_align_pair_multires": {
+      "purpose": "Multi-resolution elastic alignment (coarse DP + gradient refinement).",
+      "sig": "(f1, f2, argvals, coarsen_factor=4, n_refine_steps=10, step_size=0.01, lambda_=0.0)"
+    },
+    "elastic_align_pair_penalized": {
+      "purpose": "Elastic alignment with configurable penalty type.",
+      "sig": "(curve1, curve2, argvals, lambda_=0.0, penalty_type='first_order', second_order_weight=0.1)"
+    },
+    "elastic_changepoint": {
+      "purpose": "Detect a distributional changepoint in a sequence of curves (elastic).",
+      "sig": "(data, argvals, kind='amplitude', lam=0.0, max_iter=30, n_mc=200, seed=42, ncomp=5, pca_method='joint')"
+    },
+    "elastic_cross_distance_matrix": {
+      "purpose": "Elastic cross distance matrix.",
+      "sig": "(data1, data2, argvals, lambda_=0.0)"
+    },
+    "elastic_cross_distance_matrix_with_band": {
+      "purpose": "Elastic cross-distance matrix with optional Sakoe–Chiba band.",
+      "sig": "(data1, data2, argvals, lambda_=0.0, band_frac=None)"
+    },
+    "elastic_decomposition": {
+      "purpose": "Elastic phase-amplitude decomposition of two curves.",
+      "sig": "(f1, f2, argvals, lambda_=0.0)"
+    },
+    "elastic_depth": {
+      "purpose": "Elastic depth (depth under elastic metric).",
+      "sig": "(data, argvals, lambda_=0.0)"
+    },
+    "elastic_distance": {
+      "purpose": "Elastic (Fisher-Rao) distance between two curves.",
+      "sig": "(curve1, curve2, argvals, lambda_=0.0)"
+    },
+    "elastic_distance_closed": {
+      "purpose": "Elastic distance between two closed curves.",
+      "sig": "(f1, f2, argvals, lambda_=0.0)"
+    },
+    "elastic_logistic": {
+      "purpose": "Elastic logistic regression.",
+      "sig": "(data, argvals, labels, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)"
+    },
+    "elastic_outlier_detection": {
+      "purpose": "Elastic outlier detection using distances and Tukey fence.",
+      "sig": "(data, argvals, lambda_=0.0, alpha=0.05, use_median=True)"
+    },
+    "elastic_partial_match": {
+      "purpose": "Elastic partial matching: find best-aligned subcurve of a longer curve.",
+      "sig": "(template, target, argvals_template, argvals_target, lambda_=0.0, min_span=0.5)"
+    },
+    "elastic_regression": {
+      "purpose": "Elastic scalar-on-function regression.",
+      "sig": "(data, argvals, response, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)"
+    },
+    "elastic_self_distance_matrix": {
+      "purpose": "Elastic self distance matrix.",
+      "sig": "(data, argvals, lambda_=0.0)"
+    },
+    "elastic_self_distance_matrix_with_band": {
+      "purpose": "Elastic self-distance matrix with optional Sakoe–Chiba band.",
+      "sig": "(data, argvals, lambda_=0.0, band_frac=None)"
+    },
+    "gauss_model": {
+      "purpose": "Generate random curves from a fitted Gaussian model on aligned data.",
+      "sig": "(data, argvals, ncomp=3, n_samples=100, lambda_=0.0, max_iter=20, tol=0.0001, seed=42)"
+    },
+    "hierarchical_cut": {
+      "purpose": "Hierarchical clustering then cut to produce k clusters (convenience function).",
+      "sig": "(dist_mat, k=2, linkage='single')"
+    },
+    "hierarchical_from_distances": {
+      "purpose": "Hierarchical agglomerative clustering from a precomputed distance matrix.",
+      "sig": "(dist_mat, linkage='single')"
+    },
+    "horiz_fpca": {
+      "purpose": "Horizontal (phase) FPCA.",
+      "sig": "(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)"
+    },
+    "horiz_fpns": {
+      "purpose": "Horizontal Functional Principal Nested Spheres (FPNS) analysis.",
+      "sig": "(data, argvals, ncomp=3, lambda_=0.0, max_iter=20, tol=0.0001)"
+    },
+    "invert_warp": {
+      "purpose": "Invert a warping function.",
+      "sig": "(warp, argvals)"
+    },
+    "joint_fpca": {
+      "purpose": "Joint (amplitude + phase) FPCA.",
+      "sig": "(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)"
+    },
+    "joint_gauss_model": {
+      "purpose": "Generate random curves from a joint Gaussian model preserving amplitude-phase correlation.",
+      "sig": "(data, argvals, ncomp=3, n_samples=100, balance_c=1.0, lambda_=0.0, max_iter=20, tol=0.0001, seed=42)"
+    },
+    "karcher_mean": {
+      "purpose": "Karcher (Frechet) mean under the elastic metric.",
+      "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)"
+    },
+    "karcher_mean_closed": {
+      "purpose": "Karcher mean for closed (periodic) curves.",
+      "sig": "(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0)"
+    },
+    "karcher_mean_with_band": {
+      "purpose": "Karcher (Fréchet) mean under the elastic metric with optional Sakoe–Chiba band.",
+      "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001, band_frac=None)"
+    },
+    "karcher_median": {
+      "purpose": "Karcher median under the elastic metric.",
+      "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.001)"
+    },
+    "kmedoids_from_distances": {
+      "purpose": "K-medoids clustering from a precomputed distance matrix.",
+      "sig": "(dist_mat, k=2, max_iter=100, seed=42)"
+    },
+    "lambda_cv": {
+      "purpose": "Cross-validation for the elastic alignment regularisation parameter lambda.",
+      "sig": "(data, argvals, lambdas=None, n_folds=5, max_iter=15, tol=0.001, seed=42)"
+    },
+    "landmark_detect_and_register": {
+      "purpose": "Detect landmarks and register in one call.",
+      "sig": "(data, argvals, kind='peak', min_prominence=0.0, expected_count=0)"
+    },
+    "landmark_register": {
+      "purpose": "Register curves to common landmark positions.",
+      "sig": "(data, argvals, landmarks, target=None)"
+    },
+    "least_squares_score": {
+      "purpose": "Least-squares registration score: mean Simpson-weighted L2 spread of the",
+      "sig": "(registered, argvals)"
+    },
+    "least_squares_shift_registration": {
+      "purpose": "Register curves by a per-curve rigid horizontal shift (least-squares).",
+      "sig": "(data, argvals, max_shift)"
+    },
+    "pairwise_consistency": {
+      "purpose": "Pairwise alignment consistency via triplet checks.",
+      "sig": "(data, argvals, lambda_=0.0, max_triplets=0)"
+    },
+    "pairwise_correlation_score": {
+      "purpose": "Pairwise correlation registration score: mean functional Pearson correlation",
+      "sig": "(registered, argvals)"
+    },
+    "peak_persistence": {
+      "purpose": "Peak persistence diagram for choosing the alignment regularisation parameter.",
+      "sig": "(data, argvals, lambdas, max_iter=10, tol=0.001)"
+    },
+    "phase_boxplot": {
+      "purpose": "Phase (warping) box plot for functional data.",
+      "sig": "(gammas, argvals, factor=1.5)"
+    },
+    "phase_distance": {
+      "purpose": "Phase distance between two curves.",
+      "sig": "(curve1, curve2, argvals, lambda_=0.0)"
+    },
+    "phase_self_distance_matrix": {
+      "purpose": "Phase self distance matrix.",
+      "sig": "(data, argvals, lambda_=0.0)"
+    },
+    "reparameterize_curve": {
+      "purpose": "Apply a warping function to a curve (reparameterize).",
+      "sig": "(curve, argvals, gamma)"
+    },
+    "robust_karcher_mean": {
+      "purpose": "Robust Karcher mean (trimmed).",
+      "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.001, trim_fraction=0.1)"
+    },
+    "shape_confidence_interval": {
+      "purpose": "Bootstrap confidence intervals for the elastic Karcher mean.",
+      "sig": "(data, argvals, n_bootstrap=200, confidence_level=0.95, lambda_=0.0, max_iter=15, tol=0.001, seed=42)"
+    },
+    "shape_distance": {
+      "purpose": "Shape distance (quotient space distance).",
+      "sig": "(curve1, curve2, argvals, lambda_=0.0)"
+    },
+    "shape_mean": {
+      "purpose": "Shape mean of a set of curves.",
+      "sig": "(data, argvals, quotient='reparameterization', lambda_=0.0, max_iter=20, tol=0.0001)"
+    },
+    "shape_self_distance_matrix": {
+      "purpose": "Pairwise shape distance matrix.",
+      "sig": "(data, argvals, quotient='reparameterization', lambda_=0.0)"
+    },
+    "sobolev_least_squares_score": {
+      "purpose": "Sobolev least-squares registration score: LS spread plus a derivative-penalty",
+      "sig": "(registered, argvals, lambda_=0.0)"
+    },
+    "srsf_inverse": {
+      "purpose": "Inverse SRSF transform.",
+      "sig": "(srsf, argvals, initial_value=0.0)"
+    },
+    "srsf_transform": {
+      "purpose": "SRSF (Square Root Slope Function) transform.",
+      "sig": "(curve, argvals)"
+    },
+    "transfer_alignment": {
+      "purpose": "Align curves from a target population to a source population's coordinate system.",
+      "sig": "(source_data, target_data, argvals, lambda_=0.0, max_iter=15, tol=0.001)"
+    },
+    "tsrvf_transform": {
+      "purpose": "TSRVF (Transported SRSF) transform.",
+      "sig": "(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0)"
+    },
+    "tsrvf_transform_with_method": {
+      "purpose": "TSRVF transform with configurable transport method.",
+      "sig": "(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0, method='log_map')"
+    },
+    "vert_fpca": {
+      "purpose": "Vertical (amplitude) FPCA on aligned data.",
+      "sig": "(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)"
+    },
+    "warp_complexity": {
+      "purpose": "Warp complexity (geodesic distance from identity).",
+      "sig": "(warp, argvals)"
+    },
+    "warp_inverse_error": {
+      "purpose": "Compute the L2 error of a warp inverse: ||gamma(gamma_inv(t)) - t||.",
+      "sig": "(warp, argvals)"
+    },
+    "warp_smoothness": {
+      "purpose": "Warp smoothness (bending energy).",
+      "sig": "(warp, argvals)"
+    },
+    "warp_statistics": {
+      "purpose": "Warp statistics: mean, variance, confidence bands, Karcher mean warp.",
+      "sig": "(gammas, argvals, confidence_level=0.95)"
+    }
+  },
+  "basis": {
+    "basis_nbasis_cv": {
+      "purpose": "Cross-validated selection of number of basis functions.",
+      "sig": "(data, argvals, nbasis_min=4, nbasis_max=20, basis_type='bspline', criterion='gcv', n_folds=5, lambda_=0.0)"
+    },
+    "basis_to_fdata_1d": {
+      "purpose": "Reconstruct functional data from basis coefficients.",
+      "sig": "(coefficients, argvals, n_basis, basis_type='bspline')"
+    },
+    "bspline_basis": {
+      "purpose": "Evaluate a B-spline basis at given points.",
+      "sig": "(argvals, nknots, order=4)"
+    },
+    "bspline_basis_from_knots": {
+      "purpose": "Evaluate a B-spline basis from a given knot vector.",
+      "sig": "(argvals, knots, order=4)"
+    },
+    "constant_basis": {
+      "purpose": "Evaluate the constant (intercept) basis on a grid of evaluation points.",
+      "sig": "(argvals)"
+    },
+    "construct_bspline_knots": {
+      "purpose": "Construct B-spline knot vector.",
+      "sig": "(t_min, t_max, nknots, order=4)"
+    },
+    "fdata_to_basis_1d": {
+      "purpose": "Project functional data onto a B-spline or Fourier basis.",
+      "sig": "(data, argvals, n_basis, basis_type='bspline')"
+    },
+    "fourier_basis": {
+      "purpose": "Evaluate a Fourier basis at given points.",
+      "sig": "(argvals, n_basis)"
+    },
+    "fourier_basis_with_period": {
+      "purpose": "Evaluate a Fourier basis with specified period at given points.",
+      "sig": "(argvals, n_basis, period)"
+    },
+    "fourier_fit_1d": {
+      "purpose": "Fit Fourier basis to functional data using least squares.",
+      "sig": "(data, argvals, nbasis)"
+    },
+    "pspline_fit_1d": {
+      "purpose": "Fit P-splines to 1D functional data.",
+      "sig": "(data, argvals, n_basis, lambda_, order=2)"
+    },
+    "pspline_fit_gcv": {
+      "purpose": "P-spline fit with GCV-selected smoothing parameter.",
+      "sig": "(data, argvals, n_basis, order=2)"
+    },
+    "select_basis_auto_1d": {
+      "purpose": "Automatic basis selection (GCV/AIC/BIC) for 1D data.",
+      "sig": "(data, argvals, criterion='gcv', nbasis_min=0, nbasis_max=0, lambda_pspline=Ellipsis, use_seasonal_hint=True)"
+    },
+    "select_fourier_nbasis_gcv": {
+      "purpose": "Select optimal number of Fourier basis functions via GCV.",
+      "sig": "(data, argvals, min_nbasis, max_nbasis)"
+    },
+    "smooth_basis_aic": {
+      "purpose": "Smooth functional data using basis expansion with AIC-optimal lambda.",
+      "sig": "(data, argvals, n_basis, basis_type='bspline', lfd_order=2, log_lambda_min=Ellipsis, log_lambda_max=4.0, n_grid=25)"
+    },
+    "smooth_basis_gcv": {
+      "purpose": "Smooth functional data using basis expansion with GCV.",
+      "sig": "(data, argvals, n_basis, basis_type='bspline', lfd_order=2, log_lambda_min=Ellipsis, log_lambda_max=4.0, n_grid=25)"
+    }
+  },
+  "classification": {
+    "elastic_multinomial": {
+      "purpose": "K-class elastic multinomial classifier for functional data (one-vs-rest).",
+      "sig": "(data, labels, argvals, ncomp_beta=10, lambda_=0.1, max_iter=100, tol=0.0001)"
+    },
+    "fclassif_cv": {
+      "purpose": "Cross-validated classification.",
+      "sig": "(data, argvals, labels, method='lda', ncomp=3, nfold=5)"
+    },
+    "fclassif_dd": {
+      "purpose": "Depth-based DD-classifier for functional data.",
+      "sig": "(data, labels)"
+    },
+    "fclassif_kernel": {
+      "purpose": "Kernel classification for functional data.",
+      "sig": "(data, argvals, labels, h_func=1.0, h_scalar=1.0)"
+    },
+    "fclassif_knn": {
+      "purpose": "k-NN classification for functional data.",
+      "sig": "(data, labels, ncomp=3, k=5)"
+    },
+    "fclassif_lda": {
+      "purpose": "LDA classification for functional data via FPC scores.",
+      "sig": "(data, labels, ncomp=3)"
+    },
+    "fclassif_qda": {
+      "purpose": "QDA classification for functional data.",
+      "sig": "(data, labels, ncomp=3)"
+    },
+    "kernel_classify_from_distances": {
+      "purpose": "Kernel classification from a precomputed functional distance matrix.",
+      "sig": "(func_dists, labels, h_func=1.0, h_scalar=1.0)"
+    },
+    "knn_classify_from_distances": {
+      "purpose": "k-NN classification from a precomputed distance matrix.",
+      "sig": "(dist_matrix, labels, k=5)"
+    }
+  },
+  "clustering": {
+    "align_cluster_fd": {
+      "purpose": "Elastic-alignment functional clustering.",
+      "sig": "(data, argvals, k=2, max_iter=20, seed=42, use_amplitude_only=True, elastic_lambda=0.0, karcher_max_iter=15, karcher_tol=0.0001)"
+    },
+    "calinski_harabasz": {
+      "purpose": "Calinski-Harabasz index for cluster quality (from distance matrix).",
+      "sig": "(dist_matrix, labels)"
+    },
+    "calinski_harabasz_data": {
+      "purpose": "Calinski-Harabasz index for cluster quality (from data and argvals).",
+      "sig": "(data, argvals, labels)"
+    },
+    "dbscan_fd": {
+      "purpose": "Density-based spatial clustering of functional data (DBSCAN).",
+      "sig": "(data, argvals, eps=0.5, min_points=3)"
+    },
+    "funfem_cluster": {
+      "purpose": "Fisher-EM discriminative functional clustering (FunFEM).",
+      "sig": "(data, argvals, k=2, ncomp=10, p_disc=0, max_iter=50, tol=1e-06, seed=42)"
+    },
+    "fuzzy_cmeans_fd": {
+      "purpose": "Fuzzy C-means clustering for functional data.",
+      "sig": "(data, argvals, k, fuzziness=2.0, max_iter=100, tol=1e-06, seed=42)"
+    },
+    "gmm_cluster": {
+      "purpose": "GMM clustering for functional data (via basis projection).",
+      "sig": "(data, argvals, k_range, nbasis=5, max_iter=200, tol=1e-06, seed=42)"
+    },
+    "kcfc_cluster": {
+      "purpose": "K-means with per-cluster FPCA (KCFC) clustering for functional data.",
+      "sig": "(data, argvals, k=2, ncomp=3, max_iter=50, seed=42)"
+    },
+    "kmeans_fd": {
+      "purpose": "K-means clustering for functional data.",
+      "sig": "(data, argvals, k, max_iter=100, tol=1e-06, seed=42)"
+    },
+    "silhouette_score": {
+      "purpose": "Silhouette score for cluster quality assessment (from distance matrix).",
+      "sig": "(dist_matrix, labels)"
+    },
+    "silhouette_score_data": {
+      "purpose": "Silhouette score for cluster quality assessment (from data and argvals).",
+      "sig": "(data, argvals, labels)"
+    }
+  },
+  "conformal": {
+    "conformal_classif": {
+      "purpose": "Conformal classification prediction sets.",
+      "sig": "(data, labels, test_data, ncomp=3, classifier='lda', cal_fraction=0.25, alpha=0.1, seed=42)"
+    },
+    "conformal_elastic_logistic": {
+      "purpose": "Conformal elastic logistic regression prediction sets.",
+      "sig": "(data, labels, test_data, argvals, lambda=0.0, cal_fraction=0.25, alpha=0.1, seed=42)"
+    },
+    "conformal_elastic_pcr": {
+      "purpose": "Conformal elastic PCR prediction intervals.",
+      "sig": "(data, response, test_data, argvals, ncomp=3, pca_method=\"vertical\", lambda=0.0, cal_fraction=0.25, alpha=0.1, seed=42)"
+    },
+    "conformal_elastic_regression": {
+      "purpose": "Conformal elastic regression prediction intervals.",
+      "sig": "(data, response, test_data, argvals, ncomp_beta=3, lambda=0.0, cal_fraction=0.25, alpha=0.1, seed=42)"
+    },
+    "conformal_fregre_lm": {
+      "purpose": "Conformal regression prediction intervals.",
+      "sig": "(data, response, test_data, ncomp=3, cal_fraction=0.25, alpha=0.1, seed=42)"
+    },
+    "conformal_fregre_np": {
+      "purpose": "Conformal nonparametric regression.",
+      "sig": "(data, response, test_data, argvals, cal_fraction=0.25, alpha=0.1, h_func=1.0, h_scalar=1.0, seed=42)"
+    },
+    "conformal_logistic": {
+      "purpose": "Conformal logistic regression prediction sets.",
+      "sig": "(data, response, test_data, ncomp=3, max_iter=100, tol=1e-06, cal_fraction=0.25, alpha=0.1, seed=42)"
+    }
+  },
+  "covariance": {
+    "kernel_add": {
+      "purpose": "Sum of two kernels.",
+      "sig": "(k1, k2)"
+    },
+    "kernel_brownian": {
+      "purpose": "Brownian-motion (Wiener) kernel: ``variance * min(s, t)``.",
+      "sig": "(variance: 'float' = 1.0)"
+    },
+    "kernel_exponential": {
+      "purpose": "Exponential kernel (Matern nu=1/2): ``variance * exp(-|s-t| / l)``.",
+      "sig": "(lengthscale: 'float' = 1.0, variance: 'float' = 1.0)"
+    },
+    "kernel_gaussian": {
+      "purpose": "Squared-exponential (RBF) kernel: ``variance * exp(-(s-t)^2 / (2 l^2))``.",
+      "sig": "(lengthscale: 'float' = 1.0, variance: 'float' = 1.0)"
+    },
+    "kernel_linear": {
+      "purpose": "Linear kernel: ``variance * (s-c) * (t-c)``.",
+      "sig": "(variance: 'float' = 1.0, center: 'float' = 0.0)"
+    },
+    "kernel_matern": {
+      "purpose": "Matern kernel for ``nu`` in {0.5, 1.5, 2.5} (closed forms).",
+      "sig": "(lengthscale: 'float' = 1.0, nu: 'float' = 1.5, variance: 'float' = 1.0)"
+    },
+    "kernel_mult": {
+      "purpose": "Product of two kernels.",
+      "sig": "(k1, k2)"
+    },
+    "kernel_periodic": {
+      "purpose": "Periodic kernel: ``variance * exp(-2 sin^2(pi|s-t|/p) / l^2)``.",
+      "sig": "(lengthscale: 'float' = 1.0, period: 'float' = 1.0, variance: 'float' = 1.0)"
+    },
+    "kernel_polynomial": {
+      "purpose": "Polynomial kernel: ``variance * (s*t + offset)^degree``.",
+      "sig": "(degree: 'int' = 2, variance: 'float' = 1.0, offset: 'float' = 1.0)"
+    },
+    "kernel_whitenoise": {
+      "purpose": "White-noise kernel: ``variance`` on the diagonal (s == t), else 0.",
+      "sig": "(variance: 'float' = 1.0)"
+    },
+    "make_gaussian_process": {
+      "purpose": "Sample ``n`` Gaussian-process curves from ``kernel`` on ``argvals``.",
+      "sig": "(argvals, kernel, n: 'int' = 1, mean=0.0, jitter: 'float' = 1e-08, seed: 'int | None' = None)"
+    },
+    "r_bridge": {
+      "purpose": "Sample ``n`` Brownian-bridge paths B(t) - (t/T) B(T) (R ``r.bridge``).",
+      "sig": "(n: 'int' = 1, argvals=None, n_points: 'int | None' = None, sigma: 'float' = 1.0, seed: 'int | None' = None)"
+    },
+    "r_brownian": {
+      "purpose": "Sample ``n`` standard Brownian-motion paths (R ``r.brownian``).",
+      "sig": "(n: 'int' = 1, argvals=None, n_points: 'int | None' = None, sigma: 'float' = 1.0, seed: 'int | None' = None)"
+    },
+    "r_ou": {
+      "purpose": "Sample ``n`` Ornstein-Uhlenbeck paths (R ``r.ou``).",
+      "sig": "(n: 'int' = 1, argvals=None, n_points: 'int | None' = None, theta: 'float' = 1.0, mu: 'float' = 0.0, sigma: 'float' = 1.0, x0: 'float | None' = None, seed: 'int | None' = None)"
+    }
+  },
+  "datasets": {
+    "Dataset": {
+      "purpose": "Container for a loaded example dataset.",
+      "sig": "(data: 'Fdata', argvals: 'Any', y: 'Optional[np.ndarray]', meta: 'Any', name: 'str' = '', description: 'str' = '', _extras: 'Dict[str, Any]' = <factory>) -> None"
+    },
+    "load_canadian_weather": {
+      "purpose": "Canadian Weather: daily curves for 35 stations over a 365-day year.",
+      "sig": "(variable: 'str' = 'temperature', return_fdata: 'bool' = True)"
+    },
+    "load_growth": {
+      "purpose": "Berkeley Growth Study: heights (cm) of 39 boys & 54 girls at 31 ages.",
+      "sig": "(return_fdata: 'bool' = True)"
+    },
+    "load_phoneme": {
+      "purpose": "Phoneme: log-periodograms (256 freqs) for 5 phoneme classes.",
+      "sig": "(return_fdata: 'bool' = True)"
+    },
+    "load_sonar": {
+      "purpose": "Sonar (UCI): 60-band sonar return energies for 208 objects.",
+      "sig": "(return_fdata: 'bool' = True)"
+    },
+    "load_tecator": {
+      "purpose": "Tecator: 100-channel NIR absorbance spectra of 240 meat samples.",
+      "sig": "(return_fdata: 'bool' = True)"
+    },
+    "load_wine": {
+      "purpose": "Wine (UCI): 13 chemical measurements for 178 wines of 3 cultivars.",
+      "sig": "(return_fdata: 'bool' = True)"
+    }
+  },
+  "density_fda": {
+    "inverse_lqd": {
+      "purpose": "Compute the inverse LQD transform: reconstruct a density from its LQD representation.",
+      "sig": "(psi, t_grid, target_argvals)"
+    },
+    "lqd_fpca": {
+      "purpose": "Functional PCA of densities via the LQD transform.",
+      "sig": "(density_matrix, argvals, ncomp=3, n_quantile_pts=None)"
+    },
+    "lqd_transform": {
+      "purpose": "Compute the log-quantile density (LQD) transform of a density function.",
+      "sig": "(density, argvals, n_quantile_pts=None)"
+    },
+    "normalize_density": {
+      "purpose": "Normalize a density function to integrate to 1.",
+      "sig": "(vals, argvals)"
+    },
+    "wasserstein_barycenter": {
+      "purpose": "Compute the Wasserstein Fréchet mean (barycenter) of a collection of densities.",
+      "sig": "(density_matrix, argvals, weights=None)"
+    }
+  },
+  "depth": {
+    "band_1d": {
+      "purpose": "Band depth for 1D functional data.",
+      "sig": "(data, ref_data)"
+    },
+    "fraiman_muniz_1d": {
+      "purpose": "Fraiman-Muniz depth for 1D functional data.",
+      "sig": "(data, ref_data, scale=True)"
+    },
+    "fraiman_muniz_2d": {
+      "purpose": "Fraiman-Muniz depth for 2D functional data.",
+      "sig": "(data, ref_data, scale=True)"
+    },
+    "functional_boxplot": {
+      "purpose": "Canonical López-Pintado–Romo depth-fence functional boxplot (numeric only).",
+      "sig": "(data, method='modified_band', factor=1.5, scale=True, nproj=50, seed=None)"
+    },
+    "functional_depth": {
+      "purpose": "Unified self-depth dispatcher for functional data.",
+      "sig": "(data, method='fraiman_muniz', scale=True, nproj=50, seed=None)"
+    },
+    "functional_spatial_1d": {
+      "purpose": "Functional spatial depth for 1D data.",
+      "sig": "(data, ref_data, argvals=None)"
+    },
+    "functional_spatial_2d": {
+      "purpose": "Functional spatial depth for 2D data.",
+      "sig": "(data, ref_data)"
+    },
+    "kernel_functional_spatial_1d": {
+      "purpose": "Kernel functional spatial depth for 1D data.",
+      "sig": "(data, ref_data, argvals, h=1.0)"
+    },
+    "kernel_functional_spatial_2d": {
+      "purpose": "Kernel functional spatial depth for 2D data.",
+      "sig": "(data, ref_data, h=1.0)"
+    },
+    "modal_1d": {
+      "purpose": "Modal depth for 1D functional data.",
+      "sig": "(data, ref_data, h=1.0)"
+    },
+    "modal_2d": {
+      "purpose": "Modal depth for 2D functional data.",
+      "sig": "(data, ref_data, h=1.0)"
+    },
+    "modified_band_1d": {
+      "purpose": "Modified band depth for 1D functional data.",
+      "sig": "(data, ref_data)"
+    },
+    "modified_epigraph_index_1d": {
+      "purpose": "Modified epigraph index for 1D functional data.",
+      "sig": "(data, ref_data)"
+    },
+    "random_projection_1d": {
+      "purpose": "Random projection depth for 1D functional data.",
+      "sig": "(data, ref_data, n_proj=50)"
+    },
+    "random_projection_2d": {
+      "purpose": "Random projection depth for 2D functional data.",
+      "sig": "(data, ref_data, n_proj=50)"
+    },
+    "random_projection_deriv_1d": {
+      "purpose": "Random-projection depth using curves and their derivatives (RPD).",
+      "sig": "(data, ref_data, argvals=None, n_proj=50, n_deriv=1, seed=None)"
+    },
+    "random_tukey_1d": {
+      "purpose": "Random Tukey depth for 1D functional data.",
+      "sig": "(data, ref_data, n_proj=50)"
+    },
+    "random_tukey_2d": {
+      "purpose": "Random Tukey depth for 2D functional data.",
+      "sig": "(data, ref_data, n_proj=50)"
+    }
+  },
+  "explain": {
+    "anchor_explanation": {
+      "purpose": "Anchor explanation (linear model).",
+      "sig": "(data, response, ncomp=3, observation=0, precision_threshold=0.95, n_bins=4)"
+    },
+    "anchor_explanation_logistic": {
+      "purpose": "Anchor explanation (logistic model).",
+      "sig": "(data, labels, ncomp=3, observation=0, precision_threshold=0.95, n_bins=4)"
+    },
+    "andrews_loadings": {
+      "purpose": "Andrews-curve loadings for a rotation/loading matrix.",
+      "sig": "(rotation, n_grid=100)"
+    },
+    "andrews_transform": {
+      "purpose": "Andrews-curve transform of functional/multivariate data.",
+      "sig": "(data, n_grid=100)"
+    },
+    "beta_decomposition": {
+      "purpose": "Beta function decomposition.",
+      "sig": "(data, response, ncomp=3)"
+    },
+    "beta_decomposition_logistic": {
+      "purpose": "Beta decomposition for a logistic regression model.",
+      "sig": "(data, labels, ncomp=3)"
+    },
+    "calibration_diagnostics": {
+      "purpose": "Calibration diagnostics for a logistic model.",
+      "sig": "(data, labels, ncomp=3, n_groups=10)"
+    },
+    "conditional_permutation_importance": {
+      "purpose": "Conditional permutation importance for a linear regression model.",
+      "sig": "(data, response, ncomp=3, n_bins=5, n_perm=10, seed=42)"
+    },
+    "conditional_permutation_importance_logistic": {
+      "purpose": "Conditional permutation importance for a logistic regression model.",
+      "sig": "(data, labels, ncomp=3, n_bins=5, n_perm=10, seed=42)"
+    },
+    "conformal_prediction_residuals": {
+      "purpose": "Split-conformal prediction intervals.",
+      "sig": "(data, response, test_data, ncomp=3, cal_fraction=0.25, alpha=0.1, seed=42)"
+    },
+    "counterfactual_logistic": {
+      "purpose": "Counterfactual explanation (logistic model, gradient descent).",
+      "sig": "(data, labels, ncomp=3, observation=0, max_iter=100, step_size=0.1)"
+    },
+    "counterfactual_regression": {
+      "purpose": "Counterfactual explanation (linear regression).",
+      "sig": "(data, response, ncomp=3, observation=0, target_value=0.0)"
+    },
+    "dfbetas_dffits": {
+      "purpose": "DFBETAS and DFFITS diagnostics.",
+      "sig": "(data, response, ncomp=3)"
+    },
+    "domain_selection": {
+      "purpose": "Domain selection / interval importance (linear model).",
+      "sig": "(data, response, ncomp=3, window_width=5, threshold=0.0)"
+    },
+    "domain_selection_logistic": {
+      "purpose": "Domain selection / interval importance (logistic model).",
+      "sig": "(data, labels, ncomp=3, window_width=5, threshold=0.0)"
+    },
+    "expected_calibration_error": {
+      "purpose": "Expected calibration error (ECE, MCE, ACE).",
+      "sig": "(data, labels, ncomp=3, n_bins=10)"
+    },
+    "explanation_stability": {
+      "purpose": "Bootstrap stability analysis (linear model).",
+      "sig": "(data, response, ncomp=3, n_boot=100, seed=42)"
+    },
+    "explanation_stability_logistic": {
+      "purpose": "Bootstrap stability analysis (logistic model).",
+      "sig": "(data, labels, ncomp=3, n_boot=100, seed=42)"
+    },
+    "fpc_ale": {
+      "purpose": "ALE plot for an FPC component (linear model).",
+      "sig": "(data, response, ncomp=3, component=0, n_bins=10)"
+    },
+    "fpc_ale_logistic": {
+      "purpose": "ALE plot for an FPC component (logistic model).",
+      "sig": "(data, labels, ncomp=3, component=0, n_bins=10)"
+    },
+    "fpc_permutation_importance": {
+      "purpose": "FPC-based permutation importance.",
+      "sig": "(data, response, ncomp=3, n_perm=10, seed=42)"
+    },
+    "fpc_permutation_importance_logistic": {
+      "purpose": "FPC permutation importance for a logistic model.",
+      "sig": "(data, labels, ncomp=3, n_perm=10, seed=42)"
+    },
+    "fpc_shap_values": {
+      "purpose": "FPC SHAP values.",
+      "sig": "(data, response, ncomp=3)"
+    },
+    "fpc_shap_values_logistic": {
+      "purpose": "Kernel SHAP values for a logistic model.",
+      "sig": "(data, labels, ncomp=3, n_samples=100, seed=42)"
+    },
+    "fpc_vif": {
+      "purpose": "Variance inflation factors for FPC scores.",
+      "sig": "(data, response, ncomp=3)"
+    },
+    "fpc_vif_logistic": {
+      "purpose": "Variance inflation factors for a logistic model.",
+      "sig": "(data, labels, ncomp=3)"
+    },
+    "friedman_h_statistic": {
+      "purpose": "Friedman H-statistic for interaction between two FPC components (linear model).",
+      "sig": "(data, response, ncomp=3, component_j=0, component_k=1, n_grid=20)"
+    },
+    "friedman_h_statistic_logistic": {
+      "purpose": "Friedman H-statistic for a logistic model.",
+      "sig": "(data, labels, ncomp=3, component_j=0, component_k=1, n_grid=20)"
+    },
+    "functional_pdp": {
+      "purpose": "Functional partial dependence plot.",
+      "sig": "(data, response, ncomp=3, component=0, n_grid=50)"
+    },
+    "functional_pdp_logistic": {
+      "purpose": "Functional PDP/ICE for a logistic regression model.",
+      "sig": "(data, labels, ncomp=3, component=0, n_grid=50)"
+    },
+    "functional_saliency": {
+      "purpose": "Functional saliency maps (linear model).",
+      "sig": "(data, response, ncomp=3)"
+    },
+    "functional_saliency_logistic": {
+      "purpose": "Functional saliency maps (logistic model, gradient-based).",
+      "sig": "(data, labels, ncomp=3)"
+    },
+    "influence_diagnostics": {
+      "purpose": "Influence diagnostics (Cook's distance, leverage).",
+      "sig": "(data, response, ncomp=3)"
+    },
+    "lime_explanation": {
+      "purpose": "LIME explanation for a linear regression model.",
+      "sig": "(data, response, ncomp=3, observation=0, n_samples=100, kernel_width=1.0, seed=42)"
+    },
+    "lime_explanation_logistic": {
+      "purpose": "LIME explanation for a logistic regression model.",
+      "sig": "(data, labels, ncomp=3, observation=0, n_samples=100, kernel_width=1.0, seed=42)"
+    },
+    "loo_cv_press": {
+      "purpose": "LOO-CV / PRESS diagnostics.",
+      "sig": "(data, response, ncomp=3)"
+    },
+    "pointwise_importance": {
+      "purpose": "Pointwise variable importance for a linear regression model.",
+      "sig": "(data, response, ncomp=3)"
+    },
+    "pointwise_importance_logistic": {
+      "purpose": "Pointwise variable importance for a logistic regression model.",
+      "sig": "(data, labels, ncomp=3)"
+    },
+    "prediction_intervals": {
+      "purpose": "Prediction intervals for new observations.",
+      "sig": "(data, response, new_data, ncomp=3, confidence_level=0.95)"
+    },
+    "prototype_criticism": {
+      "purpose": "Prototype/criticism selection (MMD-based).",
+      "sig": "(data, ncomp=3, n_prototypes=5, n_criticisms=5)"
+    },
+    "regression_depth": {
+      "purpose": "Regression depth diagnostics (linear model).",
+      "sig": "(data, response, ncomp=3, n_boot=100, depth_type='fraiman_muniz', seed=42)"
+    },
+    "regression_depth_logistic": {
+      "purpose": "Regression depth diagnostics (logistic model).",
+      "sig": "(data, labels, ncomp=3, n_boot=100, depth_type='fraiman_muniz', seed=42)"
+    },
+    "significant_regions": {
+      "purpose": "Significant regions of the beta function.",
+      "sig": "(lower, upper)"
+    },
+    "significant_regions_from_se": {
+      "purpose": "Significant regions from beta(t) and its standard error.",
+      "sig": "(beta_t, beta_se, z_alpha=1.96)"
+    },
+    "sobol_indices": {
+      "purpose": "Sobol sensitivity indices (linear model).",
+      "sig": "(data, response, ncomp=3)"
+    },
+    "sobol_indices_logistic": {
+      "purpose": "Sobol sensitivity indices (logistic model, Saltelli MC).",
+      "sig": "(data, labels, ncomp=3, n_samples=1000, seed=42)"
+    }
+  },
+  "famm": {
+    "dense_flmm": {
+      "purpose": "Fit a Functional Linear Mixed Model (FLMM) via REML-EM.",
+      "sig": "(data, subject_ids, covariates=None, ncomp=3, max_iter=50, tol=1e-10)"
+    },
+    "fast_fmm": {
+      "purpose": "Fit a fast Functional Mixed Model (FMM) with optional Wald inference.",
+      "sig": "(data, subject_ids, covariates=None, smooth_window=3, max_iter=30, tol=1e-08, compute_inference=True)"
+    },
+    "multi_famm": {
+      "purpose": "Fit a multi-variable Functional Additive Mixed Model (multiFAMM).",
+      "sig": "(data_list, subject_ids, covariates=None, ncomp=3, max_iter=50, tol=1e-10)"
+    }
+  },
+  "fdata": {
+    "center_1d": {
+      "purpose": "Center functional data by subtracting the pointwise mean.",
+      "sig": "(data)"
+    },
+    "depth_based_median": {
+      "purpose": "Return the depth-based median curve of 1D functional data.",
+      "sig": "(data)"
+    },
+    "deriv_1d": {
+      "purpose": "Compute numerical derivatives of 1D functional data.",
+      "sig": "(data, argvals, nderiv=1)"
+    },
+    "deriv_2d": {
+      "purpose": "Compute numerical derivatives of 2D functional data.",
+      "sig": "(data, argvals_s, argvals_t)"
+    },
+    "functional_covariance": {
+      "purpose": "Compute the Bessel-corrected m×m covariance surface of 1D functional data.",
+      "sig": "(data)"
+    },
+    "functional_std": {
+      "purpose": "Compute the Bessel-corrected pointwise standard deviation of 1D functional data.",
+      "sig": "(data)"
+    },
+    "functional_variance": {
+      "purpose": "Compute the Bessel-corrected pointwise variance of 1D functional data.",
+      "sig": "(data)"
+    },
+    "geometric_median_1d": {
+      "purpose": "Compute the geometric (L1) median of 1D functional data.",
+      "sig": "(data, argvals, max_iter=100, tol=1e-08)"
+    },
+    "geometric_median_2d": {
+      "purpose": "Compute the geometric (L1) median of 2D functional data.",
+      "sig": "(data, argvals_s, argvals_t, max_iter=100, tol=1e-08)"
+    },
+    "mean_1d": {
+      "purpose": "Compute the pointwise mean of 1D functional data.",
+      "sig": "(data)"
+    },
+    "mean_2d": {
+      "purpose": "Compute the pointwise mean of 2D functional data.",
+      "sig": "(data)"
+    },
+    "norm_lp_1d": {
+      "purpose": "Compute Lp norms of 1D functional data.",
+      "sig": "(data, argvals, p=2.0)"
+    },
+    "normalize": {
+      "purpose": "Normalize functional data.",
+      "sig": "(data, method='center')"
+    },
+    "normalize_with_argvals": {
+      "purpose": "Normalize functional data (with argvals for Lp normalization).",
+      "sig": "(data, argvals, method='center', p=2.0)"
+    },
+    "trim_mean": {
+      "purpose": "Compute the depth-trimmed mean of 1D functional data.",
+      "sig": "(data, alpha=0.0)"
+    }
+  },
+  "frechet": {
+    "frechet_anova": {
+      "purpose": "Fréchet ANOVA: test equality of Fréchet means across groups.",
+      "sig": "(responses, argvals, group_labels, n_perm=999, seed=42)"
+    },
+    "frechet_global_reg": {
+      "purpose": "Global Fréchet linear regression for density-response functional data.",
+      "sig": "(predictors, responses, argvals, xout)"
+    },
+    "frechet_local_reg": {
+      "purpose": "Local Fréchet regression for density-response functional data.",
+      "sig": "(predictors, responses, argvals, xout, bandwidth)"
+    },
+    "frechet_mean": {
+      "purpose": "Fréchet mean over a metric space, dispatched by space name.",
+      "sig": "(objects, space, d, weights=None)"
+    }
+  },
+  "fts": {
+    "dpca": {
+      "purpose": "Fit Dynamic Functional Principal Components Analysis (DPCA).",
+      "sig": "(data, argvals, ncomp=3, bandwidth=None, filter_lag=None)"
+    },
+    "dpca_reconstruct": {
+      "purpose": "Fit DPCA and reconstruct the functional time series from dynamic components.",
+      "sig": "(data, argvals, ncomp=3, bandwidth=None, filter_lag=None)"
+    },
+    "fplsr": {
+      "purpose": "Functional Partial Least Squares Regression (fPLSR) one-step-ahead forecast.",
+      "sig": "(data, argvals, ncomp=3)"
+    },
+    "ftsm": {
+      "purpose": "Fit a Functional Time Series Model (FTSM) via FPCA + Yule-Walker AR fitting.",
+      "sig": "(data, argvals, ncomp=3)"
+    },
+    "ftsm_forecast": {
+      "purpose": "Fit an FTSM and produce a single- or multi-horizon forecast (single-step variant).",
+      "sig": "(data, argvals, h=1, ncomp=3)"
+    },
+    "ftsm_forecast_multistep": {
+      "purpose": "Fit an FTSM and produce a multi-step forecast (iterative multi-step variant).",
+      "sig": "(data, argvals, h=5, ncomp=3)"
+    },
+    "ftsm_update": {
+      "purpose": "Online update of an FTSM with one or more new curves.",
+      "sig": "(data, new_curve, argvals, ncomp=3)"
+    },
+    "functional_acf": {
+      "purpose": "Compute the functional autocorrelation function (ACF) with Monte Carlo bands.",
+      "sig": "(data, argvals, max_lag=None, n_sim=999, ci=0.95, seed=42)"
+    },
+    "functional_difference": {
+      "purpose": "Compute the first-order functional difference (lag-1 differencing).",
+      "sig": "(data)"
+    },
+    "functional_pacf": {
+      "purpose": "Compute the functional partial autocorrelation function (PACF) with Monte Carlo bands.",
+      "sig": "(data, argvals, max_lag=None, n_sim=999, ci=0.95, seed=42)"
+    },
+    "long_run_covariance": {
+      "purpose": "Estimate the long-run covariance operator of a functional time series.",
+      "sig": "(data, argvals, bandwidth=None)"
+    },
+    "spectral_density": {
+      "purpose": "Estimate the spectral density operator of a functional time series.",
+      "sig": "(data, argvals, bandwidth=None)"
+    },
+    "stationarity_test": {
+      "purpose": "Test stationarity of functional time series via permutation test.",
+      "sig": "(data, argvals, n_perm=999, seed=42)"
+    }
+  },
+  "inference": {
+    "f_perm_test": {
+      "purpose": "Functional two-sample permutation *F*-test.",
+      "sig": "(data_a, data_b, argvals, n_perm=999, seed=None)"
+    },
+    "flm_f_test": {
+      "purpose": "Functional linear model overall-significance F-test.",
+      "sig": "(data, response, n_comp=5)"
+    },
+    "flm_gof_test": {
+      "purpose": "Functional linear model goodness-of-fit test (Ramsey-RESET style).",
+      "sig": "(data, response, n_comp=5)"
+    },
+    "itp_flm": {
+      "purpose": "Interval-wise testing procedure for the functional linear model.",
+      "sig": "(data, response, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)"
+    },
+    "itp_one_pop": {
+      "purpose": "Interval-wise testing procedure for a single functional population.",
+      "sig": "(data, argvals, mu0=None, basis_type='bspline', nbasis=5, n_perm=999, seed=None)"
+    },
+    "itp_two_pop": {
+      "purpose": "Interval-wise testing procedure for two functional populations.",
+      "sig": "(data_a, data_b, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)"
+    },
+    "mean_scb": {
+      "purpose": "Simultaneous confidence band for the mean function (Degras).",
+      "sig": "(data, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')"
+    },
+    "oneway_anova_vstat": {
+      "purpose": "One-way functional ANOVA V-statistic (asymptotic scaled-χ² test).",
+      "sig": "(data, groups, argvals)"
+    },
+    "scb_two_sample_test": {
+      "purpose": "Two-sample mean-equality test via a simultaneous confidence band for the",
+      "sig": "(data_a, data_b, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')"
+    },
+    "t_perm_test": {
+      "purpose": "Functional two-sample permutation *t*-test.",
+      "sig": "(data_a, data_b, argvals, n_perm=999, seed=None)"
+    },
+    "two_sample_mean_test": {
+      "purpose": "Functional two-sample mean-equality test via Hotelling-T² on a shared FPC",
+      "sig": "(data_a, data_b, argvals, ncomp=5)"
+    }
+  },
+  "metric": {
+    "PyGakGramTrain": {
+      "purpose": "Opaque handle wrapping fdars-core GakGramTrain for incremental GAK Gram computation.",
+      "sig": "(...)"
+    },
+    "dtw_cross_1d": {
+      "purpose": "DTW cross distance for 1D data.",
+      "sig": "(data1, data2, p=2.0, w=0)"
+    },
+    "dtw_self_1d": {
+      "purpose": "DTW distance matrix (self) for 1D data.",
+      "sig": "(data, p=2.0, w=0)"
+    },
+    "fourier_cross_1d": {
+      "purpose": "Fourier coefficient distance (cross).",
+      "sig": "(data1, data2, n_basis=5)"
+    },
+    "fourier_self_1d": {
+      "purpose": "Fourier coefficient distance (self) for 1D data.",
+      "sig": "(data, n_basis=5)"
+    },
+    "gak": {
+      "purpose": "Global Alignment Kernel between two 1-D time series.",
+      "sig": "(x, y, sigma)"
+    },
+    "gak_gram_matrix": {
+      "purpose": "Global Alignment Kernel Gram matrix (one-shot, symmetric).",
+      "sig": "(data, sigma=None)"
+    },
+    "gak_gram_predict": {
+      "purpose": "Compute the GAK Gram matrix between new data and the training set.",
+      "sig": "(train, new_data)"
+    },
+    "gak_gram_train": {
+      "purpose": "Fit a GAK Gram handle for incremental train/predict computation.",
+      "sig": "(data, sigma=None)"
+    },
+    "hausdorff_cross_1d": {
+      "purpose": "Hausdorff cross distance for 1D data.",
+      "sig": "(data1, data2, argvals)"
+    },
+    "hausdorff_cross_2d": {
+      "purpose": "Hausdorff cross distance for 2D data.",
+      "sig": "(data1, data2, argvals_s, argvals_t)"
+    },
+    "hausdorff_self_1d": {
+      "purpose": "Hausdorff distance matrix (self) for 1D data.",
+      "sig": "(data, argvals)"
+    },
+    "hausdorff_self_2d": {
+      "purpose": "Hausdorff self distance for 2D data.",
+      "sig": "(data, argvals_s, argvals_t)"
+    },
+    "hshift_cross_1d": {
+      "purpose": "Horizontal shift distance (cross).",
+      "sig": "(data1, data2, argvals, max_shift=0)"
+    },
+    "hshift_self_1d": {
+      "purpose": "Horizontal shift distance (self) for 1D data.",
+      "sig": "(data, argvals, max_shift=0)"
+    },
+    "inprod": {
+      "purpose": "Inner product between two functional data sets (Simpson-integrated).",
+      "sig": "(data1, data2, argvals=None)"
+    },
+    "int_simpson": {
+      "purpose": "Simpson's-rule integral of each curve.",
+      "sig": "(data, argvals=None)"
+    },
+    "lp_cross_1d": {
+      "purpose": "Lp distance matrix (cross) between two 1D functional datasets.",
+      "sig": "(data1, data2, argvals, p=2.0)"
+    },
+    "lp_cross_2d": {
+      "purpose": "Lp cross distance for 2D data.",
+      "sig": "(data1, data2, argvals_s, argvals_t, p=2.0)"
+    },
+    "lp_self_1d": {
+      "purpose": "Lp distance matrix (self) for 1D functional data.",
+      "sig": "(data, argvals, p=2.0)"
+    },
+    "lp_self_2d": {
+      "purpose": "Lp distance matrix (self) for 2D functional data.",
+      "sig": "(data, argvals_s, argvals_t, p=2.0)"
+    },
+    "sigma_gak": {
+      "purpose": "Heuristic GAK bandwidth: median pairwise Euclidean distance, floored at 1e-8.",
+      "sig": "(data)"
+    },
+    "soft_dtw_cross_1d": {
+      "purpose": "Soft-DTW cross distance for 1D data.",
+      "sig": "(data1, data2, gamma=1.0)"
+    },
+    "soft_dtw_div_cross_1d": {
+      "purpose": "Soft-DTW divergence cross distance.",
+      "sig": "(data1, data2, gamma=1.0)"
+    },
+    "soft_dtw_div_self_1d": {
+      "purpose": "Soft-DTW divergence distance matrix (self) for 1D data.",
+      "sig": "(data, gamma=1.0)"
+    },
+    "soft_dtw_self_1d": {
+      "purpose": "Soft-DTW distance matrix (self) for 1D data.",
+      "sig": "(data, gamma=1.0)"
+    }
+  },
+  "metrics": {
+    "pred_mae": {
+      "purpose": "Mean absolute error (R ``pred.MAE``).",
+      "sig": "(y_true, y_pred) -> 'float'"
+    },
+    "pred_mse": {
+      "purpose": "Mean squared error (R ``pred.MSE``).",
+      "sig": "(y_true, y_pred) -> 'float'"
+    },
+    "pred_r2": {
+      "purpose": "Coefficient of determination R^2 (R ``pred.R2``).",
+      "sig": "(y_true, y_pred) -> 'float'"
+    },
+    "pred_rmse": {
+      "purpose": "Root mean squared error (R ``pred.RMSE``).",
+      "sig": "(y_true, y_pred) -> 'float'"
+    },
+    "prediction_metrics": {
+      "purpose": "All four ``pred.*`` metrics as a dict (``mae``, ``mse``, ``rmse``, ``r2``).",
+      "sig": "(y_true, y_pred) -> 'dict'"
+    }
+  },
+  "multi_fdata": {
+    "PyMultiFunData": {
+      "purpose": "Opaque handle wrapping fdars-core MultiFunData for multi-domain functional data.",
+      "sig": "(...)"
+    },
+    "multi_fdata_from_components": {
+      "purpose": "Build a PyMultiFunData handle from lists of 2-D data arrays and 1-D argvals vectors.",
+      "sig": "(data_list, argvals_list)"
+    }
+  },
+  "outliers": {
+    "depthgram": {
+      "purpose": "Depthgram functional outlier detection.",
+      "sig": "(data, outliergram_factor=1.5, boxplot_factor=1.5)"
+    },
+    "detect_outliers_lrt": {
+      "purpose": "LRT-based outlier detection with bootstrap.",
+      "sig": "(data, alpha=0.05, n_bootstrap=200, trim=0.1, smo=0.02)"
+    },
+    "detect_outliers_lrt_with_dist": {
+      "purpose": "LRT-based outlier detection with bootstrap (returns threshold and null distribution).",
+      "sig": "(data, alpha=0.05, n_bootstrap=200, trim=0.1, smo=0.02, seed=42)"
+    },
+    "magnitude_shape": {
+      "purpose": "Magnitude-shape outlyingness.",
+      "sig": "(data)"
+    },
+    "muod": {
+      "purpose": "MUOD (Massive Unsupervised Outlier Detection) for functional data.",
+      "sig": "(data, factor=1.5)"
+    },
+    "outliergram": {
+      "purpose": "Outliergram (MEI vs MBD plot).",
+      "sig": "(data, factor=1.5)"
+    },
+    "sequential_transform_outliers": {
+      "purpose": "Sequential transform outlier detection.",
+      "sig": "(data, transforms, depth_method='modified_band', emp_factor=1.5)"
+    },
+    "tvdmss": {
+      "purpose": "TVD-MSS functional outlier detection.",
+      "sig": "(data, emp_factor_mss=1.5, emp_factor_tvd=1.5, central_region_tvd=0.5)"
+    }
+  },
+  "pace_fpca": {
+    "PyIrregFdata": {
+      "purpose": "Opaque handle wrapping fdars-core IrregFdata for irregular/sparse functional data.",
+      "sig": "(...)"
+    },
+    "irreg_fdata_from_lists": {
+      "purpose": "Build an IrregFdata handle from two Python lists of ragged 1-D arrays.",
+      "sig": "(argvals_list, values_list)"
+    },
+    "pace_fpca": {
+      "purpose": "Run PACE FPCA on irregular/sparse functional data.",
+      "sig": "(data, ncomp=3, bandwidth=0.1, sigma2=0.01, work_grid=None, alpha=0.05)"
+    }
+  },
+  "regression": {
+    "bootstrap_ci_fregre_lm": {
+      "purpose": "Bootstrap confidence intervals for beta(t) from a functional linear model.",
+      "sig": "(data, response, n_comp=3, n_boot=200, alpha=0.05, seed=42)"
+    },
+    "bootstrap_ci_functional_logistic": {
+      "purpose": "Bootstrap confidence intervals for beta(t) from a functional logistic model.",
+      "sig": "(data, labels, n_comp=3, n_boot=200, alpha=0.05, seed=42, max_iter=25, tol=1e-06)"
+    },
+    "concurrent_regression": {
+      "purpose": "Concurrent (varying-coefficient) functional regression.",
+      "sig": "(predictors, response, argvals=None, bandwidth=0.2, kernel='gaussian')"
+    },
+    "fanova": {
+      "purpose": "Functional ANOVA.",
+      "sig": "(data, groups, n_perm=999)"
+    },
+    "fof_cv": {
+      "purpose": "Cross-validated selection of FPC component counts for function-on-function regression.",
+      "sig": "(x_data, y_data, x_argvals, y_argvals, ncomp_x_max=5, ncomp_y_max=5, n_folds=5, seed=42)"
+    },
+    "fof_re_regression": {
+      "purpose": "Function-on-function random-effects regression (mixed model).",
+      "sig": "(x_data, y_data, subject_ids, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3, max_iter=50, tol=1e-10)"
+    },
+    "fof_regression": {
+      "purpose": "Function-on-function linear regression via FPC basis decomposition.",
+      "sig": "(x_data, y_data, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3)"
+    },
+    "fosr": {
+      "purpose": "Function-on-scalar regression (FOSR).",
+      "sig": "(response, predictors, lambda_=0.0)"
+    },
+    "fosr_fpc": {
+      "purpose": "Function-on-scalar regression via FPCs (FOSR-FPC).",
+      "sig": "(data, predictors, n_comp=3)"
+    },
+    "fpca": {
+      "purpose": "Functional principal component analysis (FPCA).",
+      "sig": "(data, argvals, n_comp=3)"
+    },
+    "fpls": {
+      "purpose": "Functional PLS (Partial Least Squares).",
+      "sig": "(data, argvals, response, n_comp=3)"
+    },
+    "fregre_cv": {
+      "purpose": "Cross-validated selection of number of FPC components using K-fold CV.",
+      "sig": "(data, response, k_min=1, k_max=10, n_folds=5)"
+    },
+    "fregre_huber": {
+      "purpose": "Huber M-estimation regression for functional data.",
+      "sig": "(data, response, n_comp=3, huber_k=1.345)"
+    },
+    "fregre_l1": {
+      "purpose": "L1 robust regression for functional data.",
+      "sig": "(data, response, n_comp=3)"
+    },
+    "fregre_lm": {
+      "purpose": "Scalar-on-function linear regression via FPCs.",
+      "sig": "(data, response, n_comp=3)"
+    },
+    "fregre_np": {
+      "purpose": "Nonparametric kernel regression for functional data (from distance matrix).",
+      "sig": "(dist_matrix, response, h=0.0)"
+    },
+    "fregre_np_cv": {
+      "purpose": "Cross-validated bandwidth selection for nonparametric functional regression.",
+      "sig": "(data, response, argvals, n_folds=5, h_range=None, scalar_covariates=None)"
+    },
+    "fregre_np_mixed": {
+      "purpose": "Nonparametric functional regression mixing functional and scalar predictors.",
+      "sig": "(data, response, argvals, h_func, h_scalar=1.0, scalar_covariates=None)"
+    },
+    "fregre_pls": {
+      "purpose": "Scalar-on-function PLS regression.",
+      "sig": "(data, argvals, response, n_comp=3)"
+    },
+    "functional_glm": {
+      "purpose": "Functional generalised linear model (GLM) via FPC scores.",
+      "sig": "(data, response, family='gaussian', n_comp=3, scalar_covariates=None, max_iter=25, tol=1e-06)"
+    },
+    "functional_logistic": {
+      "purpose": "Functional logistic regression.",
+      "sig": "(data, labels, n_comp=3, max_iter=25, tol=1e-06)"
+    },
+    "model_selection_ncomp": {
+      "purpose": "Cross-validated selection of number of FPC components.",
+      "sig": "(data, response, max_comp=10, criterion='gcv')"
+    },
+    "predict_fof": {
+      "purpose": "Predict functional responses for new predictor curves using a function-on-function model.",
+      "sig": "(x_data, y_data, new_x, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3)"
+    },
+    "predict_fof_re": {
+      "purpose": "Predict functional responses using a function-on-function random-effects model.",
+      "sig": "(x_data, y_data, subject_ids, new_x, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3, max_iter=50, tol=1e-10)"
+    },
+    "predict_fosr": {
+      "purpose": "Predict new functional responses from a fitted FOSR model.",
+      "sig": "(response, predictors, new_predictors, lambda_=0.0)"
+    },
+    "predict_fregre_lm": {
+      "purpose": "Predict new responses using a fitted functional linear model.",
+      "sig": "(data_fit, response, new_data, n_comp=3)"
+    },
+    "predict_fregre_pls": {
+      "purpose": "Predict new responses using a fitted PLS regression.",
+      "sig": "(data, argvals, response, new_data, n_comp=3)"
+    },
+    "predict_fregre_robust": {
+      "purpose": "Predict new responses using a fitted robust regression (L1 or Huber).",
+      "sig": "(data, response, new_data, n_comp=3, method='l1', huber_k=1.345)"
+    },
+    "predict_functional_logistic": {
+      "purpose": "Predict probabilities for new data using a fitted functional logistic model.",
+      "sig": "(data, labels, new_data, n_comp=3, max_iter=25, tol=1e-06)"
+    }
+  },
+  "represent": {
+    "fdata_interpolate_with_policy": {
+      "purpose": "Interpolate functional data with explicit extrapolation control (linear/cubic variant).",
+      "sig": "(data, argvals, query_points, policy='exception', fill_value=0.0, method='linear')"
+    },
+    "impute_missing_values": {
+      "purpose": "Impute NaN values in a functional data matrix.",
+      "sig": "(data, argvals, method='linear', constant_value=0.0)"
+    },
+    "spline_interpolate": {
+      "purpose": "Interpolate functional data onto a new set of query points using B-splines.",
+      "sig": "(data, argvals, query_points, order=4)"
+    },
+    "spline_interpolate_with_policy": {
+      "purpose": "Interpolate functional data with explicit extrapolation control (spline variant).",
+      "sig": "(data, argvals, query_points, policy='exception', fill_value=0.0, order=4)"
+    }
+  },
+  "scalar_on_function": {
+    "fam": {
+      "purpose": "Fit a Functional Additive Model (FAM) with a single functional predictor.",
+      "sig": "(data, y, argvals, scalar_covariates=None, ncomp=0, bandwidth=0.0, kernel='gaussian', n_grid_bandwidth=20)"
+    },
+    "fregre_gkam": {
+      "purpose": "Fit a Generalised Kernel Additive Model (GKAM) with multiple functional predictors.",
+      "sig": "(predictors, y, argvals_list, scalar_covariates=None, bandwidth=0.0, kernel='gaussian', max_iter=50, epsilon=1e-06)"
+    },
+    "fregre_gsam": {
+      "purpose": "Fit a Generalised Structured Additive Model (GSAM) with a single functional predictor.",
+      "sig": "(data, y, argvals, scalar_covariates=None, ncomp=0, bandwidth=0.0, kernel='gaussian', n_grid_bandwidth=20)"
+    },
+    "model_selection_ncomp": {
+      "purpose": "Select the optimal number of FPC components for scalar-on-function regression.",
+      "sig": "(data, response, max_comp=10, criterion='gcv')"
+    },
+    "variable_selection": {
+      "purpose": "Functional variable selection via group-lasso penalised regression.",
+      "sig": "(predictors, y, argvals_list, scalar_covariates=None, ncomp=3, penalty='group_lasso', lambda_=0.0, max_iter=100, epsilon=1e-05, lambda_n_grid=20)"
+    }
+  },
+  "scoring": {
+    "functional_explained_variance": {
+      "purpose": "Functional Explained Variance Score integrated over `argvals`.",
+      "sig": "(y_true, y_pred, argvals)"
+    },
+    "functional_mae": {
+      "purpose": "Functional Mean Absolute Error integrated over `argvals`.",
+      "sig": "(y_true, y_pred, argvals)"
+    },
+    "functional_mape": {
+      "purpose": "Functional Mean Absolute Percentage Error integrated over `argvals`.",
+      "sig": "(y_true, y_pred, argvals)"
+    },
+    "functional_mse": {
+      "purpose": "Functional Mean Squared Error integrated over `argvals`.",
+      "sig": "(y_true, y_pred, argvals)"
+    },
+    "functional_msle": {
+      "purpose": "Functional Mean Squared Logarithmic Error integrated over `argvals`.",
+      "sig": "(y_true, y_pred, argvals)"
+    }
+  },
+  "seasonal": {
+    "analyze_peak_timing": {
+      "purpose": "Analyze peak timing variability.",
+      "sig": "(data, argvals, period, smooth_nbasis=None)"
+    },
+    "autoperiod": {
+      "purpose": "Autoperiod algorithm for period detection.",
+      "sig": "(data, argvals, n_candidates=None, gradient_steps=None)"
+    },
+    "cfd_autoperiod": {
+      "purpose": "CFD autoperiod for period detection.",
+      "sig": "(data, argvals, cluster_tolerance=None, min_cluster_size=None)"
+    },
+    "classify_seasonality": {
+      "purpose": "Classify seasonality type.",
+      "sig": "(data, argvals, period, strength_threshold=None, timing_threshold=None)"
+    },
+    "detect_multiple_periods": {
+      "purpose": "Detect multiple seasonal periods by iterative residual peeling.",
+      "sig": "(data, argvals, max_periods=3, min_confidence=1.5, min_strength=0.1)"
+    },
+    "detect_peaks": {
+      "purpose": "Detect peaks in functional data.",
+      "sig": "(data, argvals, min_distance=None, min_prominence=None, smooth_first=False, smooth_nbasis=None)"
+    },
+    "detect_seasonality_changes": {
+      "purpose": "Detect seasonality change points.",
+      "sig": "(data, argvals, period, threshold, window_size, min_duration)"
+    },
+    "estimate_period_acf": {
+      "purpose": "Estimate the dominant seasonal period via autocorrelation (ACF).",
+      "sig": "(data, argvals, max_lag=None)"
+    },
+    "estimate_period_fft": {
+      "purpose": "Estimate period using FFT periodogram.",
+      "sig": "(data, argvals)"
+    },
+    "instantaneous_period": {
+      "purpose": "Instantaneous period estimation via Hilbert transform.",
+      "sig": "(data, argvals)"
+    },
+    "lomb_scargle_fdata": {
+      "purpose": "Lomb-Scargle periodogram for functional data.",
+      "sig": "(data, argvals, oversampling=None, nyquist_factor=None)"
+    },
+    "matrix_profile_fdata": {
+      "purpose": "Matrix Profile analysis for functional data.",
+      "sig": "(data, subsequence_length=None, exclusion_zone=None)"
+    },
+    "sazed": {
+      "purpose": "SAZED period detection algorithm.",
+      "sig": "(data, argvals, tolerance=None)"
+    },
+    "seasonal_strength": {
+      "purpose": "Seasonal strength measure (variance method).",
+      "sig": "(data, argvals, period, method='variance')"
+    },
+    "seasonal_strength_wavelet": {
+      "purpose": "Seasonal strength using wavelet method.",
+      "sig": "(data, argvals, period)"
+    },
+    "seasonal_strength_windowed": {
+      "purpose": "Time-varying seasonal strength using windowed estimation.",
+      "sig": "(data, argvals, period, window_size, method='variance')"
+    },
+    "ssa_fdata": {
+      "purpose": "Singular Spectrum Analysis for functional data.",
+      "sig": "(data, window_length=None, n_components=None)"
+    },
+    "stl_decompose": {
+      "purpose": "STL decomposition of functional data.",
+      "sig": "(data, period, s_window=None, t_window=None, robust=False)"
+    }
+  },
+  "shapelet": {
+    "PyShapeletClassifierFit": {
+      "purpose": "Opaque handle wrapping fdars-core ShapeletClassifierFit.",
+      "sig": "(...)"
+    },
+    "PyShapeletFit": {
+      "purpose": "Opaque handle wrapping fdars-core ShapeletTransformFit.",
+      "sig": "(...)"
+    },
+    "discover_shapelets": {
+      "purpose": "Discover shapelets in labeled functional data and return a summary dict.",
+      "sig": "(data, labels, min_length=3, max_length=0, max_candidates=10000, max_shapelets=0, quality='info_gain', seed=0)"
+    },
+    "shapelet_classifier_fit": {
+      "purpose": "Fit a shapelet-based classifier on labeled functional data.",
+      "sig": "(data, labels, min_length=3, max_length=0, max_candidates=10000, max_shapelets=0, quality='info_gain', seed=0, classifier='knn', k=1, ncomp=None)"
+    },
+    "shapelet_distance": {
+      "purpose": "Compute the shapelet distance between a z-normalized shapelet and a series.",
+      "sig": "(shapelet_z, series, best_so_far=Ellipsis)"
+    },
+    "shapelet_transform": {
+      "purpose": "Apply a fitted shapelet transform to new functional data.",
+      "sig": "(fit, data)"
+    },
+    "shapelet_transform_fit": {
+      "purpose": "Fit a shapelet transform on labeled functional data.",
+      "sig": "(data, labels, min_length=3, max_length=0, max_candidates=10000, max_shapelets=0, quality='info_gain', seed=0)"
+    }
+  },
+  "simulation": {
+    "add_error_curve": {
+      "purpose": "Add curve-level Gaussian noise to functional data.",
+      "sig": "(data, sd, seed=None)"
+    },
+    "add_error_pointwise": {
+      "purpose": "Add pointwise Gaussian noise to functional data.",
+      "sig": "(data, sd, seed=None)"
+    },
+    "covariance_matrix": {
+      "purpose": "Compute covariance matrix from a kernel.",
+      "sig": "(argvals, kernel='gaussian', length_scale=0.2, variance=1.0)"
+    },
+    "eigenfunctions": {
+      "purpose": "Compute eigenfunctions.",
+      "sig": "(argvals, n_basis, efun_type='fourier')"
+    },
+    "eigenvalues": {
+      "purpose": "Compute eigenvalues.",
+      "sig": "(n_basis, eval_type='linear')"
+    },
+    "gaussian_process": {
+      "purpose": "Generate Gaussian process samples.",
+      "sig": "(n, argvals, kernel='gaussian', length_scale=0.2, variance=1.0, seed=None)"
+    },
+    "sim_kl": {
+      "purpose": "Simulate functional data via Karhunen-Loeve expansion (low-level).",
+      "sig": "(n, phi, big_m, lambda_, seed=None)"
+    },
+    "simulate": {
+      "purpose": "Simulate functional data via Karhunen-Loeve expansion.",
+      "sig": "(n, argvals, n_basis=5, efun_type='fourier', eval_type='linear', seed=None)"
+    }
+  },
+  "smoothing": {
+    "cv_smoother": {
+      "purpose": "LOO-CV score for a kernel smoother.",
+      "sig": "(x, y, bandwidth, kernel='gaussian')"
+    },
+    "gcv_smoother": {
+      "purpose": "GCV score for a kernel smoother.",
+      "sig": "(x, y, bandwidth, kernel='gaussian')"
+    },
+    "knn_gcv": {
+      "purpose": "Global LOO-CV for kNN k selection.",
+      "sig": "(x, y, max_k)"
+    },
+    "knn_lcv": {
+      "purpose": "Local (per-observation) LOO-CV for kNN k selection.",
+      "sig": "(x, y, max_k)"
+    },
+    "knn_smoother": {
+      "purpose": "K-nearest neighbors smoother.",
+      "sig": "(x, y, x_new, k)"
+    },
+    "local_linear": {
+      "purpose": "Local linear regression smoother.",
+      "sig": "(x, y, x_new, bandwidth, kernel='gaussian')"
+    },
+    "local_polynomial": {
+      "purpose": "Local polynomial regression smoother.",
+      "sig": "(x, y, x_new, bandwidth, degree=1, kernel='gaussian')"
+    },
+    "nadaraya_watson": {
+      "purpose": "Nadaraya-Watson kernel smoother.",
+      "sig": "(x, y, x_new, bandwidth, kernel='gaussian')"
+    },
+    "optim_bandwidth": {
+      "purpose": "Optimal bandwidth selection via cross-validation.",
+      "sig": "(x, y, criterion='gcv', kernel='gaussian', n_grid=50, h_min=None, h_max=None)"
+    },
+    "smoothing_matrix_nw": {
+      "purpose": "Smoothing matrix for Nadaraya-Watson.",
+      "sig": "(x, bandwidth, kernel='gaussian')"
+    }
+  },
+  "spm": {
+    "arl0_ewma_t2": {
+      "purpose": "In-control ARL for EWMA T-squared chart.",
+      "sig": "(eigenvalues, ucl, lambda_, n_simulations=10000, max_run_length=5000, seed=42)"
+    },
+    "arl0_spe": {
+      "purpose": "In-control ARL for SPE chart.",
+      "sig": "(spe_df, spe_scale, ucl, n_simulations=10000, max_run_length=5000, seed=42)"
+    },
+    "arl0_t2": {
+      "purpose": "In-control ARL for T-squared chart (ARL0).",
+      "sig": "(eigenvalues, ucl, n_simulations=10000, max_run_length=5000, seed=42)"
+    },
+    "arl1_t2": {
+      "purpose": "Out-of-control ARL for T-squared chart (ARL1).",
+      "sig": "(eigenvalues, ucl, shift, n_simulations=10000, max_run_length=5000, seed=42)"
+    },
+    "ewma_scores": {
+      "purpose": "EWMA smoothing of FPC scores.",
+      "sig": "(scores, lambda_)"
+    },
+    "hotelling_t2": {
+      "purpose": "Hotelling T^2 statistic.",
+      "sig": "(scores, eigenvalues)"
+    },
+    "hotelling_t2_regularized": {
+      "purpose": "Hotelling T^2 with eigenvalue regularization.",
+      "sig": "(scores, eigenvalues, epsilon)"
+    },
+    "mfpca": {
+      "purpose": "Multivariate Functional Principal Component Analysis (MFPCA).",
+      "sig": "(variables, ncomp=5, weighted=True)"
+    },
+    "nelson_rules": {
+      "purpose": "Apply Nelson rules to monitoring data.",
+      "sig": "(values, center, sigma)"
+    },
+    "select_ncomp": {
+      "purpose": "Select the number of principal components.",
+      "sig": "(eigenvalues, method='cumulative_variance', threshold=0.95)"
+    },
+    "spe_control_limit": {
+      "purpose": "Compute SPE control limit using moment-matched chi-squared approximation.",
+      "sig": "(spe_values, alpha)"
+    },
+    "spe_limit_robust": {
+      "purpose": "Robust SPE (squared prediction error) control limit.",
+      "sig": "(spe_values, alpha=0.05, method='empirical')"
+    },
+    "spe_moment_match_diagnostic": {
+      "purpose": "Diagnostic for SPE moment-match chi-squared approximation.",
+      "sig": "(spe_values)"
+    },
+    "spe_multivariate": {
+      "purpose": "Multivariate Squared Prediction Error (SPE) monitoring statistic.",
+      "sig": "(standardized_vars, reconstructed_vars, argvals_list)"
+    },
+    "spm_cusum": {
+      "purpose": "Functional CUSUM control chart (fit Phase I + monitor).",
+      "sig": "(train_data, sequential_data, argvals, ncomp=5, alpha=0.05, k=0.5, h=5.0, multivariate=False)"
+    },
+    "spm_ewma": {
+      "purpose": "Functional EWMA control chart (fit Phase I + monitor).",
+      "sig": "(train_data, sequential_data, argvals, ncomp=5, alpha=0.05, lam=0.2)"
+    },
+    "spm_monitor": {
+      "purpose": "SPM Phase II monitoring.",
+      "sig": "(mean, loadings, weights, eigenvalues, t2_limit, spe_limit, new_data, argvals)"
+    },
+    "spm_phase1": {
+      "purpose": "SPM Phase I estimation.",
+      "sig": "(data, argvals, ncomp=3, alpha=0.05)"
+    },
+    "t2_control_limit": {
+      "purpose": "Compute T-squared control limit from chi-squared distribution.",
+      "sig": "(ncomp, alpha)"
+    },
+    "t2_limit_robust": {
+      "purpose": "Robust Hotelling T^2 control limit.",
+      "sig": "(t2_values, ncomp, alpha=0.05, method='empirical')"
+    },
+    "t2_pc_contributions": {
+      "purpose": "Per-PC T-squared contributions.",
+      "sig": "(scores, eigenvalues)"
+    },
+    "t2_pc_significance": {
+      "purpose": "Test per-PC T-squared contributions for Bonferroni-adjusted significance.",
+      "sig": "(contributions, alpha)"
+    },
+    "western_electric_rules": {
+      "purpose": "Apply Western Electric rules to monitoring data.",
+      "sig": "(values, center, sigma)"
+    }
+  },
+  "tolerance": {
+    "conformal_prediction_band": {
+      "purpose": "Conformal prediction band.",
+      "sig": "(data, coverage=0.95, cal_fraction=0.25, seed=42)"
+    },
+    "elastic_tolerance_band": {
+      "purpose": "Elastic tolerance band (amplitude only, after alignment).",
+      "sig": "(data, argvals, ncomp=3, nb=200, coverage=0.95, band_type='simultaneous', max_iter=20, seed=42)"
+    },
+    "elastic_tolerance_band_with_config": {
+      "purpose": "Joint amplitude and phase elastic tolerance bands.",
+      "sig": "(data, argvals, ncomp_amplitude=3, ncomp_phase=3, nb=200, coverage=0.95, band_type='pointwise', max_iter=20, tol=0.0001, seed=42)"
+    },
+    "equivalence_test": {
+      "purpose": "Functional equivalence test (TOST).",
+      "sig": "(data1, data2, delta, alpha=0.05, nb=1000, seed=42)"
+    },
+    "equivalence_test_one_sample": {
+      "purpose": "One-sample equivalence test.",
+      "sig": "(data, mu0, delta, alpha=0.05, nb=1000, seed=42)"
+    },
+    "exponential_family_tolerance_band": {
+      "purpose": "Exponential family tolerance band.",
+      "sig": "(data, family='gaussian', ncomp=3, nb=200, coverage=0.95, seed=42)"
+    },
+    "fpca_tolerance_band": {
+      "purpose": "FPCA-based tolerance band.",
+      "sig": "(data, ncomp=3, nb=1000, coverage=0.95, seed=42)"
+    },
+    "phase_tolerance_band": {
+      "purpose": "Phase tolerance band on warping functions.",
+      "sig": "(data, argvals, ncomp=3, nb=200, coverage=0.95, band_type='simultaneous', max_iter=20, seed=42)"
+    },
+    "scb_mean_degras": {
+      "purpose": "Simultaneous confidence band (Degras method).",
+      "sig": "(data, argvals, bandwidth=0.0, nb=1000, confidence=0.95)"
+    }
+  }
+}
