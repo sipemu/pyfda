@@ -1,0 +1,543 @@
+# fdars — Functional Data Analysis for Python
+
+> High-performance functional data analysis toolkit powered by Rust via PyO3. Provides depth measures, basis representations, smoothing, clustering, elastic alignment, regression (scalar-on-function, function-on-scalar, Fréchet), outlier detection, functional time series, seasonal decomposition, SPM control charts, conformal prediction, density FDA, and more. 30 public submodules, 409 public callables.
+
+[Documentation](https://sipemu.github.io/pyfda/)
+[Reference](https://sipemu.github.io/pyfda/reference/)
+[GitHub](https://github.com/sipemu/pyfda)
+
+## Core Modules
+
+- [fdars.alignment](https://sipemu.github.io/pyfda/reference/alignment/): Elastic alignment, SRSF registration, Karcher mean, elastic FPCA
+- [fdars.basis](https://sipemu.github.io/pyfda/reference/basis/): Basis representations — B-spline, Fourier, functional PCA
+- [fdars.classification](https://sipemu.github.io/pyfda/reference/classification/): Functional classifiers — k-nearest neighbours, SVM, centroid-based
+- [fdars.clustering](https://sipemu.github.io/pyfda/reference/clustering/): Functional k-means, fuzzy, GMM, and elastic clustering
+- [fdars.conformal](https://sipemu.github.io/pyfda/reference/conformal/): Conformal prediction and classification bands
+- [fdars.covariance](https://sipemu.github.io/pyfda/reference/index/): Kernel covariance functions for Gaussian processes over functions
+- [fdars.datasets](https://sipemu.github.io/pyfda/reference/index/): Built-in datasets — Canadian weather, Tecator, phoneme, growth, and more
+- [fdars.density_fda](https://sipemu.github.io/pyfda/reference/index/): Density-based functional data analysis and Wasserstein distances
+- [fdars.depth](https://sipemu.github.io/pyfda/reference/depth/): Functional depth measures — Fraiman-Muniz, band, modal, random-projection
+- [fdars.explain](https://sipemu.github.io/pyfda/reference/explain/): Functional explainability — SHAP, FCI, GRAD-CAM, and attribution maps
+- [fdars.famm](https://sipemu.github.io/pyfda/reference/index/): Functional additive mixed models (FAMM) for longitudinal data
+- [fdars.fdata](https://sipemu.github.io/pyfda/reference/fdata/): Core functional data operations — mean, deriv, norm, integrate, reconstruct
+- [fdars.frechet](https://sipemu.github.io/pyfda/reference/index/): Fréchet regression for metric-space responses
+- [fdars.fts](https://sipemu.github.io/pyfda/reference/index/): Functional time series — forecasting, correlation, spectral analysis
+- [fdars.inference](https://sipemu.github.io/pyfda/reference/index/): Functional inference — two-sample tests, interval-wise testing
+- [fdars.metric](https://sipemu.github.io/pyfda/reference/metric/): Functional distance and similarity metrics — L2, L1, Mahalanobis, DTW
+- [fdars.metrics](https://sipemu.github.io/pyfda/reference/index/): Regression and classification scoring metrics for functional outputs
+- [fdars.multi_fdata](https://sipemu.github.io/pyfda/reference/index/): Multi-domain functional data — paired domains, joint analysis
+- [fdars.outliers](https://sipemu.github.io/pyfda/reference/outliers/): Functional outlier detection — depth-based, magnitude, shape outliers
+- [fdars.pace_fpca](https://sipemu.github.io/pyfda/reference/index/): PACE: Principal Analysis by Conditional Expectation for sparse data
+- [fdars.regression](https://sipemu.github.io/pyfda/reference/regression/): Functional regression — scalar-on-function, function-on-scalar, GLM
+- [fdars.represent](https://sipemu.github.io/pyfda/reference/index/): Dimensionality reduction and functional representation tools
+- [fdars.scalar_on_function](https://sipemu.github.io/pyfda/reference/index/): Scalar-on-function regression with regularisation
+- [fdars.scoring](https://sipemu.github.io/pyfda/reference/index/): Functional scoring — penalised, tolerance-band, and integrated scores
+- [fdars.seasonal](https://sipemu.github.io/pyfda/reference/seasonal/): Seasonal functional decomposition and periodic pattern analysis
+- [fdars.shapelet](https://sipemu.github.io/pyfda/reference/index/): Functional shapelets — pattern-based classification and feature learning
+- [fdars.simulation](https://sipemu.github.io/pyfda/reference/simulation/): Simulation of functional data — GPs, Brownian motion, Ornstein-Uhlenbeck
+- [fdars.smoothing](https://sipemu.github.io/pyfda/reference/smoothing/): Functional smoothing — kernel, basis, and roughness-penalised methods
+- [fdars.spm](https://sipemu.github.io/pyfda/reference/spm/): Statistical process monitoring — T2, SPE, control charts
+- [fdars.tolerance](https://sipemu.github.io/pyfda/reference/tolerance/): Functional tolerance bands — simultaneous and pointwise coverage
+
+## Full API Reference
+
+Each entry: `module.function(signature)` — one-line purpose. Where available, a `When:` note gives guidance on which task this function suits best.
+
+### fdars.alignment (68 functions)
+
+- `alignment.align_to_target(data, target, argvals, lambda_=0.0)` — Align all curves to a single target curve.
+- `alignment.alignment_quality(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)` — Comprehensive alignment quality metrics.
+- `alignment.amplitude_distance(curve1, curve2, argvals, lambda_=0.0)` — Amplitude distance between two curves.
+- `alignment.amplitude_self_distance_matrix(data, argvals, lambda_=0.0)` — Amplitude self distance matrix (same as elastic self distance matrix).
+- `alignment.bayesian_align_pair(f1, f2, argvals, n_samples=1000, burn_in=200, step_size=0.1, proposal_variance=1.0, seed=42)` — Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere.
+- `alignment.compose_warps(warp1, warp2, argvals)` — Compose two warping functions.
+- `alignment.curve_geodesic(f1, f2, argvals, n_points=10, lambda_=0.0)` — Compute the geodesic path between two 1-D curves in the elastic metric.
+- `alignment.detect_landmarks(curve, argvals, kind='peak', min_prominence=0.0)` — Detect landmarks (peaks, valleys, zero-crossings, inflections) in a curve.
+- `alignment.diagnose_alignment(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001, over_alignment_threshold=1.0, under_alignment_threshold=1e-06, max_bending_energy=100.0, min_improvement_ratio=0.5)` — Diagnose alignment quality for every curve after Karcher mean computation.
+- `alignment.elastic_align_pair(curve1, curve2, argvals, lambda_=0.0)` — Pairwise elastic alignment of two curves. When: Use to elastically align two curves by computing their optimal warp function via SRSF.
+- `alignment.elastic_align_pair_closed(f1, f2, argvals, lambda_=0.0)` — Align closed (periodic) curve f2 to f1 with rotation search.
+- `alignment.elastic_align_pair_constrained(f1, f2, argvals, landmark_targets, landmark_sources, lambda_=0.0)` — Landmark-constrained elastic alignment.
+- `alignment.elastic_align_pair_multires(f1, f2, argvals, coarsen_factor=4, n_refine_steps=10, step_size=0.01, lambda_=0.0)` — Multi-resolution elastic alignment (coarse DP + gradient refinement).
+- `alignment.elastic_align_pair_penalized(curve1, curve2, argvals, lambda_=0.0, penalty_type='first_order', second_order_weight=0.1)` — Elastic alignment with configurable penalty type.
+- `alignment.elastic_changepoint(data, argvals, kind='amplitude', lam=0.0, max_iter=30, n_mc=200, seed=42, ncomp=5, pca_method='joint')` — Detect a distributional changepoint in a sequence of curves (elastic).
+- `alignment.elastic_cross_distance_matrix(data1, data2, argvals, lambda_=0.0)` — Elastic cross distance matrix.
+- `alignment.elastic_cross_distance_matrix_with_band(data1, data2, argvals, lambda_=0.0, band_frac=None)` — Elastic cross-distance matrix with optional Sakoe–Chiba band.
+- `alignment.elastic_decomposition(f1, f2, argvals, lambda_=0.0)` — Elastic phase-amplitude decomposition of two curves.
+- `alignment.elastic_depth(data, argvals, lambda_=0.0)` — Elastic depth (depth under elastic metric).
+- `alignment.elastic_distance(curve1, curve2, argvals, lambda_=0.0)` — Elastic (Fisher-Rao) distance between two curves.
+- `alignment.elastic_distance_closed(f1, f2, argvals, lambda_=0.0)` — Elastic distance between two closed curves.
+- `alignment.elastic_logistic(data, argvals, labels, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)` — Elastic logistic regression.
+- `alignment.elastic_outlier_detection(data, argvals, lambda_=0.0, alpha=0.05, use_median=True)` — Elastic outlier detection using distances and Tukey fence.
+- `alignment.elastic_partial_match(template, target, argvals_template, argvals_target, lambda_=0.0, min_span=0.5)` — Elastic partial matching: find best-aligned subcurve of a longer curve.
+- `alignment.elastic_regression(data, argvals, response, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)` — Elastic scalar-on-function regression.
+- `alignment.elastic_self_distance_matrix(data, argvals, lambda_=0.0)` — Elastic self distance matrix.
+- `alignment.elastic_self_distance_matrix_with_band(data, argvals, lambda_=0.0, band_frac=None)` — Elastic self-distance matrix with optional Sakoe–Chiba band.
+- `alignment.gauss_model(data, argvals, ncomp=3, n_samples=100, lambda_=0.0, max_iter=20, tol=0.0001, seed=42)` — Generate random curves from a fitted Gaussian model on aligned data.
+- `alignment.hierarchical_cut(dist_mat, k=2, linkage='single')` — Hierarchical clustering then cut to produce k clusters (convenience function).
+- `alignment.hierarchical_from_distances(dist_mat, linkage='single')` — Hierarchical agglomerative clustering from a precomputed distance matrix.
+- `alignment.horiz_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)` — Horizontal (phase) FPCA.
+- `alignment.horiz_fpns(data, argvals, ncomp=3, lambda_=0.0, max_iter=20, tol=0.0001)` — Horizontal Functional Principal Nested Spheres (FPNS) analysis.
+- `alignment.invert_warp(warp, argvals)` — Invert a warping function.
+- `alignment.joint_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)` — Joint (amplitude + phase) FPCA.
+- `alignment.joint_gauss_model(data, argvals, ncomp=3, n_samples=100, balance_c=1.0, lambda_=0.0, max_iter=20, tol=0.0001, seed=42)` — Generate random curves from a joint Gaussian model preserving amplitude-phase correlation.
+- `alignment.karcher_mean(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)` — Karcher (Frechet) mean under the elastic metric. When: Use when you need the Frechet/Karcher mean of a set of curves under elastic (SRSF) warping.
+- `alignment.karcher_mean_closed(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0)` — Karcher mean for closed (periodic) curves.
+- `alignment.karcher_mean_with_band(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001, band_frac=None)` — Karcher (Fréchet) mean under the elastic metric with optional Sakoe–Chiba band.
+- `alignment.karcher_median(data, argvals, lambda_=0.0, max_iter=20, tol=0.001)` — Karcher median under the elastic metric.
+- `alignment.kmedoids_from_distances(dist_mat, k=2, max_iter=100, seed=42)` — K-medoids clustering from a precomputed distance matrix.
+- `alignment.lambda_cv(data, argvals, lambdas=None, n_folds=5, max_iter=15, tol=0.001, seed=42)` — Cross-validation for the elastic alignment regularisation parameter lambda.
+- `alignment.landmark_detect_and_register(data, argvals, kind='peak', min_prominence=0.0, expected_count=0)` — Detect landmarks and register in one call.
+- `alignment.landmark_register(data, argvals, landmarks, target=None)` — Register curves to common landmark positions.
+- `alignment.least_squares_score(registered, argvals)` — Least-squares registration score: mean Simpson-weighted L2 spread of the
+- `alignment.least_squares_shift_registration(data, argvals, max_shift)` — Register curves by a per-curve rigid horizontal shift (least-squares).
+- `alignment.pairwise_consistency(data, argvals, lambda_=0.0, max_triplets=0)` — Pairwise alignment consistency via triplet checks.
+- `alignment.pairwise_correlation_score(registered, argvals)` — Pairwise correlation registration score: mean functional Pearson correlation
+- `alignment.peak_persistence(data, argvals, lambdas, max_iter=10, tol=0.001)` — Peak persistence diagram for choosing the alignment regularisation parameter.
+- `alignment.phase_boxplot(gammas, argvals, factor=1.5)` — Phase (warping) box plot for functional data.
+- `alignment.phase_distance(curve1, curve2, argvals, lambda_=0.0)` — Phase distance between two curves.
+- `alignment.phase_self_distance_matrix(data, argvals, lambda_=0.0)` — Phase self distance matrix.
+- `alignment.reparameterize_curve(curve, argvals, gamma)` — Apply a warping function to a curve (reparameterize).
+- `alignment.robust_karcher_mean(data, argvals, lambda_=0.0, max_iter=20, tol=0.001, trim_fraction=0.1)` — Robust Karcher mean (trimmed).
+- `alignment.shape_confidence_interval(data, argvals, n_bootstrap=200, confidence_level=0.95, lambda_=0.0, max_iter=15, tol=0.001, seed=42)` — Bootstrap confidence intervals for the elastic Karcher mean.
+- `alignment.shape_distance(curve1, curve2, argvals, lambda_=0.0)` — Shape distance (quotient space distance).
+- `alignment.shape_mean(data, argvals, quotient='reparameterization', lambda_=0.0, max_iter=20, tol=0.0001)` — Shape mean of a set of curves.
+- `alignment.shape_self_distance_matrix(data, argvals, quotient='reparameterization', lambda_=0.0)` — Pairwise shape distance matrix.
+- `alignment.sobolev_least_squares_score(registered, argvals, lambda_=0.0)` — Sobolev least-squares registration score: LS spread plus a derivative-penalty
+- `alignment.srsf_inverse(srsf, argvals, initial_value=0.0)` — Inverse SRSF transform.
+- `alignment.srsf_transform(curve, argvals)` — SRSF (Square Root Slope Function) transform.
+- `alignment.transfer_alignment(source_data, target_data, argvals, lambda_=0.0, max_iter=15, tol=0.001)` — Align curves from a target population to a source population's coordinate system.
+- `alignment.tsrvf_transform(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0)` — TSRVF (Transported SRSF) transform.
+- `alignment.tsrvf_transform_with_method(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0, method='log_map')` — TSRVF transform with configurable transport method.
+- `alignment.vert_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)` — Vertical (amplitude) FPCA on aligned data.
+- `alignment.warp_complexity(warp, argvals)` — Warp complexity (geodesic distance from identity).
+- `alignment.warp_inverse_error(warp, argvals)` — Compute the L2 error of a warp inverse: ||gamma(gamma_inv(t)) - t||.
+- `alignment.warp_smoothness(warp, argvals)` — Warp smoothness (bending energy).
+- `alignment.warp_statistics(gammas, argvals, confidence_level=0.95)` — Warp statistics: mean, variance, confidence bands, Karcher mean warp.
+
+### fdars.basis (16 functions)
+
+- `basis.basis_nbasis_cv(data, argvals, nbasis_min=4, nbasis_max=20, basis_type='bspline', criterion='gcv', n_folds=5, lambda_=0.0)` — Cross-validated selection of number of basis functions. When: Use to select the optimal number of B-spline or Fourier basis functions via leave-one-out CV.
+- `basis.basis_to_fdata_1d(coefficients, argvals, n_basis, basis_type='bspline')` — Reconstruct functional data from basis coefficients. When: Use to convert a coefficient matrix + basis object into a functional data matrix on a target grid.
+- `basis.bspline_basis(argvals, nknots, order=4)` — Evaluate a B-spline basis at given points.
+- `basis.bspline_basis_from_knots(argvals, knots, order=4)` — Evaluate a B-spline basis from a given knot vector.
+- `basis.constant_basis(argvals)` — Evaluate the constant (intercept) basis on a grid of evaluation points.
+- `basis.construct_bspline_knots(t_min, t_max, nknots, order=4)` — Construct B-spline knot vector.
+- `basis.fdata_to_basis_1d(data, argvals, n_basis, basis_type='bspline')` — Project functional data onto a B-spline or Fourier basis.
+- `basis.fourier_basis(argvals, n_basis)` — Evaluate a Fourier basis at given points.
+- `basis.fourier_basis_with_period(argvals, n_basis, period)` — Evaluate a Fourier basis with specified period at given points.
+- `basis.fourier_fit_1d(data, argvals, nbasis)` — Fit Fourier basis to functional data using least squares.
+- `basis.pspline_fit_1d(data, argvals, n_basis, lambda_, order=2)` — Fit P-splines to 1D functional data.
+- `basis.pspline_fit_gcv(data, argvals, n_basis, order=2)` — P-spline fit with GCV-selected smoothing parameter.
+- `basis.select_basis_auto_1d(data, argvals, criterion='gcv', nbasis_min=0, nbasis_max=0, lambda_pspline=Ellipsis, use_seasonal_hint=True)` — Automatic basis selection (GCV/AIC/BIC) for 1D data.
+- `basis.select_fourier_nbasis_gcv(data, argvals, min_nbasis, max_nbasis)` — Select optimal number of Fourier basis functions via GCV.
+- `basis.smooth_basis_aic(data, argvals, n_basis, basis_type='bspline', lfd_order=2, log_lambda_min=Ellipsis, log_lambda_max=4.0, n_grid=25)` — Smooth functional data using basis expansion with AIC-optimal lambda.
+- `basis.smooth_basis_gcv(data, argvals, n_basis, basis_type='bspline', lfd_order=2, log_lambda_min=Ellipsis, log_lambda_max=4.0, n_grid=25)` — Smooth functional data using basis expansion with GCV.
+
+### fdars.classification (9 functions)
+
+- `classification.elastic_multinomial(data, labels, argvals, ncomp_beta=10, lambda_=0.1, max_iter=100, tol=0.0001)` — K-class elastic multinomial classifier for functional data (one-vs-rest).
+- `classification.fclassif_cv(data, argvals, labels, method='lda', ncomp=3, nfold=5)` — Cross-validated classification.
+- `classification.fclassif_dd(data, labels)` — Depth-based DD-classifier for functional data.
+- `classification.fclassif_kernel(data, argvals, labels, h_func=1.0, h_scalar=1.0)` — Kernel classification for functional data.
+- `classification.fclassif_knn(data, labels, ncomp=3, k=5)` — k-NN classification for functional data.
+- `classification.fclassif_lda(data, labels, ncomp=3)` — LDA classification for functional data via FPC scores.
+- `classification.fclassif_qda(data, labels, ncomp=3)` — QDA classification for functional data.
+- `classification.kernel_classify_from_distances(func_dists, labels, h_func=1.0, h_scalar=1.0)` — Kernel classification from a precomputed functional distance matrix.
+- `classification.knn_classify_from_distances(dist_matrix, labels, k=5)` — k-NN classification from a precomputed distance matrix.
+
+### fdars.clustering (11 functions)
+
+- `clustering.align_cluster_fd(data, argvals, k=2, max_iter=20, seed=42, use_amplitude_only=True, elastic_lambda=0.0, karcher_max_iter=15, karcher_tol=0.0001)` — Elastic-alignment functional clustering.
+- `clustering.calinski_harabasz(dist_matrix, labels)` — Calinski-Harabasz index for cluster quality (from distance matrix).
+- `clustering.calinski_harabasz_data(data, argvals, labels)` — Calinski-Harabasz index for cluster quality (from data and argvals).
+- `clustering.dbscan_fd(data, argvals, eps=0.5, min_points=3)` — Density-based spatial clustering of functional data (DBSCAN).
+- `clustering.funfem_cluster(data, argvals, k=2, ncomp=10, p_disc=0, max_iter=50, tol=1e-06, seed=42)` — Fisher-EM discriminative functional clustering (FunFEM).
+- `clustering.fuzzy_cmeans_fd(data, argvals, k, fuzziness=2.0, max_iter=100, tol=1e-06, seed=42)` — Fuzzy C-means clustering for functional data.
+- `clustering.gmm_cluster(data, argvals, k_range, nbasis=5, max_iter=200, tol=1e-06, seed=42)` — GMM clustering for functional data (via basis projection).
+- `clustering.kcfc_cluster(data, argvals, k=2, ncomp=3, max_iter=50, seed=42)` — K-means with per-cluster FPCA (KCFC) clustering for functional data.
+- `clustering.kmeans_fd(data, argvals, k, max_iter=100, tol=1e-06, seed=42)` — K-means clustering for functional data.
+- `clustering.silhouette_score(dist_matrix, labels)` — Silhouette score for cluster quality assessment (from distance matrix).
+- `clustering.silhouette_score_data(data, argvals, labels)` — Silhouette score for cluster quality assessment (from data and argvals).
+
+### fdars.conformal (7 functions)
+
+- `conformal.conformal_classif(data, labels, test_data, ncomp=3, classifier='lda', cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal classification prediction sets.
+- `conformal.conformal_elastic_logistic(data, labels, test_data, argvals, lambda=0.0, cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal elastic logistic regression prediction sets.
+- `conformal.conformal_elastic_pcr(data, response, test_data, argvals, ncomp=3, pca_method="vertical", lambda=0.0, cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal elastic PCR prediction intervals.
+- `conformal.conformal_elastic_regression(data, response, test_data, argvals, ncomp_beta=3, lambda=0.0, cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal elastic regression prediction intervals.
+- `conformal.conformal_fregre_lm(data, response, test_data, ncomp=3, cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal regression prediction intervals.
+- `conformal.conformal_fregre_np(data, response, test_data, argvals, cal_fraction=0.25, alpha=0.1, h_func=1.0, h_scalar=1.0, seed=42)` — Conformal nonparametric regression.
+- `conformal.conformal_logistic(data, response, test_data, ncomp=3, max_iter=100, tol=1e-06, cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal logistic regression prediction sets.
+
+### fdars.covariance (14 functions)
+
+- `covariance.kernel_add(k1, k2)` — Sum of two kernels.
+- `covariance.kernel_brownian(variance: 'float' = 1.0)` — Brownian-motion (Wiener) kernel: ``variance * min(s, t)``.
+- `covariance.kernel_exponential(lengthscale: 'float' = 1.0, variance: 'float' = 1.0)` — Exponential kernel (Matern nu=1/2): ``variance * exp(-|s-t| / l)``.
+- `covariance.kernel_gaussian(lengthscale: 'float' = 1.0, variance: 'float' = 1.0)` — Squared-exponential (RBF) kernel: ``variance * exp(-(s-t)^2 / (2 l^2))``.
+- `covariance.kernel_linear(variance: 'float' = 1.0, center: 'float' = 0.0)` — Linear kernel: ``variance * (s-c) * (t-c)``.
+- `covariance.kernel_matern(lengthscale: 'float' = 1.0, nu: 'float' = 1.5, variance: 'float' = 1.0)` — Matern kernel for ``nu`` in {0.5, 1.5, 2.5} (closed forms).
+- `covariance.kernel_mult(k1, k2)` — Product of two kernels.
+- `covariance.kernel_periodic(lengthscale: 'float' = 1.0, period: 'float' = 1.0, variance: 'float' = 1.0)` — Periodic kernel: ``variance * exp(-2 sin^2(pi|s-t|/p) / l^2)``.
+- `covariance.kernel_polynomial(degree: 'int' = 2, variance: 'float' = 1.0, offset: 'float' = 1.0)` — Polynomial kernel: ``variance * (s*t + offset)^degree``.
+- `covariance.kernel_whitenoise(variance: 'float' = 1.0)` — White-noise kernel: ``variance`` on the diagonal (s == t), else 0.
+- `covariance.make_gaussian_process(argvals, kernel, n: 'int' = 1, mean=0.0, jitter: 'float' = 1e-08, seed: 'int | None' = None)` — Sample ``n`` Gaussian-process curves from ``kernel`` on ``argvals``.
+- `covariance.r_bridge(n: 'int' = 1, argvals=None, n_points: 'int | None' = None, sigma: 'float' = 1.0, seed: 'int | None' = None)` — Sample ``n`` Brownian-bridge paths B(t) - (t/T) B(T) (R ``r.bridge``).
+- `covariance.r_brownian(n: 'int' = 1, argvals=None, n_points: 'int | None' = None, sigma: 'float' = 1.0, seed: 'int | None' = None)` — Sample ``n`` standard Brownian-motion paths (R ``r.brownian``).
+- `covariance.r_ou(n: 'int' = 1, argvals=None, n_points: 'int | None' = None, theta: 'float' = 1.0, mu: 'float' = 0.0, sigma: 'float' = 1.0, x0: 'float | None' = None, seed: 'int | None' = None)` — Sample ``n`` Ornstein-Uhlenbeck paths (R ``r.ou``).
+
+### fdars.datasets (7 functions)
+
+- `datasets.Dataset(data: 'Fdata', argvals: 'Any', y: 'Optional[np.ndarray]', meta: 'Any', name: 'str' = '', description: 'str' = '', _extras: 'Dict[str, Any]' = <factory>) -> None` — Container for a loaded example dataset.
+- `datasets.load_canadian_weather(variable: 'str' = 'temperature', return_fdata: 'bool' = True)` — Canadian Weather: daily curves for 35 stations over a 365-day year.
+- `datasets.load_growth(return_fdata: 'bool' = True)` — Berkeley Growth Study: heights (cm) of 39 boys & 54 girls at 31 ages.
+- `datasets.load_phoneme(return_fdata: 'bool' = True)` — Phoneme: log-periodograms (256 freqs) for 5 phoneme classes.
+- `datasets.load_sonar(return_fdata: 'bool' = True)` — Sonar (UCI): 60-band sonar return energies for 208 objects.
+- `datasets.load_tecator(return_fdata: 'bool' = True)` — Tecator: 100-channel NIR absorbance spectra of 240 meat samples.
+- `datasets.load_wine(return_fdata: 'bool' = True)` — Wine (UCI): 13 chemical measurements for 178 wines of 3 cultivars.
+
+### fdars.density_fda (5 functions)
+
+- `density_fda.inverse_lqd(psi, t_grid, target_argvals)` — Compute the inverse LQD transform: reconstruct a density from its LQD representation.
+- `density_fda.lqd_fpca(density_matrix, argvals, ncomp=3, n_quantile_pts=None)` — Functional PCA of densities via the LQD transform.
+- `density_fda.lqd_transform(density, argvals, n_quantile_pts=None)` — Compute the log-quantile density (LQD) transform of a density function.
+- `density_fda.normalize_density(vals, argvals)` — Normalize a density function to integrate to 1.
+- `density_fda.wasserstein_barycenter(density_matrix, argvals, weights=None)` — Compute the Wasserstein Fréchet mean (barycenter) of a collection of densities.
+
+### fdars.depth (18 functions)
+
+- `depth.band_1d(data, ref_data)` — Band depth for 1D functional data. When: Use to compute band depth — the proportion of bands formed by sample curve pairs that contain a query curve.
+- `depth.fraiman_muniz_1d(data, ref_data, scale=True)` — Fraiman-Muniz depth for 1D functional data. When: Use to compute the Fraiman-Muniz depth (marginal-integral depth) for 1D functional data.
+- `depth.fraiman_muniz_2d(data, ref_data, scale=True)` — Fraiman-Muniz depth for 2D functional data.
+- `depth.functional_boxplot(data, method='modified_band', factor=1.5, scale=True, nproj=50, seed=None)` — Canonical López-Pintado–Romo depth-fence functional boxplot (numeric only).
+- `depth.functional_depth(data, method='fraiman_muniz', scale=True, nproj=50, seed=None)` — Unified self-depth dispatcher for functional data.
+- `depth.functional_spatial_1d(data, ref_data, argvals=None)` — Functional spatial depth for 1D data.
+- `depth.functional_spatial_2d(data, ref_data)` — Functional spatial depth for 2D data.
+- `depth.kernel_functional_spatial_1d(data, ref_data, argvals, h=1.0)` — Kernel functional spatial depth for 1D data.
+- `depth.kernel_functional_spatial_2d(data, ref_data, h=1.0)` — Kernel functional spatial depth for 2D data.
+- `depth.modal_1d(data, ref_data, h=1.0)` — Modal depth for 1D functional data. When: Use to rank curves by modal depth (kernel density in function space); identifies the most central curve.
+- `depth.modal_2d(data, ref_data, h=1.0)` — Modal depth for 2D functional data.
+- `depth.modified_band_1d(data, ref_data)` — Modified band depth for 1D functional data.
+- `depth.modified_epigraph_index_1d(data, ref_data)` — Modified epigraph index for 1D functional data.
+- `depth.random_projection_1d(data, ref_data, n_proj=50)` — Random projection depth for 1D functional data.
+- `depth.random_projection_2d(data, ref_data, n_proj=50)` — Random projection depth for 2D functional data.
+- `depth.random_projection_deriv_1d(data, ref_data, argvals=None, n_proj=50, n_deriv=1, seed=None)` — Random-projection depth using curves and their derivatives (RPD).
+- `depth.random_tukey_1d(data, ref_data, n_proj=50)` — Random Tukey depth for 1D functional data.
+- `depth.random_tukey_2d(data, ref_data, n_proj=50)` — Random Tukey depth for 2D functional data.
+
+### fdars.explain (46 functions)
+
+- `explain.anchor_explanation(data, response, ncomp=3, observation=0, precision_threshold=0.95, n_bins=4)` — Anchor explanation (linear model).
+- `explain.anchor_explanation_logistic(data, labels, ncomp=3, observation=0, precision_threshold=0.95, n_bins=4)` — Anchor explanation (logistic model).
+- `explain.andrews_loadings(rotation, n_grid=100)` — Andrews-curve loadings for a rotation/loading matrix.
+- `explain.andrews_transform(data, n_grid=100)` — Andrews-curve transform of functional/multivariate data.
+- `explain.beta_decomposition(data, response, ncomp=3)` — Beta function decomposition.
+- `explain.beta_decomposition_logistic(data, labels, ncomp=3)` — Beta decomposition for a logistic regression model.
+- `explain.calibration_diagnostics(data, labels, ncomp=3, n_groups=10)` — Calibration diagnostics for a logistic model.
+- `explain.conditional_permutation_importance(data, response, ncomp=3, n_bins=5, n_perm=10, seed=42)` — Conditional permutation importance for a linear regression model.
+- `explain.conditional_permutation_importance_logistic(data, labels, ncomp=3, n_bins=5, n_perm=10, seed=42)` — Conditional permutation importance for a logistic regression model.
+- `explain.conformal_prediction_residuals(data, response, test_data, ncomp=3, cal_fraction=0.25, alpha=0.1, seed=42)` — Split-conformal prediction intervals.
+- `explain.counterfactual_logistic(data, labels, ncomp=3, observation=0, max_iter=100, step_size=0.1)` — Counterfactual explanation (logistic model, gradient descent).
+- `explain.counterfactual_regression(data, response, ncomp=3, observation=0, target_value=0.0)` — Counterfactual explanation (linear regression).
+- `explain.dfbetas_dffits(data, response, ncomp=3)` — DFBETAS and DFFITS diagnostics.
+- `explain.domain_selection(data, response, ncomp=3, window_width=5, threshold=0.0)` — Domain selection / interval importance (linear model).
+- `explain.domain_selection_logistic(data, labels, ncomp=3, window_width=5, threshold=0.0)` — Domain selection / interval importance (logistic model).
+- `explain.expected_calibration_error(data, labels, ncomp=3, n_bins=10)` — Expected calibration error (ECE, MCE, ACE).
+- `explain.explanation_stability(data, response, ncomp=3, n_boot=100, seed=42)` — Bootstrap stability analysis (linear model).
+- `explain.explanation_stability_logistic(data, labels, ncomp=3, n_boot=100, seed=42)` — Bootstrap stability analysis (logistic model).
+- `explain.fpc_ale(data, response, ncomp=3, component=0, n_bins=10)` — ALE plot for an FPC component (linear model).
+- `explain.fpc_ale_logistic(data, labels, ncomp=3, component=0, n_bins=10)` — ALE plot for an FPC component (logistic model).
+- `explain.fpc_permutation_importance(data, response, ncomp=3, n_perm=10, seed=42)` — FPC-based permutation importance.
+- `explain.fpc_permutation_importance_logistic(data, labels, ncomp=3, n_perm=10, seed=42)` — FPC permutation importance for a logistic model.
+- `explain.fpc_shap_values(data, response, ncomp=3)` — FPC SHAP values.
+- `explain.fpc_shap_values_logistic(data, labels, ncomp=3, n_samples=100, seed=42)` — Kernel SHAP values for a logistic model.
+- `explain.fpc_vif(data, response, ncomp=3)` — Variance inflation factors for FPC scores.
+- `explain.fpc_vif_logistic(data, labels, ncomp=3)` — Variance inflation factors for a logistic model.
+- `explain.friedman_h_statistic(data, response, ncomp=3, component_j=0, component_k=1, n_grid=20)` — Friedman H-statistic for interaction between two FPC components (linear model).
+- `explain.friedman_h_statistic_logistic(data, labels, ncomp=3, component_j=0, component_k=1, n_grid=20)` — Friedman H-statistic for a logistic model.
+- `explain.functional_pdp(data, response, ncomp=3, component=0, n_grid=50)` — Functional partial dependence plot.
+- `explain.functional_pdp_logistic(data, labels, ncomp=3, component=0, n_grid=50)` — Functional PDP/ICE for a logistic regression model.
+- `explain.functional_saliency(data, response, ncomp=3)` — Functional saliency maps (linear model).
+- `explain.functional_saliency_logistic(data, labels, ncomp=3)` — Functional saliency maps (logistic model, gradient-based).
+- `explain.influence_diagnostics(data, response, ncomp=3)` — Influence diagnostics (Cook's distance, leverage).
+- `explain.lime_explanation(data, response, ncomp=3, observation=0, n_samples=100, kernel_width=1.0, seed=42)` — LIME explanation for a linear regression model.
+- `explain.lime_explanation_logistic(data, labels, ncomp=3, observation=0, n_samples=100, kernel_width=1.0, seed=42)` — LIME explanation for a logistic regression model.
+- `explain.loo_cv_press(data, response, ncomp=3)` — LOO-CV / PRESS diagnostics.
+- `explain.pointwise_importance(data, response, ncomp=3)` — Pointwise variable importance for a linear regression model.
+- `explain.pointwise_importance_logistic(data, labels, ncomp=3)` — Pointwise variable importance for a logistic regression model.
+- `explain.prediction_intervals(data, response, new_data, ncomp=3, confidence_level=0.95)` — Prediction intervals for new observations.
+- `explain.prototype_criticism(data, ncomp=3, n_prototypes=5, n_criticisms=5)` — Prototype/criticism selection (MMD-based).
+- `explain.regression_depth(data, response, ncomp=3, n_boot=100, depth_type='fraiman_muniz', seed=42)` — Regression depth diagnostics (linear model).
+- `explain.regression_depth_logistic(data, labels, ncomp=3, n_boot=100, depth_type='fraiman_muniz', seed=42)` — Regression depth diagnostics (logistic model).
+- `explain.significant_regions(lower, upper)` — Significant regions of the beta function.
+- `explain.significant_regions_from_se(beta_t, beta_se, z_alpha=1.96)` — Significant regions from beta(t) and its standard error.
+- `explain.sobol_indices(data, response, ncomp=3)` — Sobol sensitivity indices (linear model).
+- `explain.sobol_indices_logistic(data, labels, ncomp=3, n_samples=1000, seed=42)` — Sobol sensitivity indices (logistic model, Saltelli MC).
+
+### fdars.famm (3 functions)
+
+- `famm.dense_flmm(data, subject_ids, covariates=None, ncomp=3, max_iter=50, tol=1e-10)` — Fit a Functional Linear Mixed Model (FLMM) via REML-EM.
+- `famm.fast_fmm(data, subject_ids, covariates=None, smooth_window=3, max_iter=30, tol=1e-08, compute_inference=True)` — Fit a fast Functional Mixed Model (FMM) with optional Wald inference.
+- `famm.multi_famm(data_list, subject_ids, covariates=None, ncomp=3, max_iter=50, tol=1e-10)` — Fit a multi-variable Functional Additive Mixed Model (multiFAMM).
+
+### fdars.fdata (15 functions)
+
+- `fdata.center_1d(data)` — Center functional data by subtracting the pointwise mean.
+- `fdata.depth_based_median(data)` — Return the depth-based median curve of 1D functional data.
+- `fdata.deriv_1d(data, argvals, nderiv=1)` — Compute numerical derivatives of 1D functional data. When: Use to estimate the first or higher-order derivative of a functional dataset on its evaluation grid.
+- `fdata.deriv_2d(data, argvals_s, argvals_t)` — Compute numerical derivatives of 2D functional data.
+- `fdata.functional_covariance(data)` — Compute the Bessel-corrected m×m covariance surface of 1D functional data.
+- `fdata.functional_std(data)` — Compute the Bessel-corrected pointwise standard deviation of 1D functional data.
+- `fdata.functional_variance(data)` — Compute the Bessel-corrected pointwise variance of 1D functional data.
+- `fdata.geometric_median_1d(data, argvals, max_iter=100, tol=1e-08)` — Compute the geometric (L1) median of 1D functional data.
+- `fdata.geometric_median_2d(data, argvals_s, argvals_t, max_iter=100, tol=1e-08)` — Compute the geometric (L1) median of 2D functional data.
+- `fdata.mean_1d(data)` — Compute the pointwise mean of 1D functional data. When: Use to compute the pointwise cross-sectional mean curve of a functional dataset.
+- `fdata.mean_2d(data)` — Compute the pointwise mean of 2D functional data.
+- `fdata.norm_lp_1d(data, argvals, p=2.0)` — Compute Lp norms of 1D functional data.
+- `fdata.normalize(data, method='center')` — Normalize functional data.
+- `fdata.normalize_with_argvals(data, argvals, method='center', p=2.0)` — Normalize functional data (with argvals for Lp normalization).
+- `fdata.trim_mean(data, alpha=0.0)` — Compute the depth-trimmed mean of 1D functional data.
+
+### fdars.frechet (4 functions)
+
+- `frechet.frechet_anova(responses, argvals, group_labels, n_perm=999, seed=42)` — Fréchet ANOVA: test equality of Fréchet means across groups.
+- `frechet.frechet_global_reg(predictors, responses, argvals, xout)` — Global Fréchet linear regression for density-response functional data. When: Use to run Frechet regression with a scalar or metric-space response and functional predictors.
+- `frechet.frechet_local_reg(predictors, responses, argvals, xout, bandwidth)` — Local Fréchet regression for density-response functional data.
+- `frechet.frechet_mean(objects, space, d, weights=None)` — Fréchet mean over a metric space, dispatched by space name.
+
+### fdars.fts (13 functions)
+
+- `fts.dpca(data, argvals, ncomp=3, bandwidth=None, filter_lag=None)` — Fit Dynamic Functional Principal Components Analysis (DPCA).
+- `fts.dpca_reconstruct(data, argvals, ncomp=3, bandwidth=None, filter_lag=None)` — Fit DPCA and reconstruct the functional time series from dynamic components.
+- `fts.fplsr(data, argvals, ncomp=3)` — Functional Partial Least Squares Regression (fPLSR) one-step-ahead forecast.
+- `fts.ftsm(data, argvals, ncomp=3)` — Fit a Functional Time Series Model (FTSM) via FPCA + Yule-Walker AR fitting.
+- `fts.ftsm_forecast(data, argvals, h=1, ncomp=3)` — Fit an FTSM and produce a single- or multi-horizon forecast (single-step variant).
+- `fts.ftsm_forecast_multistep(data, argvals, h=5, ncomp=3)` — Fit an FTSM and produce a multi-step forecast (iterative multi-step variant).
+- `fts.ftsm_update(data, new_curve, argvals, ncomp=3)` — Online update of an FTSM with one or more new curves.
+- `fts.functional_acf(data, argvals, max_lag=None, n_sim=999, ci=0.95, seed=42)` — Compute the functional autocorrelation function (ACF) with Monte Carlo bands.
+- `fts.functional_difference(data)` — Compute the first-order functional difference (lag-1 differencing).
+- `fts.functional_pacf(data, argvals, max_lag=None, n_sim=999, ci=0.95, seed=42)` — Compute the functional partial autocorrelation function (PACF) with Monte Carlo bands.
+- `fts.long_run_covariance(data, argvals, bandwidth=None)` — Estimate the long-run covariance operator of a functional time series.
+- `fts.spectral_density(data, argvals, bandwidth=None)` — Estimate the spectral density operator of a functional time series.
+- `fts.stationarity_test(data, argvals, n_perm=999, seed=42)` — Test stationarity of functional time series via permutation test. When: Use to test stationarity of a functional time series before fitting FTSM or computing ACF.
+
+### fdars.inference (11 functions)
+
+- `inference.f_perm_test(data_a, data_b, argvals, n_perm=999, seed=None)` — Functional two-sample permutation *F*-test.
+- `inference.flm_f_test(data, response, n_comp=5)` — Functional linear model overall-significance F-test. When: Use to test whether functional linear model coefficients are jointly zero (functional F-test).
+- `inference.flm_gof_test(data, response, n_comp=5)` — Functional linear model goodness-of-fit test (Ramsey-RESET style).
+- `inference.itp_flm(data, response, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` — Interval-wise testing procedure for the functional linear model.
+- `inference.itp_one_pop(data, argvals, mu0=None, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` — Interval-wise testing procedure for a single functional population.
+- `inference.itp_two_pop(data_a, data_b, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` — Interval-wise testing procedure for two functional populations.
+- `inference.mean_scb(data, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` — Simultaneous confidence band for the mean function (Degras).
+- `inference.oneway_anova_vstat(data, groups, argvals)` — One-way functional ANOVA V-statistic (asymptotic scaled-χ² test).
+- `inference.scb_two_sample_test(data_a, data_b, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` — Two-sample mean-equality test via a simultaneous confidence band for the
+- `inference.t_perm_test(data_a, data_b, argvals, n_perm=999, seed=None)` — Functional two-sample permutation *t*-test.
+- `inference.two_sample_mean_test(data_a, data_b, argvals, ncomp=5)` — Functional two-sample mean-equality test via Hotelling-T² on a shared FPC
+
+### fdars.metric (26 functions)
+
+- `metric.PyGakGramTrain(...)` — Opaque handle wrapping fdars-core GakGramTrain for incremental GAK Gram computation.
+- `metric.dtw_cross_1d(data1, data2, p=2.0, w=0)` — DTW cross distance for 1D data.
+- `metric.dtw_self_1d(data, p=2.0, w=0)` — DTW distance matrix (self) for 1D data.
+- `metric.fourier_cross_1d(data1, data2, n_basis=5)` — Fourier coefficient distance (cross).
+- `metric.fourier_self_1d(data, n_basis=5)` — Fourier coefficient distance (self) for 1D data.
+- `metric.gak(x, y, sigma)` — Global Alignment Kernel between two 1-D time series.
+- `metric.gak_gram_matrix(data, sigma=None)` — Global Alignment Kernel Gram matrix (one-shot, symmetric).
+- `metric.gak_gram_predict(train, new_data)` — Compute the GAK Gram matrix between new data and the training set.
+- `metric.gak_gram_train(data, sigma=None)` — Fit a GAK Gram handle for incremental train/predict computation.
+- `metric.hausdorff_cross_1d(data1, data2, argvals)` — Hausdorff cross distance for 1D data.
+- `metric.hausdorff_cross_2d(data1, data2, argvals_s, argvals_t)` — Hausdorff cross distance for 2D data.
+- `metric.hausdorff_self_1d(data, argvals)` — Hausdorff distance matrix (self) for 1D data.
+- `metric.hausdorff_self_2d(data, argvals_s, argvals_t)` — Hausdorff self distance for 2D data.
+- `metric.hshift_cross_1d(data1, data2, argvals, max_shift=0)` — Horizontal shift distance (cross).
+- `metric.hshift_self_1d(data, argvals, max_shift=0)` — Horizontal shift distance (self) for 1D data.
+- `metric.inprod(data1, data2, argvals=None)` — Inner product between two functional data sets (Simpson-integrated).
+- `metric.int_simpson(data, argvals=None)` — Simpson's-rule integral of each curve.
+- `metric.lp_cross_1d(data1, data2, argvals, p=2.0)` — Lp distance matrix (cross) between two 1D functional datasets.
+- `metric.lp_cross_2d(data1, data2, argvals_s, argvals_t, p=2.0)` — Lp cross distance for 2D data.
+- `metric.lp_self_1d(data, argvals, p=2.0)` — Lp distance matrix (self) for 1D functional data.
+- `metric.lp_self_2d(data, argvals_s, argvals_t, p=2.0)` — Lp distance matrix (self) for 2D functional data.
+- `metric.sigma_gak(data)` — Heuristic GAK bandwidth: median pairwise Euclidean distance, floored at 1e-8.
+- `metric.soft_dtw_cross_1d(data1, data2, gamma=1.0)` — Soft-DTW cross distance for 1D data.
+- `metric.soft_dtw_div_cross_1d(data1, data2, gamma=1.0)` — Soft-DTW divergence cross distance.
+- `metric.soft_dtw_div_self_1d(data, gamma=1.0)` — Soft-DTW divergence distance matrix (self) for 1D data.
+- `metric.soft_dtw_self_1d(data, gamma=1.0)` — Soft-DTW distance matrix (self) for 1D data.
+
+### fdars.metrics (5 functions)
+
+- `metrics.pred_mae(y_true, y_pred) -> 'float'` — Mean absolute error (R ``pred.MAE``).
+- `metrics.pred_mse(y_true, y_pred) -> 'float'` — Mean squared error (R ``pred.MSE``).
+- `metrics.pred_r2(y_true, y_pred) -> 'float'` — Coefficient of determination R^2 (R ``pred.R2``).
+- `metrics.pred_rmse(y_true, y_pred) -> 'float'` — Root mean squared error (R ``pred.RMSE``).
+- `metrics.prediction_metrics(y_true, y_pred) -> 'dict'` — All four ``pred.*`` metrics as a dict (``mae``, ``mse``, ``rmse``, ``r2``).
+
+### fdars.multi_fdata (2 functions)
+
+- `multi_fdata.PyMultiFunData(...)` — Opaque handle wrapping fdars-core MultiFunData for multi-domain functional data.
+- `multi_fdata.multi_fdata_from_components(data_list, argvals_list)` — Build a PyMultiFunData handle from lists of 2-D data arrays and 1-D argvals vectors.
+
+### fdars.outliers (8 functions)
+
+- `outliers.depthgram(data, outliergram_factor=1.5, boxplot_factor=1.5)` — Depthgram functional outlier detection.
+- `outliers.detect_outliers_lrt(data, alpha=0.05, n_bootstrap=200, trim=0.1, smo=0.02)` — LRT-based outlier detection with bootstrap.
+- `outliers.detect_outliers_lrt_with_dist(data, alpha=0.05, n_bootstrap=200, trim=0.1, smo=0.02, seed=42)` — LRT-based outlier detection with bootstrap (returns threshold and null distribution).
+- `outliers.magnitude_shape(data)` — Magnitude-shape outlyingness.
+- `outliers.muod(data, factor=1.5)` — MUOD (Massive Unsupervised Outlier Detection) for functional data.
+- `outliers.outliergram(data, factor=1.5)` — Outliergram (MEI vs MBD plot).
+- `outliers.sequential_transform_outliers(data, transforms, depth_method='modified_band', emp_factor=1.5)` — Sequential transform outlier detection.
+- `outliers.tvdmss(data, emp_factor_mss=1.5, emp_factor_tvd=1.5, central_region_tvd=0.5)` — TVD-MSS functional outlier detection.
+
+### fdars.pace_fpca (3 functions)
+
+- `pace_fpca.PyIrregFdata(...)` — Opaque handle wrapping fdars-core IrregFdata for irregular/sparse functional data.
+- `pace_fpca.irreg_fdata_from_lists(argvals_list, values_list)` — Build an IrregFdata handle from two Python lists of ragged 1-D arrays.
+- `pace_fpca.pace_fpca(data, ncomp=3, bandwidth=0.1, sigma2=0.01, work_grid=None, alpha=0.05)` — Run PACE FPCA on irregular/sparse functional data.
+
+### fdars.regression (29 functions)
+
+- `regression.bootstrap_ci_fregre_lm(data, response, n_comp=3, n_boot=200, alpha=0.05, seed=42)` — Bootstrap confidence intervals for beta(t) from a functional linear model.
+- `regression.bootstrap_ci_functional_logistic(data, labels, n_comp=3, n_boot=200, alpha=0.05, seed=42, max_iter=25, tol=1e-06)` — Bootstrap confidence intervals for beta(t) from a functional logistic model.
+- `regression.concurrent_regression(predictors, response, argvals=None, bandwidth=0.2, kernel='gaussian')` — Concurrent (varying-coefficient) functional regression. When: Use to fit a concurrent (pointwise) functional regression model where response and predictor share the same grid.
+- `regression.fanova(data, groups, n_perm=999)` — Functional ANOVA.
+- `regression.fof_cv(x_data, y_data, x_argvals, y_argvals, ncomp_x_max=5, ncomp_y_max=5, n_folds=5, seed=42)` — Cross-validated selection of FPC component counts for function-on-function regression.
+- `regression.fof_re_regression(x_data, y_data, subject_ids, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3, max_iter=50, tol=1e-10)` — Function-on-function random-effects regression (mixed model).
+- `regression.fof_regression(x_data, y_data, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3)` — Function-on-function linear regression via FPC basis decomposition.
+- `regression.fosr(response, predictors, lambda_=0.0)` — Function-on-scalar regression (FOSR).
+- `regression.fosr_fpc(data, predictors, n_comp=3)` — Function-on-scalar regression via FPCs (FOSR-FPC).
+- `regression.fpca(data, argvals, n_comp=3)` — Functional principal component analysis (FPCA).
+- `regression.fpls(data, argvals, response, n_comp=3)` — Functional PLS (Partial Least Squares).
+- `regression.fregre_cv(data, response, k_min=1, k_max=10, n_folds=5)` — Cross-validated selection of number of FPC components using K-fold CV.
+- `regression.fregre_huber(data, response, n_comp=3, huber_k=1.345)` — Huber M-estimation regression for functional data.
+- `regression.fregre_l1(data, response, n_comp=3)` — L1 robust regression for functional data.
+- `regression.fregre_lm(data, response, n_comp=3)` — Scalar-on-function linear regression via FPCs. When: Use to fit a scalar-on-function linear regression model via FPC basis expansion.
+- `regression.fregre_np(dist_matrix, response, h=0.0)` — Nonparametric kernel regression for functional data (from distance matrix).
+- `regression.fregre_np_cv(data, response, argvals, n_folds=5, h_range=None, scalar_covariates=None)` — Cross-validated bandwidth selection for nonparametric functional regression.
+- `regression.fregre_np_mixed(data, response, argvals, h_func, h_scalar=1.0, scalar_covariates=None)` — Nonparametric functional regression mixing functional and scalar predictors.
+- `regression.fregre_pls(data, argvals, response, n_comp=3)` — Scalar-on-function PLS regression.
+- `regression.functional_glm(data, response, family='gaussian', n_comp=3, scalar_covariates=None, max_iter=25, tol=1e-06)` — Functional generalised linear model (GLM) via FPC scores.
+- `regression.functional_logistic(data, labels, n_comp=3, max_iter=25, tol=1e-06)` — Functional logistic regression.
+- `regression.model_selection_ncomp(data, response, max_comp=10, criterion='gcv')` — Cross-validated selection of number of FPC components.
+- `regression.predict_fof(x_data, y_data, new_x, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3)` — Predict functional responses for new predictor curves using a function-on-function model.
+- `regression.predict_fof_re(x_data, y_data, subject_ids, new_x, x_argvals, y_argvals, ncomp_x=3, ncomp_y=3, max_iter=50, tol=1e-10)` — Predict functional responses using a function-on-function random-effects model.
+- `regression.predict_fosr(response, predictors, new_predictors, lambda_=0.0)` — Predict new functional responses from a fitted FOSR model.
+- `regression.predict_fregre_lm(data_fit, response, new_data, n_comp=3)` — Predict new responses using a fitted functional linear model.
+- `regression.predict_fregre_pls(data, argvals, response, new_data, n_comp=3)` — Predict new responses using a fitted PLS regression.
+- `regression.predict_fregre_robust(data, response, new_data, n_comp=3, method='l1', huber_k=1.345)` — Predict new responses using a fitted robust regression (L1 or Huber).
+- `regression.predict_functional_logistic(data, labels, new_data, n_comp=3, max_iter=25, tol=1e-06)` — Predict probabilities for new data using a fitted functional logistic model.
+
+### fdars.represent (4 functions)
+
+- `represent.fdata_interpolate_with_policy(data, argvals, query_points, policy='exception', fill_value=0.0, method='linear')` — Interpolate functional data with explicit extrapolation control (linear/cubic variant).
+- `represent.impute_missing_values(data, argvals, method='linear', constant_value=0.0)` — Impute NaN values in a functional data matrix.
+- `represent.spline_interpolate(data, argvals, query_points, order=4)` — Interpolate functional data onto a new set of query points using B-splines.
+- `represent.spline_interpolate_with_policy(data, argvals, query_points, policy='exception', fill_value=0.0, order=4)` — Interpolate functional data with explicit extrapolation control (spline variant).
+
+### fdars.scalar_on_function (5 functions)
+
+- `scalar_on_function.fam(data, y, argvals, scalar_covariates=None, ncomp=0, bandwidth=0.0, kernel='gaussian', n_grid_bandwidth=20)` — Fit a Functional Additive Model (FAM) with a single functional predictor.
+- `scalar_on_function.fregre_gkam(predictors, y, argvals_list, scalar_covariates=None, bandwidth=0.0, kernel='gaussian', max_iter=50, epsilon=1e-06)` — Fit a Generalised Kernel Additive Model (GKAM) with multiple functional predictors.
+- `scalar_on_function.fregre_gsam(data, y, argvals, scalar_covariates=None, ncomp=0, bandwidth=0.0, kernel='gaussian', n_grid_bandwidth=20)` — Fit a Generalised Structured Additive Model (GSAM) with a single functional predictor.
+- `scalar_on_function.model_selection_ncomp(data, response, max_comp=10, criterion='gcv')` — Select the optimal number of FPC components for scalar-on-function regression.
+- `scalar_on_function.variable_selection(predictors, y, argvals_list, scalar_covariates=None, ncomp=3, penalty='group_lasso', lambda_=0.0, max_iter=100, epsilon=1e-05, lambda_n_grid=20)` — Functional variable selection via group-lasso penalised regression.
+
+### fdars.scoring (5 functions)
+
+- `scoring.functional_explained_variance(y_true, y_pred, argvals)` — Functional Explained Variance Score integrated over `argvals`.
+- `scoring.functional_mae(y_true, y_pred, argvals)` — Functional Mean Absolute Error integrated over `argvals`.
+- `scoring.functional_mape(y_true, y_pred, argvals)` — Functional Mean Absolute Percentage Error integrated over `argvals`.
+- `scoring.functional_mse(y_true, y_pred, argvals)` — Functional Mean Squared Error integrated over `argvals`.
+- `scoring.functional_msle(y_true, y_pred, argvals)` — Functional Mean Squared Logarithmic Error integrated over `argvals`.
+
+### fdars.seasonal (18 functions)
+
+- `seasonal.analyze_peak_timing(data, argvals, period, smooth_nbasis=None)` — Analyze peak timing variability.
+- `seasonal.autoperiod(data, argvals, n_candidates=None, gradient_steps=None)` — Autoperiod algorithm for period detection.
+- `seasonal.cfd_autoperiod(data, argvals, cluster_tolerance=None, min_cluster_size=None)` — CFD autoperiod for period detection.
+- `seasonal.classify_seasonality(data, argvals, period, strength_threshold=None, timing_threshold=None)` — Classify seasonality type.
+- `seasonal.detect_multiple_periods(data, argvals, max_periods=3, min_confidence=1.5, min_strength=0.1)` — Detect multiple seasonal periods by iterative residual peeling.
+- `seasonal.detect_peaks(data, argvals, min_distance=None, min_prominence=None, smooth_first=False, smooth_nbasis=None)` — Detect peaks in functional data.
+- `seasonal.detect_seasonality_changes(data, argvals, period, threshold, window_size, min_duration)` — Detect seasonality change points.
+- `seasonal.estimate_period_acf(data, argvals, max_lag=None)` — Estimate the dominant seasonal period via autocorrelation (ACF).
+- `seasonal.estimate_period_fft(data, argvals)` — Estimate period using FFT periodogram.
+- `seasonal.instantaneous_period(data, argvals)` — Instantaneous period estimation via Hilbert transform.
+- `seasonal.lomb_scargle_fdata(data, argvals, oversampling=None, nyquist_factor=None)` — Lomb-Scargle periodogram for functional data.
+- `seasonal.matrix_profile_fdata(data, subsequence_length=None, exclusion_zone=None)` — Matrix Profile analysis for functional data.
+- `seasonal.sazed(data, argvals, tolerance=None)` — SAZED period detection algorithm.
+- `seasonal.seasonal_strength(data, argvals, period, method='variance')` — Seasonal strength measure (variance method).
+- `seasonal.seasonal_strength_wavelet(data, argvals, period)` — Seasonal strength using wavelet method.
+- `seasonal.seasonal_strength_windowed(data, argvals, period, window_size, method='variance')` — Time-varying seasonal strength using windowed estimation.
+- `seasonal.ssa_fdata(data, window_length=None, n_components=None)` — Singular Spectrum Analysis for functional data.
+- `seasonal.stl_decompose(data, period, s_window=None, t_window=None, robust=False)` — STL decomposition of functional data.
+
+### fdars.shapelet (7 functions)
+
+- `shapelet.PyShapeletClassifierFit(...)` — Opaque handle wrapping fdars-core ShapeletClassifierFit.
+- `shapelet.PyShapeletFit(...)` — Opaque handle wrapping fdars-core ShapeletTransformFit.
+- `shapelet.discover_shapelets(data, labels, min_length=3, max_length=0, max_candidates=10000, max_shapelets=0, quality='info_gain', seed=0)` — Discover shapelets in labeled functional data and return a summary dict.
+- `shapelet.shapelet_classifier_fit(data, labels, min_length=3, max_length=0, max_candidates=10000, max_shapelets=0, quality='info_gain', seed=0, classifier='knn', k=1, ncomp=None)` — Fit a shapelet-based classifier on labeled functional data.
+- `shapelet.shapelet_distance(shapelet_z, series, best_so_far=Ellipsis)` — Compute the shapelet distance between a z-normalized shapelet and a series.
+- `shapelet.shapelet_transform(fit, data)` — Apply a fitted shapelet transform to new functional data.
+- `shapelet.shapelet_transform_fit(data, labels, min_length=3, max_length=0, max_candidates=10000, max_shapelets=0, quality='info_gain', seed=0)` — Fit a shapelet transform on labeled functional data.
+
+### fdars.simulation (8 functions)
+
+- `simulation.add_error_curve(data, sd, seed=None)` — Add curve-level Gaussian noise to functional data.
+- `simulation.add_error_pointwise(data, sd, seed=None)` — Add pointwise Gaussian noise to functional data.
+- `simulation.covariance_matrix(argvals, kernel='gaussian', length_scale=0.2, variance=1.0)` — Compute covariance matrix from a kernel.
+- `simulation.eigenfunctions(argvals, n_basis, efun_type='fourier')` — Compute eigenfunctions.
+- `simulation.eigenvalues(n_basis, eval_type='linear')` — Compute eigenvalues.
+- `simulation.gaussian_process(n, argvals, kernel='gaussian', length_scale=0.2, variance=1.0, seed=None)` — Generate Gaussian process samples.
+- `simulation.sim_kl(n, phi, big_m, lambda_, seed=None)` — Simulate functional data via Karhunen-Loeve expansion (low-level).
+- `simulation.simulate(n, argvals, n_basis=5, efun_type='fourier', eval_type='linear', seed=None)` — Simulate functional data via Karhunen-Loeve expansion.
+
+### fdars.smoothing (10 functions)
+
+- `smoothing.cv_smoother(x, y, bandwidth, kernel='gaussian')` — LOO-CV score for a kernel smoother.
+- `smoothing.gcv_smoother(x, y, bandwidth, kernel='gaussian')` — GCV score for a kernel smoother. When: Use when bandwidth selection is needed — GCV smoother selects optimal bandwidth automatically.
+- `smoothing.knn_gcv(x, y, max_k)` — Global LOO-CV for kNN k selection.
+- `smoothing.knn_lcv(x, y, max_k)` — Local (per-observation) LOO-CV for kNN k selection.
+- `smoothing.knn_smoother(x, y, x_new, k)` — K-nearest neighbors smoother.
+- `smoothing.local_linear(x, y, x_new, bandwidth, kernel='gaussian')` — Local linear regression smoother.
+- `smoothing.local_polynomial(x, y, x_new, bandwidth, degree=1, kernel='gaussian')` — Local polynomial regression smoother.
+- `smoothing.nadaraya_watson(x, y, x_new, bandwidth, kernel='gaussian')` — Nadaraya-Watson kernel smoother. When: Use for nonparametric smoothing of noisy functional observations via Nadaraya-Watson kernel regression.
+- `smoothing.optim_bandwidth(x, y, criterion='gcv', kernel='gaussian', n_grid=50, h_min=None, h_max=None)` — Optimal bandwidth selection via cross-validation.
+- `smoothing.smoothing_matrix_nw(x, bandwidth, kernel='gaussian')` — Smoothing matrix for Nadaraya-Watson.
+
+### fdars.spm (23 functions)
+
+- `spm.arl0_ewma_t2(eigenvalues, ucl, lambda_, n_simulations=10000, max_run_length=5000, seed=42)` — In-control ARL for EWMA T-squared chart.
+- `spm.arl0_spe(spe_df, spe_scale, ucl, n_simulations=10000, max_run_length=5000, seed=42)` — In-control ARL for SPE chart.
+- `spm.arl0_t2(eigenvalues, ucl, n_simulations=10000, max_run_length=5000, seed=42)` — In-control ARL for T-squared chart (ARL0).
+- `spm.arl1_t2(eigenvalues, ucl, shift, n_simulations=10000, max_run_length=5000, seed=42)` — Out-of-control ARL for T-squared chart (ARL1).
+- `spm.ewma_scores(scores, lambda_)` — EWMA smoothing of FPC scores.
+- `spm.hotelling_t2(scores, eigenvalues)` — Hotelling T^2 statistic.
+- `spm.hotelling_t2_regularized(scores, eigenvalues, epsilon)` — Hotelling T^2 with eigenvalue regularization.
+- `spm.mfpca(variables, ncomp=5, weighted=True)` — Multivariate Functional Principal Component Analysis (MFPCA).
+- `spm.nelson_rules(values, center, sigma)` — Apply Nelson rules to monitoring data.
+- `spm.select_ncomp(eigenvalues, method='cumulative_variance', threshold=0.95)` — Select the number of principal components.
+- `spm.spe_control_limit(spe_values, alpha)` — Compute SPE control limit using moment-matched chi-squared approximation.
+- `spm.spe_limit_robust(spe_values, alpha=0.05, method='empirical')` — Robust SPE (squared prediction error) control limit.
+- `spm.spe_moment_match_diagnostic(spe_values)` — Diagnostic for SPE moment-match chi-squared approximation.
+- `spm.spe_multivariate(standardized_vars, reconstructed_vars, argvals_list)` — Multivariate Squared Prediction Error (SPE) monitoring statistic.
+- `spm.spm_cusum(train_data, sequential_data, argvals, ncomp=5, alpha=0.05, k=0.5, h=5.0, multivariate=False)` — Functional CUSUM control chart (fit Phase I + monitor).
+- `spm.spm_ewma(train_data, sequential_data, argvals, ncomp=5, alpha=0.05, lam=0.2)` — Functional EWMA control chart (fit Phase I + monitor).
+- `spm.spm_monitor(mean, loadings, weights, eigenvalues, t2_limit, spe_limit, new_data, argvals)` — SPM Phase II monitoring.
+- `spm.spm_phase1(data, argvals, ncomp=3, alpha=0.05)` — SPM Phase I estimation.
+- `spm.t2_control_limit(ncomp, alpha)` — Compute T-squared control limit from chi-squared distribution.
+- `spm.t2_limit_robust(t2_values, ncomp, alpha=0.05, method='empirical')` — Robust Hotelling T^2 control limit.
+- `spm.t2_pc_contributions(scores, eigenvalues)` — Per-PC T-squared contributions.
+- `spm.t2_pc_significance(contributions, alpha)` — Test per-PC T-squared contributions for Bonferroni-adjusted significance.
+- `spm.western_electric_rules(values, center, sigma)` — Apply Western Electric rules to monitoring data.
+
+### fdars.tolerance (9 functions)
+
+- `tolerance.conformal_prediction_band(data, coverage=0.95, cal_fraction=0.25, seed=42)` — Conformal prediction band.
+- `tolerance.elastic_tolerance_band(data, argvals, ncomp=3, nb=200, coverage=0.95, band_type='simultaneous', max_iter=20, seed=42)` — Elastic tolerance band (amplitude only, after alignment).
+- `tolerance.elastic_tolerance_band_with_config(data, argvals, ncomp_amplitude=3, ncomp_phase=3, nb=200, coverage=0.95, band_type='pointwise', max_iter=20, tol=0.0001, seed=42)` — Joint amplitude and phase elastic tolerance bands.
+- `tolerance.equivalence_test(data1, data2, delta, alpha=0.05, nb=1000, seed=42)` — Functional equivalence test (TOST).
+- `tolerance.equivalence_test_one_sample(data, mu0, delta, alpha=0.05, nb=1000, seed=42)` — One-sample equivalence test.
+- `tolerance.exponential_family_tolerance_band(data, family='gaussian', ncomp=3, nb=200, coverage=0.95, seed=42)` — Exponential family tolerance band.
+- `tolerance.fpca_tolerance_band(data, ncomp=3, nb=1000, coverage=0.95, seed=42)` — FPCA-based tolerance band.
+- `tolerance.phase_tolerance_band(data, argvals, ncomp=3, nb=200, coverage=0.95, band_type='simultaneous', max_iter=20, seed=42)` — Phase tolerance band on warping functions.
+- `tolerance.scb_mean_degras(data, argvals, bandwidth=0.0, nb=1000, confidence=0.95)` — Simultaneous confidence band (Degras method).
