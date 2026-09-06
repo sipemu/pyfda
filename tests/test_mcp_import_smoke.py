@@ -1,4 +1,4 @@
-"""Regression test: MCP v2 server and its 3 existing tools import and load (COMPAT-02).
+"""Regression test: MCP v2 server and its tool handlers import and load (COMPAT-02).
 
 This module is skipped on Python <3.10 because importing ``fdars.mcp.server``
 pulls in the ``mcp`` package which requires Python 3.10+ (mirroring the
@@ -9,8 +9,9 @@ On Python >=3.10 the test proves:
 - ``MCPServer`` is importable from ``mcp.server`` (mcp v2 path, not v1).
 - The ``fdars.mcp.server`` module loads without error.
 - The MCP server instance (``mcp``) is not ``None``.
-- All three existing tool handler names are registered/loadable on the server:
-  ``fdars_build_diagnostics``, ``fdars_run_method``, ``fdars_compare_run``.
+- All tool handler names are registered/loadable on the server:
+  ``fdars_build_diagnostics``, ``fdars_run_method``, ``fdars_compare_run``,
+  ``fdars_list_capabilities`` (SKILL-04, Plan 78-04).
 
 No ``ANTHROPIC_API_KEY`` and no network are required.
 """
@@ -38,16 +39,16 @@ pytestmark = pytest.mark.skipif(
 
 
 def test_mcp_v2_server_import_and_tools_load():
-    """Assert MCPServer (mcp v2) + 3 existing tool handlers load over stdio path.
+    """Assert MCPServer (mcp v2) + tool handlers (incl. fdars_list_capabilities) load.
 
     Verifies:
     1. ``MCPServer`` is importable from ``mcp.server`` (v2 path).
     2. ``fdars.mcp.server.mcp`` is not None.
-    3. All three existing tool handler names are registered/callable on the
-       server: ``fdars_build_diagnostics``, ``fdars_run_method``,
-       ``fdars_compare_run``.
+    3. All tool handler names are registered/callable on the server:
+       ``fdars_build_diagnostics``, ``fdars_run_method``, ``fdars_compare_run``,
+       ``fdars_list_capabilities`` (SKILL-04, Plan 78-04).
 
-    Reference: COMPAT-02 — verify-only; NO import change to server.py.
+    Reference: COMPAT-02 — verify-only; extends to cover fdars_list_capabilities.
     """
     # 1. Assert the mcp v2 MCPServer import path is intact.
     from mcp.server import MCPServer  # type: ignore[import-untyped]  # noqa: PLC0415
@@ -59,24 +60,28 @@ def test_mcp_v2_server_import_and_tools_load():
 
     assert mcp is not None, "fdars.mcp.server.mcp instance must not be None"
 
-    # 3. Assert the 3 existing tool handler symbols are importable and callable.
+    # 3. Assert all tool handler symbols are importable and callable.
     from fdars.mcp.server import (  # noqa: PLC0415
         fdars_build_diagnostics,
         fdars_compare_run,
+        fdars_list_capabilities,
         fdars_run_method,
     )
 
+    handler_map = {
+        "fdars_build_diagnostics": fdars_build_diagnostics,
+        "fdars_run_method": fdars_run_method,
+        "fdars_compare_run": fdars_compare_run,
+        "fdars_list_capabilities": fdars_list_capabilities,
+    }
     expected_tool_names = {
         "fdars_build_diagnostics",
         "fdars_run_method",
         "fdars_compare_run",
+        "fdars_list_capabilities",
     }
     for name in expected_tool_names:
-        handler = {
-            "fdars_build_diagnostics": fdars_build_diagnostics,
-            "fdars_run_method": fdars_run_method,
-            "fdars_compare_run": fdars_compare_run,
-        }[name]
+        handler = handler_map[name]
         assert callable(handler), (
             f"Tool handler {name!r} must be callable on the MCP server"
         )
