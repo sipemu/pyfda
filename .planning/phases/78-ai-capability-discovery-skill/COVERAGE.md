@@ -1,0 +1,3 @@
+# Phase 78 — External API Coverage
+
+No new external API integration: this phase introspects the in-tree `fdars` package and extends the existing in-tree MCP server (`python/fdars/mcp/server.py`) with a read-only capability tool (`fdars_list_capabilities`). No third-party API/SDK is wired in. The MCP tool is provably LLM-free (returns pre-generated static data via `importlib.resources`; no model call, no network, no credentials). All dependencies are stdlib (`inspect`, `json`, `importlib.resources`) plus the already-installed `mcp` and `fdars` packages (RESEARCH Package Legitimacy Audit: no new packages).
