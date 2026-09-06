@@ -90,7 +90,8 @@ alignment lambda, depth ranking thresholds), use the `fdars-advisor` skill inste
 
 ## Optional Extras
 
-- `fdars.plot` — matplotlib-based plotting helpers (`plot_fdata`, `plot_depth`, etc.);
+- **`plot` module** — matplotlib-based plotting helpers (`plot_fdata`, `plot_depth`, etc.);
   install with `pip install "fdars[plot]"` (matplotlib optional dependency).
-- `fdars.advisor` — LLM-powered advisor loop; not included in the capability map
+  Not included in the capability map (optional dependency).
+- **`advisor` module** — LLM-powered advisor loop; not included in the capability map
   (see the `fdars-advisor` skill for tuning and diagnostics workflows).
