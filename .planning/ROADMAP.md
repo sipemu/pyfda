@@ -299,11 +299,11 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
   3. An LLM-oriented docs page (llms.txt-style API digest of the whole library) is authored/generated and wired into the site.
   4. An MCP capability tool (e.g. `fdars_list_capabilities` / describe) is added to the existing server, returns the capability surface, stays provably LLM-free, and its guard/tests are updated to cover it.
 
-**Plans**: 2/4 plans executed
+**Plans**: 3/4 plans executed
 
 - [x] 78-01-PLAN.md — TRACER: capability generator + committed `_capability_map.json` + curated guidance file + SKILL-02 accuracy test (the single source of truth)
 - [x] 78-02-PLAN.md — SKILL-01: new `fdars-capabilities` skill dir + spec-valid SKILL.md (disjoint from fdars-advisor), map-grounded module overview
-- [ ] 78-03-PLAN.md — SKILL-03: offline-generated `docs/llms.txt` + in-nav `docs/ai-capability-map.md` + mkdocs nav wiring
+- [x] 78-03-PLAN.md — SKILL-03: offline-generated `docs/llms.txt` + in-nav `docs/ai-capability-map.md` + mkdocs nav wiring
 - [ ] 78-04-PLAN.md — SKILL-04: LLM-free `fdars_list_capabilities` MCP tool + guard-sync extension (Py3.9 primary + Py3.10+ companions) + smoke-test coverage (feeds GATE-04)
 
 **UI hint**: no
@@ -334,7 +334,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 | 75. Deepen Analyze-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
 | 76. Flagship End-to-End Example Pages | v12.0 | 3/3 | Complete    | 2026-09-06 |
 | 77. Section-Landing Card Coverage | v12.0 | 5/5 | Complete    | 2026-09-06 |
-| 78. AI Capability-Discovery Skill | v12.0 | 2/4 | In Progress|  |
+| 78. AI Capability-Discovery Skill | v12.0 | 3/4 | In Progress|  |
 | 79. Close Gate — Strict Build, SVGO/Determinism, Human Review & Release | v12.0 | 0/TBD | Not started | - |
 
 ---

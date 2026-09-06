@@ -5,16 +5,16 @@ milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 78
 current_phase_name: AI Capability-Discovery Skill
 status: executing
-stopped_at: Completed 78-02-PLAN.md
-last_updated: "2026-09-06T19:16:37.928Z"
+stopped_at: "Completed 78-03-PLAN.md (SKILL-03: llms.txt + ai-capability-map.md)"
+last_updated: "2026-09-06T19:23:27.325Z"
 last_activity: 2026-09-06
 last_activity_desc: Phase 78 execution started
-state_head: 6ccd509284e470cbbdb1f8f2a7a20fdb019e8d8b
+state_head: da94fb8abb1c3b513b1b43fee5364a9d5d7b2db9
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 22
-  completed_plans: 20
+  completed_plans: 21
   percent: 67
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 ## Current Position
 
 Phase: 78 (AI Capability-Discovery Skill) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-09-06 — Phase 78 execution started
 
@@ -83,6 +83,7 @@ Last activity: 2026-09-06 — Phase 78 execution started
 | Phase 77-section-landing-card-coverage P05 | 4 | 1 tasks | 4 files |
 | Phase 78 P01 | 315 | 3 tasks | 4 files |
 | Phase 78 P02 | 150 | 2 tasks | 1 files |
+| Phase 78 P03 | 5min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,8 @@ Recent decisions affecting current work:
 - [Phase 77]: Used fill-opacity instead of linearGradient in tolerance-vs-conformal.svg to stay under 1300-byte limit
 - [Phase 78]: _Fdata entry in capability map uses __init__ key + sorted public methods on fdars.Fdata class; no-drift test strips when curation fields to avoid spurious failures
 - [Phase 78]: SKILL.md body avoids fdars.plot / fdars.advisor dotted notation in Optional Extras — verify gate rejects fdars.<mod> tokens not in capability map keys
+- [Phase 78]: docs-emit path reads committed _capability_map.json (no fdars import at build time) — docs build stays independent of compiled extension
+- [Phase 78]: AI Capability Map placed as top-level nav entry adjacent to AI Advisor; llms.txt gets no nav entry (static passthrough only)
 
 ### Pending Todos
 
@@ -168,8 +171,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-06T19:16:37.833Z
-Stopped at: Completed 78-02-PLAN.md
+Last session: 2026-09-06T19:23:27.208Z
+Stopped at: Completed 78-03-PLAN.md (SKILL-03: llms.txt + ai-capability-map.md)
 Resume file: None
 
 ## Operator Next Steps
