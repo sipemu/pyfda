@@ -196,7 +196,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 - [x] **Phase 75: Deepen Analyze-Family Thin Pages** - Bring `functional-time-series`, `density-fda`, `multi-domain`, `shapelets`, `advanced-clustering` to mature-page parity (completed 2026-09-05)
 - [x] **Phase 76: Flagship End-to-End Example Pages** - 2–3 marquee worked-example pages (FTS forecast, Fréchet regression, +1 if a strong dataset fit exists) (completed 2026-09-06)
 - [x] **Phase 77: Section-Landing Card Coverage** - 18 focus-section thumbnails + gallery cards (align/represent/regression/analyze) + 3 examples cards (completed 2026-09-06)
-- [ ] **Phase 78: AI Capability-Discovery Skill** - Agent Skill `SKILL.md` + verified capability map + LLM-oriented docs page + LLM-free MCP capability tool
+- [x] **Phase 78: AI Capability-Discovery Skill** - Agent Skill `SKILL.md` + verified capability map + LLM-oriented docs page + LLM-free MCP capability tool (completed 2026-09-06)
 - [ ] **Phase 79: Close Gate — Strict Build, SVGO/Determinism, Human Review & Release** - Whole-site `--strict` + SVGO/determinism gates, blocking human diagram review, grounding/MCP verification, offline-fence sweep, version tick + release handoff
 
 ## Phase Details
@@ -334,7 +334,7 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 | 75. Deepen Analyze-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
 | 76. Flagship End-to-End Example Pages | v12.0 | 3/3 | Complete    | 2026-09-06 |
 | 77. Section-Landing Card Coverage | v12.0 | 5/5 | Complete    | 2026-09-06 |
-| 78. AI Capability-Discovery Skill | v12.0 | 4/4 | In Progress|  |
+| 78. AI Capability-Discovery Skill | v12.0 | 4/4 | Complete    | 2026-09-06 |
 | 79. Close Gate — Strict Build, SVGO/Determinism, Human Review & Release | v12.0 | 0/TBD | Not started | - |
 
 ---
