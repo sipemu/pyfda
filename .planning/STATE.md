@@ -5,16 +5,16 @@ milestone_name: Docs Depth, Card Coverage & AI Capability Skill
 current_phase: 79
 current_phase_name: Close Gate
 status: executing
-stopped_at: Completed 79-01-PLAN.md (GATE-02 SVGO idempotence)
-last_updated: "2026-09-06T20:38:13.963Z"
+stopped_at: Completed 79-02-PLAN.md (GATE-04 advisor/MCP tests)
+last_updated: "2026-09-06T20:43:19.755Z"
 last_activity: 2026-09-06
 last_activity_desc: Phase 79 execution started
-state_head: 9fb76febf2e1dbabc40b6889f6b0e253e94816f4
+state_head: 91c05cce5553f8101f06c70112d23327ed471c7a
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 27
-  completed_plans: 23
+  completed_plans: 24
   percent: 83
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 ## Current Position
 
 Phase: 79 (Close Gate) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-09-06 — Phase 79 execution started
 
@@ -86,6 +86,7 @@ Last activity: 2026-09-06 — Phase 79 execution started
 | Phase 78 P03 | 5min | 2 tasks | 4 files |
 | Phase 78-ai-capability-discovery-skill P04 | 5 | 3 tasks | 3 files |
 | Phase 79-close-gate P01 | 7 | 1 tasks | 0 files |
+| Phase 79 P02 | 2 | 1 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,7 @@ Recent decisions affecting current work:
 - [Phase 78]: fdars_list_capabilities is LLM-free: loads committed JSON via importlib.resources, no model call, no provider/model keys in return, frozenset allowlist enforced before load (T-78-08)
 - [Phase 78]: GATE-04 three-way literal mirror: server._CAPABILITY_MODULES == JSON submodule keys == test _EXPECTED_CAPABILITY_MODULES, enforced by Py3.9-safe primary guard-sync test
 - [Phase 79]: GATE-02 PASS: 0/21 thumbnails unstable, 0/101 diagrams unstable under npx svgo@3.3.4 two-pass idempotence check
+- [Phase 79]: GATE-04 passes on current HEAD before version bump: 76 advisor/MCP/guard-sync tests green (0 failed); grounding invariant + MCP LLM-free boundary confirmed intact after SKILL-04
 
 ### Pending Todos
 
@@ -176,8 +178,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-06T20:38:13.818Z
-Stopped at: Completed 79-01-PLAN.md (GATE-02 SVGO idempotence)
+Last session: 2026-09-06T20:43:19.623Z
+Stopped at: Completed 79-02-PLAN.md (GATE-04 advisor/MCP tests)
 Resume file: None
 
 ## Operator Next Steps

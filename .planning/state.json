@@ -21,23 +21,23 @@
     {
       "number": "77",
       "name": "Section-Landing Card Coverage",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "78",
       "name": "AI Capability-Discovery Skill",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "79",
       "name": "Close Gate — Strict Build, SVGO/Determinism, Human Review & Release",
-      "status": "pending"
+      "status": "in_progress"
     }
   ],
   "next": {
     "command": "/gsd:progress --next",
     "label": "Advance to the next step",
-    "reason": "Phase 77 of 6 · 50% · executing"
+    "reason": "Phase 79 of 6 · 83% · executing"
   },
-  "updated_at": "2026-09-05T23:03:17.593Z"
+  "updated_at": "2026-09-06T20:43:01.835Z"
 }

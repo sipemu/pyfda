@@ -48,7 +48,7 @@ Give AI agents a way to discover the full fdars capability surface, across all t
 - [ ] **GATE-01**: Whole-site `mkdocs build --strict` green offline; all worked examples across the milestone emit `FDARS_FENCE_OK`.
 - [x] **GATE-02**: SVGO idempotence + build-determinism gate green across all new/changed SVGs.
 - [ ] **GATE-03**: Blocking human diagram/method-accuracy review of the new thumbnails (and any new concept diagrams) — approved before close.
-- [ ] **GATE-04**: Grounding invariant + MCP LLM-free boundary preserved — advisor/MCP tests (incl. guard-sync) green after the SKILL-04 tool lands.
+- [x] **GATE-04**: Grounding invariant + MCP LLM-free boundary preserved — advisor/MCP tests (incl. guard-sync) green after the SKILL-04 tool lands.
 
 ## Future Requirements
 
@@ -92,7 +92,7 @@ Deferred; tracked but not in this roadmap.
 | GATE-01 | Phase 79 | Pending |
 | GATE-02 | Phase 79 | Complete |
 | GATE-03 | Phase 79 | Pending |
-| GATE-04 | Phase 79 | Pending |
+| GATE-04 | Phase 79 | Complete |
 
 **Coverage:**
 
