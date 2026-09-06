@@ -13,7 +13,7 @@ Bring the thin v11.0-era method pages (currently 20–35% of the mature-page bas
 
 - [x] **DEPTH-01**: The regression-family thin pages — `frechet-regression`, `function-on-function`, `additive-sof`, `concurrent-regression`, `functional-glm` — each reach the parity bar above.
 - [x] **DEPTH-02**: The analyze-family thin pages — `functional-time-series`, `density-fda`, `multi-domain`, `shapelets`, `advanced-clustering` — each reach the parity bar above.
-- [ ] **DEPTH-03**: Every new/extended fence on the DEPTH pages runs offline against the current `fdars` API and existing `docs/data/` datasets, emitting `FDARS_FENCE_OK`; method claims are accurate against the shipped bindings.
+- [x] **DEPTH-03**: Every new/extended fence on the DEPTH pages runs offline against the current `fdars` API and existing `docs/data/` datasets, emitting `FDARS_FENCE_OK`; method claims are accurate against the shipped bindings.
 
 ### Worked Examples (EXMP)
 
@@ -45,9 +45,9 @@ Give AI agents a way to discover the full fdars capability surface, across all t
 
 ### Close Gate (GATE)
 
-- [ ] **GATE-01**: Whole-site `mkdocs build --strict` green offline; all worked examples across the milestone emit `FDARS_FENCE_OK`.
+- [x] **GATE-01**: Whole-site `mkdocs build --strict` green offline; all worked examples across the milestone emit `FDARS_FENCE_OK`.
 - [x] **GATE-02**: SVGO idempotence + build-determinism gate green across all new/changed SVGs.
-- [ ] **GATE-03**: Blocking human diagram/method-accuracy review of the new thumbnails (and any new concept diagrams) — approved before close.
+- [x] **GATE-03**: Blocking human diagram/method-accuracy review of the new thumbnails (and any new concept diagrams) — approved before close.
 - [x] **GATE-04**: Grounding invariant + MCP LLM-free boundary preserved — advisor/MCP tests (incl. guard-sync) green after the SKILL-04 tool lands.
 
 ## Future Requirements
@@ -75,7 +75,7 @@ Deferred; tracked but not in this roadmap.
 |-------------|-------|--------|
 | DEPTH-01 | Phase 74 | Complete |
 | DEPTH-02 | Phase 75 | Complete |
-| DEPTH-03 | Phase 79 | Pending |
+| DEPTH-03 | Phase 79 | Complete |
 | EXMP-01 | Phase 76 | Complete |
 | EXMP-02 | Phase 76 | Complete |
 | EXMP-03 | Phase 76 | Complete |
@@ -89,9 +89,9 @@ Deferred; tracked but not in this roadmap.
 | SKILL-02 | Phase 78 | Complete |
 | SKILL-03 | Phase 78 | Complete |
 | SKILL-04 | Phase 78 | Complete |
-| GATE-01 | Phase 79 | Pending |
+| GATE-01 | Phase 79 | Complete |
 | GATE-02 | Phase 79 | Complete |
-| GATE-03 | Phase 79 | Pending |
+| GATE-03 | Phase 79 | Complete |
 | GATE-04 | Phase 79 | Complete |
 
 **Coverage:**
