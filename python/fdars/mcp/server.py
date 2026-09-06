@@ -15,7 +15,7 @@ Usage (in-process test)::
         tools = await client.list_tools()
         result = await client.call_tool("fdars_build_diagnostics", {...})
 
-Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03 + 52-03 + 53-03):
+Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03 + 52-03 + 53-03 + 78-04):
 
 - ``fdars_build_diagnostics`` — deterministic offline diagnostics (TOOL-01/02)
 - ``fdars_run_method`` — run any of six fdars methods; returns result handle (TOOL-01)
@@ -23,6 +23,7 @@ Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03 + 52-03 + 53-03):
 - ``fdars_compare_methods`` — deterministic multi-candidate ranking by-reference (COMPARE-04)
 - ``fdars_build_pipeline_report`` — LLM-free multi-stage pipeline diagnostic report by-reference (PIPE-04)
 - ``fdars_auto_tune`` — LLM-free closed-loop heuristic auto-tuning by-reference (TUNE-04)
+- ``fdars_list_capabilities`` — LLM-free static capability surface lookup (SKILL-04)
 """
 
 from __future__ import annotations
@@ -736,6 +737,91 @@ def fdars_auto_tune(
         target_metric=target_metric,
         max_steps=max_steps,
     )
+
+
+# ---------------------------------------------------------------------------
+# Tool: fdars_list_capabilities (SKILL-04)
+# ---------------------------------------------------------------------------
+
+# Frozenset of module names covered by the capability map.
+# MAINTENANCE: must equal frozenset(json.loads(_capability_map.json).keys()) - {'_Fdata'}.
+# Update _CAPABILITY_MODULES here, _EXPECTED_CAPABILITY_MODULES in
+# tests/test_guard_sync_version_independent.py, and regenerate the JSON in
+# one atomic commit when adding a new submodule to fdars/__init__.py.
+_CAPABILITY_MODULES: frozenset[str] = frozenset({
+    "alignment", "basis", "classification", "clustering", "conformal",
+    "covariance", "datasets", "density_fda", "depth", "explain", "famm",
+    "fdata", "frechet", "fts", "inference", "metric", "metrics", "multi_fdata",
+    "outliers", "pace_fpca", "regression", "represent", "scalar_on_function",
+    "scoring", "seasonal", "shapelet", "simulation", "smoothing", "spm",
+    "tolerance",
+})
+
+
+@mcp.tool()
+def fdars_list_capabilities(module: str | None = None) -> dict:
+    """Return the pre-generated fdars capability surface.  LLM-free.
+
+    Loads ``python/fdars/_capability_map.json`` (committed at generate time)
+    via ``importlib.resources`` and returns all or a filtered slice.  **No
+    network call; no model invoked; no ANTHROPIC_API_KEY required.**  The
+    compute path is provably LLM-free: this tool only reads pre-generated
+    static data.
+
+    Parameters
+    ----------
+    module : str, optional
+        If given, return only the capability entry for that module.
+        Must be one of the 30 modules in ``_CAPABILITY_MODULES``.
+        If ``None`` (default), return all modules.
+
+    Returns
+    -------
+    dict
+        ``{"modules": {<module>: {<fn>: {"sig": str, "purpose": str}}},
+           "version": str, "module_count": int, "callable_count": int}``
+
+    Raises
+    ------
+    ValueError
+        If ``module`` is given but not in ``_CAPABILITY_MODULES``.
+        Message format: ``"fdars_list_capabilities: unknown module '<x>'. "``
+        ``"Known: ['alignment', 'basis', ...]."``  (sorted list, parseable
+        by guard-sync test via ast.literal_eval).
+
+    Notes
+    -----
+    The ``_Fdata`` entry present in ``_capability_map.json`` (the Fdata class
+    surface) is intentionally NOT included in ``_CAPABILITY_MODULES`` — the
+    frozenset mirrors the submodule surface only.  The full map returned when
+    ``module=None`` includes ``_Fdata``; filtered requests are restricted to
+    the 30 submodule names in ``_CAPABILITY_MODULES``.
+    """
+    # V5 input validation: frozenset allowlist check BEFORE any load (T-78-08).
+    # Prevents path traversal and keeps the frozenset literal honest.
+    if module is not None and module not in _CAPABILITY_MODULES:
+        raise ValueError(
+            f"fdars_list_capabilities: unknown module {module!r}. "
+            f"Known: {sorted(_CAPABILITY_MODULES)!r}."
+        )
+
+    import json  # noqa: PLC0415
+    from importlib import resources  # noqa: PLC0415  # stdlib — no mcp dependency
+
+    cap_file = resources.files("fdars") / "_capability_map.json"
+    data: dict = json.loads(cap_file.read_text(encoding="utf-8"))
+
+    if module is not None:
+        modules = {module: data.get(module, {})}
+    else:
+        modules = data
+
+    return {
+        "modules": modules,
+        "version": "0.4.0",  # fdars.__version__ at generate time
+        "module_count": len(modules),
+        "callable_count": sum(len(v) for v in modules.values()),
+    }
 
 
 # ---------------------------------------------------------------------------
