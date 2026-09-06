@@ -1,9 +1,11 @@
-"""Version-independent guard-sync assertion: _DIAGNOSTICS_METHODS mirrors build_diagnostics._supported.
+"""Version-independent guard-sync assertions for fdars MCP server constants.
 
-This module provides a guard-sync test that runs on ALL supported Python
+This module provides guard-sync tests that run on ALL supported Python
 versions including 3.9.  It does NOT import ``mcp`` and does NOT import
 ``fdars.mcp.server`` at module level (importing that module pulls in ``mcp``,
 which is unavailable on Python 3.9).
+
+Guard Group 1 — _DIAGNOSTICS_METHODS (COMPAT-03):
 
 Primary test (runs on Python 3.9+):
     Recovers the advisor's supported-method set by calling
@@ -16,13 +18,25 @@ Companion test (guarded internally to Python 3.10+):
     Imports ``fdars.mcp.server._DIAGNOSTICS_METHODS`` and asserts it equals the
     same hard-coded frozenset, keeping the literal honest on 3.10+.
 
-Reference: COMPAT-03.
+Guard Group 2 — _CAPABILITY_MODULES / fdars_list_capabilities (GATE-04):
+
+Primary test (runs on Python 3.9+, no mcp import):
+    Loads ``_capability_map.json`` via importlib.resources and asserts its
+    submodule key set equals the hard-coded ``_EXPECTED_CAPABILITY_MODULES``.
+
+Companion tests (guarded internally to Python 3.10+):
+    (a) Calls ``fdars_list_capabilities(None)`` and asserts no provider/model
+        keys in the return value (LLM-free boundary, T-78-09).
+    (b) Imports ``server._CAPABILITY_MODULES`` and asserts it equals
+        ``_EXPECTED_CAPABILITY_MODULES`` (three-way literal mirror, T-78-10).
 """
 
 from __future__ import annotations
 
 import ast
+import json
 import sys
+from importlib import resources
 
 import pytest
 
@@ -152,4 +166,135 @@ def test_guard_sync_mcp_server_matches_expected():
         f"match _DIAGNOSTICS_METHODS).\n"
         f"  In _DIAGNOSTICS_METHODS only: {_DIAGNOSTICS_METHODS - _EXPECTED_DIAGNOSTICS_METHODS}\n"
         f"  In _EXPECTED only:            {_EXPECTED_DIAGNOSTICS_METHODS - _DIAGNOSTICS_METHODS}"
+    )
+
+
+# ===========================================================================
+# Guard Group 2 — _CAPABILITY_MODULES / fdars_list_capabilities (GATE-04)
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Expected capability modules — hard-coded mirror of _CAPABILITY_MODULES in
+# fdars.mcp.server AND the submodule keys of python/fdars/_capability_map.json
+# (i.e. all top-level JSON keys except '_Fdata').
+#
+# MAINTENANCE NOTE: update _EXPECTED_CAPABILITY_MODULES here,
+# _CAPABILITY_MODULES in fdars.mcp.server, and regenerate _capability_map.json
+# — all in one atomic commit — when adding a new submodule to fdars/__init__.py.
+# ---------------------------------------------------------------------------
+
+_EXPECTED_CAPABILITY_MODULES: frozenset[str] = frozenset({
+    "alignment", "basis", "classification", "clustering", "conformal",
+    "covariance", "datasets", "density_fda", "depth", "explain", "famm",
+    "fdata", "frechet", "fts", "inference", "metric", "metrics", "multi_fdata",
+    "outliers", "pace_fpca", "regression", "represent", "scalar_on_function",
+    "scoring", "seasonal", "shapelet", "simulation", "smoothing", "spm",
+    "tolerance",
+})
+
+
+# ---------------------------------------------------------------------------
+# PRIMARY TEST — runs on Python 3.9+ (no mcp import, no fdars.mcp.server import)
+# ---------------------------------------------------------------------------
+
+
+def test_capability_map_modules_match_expected():
+    """Guard-sync: JSON submodule keys == _EXPECTED_CAPABILITY_MODULES (Python 3.9+).
+
+    Loads the committed ``_capability_map.json`` directly via
+    ``importlib.resources`` (no mcp dependency; Py 3.9-safe) and asserts its
+    top-level keys — excluding the special ``'_Fdata'`` class entry — equal
+    the hard-coded expected frozenset.
+
+    Fails if:
+    - A new module was added to fdars but the JSON was not regenerated.
+    - ``_EXPECTED_CAPABILITY_MODULES`` is stale (update it, regenerate JSON,
+      update ``_CAPABILITY_MODULES`` in server.py — all in one atomic commit).
+
+    Reference: GATE-04 — no skip; this test MUST run on Python 3.9.
+    """
+    cap_file = resources.files("fdars") / "_capability_map.json"
+    data: dict = json.loads(cap_file.read_text(encoding="utf-8"))
+    # Exclude the special _Fdata class entry; compare submodule keys only.
+    actual = frozenset(data.keys()) - {"_Fdata"}
+
+    assert actual == _EXPECTED_CAPABILITY_MODULES, (
+        f"_capability_map.json submodule keys != _EXPECTED_CAPABILITY_MODULES.\n"
+        f"  In JSON only:     {actual - _EXPECTED_CAPABILITY_MODULES}\n"
+        f"  In expected only: {_EXPECTED_CAPABILITY_MODULES - actual}\n"
+        "Regenerate: python scripts/generate_capability_dataset.py\n"
+        "Then update _EXPECTED_CAPABILITY_MODULES here and _CAPABILITY_MODULES "
+        "in fdars.mcp.server in one atomic commit."
+    )
+
+
+# ---------------------------------------------------------------------------
+# COMPANION TESTS — internally guarded to Python 3.10+ (keeps MCP literals honest)
+# ---------------------------------------------------------------------------
+
+
+def test_capability_tool_llm_free_boundary():
+    """Guard-sync companion: fdars_list_capabilities returns LLM-free result.
+
+    Internally guarded to Python 3.10+ (mcp requires 3.10+).  Asserts:
+    - The tool is callable.
+    - Result has a ``'modules'`` key.
+    - Result has NO ``'provider'`` or ``'model'`` key (LLM-free boundary, T-78-09).
+    - Returned module set equals ``_EXPECTED_CAPABILITY_MODULES`` (excluding
+      ``'_Fdata'`` which is present in the underlying JSON but not a submodule).
+
+    Reference: GATE-04.
+    """
+    if sys.version_info < (3, 10):
+        pytest.skip("mcp requires Python 3.10+")
+
+    pytest.importorskip("mcp")  # skip if mcp not installed
+
+    from fdars.mcp.server import fdars_list_capabilities  # noqa: PLC0415
+
+    result = fdars_list_capabilities(module=None)
+
+    # Shape assertions
+    assert "modules" in result, "fdars_list_capabilities must return 'modules' key"
+    assert isinstance(result["modules"], dict)
+
+    # LLM-free boundary: no model/provider keys (T-78-09)
+    assert "provider" not in result, (
+        "fdars_list_capabilities must NOT expose 'provider' key (LLM-free boundary)"
+    )
+    assert "model" not in result, (
+        "fdars_list_capabilities must NOT expose 'model' key (LLM-free boundary)"
+    )
+
+    # Module set consistency (full return includes _Fdata from the JSON; exclude it)
+    returned_modules = frozenset(result["modules"].keys()) - {"_Fdata"}
+    assert returned_modules == _EXPECTED_CAPABILITY_MODULES, (
+        f"fdars_list_capabilities returned modules != _EXPECTED_CAPABILITY_MODULES.\n"
+        f"  Returned only:    {returned_modules - _EXPECTED_CAPABILITY_MODULES}\n"
+        f"  Expected only:    {_EXPECTED_CAPABILITY_MODULES - returned_modules}"
+    )
+
+
+def test_capability_mcp_server_frozenset_matches():
+    """Guard-sync companion: server._CAPABILITY_MODULES == expected frozenset.
+
+    Internally guarded to Python 3.10+ via pytest.importorskip.  Asserts the
+    hard-coded literal ``_CAPABILITY_MODULES`` in ``fdars.mcp.server`` equals
+    ``_EXPECTED_CAPABILITY_MODULES``, keeping the three-way mirror honest
+    (server == JSON keys == test expected; T-78-10).
+
+    Reference: GATE-04.
+    """
+    if sys.version_info < (3, 10):
+        pytest.skip("mcp requires Python 3.10+")
+
+    pytest.importorskip("mcp")
+
+    from fdars.mcp.server import _CAPABILITY_MODULES  # noqa: PLC0415
+
+    assert _CAPABILITY_MODULES == _EXPECTED_CAPABILITY_MODULES, (
+        f"server._CAPABILITY_MODULES != _EXPECTED_CAPABILITY_MODULES.\n"
+        f"  In server only:   {_CAPABILITY_MODULES - _EXPECTED_CAPABILITY_MODULES}\n"
+        f"  In expected only: {_EXPECTED_CAPABILITY_MODULES - _CAPABILITY_MODULES}\n"
+        "Update _CAPABILITY_MODULES in server.py to match."
     )
