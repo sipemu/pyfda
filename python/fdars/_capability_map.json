@@ -2,11 +2,13 @@
   "_Fdata": {
     "__init__": {
       "purpose": "Functional data object for 1-D curves or 2-D surfaces.",
-      "sig": "(self, data, argvals=None, rangeval=None, names: 'Optional[Dict[str, str]]' = None, id: 'Optional[Sequence[str]]' = None, metadata=None)"
+      "sig": "(self, data, argvals=None, rangeval=None, names: 'Optional[Dict[str, str]]' = None, id: 'Optional[Sequence[str]]' = None, metadata=None)",
+      "when": "Use to bundle your functional data matrix, evaluation grid, and metadata into a single object with method wrappers."
     },
     "center": {
       "purpose": "Subtract the pointwise mean (centering).",
-      "sig": "(self) -> \"'Fdata'\""
+      "sig": "(self) -> \"'Fdata'\"",
+      "when": "Use to subtract the cross-sectional mean from each observation before depth or PCA analysis."
     },
     "concat": {
       "purpose": "Row-bind another :class:`Fdata` onto this one (append observations).",
@@ -22,7 +24,8 @@
     },
     "depth": {
       "purpose": "Compute depth values for each observation.",
-      "sig": "(self, method: 'str' = 'fraiman_muniz', ref: \"Optional['Fdata']\" = None, **kwargs) -> 'np.ndarray'"
+      "sig": "(self, method: 'str' = 'fraiman_muniz', ref: \"Optional['Fdata']\" = None, **kwargs) -> 'np.ndarray'",
+      "when": "Use to rank observations by functional depth (e.g. Fraiman-Muniz) directly from the Fdata object."
     },
     "deriv": {
       "purpose": "Compute numerical derivatives.",
@@ -102,7 +105,8 @@
     },
     "to_pc": {
       "purpose": "Functional PCA representation of the curves (1-D only).",
-      "sig": "(self, n_comp: 'int' = 3)"
+      "sig": "(self, n_comp: 'int' = 3)",
+      "when": "Use to decompose functional data into principal components (FPCA) and get scores and basis functions."
     },
     "upsample": {
       "purpose": "Upsample this functional data to a denser uniform grid.",
@@ -152,7 +156,8 @@
     },
     "elastic_align_pair": {
       "purpose": "Pairwise elastic alignment of two curves.",
-      "sig": "(curve1, curve2, argvals, lambda_=0.0)"
+      "sig": "(curve1, curve2, argvals, lambda_=0.0)",
+      "when": "Use to elastically align two curves by computing their optimal warp function via SRSF."
     },
     "elastic_align_pair_closed": {
       "purpose": "Align closed (periodic) curve f2 to f1 with rotation search.",
@@ -256,7 +261,8 @@
     },
     "karcher_mean": {
       "purpose": "Karcher (Frechet) mean under the elastic metric.",
-      "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)"
+      "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)",
+      "when": "Use when you need the Frechet/Karcher mean of a set of curves under elastic (SRSF) warping."
     },
     "karcher_mean_closed": {
       "purpose": "Karcher mean for closed (periodic) curves.",
@@ -390,11 +396,13 @@
   "basis": {
     "basis_nbasis_cv": {
       "purpose": "Cross-validated selection of number of basis functions.",
-      "sig": "(data, argvals, nbasis_min=4, nbasis_max=20, basis_type='bspline', criterion='gcv', n_folds=5, lambda_=0.0)"
+      "sig": "(data, argvals, nbasis_min=4, nbasis_max=20, basis_type='bspline', criterion='gcv', n_folds=5, lambda_=0.0)",
+      "when": "Use to select the optimal number of B-spline or Fourier basis functions via leave-one-out CV."
     },
     "basis_to_fdata_1d": {
       "purpose": "Reconstruct functional data from basis coefficients.",
-      "sig": "(coefficients, argvals, n_basis, basis_type='bspline')"
+      "sig": "(coefficients, argvals, n_basis, basis_type='bspline')",
+      "when": "Use to convert a coefficient matrix + basis object into a functional data matrix on a target grid."
     },
     "bspline_basis": {
       "purpose": "Evaluate a B-spline basis at given points.",
@@ -680,11 +688,13 @@
   "depth": {
     "band_1d": {
       "purpose": "Band depth for 1D functional data.",
-      "sig": "(data, ref_data)"
+      "sig": "(data, ref_data)",
+      "when": "Use to compute band depth — the proportion of bands formed by sample curve pairs that contain a query curve."
     },
     "fraiman_muniz_1d": {
       "purpose": "Fraiman-Muniz depth for 1D functional data.",
-      "sig": "(data, ref_data, scale=True)"
+      "sig": "(data, ref_data, scale=True)",
+      "when": "Use to compute the Fraiman-Muniz depth (marginal-integral depth) for 1D functional data."
     },
     "fraiman_muniz_2d": {
       "purpose": "Fraiman-Muniz depth for 2D functional data.",
@@ -716,7 +726,8 @@
     },
     "modal_1d": {
       "purpose": "Modal depth for 1D functional data.",
-      "sig": "(data, ref_data, h=1.0)"
+      "sig": "(data, ref_data, h=1.0)",
+      "when": "Use to rank curves by modal depth (kernel density in function space); identifies the most central curve."
     },
     "modal_2d": {
       "purpose": "Modal depth for 2D functional data.",
@@ -962,7 +973,8 @@
     },
     "deriv_1d": {
       "purpose": "Compute numerical derivatives of 1D functional data.",
-      "sig": "(data, argvals, nderiv=1)"
+      "sig": "(data, argvals, nderiv=1)",
+      "when": "Use to estimate the first or higher-order derivative of a functional dataset on its evaluation grid."
     },
     "deriv_2d": {
       "purpose": "Compute numerical derivatives of 2D functional data.",
@@ -990,7 +1002,8 @@
     },
     "mean_1d": {
       "purpose": "Compute the pointwise mean of 1D functional data.",
-      "sig": "(data)"
+      "sig": "(data)",
+      "when": "Use to compute the pointwise cross-sectional mean curve of a functional dataset."
     },
     "mean_2d": {
       "purpose": "Compute the pointwise mean of 2D functional data.",
@@ -1020,7 +1033,8 @@
     },
     "frechet_global_reg": {
       "purpose": "Global Fréchet linear regression for density-response functional data.",
-      "sig": "(predictors, responses, argvals, xout)"
+      "sig": "(predictors, responses, argvals, xout)",
+      "when": "Use to run Frechet regression with a scalar or metric-space response and functional predictors."
     },
     "frechet_local_reg": {
       "purpose": "Local Fréchet regression for density-response functional data.",
@@ -1082,7 +1096,8 @@
     },
     "stationarity_test": {
       "purpose": "Test stationarity of functional time series via permutation test.",
-      "sig": "(data, argvals, n_perm=999, seed=42)"
+      "sig": "(data, argvals, n_perm=999, seed=42)",
+      "when": "Use to test stationarity of a functional time series before fitting FTSM or computing ACF."
     }
   },
   "inference": {
@@ -1092,7 +1107,8 @@
     },
     "flm_f_test": {
       "purpose": "Functional linear model overall-significance F-test.",
-      "sig": "(data, response, n_comp=5)"
+      "sig": "(data, response, n_comp=5)",
+      "when": "Use to test whether functional linear model coefficients are jointly zero (functional F-test)."
     },
     "flm_gof_test": {
       "purpose": "Functional linear model goodness-of-fit test (Ramsey-RESET style).",
@@ -1328,7 +1344,8 @@
     },
     "concurrent_regression": {
       "purpose": "Concurrent (varying-coefficient) functional regression.",
-      "sig": "(predictors, response, argvals=None, bandwidth=0.2, kernel='gaussian')"
+      "sig": "(predictors, response, argvals=None, bandwidth=0.2, kernel='gaussian')",
+      "when": "Use to fit a concurrent (pointwise) functional regression model where response and predictor share the same grid."
     },
     "fanova": {
       "purpose": "Functional ANOVA.",
@@ -1376,7 +1393,8 @@
     },
     "fregre_lm": {
       "purpose": "Scalar-on-function linear regression via FPCs.",
-      "sig": "(data, response, n_comp=3)"
+      "sig": "(data, response, n_comp=3)",
+      "when": "Use to fit a scalar-on-function linear regression model via FPC basis expansion."
     },
     "fregre_np": {
       "purpose": "Nonparametric kernel regression for functional data (from distance matrix).",
@@ -1642,7 +1660,8 @@
     },
     "gcv_smoother": {
       "purpose": "GCV score for a kernel smoother.",
-      "sig": "(x, y, bandwidth, kernel='gaussian')"
+      "sig": "(x, y, bandwidth, kernel='gaussian')",
+      "when": "Use when bandwidth selection is needed — GCV smoother selects optimal bandwidth automatically."
     },
     "knn_gcv": {
       "purpose": "Global LOO-CV for kNN k selection.",
@@ -1666,7 +1685,8 @@
     },
     "nadaraya_watson": {
       "purpose": "Nadaraya-Watson kernel smoother.",
-      "sig": "(x, y, x_new, bandwidth, kernel='gaussian')"
+      "sig": "(x, y, x_new, bandwidth, kernel='gaussian')",
+      "when": "Use for nonparametric smoothing of noisy functional observations via Nadaraya-Watson kernel regression."
     },
     "optim_bandwidth": {
       "purpose": "Optimal bandwidth selection via cross-validation.",
