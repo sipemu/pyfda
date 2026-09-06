@@ -1,5 +1,32 @@
 # Milestones
 
+## v12.0 Docs Depth, Card Coverage & AI Capability Skill (Shipped: 2026-09-06)
+
+**Phases completed:** 6 phases, 27 plans, 16 tasks
+
+**Key accomplishments:**
+
+- concurrent-regression.md brought to full parity: When-to-use table (concurrent vs FoF vs SoF), manual beta_curve prediction example, manual bandwidth-CV fence, formal No-built-in-bandwidth-CV warning, See also block — all 3 exec fences emit FDARS_FENCE_OK
+- functional-glm.md brought to full parity (DEPTH-01): When-to-use decision section, gaussian-reduces-to-linear-SoF comparison fence, parameter-selection subsection via model_selection_ncomp, gamma family example, 5 admonitions, 4 FDARS_FENCE_OK fences (1 html)
+- Restructured `functional-time-series.md` to mature analyze parity — UNNUMBERED template, method-selector table, When-to-use decision section, all 8 API errors corrected (ftsm_update arg order, max_lag not lags, ACF/PACF return dict, ar_models key, spectral_density full-spectrum, dpca no order=, long_run_covariance default None), 3 exec fences (html ACF plot + real data + ftsm/stationarity), 8 admonitions, See also — both verify gates pass.
+- density-fda.md restructured to UNNUMBERED analyze parity with 3-arg `inverse_lqd` corrected, quantile-grid output shape clarified in prose and admonition, `n_quantile_pts` documented, and 3 offline-verified FDARS_FENCE_OK fences including an html figure.
+- shapelets.md brought to full mature-page parity: discover_shapelets dict-return corrected, shapelet_distance tuple-return corrected, search-space and ncomp params documented, 4 runnable fences with 1 html figure, 6 admonitions, When-to-use + See-also added
+- advanced-clustering.md restructured to full mature-page parity with funfem_cluster/align_cluster_fd fully documented, KCFC reconstruction_errors and FunFEM membership inspected in fences, DBSCAN eps selection html figure, and all 3 exec fences emitting FDARS_FENCE_OK — completing the Phase 75 analyze-family sweep.
+- Flagship example page `frechet-density-regression.md` (EXMP-02): KDE-density responses from 35 Canadian weather stations regressed on latitude via `frechet_global_reg` + `frechet_local_reg`, with ISE evaluation and density integration check — all 3 fences emit `FDARS_FENCE_OK` offline, nav-wired in mkdocs.yml and index.md.
+- Flagship example page `fts-forecast.md` (EXMP-01): 35 Canadian weather stations sorted south-to-north by latitude and weekly-aggregated to (35, 52), treating the spatial gradient as a functional time series; FTSM fits ncomp=3 components with PVE from `scores.var(axis=0)`, forecasts 5 northern held-out stations via `ftsm_forecast_multistep`, reports stationarity (p≈0.010) and lag-1 ACF (≈0.33) — all 4 fences emit `FDARS_FENCE_OK` offline, nav-wired in mkdocs.yml and index.md.
+- Three hand-authored green (#198754) 320×180 SVG thumbnails and fdars-gallery cards for pace-fpca, interpolation, and imputation, bringing the represent landing gallery to 100% card coverage.
+- Five hand-authored #dc3545 SVG thumbnails (concurrent-regression, functional-glm, function-on-function, additive-sof, frechet-regression) — all SVGO-idempotent, rsvg-render-clean — inserted as fdars-gallery cards into docs/regression/index.md, completing CARD-03.
+- Eight #6f42c1 analyze thumbnails authored (functional-time-series through scoring-metrics), SVGO-idempotent + render-clean, with all 8 fdars-gallery cards inserted — analyze landing gallery at 100% coverage (16 cards)
+- llms.txt whole-library API digest (30 modules, 409 callables) and human-readable capability page generated offline from committed JSON and wired into mkdocs.yml nav
+- LLM-free `fdars_list_capabilities` @mcp.tool() registered in MCP server — loads committed `_capability_map.json` via importlib.resources, no model call, frozenset-gated allowlist, and GATE-04 three-test guard-sync added to prove LLM-free boundary on Py3.9+
+- GATE-02 PASS confirmed: all 122 SVGs (21 Phase-77 thumbnails + 101 concept diagrams) are byte-stable under a two-pass `npx svgo@3.3.4 --config svgo.config.mjs` transform — zero unstable files detected.
+- 76 advisor/MCP/guard-sync tests green (0 failed) on current HEAD, confirming the grounding invariant and MCP LLM-free boundary hold after the SKILL-04 capability tool landed.
+- Result: PASS
+- Result: APPROVED by user
+- Result: PASS.
+
+---
+
 ## v11.0 fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs (Shipped: 2026-09-05)
 
 **Phases completed:** 8 phases, 29 plans, 65 tasks

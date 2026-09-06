@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v12.0
 milestone_name: Docs Depth, Card Coverage & AI Capability Skill
-current_phase: 79
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 79 complete — all phases complete
-last_updated: "2026-09-06T21:23:45.130Z"
+last_updated: "2026-09-06T21:26:18.426Z"
 last_activity: 2026-09-06
-last_activity_desc: Phase 79 complete
-state_head: 704436646c7093018ee3e94072369f094d241f25
+last_activity_desc: Milestone v12.0 completed and archived
+state_head: f778460f7ea854c21f92573c688d31e8710fac23
 progress:
   total_phases: 6
   completed_phases: 6
   total_plans: 27
   completed_plans: 27
   percent: 100
+current_phase: 79
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 
 ## Current Position
 
-Phase: 79
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-09-06 — Phase 79 complete
+Phase: Milestone v12.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-09-06 — Milestone v12.0 completed and archived
 
 ## Performance Metrics
 
@@ -183,4 +183,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Review the v12.0 roadmap (`.planning/ROADMAP.md`), then plan the first phase with `/gsd-plan-phase 74`
+- Start the next milestone with /gsd-new-milestone

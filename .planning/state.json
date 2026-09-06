@@ -31,13 +31,13 @@
     {
       "number": "79",
       "name": "Close Gate — Strict Build, SVGO/Determinism, Human Review & Release",
-      "status": "in_progress"
+      "status": "complete"
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 79 of 6 · 83% · executing"
+    "command": "/gsd:progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
   },
-  "updated_at": "2026-09-06T20:43:01.835Z"
+  "updated_at": "2026-09-06T21:26:18.436Z"
 }
