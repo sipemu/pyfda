@@ -69,11 +69,11 @@ When asked "what is method X, where does it come from, and how else could I do i
 | SCHEMA-02 | Phase 80 | Complete |
 | SCHEMA-03 | Phase 80 | Complete |
 | SCHEMA-04 | Phase 80 | Complete |
-| CURATE-01 | Phase 81 | Pending |
-| CURATE-02 | Phase 81 | Pending |
-| CURATE-03 | Phase 81 | Pending |
+| CURATE-01 | Phase 81 | Complete |
+| CURATE-02 | Phase 81 | Complete |
+| CURATE-03 | Phase 81 | Complete |
 | CURATE-04 | Phase 81 | Pending |
-| CURATE-05 | Phase 81 | Pending |
+| CURATE-05 | Phase 81 | Complete |
 | MCP-01 | Phase 82 | Pending |
 | MCP-02 | Phase 82 | Pending |
 | MCP-03 | Phase 82 | Pending |

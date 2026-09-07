@@ -4,17 +4,17 @@ milestone: v13.0
 milestone_name: Scientific Provenance & Cross-Language Implementations
 current_phase: 81
 current_phase_name: Curation — Paper Registry
-status: planning
-stopped_at: Phase 80 complete, ready to plan Phase 81
-last_updated: "2026-09-07T10:24:54.413Z"
+status: executing
+stopped_at: Completed 81-01-PLAN.md (tracer — basis/smoothing + func-stats curated, 9 domains added, coverage emission test)
+last_updated: "2026-09-07T11:55:54.496Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 80 complete, transitioned to Phase 81
-state_head: d73899f4abe062edcebf9e60150a56b1808145e5
+last_activity_desc: Phase 81 execution started
+state_head: 6a64d3d852f43181e41cf7b633425d872fe1a279
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 7
+  completed_plans: 3
   percent: 20
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-07)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 80 — Schema, Data Home & Primary Guard Tests
+**Current focus:** Phase 81 — Curation — Paper Registry
 
 ## Current Position
 
-Phase: 81 — Curation — Paper Registry
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-07 — Phase 80 complete, transitioned to Phase 81
+Phase: 81 (Curation — Paper Registry) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-09-07 — Phase 81 execution started
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [░░░░░░░░░░] 0%
 |------|----------|-------|-------|
 | Phase 80 P01 | 5 | 3 tasks | 2 files |
 | Phase 80 P02 | 2 | 1 tasks | 1 files |
+| Phase 81 P01 | 308 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,8 @@ Recent decisions affecting current work:
 - [Phase 80]: FDARS_ONLINE_CHECKS=1 pattern: structural DOI/URL gate runs always in CI; opt-in live-resolve skips the structural gate (inverts the FDARS_INTEGRATION pattern)
 - [Phase 80]: docs/authoring/references-schema.md documents the ACTUAL shipped _references_map.json shape (5-paper seed, 11 callable_index entries) with verbatim examples — curators author against what is live
 - [Phase 80]: docs/authoring/ not added to mkdocs nav this phase — Phase 83 wires the references docs surface per plan spec
+- [Phase 81]: curated:false for ramsay_silverman_2005/gervini_2008/craven_wahba_1979/nadaraya_watson_1964 — DOIs [ASSUMED]/[CITED] not landing-page-verified; eligible for curated:true promotion at Phase 84 human review
+- [Phase 81]: _ALLOWED_DOMAINS extended with 9 domains (6 minimum + 3 conditional); coverage denominator derived from live _capability_map.json (437), not hardcoded
 
 ### Pending Todos
 
@@ -128,9 +131,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-07T10:02:09.271Z
-Stopped at: Phase 80 complete, ready to plan Phase 81
-Resume file: None
+Last session: 2026-09-07T11:55:54.463Z
+Stopped at: Completed 81-01-PLAN.md (tracer — basis/smoothing + func-stats curated, 9 domains added, coverage emission test)
+Resume file: 81-02-PLAN.md
 
 ## Operator Next Steps
 
