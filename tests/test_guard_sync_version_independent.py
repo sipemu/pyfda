@@ -416,6 +416,18 @@ _ALLOWED_DOMAINS = frozenset({
     "pypi.org", "fdasrsf-python.readthedocs.io",
     # fdars own docs
     "sipemu.github.io",
+    # Phase 81 additions — publisher hosts
+    "www3.stat.sinica.edu.tw",   # Statistica Sinica (Degras 2011, Shen & Faraway 2004)
+    "proceedings.mlr.press",      # PMLR (Cuturi & Blondel 2017 soft-DTW)
+    "journals.sagepub.com",       # SAGE Journals (Volkmann et al. 2023 multiFAMM)
+    # Phase 81 additions — cross-language package docs (Python)
+    "tslearn.readthedocs.io",     # tslearn (DTW, GAK, soft-DTW cross-language)
+    "fda.readthedocs.io",         # scikit-fda (functional data cross-language)
+    "www.sktime.net",             # sktime (shapelet cross-language)
+    # Phase 81 additions — conditionally needed (later batches)
+    "epubs.siam.org",             # SIAM (Agueh & Carlier 2011 Wasserstein)
+    "icml.cc",                    # ICML (alternative Cuturi 2011 landing page)
+    "www.stat.ucdavis.edu",       # UC Davis PACE Matlab tool
 })
 
 
@@ -503,4 +515,74 @@ def test_references_map_doi_url_structural_gate():
     assert not errors, (
         "Structural DOI/URL gate failures (SCHEMA-04):\n"
         + "\n".join(f"  - {e}" for e in errors)
+    )
+
+
+# ---------------------------------------------------------------------------
+# COVERAGE TEST — runs on Python 3.9+ — honest N/437 fraction emission
+# ---------------------------------------------------------------------------
+# NOTE: 409 was the stale roadmap-time estimate of the callable count.
+# The real denominator is derived at test-time from _capability_map.json
+# (437 at authoring time, 2026-09-07). A hardcoded denominator would desync
+# whenever a new crate version adds or removes callables; recomputing from the
+# live file keeps this test honest across crate bumps.
+
+
+def test_references_map_coverage_fraction():
+    """GATE-05 coverage emission: print N/437 fraction derived from _capability_map.json.
+
+    Loads _references_map.json and _capability_map.json via importlib.resources.
+    Computes:
+      denominator = sum(len(v) for v in cap_data.values()) — from the live file,
+                    NOT hardcoded, so a future crate-bump cannot silently desync it.
+      numerator   = count of DISTINCT callable_index keys where at least one
+                    referenced paper has curated:true.
+
+    Prints "COVERAGE: {numerator}/{denominator} callables curated ..." for
+    surfacing under pytest -s.
+
+    Asserts:
+      - denominator == 437 as a drift tripwire (update this constant if the
+        capability map legitimately grows — it exists to catch accidental
+        capability-map changes, not to block intentional growth).
+      - 0 <= numerator <= denominator (sanity bound).
+
+    No hard coverage floor — a floor is deferred to REF-FUT-01 per CONTEXT.md.
+    """
+    ref_file = resources.files("fdars") / "_references_map.json"
+    cap_file = resources.files("fdars") / "_capability_map.json"
+    ref_data: dict = json.loads(ref_file.read_text(encoding="utf-8"))
+    cap_data: dict = json.loads(cap_file.read_text(encoding="utf-8"))
+
+    # Denominator: recomputed from the live capability map (never hardcoded)
+    denominator = sum(len(v) for v in cap_data.values())
+
+    papers = ref_data.get("papers", {})
+    callable_index = ref_data.get("callable_index", {})
+
+    # Build set of paper_keys that have curated:true
+    curated_paper_keys = frozenset(
+        pk for pk, paper in papers.items() if paper.get("curated", False) is True
+    )
+
+    # Numerator: distinct callable_index keys backed by at least one curated paper
+    numerator = sum(
+        1
+        for callable_key, paper_keys in callable_index.items()
+        if any(pk in curated_paper_keys for pk in paper_keys)
+    )
+
+    print(
+        f"COVERAGE: {numerator}/{denominator} callables curated "
+        f"({100 * numerator / denominator:.1f}% of fdars callable surface)"
+    )
+
+    # Drift tripwire: update the expected count if capability map legitimately grew
+    assert denominator == 437, (
+        f"_capability_map.json callable count changed: expected 437, got {denominator}. "
+        "If a crate bump added/removed callables intentionally, update this constant "
+        "in test_references_map_coverage_fraction. If unexpected, investigate."
+    )
+    assert 0 <= numerator <= denominator, (
+        f"Numerator {numerator} out of bounds [0, {denominator}]"
     )
