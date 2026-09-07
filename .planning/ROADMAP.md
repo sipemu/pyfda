@@ -214,7 +214,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 - A BLOCKING HUMAN citation-accuracy review (papers verified against DOI landing pages by a human, not an LLM) is a hard close gate — parallel to the standing v6.0 blocking diagram review; autonomous execution stops there.
 
 - [x] **Phase 80: Schema, Data Home & Primary Guard Tests** - `_references_map.json` stub + schema/author-verification workflow + maturin include + primary GATE-05 tests + offline DOI/URL structural gate (completed 2026-09-07)
-- [ ] **Phase 81: Curation — Paper Registry** - hand-authored, author-verified paper-level entries + sub-method callable index + R/Python/Matlab pointers + anti-feature sentinels + honest `N/409` coverage (bulk / critical path)
+- [x] **Phase 81: Curation — Paper Registry** - hand-authored, author-verified paper-level entries + sub-method callable index + R/Python/Matlab pointers + anti-feature sentinels + honest `N/409` coverage (bulk / critical path) (completed 2026-09-07)
 - [ ] **Phase 82: MCP Tool `fdars_method_references` + GATE-05 Companion** - LLM-free static lookup tool + `_REFERENCES_MODULES` + curated/sentinel return shape + Guard Group 3 companion tests (can parallel Phase 81)
 - [ ] **Phase 83: Docs, llms.txt & Skill Extension** - `docs/references.md` + `--references` offline emit + `llms.txt` provenance section + `mkdocs.yml` nav + `fdars-capabilities` hybrid protocol
 - [ ] **Phase 84: Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review** - whole-site `--strict` offline + all GATE-05 groups + DOI/URL gate + blocking human citation-accuracy review + grounding/guard-sync confirmation + release handoff
@@ -315,7 +315,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 80. Schema, Data Home & Primary Guard Tests | v13.0 | 2/2 | Complete    | 2026-09-07 |
-| 81. Curation — Paper Registry | v13.0 | 5/5 | In Progress|  |
+| 81. Curation — Paper Registry | v13.0 | 5/5 | Complete    | 2026-09-07 |
 | 82. MCP Tool `fdars_method_references` + GATE-05 Companion | v13.0 | 0/TBD | Not started | - |
 | 83. Docs, llms.txt & Skill Extension | v13.0 | 0/TBD | Not started | - |
 | 84. Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Review | v13.0 | 0/TBD | Not started | - |

@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v13.0
 milestone_name: Scientific Provenance & Cross-Language Implementations
-current_phase: 81
-current_phase_name: Curation — Paper Registry
-status: executing
-stopped_at: Completed 81-04-PLAN.md
-last_updated: "2026-09-07T13:43:38.460Z"
+current_phase: 82
+current_phase_name: MCP Tool `fdars_method_references` + GATE-05 Companion
+status: planning
+stopped_at: Phase 81 complete, ready to plan Phase 82
+last_updated: "2026-09-07T14:13:07.881Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 81 execution started
-state_head: 7860f820c7725a5fad80b60472243358c093d10a
+last_activity_desc: Phase 81 complete, transitioned to Phase 82
+state_head: ca843c3e7eb4e36e369bfdda937ea749c1f1af7d
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 6
-  percent: 20
+  completed_plans: 7
+  percent: 40
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 
 ## Current Position
 
-Phase: 81 (Curation — Paper Registry) — EXECUTING
-Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-09-07 — Phase 81 execution started
+Phase: 82 — MCP Tool `fdars_method_references` + GATE-05 Companion
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-07 — Phase 81 complete, transitioned to Phase 82
 
 Progress: [██░░░░░░░░] 20%
 
@@ -49,7 +49,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 80 | 2 | - | - |
-| 81 | TBD | - | - |
+| 81 | 5 | - | - |
 | 82 | TBD | - | - |
 | 83 | TBD | - | - |
 | 84 | TBD | - | - |
@@ -70,6 +70,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 81-curation-paper-registry P02 | 12m | 3 tasks | 1 files |
 | Phase 81 P03 | 15 | 3 tasks | 1 files |
 | Phase 81 P04 | 9 | 3 tasks | 1 files |
+| Phase 81-curation-paper-registry P05 | 289 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,8 @@ Recent decisions affecting current work:
 - [Phase 81]: clustering.align_cluster_fd wired as co-primary to srivastava_et_al_2011 (callable is in clustering module, not alignment) — fdars-core alignment/clustering.rs cites arXiv:1103.3817
 - [Phase 81]: cuturi_blondel_2017 soft-DTW: doi:'' curated:true — PMLR proceedings have no journal DOI; GATE-05 C skips empty doi on curated:true entries
 - [Phase 81]: spm.mfpca curated (happ_greven_2018) despite spm anti-feature module — callable has clear paper root per Pitfall 7
+- [Phase 81]: _uncurated_spm_tail_2026-09 removed: CURATE-04 sentinel is ABSENCE from callable_index, not a curated:false placeholder entry listing the callables
+- [Phase 81]: Coverage finalized at 31/437 (7.1% curated:true) — honest per CURATE-05; no LLM-synthesized placeholder ships as curated
 
 ### Pending Todos
 
@@ -141,8 +144,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-07T13:43:38.424Z
-Stopped at: Completed 81-04-PLAN.md
+Last session: 2026-09-07T13:51:38.711Z
+Stopped at: Phase 81 complete, ready to plan Phase 82
 Resume file: None
 
 ## Operator Next Steps
