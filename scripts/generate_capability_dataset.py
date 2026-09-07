@@ -30,8 +30,17 @@ Usage
     # Emit docs/llms.txt and docs/ai-capability-map.md from the committed map:
     python scripts/generate_capability_dataset.py --llmstxt
 
-Output (default):   ``python/fdars/_capability_map.json``
-Output (--llmstxt): ``docs/llms.txt`` + ``docs/ai-capability-map.md``
+    # Emit docs/references.md and docs/llms.txt (with provenance section):
+    python scripts/generate_capability_dataset.py --references
+
+Output (default):     ``python/fdars/_capability_map.json``
+Output (--llmstxt):   ``docs/llms.txt`` + ``docs/ai-capability-map.md``
+Output (--references): ``docs/references.md`` + ``docs/llms.txt`` (extended)
+
+NOTE: ``--references`` re-emits BOTH ``docs/references.md`` AND the full
+``docs/llms.txt`` (with the provenance section appended) so the two surfaces
+stay in sync.  Run ``--references`` after any provenance data update in
+``python/fdars/_references_map.json``.
 
 EXCLUDED modules (intentional non-duplication boundary)
 --------------------------------------------------------
@@ -308,7 +317,12 @@ def _module_url(mod_name: str) -> str:
     return f"{_SITE_BASE}/{page_path}/"
 
 
-def _emit_llmstxt(data: dict, repo_root: Path) -> Path:
+def _emit_llmstxt(
+    data: dict,
+    repo_root: Path,
+    ref_data: "dict | None" = None,
+    cap_data: "dict | None" = None,
+) -> Path:
     """Emit ``docs/llms.txt`` from the capability map.
 
     Follows the llms.txt convention:
@@ -317,8 +331,15 @@ def _emit_llmstxt(data: dict, repo_root: Path) -> Path:
     - ``## Core Modules``: bullet list of module name + summary + link
     - ``## Full API Reference``: per-module subsections with
       ``module.fn(sig) — purpose`` lines (curated ``when`` appended if present)
+    - ``## Scientific Provenance & Cross-Language Implementations`` section
+      (appended only when both ``ref_data`` and ``cap_data`` are provided)
 
     Output is deterministic: modules are emitted in sorted order.
+
+    The ``ref_data`` / ``cap_data`` parameters are optional.  When both are
+    provided (the ``--references`` path), the provenance section is appended.
+    When absent (the ``--llmstxt`` path from ``emit_docs()``), the output is
+    byte-for-byte identical to the previous behaviour.
     """
     out_path = repo_root / "docs" / "llms.txt"
 
@@ -382,6 +403,10 @@ def _emit_llmstxt(data: dict, repo_root: Path) -> Path:
                 line += f" When: {when}"
             lines.append(line)
         lines.append("")
+
+    # Provenance section — appended only when ref_data/cap_data are provided
+    if ref_data is not None and cap_data is not None:
+        lines.extend(_provenance_section_lines(ref_data, cap_data))
 
     content = "\n".join(lines)
     out_path.write_text(content, encoding="utf-8")
@@ -469,6 +494,372 @@ def _emit_ai_capability_map(data: dict, repo_root: Path) -> Path:
     return out_path
 
 
+# ---------------------------------------------------------------------------
+# References-emit helpers (--references path)
+#
+# These functions read the COMMITTED ``python/fdars/_references_map.json``
+# and ``python/fdars/_capability_map.json`` to emit two docs surfaces offline.
+# They do NOT import fdars — they work in docs-build environments where the
+# compiled extension may not be present.
+# ---------------------------------------------------------------------------
+
+
+def _coverage_counts(ref_data: dict, cap_data: dict) -> "tuple[int, int]":
+    """Derive coverage numerator and denominator from the committed JSON data.
+
+    Mirrors the derivation in ``python/fdars/mcp/server.py`` exactly.
+    NEVER returns hardcoded values — all numbers are derived from live JSON.
+
+    Returns:
+        (numerator, denominator) where
+        - denominator = total callables in _capability_map.json
+        - numerator   = callables backed by at least one curated:true paper
+    """
+    denominator = sum(len(v) for v in cap_data.values())
+    papers_map = ref_data.get("papers", {})
+    callable_index = ref_data.get("callable_index", {})
+    curated_paper_keys = frozenset(
+        pk for pk, p in papers_map.items() if p.get("curated", False) is True
+    )
+    numerator = sum(
+        1 for _, pks in callable_index.items()
+        if any(pk in curated_paper_keys for pk in pks)
+    )
+    return (numerator, denominator)
+
+
+def _callable_purpose(callable_key: str, cap_data: dict) -> str:
+    """Look up purpose for a callable key from the capability map.
+
+    Handles the ``_Fdata`` module prefix (OOP container methods live under
+    ``cap_data["_Fdata"]``).
+    """
+    if "." not in callable_key:
+        return ""
+    module, fn = callable_key.split(".", 1)
+    mod_data = cap_data.get(module, {})
+    entry = mod_data.get(fn, {})
+    return entry.get("purpose", "")
+
+
+def _emit_references_page(ref_data: dict, cap_data: dict, repo_root: Path) -> Path:
+    """Write ``docs/references.md`` — family-grouped scientific references page.
+
+    Structure:
+    - H1 title + intro blockquote with derived coverage fraction
+    - ## Coverage section (derived, never hardcoded)
+    - ## Methods by Module — one H3 per module family (alphabetical)
+      - H4 per paper (Authors Year — Title)
+      - Metadata table (Authors / Year / DOI / URL / Type / Status)
+      - Callables list (with purpose from capability map)
+      - Cross-language table (only when non-empty)
+    - Sentinel papers (_uncurated* keys) are completely skipped
+
+    Only uses plain Markdown — no {#anchor} attr_list syntax, no HTML blocks.
+    Internal doc links restricted to ai-capability-map.md (confirmed present).
+    """
+    out_path = repo_root / "docs" / "references.md"
+    papers_map = ref_data.get("papers", {})
+
+    numerator, denominator = _coverage_counts(ref_data, cap_data)
+    coverage_str = f"{numerator}/{denominator}"
+
+    curated_paper_keys = frozenset(
+        pk for pk, p in papers_map.items() if p.get("curated", False) is True
+    )
+
+    # Group papers by primary module (first callable's module prefix).
+    # Skip sentinel papers (_uncurated* keys).
+    # A multi-module paper appears once under its primary module.
+    module_papers: dict[str, list[tuple[str, dict]]] = {}
+    for paper_key in sorted(papers_map.keys()):
+        if paper_key.startswith("_uncurated"):
+            continue
+        paper = papers_map[paper_key]
+        callables = paper.get("callables", [])
+        if not callables:
+            continue
+        primary_module = callables[0].split(".")[0]
+        module_papers.setdefault(primary_module, []).append((paper_key, paper))
+
+    lines: list[str] = []
+
+    # H1 + intro blockquote
+    lines.append("# fdars Scientific References")
+    lines.append("")
+    lines.append(
+        f"> Curated primary paper references for fdars functional data analysis methods.  "
+    )
+    lines.append(
+        f"> Generated offline from `python/fdars/_references_map.json`.  "
+    )
+    lines.append(
+        f"> **{numerator}/{denominator} callables** have curated entries (authoring: {coverage_str}).  "
+    )
+    lines.append(
+        f"> Uncurated callables are absent; see the [AI Capability Map](ai-capability-map.md) "
+        f"for the full callable surface."
+    )
+    lines.append("")
+
+    # Coverage section
+    lines.append("## Coverage")
+    lines.append("")
+    lines.append(
+        f"**{numerator} of {denominator} public callables** have at least one curated "
+        f"primary-paper entry."
+    )
+    lines.append(
+        "Remaining callables have contested attribution, no single primary paper, "
+        "or are pending Phase-84 human DOI-landing-page verification."
+    )
+    lines.append(
+        f"See [AI Capability Map](ai-capability-map.md) for all {denominator} callables."
+    )
+    lines.append("")
+
+    # Methods by Module
+    lines.append("## Methods by Module")
+    lines.append("")
+
+    for module_key in sorted(module_papers.keys()):
+        papers_in_module = module_papers[module_key]
+
+        # Section heading
+        if module_key == "_Fdata":
+            lines.append("### Fdata Class Methods")
+        else:
+            summary = _MODULE_SUMMARIES.get(module_key, "")
+            if summary:
+                lines.append(f"### fdars.{module_key} — {summary}")
+            else:
+                lines.append(f"### fdars.{module_key}")
+        lines.append("")
+
+        for paper_key, paper in papers_in_module:
+            authors_list = paper.get("authors", [])
+            year = paper.get("year", "")
+            title = paper.get("title", "")
+            doi = paper.get("doi", "")
+            url = paper.get("url", "")
+            pub_type = paper.get("type", "")
+            is_curated = paper.get("curated", False) is True
+            callables = paper.get("callables", [])
+            cross_language = paper.get("cross_language", {})
+
+            # H4: Authors (Year) — Title
+            authors_str = ", ".join(authors_list) if authors_list else "Unknown"
+            year_str = str(year) if year else "n.d."
+            title_str = title if title else "(title pending verification)"
+            lines.append(f"#### {authors_str} ({year_str}) — {title_str}")
+            lines.append("")
+
+            # Metadata table
+            lines.append("| Field | Value |")
+            lines.append("|-------|-------|")
+            lines.append(f"| Authors | {authors_str} |")
+            lines.append(f"| Year | {year_str} |")
+            if doi:
+                lines.append(f"| DOI | `doi:{doi}` |")
+            if url:
+                # Shorten URL for display — use the full URL as link text clipped
+                display_url = url if len(url) <= 60 else url[:57] + "..."
+                lines.append(f"| URL | [{display_url}]({url}) |")
+            lines.append(f"| Type | {pub_type} |")
+            status = "Curated" if is_curated else "Pending DOI verification"
+            lines.append(f"| Status | {status} |")
+            lines.append("")
+
+            # Callables
+            if callables:
+                lines.append("**Callables implementing this method:**")
+                lines.append("")
+                for callable_key in callables:
+                    purpose = _callable_purpose(callable_key, cap_data)
+                    if purpose:
+                        lines.append(f"- `{callable_key}` — {purpose}")
+                    else:
+                        lines.append(f"- `{callable_key}`")
+                lines.append("")
+
+            # Cross-language table (omit entirely when empty — honest gap)
+            if cross_language:
+                lines.append("**Cross-language implementations:**")
+                lines.append("")
+                lines.append("| Language | Package | Function | Confidence |")
+                lines.append("|----------|---------|----------|------------|")
+                for lang, impl in sorted(cross_language.items()):
+                    pkg = impl.get("package", "")
+                    fn = impl.get("function", "")
+                    confidence = impl.get("confidence", "")
+                    lines.append(f"| {lang} | `{pkg}` | `{fn}` | {confidence} |")
+                lines.append("")
+
+            lines.append("---")
+            lines.append("")
+
+    content = "\n".join(lines)
+    out_path.write_text(content, encoding="utf-8")
+    return out_path
+
+
+def _provenance_section_lines(ref_data: dict, cap_data: dict) -> "list[str]":
+    """Build the '## Scientific Provenance & Cross-Language Implementations' block.
+
+    Returns a list of lines to be appended to docs/llms.txt.  Emits ONLY
+    callables whose backing paper has curated:true on at least one paper.
+    Sentinel papers (_uncurated* keys) never appear in this section.
+
+    Per-entry line format:
+        - `module.callable` — Authors (Year) doi:DOI ; R: pkg::fn / Python: pkg.fn
+    The doi segment is omitted when doi is empty.
+    The cross-language segment is omitted when cross_language is empty.
+    """
+    papers_map = ref_data.get("papers", {})
+    callable_index = ref_data.get("callable_index", {})
+
+    numerator, denominator = _coverage_counts(ref_data, cap_data)
+    uncurated_count = denominator - numerator
+
+    curated_paper_keys = frozenset(
+        pk for pk, p in papers_map.items() if p.get("curated", False) is True
+    )
+
+    # Group curated callables by module for the per-module subsections.
+    # A callable appears only once in callable_index, under its canonical key.
+    # Skip any callable whose every backing paper is uncurated.
+    module_callable_entries: dict[str, list[tuple[str, str, dict]]] = {}
+    for callable_key in sorted(callable_index.keys()):
+        paper_keys = callable_index[callable_key]
+        # Only callables with at least one curated:true backing paper
+        curated_pks = [pk for pk in paper_keys if pk in curated_paper_keys]
+        if not curated_pks:
+            continue
+        module = callable_key.split(".")[0] if "." in callable_key else callable_key
+        for pk in curated_pks:
+            paper = papers_map[pk]
+            module_callable_entries.setdefault(module, []).append(
+                (callable_key, pk, paper)
+            )
+
+    lines: list[str] = []
+    lines.append("")
+    lines.append("## Scientific Provenance & Cross-Language Implementations")
+    lines.append("")
+    lines.append(
+        f"Coverage: {numerator} of {denominator} public callables have curated "
+        f"primary-paper entries."
+    )
+    lines.append(
+        "Uncurated callables are absent from this section. A consumer MAY synthesize"
+    )
+    lines.append(
+        "provenance for uncurated callables but MUST flag each synthesized citation as"
+    )
+    lines.append(
+        'ungrounded (grounded: false) — never present synthesized provenance as curated.'
+    )
+    lines.append("")
+
+    for module_key in sorted(module_callable_entries.keys()):
+        entries = module_callable_entries[module_key]
+        if module_key == "_Fdata":
+            lines.append("### Fdata Class Methods")
+        else:
+            lines.append(f"### fdars.{module_key}")
+        lines.append("")
+
+        for callable_key, paper_key, paper in entries:
+            authors_list = paper.get("authors", [])
+            year = paper.get("year", "")
+            doi = paper.get("doi", "")
+            cross_language = paper.get("cross_language", {})
+
+            authors_str = ", ".join(authors_list) if authors_list else "Unknown"
+            year_str = str(year) if year else "n.d."
+
+            # Build entry line
+            entry_line = f"- `{callable_key}` — {authors_str} ({year_str})"
+            if doi:
+                entry_line += f" doi:{doi}"
+            if cross_language:
+                lang_parts = []
+                for lang in sorted(cross_language.keys()):
+                    impl = cross_language[lang]
+                    pkg = impl.get("package", "")
+                    fn = impl.get("function", "")
+                    if lang == "R":
+                        lang_parts.append(f"R: {pkg}::{fn}")
+                    elif lang == "Python":
+                        lang_parts.append(f"Python: {pkg}.{fn}")
+                    elif lang == "Matlab":
+                        lang_parts.append(f"Matlab: {pkg}.{fn}")
+                    else:
+                        lang_parts.append(f"{lang}: {pkg}.{fn}")
+                if lang_parts:
+                    entry_line += " ; " + " / ".join(lang_parts)
+
+            lines.append(entry_line)
+
+        lines.append("")
+
+    # Closing uncurated note (verbatim per spec)
+    lines.append(
+        f"> Uncurated callables ({uncurated_count} of {denominator}) are absent "
+        f"from this section."
+    )
+    lines.append(
+        "> A consumer MAY synthesize provenance for these callables but MUST structurally"
+    )
+    lines.append(
+        '> flag each synthesized citation as ungrounded: { "grounded": false } per citation.'
+    )
+    lines.append(
+        "> Never present synthesized provenance as curated data from this file."
+    )
+    lines.append("")
+
+    return lines
+
+
+def emit_references(repo_root: Path) -> None:
+    """Read the committed JSON artifacts and emit docs/references.md + docs/llms.txt.
+
+    This is the --references offline path.  It does NOT import fdars — it reads
+    the committed JSON artifacts so it works in docs-build environments where the
+    compiled extension may not be present.
+
+    Emits BOTH docs/references.md AND the full docs/llms.txt (with the
+    '## Scientific Provenance & Cross-Language Implementations' section appended)
+    so the two surfaces stay in sync.  Run --references whenever provenance data
+    in python/fdars/_references_map.json changes.
+    """
+    ref_path = repo_root / "python" / "fdars" / "_references_map.json"
+    cap_path = repo_root / "python" / "fdars" / "_capability_map.json"
+
+    if not ref_path.exists():
+        print(f"ERROR: references map not found at {ref_path}", file=sys.stderr)
+        sys.exit(1)
+    if not cap_path.exists():
+        print(f"ERROR: capability map not found at {cap_path}", file=sys.stderr)
+        print(
+            "Run: python scripts/generate_capability_dataset.py first",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    with open(ref_path, encoding="utf-8") as f:
+        ref_data: dict = json.load(f)
+    with open(cap_path, encoding="utf-8") as f:
+        cap_data: dict = json.load(f)
+
+    refs_path = _emit_references_page(ref_data, cap_data, repo_root)
+    llmstxt_path = _emit_llmstxt(cap_data, repo_root, ref_data=ref_data, cap_data=cap_data)
+
+    print(f"Written {refs_path}")
+    print(f"Written {llmstxt_path} (extended with provenance section)")
+
+
 def emit_docs(repo_root: Path) -> None:
     """Read the committed capability map and emit docs/llms.txt + docs/ai-capability-map.md.
 
@@ -501,6 +892,8 @@ if __name__ == "__main__":
     repo_root = Path(__file__).parent.parent
     if "--llmstxt" in sys.argv:
         emit_docs(repo_root)
+    elif "--references" in sys.argv:
+        emit_references(repo_root)
     else:
         dataset = generate_capability_dataset()
         output_path = repo_root / "python" / "fdars" / "_capability_map.json"
