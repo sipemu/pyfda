@@ -79,8 +79,7 @@
         "alignment.elastic_cross_distance_matrix",
         "alignment.amplitude_distance",
         "alignment.phase_distance",
-        "alignment.elastic_decomposition",
-        "clustering.align_cluster_fd"
+        "alignment.elastic_decomposition"
       ],
       "cross_language": {
         "R": {
@@ -102,8 +101,20 @@
           "confidence": "low"
         }
       },
-      "notes": "SRSF framework via Fisher-Rao metric; arXiv:1103.3817. NOT the TPAMI SRV/shape paper. Extended in 81-04 to cover additional distance/decomposition callables. align_cluster_fd is listed as co-primary: it performs k-means clustering in the elastic SRSF metric; no single standalone clustering paper covers this exact method — attribution to Srivastava et al. 2011 framework (for the Karcher mean iteration) is the best available root, per fdars-core 0.33.0 alignment/clustering.rs which cites arXiv:1103.3817 in the module doc.",
+      "notes": "SRSF framework via Fisher-Rao metric; arXiv:1103.3817. NOT the TPAMI SRV/shape paper. Extended in 81-04 to cover additional distance/decomposition callables. align_cluster_fd moved to _uncurated_align_cluster_fd_2026-09 sentinel (contested attribution — see that entry).",
       "curated": true
+    },
+    "_uncurated_align_cluster_fd_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "preprint",
+      "callables": [
+        "clustering.align_cluster_fd"
+      ],
+      "notes": "Contested attribution — no single curated:true pick permitted per Phase-81 milestone rule. Primary candidate: Srivastava et al. 2011 (arXiv:1103.3817) for the SRSF/Karcher-mean framework used in elastic k-means clustering. fdars-core 0.33.0 alignment/clustering.rs cites arXiv:1103.3817 in module doc, but align_cluster_fd is a clustering callable not directly introduced in that alignment paper. No standalone clustering paper identified that covers this exact elastic k-means-in-SRSF-metric method. curated:false — contested; do not promote to single curated:true until fdars-core source confirms the primary reference unambiguously.",
+      "curated": false
     },
     "ramsay_dalzell_1991": {
       "title": "Some tools for functional data analysis",
@@ -282,6 +293,7 @@
       "title": "",
       "authors": [],
       "year": null,
+      "doi": "",
       "url": "",
       "type": "journal",
       "callables": [
@@ -314,8 +326,7 @@
       "url": "https://www.tandfonline.com/doi/abs/10.1198/jcgs.2011.09224",
       "type": "journal",
       "callables": [
-        "depth.functional_boxplot",
-        "outliers.outliergram"
+        "depth.functional_boxplot"
       ],
       "cross_language": {
         "R": {
@@ -325,7 +336,20 @@
           "confidence": "high"
         }
       },
-      "notes": "Introduces the functional boxplot visualization and the outliergram (MBD vs MEI parabolic fence). [VERIFIED: tandfonline.com/doi/abs/10.1198/jcgs.2011.09224 — confirmed Sun & Genton 2011, JCGS Vol 20 No 2, pp 316-334.] NOT the category-level dispatcher depth.functional_depth. curated:false until Phase 84 direct DOI-landing-page verification of title/authors.",
+      "notes": "Introduces the functional boxplot visualization only (band formed by deepest 50% of curves via MBD). [VERIFIED: tandfonline.com/doi/abs/10.1198/jcgs.2011.09224 — confirmed Sun & Genton 2011, JCGS Vol 20 No 2, pp 316-334.] NOT the category-level dispatcher depth.functional_depth. NOT the outliergram (see arribas_gil_romo_2014). curated:false until Phase 84 direct DOI-landing-page verification of title/authors.",
+      "curated": false
+    },
+    "arribas_gil_romo_2014": {
+      "title": "Shape outlier detection and visualization for functional data: the outliergram",
+      "authors": ["Arribas-Gil, A.", "Romo, J."],
+      "year": 2014,
+      "doi": "10.1093/biostatistics/kxu006",
+      "url": "https://academic.oup.com/biostatistics/article/15/4/603/269095",
+      "type": "journal",
+      "callables": [
+        "outliers.outliergram"
+      ],
+      "notes": "Introduces the outliergram — MBD vs MEI parabolic fence visualization for outlier detection in functional data. Biostatistics 15(4):603-619, 2014. [ASSUMED: DOI plausible; verify at Phase 84.] curated:false — pending Phase-84 human verify.",
       "curated": false
     },
     "dai_genton_2019": {
@@ -847,9 +871,7 @@
       "type": "conference",
       "callables": [
         "metric.soft_dtw_self_1d",
-        "metric.soft_dtw_cross_1d",
-        "metric.soft_dtw_div_self_1d",
-        "metric.soft_dtw_div_cross_1d"
+        "metric.soft_dtw_cross_1d"
       ],
       "cross_language": {
         "Python": {
@@ -859,8 +881,22 @@
           "confidence": "high"
         }
       },
-      "notes": "Introduces soft-DTW as a differentiable loss function for time-series. ICML 2017 (PMLR v70). NO journal DOI — PMLR proceedings have no DOI assigned. doi:'''' with curated:true is allowed by GATE-05 C (empty doi is skipped by the gate). [CITED: proceedings.mlr.press/v70/cuturi17a.html — confirmed via web search.] soft-DTW divergence (div variants) is a later extension using the same framework.",
+      "notes": "Introduces soft-DTW as a differentiable loss function for time-series. ICML 2017 (PMLR v70). NO journal DOI — PMLR proceedings have no DOI assigned. doi:'' with curated:true is allowed by GATE-05 C (empty doi is skipped by the gate). [CITED: proceedings.mlr.press/v70/cuturi17a.html — confirmed via web search.] soft-DTW divergence (div variants) moved to blondel_et_al_2021 which is their primary paper.",
       "curated": true
+    },
+    "blondel_et_al_2021": {
+      "title": "Differentiable Divergences Between Time Series",
+      "authors": ["Blondel, M.", "Mensch, A.", "Vert, J.P."],
+      "year": 2021,
+      "doi": "",
+      "url": "https://arxiv.org/abs/2201.12484",
+      "type": "conference",
+      "callables": [
+        "metric.soft_dtw_div_self_1d",
+        "metric.soft_dtw_div_cross_1d"
+      ],
+      "notes": "Introduces the soft-DTW divergence (debiased, symmetrized soft-DTW). AISTATS 2021 (PMLR v130). arXiv:2201.12484. No DOI (arXiv preprint/PMLR proceedings). [ASSUMED — verify at Phase 84.] curated:false — pending Phase-84 human verify.",
+      "curated": false
     },
     "_uncurated_metric_tail_2026-09": {
       "title": "",
@@ -1167,7 +1203,7 @@
     "alignment.amplitude_distance": ["srivastava_et_al_2011"],
     "alignment.phase_distance": ["srivastava_et_al_2011"],
     "alignment.elastic_decomposition": ["srivastava_et_al_2011"],
-    "clustering.align_cluster_fd": ["srivastava_et_al_2011"],
+    "clustering.align_cluster_fd": ["_uncurated_align_cluster_fd_2026-09"],
     "clustering.kmeans_fd": ["chiou_li_2007"],
     "clustering.kcfc_cluster": ["chiou_li_2007"],
     "clustering.funfem_cluster": ["bouveyron_et_al_2015"],
@@ -1188,8 +1224,8 @@
     "metric.PyGakGramTrain": ["cuturi_2011"],
     "metric.soft_dtw_self_1d": ["cuturi_blondel_2017"],
     "metric.soft_dtw_cross_1d": ["cuturi_blondel_2017"],
-    "metric.soft_dtw_div_self_1d": ["cuturi_blondel_2017"],
-    "metric.soft_dtw_div_cross_1d": ["cuturi_blondel_2017"],
+    "metric.soft_dtw_div_self_1d": ["blondel_et_al_2021"],
+    "metric.soft_dtw_div_cross_1d": ["blondel_et_al_2021"],
     "metric.lp_self_1d": ["_uncurated_metric_tail_2026-09"],
     "metric.lp_self_2d": ["_uncurated_metric_tail_2026-09"],
     "metric.lp_cross_1d": ["_uncurated_metric_tail_2026-09"],
@@ -1349,7 +1385,7 @@
     "density_fda.lqd_fpca": ["petersen_muller_2016"],
     "density_fda.normalize_density": ["petersen_muller_2016"],
     "density_fda.wasserstein_barycenter": ["agueh_carlier_2011"],
-    "outliers.outliergram": ["sun_genton_2011"],
+    "outliers.outliergram": ["arribas_gil_romo_2014"],
     "outliers.magnitude_shape": ["dai_genton_2019"],
     "outliers.muod": ["dai_genton_2019"],
     "outliers.detect_outliers_lrt": ["febrero_galeano_gonzalez_2008"],
