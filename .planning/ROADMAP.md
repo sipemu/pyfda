@@ -229,7 +229,9 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
   2. A documented author-verification workflow + JSON schema doc governs curation (paper-level unit, sub-method-keyed callable claims, cross-language entry shape with `version` + Matlab `confidence`, the `curated:false` tail convention, the personal DOI-landing-page verification bar).
   3. Primary GATE-05 tests (Python 3.9+, no `mcp`) pass: internal consistency (`callable_index` keys == union of `papers[*].callables`) and cross-file (every `callable_index` key resolves to a real callable in `_capability_map.json`, `_Fdata` special-cased).
   4. An offline structural DOI/URL gate (DOI regex `^10\.\d{4,9}/\S+$`; URL well-formedness + domain allowlist) runs in CI with no live network resolve; any live resolve is opt-in (`FDARS_ONLINE_CHECKS=1`) and never runs under `pytest`/`mkdocs build`.
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 80-01-PLAN.md — `_references_map.json` seed stub (5 author-verified papers) + Group 3 GATE-05 guard tests A/B/C in one atomic commit (SCHEMA-01, SCHEMA-03, SCHEMA-04)
+- [ ] 80-02-PLAN.md — `docs/authoring/references-schema.md` schema spec + author-verification workflow (SCHEMA-02)
 **UI hint**: no
 
 ### Phase 81: Curation — Paper Registry
