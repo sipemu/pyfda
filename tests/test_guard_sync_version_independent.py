@@ -35,7 +35,10 @@ from __future__ import annotations
 
 import ast
 import json
+import os
+import re
 import sys
+import urllib.parse
 from importlib import resources
 
 import pytest
@@ -297,4 +300,195 @@ def test_capability_mcp_server_frozenset_matches():
         f"  In server only:   {_CAPABILITY_MODULES - _EXPECTED_CAPABILITY_MODULES}\n"
         f"  In expected only: {_EXPECTED_CAPABILITY_MODULES - _CAPABILITY_MODULES}\n"
         "Update _CAPABILITY_MODULES in server.py to match."
+    )
+
+
+# ===========================================================================
+# Guard Group 3 — _references_map.json primary GATE-05 (SCHEMA-03)
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# PRIMARY TEST A — runs on Python 3.9+ (no mcp import, no fdars.mcp.server import)
+# ---------------------------------------------------------------------------
+
+
+def test_references_map_internal_consistency():
+    """GATE-05 A: callable_index keys == union of papers[*].callables (Python 3.9+).
+
+    Loads the committed ``_references_map.json`` via importlib.resources (no
+    mcp dependency; Py 3.9-safe) and asserts the internal consistency invariant:
+
+        frozenset(callable_index.keys())
+            == frozenset(c for p in papers.values() for c in p["callables"])
+
+    Fails if:
+    - A paper's callables list contains a key not in callable_index (orphan callable).
+    - callable_index contains a key with no paper referencing it (phantom index entry).
+
+    Reference: GATE-05 A — no skip; this test MUST run on Python 3.9.
+    """
+    ref_file = resources.files("fdars") / "_references_map.json"
+    data: dict = json.loads(ref_file.read_text(encoding="utf-8"))
+
+    papers = data.get("papers", {})
+    callable_index = data.get("callable_index", {})
+
+    from_papers: frozenset[str] = frozenset(
+        c for p in papers.values() for c in p.get("callables", [])
+    )
+    from_index: frozenset[str] = frozenset(callable_index.keys())
+
+    assert from_papers == from_index, (
+        f"_references_map.json internal consistency failure (GATE-05 A).\n"
+        f"  In papers but not in callable_index: {from_papers - from_index}\n"
+        f"  In callable_index but not in any paper: {from_index - from_papers}\n"
+        "Ensure every callable in papers[*].callables appears in callable_index "
+        "and vice versa."
+    )
+
+
+# ---------------------------------------------------------------------------
+# PRIMARY TEST B — runs on Python 3.9+ (no mcp import)
+# ---------------------------------------------------------------------------
+
+
+def test_references_map_cross_file_resolution():
+    """GATE-05 B: every callable_index key resolves in _capability_map.json (Python 3.9+).
+
+    Loads both ``_references_map.json`` and ``_capability_map.json`` via
+    importlib.resources and asserts every key in ``callable_index`` resolves to
+    an existing callable in the capability map:
+
+    - For ``"module.callable"`` keys: ``cap_data["module"]["callable"]`` must exist.
+    - For ``"_Fdata.<method>"`` keys: ``cap_data["_Fdata"]["<method>"]`` must exist.
+
+    Fails if a key in callable_index refers to a callable that does not exist
+    in the capability map (renamed, removed, or mistyped callable).
+
+    Reference: GATE-05 B — no skip; this test MUST run on Python 3.9.
+    """
+    ref_file = resources.files("fdars") / "_references_map.json"
+    cap_file = resources.files("fdars") / "_capability_map.json"
+
+    ref_data: dict = json.loads(ref_file.read_text(encoding="utf-8"))
+    cap_data: dict = json.loads(cap_file.read_text(encoding="utf-8"))
+
+    callable_index = ref_data.get("callable_index", {})
+    unresolved: list[str] = []
+
+    for key in callable_index:
+        if "." not in key:
+            unresolved.append(f"{key!r} — no dot separator")
+            continue
+        module, callable_name = key.split(".", 1)
+        if module not in cap_data:
+            unresolved.append(f"{key!r} — module {module!r} not in capability map")
+        elif callable_name not in cap_data[module]:
+            unresolved.append(
+                f"{key!r} — {callable_name!r} not in capability_map[{module!r}]"
+            )
+
+    assert not unresolved, (
+        f"_references_map.json cross-file resolution failures (GATE-05 B):\n"
+        + "\n".join(f"  - {e}" for e in unresolved)
+        + "\nEnsure all callable_index keys exist in _capability_map.json. "
+        "If a callable was renamed, update _references_map.json to match."
+    )
+
+
+# ---------------------------------------------------------------------------
+# PRIMARY TEST C — runs on Python 3.9+ — STRUCTURAL DOI/URL gate (no live resolve)
+# ---------------------------------------------------------------------------
+
+_DOI_RE = re.compile(r"^10\.\d{4,9}/\S+$")
+
+# Domain allowlist for cross-language entry URLs and paper landing pages.
+# Extend this list in Phase 81/84 as new reference domains are verified.
+_ALLOWED_DOMAINS = frozenset({
+    # Publisher / preprint hosts
+    "doi.org", "link.springer.com", "www.tandfonline.com",
+    "academic.oup.com", "onlinelibrary.wiley.com", "rss.onlinelibrary.wiley.com",
+    "www.sciencedirect.com", "dl.acm.org", "ieeexplore.ieee.org",
+    "www.jstor.org", "projecteuclid.org", "arxiv.org", "www.researchgate.net",
+    "pubmed.ncbi.nlm.nih.gov", "pmc.ncbi.nlm.nih.gov",
+    # Cross-language reference hosts (R, Python)
+    "rdrr.io", "cran.r-project.org", "www.rdocumentation.org",
+    "pypi.org", "fdasrsf-python.readthedocs.io",
+    # fdars own docs
+    "sipemu.github.io",
+})
+
+
+def test_references_map_doi_url_structural_gate():
+    """GATE-05 C: structural DOI regex + URL well-formedness (NO live resolve).
+
+    Checks every paper entry in _references_map.json for:
+    - doi: matches ^10\\.\\d{4,9}/\\S+$ (SCHEMA-04 DOI regex)
+    - url: well-formed http/https URL; domain in _ALLOWED_DOMAINS
+
+    For cross_language entries:
+    - url: well-formed http/https URL; domain in _ALLOWED_DOMAINS
+
+    NO live network resolve is performed. FDARS_ONLINE_CHECKS=1 is checked and
+    test raises pytest.skip if the env var is set (live resolve is opt-in only).
+
+    Reference: SCHEMA-04 — no mcp import; runs on Python 3.9+.
+    """
+    if os.environ.get("FDARS_ONLINE_CHECKS") == "1":
+        pytest.skip("FDARS_ONLINE_CHECKS=1 set — live resolve path; structural gate skipped.")
+
+    ref_file = resources.files("fdars") / "_references_map.json"
+    data: dict = json.loads(ref_file.read_text(encoding="utf-8"))
+
+    errors: list[str] = []
+    papers = data.get("papers", {})
+
+    for key, paper in papers.items():
+        doi = paper.get("doi", "")
+        url = paper.get("url", "")
+
+        # DOI structural check (skip empty doi for curated:false entries)
+        if paper.get("curated", True) and doi:
+            if not _DOI_RE.match(doi):
+                errors.append(
+                    f"papers[{key!r}].doi {doi!r} does not match ^10.\\d{{4,9}}/\\S+$"
+                )
+
+        # URL well-formedness + domain check
+        if url:
+            try:
+                parsed = urllib.parse.urlparse(url)
+                if parsed.scheme not in ("http", "https"):
+                    errors.append(f"papers[{key!r}].url {url!r} — scheme must be http/https")
+                elif parsed.netloc not in _ALLOWED_DOMAINS:
+                    errors.append(
+                        f"papers[{key!r}].url domain {parsed.netloc!r} not in _ALLOWED_DOMAINS"
+                    )
+            except Exception as exc:
+                errors.append(f"papers[{key!r}].url {url!r} — parse error: {exc}")
+
+        # Cross-language URL checks
+        for lang, cl_entry in paper.get("cross_language", {}).items():
+            cl_url = cl_entry.get("url", "")
+            if cl_url:
+                try:
+                    parsed = urllib.parse.urlparse(cl_url)
+                    if parsed.scheme not in ("http", "https"):
+                        errors.append(
+                            f"papers[{key!r}].cross_language[{lang!r}].url {cl_url!r} — "
+                            "scheme must be http/https"
+                        )
+                    elif parsed.netloc not in _ALLOWED_DOMAINS:
+                        errors.append(
+                            f"papers[{key!r}].cross_language[{lang!r}].url domain "
+                            f"{parsed.netloc!r} not in _ALLOWED_DOMAINS"
+                        )
+                except Exception as exc:
+                    errors.append(
+                        f"papers[{key!r}].cross_language[{lang!r}].url — parse error: {exc}"
+                    )
+
+    assert not errors, (
+        "Structural DOI/URL gate failures (SCHEMA-04):\n"
+        + "\n".join(f"  - {e}" for e in errors)
     )

@@ -1,0 +1,101 @@
+{
+  "papers": {
+    "fraiman_muniz_2001": {
+      "title": "Trimmed means for functional data",
+      "authors": ["Fraiman, R.", "Muniz, G."],
+      "year": 2001,
+      "doi": "10.1007/BF02595706",
+      "url": "https://link.springer.com/article/10.1007/BF02595706",
+      "type": "journal",
+      "callables": [
+        "depth.fraiman_muniz_1d",
+        "depth.fraiman_muniz_2d",
+        "_Fdata.depth"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fda.usc",
+          "function": "depth.FM",
+          "url": "https://rdrr.io/cran/fda.usc/man/depth.fdata.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces marginal-integral depth (Fraiman-Muniz depth). Year is 2001, not 1991.",
+      "curated": true
+    },
+    "lopez_pintado_romo_2009": {
+      "title": "On the concept of depth for functional data",
+      "authors": ["López-Pintado, S.", "Romo, J."],
+      "year": 2009,
+      "doi": "10.1198/jasa.2009.0108",
+      "url": "https://www.tandfonline.com/doi/abs/10.1198/jasa.2009.0108",
+      "type": "journal",
+      "callables": [
+        "depth.band_1d",
+        "depth.modified_band_1d"
+      ],
+      "notes": "Introduces band depth (BD) and modified band depth (MBD) in the same paper.",
+      "curated": true
+    },
+    "srivastava_et_al_2011": {
+      "title": "Registration of functional data using Fisher-Rao metric",
+      "authors": [
+        "Srivastava, A.",
+        "Wu, W.",
+        "Kurtek, S.",
+        "Klassen, E.",
+        "Marron, J.S."
+      ],
+      "year": 2011,
+      "url": "https://arxiv.org/abs/1103.3817",
+      "type": "preprint",
+      "callables": [
+        "alignment.karcher_mean",
+        "alignment.elastic_align_pair",
+        "alignment.srsf_transform"
+      ],
+      "notes": "SRSF framework via Fisher-Rao metric; arXiv:1103.3817. NOT the TPAMI SRV/shape paper.",
+      "curated": true
+    },
+    "ramsay_dalzell_1991": {
+      "title": "Some tools for functional data analysis",
+      "authors": ["Ramsay, J.O.", "Dalzell, C.J."],
+      "year": 1991,
+      "doi": "10.1111/j.2517-6161.1991.tb01844.x",
+      "url": "https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.2517-6161.1991.tb01844.x",
+      "type": "journal",
+      "callables": [
+        "_Fdata.to_pc"
+      ],
+      "notes": "Seminal FDA paper introducing FPCA.",
+      "curated": true
+    },
+    "eilers_marx_1996": {
+      "title": "Flexible smoothing with B-splines and penalties",
+      "authors": ["Eilers, P.H.C.", "Marx, B.D."],
+      "year": 1996,
+      "doi": "10.1214/ss/1038425655",
+      "url": "https://projecteuclid.org/journals/statistical-science/volume-11/issue-2/Flexible-smoothing-with-B-splines-and-penalties/10.1214/ss/1038425655.full",
+      "type": "journal",
+      "callables": [
+        "smoothing.gcv_smoother",
+        "basis.basis_nbasis_cv"
+      ],
+      "notes": "Introduces P-splines (penalised B-splines).",
+      "curated": true
+    }
+  },
+  "callable_index": {
+    "depth.fraiman_muniz_1d": ["fraiman_muniz_2001"],
+    "depth.fraiman_muniz_2d": ["fraiman_muniz_2001"],
+    "_Fdata.depth": ["fraiman_muniz_2001"],
+    "depth.band_1d": ["lopez_pintado_romo_2009"],
+    "depth.modified_band_1d": ["lopez_pintado_romo_2009"],
+    "alignment.karcher_mean": ["srivastava_et_al_2011"],
+    "alignment.elastic_align_pair": ["srivastava_et_al_2011"],
+    "alignment.srsf_transform": ["srivastava_et_al_2011"],
+    "_Fdata.to_pc": ["ramsay_dalzell_1991"],
+    "smoothing.gcv_smoother": ["eilers_marx_1996"],
+    "basis.basis_nbasis_cv": ["eilers_marx_1996"]
+  }
+}
