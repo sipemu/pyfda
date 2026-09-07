@@ -253,7 +253,12 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
   4. The six anti-feature families are wired to the `curated:false` sentinel path (absent from `callable_index` at the module-category level), so the tool returns the explicit uncurated signal rather than a forced module-level citation.
   5. Coverage is measured and honest — the achieved `N/409` fraction is recorded and emitted by the primary guard test; only author-verified entries carry provenance (no LLM-synthesized placeholder ships as curated).
 
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 81-01-PLAN.md — Tracer: extend _ALLOWED_DOMAINS + N/437 coverage-emission test + curate basis/smoothing + functional statistics (CURATE-01/02/03/05)
+- [ ] 81-02-PLAN.md — Curate depth sub-methods + functional boxplot + FPCA/PACE + outlier detection (CURATE-01/02/03)
+- [ ] 81-03-PLAN.md — Curate regression/FLM + Fréchet + density/LQD + inference; flag contested oneway_anova_vstat (CURATE-01/02/03)
+- [ ] 81-04-PLAN.md — Curate alignment/elastic + metrics + clustering + classification + FTS + shapelets + MFPCA/FAMM; resolve contested align_cluster/elastic_changepoint (CURATE-01/02/03)
+- [ ] 81-05-PLAN.md — Wire 6 anti-feature families to curated:false sentinel + finalize honest N/437 coverage reporting (CURATE-04/05)
 **UI hint**: no
 
 ### Phase 82: MCP Tool `fdars_method_references` + GATE-05 Companion
