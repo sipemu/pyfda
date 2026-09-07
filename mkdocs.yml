@@ -167,6 +167,7 @@ nav:
     - MCP Server: advisor/mcp.md
     - Agent Skill: advisor/agent-skill.md
   - AI Capability Map: ai-capability-map.md
+  - Scientific References: references.md
   - scikit-learn API:
     - sklearn/index.md
     - Transformers: sklearn/transformers.md
