@@ -104,14 +104,15 @@ pub fn dense_flmm<'py>(
 ) -> PyResult<Bound<'py, PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let sids = numpy1d_to_usize_vec(subject_ids);
-    let cov: Option<fdars_core::matrix::FdMatrix> = covariates
-        .map(numpy2d_to_fdmatrix)
-        .transpose()?;
+    let cov: Option<fdars_core::matrix::FdMatrix> =
+        covariates.map(numpy2d_to_fdmatrix).transpose()?;
 
-    let mut config = fdars_core::famm::DenseFlmmConfig::default();
-    config.ncomp = ncomp;
-    config.max_iter = max_iter;
-    config.tol = tol;
+    let config = fdars_core::famm::DenseFlmmConfig {
+        ncomp,
+        max_iter,
+        tol,
+        ..Default::default()
+    };
 
     let result = to_pyresult(fdars_core::famm::dense_flmm(
         &mat,
@@ -172,15 +173,15 @@ pub fn fast_fmm<'py>(
 ) -> PyResult<Bound<'py, PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let sids = numpy1d_to_usize_vec(subject_ids);
-    let cov: Option<fdars_core::matrix::FdMatrix> = covariates
-        .map(numpy2d_to_fdmatrix)
-        .transpose()?;
+    let cov: Option<fdars_core::matrix::FdMatrix> =
+        covariates.map(numpy2d_to_fdmatrix).transpose()?;
 
-    let mut config = fdars_core::famm::FastFmmConfig::default();
-    config.smooth_window = smooth_window;
-    config.max_iter = max_iter;
-    config.tol = tol;
-    config.compute_inference = compute_inference;
+    let config = fdars_core::famm::FastFmmConfig {
+        smooth_window,
+        max_iter,
+        tol,
+        compute_inference,
+    };
 
     let result = to_pyresult(fdars_core::famm::fast_fmm(
         &mat,
@@ -253,26 +254,24 @@ pub fn multi_famm<'py>(
         .iter()
         .enumerate()
         .map(|(i, item)| {
-            let arr = item
-                .extract::<PyReadonlyArray2<f64>>()
-                .map_err(|_| {
-                    pyo3::exceptions::PyValueError::new_err(format!(
-                        "multi_famm: data_list[{i}] must be a 2-D numpy array of dtype float64"
-                    ))
-                })?;
+            let arr = item.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
+                pyo3::exceptions::PyValueError::new_err(format!(
+                    "multi_famm: data_list[{i}] must be a 2-D numpy array of dtype float64"
+                ))
+            })?;
             numpy2d_to_fdmatrix(arr)
         })
         .collect::<PyResult<Vec<_>>>()?;
 
     let sids = numpy1d_to_usize_vec(subject_ids);
-    let cov: Option<fdars_core::matrix::FdMatrix> = covariates
-        .map(numpy2d_to_fdmatrix)
-        .transpose()?;
+    let cov: Option<fdars_core::matrix::FdMatrix> =
+        covariates.map(numpy2d_to_fdmatrix).transpose()?;
 
-    let mut config = fdars_core::famm::MultiFammConfig::default();
-    config.ncomp = ncomp;
-    config.max_iter = max_iter;
-    config.tol = tol;
+    let config = fdars_core::famm::MultiFammConfig {
+        ncomp,
+        max_iter,
+        tol,
+    };
 
     let result = to_pyresult(fdars_core::famm::multi_famm(
         mats.as_slice(),
@@ -290,7 +289,10 @@ pub fn multi_famm<'py>(
 
     let dict = PyDict::new(py);
     dict.set_item("n_dims", result.n_dims)?;
-    dict.set_item("stacked_fitted", fdmatrix_to_numpy2d(py, &result.stacked_fitted))?;
+    dict.set_item(
+        "stacked_fitted",
+        fdmatrix_to_numpy2d(py, &result.stacked_fitted),
+    )?;
     dict.set_item(
         "stacked_residuals",
         fdmatrix_to_numpy2d(py, &result.stacked_residuals),

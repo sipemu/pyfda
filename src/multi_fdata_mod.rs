@@ -100,8 +100,7 @@ pub fn multi_fdata_from_components<'py>(
         )));
     }
 
-    let mut components: Vec<fdars_core::multi_fdata::FdComponent> =
-        Vec::with_capacity(n_data);
+    let mut components: Vec<fdars_core::multi_fdata::FdComponent> = Vec::with_capacity(n_data);
 
     for k in 0..n_data {
         let data_item = data_list.get_item(k)?;
@@ -142,7 +141,10 @@ pub fn multi_fdata_from_components<'py>(
             })?;
         let av = numpy1d_to_vec(av_arr);
 
-        components.push(fdars_core::multi_fdata::FdComponent { data: mat, argvals: av });
+        components.push(fdars_core::multi_fdata::FdComponent {
+            data: mat,
+            argvals: av,
+        });
     }
 
     // Guard 3 (delegated): MultiFunData::new validates non-empty components,

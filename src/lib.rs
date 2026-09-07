@@ -12,28 +12,28 @@ mod basis_mod;
 mod classification_mod;
 mod clustering_mod;
 mod conformal_mod;
+mod density_fda_mod;
 mod depth_mod;
 mod explain_mod;
+mod famm_mod;
 mod fdata_mod;
+mod frechet_mod;
+mod fts_mod;
 mod inference_mod;
 mod metric_mod;
+mod multi_fdata_mod;
 mod outliers_mod;
 mod pace_fpca_mod;
 mod regression_mod;
 mod represent_mod;
+mod scalar_on_function_mod;
 mod scoring_mod;
 mod seasonal_mod;
+mod shapelet_mod;
 mod simulation_mod;
 mod smoothing_mod;
 mod spm_mod;
-mod fts_mod;
-mod scalar_on_function_mod;
 mod tolerance_mod;
-mod frechet_mod;
-mod density_fda_mod;
-mod multi_fdata_mod;
-mod famm_mod;
-mod shapelet_mod;
 
 /// Create a submodule, register its contents, and attach it to a parent module.
 macro_rules! register_submodule {

@@ -105,10 +105,7 @@ pub fn to_pyresult<T>(r: Result<T, FdarError>) -> PyResult<T> {
 ///
 /// Per-caller length-uniformity validation is the CALLER's responsibility —
 /// this helper intentionally does NOT reject ragged (non-uniform) lengths.
-pub fn extract_ragged_vecs(
-    list: &Bound<'_, PyList>,
-    caller_name: &str,
-) -> PyResult<Vec<Vec<f64>>> {
+pub fn extract_ragged_vecs(list: &Bound<'_, PyList>, caller_name: &str) -> PyResult<Vec<Vec<f64>>> {
     list.iter()
         .enumerate()
         .map(|(i, item)| {

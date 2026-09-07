@@ -322,13 +322,19 @@ pub fn dbscan_fd<'py>(
     let mut config = fdars_core::clustering_advanced::DbscanConfig::default();
     config.eps = eps;
     config.min_points = min_points;
-    let result = to_pyresult(fdars_core::clustering_advanced::dbscan_fd(&mat, &av, &config))?;
+    let result = to_pyresult(fdars_core::clustering_advanced::dbscan_fd(
+        &mat, &av, &config,
+    ))?;
 
     // Map None (noise) -> -1i64, Some(c) -> c as i64
-    let cluster_i64: Vec<i64> = result.cluster.iter().map(|c| match c {
-        None => -1,
-        Some(v) => *v as i64,
-    }).collect();
+    let cluster_i64: Vec<i64> = result
+        .cluster
+        .iter()
+        .map(|c| match c {
+            None => -1,
+            Some(v) => *v as i64,
+        })
+        .collect();
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("cluster", cluster_i64.into_pyarray(py))?;
@@ -386,8 +392,9 @@ pub fn kcfc_cluster<'py>(
     config.ncomp = ncomp;
     config.max_iter = max_iter;
     config.seed = seed;
-    let result =
-        to_pyresult(fdars_core::clustering_advanced::kcfc_cluster(&mat, &av, &config))?;
+    let result = to_pyresult(fdars_core::clustering_advanced::kcfc_cluster(
+        &mat, &av, &config,
+    ))?;
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("cluster", usize_vec_to_numpy1d(py, result.cluster))?;
@@ -460,13 +467,17 @@ pub fn funfem_cluster<'py>(
     config.max_iter = max_iter;
     config.tol = tol;
     config.seed = seed;
-    let result =
-        to_pyresult(fdars_core::clustering_advanced::funfem_cluster(&mat, &av, &config))?;
+    let result = to_pyresult(fdars_core::clustering_advanced::funfem_cluster(
+        &mat, &av, &config,
+    ))?;
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("cluster", usize_vec_to_numpy1d(py, result.cluster))?;
     dict.set_item("membership", fdmatrix_to_numpy2d(py, &result.membership))?;
-    dict.set_item("disc_subspace", fdmatrix_to_numpy2d(py, &result.disc_subspace))?;
+    dict.set_item(
+        "disc_subspace",
+        fdmatrix_to_numpy2d(py, &result.disc_subspace),
+    )?;
     dict.set_item("log_likelihood", result.log_likelihood)?;
     dict.set_item("iterations", result.iterations)?;
     dict.set_item("converged", result.converged)?;
@@ -533,8 +544,9 @@ pub fn align_cluster_fd<'py>(
     config.elastic_lambda = elastic_lambda;
     config.karcher_max_iter = karcher_max_iter;
     config.karcher_tol = karcher_tol;
-    let result =
-        to_pyresult(fdars_core::clustering_advanced::align_cluster_fd(&mat, &av, &config))?;
+    let result = to_pyresult(fdars_core::clustering_advanced::align_cluster_fd(
+        &mat, &av, &config,
+    ))?;
 
     // Convert templates: Vec<Vec<f64>> -> PyList of (m,) numpy arrays
     let templates_list = pyo3::types::PyList::empty(py);

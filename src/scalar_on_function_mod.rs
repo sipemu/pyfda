@@ -22,9 +22,7 @@ use pyo3::types::{PyDict, PyList};
 /// `VarSelectPenalty` is `#[non_exhaustive]` so a wildcard arm is mandatory.
 /// `GroupMcp` and `GroupScad` are proactively rejected here with a clear
 /// message because they raise `FdarError::InvalidParameter` upstream anyway.
-fn penalty_from_str(
-    s: &str,
-) -> PyResult<fdars_core::scalar_on_function::VarSelectPenalty> {
+fn penalty_from_str(s: &str) -> PyResult<fdars_core::scalar_on_function::VarSelectPenalty> {
     use fdars_core::scalar_on_function::VarSelectPenalty;
     match s {
         "group_lasso" => Ok(VarSelectPenalty::GroupLasso),

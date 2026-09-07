@@ -890,13 +890,11 @@ pub fn mfpca<'py>(
         .iter()
         .enumerate()
         .map(|(i, item)| {
-            let arr = item
-                .extract::<PyReadonlyArray2<f64>>()
-                .map_err(|_| {
-                    pyo3::exceptions::PyValueError::new_err(format!(
-                        "mfpca: variables[{i}] must be a 2-D numpy array of dtype float64"
-                    ))
-                })?;
+            let arr = item.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
+                pyo3::exceptions::PyValueError::new_err(format!(
+                    "mfpca: variables[{i}] must be a 2-D numpy array of dtype float64"
+                ))
+            })?;
             numpy2d_to_fdmatrix(arr)
         })
         .collect::<PyResult<Vec<_>>>()?;
@@ -904,11 +902,7 @@ pub fn mfpca<'py>(
     // Build &[&FdMatrix] slice (mats must outlive refs).
     let refs: Vec<&fdars_core::matrix::FdMatrix> = mats.iter().collect();
 
-    // Build MfpcaConfig via Default + field mutation
-    // (MfpcaConfig is NOT #[non_exhaustive], but the pattern is consistent).
-    let mut config = fdars_core::spm::mfpca::MfpcaConfig::default();
-    config.ncomp = ncomp;
-    config.weighted = weighted;
+    let config = fdars_core::spm::mfpca::MfpcaConfig { ncomp, weighted };
 
     let result = to_pyresult(fdars_core::spm::mfpca::mfpca(&refs, &config))?;
 
@@ -985,13 +979,11 @@ pub fn spe_multivariate<'py>(
         .iter()
         .enumerate()
         .map(|(i, item)| {
-            let arr = item
-                .extract::<PyReadonlyArray2<f64>>()
-                .map_err(|_| {
-                    pyo3::exceptions::PyValueError::new_err(format!(
-                        "spe_multivariate: standardized_vars[{i}] must be a 2-D float64 numpy array"
-                    ))
-                })?;
+            let arr = item.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
+                pyo3::exceptions::PyValueError::new_err(format!(
+                    "spe_multivariate: standardized_vars[{i}] must be a 2-D float64 numpy array"
+                ))
+            })?;
             numpy2d_to_fdmatrix(arr)
         })
         .collect::<PyResult<Vec<_>>>()?;
@@ -1002,13 +994,11 @@ pub fn spe_multivariate<'py>(
         .iter()
         .enumerate()
         .map(|(i, item)| {
-            let arr = item
-                .extract::<PyReadonlyArray2<f64>>()
-                .map_err(|_| {
-                    pyo3::exceptions::PyValueError::new_err(format!(
-                        "spe_multivariate: reconstructed_vars[{i}] must be a 2-D float64 numpy array"
-                    ))
-                })?;
+            let arr = item.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
+                pyo3::exceptions::PyValueError::new_err(format!(
+                    "spe_multivariate: reconstructed_vars[{i}] must be a 2-D float64 numpy array"
+                ))
+            })?;
             numpy2d_to_fdmatrix(arr)
         })
         .collect::<PyResult<Vec<_>>>()?;
@@ -1020,13 +1010,11 @@ pub fn spe_multivariate<'py>(
         .iter()
         .enumerate()
         .map(|(i, item)| {
-            let arr = item
-                .extract::<PyReadonlyArray1<f64>>()
-                .map_err(|_| {
-                    pyo3::exceptions::PyValueError::new_err(format!(
-                        "spe_multivariate: argvals_list[{i}] must be a 1-D float64 numpy array"
-                    ))
-                })?;
+            let arr = item.extract::<PyReadonlyArray1<f64>>().map_err(|_| {
+                pyo3::exceptions::PyValueError::new_err(format!(
+                    "spe_multivariate: argvals_list[{i}] must be a 1-D float64 numpy array"
+                ))
+            })?;
             Ok(numpy1d_to_vec(arr))
         })
         .collect::<PyResult<Vec<_>>>()?;
@@ -1035,9 +1023,7 @@ pub fn spe_multivariate<'py>(
     let av_refs: Vec<&[f64]> = av_vecs.iter().map(|v| v.as_slice()).collect();
 
     let result = to_pyresult(fdars_core::spm::stats::spe_multivariate(
-        &std_refs,
-        &rec_refs,
-        &av_refs,
+        &std_refs, &rec_refs, &av_refs,
     ))?;
 
     // Return naked 1-D numpy array (not a dict).

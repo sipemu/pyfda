@@ -105,10 +105,7 @@ pub fn gak<'py>(
 /// float
 ///     Bandwidth estimate (always > 0).
 #[pyfunction]
-pub fn sigma_gak<'py>(
-    _py: Python<'py>,
-    data: PyReadonlyArray2<'py, f64>,
-) -> PyResult<f64> {
+pub fn sigma_gak<'py>(_py: Python<'py>, data: PyReadonlyArray2<'py, f64>) -> PyResult<f64> {
     let mat = numpy2d_to_fdmatrix(data)?;
     Ok(core_sigma_gak(&mat))
 }

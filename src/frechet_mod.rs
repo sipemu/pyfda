@@ -426,8 +426,7 @@ pub fn frechet_mean<'py>(
                 })
                 .collect::<PyResult<_>>()?;
 
-            let sphspace =
-                to_pyresult(fdars_core::frechet::SphericalSpace::new(d))?;
+            let sphspace = to_pyresult(fdars_core::frechet::SphericalSpace::new(d))?;
             let mean = to_pyresult(fdars_core::frechet::frechet_mean(
                 &sphspace,
                 &sph_objects,
@@ -466,8 +465,7 @@ pub fn frechet_mean<'py>(
                 })
                 .collect::<PyResult<_>>()?;
 
-            let corrspace =
-                to_pyresult(fdars_core::frechet::CorrelationMatrixSpace::new(d))?;
+            let corrspace = to_pyresult(fdars_core::frechet::CorrelationMatrixSpace::new(d))?;
             let mean = to_pyresult(fdars_core::frechet::frechet_mean(
                 &corrspace,
                 &corr_objects,

@@ -256,10 +256,7 @@ pub fn lqd_fpca<'py>(
         "singular_values",
         vec_to_numpy1d(py, result.fpca.singular_values),
     )?;
-    dict.set_item(
-        "loadings",
-        fdmatrix_to_numpy2d(py, &result.fpca.rotation),
-    )?;
+    dict.set_item("loadings", fdmatrix_to_numpy2d(py, &result.fpca.rotation))?;
     dict.set_item("scores", fdmatrix_to_numpy2d(py, &result.fpca.scores))?;
     dict.set_item("fve", vec_to_numpy1d(py, result.fve))?;
     dict.set_item("ncomp", result.fpca.scores.ncols() as i64)?;

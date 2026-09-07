@@ -15,8 +15,8 @@
 
 use crate::convert::{fdmatrix_to_numpy2d, numpy2d_to_fdmatrix, to_pyresult, usize_vec_to_numpy1d};
 use fdars_core::shapelet::{
-    ShapeletClassifier, ShapeletClassifierConfig, ShapeletClassifierFit, ShapeletDiscoveryConfig,
-    ShapeletTransformFit, QualityMeasure,
+    QualityMeasure, ShapeletClassifier, ShapeletClassifierConfig, ShapeletClassifierFit,
+    ShapeletDiscoveryConfig, ShapeletTransformFit,
 };
 use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::exceptions::PyValueError;
@@ -236,7 +236,9 @@ pub fn discover_shapelets<'py>(
         seed,
     };
 
-    let set = to_pyresult(fdars_core::shapelet::discover_shapelets(&mat, &label_vec, &config))?;
+    let set = to_pyresult(fdars_core::shapelet::discover_shapelets(
+        &mat, &label_vec, &config,
+    ))?;
 
     let dict = PyDict::new(py);
     dict.set_item("n_shapelets", set.len())?;
@@ -462,7 +464,11 @@ pub fn shapelet_distance(
 ) -> PyResult<(f64, usize)> {
     let sz: Vec<f64> = shapelet_z.as_array().to_vec();
     let sv: Vec<f64> = series.as_array().to_vec();
-    to_pyresult(fdars_core::shapelet::shapelet_distance(&sz, &sv, best_so_far))
+    to_pyresult(fdars_core::shapelet::shapelet_distance(
+        &sz,
+        &sv,
+        best_so_far,
+    ))
 }
 
 // ---------------------------------------------------------------------------

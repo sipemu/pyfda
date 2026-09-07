@@ -1292,7 +1292,10 @@ pub fn fof_regression<'py>(
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("intercept", vec_to_numpy1d(py, result.intercept))?;
-    dict.set_item("beta_surface", fdmatrix_to_numpy2d(py, &result.beta_surface))?;
+    dict.set_item(
+        "beta_surface",
+        fdmatrix_to_numpy2d(py, &result.beta_surface),
+    )?;
     dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
     dict.set_item("residuals", fdmatrix_to_numpy2d(py, &result.residuals))?;
     dict.set_item("r_squared_t", vec_to_numpy1d(py, result.r_squared_t))?;
@@ -1411,7 +1414,14 @@ pub fn fof_cv<'py>(
     let ax = numpy1d_to_vec(x_argvals);
     let ay = numpy1d_to_vec(y_argvals);
     let result = to_pyresult(fdars_core::fof_regression::fof_cv(
-        &x_mat, &y_mat, &ax, &ay, ncomp_x_max, ncomp_y_max, n_folds, seed,
+        &x_mat,
+        &y_mat,
+        &ax,
+        &ay,
+        ncomp_x_max,
+        ncomp_y_max,
+        n_folds,
+        seed,
     ))?;
 
     let dict = pyo3::types::PyDict::new(py);
@@ -1439,10 +1449,7 @@ pub fn fof_cv<'py>(
 // NOT enforce ≥2 distinct groups. The binding adds this check before calling core.
 // ---------------------------------------------------------------------------
 
-fn validate_subject_ids(
-    sid: &[usize],
-    n_obs: usize,
-) -> PyResult<()> {
+fn validate_subject_ids(sid: &[usize], n_obs: usize) -> PyResult<()> {
     if sid.len() != n_obs {
         return Err(pyo3::exceptions::PyValueError::new_err(format!(
             "subject_ids length {} does not match x_data rows {}",
@@ -1550,7 +1557,10 @@ pub fn fof_re_regression<'py>(
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("intercept", vec_to_numpy1d(py, result.intercept))?;
-    dict.set_item("beta_surface", fdmatrix_to_numpy2d(py, &result.beta_surface))?;
+    dict.set_item(
+        "beta_surface",
+        fdmatrix_to_numpy2d(py, &result.beta_surface),
+    )?;
     dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
     dict.set_item("residuals", fdmatrix_to_numpy2d(py, &result.residuals))?;
     dict.set_item("r_squared_t", vec_to_numpy1d(py, result.r_squared_t))?;
@@ -1558,7 +1568,10 @@ pub fn fof_re_regression<'py>(
     dict.set_item("ncomp_x", result.ncomp_x)?;
     dict.set_item("ncomp_y", result.ncomp_y)?;
     dict.set_item("coef_matrix", fdmatrix_to_numpy2d(py, &result.coef_matrix))?;
-    dict.set_item("random_effects", fdmatrix_to_numpy2d(py, &result.random_effects))?;
+    dict.set_item(
+        "random_effects",
+        fdmatrix_to_numpy2d(py, &result.random_effects),
+    )?;
     dict.set_item("sigma2_u", vec_to_numpy1d(py, result.sigma2_u))?;
     dict.set_item("sigma2_eps", result.sigma2_eps)?;
     dict.set_item("n_subjects", result.n_subjects)?;

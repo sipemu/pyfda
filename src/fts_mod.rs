@@ -306,7 +306,9 @@ pub fn functional_acf<'py>(
 ) -> PyResult<Bound<'py, PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = to_pyresult(fdars_core::fts::functional_acf(&mat, &av, max_lag, n_sim, ci, seed))?;
+    let result = to_pyresult(fdars_core::fts::functional_acf(
+        &mat, &av, max_lag, n_sim, ci, seed,
+    ))?;
 
     // FacfResult.lags is Vec<u32> — cast to i64 for a numpy int array.
     // Do NOT pass u32 to vec_to_numpy1d (which expects Vec<f64>).
@@ -362,7 +364,9 @@ pub fn functional_pacf<'py>(
 ) -> PyResult<Bound<'py, PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = to_pyresult(fdars_core::fts::functional_pacf(&mat, &av, max_lag, n_sim, ci, seed))?;
+    let result = to_pyresult(fdars_core::fts::functional_pacf(
+        &mat, &av, max_lag, n_sim, ci, seed,
+    ))?;
 
     // FacfResult.lags is Vec<u32> — cast to i64.
     let lags_i64: Vec<i64> = result.lags.into_iter().map(|v| v as i64).collect();
@@ -654,7 +658,9 @@ pub fn dpca<'py>(
 ) -> PyResult<Bound<'py, PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = to_pyresult(fdars_core::fts::dpca(&mat, &av, ncomp, bandwidth, filter_lag))?;
+    let result = to_pyresult(fdars_core::fts::dpca(
+        &mat, &av, ncomp, bandwidth, filter_lag,
+    ))?;
     dpca_result_to_dict(py, &result)
 }
 
@@ -705,12 +711,17 @@ pub fn dpca_reconstruct<'py>(
 
     // Combined-function pattern: fit dpca internally, then reconstruct.
     // Python cannot pass &DpcaResult, so we fit it here.
-    let dp = to_pyresult(fdars_core::fts::dpca(&mat, &av, ncomp, bandwidth, filter_lag))?;
+    let dp = to_pyresult(fdars_core::fts::dpca(
+        &mat, &av, ncomp, bandwidth, filter_lag,
+    ))?;
     let recon = to_pyresult(fdars_core::fts::dpca_reconstruct(&mat, &av, &dp))?;
 
     // Build the merged dict: start with all DpcaResult fields, then add reconstruction
     let dict = dpca_result_to_dict(py, &dp)?;
-    dict.set_item("fitted_reconstruction", fdmatrix_to_numpy2d(py, &recon.fitted))?;
+    dict.set_item(
+        "fitted_reconstruction",
+        fdmatrix_to_numpy2d(py, &recon.fitted),
+    )?;
     dict.set_item(
         "reconstruction_error",
         vec_to_numpy1d(py, recon.reconstruction_error),
