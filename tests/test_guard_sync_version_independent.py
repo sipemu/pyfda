@@ -454,6 +454,12 @@ def test_references_map_doi_url_structural_gate():
                     f"papers[{key!r}].doi {doi!r} does not match ^10.\\d{{4,9}}/\\S+$"
                 )
 
+        # URL presence check for curated entries (url is required per schema)
+        if paper.get("curated", True) and not url:
+            errors.append(
+                f"papers[{key!r}] is curated:true but has no url (url is required)"
+            )
+
         # URL well-formedness + domain check
         if url:
             try:
@@ -467,8 +473,14 @@ def test_references_map_doi_url_structural_gate():
             except Exception as exc:
                 errors.append(f"papers[{key!r}].url {url!r} — parse error: {exc}")
 
-        # Cross-language URL checks
+        # Cross-language required-field presence checks (package, function, url, confidence)
         for lang, cl_entry in paper.get("cross_language", {}).items():
+            for required_field in ("package", "function", "url", "confidence"):
+                if required_field not in cl_entry:
+                    errors.append(
+                        f"papers[{key!r}].cross_language[{lang!r}] missing required "
+                        f"field {required_field!r}"
+                    )
             cl_url = cl_entry.get("url", "")
             if cl_url:
                 try:
