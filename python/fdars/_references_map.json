@@ -105,9 +105,12 @@
       "url": "https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.2517-6161.1991.tb01844.x",
       "type": "journal",
       "callables": [
-        "_Fdata.to_pc"
+        "_Fdata.to_pc",
+        "regression.fregre_lm",
+        "regression.predict_fregre_lm",
+        "regression.fregre_cv"
       ],
-      "notes": "Seminal FDA paper introducing FPCA.",
+      "notes": "Seminal FDA paper introducing FPCA and the functional linear model for scalar response. Extended in 81-03 to cover the scalar-on-function FLM trio (fregre_lm, predict_fregre_lm, fregre_cv). [VERIFIED: DOI confirmed in Phase 80 seed.]",
       "curated": true
     },
     "eilers_marx_1996": {
@@ -190,6 +193,10 @@
         "fdata.trim_mean",
         "fdata.normalize",
         "regression.fpca",
+        "regression.concurrent_regression",
+        "regression.fosr",
+        "regression.fosr_fpc",
+        "regression.predict_fosr",
         "simulation.sim_kl",
         "simulation.simulate",
         "simulation.eigenfunctions",
@@ -366,6 +373,89 @@
       "notes": "Pending curation — attribution partially confirmed from fdars-core source. tvdmss: fdars-core 0.33 outliers.rs doc says 'Huang & Sun 2019 / fdaoutlier::tvdmss' but DOI not identified. depthgram: fdars-core source says 'roahd depthGram' — [ASSUMED] Dai & Genton 2018 JCGS (different paper from Dai & Genton 2019 CSDA). sequential_transform_outliers: no paper citation in fdars-core source. All three deferred to 81-05 curated:false family or future direct verification.",
       "curated": false
     },
+    "muller_stadtmuller_2005": {
+      "title": "Generalized functional linear models",
+      "authors": ["Müller, H.G.", "Stadtmüller, U."],
+      "year": 2005,
+      "doi": "10.1214/009053604000001156",
+      "url": "https://projecteuclid.org/journals/annals-of-statistics/volume-33/issue-2/Generalized-functional-linear-models/10.1214/009053604000001156.full",
+      "type": "journal",
+      "callables": [
+        "regression.functional_logistic",
+        "regression.functional_glm",
+        "regression.predict_functional_logistic"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fda.usc",
+          "function": "fregre.glm",
+          "url": "https://rdrr.io/cran/fda.usc/man/fregre.glm.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces the generalized functional linear model (logistic, Poisson, etc.) via FPCA reduction. [VERIFIED: projecteuclid.org — AoS Vol 33, No 2, 2005, DOI 10.1214/009053604000001156] curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "ferraty_vieu_2006": {
+      "title": "Nonparametric Functional Data Analysis",
+      "authors": ["Ferraty, F.", "Vieu, P."],
+      "year": 2006,
+      "doi": "10.1007/0-387-36620-2",
+      "url": "https://link.springer.com/book/10.1007/0-387-36620-2",
+      "type": "book",
+      "callables": [
+        "regression.fregre_np",
+        "regression.fregre_np_cv",
+        "regression.fregre_np_mixed",
+        "classification.fclassif_kernel",
+        "classification.kernel_classify_from_distances"
+      ],
+      "notes": "Canonical monograph on nonparametric functional regression (kernel-based). Also covers kernel classification methods. [CITED: link.springer.com/book/10.1007/0-387-36620-2 — Ferraty & Vieu, Springer Series in Statistics, 2006.] curated:false until Phase 84 direct DOI-landing-page verification.",
+      "curated": false
+    },
+    "preda_saporta_2005": {
+      "title": "PLS regression on a stochastic process",
+      "authors": ["Preda, C.", "Saporta, G."],
+      "year": 2005,
+      "doi": "10.1016/j.csda.2004.07.002",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0167947304002208",
+      "type": "journal",
+      "callables": [
+        "regression.fpls",
+        "regression.fregre_pls",
+        "regression.predict_fregre_pls"
+      ],
+      "notes": "Introduces functional PLS (partial least squares) regression. [ASSUMED] — DOI 10.1016/j.csda.2004.07.002 is plausible but not landing-page-verified this session; curated:false until confirmed.",
+      "curated": false
+    },
+    "_uncurated_regression_robust_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "regression.fregre_l1",
+        "regression.fregre_huber",
+        "regression.predict_fregre_robust"
+      ],
+      "notes": "Robust regression adaptation (L1/Huber) for functional data. No single canonical FDA primary paper identified for these specific callables. fdars-core source has no explicit citation. curated:false — do not force-cite.",
+      "curated": false
+    },
+    "_uncurated_regression_fof_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "regression.fof_regression",
+        "regression.fof_cv",
+        "regression.predict_fof"
+      ],
+      "notes": "Function-on-function regression via double FPCA. fdars-core fof_regression.rs cites multiple co-primaries: Ramsay & Silverman 2005 Ch.16-17, Yao/Müller/Wang 2005 AoS 33(6):2873-2903, and Ivanescu et al. 2015 Comput.Stat. No single primary root — curated:false pending fdars-core source confirmation of the dominant reference.",
+      "curated": false
+    },
     "yao_muller_wang_2005": {
       "title": "Functional data analysis for sparse longitudinal data",
       "authors": ["Yao, F.", "Müller, H.G.", "Wang, J.L."],
@@ -412,6 +502,9 @@
     "alignment.elastic_align_pair": ["srivastava_et_al_2011"],
     "alignment.srsf_transform": ["srivastava_et_al_2011"],
     "_Fdata.to_pc": ["ramsay_dalzell_1991"],
+    "regression.fregre_lm": ["ramsay_dalzell_1991"],
+    "regression.predict_fregre_lm": ["ramsay_dalzell_1991"],
+    "regression.fregre_cv": ["ramsay_dalzell_1991"],
     "basis.basis_nbasis_cv": ["eilers_marx_1996"],
     "basis.pspline_fit_1d": ["eilers_marx_1996"],
     "basis.pspline_fit_gcv": ["eilers_marx_1996"],
@@ -450,6 +543,27 @@
     "depth.modified_epigraph_index_1d": ["narisetty_nair_2016"],
     "depth.functional_boxplot": ["sun_genton_2011"],
     "regression.fpca": ["ramsay_silverman_2005"],
+    "regression.concurrent_regression": ["ramsay_silverman_2005"],
+    "regression.fosr": ["ramsay_silverman_2005"],
+    "regression.fosr_fpc": ["ramsay_silverman_2005"],
+    "regression.predict_fosr": ["ramsay_silverman_2005"],
+    "regression.functional_logistic": ["muller_stadtmuller_2005"],
+    "regression.functional_glm": ["muller_stadtmuller_2005"],
+    "regression.predict_functional_logistic": ["muller_stadtmuller_2005"],
+    "regression.fregre_np": ["ferraty_vieu_2006"],
+    "regression.fregre_np_cv": ["ferraty_vieu_2006"],
+    "regression.fregre_np_mixed": ["ferraty_vieu_2006"],
+    "regression.fpls": ["preda_saporta_2005"],
+    "regression.fregre_pls": ["preda_saporta_2005"],
+    "regression.predict_fregre_pls": ["preda_saporta_2005"],
+    "regression.fregre_l1": ["_uncurated_regression_robust_2026-09"],
+    "regression.fregre_huber": ["_uncurated_regression_robust_2026-09"],
+    "regression.predict_fregre_robust": ["_uncurated_regression_robust_2026-09"],
+    "regression.fof_regression": ["_uncurated_regression_fof_2026-09"],
+    "regression.fof_cv": ["_uncurated_regression_fof_2026-09"],
+    "regression.predict_fof": ["_uncurated_regression_fof_2026-09"],
+    "classification.fclassif_kernel": ["ferraty_vieu_2006"],
+    "classification.kernel_classify_from_distances": ["ferraty_vieu_2006"],
     "simulation.sim_kl": ["ramsay_silverman_2005"],
     "simulation.simulate": ["ramsay_silverman_2005"],
     "simulation.eigenfunctions": ["ramsay_silverman_2005"],
