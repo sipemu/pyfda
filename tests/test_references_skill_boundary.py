@@ -1,15 +1,18 @@
 """SKILL-02: Skill-boundary tests for the Scientific Provenance Protocol.
 
-Exercises both routing branches defined in the fdars-capabilities skill's
+Exercises all three routing branches defined in the fdars-capabilities skill's
 ``## Scientific Provenance Protocol`` section:
 
 - Path A (curated hit): ``fdars_method_references`` returns ``curated: True``
   when the callable has at least one curated backing paper.
+- Path B (curated:false hit): ``fdars_method_references`` returns
+  ``curated: False`` WITH papers and NO ``NO_CURATED_ENTRY`` sentinel when the
+  callable is in ``callable_index`` but all backing papers are ``curated: false``.
 - Path C (NO_CURATED_ENTRY sentinel): ``fdars_method_references`` returns
   ``curated: False`` and ``sentinel == "NO_CURATED_ENTRY"`` when the callable
   is absent from ``callable_index``.
 
-Both tests skip cleanly on Python 3.9 (where ``mcp`` is unavailable) via
+All tests skip cleanly on Python 3.9 (where ``mcp`` is unavailable) via
 ``pytest.importorskip("mcp")``.  On Python 3.10+ with ``fdars[mcp]`` installed
 they run against the live MCP handler.
 
@@ -45,6 +48,31 @@ def test_references_curated_hit_returns_curated_true():
     assert any(p["curated"] for p in result["papers"]), (
         "At least one paper in the response must have curated:True (Path A)"
     )
+
+
+def test_references_curated_false_hit_returns_path_b():
+    """SKILL-02 Path B: curated:false indexed callable returns curated:False without sentinel.
+
+    ``clustering.align_cluster_fd`` is in ``callable_index`` but its sole
+    backing paper (``_uncurated_align_cluster_fd_2026-09``) has ``curated: false``.
+    Per Path B, the response must have ``curated: False`` and NO
+    ``"NO_CURATED_ENTRY"`` sentinel — the callable IS indexed, just not yet
+    DOI-verified.
+    """
+    pytest.importorskip("mcp", reason="mcp not installed (Python 3.9 or fdars[mcp] absent)")
+    from fdars.mcp.server import fdars_method_references  # noqa: PLC0415
+
+    result = fdars_method_references("clustering.align_cluster_fd")
+
+    assert result["curated"] is False, (
+        "Expected curated:False for clustering.align_cluster_fd "
+        "(all backing papers are curated:false)"
+    )
+    assert result.get("sentinel") != "NO_CURATED_ENTRY", (
+        "Path B response must not have NO_CURATED_ENTRY sentinel — "
+        "callable IS in callable_index, just not yet curated"
+    )
+    assert "papers" in result, "Path B response must return candidate paper(s)"
 
 
 def test_references_sentinel_returns_no_curated_entry():
