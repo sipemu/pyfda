@@ -5,16 +5,16 @@ milestone_name: Scientific Provenance & Cross-Language Implementations
 current_phase: 83
 current_phase_name: Docs, llms.txt & Skill Extension
 status: executing
-stopped_at: Completed 83-01-PLAN.md
-last_updated: "2026-09-07T19:26:10.434Z"
+stopped_at: Completed 83-03-PLAN.md (fdars-capabilities skill extension)
+last_updated: "2026-09-07T19:30:47.342Z"
 last_activity: 2026-09-07
 last_activity_desc: Phase 83 execution started
-state_head: f19c4f0977b0cc52c8c95511729c63a4ec0df0b1
+state_head: 58326f7d7f38011ccc1f82fcb307674d5052aee6
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 10
   percent: 60
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 ## Current Position
 
 Phase: 83 (Docs, llms.txt & Skill Extension) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-09-07 — Phase 83 execution started
 
@@ -73,6 +73,7 @@ Progress: [██████░░░░] 60%
 | Phase 81-curation-paper-registry P05 | 289 | 2 tasks | 2 files |
 | Phase 82-mcp-tool-fdars-method-references-gate-05-companion P01 | 23 | 2 tasks | 2 files |
 | Phase 83 P01 | 5 | 3 tasks | 3 files |
+| Phase 83 P03 | 118 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,8 @@ Recent decisions affecting current work:
 - [Phase 82]: Coverage denominator derived live from _capability_map.json (437), never hardcoded — MCP-02 requirement text says 409 (stale); Phase 84 should reconcile to 437
 - [Phase 83]: Extended _emit_llmstxt with optional ref/cap args for inline provenance append; backward compat preserved
 - [Phase 83]: 409->437 denominator correction: emitted honest value 437, requirement text (stale 409) to be reconciled in Phase 84
+- [Phase 83]: grounded:false is machine-readable per-citation in the skill provenance protocol — satisfies T-83-05 threat mitigation (SKILL-01)
+- [Phase 83]: pytest.importorskip used inside each test function (not module level) for clean Python 3.9 skip without collection failure (SKILL-02)
 
 ### Pending Todos
 
@@ -150,8 +153,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-07T19:26:10.348Z
-Stopped at: Completed 83-01-PLAN.md
+Last session: 2026-09-07T19:30:47.249Z
+Stopped at: Completed 83-03-PLAN.md (fdars-capabilities skill extension)
 Resume file: None
 
 ## Operator Next Steps

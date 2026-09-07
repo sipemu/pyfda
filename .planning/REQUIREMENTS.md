@@ -81,8 +81,8 @@ When asked "what is method X, where does it come from, and how else could I do i
 | DOCS-01 | Phase 83 | Complete |
 | DOCS-02 | Phase 83 | Complete |
 | DOCS-03 | Phase 83 | Pending |
-| SKILL-01 | Phase 83 | Pending |
-| SKILL-02 | Phase 83 | Pending |
+| SKILL-01 | Phase 83 | Complete |
+| SKILL-02 | Phase 83 | Complete |
 | GATE-01 | Phase 84 | Pending |
 | GATE-02 | Phase 84 | Pending |
 | GATE-03 | Phase 84 | Pending |
