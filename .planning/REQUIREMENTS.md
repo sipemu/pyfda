@@ -65,10 +65,10 @@ When asked "what is method X, where does it come from, and how else could I do i
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | Phase 80 | Pending |
+| SCHEMA-01 | Phase 80 | Complete |
 | SCHEMA-02 | Phase 80 | Pending |
-| SCHEMA-03 | Phase 80 | Pending |
-| SCHEMA-04 | Phase 80 | Pending |
+| SCHEMA-03 | Phase 80 | Complete |
+| SCHEMA-04 | Phase 80 | Complete |
 | CURATE-01 | Phase 81 | Pending |
 | CURATE-02 | Phase 81 | Pending |
 | CURATE-03 | Phase 81 | Pending |

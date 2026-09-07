@@ -2,14 +2,19 @@
 gsd_state_version: 1.0
 milestone: v13.0
 milestone_name: Scientific Provenance & Cross-Language Implementations
-status: planning
-last_updated: "2026-09-07T08:15:00.000Z"
+current_phase: 80
+current_phase_name: Schema, Data Home & Primary Guard Tests
+status: executing
+stopped_at: Completed 80-01-PLAN.md
+last_updated: "2026-09-07T09:56:44.143Z"
 last_activity: 2026-09-07
+last_activity_desc: Phase 80 execution started
+state_head: e7814dbd65fbf27cf01ac3be96062c396b9ad14e
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -24,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 
 ## Current Position
 
-Phase: 80 of 84 (Schema, Data Home & Primary Guard Tests) — first v13.0 phase
-Plan: — (roadmap created; not yet planned)
-Status: Ready to plan
-Last activity: 2026-09-07 — v13.0 ROADMAP.md + REQUIREMENTS.md created (5 phases 80–84, 22 requirements, fine granularity)
+Phase: 80 (Schema, Data Home & Primary Guard Tests) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-09-07 — Phase 80 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -55,6 +60,11 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 80 P01 | 5 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -76,6 +86,8 @@ Recent decisions affecting current work:
 - [v13.0 roadmap]: GATE-05 guard tests land in the SAME commit as the tool they guard (GATE-04 lesson); Guard Group 3 (primary A/B Py3.9+, companion C/D Py3.10+) in `tests/test_guard_sync_version_independent.py`
 - [standing v6.0]: BLOCKING HUMAN citation-accuracy review before milestone close — parallel to the standing diagram review; consolidated into Phase 84 (GATE-03), autonomous execution stops there
 - [standing v6.0/v11.0]: ALL content/doc phases run SEQUENTIALLY on `main` with `use_worktrees: false` — doc-build fences hardcode the main-tree `.venv/bin/mkdocs`; whole-site `--strict` (~25 min) + guard-sync + DOI/link gates run ONCE at the Phase-84 close
+- [Phase 80]: GATE-04 atomic commit: _references_map.json + GATE-05 A/B/C guard tests land in one commit (guard tests and artifact cannot be split across CI runs)
+- [Phase 80]: FDARS_ONLINE_CHECKS=1 pattern: structural DOI/URL gate runs always in CI; opt-in live-resolve skips the structural gate (inverts the FDARS_INTEGRATION pattern)
 
 ### Pending Todos
 
@@ -113,8 +125,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-07T08:15:00.000Z
-Stopped at: v13.0 ROADMAP.md + REQUIREMENTS.md written (5 phases 80–84, 22 requirements)
+Last session: 2026-09-07T09:56:44.127Z
+Stopped at: Completed 80-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
