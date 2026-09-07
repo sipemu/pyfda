@@ -236,6 +236,41 @@ The fourth crate-upgrade wave (after v4/v5/v6) and the largest — a 10-minor ju
 
 ---
 
+## Milestone: v13.0 — Scientific Provenance & Cross-Language Implementations
+
+**Shipped:** 2026-09-07
+**Phases:** 5 (80–84) | **Plans:** 11 | **Tasks:** 21
+
+### What Was Built
+A code + docs + skill milestone (no `fdars-core` bump) giving every fdars AI surface grounded scientific provenance. One committed side-file `python/fdars/_references_map.json` (57 author-verified papers, 243 sub-method-keyed callable→paper entries) is read identically by four surfaces: the GATE-05 guard suite, a provably LLM-free `fdars_method_references()` MCP tool (static `importlib.resources` load, `_REFERENCES_MODULES` aliased to `_CAPABILITY_MODULES`, AST-guarded against any advisor/provider import, three-way frozenset mirror), an offline `--references` emitter → family-grouped `docs/references.md` + a `llms.txt` provenance section, and a `fdars-capabilities` skill `## Scientific Provenance Protocol` (curated verbatim; else synthesize with machine-readable `grounded:false`). Partial-but-honest coverage 28/437 (437 = 409 public + 28 Fdata methods). Closed with a whole-site `mkdocs build --strict` (~23 min, green offline), all guard/DOI/grounding gates, a blocking human citation-accuracy review, and a reversible pkg tick 0.11.0 → 0.12.0. 22/22 requirements validated.
+
+### What Worked
+- **Adversarial code-review loop as the correctness engine.** For a *citation-accuracy*-gated milestone, the per-phase `gsd-code-review --fix --auto` loop caught **9 genuine wrong-attribution/honesty bugs the guards could not** — guards check structure (frozenset equality, key resolution, DOI regex), not truth. Examples: outliergram → Arribas-Gil & Romo 2014 (not Sun & Genton 2011); soft-DTW *divergence* → Blondel et al. 2021 (not Cuturi & Blondel 2017, and it was on a `curated:true` entry); `smoothing.gcv_smoother` mis-attributed to Eilers–Marx P-splines; the LLM-free-boundary guard's AST walk missing the `from fdars import advisor` form; an llms.txt 409-vs-437 denominator collision. Every phase ran the loop; every fix was re-verified clean.
+- **Honest `curated:false` default under autonomous execution.** Executors correctly refused to mark entries `curated:true` because the schema's bar is *personally* opening the DOI landing page — impossible for an agent. They populated full provenance flagged `curated:false`, deferring promotion to the Phase-84 human gate. The coverage number stayed truthful (28/437) rather than inflated.
+- **Schema-first tracer (Phase 80) unblocked everything.** Locking the JSON shape + guards on day one meant all downstream curation/tool/docs work was validated as it grew; no free-form authoring drift.
+- **Single-source-of-truth wiring.** One JSON, four consumers, one derived denominator — the integration checker confirmed no drift and consistent 28/437 across tool/docs/llms.txt/guard.
+
+### What Was Inefficient
+- **Stale roadmap-time constant (409) propagated into 3 planning docs + requirement text.** The real callable count is 437 (409 public + 28 `_Fdata`); the "409" estimate was baked into REQUIREMENTS/ROADMAP/PROJECT and every phase had to carry the correction forward, reconciled only at close. A quick denominator-derivation probe during roadmap research would have caught it.
+- **Large single-`Write` truncation on this runtime.** Several planner/executor `Write` calls truncated mid-file and needed Read+Edit recovery — a recurring runtime tax on big artifacts.
+- **The ~23-min whole-site `--strict` build dominates the close** (same floor as v11.0/v12.0) — it re-executes all pre-existing fences even though the v13.0 delta was one plain-markdown page.
+
+### Patterns Established
+- **Code-review loop is mandatory for correctness-critical *content* phases, not just code.** When the deliverable is factual claims (citations, data), treat `gsd-code-review --fix --auto` as a first-class verification gate — it catches truth errors that structural guards and goal-backward verification miss.
+- **Absence-as-sentinel needs its own guard.** Anti-feature families are "curated:false" by being *absent* from the index, not by a placeholder entry — a dedicated guard asserts the absence (and one plan had to remove a leaked placeholder that violated it).
+- **Derive denominators, never hardcode.** Coverage math computed from the live capability map at emit/test time, with a drift tripwire — so a future crate bump can't silently desync the fraction.
+
+### Key Lessons
+- A resolving DOI is not proof of correct attribution — the milestone's core value ("provably correct") is only enforced by a human opening landing pages; the automated pipeline's job is to make that review small, honest, and structurally safe (curated:false by default).
+- Guards prove structure; adversarial review proves truth. Both are needed; neither substitutes for the other.
+
+### Cost Observations
+- Model mix: planners opus, executors/researchers/reviewers sonnet, plan-checker haiku.
+- Fully autonomous via `/gsd-autonomous` (discuss→research→plan→check→execute→review-loop→verify per phase), pausing only for the two grey-area decisions and the Phase-84 human citation gate.
+- Notable: the review-loop's token cost paid for itself — 9 real citation bugs fixed before the human ever looked.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution

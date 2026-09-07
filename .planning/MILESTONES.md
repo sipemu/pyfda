@@ -1,5 +1,24 @@
 # Milestones
 
+## v13.0 Scientific Provenance & Cross-Language Implementations (Shipped: 2026-09-07)
+
+**Phases completed:** 5 phases, 11 plans, 21 tasks
+
+**Key accomplishments:**
+
+- Paper-keyed `_references_map.json` seeded with 5 author-verified papers + GATE-05 A/B/C guard tests in one atomic commit, full suite green (5681 passed)
+- `docs/authoring/references-schema.md` committed — locked schema spec + author-verification workflow governing Phase 81 curation (SCHEMA-02)
+- End-to-end curation loop established for basis/smoothing + functional-statistics families, with honest N/437 coverage-emission test and 9-domain allowlist extension.
+- Depth sub-method family (17 callables, 6 papers), FPCA/PACE/KL-simulation (8 callables, 2 papers), and outlier detection (8 callables, 3 curated + 1 sentinel) curated with honest fdars-core source attribution checks.
+- Regression family (14 callables, 6 entries including 2 sentinels), Fréchet (4 callables, 1 entry), density/LQD (5 callables, 2 entries), and inference (11 callables, 5 entries including 2 sentinels) curated with contested-attribution discipline and fdars-core source checks for all ambiguous cases.
+- Elastic/SRSF alignment (68 callables fully indexed), metrics DTW/GAK/soft-DTW (cuturi_blondel_2017 exercises doi:'' curated:true path), clustering/classification, FTS/DPCA, shapelets, MFPCA, and FAMM lineage curated; all contested cases resolved; GATE-05 green; callable_index grows to 265/437 entries.
+- Six anti-feature families wired to the absence sentinel in callable_index (CURATE-04); SPM tail placeholder removed; guard test added; coverage finalized at 31/437 (7.1% curated:true, honest per CURATE-05).
+- LLM-free `fdars_method_references()` @mcp.tool() shipped in server.py with `importlib.resources` JSON lookup, six-branch return contract, and GATE-05 (C)/(D) guard tests — all in one atomic commit; coverage emits derived 28/437
+- mkdocs.yml nav-wired `references.md` under AI/capability section and a stdlib-only 4-check fast validator confirms nav placement, balanced fences, and internal link resolution without the 25-min full strict build
+- Hybrid curated/ungrounded Scientific Provenance Protocol added to fdars-capabilities skill, with machine-readable `grounded: false` flag and both-path walkthrough covering three routing paths, plus pytest tests for Path A and Path C.
+
+---
+
 ## v12.0 Docs Depth, Card Coverage & AI Capability Skill (Shipped: 2026-09-06)
 
 **Phases completed:** 6 phases, 27 plans, 16 tasks

@@ -11,28 +11,28 @@
     {
       "number": "81",
       "name": "Curation — Paper Registry",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "82",
       "name": "MCP Tool `fdars_method_references` + GATE-05 Companion",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "83",
       "name": "Docs, llms.txt & Skill Extension",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "84",
       "name": "Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Review",
-      "status": "pending"
+      "status": "complete"
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to the next step (verify)",
-    "reason": "Phase 81 of 5 · 20% · ready to verify"
+    "command": "/gsd:progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
   },
-  "updated_at": "2026-09-07T13:51:14.876Z"
+  "updated_at": "2026-09-07T20:41:14.433Z"
 }

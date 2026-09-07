@@ -24,9 +24,13 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v13.0 Scientific Provenance & Cross-Language Implementations
+## Recently Shipped: v13.0 Scientific Provenance & Cross-Language Implementations — SHIPPED 2026-09-07
 
-**Goal:** When asked "what is method X, where does it come from, and how else could I do it?", every fdars AI surface returns *grounded* scientific provenance — foundational papers with DOIs/links — plus cross-language implementation pointers (R, Python, Matlab) for every public callable. A code + docs + skill milestone; no `fdars-core` bump and no new numerical bindings.
+**Delivered:** every fdars AI surface now answers "what is method X, where does it come from, and how else could I do it?" with grounded scientific provenance — author-verified foundational papers + DOIs plus cross-language (R/Python/Matlab) implementation pointers — from a single committed `python/fdars/_references_map.json` (57 papers, 243 callable→paper entries). A provably LLM-free `fdars_method_references()` MCP tool (GATE-05 three-way mirror), an offline-generated References page + `llms.txt` provenance section, and a hybrid curated/ungrounded `fdars-capabilities` skill protocol (machine-readable `grounded:false`). Partial-but-honest coverage **28/437** (437 = 409 public + 28 Fdata methods; the tail carries full provenance flagged `curated:false` pending human promotion). Code + docs + skill — no `fdars-core` bump; package tick 0.11.0 → 0.12.0. Blocking human citation-accuracy review approved. 22/22 requirements validated; 5 phases, 11 plans; whole-site `mkdocs build --strict` green offline. Full detail: `.planning/milestones/v13.0-ROADMAP.md`.
+
+**Next:** planning next milestone (`/gsd-new-milestone`). The v13.0 goal below is retained for historical context.
+
+**Goal (v13.0):** When asked "what is method X, where does it come from, and how else could I do it?", every fdars AI surface returns *grounded* scientific provenance — foundational papers with DOIs/links — plus cross-language implementation pointers (R, Python, Matlab) for every public callable. A code + docs + skill milestone; no `fdars-core` bump and no new numerical bindings.
 
 **Target features:**
 - **Curated references map:** a hand-authored, author-verified JSON keyed by *foundational paper* (title, authors, year, DOI/URL) with a callable→paper index covering all ~437 total callables (409 public + 28 Fdata methods) — curation is paper-level (many callables share one root paper), not 409 separate entries.
@@ -193,16 +197,16 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- v13.0 — Scientific Provenance & Cross-Language Implementations. Requirements scoped in .planning/REQUIREMENTS.md; phases in .planning/ROADMAP.md. -->
+_(No active milestone — v13.0 shipped 2026-09-07. Run `/gsd-new-milestone` to scope the next.)_
 
-**v13.0 — Scientific Provenance & Cross-Language Implementations (code + docs + skill; no crate bump):**
+**v13.0 — Scientific Provenance & Cross-Language Implementations (Phases 80–84, shipped 2026-09-07; code + docs + skill, no crate bump):**
 
-- [ ] Curated references map — author-verified JSON keyed by foundational paper (title/authors/year/DOI/URL) + callable→paper index covering all ~437 total callables (409 public + 28 Fdata methods)
-- [ ] Cross-language implementation pointers — R (fda, fda.usc, refund, funData) / Python (scikit-fda) / Matlab (Ramsay fdaM, PACE) package + function + URL per covered method
-- [ ] LLM-free MCP tool — `fdars_method_references(method)` (static JSON via `importlib.resources`, frozenset-gated); curated entry or explicit ungrounded-synthesis-permitted signal
-- [ ] Capability skill extension — `fdars-capabilities` answers "scientific root of X?" / "alternatives in R/Matlab?"; hybrid protocol with honest ungrounded flagging
-- [ ] Docs surface — References page and/or per-method References blocks, folded into the `llms.txt` digest
-- [ ] Close gate — LLM-free MCP boundary test (mirror GATE-04), curated link/DOI validity, whole-site `mkdocs build --strict` green offline, guard-sync + grounding invariant preserved
+- [x] Curated references map — `python/fdars/_references_map.json`, author-verified paper-keyed JSON + sub-method callable→paper index; 57 papers / 243 entries; honest 28/437 coverage (SCHEMA-01..04, CURATE-01..05) — Phases 80/81
+- [x] Cross-language implementation pointers — R/Python/Matlab package + function + version + URL per covered paper (Matlab `confidence:low` unless verified); honest gaps recorded (CURATE-03) — Phase 81
+- [x] LLM-free MCP tool — `fdars_method_references(method)` (static `importlib.resources` JSON, frozenset-gated, AST-guarded no-provider-import) + GATE-05 (C)/(D) companion (MCP-01..04) — Phase 82
+- [x] Capability skill extension — `fdars-capabilities` `## Scientific Provenance Protocol` hybrid (curated verbatim; else synthesize + machine-readable `grounded:false`) + both-path tests (SKILL-01/02) — Phase 83
+- [x] Docs surface — offline `--references` emitter → family-grouped `docs/references.md` + `llms.txt` provenance section, nav-wired (DOCS-01..03) — Phase 83
+- [x] Close gate — whole-site `mkdocs build --strict` green offline, all GATE-05 groups + DOI gate, blocking human citation review approved, grounding/LLM-free preserved, pkg tick 0.11.0→0.12.0 (GATE-01..04) — Phase 84
 
 **v12.0 — Docs Depth, Card Coverage & AI Capability Skill (Phases 74–79, shipped 2026-09-06):**
 
@@ -337,4 +341,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-07 — started milestone v13.0 (Scientific Provenance & Cross-Language Implementations). Code + docs + skill, no `fdars-core` bump: a curated paper-level references map + callable index (~437 total callables — 409 public + 28 Fdata methods) with R/Python/Matlab implementation pointers, an LLM-free `fdars_method_references` MCP tool, an extended `fdars-capabilities` skill (hybrid curated/flagged-LLM protocol), and a References docs surface folded into `llms.txt`. Builds on v12.0 capability-discovery infra; grounding invariant preserved. Phases continue from Phase 79. Next: research decision → requirements → roadmap.*
+*Last updated: 2026-09-07 — SHIPPED milestone v13.0 (Scientific Provenance & Cross-Language Implementations) via /gsd-autonomous. Code + docs + skill, no `fdars-core` bump: a curated paper-level references map (`_references_map.json`, 57 papers / 243 callable→paper entries, honest 28/437 coverage) with R/Python/Matlab implementation pointers, a provably LLM-free `fdars_method_references` MCP tool (GATE-05 mirror), an extended `fdars-capabilities` skill (hybrid curated/flagged-`grounded:false` protocol), and an offline-emitted References docs surface + `llms.txt` provenance section. 22/22 requirements validated; whole-site `mkdocs build --strict` green offline; blocking human citation-accuracy review approved; pkg 0.11.0 → 0.12.0. Next: `/gsd-new-milestone`.*
