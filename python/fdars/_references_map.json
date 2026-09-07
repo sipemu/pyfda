@@ -442,6 +442,51 @@
       "notes": "Robust regression adaptation (L1/Huber) for functional data. No single canonical FDA primary paper identified for these specific callables. fdars-core source has no explicit citation. curated:false — do not force-cite.",
       "curated": false
     },
+    "petersen_muller_2019": {
+      "title": "Fréchet regression for random objects with Euclidean predictors",
+      "authors": ["Petersen, A.", "Müller, H.G."],
+      "year": 2019,
+      "doi": "10.1214/17-AOS1624",
+      "url": "https://projecteuclid.org/journals/annals-of-statistics/volume-47/issue-2/Fr%c3%a9chet-regression-for-random-objects-with-Euclidean-predictors/10.1214/17-AOS1624.full",
+      "type": "journal",
+      "callables": [
+        "frechet.frechet_global_reg",
+        "frechet.frechet_local_reg",
+        "frechet.frechet_mean",
+        "frechet.frechet_anova"
+      ],
+      "notes": "Introduces global and local Fréchet regression for random objects (including distributions and covariance matrices) with Euclidean predictors. [VERIFIED: projecteuclid.org — AoS Vol 47, No 2, 2019, pp 691-719, DOI 10.1214/17-AOS1624.] No direct R or Python standalone implementation found as of 2026-09-07 (cross_language omitted — honest gap). curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "petersen_muller_2016": {
+      "title": "Functional data analysis for density functions by transformation to a Hilbert space",
+      "authors": ["Petersen, A.", "Müller, H.G."],
+      "year": 2016,
+      "doi": "10.1214/15-AOS1363",
+      "url": "https://projecteuclid.org/journals/annals-of-statistics/volume-44/issue-1/Functional-data-analysis-for-density-functions-by-transformation-to-a/10.1214/15-AOS1363.full",
+      "type": "journal",
+      "callables": [
+        "density_fda.lqd_transform",
+        "density_fda.inverse_lqd",
+        "density_fda.lqd_fpca",
+        "density_fda.normalize_density"
+      ],
+      "notes": "Introduces the log-quantile density (LQD) transform for functional data analysis of density functions. [ASSUMED] — DOI 10.1214/15-AOS1363 is plausible; not personally landing-page-verified this session. curated:false until confirmed.",
+      "curated": false
+    },
+    "agueh_carlier_2011": {
+      "title": "Barycenters in the Wasserstein space",
+      "authors": ["Agueh, M.", "Carlier, G."],
+      "year": 2011,
+      "doi": "10.1137/100805741",
+      "url": "https://epubs.siam.org/doi/10.1137/100805741",
+      "type": "journal",
+      "callables": [
+        "density_fda.wasserstein_barycenter"
+      ],
+      "notes": "Introduces barycenters in the Wasserstein space (Fréchet mean w.r.t. the 2-Wasserstein distance). [ASSUMED] — DOI 10.1137/100805741 and SIAM SIOPT URL are plausible; not personally landing-page-verified this session. curated:false until confirmed.",
+      "curated": false
+    },
     "_uncurated_regression_fof_2026-09": {
       "title": "",
       "authors": [],
@@ -571,6 +616,15 @@
     "pace_fpca.pace_fpca": ["yao_muller_wang_2005"],
     "pace_fpca.irreg_fdata_from_lists": ["yao_muller_wang_2005"],
     "pace_fpca.PyIrregFdata": ["yao_muller_wang_2005"],
+    "frechet.frechet_global_reg": ["petersen_muller_2019"],
+    "frechet.frechet_local_reg": ["petersen_muller_2019"],
+    "frechet.frechet_mean": ["petersen_muller_2019"],
+    "frechet.frechet_anova": ["petersen_muller_2019"],
+    "density_fda.lqd_transform": ["petersen_muller_2016"],
+    "density_fda.inverse_lqd": ["petersen_muller_2016"],
+    "density_fda.lqd_fpca": ["petersen_muller_2016"],
+    "density_fda.normalize_density": ["petersen_muller_2016"],
+    "density_fda.wasserstein_barycenter": ["agueh_carlier_2011"],
     "outliers.outliergram": ["sun_genton_2011"],
     "outliers.magnitude_shape": ["dai_genton_2019"],
     "outliers.muod": ["dai_genton_2019"],
