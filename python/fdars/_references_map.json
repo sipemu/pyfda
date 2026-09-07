@@ -188,7 +188,12 @@
         "fdata.deriv_2d",
         "fdata.center_1d",
         "fdata.trim_mean",
-        "fdata.normalize"
+        "fdata.normalize",
+        "regression.fpca",
+        "simulation.sim_kl",
+        "simulation.simulate",
+        "simulation.eigenfunctions",
+        "simulation.eigenvalues"
       ],
       "cross_language": {
         "R": {
@@ -301,6 +306,41 @@
       },
       "notes": "Introduces the functional boxplot visualization. [VERIFIED: tandfonline.com/doi/abs/10.1198/jcgs.2011.09224 — confirmed Sun & Genton 2011, JCGS Vol 20 No 2, pp 316-334.] NOT the category-level dispatcher depth.functional_depth. curated:false until Phase 84 direct DOI-landing-page verification of title/authors.",
       "curated": false
+    },
+    "yao_muller_wang_2005": {
+      "title": "Functional data analysis for sparse longitudinal data",
+      "authors": ["Yao, F.", "Müller, H.G.", "Wang, J.L."],
+      "year": 2005,
+      "doi": "10.1198/016214504000001745",
+      "url": "https://www.tandfonline.com/doi/abs/10.1198/016214504000001745",
+      "type": "journal",
+      "callables": [
+        "pace_fpca.pace_fpca",
+        "pace_fpca.irreg_fdata_from_lists",
+        "pace_fpca.PyIrregFdata"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdapace",
+          "function": "PACE",
+          "url": "https://rdrr.io/cran/fdapace/man/FPCA.html",
+          "confidence": "high"
+        },
+        "Python": {
+          "package": "scikit-fda",
+          "function": "FPCA",
+          "url": "https://fda.readthedocs.io/en/stable/modules/preprocessing/dim_reduction.html",
+          "confidence": "high"
+        },
+        "Matlab": {
+          "package": "PACE",
+          "function": "FPCA",
+          "url": "https://www.stat.ucdavis.edu/PACE/",
+          "confidence": "low"
+        }
+      },
+      "notes": "PACE (Principal Analysis via Conditional Expectation) for sparse/irregular functional data. [VERIFIED: tandfonline.com — Yao, Müller, Wang 2005, JASA Vol 100, No 470, pp 577-590.] curated:false until Phase 84 direct DOI-landing-page verification.",
+      "curated": false
     }
   },
   "callable_index": {
@@ -349,6 +389,14 @@
     "depth.kernel_functional_spatial_1d": ["dabo_gijbels_2010"],
     "depth.kernel_functional_spatial_2d": ["dabo_gijbels_2010"],
     "depth.modified_epigraph_index_1d": ["narisetty_nair_2016"],
-    "depth.functional_boxplot": ["sun_genton_2011"]
+    "depth.functional_boxplot": ["sun_genton_2011"],
+    "regression.fpca": ["ramsay_silverman_2005"],
+    "simulation.sim_kl": ["ramsay_silverman_2005"],
+    "simulation.simulate": ["ramsay_silverman_2005"],
+    "simulation.eigenfunctions": ["ramsay_silverman_2005"],
+    "simulation.eigenvalues": ["ramsay_silverman_2005"],
+    "pace_fpca.pace_fpca": ["yao_muller_wang_2005"],
+    "pace_fpca.irreg_fdata_from_lists": ["yao_muller_wang_2005"],
+    "pace_fpca.PyIrregFdata": ["yao_muller_wang_2005"]
   }
 }
