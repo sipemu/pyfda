@@ -233,10 +233,10 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
   3. Primary GATE-05 tests (Python 3.9+, no `mcp`) pass: internal consistency (`callable_index` keys == union of `papers[*].callables`) and cross-file (every `callable_index` key resolves to a real callable in `_capability_map.json`, `_Fdata` special-cased).
   4. An offline structural DOI/URL gate (DOI regex `^10\.\d{4,9}/\S+$`; URL well-formedness + domain allowlist) runs in CI with no live network resolve; any live resolve is opt-in (`FDARS_ONLINE_CHECKS=1`) and never runs under `pytest`/`mkdocs build`.
 
-**Plans**: 1/2 plans executed
+**Plans**: 2/2 plans executed
 
 - [x] 80-01-PLAN.md — `_references_map.json` seed stub (5 author-verified papers) + Group 3 GATE-05 guard tests A/B/C in one atomic commit (SCHEMA-01, SCHEMA-03, SCHEMA-04)
-- [ ] 80-02-PLAN.md — `docs/authoring/references-schema.md` schema spec + author-verification workflow (SCHEMA-02)
+- [x] 80-02-PLAN.md — `docs/authoring/references-schema.md` schema spec + author-verification workflow (SCHEMA-02)
 
 **UI hint**: no
 
@@ -307,7 +307,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 80. Schema, Data Home & Primary Guard Tests | v13.0 | 1/2 | In Progress|  |
+| 80. Schema, Data Home & Primary Guard Tests | v13.0 | 2/2 | In Progress|  |
 | 81. Curation — Paper Registry | v13.0 | 0/TBD | Not started | - |
 | 82. MCP Tool `fdars_method_references` + GATE-05 Companion | v13.0 | 0/TBD | Not started | - |
 | 83. Docs, llms.txt & Skill Extension | v13.0 | 0/TBD | Not started | - |
