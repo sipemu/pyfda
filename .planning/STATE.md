@@ -3,19 +3,18 @@ gsd_state_version: 1.0
 milestone: v13.0
 milestone_name: Scientific Provenance & Cross-Language Implementations
 current_phase: 84
-current_phase_name: Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review
-status: executing
-stopped_at: Phase 83 complete, ready to plan Phase 84
-last_updated: "2026-09-07T19:59:37.664Z"
+status: completed
+stopped_at: Phase 84 complete — all phases complete
+last_updated: "2026-09-07T20:34:13.320Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 84 execution started
-state_head: e705c0c9e021a85e9b98941146d1915abe76ec18
+last_activity_desc: Phase 84 complete
+state_head: d2f59004ce5671db9ae470811853743d26323d0e
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 11
   completed_plans: 11
-  percent: 80
+  percent: 100
 ---
 
 # Project State
@@ -29,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 
 ## Current Position
 
-Phase: 84 (Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review) — EXECUTING
-Plan: 1 of 1
-Status: Executing Phase 84
-Last activity: 2026-09-07 — Phase 84 execution started
+Phase: 84
+Plan: Not started
+Status: All phases complete
+Last activity: 2026-09-07 — Phase 84 complete
 
 Progress: [██████░░░░] 60%
 
@@ -52,7 +51,7 @@ Progress: [██████░░░░] 60%
 | 81 | 5 | - | - |
 | 82 | 1 | - | - |
 | 83 | 3 | - | - |
-| 84 | TBD | - | - |
+| 84 | 0 | - | - |
 
 **Recent Trend:**
 
@@ -153,16 +152,10 @@ None yet.
 | References | REF-FUT-01: complete the uncurated `N/409` tail + a coverage floor once curation stabilizes (partial-but-honest accepted this milestone) | future | v13.0 init |
 | References | REF-FUT-02: opt-in live DOI/URL liveness resolve (`scripts/check_doi_liveness.py`, `FDARS_ONLINE_CHECKS=1`) run before close — never in CI | future | v13.0 init |
 
-## Deferred Verification
-
-| Phase | State | Resume |
-|-------|-------|--------|
-| 84 | verification_deferred_human (GATE-03 blocking human citation review — by design) | /gsd-verify-work 84 then /gsd-audit-milestone → /gsd-complete-milestone v13.0 → /gsd-cleanup |
-
 ## Session Continuity
 
 Last session: 2026-09-07T19:36:07.410Z
-Stopped at: Phase 83 complete, ready to plan Phase 84
+Stopped at: Phase 84 complete — all phases complete
 Resume file: None
 
 ## Operator Next Steps

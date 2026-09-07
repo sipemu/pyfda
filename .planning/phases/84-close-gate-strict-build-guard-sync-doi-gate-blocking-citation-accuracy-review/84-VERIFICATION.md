@@ -1,14 +1,14 @@
 ---
 phase: 84-close-gate-strict-build-guard-sync-doi-gate-blocking-citation-accuracy-review
 verified: 2026-09-07
-status: human_needed
-score: 3/4 gates automated-green; GATE-03 requires human sign-off (by design)
+status: passed
+score: 4/4 gates — GATE-01/02/04 automated-green; GATE-03 human citation review APPROVED by user 2026-09-07
 requirements: [GATE-01, GATE-02, GATE-03, GATE-04]
 ---
 
 # Phase 84 Verification — Close Gate
 
-**Status: `human_needed`** — all automated gates are green; the milestone stops here for the BLOCKING HUMAN citation-accuracy review (GATE-03) and the irreversible publish handoff (GATE-04), exactly as the standing decision requires ("autonomous execution stops at this gate").
+**Status: `passed`** — all automated gates green (GATE-01 strict build, GATE-02 guard/DOI/coverage, GATE-04 grounding/LLM-free); **GATE-03 BLOCKING HUMAN citation-accuracy review was APPROVED by the user on 2026-09-07**. The reversible package-version tick (0.11.0 → 0.12.0) is committed; the irreversible tag/PyPI publish remains human-gated and is handed off (not executed autonomously).
 
 ## Automated gates — GREEN
 
