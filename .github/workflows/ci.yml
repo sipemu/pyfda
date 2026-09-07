@@ -67,7 +67,7 @@ jobs:
         run: |
           python -m venv .venv
           source .venv/bin/activate
-          pip install maturin numpy pandas pytest pyyaml pytest-asyncio
+          pip install maturin numpy pandas scipy pytest pyyaml pytest-asyncio
       - name: Build and install
         run: |
           source .venv/bin/activate
