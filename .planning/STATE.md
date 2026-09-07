@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v13.0
 milestone_name: Scientific Provenance & Cross-Language Implementations
-current_phase: 83
-current_phase_name: Docs, llms.txt & Skill Extension
-status: verifying
-stopped_at: Completed 83-02-PLAN.md (Nav wiring + fast checker)
-last_updated: "2026-09-07T19:36:07.482Z"
+current_phase: 84
+current_phase_name: Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review
+status: planning
+stopped_at: Phase 83 complete, ready to plan Phase 84
+last_updated: "2026-09-07T19:56:34.581Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 83 execution started
-state_head: cbfd1f2e865c0a38dfae4e12520429935e9c7779
+last_activity_desc: Phase 83 complete, transitioned to Phase 84
+state_head: 71f2745e446d1ed2af08fcd04d71bf8f68cea616
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 11
   completed_plans: 11
-  percent: 60
+  percent: 80
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 
 ## Current Position
 
-Phase: 83 (Docs, llms.txt & Skill Extension) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-09-07 — Phase 83 execution started
+Phase: 84 — Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-07 — Phase 83 complete, transitioned to Phase 84
 
 Progress: [██████░░░░] 60%
 
@@ -51,7 +51,7 @@ Progress: [██████░░░░] 60%
 | 80 | 2 | - | - |
 | 81 | 5 | - | - |
 | 82 | 1 | - | - |
-| 83 | TBD | - | - |
+| 83 | 3 | - | - |
 | 84 | TBD | - | - |
 
 **Recent Trend:**
@@ -156,7 +156,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-07T19:36:07.410Z
-Stopped at: Completed 83-02-PLAN.md (Nav wiring + fast checker)
+Stopped at: Phase 83 complete, ready to plan Phase 84
 Resume file: None
 
 ## Operator Next Steps

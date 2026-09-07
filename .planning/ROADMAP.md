@@ -216,7 +216,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 - [x] **Phase 80: Schema, Data Home & Primary Guard Tests** - `_references_map.json` stub + schema/author-verification workflow + maturin include + primary GATE-05 tests + offline DOI/URL structural gate (completed 2026-09-07)
 - [x] **Phase 81: Curation — Paper Registry** - hand-authored, author-verified paper-level entries + sub-method callable index + R/Python/Matlab pointers + anti-feature sentinels + honest `N/409` coverage (bulk / critical path) (completed 2026-09-07)
 - [x] **Phase 82: MCP Tool `fdars_method_references` + GATE-05 Companion** - LLM-free static lookup tool + `_REFERENCES_MODULES` + curated/sentinel return shape + Guard Group 3 companion tests (can parallel Phase 81) (completed 2026-09-07)
-- [ ] **Phase 83: Docs, llms.txt & Skill Extension** - `docs/references.md` + `--references` offline emit + `llms.txt` provenance section + `mkdocs.yml` nav + `fdars-capabilities` hybrid protocol
+- [x] **Phase 83: Docs, llms.txt & Skill Extension** - `docs/references.md` + `--references` offline emit + `llms.txt` provenance section + `mkdocs.yml` nav + `fdars-capabilities` hybrid protocol (completed 2026-09-07)
 - [ ] **Phase 84: Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review** - whole-site `--strict` offline + all GATE-05 groups + DOI/URL gate + blocking human citation-accuracy review + grounding/guard-sync confirmation + release handoff
 
 ## Phase Details
@@ -325,7 +325,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 | 80. Schema, Data Home & Primary Guard Tests | v13.0 | 2/2 | Complete    | 2026-09-07 |
 | 81. Curation — Paper Registry | v13.0 | 5/5 | Complete    | 2026-09-07 |
 | 82. MCP Tool `fdars_method_references` + GATE-05 Companion | v13.0 | 1/1 | Complete    | 2026-09-07 |
-| 83. Docs, llms.txt & Skill Extension | v13.0 | 3/3 | In Progress|  |
+| 83. Docs, llms.txt & Skill Extension | v13.0 | 3/3 | Complete    | 2026-09-07 |
 | 84. Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Review | v13.0 | 0/TBD | Not started | - |
 
 ---
