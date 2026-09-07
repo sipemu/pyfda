@@ -1,208 +1,399 @@
 # Stack Research
 
-**Domain:** PyO3 Rust-to-Python binding layer — fdars-core upgrade (0.23.0 → 0.33.0)
-**Researched:** 2026-09-02
-**Confidence:** MEDIUM (all facts sourced from crates.io API and docs.rs; confidence rating LOW per provider tier, elevated to MEDIUM because primary sources are the authoritative registry and the published documentation, and key claims are cross-checked across multiple API endpoints)
+**Domain:** Scientific-provenance + cross-language-implementations reference data for a Python/Rust FDA library  
+**Researched:** 2026-09-07  
+**Confidence:** HIGH (packaging/importlib patterns verified against shipped v12.0 code; format decision derived from existing JSON shapes; stdlib tooling verified against Python docs)
 
 ---
 
-## Upgrade Verdict: Clean Bump Path
+## 1. Reference Data Format
 
-**YES — the 0.23.0 → 0.33.0 bump is a clean, additive-only upgrade.** No breaking changes to existing public signatures were found across any of the 10 minor versions (0.24–0.33). The existing `Cargo.toml` one-liner change (`0.23.0` → `0.33.0`) is sufficient to complete the bump; no other toolchain, binding-layer, or Python-stack changes are forced.
+### Recommendation: Bespoke minimal JSON, NOT CSL-JSON or BibTeX
 
----
+**Use two committed JSON files mirroring the `_capability_map.json` + `_capability_curation.json` split:**
 
-## Q1 — MSRV at 0.33.0
-
-**fdars-core 0.33.0 MSRV: Rust 1.81**
-
-Sourced directly from the crates.io API (`rust_version` field on the 0.33.0 version record, published 2026-09-02). Every release from 0.4.0 through 0.33.0 declares `rust-version = "1.81"`.
-
-pyfda's current pinned `rust-version = "1.83"` in `Cargo.toml` satisfies this requirement with headroom. **No Rust toolchain change is needed.**
-
----
-
-## Q2 — linalg Feature Status at 0.33.0
-
-**linalg is no longer gated on Rust 1.84+. The earlier deferral reason (MSRV mismatch) is obsolete.**
-
-At the time of v6.0 (0.23.0), the `linalg` feature pulled in `faer`, which at that point required Rust 1.84 — above the project's MSRV of 1.83. At 0.33.0, confirmed from the crates.io dependency manifest:
-
-- `faer = "^0.23"` (optional, linalg feature) — faer 0.23's MSRV is 1.81, matching fdars-core's own MSRV
-- `anofox-regression = "^0.4"` (optional, linalg feature) — a standalone regression library providing OLS/GLM/quantile/penalized-spline estimators; MSRV is 1.81
-
-**Consequence for this milestone:** The user decision to keep `parallel`-only and NOT enable `linalg` is upheld. But the technical reason that forced it (MSRV mismatch) is gone. If a future milestone wants `linalg`, there is no toolchain blocker at 0.33.0.
-
----
-
-## Q3 — Cargo Feature Flags at 0.33.0
-
-Features confirmed from the crates.io API dependency manifest for 0.33.0:
-
-| Feature | Value | Status vs 0.23.0 |
-|---------|-------|-----------------|
-| `default` | `["parallel"]` | Unchanged |
-| `parallel` | `["rayon"]` | Unchanged — still the correct flag to enable |
-| `linalg` | `["faer", "anofox-regression"]` | Flag name unchanged; `anofox-regression` is the dependency alongside faer |
-| `serde` | `["dep:serde", "dep:serde_json"]` | NEW in this series — optional serialization; not needed for pyfda |
-| `dhat-heap` | `[]` | Unchanged — heap profiling only |
-| `js` | `["getrandom/js"]` | Unchanged — WASM only |
-
-**For pyfda `Cargo.toml`:** No change to the `features = ["parallel"]` line. No new feature is required to expose any of the new modules. `clustering_advanced`, `famm` extensions, `multi_fdata`, `density_fda`, `pda`, `fts`, `frechet`, and `shapelet` all sit under the default/no-feature surface and are compiled in unconditionally.
-
----
-
-## Q4 — Transitive Dependency Changes
-
-Dependencies confirmed from the crates.io API for both 0.23.0 and 0.33.0:
-
-| Dependency | At 0.23.0 | At 0.33.0 | Impact on pyfda |
-|------------|-----------|-----------|-----------------|
-| `nalgebra` | `^0.33` | `^0.33` | No change |
-| `rustfft` | `^6.2` | `^6.2` | No change |
-| `rand` | `^0.8` | `^0.8` | No change |
-| `rand_distr` | `^0.4` | `^0.4` | No change |
-| `num-complex` | `^0.4` | `^0.4` | No change |
-| `getrandom` | `^0.2` | `^0.2` | No change |
-| `rayon` (parallel) | `^1.10` | `^1.10` | No change |
-| `faer` (linalg) | `^0.23` | `^0.23` | No change (linalg not enabled) |
-| `anofox-regression` (linalg) | `^0.4` | `^0.4` | No change (linalg not enabled) |
-| `serde` / `serde_json` (serde) | not present | `^1` optional | Not enabled; no impact |
-
-**Verdict:** Zero transitive dependency changes between 0.23.0 and 0.33.0 under the `parallel`-only feature set. `Cargo.lock` will update automatically on `cargo build`; no manual intervention is needed.
-
----
-
-## Q5 — PyO3 / numpy / maturin Compatibility
-
-**No forced upgrade to any of these.**
-
-- `pyo3 = "0.28"` with `["extension-module", "abi3-py39"]`: unchanged and compatible. fdars-core 0.33.0 does not list pyo3 or numpy as its own dependencies — those live exclusively in pyfda's `Cargo.toml`. The upgrade only swaps fdars-core's own algorithms; the PyO3 binding surface is entirely pyfda's concern.
-- `numpy = "0.28"`: unchanged. No new fdars-core types require numpy array layout changes beyond the existing column-major pattern already established in `src/convert.rs`.
-- `maturin 1.x`: unchanged. The `cdylib` + `abi3-py39` build path is unaffected.
-- Python 3.9–3.14 CI matrix: unchanged.
-
----
-
-## Q6 — New Surface Added in 0.24–0.33
-
-All changes are **additive only** — no existing public signatures were removed or altered across the 10 minor versions. The new capabilities require new `*_mod.rs` binding files and Python API additions; they do not require modifying any existing binding.
-
-### New Modules (confirmed absent in 0.23.0 via docs.rs 404)
-
-| Module | Introduced | Key public surface |
-|--------|------------|-------------------|
-| `clustering_advanced` | 0.24.0 | `dbscan_fd`, `kcfc_cluster`, `funfem_cluster`, `align_cluster_fd` + 4 config/result pairs (`DbscanConfig/Result`, `KcfcConfig/Result`, `FunFemConfig/Result`, `AlignClusterConfig/Result`) |
-| `density_fda` | ~0.25.0 | `lqd_transform`, `inverse_lqd`, `lqd_fpca` (`LqdFpcaResult`), `wasserstein_barycenter`, `normalize_density` |
-| `multi_fdata` | ~0.26.0 | `MultiFunData`, `FdComponent` (multi-domain functional data container; same-obs-count constraint) |
-| `pda` | ~0.27.0 | `principal_differential_analysis`, `Lfd`, `PdaResult` (linear differential operators; mirrors R `pda.fd`) |
-| `fts` | 0.27.0–0.28.0 | 13 functions: `ftsm`, `ftsm_forecast`, `ftsm_forecast_multistep`, `ftsm_update`, `fplsr`, `dpca`, `dpca_reconstruct`, `spectral_density`, `functional_acf`, `functional_pacf`, `long_run_covariance`, `stationarity_test`, `functional_difference`; 10 result structs (`ArModelResult`, `DpcaReconstruction`, `DpcaResult`, `FacfResult`, `FplsrResult`, `FtsmForecastResult`, `FtsmResult`, `LongRunCovResult`, `SpectralDensityResult`, `StationarityResult`) |
-| `frechet` | 0.27.0–0.28.0 | `MetricSpace` trait; 6 backends (`WassersteinDensitySpace`, `SpdMatrixSpace`, `SphericalSpace`, `CorrelationMatrixSpace`, `NetworkSpace`, `PointProcessSpace`); 9 functions (`frechet_mean`, `frechet_variance`, `wasserstein2_distance`, `frechet_global_reg`, `frechet_global_reg_space`, `frechet_local_reg`, `frechet_local_reg_space`, `frechet_anova`, `frechet_anova_space`); 3 result structs |
-| `shapelet` | 0.33.0 | `discover_shapelets`, `shapelet_classifier_fit`, `shapelet_transform`, `shapelet_transform_fit`, `shapelet_distance`, `z_normalize_into`, `z_normalize_window`; 8 types (`Shapelet`, `ShapeletSet`, `QualityMeasure`, `ShapeletClassifier`, `ShapeletClassifierConfig`, `ShapeletClassifierFit`, `ShapeletDiscoveryConfig`, `ShapeletTransformFit`) |
-
-Note: `~0.25.0` and `~0.26.0` are approximate (changelog consolidates those into the 0.27.0 entry); `pda` confirmed present by 0.27.0, `multi_fdata` confirmed present by 0.27.0, `density_fda` absent at 0.24.0 (404). The exact introduction minor does not affect binding work — all are absent from 0.23.0 and present at 0.33.0.
-
-### Extended Modules (present in 0.23.0, new items added)
-
-| Module | What was added (not in 0.23.0) |
-|--------|-------------------------------|
-| `famm` | `dense_flmm`, `fast_fmm`, `multi_famm` + 6 new config/result types (`DenseFlmmConfig/Result`, `FastFmmConfig/Result`, `MultiFammConfig/Result`) — all present by 0.24.0 |
-| `seasonal` | ~13 new functions: `analyze_peak_timing`, `autoperiod_fdata`, `cfd_autoperiod`, `cfd_autoperiod_fdata`, `instantaneous_period`, `lomb_scargle_fdata`, `matrix_profile_fdata`, `matrix_profile_seasonality`, `seasonal_strength_spectral`, `seasonal_strength_wavelet`, `seasonal_strength_windowed`, `sazed_fdata`, `ssa_fdata`, `ssa_seasonality`; ~14 new types (`AutoperiodCandidate`, `CfdAutoperiodResult`, `ChangeDetectionResult`, `ChangePoint`, `DetectedPeriod`, `InstantaneousPeriod`, `LombScargleResult`, `MatrixProfileResult`, `PeakDetectionResult`, `PeakTimingResult`, `SazedComponents`, `SazedResult`, `SeasonalityClassification`, `WaveletAmplitudeResult`) |
-| `function_on_scalar` | `fanova_seeded` added (0.30.0, seedable permutation ANOVA); `fanova` deprecated (soft — still callable, not removed) |
-
-### Deprecations
-
-Only one: `fanova` in `function_on_scalar` — deprecated in 0.30.0 in favour of `fanova_seeded` (which takes an explicit `seed: u64`). The deprecated function remains callable; no existing pyfda binding breaks. Existing code in `src/function_on_scalar_mod.rs` continues to compile and work; a new binding for `fanova_seeded` is desirable but not required by the compiler.
-
-### Changelog: Version-by-Version Summary (0.24–0.33)
-
-| Version | Date | Theme | Breaking changes |
-|---------|------|-------|-----------------|
-| 0.24.0 | 2026-08-20 | Advanced clustering + FAMM breadth | None |
-| 0.25.0 | 2026-08-22 | Serial dependence, density FDA, multi-fdata | None |
-| 0.26.0 | 2026-08-22 | FPCA breadth, sparse covariance | None |
-| 0.27.0 | 2026-08-22 | FTS forecasting, Fréchet regression, PDA | None |
-| 0.28.0 | 2026-08-23 | Spectral FTS, object-data Fréchet | None |
-| 0.29.0 | 2026-08-30 | FAMM extensions (dense/fast/multi) | None |
-| 0.30.0 | 2026-09-01 | Performance & consolidation; `fanova` deprecated | None (deprecated, not removed) |
-| 0.31.0 | 2026-09-02 | (details not in changelog; all versions published same day as 0.32/0.33) | None confirmed |
-| 0.32.0 | 2026-09-02 | (details not in changelog) | None confirmed |
-| 0.33.0 | 2026-09-02 | Shapelets (time-series shapelet discovery/classification) | None |
-
-Versions 0.31.0 and 0.32.0 are confirmed to exist (crates.io API) but their changelog entries are not present in the published CHANGELOG.md. Based on the module-level inspection at 0.32.0 (no `shapelet` module), 0.31 and 0.32 are likely internal or performance-only passes. No new breaking signatures are expected.
-
----
-
-## Q7 — Package Version Bump for pyfda
-
-**Recommended: bump to `0.10.0`.**
-
-Project convention (from `MEMORY.md` and `PROJECT.md`): a semver `vX.Y.Z` tag triggers the PyPI publish workflow. The current package version is `0.9.0` (shipped with v9.0 sklearn milestone). This is a code milestone (new bindings, advisor changes, package change) so a version bump is required at close.
-
-- `0.10.0` is idiomatic — it is the next minor after `0.9.0`, signals a substantial capability addition without a breaking API change, and stays under `1.0.0` which the project has historically reserved.
-- The PyPI publish tag would be `v0.10.0`; the milestone label is `v11.0` (milestone version and package version are intentionally decoupled per project convention).
-
----
-
-## Recommended Cargo.toml Change
-
-The sole required edit to `Cargo.toml` for the crate bump phase:
-
-```toml
-[dependencies]
-fdars-core = { version = "0.33.0", features = ["parallel"] }
-pyo3 = { version = "0.28", features = ["extension-module", "abi3-py39"] }
-numpy = "0.28"
+```
+python/fdars/_references_map.json     # paper registry + callable index + cross-language pointers
+python/fdars/_references_curation.json  # (optional) hand override layer, same pattern as _capability_curation.json
 ```
 
-Only the `fdars-core` version string changes (`0.23.0` → `0.33.0`). Everything else is unchanged.
+**Rationale — why NOT CSL-JSON:**
+
+CSL-JSON is a rich bibliographic interchange format originally designed for the citeproc-js citation processor. It carries significant complexity: `author` is an array of objects with `family`/`given` keys, `issued` is a nested `{"date-parts": [[year, month, day]]}` object, type discriminators (`"article-journal"`, `"book"`, etc.) are required for processor dispatch, and field names like `container-title` are citeproc-specific. For a hand-authored provenance store read by Python code and LLMs, this is unnecessary weight. The format is designed for rendering bibliography outputs, not for machine-readable method lookups.
+
+**Rationale — why NOT BibTeX:**
+
+BibTeX is a string format, not JSON. Parsing it requires a third-party library (bibtexparser, pybtex) — adding a runtime dependency. It is also not natively readable by LLMs or directly ingestable by the MCP tool without a parse step. The v12.0 pattern is committed JSON read with `json.loads()` and zero dependencies.
+
+**Rationale — why bespoke minimal JSON:**
+
+The `_capability_map.json` shape (`module -> callable -> {purpose, sig}`) is already the project's data-at-rest convention. The references map extends that same pattern. It stays flat, human-editable, stdlib-readable, and consistent with everything the existing MCP tool and guard-sync tests already know how to handle.
+
+### Recommended schema
+
+Two top-level sections in one file, kept small enough to load in full at every tool call:
+
+```json
+{
+  "papers": {
+    "<paper-key>": {
+      "title": "Depth measures for multivariate functional data",
+      "authors": ["Ieva, F.", "Paganoni, A.M."],
+      "year": 2013,
+      "doi": "10.1080/02331888.2012.719672",
+      "url": "https://doi.org/10.1080/02331888.2012.719672",
+      "venue": "Statistics",
+      "notes": ""
+    }
+  },
+  "callables": {
+    "depth.fraiman_muniz_1d": {
+      "paper_keys": ["fraiman_muniz_2001"],
+      "cross_language": [
+        {
+          "language": "R",
+          "package": "fda.usc",
+          "function": "fdata.comp",
+          "url": "https://cran.r-project.org/package=fda.usc"
+        },
+        {
+          "language": "Python",
+          "package": "scikit-fda",
+          "function": "MeanDepth",
+          "url": "https://fda.readthedocs.io/en/stable/modules/representation/index.html"
+        }
+      ]
+    }
+  }
+}
+```
+
+**Key design decisions in this schema:**
+
+- `papers` is a flat dict keyed by a short human-authored slug (e.g. `"fraiman_muniz_2001"`, `"ramsay_silverman_2005"`) — not by DOI — so callable entries reference readable keys, not opaque DOI strings.
+- `authors` is a flat list of `"Family, Given"` strings — not CSL-JSON's nested objects. Sufficient for display and LLM consumption; avoids nested parse complexity.
+- `doi` and `url` are both present. `doi` is the bare identifier (`10.XXXX/...`); `url` is the resolvable link. Both are optional for older works without DOIs (e.g. Ramsay & Silverman 2005 book).
+- `year` is an integer, not a CSL-JSON nested date-parts object.
+- `callables` maps `"module.callable"` keys (matching the `_capability_map.json` + `_capability_curation.json` structure) to `{paper_keys, cross_language}`. Callable keys not present in the callable index have no curated entry — the MCP tool returns an explicit `{"curated": false}` signal for the tail (as specified in PROJECT.md).
+- `cross_language` is a list to allow multiple implementations per language; `language` is one of `"R"`, `"Python"`, `"Matlab"`.
+- `notes` on `papers` is an optional free-text field for disambiguation or caveats.
+- `venue` on `papers` is optional (journal name, conference, or "book") — useful for display on the docs References page.
+
+**Consistency with `_capability_map.json`:**
+
+The `callables` keys use the same `"module.callable"` dot-notation as `_capability_curation.json`. The MCP tool can join the two files at call time: look up the callable in `_references_map.json` -> resolve `paper_keys` to entries in `papers` -> attach `cross_language`. No cross-file index needed; both files live under `importlib.resources.files("fdars")`.
 
 ---
 
-## Version Compatibility Matrix
+## 2. DOI / URL Validity Checking
 
-| Component | Current (0.23.0) | After Bump (0.33.0) | Action |
-|-----------|-----------------|---------------------|--------|
-| `fdars-core` | 0.23.0 | **0.33.0** | Change version string in `Cargo.toml` |
-| `pyo3` | 0.28 | 0.28 | No change |
-| `numpy` (PyO3 binding) | 0.28 | 0.28 | No change |
-| Rust MSRV (`rust-version`) | 1.83 | 1.83 | No change (0.33.0 requires ≥1.81) |
-| maturin | 1.x | 1.x | No change |
-| Python CI matrix | 3.9–3.14 | 3.9–3.14 | No change |
-| pyfda package version | 0.9.0 | **0.10.0** | Bump at milestone close; tag `v0.10.0` |
+### Strict separation: offline structural gate (CI) vs online resolve (opt-in only)
+
+**OFFLINE structural check — suitable for CI and the default test path:**
+
+Use Python stdlib `re` and `urllib.parse`. No network, no new dependencies.
+
+```python
+import re
+from urllib.parse import urlparse
+
+_DOI_RE = re.compile(r'^10\.\d{4,9}/\S+$')
+
+def _is_valid_doi(doi: str) -> bool:
+    """Structural DOI check: matches 10.NNNN/suffix pattern (CrossRef/MEDRA syntax)."""
+    return bool(_DOI_RE.match(doi.strip()))
+
+def _is_valid_url(url: str) -> bool:
+    """Structural URL check: scheme is http/https, netloc is non-empty."""
+    try:
+        p = urlparse(url)
+        return p.scheme in ("http", "https") and bool(p.netloc)
+    except Exception:
+        return False
+```
+
+The DOI regex `^10\.\d{4,9}/\S+$` is the CrossRef/MEDRA structural definition: registrant prefix starts with `10.`, followed by 4-9 digits, a `/`, and a non-whitespace suffix of any length. This catches malformed DOIs (wrong prefix, missing slash, whitespace) without requiring a network call.
+
+`urllib.parse.urlparse` is a Python stdlib parser (no install needed) that decomposes a URL into `scheme`, `netloc`, `path`, etc. Checking `scheme in ("http", "https")` and `bool(netloc)` is a reliable structural well-formedness gate — it will not reject valid URLs and will catch obviously broken ones (no scheme, no host). Note: `urlparse` does not validate that a URL is reachable; it is a syntax-only check, which is exactly what is needed for CI.
+
+**This check runs in pytest CI on every push** as part of the schema validation test group (see Section 4).
+
+**OPTIONAL online resolve — must NOT run in default test/build path:**
+
+To actually resolve a DOI to its landing page, use `urllib.request.urlopen` with a HEAD request to `https://doi.org/{doi}`. This MUST be gated behind an environment variable (e.g. `FDARS_ONLINE_CHECKS=1`) and excluded from the default `pytest` run and the docs build.
+
+```python
+import os
+import urllib.request
+
+def _resolve_doi_online(doi: str) -> bool:
+    """Optional online DOI resolution — do NOT call from CI default path."""
+    if not os.environ.get("FDARS_ONLINE_CHECKS"):
+        return True  # skip silently when env var absent
+    url = f"https://doi.org/{doi}"
+    try:
+        req = urllib.request.Request(url, method="HEAD")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status < 400
+    except Exception:
+        return False
+```
+
+**Decision: never make the online check part of `pytest` or `mkdocs build`.** The v12.0 pattern and the project constraints are explicit that CI is network-free. A separate `make check-links` target or a GitHub Actions job with `FDARS_ONLINE_CHECKS=1` can run the optional online resolve on demand before committing a curated data update.
 
 ---
 
-## What NOT to Do
+## 3. Packaging
 
-| Avoid | Why | Instead |
-|-------|-----|---------|
-| Enabling `linalg` feature | User decision for this milestone; not needed for any new bindings | Keep `features = ["parallel"]` |
-| Bumping PyO3 or numpy | Not forced; no incompatibility | Leave at 0.28 |
-| Raising Rust MSRV | 0.33.0 requires 1.81; pyfda already pins 1.83 | No `rust-version` change |
-| Enabling `serde` feature | New optional feature; pyfda serializes via PyDict patterns, not serde | Keep disabled |
-| Bumping package to `1.0.0` | Project convention reserves this | Use `0.10.0` |
-| Treating 0.30 `fanova` deprecation as a breaking change | The function is still callable; no compiler error | Add `fanova_seeded` binding alongside existing `fanova` |
+### How the JSON ships and is read
+
+**The reference map ships as package data inside `python/fdars/`, the same directory as `_capability_map.json`.** Maturin's `python-source = "python"` setting in `pyproject.toml` means the Python package root is `python/fdars/`. All files in that directory — including non-`.py` files — are included in the wheel when maturin copies the package source tree. The existing `_capability_map.json` is not in the `[tool.maturin] include` list and ships correctly because it sits directly in the package source tree.
+
+**To be safe and explicit, add the new file to the `include` glob pattern in `pyproject.toml`:**
+
+```toml
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "python"
+module-name = "fdars._native"
+include = [
+  "python/fdars/data/*.csv",
+  "python/fdars/_capability_map.json",
+  "python/fdars/_references_map.json",
+]
+```
+
+Explicit inclusion makes the packaging contract visible and guards against any future maturin version change that might alter default non-Python file behavior.
+
+**How the MCP tool reads the file — mirror `fdars_list_capabilities` exactly:**
+
+```python
+import json
+from importlib import resources
+
+ref_file = resources.files("fdars") / "_references_map.json"
+data: dict = json.loads(ref_file.read_text(encoding="utf-8"))
+```
+
+`importlib.resources.files()` was added in Python 3.9 (the project's minimum supported version) and returns a `Traversable` object. The `/` operator is syntactic sugar for `.joinpath()`. `.read_text(encoding="utf-8")` reads the file as a string without requiring an actual filesystem path — it works correctly inside a zip-packaged wheel or an editable install. This is the exact pattern already used in `fdars_list_capabilities` at `server.py` line 813.
+
+**No new Python dependencies are introduced.** `json` and `importlib.resources` are both stdlib. The references file is read at tool-call time, not at import time, consistent with the `fdars_list_capabilities` lazy-load pattern.
+
+**Docs build reads the same committed file offline:**
+
+The MkDocs build uses `markdown-exec` to run Python fences. Any References page that renders the data should read the file via `importlib.resources.files("fdars") / "_references_map.json"` if `fdars` is installed in the docs venv (it is — the docs build requires `fdars` installed). This is network-free and offline, consistent with the `--strict` build constraint and the 22-35 min build time noted in memory. Do NOT read the file by raw filesystem path in docs fences — use the same `importlib.resources` path as the tool for consistency.
+
+---
+
+## 4. Testing
+
+### Test structure mirrors GATE-04 (three-way guard-sync)
+
+All tests use stdlib only (`json`, `re`, `urllib.parse`, `importlib.resources`, `sys`) plus `pytest`. No `jsonschema` library. No network in the default path. New file: `tests/test_references_map.py`.
+
+**Group A — Schema validity (runs on Python 3.9+, no mcp import):**
+
+```python
+def test_references_map_schema():
+    """Every paper entry has required fields; every callable entry has valid keys."""
+    from importlib import resources
+    import json, re
+    from urllib.parse import urlparse
+
+    data = json.loads(
+        (resources.files("fdars") / "_references_map.json").read_text(encoding="utf-8")
+    )
+    papers = data["papers"]
+    callables = data["callables"]
+
+    _DOI_RE = re.compile(r'^10\.\d{4,9}/\S+$')
+
+    for key, p in papers.items():
+        assert "title" in p and p["title"], f"paper {key!r} missing title"
+        assert "authors" in p and isinstance(p["authors"], list), \
+            f"paper {key!r} authors must be list"
+        assert "year" in p and isinstance(p["year"], int), \
+            f"paper {key!r} year must be int"
+        # doi OR url required (older books may lack DOI)
+        has_doi = bool(p.get("doi", "").strip())
+        has_url = bool(p.get("url", "").strip())
+        assert has_doi or has_url, f"paper {key!r} needs doi or url"
+        if has_doi:
+            assert _DOI_RE.match(p["doi"].strip()), \
+                f"paper {key!r} DOI malformed: {p['doi']!r}"
+        if has_url:
+            u = urlparse(p["url"])
+            assert u.scheme in ("http", "https") and u.netloc, \
+                f"paper {key!r} URL malformed: {p['url']!r}"
+
+    for key, c in callables.items():
+        assert "." in key, f"callable key {key!r} must be 'module.function'"
+        assert "paper_keys" in c and isinstance(c["paper_keys"], list), \
+            f"{key!r} paper_keys must be list"
+        for pk in c["paper_keys"]:
+            assert pk in papers, \
+                f"{key!r} references unknown paper_key {pk!r}"
+        for impl in c.get("cross_language", []):
+            assert impl.get("language") in ("R", "Python", "Matlab"), \
+                f"{key!r} impl language must be R/Python/Matlab"
+            assert "package" in impl and "function" in impl, \
+                f"{key!r} impl missing package or function"
+```
+
+**Group B — Callable index completeness vs capability map:**
+
+```python
+def test_callable_index_subset_of_capability_map():
+    """Every key in callables[] matches a known callable in _capability_map.json."""
+    from importlib import resources
+    import json
+
+    cap = json.loads(
+        (resources.files("fdars") / "_capability_map.json").read_text(encoding="utf-8")
+    )
+    ref = json.loads(
+        (resources.files("fdars") / "_references_map.json").read_text(encoding="utf-8")
+    )
+
+    # Build flat set of known callables from capability map
+    known = set()
+    for module, fns in cap.items():
+        for fn in fns:
+            known.add(f"{module}.{fn}")
+
+    for key in ref["callables"]:
+        assert key in known, (
+            f"references callable {key!r} not found in _capability_map.json. "
+            "Update the key or regenerate the capability map."
+        )
+```
+
+**Group C — LLM-free boundary test for `fdars_method_references` (mirrors GATE-04, Python 3.10+ only):**
+
+```python
+def test_method_references_tool_llm_free_boundary():
+    """fdars_method_references returns no model/provider keys (LLM-free boundary)."""
+    import sys
+    if sys.version_info < (3, 10):
+        pytest.skip("mcp requires Python 3.10+")
+    pytest.importorskip("mcp")
+
+    from fdars.mcp.server import fdars_method_references
+
+    result = fdars_method_references("depth.fraiman_muniz_1d")
+
+    assert "provider" not in result, \
+        "must not expose 'provider' key (LLM-free boundary)"
+    assert "model" not in result, \
+        "must not expose 'model' key (LLM-free boundary)"
+    assert "curated" in result, \
+        "must return 'curated' key indicating lookup outcome"
+
+    # Unknown callable must return explicit ungrounded signal, not raise
+    result_unknown = fdars_method_references("__unknown_callable__")
+    assert result_unknown.get("curated") is False, (
+        "unknown callable must return curated=False (ungrounded-synthesis-permitted signal)"
+    )
+```
+
+**Group D — Paper count guard-sync (Python 3.9+, lightweight drift detector):**
+
+```python
+# Hard-coded mirror of len(data["papers"]) — update in same atomic commit as JSON.
+# Prevents silent paper deletions. Intentionally a count, not a full key set
+# (the schema test in Group A already checks all key constraints).
+_EXPECTED_PAPER_COUNT = 0  # set to actual count after initial curation
+
+def test_references_paper_count_guard():
+    """Guard-sync: paper count equals hard-coded expected value."""
+    from importlib import resources
+    import json
+
+    data = json.loads(
+        (resources.files("fdars") / "_references_map.json").read_text(encoding="utf-8")
+    )
+    actual = len(data["papers"])
+    assert actual == _EXPECTED_PAPER_COUNT, (
+        f"_references_map.json has {actual} papers but expected {_EXPECTED_PAPER_COUNT}. "
+        "Update _EXPECTED_PAPER_COUNT in this file to match the new count."
+    )
+```
+
+---
+
+## Core Technologies (Summary)
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| `json` (stdlib) | Python 3.9+ | Load and parse `_references_map.json` | Already used in `fdars_list_capabilities`; zero new deps |
+| `importlib.resources.files()` (stdlib) | Python 3.9+ | Read committed JSON from inside the installed wheel | Exact pattern from v12.0; works in zip wheels and editable installs |
+| `re` (stdlib) | Python 3.9+ | DOI structural validation (`10.\d{4,9}/...`) | Offline, zero-dep, CI-safe |
+| `urllib.parse.urlparse` (stdlib) | Python 3.9+ | URL structural well-formedness check | Offline, zero-dep, CI-safe |
+| `urllib.request` (stdlib) | Python 3.9+ | Optional online DOI/URL resolve (env-gated) | Stdlib; never runs in default CI path |
+| Bespoke minimal JSON | n/a | References data format | Consistent with `_capability_map.json`; no parser library needed; hand-authorable |
+| `pytest` | already in `[dev]` extra | Schema validity, completeness, LLM-free boundary tests | Already in the test suite; no new dev dep |
+
+---
+
+## Supporting Libraries
+
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| `importlib.resources` (stdlib) | Python 3.9+ | Package data access | Always — `resources.files("fdars") / "_references_map.json"` |
+| `json` (stdlib) | Python 3.9+ | JSON decode | Always — `json.loads(file.read_text(encoding="utf-8"))` |
+| `re` (stdlib) | Python 3.9+ | DOI regex structural check | In CI schema-validity test |
+| `urllib.parse` (stdlib) | Python 3.9+ | URL structural check | In CI schema-validity test |
+
+---
+
+## What NOT to Add
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| `jsonschema` (PyPI) | New runtime/dev dependency; stdlib dict checks are sufficient for this flat schema | Manual assertions in pytest (Group A above) |
+| `bibtexparser` / `pybtex` | New dependency; BibTeX is a string format requiring a parser | Bespoke JSON readable with `json.loads()` |
+| `citeproc-py` or CSL-JSON tooling | Heavy dependency; CSL-JSON is for citation rendering, not machine lookup | Bespoke minimal JSON schema |
+| `requests` / `httpx` | New network dependency | `urllib.request` stdlib for the optional online check |
+| Network calls in `pytest` or `mkdocs build` | Violates the project's offline constraint | `os.environ.get("FDARS_ONLINE_CHECKS")` gate; default is offline |
+| Separate `_references_papers.json` + `_references_callables.json` | Two-file split adds indirection with no benefit at this data size (~409 callables, ~100 papers) | Single `_references_map.json` with `papers` and `callables` top-level keys |
+
+---
+
+## Packaging Details
+
+**No new `pyproject.toml` extras.** The references JSON is core package data, not optional. It ships in the base `fdars` wheel alongside `_capability_map.json`. The `fdars_method_references` MCP tool is added to `server.py` under the same `[mcp]` extra gating as today — but the JSON file itself is always installed.
+
+**Wheel inclusion:** Add to `[tool.maturin] include` in `pyproject.toml` explicitly alongside the existing CSV glob. Glob path is relative to the project root (where `pyproject.toml` lives), matching the existing `"python/fdars/data/*.csv"` pattern.
+
+**`importlib.resources` path invariant:** Always use `resources.files("fdars") / "_references_map.json"` — never construct a raw filesystem path. This ensures the read works identically in a wheel, an editable install (`maturin develop`), and the docs build environment.
+
+---
+
+## Alternatives Considered
+
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| Bespoke minimal JSON | CSL-JSON | Only if you need a citeproc renderer to produce formatted citations — not this project's use case |
+| Bespoke minimal JSON | BibTeX | Only if you need LaTeX integration — requires a parser library |
+| Single `_references_map.json` | Split papers/callables files | Only if the combined file grows beyond ~500KB — unlikely at this scale |
+| `re` + `urllib.parse` offline | `rfc3986` (PyPI) | Only if strict RFC 3986 conformance is needed for untrusted external input — overkill for hand-authored data |
+| Pytest manual assertions | `jsonschema` (PyPI) | Only if the schema becomes complex enough to justify a JSON Schema — current schema is flat enough for manual checks |
 
 ---
 
 ## Sources
 
-- `https://crates.io/api/v1/crates/fdars-core` — crate metadata, current version 0.33.0 published 2026-09-02
-- `https://crates.io/api/v1/crates/fdars-core/versions` — full version list with `rust_version` field for every release; all 0.4.0+ = 1.81
-- `https://crates.io/api/v1/crates/fdars-core/0.33.0/dependencies` — dependency list at 0.33.0 (nalgebra ^0.33, rayon ^1.10, faer ^0.23, anofox-regression ^0.4, serde new)
-- `https://crates.io/api/v1/crates/fdars-core/0.23.0/dependencies` — dependency list at 0.23.0 (verified all deps match; nalgebra already ^0.33 at 0.23.0)
-- `https://crates.io/api/v1/crates/fdars-core/0.33.0` — features manifest (default=parallel, linalg=faer+anofox-regression, serde new optional)
-- `https://raw.githubusercontent.com/sipemu/fdars/main/CHANGELOG.md` — entries for 0.27.0, 0.28.0, 0.30.0 confirmed; 0.25/0.26 folded into 0.27 entry; 0.31/0.32/0.33 entries absent from document
-- `https://docs.rs/fdars-core/0.33.0/fdars_core/` — full module inventory at 0.33.0
-- `https://docs.rs/fdars-core/0.23.0/fdars_core/` — full module inventory at 0.23.0 (baseline)
-- `https://docs.rs/fdars-core/0.24.0/fdars_core/` — confirmed `clustering_advanced`, `detrend`, `seasonal` (expanded) present; `density_fda`, `multi_fdata`, `pda`, `fts`, `frechet` absent → 404
-- `https://docs.rs/fdars-core/0.27.0/fdars_core/` — confirmed `multi_fdata`, `pda`, `fts`, `frechet` present by 0.27
-- 404 responses on `shapelet` at docs.rs for 0.27/0.28/0.29/0.30/0.32 — confirmed shapelet arrived in 0.33.0 only
-- 404 responses on `pda`, `multi_fdata`, `density_fda` at docs.rs/0.23.0 — confirmed absent from 0.23.0 baseline
-- Module-level API pages for `fts`, `frechet`, `density_fda`, `pda`, `clustering_advanced`, `multi_fdata`, `seasonal`, `detrend`, `famm`, `shapelet`, `streaming_depth` at 0.33.0 — function/type counts and names verified
+- `/home/simonm/projects/rust/pyfda/python/fdars/mcp/server.py` lines 747-826 — `fdars_list_capabilities` pattern (verified: `resources.files("fdars") / "_capability_map.json"`, `json.loads(cap_file.read_text(encoding="utf-8"))`) — HIGH confidence (direct code read)
+- `/home/simonm/projects/rust/pyfda/python/fdars/_capability_map.json` — existing data shape (module -> callable -> {purpose, sig}) — HIGH confidence
+- `/home/simonm/projects/rust/pyfda/python/fdars/_capability_curation.json` — existing override layer shape ("module.callable" -> when-string) — HIGH confidence
+- `/home/simonm/projects/rust/pyfda/tests/test_guard_sync_version_independent.py` — GATE-04 test pattern (three-way guard-sync, 3.9-safe primary + 3.10-guarded companion) — HIGH confidence
+- `/home/simonm/projects/rust/pyfda/tests/test_capability_accuracy.py` — schema validation pattern (no jsonschema, stdlib only) — HIGH confidence
+- `/home/simonm/projects/rust/pyfda/pyproject.toml` lines 79-87 — `[tool.maturin]` include syntax — HIGH confidence
+- Python 3.9 docs (`docs.python.org/3.9`) — `importlib.resources.files()` added in 3.9; `Traversable` API — MEDIUM confidence (web fetch)
+- CrossRef DOI syntax — registrant prefix `10.NNNN/suffix`, 4-9 digit prefix — MEDIUM confidence (websearch)
+- Maturin docs (`maturin.rs/config.html`) — `python-source` + `include` field behavior — MEDIUM confidence (web fetch)
 
 ---
 
-*Stack research for: pyfda v11.0 — fdars-core 0.23.0 → 0.33.0 upgrade*
-*Researched: 2026-09-02*
+*Stack research for: fdars v13.0 Scientific Provenance & Cross-Language Implementations*  
+*Researched: 2026-09-07*

@@ -1,324 +1,662 @@
-# Architecture Patterns
+# Architecture Research
 
-**Project:** pyfda — fdars-core 0.23.0 → 0.33.0 Upgrade
-**Researched:** 2026-09-02
-**Confidence:** MEDIUM (breaking-change assessment from CHANGELOG.md confirmed additive + deprecations only; new-module surface from docs.rs cross-checked against GitHub release notes; exact struct field stability inferred from field-access patterns in the docs)
-
----
-
-## 1. Breaking Changes: 0.24 → 0.33 against the existing 0.23 surface
-
-**Verdict: No hard breaking changes to any currently-bound function.** The changelog explicitly states every release from 0.24 through 0.33 is "additive and non-breaking — no existing public signature changed." The GitHub release notes for v0.24, v0.27, v0.28, v0.29, v0.32, v0.33 each confirm backward compatibility.
-
-**One soft break introduced in 0.30:** six depth functions were marked `#[deprecated]` in favour of unified dispatchers. They remain functional and will not cause a compile error, but Rust's `#[deprecated]` attribute emits a compiler warning. This affects the following pyfda bindings:
-
-| Deprecated function (depth module) | Used in pyfda file | Status |
-|-------------------------------------|--------------------|--------|
-| `fraiman_muniz_2d` | `src/depth_mod.rs` | Deprecated (0.30); still compiles |
-| `modal_2d` | `src/depth_mod.rs` | Deprecated (0.30); still compiles |
-| `random_projection_2d` | `src/depth_mod.rs` | Deprecated (0.30); still compiles |
-| `random_tukey_2d` | `src/depth_mod.rs` | Deprecated (0.30); still compiles |
-
-The unified replacements accept a `Dim` parameter. **The bump-gate phase (Phase 1) must build cleanly.** Deprecation warnings in Rust are not errors by default, and pyfda's `Cargo.toml` does not set `#![deny(deprecated)]`, so this will not block the build. The deprecation warnings should be addressed in the new-bindings phase (Phase 2) as part of migration, not the bump phase.
-
-**Struct fields accessed by the existing bindings:** All struct fields accessed by the current `*_mod.rs` converters are still present in 0.33.0 per the docs.rs field listings:
-- `ConcurrentRegrResult`: `beta_curve`, `intercept`, `fitted`, `residuals`, `argvals` — confirmed present
-- `GmmClusterResult`: `best`, `bic_values`, `icl_values` — confirmed present
-- `SpmChart` fields: `t2_phase1`, `spe_phase1`, `t2_limit`, `spe_limit` — confirmed present
-- `PaceFpcaResult`: `mean`, `eigenvalues`, `eigenfunctions`, `scores`, `fitted`, `fitted_lower`, `fitted_upper`, `argvals`, `sigma2`, `ncomp` — confirmed present
-
-No rename, no removal.
-
-**Enums:** `GlmFamily` (used in `regression_mod.rs:1120`) and `ProjectionBasisType` (used in `inference_mod.rs:555`) retain their existing variants in 0.33.0. The wildcard fallback arms already present in both files remain sufficient. `CvCriterion` (used in `smoothing_mod.rs`) is unchanged.
-
-**Action for Phase 1 (isolated bump):** Bump `fdars-core = "0.23.0"` to `"0.33.0"` in `Cargo.toml`, run `cargo build` plus full test suite. Expected: green with deprecation warnings for the four 2D depth functions. Zero test changes needed. The deprecation warnings are a known pre-existing risk, not a blocker.
+**Domain:** Scientific provenance references capability integrated into fdars capability-discovery system (v13.0)
+**Researched:** 2026-09-07
+**Confidence:** HIGH — all integration points verified against real v12.0 source files
 
 ---
 
-## 2. New Capabilities: Integration Patterns
+## 1. Data Home + Shape
 
-### 2a. Modules new in 0.24 → 0.33 not yet bound in pyfda
+### Decision: Separate file, callable-index keyed to capability-map identifiers
 
-Comparison of 0.23.0 module list (confirmed from docs.rs) against 0.33.0:
+Keep `_references_map.json` as a **separate, paper-keyed file** alongside `_capability_map.json` in `python/fdars/`. Do not extend `_capability_map.json` with a references field.
 
-| New module | First appeared | What it provides | Binding priority |
-|------------|---------------|-----------------|-----------------|
-| `multi_fdata` | 0.27 | `MultiFunData` + `FdComponent` — multi-domain functional data container | HIGH — new input type needed by MFPCA, FAMM |
-| `fts` | 0.27 | Functional time series: FTSM forecast, DPCA, ACF/PACF, stationarity test, long-run covariance | HIGH — new submodule, advisor-relevant |
-| `frechet` | 0.27 | Frechet mean/variance/regression/ANOVA over metric-space backends | MEDIUM — new submodule |
-| `density_fda` | ~0.27 | LQD transform, LQD-FPCA, Wasserstein barycenter for density-valued curves | MEDIUM |
-| `pda` | 0.27 | Principal differential analysis — `Lfd`, `PdaResult`, `principal_differential_analysis` | MEDIUM |
-| `fpca_variants` | 0.27 | Derivative FPCA, functional SVD, cross-covariance, dynamical correlation, SSVD | MEDIUM |
-| `famm` | 0.24 | Functional additive/mixed models — `fmm`, `dense_flmm`, `fast_fmm`, `multi_famm` | MEDIUM |
-| `fof_regression` | 0.24 | Function-on-function regression — `fof_regression`, `fof_re_regression`, predict | HIGH — closes a visible gap |
-| `clustering_advanced` | 0.24 | DBSCAN, funFEM, kCFC, align-cluster — extends `fdars.clustering` | MEDIUM |
-| `fem_smoothing` | ~0.29 | FEM/PDE surface smoothing for 2D domains — `fem_smooth`, `fem_smooth_gcv` | LOW — specialised |
-| `shapelet` | 0.33 | Shapelet discovery, transform, classifier | MEDIUM |
+**Rationale:**
 
-Modules already bound in 0.23 that gained new functions (additive, no signature changes):
-- `spm`: adds `mf_spm_phase1`/`mf_spm_monitor`, `spm_amewma_monitor`, `frcc_phase1`/`frcc_monitor`, `profile_phase1`/`profile_monitor`, partial monitoring, `hotelling_t2_regularized`, ARL metrics. The existing `spm_mod.rs` can be extended without restructuring.
-- `scalar_on_function`: adds FAM, GKAM, GSAM, group-lasso variable selection, bootstrap CI, `history_index`, `fregre_l1`, `fregre_huber`, `model_selection_ncomp`. Extends `regression_mod.rs`.
-- `clustering` / `gmm`: adds `funhddC_cluster` in `gmm` module. Extends `clustering_mod.rs`.
-- `smooth_basis`: adds `smooth_monotone`, `smooth_positive`, `FdPar`. Extends `smoothing_mod.rs`.
-- `alignment`: adds `karcher_median`, `robust_karcher_mean`, `bayesian_align_pair`, `hierarchical_from_distances`, `kmedoids_from_distances`, `shape_confidence_interval`, `peak_persistence`, `phase_boxplot`. Extends `alignment_mod.rs`.
+The capability map is introspected from the live package and regenerated by `scripts/generate_capability_dataset.py`. Adding hand-authored paper data into it would pollute the automation boundary — the generator would have to skip the hand-authored fields or they would be overwritten on every regeneration.
 
-### 2b. Which new capabilities need `#[pyclass]` opaque handles
+The curation precedent already exists: `_capability_curation.json` uses `"module.callable"` keys and is merged into `_capability_map.json` at generation time via the `when` field. The references map follows the same side-file pattern but does **not** merge into `_capability_map.json` — it stays independent and is loaded separately at MCP-tool time and docs-emit time.
 
-The precedent is `PyIrregFdata` in `src/pace_fpca_mod.rs`: use a `#[pyclass]` when the Rust type is a non-trivial struct that Python needs to hold across calls (by-reference semantics) and cannot be transparently serialised to a dict.
+Keeping it separate also means the references data can be authored, reviewed, and committed without triggering the SKILL-02 no-drift test (which runs `generate_capability_dataset.py` and byte-compares against the committed map).
 
-| Capability | Needs `#[pyclass]`? | Rationale |
-|-----------|--------------------|-----------| 
-| `MultiFunData` | YES — new `PyMultiFunData` | Multi-domain container with per-component grids; too complex for a ragged dict; Python needs to construct once and pass to MFPCA/FAMM/SPM-MF functions. Mirror the `PyIrregFdata` pattern exactly: builder `multifdata_from_components(data_list, argvals_list)` plus `#[pyclass(name="PyMultiFunData")]` wrapper. |
-| `ShapeletClassifierFit` / `ShapeletTransformFit` | YES — new `PyShapeletFit` | Fitted shapelet state that must be passed to `shapelet_transform`/classify. Stateful handle like a trained model; should not be forced through a PyDict. |
-| `FtsmResult` | NO — use PyDict | All fields are `FdMatrix`/`Vec<f64>` — serialisable. Use a 10-key PyDict. No `#[pyclass]` needed. |
-| All other new result types | NO — use PyDict converters | `FtsStationarityResult`, `LongRunCovResult`, `SpectralDensityResult`, `FrechetGlobalRegResult`, `LqdFpcaResult`, `FofResult`, `FemSmoothResult`, etc. all return arrays plus scalars; follow the `itp_result_to_pydict`/`pace_fpca_result_to_pydict` pattern. |
-
-### 2c. New `#[non_exhaustive]` enums requiring forward-compatible fallback arms
-
-| Enum | Module | Status | Binding impact |
-|------|--------|--------|---------------|
-| `GlmFamily` | `scalar_on_function` | No new variants in 0.33 | Existing wildcard arm in `regression_mod.rs:1120` already correct |
-| `ProjectionBasisType` | crate root | No new variants in 0.33 | Existing wildcard arm in `inference_mod.rs:555` already correct |
-| `CvCriterion` | `smooth_basis` | No new variants in 0.33 | Existing wildcard arm already correct |
-| `DepthMethod` | `depth` | May have new variants if new depth algorithms added | Wildcard arm in `depth_mod.rs` must remain; audit when binding |
-| `QualityMeasure` | `shapelet` | New enum in 0.33: `InformationGain`, `FStatistic` | New shapelet binding needs a wildcard arm from day one |
-| `ShapeletClassifier` | `shapelet` | New enum in 0.33: `Knn`, `Lda` | New shapelet binding needs a wildcard arm |
-| `SpdMetric` | `frechet` | New enum in 0.27: Frobenius/Power/LogCholesky | New frechet binding must add wildcard arm |
-
----
-
-## 3. New Input Types and `src/convert.rs` Extensions
-
-### 3a. `MultiFunData` — the main new input type
-
-`MultiFunData::new(Vec<FdComponent>)` takes components where each `FdComponent` holds an `FdMatrix` plus a `Vec<f64>` grid. The Python-side construction pattern mirrors `PyIrregFdata`:
+### File layout
 
 ```
-# Python user:
-comp_a = fdars.multi_fdata.component_from_array(data_a, argvals_a)
-comp_b = fdars.multi_fdata.component_from_array(data_b, argvals_b)
-mfd = fdars.multi_fdata.multifdata_from_components([comp_a, comp_b])
-result = fdars.spm.mf_spm_phase1(mfd, ncomp=3)
+python/fdars/
+  _capability_map.json        ← existing (introspected, auto-generated)
+  _capability_curation.json   ← existing (hand-authored "when" notes, merged at generate)
+  _references_map.json        ← NEW v13.0 (hand-authored paper provenance + callable index)
 ```
 
-Conversion path: each Python `data_i` (numpy 2D row-major) goes through `numpy2d_to_fdmatrix()` (existing) then into `FdComponent { data: mat, argvals: av }` then `Vec<FdComponent>` then `MultiFunData::new()`. No new conversion primitive needed in `src/convert.rs`. The builder function lives in a new `src/multi_fdata_mod.rs`.
+### Schema design
 
-### 3b. FEM 2D surface smoothing — irregular mesh input
+The file is **paper-keyed at the top level**. Each paper entry carries provenance metadata and a `callables` list that is the inverse index back to capability-map identifiers. The same `"module.callable"` key format used in `_capability_curation.json` is reused so both side-files share the same identifier space.
 
-`fem_smooth(x, y, z, triangles, lambda)` takes coordinate/value vectors handled by `numpy1d_to_vec` (existing), but `triangles` is an integer index matrix. Requires a new conversion: `numpy2d_i64_to_usize_vec` returning a flat `Vec<usize>` with row-major layout. Add to `src/convert.rs` — small addition, reusable.
+```json
+{
+  "version": "13.0",
+  "papers": {
+    "ramsay-silverman-2005": {
+      "title": "Functional Data Analysis",
+      "authors": ["Ramsay, J.O.", "Silverman, B.W."],
+      "year": 2005,
+      "doi": "10.1007/b98888",
+      "url": "https://doi.org/10.1007/b98888",
+      "type": "book",
+      "callables": [
+        "fdata.mean_1d",
+        "fdata.mean_2d",
+        "basis.basis_nbasis_cv",
+        "smoothing.nadaraya_watson",
+        "_Fdata.__init__"
+      ],
+      "implementations": {
+        "R": [
+          {"package": "fda", "function": "smooth.basis", "url": "https://cran.r-project.org/package=fda"}
+        ],
+        "Python": [
+          {"package": "scikit-fda", "function": "BSplineBasis", "url": "https://fda.readthedocs.io/"}
+        ],
+        "Matlab": [
+          {"package": "fdaM", "function": "smooth_basis", "url": "https://www.psych.mcgill.ca/misc/fda/"}
+        ]
+      }
+    },
+    "fraiman-muniz-2001": {
+      "title": "Trimmed means for functional data",
+      "authors": ["Fraiman, R.", "Muniz, G."],
+      "year": 2001,
+      "doi": "10.1007/s11749-001-0028-7",
+      "url": "https://doi.org/10.1007/s11749-001-0028-7",
+      "type": "article",
+      "callables": [
+        "depth.fraiman_muniz_1d",
+        "depth.fraiman_muniz_2d"
+      ],
+      "implementations": {
+        "R": [
+          {"package": "fda.usc", "function": "depth.FM", "url": "https://cran.r-project.org/package=fda.usc"}
+        ],
+        "Python": [
+          {"package": "scikit-fda", "function": "ModifiedBandDepth", "url": "https://fda.readthedocs.io/"}
+        ],
+        "Matlab": []
+      }
+    }
+  },
+  "callable_index": {
+    "fdata.mean_1d":         ["ramsay-silverman-2005"],
+    "basis.basis_nbasis_cv": ["ramsay-silverman-2005"],
+    "depth.fraiman_muniz_1d": ["fraiman-muniz-2001"],
+    "_Fdata.__init__":       ["ramsay-silverman-2005"]
+  }
+}
+```
 
-### 3c. Frechet density responses
+The `callable_index` is a **flat lookup map** that maps `"module.callable"` → `[list of paper keys]`. This makes the MCP tool O(1) — one dict lookup, no list-scan across all papers. The paper entries contain the `callables` list as the canonical authoring source; the `callable_index` is a derived cross-reference embedded in the same file for lookup performance.
 
-`frechet_global_reg(responses, predictors, space)` with `WassersteinDensitySpace` takes density curves as `Vec<Vec<f64>>`. The ragged-list extraction pattern already exists in `pace_fpca_mod.rs` as `extract_list_of_vecs`.
+**Authoring rule:** The author edits paper entries' `callables` lists. A validation step (guard test) asserts `callable_index` is consistent with those lists. The recommended authoring workflow keeps them manually in sync, with the guard test catching any divergence.
 
-**Recommendation:** Factor `extract_list_of_vecs` from `src/pace_fpca_mod.rs` into `src/convert.rs` as a public helper `extract_ragged_vecs`. Then reuse in both PACE and Frechet density bindings. This is the only non-trivial `convert.rs` refactor in this upgrade.
+**Tail handling:** Any `"module.callable"` string present in `_capability_map.json` but absent from `callable_index` is in the **uncurated tail**. The MCP tool detects absence and returns the explicit sentinel (see Section 2). There is no placeholder or partial entry — absence means uncurated.
 
-### 3d. Shapelet discovery — no new conversions
-
-`discover_shapelets(data, min_len, max_len, top_k, config)` takes dense 2D data via `PyReadonlyArray2<f64>` (standard) plus scalar parameters. No new conversion needed.
-
-### 3e. Summary of `src/convert.rs` changes
-
-| Change | Type | Priority |
-|--------|------|----------|
-| Factor `extract_list_of_vecs` into `extract_ragged_vecs` | Refactor (non-breaking) | MEDIUM — needed for frechet and avoids duplication |
-| Add `numpy2d_i64_to_usize_vec` | New function | LOW — needed only for FEM mesh input |
-| All other new bindings | None — use existing primitives | — |
-
----
-
-## 4. Advisor Integration: Which New Capabilities Are Advisor-Relevant
-
-The grounding invariant requires every diagnostic value to be computed by fdars (not the LLM). New capabilities slot into the advisor only when they produce scalar or bounded-vector outputs diagnosable with a crisp narrative.
-
-### 4a. Strongly advisor-relevant (new aspect or major extension)
-
-| Capability | Proposed advisor slot | Diagnostic scalars |
-|------------|----------------------|-------------------|
-| **Functional time series (`fts`)** | New aspect `"fts"` (#15) | AR order, explained variance ratio, lag-1 autocorrelation magnitude, stationarity p-value, forecast RMSE |
-| **Function-on-function regression (`fof_regression`)** | Extend `"regression"` aspect or new sub-aspect | R-squared, RMSE, cross-validated RMSE from `FofCvResult`, ncomp for both predictor and response |
-| **Frechet regression (`frechet`)** | New aspect `"frechet"` (#16) | Frechet R-squared, ANOVA p-value (where applicable) |
-| **Shapelet classifier (`shapelet`)** | Extend `"classification"` aspect | Accuracy, top-K shapelet lengths, quality measure score |
-
-### 4b. Moderately advisor-relevant (extend existing aspects)
-
-| Capability | Existing aspect | Extension |
-|------------|----------------|-----------|
-| `spm` multivariate monitoring (`mf_spm_*`, `mfpca`) | `"spm"` | Add multivariate T2/SPE scalars; chart-in-control fraction; number of MF components |
-| Advanced scalar-on-function (FAM, GKAM, variable selection) | `"regression"` | Selected-variables count, FAM component count, permutation test p-value |
-| PDA (`principal_differential_analysis`) | `"fpca"` | Differential operator order; residual norm |
-| Density FDA (`lqd_fpca`) | `"fpca"` | Extend with LQD variance-explained, reconstruction error |
-| FPCA variants (`fpca_der`, `fsvd`) | `"fpca"` | Cross-covariance singular values, dynamical correlation |
-
-### 4c. Not advisor-relevant (defer)
-
-- `fem_smoothing` — surface fitting utility; no standard diagnostic scalar applies
-- `clustering_advanced` (DBSCAN, funFEM, kCFC) — defer unless these become primary clustering methods
-- `frechet` SPD/network/sphere metric-space backends — outputs are matrix-valued; no grounded scalar reduction obvious
-- `density_fda` standalone transforms — utility functions, not fit results; `lqd_fpca` is the exception (diagnosable via `"fpca"` aspect)
-
-### 4d. MCP `_DIAGNOSTICS_METHODS` guard-sync protocol
-
-Adding new aspects (`"fts"`, `"frechet"`) requires a **single atomic commit** that simultaneously:
-1. Adds the new `_build_fts_diagnostics` function in `python/fdars/advisor/aspects/fts.py`
-2. Adds `"fts"` to `_DIAGNOSTICS_METHODS` in `python/fdars/mcp/server.py`
-3. Adds the aspect primer in `_ASPECT_PRIMERS` in `python/fdars/advisor/_prompts.py`
-
-Do NOT add new aspects to `_RUNNABLE_METHODS` without confirming the MCP dataset model can supply all required inputs at run time. `"fts"` requires time-ordered data — feasible (time ordering is implicit in row order of a registered dataset handle). `"frechet"` with density responses requires a different data registration protocol — defer `_RUNNABLE_METHODS` addition for `"frechet"` until that protocol is defined.
-
----
-
-## 5. Recommended Build Order / Phase Grouping
-
-This mirrors the v4.0/v5.0/v6.0 shape: isolated bump → binding groups (parallelisable) → advisor → docs.
-
-### Phase 1 — Isolated Crate Bump (sequential, regression gate)
-
-**Goal:** Bump `fdars-core 0.23.0 → 0.33.0` in `Cargo.toml`. Rebuild. Run all 772 baseline tests.
-
-**Risk:** Deprecation warnings for four 2D depth functions (`fraiman_muniz_2d`, `modal_2d`, `random_projection_2d`, `random_tukey_2d`). Not a compile error; not a test failure. Record the warning count. Do NOT migrate them in this phase — keep the diff minimal.
-
-**Gate:** All 772 tests pass / 0 failures. Only `Cargo.toml` and `Cargo.lock` change.
-
-**Files touched:** `Cargo.toml` (one line bump), `Cargo.lock` (auto-updated).
-
-### Phase 2 — Binding Groups (parallelisable after Phase 1 lands)
-
-Split into independent groups by capability family. Each group produces a new or extended `src/*_mod.rs`, Python-layer wiring in `python/fdars/__init__.py`, and new tests.
-
-**Group A — Functional Time Series (`fts`)** — highest user value, new submodule
-- New file: `src/fts_mod.rs`
-- Binds: `ftsm`, `ftsm_forecast`, `ftsm_forecast_multistep`, `functional_acf`, `functional_pacf`, `stationarity_test`, `long_run_covariance`
-- Result converters: `ftsm_result_to_pydict` (10-key dict), `facf_result_to_pydict`, `stationarity_result_to_pydict`
-- No `#[pyclass]` needed (all results serialisable to dicts)
-- Register in `lib.rs` as `"fts"`
-- Can run in parallel with Groups B, D, E
-
-**Group B — Function-on-Function Regression (`fof_regression`)** — closes a visible gap
-- Extend: `src/regression_mod.rs` (add `fof_regression`, `fof_re_regression`, `fof_cv`, `predict_fof`)
-- Result converters: `fof_result_to_pydict`, `fof_re_result_to_pydict`, `fof_cv_result_to_pydict`
-- No new submodule; extends existing `fdars.regression` Python namespace
-- Can run in parallel with Groups A, D, E
-
-**Group C — Multi-domain Data + MFPCA + Advanced SPM** (sequential within group)
-- New file: `src/multi_fdata_mod.rs` — `PyMultiFunData` `#[pyclass]` plus builder
-- Extend: `src/spm_mod.rs` — add `mf_spm_phase1`, `mf_spm_monitor`, `mfpca` (uses `PyMultiFunData`)
-- Register `multi_fdata` as a new submodule in `lib.rs`
-- Python: add `fdars.multi_fdata` and extend `fdars.spm`
-- Note: Groups C and F both touch `spm_mod.rs` — run C and F sequentially, not in parallel
-
-**Group D — Frechet Regression + Density FDA** (can run in parallel with A/B/E)
-- New file: `src/frechet_mod.rs`
-- Binds: `frechet_mean`, `frechet_global_reg` (Wasserstein backend initially), `frechet_local_reg`, `frechet_anova`
-- New file: `src/density_fda_mod.rs`
-- Binds: `lqd_transform`, `inverse_lqd`, `lqd_fpca`, `wasserstein_barycenter`
-- Factor `extract_list_of_vecs` from `pace_fpca_mod.rs` into `convert.rs` as `extract_ragged_vecs` (prerequisite within this group)
-
-**Group E — Shapelet Classifier** (can run in parallel with A/B/D)
-- New file: `src/shapelet_mod.rs`
-- `PyShapeletFit` `#[pyclass]` for `ShapeletClassifierFit`
-- Binds: `discover_shapelets`, `shapelet_transform_fit`, `shapelet_classifier_fit`, predict
-- New enums: `QualityMeasure`, `ShapeletClassifier` — both need wildcard arms
-- Register as `fdars.shapelet`
-
-**Group F — Depth 2D deprecation migration + alignment/smoothing extensions** (sequential with C; lower priority)
-- Update `src/depth_mod.rs`: migrate four deprecated 2D depth variants to unified Dim-parameterised calls
-- Extend `src/alignment_mod.rs`: add `karcher_median`, `robust_karcher_mean`, `bayesian_align_pair`, `hierarchical_from_distances`, `kmedoids_from_distances`
-- Extend `src/smoothing_mod.rs`: add `smooth_monotone`, `smooth_positive`
-- Extend `src/clustering_mod.rs`: add `clustering_advanced` (DBSCAN, funFEM, kCFC, align-cluster) and `gmm::funhddC_cluster`
-- This group can run after Phase 1; does not block Groups A/B/D/E
-
-### Phase 3 — Advisor Extension (sequential, after all binding groups land)
-
-- Add `"fts"` aspect (#15) in `python/fdars/advisor/aspects/fts.py`
-- Add `"frechet"` aspect (#16) in `python/fdars/advisor/aspects/frechet.py`
-- Extend `"regression"` aspect for `fof_regression` diagnostics
-- Extend `"classification"` aspect for shapelet accuracy/top-K shapelet lengths
-- Extend `"spm"` aspect for multivariate monitoring scalars
-- Atomic MCP guard-sync commit for each new aspect (single commit: aspect file + `_DIAGNOSTICS_METHODS` + `_ASPECT_PRIMERS`)
-
-### Phase 4 — Documentation (sequential, after advisor phase lands)
-
-- New pages: `fts/`, `fof-regression/`, `frechet/`, `multi-fdata/`, `shapelet/`
-- Method-accurate hand-authored inline SVG per new page
-- Runnable offline `FDARS_FENCE_OK` worked examples per page
-- Whole-site `mkdocs build --strict` green
-- Blocking human diagram review before close
+**Authoring unit:** The curation unit is the foundational paper, not the callable. Many callables (e.g., all 15 `fdars.fdata` functions) share one or two root papers. Authoring at the paper level (with a `callables` list) keeps the effort tractable across ~409 total callables. The curated paper count will be N << 409.
 
 ---
 
-## 6. Component Boundary Summary
+## 2. MCP Tool: `fdars_method_references`
 
-### Existing boundaries — unchanged role, extended content
+### Integration point in server.py
 
-| Component | File | Role in upgrade |
-|-----------|------|----------------|
-| Conversion layer | `src/convert.rs` | Add `extract_ragged_vecs` (factored from `pace_fpca_mod.rs`); add `numpy2d_i64_to_usize_vec` for FEM mesh indices |
-| Module registry | `src/lib.rs` | Add `register_submodule!` calls for new modules: `fts`, `multi_fdata`, `frechet`, `density_fda`, `shapelet` |
-| Fdata OOP container | `python/fdars/fdata_class.py` | Potentially add `.forecast()` method wrapping `ftsm` + `ftsm_forecast`; decide based on whether time-series fits the Fdata API contract |
-| Advisor aspects | `python/fdars/advisor/aspects/` | New files: `fts.py`, `frechet.py`; extend `regression.py`, `classification.py`, `spm.py` |
-| MCP guard | `python/fdars/mcp/server.py` | Atomic guard-sync for new aspects only |
+Added to `python/fdars/mcp/server.py` immediately after `fdars_list_capabilities` (line ~830), following the same structure exactly:
 
-### New boundaries introduced by this upgrade
+- A `_REFERENCES_MODULES` frozenset allowlist gates input validation (same 30 modules as `_CAPABILITY_MODULES`)
+- A `@mcp.tool()` decorated synchronous handler (not async — fdars compute layer rule)
+- `importlib.resources` to load the committed JSON at call time — no network call, no model invocation
+- An explicit `curated: false` sentinel for uncurated callables
+
+### Input
+
+The `method` parameter accepts:
+- `"module.callable"` (preferred) — e.g. `"depth.fraiman_muniz_1d"`, `"_Fdata.mean"`
+- `"callable"` alone — e.g. `"fraiman_muniz_1d"` — resolved by scanning `callable_index` for any matching suffix; if ambiguous, all matches are returned
+
+### Lookup path
+
+```
+fdars_method_references("depth.fraiman_muniz_1d")
+  → validate "depth" in _REFERENCES_MODULES (frozenset check before any load)
+  → importlib.resources.files("fdars") / "_references_map.json"
+  → json.loads(content)
+  → lookup data["callable_index"]["depth.fraiman_muniz_1d"]
+    HIT  → collect paper dicts from data["papers"] for each key in the list
+          → return {"method": "depth.fraiman_muniz_1d", "curated": true, "papers": [...], ...}
+    MISS → return {"method": "depth.fraiman_muniz_1d", "curated": false, "sentinel": "NO_CURATED_ENTRY", ...}
+```
+
+### Return shape — curated hit
+
+```json
+{
+  "method": "depth.fraiman_muniz_1d",
+  "curated": true,
+  "papers": [
+    {
+      "key": "fraiman-muniz-2001",
+      "title": "Trimmed means for functional data",
+      "authors": ["Fraiman, R.", "Muniz, G."],
+      "year": 2001,
+      "doi": "10.1007/s11749-001-0028-7",
+      "url": "https://doi.org/10.1007/s11749-001-0028-7",
+      "type": "article",
+      "implementations": {
+        "R": [
+          {"package": "fda.usc", "function": "depth.FM", "url": "https://cran.r-project.org/package=fda.usc"}
+        ],
+        "Python": [
+          {"package": "scikit-fda", "function": "ModifiedBandDepth", "url": "https://fda.readthedocs.io/"}
+        ],
+        "Matlab": []
+      }
+    }
+  ],
+  "version": "13.0"
+}
+```
+
+### Return shape — uncurated tail sentinel
+
+```json
+{
+  "method": "fts.fplsr",
+  "curated": false,
+  "sentinel": "NO_CURATED_ENTRY",
+  "message": "No curated provenance entry for this method. An LLM consumer may synthesize a response but MUST flag it as ungrounded.",
+  "version": "13.0"
+}
+```
+
+The `curated: false` + `sentinel` field is the explicit LLM-free signal. The tool itself never fabricates — it returns the absence signal and the consuming agent (skill) decides what to do. The grounding invariant is preserved: the MCP tool is still LLM-free; the hybrid fallback lives entirely in the consumer.
+
+### Frozenset in server.py
+
+```python
+# Frozenset of module names covered by the references tool.
+# MAINTENANCE: must equal _CAPABILITY_MODULES (references are scoped to the same surface).
+# Update _REFERENCES_MODULES here, _EXPECTED_REFERENCES_MODULES in
+# tests/test_guard_sync_version_independent.py, in one atomic commit
+# when adding a new submodule.
+_REFERENCES_MODULES: frozenset[str] = frozenset({
+    "alignment", "basis", "classification", "clustering", "conformal",
+    "covariance", "datasets", "density_fda", "depth", "explain", "famm",
+    "fdata", "frechet", "fts", "inference", "metric", "metrics", "multi_fdata",
+    "outliers", "pace_fpca", "regression", "represent", "scalar_on_function",
+    "scoring", "seasonal", "shapelet", "simulation", "smoothing", "spm",
+    "tolerance",
+})
+```
+
+Because `_REFERENCES_MODULES` is defined as equal to `_CAPABILITY_MODULES`, a convenience guard assertion in the companion test confirms they are equal:
+
+```python
+assert _REFERENCES_MODULES == _CAPABILITY_MODULES, (
+    "_REFERENCES_MODULES must equal _CAPABILITY_MODULES"
+)
+```
+
+---
+
+## 3. Sync Invariant: GATE-05 (mirroring GATE-04)
+
+### Existing three-way mirror (v12.0 GATE-04) — unchanged
+
+```
+server._CAPABILITY_MODULES
+    == frozenset(_capability_map.json.keys()) - {"_Fdata"}
+    == test._EXPECTED_CAPABILITY_MODULES
+```
+
+Tests in `tests/test_guard_sync_version_independent.py` Guard Group 2:
+- `test_capability_map_modules_match_expected` (Python 3.9+, no mcp)
+- `test_capability_tool_llm_free_boundary` (Python 3.10+ companion)
+- `test_capability_mcp_server_frozenset_matches` (Python 3.10+ companion)
+
+These are not modified. The GATE-05 tests form a new Guard Group 3 in the same file.
+
+### Four new invariants for GATE-05
+
+#### Invariant A — Internal consistency: callable_index derived from papers[*].callables
+
+```python
+# What it asserts:
+from_index = frozenset(callable_index.keys())
+from_papers = frozenset(
+    c for p in papers.values() for c in p["callables"]
+)
+assert from_index == from_papers
+```
+
+Caught by `test_references_callable_index_consistent` (Python 3.9+, no mcp).
+
+An authoring mistake where a paper's `callables` list is updated but the `callable_index` is not (or vice versa) fails here. This is the only invariant that is purely internal to `_references_map.json`.
+
+#### Invariant B — All callable-index keys resolve in the capability map
+
+```python
+# What it asserts:
+for key in callable_index.keys():
+    mod_name, _, fn_name = key.partition(".")
+    if mod_name == "_Fdata":
+        assert fn_name in capability_map["_Fdata"]
+    else:
+        assert fn_name in capability_map.get(mod_name, {})
+```
+
+Caught by `test_references_callables_exist_in_capability_map` (Python 3.9+, no mcp).
+
+This is the cross-file drift guard. If a callable is renamed in fdars, the SKILL-02 test (`test_capability_map_no_drift`) catches it in the capability map; this test catches the stale reference in the references map. Both must be updated together when a callable changes name.
+
+#### Invariant C — LLM-free boundary
+
+```python
+# What it asserts:
+result = fdars_method_references("depth.fraiman_muniz_1d")
+assert "provider" not in result
+assert "model" not in result
+assert "curated" in result
+```
+
+Caught by `test_references_tool_llm_free_boundary` (Python 3.10+ companion, parallel to `test_capability_tool_llm_free_boundary`).
+
+#### Invariant D — Frozenset literal mirror
+
+```python
+# What it asserts:
+assert server._REFERENCES_MODULES == _EXPECTED_REFERENCES_MODULES
+assert server._REFERENCES_MODULES == server._CAPABILITY_MODULES
+```
+
+Caught by `test_references_mcp_server_frozenset_matches` (Python 3.10+ companion).
+
+### Coverage measurement (informational, not a hard gate)
+
+```python
+curated_count = len(callable_index)
+total_count = sum(len(v) for v in capability_map.values())
+print(f"References coverage: {curated_count}/{total_count} callables ({curated_count/total_count*100:.1f}%)")
+```
+
+This is emitted in test output but does not cause a pass/fail. Coverage starts partial — curation is the bulk of the milestone work — and is expected to grow. A coverage floor can be introduced at a future milestone once curation reaches a stable threshold.
+
+### Test file location and structure
+
+All GATE-05 tests are added to `tests/test_guard_sync_version_independent.py` as Guard Group 3, following the exact primary/companion pattern of Guards 1 and 2:
+
+```python
+# ===========================================================================
+# Guard Group 3 — _REFERENCES_MODULES / fdars_method_references (GATE-05)
+# ===========================================================================
+
+_EXPECTED_REFERENCES_MODULES: frozenset[str] = frozenset({
+    "alignment", "basis", ...  # same 30 as _EXPECTED_CAPABILITY_MODULES
+})
+
+def test_references_callable_index_consistent():         # Python 3.9+
+def test_references_callables_exist_in_capability_map(): # Python 3.9+
+def test_references_tool_llm_free_boundary():            # Python 3.10+ companion
+def test_references_mcp_server_frozenset_matches():      # Python 3.10+ companion
+```
+
+---
+
+## 4. Docs + llms.txt + Skill
+
+### Docs: offline emit from committed JSON (no fdars import)
+
+The existing `scripts/generate_capability_dataset.py --llmstxt` path reads `_capability_map.json` and emits `docs/llms.txt` + `docs/ai-capability-map.md` without importing fdars. The references equivalent follows the same offline-emit constraint established in the script's module docstring.
+
+**Extension: `--references` flag**
+
+```
+python scripts/generate_capability_dataset.py --references
+```
+
+Reads `python/fdars/_references_map.json` offline and emits:
+- `docs/references.md` — human-readable References page
+- Extended `docs/llms.txt` — adds `## Scientific Provenance` section
+
+The `--llmstxt` flag is also extended to optionally include the provenance section when `_references_map.json` exists, so a single `--llmstxt` run produces a complete `llms.txt`.
+
+**docs/references.md structure:**
+
+```markdown
+# Scientific Provenance & Cross-Language Implementations
+
+Maps fdars methods to foundational papers and alternative implementations
+in R (fda, fda.usc, refund, funData), Python (scikit-fda), and Matlab
+(Ramsay fdaM, PACE). Generated offline from `_references_map.json`.
+
+## Coverage
+N of 409 callables have curated provenance entries (M papers).
+
+## By Method Family
+
+### Depth Methods
+| fdars callable | Paper | DOI | R | Python | Matlab |
+|----------------|-------|-----|---|--------|--------|
+| `depth.fraiman_muniz_1d` | Fraiman & Muniz (2001) | 10.1007/... | fda.usc::depth.FM | scikit-fda.ModifiedBandDepth | — |
+
+### Smoothing & Basis
+...
+```
+
+The page is wired into `mkdocs.yml` nav under the existing AI/capability section:
+
+```yaml
+nav:
+  - AI Capability Map: ai-capability-map.md
+  - Scientific References: references.md   # NEW
+```
+
+**llms.txt extension:**
+
+The `## Scientific Provenance & Cross-Language Implementations` section is appended to `docs/llms.txt`:
+
+```
+## Scientific Provenance & Cross-Language Implementations
+
+Each entry: `module.function` — [Authors (Year)] doi:[DOI]. Implementations: R: pkg::fn; Python: pkg.fn; Matlab: pkg/fn.
+Uncurated methods are absent from this list; an LLM consumer may synthesize provenance but MUST flag it as ungrounded.
+
+- `depth.fraiman_muniz_1d` — Fraiman & Muniz (2001) doi:10.1007/s11749-001-0028-7. R: fda.usc::depth.FM; Python: scikit-fda.ModifiedBandDepth
+- `alignment.karcher_mean` — Srivastava & Klassen (2016) doi:... R: fdasrvs::karcher_mean
+```
+
+**Per-method reference-docs pages:** Individual reference docs pages (e.g. `docs/reference/depth.md`) may carry a hand-authored "References" subsection linking to the references page anchor. This is hand-authored in the method page; the generated `docs/references.md` is the cross-index.
+
+### SKILL.md extension
+
+The `fdars-capabilities` SKILL.md at `.claude/skills/fdars-capabilities/SKILL.md` is extended with a new `## Scientific Provenance Protocol` section. The existing capability-discovery boundary (what fdars can do, which method for a task) is preserved — provenance is additive, not a replacement.
+
+The extension adds:
+
+```markdown
+## Scientific Provenance Protocol
+
+To answer "where does method X come from?" or "alternatives in R/Matlab?":
+
+1. **Prefer curated data** — call `fdars_method_references(method)` (MCP tool,
+   Python 3.10+, mcp>=2.0.0) or check:
+   - `https://sipemu.github.io/pyfda/references/` (human-readable)
+   - `https://sipemu.github.io/pyfda/llms.txt` section `## Scientific Provenance`
+
+2. **If `curated: true`** — return the paper(s) and implementation pointers
+   verbatim. This is grounded.
+
+3. **If `curated: false` / sentinel `"NO_CURATED_ENTRY"`** — you MAY synthesize
+   from training knowledge, but MUST flag it explicitly:
+   > "No curated provenance entry exists for this method. The following is based
+   > on general knowledge and has not been verified against fdars source."
+
+4. **Never present synthesized provenance as curated.** The ungrounded flag is
+   mandatory for any synthesized response.
+
+## References MCP Tool
+
+`fdars_method_references(method)` — LLM-free static lookup (Python 3.10+,
+mcp>=2.0.0). Accepts `"module.callable"` (e.g. `"depth.fraiman_muniz_1d"`).
+
+Returns:
+- `{"curated": true, "papers": [...], ...}` — curated entry with paper + implementations
+- `{"curated": false, "sentinel": "NO_CURATED_ENTRY", ...}` — explicit uncurated signal
+```
+
+The skill does **not** duplicate the `fdars-advisor` boundary — provenance ("where did method X come from?") is categorically different from parameter tuning and diagnostics (advisor territory).
+
+---
+
+## 5. Component Map: New vs Modified
+
+### New components
 
 | Component | File | What it does |
-|-----------|------|-------------|
-| `PyMultiFunData` opaque handle | `src/multi_fdata_mod.rs` | Multi-domain functional data container; builder `multifdata_from_components(data_list, argvals_list)` validates shapes and wraps `MultiFunData::new()` |
-| `PyShapeletFit` opaque handle | `src/shapelet_mod.rs` | Fitted shapelet classifier/transform state; wraps `ShapeletClassifierFit` for cross-boundary persistence |
-| `fdars.fts` submodule | `src/fts_mod.rs` + `python/fdars/__init__.py` | Functional time series: FTSM, forecast, ACF/PACF, stationarity |
-| `fdars.multi_fdata` submodule | `src/multi_fdata_mod.rs` + `python/fdars/__init__.py` | Multi-domain data construction |
-| `fdars.frechet` submodule | `src/frechet_mod.rs` + `python/fdars/__init__.py` | Frechet regression and ANOVA |
-| `fdars.density_fda` submodule | `src/density_fda_mod.rs` + `python/fdars/__init__.py` | Density-valued functional data (LQD transform, Wasserstein barycenter) |
-| `fdars.shapelet` submodule | `src/shapelet_mod.rs` + `python/fdars/__init__.py` | Shapelet discovery, transform, classification |
+|-----------|------|--------------|
+| References map | `python/fdars/_references_map.json` | Hand-authored paper-keyed provenance with callable index; the curation artifact |
+| `fdars_method_references` MCP tool | `python/fdars/mcp/server.py` | LLM-free static lookup; returns curated entry or explicit uncurated sentinel |
+| `_REFERENCES_MODULES` frozenset | `python/fdars/mcp/server.py` | Allowlist mirror of `_CAPABILITY_MODULES`; gates tool input validation |
+| GATE-05 guard tests | `tests/test_guard_sync_version_independent.py` | Guard Group 3 — four new invariants (see Section 3) |
+| References docs page | `docs/references.md` | Human-readable method→paper→implementation cross-index, generated offline |
+| References emit function | `scripts/generate_capability_dataset.py` | `--references` flag + provenance section in `--llmstxt` output |
+
+### Modified components
+
+| Component | File | Change |
+|-----------|------|--------|
+| `fdars-capabilities` SKILL.md | `.claude/skills/fdars-capabilities/SKILL.md` | Add `## Scientific Provenance Protocol` section |
+| `docs/llms.txt` | regenerated by script | Extended with `## Scientific Provenance & Cross-Language Implementations` section |
+| `mkdocs.yml` | `mkdocs.yml` | Add `Scientific References: references.md` nav entry |
+| `scripts/generate_capability_dataset.py` | same file | Add `--references` flag and references emit logic; extend `--llmstxt` to include provenance section |
+
+### Unchanged components (explicitly not touched)
+
+| Component | Why untouched |
+|-----------|---------------|
+| `python/fdars/_capability_map.json` | Not extended; references live in the separate file to preserve the automation boundary |
+| `python/fdars/_capability_curation.json` | Curation/when notes stay as-is; unrelated to provenance |
+| `python/fdars/mcp/server.py` existing tools | Existing tools, frozensets, and guard patterns are not changed |
+| `tests/test_capability_accuracy.py` | No drift risk to capability map; no changes needed |
+| GATE-04 tests (Guard Group 2) | Not modified; the three-way capability mirror is untouched |
+| `python/fdars/advisor/` | Not touched; no LLM boundary changes |
+| Rust/PyO3 layer (`src/`) | No crate bump, no new bindings |
 
 ---
 
-## 7. Architecture Anti-Patterns to Avoid
+## 6. System Overview
 
-### Do not bypass `extract_ragged_vecs` for Frechet density inputs
-
-The `extract_list_of_vecs` function in `pace_fpca_mod.rs` handles dtype-agnostic ragged list input with proper error messages. Factor it into `convert.rs` rather than re-implementing per module. Two implementations of the same ragged-list validation will drift.
-
-### Do not add `MultiFunData` construction to `convert.rs`
-
-`convert.rs` is for primitive type conversions (numpy ↔ FdMatrix, Vec ↔ numpy1d). Higher-level object construction belongs in the module file. The `multifdata_from_components` builder lives in `src/multi_fdata_mod.rs`, not `src/convert.rs`.
-
-### Do not add `#[pyclass]` for `FtsmResult`
-
-Unlike `PyIrregFdata` (which must be created once and passed to a compute function), `FtsmResult` is a pure output type. Convert it to a PyDict immediately — no cross-call persistence needed. The precedent is every other result type in pyfda.
-
-### Do not register `multi_fdata` as an extension of `pace_fpca`
-
-`PyMultiFunData` is a general multi-domain container used by MFPCA in SPM, FAMM, and potentially future modules. It must be its own registered submodule (`fdars.multi_fdata`), not nested under `fdars.pace_fpca`.
-
-### Do not add new aspects to `_RUNNABLE_METHODS` without a dataset model
-
-The `fdars_run_method` MCP tool requires constructing the full input from a pre-registered dataset handle. For `"fts"`, time-ordering is implicit in row order — a registered dataset handle is sufficient. For `"frechet"` with density-valued responses, do NOT add to `_RUNNABLE_METHODS` without first defining a dataset registration protocol for density responses.
-
-### Do not run Groups C and F in parallel worktrees
-
-Both groups extend `src/spm_mod.rs`. Run them sequentially (C first, then F) to avoid merge conflicts, as in the v6.0 sequential-on-main lesson.
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           Static Artifact Layer                              │
+│                                                                              │
+│  python/fdars/_capability_map.json   python/fdars/_references_map.json     │
+│  (introspected, auto-generated)      (hand-authored, paper-keyed) [NEW]     │
+│                                                                              │
+│  python/fdars/_capability_curation.json                                     │
+│  (hand-authored "when" notes, merged at generate time)                      │
+└────────────┬─────────────────────────────────────┬───────────────────────────┘
+             │ importlib.resources                  │ importlib.resources
+             │ (Python 3.9+, no fdars import)       │ (offline, Path read in script)
+  ┌──────────▼──────────────┐         ┌─────────────▼───────────────────────┐
+  │  MCP Server             │         │  Docs Emit Script                   │
+  │  python/fdars/mcp/      │         │  scripts/generate_capability_       │
+  │  server.py              │         │  dataset.py                         │
+  │                         │         │                                      │
+  │  fdars_list_            │         │  --llmstxt → docs/llms.txt          │
+  │   capabilities()        │         │  (extended with § Provenance)       │
+  │  [GATE-04 gated]        │         │  --references → docs/references.md  │
+  │                         │         └─────────────────────────────────────┘
+  │  fdars_method_          │
+  │   references()   [NEW]  │         ┌─────────────────────────────────────┐
+  │  [GATE-05 gated]        │         │  Agent Skill                        │
+  └──────────┬──────────────┘         │  .claude/skills/                    │
+             │                        │  fdars-capabilities/SKILL.md        │
+             │                        │                                      │
+  ┌──────────▼──────────────┐         │  Extended with provenance protocol: │
+  │  Guard-Sync Tests       │         │  1. Prefer curated (MCP tool)       │
+  │  tests/test_guard_sync_ │         │  2. Absent → flag as ungrounded     │
+  │  version_independent.py │         └─────────────────────────────────────┘
+  │                         │
+  │  Guard Group 1:         │         ┌─────────────────────────────────────┐
+  │   DIAGNOSTICS (existing)│         │  MkDocs Site                        │
+  │  Guard Group 2:         │         │  docs/references.md       [NEW]     │
+  │   CAPABILITIES (exist.) │         │  docs/llms.txt (extended) [MOD]     │
+  │  Guard Group 3: [NEW]   │         │  docs/ai-capability-map.md (exist.) │
+  │   REFERENCES            │         └─────────────────────────────────────┘
+  └─────────────────────────┘
+```
 
 ---
 
-## 8. Scalability and Build Considerations
+## 7. Data Flow
 
-| Concern | Impact | Mitigation |
-|---------|--------|------------|
-| Docs build time | Each new submodule adds ~1-2 min of fence execution; 5 new submodules adds ~10 min to the current ~22 min build | Keep fence datasets small (50 obs, 100 grid points); use `DOCS_FAST=1` during development |
-| `linalg` feature flag | Still off at 0.33 (MSRV check needed at bump time); `fem_smoothing` and some `famm` functions may require `linalg` | If `linalg` needed for specific new functions, skip those in initial binding; defer to a later milestone when MSRV resolves |
-| Parallel binding phases | Groups A/B/D/E can run in parallel worktrees after Phase 1 lands | Same pattern as v6.0 Groups A/B/C; do not share worktrees for groups that touch the same `*_mod.rs` |
-| Test suite growth | From 772 tests; each new module should add ~20-40 tests | Target total ~900-1000 tests after all groups |
-| Deprecation warnings at compile | Four `#[deprecated]` depth calls produce Rust warnings | These are expected from Phase 1 onward; suppressed or migrated in Group F |
+### MCP tool lookup (runtime, Python 3.10+)
+
+```
+Agent calls fdars_method_references("depth.fraiman_muniz_1d")
+  → server.py: extract module = "depth"
+  → validate "depth" in _REFERENCES_MODULES (frozenset check before any I/O)
+  → importlib.resources.files("fdars") / "_references_map.json"
+  → json.loads(content)
+  → data["callable_index"].get("depth.fraiman_muniz_1d")
+      HIT  → [paper_key, ...]
+            → collect data["papers"][paper_key] for each key
+            → return {"method": "...", "curated": true, "papers": [...], "version": "13.0"}
+      MISS → return {"method": "...", "curated": false,
+                     "sentinel": "NO_CURATED_ENTRY", "message": "...", "version": "13.0"}
+```
+
+### Docs emit (build time, offline, no fdars import)
+
+```
+python scripts/generate_capability_dataset.py --llmstxt
+  → load python/fdars/_capability_map.json  (Path.read_text)
+  → load python/fdars/_references_map.json  (Path.read_text, if exists)
+  → emit docs/llms.txt
+      § Core Modules              (from capability map)
+      § Full API Reference        (from capability map + curation "when" fields)
+      § Scientific Provenance     (from references map callable_index) [NEW]
+  → emit docs/references.md  (from references map, grouped by method family) [NEW]
+```
+
+### Guard-sync CI path (Python 3.9+, primary tests; 3.10+ companion tests)
+
+```
+pytest tests/test_guard_sync_version_independent.py
+
+Guard Group 3 — Primary (Python 3.9+, no mcp import):
+
+  test_references_callable_index_consistent
+    → load _references_map.json via importlib.resources
+    → assert frozenset(callable_index.keys())
+         == frozenset(c for p in papers.values() for c in p["callables"])
+
+  test_references_callables_exist_in_capability_map
+    → load _references_map.json + _capability_map.json
+    → for each key in callable_index:
+        mod, fn = key.split(".", 1)
+        assert fn in capability_map[mod]  (or "_Fdata" special case)
+
+Guard Group 3 — Companion (Python 3.10+, imports mcp):
+
+  test_references_tool_llm_free_boundary
+    → call fdars_method_references("depth.fraiman_muniz_1d")
+    → assert "provider" not in result
+    → assert "model" not in result
+    → assert "curated" in result
+
+  test_references_mcp_server_frozenset_matches
+    → import server._REFERENCES_MODULES
+    → assert _REFERENCES_MODULES == _EXPECTED_REFERENCES_MODULES
+    → assert _REFERENCES_MODULES == _CAPABILITY_MODULES
+```
+
+---
+
+## 8. Build Order (Phase Sequence)
+
+### Principle: curation is on the critical path
+
+The hand-authored references map authoring (~409 callables → N foundational papers, N << 409) is the bulk of work. The phase sequence puts schema + tooling first (so authoring has validation support from day one), authoring second, then MCP tool, then docs/skill, then close gate.
+
+| Phase | Name | What ships | Critical dependency | Data-flow change |
+|-------|------|-----------|---------------------|-----------------|
+| **A** | Schema + data home | `_references_map.json` (stub: 3–5 example entries covering different capability families); primary GATE-05 tests A + B (Guard Group 3 Primary) | None — starts immediately | New file packaged in `fdars`; GATE-05 primary tests run against it in CI |
+| **B** | Curation (bulk) | Full `_references_map.json`: all curated papers across all 30 modules, callable index complete, implementation pointers populated | Phase A (schema + tests exist so curation is validated as it grows) | File grows to full coverage; primary guard tests keep running on every commit |
+| **C** | MCP tool + GATE-05 complete | `fdars_method_references()` in `server.py`, `_REFERENCES_MODULES` frozenset, GATE-05 companion tests (Guard Group 3 Companion) | Phase A (file must exist with at least stub data) — can start in parallel with Phase B | New tool registers on MCP server; full GATE-05 enforced |
+| **D** | Docs + llms.txt + skill | `docs/references.md`, extended `docs/llms.txt`, extended SKILL.md, `mkdocs.yml` nav entry | Phase B (coverage meaningful enough for a useful docs page) | Docs site gains References page; llms.txt gains provenance section; skill gains hybrid protocol |
+| **E** | Close gate | Whole-site `mkdocs build --strict` green offline; GATE-05 guard-sync green; curated link/DOI validity check; grounding invariant confirmation; coverage metric reported | Phases A-D | No new data-flow changes; validation only |
+
+**Parallel opportunity:** Phase C (MCP tool skeleton) can start as soon as Phase A is done (the tool only needs the file to exist with the correct schema). Phase B (curation) and Phase C (MCP wiring) can run in parallel. Phase D waits for Phase B because the docs page's value is proportional to coverage.
+
+**Integration points at phase boundaries:**
+
+- Phase A → B: schema is locked and tests validate as curation grows — authoring is never "free-form"
+- Phase A → C: MCP tool can be written and tested against the stub; GATE-05 tests (A+B+C+D) all pass against the stub
+- Phase B complete → Phase D starts: docs page built against real coverage, not a stub
+- Phase C complete → Phase D: SKILL.md provenance section can reference the MCP tool concretely
+- Phase D complete → Phase E: all surfaces integrated; gate validates the full system
+
+---
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Extending `_capability_map.json` with references data
+
+**What people do:** Add a `"papers"` or `"references"` field to each callable entry in the existing capability map.
+
+**Why it's wrong:** The capability map is auto-generated by `generate_capability_dataset.py` from live introspection. Any hand-authored fields would be overwritten on the next regeneration run, causing SKILL-02 no-drift failures. The `_capability_curation.json` side-file pattern already established the correct model for hand-authored data.
+
+**Do this instead:** Keep `_references_map.json` as a separate committed file. The generator reads `_capability_map.json` for the capability surface; the docs-emit and MCP tool read `_references_map.json` for provenance. They are never merged into one artifact.
+
+### Anti-Pattern 2: One entry per callable (409 entries)
+
+**What people do:** Author one references entry per public callable, producing massive duplication (e.g., all 68 alignment functions individually listing Srivastava & Klassen 2016).
+
+**Why it's wrong:** The curation unit is the foundational paper, not the callable. Most callables in a module family share one or two root papers. 409 separate entries would be unmaintainable and prone to drift when a callable is renamed or added.
+
+**Do this instead:** Author N papers (N << 409), each with a `callables` list. Many callables share a paper entry. The curation effort scales with the number of distinct papers, not the number of callables. The guard test (Invariant B) ensures no callable drifts out of the capability map.
+
+### Anti-Pattern 3: Making the MCP tool call an LLM for uncurated methods
+
+**What people do:** Have `fdars_method_references` invoke a model call for uncurated callables to "fill the gap."
+
+**Why it's wrong:** This violates the LLM-free MCP boundary. GATE-05's `test_references_tool_llm_free_boundary` would fail immediately. It also blurs the grounding invariant — the MCP compute path must be provably static.
+
+**Do this instead:** Return the explicit `curated: false` sentinel. The LLM fallback lives entirely in the skill / consuming agent and is explicitly flagged as ungrounded. The tool remains a pure static lookup.
+
+### Anti-Pattern 4: Importing `fdars` in the docs-emit path
+
+**What people do:** Import `fdars` inside `generate_capability_dataset.py --references` to cross-validate callable names at emit time.
+
+**Why it's wrong:** The docs-emit path runs in CI docs environments where the compiled Rust extension is not present (the existing `--llmstxt` path documents this constraint explicitly in the module docstring: "Does NOT import fdars so they work in CI docs environments where the compiled extension may not be present").
+
+**Do this instead:** The `--references` emit reads only committed JSON files. Cross-validation against the live fdars surface is done by the GATE-05 primary tests, which do run in the full CI environment where `fdars` is installed.
+
+### Anti-Pattern 5: Putting the hybrid-fallback logic in the MCP tool
+
+**What people do:** Implement "if curated → return data; else → call LLM and return synthesized" in `fdars_method_references`.
+
+**Why it's wrong:** The MCP tool must be LLM-free. The hybrid protocol belongs in the consuming agent's behavior, not in the tool itself.
+
+**Do this instead:** The tool is a pure static lookup. The hybrid protocol (prefer curated; fallback = synthesize but flag as ungrounded) is documented in the SKILL.md and enforced by the consuming agent. The tool's explicit `"sentinel": "NO_CURATED_ENTRY"` is the signal the skill acts on.
+
+---
+
+## Integration Points Summary
+
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| `_references_map.json` ↔ `server.py` | `importlib.resources` load at tool call time | Small file; per-call load acceptable; no caching needed |
+| `_references_map.json` ↔ `generate_capability_dataset.py` | `Path.read_text()` at docs-emit time | No fdars import — offline constraint |
+| `_references_map.json` ↔ GATE-05 primary tests | `importlib.resources` in test suite | Python 3.9+, no mcp import |
+| `_capability_map.json` ↔ GATE-05-B test | Loaded alongside references map | Cross-validates callable-index keys against capability surface |
+| `server._REFERENCES_MODULES` ↔ GATE-05 companion test | Imported in Python 3.10+ companion | Must equal `_CAPABILITY_MODULES` — convenience assertion added |
+| `fdars-capabilities SKILL.md` ↔ `fdars_method_references` | Skill documents the tool as preferred curated path | Not a code dependency — skill extension only |
 
 ---
 
 ## Sources
 
-- `docs.rs/fdars-core/0.23.0` through `0.33.0` — module lists and public API, webfetch (LOW confidence; cross-checked across multiple versions for convergence)
-- `crates.io/api/v1/crates/fdars-core/versions` — confirmed 0.23–0.33 version sequence, webfetch (LOW)
-- `github.com/sipemu/fdars` release notes for v0.24, v0.27, v0.28, v0.29, v0.32, v0.33 — each confirms "additive and non-breaking", webfetch (LOW; convergent = MEDIUM confidence on no-breaking-changes verdict)
-- `github.com/sipemu/fdars/blob/main/CHANGELOG.md` — explicit "additive and non-breaking" statement for 0.24–0.30; 0.30 deprecations confirmed, webfetch (LOW; convergent with release notes = MEDIUM)
-- `src/convert.rs`, `src/lib.rs`, `src/pace_fpca_mod.rs`, `src/inference_mod.rs`, `src/regression_mod.rs`, `src/clustering_mod.rs`, `src/spm_mod.rs` — current pyfda binding patterns (direct file read, HIGH)
-- `.planning/PROJECT.md` — milestone history, integration constraints, prior upgrade lessons (direct file read, HIGH)
-- `.planning/codebase/ARCHITECTURE.md` — component responsibilities (direct file read, HIGH)
+- `python/fdars/mcp/server.py` — v12.0 GATE-04 pattern read directly (HIGH)
+- `python/fdars/_capability_map.json` — existing structure verified (HIGH)
+- `python/fdars/_capability_curation.json` — side-file pattern confirmed (HIGH)
+- `scripts/generate_capability_dataset.py` — offline emit path and constraints read directly (HIGH)
+- `tests/test_guard_sync_version_independent.py` — GATE-04 three-way mirror pattern read directly (HIGH)
+- `tests/test_capability_accuracy.py` — SKILL-02 no-drift pattern read directly (HIGH)
+- `.claude/skills/fdars-capabilities/SKILL.md` — v12.0 skill to be extended, read directly (HIGH)
+- `.planning/PROJECT.md` — v13.0 milestone scope and constraints (HIGH)
+
+---
+
+*Architecture research for: v13.0 Scientific Provenance & Cross-Language Implementations*
+*Researched: 2026-09-07*
+*Confidence: HIGH — all integration points verified against real v12.0 source files*

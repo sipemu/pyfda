@@ -1,628 +1,638 @@
-# Feature Research: fdars-core 0.24.0 → 0.33.0 New Capabilities
+# Feature Research
 
-**Domain:** PyO3 binding layer — functional data analysis (Rust → Python)
-**Researched:** 2026-09-02
-**Confidence:** MEDIUM (docs.rs API pages + CHANGELOG cross-verified; function signatures confirmed from struct pages; linalg gating inferred from docs annotations and Cargo.toml features section)
-
----
-
-## Scope
-
-This file covers **only** capabilities added in fdars-core 0.24.0 through 0.33.0. All capabilities present in 0.23.0 are already bound in pyfda and are excluded.
-
-**Version map** (versions that actually exist on crates.io):
-
-| Version | Released | What it added |
-|---------|----------|---------------|
-| 0.24.0 | 2026-08-20 | Clustering advanced + FAMM extensions + SoF extensions + FoF RE |
-| 0.27.0 | 2026-08-22 | Multi-FData + PDA + Density FDA + Frechet + FTS + FPCA variants |
-| 0.28.0 | 2026-08-22 | FEM smoothing |
-| 0.29.0 | 2026-08-30 | No new public modules (internal fixes) |
-| 0.30.0 | 2026-09-01 | No new public modules (internal fixes) |
-| 0.32.0 | 2026-09-02 | GAK metric + kernel k-means (in metric module) |
-| 0.33.0 | 2026-09-02 | Shapelet discovery & classification |
-
-Versions 0.25, 0.26, 0.31 do not exist on crates.io (version numbers skipped).
-
-**MSRV at 0.33.0:** Rust 1.81 — unchanged from 0.23.0. pyfda's MSRV constraint (1.83) is satisfied.
-
-**linalg feature at 0.33.0:** Still activates `faer 0.23` and `anofox-regression 0.4`. pyfda does NOT enable linalg. Items gated behind linalg are flagged `[LINALG-GATED]` below; they are **out of scope for this milestone**.
+**Domain:** Functional data analysis — scientific provenance and cross-language implementation landscape
+**Researched:** 2026-09-07
+**Confidence:** MEDIUM (web search cross-checked for canonical papers; DOIs spot-verified against publisher URLs)
 
 ---
 
-## Capability Inventory by Family
+## Purpose of This Document
 
-### Group A — Advanced Clustering (introduced 0.24.0)
+This is the authoring backbone for v13.0 Scientific Provenance & Cross-Language Implementations.
+It maps every `fdars` submodule family to:
+- its foundational paper(s) — author, year, journal, DOI or stable URL
+- alternative implementations in R, Python, and Matlab — package + representative function + stable URL
+- honest notes on ambiguity, contested attributions, and genuine gaps
 
-**Module:** `fdars_core::clustering_advanced`
-
-Four new paradigms beyond the existing k-means/fuzzy-c-means. All operate on `&FdMatrix` + `&[f64]` argvals + config struct.
-
-#### A1. Elastic K-Means with Joint Alignment — `align_cluster_fd`
-
-- **What it does:** Jointly aligns and clusters functional curves using Karcher-mean templates and elastic distance. Each iteration re-estimates templates via elastic mean and reassigns curves by elastic distance.
-- **Why table stakes:** Elastic clustering is a standard FDA operation; aligns shape and amplitude simultaneously, unlike plain L2 k-means.
-- **Signature:** `align_cluster_fd(data: &FdMatrix, argvals: &[f64], config: &AlignClusterConfig) -> Result<AlignClusterResult, FdarError>`
-- **Result struct** `AlignClusterResult`:
-  - `cluster: Vec<usize>` — 0-based assignments, length n
-  - `templates: Vec<Vec<f64>>` — per-cluster Karcher-mean curves (k entries, each length m)
-  - `distances: FdMatrix` — n x k elastic-distance matrix
-  - `iterations: usize`
-  - `converged: bool`
-- **Config struct** `AlignClusterConfig` — k, max_iter, tol, seed, alignment sub-config
-- **linalg gated?** No
-
-#### A2. Functional DBSCAN — `dbscan_fd`
-
-- **What it does:** Density-based clustering over functional L2 distances. Discovers clusters of arbitrary shape; labels noise curves as `None`.
-- **Why table stakes:** Completes the clustering family; DBSCAN handles non-convex cluster shapes that k-means misses.
-- **Signature:** `dbscan_fd(data: &FdMatrix, argvals: &[f64], config: &DbscanConfig) -> Result<DbscanResult, FdarError>`
-- **Result struct** `DbscanResult`:
-  - `cluster: Vec<Option<usize>>` — `None` = noise; `Some(c)` = cluster c
-  - `n_clusters: usize`
-  - `n_noise: usize`
-  - `distances: FdMatrix` — precomputed n x n L2 distance matrix
-- **Config struct** `DbscanConfig` — eps (neighborhood radius), min_samples
-- **linalg gated?** No
-
-#### A3. Per-Cluster FPCA Clustering (kCFC) — `kcfc_cluster`
-
-- **What it does:** Assigns curves by reconstruction error under per-cluster FPCA models; iterates until labels stabilize.
-- **Signature:** `kcfc_cluster(data: &FdMatrix, argvals: &[f64], config: &KcfcConfig) -> Result<KcfcResult, FdarError>`
-- **Result struct** `KcfcResult`:
-  - `cluster: Vec<usize>`
-  - `fpca_models: Vec<Option<FpcaResult>>` — per-cluster FPCA (None if cluster empty)
-  - `reconstruction_errors: FdMatrix` — n x k squared L2 errors
-  - `iterations: usize`
-  - `converged: bool`
-- **linalg gated?** No
-
-#### A4. Fisher-EM Discriminative-Subspace Clustering — `funfem_cluster`
-
-- **What it does:** GMM in a discriminative subspace estimated by Fisher's criterion. Produces soft memberships and the discriminative direction matrix.
-- **Signature:** `funfem_cluster(data: &FdMatrix, argvals: &[f64], config: &FunFemConfig) -> Result<FunFemResult, FdarError>`
-- **Result struct** `FunFemResult` (`#[non_exhaustive]`):
-  - `cluster: Vec<usize>`
-  - `membership: FdMatrix` — n x k soft membership
-  - `disc_subspace: FdMatrix` — discriminative directions (ncomp_eff x p_disc_eff)
-  - `log_likelihood: f64`
-  - `iterations: usize`
-  - `converged: bool`
-- **linalg gated?** No (uses nalgebra, which is always available)
-
-**Binding priority for Group A:** Table stakes. Fills the clustering gap that existed up to 0.23. All four are bindable without linalg.
+The curation unit is **paper-level** (many callables share one root paper). Callable-to-paper indexing happens in the references JSON; this document supplies the raw material for that index.
 
 ---
 
-### Group B — Scalar-on-Function Regression Extensions (introduced 0.24.0)
+## Part A — Foundational Papers per Method Family
 
-**Module:** `fdars_core::scalar_on_function` — extensions to the existing `fregre_lm`/`functional_logistic` surface.
+### A1. Functional Data Representation & Basis Expansion
+**fdars modules:** `basis`, `_Fdata`, `represent`, `smoothing` (partially)
 
-#### B1. Functional Additive Model (FAM) — `fam`
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| *Functional Data Analysis* (2nd ed.) | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
+| *Functional Data Analysis with R and Matlab* | Ramsay, J.O., Hooker, G. & Graves, S. | 2009 | Springer (book) | https://doi.org/10.1007/978-0-387-98185-7 |
+| "Spline estimators for the functional linear model" | Cardot, H., Ferraty, F. & Sarda, P. | 2003 | Statistica Sinica 13: 571-591 | https://www3.stat.sinica.edu.tw/statistica/oldpdf/A13n31.pdf |
 
-- **What it does:** Additive nonlinear scalar-on-function regression. Y_i = mu + sum_k f_k(xi_{ik}) + epsilon, where xi_{ik} are FPC scores and f_k are estimated via kernel smoothing (Muller & Yao 2008).
-- **Signature:** `fam(data: &FdMatrix, y: &[f64], argvals: &[f64], scalar_covariates: Option<&FdMatrix>, config: &FamConfig) -> Result<FamResult, FdarError>`
-- **Result struct** `FamResult`:
-  - `fitted_values: Vec<f64>` — length n
-  - `residuals: Vec<f64>`
-  - `component_fits: Vec<Vec<f64>>` — per-FPC component fit
-  - `intercept: f64`
-  - `bandwidths: Vec<f64>`
-  - `ncomp: usize`
-  - `r_squared: f64`
-  - `fpca: FpcaResult`
-- **linalg gated?** No
+**Callables covered:** `bspline_basis`, `bspline_basis_from_knots`, `fourier_basis`, `fourier_basis_with_period`, `constant_basis`, `pspline_fit_1d`, `pspline_fit_gcv`, `smooth_basis_gcv`, `smooth_basis_aic`, `fdata_to_basis_1d`, `basis_to_fdata_1d`, `basis_nbasis_cv`, `select_basis_auto_1d`, `_Fdata.to_basis`, `_Fdata.from_basis`
 
-#### B2. Generalized Kernel Additive Model (GKAM) — `fregre_gkam`
-
-- **What it does:** Backfitting-based nonparametric regression over multiple functional predictors on different grids; allows scalar covariates.
-- **Signature:** `fregre_gkam(predictors: &[&FdMatrix], y: &[f64], argvals_list: &[&[f64]], scalar_covariates: Option<&FdMatrix>, config: &GkamConfig) -> Result<GkamResult, FdarError>`
-- **Result struct** `GkamResult`:
-  - `fitted_values: Vec<f64>`
-  - `residuals: Vec<f64>`
-  - `component_fits: Vec<Vec<f64>>` — q x n
-  - `intercept: f64`
-  - `bandwidths: Vec<f64>`
-  - `iterations: usize`
-  - `converged: bool`
-  - `r_squared: f64`
-- **linalg gated?** No (uses nalgebra)
-
-#### B3. Generalized Spectral Additive Model (GSAM) — `fregre_gsam`
-
-- **What it does:** Additive regression using spectral (Fourier/eigenfunction) decomposition instead of kernel smoothing; single functional predictor with scalar covariates.
-- **Signature:** `fregre_gsam(data: &FdMatrix, y: &[f64], argvals: &[f64], scalar_covariates: Option<&FdMatrix>, config: &GsamConfig) -> Result<GsamResult, FdarError>`
-- **Result struct** `GsamResult`:
-  - `fitted_values: Vec<f64>`, `residuals: Vec<f64>`, `component_fits: Vec<Vec<f64>>`, `intercept: f64`, `bandwidths: Vec<f64>`, `ncomp: usize`, `r_squared: f64`, `fpca: FpcaResult`
-- **linalg gated?** No
-
-#### B4. History-Index Scalar-on-Function Estimator — `history_index`
-
-- **What it does:** Models response as a function of a weighted integral over the recent history of the predictor: Y_i = beta_0 + beta_1 * (sum_l gamma_l * X_i(T-u_l) * Delta_u) + epsilon.
-- **Signature:** `history_index(data: &FdMatrix, y: &[f64], argvals: &[f64], config: &HistoryIndexConfig) -> Result<HistoryIndexResult, FdarError>`
-- **Result struct** `HistoryIndexResult`:
-  - `fitted_values: Vec<f64>`, `residuals: Vec<f64>`, `intercept: f64`, `slope: f64`
-  - `gamma: Vec<f64>` — history weight function
-  - `lag_grid: Vec<f64>` — lag discretisation points
-  - `history_scores: Vec<f64>` — integral scores per observation
-  - `r_squared: f64`
-- **linalg gated?** No
-
-#### B5. Model Selection (AIC/BIC/GCV) — `model_selection_ncomp`
-
-- **What it does:** Selects optimal number of FPC components for `fregre_lm` via AIC, BIC, or GCV.
-- **Result** `ModelSelectionResult`
-- **linalg gated?** No
-
-#### B6. GroupLasso Variable Selection — `variable_selection`
-
-- **What it does:** Selects among multiple functional predictors via GroupLasso coordinate-descent over FPC scores.
-- **Signature:** `variable_selection(predictors: &[&FdMatrix], y: &[f64], argvals_list: &[&[f64]], scalar_covariates: Option<&FdMatrix>, config: &VarSelectConfig) -> Result<VarSelectResult, FdarError>`
-- **Result struct** `VarSelectResult`:
-  - `active_predictors: Vec<bool>`, `coefficients: Vec<Vec<f64>>`, `fitted_values: Vec<f64>`, `residuals: Vec<f64>`, `intercept: f64`, `lambda: f64`, `r_squared: f64`, `iterations: usize`, `converged: bool`, `fpcas: Vec<FpcaResult>`
-- **linalg gated?** No (uses Cholesky via nalgebra)
-
-#### B7. FAM Permutation Test — `permutation_test_fam`
-
-- **What it does:** Permutation significance test for each FAM additive component.
-- **Config** `PermTestConfig`, **result** `PermTestResult`
-- **linalg gated?** No
-
-**Binding priority for Group B:** Table stakes (B1-B4 fill major gaps in the regression surface). B5-B7 are supporting utilities, lower priority.
+**Notes:** Ramsay & Silverman (2005) is the unambiguous single root for B-spline and Fourier basis FDA. P-spline smoothing has a separate root: Eilers & Marx (1996) "Flexible smoothing with B-splines and penalties" *Statist. Sci.* 11(2): 89-121 (DOI: 10.1214/ss/1038425655), cited alongside Ramsay & Silverman in the fdars smoothing context.
 
 ---
 
-### Group C — Functional Mixed Models: FAMM Extensions (introduced 0.24.0)
+### A2. Functional Statistics & Descriptive Analysis
+**fdars modules:** `fdata`, `_Fdata` (mean/var/std/cov/norm/center)
 
-**Module:** `fdars_core::famm` — extensions to existing `fmm`/`fmm_predict`/`fmm_test_fixed`.
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| *Functional Data Analysis* (2nd ed.) | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
+| "Trimmed means for functional data" | Fraiman, R. & Muniz, G. | 2001 | *TEST* 10: 419-440 | https://link.springer.com/article/10.1007/BF02595706 |
 
-#### C1. Dense Functional Linear Mixed Model — `dense_flmm`
+**Callables covered:** `mean_1d`, `mean_2d`, `functional_variance`, `functional_std`, `functional_covariance`, `norm_lp_1d`, `center_1d`, `normalize`, `normalize_with_argvals`, `deriv_1d`, `deriv_2d`, `geometric_median_1d`, `geometric_median_2d`, `depth_based_median`, `trim_mean`, `_Fdata.mean`, `_Fdata.var`, `_Fdata.std`, `_Fdata.cov`, `_Fdata.center`, `_Fdata.norm`, `_Fdata.normalize`, `_Fdata.deriv`, `_Fdata.median`
 
-- **What it does:** FPC-score decomposition of a longitudinal/repeated-measures functional dataset with per-subject random effects (random intercept + optional random slope). Fits REML via EM.
-- **Signature:** `dense_flmm(data: &FdMatrix, subject_ids: &[usize], covariates: Option<&FdMatrix>, config: &DenseFlmmConfig) -> Result<DenseFlmmResult, FdarError>`
-- **Result struct** `DenseFlmmResult` (14 fields):
-  - `mean_function: Vec<f64>`, `beta_functions: FdMatrix` (p x m), `random_effects: FdMatrix` (n_subjects x m)
-  - `fitted: FdMatrix`, `residuals: FdMatrix`
-  - `random_variance: Vec<f64>`, `sigma2_eps: f64`, `sigma2_u: Vec<f64>`, `sigma2_slope: Vec<f64>`
-  - `ncomp: usize`, `n_subjects: usize`, `eigenvalues: Vec<f64>`, `n_iter: usize`, `converged: bool`
-- **linalg gated?** No
-
-#### C2. Fast Massively-Univariate Functional Mixed Model — `fast_fmm`
-
-- **What it does:** Pointwise mixed model fitting (no FPCA basis step) — scales to large grids where `dense_flmm` is slow; optionally computes pointwise Wald inference.
-- **Signature:** `fast_fmm(data: &FdMatrix, subject_ids: &[usize], covariates: Option<&FdMatrix>, config: &FastFmmConfig) -> Result<FastFmmResult, FdarError>`
-- **Result struct** `FastFmmResult`:
-  - `beta_matrix: FdMatrix` (p x m), `t_stats: FdMatrix` (p x m), `p_values: FdMatrix` (p x m)
-  - `sigma2_eps: Vec<f64>` (length m), `sigma2_u: Vec<f64>` (length m), `n_grid: usize`
-- **linalg gated?** No
-
-#### C3. Multivariate FAMM — `multi_famm`
-
-- **What it does:** Fits a separate `dense_flmm` per response dimension; stacks results. For multivariate functional response (e.g., D-dimensional functional phenotype).
-- **Signature:** `multi_famm(data: &[FdMatrix], subject_ids: &[usize], covariates: Option<&FdMatrix>, config: &MultiFammConfig) -> Result<MultiFammResult, FdarError>`
-- **Result struct** `MultiFammResult` (`#[non_exhaustive]`):
-  - `components: Vec<DenseFlmmResult>` — D per-dimension models
-  - `stacked_fitted: FdMatrix` — (n_total x D) x m
-  - `stacked_residuals: FdMatrix` — (n_total x D) x m
-  - `n_dims: usize`
-- **linalg gated?** No
-
-**Binding priority for Group C:** Differentiators. Longitudinal/repeated-measures functional data is an important use case not addressed by the existing `fmm`. Dense flmm (C1) is the core capability; fast_fmm (C2) and multi_famm (C3) are enhancements.
+**CORRECTION NOTE — Fraiman & Muniz date:** The paper is **2001**, not 1991. The "1991" date commonly cited in the FDA literature is a misattribution to a pre-print or working-paper circulated informally. The published journal paper in *TEST* is 2001. Curators should use 2001.
 
 ---
 
-### Group D — Function-on-Function Regression: Random Effects (introduced 0.24.0)
+### A3. Kernel Smoothing & Bandwidth Selection
+**fdars modules:** `smoothing`
 
-**Module:** `fdars_core::fof_regression` — extension to existing `fof_regression`/`fof_cv`/`predict_fof`.
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| *Functional Data Analysis* (2nd ed.) | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
+| *Nonparametric Functional Statistics* | Ferraty, F. & Vieu, P. | 2006 | Springer (book) | https://doi.org/10.1007/0-387-36620-2 |
 
-#### D1. Random-Effects FoF Regression — `fof_re_regression`
+**Callables covered:** `nadaraya_watson`, `local_linear`, `local_polynomial`, `gcv_smoother`, `cv_smoother`, `optim_bandwidth`, `smoothing_matrix_nw`, `knn_smoother`, `knn_gcv`, `knn_lcv`
 
-- **What it does:** Extends plain FoF double-FPCA regression with per-subject random intercept functions; handles repeated-measures functional data.
-- **Signature:** `fof_re_regression(predictors: &FdMatrix, responses: &FdMatrix, subject_ids: &[usize], argvals_x: &[f64], argvals_y: &[f64], config: &FofReConfig) -> Result<FofReResult, FdarError>`
-- **Predict:** `predict_fof_re(result: &FofReResult, new_x: &FdMatrix) -> Result<FdMatrix, FdarError>`
-- **Result struct** `FofReResult` (15 fields):
-  - `intercept: Vec<f64>`, `beta_surface: FdMatrix` (m_y x m_x), `fitted: FdMatrix` (n x m_y), `residuals: FdMatrix`
-  - `r_squared_t: Vec<f64>`, `r_squared: f64`
-  - `ncomp_x: usize`, `ncomp_y: usize`
-  - `fpca_x: FpcaResult`, `fpca_y: FpcaResult`
-  - `coef_matrix: FdMatrix` (ncomp_x x ncomp_y)
-  - `random_effects: FdMatrix` (n_subjects x m_y)
-  - `sigma2_u: Vec<f64>` (length ncomp_y), `sigma2_eps: f64`, `n_subjects: usize`
-- **linalg gated?** No
-
-**Binding priority:** Table stakes. Completes the FoF regression surface (repeated-measures is a common FDA scenario).
+**Notes:** Nadaraya-Watson estimator has a classical scalar origin (Nadaraya 1964; Watson 1964) but the FDA framing — including bandwidth selection via GCV for functional data — is standardized in Ferraty & Vieu (2006). Ramsay & Silverman (2005) covers penalized spline smoothing.
 
 ---
 
-### Group E — Multivariate Functional Data Container (introduced 0.27.0)
+### A4. Functional Depth
+**fdars modules:** `depth`
 
-**Module:** `fdars_core::multi_fdata`
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "On the concept of depth for functional data" (band/modified-band depth) | Lopez-Pintado, S. & Romo, J. | 2009 | *JASA* 104(486): 718-734 | https://doi.org/10.1198/jasa.2009.0015 |
+| "Trimmed means for functional data" (FM depth) | Fraiman, R. & Muniz, G. | 2001 | *TEST* 10: 419-440 | https://link.springer.com/article/10.1007/BF02595706 |
+| "Mathematics and the picturing of data" (halfspace / Tukey depth) | Tukey, J.W. | 1975 | *Proc. Int. Congress Math.* Vol. 2: 523-531 | (no DOI; proceedings volume) |
+| "A half-region depth for functional data" (HRD/MHRD) | Lopez-Pintado, S. & Romo, J. | 2011 | *CSDA* 55(4): 1679-1695 | https://doi.org/10.1016/j.csda.2010.10.029 |
+| "A topologically valid definition of depth for functional data" | Nieto-Reyes, A. & Battey, H. | 2016 | *Statist. Sci.* 31(1): 61-79 | https://doi.org/10.1214/15-STS532 |
 
-#### E1. MultiFunData / FdComponent
+**Callables covered:** `fraiman_muniz_1d`, `fraiman_muniz_2d`, `band_1d`, `modified_band_1d`, `modified_epigraph_index_1d`, `modal_1d`, `modal_2d`, `random_projection_1d`, `random_projection_2d`, `random_projection_deriv_1d`, `random_tukey_1d`, `random_tukey_2d`, `functional_spatial_1d`, `functional_spatial_2d`, `kernel_functional_spatial_1d`, `kernel_functional_spatial_2d`, `functional_depth`, `functional_boxplot`
 
-- **What it does:** Stores D functional components that may live on different evaluation grids; enforces uniform observation count across components. Mirrors R `funData`.
-- **Key structs:**
-  - `MultiFunData` — methods: `new(components: Vec<FdComponent>) -> Result`, `n_obs()`, `n_components()`
-  - `FdComponent { data: FdMatrix, argvals: Vec<f64> }`
-- **linalg gated?** No
-- **Binding note:** Required by `multi_famm` input and potentially by other multi-domain functions. Expose as a Python class (`FdComponent`) and factory function.
-
-**Binding priority:** Table stakes (dependency for C3 and future multivariate methods).
-
----
-
-### Group F — Principal Differential Analysis (introduced 0.27.0)
-
-**Module:** `fdars_core::pda`
-
-#### F1. `principal_differential_analysis`
-
-- **What it does:** Estimates coefficient functions beta_k(t) of a linear ODE L*x(t)=0 from observed solution curves (pointwise least squares per grid point). Returns the recovered ODE operator.
-- **Signature:** `principal_differential_analysis(data: &FdMatrix, argvals: &[f64], order: usize, ...) -> Result<PdaResult, FdarError>`
-- **Result struct** `PdaResult` (`#[non_exhaustive]`):
-  - `coefficients: Vec<Vec<f64>>` — length-`order` outer Vec; `coefficients[k]` = beta_k(t) sampled at argvals
-  - `order: usize`
-  - `residuals: Option<FdMatrix>` — currently always None
-- **Struct** `Lfd { coefs: Vec<Vec<f64>> }` — represents the linear differential operator
-- **linalg gated?** No
-
-**Binding priority:** Differentiator. Niche but genuine new capability; no equivalent in existing bindings.
+**ANTI-FEATURE NOTE:** This module cannot have a single root paper. The `functional_depth` dispatcher unifies at least 7 distinct methods, each with its own root paper. The references JSON needs method-keyed entries, not a module-level single citation. Modal depth traces specifically to Cuevas, Febrero & Fraiman (2007) "Robust estimation and classification for functional data via projection-based depth notions" *CSDA*; ERL/extremal depth to Narisetty & Nair (2016); epigraph/hypograph indices to Lopez-Pintado & Romo (2012).
 
 ---
 
-### Group G — Density Functional Data Analysis (introduced 0.27.0)
+### A5. Functional Boxplot & Outlier Visualization
+**fdars modules:** `depth` (functional_boxplot), `outliers`
 
-**Module:** `fdars_core::density_fda`
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Functional boxplots" | Sun, Y. & Genton, M.G. | 2011 | *JCGS* 20(2): 316-334 | https://doi.org/10.1198/jcgs.2011.09224 |
+| "Outlier detection in functional data by depth measures..." | Febrero-Bande, M., Galeano, P. & Gonzalez-Manteiga, W. | 2008 | *Environmetrics* 19(4): 331-345 | https://doi.org/10.1002/env.878 |
+| "Multivariate functional data visualization and outlier detection" (MS-Plot) | Dai, W. & Genton, M.G. | 2018 | *JCGS* 27(4): 923-934 | https://doi.org/10.1080/10618600.2018.1473781 |
+| "Directional outlyingness for multivariate functional data" | Dai, W. & Genton, M.G. | 2019 | *CSDA* 131: 50-65 | https://doi.org/10.1016/j.csda.2018.03.017 |
 
-#### G1. Log-Quantile-Density (LQD) FPCA — `lqd_fpca`
+**Callables covered:** `functional_boxplot`, `magnitude_shape`, `outliergram`, `depthgram`, `muod`, `tvdmss`, `sequential_transform_outliers`, `detect_outliers_lrt`, `detect_outliers_lrt_with_dist`
 
-- **What it does:** FPCA on density-valued functional data via the LQD embedding (maps densities to unconstrained L^2 space before PCA). Delegates SVD to existing `fdata_to_pc_1d`.
-- **Signature:** `lqd_fpca(density_matrix: &FdMatrix, argvals: &[f64], ncomp: usize, n_quantile_pts: Option<usize>) -> Result<LqdFpcaResult, FdarError>`
-- **Result struct** `LqdFpcaResult`: `fpca: FpcaResult`, `fve: Vec<f64>` (cumulative fraction of variance explained)
-- **linalg gated?** No
-
-#### G2. Supporting transforms
-
-- `normalize_density(density: &[f64], argvals: &[f64]) -> Result<Vec<f64>>` — trapezoidal normalization to unit integral
-- `lqd_transform(density: &[f64], argvals: &[f64], n_grid: Option<usize>) -> Result<Vec<f64>>` — forward LQD mapping
-- `inverse_lqd(psi: &[f64], t_grid: &[f64], target_argvals: &[f64]) -> Result<Vec<f64>>` — inverse LQD
-- `wasserstein_barycenter(densities: &[Vec<f64>], argvals: &[f64], weights: Option<&[f64]>) -> Result<Vec<f64>>` — 1D Wasserstein Frechet mean via quantile averaging
-
-**Binding priority:** Differentiator. Density-on-density FDA is a specialized but growing area; LQD FPCA is the key entry point.
+**Notes:** `tvdmss` traces to Huang & Sun (2019); `depthgram` to Aleman-Gomez et al. (2022); `muod` (MUOD) to Ojo et al. (2021). Individual citations needed per callable in the references JSON.
 
 ---
 
-### Group H — Frechet Statistics on Metric Spaces (introduced 0.27.0)
+### A6. Functional Principal Component Analysis (FPCA)
+**fdars modules:** `regression` (fpca), `pace_fpca`
 
-**Module:** `fdars_core::frechet`
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| *Functional Data Analysis* (2nd ed.) — FPCA chapters | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
+| "Functional data analysis for sparse longitudinal data" (PACE) | Yao, F., Muller, H.-G. & Wang, J.-L. | 2005 | *JASA* 100(470): 577-590 | https://doi.org/10.1198/016214504000001745 |
 
-#### H1. Frechet Regression — `frechet_global_reg`, `frechet_local_reg`
+**Callables covered:** `regression.fpca`, `pace_fpca.pace_fpca`, `pace_fpca.PyIrregFdata`, `pace_fpca.irreg_fdata_from_lists`, `_Fdata.to_pc`
 
-- **What they do:** Regression when the response lives in a metric space (e.g., Wasserstein space of densities). Global = linear predictor weight, local = Gaussian kernel-weighted.
-- **Global signature:** `frechet_global_reg(predictors: &FdMatrix, responses: &FdMatrix, argvals: &[f64], xout: &FdMatrix) -> Result<FrechetGlobalRegResult, FdarError>`
-  - **Result** `FrechetGlobalRegResult`: `predicted: FdMatrix` (n_out x m), `xout: FdMatrix` (n_out x p), `x_bar: Vec<f64>` (length p)
-- **Local signature:** `frechet_local_reg(predictors: &FdMatrix, responses: &FdMatrix, argvals: &[f64], xout: &FdMatrix, bandwidth: f64) -> Result<FrechetLocalRegResult, FdarError>`
-  - **Result** `FrechetLocalRegResult`: `predicted: FdMatrix`, `xout: FdMatrix`, `bandwidth: f64`
-- **linalg gated?** No (uses nalgebra for covariance inversion)
-
-#### H2. Frechet Mean and Variance — `frechet_mean`, `frechet_variance`
-
-- **What they do:** Compute the Frechet mean (weighted barycenter) and mean-squared-distance from objects to the Frechet mean in a metric space.
-- **linalg gated?** No
-
-#### H3. Frechet ANOVA — `frechet_anova`
-
-- **What it does:** Group-difference test for metric-space responses (Dubey-Muller test). Seeded permutation for primary p-value; asymptotic chi-squared secondary.
-- **Signature:** `frechet_anova(groups: &[usize], responses: &FdMatrix, argvals: &[f64], n_perm: usize, seed: u64) -> Result<FrechetAnovaResult, FdarError>`
-- **Result struct** `FrechetAnovaResult`:
-  - `statistic: f64`, `p_value_asymptotic: f64`, `p_value_permutation: f64`, `n_perm: usize`
-  - `group_frechet_variances: Vec<f64>` (length k), `pooled_frechet_variance: f64`
-  - `fn_statistic: f64`, `un_statistic: f64`, `group_labels: Vec<usize>`
-- **linalg gated?** No
-
-#### H4. Wasserstein Distance — `wasserstein2_distance`
-
-- **What it does:** 1D 2-Wasserstein distance between two densities.
-- **Trait** `MetricSpace` — defines distance measurement and weighted-Frechet-mean solving; regression/statistical routines are generic over this trait.
-
-**Binding priority:** Differentiator. Frechet regression and ANOVA on density-valued data are genuinely new analysis capabilities not available in any existing pyfda module.
+**Notes:** Standard dense FPCA traces to Ramsay & Silverman (2005). PACE FPCA for sparse/irregular data is unambiguously Yao, Muller & Wang (2005). These are distinct methods requiring distinct reference entries.
 
 ---
 
-### Group I — Functional Time Series (introduced 0.27.0)
+### A7. Scalar-on-Function & Functional Linear Regression
+**fdars modules:** `regression`, `scalar_on_function`
 
-**Module:** `fdars_core::fts`
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Functional linear model" | Cardot, H., Ferraty, F. & Sarda, P. | 1999 | *Statist. Probab. Lett.* 45: 11-22 | https://doi.org/10.1016/S0167-7152(99)00036-X |
+| "Spline estimators for the functional linear model" | Cardot, H., Ferraty, F. & Sarda, P. | 2003 | *Statistica Sinica* 13: 571-591 | https://www3.stat.sinica.edu.tw/statistica/oldpdf/A13n31.pdf |
+| *Functional Data Analysis* (2nd ed.) — regression chapters | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
+| "Functional additive models" (FAM/GKAM) | Muller, H.-G. & Yao, F. | 2008 | *JASA* 103(484): 1534-1544 | https://doi.org/10.1198/016214508000000516 |
+| "An ANOVA test for functional data" (fanova) | Cuevas, A., Febrero, M. & Fraiman, R. | 2004 | *CSDA* 47(1): 111-122 | https://doi.org/10.1016/j.csda.2003.10.021 |
 
-#### I1. Functional Time Series Model (FPCA-AR) — `ftsm`
+**Callables covered:** `fregre_lm`, `fregre_cv`, `fregre_pls`, `fpls`, `model_selection_ncomp`, `bootstrap_ci_fregre_lm`, `predict_fregre_lm`, `predict_fregre_pls`, `fregre_huber`, `fregre_l1`, `fregre_np`, `fregre_np_cv`, `fregre_np_mixed`, `functional_logistic`, `functional_glm`, `bootstrap_ci_functional_logistic`, `predict_functional_logistic`, `fosr`, `fosr_fpc`, `predict_fosr`, `concurrent_regression`, `fof_regression`, `fof_re_regression`, `fof_cv`, `predict_fof`, `predict_fof_re`, `fanova`, `scalar_on_function.fam`, `scalar_on_function.fregre_gkam`, `scalar_on_function.fregre_gsam`, `scalar_on_function.variable_selection`, `scalar_on_function.model_selection_ncomp`
 
-- **What it does:** Fits FPCA + per-component AR(p) models to a time-ordered curve series. Supports h-step-ahead forecasting, multi-step iterative forecasting, and online updates.
-- **Core functions:**
-  - `ftsm(data: &FdMatrix, ncomp: usize, argvals: &[f64]) -> Result<FtsmResult>`
-  - `ftsm_forecast(result: &FtsmResult, h: usize) -> Result<FtsmForecastResult>`
-  - `ftsm_forecast_multistep(result: &FtsmResult, h: usize) -> Result<Vec<FtsmForecastResult>>`
-  - `ftsm_update(result: &FtsmResult, new_curve: &[f64]) -> Result<FtsmResult>`
-- **Result structs:**
-  - `FtsmResult` (`#[non_exhaustive]`): `mean: Vec<f64>`, `rotation: FdMatrix` (m x ncomp), `scores: FdMatrix` (n x ncomp), `fitted: FdMatrix`, `weights: Vec<f64>`, `ncomp: usize`, `ar_models: Vec<ArModelResult>`
-  - `FtsmForecastResult`: `forecast: FdMatrix` (h x m), `h: usize`
-  - `ArModelResult` — per-FPC AR diagnostics
-- **linalg gated?** No
-
-#### I2. Functional PLS Forecasting — `fplsr`
-
-- **What it does:** PLS-score-based alternative to FPCA-score AR for curve forecasting.
-- **Result** `FplsrResult`
-- **linalg gated?** No
-
-#### I3. Functional ACF/PACF — `functional_acf`, `functional_pacf`
-
-- **What they do:** Lag-h functional autocorrelation (trace of lag-h functional covariance normalized by lag-0 trace) and partial autocorrelation.
-- **Result** `FacfResult`
-- **linalg gated?** No
-
-#### I4. Long-Run Covariance — `long_run_covariance`
-
-- **What it does:** Bartlett kernel-sandwich estimator of the long-run covariance function; used in stationarity tests.
-- **Result** `LongRunCovResult`
-- **linalg gated?** No
-
-#### I5. Functional Stationarity Test — `stationarity_test`
-
-- **What it does:** KPSS-style partial-sum L2 statistic with Monte-Carlo permutation p-value.
-- **Result struct** `StationarityResult` (`#[non_exhaustive]`): `statistic: f64`, `p_value: f64`, `n_perm: usize`
-- **linalg gated?** No
-
-#### I6. Functional First-Difference — `functional_difference`
-
-- **What it does:** Functional first-difference operator (produces a curve series of length n-1).
-- **linalg gated?** No
-
-**Binding priority:** Differentiator. The complete FTS pipeline (fit -> ACF check -> stationarity test -> forecast) is a genuinely new analysis dimension not covered by existing bindings.
+**Notes:** This module spans ~7 different root papers. Concurrent/varying-coefficient regression (`concurrent_regression`) traces to Ramsay (1996) / Hastie & Tibshirani (1993), treated in FDA context by Ramsay & Silverman (2005). Function-on-function regression (`fof_regression`) traces to Yao et al. (2005) extensions and Ivanescu et al. (2015). Flag for curators: require per-callable citations for this module.
 
 ---
 
-### Group J — FPCA Variants (introduced 0.27.0)
+### A8. Frechet Regression & Non-Euclidean Response
+**fdars modules:** `frechet`
 
-**Module:** `fdars_core::fpca_variants`
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Frechet regression for random objects with Euclidean predictors" | Petersen, A. & Muller, H.-G. | 2019 | *Ann. Statist.* 47(2): 691-719 | https://doi.org/10.1214/17-AOS1624 |
 
-#### J1. Functional SVD / Cross-FPCA — `fsvd`
+**Callables covered:** `frechet_mean`, `frechet_global_reg`, `frechet_local_reg`, `frechet_anova`
 
-- **What it does:** Functional SVD between two paired functional datasets (X, Y on different grids); decomposes cross-covariance into singular functions and scores.
-- **Signature:** `fsvd(x: &FdMatrix, argvals_x: &[f64], y: &FdMatrix, argvals_y: &[f64], ncomp: usize) -> Result<FsvdResult, FdarError>`
-- **Result struct** `FsvdResult`:
-  - `singular_values: Vec<f64>` (length ncomp, non-increasing)
-  - `left_functions: FdMatrix` (p x ncomp, unit L2 norm on argvals_x)
-  - `right_functions: FdMatrix` (q x ncomp, unit L2 norm on argvals_y)
-  - `left_scores: FdMatrix` (n x ncomp)
-  - `right_scores: FdMatrix` (n x ncomp)
-- **linalg gated?** No (docs annotations show no feature gate)
-
-#### J2. FPCA of Derivatives — `fpca_der`
-
-- **What it does:** FPCA applied to the derivatives of a functional sample. Pre-differentiates curves, then runs standard FPCA.
-- **linalg gated?** No
-
-#### J3. Cross-Covariance Surface — `cross_covariance`
-
-- **What it does:** Estimates the cross-covariance surface between two paired functional datasets.
-- **linalg gated?** No
-
-#### J4. Dynamical Correlation — `dynamical_correlation`
-
-- **What it does:** Computes dynamical (functional) correlation between two paired samples (normalized cross-covariance trace).
-- **linalg gated?** No
-
-#### J5. Sandwich-Smoother FPCA — `ssvd`
-
-- **What it does:** Sparse-SVD / sandwich-smoother FPCA path for noisy/sparse data.
-- **linalg gated?** No (no feature annotations)
-
-**Binding priority:** Table stakes (J1 fsvd and J3 cross_covariance) as common FDA operations. J2, J4, J5 are differentiators.
+**Notes:** Petersen & Muller (2019) is the unambiguous single root for Frechet regression. Paper was published 2019 (appeared online 2018). The `frechet_mean` for SPD matrices also relates to Moakher (2005) "A differential geometric approach to the geometric mean of symmetric positive-definite matrices" *SIAM J. Matrix Anal. Appl.* 26(3): 735-747 for the Karcher mean formula, but the regression framing is fully the Petersen & Muller (2019) paper.
 
 ---
 
-### Group K — FEM Surface Smoothing (introduced 0.28.0 / confirmed 0.29.0)
+### A9. Density FDA — LQD Transform & Wasserstein
+**fdars modules:** `density_fda`
 
-**Module:** `fdars_core::fem_smoothing`
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Functional data analysis for density functions by transformation to a Hilbert space" (LQD) | Petersen, A. & Muller, H.-G. | 2016 | *Ann. Statist.* 44(1): 183-218 | https://doi.org/10.1214/15-AOS1363 |
 
-#### K1. FEM/PDE-Regularized Surface Smoothing — `fem_smooth`, `fem_smooth_gcv`
+**Callables covered:** `lqd_transform`, `inverse_lqd`, `lqd_fpca`, `wasserstein_barycenter`, `normalize_density`
 
-- **What it does:** Laplacian-penalty smoothing over triangulated 2D domains. Assembles mass (M) and stiffness (K) matrices from P1 Lagrange elements; solves (M + lambda*K)c = y. `fem_smooth` takes fixed lambda; `fem_smooth_gcv` selects lambda via GCV on log grid.
-- **Signatures:**
-  - `fem_smooth(nodes: &[[f64;2]], triangles: &[[usize;3]], observations: &[(f64, f64, f64)], lambda: f64) -> Result<FemSmoothResult>`
-  - `fem_smooth_gcv(nodes: &[[f64;2]], triangles: &[[usize;3]], observations: &[(f64, f64, f64)]) -> Result<FemSmoothResult>`
-  - `assemble_fem_matrices(nodes: &[[f64;2]], triangles: &[[usize;3]]) -> (Vec<Vec<f64>>, Vec<Vec<f64>>)` — returns (M, K) mass and stiffness matrices
-  - `fem_basis_eval(nodes, triangles, query_points: &[[f64;2]]) -> Vec<Vec<f64>>` — P1 hat function values
-  - `fem_predict(nodes, triangles, coefficients: &[f64], query_points: &[[f64;2]]) -> Vec<f64>` — interpolate at new points
-- **Result struct** `FemSmoothResult` — fitted surface values, lambda used, GCV score
-- **linalg gated?** No (docs note: "Dense in-house assembly — no new crate dependencies; sparse solvers are deferred")
-
-**Binding priority:** Differentiator. FEM smoothing for 2D surface-valued functional data over irregular triangulated domains is a genuinely advanced capability with no existing pyfda equivalent. Mesh input shape (nodes + triangles arrays) requires custom PyO3 conversion logic.
+**Notes:** LQD transform is unambiguously Petersen & Muller (2016). The `wasserstein_barycenter` is conceptually related to Agueh & Carlier (2011) "Barycenters in the Wasserstein space" *SIAM J. Math. Anal.* 43(2): 904-924 but the density-FDA framing is Petersen & Muller (2016/2019). Curators may want to note both.
 
 ---
 
-### Group L — GAK Metric + Kernel K-Means (introduced 0.32.0)
+### A10. Elastic / Fisher-Rao Registration & SRSF Framework
+**fdars modules:** `alignment` (most elastic_* and karcher_* callables)
 
-**Module:** `fdars_core::metric` (new `gak` submodule added to existing metric module)
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Registration of functional data using Fisher-Rao metric" (SRSF framework) | Srivastava, A., Wu, W., Kurtek, S., Klassen, E. & Marron, J.S. | 2011 | *arXiv:1103.3817* | https://arxiv.org/abs/1103.3817 |
+| *Functional and Shape Data Analysis* (book) | Srivastava, A. & Klassen, E.P. | 2016 | Springer | https://doi.org/10.1007/978-1-4939-4020-2 |
+| "Functional Data Analysis of Amplitude and Phase Variation" (review) | Marron, J.S., Ramsay, J.O., Sangalli, L.M. & Srivastava, A. | 2015 | *Statist. Sci.* 30(4) | https://doi.org/10.1214/15-STS524 |
 
-#### L1. Global Alignment Kernel (GAK) — `gak`, `gak_gram_matrix`
+**Callables covered:** `elastic_align_pair`, `elastic_align_pair_closed`, `elastic_align_pair_constrained`, `elastic_align_pair_multires`, `elastic_align_pair_penalized`, `elastic_changepoint`, `elastic_cross_distance_matrix`, `elastic_cross_distance_matrix_with_band`, `elastic_decomposition`, `elastic_depth`, `elastic_distance`, `elastic_distance_closed`, `elastic_logistic`, `elastic_outlier_detection`, `elastic_partial_match`, `elastic_regression`, `elastic_self_distance_matrix`, `elastic_self_distance_matrix_with_band`, `karcher_mean`, `karcher_mean_closed`, `karcher_mean_with_band`, `karcher_median`, `robust_karcher_mean`, `shape_mean`, `shape_distance`, `shape_self_distance_matrix`, `shape_confidence_interval`, `srsf_transform`, `srsf_inverse`, `tsrvf_transform`, `tsrvf_transform_with_method`, `vert_fpca`, `horiz_fpca`, `horiz_fpns`, `joint_fpca`, `amplitude_distance`, `amplitude_self_distance_matrix`, `phase_distance`, `phase_self_distance_matrix`, `phase_boxplot`, `gauss_model`, `joint_gauss_model`, `bayesian_align_pair`, `curve_geodesic`, `warp_complexity`, `warp_smoothness`, `warp_inverse_error`, `warp_statistics`, `reparameterize_curve`, `invert_warp`, `compose_warps`, `transfer_alignment`, `pairwise_consistency`
 
-- **What it does:** Triangular Global Alignment Kernel (Cuturi 2011) — a PSD similarity measure on time-series sequences. Computed via log-domain forward DP. `gak_gram_matrix` builds symmetric n x n PSD Gram matrix (unit diagonal).
-- **Signatures:**
-  - `gak(x: &[f64], y: &[f64], sigma: f64) -> f64` — normalized pairwise similarity [0,1]
-  - `gak_gram_matrix(data: &FdMatrix, config: &GakConfig) -> Result<FdMatrix>`
-  - `sigma_gak(data: &FdMatrix) -> f64` — median-distance bandwidth heuristic
-- **Config struct** `GakConfig { sigma: Option<f64> }` — None = auto via `sigma_gak`
-
-#### L2. GAK Train/Predict Gram (sklearn precomputed-kernel convention) — `gak_gram_train`, `gak_gram_predict`
-
-- **What they do:** Training Gram (with stored self-kernels and resolved sigma) and prediction Gram (n_test x n_train); follows sklearn's precomputed kernel API.
-- **Signatures:**
-  - `gak_gram_train(data: &FdMatrix, config: &GakConfig) -> Result<GakGramTrain>`
-  - `gak_gram_predict(train: &GakGramTrain, new_data: &FdMatrix) -> Result<FdMatrix>`
-- **Result** `GakGramTrain` — stores training data reference and self-kernels
-- **linalg gated?** No
-
-**Binding priority:** Table stakes (GAK is a widely-used kernel for time-series/FDA; enables kernel SVM via `fdars.sklearn`). The train/predict split is critical for sklearn precomputed-kernel integration.
+**Notes:** Srivastava et al. (2011) arXiv is the primary technical reference; the 2016 book is the full treatment. Landmark registration (`landmark_register`) traces to Ramsay & Silverman (2005). Shift registration (`least_squares_shift_registration`) is also Ramsay & Silverman (2005). Banded elastic alignment (`*_with_band`) references the Sakoe-Chiba band constraint from Sakoe & Chiba (1978) IEEE paper. Bayesian alignment (`bayesian_align_pair`) traces to Cheng et al. (2016) "Bayesian registration of functions and curves" *Bayesian Anal.* 11(2): 447-475. This module is the largest in fdars and requires many distinct paper entries keyed by sub-method.
 
 ---
 
-### Group M — Shapelet Discovery & Classification (introduced 0.33.0)
+### A11. Shift Registration & Landmark Registration
+**fdars modules:** `alignment` (least_squares_shift_*, landmark_*, alignment_quality, diagnose_alignment, peak_persistence, lambda_cv, detect_landmarks, align_to_target)
 
-**Module:** `fdars_core::shapelet`
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| *Functional Data Analysis* (2nd ed.) — registration chapters | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
 
-#### M1. Shapelet Discovery — `discover_shapelets`
-
-- **What it does:** Finds discriminative subsequences via candidate generation across length ranges, quality scoring (information gain or F-statistic), and self-similarity pruning. Produces a ranked `ShapeletSet`.
-- **Signature:** `discover_shapelets(data: &FdMatrix, labels: &[usize], config: &ShapeletDiscoveryConfig) -> Result<ShapeletSet, FdarError>`
-- **Config struct** `ShapeletDiscoveryConfig` (serde-enabled, sktime-compatible defaults) — min_len, max_len, max_shapelets, quality_measure, seed, n_candidates
-- **Result** `ShapeletSet` — ranked collection of `Shapelet` structs with z-normalized values + provenance
-
-#### M2. Shapelet Transform — `shapelet_transform`, `shapelet_transform_fit`
-
-- **What they do:** Maps curves to an n x K distance-feature matrix using a fitted `ShapeletSet`. `shapelet_transform_fit` discovers + transforms training set in one call; the resulting `ShapeletTransformFit` applies to out-of-sample curves.
-- **Signatures:**
-  - `shapelet_transform(shapelets: &ShapeletSet, data: &FdMatrix) -> Result<FdMatrix>` — n x K distance matrix
-  - `shapelet_transform_fit(data: &FdMatrix, labels: &[usize], config: &ShapeletDiscoveryConfig) -> Result<ShapeletTransformFit>`
-  - `ShapeletTransformFit::transform(data: &FdMatrix) -> Result<FdMatrix>` — out-of-sample
-  - `shapelet_distance(shapelet: &Shapelet, curve: &[f64]) -> f64` — sliding-window z-normalized Euclidean distance
-
-#### M3. Shapelet Classifier — `shapelet_classifier_fit`
-
-- **What it does:** End-to-end discover -> transform -> classify pipeline. Inner classifier: kNN (default) or LDA.
-- **Signature:** `shapelet_classifier_fit(data: &FdMatrix, labels: &[usize], argvals: &[f64], config: &ShapeletClassifierConfig) -> Result<ShapeletClassifierFit, FdarError>`
-- **`ShapeletClassifierFit::predict(new_data: &FdMatrix) -> Result<Vec<usize>>`**
-- **Enums:** `QualityMeasure` (InfoGain | FStatistic)
-- **linalg gated?** No
-
-#### M4. Normalization helpers — `z_normalize_window`, `z_normalize_into`
-
-- **What they do:** Z-score normalization on a windowed segment (in-place and windowed variants).
-
-**Binding priority:** Differentiator. Shapelet-based classification is a genuinely new analysis paradigm in pyfda (time-series/functional data classification via discriminative subsequences).
+**Callables covered:** `least_squares_shift_registration`, `least_squares_score`, `pairwise_correlation_score`, `sobolev_least_squares_score`, `align_to_target`, `alignment_quality`, `diagnose_alignment`, `peak_persistence`, `lambda_cv`, `detect_landmarks`, `landmark_register`, `landmark_detect_and_register`
 
 ---
 
-## Feature Classification Summary
+### A12. Metrics — Lp, DTW, GAK, Hausdorff
+**fdars modules:** `metric`
 
-### Table Stakes (fills obvious gaps in the existing binding surface)
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Fast global alignment kernels" (GAK) | Cuturi, M. | 2011 | *ICML 2011* Proc. 28th ICML: 929-936 | https://dl.acm.org/doi/10.5555/3104482.3104599 |
+| "Dynamic programming algorithm optimization for spoken word recognition" (DTW + Sakoe-Chiba band) | Sakoe, H. & Chiba, S. | 1978 | *IEEE Trans. Acoust.* ASSP-26: 43-49 | https://doi.org/10.1109/TASSP.1978.1163055 |
+| "Soft-DTW: a differentiable loss function for time-series" | Cuturi, M. & Blondel, M. | 2017 | *ICML 2017* | https://proceedings.mlr.press/v70/cuturi17a.html |
 
-| Feature | Group | Complexity | Notes |
-|---------|-------|------------|-------|
-| Elastic k-means joint alignment (`align_cluster_fd`) | A1 | MEDIUM | Extends existing clustering surface |
-| Functional DBSCAN (`dbscan_fd`) | A2 | LOW | Simple config, familiar paradigm |
-| kCFC per-cluster FPCA clustering (`kcfc_cluster`) | A3 | MEDIUM | Returns per-cluster FpcaResult |
-| Function-on-function random effects (`fof_re_regression`) | D1 | HIGH | 15-field result struct; subject_ids required |
-| MultiFunData container (`multi_fdata`) | E1 | LOW | Data structure only; dependency for C3 |
-| Functional SVD / cross-FPCA (`fsvd`) | J1 | MEDIUM | 5-field result; cross-grid binding |
-| Cross-covariance surface (`cross_covariance`) | J3 | LOW | Returns FdMatrix |
-| FPCA of derivatives (`fpca_der`) | J2 | LOW | Thin wrapper |
-| GAK gram matrix (`gak_gram_matrix`, `gak_gram_train`, `gak_gram_predict`) | L1/L2 | MEDIUM | sklearn precomputed-kernel convention critical |
-| Model selection AIC/BIC/GCV (`model_selection_ncomp`) | B5 | LOW | Wraps existing `fregre_lm` |
+**Callables covered:** `lp_self_1d`, `lp_cross_1d`, `lp_self_2d`, `lp_cross_2d`, `dtw_self_1d`, `dtw_cross_1d`, `soft_dtw_self_1d`, `soft_dtw_cross_1d`, `soft_dtw_div_self_1d`, `soft_dtw_div_cross_1d`, `gak`, `gak_gram_matrix`, `gak_gram_train`, `gak_gram_predict`, `sigma_gak`, `PyGakGramTrain`, `hausdorff_self_1d`, `hausdorff_cross_1d`, `hausdorff_self_2d`, `hausdorff_cross_2d`, `hshift_self_1d`, `hshift_cross_1d`, `fourier_self_1d`, `fourier_cross_1d`, `inprod`, `int_simpson`
 
-### Differentiators (genuinely new analysis capability)
-
-| Feature | Group | Complexity | Notes |
-|---------|-------|------------|-------|
-| Functional Additive Model (`fam`) | B1 | HIGH | Nonlinear SoF regression; new result struct |
-| GKAM multi-predictor (`fregre_gkam`) | B2 | HIGH | Multiple grids; backfitting; slice-of-slice input |
-| GSAM spectral additive model (`fregre_gsam`) | B3 | MEDIUM | Single-predictor variant of GKAM |
-| History-index estimator (`history_index`) | B4 | MEDIUM | New lag-based model class |
-| GroupLasso variable selection (`variable_selection`) | B6 | HIGH | Coordinate descent; multi-predictor |
-| Dense functional mixed model (`dense_flmm`) | C1 | HIGH | Longitudinal/repeated-measures FDA; 14-field result |
-| Fast pointwise mixed model (`fast_fmm`) | C2 | MEDIUM | Large-grid alternative to C1 |
-| Multivariate FAMM (`multi_famm`) | C3 | HIGH | Depends on C1 + E1 |
-| Principal Differential Analysis (`principal_differential_analysis`) | F1 | MEDIUM | ODE estimation from curves |
-| LQD density FPCA + transforms | G1/G2 | HIGH | Density-valued data new paradigm; new module |
-| Frechet regression + ANOVA | H1-H3 | HIGH | Metric space; new module; FrechetAnovaResult |
-| Functional time series (ftsm + forecast + ACF + stationarity) | I1-I5 | HIGH | Multi-function new module; online update |
-| Functional PLS forecasting (`fplsr`) | I2 | MEDIUM | Part of FTS group |
-| Dynamical correlation (`dynamical_correlation`) | J4 | LOW | Single scalar result |
-| Sandwich-smoother FPCA (`ssvd`) | J5 | MEDIUM | Sparse data path |
-| FEM surface smoothing (`fem_smooth`, `fem_smooth_gcv`) | K | HIGH | Mesh input; no Python precedent in pyfda |
-| Shapelet discovery + transform + classifier | M | HIGH | New classification paradigm; QualityMeasure enum |
-| Fisher-EM discriminative clustering (`funfem_cluster`) | A4 | HIGH | Discriminative subspace; soft memberships |
-
-### Anti-Features (do NOT bind this milestone)
-
-| Anti-Feature | Why | What Instead |
-|--------------|-----|--------------|
-| `fregre_gsam` as first priority | Spectral additive model very niche vs GKAM | Bind `fregre_gkam` (B2) first; defer B3 if needed |
-| FEM mesh helpers as primary surface | `fem_basis_eval` and `assemble_fem_matrices` are internal utilities | Expose only `fem_smooth` / `fem_smooth_gcv` / `fem_predict` |
-| `explain` module additions | No new public items detected 0.23 -> 0.33 in explain | Skip |
-| `function_on_scalar_2d` additions | API unchanged from 0.23 | Skip |
-| Streaming depth additions | API unchanged from 0.23 | Skip |
-| Landmark module additions | API unchanged from 0.23 | Skip |
+**Notes:** Lp distances for functional data are described in Ramsay & Silverman (2005) and Ferraty & Vieu (2006). GAK is unambiguously Cuturi (2011). DTW is Sakoe & Chiba (1978). Soft-DTW is Cuturi & Blondel (2017). Hausdorff distance has no single FDA root paper; it is a classical metric described in a functional data context by Ferraty & Vieu (2006).
 
 ---
 
-## linalg-Gated Items (OUT OF SCOPE — pyfda does not enable linalg)
+### A13. Clustering
+**fdars modules:** `clustering`
 
-Research found **no items explicitly feature-gated behind `linalg`** in 0.24-0.33 based on docs.rs annotations and Cargo.toml inspection. The `linalg` feature enables `faer 0.23` and `anofox-regression 0.4` but the new modules (fts, frechet, density_fda, clustering_advanced, fpca_variants, fem_smoothing, shapelet, metric::gak) all use only nalgebra (always available) or in-house dense assembly.
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Model-based clustering of time series in group-specific functional subspaces" (KCFC / FunFEM ancestor) | Bouveyron, C. & Jacques, J. | 2011 | *Adv. Data Anal. Classif.* 5(4): 281-300 | https://doi.org/10.1007/s11634-011-0095-6 |
+| "The discriminative functional mixture model..." (FunFEM) | Bouveyron, C., Come, E. & Jacques, J. | 2015 | *Ann. Appl. Stat.* 9(4): 1726-1760 | https://doi.org/10.1214/15-AOAS861 |
+| "Functional clustering and identifying substructures of longitudinal data" (KCFC) | Chiou, J.-M. & Li, P.-L. | 2007 | *JRSSB* 69(4): 679-699 | https://doi.org/10.1111/j.1467-9868.2007.00605.x |
 
-**Conclusion:** No new capability in 0.24-0.33 is linalg-gated. All groups (A-M) are bindable with the existing `parallel`-only build.
+**Callables covered:** `kmeans_fd`, `kcfc_cluster`, `funfem_cluster`, `dbscan_fd`, `fuzzy_cmeans_fd`, `gmm_cluster`, `align_cluster_fd`, `silhouette_score`, `silhouette_score_data`, `calinski_harabasz`, `calinski_harabasz_data`, `hierarchical_from_distances`, `hierarchical_cut`, `kmedoids_from_distances`
+
+**Notes:** K-means for functional data follows James & Sugar (2003) *JASA* 98(461): 178-186 (DOI: 10.1198/016214503388619113). KCFC is Chiou & Li (2007). FunFEM is Bouveyron et al. (2015) built on Bouveyron & Jacques (2011). DBSCAN for functional data is a direct application of Ester et al. (1996) with no FDA-specific founding paper. Elastic clustering (`align_cluster_fd`) combines Srivastava et al. (2011) alignment with k-means; closest reference is Tucker et al. (2013) or Sangalli et al. (2010) *CSDA* "k-mean alignment for curve clustering." Flag for curators: `kcfc_cluster`, `dbscan_fd`, `align_cluster_fd` have contested or ambiguous single roots.
 
 ---
 
-## Breaking Changes to Existing Bindings
+### A14. Classification
+**fdars modules:** `classification`
 
-The CHANGELOG confirms **no breaking changes** in 0.24-0.33 to the public API surface that pyfda binds. Specifically:
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| *Nonparametric Functional Statistics* — classification chapters | Ferraty, F. & Vieu, P. | 2006 | Springer (book) | https://doi.org/10.1007/0-387-36620-2 |
+| "K-class elastic multinomial regression" (elastic multinomial) | Tucker, J.D., Wu, W. & Srivastava, A. | 2013 | *Electron. J. Stat.* 7: 1100-1128 | https://doi.org/10.1214/13-EJS816 |
 
-- `scalar_on_function::fregre_lm`, `functional_logistic`, `fregre_lm_multi`, and their predict variants: signatures unchanged
-- `fof_regression::fof_regression`, `fof_cv`, `predict_fof`: unchanged (new RE functions added alongside)
-- `famm::fmm`, `fmm_predict`, `fmm_test_fixed`: unchanged (new functions added alongside)
-- `gmm`: unchanged (funhddC_cluster verified present in 0.23)
-- All previously bound modules (depth, inference, alignment, smoothing, classification, outliers, etc.): no signature drift
+**Callables covered:** `fclassif_lda`, `fclassif_qda`, `fclassif_knn`, `fclassif_kernel`, `fclassif_dd`, `fclassif_cv`, `elastic_multinomial`, `kernel_classify_from_distances`, `knn_classify_from_distances`
 
-**Regression gate approach:** Bump `fdars-core` to 0.33.0 in Cargo.toml first as an isolated commit; run the 772-test suite; expect zero failures before adding any new bindings.
+**Notes:** LDA/QDA/kNN via FPC scores is standard material in Ferraty & Vieu (2006) and Ramsay & Silverman (2005). DD-classifier traces to Li et al. (2012) "DD-classifier: Nonparametric classification procedure based on DD-plot" *JASA* 107(499): 737-753 (DOI: 10.1080/01621459.2012.695630). Elastic multinomial is Tucker et al. (2013).
+
+---
+
+### A15. Functional Inference — Tests & SCBs
+**fdars modules:** `inference`
+
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "An ANOVA test for functional data" (permutation tests) | Cuevas, A., Febrero, M. & Fraiman, R. | 2004 | *CSDA* 47(1): 111-122 | https://doi.org/10.1016/j.csda.2003.10.021 |
+| "Simultaneous confidence bands for nonparametric regression with functional data" (SCB) | Degras, D. | 2011 | *Statistica Sinica* 21(4): 1735-1765 | https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N412.html |
+| "Interval-wise testing for functional data" (ITP) | Pini, A. & Vantini, S. | 2017 | *J. Nonparam. Stat.* 29(2): 407-424 | https://doi.org/10.1080/10485252.2017.1306627 |
+
+**Callables covered:** `t_perm_test`, `f_perm_test`, `two_sample_mean_test`, `mean_scb`, `scb_two_sample_test`, `flm_f_test`, `flm_gof_test`, `oneway_anova_vstat`, `itp_one_pop`, `itp_two_pop`, `itp_flm`
+
+**Notes:** Two-sample permutation tests (`t_perm_test`, `f_perm_test`) trace to Cuevas et al. (2004). SCBs trace to Degras (2011). The V-statistic one-way ANOVA (`oneway_anova_vstat`) traces to Zhang & Liang (2014) "One-way ANOVA for functional data via globalizing the pointwise F-test" *Scand. J. Statist.* 41(1): 51-71 — flag for curator verification. ITP (`itp_*`) is unambiguously Pini & Vantini (2017).
+
+---
+
+### A16. Functional Time Series
+**fdars modules:** `fts`
+
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Forecasting functional time series" (FTSM) | Hyndman, R.J. & Shang, H.L. | 2009 | *J. Korean Statist. Soc.* 38(3): 199-211 | https://doi.org/10.1016/j.jkss.2009.06.002 |
+| "Dynamic functional principal components" (DPCA) | Hormann, S., Kidzinski, L. & Hallin, M. | 2015 | *JRSSB* 77(2): 319-348 | https://doi.org/10.1111/rssb.12076 |
+
+**Callables covered:** `ftsm`, `ftsm_forecast`, `ftsm_forecast_multistep`, `ftsm_update`, `fplsr`, `functional_acf`, `functional_pacf`, `long_run_covariance`, `spectral_density`, `dpca`, `dpca_reconstruct`, `stationarity_test`, `functional_difference`
+
+**Notes:** FTSM (FPCA + Yule-Walker AR) is Hyndman & Shang (2009). DPCA is Hormann, Kidzinski & Hallin (2015). Functional PLS for FTS (`fplsr`) is described in Aue, Norinho & Hormann (2015) "On the prediction of stationary functional time series" *JASA* 110(509): 378-392. Long-run covariance estimation traces to Hormann & Kokoszka (2010) "Weakly dependent functional data" *Ann. Statist.* 38(3): 1845-1884. Stationarity test traces to Horvath, Kokoszka & Rice (2014) "Testing stationarity of functional time series" *J. Econometrics* 179: 66-82. Each sub-method needs a separate entry in the references JSON.
+
+---
+
+### A17. Shapelets
+**fdars modules:** `shapelet`
+
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Time series shapelets: a new primitive for data mining" | Ye, L. & Keogh, E. | 2009 | *KDD 2009*, pp. 947-956 | https://dl.acm.org/doi/10.1145/1557019.1557122 |
+| "Time series shapelets: a novel technique..." (journal version) | Ye, L. & Keogh, E. | 2011 | *Data Min. Knowl. Discov.* 22: 149-182 | https://doi.org/10.1007/s10618-010-0179-5 |
+
+**Callables covered:** `discover_shapelets`, `shapelet_transform_fit`, `shapelet_transform`, `shapelet_classifier_fit`, `shapelet_distance`, `PyShapeletFit`, `PyShapeletClassifierFit`
+
+**Notes:** Ye & Keogh (2009) is the original KDD conference paper; the 2011 journal version is the more complete reference. The shapelets approach for functional data classification is a direct application with no separate FDA-specific foundational paper. Information-gain quality criterion is from the same paper.
+
+---
+
+### A18. Multivariate Functional Data & MFPCA
+**fdars modules:** `multi_fdata`, `spm` (mfpca, spe_multivariate), `famm`
+
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Multivariate functional principal component analysis for data observed on different (dimensional) domains" | Happ, C. & Greven, S. | 2018 | *JASA* 113(522): 649-659 | https://doi.org/10.1080/01621459.2016.1273115 |
+
+**Callables covered:** `PyMultiFunData`, `multi_fdata_from_components`, `mfpca`, `spe_multivariate`, `dense_flmm`, `fast_fmm`, `multi_famm`
+
+**Notes:** MFPCA is unambiguously Happ & Greven (2018). The Functional Linear Mixed Model (`dense_flmm`, `fast_fmm`, `multi_famm`) traces to Greven & Scheipl (2017) "A general framework for functional regression modelling" *Stat. Model.* 17(1-2): 1-35 and Scheipl, Staicu & Greven (2015) "Functional additive mixed models" *JCGS* 24(2): 477-501 (DOI: 10.1080/10618600.2014.901914). Multiple plausible attributions; flag for curator.
+
+---
+
+### A19. Statistical Process Monitoring / SPM
+**fdars modules:** `spm`
+
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Multivariate quality control" (Hotelling T-squared origin) | Hotelling, H. | 1947 | Chapter in *Techniques of Statistical Analysis* | (no DOI; historical) |
+| "Control procedures for residuals associated with principal component analysis" (T²/SPE pattern) | Jackson, J.E. & Mudholkar, G.S. | 1979 | *Technometrics* 21(3): 341-349 | https://doi.org/10.1080/00401706.1979.10489779 |
+
+**Callables covered:** `spm_phase1`, `spm_monitor`, `spm_ewma`, `spm_cusum`, `hotelling_t2`, `hotelling_t2_regularized`, `t2_control_limit`, `t2_limit_robust`, `t2_pc_contributions`, `t2_pc_significance`, `spe_control_limit`, `spe_limit_robust`, `spe_moment_match_diagnostic`, `arl0_t2`, `arl1_t2`, `arl0_spe`, `arl0_ewma_t2`, `select_ncomp`, `ewma_scores`, `nelson_rules`, `western_electric_rules`
+
+**ANTI-FEATURE NOTE:** Functional data SPM is an extension of classical multivariate SPC with no single canonical FDA-SPM paper. Curators should cite Jackson & Mudholkar (1979) as the T²/SPE root and note that the functional extension follows Colosimo & Pacella (2007) *Int. J. Prod. Res.* 45(23): 5563-5581 or Woodall et al. (2004) *J. Qual. Technol.* 36(3): 309-320. Forcing a single FDA citation would mislead.
+
+---
+
+### A20. Conformal Prediction & Tolerance Bands
+**fdars modules:** `conformal`, `tolerance`
+
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Conformal prediction: a gentle introduction" | Angelopoulos, A.N. & Bates, S. | 2023 | *Found. Trends Mach. Learn.* 16(4): 494-591 | https://doi.org/10.1561/2200000101 |
+
+**Callables covered:** `conformal_classif`, `conformal_fregre_lm`, `conformal_fregre_np`, `conformal_logistic`, `conformal_elastic_regression`, `conformal_elastic_pcr`, `conformal_elastic_logistic`, `fpca_tolerance_band`, `elastic_tolerance_band`, `elastic_tolerance_band_with_config`, `exponential_family_tolerance_band`, `phase_tolerance_band`, `conformal_prediction_band`, `equivalence_test`, `equivalence_test_one_sample`, `scb_mean_degras`
+
+**ANTI-FEATURE NOTE:** Conformal prediction for functional data is a 2020-present research frontier with no consensus single foundational FDA paper. The CP framework root is Vovk, Gammerman & Shafer (2005) book + Angelopoulos & Bates (2023) survey. Functional conformal prediction is described in Diquigiovanni, Fontana & Vantini (2022) "Conformal prediction bands for multivariate functional data" *J. Multivar. Anal.* 189: 104879 (DOI: 10.1016/j.jmva.2021.104879) — a plausible functional-specific reference, but the field remains active and contested.
+
+---
+
+### A21. Simulation & GP Sampling
+**fdars modules:** `simulation`, `covariance`
+
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| *Functional Data Analysis* (2nd ed.) — simulation / Karhunen-Loeve chapters | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
+| *Gaussian Processes for Machine Learning* (kernel definitions) | Rasmussen, C.E. & Williams, C.K.I. | 2006 | MIT Press (book) | https://gaussianprocess.org/gpml/ |
+
+**Callables covered:** `sim_kl`, `simulate`, `eigenfunctions`, `eigenvalues`, `covariance_matrix`, `gaussian_process`, `add_error_curve`, `add_error_pointwise`, `kernel_gaussian`, `kernel_exponential`, `kernel_brownian`, `kernel_matern`, `kernel_periodic`, `kernel_linear`, `kernel_polynomial`, `kernel_whitenoise`, `kernel_add`, `kernel_mult`, `make_gaussian_process`, `r_brownian`, `r_bridge`, `r_ou`
+
+---
+
+### A22. Seasonality & Period Detection
+**fdars modules:** `seasonal`
+
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "STL: A seasonal-trend decomposition procedure based on loess" | Cleveland, R.B., Cleveland, W.S., McRae, J.E. & Terpenning, I. | 1990 | *J. Official Statist.* 6(1): 3-73 | https://www.scb.se/contentassets/ca21efb41fee47d293bbee5bf7be7fb3/stl-a-seasonal-trend-decomposition-procedure-based-on-loess.pdf |
+
+**Callables covered:** `stl_decompose`, `autoperiod`, `cfd_autoperiod`, `estimate_period_acf`, `estimate_period_fft`, `instantaneous_period`, `sazed`, `lomb_scargle_fdata`, `matrix_profile_fdata`, `detect_peaks`, `detect_seasonality_changes`, `detect_multiple_periods`, `seasonal_strength`, `seasonal_strength_wavelet`, `seasonal_strength_windowed`, `classify_seasonality`, `ssa_fdata`, `analyze_peak_timing`
+
+**ANTI-FEATURE NOTE:** The `seasonal` module is the most heterogeneous in provenance. Each sub-method has its own root paper from distinct research communities: STL (Cleveland et al. 1990), Lomb-Scargle periodogram (Lomb 1976; Scargle 1982), SSA (Broomhead & King 1986), Matrix Profile (Yeh et al. 2016 ICDM), SAZED (Talagala et al. 2021). A single root citation for this module does not exist. Curators must list sub-method-level citations.
+
+---
+
+### A23. Scoring Metrics
+**fdars modules:** `scoring`, `metrics`
+
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| *Functional Data Analysis* (2nd ed.) — regression evaluation | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
+
+**Callables covered:** `functional_mae`, `functional_mse`, `functional_mape`, `functional_msle`, `functional_explained_variance`, `pred_mae`, `pred_mse`, `pred_rmse`, `pred_r2`, `prediction_metrics`
+
+**ANTI-FEATURE NOTE:** These are standard scalar metrics integrated over the domain. No FDA-specific founding paper exists. Forcing a single citation would be an overreach. The appropriate note for these callables is "domain-integrated extensions of standard prediction metrics; see standard ML/statistics references (e.g., Hastie, Tibshirani & Friedman 2009)."
+
+---
+
+### A24. Explainability / XAI
+**fdars modules:** `explain`
+
+| Paper | Authors | Year | Venue | DOI / URL |
+|-------|---------|------|-------|-----------|
+| "Why should I trust you? Explaining the predictions of any classifier" (LIME) | Ribeiro, M.T., Singh, S. & Guestrin, C. | 2016 | *KDD 2016* | https://dl.acm.org/doi/10.1145/2939672.2939778 |
+| "A unified approach to interpreting model predictions" (SHAP) | Lundberg, S.M. & Lee, S.-I. | 2017 | *NeurIPS 2017* | https://proceedings.neurips.cc/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html |
+| "Anchors: High-precision model-agnostic explanations" | Ribeiro, M.T., Singh, S. & Guestrin, C. | 2018 | *AAAI 2018* | https://ojs.aaai.org/index.php/AAAI/article/view/11491 |
+
+**Callables covered:** All `explain.*` callables
+
+**ANTI-FEATURE NOTE:** The `explain` module applies standard ML XAI techniques (LIME, SHAP, Anchors, ALE, PDP, permutation importance) to functional regression/classification models via FPC scores. Root papers are ML-community XAI papers listed above, not FDA-specific. No dedicated FDA-XAI foundational paper exists. Forcing FDA-specific citations would mislead.
+
+---
+
+## Part B — Cross-Language Implementation Landscape
+
+### B1. R Implementation Landscape
+
+| fdars Family | R Package | Representative Function | CRAN / URL | Gap? |
+|---|---|---|---|---|
+| Basis expansion & smoothing | `fda` (Ramsay) | `create.bspline.basis`, `smooth.basis` | https://cran.r-project.org/package=fda | No gap |
+| Basis expansion & smoothing | `refund` | `pfr`, `pffr` | https://cran.r-project.org/package=refund | No gap |
+| Functional statistics (mean/var/cov) | `fda` | `mean.fd`, `var.fd` | https://cran.r-project.org/package=fda | No gap |
+| Functional statistics | `fda.usc` | `func.mean`, `func.var` | https://cran.r-project.org/package=fda.usc | No gap |
+| FM depth | `fda.usc` | `depth.FM` | https://cran.r-project.org/package=fda.usc | No gap |
+| Band depth / modified band depth | `fda.usc` | `depth.mode`, `depth.BD` | https://cran.r-project.org/package=fda.usc | No gap |
+| Functional depth (unified) | `ddalpha` | `depthf.FM1`, `depthf.BD` | https://cran.r-project.org/package=ddalpha | No gap |
+| Functional boxplot | `fdaoutlier` | `functional_boxplot` | https://cran.r-project.org/package=fdaoutlier | No gap |
+| Outlier detection (MS-plot, MUOD, TVDMSS) | `fdaoutlier` | `msplot`, `muod`, `tvdmss`, `dir_out` | https://cran.r-project.org/package=fdaoutlier | No gap |
+| FPCA (dense) | `fda` | `pca.fd` | https://cran.r-project.org/package=fda | No gap |
+| PACE FPCA (sparse) | `fdapace` | `FPCA` | https://cran.r-project.org/package=fdapace | No gap |
+| Kernel smoothing | `fda.usc` | `optim.np`, `fdata.comp` | https://cran.r-project.org/package=fda.usc | No gap |
+| Scalar-on-function regression | `refund` | `pfr` | https://cran.r-project.org/package=refund | No gap |
+| Scalar-on-function regression | `fda.usc` | `fregre.np`, `fregre.lm` | https://cran.r-project.org/package=fda.usc | No gap |
+| Functional GLM | `refund` | `pfr` (with family arg) | https://cran.r-project.org/package=refund | No gap |
+| Concurrent regression | `refund` | `ccb`, `peer` | https://cran.r-project.org/package=refund | No gap |
+| Function-on-function regression | `refund` | `pffr` | https://cran.r-project.org/package=refund | No gap |
+| Function-on-scalar regression | `refund` | `fosr` | https://cran.r-project.org/package=refund | No gap |
+| Elastic / SRSF registration | `fdasrvf` | `time_warping`, `elastic.regression` | https://cran.r-project.org/package=fdasrvf | No gap |
+| Shift / landmark registration | `fda` | `register.fd` | https://cran.r-project.org/package=fda | No gap |
+| DTW metrics | `dtw` | `dtw` | https://cran.r-project.org/package=dtw | No gap |
+| GAK metric | `dtwclust` | `GAK` | https://cran.r-project.org/package=dtwclust | No gap |
+| k-means clustering (functional) | `fda.usc` | `kmeans.fd` | https://cran.r-project.org/package=fda.usc | No gap |
+| FunFEM clustering | `funFEM` | `funFEM` | https://cran.r-project.org/package=funFEM | No gap |
+| MFPCA | `MFPCA` | `MFPCA` | https://cran.r-project.org/package=MFPCA | No gap |
+| Multi-domain data container | `funData` | `funData`, `multiFunData` | https://cran.r-project.org/package=funData | No gap |
+| Functional inference (perm tests) | `fda.usc` | `fanova.onefactor` | https://cran.r-project.org/package=fda.usc | No gap |
+| ITP interval testing | `fdatest` (GitHub only) | `IWT1`, `IWT2`, `IWTlm` | https://github.com/alessiapini/fdatest | GAP: not on CRAN |
+| Functional time series (FTSM) | `ftsa` | `fts`, `ftsm`, `forecast.fts` | https://cran.r-project.org/package=ftsa | No gap |
+| DPCA | `freqdom.fda` | `fts.dpca`, `fts.spectral.density` | https://cran.r-project.org/package=freqdom.fda | No gap |
+| Frechet regression | NO standard R package | — | — | GAP: research code only |
+| Density FDA (LQD/Wasserstein) | NO CRAN package | — | — | GAP: `fdadensity` on GitHub only |
+| Shapelets | NO R package | — | — | GAP: no CRAN or major R shapelets package |
+| Functional SPM | NO dedicated R package | — | — | GAP: `fda.usc` has partial SPC; no dedicated FDA-SPM package |
+| Conformal prediction (functional) | `conformalInference.fd` (GitHub) | `conformal.fd` | https://github.com/Paolo-Bosc/conformalInference.fd | GAP: not on CRAN |
+| XAI for functional models | NO FDA-specific R package | — | — | GAP: general `DALEX`, `iml` exist but not FDA-aware |
+| Elastic classification | `fdasrvf` | `elastic.logistic`, `elastic.mlogistic` | https://cran.r-project.org/package=fdasrvf | No gap |
+
+---
+
+### B2. Python Implementation Landscape
+
+| fdars Family | Python Package | Representative Function/Class | PyPI / URL | Gap? |
+|---|---|---|---|---|
+| Basis expansion & smoothing | `scikit-fda` | `BSplineBasis`, `FourierBasis`, `BasisSmoother` | https://pypi.org/project/scikit-fda/ | No gap |
+| Functional statistics | `scikit-fda` | `FDataGrid.mean()`, `.var()`, `.cov()` | https://fda.readthedocs.io | No gap |
+| FM depth / band depth | `scikit-fda` | `fraiman_muniz_depth`, `band_depth`, `modified_band_depth` | https://fda.readthedocs.io | No gap |
+| Functional boxplot | `scikit-fda` | `FunctionalBoxplot` | https://fda.readthedocs.io | No gap |
+| FPCA (dense) | `scikit-fda` | `FPCA` | https://fda.readthedocs.io | No gap |
+| PACE FPCA (sparse) | NO mature Python package | — | — | GAP: `scikit-fda` has partial support; no PACE BLUP scoring |
+| Kernel smoothing | `scikit-fda` | `KernelSmoother` | https://fda.readthedocs.io | No gap |
+| Scalar-on-function regression | `scikit-fda` | `LinearFunctionalRegression` | https://fda.readthedocs.io | No gap |
+| Functional GLM (logistic) | `scikit-fda` | partial via `LinearFunctionalRegression` | https://fda.readthedocs.io | Partial gap: no standalone functional GLM family dispatch |
+| Elastic / SRSF registration | `fdasrsf` | `time_warping`, `elastic_regression` | https://pypi.org/project/fdasrsf/ | No gap |
+| Elastic / SRSF registration | `scikit-fda` | `ElasticRegistration` | https://fda.readthedocs.io | No gap (second option) |
+| DTW metrics | `tslearn` | `dtw`, `dtw_path` | https://pypi.org/project/tslearn/ | No gap |
+| GAK metric | `tslearn` | `GlobalAlignmentKernel` | https://pypi.org/project/tslearn/ | No gap |
+| Soft-DTW | `tslearn` | `SoftDTW` | https://pypi.org/project/tslearn/ | No gap |
+| k-means clustering (functional) | `scikit-fda` | `FuzzyKMeans`, `KMeans` | https://fda.readthedocs.io | No gap |
+| FunFEM clustering | NO Python package | — | — | GAP: no Python port |
+| MFPCA | NO mature Python package | — | — | GAP: scikit-fda lacks multi-domain MFPCA |
+| Functional inference (perm tests) | `scikit-fda` | `hotelling_t2` (partial) | https://fda.readthedocs.io | Partial gap |
+| ITP interval testing | NO Python package | — | — | GAP: R-only |
+| Functional time series | NO dedicated Python package | — | — | GAP: `statsmodels` handles scalar TS; no functional TS |
+| Frechet regression | NO Python package | — | — | GAP: research code only |
+| Density FDA (LQD/Wasserstein) | `POT` (partial) | `ot.barycenter_sinkhorn` | https://pypi.org/project/POT/ | Partial gap: Wasserstein barycenter only; not LQD-framed |
+| Shapelets | `tslearn` | `ShapeletModel` | https://pypi.org/project/tslearn/ | No gap |
+| Shapelets | `sktime` | `ShapeletTransformClassifier` | https://pypi.org/project/sktime/ | No gap (second option) |
+| Functional SPM | NO FDA-specific Python package | — | — | GAP: no functional SPC Python package |
+| Conformal prediction | `MAPIE` (general) | `MapieRegressor` | https://pypi.org/project/mapie/ | Partial gap: general CP, not FDA-specific |
+| XAI for functional models | `shap`, `lime` | standard APIs | https://pypi.org/project/shap/ | Partial gap: not FDA-aware |
+| Outlier detection | `scikit-fda` | `OutliergramOutlierDetector`, `FunctionalBoxplotOutlierDetector` | https://fda.readthedocs.io | No gap for common methods |
+
+---
+
+### B3. Matlab Implementation Landscape
+
+| fdars Family | Matlab Toolbox | Representative Function | URL | Gap? |
+|---|---|---|---|---|
+| Basis expansion & smoothing | `fdaM` (Ramsay) | `create_bspline_basis`, `smooth_basis` | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
+| Functional statistics | `fdaM` | `mean_fd`, `var_fd` | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
+| FPCA (dense) | `fdaM` | `pca_fd` | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
+| PACE FPCA (sparse) | `PACE` (UC Davis) | `FPCA` | https://anson.ucdavis.edu/~mueller/data/pace.html | No gap |
+| Kernel smoothing | `fdaM` | `smooth_basis`, kernel functions | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
+| Scalar-on-function regression | `fdaM` | `fRegress` | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
+| Concurrent regression | `fdaM` | `fRegress` (pointwise basis) | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
+| Elastic / SRSF registration | `fdasrvf_MATLAB` | `time_warping`, `ElasticFunctionData` | https://github.com/jdtuck/fdasrvf_MATLAB | No gap |
+| Shift / landmark registration | `fdaM` | `register_fd` | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
+| Functional depth | NO dedicated Matlab toolbox | — | — | GAP: depth functions scattered across paper-specific research code |
+| Functional boxplot | `PACE` (partial) | trajectory boxplot | https://anson.ucdavis.edu/~mueller/data/pace.html | Partial gap |
+| Outlier detection | NO Matlab toolbox | — | — | GAP: no equivalent to fdaoutlier |
+| k-means clustering | NO dedicated Matlab FDA package | — | — | GAP: custom code in papers |
+| FunFEM clustering | NO Matlab implementation | — | — | GAP |
+| MFPCA | NO Matlab toolbox | — | — | GAP: research code only |
+| ITP interval testing | NO Matlab toolbox | — | — | GAP: R-only |
+| Functional time series | NO dedicated Matlab toolbox | — | — | GAP: PACE has trajectory tools; no FTSM/DPCA |
+| Frechet regression | NO Matlab toolbox | — | — | GAP |
+| Density FDA (LQD) | NO Matlab toolbox | — | — | GAP |
+| Shapelets | NO FDA Matlab toolbox | — | — | GAP |
+| Functional SPM | Statistics and ML Toolbox | `hotelling` | https://www.mathworks.com/products/statistics.html | Partial gap: classical Hotelling T2; no functional version |
+| Conformal prediction | NO Matlab toolbox | — | — | GAP |
+
+---
+
+## Feature Landscape (Per Milestone Taxonomy)
+
+### Table Stakes
+Families with a clear single root paper and obvious R + Matlab equivalents. Curation is straightforward; attribution is uncontested.
+
+| Family | fdars Module | Root Paper | R Pkg | Python Pkg | Matlab Pkg |
+|--------|-------------|------------|-------|------------|------------|
+| B-spline / Fourier basis | `basis` | Ramsay & Silverman (2005) | `fda` | `scikit-fda` | `fdaM` |
+| Penalized smoothing (GCV/AIC) | `smoothing` | Ramsay & Silverman (2005) | `fda`, `refund` | `scikit-fda` | `fdaM` |
+| Functional mean / var / cov | `fdata` | Ramsay & Silverman (2005) | `fda`, `fda.usc` | `scikit-fda` | `fdaM` |
+| FM depth | `depth.fraiman_muniz_*` | Fraiman & Muniz (2001) | `fda.usc::depth.FM` | `scikit-fda` | GAP |
+| Band depth / modified band | `depth.band_1d`, `modified_band_1d` | Lopez-Pintado & Romo (2009) | `fda.usc`, `fdaoutlier` | `scikit-fda` | GAP |
+| Functional boxplot | `depth.functional_boxplot` | Sun & Genton (2011) | `fdaoutlier` | `scikit-fda` | `PACE` (partial) |
+| FPCA (dense) | `regression.fpca` | Ramsay & Silverman (2005) | `fda`, `fdapace` | `scikit-fda` | `fdaM`, `PACE` |
+| PACE FPCA (sparse) | `pace_fpca` | Yao, Muller & Wang (2005) | `fdapace` | GAP | `PACE` |
+| Scalar-on-function FPC regression | `regression.fregre_lm` | Cardot et al. (1999/2003) | `refund`, `fda.usc` | `scikit-fda` | `fdaM` |
+| Elastic / SRSF registration | `alignment` (elastic_*) | Srivastava et al. (2011) | `fdasrvf` | `fdasrsf` | `fdasrvf_MATLAB` |
+| GAK metric | `metric.gak*` | Cuturi (2011) | `dtwclust::GAK` | `tslearn` | GAP |
+| DTW metric | `metric.dtw_*` | Sakoe & Chiba (1978) | `dtw` | `tslearn` | GAP |
+| Functional ANOVA (permutation) | `inference`, `regression.fanova` | Cuevas et al. (2004) | `fda.usc` | `scikit-fda` (partial) | GAP |
+| Simultaneous confidence bands | `inference.mean_scb` | Degras (2011) | `fda` (partial) | GAP | GAP |
+| Functional time series (FTSM) | `fts.ftsm*` | Hyndman & Shang (2009) | `ftsa` | GAP | GAP |
+| DPCA | `fts.dpca` | Hormann et al. (2015) | `freqdom.fda` | GAP | GAP |
+| Shapelets | `shapelet` | Ye & Keogh (2009) | GAP | `tslearn`, `sktime` | GAP |
+| Multi-domain MFPCA | `spm.mfpca`, `multi_fdata` | Happ & Greven (2018) | `MFPCA`, `funData` | GAP | GAP |
+
+### Differentiators
+Families where fdars' provenance documentation is more valuable because implementations are scattered, new, or cross-language gaps exist.
+
+| Family | fdars Module | Root Paper | Why Differentiating |
+|--------|-------------|------------|---------------------|
+| Frechet regression on metric spaces | `frechet` | Petersen & Muller (2019) | No CRAN, no PyPI, no Matlab toolbox. Research code only. fdars is a notable implementation. |
+| Density FDA (LQD/Wasserstein) | `density_fda` | Petersen & Muller (2016) | No CRAN/PyPI package with LQD framing; `POT` Python covers Wasserstein barycenter only. |
+| ITP interval-wise testing | `inference.itp_*` | Pini & Vantini (2017) | Only in unmaintained GitHub R package (`fdatest`); no Python or Matlab. |
+| FunFEM clustering | `clustering.funfem_cluster` | Bouveyron et al. (2015) | R `funFEM` CRAN exists; no Python or Matlab port. |
+| Functional time series (full: ACF/PACF, long-run cov, DPCA) | `fts` | Hormann et al. (2015); Hyndman & Shang (2009) | R has `ftsa` + `freqdom.fda`; Python has nothing dedicated; Matlab gap. |
+| MUOD / TVDMSS / depthgram / sequential outlier | `outliers` | Dai & Genton (2018/2019) etc. | R `fdaoutlier` covers these; Python and Matlab lack equivalents. |
+| Functional XAI (LIME/SHAP applied to FDA models) | `explain` | Ribeiro et al. (2016); Lundberg & Lee (2017) | No R/Python/Matlab package applies XAI specifically to functional regression/classification models. |
+| Conformal prediction for functional data | `conformal`, `tolerance` | Angelopoulos & Bates (2023) | Only an unmaintained GitHub R package; no Python or Matlab. |
+| Functional SPM (T2/SPE on FPC scores) | `spm` | Jackson & Mudholkar (1979) extended to FDA | No dedicated functional SPC package in any language. |
+| Soft-DTW | `metric.soft_dtw_*` | Cuturi & Blondel (2017) | Python `tslearn` has it; no R CRAN package; no Matlab. |
+| Elastic multinomial classification | `classification.elastic_multinomial` | Tucker et al. (2013) | `fdasrvf` R covers this; no Python sklearn-compatible version. |
+| Bayesian alignment | `alignment.bayesian_align_pair` | Cheng et al. (2016) | Research code only; no standard package in any language. |
+| PACE FPCA in Python | `pace_fpca` | Yao et al. (2005) | R `fdapace` and Matlab `PACE` exist; no mature Python equivalent. |
+
+### Anti-Features (Do Not Force a Single Citation)
+Families where assigning a single foundational paper would be misleading or inaccurate.
+
+| Family | fdars Module | Why Ambiguous / Anti-Feature |
+|--------|-------------|------------------------------|
+| Functional depth (as a category) | `depth` | At least 7 distinct root papers across methods. The `functional_depth` dispatcher unifies them; no single citation fits the module. |
+| Scoring metrics (MAE/MSE/MAPE etc.) | `scoring`, `metrics` | Standard scalar metrics integrated over domain. No FDA-specific founding paper. |
+| Functional SPM | `spm` | T2/SPE traces to Hotelling (1947) and Jackson & Mudholkar (1979); functional extension is spread across applied papers without a single canonical FDA-SPM paper. |
+| Seasonal decomposition | `seasonal` | Each sub-method has its own root paper from distinct research communities (STL, Lomb-Scargle, SSA, Matrix Profile, SAZED). |
+| XAI for functional models | `explain` | Root papers are ML-community XAI papers (LIME, SHAP, Anchors). No canonical FDA-XAI paper exists. |
+| Conformal prediction | `conformal`, `tolerance` | Active 2020-present research frontier; no single paper has achieved consensus for functional data. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-MultiFunData (E1) ──required-by──> multi_famm (C3)
-dense_flmm (C1) ──required-by──> multi_famm (C3)
-discover_shapelets (M1) ──feeds──> shapelet_transform_fit (M2) ──feeds──> shapelet_classifier_fit (M3)
-lqd_transform (G2) ──feeds──> lqd_fpca (G1)
-GakGramTrain (L2) ──required-by──> gak_gram_predict (L2)
-ftsm (I1) ──required-by──> ftsm_forecast (I1)
-ftsm (I1) ──required-by──> ftsm_update (I1)
+Paper-level curation (REFERENCES_MAP JSON)
+    requires ---> Callable-to-paper index (callable_refs field in JSON)
+                      requires ---> Part A per-family tables (this document)
+
+Cross-language implementation pointers (Part B)
+    enhances ---> Skill hybrid-protocol answers ("alternatives in R/Matlab?")
+
+fdars_method_references MCP tool
+    requires ---> REFERENCES_MAP JSON (static, via importlib.resources)
+    provides ---> curated entry OR explicit "ungrounded, flag it" signal
+
+fdars-capabilities skill extension
+    extends ---> v12.0 capability-discovery skill
+    uses ---> MCP tool as grounded source
+    falls back to ---> LLM synthesis FLAGGED as ungrounded
 ```
+
+### Dependency Notes
+
+- **Paper-level JSON requires this document:** The Part A tables are the direct authoring source for the `_references_map.json` file to be created in v13.0. Each family section maps to one or more top-level entries in that JSON.
+- **Anti-feature families require explicit ungrounded signal:** For families marked anti-feature above (seasonal, scoring, SPM, XAI), the MCP tool should return an explicit "no single curated entry — ungrounded synthesis permitted, flag it" signal rather than a forced single paper.
+- **Multi-paper families require method-keyed entries:** The `depth`, `alignment`, `regression`, and `fts` modules each require multiple JSON entries, keyed by the specific method or callable group, not at the module level.
 
 ---
 
-## Suggested Binding Groups for Roadmap Phasing
+## MVP Definition
 
-Based on coupling and complexity, the capabilities cluster into four natural binding groups:
+### Phase 1: Core reference map (essential for roadmap)
+- Cover all 24 families (A1-A24) with at least one curated paper entry per family
+- Priority: A1-A18 (non-seasonal, non-conformal) have HIGH curation confidence
+- Callable-to-paper index covering the ~300 non-XAI/non-SPM callables
 
-**Group 1 — Regression Depth** (extends existing `fdars.scalar_on_function` and `fdars.fof_regression`):
-B1-B7 (fam, gkam, gsam, history_index, model_selection_ncomp, variable_selection, permutation_test_fam) + D1 (fof_re_regression/predict_fof_re). No new submodule needed; medium result structs.
+### Phase 2: MCP tool + skill extension
+- `fdars_method_references(method)` LLM-free static lookup via `importlib.resources`
+- `fdars-capabilities` skill extended with hybrid protocol (curated first, flagged-LLM fallback)
 
-**Group 2 — Clustering + Mixed Models** (new `fdars.clustering_advanced` submodule + FAMM extensions):
-A1-A4 (clustering_advanced) + E1 (multi_fdata) + C1-C3 (dense_flmm/fast_fmm/multi_famm). High complexity; C3 depends on E1; new `fdars.clustering_advanced` submodule required.
+### Phase 3: Docs surface
+- References page on the MkDocs site
+- Per-method "References" blocks on method pages
+- `llms.txt` extended with provenance data
 
-**Group 3 — Time Series + FPCA Variants + Density + Frechet** (four new submodules, shared theme of "new analysis paradigm"):
-I (fts: new `fdars.fts` submodule) + J (fpca_variants: new `fdars.fpca_variants` submodule) + G (density_fda: new `fdars.density_fda` submodule) + H (frechet: new `fdars.frechet` submodule). High complexity; fully self-contained.
-
-**Group 4 — Advanced Methods** (GAK metric + shapelet + FEM smoothing):
-L (GAK: extends `fdars.metric`) + M (shapelet: new `fdars.shapelet` submodule) + K (FEM: new `fdars.fem_smoothing` submodule). Advanced/deferrable; FEM has non-standard mesh input shape.
+### Defer
+- DOI network validation (offline JSON sufficient for v13.0 gate)
+- Automated citation count or impact factor scraping
+- Full XAI `explain` module citation coverage (anti-feature risk; low demand)
 
 ---
 
 ## Sources
 
-- [fdars-core API docs 0.23.0](https://docs.rs/fdars-core/0.23.0/fdars_core/) — baseline confirmation (LOW confidence, webfetch)
-- [fdars-core API docs 0.24.0](https://docs.rs/fdars-core/0.24.0/fdars_core/) — Group A/B/C/D/E attribution (LOW confidence, webfetch)
-- [fdars-core API docs 0.27.0](https://docs.rs/fdars-core/0.27.0/fdars_core/) — Group F/G/H/I/J attribution (LOW confidence, webfetch)
-- [fdars-core API docs 0.28.0](https://docs.rs/fdars-core/0.28.0/fdars_core/) — Group K attribution (LOW confidence, webfetch)
-- [fdars-core API docs 0.32.0](https://docs.rs/fdars-core/0.32.0/fdars_core/) — Group L attribution (LOW confidence, webfetch)
-- [fdars-core API docs 0.33.0](https://docs.rs/fdars-core/0.33.0/fdars_core/) — Group M + MSRV + linalg feature confirmation (LOW confidence, webfetch)
-- [crates.io version list](https://crates.io/api/v1/crates/fdars-core/versions) — version dates/existence confirmation (LOW confidence, webfetch)
-- [CHANGELOG.md source view](https://docs.rs/crate/fdars-core/0.33.0/source/CHANGELOG.md) — breaking-change assessment (LOW confidence, webfetch)
-- Per-struct docs pages (docs.rs) — field names/types for AlignClusterResult, DbscanResult, KcfcResult, FunFemResult, FamResult, GkamResult, GsamResult, HistoryIndexResult, VarSelectResult, DenseFlmmResult, FastFmmResult, MultiFammResult, FofReResult, PdaResult, LqdFpcaResult, FrechetGlobalRegResult, FrechetLocalRegResult, FrechetAnovaResult, FtsmResult, FtsmForecastResult, FsvdResult, FemSmoothResult (LOW confidence, webfetch; cross-verified across struct + module index pages)
+- [Ramsay & Silverman (2005) Springer](https://link.springer.com/book/10.1007/b98888)
+- [Ramsay, Hooker & Graves (2009) Springer](https://link.springer.com/book/10.1007/978-0-387-98185-7)
+- [Fraiman & Muniz (2001) TEST](https://link.springer.com/article/10.1007/BF02595706)
+- [Lopez-Pintado & Romo (2009) JASA](https://doi.org/10.1198/jasa.2009.0015)
+- [Lopez-Pintado & Romo (2011) CSDA](https://doi.org/10.1016/j.csda.2010.10.029)
+- [Nieto-Reyes & Battey (2016) Statist. Sci.](https://doi.org/10.1214/15-STS532)
+- [Yao, Muller & Wang (2005) JASA](https://www.tandfonline.com/doi/abs/10.1198/016214504000001745)
+- [Srivastava et al. (2011) arXiv](https://arxiv.org/abs/1103.3817)
+- [Srivastava & Klassen (2016) Springer book](https://doi.org/10.1007/978-1-4939-4020-2)
+- [Marron et al. (2015) Statist. Sci.](https://doi.org/10.1214/15-STS524)
+- [Petersen & Muller (2019) Ann. Statist.](https://doi.org/10.1214/17-AOS1624)
+- [Petersen & Muller (2016) Ann. Statist. LQD](https://doi.org/10.1214/15-AOS1363)
+- [Hyndman & Shang (2009) J. Korean Statist. Soc.](https://doi.org/10.1016/j.jkss.2009.06.002)
+- [Hormann, Kidzinski & Hallin (2015) JRSSB](https://doi.org/10.1111/rssb.12076)
+- [Cuturi (2011) ICML](https://dl.acm.org/doi/10.5555/3104482.3104599)
+- [Cuturi & Blondel (2017) ICML](https://proceedings.mlr.press/v70/cuturi17a.html)
+- [Sakoe & Chiba (1978) IEEE Trans. Acoust.](https://doi.org/10.1109/TASSP.1978.1163055)
+- [Ye & Keogh (2009) KDD](https://dl.acm.org/doi/10.1145/1557019.1557122)
+- [Ye & Keogh (2011) DMKD](https://doi.org/10.1007/s10618-010-0179-5)
+- [Bouveyron & Jacques (2011) ADAC](https://doi.org/10.1007/s11634-011-0095-6)
+- [Bouveyron, Come & Jacques (2015) Ann. Appl. Stat.](https://doi.org/10.1214/15-AOAS861)
+- [Happ & Greven (2018) JASA](https://doi.org/10.1080/01621459.2016.1273115)
+- [Sun & Genton (2011) JCGS](https://doi.org/10.1198/jcgs.2011.09224)
+- [Dai & Genton (2018) JCGS](https://doi.org/10.1080/10618600.2018.1473781)
+- [Dai & Genton (2019) CSDA](https://doi.org/10.1016/j.csda.2018.03.017)
+- [Pini & Vantini (2017) J. Nonparam. Stat.](https://doi.org/10.1080/10485252.2017.1306627)
+- [Degras (2011) Statistica Sinica](https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N412.html)
+- [Cuevas, Febrero & Fraiman (2004) CSDA](https://doi.org/10.1016/j.csda.2003.10.021)
+- [Jackson & Mudholkar (1979) Technometrics](https://doi.org/10.1080/00401706.1979.10489779)
+- [Cardot, Ferraty & Sarda (1999) Statist. Probab. Lett.](https://doi.org/10.1016/S0167-7152(99)00036-X)
+- [Muller & Yao (2008) JASA](https://doi.org/10.1198/016214508000000516)
+- [Tucker, Wu & Srivastava (2013) EJS](https://doi.org/10.1214/13-EJS816)
+- [Chiou & Li (2007) JRSSB](https://doi.org/10.1111/j.1467-9868.2007.00605.x)
+- [Angelopoulos & Bates (2023) Found. Trends](https://doi.org/10.1561/2200000101)
+- [scikit-fda documentation](https://fda.readthedocs.io/)
+- [R fda CRAN](https://cran.r-project.org/package=fda)
+- [R fda.usc CRAN](https://cran.r-project.org/package=fda.usc)
+- [R refund CRAN](https://cran.r-project.org/package=refund)
+- [R fdapace CRAN](https://cran.r-project.org/package=fdapace)
+- [R fdasrvf CRAN](https://cran.r-project.org/package=fdasrvf)
+- [R fdaoutlier CRAN](https://cran.r-project.org/package=fdaoutlier)
+- [R MFPCA CRAN](https://cran.r-project.org/package=MFPCA)
+- [R funFEM CRAN](https://cran.r-project.org/package=funFEM)
+- [R ftsa CRAN](https://cran.r-project.org/package=ftsa)
+- [R freqdom.fda CRAN](https://cran.r-project.org/package=freqdom.fda)
+- [fdasrsf Python PyPI](https://pypi.org/project/fdasrsf)
+- [fdasrvf Matlab GitHub](https://github.com/jdtuck/fdasrvf_MATLAB)
+- [fdaM Matlab McGill](https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/)
+- [PACE Matlab UC Davis](https://anson.ucdavis.edu/~mueller/data/pace.html)
+- [CRAN Task View Functional Data Analysis](https://cran.r-project.org/view=FunctionalData)
 
 ---
 
-*Feature research for: pyfda v11.0 — fdars-core 0.33.0 upgrade*
-*Researched: 2026-09-02*
-*Confidence: MEDIUM — function signatures sourced directly from docs.rs struct/function pages; version attribution based on presence/absence checks across per-version index pages; linalg gating based on feature annotations in docs; no items fabricated.*
+*Feature research for: v13.0 Scientific Provenance & Cross-Language Implementations (fdars)*
+*Researched: 2026-09-07*
