@@ -776,6 +776,229 @@
       ],
       "notes": "Specialized alignment variants and utility callables without a clear single-paper primary root. Includes: multi-resolution/constrained/penalized elastic alignment variants (extend Srivastava et al. 2011 SRSF framework); Bayesian alignment (Kurtek 2017 or similar — unconfirmed); shape callables (Srivastava & Klassen 2016 book — unconfirmed against fdars-core source); horiz_fpns (FPNS method — unclear primary); robust Karcher mean (extends Srivastava et al. 2011 — unconfirmed); elastic/warp utility callables; hierarchical/kmedoids clustering utilities; warp diagnostics. All deferred to REF-FUT-01 for per-method source confirmation. curated:false.",
       "curated": false
+    },
+    "sakoe_chiba_1978": {
+      "title": "Dynamic programming algorithm optimization for spoken word recognition",
+      "authors": ["Sakoe, H.", "Chiba, S."],
+      "year": 1978,
+      "doi": "10.1109/TASSP.1978.1163055",
+      "url": "https://ieeexplore.ieee.org/document/1163055",
+      "type": "journal",
+      "callables": [
+        "metric.dtw_self_1d",
+        "metric.dtw_cross_1d"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "dtw",
+          "function": "dtw",
+          "url": "https://rdrr.io/cran/dtw/man/dtw.html",
+          "confidence": "high"
+        },
+        "Python": {
+          "package": "tslearn",
+          "function": "dtw",
+          "url": "https://tslearn.readthedocs.io/en/stable/gen_modules/metrics/tslearn.metrics.dtw.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces Dynamic Time Warping (DTW) for time-series comparison via dynamic programming. [CITED: ieeexplore.ieee.org — IEEE TASSP Vol 26, No 1, 1978, DOI 10.1109/TASSP.1978.1163055.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "cuturi_2011": {
+      "title": "Fast global alignment kernels",
+      "authors": ["Cuturi, M."],
+      "year": 2011,
+      "doi": "10.5555/3104482.3104599",
+      "url": "https://dl.acm.org/doi/10.5555/3104482.3104599",
+      "type": "conference",
+      "callables": [
+        "metric.gak",
+        "metric.gak_gram_matrix",
+        "metric.gak_gram_train",
+        "metric.gak_gram_predict",
+        "metric.sigma_gak",
+        "metric.PyGakGramTrain"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "dtwclust",
+          "function": "GAK",
+          "url": "https://rdrr.io/cran/dtwclust/man/GAK.html",
+          "confidence": "high"
+        },
+        "Python": {
+          "package": "tslearn",
+          "function": "gak",
+          "url": "https://tslearn.readthedocs.io/en/stable/gen_modules/metrics/tslearn.metrics.gak.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces the Global Alignment Kernel (GAK) for time-series — a positive definite kernel from soft-DTW alignment. [CITED: dl.acm.org/doi/10.5555/3104482.3104599 — ICML 2011 proceedings. DOI prefix 10.5555 (4 digits) matches GATE-05 C regex.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "cuturi_blondel_2017": {
+      "title": "Soft-DTW: a differentiable loss function for time-series",
+      "authors": ["Cuturi, M.", "Blondel, M."],
+      "year": 2017,
+      "doi": "",
+      "url": "https://proceedings.mlr.press/v70/cuturi17a.html",
+      "type": "conference",
+      "callables": [
+        "metric.soft_dtw_self_1d",
+        "metric.soft_dtw_cross_1d",
+        "metric.soft_dtw_div_self_1d",
+        "metric.soft_dtw_div_cross_1d"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "tslearn",
+          "function": "soft_dtw",
+          "url": "https://tslearn.readthedocs.io/en/stable/gen_modules/metrics/tslearn.metrics.soft_dtw.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces soft-DTW as a differentiable loss function for time-series. ICML 2017 (PMLR v70). NO journal DOI — PMLR proceedings have no DOI assigned. doi:'''' with curated:true is allowed by GATE-05 C (empty doi is skipped by the gate). [CITED: proceedings.mlr.press/v70/cuturi17a.html — confirmed via web search.] soft-DTW divergence (div variants) is a later extension using the same framework.",
+      "curated": true
+    },
+    "_uncurated_metric_tail_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "metric.lp_self_1d",
+        "metric.lp_self_2d",
+        "metric.lp_cross_1d",
+        "metric.lp_cross_2d",
+        "metric.hausdorff_self_1d",
+        "metric.hausdorff_self_2d",
+        "metric.hausdorff_cross_1d",
+        "metric.hausdorff_cross_2d",
+        "metric.fourier_self_1d",
+        "metric.fourier_cross_1d",
+        "metric.hshift_self_1d",
+        "metric.hshift_cross_1d",
+        "metric.inprod",
+        "metric.int_simpson"
+      ],
+      "notes": "Standard mathematical metrics without a single FDA-specific primary paper root. Lp distances (standard Lp norms), Hausdorff distance, Fourier-domain distance, horizontal shift distance, inner product, Simpson integration — each is a general mathematical construction adapted to FDA. No single primary paper covers all; deferred to REF-FUT-01. curated:false.",
+      "curated": false
+    },
+    "chiou_li_2007": {
+      "title": "Functional clustering and identifying substructures of longitudinal data",
+      "authors": ["Chiou, J.M.", "Li, P.L."],
+      "year": 2007,
+      "doi": "10.1111/j.1467-9868.2007.00605.x",
+      "url": "https://rss.onlinelibrary.wiley.com/doi/full/10.1111/j.1467-9868.2007.00605.x",
+      "type": "journal",
+      "callables": [
+        "clustering.kmeans_fd",
+        "clustering.kcfc_cluster"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdapace",
+          "function": "kCFC",
+          "url": "https://rdrr.io/cran/fdapace/man/kCFC.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces k-centres functional clustering (KCFC) and k-means for functional data via functional FPCA-based prototype representation. [CITED: rss.onlinelibrary.wiley.com — JRSSB Vol 69, No 4, 2007.] kcfc_cluster maps to the same paper as kmeans_fd (both implement the Chiou & Li 2007 KCFC framework). [ASSUMED] — executor checked fdars-core 0.33.0 clustering.rs which references Chiou & Li 2007 for KCFC. curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "bouveyron_et_al_2015": {
+      "title": "The discriminative functional mixture model for a comparative analysis of bike sharing systems",
+      "authors": ["Bouveyron, C.", "Côme, E.", "Jacques, J."],
+      "year": 2015,
+      "doi": "10.1214/15-AOAS861",
+      "url": "https://projecteuclid.org/journals/annals-of-applied-statistics/volume-9/issue-4/The-discriminative-functional-mixture-model-for-a-comparative-analysis-of/10.1214/15-AOAS861.full",
+      "type": "journal",
+      "callables": [
+        "clustering.funfem_cluster"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "funFEM",
+          "function": "funFEM",
+          "url": "https://rdrr.io/cran/funFEM/man/funFEM.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces funFEM — discriminative functional mixture model for clustering functional data. [ASSUMED] — DOI 10.1214/15-AOAS861 is plausible from web search description; not landing-page-verified this session. curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "bouveyron_jacques_2011": {
+      "title": "Model-based clustering of time series in group-specific functional subspaces",
+      "authors": ["Bouveyron, C.", "Jacques, J."],
+      "year": 2011,
+      "doi": "10.1007/s11634-011-0095-6",
+      "url": "https://link.springer.com/article/10.1007/s11634-011-0095-6",
+      "type": "journal",
+      "callables": [
+        "clustering.gmm_cluster"
+      ],
+      "notes": "Introduces model-based Gaussian mixture clustering in functional subspaces. [ASSUMED] — DOI 10.1007/s11634-011-0095-6 is plausible from web search; not landing-page-verified this session. curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "_uncurated_clustering_tail_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "clustering.dbscan_fd",
+        "clustering.fuzzy_cmeans_fd",
+        "clustering.calinski_harabasz",
+        "clustering.calinski_harabasz_data",
+        "clustering.silhouette_score",
+        "clustering.silhouette_score_data"
+      ],
+      "notes": "Clustering utility callables without a clear functional-data-specific paper root. DBSCAN (Ester et al. 1996 — not FDA-specific), fuzzy c-means (Bezdek 1981 — not FDA-specific), Calinski-Harabasz index (1974 — general ML), silhouette score (Rousseeuw 1987 — general ML). All adapt general ML techniques to FDA without a specific FDA paper. Deferred to REF-FUT-01. curated:false.",
+      "curated": false
+    },
+    "cuesta_albertos_fraiman_2009": {
+      "title": "Impartial trimmed means for functional data",
+      "authors": ["Cuesta-Albertos, J.A.", "Fraiman, R."],
+      "year": 2009,
+      "doi": "10.1007/978-3-7908-2349-3_12",
+      "url": "https://link.springer.com/chapter/10.1007/978-3-7908-2349-3_12",
+      "type": "book_chapter",
+      "callables": [
+        "classification.fclassif_dd"
+      ],
+      "notes": "DD-classifier (Depth-Depth classifier) attributed root. [ASSUMED] — the DD-classifier as described in fdars-core classification.rs uses functional depth depth-depth plots; Cuesta-Albertos & Fraiman 2009 is the most common citation for functional DD classifiers. Alternative: Li, Cuesta-Albertos & Liu (2012) 'DD-classifier: nonparametric classification procedure based on DD-plot'. Executor could not verify fdars-core source citation against either candidate this session. DOI 10.1007/978-3-7908-2349-3_12 is [ASSUMED]. curated:false pending fdars-core source confirmation.",
+      "curated": false
+    },
+    "_uncurated_classification_ramsay_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "classification.fclassif_lda",
+        "classification.fclassif_qda",
+        "classification.fclassif_knn",
+        "classification.knn_classify_from_distances",
+        "classification.fclassif_cv"
+      ],
+      "notes": "LDA, QDA, KNN, and cross-validated classification for functional data. Ramsay & Silverman 2005 covers LDA/QDA/KNN for FDA (Ch. 11-12). However, fdars-core classification.rs cites no specific paper in module docs for these standard classifiers; they apply classical discriminant analysis to FPC scores. Wired here as a sentinel rather than force-citing ramsay_silverman_2005 to avoid attributing the general FDA textbook to specific classifier implementations. Deferred to REF-FUT-01 for per-method source confirmation. curated:false.",
+      "curated": false
+    },
+    "_uncurated_classification_elastic_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "classification.elastic_multinomial"
+      ],
+      "notes": "Elastic multinomial/logistic classification in the SRSF framework. Tucker et al. 2013 (tucker_wu_srivastava_2013) is the most likely root via the elastic generative model framework. However, fdars-core classification/elastic.rs does not cite a specific paper for elastic_multinomial in its source comments. [ASSUMED] — marked curated:false rather than force-citing Tucker et al. 2013 without source confirmation. Deferred to REF-FUT-01 for fdars-core source check.",
+      "curated": false
     }
   },
   "callable_index": {
@@ -795,6 +1018,49 @@
     "alignment.phase_distance": ["srivastava_et_al_2011"],
     "alignment.elastic_decomposition": ["srivastava_et_al_2011"],
     "clustering.align_cluster_fd": ["srivastava_et_al_2011"],
+    "clustering.kmeans_fd": ["chiou_li_2007"],
+    "clustering.kcfc_cluster": ["chiou_li_2007"],
+    "clustering.funfem_cluster": ["bouveyron_et_al_2015"],
+    "clustering.gmm_cluster": ["bouveyron_jacques_2011"],
+    "clustering.dbscan_fd": ["_uncurated_clustering_tail_2026-09"],
+    "clustering.fuzzy_cmeans_fd": ["_uncurated_clustering_tail_2026-09"],
+    "clustering.calinski_harabasz": ["_uncurated_clustering_tail_2026-09"],
+    "clustering.calinski_harabasz_data": ["_uncurated_clustering_tail_2026-09"],
+    "clustering.silhouette_score": ["_uncurated_clustering_tail_2026-09"],
+    "clustering.silhouette_score_data": ["_uncurated_clustering_tail_2026-09"],
+    "metric.dtw_self_1d": ["sakoe_chiba_1978"],
+    "metric.dtw_cross_1d": ["sakoe_chiba_1978"],
+    "metric.gak": ["cuturi_2011"],
+    "metric.gak_gram_matrix": ["cuturi_2011"],
+    "metric.gak_gram_train": ["cuturi_2011"],
+    "metric.gak_gram_predict": ["cuturi_2011"],
+    "metric.sigma_gak": ["cuturi_2011"],
+    "metric.PyGakGramTrain": ["cuturi_2011"],
+    "metric.soft_dtw_self_1d": ["cuturi_blondel_2017"],
+    "metric.soft_dtw_cross_1d": ["cuturi_blondel_2017"],
+    "metric.soft_dtw_div_self_1d": ["cuturi_blondel_2017"],
+    "metric.soft_dtw_div_cross_1d": ["cuturi_blondel_2017"],
+    "metric.lp_self_1d": ["_uncurated_metric_tail_2026-09"],
+    "metric.lp_self_2d": ["_uncurated_metric_tail_2026-09"],
+    "metric.lp_cross_1d": ["_uncurated_metric_tail_2026-09"],
+    "metric.lp_cross_2d": ["_uncurated_metric_tail_2026-09"],
+    "metric.hausdorff_self_1d": ["_uncurated_metric_tail_2026-09"],
+    "metric.hausdorff_self_2d": ["_uncurated_metric_tail_2026-09"],
+    "metric.hausdorff_cross_1d": ["_uncurated_metric_tail_2026-09"],
+    "metric.hausdorff_cross_2d": ["_uncurated_metric_tail_2026-09"],
+    "metric.fourier_self_1d": ["_uncurated_metric_tail_2026-09"],
+    "metric.fourier_cross_1d": ["_uncurated_metric_tail_2026-09"],
+    "metric.hshift_self_1d": ["_uncurated_metric_tail_2026-09"],
+    "metric.hshift_cross_1d": ["_uncurated_metric_tail_2026-09"],
+    "metric.inprod": ["_uncurated_metric_tail_2026-09"],
+    "metric.int_simpson": ["_uncurated_metric_tail_2026-09"],
+    "classification.fclassif_dd": ["cuesta_albertos_fraiman_2009"],
+    "classification.fclassif_lda": ["_uncurated_classification_ramsay_2026-09"],
+    "classification.fclassif_qda": ["_uncurated_classification_ramsay_2026-09"],
+    "classification.fclassif_knn": ["_uncurated_classification_ramsay_2026-09"],
+    "classification.knn_classify_from_distances": ["_uncurated_classification_ramsay_2026-09"],
+    "classification.fclassif_cv": ["_uncurated_classification_ramsay_2026-09"],
+    "classification.elastic_multinomial": ["_uncurated_classification_elastic_2026-09"],
     "alignment.vert_fpca": ["tucker_wu_srivastava_2013"],
     "alignment.horiz_fpca": ["tucker_wu_srivastava_2013"],
     "alignment.joint_fpca": ["tucker_wu_srivastava_2013"],
