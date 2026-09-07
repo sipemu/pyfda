@@ -14,7 +14,8 @@
 - ✅ **v9.0 — scikit-learn API Compatibility** — Phases 55–59 (shipped 2026-09-02)
 - ✅ **v10.0 — Diagram Quality & Accessibility Pass** — Phases 60–65 (shipped 2026-09-02)
 - ✅ **v11.0 — fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs** — Phases 66–73 (shipped 2026-09-05)
-- 🚧 **v12.0 — Docs Depth, Card Coverage & AI Capability Skill** — Phases 74–79 (in progress)
+- ✅ **v12.0 — Docs Depth, Card Coverage & AI Capability Skill** — Phases 74–79 (shipped 2026-09-06)
+- 🚧 **v13.0 — Scientific Provenance & Cross-Language Implementations** — Phases 80–84 (in progress)
 
 ## Phases
 
@@ -186,164 +187,112 @@ Bumped `fdars-core` 0.23.0 → 0.33.0 (parallel-only, no linalg; zero drift, 565
 
 </details>
 
-### 🚧 v12.0 Docs Depth, Card Coverage & AI Capability Skill (Phases 74–79) — IN PROGRESS
+<details>
+<summary>✅ v12.0 Docs Depth, Card Coverage & AI Capability Skill (Phases 74–79) — SHIPPED 2026-09-06</summary>
 
-**Milestone Goal:** Bring the recently-added (v11.0-era) functionality up to the documentation bar of the mature pages, complete section-landing card coverage across the focus sections, and give AI agents a way to discover the full fdars capability surface — a docs + skill milestone, no `fdars-core` bump and no new bindings (v7.0/v10.0 precedent).
+Brought the v11.0-era thin method pages (regression + analyze families) to mature-page parity, added 2 flagship end-to-end example pages, completed section-landing card coverage (16 new hand-authored SVG thumbnails), and shipped the first non-advisor Agent Skill (`fdars-capabilities`) + an `llms.txt` capability digest (30 modules, 409 callables) + an LLM-free `fdars_list_capabilities` MCP tool guarded by the three-way GATE-04 guard-sync. Docs + skill — no crate bump, no new bindings. 20/20 requirements validated; 6 phases, 27 plans; whole-site `--strict` green offline; SVGO/determinism green (0/122 unstable); blocking human diagram review approved; grounding invariant + MCP LLM-free boundary preserved. Full detail: `.planning/milestones/v12.0-ROADMAP.md`.
 
-**Standing execution constraints (all content/doc phases):** run SEQUENTIALLY on `main` with `use_worktrees: false` — doc-build fences hardcode the main-tree `.venv/bin/mkdocs` path (v6.0/v11.0 standing decision). Keep fence datasets small (~25-min whole-site executed `--strict` build). The whole-site `mkdocs build --strict` gate, the SVGO/determinism gate, and the blocking human diagram review run ONCE, in the final gate phase (Phase 79) — not per content phase.
+- [x] Phase 74: Deepen Regression-Family Thin Pages (completed 2026-09-05)
+- [x] Phase 75: Deepen Analyze-Family Thin Pages (completed 2026-09-05)
+- [x] Phase 76: Flagship End-to-End Example Pages (completed 2026-09-06)
+- [x] Phase 77: Section-Landing Card Coverage (completed 2026-09-06)
+- [x] Phase 78: AI Capability-Discovery Skill (completed 2026-09-06)
+- [x] Phase 79: Close Gate — Strict Build, SVGO/Determinism, Human Review & Release (completed 2026-09-06)
 
-- [x] **Phase 74: Deepen Regression-Family Thin Pages** - Bring `frechet-regression`, `function-on-function`, `additive-sof`, `concurrent-regression`, `functional-glm` to mature-page parity (completed 2026-09-05)
-- [x] **Phase 75: Deepen Analyze-Family Thin Pages** - Bring `functional-time-series`, `density-fda`, `multi-domain`, `shapelets`, `advanced-clustering` to mature-page parity (completed 2026-09-05)
-- [x] **Phase 76: Flagship End-to-End Example Pages** - 2–3 marquee worked-example pages (FTS forecast, Fréchet regression, +1 if a strong dataset fit exists) (completed 2026-09-06)
-- [x] **Phase 77: Section-Landing Card Coverage** - 18 focus-section thumbnails + gallery cards (align/represent/regression/analyze) + 3 examples cards (completed 2026-09-06)
-- [x] **Phase 78: AI Capability-Discovery Skill** - Agent Skill `SKILL.md` + verified capability map + LLM-oriented docs page + LLM-free MCP capability tool (completed 2026-09-06)
-- [x] **Phase 79: Close Gate — Strict Build, SVGO/Determinism, Human Review & Release** - Whole-site `--strict` + SVGO/determinism gates, blocking human diagram review, grounding/MCP verification, offline-fence sweep, version tick + release handoff (completed 2026-09-06)
+</details>
+
+### 🚧 v13.0 Scientific Provenance & Cross-Language Implementations (Phases 80–84) — IN PROGRESS
+
+**Milestone Goal:** When asked "what is method X, where does it come from, and how else could I do it?", every fdars AI surface returns *grounded* scientific provenance — foundational papers with DOIs/links — plus cross-language implementation pointers (R, Python, Matlab) for the covered public callables. A code + docs + skill milestone; no `fdars-core` bump and no new numerical bindings. Builds directly on v12.0's capability-discovery infrastructure (`_capability_map.json`, `fdars_list_capabilities`, `fdars-capabilities` skill, `llms.txt`, GATE-04 guard-sync).
+
+**Standing execution constraints (all phases):**
+- The MCP tool `fdars_method_references()` stays provably LLM-free (mirror GATE-04 → GATE-05): static `importlib.resources` JSON load, `_REFERENCES_MODULES` DERIVED from `_CAPABILITY_MODULES`, no `provider`/`model` keys, explicit `{"curated": false, "sentinel": "NO_CURATED_ENTRY"}` for the tail. The hybrid curated/LLM-fallback lives ONLY in the extended skill (flagged ungrounded), never in the tool.
+- Curation is PAPER-LEVEL (~40–100 papers with a callable→paper index), sub-method-keyed, partial-but-honest across ~409 callables. Author-verify every entry against its DOI landing page before commit (F&M is **2001**, not 1991). Six anti-feature families (functional depth as a category, scoring metrics, SPM, seasonal, XAI/explain, conformal) return the `curated:false` sentinel, not forced citations. Report `N/409` explicitly.
+- Docs / `llms.txt` emit OFFLINE from committed JSON (no `fdars` import at build), consistent with v12.0's `generate_capability_dataset.py`.
+- Content/docs phases run SEQUENTIALLY on `main` with `use_worktrees: false` (doc-build fences hardcode the main-tree `.venv/bin/mkdocs`). The whole-site `mkdocs build --strict` (~25 min) + guard-sync + DOI/link gates run ONCE, consolidated at the CLOSE phase (Phase 84).
+- A BLOCKING HUMAN citation-accuracy review (papers verified against DOI landing pages by a human, not an LLM) is a hard close gate — parallel to the standing v6.0 blocking diagram review; autonomous execution stops there.
+
+- [ ] **Phase 80: Schema, Data Home & Primary Guard Tests** - `_references_map.json` stub + schema/author-verification workflow + maturin include + primary GATE-05 tests + offline DOI/URL structural gate
+- [ ] **Phase 81: Curation — Paper Registry** - hand-authored, author-verified paper-level entries + sub-method callable index + R/Python/Matlab pointers + anti-feature sentinels + honest `N/409` coverage (bulk / critical path)
+- [ ] **Phase 82: MCP Tool `fdars_method_references` + GATE-05 Companion** - LLM-free static lookup tool + `_REFERENCES_MODULES` + curated/sentinel return shape + Guard Group 3 companion tests (can parallel Phase 81)
+- [ ] **Phase 83: Docs, llms.txt & Skill Extension** - `docs/references.md` + `--references` offline emit + `llms.txt` provenance section + `mkdocs.yml` nav + `fdars-capabilities` hybrid protocol
+- [ ] **Phase 84: Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review** - whole-site `--strict` offline + all GATE-05 groups + DOI/URL gate + blocking human citation-accuracy review + grounding/guard-sync confirmation + release handoff
 
 ## Phase Details
 
-### Phase 74: Deepen Regression-Family Thin Pages
-
-**Goal**: The five thin regression-family method pages read like the mature pages — a reader can decide when to use each method, cross-navigate to related methods, choose parameters, interpret results, and copy runnable examples.
-**Depends on**: Nothing (first phase of v12.0; picks up from Phase 73)
-**Requirements**: DEPTH-01
+### Phase 80: Schema, Data Home & Primary Guard Tests
+**Goal**: The references data home exists with a locked, validated schema and a small verified stub, so all downstream curation/tool/docs work is validated from day one — the schema is never authored free-form.
+**Depends on**: Nothing new in v13.0 (first phase; picks up from Phase 79). Runs on `main`, `use_worktrees: false`.
+**Requirements**: SCHEMA-01, SCHEMA-02, SCHEMA-03, SCHEMA-04
 **Success Criteria** (what must be TRUE):
-
-  1. Each of `frechet-regression`, `function-on-function`, `additive-sof`, `concurrent-regression`, `functional-glm` has a "When to use" decision section and a "See also" cross-reference block.
-  2. Each page adds parameter-selection + result-interpretation guidance and ≥3 caution/tip/note admonition boxes.
-  3. Each page carries ≥3 runnable inline `FDARS_FENCE_OK` worked examples that emit the sentinel when run offline under `.venv`.
-  4. Every method claim on these pages is accurate against the shipped v11.0 bindings (no stale/renamed API, no R-era prose).
-
-**Plans**: 5/5 plans executed
-
-- [x] 74-01-PLAN.md — TRACER: frechet-regression.md to full parity (fix frechet_anova/local_reg/xout API) + offline fence verify
-- [x] 74-02-PLAN.md — function-on-function.md to parity (fix predict_fof arg order + fof_cv params)
-- [x] 74-03-PLAN.md — additive-sof.md to parity (fix fam/gsam auto-defaults + variable_selection/model_selection keys)
-- [x] 74-04-PLAN.md — concurrent-regression.md to full parity (manual predict + manual bandwidth-CV + decision/see-also)
-- [x] 74-05-PLAN.md — functional-glm.md to full parity (gaussian-reduces-to-linear + param selection + decision/see-also)
-
+  1. A committed `python/fdars/_references_map.json` (paper-keyed `papers` + flat `callable_index`, same identifier space as `_capability_curation.json`) is packaged as wheel data via maturin `include` and loads via `importlib.resources`; it is seeded with a small (3–5 paper) author-verified stub spanning distinct capability families.
+  2. A documented author-verification workflow + JSON schema doc governs curation (paper-level unit, sub-method-keyed callable claims, cross-language entry shape with `version` + Matlab `confidence`, the `curated:false` tail convention, the personal DOI-landing-page verification bar).
+  3. Primary GATE-05 tests (Python 3.9+, no `mcp`) pass: internal consistency (`callable_index` keys == union of `papers[*].callables`) and cross-file (every `callable_index` key resolves to a real callable in `_capability_map.json`, `_Fdata` special-cased).
+  4. An offline structural DOI/URL gate (DOI regex `^10\.\d{4,9}/\S+$`; URL well-formedness + domain allowlist) runs in CI with no live network resolve; any live resolve is opt-in (`FDARS_ONLINE_CHECKS=1`) and never runs under `pytest`/`mkdocs build`.
+**Plans**: TBD
 **UI hint**: no
 
-### Phase 75: Deepen Analyze-Family Thin Pages
-
-**Goal**: The five thin analyze-family method pages reach the same mature-page parity, so a reader can choose, parameterize, interpret, and run each analyze method with confidence.
-**Depends on**: Phase 74 (sequential on `main`; disjoint page set)
-**Requirements**: DEPTH-02
+### Phase 81: Curation — Paper Registry
+**Goal**: `_references_map.json` carries author-verified, sub-method-accurate paper provenance + cross-language pointers across the table-stakes and differentiator families — the substantive, correctness-critical body of the milestone — with the anti-feature families honestly wired to the uncurated sentinel and coverage reported as `N/409`.
+**Depends on**: Phase 80 (schema locked; primary guard tests validate every entry as curation grows). Runs on `main`, `use_worktrees: false`.
+**Requirements**: CURATE-01, CURATE-02, CURATE-03, CURATE-04, CURATE-05
 **Success Criteria** (what must be TRUE):
-
-  1. Each of `functional-time-series`, `density-fda`, `multi-domain`, `shapelets`, `advanced-clustering` has a "When to use" decision section and a "See also" cross-reference block.
-  2. Each page adds parameter-selection + result-interpretation guidance and ≥3 caution/tip/note admonition boxes.
-  3. Each page carries ≥3 runnable inline `FDARS_FENCE_OK` worked examples that emit the sentinel when run offline under `.venv`.
-  4. Every method claim on these pages is accurate against the shipped v11.0 bindings and existing `docs/data/` datasets.
-
-**Plans**: 5/5 plans executed
-
-- [x] 75-01-PLAN.md — TRACER: functional-time-series.md to full parity (8 API corrections)
-- [x] 75-02-PLAN.md — density-fda.md to parity (3-arg inverse_lqd, quantile-grid clarification)
-- [x] 75-03-PLAN.md — multi-domain.md to parity (dense_flmm/multi_famm take plain arrays, not PyMultiFunData)
-- [x] 75-04-PLAN.md — shapelets.md to parity (discover_shapelets dict, shapelet_distance tuple)
-- [x] 75-05-PLAN.md — advanced-clustering.md to parity (funfem_cluster/align_cluster_fd full signatures)
-
+  1. Paper-level entries populate the families with clear roots (basis/smoothing, functional statistics, FM/band/modified-band depth, functional boxplot, dense FPCA + PACE, scalar-on-function & FLM, Fréchet regression, density/LQD FDA, elastic/SRSF registration, shift/landmark registration, metrics incl. GAK/DTW/soft-DTW, clustering, classification, inference incl. ITP/SCB, FTS incl. DPCA, shapelets, MFPCA/FAMM) — each entry's authors/year/title verified against its DOI landing page.
+  2. The `callable_index` records sub-method-level attribution (e.g. `band_1d` vs `modified_band_1d` point to distinct papers, never a shared over-broad pointer); contested/multi-primary attributions list co-primaries or are flagged in-JSON rather than force-picked.
+  3. Cross-language pointers (R / Python / Matlab) with package + representative function + `version` + specific-function URL are populated per covered paper; Matlab marked `confidence: low` unless verified; honest "no implementation in language X" gaps recorded explicitly.
+  4. The six anti-feature families are wired to the `curated:false` sentinel path (absent from `callable_index` at the module-category level), so the tool returns the explicit uncurated signal rather than a forced module-level citation.
+  5. Coverage is measured and honest — the achieved `N/409` fraction is recorded and emitted by the primary guard test; only author-verified entries carry provenance (no LLM-synthesized placeholder ships as curated).
+**Plans**: TBD
 **UI hint**: no
 
-### Phase 76: Flagship End-to-End Example Pages
-
-**Goal**: The examples section gains 2–3 marquee end-to-end walkthroughs for the new methods, matching the mature `examples/` standard (narrative + real dataset + runnable offline fences), wired into nav.
-**Depends on**: Phase 75 (methods documented; sequential on `main`)
-**Requirements**: EXMP-01, EXMP-02, EXMP-03
+### Phase 82: MCP Tool `fdars_method_references` + GATE-05 Companion
+**Goal**: The LLM-free `fdars_method_references()` MCP tool ships alongside `fdars_list_capabilities`, returning curated provenance or an explicit uncurated sentinel, with the full GATE-05 three-way mirror enforced in the same commit — the provable LLM-free boundary is closed.
+**Depends on**: Phase 80 (needs the file + schema to exist; can start as soon as the stub lands and run in PARALLEL with Phase 81's curation). Runs on `main`, `use_worktrees: false`.
+**Requirements**: MCP-01, MCP-02, MCP-03, MCP-04
 **Success Criteria** (what must be TRUE):
-
-  1. A flagship Functional Time Series example page (forecast + evaluation) runs end-to-end offline against a `docs/data/` dataset, emitting `FDARS_FENCE_OK`.
-  2. A flagship Fréchet-regression example page (metric-space response walkthrough) runs end-to-end offline, emitting `FDARS_FENCE_OK`.
-  3. A third flagship example (e.g. shapelet classification or density FDA) is added if a strong `docs/data/` fit exists; otherwise the "2–3" range is satisfied by the first two, with the decision recorded.
-  4. Each new example page is wired into the examples nav so a reader reaches it from the site navigation.
-
-**Plans**: 3/3 plans executed
-
-- [x] 76-01-PLAN.md — EXMP-02 Fréchet-regression flagship example (tracer; KDE density response on latitude) + nav
-- [x] 76-02-PLAN.md — EXMP-01 Functional Time Series flagship example (forecast + RMSE eval) + nav
-- [x] 76-03-PLAN.md — EXMP-03 shapelet-classification flagship example (phoneme 3-class) + nav
-
+  1. `fdars_method_references(method)` is a synchronous `@mcp.tool()` handler added after `fdars_list_capabilities` that loads the committed JSON via `importlib.resources`, accepts `"module.callable"` (preferred) or a suffix-resolved bare `"callable"`, and makes no model/provider call and no synthesis.
+  2. On a hit it returns `{"method", "curated": true, "papers": [...with implementations...], "coverage": "N/409", "version"}`; on a miss it returns `{"method", "curated": false, "sentinel": "NO_CURATED_ENTRY", "message", "version"}` — never an empty dict or an error.
+  3. `_REFERENCES_MODULES` is derived from / asserted equal to `_CAPABILITY_MODULES` and gates input before any JSON load.
+  4. GATE-05 companion tests (Python 3.10+) land in `tests/test_guard_sync_version_independent.py` as Guard Group 3 in the SAME commit as the tool: LLM-free boundary (no `provider`/`model` keys; known-absent callable returns `curated:false` with no `doi`; no advisor/provider import) and frozenset literal mirror (`_REFERENCES_MODULES == _EXPECTED_REFERENCES_MODULES == _CAPABILITY_MODULES`).
+**Plans**: TBD
 **UI hint**: no
 
-### Phase 77: Section-Landing Card Coverage
-
-**Goal**: The align, represent, regression, and analyze landing galleries reach 100% card coverage and the examples gallery gains its three missing cards — every focus-section page is reachable from a section-landing card with a hand-authored thumbnail.
-**Depends on**: Phase 76 (example pages exist before their examples cards; sequential on `main`)
-**Requirements**: CARD-01, CARD-02, CARD-03, CARD-04, CARD-05, CARD-06
+### Phase 83: Docs, llms.txt & Skill Extension
+**Goal**: The provenance surface is public and consumable — a family-grouped References page (offline-generated with an honest coverage fraction), an extended `llms.txt` provenance section, and the `fdars-capabilities` skill carrying the hybrid curated/ungrounded protocol — so a reader or agent can find "where method X comes from and how else to do it."
+**Depends on**: Phase 81 (needs meaningful curation coverage for a useful page) and Phase 82 (skill references the concrete tool). Runs on `main`, `use_worktrees: false`.
+**Requirements**: DOCS-01, DOCS-02, DOCS-03, SKILL-01, SKILL-02
 **Success Criteria** (what must be TRUE):
-
-  1. Align (`shift-registration`, `banded-alignment`) and represent (`pace-fpca`, `interpolation`, `imputation`) landing galleries show a card for every page.
-  2. Regression (5 pages) and analyze (8 pages) landing galleries show a card for every focus-section page.
-  3. The examples landing page shows cards for `functional-outlier-workflow`, `canadian-depth-centrality`, and `tolerance-vs-conformal`.
-  4. Each new card has a hand-authored inline SVG thumbnail at `docs/assets/thumb/<page-slug>.svg` that is STYLE_SPEC-conformant and decorative-accessible (matching the existing `aria-hidden` card pattern).
-
-**Plans**: 5/5 plans executed
-
-- [x] 77-01-PLAN.md — TRACER: align section fully carded (shift-registration, banded-alignment thumbnails + cards; #fd7e14) end-to-end
-- [x] 77-02-PLAN.md — represent section carded (pace-fpca, interpolation, imputation; #198754)
-- [x] 77-03-PLAN.md — regression section carded (concurrent-regression, functional-glm, function-on-function, additive-sof, frechet-regression; #dc3545)
-- [x] 77-04-PLAN.md — analyze section carded (functional-time-series, density-fda, advanced-clustering, multi-domain, shapelets, functional-boxplot, functional-statistics, scoring-metrics; #6f42c1)
-- [x] 77-05-PLAN.md — examples section carded (functional-outlier-workflow, canadian-depth-centrality, tolerance-vs-conformal; #3f51b5)
-
-**UI hint**: yes
-
-### Phase 78: AI Capability-Discovery Skill
-
-**Goal**: AI agents can discover the whole fdars capability surface across the three selected surfaces — a standalone Agent Skill, an LLM-oriented docs page, and an LLM-free MCP capability tool — distinct from and non-duplicating the existing narrow `fdars-advisor` skill/MCP.
-**Depends on**: Nothing new in v12.0 (independent of the DEPTH/CARD content work; scheduled here to keep the final gate phase clean). Runs on `main`, `use_worktrees: false`.
-**Requirements**: SKILL-01, SKILL-02, SKILL-03, SKILL-04
-**Success Criteria** (what must be TRUE):
-
-  1. A standalone capability-discovery Agent Skill ships a spec-valid `SKILL.md` mapping every public fdars submodule — what each method does, when to reach for it, and how to call it (signature + minimal usage).
-  2. An automated test/harness verifies the skill's capability map against the live package (every documented method exists and is importable; no stale/renamed entries).
-  3. An LLM-oriented docs page (llms.txt-style API digest of the whole library) is authored/generated and wired into the site.
-  4. An MCP capability tool (e.g. `fdars_list_capabilities` / describe) is added to the existing server, returns the capability surface, stays provably LLM-free, and its guard/tests are updated to cover it.
-
-**Plans**: 4/4 plans executed
-
-- [x] 78-01-PLAN.md — TRACER: capability generator + committed `_capability_map.json` + curated guidance file + SKILL-02 accuracy test (the single source of truth)
-- [x] 78-02-PLAN.md — SKILL-01: new `fdars-capabilities` skill dir + spec-valid SKILL.md (disjoint from fdars-advisor), map-grounded module overview
-- [x] 78-03-PLAN.md — SKILL-03: offline-generated `docs/llms.txt` + in-nav `docs/ai-capability-map.md` + mkdocs nav wiring
-- [x] 78-04-PLAN.md — SKILL-04: LLM-free `fdars_list_capabilities` MCP tool + guard-sync extension (Py3.9 primary + Py3.10+ companions) + smoke-test coverage (feeds GATE-04)
-
+  1. `scripts/generate_capability_dataset.py --references` reads `_references_map.json` OFFLINE (no `fdars` import) and emits `docs/references.md` — a family-grouped method→paper→implementation cross-index with a prominent Coverage section stating `N of 409 callables have curated entries`.
+  2. The `llms.txt` emit gains a `## Scientific Provenance & Cross-Language Implementations` section (per-entry `module.function — Authors (Year) doi:… ; R/Python/Matlab pointers`) with an explicit coverage fraction and the "uncurated methods absent; synthesize-but-flag-ungrounded" note — emitted offline.
+  3. `docs/references.md` is wired into `mkdocs.yml` nav under the AI/capability section and renders under a `--strict` build.
+  4. `.claude/skills/fdars-capabilities/SKILL.md` gains a `## Scientific Provenance Protocol` section encoding the hybrid (prefer curated; on `curated:false` synthesize but structurally flag `grounded:false`, never present synthesized as curated), non-duplicating the `fdars-advisor` boundary, and its walkthrough + tests demonstrate BOTH the curated-hit and the visibly-labelled ungrounded-fallback paths.
+**Plans**: TBD
 **UI hint**: no
 
-### Phase 79: Close Gate — Strict Build, SVGO/Determinism, Human Review & Release
-
-**Goal**: The whole milestone is proven correct and shippable in one pass — the site builds strict and offline with every fence green, all new SVGs pass the determinism gates, a human approves the new diagrams for method-accuracy, the advisor/MCP boundaries still hold, and the release handoff is prepared.
-**Depends on**: Phases 74, 75, 76, 77, 78 (all content, cards, and the skill must land before the single whole-site gate). Runs on `main`, `use_worktrees: false`.
-**Requirements**: GATE-01, GATE-02, GATE-03, GATE-04, DEPTH-03
+### Phase 84: Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review
+**Goal**: The whole milestone is proven correct and shippable in one pass — the site builds strict and offline, all guard-sync groups and the structural DOI/URL gate are green, the coverage fraction is reported, a human confirms citation accuracy against DOI landing pages, the grounding/LLM-free boundaries still hold, and any release tick is handed off.
+**Depends on**: Phases 80, 81, 82, 83 (all data, tool, docs, and skill must land before the single whole-site gate). Runs on `main`, `use_worktrees: false`.
+**Requirements**: GATE-01, GATE-02, GATE-03, GATE-04
 **Success Criteria** (what must be TRUE):
-
-  1. Whole-site `mkdocs build --strict` is green offline and every worked example across the milestone emits `FDARS_FENCE_OK` (satisfying DEPTH-03's offline/method-accuracy sweep for the DEPTH pages).
-  2. The SVGO idempotence + build-determinism gate is green across all new/changed SVGs (new thumbnails and any new concept diagrams).
-  3. A blocking human diagram/method-accuracy review of the new thumbnails (and any new concept diagrams) is approved before close.
-  4. Advisor/MCP tests (including guard-sync) are green after the SKILL-04 tool lands — grounding invariant + MCP LLM-free boundary preserved.
-  5. Any package-version tick is committed; any irreversible publish (tag/PyPI) stays human-gated and is handed off, not executed autonomously.
-
-**Plans**: 5/5 plans executed
-
-- [x] 79-01-PLAN.md — GATE-02: SVGO two-pass idempotence across the 21 Phase-77 thumbnails + concept diagrams (wave 1)
-- [x] 79-02-PLAN.md — GATE-04: 5 advisor/MCP test files green — grounding invariant + MCP LLM-free boundary (wave 1)
-- [x] 79-03-PLAN.md — GATE-01 + DEPTH-03: whole-site `mkdocs build --strict` offline + check_docs_figures sweep (wave 2)
-- [x] 79-04-PLAN.md — GATE-03: BLOCKING human diagram/method-accuracy review of 21 thumbnails + IN-02/IN-03 (wave 3, autonomous:false)
-- [x] 79-05-PLAN.md — Version tick to 0.11.0 (reversible) + post-bump GATE-04 confirm + RELEASE-HANDOFF.md (publish stays human-gated) (wave 4)
-
+  1. Whole-site `mkdocs build --strict` is green OFFLINE with the new References page rendering and any executed fences emitting `FDARS_FENCE_OK`.
+  2. All GATE-05 groups (primary A/B + companion C/D) are green and the offline structural DOI/URL gate is green; the coverage `N/409` fraction is reported and reviewed.
+  3. A BLOCKING HUMAN citation-accuracy review is approved before close — a sample of curated entries verified against DOI landing pages by a human (not an LLM): authors/year/title match, sub-method attribution correct, cross-language pointers resolve. Autonomous execution stops at this gate.
+  4. The grounding invariant + MCP LLM-free boundary are confirmed intact (full advisor/MCP/guard-sync suite incl. Guard Group 3 green); any reversible package-version tick is committed and any irreversible publish (tag/PyPI) stays human-gated and is handed off, not executed autonomously.
+**Plans**: TBD
 **UI hint**: no
 
 ## Progress
 
-**Execution Order:** Phases execute in numeric order: 74 → 75 → 76 → 77 → 78 → 79 (all sequential on `main`, `use_worktrees: false`).
+**Execution Order:** Phases execute in numeric order: 80 → 81 → 82 → 83 → 84 (all sequential on `main`, `use_worktrees: false`). Phase 82 (MCP tool) MAY run in parallel with Phase 81 (curation) once the Phase 80 stub lands, but is listed sequentially for the standing main-tree constraint.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 74. Deepen Regression-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
-| 75. Deepen Analyze-Family Thin Pages | v12.0 | 5/5 | Complete    | 2026-09-05 |
-| 76. Flagship End-to-End Example Pages | v12.0 | 3/3 | Complete    | 2026-09-06 |
-| 77. Section-Landing Card Coverage | v12.0 | 5/5 | Complete    | 2026-09-06 |
-| 78. AI Capability-Discovery Skill | v12.0 | 4/4 | Complete    | 2026-09-06 |
-| 79. Close Gate — Strict Build, SVGO/Determinism, Human Review & Release | v12.0 | 5/5 | Complete    | 2026-09-06 |
+| 80. Schema, Data Home & Primary Guard Tests | v13.0 | 0/TBD | Not started | - |
+| 81. Curation — Paper Registry | v13.0 | 0/TBD | Not started | - |
+| 82. MCP Tool `fdars_method_references` + GATE-05 Companion | v13.0 | 0/TBD | Not started | - |
+| 83. Docs, llms.txt & Skill Extension | v13.0 | 0/TBD | Not started | - |
+| 84. Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Review | v13.0 | 0/TBD | Not started | - |
 
 ---
 
-_Full phase detail for shipped milestones is archived under `.planning/milestones/` (`v1.0-ROADMAP.md` … `v11.0-ROADMAP.md`). Phase directories are archived under `.planning/milestones/v{...}-phases/`._
+_Full phase detail for shipped milestones is archived under `.planning/milestones/` (`v1.0-ROADMAP.md` … `v12.0-ROADMAP.md`). Phase directories are archived under `.planning/milestones/v{...}-phases/`._

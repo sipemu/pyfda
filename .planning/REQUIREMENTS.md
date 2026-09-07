@@ -1,0 +1,91 @@
+# Requirements: v13.0 — Scientific Provenance & Cross-Language Implementations
+
+**Milestone:** v13.0
+**Type:** Code + docs + skill (NO `fdars-core` bump, NO new PyO3/numerical bindings)
+**Derived from:** PROJECT.md "Current Milestone" + `.planning/research/SUMMARY.md` / FEATURES.md / ARCHITECTURE.md / PITFALLS.md
+**Phase range:** 80–84 (continues from v12.0, which ended at Phase 79)
+
+## Milestone Goal
+
+When asked "what is method X, where does it come from, and how else could I do it?", every fdars AI surface returns *grounded* scientific provenance — foundational papers with DOIs/links — plus cross-language implementation pointers (R, Python, Matlab) for the covered public callables. Curation is **paper-level** (~40–100 foundational papers with a callable→paper index), partial-but-honest across the ~409 callables, and the LLM-free MCP boundary (GATE-04 → GATE-05) is preserved throughout.
+
+## Hard Constraints (carry into every phase)
+
+- No `fdars-core` bump; no new PyO3/numerical bindings. Touches: `python/fdars/_references_map.json` (NEW), `python/fdars/mcp/server.py`, `.claude/skills/fdars-capabilities/SKILL.md`, `docs/`, `scripts/generate_capability_dataset.py`, `tests/`, `pyproject.toml`/`Cargo.toml` maturin include.
+- The MCP tool `fdars_method_references()` MUST stay provably LLM-free: static `importlib.resources` JSON load, frozenset-gated (`_REFERENCES_MODULES` DERIVED from `_CAPABILITY_MODULES`), no `provider`/`model` keys in return, explicit `{"curated": false, "sentinel": "NO_CURATED_ENTRY"}` for uncovered callables. The hybrid curated/LLM-fallback lives ONLY in the extended skill (flagged ungrounded), never in the tool.
+- Curation is paper-level with a callable index keyed at SUB-METHOD level (band depth ≠ modified band depth). NOT 409 separate entries; NOT one paper mapped blindly across a family.
+- Six families are anti-features for single citation (functional depth as a category, scoring metrics, SPM, seasonal, XAI/explain, conformal) → return the `curated:false` sentinel, not forced citations.
+- Coverage is partial-but-honest: report `N/409` explicitly in the tool response, docs, and `llms.txt`; uncovered callables signal `curated:false`, never silence.
+- Docs / `llms.txt` emit OFFLINE from committed JSON (no `fdars` import at build), consistent with the v12.0 `generate_capability_dataset.py` path.
+- Author-verification is a hard authoring rule: every paper entry checked against its DOI landing page before commit (authors + year + title match). A DOI that resolves is NOT proof of correct attribution (F&M is **2001**, not 1991).
+- Content/docs phases run SEQUENTIALLY on `main` with `use_worktrees: false` (doc-build fences hardcode the main-tree `.venv/bin/mkdocs`).
+- Whole-site `mkdocs build --strict` (~25 min) + guard-sync + DOI/link structural gates run ONCE, consolidated at the CLOSE phase.
+- A BLOCKING HUMAN citation-accuracy review (papers verified against DOI landing pages by a human, not an LLM) is a hard close gate — parallel to the standing v6.0 blocking diagram review.
+
+## Requirements
+
+### SCHEMA — Schema, data home, primary guards (Phase 80)
+
+- **SCHEMA-01** — A committed `python/fdars/_references_map.json` side-file exists, paper-keyed at the top level (`papers` map with title/authors/year/doi/url/type/`callables`) plus a flat `callable_index` (`"module.callable"` → `[paper keys]`) in the same identifier space as `_capability_curation.json`. Ships as package data via maturin `include` so `importlib.resources` finds it in wheel builds. Seeded with a small verified stub (3–5 papers) spanning distinct capability families.
+- **SCHEMA-02** — A documented author-verification workflow + JSON schema doc governs curation: paper-level unit, sub-method-keyed callable claims, cross-language entry shape (package/function/version/url + `confidence` for Matlab), the `curated:false` tail convention, and the minimum bar for "curated" (author + year + title verified against the DOI landing page personally).
+- **SCHEMA-03** — Primary GATE-05 guard tests (Python 3.9+, no `mcp` import) pass: (A) internal consistency — `frozenset(callable_index.keys()) == frozenset(c for p in papers.values() for c in p["callables"])`; (B) cross-file — every `callable_index` key resolves to an existing callable in `_capability_map.json` (module + `_Fdata` special case).
+- **SCHEMA-04** — An offline structural DOI/URL gate (regex `^10\.\d{4,9}/\S+$` for DOIs; URL well-formedness + domain-allowlist for cross-language links) runs in CI with NO live network resolve; any live-resolve check is opt-in (`FDARS_ONLINE_CHECKS=1`) and never runs under `pytest`/`mkdocs build`.
+
+### CURATE — Paper registry curation (Phase 81, critical path)
+
+- **CURATE-01** — Hand-authored, author-verified paper-level entries populate `_references_map.json` across the table-stakes + differentiator families with clear roots (basis/smoothing, functional statistics, FM/band/modified-band depth, functional boxplot, dense FPCA + PACE, scalar-on-function & FLM, Fréchet regression, density/LQD FDA, elastic/SRSF registration, shift/landmark registration, metrics incl. GAK/DTW/soft-DTW, clustering, classification, inference incl. ITP/SCB, FTS incl. DPCA, shapelets, MFPCA/FAMM). Each entry's authors/year/title match its DOI landing page.
+- **CURATE-02** — The `callable_index` records sub-method-level attribution: closely related callables (e.g. `band_1d` vs `modified_band_1d`) point to their specific paper, never a shared over-broad pointer. Contested/multi-primary attributions (e.g. Fraiman–Muniz, `align_cluster_fd`, `elastic_changepoint`, `oneway_anova_vstat`, FAMM lineage) list co-primary papers or are flagged in-JSON rather than force-picked.
+- **CURATE-03** — Cross-language implementation pointers are populated per covered paper for R (fda, fda.usc, refund, funData/MFPCA, fdapace, fdasrvf, funFEM, fdaoutlier, ftsa, freqdom.fda), Python (scikit-fda, fdasrsf, tslearn, sktime), and Matlab (fdaM, PACE, fdasrvf_MATLAB) — each with package + representative function + `version` + specific-function URL; Matlab entries marked `confidence: low` unless individually verified. Honest "no implementation in language X" gaps are recorded explicitly.
+- **CURATE-04** — The six anti-feature families (functional depth as a category via the `functional_depth` dispatcher, scoring metrics, SPM, seasonal, XAI/explain, conformal) are wired to the `curated:false` sentinel path — they are absent from `callable_index` (per-sub-method depth papers may still be curated where a clear root exists), so the tool returns the explicit uncurated signal, not a forced module-level citation.
+- **CURATE-05** — Coverage is measured and honest: the achieved `N/409` fraction is recorded (in-JSON coverage metadata and/or an explicit `not_yet_curated` derivation) and the primary guard test emits the coverage fraction; only author-verified entries carry provenance — no LLM-synthesized placeholder ships as curated fact.
+
+### MCP — LLM-free references tool + GATE-05 companion (Phase 82, parallelizable with Phase 81)
+
+- **MCP-01** — `fdars_method_references(method)` is added to `python/fdars/mcp/server.py` immediately after `fdars_list_capabilities`: a synchronous `@mcp.tool()` handler that loads the committed JSON via `importlib.resources`, accepts `"module.callable"` (preferred) or a bare `"callable"` (suffix-resolved, all matches returned if ambiguous), and makes no model/provider call and no synthesis.
+- **MCP-02** — On a hit the tool returns `{"method", "curated": true, "papers": [...with implementations...], "coverage": "N/409", "version"}`; on a miss it returns `{"method", "curated": false, "sentinel": "NO_CURATED_ENTRY", "message", "version"}` — an explicit first-class uncurated signal, never an empty dict or error.
+- **MCP-03** — `_REFERENCES_MODULES` is DERIVED from / asserted equal to `_CAPABILITY_MODULES` (not independently re-declared), and input is frozenset-gated before any JSON load.
+- **MCP-04** — GATE-05 companion tests (Python 3.10+, importing `mcp`) land in `tests/test_guard_sync_version_independent.py` as Guard Group 3 in the SAME commit as the tool: (C) LLM-free boundary — a known callable's result has no `provider`/`model` keys and has `curated`; a known-absent callable returns `curated:false` with no `doi`; the handler imports no advisor/provider module; (D) frozenset literal mirror — `_REFERENCES_MODULES == _EXPECTED_REFERENCES_MODULES == _CAPABILITY_MODULES`.
+
+### DOCS — Docs surface + llms.txt + skill extension (Phase 83, needs meaningful Phase 81 coverage)
+
+- **DOCS-01** — `scripts/generate_capability_dataset.py` gains a `--references` flag that reads `_references_map.json` OFFLINE (no `fdars` import) and emits `docs/references.md` — a family-grouped method→paper→implementation cross-index with a prominent Coverage section stating `N of 409 callables have curated entries`.
+- **DOCS-02** — The `llms.txt` emit is extended with a `## Scientific Provenance & Cross-Language Implementations` section (per-entry `module.function — Authors (Year) doi:… ; R/Python/Matlab pointers`) plus an explicit coverage fraction and the "uncurated methods are absent; a consumer may synthesize but MUST flag as ungrounded" note — emitted offline from the committed JSON.
+- **DOCS-03** — `docs/references.md` is wired into `mkdocs.yml` nav under the existing AI/capability section, and the whole page renders under `mkdocs build --strict` offline.
+- **SKILL-01** — `.claude/skills/fdars-capabilities/SKILL.md` gains a `## Scientific Provenance Protocol` section encoding the hybrid: prefer curated (`fdars_method_references` / references page / `llms.txt`); on `curated:true` return verbatim; on `curated:false`/sentinel the consumer MAY synthesize but MUST structurally flag it ungrounded (a machine-readable `grounded: bool` per citation, not prose-only), never presenting synthesized provenance as curated. It does not duplicate the `fdars-advisor` boundary.
+- **SKILL-02** — The SKILL.md walkthrough demonstrates BOTH paths — a curated hit and an uncurated (ungrounded, visibly labelled) fallback — and skill tests exercise both branches.
+
+### GATE — Close gate + blocking human review (Phase 84, validation only)
+
+- **GATE-01** — Whole-site `mkdocs build --strict` is green OFFLINE with the new References page rendering and any executed fences emitting `FDARS_FENCE_OK`.
+- **GATE-02** — All GATE-05 groups (primary A/B + companion C/D) are green, and the offline structural DOI/URL gate is green; the coverage `N/409` fraction is reported and reviewed.
+- **GATE-03** — A BLOCKING HUMAN citation-accuracy review is approved before close: a sample of curated entries verified against DOI landing pages by a human (not an LLM) — authors/year/title match, sub-method attribution correct, cross-language pointers resolve. Autonomous execution stops at this gate.
+- **GATE-04** — The grounding invariant + MCP LLM-free boundary are confirmed intact: the full advisor/MCP/guard-sync suite (including the new Guard Group 3) is green; any reversible package-version tick is committed and any irreversible publish (tag/PyPI) stays human-gated and is handed off, not executed autonomously.
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SCHEMA-01 | Phase 80 | Pending |
+| SCHEMA-02 | Phase 80 | Pending |
+| SCHEMA-03 | Phase 80 | Pending |
+| SCHEMA-04 | Phase 80 | Pending |
+| CURATE-01 | Phase 81 | Pending |
+| CURATE-02 | Phase 81 | Pending |
+| CURATE-03 | Phase 81 | Pending |
+| CURATE-04 | Phase 81 | Pending |
+| CURATE-05 | Phase 81 | Pending |
+| MCP-01 | Phase 82 | Pending |
+| MCP-02 | Phase 82 | Pending |
+| MCP-03 | Phase 82 | Pending |
+| MCP-04 | Phase 82 | Pending |
+| DOCS-01 | Phase 83 | Pending |
+| DOCS-02 | Phase 83 | Pending |
+| DOCS-03 | Phase 83 | Pending |
+| SKILL-01 | Phase 83 | Pending |
+| SKILL-02 | Phase 83 | Pending |
+| GATE-01 | Phase 84 | Pending |
+| GATE-02 | Phase 84 | Pending |
+| GATE-03 | Phase 84 | Pending |
+| GATE-04 | Phase 84 | Pending |
+
+**Coverage:** 22/22 v13.0 requirements mapped to exactly one phase. No orphans, no duplicates.
