@@ -29,14 +29,14 @@ The documentation — diagrams first, examples second — must make functional d
 **Goal:** When asked "what is method X, where does it come from, and how else could I do it?", every fdars AI surface returns *grounded* scientific provenance — foundational papers with DOIs/links — plus cross-language implementation pointers (R, Python, Matlab) for every public callable. A code + docs + skill milestone; no `fdars-core` bump and no new numerical bindings.
 
 **Target features:**
-- **Curated references map:** a hand-authored, author-verified JSON keyed by *foundational paper* (title, authors, year, DOI/URL) with a callable→paper index covering all ~409 public callables — curation is paper-level (many callables share one root paper), not 409 separate entries.
+- **Curated references map:** a hand-authored, author-verified JSON keyed by *foundational paper* (title, authors, year, DOI/URL) with a callable→paper index covering all ~437 total callables (409 public + 28 Fdata methods) — curation is paper-level (many callables share one root paper), not 409 separate entries.
 - **Cross-language implementation pointers:** for each covered method, links to alternative implementations in R (fda, fda.usc, refund, funData), Python (scikit-fda), and Matlab (Ramsay fdaM, PACE), with package/function names and URLs.
 - **LLM-free MCP tool:** e.g. `fdars_method_references(method)` mirroring the `fdars_list_capabilities` pattern (static JSON via `importlib.resources`, frozenset-gated, no model call); returns the curated entry, or an explicit "no curated entry — ungrounded synthesis permitted, flag it" signal for the tail.
 - **Capability skill extension:** extend `fdars-capabilities` so "scientific root of X?" and "alternatives in R/Matlab?" are answerable, encoding the hybrid protocol — prefer curated data; where absent, the consuming LLM may synthesize but MUST flag it as ungrounded.
 - **Docs surface:** a References page and/or per-method References blocks on the site, folded into the machine-readable `llms.txt` digest.
 - **Gate:** LLM-free MCP boundary test (mirror GATE-04); curated-entry link/DOI validity; whole-site `mkdocs build --strict` green offline; guard-sync + grounding invariant preserved.
 
-**Key context:** Code + docs + skill — no crate bump, no new numerical bindings. Builds directly on v12.0's capability-discovery infrastructure (`_capability_map.json`, `fdars_list_capabilities` MCP tool, `fdars-capabilities` skill, `llms.txt`). The MCP tool itself stays **LLM-free** (static curated lookup); the "hybrid" LLM fallback lives in the *consumer's* behavior, governed by the skill and always flagged as ungrounded — so the GATE-04 grounding invariant is preserved. Curation unit is paper-level with a callable index, keeping authoring tractable across ~409 callables. Ecosystem targets: R (fda, fda.usc, refund, funData), Python (scikit-fda), Matlab (Ramsay fdaM, PACE).
+**Key context:** Code + docs + skill — no crate bump, no new numerical bindings. Builds directly on v12.0's capability-discovery infrastructure (`_capability_map.json`, `fdars_list_capabilities` MCP tool, `fdars-capabilities` skill, `llms.txt`). The MCP tool itself stays **LLM-free** (static curated lookup); the "hybrid" LLM fallback lives in the *consumer's* behavior, governed by the skill and always flagged as ungrounded — so the GATE-04 grounding invariant is preserved. Curation unit is paper-level with a callable index, keeping authoring tractable across ~437 total callables (409 public + 28 Fdata methods). Ecosystem targets: R (fda, fda.usc, refund, funData), Python (scikit-fda), Matlab (Ramsay fdaM, PACE).
 
 ## Last Shipped Milestone: v12.0 Docs Depth, Card Coverage & AI Capability Skill (shipped 2026-09-06)
 
@@ -197,7 +197,7 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 **v13.0 — Scientific Provenance & Cross-Language Implementations (code + docs + skill; no crate bump):**
 
-- [ ] Curated references map — author-verified JSON keyed by foundational paper (title/authors/year/DOI/URL) + callable→paper index covering all ~409 public callables
+- [ ] Curated references map — author-verified JSON keyed by foundational paper (title/authors/year/DOI/URL) + callable→paper index covering all ~437 total callables (409 public + 28 Fdata methods)
 - [ ] Cross-language implementation pointers — R (fda, fda.usc, refund, funData) / Python (scikit-fda) / Matlab (Ramsay fdaM, PACE) package + function + URL per covered method
 - [ ] LLM-free MCP tool — `fdars_method_references(method)` (static JSON via `importlib.resources`, frozenset-gated); curated entry or explicit ungrounded-synthesis-permitted signal
 - [ ] Capability skill extension — `fdars-capabilities` answers "scientific root of X?" / "alternatives in R/Matlab?"; hybrid protocol with honest ungrounded flagging
@@ -337,4 +337,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-07 — started milestone v13.0 (Scientific Provenance & Cross-Language Implementations). Code + docs + skill, no `fdars-core` bump: a curated paper-level references map + callable index (~409 callables) with R/Python/Matlab implementation pointers, an LLM-free `fdars_method_references` MCP tool, an extended `fdars-capabilities` skill (hybrid curated/flagged-LLM protocol), and a References docs surface folded into `llms.txt`. Builds on v12.0 capability-discovery infra; grounding invariant preserved. Phases continue from Phase 79. Next: research decision → requirements → roadmap.*
+*Last updated: 2026-09-07 — started milestone v13.0 (Scientific Provenance & Cross-Language Implementations). Code + docs + skill, no `fdars-core` bump: a curated paper-level references map + callable index (~437 total callables — 409 public + 28 Fdata methods) with R/Python/Matlab implementation pointers, an LLM-free `fdars_method_references` MCP tool, an extended `fdars-capabilities` skill (hybrid curated/flagged-LLM protocol), and a References docs surface folded into `llms.txt`. Builds on v12.0 capability-discovery infra; grounding invariant preserved. Phases continue from Phase 79. Next: research decision → requirements → roadmap.*

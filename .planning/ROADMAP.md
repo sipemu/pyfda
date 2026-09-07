@@ -208,13 +208,13 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 **Standing execution constraints (all phases):**
 
 - The MCP tool `fdars_method_references()` stays provably LLM-free (mirror GATE-04 → GATE-05): static `importlib.resources` JSON load, `_REFERENCES_MODULES` DERIVED from `_CAPABILITY_MODULES`, no `provider`/`model` keys, explicit `{"curated": false, "sentinel": "NO_CURATED_ENTRY"}` for the tail. The hybrid curated/LLM-fallback lives ONLY in the extended skill (flagged ungrounded), never in the tool.
-- Curation is PAPER-LEVEL (~40–100 papers with a callable→paper index), sub-method-keyed, partial-but-honest across ~409 callables. Author-verify every entry against its DOI landing page before commit (F&M is **2001**, not 1991). Six anti-feature families (functional depth as a category, scoring metrics, SPM, seasonal, XAI/explain, conformal) return the `curated:false` sentinel, not forced citations. Report `N/409` explicitly.
+- Curation is PAPER-LEVEL (~40–100 papers with a callable→paper index), sub-method-keyed, partial-but-honest across ~437 total callables (409 public + 28 Fdata methods). Author-verify every entry against its DOI landing page before commit (F&M is **2001**, not 1991). Six anti-feature families (functional depth as a category, scoring metrics, SPM, seasonal, XAI/explain, conformal) return the `curated:false` sentinel, not forced citations. Report `N/437` explicitly.
 - Docs / `llms.txt` emit OFFLINE from committed JSON (no `fdars` import at build), consistent with v12.0's `generate_capability_dataset.py`.
 - Content/docs phases run SEQUENTIALLY on `main` with `use_worktrees: false` (doc-build fences hardcode the main-tree `.venv/bin/mkdocs`). The whole-site `mkdocs build --strict` (~25 min) + guard-sync + DOI/link gates run ONCE, consolidated at the CLOSE phase (Phase 84).
 - A BLOCKING HUMAN citation-accuracy review (papers verified against DOI landing pages by a human, not an LLM) is a hard close gate — parallel to the standing v6.0 blocking diagram review; autonomous execution stops there.
 
 - [x] **Phase 80: Schema, Data Home & Primary Guard Tests** - `_references_map.json` stub + schema/author-verification workflow + maturin include + primary GATE-05 tests + offline DOI/URL structural gate (completed 2026-09-07)
-- [x] **Phase 81: Curation — Paper Registry** - hand-authored, author-verified paper-level entries + sub-method callable index + R/Python/Matlab pointers + anti-feature sentinels + honest `N/409` coverage (bulk / critical path) (completed 2026-09-07)
+- [x] **Phase 81: Curation — Paper Registry** - hand-authored, author-verified paper-level entries + sub-method callable index + R/Python/Matlab pointers + anti-feature sentinels + honest `N/437` coverage (bulk / critical path) (completed 2026-09-07)
 - [x] **Phase 82: MCP Tool `fdars_method_references` + GATE-05 Companion** - LLM-free static lookup tool + `_REFERENCES_MODULES` + curated/sentinel return shape + Guard Group 3 companion tests (can parallel Phase 81) (completed 2026-09-07)
 - [x] **Phase 83: Docs, llms.txt & Skill Extension** - `docs/references.md` + `--references` offline emit + `llms.txt` provenance section + `mkdocs.yml` nav + `fdars-capabilities` hybrid protocol (completed 2026-09-07)
 - [ ] **Phase 84: Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review** - whole-site `--strict` offline + all GATE-05 groups + DOI/URL gate + blocking human citation-accuracy review + grounding/guard-sync confirmation + release handoff
@@ -242,7 +242,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 
 ### Phase 81: Curation — Paper Registry
 
-**Goal**: `_references_map.json` carries author-verified, sub-method-accurate paper provenance + cross-language pointers across the table-stakes and differentiator families — the substantive, correctness-critical body of the milestone — with the anti-feature families honestly wired to the uncurated sentinel and coverage reported as `N/409`.
+**Goal**: `_references_map.json` carries author-verified, sub-method-accurate paper provenance + cross-language pointers across the table-stakes and differentiator families — the substantive, correctness-critical body of the milestone — with the anti-feature families honestly wired to the uncurated sentinel and coverage reported as `N/437`.
 **Depends on**: Phase 80 (schema locked; primary guard tests validate every entry as curation grows). Runs on `main`, `use_worktrees: false`.
 **Requirements**: CURATE-01, CURATE-02, CURATE-03, CURATE-04, CURATE-05
 **Success Criteria** (what must be TRUE):
@@ -251,7 +251,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
   2. The `callable_index` records sub-method-level attribution (e.g. `band_1d` vs `modified_band_1d` point to distinct papers, never a shared over-broad pointer); contested/multi-primary attributions list co-primaries or are flagged in-JSON rather than force-picked.
   3. Cross-language pointers (R / Python / Matlab) with package + representative function + `version` + specific-function URL are populated per covered paper; Matlab marked `confidence: low` unless verified; honest "no implementation in language X" gaps recorded explicitly.
   4. The six anti-feature families are wired to the `curated:false` sentinel path (absent from `callable_index` at the module-category level), so the tool returns the explicit uncurated signal rather than a forced module-level citation.
-  5. Coverage is measured and honest — the achieved `N/409` fraction is recorded and emitted by the primary guard test; only author-verified entries carry provenance (no LLM-synthesized placeholder ships as curated).
+  5. Coverage is measured and honest — the achieved `N/437` fraction is recorded and emitted by the primary guard test; only author-verified entries carry provenance (no LLM-synthesized placeholder ships as curated).
 
 **Plans**: 5/5 plans executed
 
@@ -271,7 +271,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 **Success Criteria** (what must be TRUE):
 
   1. `fdars_method_references(method)` is a synchronous `@mcp.tool()` handler added after `fdars_list_capabilities` that loads the committed JSON via `importlib.resources`, accepts `"module.callable"` (preferred) or a suffix-resolved bare `"callable"`, and makes no model/provider call and no synthesis.
-  2. On a hit it returns `{"method", "curated": true, "papers": [...with implementations...], "coverage": "N/409", "version"}`; on a miss it returns `{"method", "curated": false, "sentinel": "NO_CURATED_ENTRY", "message", "version"}` — never an empty dict or an error.
+  2. On a hit it returns `{"method", "curated": true, "papers": [...with implementations...], "coverage": "N/437", "version"}`; on a miss it returns `{"method", "curated": false, "sentinel": "NO_CURATED_ENTRY", "message", "version"}` — never an empty dict or an error.
   3. `_REFERENCES_MODULES` is derived from / asserted equal to `_CAPABILITY_MODULES` and gates input before any JSON load.
   4. GATE-05 companion tests (Python 3.10+) land in `tests/test_guard_sync_version_independent.py` as Guard Group 3 in the SAME commit as the tool: LLM-free boundary (no `provider`/`model` keys; known-absent callable returns `curated:false` with no `doi`; no advisor/provider import) and frozenset literal mirror (`_REFERENCES_MODULES == _EXPECTED_REFERENCES_MODULES == _CAPABILITY_MODULES`).
 
@@ -288,7 +288,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 **Requirements**: DOCS-01, DOCS-02, DOCS-03, SKILL-01, SKILL-02
 **Success Criteria** (what must be TRUE):
 
-  1. `scripts/generate_capability_dataset.py --references` reads `_references_map.json` OFFLINE (no `fdars` import) and emits `docs/references.md` — a family-grouped method→paper→implementation cross-index with a prominent Coverage section stating `N of 409 callables have curated entries`.
+  1. `scripts/generate_capability_dataset.py --references` reads `_references_map.json` OFFLINE (no `fdars` import) and emits `docs/references.md` — a family-grouped method→paper→implementation cross-index with a prominent Coverage section stating `N of 437 callables have curated entries`.
   2. The `llms.txt` emit gains a `## Scientific Provenance & Cross-Language Implementations` section (per-entry `module.function — Authors (Year) doi:… ; R/Python/Matlab pointers`) with an explicit coverage fraction and the "uncurated methods absent; synthesize-but-flag-ungrounded" note — emitted offline.
   3. `docs/references.md` is wired into `mkdocs.yml` nav under the AI/capability section and renders under a `--strict` build.
   4. `.claude/skills/fdars-capabilities/SKILL.md` gains a `## Scientific Provenance Protocol` section encoding the hybrid (prefer curated; on `curated:false` synthesize but structurally flag `grounded:false`, never present synthesized as curated), non-duplicating the `fdars-advisor` boundary, and its walkthrough + tests demonstrate BOTH the curated-hit and the visibly-labelled ungrounded-fallback paths.
@@ -309,7 +309,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 **Success Criteria** (what must be TRUE):
 
   1. Whole-site `mkdocs build --strict` is green OFFLINE with the new References page rendering and any executed fences emitting `FDARS_FENCE_OK`.
-  2. All GATE-05 groups (primary A/B + companion C/D) are green and the offline structural DOI/URL gate is green; the coverage `N/409` fraction is reported and reviewed.
+  2. All GATE-05 groups (primary A/B + companion C/D) are green and the offline structural DOI/URL gate is green; the coverage `N/437` fraction is reported and reviewed.
   3. A BLOCKING HUMAN citation-accuracy review is approved before close — a sample of curated entries verified against DOI landing pages by a human (not an LLM): authors/year/title match, sub-method attribution correct, cross-language pointers resolve. Autonomous execution stops at this gate.
   4. The grounding invariant + MCP LLM-free boundary are confirmed intact (full advisor/MCP/guard-sync suite incl. Guard Group 3 green); any reversible package-version tick is committed and any irreversible publish (tag/PyPI) stays human-gated and is handed off, not executed autonomously.
 
