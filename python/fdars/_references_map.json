@@ -72,7 +72,15 @@
       "callables": [
         "alignment.karcher_mean",
         "alignment.elastic_align_pair",
-        "alignment.srsf_transform"
+        "alignment.srsf_transform",
+        "alignment.srsf_inverse",
+        "alignment.elastic_distance",
+        "alignment.elastic_self_distance_matrix",
+        "alignment.elastic_cross_distance_matrix",
+        "alignment.amplitude_distance",
+        "alignment.phase_distance",
+        "alignment.elastic_decomposition",
+        "clustering.align_cluster_fd"
       ],
       "cross_language": {
         "R": {
@@ -94,7 +102,7 @@
           "confidence": "low"
         }
       },
-      "notes": "SRSF framework via Fisher-Rao metric; arXiv:1103.3817. NOT the TPAMI SRV/shape paper.",
+      "notes": "SRSF framework via Fisher-Rao metric; arXiv:1103.3817. NOT the TPAMI SRV/shape paper. Extended in 81-04 to cover additional distance/decomposition callables. align_cluster_fd is listed as co-primary: it performs k-means clustering in the elastic SRSF metric; no single standalone clustering paper covers this exact method — attribution to Srivastava et al. 2011 framework (for the Karcher mean iteration) is the best available root, per fdars-core 0.33.0 alignment/clustering.rs which cites arXiv:1103.3817 in the module doc.",
       "curated": true
     },
     "ramsay_dalzell_1991": {
@@ -200,7 +208,12 @@
         "simulation.sim_kl",
         "simulation.simulate",
         "simulation.eigenfunctions",
-        "simulation.eigenvalues"
+        "simulation.eigenvalues",
+        "alignment.landmark_register",
+        "alignment.landmark_detect_and_register",
+        "alignment.least_squares_shift_registration",
+        "alignment.detect_landmarks",
+        "_Fdata.shift_register"
       ],
       "cross_language": {
         "R": {
@@ -216,7 +229,7 @@
           "confidence": "high"
         }
       },
-      "notes": "Canonical FDA textbook (2nd edition). DOI 10.1007/b98888 is [CITED via link.springer.com] — confirmed as the Springer book DOI. curated:false — this session cannot personally open the DOI landing page to verify author list and title exactly as printed; set curated:true after direct landing-page verification at Phase 84 review.",
+      "notes": "Canonical FDA textbook (2nd edition). DOI 10.1007/b98888 is [CITED via link.springer.com] — confirmed as the Springer book DOI. Extended in 81-04 to cover landmark/shift registration callables (landmark_register, landmark_detect_and_register, least_squares_shift_registration, detect_landmarks, _Fdata.shift_register) — classical registration methods covered extensively in Ch. 7-8. curated:false — this session cannot personally open the DOI landing page to verify author list and title exactly as printed; set curated:true after direct landing-page verification at Phase 84 review.",
       "curated": false
     },
     "gervini_2008": {
@@ -622,6 +635,147 @@
       },
       "notes": "PACE (Principal Analysis via Conditional Expectation) for sparse/irregular functional data. [VERIFIED: tandfonline.com — Yao, Müller, Wang 2005, JASA Vol 100, No 470, pp 577-590.] curated:false until Phase 84 direct DOI-landing-page verification.",
       "curated": false
+    },
+    "tucker_wu_srivastava_2013": {
+      "title": "Generative models for functional data using phase and amplitude separation",
+      "authors": ["Tucker, J.D.", "Wu, W.", "Srivastava, A."],
+      "year": 2013,
+      "doi": "10.1016/j.csda.2012.12.001",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0167947312004227",
+      "type": "journal",
+      "callables": [
+        "alignment.vert_fpca",
+        "alignment.horiz_fpca",
+        "alignment.joint_fpca",
+        "alignment.gauss_model",
+        "alignment.joint_gauss_model"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "fdasrsf",
+          "function": "fdavpca",
+          "url": "https://fdasrsf-python.readthedocs.io/",
+          "confidence": "high"
+        },
+        "R": {
+          "package": "fdasrvf",
+          "function": "jointFPCA",
+          "url": "https://rdrr.io/cran/fdasrvf/man/jointFPCA.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces generative models for functional data using phase/amplitude separation: vertical FPCA (vert_fpca), horizontal FPCA (horiz_fpca), joint FPCA (joint_fpca), and Gaussian process models (gauss_model, joint_gauss_model) in the SRSF framework. [CITED: sciencedirect.com — arXiv:1212.1791; CSDA 58:222-236, 2013.] DOI 10.1016/j.csda.2012.12.001 is [ASSUMED] — plausible from web search description; not landing-page-verified this session. curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "marron_ramsay_sangalli_srivastava_2015": {
+      "title": "Functional Data Analysis of Amplitude and Phase Variation",
+      "authors": ["Marron, J.S.", "Ramsay, J.O.", "Sangalli, L.M.", "Srivastava, A."],
+      "year": 2015,
+      "doi": "10.1214/15-STS524",
+      "url": "https://projecteuclid.org/journals/statistical-science/volume-30/issue-4/Functional-Data-Analysis-of-Amplitude-and-Phase-Variation/10.1214/15-STS524.full",
+      "type": "journal",
+      "callables": [
+        "alignment.alignment_quality",
+        "alignment.diagnose_alignment"
+      ],
+      "notes": "Review/tutorial on amplitude and phase variation decomposition in FDA. Covers alignment quality and diagnosis methods. [CITED: projecteuclid.org — Statistical Science Vol 30, No 4, 2015, DOI 10.1214/15-STS524.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "srivastava_klassen_2016": {
+      "title": "Functional and Shape Data Analysis",
+      "authors": ["Srivastava, A.", "Klassen, E.P."],
+      "year": 2016,
+      "doi": "10.1007/978-1-4939-4020-2",
+      "url": "https://link.springer.com/book/10.1007/978-1-4939-4020-2",
+      "type": "book",
+      "callables": [
+        "alignment.tsrvf_transform",
+        "alignment.tsrvf_transform_with_method",
+        "alignment.karcher_mean_closed",
+        "alignment.elastic_align_pair_closed"
+      ],
+      "notes": "Springer textbook on functional and shape data analysis. Covers transported SRSF (TSRVF) for closed curves and Karcher mean computation on closed curves. [CITED: link.springer.com — Srivastava & Klassen 2016, Springer Series in Statistics.] DOI 10.1007/978-1-4939-4020-2 is [ASSUMED] — plausible from web search; not landing-page-verified this session. curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "tucker_yarger_2024": {
+      "title": "Elastic functional changepoint detection of climate impacts from localized sources",
+      "authors": ["Tucker, J.D.", "Yarger, D."],
+      "year": 2024,
+      "doi": "10.1002/env.2826",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1002/env.2826",
+      "type": "journal",
+      "callables": [
+        "alignment.elastic_changepoint"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdasrvf",
+          "function": "elastic.changepoint",
+          "url": "https://rdrr.io/cran/fdasrvf/man/elastic.changepoint.html",
+          "confidence": "high"
+        },
+        "Python": {
+          "package": "fdasrsf",
+          "function": "ElasticChangePoint",
+          "url": "https://fdasrsf-python.readthedocs.io/",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces elastic functional changepoint detection in curve sequences using the SRSF framework. Won the 2024 Wiley-TIES Best Environmetrics Paper Award. [CITED: onlinelibrary.wiley.com/doi/10.1002/env.2826 — Environmetrics 2024, DOI 10.1002/env.2826.] arXiv preprint 2022 (arXiv:2211.12687); published year 2024. fdars-core alignment/changepoint.rs cites Tucker & Yarger 2024 Environmetrics in module doc. curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "_uncurated_alignment_variants_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "alignment.elastic_align_pair_multires",
+        "alignment.elastic_align_pair_constrained",
+        "alignment.elastic_align_pair_penalized",
+        "alignment.bayesian_align_pair",
+        "alignment.shape_mean",
+        "alignment.shape_distance",
+        "alignment.shape_self_distance_matrix",
+        "alignment.horiz_fpns",
+        "alignment.robust_karcher_mean",
+        "alignment.elastic_distance_closed",
+        "alignment.elastic_self_distance_matrix_with_band",
+        "alignment.elastic_cross_distance_matrix_with_band",
+        "alignment.amplitude_self_distance_matrix",
+        "alignment.phase_self_distance_matrix",
+        "alignment.karcher_median",
+        "alignment.karcher_mean_with_band",
+        "alignment.elastic_depth",
+        "alignment.elastic_logistic",
+        "alignment.elastic_outlier_detection",
+        "alignment.elastic_partial_match",
+        "alignment.elastic_regression",
+        "alignment.compose_warps",
+        "alignment.curve_geodesic",
+        "alignment.reparameterize_curve",
+        "alignment.invert_warp",
+        "alignment.transfer_alignment",
+        "alignment.align_to_target",
+        "alignment.warp_complexity",
+        "alignment.warp_inverse_error",
+        "alignment.warp_smoothness",
+        "alignment.warp_statistics",
+        "alignment.hierarchical_cut",
+        "alignment.hierarchical_from_distances",
+        "alignment.kmedoids_from_distances",
+        "alignment.lambda_cv",
+        "alignment.least_squares_score",
+        "alignment.sobolev_least_squares_score",
+        "alignment.pairwise_consistency",
+        "alignment.pairwise_correlation_score",
+        "alignment.peak_persistence",
+        "alignment.phase_boxplot",
+        "alignment.shape_confidence_interval"
+      ],
+      "notes": "Specialized alignment variants and utility callables without a clear single-paper primary root. Includes: multi-resolution/constrained/penalized elastic alignment variants (extend Srivastava et al. 2011 SRSF framework); Bayesian alignment (Kurtek 2017 or similar — unconfirmed); shape callables (Srivastava & Klassen 2016 book — unconfirmed against fdars-core source); horiz_fpns (FPNS method — unclear primary); robust Karcher mean (extends Srivastava et al. 2011 — unconfirmed); elastic/warp utility callables; hierarchical/kmedoids clustering utilities; warp diagnostics. All deferred to REF-FUT-01 for per-method source confirmation. curated:false.",
+      "curated": false
     }
   },
   "callable_index": {
@@ -633,6 +787,73 @@
     "alignment.karcher_mean": ["srivastava_et_al_2011"],
     "alignment.elastic_align_pair": ["srivastava_et_al_2011"],
     "alignment.srsf_transform": ["srivastava_et_al_2011"],
+    "alignment.srsf_inverse": ["srivastava_et_al_2011"],
+    "alignment.elastic_distance": ["srivastava_et_al_2011"],
+    "alignment.elastic_self_distance_matrix": ["srivastava_et_al_2011"],
+    "alignment.elastic_cross_distance_matrix": ["srivastava_et_al_2011"],
+    "alignment.amplitude_distance": ["srivastava_et_al_2011"],
+    "alignment.phase_distance": ["srivastava_et_al_2011"],
+    "alignment.elastic_decomposition": ["srivastava_et_al_2011"],
+    "clustering.align_cluster_fd": ["srivastava_et_al_2011"],
+    "alignment.vert_fpca": ["tucker_wu_srivastava_2013"],
+    "alignment.horiz_fpca": ["tucker_wu_srivastava_2013"],
+    "alignment.joint_fpca": ["tucker_wu_srivastava_2013"],
+    "alignment.gauss_model": ["tucker_wu_srivastava_2013"],
+    "alignment.joint_gauss_model": ["tucker_wu_srivastava_2013"],
+    "alignment.alignment_quality": ["marron_ramsay_sangalli_srivastava_2015"],
+    "alignment.diagnose_alignment": ["marron_ramsay_sangalli_srivastava_2015"],
+    "alignment.tsrvf_transform": ["srivastava_klassen_2016"],
+    "alignment.tsrvf_transform_with_method": ["srivastava_klassen_2016"],
+    "alignment.karcher_mean_closed": ["srivastava_klassen_2016"],
+    "alignment.elastic_align_pair_closed": ["srivastava_klassen_2016"],
+    "alignment.landmark_register": ["ramsay_silverman_2005"],
+    "alignment.landmark_detect_and_register": ["ramsay_silverman_2005"],
+    "alignment.least_squares_shift_registration": ["ramsay_silverman_2005"],
+    "alignment.detect_landmarks": ["ramsay_silverman_2005"],
+    "_Fdata.shift_register": ["ramsay_silverman_2005"],
+    "alignment.elastic_changepoint": ["tucker_yarger_2024"],
+    "alignment.elastic_align_pair_multires": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.elastic_align_pair_constrained": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.elastic_align_pair_penalized": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.bayesian_align_pair": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.shape_mean": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.shape_distance": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.shape_self_distance_matrix": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.horiz_fpns": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.robust_karcher_mean": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.elastic_distance_closed": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.elastic_self_distance_matrix_with_band": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.elastic_cross_distance_matrix_with_band": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.amplitude_self_distance_matrix": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.phase_self_distance_matrix": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.karcher_median": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.karcher_mean_with_band": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.elastic_depth": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.elastic_logistic": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.elastic_outlier_detection": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.elastic_partial_match": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.elastic_regression": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.compose_warps": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.curve_geodesic": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.reparameterize_curve": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.invert_warp": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.transfer_alignment": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.align_to_target": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.warp_complexity": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.warp_inverse_error": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.warp_smoothness": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.warp_statistics": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.hierarchical_cut": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.hierarchical_from_distances": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.kmedoids_from_distances": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.lambda_cv": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.least_squares_score": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.sobolev_least_squares_score": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.pairwise_consistency": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.pairwise_correlation_score": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.peak_persistence": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.phase_boxplot": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.shape_confidence_interval": ["_uncurated_alignment_variants_2026-09"],
     "_Fdata.to_pc": ["ramsay_dalzell_1991"],
     "regression.fregre_lm": ["ramsay_dalzell_1991"],
     "regression.predict_fregre_lm": ["ramsay_dalzell_1991"],
