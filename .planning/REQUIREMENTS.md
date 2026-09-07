@@ -80,7 +80,7 @@ When asked "what is method X, where does it come from, and how else could I do i
 | MCP-04 | Phase 82 | Complete |
 | DOCS-01 | Phase 83 | Complete |
 | DOCS-02 | Phase 83 | Complete |
-| DOCS-03 | Phase 83 | Pending |
+| DOCS-03 | Phase 83 | Complete |
 | SKILL-01 | Phase 83 | Complete |
 | SKILL-02 | Phase 83 | Complete |
 | GATE-01 | Phase 84 | Pending |
