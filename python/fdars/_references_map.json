@@ -436,9 +436,10 @@
       "callables": [
         "regression.fpls",
         "regression.fregre_pls",
-        "regression.predict_fregre_pls"
+        "regression.predict_fregre_pls",
+        "fts.fplsr"
       ],
-      "notes": "Introduces functional PLS (partial least squares) regression. [ASSUMED] — DOI 10.1016/j.csda.2004.07.002 is plausible but not landing-page-verified this session; curated:false until confirmed.",
+      "notes": "Introduces functional PLS (partial least squares) regression on stochastic processes. Also covers FPLSR (functional PLS regression) in the time-series context. [ASSUMED] — DOI 10.1016/j.csda.2004.07.002 is plausible but not landing-page-verified this session; curated:false until confirmed.",
       "curated": false
     },
     "pini_vantini_2016": {
@@ -999,6 +1000,188 @@
       ],
       "notes": "Elastic multinomial/logistic classification in the SRSF framework. Tucker et al. 2013 (tucker_wu_srivastava_2013) is the most likely root via the elastic generative model framework. However, fdars-core classification/elastic.rs does not cite a specific paper for elastic_multinomial in its source comments. [ASSUMED] — marked curated:false rather than force-citing Tucker et al. 2013 without source confirmation. Deferred to REF-FUT-01 for fdars-core source check.",
       "curated": false
+    },
+    "hyndman_ullah_2007": {
+      "title": "Robust forecasting of mortality and fertility rates: a functional data approach",
+      "authors": ["Hyndman, R.J.", "Ullah, M.S."],
+      "year": 2007,
+      "doi": "10.1016/j.csda.2006.07.028",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0167947306002775",
+      "type": "journal",
+      "callables": [
+        "fts.ftsm",
+        "fts.ftsm_forecast",
+        "fts.ftsm_forecast_multistep",
+        "fts.ftsm_update"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "ftsa",
+          "function": "ftsm",
+          "url": "https://rdrr.io/cran/ftsa/man/ftsm.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces the functional time series model (FTSM) via functional PCA with robust robust estimation for mortality/fertility forecasting. [CITED: sciencedirect.com — CSDA 51(10):4942-4956, 2007.] Python: no direct FTSM implementation found — gap recorded honestly. curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "panaretos_tavakoli_2013": {
+      "title": "Fourier analysis of stationary time series in function space",
+      "authors": ["Panaretos, V.M.", "Tavakoli, S."],
+      "year": 2013,
+      "doi": "10.1214/13-AOS1086",
+      "url": "https://projecteuclid.org/journals/annals-of-statistics/volume-41/issue-2/Fourier-analysis-of-stationary-time-series-in-function-space/10.1214/13-AOS1086.full",
+      "type": "journal",
+      "callables": [
+        "fts.dpca",
+        "fts.dpca_reconstruct",
+        "fts.spectral_density",
+        "fts.long_run_covariance"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "freqdom.fda",
+          "function": "dpca",
+          "url": "https://rdrr.io/cran/freqdom.fda/man/dpca.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces dynamic FPCA (DPCA) via Fourier analysis of stationary functional time series. Covers the spectral density operator and long-run covariance. [CITED: projecteuclid.org — AoS Vol 41, No 2, 2013, DOI 10.1214/13-AOS1086.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "hormann_kokoszka_2010": {
+      "title": "Weakly dependent functional data",
+      "authors": ["Hörmann, S.", "Kokoszka, P."],
+      "year": 2010,
+      "doi": "10.1214/09-AOS768",
+      "url": "https://projecteuclid.org/journals/annals-of-statistics/volume-38/issue-3/Weakly-dependent-functional-data/10.1214/09-AOS768.full",
+      "type": "journal",
+      "callables": [
+        "fts.functional_acf",
+        "fts.functional_pacf",
+        "fts.stationarity_test",
+        "fts.functional_difference"
+      ],
+      "notes": "Introduces the framework for weakly dependent functional data, including the functional autocorrelation function (ACF) and partial ACF, stationarity conditions, and differencing for functional time series. [ASSUMED] — DOI 10.1214/09-AOS768 is plausible; not landing-page-verified this session. curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "ye_keogh_2009": {
+      "title": "Time series shapelets: a new primitive for data mining",
+      "authors": ["Ye, L.", "Keogh, E."],
+      "year": 2009,
+      "doi": "10.1145/1557019.1557122",
+      "url": "https://dl.acm.org/doi/10.1145/1557019.1557122",
+      "type": "conference",
+      "callables": [
+        "shapelet.discover_shapelets",
+        "shapelet.shapelet_transform_fit",
+        "shapelet.shapelet_transform",
+        "shapelet.shapelet_distance",
+        "shapelet.shapelet_classifier_fit",
+        "shapelet.PyShapeletFit",
+        "shapelet.PyShapeletClassifierFit"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "sktime",
+          "function": "ShapeletTransform",
+          "url": "https://www.sktime.net/en/stable/api_reference/auto_generated/sktime.transformations.panel.shapelet_transform.ShapeletTransform.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces time series shapelets — subsequences that optimally discriminate between classes — as a primitive for time series classification. [CITED: dl.acm.org/doi/10.1145/1557019.1557122 — KDD 2009, pp 947-956.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "happ_greven_2018": {
+      "title": "Multivariate functional principal component analysis for data observed on different (dimensional) domains",
+      "authors": ["Happ, C.", "Greven, S."],
+      "year": 2018,
+      "doi": "10.1080/01621459.2016.1273115",
+      "url": "https://www.tandfonline.com/doi/abs/10.1080/01621459.2016.1273115",
+      "type": "journal",
+      "callables": [
+        "spm.mfpca",
+        "multi_fdata.PyMultiFunData",
+        "multi_fdata.multi_fdata_from_components"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "MFPCA",
+          "function": "MFPCA",
+          "url": "https://rdrr.io/cran/MFPCA/man/MFPCA.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces multivariate functional PCA (MFPCA) for data on different domains. spm.mfpca is curated despite spm being an anti-feature module at the module level — it has a clear paper root (Pitfall 7). Python: no direct Python MFPCA package found as of 2026-09-07 (honest gap). [CITED: tandfonline.com — JASA Vol 113, No 522, 2018, DOI 10.1080/01621459.2016.1273115.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "scheipl_staicu_greven_2015": {
+      "title": "Functional additive mixed models",
+      "authors": ["Scheipl, F.", "Staicu, A.M.", "Greven, S."],
+      "year": 2015,
+      "doi": "10.1080/10618600.2014.901914",
+      "url": "https://www.tandfonline.com/doi/abs/10.1080/10618600.2014.901914",
+      "type": "journal",
+      "callables": [
+        "famm.dense_flmm",
+        "famm.fast_fmm"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "refund",
+          "function": "pfr",
+          "url": "https://rdrr.io/cran/refund/man/pfr.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces functional additive mixed models (FAMM) via penalized splines and random effects. FAMM lineage is clear (NOT contested per 81-RESEARCH §3.15). dense_flmm: full FAMM; fast_fmm: fast approximation via mgcv. [CITED: tandfonline.com — JCGS Vol 24, No 2, 2015, DOI 10.1080/10618600.2014.901914.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "volkmann_et_al_2023": {
+      "title": "Multivariate functional additive mixed models",
+      "authors": ["Volkmann, A.", "Stöcker, A.", "Scheipl, F.", "Greven, S."],
+      "year": 2023,
+      "doi": "10.1177/1471082X211056158",
+      "url": "https://journals.sagepub.com/doi/full/10.1177/1471082X211056158",
+      "type": "journal",
+      "callables": [
+        "famm.multi_famm"
+      ],
+      "notes": "Extends FAMM to the multivariate functional setting (multiFAMM). FAMM lineage is clear (NOT contested per 81-RESEARCH §3.15). [CITED: journals.sagepub.com — Stat. Modelling Vol 22, 2022/2023, DOI 10.1177/1471082X211056158.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "_uncurated_spm_tail_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "spm.arl0_ewma_t2",
+        "spm.arl0_spe",
+        "spm.arl0_t2",
+        "spm.arl1_t2",
+        "spm.ewma_scores",
+        "spm.hotelling_t2",
+        "spm.hotelling_t2_regularized",
+        "spm.nelson_rules",
+        "spm.select_ncomp",
+        "spm.spe_control_limit",
+        "spm.spe_limit_robust",
+        "spm.spe_moment_match_diagnostic",
+        "spm.spe_multivariate",
+        "spm.spm_cusum",
+        "spm.spm_ewma",
+        "spm.spm_monitor",
+        "spm.spm_phase1",
+        "spm.t2_control_limit",
+        "spm.t2_limit_robust",
+        "spm.t2_pc_contributions",
+        "spm.t2_pc_significance",
+        "spm.western_electric_rules"
+      ],
+      "notes": "Statistical Process Monitoring (SPM) callables. Anti-feature module at the category level per 81-RESEARCH §2 (engineering/control literature — broad origins; Hotelling T² 1931, EWMA Montgomery 1991, CUSUM Page 1954, Nelson rules 1984, Western Electric 1956). No single FDA-specific primary paper. Entire module wired to curated:false sentinel except spm.mfpca (which has a clear root: happ_greven_2018). Deferred to REF-FUT-01. curated:false.",
+      "curated": false
     }
   },
   "callable_index": {
@@ -1218,6 +1401,54 @@
     "inference.oneway_anova_vstat": ["cuesta_albertos_febrero_2010"],
     "outliers.depthgram": ["_uncurated_outliers_2026-09"],
     "outliers.tvdmss": ["_uncurated_outliers_2026-09"],
-    "outliers.sequential_transform_outliers": ["_uncurated_outliers_2026-09"]
+    "outliers.sequential_transform_outliers": ["_uncurated_outliers_2026-09"],
+    "fts.ftsm": ["hyndman_ullah_2007"],
+    "fts.ftsm_forecast": ["hyndman_ullah_2007"],
+    "fts.ftsm_forecast_multistep": ["hyndman_ullah_2007"],
+    "fts.ftsm_update": ["hyndman_ullah_2007"],
+    "fts.dpca": ["panaretos_tavakoli_2013"],
+    "fts.dpca_reconstruct": ["panaretos_tavakoli_2013"],
+    "fts.spectral_density": ["panaretos_tavakoli_2013"],
+    "fts.long_run_covariance": ["panaretos_tavakoli_2013"],
+    "fts.functional_acf": ["hormann_kokoszka_2010"],
+    "fts.functional_pacf": ["hormann_kokoszka_2010"],
+    "fts.stationarity_test": ["hormann_kokoszka_2010"],
+    "fts.functional_difference": ["hormann_kokoszka_2010"],
+    "fts.fplsr": ["preda_saporta_2005"],
+    "shapelet.discover_shapelets": ["ye_keogh_2009"],
+    "shapelet.shapelet_transform_fit": ["ye_keogh_2009"],
+    "shapelet.shapelet_transform": ["ye_keogh_2009"],
+    "shapelet.shapelet_distance": ["ye_keogh_2009"],
+    "shapelet.shapelet_classifier_fit": ["ye_keogh_2009"],
+    "shapelet.PyShapeletFit": ["ye_keogh_2009"],
+    "shapelet.PyShapeletClassifierFit": ["ye_keogh_2009"],
+    "spm.mfpca": ["happ_greven_2018"],
+    "multi_fdata.PyMultiFunData": ["happ_greven_2018"],
+    "multi_fdata.multi_fdata_from_components": ["happ_greven_2018"],
+    "famm.dense_flmm": ["scheipl_staicu_greven_2015"],
+    "famm.fast_fmm": ["scheipl_staicu_greven_2015"],
+    "famm.multi_famm": ["volkmann_et_al_2023"],
+    "spm.arl0_ewma_t2": ["_uncurated_spm_tail_2026-09"],
+    "spm.arl0_spe": ["_uncurated_spm_tail_2026-09"],
+    "spm.arl0_t2": ["_uncurated_spm_tail_2026-09"],
+    "spm.arl1_t2": ["_uncurated_spm_tail_2026-09"],
+    "spm.ewma_scores": ["_uncurated_spm_tail_2026-09"],
+    "spm.hotelling_t2": ["_uncurated_spm_tail_2026-09"],
+    "spm.hotelling_t2_regularized": ["_uncurated_spm_tail_2026-09"],
+    "spm.nelson_rules": ["_uncurated_spm_tail_2026-09"],
+    "spm.select_ncomp": ["_uncurated_spm_tail_2026-09"],
+    "spm.spe_control_limit": ["_uncurated_spm_tail_2026-09"],
+    "spm.spe_limit_robust": ["_uncurated_spm_tail_2026-09"],
+    "spm.spe_moment_match_diagnostic": ["_uncurated_spm_tail_2026-09"],
+    "spm.spe_multivariate": ["_uncurated_spm_tail_2026-09"],
+    "spm.spm_cusum": ["_uncurated_spm_tail_2026-09"],
+    "spm.spm_ewma": ["_uncurated_spm_tail_2026-09"],
+    "spm.spm_monitor": ["_uncurated_spm_tail_2026-09"],
+    "spm.spm_phase1": ["_uncurated_spm_tail_2026-09"],
+    "spm.t2_control_limit": ["_uncurated_spm_tail_2026-09"],
+    "spm.t2_limit_robust": ["_uncurated_spm_tail_2026-09"],
+    "spm.t2_pc_contributions": ["_uncurated_spm_tail_2026-09"],
+    "spm.t2_pc_significance": ["_uncurated_spm_tail_2026-09"],
+    "spm.western_electric_rules": ["_uncurated_spm_tail_2026-09"]
   }
 }
