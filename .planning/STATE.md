@@ -5,16 +5,16 @@ milestone_name: Scientific Provenance & Cross-Language Implementations
 current_phase: 81
 current_phase_name: Curation — Paper Registry
 status: executing
-stopped_at: Completed 81-01-PLAN.md (tracer — basis/smoothing + func-stats curated, 9 domains added, coverage emission test)
-last_updated: "2026-09-07T11:55:54.496Z"
+stopped_at: Completed 81-02-PLAN.md — depth/FPCA/outlier curation
+last_updated: "2026-09-07T12:05:17.931Z"
 last_activity: 2026-09-07
 last_activity_desc: Phase 81 execution started
-state_head: 6a64d3d852f43181e41cf7b633425d872fe1a279
+state_head: d5bd592143e3750158dc9276b0c4d62ba57ed325
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 7
-  completed_plans: 3
+  completed_plans: 4
   percent: 20
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 ## Current Position
 
 Phase: 81 (Curation — Paper Registry) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-09-07 — Phase 81 execution started
 
@@ -67,6 +67,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 80 P01 | 5 | 3 tasks | 2 files |
 | Phase 80 P02 | 2 | 1 tasks | 1 files |
 | Phase 81 P01 | 308 | 3 tasks | 2 files |
+| Phase 81-curation-paper-registry P02 | 12m | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,8 @@ Recent decisions affecting current work:
 - [Phase 80]: docs/authoring/ not added to mkdocs nav this phase — Phase 83 wires the references docs surface per plan spec
 - [Phase 81]: curated:false for ramsay_silverman_2005/gervini_2008/craven_wahba_1979/nadaraya_watson_1964 — DOIs [ASSUMED]/[CITED] not landing-page-verified; eligible for curated:true promotion at Phase 84 human review
 - [Phase 81]: _ALLOWED_DOMAINS extended with 9 domains (6 minimum + 3 conditional); coverage denominator derived from live _capability_map.json (437), not hardcoded
+- [Phase 81]: All new entries curated:false — personal DOI landing-page verification deferred to Phase 84 GATE-03 human review
+- [Phase 81]: fdars-core 0.33 source check: extremal.rs confirms Narisetty & Nair 2016; spatial.rs has no paper attribution; tvdmss cites Huang & Sun 2019 by name
 
 ### Pending Todos
 
@@ -131,9 +134,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-07T11:55:54.463Z
-Stopped at: Completed 81-01-PLAN.md (tracer — basis/smoothing + func-stats curated, 9 domains added, coverage emission test)
-Resume file: 81-02-PLAN.md
+Last session: 2026-09-07T12:05:17.898Z
+Stopped at: Completed 81-02-PLAN.md — depth/FPCA/outlier curation
+Resume file: None
 
 ## Operator Next Steps
 
