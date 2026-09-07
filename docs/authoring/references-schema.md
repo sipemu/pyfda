@@ -97,7 +97,7 @@ GATE-05 A catches any mismatch immediately (see Pitfall 5 below).
 
 ### Shipped example (Phase 80 seed)
 
-The 5-paper seed committed in Phase 80 and the 11 `callable_index` entries:
+The 5-paper seed committed in Phase 80 and the 10 `callable_index` entries:
 
 ```json
 {
@@ -115,7 +115,7 @@ The 5-paper seed committed in Phase 80 and the 11 `callable_index` entries:
       "callables": ["_Fdata.to_pc"]
     },
     "eilers_marx_1996": {
-      "callables": ["smoothing.gcv_smoother", "basis.basis_nbasis_cv"]
+      "callables": ["basis.basis_nbasis_cv"]
     }
   },
   "callable_index": {
@@ -128,7 +128,6 @@ The 5-paper seed committed in Phase 80 and the 11 `callable_index` entries:
     "alignment.elastic_align_pair": ["srivastava_et_al_2011"],
     "alignment.srsf_transform": ["srivastava_et_al_2011"],
     "_Fdata.to_pc": ["ramsay_dalzell_1991"],
-    "smoothing.gcv_smoother": ["eilers_marx_1996"],
     "basis.basis_nbasis_cv": ["eilers_marx_1996"]
   }
 }
