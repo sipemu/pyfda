@@ -72,7 +72,7 @@ When asked "what is method X, where does it come from, and how else could I do i
 | CURATE-01 | Phase 81 | Complete |
 | CURATE-02 | Phase 81 | Complete |
 | CURATE-03 | Phase 81 | Complete |
-| CURATE-04 | Phase 81 | Pending |
+| CURATE-04 | Phase 81 | Complete |
 | CURATE-05 | Phase 81 | Complete |
 | MCP-01 | Phase 82 | Pending |
 | MCP-02 | Phase 82 | Pending |

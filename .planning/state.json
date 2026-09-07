@@ -11,7 +11,7 @@
     {
       "number": "81",
       "name": "Curation — Paper Registry",
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "number": "82",
@@ -31,8 +31,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step (plan phase 81)",
-    "reason": "Phase 81 of 5 — needs a plan"
+    "label": "Advance to the next step (verify)",
+    "reason": "Phase 81 of 5 · 20% · ready to verify"
   },
-  "updated_at": "2026-09-07T10:24:54.422Z"
+  "updated_at": "2026-09-07T13:51:14.876Z"
 }
