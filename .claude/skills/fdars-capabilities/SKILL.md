@@ -75,7 +75,7 @@ python -c "import fdars; print([n for n in dir(fdars.depth) if not n.startswith(
 # Or via MCP tool (requires mcp>=2.0.0, Python 3.10+):
 # fdars_list_capabilities(module="depth")
 
-# Browse the full 409-callable digest:
+# Browse the full API digest (409 public module callables + 28 Fdata class methods = 437 total):
 # https://sipemu.github.io/pyfda/llms.txt
 ```
 

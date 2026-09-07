@@ -545,7 +545,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 
 ## Scientific Provenance & Cross-Language Implementations
 
-Coverage: 28 of 437 public callables have curated primary-paper entries.
+Coverage: 28 of 437 callables (including 28 Fdata class methods) have curated primary-paper entries.
 Uncurated callables are absent from this section. A consumer MAY synthesize
 provenance for uncurated callables but MUST flag each synthesized citation as
 ungrounded (grounded: false) — never present synthesized provenance as curated.
@@ -596,7 +596,7 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `regression.fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 - `regression.predict_fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 
-> Uncurated callables (409 of 437) are absent from this section.
+> 409 of 437 total callables are not yet curated and are absent from this section.
 > A consumer MAY synthesize provenance for these callables but MUST structurally
 > flag each synthesized citation as ungrounded: { "grounded": false } per citation.
 > Never present synthesized provenance as curated data from this file.

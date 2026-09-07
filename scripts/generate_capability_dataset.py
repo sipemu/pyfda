@@ -594,7 +594,7 @@ def _emit_references_page(ref_data: dict, cap_data: dict, repo_root: Path) -> Pa
         f"> Generated offline from `python/fdars/_references_map.json`.  "
     )
     lines.append(
-        f"> **{numerator}/{denominator} callables** have curated entries (authoring: {coverage_str}).  "
+        f"> **{numerator}/{denominator} callables** have at least one curated primary-paper entry.  "
     )
     lines.append(
         f"> Uncurated callables are absent; see the [AI Capability Map](ai-capability-map.md) "
@@ -746,8 +746,10 @@ def _provenance_section_lines(ref_data: dict, cap_data: dict) -> "list[str]":
     lines.append("")
     lines.append("## Scientific Provenance & Cross-Language Implementations")
     lines.append("")
+    n_fdata_methods = len(cap_data.get("_Fdata", {}))
     lines.append(
-        f"Coverage: {numerator} of {denominator} public callables have curated "
+        f"Coverage: {numerator} of {denominator} callables "
+        f"(including {n_fdata_methods} Fdata class methods) have curated "
         f"primary-paper entries."
     )
     lines.append(
@@ -805,8 +807,8 @@ def _provenance_section_lines(ref_data: dict, cap_data: dict) -> "list[str]":
 
     # Closing uncurated note (verbatim per spec)
     lines.append(
-        f"> Uncurated callables ({uncurated_count} of {denominator}) are absent "
-        f"from this section."
+        f"> {uncurated_count} of {denominator} total callables are not yet curated "
+        f"and are absent from this section."
     )
     lines.append(
         "> A consumer MAY synthesize provenance for these callables but MUST structurally"
