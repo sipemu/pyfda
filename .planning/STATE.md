@@ -4,12 +4,12 @@ milestone: v13.0
 milestone_name: Scientific Provenance & Cross-Language Implementations
 current_phase: 84
 current_phase_name: Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review
-status: planning
+status: executing
 stopped_at: Phase 83 complete, ready to plan Phase 84
-last_updated: "2026-09-07T19:56:34.581Z"
+last_updated: "2026-09-07T19:59:37.664Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 83 complete, transitioned to Phase 84
-state_head: 71f2745e446d1ed2af08fcd04d71bf8f68cea616
+last_activity_desc: Phase 84 execution started
+state_head: e705c0c9e021a85e9b98941146d1915abe76ec18
 progress:
   total_phases: 5
   completed_phases: 4
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-07)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 83 — Docs, llms.txt & Skill Extension
+**Current focus:** Phase 84 — Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review
 
 ## Current Position
 
-Phase: 84 — Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-07 — Phase 83 complete, transitioned to Phase 84
+Phase: 84 (Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review) — EXECUTING
+Plan: 1 of 1
+Status: Executing Phase 84
+Last activity: 2026-09-07 — Phase 84 execution started
 
 Progress: [██████░░░░] 60%
 
@@ -152,6 +152,12 @@ None yet.
 | Core | `linalg`-gated `ridge_regression_fit` (Rust 1.84+ > MSRV 1.83) + HEAD 0.24-bound work | out of scope | v6.0 init |
 | References | REF-FUT-01: complete the uncurated `N/409` tail + a coverage floor once curation stabilizes (partial-but-honest accepted this milestone) | future | v13.0 init |
 | References | REF-FUT-02: opt-in live DOI/URL liveness resolve (`scripts/check_doi_liveness.py`, `FDARS_ONLINE_CHECKS=1`) run before close — never in CI | future | v13.0 init |
+
+## Deferred Verification
+
+| Phase | State | Resume |
+|-------|-------|--------|
+| 84 | verification_deferred_human (GATE-03 blocking human citation review — by design) | /gsd-verify-work 84 then /gsd-audit-milestone → /gsd-complete-milestone v13.0 → /gsd-cleanup |
 
 ## Session Continuity
 
