@@ -586,3 +586,82 @@ def test_references_map_coverage_fraction():
     assert 0 <= numerator <= denominator, (
         f"Numerator {numerator} out of bounds [0, {denominator}]"
     )
+
+
+# ---------------------------------------------------------------------------
+# ANTI-FEATURE ABSENCE GUARD (CURATE-04) — runs on Python 3.9+
+# ---------------------------------------------------------------------------
+
+
+def test_references_map_anti_feature_families_absent():
+    """GATE-05 anti-feature: six anti-feature families absent from callable_index (CURATE-04).
+
+    Loads _references_map.json via importlib.resources and asserts that callables
+    belonging to the six anti-feature families are NOT present as keys in
+    callable_index. Absence is the sentinel for these families — the Phase-82 MCP
+    tool returns curated:false / NO_CURATED_ENTRY for any callable not in the index.
+
+    The six anti-feature families (per 81-RESEARCH §2):
+    - ``explain`` (46 callables — XAI/general ML explainability, no FDA-specific root)
+    - ``metrics`` + ``scoring`` (10 callables — utility definitions, no primary paper)
+    - ``conformal`` (7 callables — general ML framework, not FDA-specific)
+    - ``seasonal`` (18 callables — mixed STL/FFT/SAZED/Lomb-Scargle origins, no single FDA root)
+    - ``spm`` EXCEPT ``spm.mfpca`` (22 callables — engineering/control literature)
+    - ``depth.functional_depth`` (category dispatcher — attribution belongs to sub-methods)
+
+    Allowed exceptions:
+    - ``spm.mfpca`` IS in callable_index (Happ & Greven 2018 — Pitfall 7 in references-schema.md)
+    - Per-sub-method depth callables (fraiman_muniz, band, modified_band, modal, etc.) ARE curated
+
+    Fails if any anti-feature callable appears in callable_index. Failure message
+    names the offending key and references CURATE-04 / 81-RESEARCH §2.
+    """
+    ref_file = resources.files("fdars") / "_references_map.json"
+    data: dict = json.loads(ref_file.read_text(encoding="utf-8"))
+
+    callable_index = data.get("callable_index", {})
+    keys = set(callable_index.keys())
+
+    # Anti-feature module prefixes — ALL callables in these modules must be absent
+    anti_feature_modules = frozenset({"explain", "metrics", "scoring", "conformal", "seasonal"})
+
+    violations: list[str] = []
+
+    # Check: no callable from the five fully-excluded modules appears in callable_index
+    for key in keys:
+        module = key.split(".", 1)[0]
+        if module in anti_feature_modules:
+            violations.append(
+                f"{key!r} — module {module!r} is an anti-feature family and must be "
+                "absent from callable_index (curated:false sentinel path) — "
+                "see CURATE-04 / 81-RESEARCH §2"
+            )
+
+    # Check: no spm.* key except spm.mfpca
+    for key in keys:
+        if key.startswith("spm.") and key != "spm.mfpca":
+            violations.append(
+                f"{key!r} — spm.* callables (except spm.mfpca) are anti-feature and must be "
+                "absent from callable_index — see CURATE-04 / 81-RESEARCH §2"
+            )
+
+    # Check: depth.functional_depth (category dispatcher) is absent
+    if "depth.functional_depth" in keys:
+        violations.append(
+            "'depth.functional_depth' — this is the category dispatcher; attribution belongs "
+            "to the sub-methods (fraiman_muniz, band, modified_band, etc.). The dispatcher must "
+            "be absent from callable_index (curated:false sentinel path) — "
+            "see CURATE-04 / 81-RESEARCH §2"
+        )
+
+    assert not violations, (
+        "Anti-feature family callable_index violation(s) (CURATE-04):\n"
+        + "\n".join(f"  - {v}" for v in violations)
+    )
+
+    # Positive assertion: spm.mfpca IS present (the sole curated spm callable)
+    assert "spm.mfpca" in keys, (
+        "spm.mfpca is missing from callable_index — it has a clear paper root "
+        "(Happ & Greven 2018) and must remain curated despite spm being an "
+        "anti-feature module at the category level (Pitfall 7 in references-schema.md)"
+    )
