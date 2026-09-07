@@ -5,16 +5,16 @@ milestone_name: Scientific Provenance & Cross-Language Implementations
 current_phase: 81
 current_phase_name: Curation — Paper Registry
 status: executing
-stopped_at: Completed 81-02-PLAN.md — depth/FPCA/outlier curation
-last_updated: "2026-09-07T12:05:17.931Z"
+stopped_at: Completed 81-03-PLAN.md
+last_updated: "2026-09-07T13:30:45.487Z"
 last_activity: 2026-09-07
 last_activity_desc: Phase 81 execution started
-state_head: d5bd592143e3750158dc9276b0c4d62ba57ed325
+state_head: 4a57ed6422aae8e42ff8e2897506c4eb3a0b819d
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 7
-  completed_plans: 4
+  completed_plans: 5
   percent: 20
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 ## Current Position
 
 Phase: 81 (Curation — Paper Registry) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-09-07 — Phase 81 execution started
 
@@ -68,6 +68,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 80 P02 | 2 | 1 tasks | 1 files |
 | Phase 81 P01 | 308 | 3 tasks | 2 files |
 | Phase 81-curation-paper-registry P02 | 12m | 3 tasks | 1 files |
+| Phase 81 P03 | 15 | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,8 @@ Recent decisions affecting current work:
 - [Phase 81]: _ALLOWED_DOMAINS extended with 9 domains (6 minimum + 3 conditional); coverage denominator derived from live _capability_map.json (437), not hardcoded
 - [Phase 81]: All new entries curated:false — personal DOI landing-page verification deferred to Phase 84 GATE-03 human review
 - [Phase 81]: fdars-core 0.33 source check: extremal.rs confirms Narisetty & Nair 2016; spatial.rs has no paper attribution; tvdmss cites Huang & Sun 2019 by name
+- [Phase 81]: flm_f_test/flm_gof_test curated:false — fdars-core uses classical FPC R² F-test and RESET GoF, not Shen & Faraway 2004
+- [Phase 81]: oneway_anova_vstat contested flag: cuesta_albertos_febrero_2010 entry with notes citing both 2010 and Górecki & Smaga 2015 as candidates; curated:false pending Phase 84
 
 ### Pending Todos
 
@@ -134,8 +137,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-07T12:05:17.898Z
-Stopped at: Completed 81-02-PLAN.md — depth/FPCA/outlier curation
+Last session: 2026-09-07T13:30:45.454Z
+Stopped at: Completed 81-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
