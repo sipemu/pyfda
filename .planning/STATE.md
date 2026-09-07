@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v12.0
-milestone_name: Docs Depth, Card Coverage & AI Capability Skill
-status: Awaiting next milestone
-stopped_at: Phase 79 complete — all phases complete
-last_updated: "2026-09-06T21:26:18.426Z"
-last_activity: 2026-09-06
-last_activity_desc: Milestone v12.0 completed and archived
-state_head: f778460f7ea854c21f92573c688d31e8710fac23
+milestone: v13.0
+milestone_name: Scientific Provenance & Cross-Language Implementations
+status: planning
+last_updated: "2026-09-07T07:57:38.561Z"
+last_activity: 2026-09-07
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 27
-  completed_plans: 27
-  percent: 100
-current_phase: 79
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-09-05)
 
 ## Current Position
 
-Phase: Milestone v12.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-06 — Milestone v12.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-09-07 — Milestone v13.0 started
 
 ## Performance Metrics
 
@@ -177,8 +173,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-06T20:43:19.623Z
-Stopped at: Phase 79 complete — all phases complete
+Last session: 2026-09-07T07:14:27.150Z
+Stopped at: context exhaustion at 75% (2026-09-07)
 Resume file: None
 
 ## Operator Next Steps

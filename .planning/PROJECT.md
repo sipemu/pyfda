@@ -24,18 +24,25 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Current Milestone: v12.0 Docs Depth, Card Coverage & AI Capability Skill
+## Current Milestone: v13.0 Scientific Provenance & Cross-Language Implementations
 
-**Goal:** Bring the recently-added (v11.0-era) functionality up to the documentation bar of the mature pages, complete section-landing card coverage across the focus sections, and give AI agents a way to discover the full fdars capability surface — a docs + skill milestone, no `fdars-core` bump and no new bindings (v7.0/v10.0 precedent).
+**Goal:** When asked "what is method X, where does it come from, and how else could I do it?", every fdars AI surface returns *grounded* scientific provenance — foundational papers with DOIs/links — plus cross-language implementation pointers (R, Python, Matlab) for every public callable. A code + docs + skill milestone; no `fdars-core` bump and no new numerical bindings.
 
 **Target features:**
-- **Deepen 9–10 thin v11.0 method pages to mature-page parity** (currently 20–35%): `functional-time-series`, `frechet-regression`, `density-fda`, `multi-domain`, `shapelets`, `advanced-clustering`, `function-on-function`, `additive-sof`, `concurrent-regression` (+ `functional-glm`) — add "When to use", "See also", parameter-selection guidance, caution/tip boxes, and more runnable inline `FDARS_FENCE_OK` examples.
-- **2–3 flagship end-to-end `examples/` pages** for marquee new methods (e.g. an FTS forecast walkthrough, a Fréchet-regression walkthrough) against existing `docs/data/` datasets.
-- **Complete section-landing card coverage:** create the 18 missing `assets/thumb/<page>.svg` thumbnails + gallery cards across **align (2), represent (3), regression (5), analyze (8)** and fill the **3 missing examples** cards — bringing those five galleries to 100%.
-- **AI capability-discovery skill across three surfaces:** a standalone **Agent Skill** (`SKILL.md`) mapping the whole fdars surface (every submodule, what it does, when to use it, how to call it); an **LLM-oriented docs page** (llms.txt-style API digest); and an **MCP capability tool** (describe/list capabilities) on the existing server, staying LLM-free.
-- **Gate:** whole-site `mkdocs build --strict` green offline; new/updated SVGs pass the SVGO/determinism gate; blocking human diagram review before close; grounding invariant + MCP LLM-free boundary preserved.
+- **Curated references map:** a hand-authored, author-verified JSON keyed by *foundational paper* (title, authors, year, DOI/URL) with a callable→paper index covering all ~409 public callables — curation is paper-level (many callables share one root paper), not 409 separate entries.
+- **Cross-language implementation pointers:** for each covered method, links to alternative implementations in R (fda, fda.usc, refund, funData), Python (scikit-fda), and Matlab (Ramsay fdaM, PACE), with package/function names and URLs.
+- **LLM-free MCP tool:** e.g. `fdars_method_references(method)` mirroring the `fdars_list_capabilities` pattern (static JSON via `importlib.resources`, frozenset-gated, no model call); returns the curated entry, or an explicit "no curated entry — ungrounded synthesis permitted, flag it" signal for the tail.
+- **Capability skill extension:** extend `fdars-capabilities` so "scientific root of X?" and "alternatives in R/Matlab?" are answerable, encoding the hybrid protocol — prefer curated data; where absent, the consuming LLM may synthesize but MUST flag it as ungrounded.
+- **Docs surface:** a References page and/or per-method References blocks on the site, folded into the machine-readable `llms.txt` digest.
+- **Gate:** LLM-free MCP boundary test (mirror GATE-04); curated-entry link/DOI validity; whole-site `mkdocs build --strict` green offline; guard-sync + grounding invariant preserved.
 
-**Key context:** Docs + skill only — no crate bump, no new bindings. Section cards use external thumbnails at `docs/assets/thumb/<page-slug>.svg` referenced from a `fdars-gallery` block in each section `index.md`; all 18 focus-section gaps are missing precisely because their thumbnail SVG is absent. Concept SVGs for the thin pages already exist (strength). Build is ~25 min with executed fences — keep fence datasets small; the `--strict` gate runs at the close phase. Advisor (7) and sklearn (5) landing pages have no gallery at all — deliberately deferred (different pattern). The new capability skill is the first non-advisor skill; it complements, and must not duplicate, the existing narrow `fdars-advisor` skill/MCP surface.
+**Key context:** Code + docs + skill — no crate bump, no new numerical bindings. Builds directly on v12.0's capability-discovery infrastructure (`_capability_map.json`, `fdars_list_capabilities` MCP tool, `fdars-capabilities` skill, `llms.txt`). The MCP tool itself stays **LLM-free** (static curated lookup); the "hybrid" LLM fallback lives in the *consumer's* behavior, governed by the skill and always flagged as ungrounded — so the GATE-04 grounding invariant is preserved. Curation unit is paper-level with a callable index, keeping authoring tractable across ~409 callables. Ecosystem targets: R (fda, fda.usc, refund, funData), Python (scikit-fda), Matlab (Ramsay fdaM, PACE).
+
+## Last Shipped Milestone: v12.0 Docs Depth, Card Coverage & AI Capability Skill (shipped 2026-09-06)
+
+_All 20 requirements validated; 6 phases (74–79), 27 plans; whole-site `mkdocs build --strict` green offline; SVGO/determinism gate green (0/122 unstable); blocking human diagram review approved; grounding invariant + MCP LLM-free boundary (GATE-04, 76 tests) preserved. Docs + skill — no crate bump, no new bindings. Full detail: `.planning/milestones/v12.0-ROADMAP.md`. Next milestone: v13.0._
+
+**Delivered:** brought the v11.0-era thin method pages (regression + analyze families) to full mature-page parity with corrected API usage and offline `FDARS_FENCE_OK` fences; added 2 flagship end-to-end `examples/` pages (FTS forecast, Fréchet density regression); completed section-landing card coverage (represent/regression/analyze galleries to 100%, 16 new hand-authored SVG thumbnails); shipped the first non-advisor Agent Skill (`fdars-capabilities`) + an LLM-oriented `llms.txt` capability digest (30 modules, 409 callables) + an LLM-free `fdars_list_capabilities` MCP tool (committed `_capability_map.json` via `importlib.resources`, frozenset-gated) guarded by a three-way GATE-04 guard-sync.
 
 ## Last Shipped Milestone: v11.0 fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs (shipped 2026-09-05)
 
@@ -186,15 +193,24 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-<!-- v12.0 — Docs Depth, Card Coverage & AI Capability Skill. Requirements scoped in .planning/REQUIREMENTS.md; phases in .planning/ROADMAP.md. -->
+<!-- v13.0 — Scientific Provenance & Cross-Language Implementations. Requirements scoped in .planning/REQUIREMENTS.md; phases in .planning/ROADMAP.md. -->
 
-**v12.0 — Docs Depth, Card Coverage & AI Capability Skill (docs + skill; no crate bump):**
+**v13.0 — Scientific Provenance & Cross-Language Implementations (code + docs + skill; no crate bump):**
 
-- [ ] Deepen the 9–10 thin v11.0 method pages to mature-page parity (When-to-use, See-also, parameter guidance, caution boxes, more runnable inline `FDARS_FENCE_OK` examples)
-- [ ] Add 2–3 flagship end-to-end `examples/` pages for marquee new methods
-- [ ] Complete section-landing card coverage — 18 focus-section thumbnails + cards (align/represent/regression/analyze) + 3 examples cards
-- [ ] AI capability-discovery skill — Agent Skill (`SKILL.md`) + LLM-oriented docs page + MCP capability tool (LLM-free)
-- [ ] Close gate — whole-site `mkdocs build --strict` green offline, SVGO/determinism green, blocking human diagram review, grounding invariant preserved
+- [ ] Curated references map — author-verified JSON keyed by foundational paper (title/authors/year/DOI/URL) + callable→paper index covering all ~409 public callables
+- [ ] Cross-language implementation pointers — R (fda, fda.usc, refund, funData) / Python (scikit-fda) / Matlab (Ramsay fdaM, PACE) package + function + URL per covered method
+- [ ] LLM-free MCP tool — `fdars_method_references(method)` (static JSON via `importlib.resources`, frozenset-gated); curated entry or explicit ungrounded-synthesis-permitted signal
+- [ ] Capability skill extension — `fdars-capabilities` answers "scientific root of X?" / "alternatives in R/Matlab?"; hybrid protocol with honest ungrounded flagging
+- [ ] Docs surface — References page and/or per-method References blocks, folded into the `llms.txt` digest
+- [ ] Close gate — LLM-free MCP boundary test (mirror GATE-04), curated link/DOI validity, whole-site `mkdocs build --strict` green offline, guard-sync + grounding invariant preserved
+
+**v12.0 — Docs Depth, Card Coverage & AI Capability Skill (Phases 74–79, shipped 2026-09-06):**
+
+- [x] Deepen the v11.0-era thin method pages (regression + analyze families) to mature-page parity with corrected API + offline `FDARS_FENCE_OK` fences — Phases 74/75
+- [x] Add 2 flagship end-to-end `examples/` pages (FTS forecast, Fréchet density regression) — Phase 76
+- [x] Complete section-landing card coverage — represent/regression/analyze galleries to 100% (16 new hand-authored SVG thumbnails + cards) — Phase 77
+- [x] AI capability-discovery skill — `fdars-capabilities` Agent Skill + `llms.txt` digest (30 modules, 409 callables) + LLM-free `fdars_list_capabilities` MCP tool (GATE-04 guard-sync) — Phase 78
+- [x] Close gate — whole-site `mkdocs build --strict` green offline, SVGO/determinism green (0/122 unstable), human diagram review approved, grounding invariant preserved — Phase 79
 
 **v11.0 — fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs (Phases 66–73, shipped 2026-09-05):**
 
@@ -321,4 +337,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-05 — started milestone v12.0 (Docs Depth, Card Coverage & AI Capability Skill). Docs + skill only, no `fdars-core` bump: deepen the 9–10 thin v11.0 method pages to mature parity + 2–3 flagship `examples/` pages, complete section-landing card coverage (18 focus-section thumbnails/cards + 3 examples cards), and add an AI capability-discovery skill across three surfaces (Agent Skill + LLM-oriented docs page + LLM-free MCP capability tool). Phases continue from Phase 74. Next: research decision → requirements → roadmap.*
+*Last updated: 2026-09-07 — started milestone v13.0 (Scientific Provenance & Cross-Language Implementations). Code + docs + skill, no `fdars-core` bump: a curated paper-level references map + callable index (~409 callables) with R/Python/Matlab implementation pointers, an LLM-free `fdars_method_references` MCP tool, an extended `fdars-capabilities` skill (hybrid curated/flagged-LLM protocol), and a References docs surface folded into `llms.txt`. Builds on v12.0 capability-discovery infra; grounding invariant preserved. Phases continue from Phase 79. Next: research decision → requirements → roadmap.*
