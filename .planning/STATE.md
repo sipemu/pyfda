@@ -5,16 +5,16 @@ milestone_name: Scientific Provenance & Cross-Language Implementations
 current_phase: 81
 current_phase_name: Curation — Paper Registry
 status: executing
-stopped_at: Completed 81-03-PLAN.md
-last_updated: "2026-09-07T13:30:45.487Z"
+stopped_at: Completed 81-04-PLAN.md
+last_updated: "2026-09-07T13:43:38.460Z"
 last_activity: 2026-09-07
 last_activity_desc: Phase 81 execution started
-state_head: 4a57ed6422aae8e42ff8e2897506c4eb3a0b819d
+state_head: 7860f820c7725a5fad80b60472243358c093d10a
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
   percent: 20
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 ## Current Position
 
 Phase: 81 (Curation — Paper Registry) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-09-07 — Phase 81 execution started
 
@@ -69,6 +69,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 81 P01 | 308 | 3 tasks | 2 files |
 | Phase 81-curation-paper-registry P02 | 12m | 3 tasks | 1 files |
 | Phase 81 P03 | 15 | 3 tasks | 1 files |
+| Phase 81 P04 | 9 | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,9 @@ Recent decisions affecting current work:
 - [Phase 81]: fdars-core 0.33 source check: extremal.rs confirms Narisetty & Nair 2016; spatial.rs has no paper attribution; tvdmss cites Huang & Sun 2019 by name
 - [Phase 81]: flm_f_test/flm_gof_test curated:false — fdars-core uses classical FPC R² F-test and RESET GoF, not Shen & Faraway 2004
 - [Phase 81]: oneway_anova_vstat contested flag: cuesta_albertos_febrero_2010 entry with notes citing both 2010 and Górecki & Smaga 2015 as candidates; curated:false pending Phase 84
+- [Phase 81]: clustering.align_cluster_fd wired as co-primary to srivastava_et_al_2011 (callable is in clustering module, not alignment) — fdars-core alignment/clustering.rs cites arXiv:1103.3817
+- [Phase 81]: cuturi_blondel_2017 soft-DTW: doi:'' curated:true — PMLR proceedings have no journal DOI; GATE-05 C skips empty doi on curated:true entries
+- [Phase 81]: spm.mfpca curated (happ_greven_2018) despite spm anti-feature module — callable has clear paper root per Pitfall 7
 
 ### Pending Todos
 
@@ -137,8 +141,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-07T13:30:45.454Z
-Stopped at: Completed 81-03-PLAN.md
+Last session: 2026-09-07T13:43:38.424Z
+Stopped at: Completed 81-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
