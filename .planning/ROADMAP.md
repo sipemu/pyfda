@@ -213,7 +213,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 - Content/docs phases run SEQUENTIALLY on `main` with `use_worktrees: false` (doc-build fences hardcode the main-tree `.venv/bin/mkdocs`). The whole-site `mkdocs build --strict` (~25 min) + guard-sync + DOI/link gates run ONCE, consolidated at the CLOSE phase (Phase 84).
 - A BLOCKING HUMAN citation-accuracy review (papers verified against DOI landing pages by a human, not an LLM) is a hard close gate — parallel to the standing v6.0 blocking diagram review; autonomous execution stops there.
 
-- [ ] **Phase 80: Schema, Data Home & Primary Guard Tests** - `_references_map.json` stub + schema/author-verification workflow + maturin include + primary GATE-05 tests + offline DOI/URL structural gate
+- [x] **Phase 80: Schema, Data Home & Primary Guard Tests** - `_references_map.json` stub + schema/author-verification workflow + maturin include + primary GATE-05 tests + offline DOI/URL structural gate (completed 2026-09-07)
 - [ ] **Phase 81: Curation — Paper Registry** - hand-authored, author-verified paper-level entries + sub-method callable index + R/Python/Matlab pointers + anti-feature sentinels + honest `N/409` coverage (bulk / critical path)
 - [ ] **Phase 82: MCP Tool `fdars_method_references` + GATE-05 Companion** - LLM-free static lookup tool + `_REFERENCES_MODULES` + curated/sentinel return shape + Guard Group 3 companion tests (can parallel Phase 81)
 - [ ] **Phase 83: Docs, llms.txt & Skill Extension** - `docs/references.md` + `--references` offline emit + `llms.txt` provenance section + `mkdocs.yml` nav + `fdars-capabilities` hybrid protocol
@@ -307,7 +307,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 80. Schema, Data Home & Primary Guard Tests | v13.0 | 2/2 | In Progress|  |
+| 80. Schema, Data Home & Primary Guard Tests | v13.0 | 2/2 | Complete    | 2026-09-07 |
 | 81. Curation — Paper Registry | v13.0 | 0/TBD | Not started | - |
 | 82. MCP Tool `fdars_method_references` + GATE-05 Companion | v13.0 | 0/TBD | Not started | - |
 | 83. Docs, llms.txt & Skill Extension | v13.0 | 0/TBD | Not started | - |

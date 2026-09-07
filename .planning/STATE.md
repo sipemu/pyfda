@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v13.0
 milestone_name: Scientific Provenance & Cross-Language Implementations
-current_phase: 80
-current_phase_name: Schema, Data Home & Primary Guard Tests
-status: verifying
-stopped_at: Completed 80-02-PLAN.md
-last_updated: "2026-09-07T10:02:09.290Z"
+current_phase: 81
+current_phase_name: Curation — Paper Registry
+status: planning
+stopped_at: Phase 80 complete, ready to plan Phase 81
+last_updated: "2026-09-07T10:24:54.413Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 80 execution started
-state_head: f037062a2105b3139a3c739c9132b295bfef94c2
+last_activity_desc: Phase 80 complete, transitioned to Phase 81
+state_head: d73899f4abe062edcebf9e60150a56b1808145e5
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
   completed_plans: 2
-  percent: 0
+  percent: 20
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 
 ## Current Position
 
-Phase: 80 (Schema, Data Home & Primary Guard Tests) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-09-07 — Phase 80 execution started
+Phase: 81 — Curation — Paper Registry
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-07 — Phase 80 complete, transitioned to Phase 81
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -48,7 +48,7 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 80 | TBD | - | - |
+| 80 | 2 | - | - |
 | 81 | TBD | - | - |
 | 82 | TBD | - | - |
 | 83 | TBD | - | - |
@@ -129,7 +129,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-07T10:02:09.271Z
-Stopped at: Completed 80-02-PLAN.md
+Stopped at: Phase 80 complete, ready to plan Phase 81
 Resume file: None
 
 ## Operator Next Steps
