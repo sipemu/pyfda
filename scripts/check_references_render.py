@@ -14,6 +14,8 @@ Checks performed:
      after the ``AI Capability Map: ai-capability-map.md`` entry.
   4. Every relative ``.md`` link inside docs/references.md resolves to an
      existing file under docs/ (http/https links are skipped).
+  5. Neither docs/references.md nor docs/llms.txt contains any ``_uncurated``
+     sentinel token — sentinel papers must never appear in published docs.
 
 Exits 0 with ``RENDER_VALIDITY_OK`` on success, non-zero with a descriptive
 error message on any failure.
@@ -143,6 +145,32 @@ def check_internal_links(docs_dir: pathlib.Path) -> None:
     )
 
 
+def check_no_sentinel_leakage(docs_dir: pathlib.Path, repo_root: pathlib.Path) -> None:
+    """Assert _uncurated* sentinel keys do not appear in generated docs."""
+    refs_text = (docs_dir / "references.md").read_text(encoding="utf-8")
+    llms_path = docs_dir / "llms.txt"
+    if not llms_path.exists():
+        print(
+            f"ERROR: docs/llms.txt not found at {llms_path}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    llms_text = llms_path.read_text(encoding="utf-8")
+    failed = False
+    for filename, text in [("references.md", refs_text), ("llms.txt", llms_text)]:
+        count = text.count("_uncurated")
+        if count > 0:
+            print(
+                f"ERROR: {filename} contains {count} occurrence(s) of '_uncurated' "
+                f"— sentinel papers must not appear in published docs.",
+                file=sys.stderr,
+            )
+            failed = True
+    if failed:
+        sys.exit(1)
+    print("  [5] Sentinel leakage: OK (no '_uncurated' in references.md or llms.txt)")
+
+
 def main() -> None:
     repo_root = _repo_root()
     docs_dir = repo_root / "docs"
@@ -152,6 +180,7 @@ def main() -> None:
     check_balanced_fences(docs_dir)
     check_nav_placement(repo_root)
     check_internal_links(docs_dir)
+    check_no_sentinel_leakage(docs_dir, repo_root)
     print("RENDER_VALIDITY_OK")
 
 
