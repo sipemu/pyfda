@@ -4,17 +4,17 @@ milestone: v13.0
 milestone_name: Scientific Provenance & Cross-Language Implementations
 current_phase: 83
 current_phase_name: Docs, llms.txt & Skill Extension
-status: planning
-stopped_at: Phase 82 complete, ready to plan Phase 83
-last_updated: "2026-09-07T18:59:32.417Z"
+status: executing
+stopped_at: Completed 83-01-PLAN.md
+last_updated: "2026-09-07T19:26:10.434Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 82 complete, transitioned to Phase 83
-state_head: 41441f1428627945a96069566fbf8f6226e788e2
+last_activity_desc: Phase 83 execution started
+state_head: f19c4f0977b0cc52c8c95511729c63a4ec0df0b1
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 11
+  completed_plans: 9
   percent: 60
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-07)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 82 — MCP Tool fdars_method_references + GATE-05 Companion
+**Current focus:** Phase 83 — Docs, llms.txt & Skill Extension
 
 ## Current Position
 
-Phase: 83 — Docs, llms.txt & Skill Extension
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-07 — Phase 82 complete, transitioned to Phase 83
+Phase: 83 (Docs, llms.txt & Skill Extension) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-09-07 — Phase 83 execution started
 
-Progress: [████░░░░░░] 40%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [████░░░░░░] 40%
 | Phase 81 P04 | 9 | 3 tasks | 1 files |
 | Phase 81-curation-paper-registry P05 | 289 | 2 tasks | 2 files |
 | Phase 82-mcp-tool-fdars-method-references-gate-05-companion P01 | 23 | 2 tasks | 2 files |
+| Phase 83 P01 | 5 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,8 @@ Recent decisions affecting current work:
 - [Phase 81]: Coverage finalized at 31/437 (7.1% curated:true) — honest per CURATE-05; no LLM-synthesized placeholder ships as curated
 - [Phase 82]: _REFERENCES_MODULES is an alias (= _CAPABILITY_MODULES), not an independent frozenset — the DERIVED relationship is structural and asserted by GATE-05 D three-way equality guard
 - [Phase 82]: Coverage denominator derived live from _capability_map.json (437), never hardcoded — MCP-02 requirement text says 409 (stale); Phase 84 should reconcile to 437
+- [Phase 83]: Extended _emit_llmstxt with optional ref/cap args for inline provenance append; backward compat preserved
+- [Phase 83]: 409->437 denominator correction: emitted honest value 437, requirement text (stale 409) to be reconciled in Phase 84
 
 ### Pending Todos
 
@@ -147,8 +150,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-07T18:46:02.642Z
-Stopped at: Phase 82 complete, ready to plan Phase 83
+Last session: 2026-09-07T19:26:10.348Z
+Stopped at: Completed 83-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
