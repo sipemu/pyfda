@@ -78,7 +78,6 @@
       "url": "https://projecteuclid.org/journals/statistical-science/volume-11/issue-2/Flexible-smoothing-with-B-splines-and-penalties/10.1214/ss/1038425655.full",
       "type": "journal",
       "callables": [
-        "smoothing.gcv_smoother",
         "basis.basis_nbasis_cv"
       ],
       "notes": "Introduces P-splines (penalised B-splines).",
@@ -95,7 +94,6 @@
     "alignment.elastic_align_pair": ["srivastava_et_al_2011"],
     "alignment.srsf_transform": ["srivastava_et_al_2011"],
     "_Fdata.to_pc": ["ramsay_dalzell_1991"],
-    "smoothing.gcv_smoother": ["eilers_marx_1996"],
     "basis.basis_nbasis_cv": ["eilers_marx_1996"]
   }
 }
