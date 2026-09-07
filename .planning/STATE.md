@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v13.0
 milestone_name: Scientific Provenance & Cross-Language Implementations
-current_phase: 82
-current_phase_name: MCP Tool fdars_method_references + GATE-05 Companion
-status: verifying
-stopped_at: Completed 82-01-PLAN.md
-last_updated: "2026-09-07T18:46:02.765Z"
+current_phase: 83
+current_phase_name: Docs, llms.txt & Skill Extension
+status: planning
+stopped_at: Phase 82 complete, ready to plan Phase 83
+last_updated: "2026-09-07T18:59:32.417Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 82 execution started
-state_head: 3610b454a8d3401955364c67e74bd3e5663f4e4b
+last_activity_desc: Phase 82 complete, transitioned to Phase 83
+state_head: 41441f1428627945a96069566fbf8f6226e788e2
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 8
   completed_plans: 8
-  percent: 40
+  percent: 60
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 
 ## Current Position
 
-Phase: 82 (MCP Tool fdars_method_references + GATE-05 Companion) — EXECUTING
-Plan: 1 of 1
-Status: Phase complete — ready for verification
-Last activity: 2026-09-07 — Phase 82 execution started
+Phase: 83 — Docs, llms.txt & Skill Extension
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-07 — Phase 82 complete, transitioned to Phase 83
 
 Progress: [████░░░░░░] 40%
 
@@ -50,7 +50,7 @@ Progress: [████░░░░░░] 40%
 |-------|-------|-------|----------|
 | 80 | 2 | - | - |
 | 81 | 5 | - | - |
-| 82 | TBD | - | - |
+| 82 | 1 | - | - |
 | 83 | TBD | - | - |
 | 84 | TBD | - | - |
 
@@ -148,7 +148,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-07T18:46:02.642Z
-Stopped at: Completed 82-01-PLAN.md
+Stopped at: Phase 82 complete, ready to plan Phase 83
 Resume file: None
 
 ## Operator Next Steps
