@@ -169,6 +169,58 @@
       ],
       "notes": "Simultaneous 1964 papers: Nadaraya 'On Estimating Regression' (Theory of Probability) and Watson 'Smooth Regression Analysis' (Sankhya). Both introduce the Nadaraya-Watson kernel estimator. Soviet-era journals with no DOI assignment. curated:false — cannot DOI-verify 1964 journal articles.",
       "curated": false
+    },
+    "ramsay_silverman_2005": {
+      "title": "Functional Data Analysis",
+      "authors": ["Ramsay, J.O.", "Silverman, B.W."],
+      "year": 2005,
+      "doi": "10.1007/b98888",
+      "url": "https://link.springer.com/book/10.1007/b98888",
+      "type": "book",
+      "callables": [
+        "fdata.mean_1d",
+        "fdata.mean_2d",
+        "fdata.functional_covariance",
+        "fdata.functional_variance",
+        "fdata.functional_std",
+        "fdata.norm_lp_1d",
+        "fdata.deriv_1d",
+        "fdata.deriv_2d",
+        "fdata.center_1d",
+        "fdata.trim_mean",
+        "fdata.normalize"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fda",
+          "function": "pca.fd",
+          "url": "https://rdrr.io/cran/fda/man/pca.fd.html",
+          "confidence": "high"
+        },
+        "Python": {
+          "package": "scikit-fda",
+          "function": "FPCA",
+          "url": "https://fda.readthedocs.io/en/stable/modules/preprocessing/dim_reduction.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Canonical FDA textbook (2nd edition). DOI 10.1007/b98888 is [CITED via link.springer.com] — confirmed as the Springer book DOI. curated:false — this session cannot personally open the DOI landing page to verify author list and title exactly as printed; set curated:true after direct landing-page verification at Phase 84 review.",
+      "curated": false
+    },
+    "gervini_2008": {
+      "title": "Robust functional estimation using the median and spherical principal components",
+      "authors": ["Gervini, D."],
+      "year": 2008,
+      "doi": "10.1093/biomet/asn031",
+      "url": "https://academic.oup.com/biomet/article/95/3/587/217534",
+      "type": "journal",
+      "callables": [
+        "fdata.geometric_median_1d",
+        "fdata.geometric_median_2d",
+        "_Fdata.geometric_median"
+      ],
+      "notes": "Introduces the geometric (L1) median for functional data via Weiszfeld-type iteration in function space. DOI 10.1093/biomet/asn031 is [ASSUMED] — not landing-page-verified this session; curated:false until confirmed.",
+      "curated": false
     }
   },
   "callable_index": {
@@ -190,6 +242,20 @@
     "basis.basis_to_fdata_1d": ["eilers_marx_1996"],
     "smoothing.gcv_smoother": ["craven_wahba_1979"],
     "smoothing.optim_bandwidth": ["craven_wahba_1979"],
-    "smoothing.nadaraya_watson": ["nadaraya_watson_1964"]
+    "smoothing.nadaraya_watson": ["nadaraya_watson_1964"],
+    "fdata.mean_1d": ["ramsay_silverman_2005"],
+    "fdata.mean_2d": ["ramsay_silverman_2005"],
+    "fdata.functional_covariance": ["ramsay_silverman_2005"],
+    "fdata.functional_variance": ["ramsay_silverman_2005"],
+    "fdata.functional_std": ["ramsay_silverman_2005"],
+    "fdata.norm_lp_1d": ["ramsay_silverman_2005"],
+    "fdata.deriv_1d": ["ramsay_silverman_2005"],
+    "fdata.deriv_2d": ["ramsay_silverman_2005"],
+    "fdata.center_1d": ["ramsay_silverman_2005"],
+    "fdata.trim_mean": ["ramsay_silverman_2005"],
+    "fdata.normalize": ["ramsay_silverman_2005"],
+    "fdata.geometric_median_1d": ["gervini_2008"],
+    "fdata.geometric_median_2d": ["gervini_2008"],
+    "_Fdata.geometric_median": ["gervini_2008"]
   }
 }
