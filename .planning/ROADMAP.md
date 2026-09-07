@@ -275,9 +275,9 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
   3. `_REFERENCES_MODULES` is derived from / asserted equal to `_CAPABILITY_MODULES` and gates input before any JSON load.
   4. GATE-05 companion tests (Python 3.10+) land in `tests/test_guard_sync_version_independent.py` as Guard Group 3 in the SAME commit as the tool: LLM-free boundary (no `provider`/`model` keys; known-absent callable returns `curated:false` with no `doi`; no advisor/provider import) and frozenset literal mirror (`_REFERENCES_MODULES == _EXPECTED_REFERENCES_MODULES == _CAPABILITY_MODULES`).
 
-**Plans**: 1 plan
+**Plans**: 1/1 plans executed
 
-- [ ] 82-01-PLAN.md — Tracer: ship `fdars_method_references` tool + `_REFERENCES_MODULES` alias + Guard Group 3 (C)/(D) companion tests in one atomic commit, then exercise all return-contract branches (MCP-01, MCP-02, MCP-03, MCP-04)
+- [x] 82-01-PLAN.md — Tracer: ship `fdars_method_references` tool + `_REFERENCES_MODULES` alias + Guard Group 3 (C)/(D) companion tests in one atomic commit, then exercise all return-contract branches (MCP-01, MCP-02, MCP-03, MCP-04)
 
 **UI hint**: no
 
@@ -319,7 +319,7 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
 |-------|-----------|----------------|--------|-----------|
 | 80. Schema, Data Home & Primary Guard Tests | v13.0 | 2/2 | Complete    | 2026-09-07 |
 | 81. Curation — Paper Registry | v13.0 | 5/5 | Complete    | 2026-09-07 |
-| 82. MCP Tool `fdars_method_references` + GATE-05 Companion | v13.0 | 0/1 | Not started | - |
+| 82. MCP Tool `fdars_method_references` + GATE-05 Companion | v13.0 | 1/1 | In Progress|  |
 | 83. Docs, llms.txt & Skill Extension | v13.0 | 0/TBD | Not started | - |
 | 84. Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Review | v13.0 | 0/TBD | Not started | - |
 

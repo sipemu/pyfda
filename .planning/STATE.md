@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v13.0
 milestone_name: Scientific Provenance & Cross-Language Implementations
 current_phase: 82
-current_phase_name: MCP Tool `fdars_method_references` + GATE-05 Companion
-status: planning
-stopped_at: Phase 81 complete, ready to plan Phase 82
-last_updated: "2026-09-07T14:13:07.881Z"
+current_phase_name: MCP Tool fdars_method_references + GATE-05 Companion
+status: verifying
+stopped_at: Completed 82-01-PLAN.md
+last_updated: "2026-09-07T18:46:02.765Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 81 complete, transitioned to Phase 82
-state_head: ca843c3e7eb4e36e369bfdda937ea749c1f1af7d
+last_activity_desc: Phase 82 execution started
+state_head: 3610b454a8d3401955364c67e74bd3e5663f4e4b
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 8
+  completed_plans: 8
   percent: 40
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-07)
 
 **Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 81 — Curation — Paper Registry
+**Current focus:** Phase 82 — MCP Tool fdars_method_references + GATE-05 Companion
 
 ## Current Position
 
-Phase: 82 — MCP Tool `fdars_method_references` + GATE-05 Companion
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-07 — Phase 81 complete, transitioned to Phase 82
+Phase: 82 (MCP Tool fdars_method_references + GATE-05 Companion) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-09-07 — Phase 82 execution started
 
-Progress: [██░░░░░░░░] 20%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
@@ -71,6 +71,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 81 P03 | 15 | 3 tasks | 1 files |
 | Phase 81 P04 | 9 | 3 tasks | 1 files |
 | Phase 81-curation-paper-registry P05 | 289 | 2 tasks | 2 files |
+| Phase 82-mcp-tool-fdars-method-references-gate-05-companion P01 | 23 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,8 @@ Recent decisions affecting current work:
 - [Phase 81]: spm.mfpca curated (happ_greven_2018) despite spm anti-feature module — callable has clear paper root per Pitfall 7
 - [Phase 81]: _uncurated_spm_tail_2026-09 removed: CURATE-04 sentinel is ABSENCE from callable_index, not a curated:false placeholder entry listing the callables
 - [Phase 81]: Coverage finalized at 31/437 (7.1% curated:true) — honest per CURATE-05; no LLM-synthesized placeholder ships as curated
+- [Phase 82]: _REFERENCES_MODULES is an alias (= _CAPABILITY_MODULES), not an independent frozenset — the DERIVED relationship is structural and asserted by GATE-05 D three-way equality guard
+- [Phase 82]: Coverage denominator derived live from _capability_map.json (437), never hardcoded — MCP-02 requirement text says 409 (stale); Phase 84 should reconcile to 437
 
 ### Pending Todos
 
@@ -144,8 +147,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-07T13:51:38.711Z
-Stopped at: Phase 81 complete, ready to plan Phase 82
+Last session: 2026-09-07T18:46:02.642Z
+Stopped at: Completed 82-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

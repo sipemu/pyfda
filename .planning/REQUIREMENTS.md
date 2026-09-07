@@ -74,10 +74,10 @@ When asked "what is method X, where does it come from, and how else could I do i
 | CURATE-03 | Phase 81 | Complete |
 | CURATE-04 | Phase 81 | Complete |
 | CURATE-05 | Phase 81 | Complete |
-| MCP-01 | Phase 82 | Pending |
-| MCP-02 | Phase 82 | Pending |
-| MCP-03 | Phase 82 | Pending |
-| MCP-04 | Phase 82 | Pending |
+| MCP-01 | Phase 82 | Complete |
+| MCP-02 | Phase 82 | Complete |
+| MCP-03 | Phase 82 | Complete |
+| MCP-04 | Phase 82 | Complete |
 | DOCS-01 | Phase 83 | Pending |
 | DOCS-02 | Phase 83 | Pending |
 | DOCS-03 | Phase 83 | Pending |
