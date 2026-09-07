@@ -294,7 +294,8 @@
       "url": "https://www.tandfonline.com/doi/abs/10.1198/jcgs.2011.09224",
       "type": "journal",
       "callables": [
-        "depth.functional_boxplot"
+        "depth.functional_boxplot",
+        "outliers.outliergram"
       ],
       "cross_language": {
         "R": {
@@ -304,7 +305,65 @@
           "confidence": "high"
         }
       },
-      "notes": "Introduces the functional boxplot visualization. [VERIFIED: tandfonline.com/doi/abs/10.1198/jcgs.2011.09224 — confirmed Sun & Genton 2011, JCGS Vol 20 No 2, pp 316-334.] NOT the category-level dispatcher depth.functional_depth. curated:false until Phase 84 direct DOI-landing-page verification of title/authors.",
+      "notes": "Introduces the functional boxplot visualization and the outliergram (MBD vs MEI parabolic fence). [VERIFIED: tandfonline.com/doi/abs/10.1198/jcgs.2011.09224 — confirmed Sun & Genton 2011, JCGS Vol 20 No 2, pp 316-334.] NOT the category-level dispatcher depth.functional_depth. curated:false until Phase 84 direct DOI-landing-page verification of title/authors.",
+      "curated": false
+    },
+    "dai_genton_2019": {
+      "title": "Directional outlyingness for multivariate functional data",
+      "authors": ["Dai, W.", "Genton, M.G."],
+      "year": 2019,
+      "doi": "10.1016/j.csda.2018.03.017",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S016794731830077X",
+      "type": "journal",
+      "callables": [
+        "outliers.magnitude_shape",
+        "outliers.muod"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdaoutlier",
+          "function": "msplot",
+          "url": "https://rdrr.io/cran/fdaoutlier/man/msplot.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces directional outlyingness (magnitude-shape outlyingness) and the MS-plot (MUOD). [CITED: sciencedirect.com — Dai & Genton 2019, CSDA.] curated:false until Phase 84 direct DOI-landing-page verification.",
+      "curated": false
+    },
+    "febrero_galeano_gonzalez_2008": {
+      "title": "Outlier detection in functional data by depth measures with application to identify abnormal NOx levels",
+      "authors": ["Febrero, M.", "Galeano, P.", "González-Manteiga, W."],
+      "year": 2008,
+      "doi": "10.1002/env.878",
+      "url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/env.878",
+      "type": "journal",
+      "callables": [
+        "outliers.detect_outliers_lrt",
+        "outliers.detect_outliers_lrt_with_dist"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fda.usc",
+          "function": "foutliers",
+          "url": "https://rdrr.io/cran/fda.usc/man/foutliers.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Depth-based likelihood ratio test (LRT) for outlier detection in functional data. [CITED: onlinelibrary.wiley.com — Febrero, Galeano, González-Manteiga 2008, Environmetrics.] curated:false until Phase 84 direct DOI-landing-page verification.",
+      "curated": false
+    },
+    "_uncurated_outliers_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "outliers.depthgram",
+        "outliers.tvdmss",
+        "outliers.sequential_transform_outliers"
+      ],
+      "notes": "Pending curation — attribution partially confirmed from fdars-core source. tvdmss: fdars-core 0.33 outliers.rs doc says 'Huang & Sun 2019 / fdaoutlier::tvdmss' but DOI not identified. depthgram: fdars-core source says 'roahd depthGram' — [ASSUMED] Dai & Genton 2018 JCGS (different paper from Dai & Genton 2019 CSDA). sequential_transform_outliers: no paper citation in fdars-core source. All three deferred to 81-05 curated:false family or future direct verification.",
       "curated": false
     },
     "yao_muller_wang_2005": {
@@ -397,6 +456,14 @@
     "simulation.eigenvalues": ["ramsay_silverman_2005"],
     "pace_fpca.pace_fpca": ["yao_muller_wang_2005"],
     "pace_fpca.irreg_fdata_from_lists": ["yao_muller_wang_2005"],
-    "pace_fpca.PyIrregFdata": ["yao_muller_wang_2005"]
+    "pace_fpca.PyIrregFdata": ["yao_muller_wang_2005"],
+    "outliers.outliergram": ["sun_genton_2011"],
+    "outliers.magnitude_shape": ["dai_genton_2019"],
+    "outliers.muod": ["dai_genton_2019"],
+    "outliers.detect_outliers_lrt": ["febrero_galeano_gonzalez_2008"],
+    "outliers.detect_outliers_lrt_with_dist": ["febrero_galeano_gonzalez_2008"],
+    "outliers.depthgram": ["_uncurated_outliers_2026-09"],
+    "outliers.tvdmss": ["_uncurated_outliers_2026-09"],
+    "outliers.sequential_transform_outliers": ["_uncurated_outliers_2026-09"]
   }
 }
