@@ -29,6 +29,27 @@ Companion tests (guarded internally to Python 3.10+):
         keys in the return value (LLM-free boundary, T-78-09).
     (b) Imports ``server._CAPABILITY_MODULES`` and asserts it equals
         ``_EXPECTED_CAPABILITY_MODULES`` (three-way literal mirror, T-78-10).
+
+Guard Group 3 — fdars_method_references / _REFERENCES_MODULES (GATE-05):
+
+Primary tests (runs on Python 3.9+, no mcp import):
+    A: ``callable_index`` keys == union of ``papers[*].callables`` (internal
+       consistency).
+    B: Every ``callable_index`` key resolves in ``_capability_map.json``
+       (cross-file resolution check).
+    C (primary): DOI regex + URL well-formedness structural gate (SCHEMA-04).
+    Coverage: N/437 fraction derived from ``_capability_map.json``
+       (drift tripwire — fails if the capability map grows without adding refs).
+    Anti-feature: Six anti-feature families absent from ``callable_index``
+       (CURATE-04).
+
+Companion tests (guarded internally to Python 3.10+):
+    (C) Calls ``fdars_method_references`` with a curated hit and an absent
+        callable; asserts LLM-free boundary via AST inspection of the handler
+        source (no advisor or provider module imported).
+    (D) Imports ``server._REFERENCES_MODULES`` and asserts three-way equality:
+        ``_REFERENCES_MODULES == _EXPECTED_REFERENCES_MODULES
+        == _CAPABILITY_MODULES``.
 """
 
 from __future__ import annotations
@@ -758,6 +779,9 @@ def test_references_tool_llm_free_boundary():
     tree = ast.parse(src)
     forbidden_modules = {"fdars.advisor", "fdars.mcp._runner", "fdars.mcp._compare",
                          "fdars.mcp._tuning", "anthropic", "openai"}
+    # Submodule names that must not be imported even via 'from fdars import <name>'.
+    # __version__ is explicitly excluded — the handler legitimately uses it.
+    forbidden_fdars_names = {"advisor"}
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom) and node.module:
             assert node.module not in forbidden_modules, (
@@ -765,6 +789,15 @@ def test_references_tool_llm_free_boundary():
                 "LLM-free boundary violated: this handler must not import "
                 "advisor or provider modules."
             )
+            # Also catch: 'from fdars import advisor' — module is "fdars" but the
+            # imported name is a forbidden submodule.
+            if node.module == "fdars":
+                for alias in node.names:
+                    assert alias.name not in forbidden_fdars_names, (
+                        f"fdars_method_references uses 'from fdars import {alias.name}' — "
+                        "LLM-free boundary violated: this handler must not import "
+                        "advisor or provider modules."
+                    )
         if isinstance(node, ast.Import):
             for alias in node.names:
                 assert alias.name not in forbidden_modules, (
