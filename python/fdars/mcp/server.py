@@ -15,7 +15,7 @@ Usage (in-process test)::
         tools = await client.list_tools()
         result = await client.call_tool("fdars_build_diagnostics", {...})
 
-Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03 + 52-03 + 53-03 + 78-04):
+Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03 + 52-03 + 53-03 + 78-04 + 82-01):
 
 - ``fdars_build_diagnostics`` — deterministic offline diagnostics (TOOL-01/02)
 - ``fdars_run_method`` — run any of six fdars methods; returns result handle (TOOL-01)
@@ -24,6 +24,7 @@ Tools exposed (Plans 12-01/02/03 + 22-01 + 22-02 + 51-03 + 52-03 + 53-03 + 78-04
 - ``fdars_build_pipeline_report`` — LLM-free multi-stage pipeline diagnostic report by-reference (PIPE-04)
 - ``fdars_auto_tune`` — LLM-free closed-loop heuristic auto-tuning by-reference (TUNE-04)
 - ``fdars_list_capabilities`` — LLM-free static capability surface lookup (SKILL-04)
+- ``fdars_method_references`` — LLM-free static reference lookup by callable (MCP-01..04)
 """
 
 from __future__ import annotations
@@ -745,9 +746,11 @@ def fdars_auto_tune(
 
 # Frozenset of module names covered by the capability map.
 # MAINTENANCE: must equal frozenset(json.loads(_capability_map.json).keys()) - {'_Fdata'}.
-# Update _CAPABILITY_MODULES here, _EXPECTED_CAPABILITY_MODULES in
-# tests/test_guard_sync_version_independent.py, and regenerate the JSON in
-# one atomic commit when adding a new submodule to fdars/__init__.py.
+# Update _CAPABILITY_MODULES here, _EXPECTED_CAPABILITY_MODULES and
+# _EXPECTED_REFERENCES_MODULES in tests/test_guard_sync_version_independent.py,
+# and regenerate the JSON in one atomic commit when adding a new submodule to
+# fdars/__init__.py.  _REFERENCES_MODULES is DERIVED from _CAPABILITY_MODULES
+# (alias immediately below) — the (D) guard asserts the three-way equality.
 _CAPABILITY_MODULES: frozenset[str] = frozenset({
     "alignment", "basis", "classification", "clustering", "conformal",
     "covariance", "datasets", "density_fda", "depth", "explain", "famm",
@@ -756,6 +759,11 @@ _CAPABILITY_MODULES: frozenset[str] = frozenset({
     "scoring", "seasonal", "shapelet", "simulation", "smoothing", "spm",
     "tolerance",
 })
+
+# _REFERENCES_MODULES is intentionally an alias for _CAPABILITY_MODULES — single
+# source of truth.  The (D) guard in test_guard_sync_version_independent.py asserts
+# _REFERENCES_MODULES == _CAPABILITY_MODULES == _EXPECTED_REFERENCES_MODULES.
+_REFERENCES_MODULES: frozenset[str] = _CAPABILITY_MODULES
 
 
 @mcp.tool()
@@ -823,6 +831,220 @@ def fdars_list_capabilities(module: str | None = None) -> dict:
         "version": _fdars_version,
         "module_count": len(modules),
         "callable_count": sum(len(v) for v in modules.values()),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Tool: fdars_method_references (MCP-01..04)
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def fdars_method_references(method: str) -> dict:
+    """Return curated paper references for an fdars callable.  LLM-free.
+
+    Loads ``python/fdars/_references_map.json`` (committed at curation time)
+    via ``importlib.resources`` and returns the paper(s) backing the requested
+    callable, or an explicit sentinel when no curated entry exists.
+    **No network call; no model invoked; no ANTHROPIC_API_KEY required.**
+
+    Parameters
+    ----------
+    method : str
+        The callable to look up.  Two formats accepted:
+
+        - ``"module.callable"`` (preferred): e.g. ``"depth.fraiman_muniz_1d"``,
+          ``"_Fdata.depth"``.  The module prefix is validated against
+          ``_REFERENCES_MODULES`` before any JSON load.
+        - bare ``"callable"`` (no dot): e.g. ``"fraiman_muniz_1d"``.  Resolved
+          by suffix-matching all ``callable_index`` keys ending in
+          ``".<callable>"``.  If exactly one match, auto-resolved.  If multiple
+          matches, all are returned (ambiguous result).  If zero matches,
+          sentinel is returned.
+
+    Returns
+    -------
+    dict
+        **Hit** (callable found in ``callable_index``)::
+
+            {
+                "method": "module.callable",
+                "curated": True,          # or False if all backing papers are curated:false
+                "papers": [...],          # projected paper entries (see below)
+                "coverage": "28/437",     # N/T derived from live JSON files
+                "version": "0.11.0",
+            }
+
+        **Miss** (callable absent from ``callable_index``)::
+
+            {
+                "method": "module.callable",
+                "curated": False,
+                "sentinel": "NO_CURATED_ENTRY",
+                "message": "No curated reference entry for 'module.callable'. ...",
+                "version": "0.11.0",
+            }
+
+        **Ambiguous bare callable** (multiple module matches)::
+
+            {
+                "method": "<bare>",
+                "curated": False,
+                "sentinel": "AMBIGUOUS_CALLABLE",
+                "matches": ["module1.callable", "module2.callable"],
+                "message": "Bare callable '<bare>' matches multiple entries. ...",
+                "version": "0.11.0",
+            }
+
+    Raises
+    ------
+    ValueError
+        If ``method`` is ``"module.callable"`` format and the module is not in
+        ``_REFERENCES_MODULES``.  Message format mirrors ``fdars_list_capabilities``:
+        ``"fdars_method_references: unknown module '<x>'. Known: [...]."``
+
+    Notes
+    -----
+    The ``_Fdata`` entry present in ``_references_map.json`` (the Fdata class
+    surface) is special-cased: ``_Fdata.<method>`` inputs pass the frozenset gate
+    even though ``_Fdata`` is not in ``_REFERENCES_MODULES``, consistent with
+    how ``fdars_list_capabilities`` handles ``_Fdata``.
+
+    Paper projection omits ``callables`` (redundant) and ``notes`` (internal).
+    Fields projected: ``paper_key``, ``title``, ``authors``, ``year``, ``doi``,
+    ``url``, ``type``, ``cross_language``, ``curated``.
+    """
+    import json  # noqa: PLC0415
+    from importlib import resources  # noqa: PLC0415
+
+    from fdars import __version__ as _fdars_version  # noqa: PLC0415
+
+    # ------------------------------------------------------------------
+    # Input classification
+    # ------------------------------------------------------------------
+    has_dot = "." in method
+
+    if has_dot:
+        # "module.callable" or "_Fdata.method" format
+        module, _callable = method.split(".", 1)
+        # Frozenset gate: validate module BEFORE any JSON load (T-82-01 / T-78-08
+        # discipline). _Fdata is NOT in _REFERENCES_MODULES (it is the class entry,
+        # not a submodule); special-case it consistently with fdars_list_capabilities.
+        if module != "_Fdata" and module not in _REFERENCES_MODULES:
+            raise ValueError(
+                f"fdars_method_references: unknown module {module!r}. "
+                f"Known: {sorted(_REFERENCES_MODULES)!r}."
+            )
+        resolved_key = method  # use as-is for callable_index lookup
+
+    else:
+        # Bare callable — defer resolution until after JSON load
+        resolved_key = None  # signals suffix-resolve path
+
+    # ------------------------------------------------------------------
+    # JSON load
+    # ------------------------------------------------------------------
+    ref_file = resources.files("fdars") / "_references_map.json"
+    cap_file = resources.files("fdars") / "_capability_map.json"
+
+    ref_data: dict = json.loads(ref_file.read_text(encoding="utf-8"))
+    cap_data: dict = json.loads(cap_file.read_text(encoding="utf-8"))
+
+    papers_map = ref_data.get("papers", {})
+    callable_index = ref_data.get("callable_index", {})
+
+    # ------------------------------------------------------------------
+    # Suffix resolution (bare callable path)
+    # ------------------------------------------------------------------
+    if resolved_key is None:
+        suffix = "." + method
+        matches = [k for k in callable_index if k.endswith(suffix)]
+        if len(matches) == 0:
+            return {
+                "method": method,
+                "curated": False,
+                "sentinel": "NO_CURATED_ENTRY",
+                "message": (
+                    f"No curated reference entry for bare callable {method!r}. "
+                    "Use 'module.callable' format (e.g. 'depth.fraiman_muniz_1d') "
+                    "or check fdars_list_capabilities for available callables."
+                ),
+                "version": _fdars_version,
+            }
+        if len(matches) > 1:
+            return {
+                "method": method,
+                "curated": False,
+                "sentinel": "AMBIGUOUS_CALLABLE",
+                "matches": sorted(matches),
+                "message": (
+                    f"Bare callable {method!r} matches {len(matches)} entries: "
+                    f"{sorted(matches)}. Use 'module.callable' format to disambiguate."
+                ),
+                "version": _fdars_version,
+            }
+        # Exactly one match — auto-resolve
+        resolved_key = matches[0]
+
+    # ------------------------------------------------------------------
+    # Callable index lookup
+    # ------------------------------------------------------------------
+    if resolved_key not in callable_index:
+        return {
+            "method": resolved_key,
+            "curated": False,
+            "sentinel": "NO_CURATED_ENTRY",
+            "message": (
+                f"No curated reference entry for {resolved_key!r}. "
+                "This callable exists in fdars but has not yet been mapped to a "
+                "primary paper. Use fdars_list_capabilities to confirm the callable "
+                "exists, and check back after Phase 84 human citation review."
+            ),
+            "version": _fdars_version,
+        }
+
+    # ------------------------------------------------------------------
+    # Paper projection
+    # ------------------------------------------------------------------
+    paper_keys: list[str] = callable_index[resolved_key]
+
+    projected_papers = []
+    any_curated = False
+    for pk in paper_keys:
+        paper = papers_map.get(pk, {})
+        if paper.get("curated", False):
+            any_curated = True
+        projected_papers.append({
+            "paper_key": pk,
+            "title": paper.get("title", ""),
+            "authors": paper.get("authors", []),
+            "year": paper.get("year"),
+            "doi": paper.get("doi", ""),
+            "url": paper.get("url", ""),
+            "type": paper.get("type", ""),
+            "cross_language": paper.get("cross_language", {}),
+            "curated": paper.get("curated", False),
+        })
+
+    # ------------------------------------------------------------------
+    # Coverage (derived at call time from live JSON — NEVER hardcoded)
+    # ------------------------------------------------------------------
+    denominator = sum(len(v) for v in cap_data.values())
+    curated_paper_keys = frozenset(
+        pk for pk, p in papers_map.items() if p.get("curated", False) is True
+    )
+    numerator = sum(
+        1 for _, pks in callable_index.items()
+        if any(pk in curated_paper_keys for pk in pks)
+    )
+    coverage_str = f"{numerator}/{denominator}"
+
+    return {
+        "method": resolved_key,
+        "curated": any_curated,
+        "papers": projected_papers,
+        "coverage": coverage_str,
+        "version": _fdars_version,
     }
 
 

@@ -195,6 +195,24 @@ _EXPECTED_CAPABILITY_MODULES: frozenset[str] = frozenset({
     "tolerance",
 })
 
+# ---------------------------------------------------------------------------
+# Expected references modules — hard-coded mirror of _REFERENCES_MODULES in
+# fdars.mcp.server (which is DERIVED from _CAPABILITY_MODULES — an alias).
+#
+# MAINTENANCE NOTE: _REFERENCES_MODULES == _CAPABILITY_MODULES by design.
+# Update _EXPECTED_REFERENCES_MODULES here in the same atomic commit that
+# updates _EXPECTED_CAPABILITY_MODULES and regenerates _capability_map.json.
+# ---------------------------------------------------------------------------
+
+_EXPECTED_REFERENCES_MODULES: frozenset[str] = frozenset({
+    "alignment", "basis", "classification", "clustering", "conformal",
+    "covariance", "datasets", "density_fda", "depth", "explain", "famm",
+    "fdata", "frechet", "fts", "inference", "metric", "metrics", "multi_fdata",
+    "outliers", "pace_fpca", "regression", "represent", "scalar_on_function",
+    "scoring", "seasonal", "shapelet", "simulation", "smoothing", "spm",
+    "tolerance",
+})
+
 
 # ---------------------------------------------------------------------------
 # PRIMARY TEST — runs on Python 3.9+ (no mcp import, no fdars.mcp.server import)
@@ -669,4 +687,124 @@ def test_references_map_anti_feature_families_absent():
         "spm.mfpca is missing from callable_index — it has a clear paper root "
         "(Happ & Greven 2018) and must remain curated despite spm being an "
         "anti-feature module at the category level (Pitfall 7 in references-schema.md)"
+    )
+
+
+# ===========================================================================
+# Guard Group 3 — fdars_method_references companion tests (GATE-05 C/D)
+# ===========================================================================
+
+
+def test_references_tool_llm_free_boundary():
+    """GATE-05 C: fdars_method_references is LLM-free (Python 3.10+).
+
+    Internally guarded to Python 3.10+ (mcp requires 3.10+).  Asserts:
+
+    1. A known curated callable returns a hit with ``'curated'`` key, no
+       ``'provider'`` or ``'model'`` key (LLM-free boundary).
+    2. A callable absent from ``callable_index`` returns ``curated:False``
+       with ``sentinel: 'NO_CURATED_ENTRY'`` and no ``'doi'`` key.
+    3. The handler function body contains no import of ``fdars.advisor`` or
+       any provider/model module (AST-level no-import assertion).
+
+    Reference: GATE-05 C — companion test (Python 3.10+).
+    """
+    if sys.version_info < (3, 10):
+        pytest.skip("mcp requires Python 3.10+")
+
+    pytest.importorskip("mcp")
+
+    import ast  # noqa: PLC0415
+    import inspect  # noqa: PLC0415
+
+    from fdars.mcp.server import fdars_method_references  # noqa: PLC0415
+
+    # --- Assertion 1: known curated callable hit is LLM-free ---
+    result_hit = fdars_method_references("depth.fraiman_muniz_1d")
+
+    assert "curated" in result_hit, (
+        "fdars_method_references hit must return 'curated' key"
+    )
+    assert result_hit["curated"] is True, (
+        "depth.fraiman_muniz_1d is backed by fraiman_muniz_2001 (curated:true)"
+    )
+    assert "provider" not in result_hit, (
+        "fdars_method_references must NOT expose 'provider' key (LLM-free boundary)"
+    )
+    assert "model" not in result_hit, (
+        "fdars_method_references must NOT expose 'model' key (LLM-free boundary)"
+    )
+    assert "papers" in result_hit and isinstance(result_hit["papers"], list)
+    assert "coverage" in result_hit
+    assert "version" in result_hit
+
+    # --- Assertion 2: known-absent callable returns sentinel with no doi ---
+    # explain.shap_values: module 'explain' IS in _REFERENCES_MODULES (passes gate)
+    # but 'explain.shap_values' is absent from callable_index -> sentinel
+    result_miss = fdars_method_references("explain.shap_values")
+
+    assert result_miss.get("curated") is False, (
+        "A callable absent from callable_index must return curated:False"
+    )
+    assert result_miss.get("sentinel") == "NO_CURATED_ENTRY", (
+        "A callable absent from callable_index must return sentinel='NO_CURATED_ENTRY'"
+    )
+    assert "doi" not in result_miss, (
+        "The sentinel response must NOT expose a 'doi' key (no paper data to project)"
+    )
+
+    # --- Assertion 3: AST-level no-import boundary ---
+    src = inspect.getsource(fdars_method_references)
+    tree = ast.parse(src)
+    forbidden_modules = {"fdars.advisor", "fdars.mcp._runner", "fdars.mcp._compare",
+                         "fdars.mcp._tuning", "anthropic", "openai"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            assert node.module not in forbidden_modules, (
+                f"fdars_method_references imports from {node.module!r} — "
+                "LLM-free boundary violated: this handler must not import "
+                "advisor or provider modules."
+            )
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                assert alias.name not in forbidden_modules, (
+                    f"fdars_method_references imports {alias.name!r} — "
+                    "LLM-free boundary violated."
+                )
+
+
+def test_references_mcp_server_frozenset_matches():
+    """GATE-05 D: server._REFERENCES_MODULES == expected frozenset (Python 3.10+).
+
+    Internally guarded to Python 3.10+.  Asserts the three-way literal mirror:
+
+        server._REFERENCES_MODULES
+            == _EXPECTED_REFERENCES_MODULES
+            == server._CAPABILITY_MODULES
+
+    ``_REFERENCES_MODULES`` is DERIVED from ``_CAPABILITY_MODULES`` (alias) so
+    the three-way equality holds by construction.  This guard catches any future
+    edit that accidentally makes them diverge.
+
+    Reference: GATE-05 D — companion test (Python 3.10+).
+    """
+    if sys.version_info < (3, 10):
+        pytest.skip("mcp requires Python 3.10+")
+
+    pytest.importorskip("mcp")
+
+    from fdars.mcp.server import _CAPABILITY_MODULES, _REFERENCES_MODULES  # noqa: PLC0415
+
+    assert _REFERENCES_MODULES == _EXPECTED_REFERENCES_MODULES, (
+        f"server._REFERENCES_MODULES != _EXPECTED_REFERENCES_MODULES.\n"
+        f"  In server only:   {_REFERENCES_MODULES - _EXPECTED_REFERENCES_MODULES}\n"
+        f"  In expected only: {_EXPECTED_REFERENCES_MODULES - _REFERENCES_MODULES}\n"
+        "Update _REFERENCES_MODULES in server.py and _EXPECTED_REFERENCES_MODULES here "
+        "in one atomic commit."
+    )
+    assert _REFERENCES_MODULES == _CAPABILITY_MODULES, (
+        f"server._REFERENCES_MODULES != server._CAPABILITY_MODULES — "
+        "they must remain equal (DERIVED relationship).\n"
+        f"  In _REFERENCES only:  {_REFERENCES_MODULES - _CAPABILITY_MODULES}\n"
+        f"  In _CAPABILITY only:  {_CAPABILITY_MODULES - _REFERENCES_MODULES}"
     )
