@@ -293,7 +293,10 @@ Brought the v11.0-era thin method pages (regression + analyze families) to matur
   3. `docs/references.md` is wired into `mkdocs.yml` nav under the AI/capability section and renders under a `--strict` build.
   4. `.claude/skills/fdars-capabilities/SKILL.md` gains a `## Scientific Provenance Protocol` section encoding the hybrid (prefer curated; on `curated:false` synthesize but structurally flag `grounded:false`, never present synthesized as curated), non-duplicating the `fdars-advisor` boundary, and its walkthrough + tests demonstrate BOTH the curated-hit and the visibly-labelled ungrounded-fallback paths.
 
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 83-01-PLAN.md — `--references` offline emitter: family-grouped `docs/references.md` + `llms.txt` provenance section, honest derived 28/437 coverage (DOCS-01, DOCS-02) [tracer]
+- [ ] 83-02-PLAN.md — wire `docs/references.md` into `mkdocs.yml` nav + fast render/nav-validity check (DOCS-03)
+- [ ] 83-03-PLAN.md — SKILL.md `## Scientific Provenance Protocol` hybrid section + both-path walkthrough + branch tests (SKILL-01, SKILL-02)
 **UI hint**: no
 
 ### Phase 84: Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review
