@@ -541,3 +541,62 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `tolerance.fpca_tolerance_band(data, ncomp=3, nb=1000, coverage=0.95, seed=42)` — FPCA-based tolerance band.
 - `tolerance.phase_tolerance_band(data, argvals, ncomp=3, nb=200, coverage=0.95, band_type='simultaneous', max_iter=20, seed=42)` — Phase tolerance band on warping functions.
 - `tolerance.scb_mean_degras(data, argvals, bandwidth=0.0, nb=1000, confidence=0.95)` — Simultaneous confidence band (Degras method).
+
+
+## Scientific Provenance & Cross-Language Implementations
+
+Coverage: 28 of 437 public callables have curated primary-paper entries.
+Uncurated callables are absent from this section. A consumer MAY synthesize
+provenance for uncurated callables but MUST flag each synthesized citation as
+ungrounded (grounded: false) — never present synthesized provenance as curated.
+
+### Fdata Class Methods
+
+- `_Fdata.depth` — Fraiman, R., Muniz, G. (2001) doi:10.1007/BF02595706 ; Python: scikit-fda.fraiman_muniz_depth / R: fda.usc::depth.FM
+- `_Fdata.to_pc` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
+
+### fdars.alignment
+
+- `alignment.amplitude_distance` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.elastic_align_pair` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.elastic_cross_distance_matrix` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.elastic_decomposition` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.elastic_distance` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.elastic_self_distance_matrix` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.karcher_mean` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.phase_distance` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.srsf_inverse` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.srsf_transform` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+
+### fdars.basis
+
+- `basis.basis_nbasis_cv` — Eilers, P.H.C., Marx, B.D. (1996) doi:10.1214/ss/1038425655 ; Python: scikit-fda.BSplineSmoother / R: mgcv::s(..., bs="ps")
+- `basis.basis_to_fdata_1d` — Eilers, P.H.C., Marx, B.D. (1996) doi:10.1214/ss/1038425655 ; Python: scikit-fda.BSplineSmoother / R: mgcv::s(..., bs="ps")
+- `basis.fdata_to_basis_1d` — Eilers, P.H.C., Marx, B.D. (1996) doi:10.1214/ss/1038425655 ; Python: scikit-fda.BSplineSmoother / R: mgcv::s(..., bs="ps")
+- `basis.pspline_fit_1d` — Eilers, P.H.C., Marx, B.D. (1996) doi:10.1214/ss/1038425655 ; Python: scikit-fda.BSplineSmoother / R: mgcv::s(..., bs="ps")
+- `basis.pspline_fit_gcv` — Eilers, P.H.C., Marx, B.D. (1996) doi:10.1214/ss/1038425655 ; Python: scikit-fda.BSplineSmoother / R: mgcv::s(..., bs="ps")
+- `basis.smooth_basis_aic` — Eilers, P.H.C., Marx, B.D. (1996) doi:10.1214/ss/1038425655 ; Python: scikit-fda.BSplineSmoother / R: mgcv::s(..., bs="ps")
+- `basis.smooth_basis_gcv` — Eilers, P.H.C., Marx, B.D. (1996) doi:10.1214/ss/1038425655 ; Python: scikit-fda.BSplineSmoother / R: mgcv::s(..., bs="ps")
+
+### fdars.depth
+
+- `depth.band_1d` — López-Pintado, S., Romo, J. (2009) doi:10.1198/jasa.2009.0108 ; Python: scikit-fda.BandDepth / R: fda.usc::depth.mode
+- `depth.fraiman_muniz_1d` — Fraiman, R., Muniz, G. (2001) doi:10.1007/BF02595706 ; Python: scikit-fda.fraiman_muniz_depth / R: fda.usc::depth.FM
+- `depth.fraiman_muniz_2d` — Fraiman, R., Muniz, G. (2001) doi:10.1007/BF02595706 ; Python: scikit-fda.fraiman_muniz_depth / R: fda.usc::depth.FM
+- `depth.modified_band_1d` — López-Pintado, S., Romo, J. (2009) doi:10.1198/jasa.2009.0108 ; Python: scikit-fda.BandDepth / R: fda.usc::depth.mode
+
+### fdars.metric
+
+- `metric.soft_dtw_cross_1d` — Cuturi, M., Blondel, M. (2017) ; Python: tslearn.soft_dtw
+- `metric.soft_dtw_self_1d` — Cuturi, M., Blondel, M. (2017) ; Python: tslearn.soft_dtw
+
+### fdars.regression
+
+- `regression.fregre_cv` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
+- `regression.fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
+- `regression.predict_fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
+
+> Uncurated callables (409 of 437) are absent from this section.
+> A consumer MAY synthesize provenance for these callables but MUST structurally
+> flag each synthesized citation as ungrounded: { "grounded": false } per citation.
+> Never present synthesized provenance as curated data from this file.
