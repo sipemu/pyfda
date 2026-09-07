@@ -560,12 +560,17 @@ def test_references_map_coverage_fraction():
     papers = ref_data.get("papers", {})
     callable_index = ref_data.get("callable_index", {})
 
-    # Build set of paper_keys that have curated:true
+    # Build set of paper_keys that have curated:true.
+    # CURATE-05: curated:false entries do NOT count toward coverage — only
+    # author-verified (curated:true) entries carry provenance. Anti-feature families
+    # are absent from callable_index entirely, so they cannot inflate the numerator.
     curated_paper_keys = frozenset(
         pk for pk, paper in papers.items() if paper.get("curated", False) is True
     )
 
-    # Numerator: distinct callable_index keys backed by at least one curated paper
+    # Numerator: distinct callable_index keys backed by at least one curated:true paper.
+    # CURATE-05: a callable backed only by curated:false entries does NOT count toward
+    # coverage (no LLM-synthesized placeholder ships as curated).
     numerator = sum(
         1
         for callable_key, paper_keys in callable_index.items()
