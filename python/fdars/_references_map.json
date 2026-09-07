@@ -428,6 +428,93 @@
       "notes": "Introduces functional PLS (partial least squares) regression. [ASSUMED] — DOI 10.1016/j.csda.2004.07.002 is plausible but not landing-page-verified this session; curated:false until confirmed.",
       "curated": false
     },
+    "pini_vantini_2016": {
+      "title": "The interval testing procedure: A general framework for inference in functional data analysis",
+      "authors": ["Pini, A.", "Vantini, S."],
+      "year": 2016,
+      "doi": "10.1111/biom.12476",
+      "url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/biom.12476",
+      "type": "journal",
+      "callables": [
+        "inference.itp_flm",
+        "inference.itp_one_pop",
+        "inference.itp_two_pop"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdatest",
+          "function": "ITP1bspline",
+          "url": "https://rdrr.io/github/alessiapini/fdatest/man/IWT1.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces the Interval Testing Procedure (ITP) for point-wise and interval inference on functional data. [CITED: onlinelibrary.wiley.com/doi/abs/10.1111/biom.12476 — Biometrics 2016.] The 2016 Biometrics paper is the primary framework reference (NOT the 2017 companion in J.Nonparametric Statistics). curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "degras_2011": {
+      "title": "Simultaneous confidence bands for nonparametric regression with functional data",
+      "authors": ["Degras, D."],
+      "year": 2011,
+      "doi": "10.5705/ss.2009.207",
+      "url": "https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N412.html",
+      "type": "journal",
+      "callables": [
+        "inference.mean_scb",
+        "inference.scb_two_sample_test",
+        "tolerance.scb_mean_degras"
+      ],
+      "notes": "Introduces simultaneous confidence bands (SCB) for nonparametric regression with functional data. [CITED: stat.sinica.edu.tw — Statistica Sinica 21(4):1735-1765, 2011, DOI 10.5705/ss.2009.207.] No standalone CRAN package found (cross_language omitted — honest gap). curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "cuevas_febrero_fraiman_2004": {
+      "title": "An ANOVA test for functional data",
+      "authors": ["Cuevas, A.", "Febrero, M.", "Fraiman, R."],
+      "year": 2004,
+      "doi": "10.1016/j.csda.2003.10.021",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0167947303001567",
+      "type": "journal",
+      "callables": [
+        "inference.f_perm_test",
+        "inference.t_perm_test",
+        "inference.two_sample_mean_test"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fda.usc",
+          "function": "fanova.onefactor",
+          "url": "https://rdrr.io/cran/fda.usc/man/fanova.onefactor.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces permutation-based ANOVA F-test and t-test for functional data (functional permutation testing framework). [CITED: sciencedirect.com — CSDA 47(1):111-122, 2004.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
+      "curated": false
+    },
+    "_uncurated_inference_flmftest_2026-09": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "inference.flm_f_test",
+        "inference.flm_gof_test"
+      ],
+      "notes": "FLM F-test and GoF test for scalar-on-function model. fdars-core inference/flm.rs uses a classical FPC-based R² F-statistic (not the functional projection F-test of Shen & Faraway 2004 or the generalized FLM test of Müller & Stadtmüller 2005). The GoF test is a RESET-style polynomial auxiliary regression — standard econometrics, no FDA-specific paper. No explicit paper citation found in fdars-core source. curated:false — do not force-cite Shen & Faraway 2004.",
+      "curated": false
+    },
+    "cuesta_albertos_febrero_2010": {
+      "title": "A simple multiway ANOVA for functional data",
+      "authors": ["Cuesta-Albertos, J.A.", "Febrero-Bande, M."],
+      "year": 2010,
+      "doi": "10.1007/s11749-010-0185-3",
+      "url": "https://link.springer.com/article/10.1007/s11749-010-0185-3",
+      "type": "journal",
+      "callables": [
+        "inference.oneway_anova_vstat"
+      ],
+      "notes": "V-statistic functional ANOVA. Contested attribution: primary candidates are Cuesta-Albertos & Febrero-Bande (2010) TEST and Górecki & Smaga (2015) Comput. Stat. (DOI 10.1007/s00180-015-0555-0). fdars-core inference/anova.rs uses V = ∫ Σ_g n_g (x̄_g(t) − x̄(t))² dt with Satterthwaite/Box scaled-χ² approximation but cites NO specific paper in the source. Both 2010 and 2015 papers describe V-statistic approaches. Executor must check fdars-core source for the specific V-statistic formula used. curated:false pending fdars-core source confirmation of the dominant reference.",
+      "curated": false
+    },
     "_uncurated_regression_robust_2026-09": {
       "title": "",
       "authors": [],
@@ -630,6 +717,18 @@
     "outliers.muod": ["dai_genton_2019"],
     "outliers.detect_outliers_lrt": ["febrero_galeano_gonzalez_2008"],
     "outliers.detect_outliers_lrt_with_dist": ["febrero_galeano_gonzalez_2008"],
+    "inference.itp_flm": ["pini_vantini_2016"],
+    "inference.itp_one_pop": ["pini_vantini_2016"],
+    "inference.itp_two_pop": ["pini_vantini_2016"],
+    "inference.mean_scb": ["degras_2011"],
+    "inference.scb_two_sample_test": ["degras_2011"],
+    "tolerance.scb_mean_degras": ["degras_2011"],
+    "inference.f_perm_test": ["cuevas_febrero_fraiman_2004"],
+    "inference.t_perm_test": ["cuevas_febrero_fraiman_2004"],
+    "inference.two_sample_mean_test": ["cuevas_febrero_fraiman_2004"],
+    "inference.flm_f_test": ["_uncurated_inference_flmftest_2026-09"],
+    "inference.flm_gof_test": ["_uncurated_inference_flmftest_2026-09"],
+    "inference.oneway_anova_vstat": ["cuesta_albertos_febrero_2010"],
     "outliers.depthgram": ["_uncurated_outliers_2026-09"],
     "outliers.tvdmss": ["_uncurated_outliers_2026-09"],
     "outliers.sequential_transform_outliers": ["_uncurated_outliers_2026-09"]
