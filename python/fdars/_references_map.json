@@ -221,6 +221,86 @@
       ],
       "notes": "Introduces the geometric (L1) median for functional data via Weiszfeld-type iteration in function space. DOI 10.1093/biomet/asn031 is [ASSUMED] — not landing-page-verified this session; curated:false until confirmed.",
       "curated": false
+    },
+    "cuevas_febrero_fraiman_2007": {
+      "title": "Robust estimation and classification for functional data via projection-based depth notions",
+      "authors": ["Cuevas, A.", "Febrero, M.", "Fraiman, R."],
+      "year": 2007,
+      "doi": "10.1007/s00180-007-0053-0",
+      "url": "https://link.springer.com/article/10.1007/s00180-007-0053-0",
+      "type": "journal",
+      "callables": [
+        "depth.modal_1d",
+        "depth.modal_2d",
+        "depth.random_projection_1d",
+        "depth.random_projection_2d",
+        "depth.random_tukey_1d",
+        "depth.random_tukey_2d"
+      ],
+      "notes": "Introduces modal depth (h-depth), random projection depth, and random Tukey depth for functional data. [CITED: link.springer.com/article/10.1007/s00180-007-0053-0 — confirmed via web search; landing page not personally opened this session.] curated:false until Phase 84 direct verification.",
+      "curated": false
+    },
+    "claeskens_hubert_slaets_2014": {
+      "title": "Multivariate functional halfspace depth",
+      "authors": ["Claeskens, G.", "Hubert, M.", "Slaets, L.", "Vakili, K."],
+      "year": 2014,
+      "doi": "10.1080/01621459.2013.856795",
+      "url": "https://www.tandfonline.com/doi/abs/10.1080/01621459.2013.856795",
+      "type": "journal",
+      "callables": [
+        "depth.random_projection_deriv_1d"
+      ],
+      "notes": "Attributed as the primary source for derivative-augmented random projection depth (RPD). fdars-core rpd.rs does not cite this paper explicitly; attribution is [ASSUMED] from the derivative-inclusive halfspace depth concept. curated:false pending fdars-core source confirmation.",
+      "curated": false
+    },
+    "dabo_gijbels_2010": {
+      "title": "",
+      "authors": [],
+      "year": null,
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "depth.functional_spatial_1d",
+        "depth.functional_spatial_2d",
+        "depth.kernel_functional_spatial_1d",
+        "depth.kernel_functional_spatial_2d"
+      ],
+      "notes": "Spatial depth root unconfirmed against fdars-core source. fdars-core spatial.rs (0.33.0) cites only 'R depth.FSD()' — no paper reference in source comments. Attribution to Dabo-Niang & Gijbels 2010 is [ASSUMED] per 81-RESEARCH §3.3 A11. curated:false pending explicit source confirmation.",
+      "curated": false
+    },
+    "narisetty_nair_2016": {
+      "title": "Extremal depth for functional data and applications",
+      "authors": ["Narisetty, N.N.", "Nair, V.N."],
+      "year": 2016,
+      "doi": "10.1080/01621459.2015.1110033",
+      "url": "https://www.tandfonline.com/doi/full/10.1080/01621459.2015.1110033",
+      "type": "journal",
+      "callables": [
+        "depth.modified_epigraph_index_1d"
+      ],
+      "notes": "Explicitly cited in fdars-core 0.33.0 extremal.rs module doc comment: '//! Extremal depth (Narisetty & Nair 2016).' The modified epigraph index is the MEI measure from this paper. [CITED: tandfonline.com — confirmed via web search: JASA Vol 111, No 516, 2016.] curated:false until Phase 84 direct DOI-landing-page verification.",
+      "curated": false
+    },
+    "sun_genton_2011": {
+      "title": "Functional boxplots",
+      "authors": ["Sun, Y.", "Genton, M.G."],
+      "year": 2011,
+      "doi": "10.1198/jcgs.2011.09224",
+      "url": "https://www.tandfonline.com/doi/abs/10.1198/jcgs.2011.09224",
+      "type": "journal",
+      "callables": [
+        "depth.functional_boxplot"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdaoutlier",
+          "function": "functional_boxplot",
+          "url": "https://rdrr.io/cran/fdaoutlier/man/functional_boxplot.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces the functional boxplot visualization. [VERIFIED: tandfonline.com/doi/abs/10.1198/jcgs.2011.09224 — confirmed Sun & Genton 2011, JCGS Vol 20 No 2, pp 316-334.] NOT the category-level dispatcher depth.functional_depth. curated:false until Phase 84 direct DOI-landing-page verification of title/authors.",
+      "curated": false
     }
   },
   "callable_index": {
@@ -256,6 +336,19 @@
     "fdata.normalize": ["ramsay_silverman_2005"],
     "fdata.geometric_median_1d": ["gervini_2008"],
     "fdata.geometric_median_2d": ["gervini_2008"],
-    "_Fdata.geometric_median": ["gervini_2008"]
+    "_Fdata.geometric_median": ["gervini_2008"],
+    "depth.modal_1d": ["cuevas_febrero_fraiman_2007"],
+    "depth.modal_2d": ["cuevas_febrero_fraiman_2007"],
+    "depth.random_projection_1d": ["cuevas_febrero_fraiman_2007"],
+    "depth.random_projection_2d": ["cuevas_febrero_fraiman_2007"],
+    "depth.random_tukey_1d": ["cuevas_febrero_fraiman_2007"],
+    "depth.random_tukey_2d": ["cuevas_febrero_fraiman_2007"],
+    "depth.random_projection_deriv_1d": ["claeskens_hubert_slaets_2014"],
+    "depth.functional_spatial_1d": ["dabo_gijbels_2010"],
+    "depth.functional_spatial_2d": ["dabo_gijbels_2010"],
+    "depth.kernel_functional_spatial_1d": ["dabo_gijbels_2010"],
+    "depth.kernel_functional_spatial_2d": ["dabo_gijbels_2010"],
+    "depth.modified_epigraph_index_1d": ["narisetty_nair_2016"],
+    "depth.functional_boxplot": ["sun_genton_2011"]
   }
 }
