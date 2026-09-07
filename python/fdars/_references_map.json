@@ -18,6 +18,12 @@
           "function": "depth.FM",
           "url": "https://rdrr.io/cran/fda.usc/man/depth.fdata.html",
           "confidence": "high"
+        },
+        "Python": {
+          "package": "scikit-fda",
+          "function": "fraiman_muniz_depth",
+          "url": "https://fda.readthedocs.io/en/stable/modules/depth.html",
+          "confidence": "high"
         }
       },
       "notes": "Introduces marginal-integral depth (Fraiman-Muniz depth). Year is 2001, not 1991.",
@@ -34,6 +40,20 @@
         "depth.band_1d",
         "depth.modified_band_1d"
       ],
+      "cross_language": {
+        "R": {
+          "package": "fda.usc",
+          "function": "depth.mode",
+          "url": "https://rdrr.io/cran/fda.usc/man/depth.fdata.html",
+          "confidence": "high"
+        },
+        "Python": {
+          "package": "scikit-fda",
+          "function": "BandDepth",
+          "url": "https://fda.readthedocs.io/en/stable/modules/depth.html",
+          "confidence": "high"
+        }
+      },
       "notes": "Introduces band depth (BD) and modified band depth (MBD) in the same paper.",
       "curated": true
     },
@@ -54,6 +74,26 @@
         "alignment.elastic_align_pair",
         "alignment.srsf_transform"
       ],
+      "cross_language": {
+        "R": {
+          "package": "fdasrvf",
+          "function": "multiple_align_functions",
+          "url": "https://rdrr.io/cran/fdasrvf/man/multiple_align_functions.html",
+          "confidence": "high"
+        },
+        "Python": {
+          "package": "fdasrsf",
+          "function": "fdawarp",
+          "url": "https://fdasrsf-python.readthedocs.io/",
+          "confidence": "high"
+        },
+        "Matlab": {
+          "package": "fdasrvf_MATLAB",
+          "function": "multiple_align_functions",
+          "url": "https://arxiv.org/abs/1103.3817",
+          "confidence": "low"
+        }
+      },
       "notes": "SRSF framework via Fisher-Rao metric; arXiv:1103.3817. NOT the TPAMI SRV/shape paper.",
       "curated": true
     },
@@ -78,10 +118,57 @@
       "url": "https://projecteuclid.org/journals/statistical-science/volume-11/issue-2/Flexible-smoothing-with-B-splines-and-penalties/10.1214/ss/1038425655.full",
       "type": "journal",
       "callables": [
-        "basis.basis_nbasis_cv"
+        "basis.basis_nbasis_cv",
+        "basis.pspline_fit_1d",
+        "basis.pspline_fit_gcv",
+        "basis.smooth_basis_gcv",
+        "basis.smooth_basis_aic",
+        "basis.fdata_to_basis_1d",
+        "basis.basis_to_fdata_1d"
       ],
-      "notes": "Introduces P-splines (penalised B-splines).",
+      "cross_language": {
+        "R": {
+          "package": "mgcv",
+          "function": "s(..., bs=\"ps\")",
+          "url": "https://www.rdocumentation.org/packages/mgcv/versions/1.9-0/topics/s",
+          "confidence": "high"
+        },
+        "Python": {
+          "package": "scikit-fda",
+          "function": "BSplineSmoother",
+          "url": "https://fda.readthedocs.io/en/stable/modules/preprocessing/smoothing.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces P-splines (penalised B-splines). Covers basis_nbasis_cv (GCV-based nbasis selection), P-spline fitting (pspline_fit_1d, pspline_fit_gcv), and basis-smoothed projection (smooth_basis_gcv, smooth_basis_aic, fdata_to_basis_1d, basis_to_fdata_1d).",
       "curated": true
+    },
+    "craven_wahba_1979": {
+      "title": "Smoothing noisy data with spline functions",
+      "authors": ["Craven, P.", "Wahba, G."],
+      "year": 1979,
+      "doi": "10.1007/BF01404567",
+      "url": "https://link.springer.com/article/10.1007/BF01404567",
+      "type": "journal",
+      "callables": [
+        "smoothing.gcv_smoother",
+        "smoothing.optim_bandwidth"
+      ],
+      "notes": "Introduces Generalized Cross-Validation (GCV) for spline smoothing. DOI 10.1007/BF01404567 is [ASSUMED] — not landing-page-verified this session; curated:false until confirmed.",
+      "curated": false
+    },
+    "nadaraya_watson_1964": {
+      "title": "",
+      "authors": ["Nadaraya, E.A.", "Watson, G.S."],
+      "year": 1964,
+      "doi": "",
+      "url": "",
+      "type": "journal",
+      "callables": [
+        "smoothing.nadaraya_watson"
+      ],
+      "notes": "Simultaneous 1964 papers: Nadaraya 'On Estimating Regression' (Theory of Probability) and Watson 'Smooth Regression Analysis' (Sankhya). Both introduce the Nadaraya-Watson kernel estimator. Soviet-era journals with no DOI assignment. curated:false — cannot DOI-verify 1964 journal articles.",
+      "curated": false
     }
   },
   "callable_index": {
@@ -94,6 +181,15 @@
     "alignment.elastic_align_pair": ["srivastava_et_al_2011"],
     "alignment.srsf_transform": ["srivastava_et_al_2011"],
     "_Fdata.to_pc": ["ramsay_dalzell_1991"],
-    "basis.basis_nbasis_cv": ["eilers_marx_1996"]
+    "basis.basis_nbasis_cv": ["eilers_marx_1996"],
+    "basis.pspline_fit_1d": ["eilers_marx_1996"],
+    "basis.pspline_fit_gcv": ["eilers_marx_1996"],
+    "basis.smooth_basis_gcv": ["eilers_marx_1996"],
+    "basis.smooth_basis_aic": ["eilers_marx_1996"],
+    "basis.fdata_to_basis_1d": ["eilers_marx_1996"],
+    "basis.basis_to_fdata_1d": ["eilers_marx_1996"],
+    "smoothing.gcv_smoother": ["craven_wahba_1979"],
+    "smoothing.optim_bandwidth": ["craven_wahba_1979"],
+    "smoothing.nadaraya_watson": ["nadaraya_watson_1964"]
   }
 }
