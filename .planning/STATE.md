@@ -4,17 +4,17 @@ milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 86
 current_phase_name: Single-Source-of-Truth Wiring + CI Gate
-status: executing
-stopped_at: "Completed 86-01: assert_coverage.py + gen_refs_bib.py + Makefile wiring"
-last_updated: "2026-09-08T21:23:24.184Z"
+status: verifying
+stopped_at: Completed 86-02-PLAN.md
+last_updated: "2026-09-08T21:27:04.347Z"
 last_activity: 2026-09-08
 last_activity_desc: Phase 86 execution started
-state_head: e9cc50aae1951b77b4d1e23dabdba57f638de3b2
+state_head: d627775cd9082a92b3f35ea331d45cbfe060d99c
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 Phase: 86 (Single-Source-of-Truth Wiring + CI Gate) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-08 — Phase 86 execution started
 
 ## Performance Metrics
@@ -65,6 +65,7 @@ Last activity: 2026-09-08 — Phase 86 execution started
 | Phase 85 P01 | 2 | 3 tasks | 5 files |
 | Phase 85 P85-02 | 3 | 2 tasks | 10 files |
 | Phase 86 P86-01 | 3 | 3 tasks | 6 files |
+| Phase 86-single-source-of-truth-wiring-ci-gate P02 | 2 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,9 @@ Recent decisions affecting current work:
 - [Phase 85]: CITATION.cff preferred-citation doi field omitted entirely until Phase 90 assigns arXiv ID; identifiers.type=url used instead to avoid schema validation failure
 - [Phase 86]: assert_coverage.py mirrors _coverage_counts() from generate_capability_dataset.py exactly; sorted macro keys ensure byte-identical re-runs (PIPE-03)
 - [Phase 86]: gen_refs_bib.py emits @misc for all 47 non-uncurated entries (no journal/booktitle in map); cite-key = paper-key verbatim; double-braced titles; conditional doi/url (PIPE-04)
+- [Phase 86]: paper.yml step order load-bearing: offline pipeline (gen_figures → assert_coverage --check → gen_refs_bib) before tectonic PDF compile so drift fails fast
+- [Phase 86]: wtfjoke/setup-tectonic@v4 with github-token only (no biber-version for natbib+plain BibTeX)
+- [Phase 86]: No maturin/fdars install in paper.yml Phase 86 — stdlib-only scripts; Phase 89 will extend for case study scripts
 
 ### Pending Todos
 
@@ -138,8 +142,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-08T21:23:24.139Z
-Stopped at: Completed 86-01: assert_coverage.py + gen_refs_bib.py + Makefile wiring
+Last session: 2026-09-08T21:27:04.313Z
+Stopped at: Completed 86-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

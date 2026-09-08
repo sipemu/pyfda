@@ -63,7 +63,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 **Plans**: 2 plans
 
 - [x] 86-01-PLAN.md — Generators + machine-derived outputs (tracer): `assert_coverage.py` (six coverage macros + `--check` drift gate) + `gen_refs_bib.py` (47 `@misc` entries), commit `coverage_counts.tex` + regenerated `refs.bib`, `\input{coverage_counts}` in `paper.tex`, extend `make paper`
-- [ ] 86-02-PLAN.md — CI gate: `.github/workflows/paper.yml` path-filtered to `paper/**` + both JSON maps + `docs/data/**`, offline pipeline hard gate before tectonic PDF compile, drift-fires negative test
+- [x] 86-02-PLAN.md — CI gate: `.github/workflows/paper.yml` path-filtered to `paper/**` + both JSON maps + `docs/data/**`, offline pipeline hard gate before tectonic PDF compile, drift-fires negative test
 
 ### Phase 87: Comparison Table + Evidence File
 
