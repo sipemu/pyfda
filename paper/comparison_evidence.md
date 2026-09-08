@@ -77,16 +77,16 @@
 - **Source URL:** https://cran.r-project.org/web/packages/fda/index.html
 - **Release date:** 2025-05-21
 - **Reference:** Ramsay, J.O. and Silverman, B.W. (2005). Functional Data Analysis. Springer.
-- Spot-checked: NO (spot-check satisfied by fda.usc below)
+- Spot-checked: YES (CRAN index + fda reference manual PDF, 2026-09-09)
 
 ### Claims
 
 | Dimension | Cell | Justification | Source |
 |-----------|------|---------------|--------|
 | Representation / basis smoothing | ✓ | CRAN: "functions for smoothing, plotting and simple regression models"; B-spline, Fourier, polynomial basis | https://cran.r-project.org/web/packages/fda/index.html |
-| Registration / alignment | ✓ | CRAN task view: "landmark-based" registration supported; shift and warping | https://cran.r-project.org/web/views/FunctionalData.html |
+| Registration / alignment | ✓ | fda reference manual: register.fd / landmarkreg — landmark and continuous registration (Ramsay & Silverman §5); shift and warping | https://cran.r-project.org/web/views/FunctionalData.html; https://cran.r-project.org/web/packages/fda/fda.pdf |
 | Depth & outlier detection | partial | Functional boxplot included; depth measures limited compared to fda.usc; "functional boxplot for descriptives and outlier detection" | https://cran.r-project.org/web/views/FunctionalData.html |
-| FPCA / covariance / PACE sparse FPCA | ✓ | CRAN task view: FPCA support; covariance surface; no PACE sparse FPCA (PACE implemented via fdapace, not fda) | https://cran.r-project.org/web/views/FunctionalData.html |
+| FPCA / covariance / PACE sparse FPCA | ✓ | fda reference manual: pca.fd — FPCA on functional objects; covariance surface; no PACE sparse FPCA (PACE implemented via fdapace, not fda) | https://cran.r-project.org/web/views/FunctionalData.html; https://cran.r-project.org/web/packages/fda/fda.pdf |
 | Clustering | — | Not a primary feature of fda package; clustering attributed to other packages | https://cran.r-project.org/web/views/FunctionalData.html |
 | Classification | — | Not a primary feature | https://cran.r-project.org/web/views/FunctionalData.html |
 | Functional regression (SoF / FoF) | partial | CRAN: "simple regression models"; scalar-on-function via basis; advanced regression in refund | https://cran.r-project.org/web/packages/fda/index.html |
