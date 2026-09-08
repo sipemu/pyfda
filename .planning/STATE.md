@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
-current_phase: 85
-current_phase_name: Manuscript Scaffold + Pipeline Infrastructure
-status: verifying
-stopped_at: Completed 85-02-PLAN.md (2/2 tasks; TEX_OK + CFF_OK gates passed)
-last_updated: "2026-09-08T20:49:33.548Z"
+current_phase: 86
+current_phase_name: Single-Source-of-Truth Wiring + CI Gate
+status: planning
+stopped_at: Phase 85 complete, ready to plan Phase 86
+last_updated: "2026-09-08T21:02:02.328Z"
 last_activity: 2026-09-08
-last_activity_desc: Phase 85 execution started
-state_head: 2cfa12fdb6f9c7a7715f28306821a58d59f366df
+last_activity_desc: Phase 85 complete, transitioned to Phase 86
+state_head: 849c48fb7ee51bfa688a9dc8ea7715ca06796763
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
   completed_plans: 2
 ---
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Phase: 85 (Manuscript Scaffold + Pipeline Infrastructure) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-09-08 — Phase 85 execution started
+Phase: 86 — Single-Source-of-Truth Wiring + CI Gate
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-08 — Phase 85 complete, transitioned to Phase 86
 
 ## Performance Metrics
 
@@ -45,7 +45,7 @@ Last activity: 2026-09-08 — Phase 85 execution started
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 85 | - | - | - |
+| 85 | 2 | - | - |
 | 86 | - | - | - |
 | 87 | - | - | - |
 | 88 | - | - | - |
@@ -136,7 +136,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-08T20:49:33.531Z
-Stopped at: Completed 85-02-PLAN.md (2/2 tasks; TEX_OK + CFF_OK gates passed)
+Stopped at: Phase 85 complete, ready to plan Phase 86
 Resume file: None
 
 ## Operator Next Steps
