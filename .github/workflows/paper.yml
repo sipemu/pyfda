@@ -44,7 +44,7 @@ jobs:
         run: python paper/code/gen_refs_bib.py
 
       - name: Setup tectonic
-        uses: wtfjoke/setup-tectonic@v4
+        uses: wtfjoke/setup-tectonic@eb29fd68b7d3f76011906b6e45ea4320c8de5d2f  # v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
