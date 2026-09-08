@@ -1,0 +1,148 @@
+\newcommand{\FdarsVersion}{0.12.0}
+% paper/sections/comparison_table.tex
+% Capability comparison table — generated in Phase 87.
+% \FdarsVersion updated to 0.13.0 in Phase 90 (REL-01).
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Capability comparison of \textbf{fdars}~\FdarsVersion{} with related
+  functional data analysis software.
+  $\checkmark$~= first-class documented support;
+  \textit{partial}~= limited, indirect, or requires glue code;
+  ---~= no support found.
+  Ambiguity resolves down (see text).
+  Peer versions accessed 2026-09-08:
+  scikit-fda~0.10.1; FDApy~1.0.3;
+  fda~6.3.0; fda.usc~2.2.0; refund~0.1-40;
+  funData~1.3-9; tidyfun~0.2.0;
+  fdaM~{\textasciitilde}2014; PACE~v2.17.}
+\label{tab:comparison}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Capability} &
+  \textbf{fdars} &
+  \textbf{scikit-fda} &
+  \textbf{FDApy} &
+  \textbf{R (fda / fda.usc / refund)} &
+  \textbf{funData / tidyfun} &
+  \textbf{Matlab (fdaM / PACE)} \\
+\midrule
+Representation / basis smoothing &
+  $\checkmark$ &
+  $\checkmark$ &
+  $\checkmark$ &
+  $\checkmark$ &
+  $\checkmark$ &
+  $\checkmark$ \\
+Registration / alignment &
+  $\checkmark$ &
+  $\checkmark$ &
+  --- &
+  $\checkmark$ &
+  \textit{partial} &
+  $\checkmark$ \\
+Depth \& outlier detection &
+  $\checkmark$ &
+  $\checkmark$ &
+  --- &
+  $\checkmark$ &
+  --- &
+  --- \\
+FPCA / covariance / PACE sparse FPCA &
+  $\checkmark$ &
+  \textit{partial} &
+  $\checkmark$ &
+  $\checkmark$ &
+  \textit{partial} &
+  $\checkmark$ \\
+Clustering &
+  $\checkmark$ &
+  $\checkmark$ &
+  \textit{partial} &
+  \textit{partial} &
+  --- &
+  \textit{partial} \\
+Classification &
+  $\checkmark$ &
+  $\checkmark$ &
+  --- &
+  $\checkmark$ &
+  --- &
+  --- \\
+Functional regression (SoF / FoF) &
+  $\checkmark$ &
+  \textit{partial} &
+  --- &
+  $\checkmark$ &
+  --- &
+  \textit{partial} \\
+Functional time series &
+  $\checkmark$ &
+  --- &
+  --- &
+  --- &
+  --- &
+  --- \\
+Statistical process monitoring &
+  $\checkmark$ &
+  --- &
+  --- &
+  --- &
+  --- &
+  --- \\
+Inference / hypothesis testing &
+  $\checkmark$ &
+  \textit{partial} &
+  --- &
+  \textit{partial} &
+  --- &
+  --- \\
+Conformal prediction \& tolerance bands &
+  $\checkmark$ &
+  --- &
+  --- &
+  --- &
+  --- &
+  --- \\
+Density / Fr\'{e}chet / metric-space &
+  $\checkmark$ &
+  --- &
+  --- &
+  --- &
+  --- &
+  --- \\
+Simulation \& datasets &
+  $\checkmark$ &
+  $\checkmark$ &
+  $\checkmark$ &
+  $\checkmark$ &
+  \textit{partial} &
+  \textit{partial} \\
+Grounded advisor + scientific provenance &
+  $\checkmark$ &
+  --- &
+  --- &
+  --- &
+  --- &
+  --- \\
+\midrule
+\textbf{sklearn-compatible API} &
+  $\checkmark$ &
+  $\checkmark$ &
+  --- &
+  --- &
+  --- &
+  --- \\
+\textbf{Language} &
+  Rust/Python &
+  Python &
+  Python &
+  R &
+  R &
+  MATLAB \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
