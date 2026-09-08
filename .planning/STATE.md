@@ -2,15 +2,19 @@
 gsd_state_version: 1.0
 milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
-status: roadmapped
-last_updated: "2026-09-08T19:05:28.465Z"
+current_phase: 85
+current_phase_name: Manuscript Scaffold + Pipeline Infrastructure
+status: executing
+stopped_at: Completed 85-01-PLAN.md (3/3 tasks; PIPE-01 + PIPE-02 gates passed)
+last_updated: "2026-09-08T20:44:50.524Z"
 last_activity: 2026-09-08
+last_activity_desc: Phase 85 execution started
+state_head: 2ac41b8ddaef6ce78d466a597b7f60c23673f7b1
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 2
+  completed_plans: 1
 ---
 
 # Project State
@@ -24,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Phase: Not started (roadmap complete; Phase 85 next)
-Plan: —
-Status: Roadmapped — ready for `/gsd-plan-phase 85`
-Last activity: 2026-09-08 — Milestone v14.0 roadmapped (Phases 85–90)
+Phase: 85 (Manuscript Scaffold + Pipeline Infrastructure) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-09-08 — Phase 85 execution started
 
 ## Performance Metrics
 
@@ -54,6 +58,11 @@ Last activity: 2026-09-08 — Milestone v14.0 roadmapped (Phases 85–90)
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 85 P01 | 2 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -72,6 +81,9 @@ Recent decisions affecting current work:
 - [v14.0 roadmap]: Deterministic matplotlib — `Agg` backend, module-top rcParams, per-figure `np.random.seed`, PDF with suppressed `CreationDate`; determinism gate = empty `git diff paper/figures/`
 - [standing v6.0]: BLOCKING HUMAN manuscript read-through before milestone close (GATE-04, Phase 90) — same shape as the standing diagram/citation reviews; autonomous execution stops there
 - [standing v6.0/v11.0]: ALL content phases run SEQUENTIALLY on `main` with `use_worktrees: false`
+- [Phase 85]: Import fig/FDARS_COLORS from docs_fig (not reimplemented) — reuses established Agg+rcParams block via import side-effect
+- [Phase 85]: save_figure() passes metadata={"CreationDate": None} suppressing PDF timestamp so git diff paper/figures/ is empty on re-run (PIPE-02)
+- [Phase 85]: Makefile paper targets use plain python (same convention as docs targets); no tectonic invocation — PDF compile is CI-only (Phase 86)
 
 ### Pending Todos
 
@@ -119,8 +131,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-08 — v14.0 roadmap created (Phases 85–90)
-Stopped at: Roadmap complete; REQUIREMENTS.md traceability filled (23/23 mapped)
+Last session: 2026-09-08T20:44:50.509Z
+Stopped at: Completed 85-01-PLAN.md (3/3 tasks; PIPE-01 + PIPE-02 gates passed)
 Resume file: None
 
 ## Operator Next Steps
