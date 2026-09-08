@@ -24,6 +24,8 @@ Exits 1 and prints one or more of:
   - ``FDARS_NOT_CHECK: <dimension>`` when an fdars cell is not ``\\checkmark``.
   - ``UNGROUNDED: <dimension> (submodules=<tuple>)`` when no backing submodule
     has ≥1 public callable in the map.
+  - ``ORPHAN_SUBMODULE_KEY: <key>`` when a DIMENSION_SUBMODULES key has no
+    matching table row (bidirectional drift detection).
 
 Notes
 -----
@@ -460,6 +462,21 @@ def main() -> None:
     rows = _parse_table(_TABLE)
     evidence = _parse_evidence(_EVIDENCE)
     cap_map = _load_cap_map(_CAP_MAP)
+
+    # Bidirectional key validation: ensure no DIMENSION_SUBMODULES key is orphaned
+    # (i.e., every key in the dict corresponds to an actual table dimension label).
+    # The reverse direction (table row missing from the dict) already causes
+    # UNGROUNDED failures at runtime; this catches stale keys in the dict that
+    # silently decay when a table row is renamed or removed.
+    table_labels = {label for label, _ in rows}
+    orphan_keys = set(DIMENSION_SUBMODULES.keys()) - table_labels
+    if orphan_keys:
+        for k in sorted(orphan_keys):
+            print(
+                f"ORPHAN_SUBMODULE_KEY: {k!r} (in DIMENSION_SUBMODULES but not in table)",
+                file=sys.stderr,
+            )
+        sys.exit(1)
 
     # SC-3 peer-traceability check
     misses = _check(rows, evidence)
