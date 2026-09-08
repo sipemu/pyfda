@@ -36,7 +36,7 @@ docs-clean:
 # on PYTHONPATH.  PDF compile (tectonic) is CI-only — not invoked here.
 PAPER_PYTHONPATH := scripts:paper/code
 
-.PHONY: paper paper-figures paper-coverage paper-refs
+.PHONY: paper paper-figures paper-coverage paper-refs paper-check
 
 paper-figures:  ## Regenerate all paper figures deterministically
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_figures.py
@@ -46,5 +46,9 @@ paper-coverage:  ## Regenerate paper/coverage_counts.tex from _capability_map.js
 
 paper-refs:  ## Regenerate paper/refs.bib from _references_map.json
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_refs_bib.py
+
+paper-check:  ## Run the CI drift gates locally (exits 1 if any file is stale)
+	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/assert_coverage.py --check
+	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_refs_bib.py --check
 
 paper: paper-figures paper-coverage paper-refs  ## Run the one-command reproducible paper pipeline
