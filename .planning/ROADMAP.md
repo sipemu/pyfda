@@ -40,7 +40,9 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
   2. `CITATION.cff` (v1.2.0) is `cffconvert`-valid with a `preferred-citation` block and the author block placeholdered to Simon Müller <sm@data-zoo.de>.
   3. `paper/code/paper_utils.py` imports and reuses `scripts/docs_fig.py` (`fig()`/colors) and resolves datasets through a `data_path()` helper pointing at `docs/data/` — no dataset is copied or duplicated.
   4. A one-command Makefile target regenerates all pipeline outputs; matplotlib runs on the `Agg` backend with module-top rcParams and per-figure `np.random.seed`, and a re-run of the pipeline leaves `git diff paper/figures/` empty (deterministic PDF output with suppressed `CreationDate`).
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 85-01-PLAN.md — Reproducible figure pipeline (tracer): paper_utils.py reusing docs_fig.py + data_path(), seeded figure script, one-command Makefile runner, determinism gate (empty git diff)
+- [ ] 85-02-PLAN.md — LaTeX manuscript skeleton (article + natbib/BibTeX, seven section stubs, no timestamps) + cffconvert-valid CITATION.cff
 
 ### Phase 86: Single-Source-of-Truth Wiring + CI Gate
 **Goal**: The drift tripwires are functional before any prose cites a number — coverage counts and the bibliography are machine-derived from the committed JSON maps, and a standalone CI workflow runs the pipeline offline and compiles the PDF.
@@ -102,7 +104,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 85. Manuscript Scaffold + Pipeline Infrastructure | 0/0 | Not started | - |
+| 85. Manuscript Scaffold + Pipeline Infrastructure | 0/2 | Planned | - |
 | 86. Single-Source-of-Truth Wiring + CI Gate | 0/0 | Not started | - |
 | 87. Comparison Table + Evidence File | 0/0 | Not started | - |
 | 88. Front Matter, Design/Architecture & Capability Tour | 0/0 | Not started | - |
