@@ -1,638 +1,584 @@
 # Feature Research
 
-**Domain:** Functional data analysis — scientific provenance and cross-language implementation landscape
-**Researched:** 2026-09-07
-**Confidence:** MEDIUM (web search cross-checked for canonical papers; DOIs spot-verified against publisher URLs)
+**Domain:** FDA software-description paper — structure, comparison-table design, case-study conventions, table-stakes vs differentiators
+**Researched:** 2026-09-08
+**Confidence:** MEDIUM (web search + FDApy HTML page extracted; scikit-fda JSS section structure confirmed from search snippet; JOSS requirements from official docs; peer-package capability facts cross-checked against CRAN task view and PyPI docs)
 
 ---
 
 ## Purpose of This Document
 
-This is the authoring backbone for v13.0 Scientific Provenance & Cross-Language Implementations.
-It maps every `fdars` submodule family to:
-- its foundational paper(s) — author, year, journal, DOI or stable URL
-- alternative implementations in R, Python, and Matlab — package + representative function + stable URL
-- honest notes on ambiguity, contested attributions, and genuine gaps
+This file answers four questions for the v14.0 arXiv preprint milestone:
 
-The curation unit is **paper-level** (many callables share one root paper). Callable-to-paper indexing happens in the references JSON; this document supplies the raw material for that index.
+(a) **Section skeleton** — recommended ordering for the fdars paper with what each section must contain.
 
----
+(b) **Comparison-table design** — which peer packages to compare, which capability dimensions to use as rows, and how to state coverage honestly.
 
-## Part A — Foundational Papers per Method Family
+(c) **Case-study conventions** — what illustrative examples look like in comparable papers, keyed to the available `docs/data/` datasets (canadian_weather, growth, phoneme, tecator, sonar, wine).
 
-### A1. Functional Data Representation & Basis Expansion
-**fdars modules:** `basis`, `_Fdata`, `represent`, `smoothing` (partially)
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| *Functional Data Analysis* (2nd ed.) | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
-| *Functional Data Analysis with R and Matlab* | Ramsay, J.O., Hooker, G. & Graves, S. | 2009 | Springer (book) | https://doi.org/10.1007/978-0-387-98185-7 |
-| "Spline estimators for the functional linear model" | Cardot, H., Ferraty, F. & Sarda, P. | 2003 | Statistica Sinica 13: 571-591 | https://www3.stat.sinica.edu.tw/statistica/oldpdf/A13n31.pdf |
-
-**Callables covered:** `bspline_basis`, `bspline_basis_from_knots`, `fourier_basis`, `fourier_basis_with_period`, `constant_basis`, `pspline_fit_1d`, `pspline_fit_gcv`, `smooth_basis_gcv`, `smooth_basis_aic`, `fdata_to_basis_1d`, `basis_to_fdata_1d`, `basis_nbasis_cv`, `select_basis_auto_1d`, `_Fdata.to_basis`, `_Fdata.from_basis`
-
-**Notes:** Ramsay & Silverman (2005) is the unambiguous single root for B-spline and Fourier basis FDA. P-spline smoothing has a separate root: Eilers & Marx (1996) "Flexible smoothing with B-splines and penalties" *Statist. Sci.* 11(2): 89-121 (DOI: 10.1214/ss/1038425655), cited alongside Ramsay & Silverman in the fdars smoothing context.
+(d) **Table stakes vs differentiators vs anti-features** — what a software paper must include, what can distinguish fdars, and what to explicitly omit (including benchmarks as excluded per project brief).
 
 ---
 
-### A2. Functional Statistics & Descriptive Analysis
-**fdars modules:** `fdata`, `_Fdata` (mean/var/std/cov/norm/center)
+## Feature Landscape
 
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| *Functional Data Analysis* (2nd ed.) | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
-| "Trimmed means for functional data" | Fraiman, R. & Muniz, G. | 2001 | *TEST* 10: 419-440 | https://link.springer.com/article/10.1007/BF02595706 |
+### Table Stakes (Paper Must Have These)
 
-**Callables covered:** `mean_1d`, `mean_2d`, `functional_variance`, `functional_std`, `functional_covariance`, `norm_lp_1d`, `center_1d`, `normalize`, `normalize_with_argvals`, `deriv_1d`, `deriv_2d`, `geometric_median_1d`, `geometric_median_2d`, `depth_based_median`, `trim_mean`, `_Fdata.mean`, `_Fdata.var`, `_Fdata.std`, `_Fdata.cov`, `_Fdata.center`, `_Fdata.norm`, `_Fdata.normalize`, `_Fdata.deriv`, `_Fdata.median`
+Every credible FDA software paper in 2024 is expected to have these. Missing any makes reviewers reject the manuscript as incomplete.
 
-**CORRECTION NOTE — Fraiman & Muniz date:** The paper is **2001**, not 1991. The "1991" date commonly cited in the FDA literature is a misattribution to a pre-print or working-paper circulated informally. The published journal paper in *TEST* is 2001. Curators should use 2001.
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Abstract (≤ 250 words, method-accurate) | All academic papers require it | LOW | Lead with "breadth of FDA method coverage" + sklearn compat + provenance; mention the differentiators in sentence 3 |
+| Statement of need / motivation | JOSS mandatory; JSS expected; arXiv audience expects justification | LOW | State the Python FDA gap explicitly: only scikit-fda and FDApy exist, each with narrow scope; reference CRAN FDA richness as the benchmark |
+| Brief FDA background (1-2 paragraphs) | Readers outside FDA community need orientation | LOW | Reference Ramsay & Silverman (2005) and Gertheiss et al. (2024) as the review paper; keep it to ≤ 1 page |
+| Software architecture / design section | Explains what makes the package work; required by JOSS "Software design" section | MEDIUM | Cover Rust/PyO3/zero-copy qualitatively (no benchmarks), module map, Fdata container, sklearn layer |
+| Capability tour by method family | Shows breadth; every FDA software paper does this | HIGH | Use code snippets, not wall of text; group by: represent/smooth → FPCA → depth/outliers → registration → regression families → inference → FTS/Fréchet/density → multi-domain → monitoring |
+| Comparison with related software | JOSS mandatory ("State of the field"); JSS standard | MEDIUM | Formal table is expected by FDA community; narrative alone is insufficient |
+| Illustrative case studies on real datasets | Demonstrates the paper's claims work in practice | HIGH | At least 2-3 studies; one per major capability cluster; use bundled docs/data/ datasets |
+| Availability / installation section | Users need to know how to install | LOW | pip install fdars, optional extras, GitHub URL, CITATION.cff |
+| References (grounded from _references_map.json) | Required; v13.0 already produced the bibliography | LOW | Use existing _references_map.json to generate refs.bib |
 
----
+### Differentiators (Competitive Advantage)
 
-### A3. Kernel Smoothing & Bandwidth Selection
-**fdars modules:** `smoothing`
+Features that set fdars apart from scikit-fda and FDApy and justify "why a new package exists."
 
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| *Functional Data Analysis* (2nd ed.) | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
-| *Nonparametric Functional Statistics* | Ferraty, F. & Vieu, P. | 2006 | Springer (book) | https://doi.org/10.1007/0-387-36620-2 |
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Breadth of FDA method coverage (437 callables, 31 modules) | scikit-fda covers ~6 capability clusters; fdars covers all major FDA families including FTS, Fréchet, density FDA, conformal, SPM, XAI — no other Python package covers this breadth | LOW to write | State coverage numbers derived from live `_capability_map.json`; be honest about coverage depth vs breadth tradeoff |
+| PACE FPCA for sparse/irregular data | scikit-fda lacks PACE BLUP scoring; FDApy lacks PACE entirely | LOW | Python FDA gap: PACE was R-only (fdapace) and Matlab-only (PACE toolbox); fdars closes the Python gap |
+| Full sklearn compatibility (28 estimators, zero check_estimator exemptions) | FDApy: no sklearn layer; scikit-fda: partial sklearn compat (some estimators) | LOW | v9.0 delivered this; emphasize Pipeline/GridSearchCV interop with example |
+| AI advisor + scientific provenance layer | No other FDA package has an LLM-backed analysis advisor or a curated paper→callable provenance map | LOW | Unique; describe the grounding invariant (fdars computes, LLM interprets) in 1 paragraph; mention the MCP tool and capability skill |
+| Functional time series (13 functions: FTSM, DPCA, fplsr, ACF/PACF, stationarity, long-run cov, spectral density) | No Python FDA package covers FTS; R has ftsa + freqdom.fda; Python has nothing equivalent | LOW | This is a genuine Python gap; state it clearly in comparison table |
+| Fréchet regression + density FDA (LQD/Wasserstein) | No CRAN package for Fréchet regression; no PyPI package with LQD framing | LOW | Another genuine Python (and largely R) gap |
+| Functional SPM / statistical process monitoring | No dedicated functional SPC package exists in any language | LOW | Genuine multi-language gap; highlight |
+| Conformal prediction + tolerance bands for functional data | Only unmaintained R GitHub package; no Python equivalent | LOW | Emerging area; state with appropriate hedging |
+| Rust core + zero-copy PyO3 architecture (qualitative only, no benchmarks) | Enables the broad capability surface without sacrificing correctness; GIL release via PyReadonly | LOW to write | Do NOT include benchmark numbers (user explicitly excluded); describe architecture qualitatively as "correctness-first, compute-second" |
 
-**Callables covered:** `nadaraya_watson`, `local_linear`, `local_polynomial`, `gcv_smoother`, `cv_smoother`, `optim_bandwidth`, `smoothing_matrix_nw`, `knn_smoother`, `knn_gcv`, `knn_lcv`
+### Anti-Features (Explicitly Exclude)
 
-**Notes:** Nadaraya-Watson estimator has a classical scalar origin (Nadaraya 1964; Watson 1964) but the FDA framing — including bandwidth selection via GCV for functional data — is standardized in Ferraty & Vieu (2006). Ramsay & Silverman (2005) covers penalized spline smoothing.
+Things that would weaken the paper or that are explicitly out of scope.
 
----
-
-### A4. Functional Depth
-**fdars modules:** `depth`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "On the concept of depth for functional data" (band/modified-band depth) | Lopez-Pintado, S. & Romo, J. | 2009 | *JASA* 104(486): 718-734 | https://doi.org/10.1198/jasa.2009.0015 |
-| "Trimmed means for functional data" (FM depth) | Fraiman, R. & Muniz, G. | 2001 | *TEST* 10: 419-440 | https://link.springer.com/article/10.1007/BF02595706 |
-| "Mathematics and the picturing of data" (halfspace / Tukey depth) | Tukey, J.W. | 1975 | *Proc. Int. Congress Math.* Vol. 2: 523-531 | (no DOI; proceedings volume) |
-| "A half-region depth for functional data" (HRD/MHRD) | Lopez-Pintado, S. & Romo, J. | 2011 | *CSDA* 55(4): 1679-1695 | https://doi.org/10.1016/j.csda.2010.10.029 |
-| "A topologically valid definition of depth for functional data" | Nieto-Reyes, A. & Battey, H. | 2016 | *Statist. Sci.* 31(1): 61-79 | https://doi.org/10.1214/15-STS532 |
-
-**Callables covered:** `fraiman_muniz_1d`, `fraiman_muniz_2d`, `band_1d`, `modified_band_1d`, `modified_epigraph_index_1d`, `modal_1d`, `modal_2d`, `random_projection_1d`, `random_projection_2d`, `random_projection_deriv_1d`, `random_tukey_1d`, `random_tukey_2d`, `functional_spatial_1d`, `functional_spatial_2d`, `kernel_functional_spatial_1d`, `kernel_functional_spatial_2d`, `functional_depth`, `functional_boxplot`
-
-**ANTI-FEATURE NOTE:** This module cannot have a single root paper. The `functional_depth` dispatcher unifies at least 7 distinct methods, each with its own root paper. The references JSON needs method-keyed entries, not a module-level single citation. Modal depth traces specifically to Cuevas, Febrero & Fraiman (2007) "Robust estimation and classification for functional data via projection-based depth notions" *CSDA*; ERL/extremal depth to Narisetty & Nair (2016); epigraph/hypograph indices to Lopez-Pintado & Romo (2012).
-
----
-
-### A5. Functional Boxplot & Outlier Visualization
-**fdars modules:** `depth` (functional_boxplot), `outliers`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Functional boxplots" | Sun, Y. & Genton, M.G. | 2011 | *JCGS* 20(2): 316-334 | https://doi.org/10.1198/jcgs.2011.09224 |
-| "Outlier detection in functional data by depth measures..." | Febrero-Bande, M., Galeano, P. & Gonzalez-Manteiga, W. | 2008 | *Environmetrics* 19(4): 331-345 | https://doi.org/10.1002/env.878 |
-| "Multivariate functional data visualization and outlier detection" (MS-Plot) | Dai, W. & Genton, M.G. | 2018 | *JCGS* 27(4): 923-934 | https://doi.org/10.1080/10618600.2018.1473781 |
-| "Directional outlyingness for multivariate functional data" | Dai, W. & Genton, M.G. | 2019 | *CSDA* 131: 50-65 | https://doi.org/10.1016/j.csda.2018.03.017 |
-
-**Callables covered:** `functional_boxplot`, `magnitude_shape`, `outliergram`, `depthgram`, `muod`, `tvdmss`, `sequential_transform_outliers`, `detect_outliers_lrt`, `detect_outliers_lrt_with_dist`
-
-**Notes:** `tvdmss` traces to Huang & Sun (2019); `depthgram` to Aleman-Gomez et al. (2022); `muod` (MUOD) to Ojo et al. (2021). Individual citations needed per callable in the references JSON.
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| Performance benchmarks (wall-clock, throughput, memory) | User explicitly excluded; Rust architecture mentioned only qualitatively; benchmark wars invite reviewer nitpicking and distract from breadth narrative | One sentence: "Performance benefits of the Rust backend are not the focus of this work; the design prioritizes correctness and breadth of method coverage." |
+| API tutorial / exhaustive function listing | This is documentation, not a paper; JOSS explicitly says API docs belong in software docs, not the paper | Link to docs site; use a few illustrative code snippets only |
+| Derivation of FDA methods | The paper is a software paper, not a methods paper | Reference the original papers (from _references_map.json) and keep method descriptions to one sentence each |
+| Ablation studies or training-loss curves | These are ML training paper conventions; FDA software papers do not include them | Not applicable |
+| Simulated-data benchmarks | Even without wall-clock numbers, synthetic comparison experiments on simulated data are out of scope (user excluded benchmarks) | Show real-data case studies instead |
+| Section on future work that promises unbounded features | Weak in software papers; reviewers hold authors accountable | Keep conclusions tight: what is delivered, not what might be added |
+| Overstating coverage depth for the long tail | _references_map.json has 28/437 curated entries — honesty required | State coverage as "breadth-first with 57 foundational papers documented; per-method depth varies" |
 
 ---
 
-### A6. Functional Principal Component Analysis (FPCA)
-**fdars modules:** `regression` (fpca), `pace_fpca`
+## (a) Recommended Section Skeleton
 
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| *Functional Data Analysis* (2nd ed.) — FPCA chapters | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
-| "Functional data analysis for sparse longitudinal data" (PACE) | Yao, F., Muller, H.-G. & Wang, J.-L. | 2005 | *JASA* 100(470): 577-590 | https://doi.org/10.1198/016214504000001745 |
+This skeleton is concrete and orderable — each section maps to a phase in the writing roadmap.
 
-**Callables covered:** `regression.fpca`, `pace_fpca.pace_fpca`, `pace_fpca.PyIrregFdata`, `pace_fpca.irreg_fdata_from_lists`, `_Fdata.to_pc`
+```
+§1   Abstract                            [~200 words; write last]
+§2   Introduction & Statement of Need    [~600 words]
+§3   Brief FDA Background                [~300 words]
+§4   Software Architecture               [~500 words + module-map figure]
+§5   Data Representation                 [~300 words + code snippet]
+§6   Capability Tour                     [~1200 words + code snippets, organized by family]
+  §6.1  Representation, Smoothing & Basis
+  §6.2  Functional Depth & Outlier Detection
+  §6.3  Registration & Alignment
+  §6.4  Dimension Reduction (FPCA — dense and PACE)
+  §6.5  Functional Regression Families
+  §6.6  Classification & Clustering
+  §6.7  Statistical Inference
+  §6.8  Functional Time Series
+  §6.9  Fréchet Regression & Density FDA
+  §6.10 Statistical Process Monitoring
+  §6.11 scikit-learn Estimator Layer
+  §6.12 AI Advisor & Scientific Provenance Layer
+§7   Comparison with Related Software    [~400 words + formal table]
+§8   Illustrative Case Studies           [~800 words + 3-4 figures]
+  §8.1  Smooth + FPCA + classify on phoneme or growth
+  §8.2  Registration + regression on canadian_weather or tecator
+  §8.3  Functional time series on canadian_weather precipitation
+  §8.4  (Optional) sklearn Pipeline on wine or sonar
+§9   Availability & Installation         [~150 words]
+§10  Conclusion                          [~200 words]
+Acknowledgements
+References                               [from paper/refs.bib generated by _references_map.json]
+```
 
-**Notes:** Standard dense FPCA traces to Ramsay & Silverman (2005). PACE FPCA for sparse/irregular data is unambiguously Yao, Muller & Wang (2005). These are distinct methods requiring distinct reference entries.
+### What Each Section Must Contain
 
----
+**§2 Introduction & Statement of Need**
+- The FDA problem: infinite-dimensional data, standard statistics fails
+- Why Python is the right ecosystem (NumPy/sklearn/matplotlib ecosystem)
+- The Python FDA gap: only scikit-fda (narrow: one-dimensional, no FTS/Fréchet/SPM) and FDApy (narrow: FPCA + dimension reduction, no regression/classification/inference)
+- R has richness spread across 30+ packages (fda, fda.usc, refund, fdapace, fdasrvf, ftsa, fdaoutlier, fdatest, etc.) but no Python package consolidates this surface
+- What fdars provides: ~437 callables, 31 modules, sklearn compat, AI advisor
+- Target audience: researchers in statistics, biomedical science, chemometrics, industrial QC, data scientists with Python backgrounds
 
-### A7. Scalar-on-Function & Functional Linear Regression
-**fdars modules:** `regression`, `scalar_on_function`
+**§3 Brief FDA Background**
+- Functional observations as elements of L2; evaluation grids; basis expansions
+- Key concepts: smoothing, FPCA, registration, depth, regression
+- Point to Ramsay & Silverman (2005) and Gertheiss et al. (2024) for full treatments
+- One equation at most (Karhunen-Loève expansion for FPCA is the canonical one to include)
 
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Functional linear model" | Cardot, H., Ferraty, F. & Sarda, P. | 1999 | *Statist. Probab. Lett.* 45: 11-22 | https://doi.org/10.1016/S0167-7152(99)00036-X |
-| "Spline estimators for the functional linear model" | Cardot, H., Ferraty, F. & Sarda, P. | 2003 | *Statistica Sinica* 13: 571-591 | https://www3.stat.sinica.edu.tw/statistica/oldpdf/A13n31.pdf |
-| *Functional Data Analysis* (2nd ed.) — regression chapters | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
-| "Functional additive models" (FAM/GKAM) | Muller, H.-G. & Yao, F. | 2008 | *JASA* 103(484): 1534-1544 | https://doi.org/10.1198/016214508000000516 |
-| "An ANOVA test for functional data" (fanova) | Cuevas, A., Febrero, M. & Fraiman, R. | 2004 | *CSDA* 47(1): 111-122 | https://doi.org/10.1016/j.csda.2003.10.021 |
+**§4 Software Architecture**
+- Layer diagram: Rust fdars-core → PyO3 zero-copy → Python API (Fdata + modules) → sklearn layer → AI advisor
+- Rust/PyO3 binding model: qualitative "zero-copy via PyReadonly; GIL released for parallel Rust computation" — no benchmarks
+- Module map table: 31 modules, callable counts per module (from _capability_map.json)
+- Fdata container: data matrix (n_obs × n_points), argvals, rangeval, ids, metadata
+- Optional extras: [sklearn], [mcp], [plot]
 
-**Callables covered:** `fregre_lm`, `fregre_cv`, `fregre_pls`, `fpls`, `model_selection_ncomp`, `bootstrap_ci_fregre_lm`, `predict_fregre_lm`, `predict_fregre_pls`, `fregre_huber`, `fregre_l1`, `fregre_np`, `fregre_np_cv`, `fregre_np_mixed`, `functional_logistic`, `functional_glm`, `bootstrap_ci_functional_logistic`, `predict_functional_logistic`, `fosr`, `fosr_fpc`, `predict_fosr`, `concurrent_regression`, `fof_regression`, `fof_re_regression`, `fof_cv`, `predict_fof`, `predict_fof_re`, `fanova`, `scalar_on_function.fam`, `scalar_on_function.fregre_gkam`, `scalar_on_function.fregre_gsam`, `scalar_on_function.variable_selection`, `scalar_on_function.model_selection_ncomp`
+**§5 Data Representation**
+- FDataGrid (discretized observations on shared grid) via fdars.Fdata
+- Basis expansion path: fdata_to_basis_1d, bspline_basis, fourier_basis
+- IrregFdata for PACE/sparse path (pace_fpca.PyIrregFdata)
+- Contrast with scikit-fda (FDataGrid / FDataBasis), FDApy (DenseFunctionalData / IrregularFunctionalData)
+- One code snippet: constructing an Fdata object from a numpy array
 
-**Notes:** This module spans ~7 different root papers. Concurrent/varying-coefficient regression (`concurrent_regression`) traces to Ramsay (1996) / Hastie & Tibshirani (1993), treated in FDA context by Ramsay & Silverman (2005). Function-on-function regression (`fof_regression`) traces to Yao et al. (2005) extensions and Ivanescu et al. (2015). Flag for curators: require per-callable citations for this module.
+**§6 Capability Tour**
+- For each subsection: 1-3 sentence description + 3-8 line code snippet
+- Code snippets must execute against current fdars API (enforced by reproducible pipeline gate)
+- Each snippet uses a dataset from docs/data/ or generates minimal synthetic data
+- No derivations; cite foundational paper by name only (full citation in References)
 
----
+**§7 Comparison with Related Software**
+- Formal table (see section (b) below for design)
+- Narrative: 2-3 paragraphs explaining the table. Key messages:
+  (1) R ecosystem is the richest but fragmented across many packages
+  (2) Python FDA options are narrow (scikit-fda: one-dimensional focus; FDApy: FPCA/dimension reduction only)
+  (3) fdars consolidates the Python surface; Matlab (fdaM + PACE) is the closest in breadth but limited to Ramsay-era methods
 
-### A8. Frechet Regression & Non-Euclidean Response
-**fdars modules:** `frechet`
+**§8 Illustrative Case Studies**
+- See section (c) below for design
 
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Frechet regression for random objects with Euclidean predictors" | Petersen, A. & Muller, H.-G. | 2019 | *Ann. Statist.* 47(2): 691-719 | https://doi.org/10.1214/17-AOS1624 |
+**§9 Availability & Installation**
+- pip install fdars
+- pip install "fdars[sklearn,mcp,plot]" for full install
+- GitHub URL: https://github.com/[owner]/pyfda
+- License, CITATION.cff pointer
+- Documentation: link to MkDocs site
+- Python version support: 3.9-3.13
 
-**Callables covered:** `frechet_mean`, `frechet_global_reg`, `frechet_local_reg`, `frechet_anova`
-
-**Notes:** Petersen & Muller (2019) is the unambiguous single root for Frechet regression. Paper was published 2019 (appeared online 2018). The `frechet_mean` for SPD matrices also relates to Moakher (2005) "A differential geometric approach to the geometric mean of symmetric positive-definite matrices" *SIAM J. Matrix Anal. Appl.* 26(3): 735-747 for the Karcher mean formula, but the regression framing is fully the Petersen & Muller (2019) paper.
-
----
-
-### A9. Density FDA — LQD Transform & Wasserstein
-**fdars modules:** `density_fda`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Functional data analysis for density functions by transformation to a Hilbert space" (LQD) | Petersen, A. & Muller, H.-G. | 2016 | *Ann. Statist.* 44(1): 183-218 | https://doi.org/10.1214/15-AOS1363 |
-
-**Callables covered:** `lqd_transform`, `inverse_lqd`, `lqd_fpca`, `wasserstein_barycenter`, `normalize_density`
-
-**Notes:** LQD transform is unambiguously Petersen & Muller (2016). The `wasserstein_barycenter` is conceptually related to Agueh & Carlier (2011) "Barycenters in the Wasserstein space" *SIAM J. Math. Anal.* 43(2): 904-924 but the density-FDA framing is Petersen & Muller (2016/2019). Curators may want to note both.
-
----
-
-### A10. Elastic / Fisher-Rao Registration & SRSF Framework
-**fdars modules:** `alignment` (most elastic_* and karcher_* callables)
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Registration of functional data using Fisher-Rao metric" (SRSF framework) | Srivastava, A., Wu, W., Kurtek, S., Klassen, E. & Marron, J.S. | 2011 | *arXiv:1103.3817* | https://arxiv.org/abs/1103.3817 |
-| *Functional and Shape Data Analysis* (book) | Srivastava, A. & Klassen, E.P. | 2016 | Springer | https://doi.org/10.1007/978-1-4939-4020-2 |
-| "Functional Data Analysis of Amplitude and Phase Variation" (review) | Marron, J.S., Ramsay, J.O., Sangalli, L.M. & Srivastava, A. | 2015 | *Statist. Sci.* 30(4) | https://doi.org/10.1214/15-STS524 |
-
-**Callables covered:** `elastic_align_pair`, `elastic_align_pair_closed`, `elastic_align_pair_constrained`, `elastic_align_pair_multires`, `elastic_align_pair_penalized`, `elastic_changepoint`, `elastic_cross_distance_matrix`, `elastic_cross_distance_matrix_with_band`, `elastic_decomposition`, `elastic_depth`, `elastic_distance`, `elastic_distance_closed`, `elastic_logistic`, `elastic_outlier_detection`, `elastic_partial_match`, `elastic_regression`, `elastic_self_distance_matrix`, `elastic_self_distance_matrix_with_band`, `karcher_mean`, `karcher_mean_closed`, `karcher_mean_with_band`, `karcher_median`, `robust_karcher_mean`, `shape_mean`, `shape_distance`, `shape_self_distance_matrix`, `shape_confidence_interval`, `srsf_transform`, `srsf_inverse`, `tsrvf_transform`, `tsrvf_transform_with_method`, `vert_fpca`, `horiz_fpca`, `horiz_fpns`, `joint_fpca`, `amplitude_distance`, `amplitude_self_distance_matrix`, `phase_distance`, `phase_self_distance_matrix`, `phase_boxplot`, `gauss_model`, `joint_gauss_model`, `bayesian_align_pair`, `curve_geodesic`, `warp_complexity`, `warp_smoothness`, `warp_inverse_error`, `warp_statistics`, `reparameterize_curve`, `invert_warp`, `compose_warps`, `transfer_alignment`, `pairwise_consistency`
-
-**Notes:** Srivastava et al. (2011) arXiv is the primary technical reference; the 2016 book is the full treatment. Landmark registration (`landmark_register`) traces to Ramsay & Silverman (2005). Shift registration (`least_squares_shift_registration`) is also Ramsay & Silverman (2005). Banded elastic alignment (`*_with_band`) references the Sakoe-Chiba band constraint from Sakoe & Chiba (1978) IEEE paper. Bayesian alignment (`bayesian_align_pair`) traces to Cheng et al. (2016) "Bayesian registration of functions and curves" *Bayesian Anal.* 11(2): 447-475. This module is the largest in fdars and requires many distinct paper entries keyed by sub-method.
-
----
-
-### A11. Shift Registration & Landmark Registration
-**fdars modules:** `alignment` (least_squares_shift_*, landmark_*, alignment_quality, diagnose_alignment, peak_persistence, lambda_cv, detect_landmarks, align_to_target)
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| *Functional Data Analysis* (2nd ed.) — registration chapters | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
-
-**Callables covered:** `least_squares_shift_registration`, `least_squares_score`, `pairwise_correlation_score`, `sobolev_least_squares_score`, `align_to_target`, `alignment_quality`, `diagnose_alignment`, `peak_persistence`, `lambda_cv`, `detect_landmarks`, `landmark_register`, `landmark_detect_and_register`
-
----
-
-### A12. Metrics — Lp, DTW, GAK, Hausdorff
-**fdars modules:** `metric`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Fast global alignment kernels" (GAK) | Cuturi, M. | 2011 | *ICML 2011* Proc. 28th ICML: 929-936 | https://dl.acm.org/doi/10.5555/3104482.3104599 |
-| "Dynamic programming algorithm optimization for spoken word recognition" (DTW + Sakoe-Chiba band) | Sakoe, H. & Chiba, S. | 1978 | *IEEE Trans. Acoust.* ASSP-26: 43-49 | https://doi.org/10.1109/TASSP.1978.1163055 |
-| "Soft-DTW: a differentiable loss function for time-series" | Cuturi, M. & Blondel, M. | 2017 | *ICML 2017* | https://proceedings.mlr.press/v70/cuturi17a.html |
-
-**Callables covered:** `lp_self_1d`, `lp_cross_1d`, `lp_self_2d`, `lp_cross_2d`, `dtw_self_1d`, `dtw_cross_1d`, `soft_dtw_self_1d`, `soft_dtw_cross_1d`, `soft_dtw_div_self_1d`, `soft_dtw_div_cross_1d`, `gak`, `gak_gram_matrix`, `gak_gram_train`, `gak_gram_predict`, `sigma_gak`, `PyGakGramTrain`, `hausdorff_self_1d`, `hausdorff_cross_1d`, `hausdorff_self_2d`, `hausdorff_cross_2d`, `hshift_self_1d`, `hshift_cross_1d`, `fourier_self_1d`, `fourier_cross_1d`, `inprod`, `int_simpson`
-
-**Notes:** Lp distances for functional data are described in Ramsay & Silverman (2005) and Ferraty & Vieu (2006). GAK is unambiguously Cuturi (2011). DTW is Sakoe & Chiba (1978). Soft-DTW is Cuturi & Blondel (2017). Hausdorff distance has no single FDA root paper; it is a classical metric described in a functional data context by Ferraty & Vieu (2006).
-
----
-
-### A13. Clustering
-**fdars modules:** `clustering`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Model-based clustering of time series in group-specific functional subspaces" (KCFC / FunFEM ancestor) | Bouveyron, C. & Jacques, J. | 2011 | *Adv. Data Anal. Classif.* 5(4): 281-300 | https://doi.org/10.1007/s11634-011-0095-6 |
-| "The discriminative functional mixture model..." (FunFEM) | Bouveyron, C., Come, E. & Jacques, J. | 2015 | *Ann. Appl. Stat.* 9(4): 1726-1760 | https://doi.org/10.1214/15-AOAS861 |
-| "Functional clustering and identifying substructures of longitudinal data" (KCFC) | Chiou, J.-M. & Li, P.-L. | 2007 | *JRSSB* 69(4): 679-699 | https://doi.org/10.1111/j.1467-9868.2007.00605.x |
-
-**Callables covered:** `kmeans_fd`, `kcfc_cluster`, `funfem_cluster`, `dbscan_fd`, `fuzzy_cmeans_fd`, `gmm_cluster`, `align_cluster_fd`, `silhouette_score`, `silhouette_score_data`, `calinski_harabasz`, `calinski_harabasz_data`, `hierarchical_from_distances`, `hierarchical_cut`, `kmedoids_from_distances`
-
-**Notes:** K-means for functional data follows James & Sugar (2003) *JASA* 98(461): 178-186 (DOI: 10.1198/016214503388619113). KCFC is Chiou & Li (2007). FunFEM is Bouveyron et al. (2015) built on Bouveyron & Jacques (2011). DBSCAN for functional data is a direct application of Ester et al. (1996) with no FDA-specific founding paper. Elastic clustering (`align_cluster_fd`) combines Srivastava et al. (2011) alignment with k-means; closest reference is Tucker et al. (2013) or Sangalli et al. (2010) *CSDA* "k-mean alignment for curve clustering." Flag for curators: `kcfc_cluster`, `dbscan_fd`, `align_cluster_fd` have contested or ambiguous single roots.
+**§10 Conclusion**
+- fdars delivers breadth of FDA methods in Python with correctness as the primary goal
+- sklearn compatibility enables immediate use in existing ML workflows
+- The AI advisor + provenance layer is a novel addition to the FDA software landscape
+- No future-work promises that can't be delivered
 
 ---
 
-### A14. Classification
-**fdars modules:** `classification`
+## (b) Comparison-Table Design
 
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| *Nonparametric Functional Statistics* — classification chapters | Ferraty, F. & Vieu, P. | 2006 | Springer (book) | https://doi.org/10.1007/0-387-36620-2 |
-| "K-class elastic multinomial regression" (elastic multinomial) | Tucker, J.D., Wu, W. & Srivastava, A. | 2013 | *Electron. J. Stat.* 7: 1100-1128 | https://doi.org/10.1214/13-EJS816 |
+### Recommended Table Structure
 
-**Callables covered:** `fclassif_lda`, `fclassif_qda`, `fclassif_knn`, `fclassif_kernel`, `fclassif_dd`, `fclassif_cv`, `elastic_multinomial`, `kernel_classify_from_distances`, `knn_classify_from_distances`
+The table has **peer packages as columns** and **capability dimensions as rows**.
 
-**Notes:** LDA/QDA/kNN via FPC scores is standard material in Ferraty & Vieu (2006) and Ramsay & Silverman (2005). DD-classifier traces to Li et al. (2012) "DD-classifier: Nonparametric classification procedure based on DD-plot" *JASA* 107(499): 737-753 (DOI: 10.1080/01621459.2012.695630). Elastic multinomial is Tucker et al. (2013).
+**Columns (Packages):**
+| Column ID | Package | Language | Primary Reference |
+|-----------|---------|----------|-------------------|
+| fdars | fdars (this paper) | Python | — |
+| skfda | scikit-fda | Python | Ramos-Carreño et al. (2024) JSS |
+| FDApy | FDApy | Python | Golovkine (2025) JOSS |
+| fda | fda (Ramsay) | R | Ramsay & Silverman (2005) + Ramsay et al. (2009) |
+| fda.usc | fda.usc | R | Febrero-Bande & Oviedo de la Fuente (2012) JSS |
+| refund | refund | R | Goldsmith et al. (2020) |
+| fdapace | fdapace / PACE | R + Matlab | Yao, Müller & Wang (2005) |
+| fdaM | fdaM (Ramsay) | Matlab | Ramsay & Silverman (2005) |
+
+**Note on roahd:** roahd (R Journal 2019) is intentionally omitted from the main table because it covers only depth + outlier visualization and would create an imbalanced sparse column. Mention it in the narrative as a specialized depth package.
+
+**Note on fdasrvf / fdasrsf:** These cover elastic registration only. Include a row note pointing to them rather than a full column.
+
+**Rows (Capability Dimensions):**
+
+Use check-mark symbols with optional qualifiers: ✓ (full), ◑ (partial), — (absent).
+
+```
+Row ID   | Capability Dimension             | What "full" means for fdars
+---------|----------------------------------|-----------------------------
+R01      | Data representation              | Grid + basis + irregular (IrregFdata)
+R02      | Smoothing & basis estimation     | B-spline, Fourier, local-poly, kernel, P-spline GCV/AIC
+R03      | Standard FPCA (dense)            | Covariance operator, eigenfunctions, scores, reconstruction
+R04      | PACE FPCA (sparse/irregular)     | BLUP scores, fitted trajectories, prediction variance
+R05      | Functional depth                 | ≥5 depth methods unified via dispatcher
+R06      | Outlier detection                | ≥4 methods (magnitude/shape/tvdmss/muod/depthgram)
+R07      | Registration & alignment         | Landmark, shift, elastic (SRSF/Fisher-Rao), banded
+R08      | Scalar-on-function regression    | FPC, PLS, nonparametric kernel, robust, GLM family
+R09      | Function-on-scalar regression    | fosr / function-on-scalar families
+R10      | Function-on-function regression  | pffr / FOF families
+R11      | Concurrent / varying-coeff regression | concurrent_regression
+R12      | Functional classification        | kNN, LDA, QDA, DD-classifier, elastic multinomial
+R13      | Functional clustering            | k-means, FunFEM, KCFC, DBSCAN, GMM, fuzzy c-means
+R14      | Functional inference             | Permutation tests, SCBs, ITP interval testing, ANOVA
+R15      | Functional time series           | FTSM forecasting, DPCA, ACF/PACF, long-run cov, stationarity
+R16      | Fréchet / metric-space regression | Fréchet mean + local/global regression for non-Euclidean responses
+R17      | Density FDA                      | LQD transform, Wasserstein barycenter
+R18      | Multi-domain FDA                 | PyMultiFunData, MFPCA, FAMM
+R19      | Statistical process monitoring   | T2/SPE, CUSUM, EWMA, ARL estimation
+R20      | Conformal prediction (functional)| Conformal prediction bands, tolerance bands
+R21      | scikit-learn compatibility       | BaseEstimator, Pipeline, check_estimator
+R22      | Scientific provenance            | Curated paper→callable map, MCP reference tool
+R23      | AI analysis advisor              | LLM-backed grounded advice with diagnostics
+```
+
+### Honest Coverage Statements
+
+**fdars honest qualifiers:**
+- R01: ✓ (grid + basis + IrregFdata)
+- R02: ✓ (B-spline, Fourier, P-spline, kernel, local-poly, GCV, AIC)
+- R03: ✓ (via regression.fpca)
+- R04: ✓ (PACE BLUP, prediction variance — unique in Python)
+- R05: ✓ (≥9 depth methods via functional_depth dispatcher)
+- R06: ✓ (tvdmss, muod, depthgram, sequential_transform, LRT, outliergram, magnitude_shape)
+- R07: ✓ (elastic/SRSF full surface, landmark, shift, banded, Bayesian)
+- R08: ✓ (FPC, PLS, kernel, Huber, L1, additive, GLM, logistic)
+- R09: ✓ (fosr, fosr_fpc, function-on-scalar families)
+- R10: ✓ (fof_regression, fof_re_regression, fof_cv)
+- R11: ✓ (concurrent_regression)
+- R12: ✓ (9 classifiers)
+- R13: ✓ (11 clustering methods)
+- R14: ✓ (permutation tests, SCB, ITP, ANOVA — ITP unique in Python)
+- R15: ✓ (13 FTS functions — unique in Python)
+- R16: ✓ (unique in Python; no CRAN or PyPI equivalent)
+- R17: ✓ (unique in Python with full LQD framing)
+- R18: ✓ (PyMultiFunData, mfpca, spe_multivariate, FAMM)
+- R19: ✓ (unique across all languages)
+- R20: ✓ (unique in Python)
+- R21: ✓ (28 estimators, zero check_estimator exemptions)
+- R22: ✓ (unique: 57 papers, 243 entries, MCP tool, fdars-capabilities skill)
+- R23: ✓ (unique: grounding invariant, 14 aspects, 4 providers, MCP server)
+
+**scikit-fda honest qualifiers:**
+- R01: ✓ (FDataGrid + FDataBasis, no true IrregFdata)
+- R02: ✓
+- R03: ✓
+- R04: ◑ (partial: no PACE BLUP scoring)
+- R05: ✓ (FM, band, modified band, projection-based)
+- R06: ✓ (outliergram, boxplot-based; fewer methods than fdars)
+- R07: ✓ (elastic via ElasticRegistration; shift; landmark)
+- R08: ✓ (LinearFunctionalRegression, FPC-based)
+- R09: — (not covered natively)
+- R10: — (not covered)
+- R11: — (not covered)
+- R12: ✓ (kNN, nearest centroid, DDClassifier, nearest class centroid)
+- R13: ✓ (FuzzyKMeans, KMeans functional)
+- R14: ◑ (partial: Hotelling T2 via hotelling_t2; no ITP; no functional SCB)
+- R15: — (no functional time series)
+- R16: — (no Fréchet regression)
+- R17: — (no density FDA / LQD)
+- R18: — (multivariate on same domain only; no multi-domain MFPCA)
+- R19: — (no SPM)
+- R20: — (no conformal prediction)
+- R21: ✓ (sklearn API is core design; most estimators check_estimator compliant)
+- R22: — (no provenance layer)
+- R23: — (no AI advisor)
+
+**FDApy honest qualifiers:**
+- R01: ✓ (DenseFunctionalData, IrregularFunctionalData; multi-dimensional domains)
+- R02: ✓ (P-splines smoothing)
+- R03: ✓ (FPCA via diagonalization of covariance operator)
+- R04: ✓ (MFPCA for sparse/irregular via IrregularFunctionalData)
+- R05: — (no depth methods as of v1.x)
+- R06: — (no outlier detection)
+- R07: — (no registration)
+- R08: — (no regression)
+- R09: — (no regression)
+- R10: — (no regression)
+- R11: — (no regression)
+- R12: — (no classification)
+- R13: — (no clustering)
+- R14: — (no inference)
+- R15: — (no FTS)
+- R16: — (no Fréchet)
+- R17: — (no density FDA)
+- R18: ✓ (multi-dimensional domains, multiFunData)
+- R19: — (no SPM)
+- R20: — (no conformal)
+- R21: — (no sklearn layer)
+- R22: — (no provenance)
+- R23: — (no AI advisor)
+
+**fda (R) honest qualifiers:**
+- R01: ✓ (fd class, basis expansions, evaluation grid)
+- R02: ✓ (smooth.basis, penalized spline)
+- R03: ✓ (pca.fd)
+- R04: — (no PACE; use fdapace separately)
+- R05: ◑ (limited: no dedicated depth functions; use fda.usc or ddalpha)
+- R06: — (no outlier detection)
+- R07: ✓ (register.fd: landmark + shift)
+- R08: ✓ (fRegress: FPC and penalized regression)
+- R09: ✓ (fRegress: function-on-scalar)
+- R10: ◑ (fRegress has limited FOF support; refund needed for pffr)
+- R11: ✓ (fRegress with pointwise basis)
+- R12: — (no classification)
+- R13: — (no clustering; use fda.usc)
+- R14: — (no permutation tests; use fda.usc or fdANOVA)
+- R15: — (no FTS; use ftsa)
+- R16: — (no Fréchet)
+- R17: — (no density FDA)
+- R18: — (no multi-domain)
+- R19: — (no SPM)
+- R20: — (no conformal)
+- R21: — (no sklearn equiv)
+- R22: — (no provenance)
+- R23: — (no AI)
+
+**fda.usc (R) honest qualifiers:**
+- R01: ✓ (fdata class)
+- R02: ✓ (optim.np, kernel smoothing)
+- R03: ✓ (fdata.comp via FPCA)
+- R04: — (no PACE)
+- R05: ✓ (depth.FM, depth.BD, depth.mode, depth.RP — comprehensive)
+- R06: ✓ (fdata.outliers, Febrero-Bande et al. methods)
+- R07: — (no registration; use fda or fdasrvf)
+- R08: ✓ (fregre.np, fregre.lm, fregre.pls, fregre.gsam)
+- R09: — (use refund)
+- R10: — (use refund)
+- R11: — (no concurrent)
+- R12: ✓ (classif.knn, classif.lda, classif.qda, classif.kernel)
+- R13: ✓ (kmeans.fd, fclust functions)
+- R14: ✓ (fanova.onefactor, Wilcoxon functional test)
+- R15: — (no FTS)
+- R16: — (no Fréchet)
+- R17: — (no density FDA)
+- R18: — (no multi-domain)
+- R19: — (no SPM)
+- R20: — (no conformal)
+- R21: — (no sklearn)
+- R22: — (no provenance)
+- R23: — (no AI)
+
+**refund (R) honest qualifiers:**
+- R01: ◑ (fdata objects not its own representation; delegates to fda)
+- R02: ◑ (penalized spline via pfr/pffr; not standalone smoothing)
+- R03: ✓ (fpca.sc, fpca.face, fpca.ssvd, fpca2s — excellent sparse FPCA)
+- R04: ✓ (fpca.sc with sparse data; not PACE but comparable quality)
+- R05: — (no depth)
+- R06: — (no outlier detection)
+- R07: — (use registr separately)
+- R08: ✓ (pfr: penalized FPC, spline, FPCR)
+- R09: ✓ (fosr, fosr2s)
+- R10: ✓ (pffr: function-on-function, excellent)
+- R11: ✓ (peer, ccb for concurrent)
+- R12: — (no classification)
+- R13: — (no clustering)
+- R14: ◑ (limited inference; use fdANOVA separately)
+- R15: — (no FTS)
+- R16: — (no Fréchet)
+- R17: — (no density FDA)
+- R18: — (no multi-domain)
+- R19: — (no SPM)
+- R20: — (no conformal)
+- R21: — (no sklearn)
+- R22: — (no provenance)
+- R23: — (no AI)
+
+**fdapace / PACE (R + Matlab) honest qualifiers:**
+- R01: ◑ (sparse trajectory input; no basis expansion)
+- R02: ◑ (covariance smoothing only, not general basis)
+- R03: ✓ (dense FPCA via pca_fd / pca.fd path)
+- R04: ✓ (PACE BLUP: the definitive reference implementation)
+- R05: — (no depth; PACE Matlab has trajectory boxplot only)
+- R06: — (no systematic outlier detection)
+- R07: ◑ (PACE-WARP in Matlab: time synchronization; limited)
+- R08: ✓ (PACE-REG in Matlab; fdapace: FLM scalar-on-function)
+- R09: — (limited)
+- R10: — (PACE-SVD in Matlab only; R fdapace limited)
+- R11: — (PACE-GRM: generalized repeated measures, not classic concurrent)
+- R12: — (no general classification; PACE has FSIM for functional index models)
+- R13: ◑ (PACE-KCFC in Matlab: k-center functional clustering)
+- R14: — (no formal testing module)
+- R15: — (no FTS)
+- R16: — (no Fréchet)
+- R17: — (no density FDA)
+- R18: — (no multi-domain)
+- R19: — (no SPM)
+- R20: — (no conformal)
+- R21: — (no sklearn)
+- R22: — (no provenance)
+- R23: — (no AI)
+
+**fdaM (Matlab, Ramsay) honest qualifiers:**
+- R01: ✓ (basis expansion: B-spline, Fourier, constant; fd objects)
+- R02: ✓ (smooth_basis, penalized spline, GCV)
+- R03: ✓ (pca_fd)
+- R04: — (no PACE; use PACE toolbox separately)
+- R05: — (no depth functions in fdaM)
+- R06: — (no outlier detection)
+- R07: ✓ (register_fd: landmark + shift)
+- R08: ✓ (fRegress: FPC and penalized)
+- R09: ✓ (fRegress: function-on-scalar)
+- R10: ◑ (limited in fdaM; no full pffr equivalent)
+- R11: ✓ (fRegress with pointwise basis = concurrent)
+- R12: — (no classification)
+- R13: — (no clustering)
+- R14: — (no formal inference module)
+- R15: — (no FTS)
+- R16: — (no Fréchet)
+- R17: — (no density FDA)
+- R18: — (no multi-domain)
+- R19: — (no SPM)
+- R20: — (no conformal)
+- R21: — (no sklearn)
+- R22: — (no provenance)
+- R23: — (no AI)
+
+### Dependency: Comparison Table Needs Peer Coverage Verification
+
+**Flag for roadmap author:** The peer coverage facts above are based on web search and CRAN task-view inspection (MEDIUM confidence). Before final manuscript submission, each ◑ and ✓ entry for peer packages should be spot-checked against the package documentation or a test run. This is a Phase deliverable — assign a verification step. The fdars column is grounded from the live `_capability_map.json` (HIGH confidence).
 
 ---
 
-### A15. Functional Inference — Tests & SCBs
-**fdars modules:** `inference`
+## (c) Illustrative Case Study Conventions
 
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "An ANOVA test for functional data" (permutation tests) | Cuevas, A., Febrero, M. & Fraiman, R. | 2004 | *CSDA* 47(1): 111-122 | https://doi.org/10.1016/j.csda.2003.10.021 |
-| "Simultaneous confidence bands for nonparametric regression with functional data" (SCB) | Degras, D. | 2011 | *Statistica Sinica* 21(4): 1735-1765 | https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N412.html |
-| "Interval-wise testing for functional data" (ITP) | Pini, A. & Vantini, S. | 2017 | *J. Nonparam. Stat.* 29(2): 407-424 | https://doi.org/10.1080/10485252.2017.1306627 |
+### What Comparable Papers Do
 
-**Callables covered:** `t_perm_test`, `f_perm_test`, `two_sample_mean_test`, `mean_scb`, `scb_two_sample_test`, `flm_f_test`, `flm_gof_test`, `oneway_anova_vstat`, `itp_one_pop`, `itp_two_pop`, `itp_flm`
+FDA software papers use real datasets that are canonical in the field. The preferred figure types are:
 
-**Notes:** Two-sample permutation tests (`t_perm_test`, `f_perm_test`) trace to Cuevas et al. (2004). SCBs trace to Degras (2011). The V-statistic one-way ANOVA (`oneway_anova_vstat`) traces to Zhang & Liang (2014) "One-way ANOVA for functional data via globalizing the pointwise F-test" *Scand. J. Statist.* 41(1): 51-71 — flag for curator verification. ITP (`itp_*`) is unambiguously Pini & Vantini (2017).
+1. **Trajectory plots** — raw or smoothed functional observations over the evaluation grid; demonstrates representation
+2. **Mean and variance band** — sample mean ± 1 SD functional band; demonstrates functional statistics
+3. **Eigenfunction plots** — first 2-3 FPCA modes; demonstrates dimension reduction
+4. **Depth rank plot / functional boxplot** — central tube + outlier flags; demonstrates depth
+5. **Aligned vs unaligned trajectories** — before/after registration; demonstrates alignment
+6. **Regression coefficient function** — scalar-on-function regression beta(t) over the grid; demonstrates regression
+7. **Classification decision boundary or confusion matrix** — demonstrates classification
+8. **Forecasting plot** — future trajectory fan; demonstrates FTS
 
----
+FDApy (arXiv 2101.11003v2) uses: Canadian weather (35 city temperature + precipitation lines), Primary Biliary Cirrhosis (irregular longitudinal biomarkers), NBA shooting position density maps. All plotted as line trajectories.
 
-### A16. Functional Time Series
-**fdars modules:** `fts`
+scikit-fda paper uses: Canadian weather (smooth + classify), Berkeley growth curves, phoneme log-periodograms (classification). Datasets are also bundled in the package (fetch_weather, fetch_growth, fetch_phoneme equivalents).
 
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Forecasting functional time series" (FTSM) | Hyndman, R.J. & Shang, H.L. | 2009 | *J. Korean Statist. Soc.* 38(3): 199-211 | https://doi.org/10.1016/j.jkss.2009.06.002 |
-| "Dynamic functional principal components" (DPCA) | Hormann, S., Kidzinski, L. & Hallin, M. | 2015 | *JRSSB* 77(2): 319-348 | https://doi.org/10.1111/rssb.12076 |
+The FDApy pattern of **3 datasets × 1 primary figure each** is the minimum expected. A richer paper uses **3-4 datasets × 2 figure panels each** (raw + analyzed).
 
-**Callables covered:** `ftsm`, `ftsm_forecast`, `ftsm_forecast_multistep`, `ftsm_update`, `fplsr`, `functional_acf`, `functional_pacf`, `long_run_covariance`, `spectral_density`, `dpca`, `dpca_reconstruct`, `stationarity_test`, `functional_difference`
+### Recommended Case Studies for fdars
 
-**Notes:** FTSM (FPCA + Yule-Walker AR) is Hyndman & Shang (2009). DPCA is Hormann, Kidzinski & Hallin (2015). Functional PLS for FTS (`fplsr`) is described in Aue, Norinho & Hormann (2015) "On the prediction of stationary functional time series" *JASA* 110(509): 378-392. Long-run covariance estimation traces to Hormann & Kokoszka (2010) "Weakly dependent functional data" *Ann. Statist.* 38(3): 1845-1884. Stationarity test traces to Horvath, Kokoszka & Rice (2014) "Testing stationarity of functional time series" *J. Econometrics* 179: 66-82. Each sub-method needs a separate entry in the references JSON.
+The available `docs/data/` datasets and their natural case-study mappings:
 
----
+**Study 1: Smoothing + FPCA + Classification (phoneme.csv or growth.csv)**
 
-### A17. Shapelets
-**fdars modules:** `shapelet`
+- Dataset: `phoneme.csv` — log-periodograms of 5 phoneme classes; OR `growth.csv` — Berkeley growth curves (boys/girls)
+- Pipeline: smooth raw profiles → FPCA (show first 2 eigenfunctions) → classify with functional kNN or LDA
+- Figures: (a) raw trajectories colored by class, (b) first 2 eigenfunctions, (c) classification accuracy table
+- Why it works: demonstrates the most frequently cited FDA pipeline (smooth → reduce → classify); datasets are canonical in the FDA literature and appear in scikit-fda and FDApy papers as well
+- Code: ~15 lines using `fdars.smoothing.nadaraya_watson` + `fdars.regression.fpca` + `fdars.classification.fclassif_lda`
 
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Time series shapelets: a new primitive for data mining" | Ye, L. & Keogh, E. | 2009 | *KDD 2009*, pp. 947-956 | https://dl.acm.org/doi/10.1145/1557019.1557122 |
-| "Time series shapelets: a novel technique..." (journal version) | Ye, L. & Keogh, E. | 2011 | *Data Min. Knowl. Discov.* 22: 149-182 | https://doi.org/10.1007/s10618-010-0179-5 |
+**Study 2: Registration + Scalar-on-Function Regression (canadian_weather.csv or tecator.csv)**
 
-**Callables covered:** `discover_shapelets`, `shapelet_transform_fit`, `shapelet_transform`, `shapelet_classifier_fit`, `shapelet_distance`, `PyShapeletFit`, `PyShapeletClassifierFit`
+- Dataset preferred: `tecator.csv` — fat/moisture/protein content from NIR absorbance spectra; OR `canadian_weather.csv` — predict annual precipitation from temperature curves
+- Pipeline: (1) elastic registration to remove phase variation, (2) scalar-on-function FPC regression, (3) show regression coefficient function beta(t)
+- Figures: (a) unregistered vs registered absorbance curves, (b) regression coefficient function with CI
+- Why it works: showcases two key fdars capability clusters (alignment + regression) that scikit-fda does not cover together; tecator is the chemometrics community benchmark
+- Code: ~20 lines using `fdars.alignment.karcher_mean` + `fdars.regression.fregre_lm`
 
-**Notes:** Ye & Keogh (2009) is the original KDD conference paper; the 2011 journal version is the more complete reference. The shapelets approach for functional data classification is a direct application with no separate FDA-specific foundational paper. Information-gain quality criterion is from the same paper.
+**Study 3: Functional Time Series Forecasting (canadian_weather.csv precipitation)**
 
----
+- Dataset: `canadian_weather_precip.csv` — daily precipitation across 35 Canadian cities, multiple years
+- Pipeline: treat each city×year as a functional observation → FTSM model → 1-step-ahead forecast
+- Figures: (a) observed precipitation trajectories, (b) forecasted trajectories with uncertainty bands
+- Why it works: demonstrates fdars FTS capability which is absent from all Python FDA alternatives; connects to the Hyndman & Shang (2009) classic paper; uses the most famous FDA dataset
+- Code: ~15 lines using `fdars.fts.ftsm` + `fdars.fts.ftsm_forecast`
 
-### A18. Multivariate Functional Data & MFPCA
-**fdars modules:** `multi_fdata`, `spm` (mfpca, spe_multivariate), `famm`
+**Study 4 (Optional): sklearn Pipeline on wine.csv or sonar.csv**
 
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Multivariate functional principal component analysis for data observed on different (dimensional) domains" | Happ, C. & Greven, S. | 2018 | *JASA* 113(522): 649-659 | https://doi.org/10.1080/01621459.2016.1273115 |
+- Dataset: `wine.csv` (13 features, 3 classes) or `sonar.csv` (60 frequency features, 2 classes)
+- Pipeline: FPCATransformer → RandomForestClassifier (native sklearn estimator) via sklearn Pipeline
+- Figures: (a) cross-validation accuracy by number of FPCs, (b) Pipeline diagram (reference the docs SVG)
+- Why it works: demonstrates sklearn compatibility uniquely; none of the peer packages (FDApy, fdaM, PACE) have this; shows interop with native sklearn estimators
+- Code: ~10 lines using `fdars.sklearn.FPCATransformer` + sklearn `Pipeline` + `cross_val_score`
 
-**Callables covered:** `PyMultiFunData`, `multi_fdata_from_components`, `mfpca`, `spe_multivariate`, `dense_flmm`, `fast_fmm`, `multi_famm`
+### Conventions for the Reproducible Pipeline
 
-**Notes:** MFPCA is unambiguously Happ & Greven (2018). The Functional Linear Mixed Model (`dense_flmm`, `fast_fmm`, `multi_famm`) traces to Greven & Scheipl (2017) "A general framework for functional regression modelling" *Stat. Model.* 17(1-2): 1-35 and Scheipl, Staicu & Greven (2015) "Functional additive mixed models" *JCGS* 24(2): 477-501 (DOI: 10.1080/10618600.2014.901914). Multiple plausible attributions; flag for curator.
-
----
-
-### A19. Statistical Process Monitoring / SPM
-**fdars modules:** `spm`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Multivariate quality control" (Hotelling T-squared origin) | Hotelling, H. | 1947 | Chapter in *Techniques of Statistical Analysis* | (no DOI; historical) |
-| "Control procedures for residuals associated with principal component analysis" (T²/SPE pattern) | Jackson, J.E. & Mudholkar, G.S. | 1979 | *Technometrics* 21(3): 341-349 | https://doi.org/10.1080/00401706.1979.10489779 |
-
-**Callables covered:** `spm_phase1`, `spm_monitor`, `spm_ewma`, `spm_cusum`, `hotelling_t2`, `hotelling_t2_regularized`, `t2_control_limit`, `t2_limit_robust`, `t2_pc_contributions`, `t2_pc_significance`, `spe_control_limit`, `spe_limit_robust`, `spe_moment_match_diagnostic`, `arl0_t2`, `arl1_t2`, `arl0_spe`, `arl0_ewma_t2`, `select_ncomp`, `ewma_scores`, `nelson_rules`, `western_electric_rules`
-
-**ANTI-FEATURE NOTE:** Functional data SPM is an extension of classical multivariate SPC with no single canonical FDA-SPM paper. Curators should cite Jackson & Mudholkar (1979) as the T²/SPE root and note that the functional extension follows Colosimo & Pacella (2007) *Int. J. Prod. Res.* 45(23): 5563-5581 or Woodall et al. (2004) *J. Qual. Technol.* 36(3): 309-320. Forcing a single FDA citation would mislead.
-
----
-
-### A20. Conformal Prediction & Tolerance Bands
-**fdars modules:** `conformal`, `tolerance`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Conformal prediction: a gentle introduction" | Angelopoulos, A.N. & Bates, S. | 2023 | *Found. Trends Mach. Learn.* 16(4): 494-591 | https://doi.org/10.1561/2200000101 |
-
-**Callables covered:** `conformal_classif`, `conformal_fregre_lm`, `conformal_fregre_np`, `conformal_logistic`, `conformal_elastic_regression`, `conformal_elastic_pcr`, `conformal_elastic_logistic`, `fpca_tolerance_band`, `elastic_tolerance_band`, `elastic_tolerance_band_with_config`, `exponential_family_tolerance_band`, `phase_tolerance_band`, `conformal_prediction_band`, `equivalence_test`, `equivalence_test_one_sample`, `scb_mean_degras`
-
-**ANTI-FEATURE NOTE:** Conformal prediction for functional data is a 2020-present research frontier with no consensus single foundational FDA paper. The CP framework root is Vovk, Gammerman & Shafer (2005) book + Angelopoulos & Bates (2023) survey. Functional conformal prediction is described in Diquigiovanni, Fontana & Vantini (2022) "Conformal prediction bands for multivariate functional data" *J. Multivar. Anal.* 189: 104879 (DOI: 10.1016/j.jmva.2021.104879) — a plausible functional-specific reference, but the field remains active and contested.
-
----
-
-### A21. Simulation & GP Sampling
-**fdars modules:** `simulation`, `covariance`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| *Functional Data Analysis* (2nd ed.) — simulation / Karhunen-Loeve chapters | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
-| *Gaussian Processes for Machine Learning* (kernel definitions) | Rasmussen, C.E. & Williams, C.K.I. | 2006 | MIT Press (book) | https://gaussianprocess.org/gpml/ |
-
-**Callables covered:** `sim_kl`, `simulate`, `eigenfunctions`, `eigenvalues`, `covariance_matrix`, `gaussian_process`, `add_error_curve`, `add_error_pointwise`, `kernel_gaussian`, `kernel_exponential`, `kernel_brownian`, `kernel_matern`, `kernel_periodic`, `kernel_linear`, `kernel_polynomial`, `kernel_whitenoise`, `kernel_add`, `kernel_mult`, `make_gaussian_process`, `r_brownian`, `r_bridge`, `r_ou`
-
----
-
-### A22. Seasonality & Period Detection
-**fdars modules:** `seasonal`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "STL: A seasonal-trend decomposition procedure based on loess" | Cleveland, R.B., Cleveland, W.S., McRae, J.E. & Terpenning, I. | 1990 | *J. Official Statist.* 6(1): 3-73 | https://www.scb.se/contentassets/ca21efb41fee47d293bbee5bf7be7fb3/stl-a-seasonal-trend-decomposition-procedure-based-on-loess.pdf |
-
-**Callables covered:** `stl_decompose`, `autoperiod`, `cfd_autoperiod`, `estimate_period_acf`, `estimate_period_fft`, `instantaneous_period`, `sazed`, `lomb_scargle_fdata`, `matrix_profile_fdata`, `detect_peaks`, `detect_seasonality_changes`, `detect_multiple_periods`, `seasonal_strength`, `seasonal_strength_wavelet`, `seasonal_strength_windowed`, `classify_seasonality`, `ssa_fdata`, `analyze_peak_timing`
-
-**ANTI-FEATURE NOTE:** The `seasonal` module is the most heterogeneous in provenance. Each sub-method has its own root paper from distinct research communities: STL (Cleveland et al. 1990), Lomb-Scargle periodogram (Lomb 1976; Scargle 1982), SSA (Broomhead & King 1986), Matrix Profile (Yeh et al. 2016 ICDM), SAZED (Talagala et al. 2021). A single root citation for this module does not exist. Curators must list sub-method-level citations.
-
----
-
-### A23. Scoring Metrics
-**fdars modules:** `scoring`, `metrics`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| *Functional Data Analysis* (2nd ed.) — regression evaluation | Ramsay, J.O. & Silverman, B.W. | 2005 | Springer (book) | https://doi.org/10.1007/b98888 |
-
-**Callables covered:** `functional_mae`, `functional_mse`, `functional_mape`, `functional_msle`, `functional_explained_variance`, `pred_mae`, `pred_mse`, `pred_rmse`, `pred_r2`, `prediction_metrics`
-
-**ANTI-FEATURE NOTE:** These are standard scalar metrics integrated over the domain. No FDA-specific founding paper exists. Forcing a single citation would be an overreach. The appropriate note for these callables is "domain-integrated extensions of standard prediction metrics; see standard ML/statistics references (e.g., Hastie, Tibshirani & Friedman 2009)."
-
----
-
-### A24. Explainability / XAI
-**fdars modules:** `explain`
-
-| Paper | Authors | Year | Venue | DOI / URL |
-|-------|---------|------|-------|-----------|
-| "Why should I trust you? Explaining the predictions of any classifier" (LIME) | Ribeiro, M.T., Singh, S. & Guestrin, C. | 2016 | *KDD 2016* | https://dl.acm.org/doi/10.1145/2939672.2939778 |
-| "A unified approach to interpreting model predictions" (SHAP) | Lundberg, S.M. & Lee, S.-I. | 2017 | *NeurIPS 2017* | https://proceedings.neurips.cc/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html |
-| "Anchors: High-precision model-agnostic explanations" | Ribeiro, M.T., Singh, S. & Guestrin, C. | 2018 | *AAAI 2018* | https://ojs.aaai.org/index.php/AAAI/article/view/11491 |
-
-**Callables covered:** All `explain.*` callables
-
-**ANTI-FEATURE NOTE:** The `explain` module applies standard ML XAI techniques (LIME, SHAP, Anchors, ALE, PDP, permutation importance) to functional regression/classification models via FPC scores. Root papers are ML-community XAI papers listed above, not FDA-specific. No dedicated FDA-XAI foundational paper exists. Forcing FDA-specific citations would mislead.
-
----
-
-## Part B — Cross-Language Implementation Landscape
-
-### B1. R Implementation Landscape
-
-| fdars Family | R Package | Representative Function | CRAN / URL | Gap? |
-|---|---|---|---|---|
-| Basis expansion & smoothing | `fda` (Ramsay) | `create.bspline.basis`, `smooth.basis` | https://cran.r-project.org/package=fda | No gap |
-| Basis expansion & smoothing | `refund` | `pfr`, `pffr` | https://cran.r-project.org/package=refund | No gap |
-| Functional statistics (mean/var/cov) | `fda` | `mean.fd`, `var.fd` | https://cran.r-project.org/package=fda | No gap |
-| Functional statistics | `fda.usc` | `func.mean`, `func.var` | https://cran.r-project.org/package=fda.usc | No gap |
-| FM depth | `fda.usc` | `depth.FM` | https://cran.r-project.org/package=fda.usc | No gap |
-| Band depth / modified band depth | `fda.usc` | `depth.mode`, `depth.BD` | https://cran.r-project.org/package=fda.usc | No gap |
-| Functional depth (unified) | `ddalpha` | `depthf.FM1`, `depthf.BD` | https://cran.r-project.org/package=ddalpha | No gap |
-| Functional boxplot | `fdaoutlier` | `functional_boxplot` | https://cran.r-project.org/package=fdaoutlier | No gap |
-| Outlier detection (MS-plot, MUOD, TVDMSS) | `fdaoutlier` | `msplot`, `muod`, `tvdmss`, `dir_out` | https://cran.r-project.org/package=fdaoutlier | No gap |
-| FPCA (dense) | `fda` | `pca.fd` | https://cran.r-project.org/package=fda | No gap |
-| PACE FPCA (sparse) | `fdapace` | `FPCA` | https://cran.r-project.org/package=fdapace | No gap |
-| Kernel smoothing | `fda.usc` | `optim.np`, `fdata.comp` | https://cran.r-project.org/package=fda.usc | No gap |
-| Scalar-on-function regression | `refund` | `pfr` | https://cran.r-project.org/package=refund | No gap |
-| Scalar-on-function regression | `fda.usc` | `fregre.np`, `fregre.lm` | https://cran.r-project.org/package=fda.usc | No gap |
-| Functional GLM | `refund` | `pfr` (with family arg) | https://cran.r-project.org/package=refund | No gap |
-| Concurrent regression | `refund` | `ccb`, `peer` | https://cran.r-project.org/package=refund | No gap |
-| Function-on-function regression | `refund` | `pffr` | https://cran.r-project.org/package=refund | No gap |
-| Function-on-scalar regression | `refund` | `fosr` | https://cran.r-project.org/package=refund | No gap |
-| Elastic / SRSF registration | `fdasrvf` | `time_warping`, `elastic.regression` | https://cran.r-project.org/package=fdasrvf | No gap |
-| Shift / landmark registration | `fda` | `register.fd` | https://cran.r-project.org/package=fda | No gap |
-| DTW metrics | `dtw` | `dtw` | https://cran.r-project.org/package=dtw | No gap |
-| GAK metric | `dtwclust` | `GAK` | https://cran.r-project.org/package=dtwclust | No gap |
-| k-means clustering (functional) | `fda.usc` | `kmeans.fd` | https://cran.r-project.org/package=fda.usc | No gap |
-| FunFEM clustering | `funFEM` | `funFEM` | https://cran.r-project.org/package=funFEM | No gap |
-| MFPCA | `MFPCA` | `MFPCA` | https://cran.r-project.org/package=MFPCA | No gap |
-| Multi-domain data container | `funData` | `funData`, `multiFunData` | https://cran.r-project.org/package=funData | No gap |
-| Functional inference (perm tests) | `fda.usc` | `fanova.onefactor` | https://cran.r-project.org/package=fda.usc | No gap |
-| ITP interval testing | `fdatest` (GitHub only) | `IWT1`, `IWT2`, `IWTlm` | https://github.com/alessiapini/fdatest | GAP: not on CRAN |
-| Functional time series (FTSM) | `ftsa` | `fts`, `ftsm`, `forecast.fts` | https://cran.r-project.org/package=ftsa | No gap |
-| DPCA | `freqdom.fda` | `fts.dpca`, `fts.spectral.density` | https://cran.r-project.org/package=freqdom.fda | No gap |
-| Frechet regression | NO standard R package | — | — | GAP: research code only |
-| Density FDA (LQD/Wasserstein) | NO CRAN package | — | — | GAP: `fdadensity` on GitHub only |
-| Shapelets | NO R package | — | — | GAP: no CRAN or major R shapelets package |
-| Functional SPM | NO dedicated R package | — | — | GAP: `fda.usc` has partial SPC; no dedicated FDA-SPM package |
-| Conformal prediction (functional) | `conformalInference.fd` (GitHub) | `conformal.fd` | https://github.com/Paolo-Bosc/conformalInference.fd | GAP: not on CRAN |
-| XAI for functional models | NO FDA-specific R package | — | — | GAP: general `DALEX`, `iml` exist but not FDA-aware |
-| Elastic classification | `fdasrvf` | `elastic.logistic`, `elastic.mlogistic` | https://cran.r-project.org/package=fdasrvf | No gap |
-
----
-
-### B2. Python Implementation Landscape
-
-| fdars Family | Python Package | Representative Function/Class | PyPI / URL | Gap? |
-|---|---|---|---|---|
-| Basis expansion & smoothing | `scikit-fda` | `BSplineBasis`, `FourierBasis`, `BasisSmoother` | https://pypi.org/project/scikit-fda/ | No gap |
-| Functional statistics | `scikit-fda` | `FDataGrid.mean()`, `.var()`, `.cov()` | https://fda.readthedocs.io | No gap |
-| FM depth / band depth | `scikit-fda` | `fraiman_muniz_depth`, `band_depth`, `modified_band_depth` | https://fda.readthedocs.io | No gap |
-| Functional boxplot | `scikit-fda` | `FunctionalBoxplot` | https://fda.readthedocs.io | No gap |
-| FPCA (dense) | `scikit-fda` | `FPCA` | https://fda.readthedocs.io | No gap |
-| PACE FPCA (sparse) | NO mature Python package | — | — | GAP: `scikit-fda` has partial support; no PACE BLUP scoring |
-| Kernel smoothing | `scikit-fda` | `KernelSmoother` | https://fda.readthedocs.io | No gap |
-| Scalar-on-function regression | `scikit-fda` | `LinearFunctionalRegression` | https://fda.readthedocs.io | No gap |
-| Functional GLM (logistic) | `scikit-fda` | partial via `LinearFunctionalRegression` | https://fda.readthedocs.io | Partial gap: no standalone functional GLM family dispatch |
-| Elastic / SRSF registration | `fdasrsf` | `time_warping`, `elastic_regression` | https://pypi.org/project/fdasrsf/ | No gap |
-| Elastic / SRSF registration | `scikit-fda` | `ElasticRegistration` | https://fda.readthedocs.io | No gap (second option) |
-| DTW metrics | `tslearn` | `dtw`, `dtw_path` | https://pypi.org/project/tslearn/ | No gap |
-| GAK metric | `tslearn` | `GlobalAlignmentKernel` | https://pypi.org/project/tslearn/ | No gap |
-| Soft-DTW | `tslearn` | `SoftDTW` | https://pypi.org/project/tslearn/ | No gap |
-| k-means clustering (functional) | `scikit-fda` | `FuzzyKMeans`, `KMeans` | https://fda.readthedocs.io | No gap |
-| FunFEM clustering | NO Python package | — | — | GAP: no Python port |
-| MFPCA | NO mature Python package | — | — | GAP: scikit-fda lacks multi-domain MFPCA |
-| Functional inference (perm tests) | `scikit-fda` | `hotelling_t2` (partial) | https://fda.readthedocs.io | Partial gap |
-| ITP interval testing | NO Python package | — | — | GAP: R-only |
-| Functional time series | NO dedicated Python package | — | — | GAP: `statsmodels` handles scalar TS; no functional TS |
-| Frechet regression | NO Python package | — | — | GAP: research code only |
-| Density FDA (LQD/Wasserstein) | `POT` (partial) | `ot.barycenter_sinkhorn` | https://pypi.org/project/POT/ | Partial gap: Wasserstein barycenter only; not LQD-framed |
-| Shapelets | `tslearn` | `ShapeletModel` | https://pypi.org/project/tslearn/ | No gap |
-| Shapelets | `sktime` | `ShapeletTransformClassifier` | https://pypi.org/project/sktime/ | No gap (second option) |
-| Functional SPM | NO FDA-specific Python package | — | — | GAP: no functional SPC Python package |
-| Conformal prediction | `MAPIE` (general) | `MapieRegressor` | https://pypi.org/project/mapie/ | Partial gap: general CP, not FDA-specific |
-| XAI for functional models | `shap`, `lime` | standard APIs | https://pypi.org/project/shap/ | Partial gap: not FDA-aware |
-| Outlier detection | `scikit-fda` | `OutliergramOutlierDetector`, `FunctionalBoxplotOutlierDetector` | https://fda.readthedocs.io | No gap for common methods |
-
----
-
-### B3. Matlab Implementation Landscape
-
-| fdars Family | Matlab Toolbox | Representative Function | URL | Gap? |
-|---|---|---|---|---|
-| Basis expansion & smoothing | `fdaM` (Ramsay) | `create_bspline_basis`, `smooth_basis` | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
-| Functional statistics | `fdaM` | `mean_fd`, `var_fd` | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
-| FPCA (dense) | `fdaM` | `pca_fd` | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
-| PACE FPCA (sparse) | `PACE` (UC Davis) | `FPCA` | https://anson.ucdavis.edu/~mueller/data/pace.html | No gap |
-| Kernel smoothing | `fdaM` | `smooth_basis`, kernel functions | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
-| Scalar-on-function regression | `fdaM` | `fRegress` | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
-| Concurrent regression | `fdaM` | `fRegress` (pointwise basis) | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
-| Elastic / SRSF registration | `fdasrvf_MATLAB` | `time_warping`, `ElasticFunctionData` | https://github.com/jdtuck/fdasrvf_MATLAB | No gap |
-| Shift / landmark registration | `fdaM` | `register_fd` | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/ | No gap |
-| Functional depth | NO dedicated Matlab toolbox | — | — | GAP: depth functions scattered across paper-specific research code |
-| Functional boxplot | `PACE` (partial) | trajectory boxplot | https://anson.ucdavis.edu/~mueller/data/pace.html | Partial gap |
-| Outlier detection | NO Matlab toolbox | — | — | GAP: no equivalent to fdaoutlier |
-| k-means clustering | NO dedicated Matlab FDA package | — | — | GAP: custom code in papers |
-| FunFEM clustering | NO Matlab implementation | — | — | GAP |
-| MFPCA | NO Matlab toolbox | — | — | GAP: research code only |
-| ITP interval testing | NO Matlab toolbox | — | — | GAP: R-only |
-| Functional time series | NO dedicated Matlab toolbox | — | — | GAP: PACE has trajectory tools; no FTSM/DPCA |
-| Frechet regression | NO Matlab toolbox | — | — | GAP |
-| Density FDA (LQD) | NO Matlab toolbox | — | — | GAP |
-| Shapelets | NO FDA Matlab toolbox | — | — | GAP |
-| Functional SPM | Statistics and ML Toolbox | `hotelling` | https://www.mathworks.com/products/statistics.html | Partial gap: classical Hotelling T2; no functional version |
-| Conformal prediction | NO Matlab toolbox | — | — | GAP |
-
----
-
-## Feature Landscape (Per Milestone Taxonomy)
-
-### Table Stakes
-Families with a clear single root paper and obvious R + Matlab equivalents. Curation is straightforward; attribution is uncontested.
-
-| Family | fdars Module | Root Paper | R Pkg | Python Pkg | Matlab Pkg |
-|--------|-------------|------------|-------|------------|------------|
-| B-spline / Fourier basis | `basis` | Ramsay & Silverman (2005) | `fda` | `scikit-fda` | `fdaM` |
-| Penalized smoothing (GCV/AIC) | `smoothing` | Ramsay & Silverman (2005) | `fda`, `refund` | `scikit-fda` | `fdaM` |
-| Functional mean / var / cov | `fdata` | Ramsay & Silverman (2005) | `fda`, `fda.usc` | `scikit-fda` | `fdaM` |
-| FM depth | `depth.fraiman_muniz_*` | Fraiman & Muniz (2001) | `fda.usc::depth.FM` | `scikit-fda` | GAP |
-| Band depth / modified band | `depth.band_1d`, `modified_band_1d` | Lopez-Pintado & Romo (2009) | `fda.usc`, `fdaoutlier` | `scikit-fda` | GAP |
-| Functional boxplot | `depth.functional_boxplot` | Sun & Genton (2011) | `fdaoutlier` | `scikit-fda` | `PACE` (partial) |
-| FPCA (dense) | `regression.fpca` | Ramsay & Silverman (2005) | `fda`, `fdapace` | `scikit-fda` | `fdaM`, `PACE` |
-| PACE FPCA (sparse) | `pace_fpca` | Yao, Muller & Wang (2005) | `fdapace` | GAP | `PACE` |
-| Scalar-on-function FPC regression | `regression.fregre_lm` | Cardot et al. (1999/2003) | `refund`, `fda.usc` | `scikit-fda` | `fdaM` |
-| Elastic / SRSF registration | `alignment` (elastic_*) | Srivastava et al. (2011) | `fdasrvf` | `fdasrsf` | `fdasrvf_MATLAB` |
-| GAK metric | `metric.gak*` | Cuturi (2011) | `dtwclust::GAK` | `tslearn` | GAP |
-| DTW metric | `metric.dtw_*` | Sakoe & Chiba (1978) | `dtw` | `tslearn` | GAP |
-| Functional ANOVA (permutation) | `inference`, `regression.fanova` | Cuevas et al. (2004) | `fda.usc` | `scikit-fda` (partial) | GAP |
-| Simultaneous confidence bands | `inference.mean_scb` | Degras (2011) | `fda` (partial) | GAP | GAP |
-| Functional time series (FTSM) | `fts.ftsm*` | Hyndman & Shang (2009) | `ftsa` | GAP | GAP |
-| DPCA | `fts.dpca` | Hormann et al. (2015) | `freqdom.fda` | GAP | GAP |
-| Shapelets | `shapelet` | Ye & Keogh (2009) | GAP | `tslearn`, `sktime` | GAP |
-| Multi-domain MFPCA | `spm.mfpca`, `multi_fdata` | Happ & Greven (2018) | `MFPCA`, `funData` | GAP | GAP |
-
-### Differentiators
-Families where fdars' provenance documentation is more valuable because implementations are scattered, new, or cross-language gaps exist.
-
-| Family | fdars Module | Root Paper | Why Differentiating |
-|--------|-------------|------------|---------------------|
-| Frechet regression on metric spaces | `frechet` | Petersen & Muller (2019) | No CRAN, no PyPI, no Matlab toolbox. Research code only. fdars is a notable implementation. |
-| Density FDA (LQD/Wasserstein) | `density_fda` | Petersen & Muller (2016) | No CRAN/PyPI package with LQD framing; `POT` Python covers Wasserstein barycenter only. |
-| ITP interval-wise testing | `inference.itp_*` | Pini & Vantini (2017) | Only in unmaintained GitHub R package (`fdatest`); no Python or Matlab. |
-| FunFEM clustering | `clustering.funfem_cluster` | Bouveyron et al. (2015) | R `funFEM` CRAN exists; no Python or Matlab port. |
-| Functional time series (full: ACF/PACF, long-run cov, DPCA) | `fts` | Hormann et al. (2015); Hyndman & Shang (2009) | R has `ftsa` + `freqdom.fda`; Python has nothing dedicated; Matlab gap. |
-| MUOD / TVDMSS / depthgram / sequential outlier | `outliers` | Dai & Genton (2018/2019) etc. | R `fdaoutlier` covers these; Python and Matlab lack equivalents. |
-| Functional XAI (LIME/SHAP applied to FDA models) | `explain` | Ribeiro et al. (2016); Lundberg & Lee (2017) | No R/Python/Matlab package applies XAI specifically to functional regression/classification models. |
-| Conformal prediction for functional data | `conformal`, `tolerance` | Angelopoulos & Bates (2023) | Only an unmaintained GitHub R package; no Python or Matlab. |
-| Functional SPM (T2/SPE on FPC scores) | `spm` | Jackson & Mudholkar (1979) extended to FDA | No dedicated functional SPC package in any language. |
-| Soft-DTW | `metric.soft_dtw_*` | Cuturi & Blondel (2017) | Python `tslearn` has it; no R CRAN package; no Matlab. |
-| Elastic multinomial classification | `classification.elastic_multinomial` | Tucker et al. (2013) | `fdasrvf` R covers this; no Python sklearn-compatible version. |
-| Bayesian alignment | `alignment.bayesian_align_pair` | Cheng et al. (2016) | Research code only; no standard package in any language. |
-| PACE FPCA in Python | `pace_fpca` | Yao et al. (2005) | R `fdapace` and Matlab `PACE` exist; no mature Python equivalent. |
-
-### Anti-Features (Do Not Force a Single Citation)
-Families where assigning a single foundational paper would be misleading or inaccurate.
-
-| Family | fdars Module | Why Ambiguous / Anti-Feature |
-|--------|-------------|------------------------------|
-| Functional depth (as a category) | `depth` | At least 7 distinct root papers across methods. The `functional_depth` dispatcher unifies them; no single citation fits the module. |
-| Scoring metrics (MAE/MSE/MAPE etc.) | `scoring`, `metrics` | Standard scalar metrics integrated over domain. No FDA-specific founding paper. |
-| Functional SPM | `spm` | T2/SPE traces to Hotelling (1947) and Jackson & Mudholkar (1979); functional extension is spread across applied papers without a single canonical FDA-SPM paper. |
-| Seasonal decomposition | `seasonal` | Each sub-method has its own root paper from distinct research communities (STL, Lomb-Scargle, SSA, Matrix Profile, SAZED). |
-| XAI for functional models | `explain` | Root papers are ML-community XAI papers (LIME, SHAP, Anchors). No canonical FDA-XAI paper exists. |
-| Conformal prediction | `conformal`, `tolerance` | Active 2020-present research frontier; no single paper has achieved consensus for functional data. |
+- All case-study figures must be generated by `paper/code/` and committed to `paper/figures/`
+- Use `numpy.random.seed(42)` or Rust seeded methods for determinism
+- No network access at figure-generation time (offline gate)
+- Each case study should produce ≤ 2 figures with meaningful axis labels
+- Figure resolution: 150 dpi minimum for arXiv (PDF vector preferred via matplotlib savefig PDF)
+- Figure size: 3.5 inches wide (single column) or 7 inches wide (double column) for arXiv preprint
 
 ---
 
 ## Feature Dependencies
 
 ```
-Paper-level curation (REFERENCES_MAP JSON)
-    requires ---> Callable-to-paper index (callable_refs field in JSON)
-                      requires ---> Part A per-family tables (this document)
+Section skeleton (§) depends on:
+  §5 Data Representation → must show Fdata and IrregFdata APIs correctly
+  §6 Capability Tour → each snippet must execute against current fdars (CI gate)
+  §7 Comparison Table → peer coverage facts need spot-check verification
+  §8 Case Studies → figures must come from paper/code/ reproducible pipeline
 
-Cross-language implementation pointers (Part B)
-    enhances ---> Skill hybrid-protocol answers ("alternatives in R/Matlab?")
+Comparison table depends on:
+  _capability_map.json → fdars column is grounded HERE; do not hand-derive
+  Peer coverage spot-check → phase deliverable; MEDIUM confidence until done
 
-fdars_method_references MCP tool
-    requires ---> REFERENCES_MAP JSON (static, via importlib.resources)
-    provides ---> curated entry OR explicit "ungrounded, flag it" signal
+Case studies depend on:
+  docs/data/ datasets (existing, no new downloads needed)
+  fdars installed in the paper/code/ Python environment
 
-fdars-capabilities skill extension
-    extends ---> v12.0 capability-discovery skill
-    uses ---> MCP tool as grounded source
-    falls back to ---> LLM synthesis FLAGGED as ungrounded
+refs.bib depends on:
+  python/fdars/_references_map.json (57 papers from v13.0)
+  LaTeX formatting pass to convert JSON to BibTeX
 ```
 
 ### Dependency Notes
 
-- **Paper-level JSON requires this document:** The Part A tables are the direct authoring source for the `_references_map.json` file to be created in v13.0. Each family section maps to one or more top-level entries in that JSON.
-- **Anti-feature families require explicit ungrounded signal:** For families marked anti-feature above (seasonal, scoring, SPM, XAI), the MCP tool should return an explicit "no single curated entry — ungrounded synthesis permitted, flag it" signal rather than a forced single paper.
-- **Multi-paper families require method-keyed entries:** The `depth`, `alignment`, `regression`, and `fts` modules each require multiple JSON entries, keyed by the specific method or callable group, not at the module level.
+- **Comparison table column for fdars is authoritative from _capability_map.json:** The live 437-callable map is the ground truth; do not re-derive capability counts manually. Pull them at LaTeX generation time.
+- **Peer coverage is MEDIUM confidence until verified:** The table above is research-quality but should be spot-checked against current package versions before paper submission. Assign a verification sub-task.
+- **Case study code must execute against current fdars API:** The reproducible pipeline gate enforces this. A snippet that fails the pipeline must be fixed before the phase closes.
+- **FTS case study (§8.3) requires canadian_weather_precip.csv as a time-series of curves:** Verify the dataset structure supports multiple-year slicing before writing the phase plan.
 
 ---
 
 ## MVP Definition
 
-### Phase 1: Core reference map (essential for roadmap)
-- Cover all 24 families (A1-A24) with at least one curated paper entry per family
-- Priority: A1-A18 (non-seasonal, non-conformal) have HIGH curation confidence
-- Callable-to-paper index covering the ~300 non-XAI/non-SPM callables
+### Phase A: Manuscript Scaffold
 
-### Phase 2: MCP tool + skill extension
-- `fdars_method_references(method)` LLM-free static lookup via `importlib.resources`
-- `fdars-capabilities` skill extended with hybrid protocol (curated first, flagged-LLM fallback)
+Write §§1-4 (abstract placeholder, intro, FDA background, architecture). These sections depend on no experimental results and can be written first.
 
-### Phase 3: Docs surface
-- References page on the MkDocs site
-- Per-method "References" blocks on method pages
-- `llms.txt` extended with provenance data
+- [ ] §2 Introduction with explicit Python FDA gap argument
+- [ ] §3 FDA background (≤ 300 words, Karhunen-Loève equation, ≤ 3 key references)
+- [ ] §4 Architecture (module-map table from _capability_map.json, layer diagram figure)
 
-### Defer
-- DOI network validation (offline JSON sufficient for v13.0 gate)
-- Automated citation count or impact factor scraping
-- Full XAI `explain` module citation coverage (anti-feature risk; low demand)
+### Phase B: Capability Tour + Comparison Table
+
+- [ ] §6 Capability tour with runnable snippets (one per subsection from §6.1-§6.12)
+- [ ] §7 Comparison table (formal LaTeX table using the row/column design above)
+
+### Phase C: Case Studies + Figures
+
+- [ ] §8.1-§8.3 case studies written with figures from reproducible pipeline
+- [ ] paper/figures/ committed with deterministic output
+
+### Phase D: Close + Polish
+
+- [ ] §1 Abstract (write last when everything is stable)
+- [ ] §5 Data Representation (short section, write during Phase B alongside capability tour)
+- [ ] §9 Availability
+- [ ] §10 Conclusion
+- [ ] refs.bib generated from _references_map.json
+- [ ] CITATION.cff authored
+- [ ] PDF compile via CI tectonic (no local TeX needed)
+- [ ] Human manuscript read-through approved
 
 ---
 
 ## Sources
 
-- [Ramsay & Silverman (2005) Springer](https://link.springer.com/book/10.1007/b98888)
-- [Ramsay, Hooker & Graves (2009) Springer](https://link.springer.com/book/10.1007/978-0-387-98185-7)
-- [Fraiman & Muniz (2001) TEST](https://link.springer.com/article/10.1007/BF02595706)
-- [Lopez-Pintado & Romo (2009) JASA](https://doi.org/10.1198/jasa.2009.0015)
-- [Lopez-Pintado & Romo (2011) CSDA](https://doi.org/10.1016/j.csda.2010.10.029)
-- [Nieto-Reyes & Battey (2016) Statist. Sci.](https://doi.org/10.1214/15-STS532)
-- [Yao, Muller & Wang (2005) JASA](https://www.tandfonline.com/doi/abs/10.1198/016214504000001745)
-- [Srivastava et al. (2011) arXiv](https://arxiv.org/abs/1103.3817)
-- [Srivastava & Klassen (2016) Springer book](https://doi.org/10.1007/978-1-4939-4020-2)
-- [Marron et al. (2015) Statist. Sci.](https://doi.org/10.1214/15-STS524)
-- [Petersen & Muller (2019) Ann. Statist.](https://doi.org/10.1214/17-AOS1624)
-- [Petersen & Muller (2016) Ann. Statist. LQD](https://doi.org/10.1214/15-AOS1363)
-- [Hyndman & Shang (2009) J. Korean Statist. Soc.](https://doi.org/10.1016/j.jkss.2009.06.002)
-- [Hormann, Kidzinski & Hallin (2015) JRSSB](https://doi.org/10.1111/rssb.12076)
-- [Cuturi (2011) ICML](https://dl.acm.org/doi/10.5555/3104482.3104599)
-- [Cuturi & Blondel (2017) ICML](https://proceedings.mlr.press/v70/cuturi17a.html)
-- [Sakoe & Chiba (1978) IEEE Trans. Acoust.](https://doi.org/10.1109/TASSP.1978.1163055)
-- [Ye & Keogh (2009) KDD](https://dl.acm.org/doi/10.1145/1557019.1557122)
-- [Ye & Keogh (2011) DMKD](https://doi.org/10.1007/s10618-010-0179-5)
-- [Bouveyron & Jacques (2011) ADAC](https://doi.org/10.1007/s11634-011-0095-6)
-- [Bouveyron, Come & Jacques (2015) Ann. Appl. Stat.](https://doi.org/10.1214/15-AOAS861)
-- [Happ & Greven (2018) JASA](https://doi.org/10.1080/01621459.2016.1273115)
-- [Sun & Genton (2011) JCGS](https://doi.org/10.1198/jcgs.2011.09224)
-- [Dai & Genton (2018) JCGS](https://doi.org/10.1080/10618600.2018.1473781)
-- [Dai & Genton (2019) CSDA](https://doi.org/10.1016/j.csda.2018.03.017)
-- [Pini & Vantini (2017) J. Nonparam. Stat.](https://doi.org/10.1080/10485252.2017.1306627)
-- [Degras (2011) Statistica Sinica](https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N412.html)
-- [Cuevas, Febrero & Fraiman (2004) CSDA](https://doi.org/10.1016/j.csda.2003.10.021)
-- [Jackson & Mudholkar (1979) Technometrics](https://doi.org/10.1080/00401706.1979.10489779)
-- [Cardot, Ferraty & Sarda (1999) Statist. Probab. Lett.](https://doi.org/10.1016/S0167-7152(99)00036-X)
-- [Muller & Yao (2008) JASA](https://doi.org/10.1198/016214508000000516)
-- [Tucker, Wu & Srivastava (2013) EJS](https://doi.org/10.1214/13-EJS816)
-- [Chiou & Li (2007) JRSSB](https://doi.org/10.1111/j.1467-9868.2007.00605.x)
-- [Angelopoulos & Bates (2023) Found. Trends](https://doi.org/10.1561/2200000101)
-- [scikit-fda documentation](https://fda.readthedocs.io/)
-- [R fda CRAN](https://cran.r-project.org/package=fda)
-- [R fda.usc CRAN](https://cran.r-project.org/package=fda.usc)
-- [R refund CRAN](https://cran.r-project.org/package=refund)
-- [R fdapace CRAN](https://cran.r-project.org/package=fdapace)
-- [R fdasrvf CRAN](https://cran.r-project.org/package=fdasrvf)
-- [R fdaoutlier CRAN](https://cran.r-project.org/package=fdaoutlier)
-- [R MFPCA CRAN](https://cran.r-project.org/package=MFPCA)
-- [R funFEM CRAN](https://cran.r-project.org/package=funFEM)
-- [R ftsa CRAN](https://cran.r-project.org/package=ftsa)
-- [R freqdom.fda CRAN](https://cran.r-project.org/package=freqdom.fda)
-- [fdasrsf Python PyPI](https://pypi.org/project/fdasrsf)
-- [fdasrvf Matlab GitHub](https://github.com/jdtuck/fdasrvf_MATLAB)
-- [fdaM Matlab McGill](https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/)
-- [PACE Matlab UC Davis](https://anson.ucdavis.edu/~mueller/data/pace.html)
+- [FDApy arXiv 2101.11003v2 HTML](https://arxiv.org/html/2101.11003v2)
+- [FDApy JOSS 10.21105/joss.07526](https://joss.theoj.org/papers/10.21105/joss.07526)
+- [scikit-fda JSS v109i02](https://www.jstatsoft.org/article/view/v109i02)
+- [scikit-fda arXiv 2211.02566](https://arxiv.org/abs/2211.02566)
+- [JOSS Paper Format official docs](https://joss.readthedocs.io/en/latest/paper.html)
+- [roahd R Journal 2019](https://journal.r-project.org/articles/RJ-2019-032/)
+- [fda.usc JSS v051i04](https://www.jstatsoft.org/article/view/v051i04)
+- [refund GitHub](https://github.com/refunders/refund)
+- [PACE Matlab UC Davis description](https://www.stat.ucdavis.edu/PACE/description.html)
 - [CRAN Task View Functional Data Analysis](https://cran.r-project.org/view=FunctionalData)
+- [Gertheiss et al. (2024) FDA review arXiv 2312.05523](https://arxiv.org/abs/2312.05523)
+- [fdars _capability_map.json — 437 callables, 31 modules](file:///home/simonm/projects/rust/pyfda/python/fdars/_capability_map.json)
+- [sktime NeurIPS 2019 paper](http://learningsys.org/neurips19/assets/papers/sktime_ml_systems_neurips2019.pdf)
+- [tslearn JMLR 2020](https://www.jmlr.org/papers/v21/20-091.html)
 
 ---
 
-*Feature research for: v13.0 Scientific Provenance & Cross-Language Implementations (fdars)*
-*Researched: 2026-09-07*
+*Feature research for: v14.0 fdars Software Paper — arXiv Preprint*
+*Researched: 2026-09-08*
