@@ -1,0 +1,51 @@
+name: Paper
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "paper/**"
+      - "python/fdars/_capability_map.json"
+      - "python/fdars/_references_map.json"
+      - "docs/data/**"
+  pull_request:
+    paths:
+      - "paper/**"
+      - "python/fdars/_capability_map.json"
+      - "python/fdars/_references_map.json"
+      - "docs/data/**"
+
+jobs:
+  paper:
+    name: Paper pipeline + PDF compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: pip install matplotlib numpy
+
+      - name: Regenerate figures (PIPE-02 determinism gate)
+        env:
+          PYTHONPATH: scripts:paper/code
+        run: python paper/code/gen_figures.py
+
+      - name: Assert coverage macros (PIPE-03 drift gate)
+        run: python paper/code/assert_coverage.py --check
+
+      - name: Regenerate refs.bib (PIPE-04)
+        run: python paper/code/gen_refs_bib.py
+
+      - name: Setup tectonic
+        uses: wtfjoke/setup-tectonic@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile PDF (GATE-01)
+        env:
+          SOURCE_DATE_EPOCH: "0"
+        run: tectonic paper/paper.tex
