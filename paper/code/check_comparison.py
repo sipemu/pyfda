@@ -110,7 +110,7 @@ def _norm(s: str) -> str:
         Normalized label suitable for equality comparison.
     """
     t = s.strip()
-    t = t.replace(r"\&", "&").replace("\\&", "&")
+    t = t.replace(r"\&", "&")
     # Remove LaTeX accent macros: \'{X}, \`{X}, \"{X}, \^{X}, \~{X}, \={X}
     t = re.sub(r"\\[`'^\"~=]?\{([a-zA-Z])\}", r"\1", t)
     # Also handle non-braced forms: \'e → e
