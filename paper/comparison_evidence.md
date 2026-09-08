@@ -212,7 +212,7 @@
 | FPCA / covariance / PACE sparse FPCA | partial | funData works with companion MFPCA package (separate package); not built-in | https://cran.r-project.org/web/packages/funData/index.html |
 | Clustering | — | Not a feature of funData or tidyfun | https://cran.r-project.org/web/views/FunctionalData.html |
 | Classification | — | Not a feature | https://cran.r-project.org/web/views/FunctionalData.html |
-| Functional regression (SoF / FoF) | — | Not a primary feature | https://cran.r-parse.org/web/views/FunctionalData.html |
+| Functional regression (SoF / FoF) | — | Not a primary feature | https://cran.r-project.org/web/views/FunctionalData.html |
 | Functional time series | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
 | Statistical process monitoring | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
 | Inference / hypothesis testing | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
