@@ -16,8 +16,102 @@
 - ✅ **v11.0 — fdars-core 0.33 Upgrade — New Bindings, Advisor & Docs** — Phases 66–73 (shipped 2026-09-05)
 - ✅ **v12.0 — Docs Depth, Card Coverage & AI Capability Skill** — Phases 74–79 (shipped 2026-09-06)
 - ✅ **v13.0 — Scientific Provenance & Cross-Language Implementations** — Phases 80–84 (shipped 2026-09-07)
+- 🚧 **v14.0 — fdars Software Paper — arXiv Preprint** — Phases 85–90 (active)
 
 ## Phases
+
+Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 85–90).
+
+- [ ] **Phase 85: Manuscript Scaffold + Pipeline Infrastructure** - `paper/` tree, `article`-class `paper.tex` skeleton (natbib+BibTeX, no timestamps), `CITATION.cff`, deterministic `paper/code/` framework reusing `docs_fig.py` + `docs/data/`
+- [ ] **Phase 86: Single-Source-of-Truth Wiring + CI Gate** - `assert_coverage.py` (counts from `_capability_map.json`) + `gen_refs_bib.py` (`refs.bib` from `_references_map.json`) drift tripwires + `.github/workflows/paper.yml` offline gate + tectonic PDF compile
+- [ ] **Phase 87: Comparison Table + Evidence File** - version-stamped `comparison_evidence.md` (peer spot-check) + the capability-dimension × peer-package comparison table (`\input`-ed, fdars column grounded from `_capability_map.json`)
+- [ ] **Phase 88: Front Matter, Design/Architecture & Capability Tour** - Abstract, Intro/statement-of-need, FDA background, data-representation, software-design/architecture, advisor+provenance section, and the capability tour with executed-script snippets
+- [ ] **Phase 89: Case Studies + Reproducible Figures** - four real-dataset case studies (phoneme/growth, tecator/canadian_weather, canadian_weather_precip FTS, wine/sonar sklearn Pipeline) with committed deterministic figures
+- [ ] **Phase 90: Close Gate + Citable Release** - snippet-runs + coverage-drift + determinism gates, clean-dir arXiv `pdflatex+bibtex` compile, blocking human read-through, and the citable 0.13.0 release (bump + tag + CITATION/DOI wiring)
+
+## Phase Details
+
+### Phase 85: Manuscript Scaffold + Pipeline Infrastructure
+**Goal**: A `paper/` project exists with a compiling minimal manuscript skeleton and a deterministic reproducible-code framework, locking every tooling decision (plain `article`, natbib+BibTeX, no timestamp macros, `Agg`/seeded matplotlib, data reuse) that later phases depend on.
+**Depends on**: Nothing (first phase of milestone)
+**Requirements**: MANU-01, MANU-08, PIPE-01, PIPE-02
+**Success Criteria** (what must be TRUE):
+  1. `paper/paper.tex` uses `\documentclass{article}` with natbib + BibTeX (no biblatex/biber, no `\today`/timestamp macros) and `\input`s per-section stub files that together compile to a minimal PDF (via CI tectonic — no local TeX assumed).
+  2. `CITATION.cff` (v1.2.0) is `cffconvert`-valid with a `preferred-citation` block and the author block placeholdered to Simon Müller <sm@data-zoo.de>.
+  3. `paper/code/paper_utils.py` imports and reuses `scripts/docs_fig.py` (`fig()`/colors) and resolves datasets through a `data_path()` helper pointing at `docs/data/` — no dataset is copied or duplicated.
+  4. A one-command Makefile target regenerates all pipeline outputs; matplotlib runs on the `Agg` backend with module-top rcParams and per-figure `np.random.seed`, and a re-run of the pipeline leaves `git diff paper/figures/` empty (deterministic PDF output with suppressed `CreationDate`).
+**Plans**: TBD
+
+### Phase 86: Single-Source-of-Truth Wiring + CI Gate
+**Goal**: The drift tripwires are functional before any prose cites a number — coverage counts and the bibliography are machine-derived from the committed JSON maps, and a standalone CI workflow runs the pipeline offline and compiles the PDF.
+**Depends on**: Phase 85
+**Requirements**: PIPE-03, PIPE-04, GATE-01
+**Success Criteria** (what must be TRUE):
+  1. `assert_coverage.py` derives public + total callable counts from `_capability_map.json`, writes `coverage_counts.tex` macros consumed by the manuscript, and exits non-zero on drift — no coverage integer is hardcoded in any `.tex` file.
+  2. `gen_refs_bib.py` generates `paper/refs.bib` from `_references_map.json` (paper-key → cite-key, authors joined, DOI/URL fields) with a resolved strategy for the missing `journal` field (venue added during a curation pass, or `@misc` emitted).
+  3. `.github/workflows/paper.yml` is path-filtered to `paper/**` + `_capability_map.json` + `_references_map.json` + `docs/data/**`, runs the reproducible pipeline offline as a hard gate, then compiles the PDF via `tectonic` (`wtfjoke/setup-tectonic@v4`).
+  4. Introducing a drift (e.g. a stale hardcoded count or a missing ref) causes the CI gate to fail rather than pass silently.
+**Plans**: TBD
+
+### Phase 87: Comparison Table + Evidence File
+**Goal**: The highest peer-review-rejection-risk artifact — the comparison-with-related-software table — exists and is defensible, with every competitor cell backed by a version-stamped source, so the capability tour that cites it can be written with confidence.
+**Depends on**: Phase 86
+**Requirements**: COMP-01, COMP-02
+**Success Criteria** (what must be TRUE):
+  1. `comparison_evidence.md` records, for scikit-fda, FDApy, R fda/fda.usc/refund, funData/tidyfun, and Matlab fdaM/PACE, a version-stamped source (package, version, URL, date) for every peer-package claim, with ≥1 peer package spot-checked against CRAN/PyPI/arXiv.
+  2. An `\input`-ed comparison table (capability-dimension rows × peer-package columns) renders in the manuscript, with the fdars column grounded from `_capability_map.json` and coverage stated honestly (✓ / partial / —).
+  3. Every non-fdars cell in the table traces to a claim in `comparison_evidence.md`.
+**Plans**: TBD
+
+### Phase 88: Front Matter, Design/Architecture & Capability Tour
+**Goal**: The experiment-free prose of the paper is complete — a reader can understand the Python FDA gap, the data model, the Rust/PyO3 + sklearn + advisor architecture, and can see the breadth of the library through minimal runnable, executed-script-sourced snippets.
+**Depends on**: Phase 86 (drift gates live); reads the Phase 87 comparison table
+**Requirements**: MANU-02, MANU-03, MANU-04, MANU-05, MANU-06, MANU-07
+**Success Criteria** (what must be TRUE):
+  1. Front matter reads coherently: Abstract, an Introduction & statement of need framing the Python FDA gap, and a brief FDA-background section.
+  2. The software design & architecture section describes the Rust core + PyO3 zero-copy boundary, a module map, the `Fdata` container, and the sklearn estimator layer qualitatively (no benchmarks); a separate section presents the grounded AI advisor + scientific-provenance layer as a contribution absent from peer FDA packages.
+  3. The data-representation section explains `Fdata`, argvals/grids, and irregular/sparse (`IrregFdata`) representation.
+  4. The capability tour walks method families with minimal runnable code snippets, each snippet sourced from an executed `paper/code/` script (never hand-copied).
+  5. An Availability & installation section (PyPI, extras, Python 3.9–3.14) and a Conclusion are present.
+**Plans**: TBD
+
+### Phase 89: Case Studies + Reproducible Figures
+**Goal**: The paper demonstrates fdars end-to-end on real datasets — four illustrative case studies, each a narrative worked example whose figures are regenerated deterministically by the pipeline and committed under `paper/figures/`.
+**Depends on**: Phase 86 (pipeline + determinism gate); needs `fdars` installed in the paper env + verified dataset structures
+**Requirements**: CASE-01, CASE-02, CASE-03, CASE-04
+**Success Criteria** (what must be TRUE):
+  1. Study 1 runs smooth + FPCA + classification on phoneme/growth (`docs/data/`) with reproducible committed figures.
+  2. Study 2 runs registration + functional/scalar-on-function regression on tecator/canadian_weather with reproducible committed figures.
+  3. Study 3 runs a functional-time-series forecast on `canadian_weather_precip` (dataset structure verified to support the slicing) with reproducible committed figures.
+  4. Study 4 runs a sklearn `Pipeline` + `GridSearchCV` on wine/sonar showcasing the estimator layer with reproducible committed figures.
+  5. Re-running the pipeline leaves `git diff paper/figures/` empty for every case-study figure.
+**Plans**: TBD
+
+### Phase 90: Close Gate + Citable Release
+**Goal**: The manuscript is provably correct, self-contained for arXiv, human-approved, and shipped as a citable release — the milestone's core-value gates all pass and the paired 0.13.0 package tag is prepared.
+**Depends on**: Phases 87, 88, 89 (all sections + figures)
+**Requirements**: GATE-02, GATE-03, GATE-04, REL-01
+**Success Criteria** (what must be TRUE):
+  1. Correctness gate is green: every manuscript code snippet executes against the current `fdars`, `assert_coverage.py` re-runs clean (catching late binding additions), and the determinism check passes (byte-identical figures on re-run).
+  2. arXiv self-containment holds: a clean-directory `pdflatex + bibtex` compile of the submission sources succeeds with all figures committed under `paper/figures/`.
+  3. A blocking human read-through of the manuscript (prose accuracy, comparison table, citations) is approved before close.
+  4. A citable 0.13.0 release is prepared: version bumped in `Cargo.toml`/`pyproject.toml`/`__version__`, `CITATION.cff` + arXiv/Zenodo DOI wiring finalized, and a semver `v0.13.0` tag prepared/handed to the user for PyPI publish.
+**Plans**: TBD
+
+## Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 85. Manuscript Scaffold + Pipeline Infrastructure | 0/0 | Not started | - |
+| 86. Single-Source-of-Truth Wiring + CI Gate | 0/0 | Not started | - |
+| 87. Comparison Table + Evidence File | 0/0 | Not started | - |
+| 88. Front Matter, Design/Architecture & Capability Tour | 0/0 | Not started | - |
+| 89. Case Studies + Reproducible Figures | 0/0 | Not started | - |
+| 90. Close Gate + Citable Release | 0/0 | Not started | - |
+
+---
+
+## Shipped Milestones (archived detail)
 
 <details>
 <summary>✅ v1.0 Documentation Overhaul (Phases 1–9) — SHIPPED 2026-08-08</summary>

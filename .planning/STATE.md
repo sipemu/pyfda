@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
-status: planning
+status: roadmapped
 last_updated: "2026-09-08T19:05:28.465Z"
 last_activity: 2026-09-08
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,35 +17,36 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-09-07)
+See: .planning/PROJECT.md (updated 2026-09-08)
 
-**Core value:** The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
-**Current focus:** Phase 84 — Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Citation-Accuracy Review
+**Core value:** A submission-ready arXiv software paper that makes `fdars`'s breadth and method-accuracy provably clear — every code snippet runs against the current API, every number is machine-derived from the live capability/reference maps, and every figure/table is regenerable by a single command.
+**Current focus:** Phase 85 — Manuscript Scaffold + Pipeline Infrastructure
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (roadmap complete; Phase 85 next)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-09-08 — Milestone v14.0 started
+Status: Roadmapped — ready for `/gsd-plan-phase 85`
+Last activity: 2026-09-08 — Milestone v14.0 roadmapped (Phases 85–90)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed (v12.0): 27; prior: 29 (v11.0), 7 (v10.0), 17 (v9.0), 16 (v8.0)
+- Total plans completed (v13.0): 11; prior: 27 (v12.0), 29 (v11.0), 7 (v10.0), 17 (v9.0)
 - Average duration: -
-- Total execution time (v13.0): 0 hours
+- Total execution time (v14.0): 0 hours
 
-**By Phase (v13.0):**
+**By Phase (v14.0):**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 80 | 2 | - | - |
-| 81 | 5 | - | - |
-| 82 | 1 | - | - |
-| 83 | 3 | - | - |
-| 84 | 0 | - | - |
+| 85 | - | - | - |
+| 86 | - | - | - |
+| 87 | - | - | - |
+| 88 | - | - | - |
+| 89 | - | - | - |
+| 90 | - | - | - |
 
 **Recent Trend:**
 
@@ -53,21 +54,6 @@ Last activity: 2026-09-08 — Milestone v14.0 started
 - Trend: -
 
 *Updated after each plan completion*
-**Per-Plan Metrics:**
-
-| Plan | Duration | Tasks | Files |
-|------|----------|-------|-------|
-| Phase 80 P01 | 5 | 3 tasks | 2 files |
-| Phase 80 P02 | 2 | 1 tasks | 1 files |
-| Phase 81 P01 | 308 | 3 tasks | 2 files |
-| Phase 81-curation-paper-registry P02 | 12m | 3 tasks | 1 files |
-| Phase 81 P03 | 15 | 3 tasks | 1 files |
-| Phase 81 P04 | 9 | 3 tasks | 1 files |
-| Phase 81-curation-paper-registry P05 | 289 | 2 tasks | 2 files |
-| Phase 82-mcp-tool-fdars-method-references-gate-05-companion P01 | 23 | 2 tasks | 2 files |
-| Phase 83 P01 | 5 | 3 tasks | 3 files |
-| Phase 83 P03 | 118 | 2 tasks | 2 files |
-| Phase 83-docs-llms-txt-skill-extension P02 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -76,41 +62,16 @@ Last activity: 2026-09-08 — Milestone v14.0 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v13.0 roadmap]: Phase numbering CONTINUES from v12.0 (starts at Phase 80; v12.0 ended at Phase 79) — no reset
-- [v13.0 roadmap]: 5 phases (80–84), 22 requirements (SCHEMA/CURATE/MCP/DOCS+SKILL/GATE), fine granularity — schema-first (80) unblocks curation (81, critical path) + MCP tool (82, parallelizable) → docs+skill (83) → close gate (84), mirroring the v12.0 sequencing and ARCHITECTURE.md build order
-- [v13.0 roadmap]: Code + docs + skill only — NO `fdars-core` bump, NO new PyO3/numerical bindings. Touches `python/fdars/_references_map.json` (NEW), `python/fdars/mcp/server.py`, `.claude/skills/fdars-capabilities/SKILL.md`, `docs/`, `scripts/generate_capability_dataset.py`, `tests/`, maturin include
-- [v13.0 roadmap]: References map is a SEPARATE committed side-file (`_references_map.json`), paper-keyed + flat `callable_index`, NOT merged into the auto-generated `_capability_map.json` (preserves the SKILL-02 no-drift boundary; mirrors `_capability_curation.json`)
-- [v13.0 roadmap]: MCP tool `fdars_method_references` stays provably LLM-free (GATE-04 → GATE-05): static `importlib.resources` load, `_REFERENCES_MODULES` DERIVED from `_CAPABILITY_MODULES`, no `provider`/`model` keys, explicit `{"curated": false, "sentinel": "NO_CURATED_ENTRY"}` for the tail. Hybrid fallback lives ONLY in the skill, flagged ungrounded
-- [v13.0 roadmap]: Curation is PAPER-LEVEL (~40–100 papers, N << 409) with a sub-method-keyed callable index — NOT 409 separate entries, NOT one paper mapped blindly across a family (band depth ≠ modified band depth)
-- [v13.0 roadmap]: Six anti-feature families (functional depth as a category, scoring metrics, SPM, seasonal, XAI/explain, conformal) return the `curated:false` sentinel — no forced module-level citation (per-sub-method depth papers may still be curated where a clear root exists)
-- [v13.0 roadmap]: Coverage is partial-but-honest — report `N/409` explicitly in tool response, docs, and `llms.txt`; uncovered callables signal `curated:false`, never silence. GATE-05 emits the fraction (informational, not a hard floor this milestone)
-- [v13.0 roadmap]: Author-verification is a hard authoring rule — every paper entry checked against its DOI landing page before commit (F&M is 2001, not 1991; a resolving DOI is NOT proof of correct attribution)
-- [v13.0 roadmap]: Docs/`llms.txt` emit OFFLINE from committed JSON via `--references` flag (no `fdars` import at build), consistent with the v12.0 `generate_capability_dataset.py --llmstxt` path
-- [v13.0 roadmap]: GATE-05 guard tests land in the SAME commit as the tool they guard (GATE-04 lesson); Guard Group 3 (primary A/B Py3.9+, companion C/D Py3.10+) in `tests/test_guard_sync_version_independent.py`
-- [standing v6.0]: BLOCKING HUMAN citation-accuracy review before milestone close — parallel to the standing diagram review; consolidated into Phase 84 (GATE-03), autonomous execution stops there
-- [standing v6.0/v11.0]: ALL content/doc phases run SEQUENTIALLY on `main` with `use_worktrees: false` — doc-build fences hardcode the main-tree `.venv/bin/mkdocs`; whole-site `--strict` (~25 min) + guard-sync + DOI/link gates run ONCE at the Phase-84 close
-- [Phase 80]: GATE-04 atomic commit: _references_map.json + GATE-05 A/B/C guard tests land in one commit (guard tests and artifact cannot be split across CI runs)
-- [Phase 80]: FDARS_ONLINE_CHECKS=1 pattern: structural DOI/URL gate runs always in CI; opt-in live-resolve skips the structural gate (inverts the FDARS_INTEGRATION pattern)
-- [Phase 80]: docs/authoring/references-schema.md documents the ACTUAL shipped _references_map.json shape (5-paper seed, 11 callable_index entries) with verbatim examples — curators author against what is live
-- [Phase 80]: docs/authoring/ not added to mkdocs nav this phase — Phase 83 wires the references docs surface per plan spec
-- [Phase 81]: curated:false for ramsay_silverman_2005/gervini_2008/craven_wahba_1979/nadaraya_watson_1964 — DOIs [ASSUMED]/[CITED] not landing-page-verified; eligible for curated:true promotion at Phase 84 human review
-- [Phase 81]: _ALLOWED_DOMAINS extended with 9 domains (6 minimum + 3 conditional); coverage denominator derived from live _capability_map.json (437), not hardcoded
-- [Phase 81]: All new entries curated:false — personal DOI landing-page verification deferred to Phase 84 GATE-03 human review
-- [Phase 81]: fdars-core 0.33 source check: extremal.rs confirms Narisetty & Nair 2016; spatial.rs has no paper attribution; tvdmss cites Huang & Sun 2019 by name
-- [Phase 81]: flm_f_test/flm_gof_test curated:false — fdars-core uses classical FPC R² F-test and RESET GoF, not Shen & Faraway 2004
-- [Phase 81]: oneway_anova_vstat contested flag: cuesta_albertos_febrero_2010 entry with notes citing both 2010 and Górecki & Smaga 2015 as candidates; curated:false pending Phase 84
-- [Phase 81]: clustering.align_cluster_fd wired as co-primary to srivastava_et_al_2011 (callable is in clustering module, not alignment) — fdars-core alignment/clustering.rs cites arXiv:1103.3817
-- [Phase 81]: cuturi_blondel_2017 soft-DTW: doi:'' curated:true — PMLR proceedings have no journal DOI; GATE-05 C skips empty doi on curated:true entries
-- [Phase 81]: spm.mfpca curated (happ_greven_2018) despite spm anti-feature module — callable has clear paper root per Pitfall 7
-- [Phase 81]: _uncurated_spm_tail_2026-09 removed: CURATE-04 sentinel is ABSENCE from callable_index, not a curated:false placeholder entry listing the callables
-- [Phase 81]: Coverage finalized at 31/437 (7.1% curated:true) — honest per CURATE-05; no LLM-synthesized placeholder ships as curated
-- [Phase 82]: _REFERENCES_MODULES is an alias (= _CAPABILITY_MODULES), not an independent frozenset — the DERIVED relationship is structural and asserted by GATE-05 D three-way equality guard
-- [Phase 82]: Coverage denominator derived live from _capability_map.json (437), never hardcoded — MCP-02 requirement text says 409 (stale); Phase 84 should reconcile to 437
-- [Phase 83]: Extended _emit_llmstxt with optional ref/cap args for inline provenance append; backward compat preserved
-- [Phase 83]: 409->437 denominator correction: emitted honest value 437, requirement text (stale 409) to be reconciled in Phase 84
-- [Phase 83]: grounded:false is machine-readable per-citation in the skill provenance protocol — satisfies T-83-05 threat mitigation (SKILL-01)
-- [Phase 83]: pytest.importorskip used inside each test function (not module level) for clean Python 3.9 skip without collection failure (SKILL-02)
-- [Phase 83]: 83-02: mkdocs.yml nav-wired references.md (DOCS-03); stdlib-only fast validator script confirms page/nav validity without 25-min full strict build
+- [v14.0 roadmap]: Phase numbering CONTINUES from v13.0 (starts at Phase 85; v13.0 ended at Phase 84) — no reset
+- [v14.0 roadmap]: 6 phases (85–90), 23 requirements (MANU/PIPE/COMP/CASE/GATE/REL), fine granularity — infrastructure-first: scaffold+pipeline (85) → SSoT wiring + CI gate (86, drift tripwires functional before any prose cites a number) → comparison table + evidence (87, highest peer-review-rejection risk, precedes the tour that cites it) → front-matter/design/capability-tour prose (88) → case studies + figures (89, experiment-dependent) → close gate + citable release (90)
+- [v14.0 roadmap]: Writing + reproducible-code milestone — NO `fdars-core` bump, NO new numerical bindings. New tree `paper/` at repo root (peer to `docs/`), plus `.github/workflows/paper.yml`, `CITATION.cff`, `comparison_evidence.md`. Reuses `scripts/docs_fig.py`, `docs/data/`, `_capability_map.json`, `_references_map.json`
+- [v14.0 roadmap]: REL-01 (citable 0.13.0 release) folds into the close phase (90) alongside GATE-02/03/04 — the release is gated on human read-through approval + metadata finalization, not a standalone ship phase
+- [v14.0 roadmap]: natbib + BibTeX (NOT biblatex/biber) — tectonic silently breaks biber in CI (`[?]` citations); decided before the first `paper.tex` commit (locked in Phase 85)
+- [v14.0 roadmap]: NO local LaTeX — PDF compile is CI-only via tectonic (`wtfjoke/setup-tectonic@v4`); the local hard gate is the Python reproducible pipeline (empty `git diff paper/figures/` on re-run)
+- [v14.0 roadmap]: Every numeric claim machine-derived — coverage counts from `_capability_map.json` via `assert_coverage.py` → `coverage_counts.tex` macros (non-zero on drift, no hardcoded `.tex` integers); bibliography from `_references_map.json` via `gen_refs_bib.py`; every snippet sourced from an executed `paper/code/` script, never hand-copied
+- [v14.0 roadmap]: Deterministic matplotlib — `Agg` backend, module-top rcParams, per-figure `np.random.seed`, PDF with suppressed `CreationDate`; determinism gate = empty `git diff paper/figures/`
+- [standing v6.0]: BLOCKING HUMAN manuscript read-through before milestone close (GATE-04, Phase 90) — same shape as the standing diagram/citation reviews; autonomous execution stops there
+- [standing v6.0/v11.0]: ALL content phases run SEQUENTIALLY on `main` with `use_worktrees: false`
 
 ### Pending Todos
 
@@ -118,40 +79,50 @@ None yet.
 
 ### Blockers/Concerns
 
-- [milestone shape]: Code + docs + skill ONLY — no `fdars-core` bump, no new bindings. Crosses `python/fdars/_references_map.json` (NEW), `python/fdars/mcp/server.py`, `.claude/skills/fdars-capabilities/`, `docs/`, `scripts/generate_capability_dataset.py`, `tests/`.
-- [citation correctness — MILESTONE-GATING]: a wrong attribution (variant conflation, wrong year/authors, textbook where a primary source belongs) is a correctness failure against the "provably correct" core value. Author-verify against DOI landing pages; blocking human review at Phase 84.
-- [LLM-free boundary — MILESTONE-GATING]: the MCP tool must never synthesize — static load + `curated:false` sentinel; guard-sync asserts no `provider`/`model` keys and no advisor import. Hybrid fallback lives only in the skill.
-- [guard-sync drift]: derive `_REFERENCES_MODULES` from `_CAPABILITY_MODULES` so a future crate-bump adding a submodule cannot silently desync; write the guard test in the same commit as the tool handler.
-- [coverage honesty]: report `N/409` in tool, docs, and `llms.txt`; uncovered callables return `curated:false`, never an empty dict.
-- [cross-language accuracy / link rot]: mark Matlab (fdaM/PACE) pointers `confidence: low` unless verified; point URLs at specific function docs; pin `version`; structural link gate in CI, online resolve opt-in only.
-- [build time]: whole-site `mkdocs build --strict` is ~25 min with executed fences — the `--strict` gate runs only at the Phase-84 close, once.
-- [contested attributions — research flag]: `align_cluster_fd`, `elastic_changepoint`, `oneway_anova_vstat`, FAMM lineage — resolve during Phase 81 against fdars-core source; where genuinely contested, flag in-JSON rather than force-pick.
+- [milestone shape]: Writing + reproducible-code ONLY — no crate bump, no new bindings. New tree `paper/` (`paper.tex` + `sections/` + `refs.bib` + `figures/` + `code/`), `.github/workflows/paper.yml`, `CITATION.cff`, `comparison_evidence.md`.
+- [stale API snippets — HIGHEST RISK]: every `.tex` snippet must flow from an executed `paper/code/` script (never copy-pasted); the pipeline runner is the hard local gate, re-verified at Phase 90 (GATE-02).
+- [hardcoded coverage counts — MILESTONE-GATING]: derive all numbers as `\input{coverage_counts.tex}` macros; `assert_coverage.py` exits non-zero on drift; wired into CI before figures are committed (Phase 86).
+- [inaccurate peer-comparison rows — reviewer-rejection risk]: ground every competitor cell in `comparison_evidence.md` (URL + version + date); ≥1 peer package spot-checked; blocking human review at Phase 90.
+- [non-deterministic matplotlib]: `Agg` + fixed rcParams + per-figure seed + suppressed `CreationDate`; FreeType/font variance across platforms is the residual risk — generate/verify figures in CI (Phase 86/89 determinism gate).
+- [tectonic + biblatex silent bib failure]: natbib + BibTeX only; locked before the first `paper.tex` commit (Phase 85).
+- [arXiv self-containment]: close gate must test a clean-dir `pdflatex + bibtex` build with all figures committed under `paper/figures/` (GATE-03, Phase 90).
+- [`journal` field missing in `_references_map.json`]: `gen_refs_bib.py` needs a resolved strategy (add venue during a curation pass, or emit `@misc`) — resolve in Phase 86.
+- [FTS dataset structure]: verify `canadian_weather_precip.csv` slicing supports the forecast case study before the figure script — resolve in Phase 89.
+- [package tick]: reversible 0.12.0 → 0.13.0 pairs with the citable release (REL-01); semver `v0.13.0` tag triggers PyPI publish — handed to user at Phase 90 close.
+
+### Research Flags (from SUMMARY.md)
+
+- Phase 86: verify tectonic caching + path-filter behavior (cache hit/miss when the library changes but `paper/` doesn't) before deploying `paper.yml`.
+- Phase 87: spot-check peer-package coverage facts (scikit-fda `check_estimator` status, FDApy v1.x, R refund) against CRAN/PyPI/arXiv before finalizing the table.
+- Phase 89: confirm `canadian_weather_precip.csv` structure supports multi-year slicing for the FTS case study before writing the figure script.
 
 ## Deferred Items
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| Documentation | CARD-FUT-01: gallery/card grid for the Advisor (7 pages) + sklearn (5 pages) landing pages — deliberate no-gallery pattern today; conversion is a separate design call | future | v12.0 init |
-| Documentation | DEPTH-FUT-01: depth sweep of any older thin pages beyond the v11.0-era set surfaced during work | future | v12.0 init |
-| verification_gap | Phase 59 (Documentation & Docs Gate) closed via override — no formal `59-VERIFICATION.md`; deliverables shipped (docs live, `--strict` green, tag `v0.9.0` on PyPI) | acknowledged | v9.0 close |
-| diagram_review | DOCS-03 blocking human diagram review never explicitly approved — pre-verified method-accurate, now moot (SVG live on published site) | acknowledged | v9.0 close |
+| Venue | VENUE-01: JOSS short-form draft (750–1750 words, "state of the field") derived from the arXiv manuscript | future | v14.0 init |
+| Venue | VENUE-02: JSS/SoftwareX full-template reshaping with complete API reference | future | v14.0 init |
+| References | REF-FUT-01: complete the uncurated `N/437` tail + a coverage floor once curation stabilizes | future | v13.0 init |
+| References | REF-FUT-02: opt-in live DOI/URL liveness resolve (`FDARS_ONLINE_CHECKS=1`) run before close — never in CI | future | v13.0 init |
+| Documentation | CARD-FUT-01: gallery/card grid for the Advisor + sklearn landing pages | future | v12.0 init |
+| Documentation | DEPTH-FUT-01: depth sweep of any older thin pages beyond the v11.0-era set | future | v12.0 init |
+| verification_gap | Phase 59 closed via override — no formal `59-VERIFICATION.md`; deliverables shipped | acknowledged | v9.0 close |
+| diagram_review | DOCS-03 blocking human diagram review never explicitly approved — now moot (SVG live) | acknowledged | v9.0 close |
 | Diagrams | DIAG-FUT-01b: full dark-mode / theming adaptation of the diagram set | future | v10.0 init |
-| Diagrams | DIAG-FUT-03: palette / typography re-theme (beyond consistency + defect-fix) | future | v10.0 init |
+| Diagrams | DIAG-FUT-03: palette / typography re-theme | future | v10.0 init |
 | sklearn | FUT-01: `set_output(transform="pandas")` / DataFrame output API | future | v9.0 init |
 | sklearn | FUT-02: re-evaluate EXCLUDED methods if fdars-core exposes stored-model/template-free variants | future | v9.0 init |
-| sklearn | FUT-03: sklearn 1.7+ support once Python 3.9 is dropped (single tags-API path) | future | v9.0 init |
+| sklearn | FUT-03: sklearn 1.7+ support once Python 3.9 is dropped | future | v9.0 init |
 | SDK | ANTHROPIC-1X: full `anthropic` 1.x migration (drops Python 3.9) — its own milestone | future | v8.0 init |
 | Transport | HTTP-01 / FUT-01: HTTP/SSE MCP transport (stdio shipped v2.0) | v3.x/future | v2.0 close |
-| Core | `linalg`-gated `ridge_regression_fit` (Rust 1.84+ > MSRV 1.83) + HEAD 0.24-bound work | out of scope | v6.0 init |
-| References | REF-FUT-01: complete the uncurated `N/409` tail + a coverage floor once curation stabilizes (partial-but-honest accepted this milestone) | future | v13.0 init |
-| References | REF-FUT-02: opt-in live DOI/URL liveness resolve (`scripts/check_doi_liveness.py`, `FDARS_ONLINE_CHECKS=1`) run before close — never in CI | future | v13.0 init |
+| Core | `linalg`-gated `ridge_regression_fit` (Rust 1.84+ > MSRV 1.83) | out of scope | v6.0 init |
 
 ## Session Continuity
 
-Last session: 2026-09-07T19:36:07.410Z
-Stopped at: Phase 84 complete — all phases complete
+Last session: 2026-09-08 — v14.0 roadmap created (Phases 85–90)
+Stopped at: Roadmap complete; REQUIREMENTS.md traceability filled (23/23 mapped)
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Review the roadmap (`.planning/ROADMAP.md`), then plan Phase 85 with `/gsd-plan-phase 85`

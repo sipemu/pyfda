@@ -76,35 +76,43 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MANU-01 | TBD | Pending |
-| MANU-02 | TBD | Pending |
-| MANU-03 | TBD | Pending |
-| MANU-04 | TBD | Pending |
-| MANU-05 | TBD | Pending |
-| MANU-06 | TBD | Pending |
-| MANU-07 | TBD | Pending |
-| MANU-08 | TBD | Pending |
-| PIPE-01 | TBD | Pending |
-| PIPE-02 | TBD | Pending |
-| PIPE-03 | TBD | Pending |
-| PIPE-04 | TBD | Pending |
-| COMP-01 | TBD | Pending |
-| COMP-02 | TBD | Pending |
-| CASE-01 | TBD | Pending |
-| CASE-02 | TBD | Pending |
-| CASE-03 | TBD | Pending |
-| CASE-04 | TBD | Pending |
-| GATE-01 | TBD | Pending |
-| GATE-02 | TBD | Pending |
-| GATE-03 | TBD | Pending |
-| GATE-04 | TBD | Pending |
-| REL-01 | TBD | Pending |
+| MANU-01 | Phase 85 | Pending |
+| MANU-02 | Phase 88 | Pending |
+| MANU-03 | Phase 88 | Pending |
+| MANU-04 | Phase 88 | Pending |
+| MANU-05 | Phase 88 | Pending |
+| MANU-06 | Phase 88 | Pending |
+| MANU-07 | Phase 88 | Pending |
+| MANU-08 | Phase 85 | Pending |
+| PIPE-01 | Phase 85 | Pending |
+| PIPE-02 | Phase 85 | Pending |
+| PIPE-03 | Phase 86 | Pending |
+| PIPE-04 | Phase 86 | Pending |
+| COMP-01 | Phase 87 | Pending |
+| COMP-02 | Phase 87 | Pending |
+| CASE-01 | Phase 89 | Pending |
+| CASE-02 | Phase 89 | Pending |
+| CASE-03 | Phase 89 | Pending |
+| CASE-04 | Phase 89 | Pending |
+| GATE-01 | Phase 86 | Pending |
+| GATE-02 | Phase 90 | Pending |
+| GATE-03 | Phase 90 | Pending |
+| GATE-04 | Phase 90 | Pending |
+| REL-01 | Phase 90 | Pending |
 
 **Coverage:**
 - v14.0 requirements: 23 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 23 ⚠️
+- Mapped to phases: 23 ✓
+- Unmapped: 0
+
+**Per-phase distribution:**
+- Phase 85 (Scaffold + Pipeline Infra): MANU-01, MANU-08, PIPE-01, PIPE-02 (4)
+- Phase 86 (SSoT Wiring + CI Gate): PIPE-03, PIPE-04, GATE-01 (3)
+- Phase 87 (Comparison Table + Evidence): COMP-01, COMP-02 (2)
+- Phase 88 (Front Matter, Design & Capability Tour): MANU-02..07 (6)
+- Phase 89 (Case Studies + Figures): CASE-01..04 (4)
+- Phase 90 (Close Gate + Citable Release): GATE-02, GATE-03, GATE-04, REL-01 (4)
 
 ---
 *Requirements defined: 2026-09-08*
-*Last updated: 2026-09-08 after initial definition*
+*Last updated: 2026-09-08 after roadmap creation (phases 85–90 mapped)*
