@@ -76,7 +76,10 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
   2. An `\input`-ed comparison table (capability-dimension rows × peer-package columns) renders in the manuscript, with the fdars column grounded from `_capability_map.json` and coverage stated honestly (✓ / partial / —).
   3. Every non-fdars cell in the table traces to a claim in `comparison_evidence.md`.
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+- [ ] 87-01-PLAN.md — Core artifact set (tracer): version-stamped `comparison_evidence.md` (all nine peer packages, spot-checks), the `\input`-ed booktabs/adjustbox comparison table, `paper.tex` preamble additions, and `check_comparison.py` traceability gate
+- [ ] 87-02-PLAN.md — Enforce + ground: extend `check_comparison.py` with the fdars-column grounding assertion from `_capability_map.json`, then wire it into `make paper-check` and `paper.yml` (before tectonic)
 
 ### Phase 88: Front Matter, Design/Architecture & Capability Tour
 
@@ -128,7 +131,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 |-------|----------------|--------|-----------|
 | 85. Manuscript Scaffold + Pipeline Infrastructure | 2/2 | Complete    | 2026-09-08 |
 | 86. Single-Source-of-Truth Wiring + CI Gate | 2/2 | Complete    | 2026-09-08 |
-| 87. Comparison Table + Evidence File | 0/0 | Not started | - |
+| 87. Comparison Table + Evidence File | 0/2 | Planned | - |
 | 88. Front Matter, Design/Architecture & Capability Tour | 0/0 | Not started | - |
 | 89. Case Studies + Reproducible Figures | 0/0 | Not started | - |
 | 90. Close Gate + Citable Release | 0/0 | Not started | - |
