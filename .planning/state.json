@@ -11,7 +11,7 @@
     {
       "number": "86",
       "name": "Single-Source-of-Truth Wiring + CI Gate",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "87",
@@ -36,8 +36,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 86 of 6 · executing"
+    "label": "Advance to the next step (plan phase 87)",
+    "reason": "Phase 87 of 6 — needs a plan"
   },
-  "updated_at": "2026-09-08T21:23:08.433Z"
+  "updated_at": "2026-09-08T21:45:40.727Z"
 }

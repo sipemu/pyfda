@@ -23,7 +23,7 @@
 Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 85–90).
 
 - [x] **Phase 85: Manuscript Scaffold + Pipeline Infrastructure** - `paper/` tree, `article`-class `paper.tex` skeleton (natbib+BibTeX, no timestamps), `CITATION.cff`, deterministic `paper/code/` framework reusing `docs_fig.py` + `docs/data/` (completed 2026-09-08)
-- [ ] **Phase 86: Single-Source-of-Truth Wiring + CI Gate** - `assert_coverage.py` (counts from `_capability_map.json`) + `gen_refs_bib.py` (`refs.bib` from `_references_map.json`) drift tripwires + `.github/workflows/paper.yml` offline gate + tectonic PDF compile
+- [x] **Phase 86: Single-Source-of-Truth Wiring + CI Gate** - `assert_coverage.py` (counts from `_capability_map.json`) + `gen_refs_bib.py` (`refs.bib` from `_references_map.json`) drift tripwires + `.github/workflows/paper.yml` offline gate + tectonic PDF compile (completed 2026-09-08)
 - [ ] **Phase 87: Comparison Table + Evidence File** - version-stamped `comparison_evidence.md` (peer spot-check) + the capability-dimension × peer-package comparison table (`\input`-ed, fdars column grounded from `_capability_map.json`)
 - [ ] **Phase 88: Front Matter, Design/Architecture & Capability Tour** - Abstract, Intro/statement-of-need, FDA background, data-representation, software-design/architecture, advisor+provenance section, and the capability tour with executed-script snippets
 - [ ] **Phase 89: Case Studies + Reproducible Figures** - four real-dataset case studies (phoneme/growth, tecator/canadian_weather, canadian_weather_precip FTS, wine/sonar sklearn Pipeline) with committed deterministic figures
@@ -127,7 +127,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 85. Manuscript Scaffold + Pipeline Infrastructure | 2/2 | Complete    | 2026-09-08 |
-| 86. Single-Source-of-Truth Wiring + CI Gate | 0/2 | Not started | - |
+| 86. Single-Source-of-Truth Wiring + CI Gate | 2/2 | Complete    | 2026-09-08 |
 | 87. Comparison Table + Evidence File | 0/0 | Not started | - |
 | 88. Front Matter, Design/Architecture & Capability Tour | 0/0 | Not started | - |
 | 89. Case Studies + Reproducible Figures | 0/0 | Not started | - |

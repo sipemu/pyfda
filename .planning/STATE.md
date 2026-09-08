@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
-current_phase: 86
-current_phase_name: Single-Source-of-Truth Wiring + CI Gate
-status: verifying
-stopped_at: Completed 86-02-PLAN.md
-last_updated: "2026-09-08T21:27:04.347Z"
+current_phase: 87
+current_phase_name: Comparison Table + Evidence File
+status: planning
+stopped_at: Phase 86 complete, ready to plan Phase 87
+last_updated: "2026-09-08T21:45:40.713Z"
 last_activity: 2026-09-08
-last_activity_desc: Phase 86 execution started
-state_head: d627775cd9082a92b3f35ea331d45cbfe060d99c
+last_activity_desc: Phase 86 complete, transitioned to Phase 87
+state_head: 4e75b1876c436b40a0ca67ec9745b75514dcf74f
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
   completed_plans: 4
 ---
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Phase: 86 (Single-Source-of-Truth Wiring + CI Gate) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-09-08 — Phase 86 execution started
+Phase: 87 — Comparison Table + Evidence File
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-08 — Phase 86 complete, transitioned to Phase 87
 
 ## Performance Metrics
 
@@ -46,7 +46,7 @@ Last activity: 2026-09-08 — Phase 86 execution started
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 85 | 2 | - | - |
-| 86 | - | - | - |
+| 86 | 2 | - | - |
 | 87 | - | - | - |
 | 88 | - | - | - |
 | 89 | - | - | - |
@@ -143,7 +143,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-08T21:27:04.313Z
-Stopped at: Completed 86-02-PLAN.md
+Stopped at: Phase 86 complete, ready to plan Phase 87
 Resume file: None
 
 ## Operator Next Steps
