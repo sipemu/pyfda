@@ -20,7 +20,7 @@ Macro set emitted
 ``\\nsubmodules``      — number of public (non-underscore) module keys
 ``\\ncallables``       — total callable entries across all map keys
 ``\\npubliccallables`` — callable entries in non-underscore module keys
-``\\nfdata``           — public (non-dunder) methods in the ``_Fdata`` key
+``\\nfdata``           — public (non-underscore-prefixed) methods in the ``_Fdata`` key
 ``\\ncoverage``        — callables backed by at least one curated paper
 ``\\ndocpapers``       — non-``_uncurated`` papers in _references_map.json
 """
@@ -59,7 +59,8 @@ def _derive_counts() -> dict[str, int]:
     # Public modules: non-underscore top-level keys (excludes "_Fdata")
     public_modules = [k for k in cap if not k.startswith("_")]
 
-    # Public Fdata methods: non-dunder entries in the "_Fdata" key
+    # Public Fdata methods: non-underscore-prefixed entries in the "_Fdata" key
+    # (excludes all private/dunder methods; counts the public API surface)
     fdata_public = [m for m in cap.get("_Fdata", {}) if not m.startswith("_")]
 
     # Curated paper keys (curated is True, not just truthy)
