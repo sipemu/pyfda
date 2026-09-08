@@ -4,17 +4,17 @@ milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 87
 current_phase_name: Comparison Table + Evidence File
-status: executing
-stopped_at: Completed 87-01-PLAN.md
-last_updated: "2026-09-08T22:21:21.341Z"
+status: verifying
+stopped_at: Completed 87-02-PLAN.md
+last_updated: "2026-09-08T22:28:49.781Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 87 execution started
-state_head: 1e12c6bf8cf5a1b985f1866d876672dbfd652144
+state_head: 140833948bed4cecb968e50eefdba8ab1f1d6cd1
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 Phase: 87 (Comparison Table + Evidence File) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-09 — Phase 87 execution started
 
 ## Performance Metrics
@@ -67,6 +67,7 @@ Last activity: 2026-09-09 — Phase 87 execution started
 | Phase 86 P86-01 | 3 | 3 tasks | 6 files |
 | Phase 86-single-source-of-truth-wiring-ci-gate P02 | 2 | 2 tasks | 1 files |
 | Phase 87 P87-01 | 10 | 3 tasks | 5 files |
+| Phase 87 P02 | 5min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,8 @@ Recent decisions affecting current work:
 - [Phase 87]: evidence-first authoring: comparison_evidence.md before table; cells from RESEARCH.md dossiers verbatim, not from memory
 - [Phase 87]: \FdarsVersion{0.12.0} macro in comparison_table.tex for single-point Phase 90 update to 0.13.0
 - [Phase 87]: check_comparison.py SC-3 gate: escaped-ampersand sentinel split + prefix-match evidence lookup for fda 6.3.0 → fda
+- [Phase 87]: DIMENSION_SUBMODULES transcribed from RESEARCH.md §fdars Column Derivation — dimension labels match _parse_table() output after _norm() strips LaTeX accents
+- [Phase 87]: check_comparison.py added to paper-check recipe only (not paper: generation target); paper.yml step placed after gen_refs_bib and before Setup tectonic
 
 ### Pending Todos
 
@@ -146,8 +149,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-08T22:21:21.267Z
-Stopped at: Completed 87-01-PLAN.md
+Last session: 2026-09-08T22:28:49.730Z
+Stopped at: Completed 87-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

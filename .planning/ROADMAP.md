@@ -79,7 +79,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 **Plans**: 2 plans
 
 - [x] 87-01-PLAN.md — Core artifact set (tracer): version-stamped `comparison_evidence.md` (all nine peer packages, spot-checks), the `\input`-ed booktabs/adjustbox comparison table, `paper.tex` preamble additions, and `check_comparison.py` traceability gate
-- [ ] 87-02-PLAN.md — Enforce + ground: extend `check_comparison.py` with the fdars-column grounding assertion from `_capability_map.json`, then wire it into `make paper-check` and `paper.yml` (before tectonic)
+- [x] 87-02-PLAN.md — Enforce + ground: extend `check_comparison.py` with the fdars-column grounding assertion from `_capability_map.json`, then wire it into `make paper-check` and `paper.yml` (before tectonic)
 
 ### Phase 88: Front Matter, Design/Architecture & Capability Tour
 
