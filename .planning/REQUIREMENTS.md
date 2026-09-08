@@ -27,8 +27,8 @@ Requirements for this milestone. Each maps to exactly one roadmap phase. A writi
 
 ### Comparison (COMP)
 
-- [ ] **COMP-01**: `comparison_evidence.md` — every peer-package claim backed by a version-stamped source (package, version, URL, date) for scikit-fda, FDApy, R fda/fda.usc/refund, funData/tidyfun, Matlab fdaM/PACE; ≥1 peer package spot-checked against CRAN/PyPI/arXiv
-- [ ] **COMP-02**: Comparison-with-related-software table (`\input`-ed) — capability-dimension rows × peer-package columns; the fdars column grounded from `_capability_map.json`; coverage stated honestly (✓/partial/—)
+- [x] **COMP-01**: `comparison_evidence.md` — every peer-package claim backed by a version-stamped source (package, version, URL, date) for scikit-fda, FDApy, R fda/fda.usc/refund, funData/tidyfun, Matlab fdaM/PACE; ≥1 peer package spot-checked against CRAN/PyPI/arXiv
+- [x] **COMP-02**: Comparison-with-related-software table (`\input`-ed) — capability-dimension rows × peer-package columns; the fdars column grounded from `_capability_map.json`; coverage stated honestly (✓/partial/—)
 
 ### Case Studies (CASE)
 
@@ -88,8 +88,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | PIPE-02 | Phase 85 | Complete |
 | PIPE-03 | Phase 86 | Complete |
 | PIPE-04 | Phase 86 | Complete |
-| COMP-01 | Phase 87 | Pending |
-| COMP-02 | Phase 87 | Pending |
+| COMP-01 | Phase 87 | Complete |
+| COMP-02 | Phase 87 | Complete |
 | CASE-01 | Phase 89 | Pending |
 | CASE-02 | Phase 89 | Pending |
 | CASE-03 | Phase 89 | Pending |

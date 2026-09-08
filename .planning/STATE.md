@@ -4,17 +4,17 @@ milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 87
 current_phase_name: Comparison Table + Evidence File
-status: planning
-stopped_at: Phase 86 complete, ready to plan Phase 87
-last_updated: "2026-09-08T21:45:40.713Z"
-last_activity: 2026-09-08
-last_activity_desc: Phase 86 complete, transitioned to Phase 87
-state_head: 4e75b1876c436b40a0ca67ec9745b75514dcf74f
+status: executing
+stopped_at: Completed 87-01-PLAN.md
+last_updated: "2026-09-08T22:21:21.341Z"
+last_activity: 2026-09-09
+last_activity_desc: Phase 87 execution started
+state_head: 1e12c6bf8cf5a1b985f1866d876672dbfd652144
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-08)
 
 **Core value:** A submission-ready arXiv software paper that makes `fdars`'s breadth and method-accuracy provably clear — every code snippet runs against the current API, every number is machine-derived from the live capability/reference maps, and every figure/table is regenerable by a single command.
-**Current focus:** Phase 86 — Single-Source-of-Truth Wiring + CI Gate
+**Current focus:** Phase 87 — Comparison Table + Evidence File
 
 ## Current Position
 
-Phase: 87 — Comparison Table + Evidence File
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-08 — Phase 86 complete, transitioned to Phase 87
+Phase: 87 (Comparison Table + Evidence File) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-09-09 — Phase 87 execution started
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Last activity: 2026-09-08 — Phase 86 complete, transitioned to Phase 87
 | Phase 85 P85-02 | 3 | 2 tasks | 10 files |
 | Phase 86 P86-01 | 3 | 3 tasks | 6 files |
 | Phase 86-single-source-of-truth-wiring-ci-gate P02 | 2 | 2 tasks | 1 files |
+| Phase 87 P87-01 | 10 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,9 @@ Recent decisions affecting current work:
 - [Phase 86]: paper.yml step order load-bearing: offline pipeline (gen_figures → assert_coverage --check → gen_refs_bib) before tectonic PDF compile so drift fails fast
 - [Phase 86]: wtfjoke/setup-tectonic@v4 with github-token only (no biber-version for natbib+plain BibTeX)
 - [Phase 86]: No maturin/fdars install in paper.yml Phase 86 — stdlib-only scripts; Phase 89 will extend for case study scripts
+- [Phase 87]: evidence-first authoring: comparison_evidence.md before table; cells from RESEARCH.md dossiers verbatim, not from memory
+- [Phase 87]: \FdarsVersion{0.12.0} macro in comparison_table.tex for single-point Phase 90 update to 0.13.0
+- [Phase 87]: check_comparison.py SC-3 gate: escaped-ampersand sentinel split + prefix-match evidence lookup for fda 6.3.0 → fda
 
 ### Pending Todos
 
@@ -142,8 +146,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-08T21:27:04.313Z
-Stopped at: Phase 86 complete, ready to plan Phase 87
+Last session: 2026-09-08T22:21:21.267Z
+Stopped at: Completed 87-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
