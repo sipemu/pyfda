@@ -1,38 +1,12 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v13.0 — Scientific Provenance & Cross-Language Implementations",
-  "phases": [
-    {
-      "number": "80",
-      "name": "Schema, Data Home & Primary Guard Tests",
-      "status": "complete"
-    },
-    {
-      "number": "81",
-      "name": "Curation — Paper Registry",
-      "status": "complete"
-    },
-    {
-      "number": "82",
-      "name": "MCP Tool `fdars_method_references` + GATE-05 Companion",
-      "status": "complete"
-    },
-    {
-      "number": "83",
-      "name": "Docs, llms.txt & Skill Extension",
-      "status": "complete"
-    },
-    {
-      "number": "84",
-      "name": "Close Gate — Strict Build, Guard-Sync, DOI Gate & Blocking Review",
-      "status": "complete"
-    }
-  ],
+  "milestone": "v14.0",
+  "phases": [],
   "next": {
-    "command": "/gsd:progress",
-    "label": "Show progress",
-    "reason": "Unsure of state — showing progress"
+    "command": "/gsd:discuss-phase",
+    "label": "Discuss the first phase",
+    "reason": "Project initialized — plan your first phase"
   },
-  "updated_at": "2026-09-07T20:41:14.433Z"
+  "updated_at": "2026-09-08T19:05:28.468Z"
 }
