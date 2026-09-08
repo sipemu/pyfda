@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v13.0
-milestone_name: Scientific Provenance & Cross-Language Implementations
-status: Awaiting next milestone
-stopped_at: Phase 84 complete — all phases complete
-last_updated: "2026-09-07T20:41:14.424Z"
-last_activity: 2026-09-07
-last_activity_desc: Milestone v13.0 completed and archived
-state_head: bef6d49dd96e2b4a42617d07e6de9b82bc4185b3
+milestone: v14.0
+milestone_name: fdars Software Paper — arXiv Preprint
+status: planning
+last_updated: "2026-09-08T19:05:28.465Z"
+last_activity: 2026-09-08
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
-current_phase: 84
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 
 ## Current Position
 
-Phase: Milestone v13.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-07 — Milestone v13.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-09-08 — Milestone v14.0 started
 
 ## Performance Metrics
 

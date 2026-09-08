@@ -8,6 +8,19 @@ pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-da
 
 The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
 
+## Current Milestone: v14.0 fdars Software Paper — arXiv Preprint
+
+**Goal:** Produce a submission-ready arXiv software paper introducing the `fdars` package (FDApy-style — cf. arXiv:2101.11003), backed by a fully reproducible figure/table pipeline, foregrounding **breadth of FDA method coverage** and **method-accuracy/correctness** as the differentiators, with the Rust/zero-copy architecture and the unique grounded-AI-advisor + scientific-provenance layers as design highlights. A writing + reproducible-code milestone — no `fdars-core` bump, no new numerical bindings.
+
+**Target features:**
+- **Manuscript** — `paper/` LaTeX source (arXiv `article`, self-contained): Abstract · Introduction & statement of need · brief FDA background · Software design & architecture (Rust core + PyO3 zero-copy, module map, `Fdata` container, sklearn layer, AI advisor) · data-representation model · capability tour by family with minimal runnable examples · comparison-with-related-software table (scikit-fda, FDApy, R fda/fda.usc/refund) · illustrative case studies on real datasets · availability/install · conclusion · references.
+- **Reproducible artifact** — `paper/code/` + one-command runner that regenerates *every* figure and table against the current `fdars` API: offline, seeded/deterministic, using existing `docs/data/` datasets; matplotlib result figures committed to `paper/figures/`.
+- **Grounded claims** — coverage numbers derived from the live `_capability_map.json`; bibliography (`paper/refs.bib`) generated from v13's `_references_map.json`; every manuscript code snippet executes against current `fdars`.
+- **Citable-release companion** — `CITATION.cff` + arXiv-ready metadata (author block placeholdered to Simon Müller <sm@data-zoo.de>, finalized by human).
+- **Build gate** — reproducible pipeline runs green offline (hard local gate, no LaTeX needed); LaTeX PDF compile gated in CI via `tectonic` (no local TeX toolchain); blocking human read-through of the manuscript before close.
+
+**Key context:** No crate bump / no new bindings — reuses existing `docs/data/` datasets (compatibility constraint) and the v12/v13 single-source-of-truth machinery (`_capability_map.json` for coverage, `_references_map.json` for the bibliography). No local TeX → PDF compile lives in CI (tectonic) or Overleaf; the local hard gate is the Python reproducible pipeline. Author block + final venue-shaping placeholdered for human finalization; package tick decided at close (likely a reversible `0.12.0 → 0.13.0` to pair with a citable release, or none).
+
 ## Current State
 
 **Shipped milestones:**
@@ -24,11 +37,11 @@ The documentation — diagrams first, examples second — must make functional d
 
 **Design source of truth (v2.0):** `.planning/design/llm-cluster-narration.md`
 
-## Recently Shipped: v13.0 Scientific Provenance & Cross-Language Implementations — SHIPPED 2026-09-07
+## Last Shipped Milestone: v13.0 Scientific Provenance & Cross-Language Implementations (shipped 2026-09-07)
 
 **Delivered:** every fdars AI surface now answers "what is method X, where does it come from, and how else could I do it?" with grounded scientific provenance — author-verified foundational papers + DOIs plus cross-language (R/Python/Matlab) implementation pointers — from a single committed `python/fdars/_references_map.json` (57 papers, 243 callable→paper entries). A provably LLM-free `fdars_method_references()` MCP tool (GATE-05 three-way mirror), an offline-generated References page + `llms.txt` provenance section, and a hybrid curated/ungrounded `fdars-capabilities` skill protocol (machine-readable `grounded:false`). Partial-but-honest coverage **28/437** (437 = 409 public + 28 Fdata methods; the tail carries full provenance flagged `curated:false` pending human promotion). Code + docs + skill — no `fdars-core` bump; package tick 0.11.0 → 0.12.0. Blocking human citation-accuracy review approved. 22/22 requirements validated; 5 phases, 11 plans; whole-site `mkdocs build --strict` green offline. Full detail: `.planning/milestones/v13.0-ROADMAP.md`.
 
-**Next:** planning next milestone (`/gsd-new-milestone`). The v13.0 goal below is retained for historical context.
+**Next:** v14.0 fdars Software Paper — arXiv Preprint (see Current Milestone above). The v13.0 goal below is retained for historical context.
 
 **Goal (v13.0):** When asked "what is method X, where does it come from, and how else could I do it?", every fdars AI surface returns *grounded* scientific provenance — foundational papers with DOIs/links — plus cross-language implementation pointers (R, Python, Matlab) for every public callable. A code + docs + skill milestone; no `fdars-core` bump and no new numerical bindings.
 
@@ -197,7 +210,15 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-_(No active milestone — v13.0 shipped 2026-09-07. Run `/gsd-new-milestone` to scope the next.)_
+**v14.0 — fdars Software Paper — arXiv Preprint (scoped 2026-09-08; writing + reproducible code, no crate bump):**
+
+- [ ] Manuscript scaffold — `paper/` LaTeX source (arXiv `article`, self-contained), FDApy-style section skeleton, author/metadata block, `refs.bib` generated from `_references_map.json`
+- [ ] Software design & architecture section — Rust core + PyO3 zero-copy, module map, `Fdata` container, sklearn layer, AI advisor/provenance (qualitative, no benchmarks)
+- [ ] Capability tour + comparison-with-related-software table — coverage grounded in the live `_capability_map.json`; feature comparison vs scikit-fda / FDApy / R fda·fda.usc·refund
+- [ ] Illustrative case studies on real `docs/data/` datasets — narrative worked examples with result figures
+- [ ] Reproducible artifact — `paper/code/` one-command runner regenerating every figure + table against current `fdars` (offline, seeded, deterministic), figures committed to `paper/figures/`
+- [ ] Citable-release companion — `CITATION.cff` + arXiv-ready metadata
+- [ ] Close gate — reproducible pipeline green offline; every manuscript snippet executes against current `fdars`; PDF compile via CI `tectonic`; blocking human manuscript read-through approved
 
 **v13.0 — Scientific Provenance & Cross-Language Implementations (Phases 80–84, shipped 2026-09-07; code + docs + skill, no crate bump):**
 
@@ -341,4 +362,6 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-07 — SHIPPED milestone v13.0 (Scientific Provenance & Cross-Language Implementations) via /gsd-autonomous. Code + docs + skill, no `fdars-core` bump: a curated paper-level references map (`_references_map.json`, 57 papers / 243 callable→paper entries, honest 28/437 coverage) with R/Python/Matlab implementation pointers, a provably LLM-free `fdars_method_references` MCP tool (GATE-05 mirror), an extended `fdars-capabilities` skill (hybrid curated/flagged-`grounded:false` protocol), and an offline-emitted References docs surface + `llms.txt` provenance section. 22/22 requirements validated; whole-site `mkdocs build --strict` green offline; blocking human citation-accuracy review approved; pkg 0.11.0 → 0.12.0. Next: `/gsd-new-milestone`.*
+*Last updated: 2026-09-08 — STARTED milestone v14.0 (fdars Software Paper — arXiv Preprint) via /gsd-new-milestone. FDApy-style software paper (arXiv preprint) introducing the `fdars` package, foregrounding breadth of FDA method coverage + method-accuracy/correctness (no benchmarks), backed by a fully reproducible figure/table pipeline in `paper/code/` running against the current API. Writing + reproducible-code milestone — no `fdars-core` bump, no new bindings; reuses `docs/data/` datasets, `_capability_map.json` (coverage) and `_references_map.json` (bibliography). Local hard gate = Python reproducible pipeline; PDF compile via CI tectonic; blocking human manuscript read-through before close. Next: `/gsd-plan-phase` after roadmap.*
+
+*Prior update: 2026-09-07 — SHIPPED milestone v13.0 (Scientific Provenance & Cross-Language Implementations) via /gsd-autonomous. Code + docs + skill, no `fdars-core` bump: a curated paper-level references map (`_references_map.json`, 57 papers / 243 callable→paper entries, honest 28/437 coverage) with R/Python/Matlab implementation pointers, a provably LLM-free `fdars_method_references` MCP tool (GATE-05 mirror), an extended `fdars-capabilities` skill (hybrid curated/flagged-`grounded:false` protocol), and an offline-emitted References docs surface + `llms.txt` provenance section. 22/22 requirements validated; whole-site `mkdocs build --strict` green offline; blocking human citation-accuracy review approved; pkg 0.11.0 → 0.12.0. Next: `/gsd-new-milestone`.*
