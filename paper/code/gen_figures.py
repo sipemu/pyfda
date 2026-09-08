@@ -30,8 +30,8 @@ def _smoke() -> None:
     Seeds the RNG before any stochastic draw; writes a deterministic PDF to
     paper/figures/smoke.pdf (per PIPE-02).
     """
-    np.random.seed(20260908)
-    y = np.random.randn(50).cumsum()
+    rng = np.random.default_rng(20260908)
+    y = rng.standard_normal(50).cumsum()
     x = np.arange(len(y))
 
     f, ax = fig()
