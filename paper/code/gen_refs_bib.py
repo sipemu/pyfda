@@ -56,18 +56,22 @@ def _entry(key: str, paper: dict) -> str:
     lowercase proper nouns.  ``doi`` and ``url`` are emitted only when
     non-empty (guards against the ``doi = {},`` empty-field BibTeX warning).
     """
-    authors = " and ".join(paper.get("authors", []))
+    authors = " and ".join(paper.get("authors") or [])
     # Escape any literal braces in the title before double-bracing
-    title = paper.get("title", "").replace("{", r"\{").replace("}", r"\}")
-    year = paper.get("year", "")
+    raw_title = paper.get("title") or ""
+    title = raw_title.replace("{", r"\{").replace("}", r"\}")
+    year = paper.get("year") or ""
     doi = paper.get("doi") or ""
     url = paper.get("url") or ""
     ptype = paper.get("type", "")
 
     lines = [f"@misc{{{key},"]
-    lines.append(f"  author = {{{authors}}},")
-    lines.append(f"  title  = {{{{{title}}}}},")
-    lines.append(f"  year   = {{{year}}},")
+    if authors:
+        lines.append(f"  author = {{{authors}}},")
+    if title:
+        lines.append(f"  title  = {{{{{title}}}}},")
+    if year:
+        lines.append(f"  year   = {{{year}}},")
     if doi:
         lines.append(f"  doi    = {{{doi}}},")
     if url:
