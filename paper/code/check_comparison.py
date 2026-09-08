@@ -1,8 +1,14 @@
-"""SC-3 traceability gate: every non-fdars checkmark/partial cell traces to evidence.
+"""SC-3 traceability gate + COMP-02 fdars-column grounding gate.
 
 Parses ``paper/sections/comparison_table.tex`` and ``paper/comparison_evidence.md``
-to verify that every non-fdars covered cell (``\\checkmark`` or ``\\textit{partial}``)
-in the comparison table has at least one matching claim line in the evidence file.
+to verify:
+
+1. **SC-3 peer-traceability:** Every non-fdars covered cell (``\\checkmark`` or
+   ``\\textit{partial}``) in the comparison table has at least one matching claim
+   line in the evidence file.
+2. **COMP-02 fdars-grounding:** Every fdars column cell is ``\\checkmark`` AND is
+   backed by at least one real submodule in ``python/fdars/_capability_map.json``
+   that contains ≥1 public (non-underscore) callable.
 
 Usage
 -----
@@ -10,22 +16,29 @@ Run from the repository root::
 
     python paper/code/check_comparison.py
 
-Exits 0 and prints ``COMPARISON_TRACE_OK`` when the evidence+table pair is complete.
-Exits 1 and prints ``UNSOURCED: <column> / <dimension> (<state>)`` for each gap.
+Exits 0 and prints ``COMPARISON_TRACE_OK`` when BOTH checks pass.
+Exits 1 and prints one or more of:
+  - ``UNSOURCED: <column> / <dimension> (<state>)`` for SC-3 peer gaps.
+  - ``FDARS_NOT_CHECK: <dimension>`` when an fdars cell is not ``\\checkmark``.
+  - ``UNGROUNDED: <dimension> (submodules=<tuple>)`` when no backing submodule
+    has ≥1 public callable in the map.
 
 Notes
 -----
-- The first data column (fdars) is skipped — the fdars column is grounded from
-  ``_capability_map.json`` in Plan 87-02, not from the evidence file.
+- The first data column (fdars) is grounded from ``_capability_map.json``
+  (COMP-02), not from the evidence file.
 - The trailing ``sklearn-compatible API`` and ``Language`` rows are excluded from
-  the traceability requirement (they are not capability dimensions).
+  both checks (they are not capability dimensions).
 - Dimension labels are matched by exact normalized string equality (whitespace
   stripped, ``\\&`` replaced with ``&``).
 - A family cell is considered evidenced if AT LEAST ONE member package has a
   matching (dimension-label, state != —) claim line in its section.
+- A dimension is grounded if AT LEAST ONE of its listed submodule keys exists
+  in the top-level capability map AND has ≥1 public callable entry.
 """
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -33,6 +46,7 @@ from pathlib import Path
 _REPO = Path(__file__).resolve().parent.parent.parent
 _TABLE = _REPO / "paper" / "sections" / "comparison_table.tex"
 _EVIDENCE = _REPO / "paper" / "comparison_evidence.md"
+_CAP_MAP = _REPO / "python" / "fdars" / "_capability_map.json"
 
 # ── Column definitions ────────────────────────────────────────────────────────
 # Order matches the tabular column order in comparison_table.tex (0-indexed).
@@ -46,6 +60,30 @@ _PEER_COLS: list[tuple[str, list[str]]] = [
     ("funData / tidyfun", ["funData", "tidyfun"]),
     ("Matlab (fdaM / PACE)", ["fdaM", "PACE"]),
 ]
+
+# ── fdars-column grounding map ────────────────────────────────────────────────
+# Maps each normalized dimension label (as returned by _norm(), matching what
+# the table parser produces) to the tuple of _capability_map.json top-level
+# submodule keys that back the fdars ✓ cell for that dimension.
+# Transcribed from RESEARCH.md §fdars Column Derivation.
+# A dimension is grounded if AT LEAST ONE listed submodule exists in the map
+# with ≥1 public (non-underscore) callable.
+DIMENSION_SUBMODULES: dict[str, tuple[str, ...]] = {
+    "Representation / basis smoothing": ("basis", "represent", "smoothing"),
+    "Registration / alignment": ("alignment",),
+    "Depth & outlier detection": ("depth", "outliers"),
+    "FPCA / covariance / PACE sparse FPCA": ("pace_fpca", "covariance"),
+    "Clustering": ("clustering",),
+    "Classification": ("classification", "shapelet"),
+    "Functional regression (SoF / FoF)": ("regression", "scalar_on_function", "famm"),
+    "Functional time series": ("fts",),
+    "Statistical process monitoring": ("spm",),
+    "Inference / hypothesis testing": ("inference",),
+    "Conformal prediction & tolerance bands": ("conformal", "tolerance"),
+    "Density / Frechet / metric-space": ("density_fda", "frechet", "metric"),
+    "Simulation & datasets": ("simulation", "datasets"),
+    "Grounded advisor + scientific provenance": ("explain",),
+}
 
 # Rows that are NOT capability dimensions — excluded from traceability check.
 _NON_CAPABILITY_ROWS = {
@@ -317,17 +355,104 @@ def _check(
     return sorted(misses)
 
 
+# ── fdars-column grounding check ─────────────────────────────────────────────
+
+def _load_cap_map(path: Path) -> dict[str, list[object]]:
+    """Load and return the capability map JSON.
+
+    Parameters
+    ----------
+    path : Path
+        Path to ``_capability_map.json``.
+
+    Returns
+    -------
+    dict[str, list]
+        Mapping of submodule key → list of callable entries.
+    """
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _check_fdars_grounding(
+    rows: list[tuple[str, list[str]]],
+    cap_map: dict[str, list[object]],
+) -> tuple[list[str], list[str]]:
+    """Verify that every fdars cell is ✓ and backed by the capability map.
+
+    Parameters
+    ----------
+    rows : list of (label, states)
+        Parsed table rows from :func:`_parse_table`.
+        ``states[0]`` is the fdars cell state.
+    cap_map : dict
+        The loaded capability map from ``_capability_map.json``.
+
+    Returns
+    -------
+    tuple[list[str], list[str]]
+        ``(not_check_misses, ungrounded_misses)`` — both sorted.
+        ``not_check_misses``: dimensions whose fdars cell is not ``\\checkmark``.
+        ``ungrounded_misses``: dimensions that have no backing submodule with
+        ≥1 public callable in the map.
+    """
+    not_check: list[str] = []
+    ungrounded: list[str] = []
+
+    for dim_label, states in rows:
+        # states[0] = fdars cell
+        fdars_state = states[0] if states else "none"
+
+        # (a) fdars cell must be ✓
+        if fdars_state != "checkmark":
+            not_check.append(f"FDARS_NOT_CHECK: {dim_label}")
+
+        # (b) grounding: at least one backing submodule has ≥1 public callable.
+        # The map stores each submodule as a dict of {callable_name: metadata},
+        # so public callables are keys that do not start with "_".
+        submodules = DIMENSION_SUBMODULES.get(dim_label, ())
+        grounded = False
+        for mod in submodules:
+            mod_entry = cap_map.get(mod)
+            if not mod_entry:
+                continue
+            if isinstance(mod_entry, dict):
+                public_count = sum(1 for k in mod_entry if not k.startswith("_"))
+            else:
+                # Defensive: treat as sequence of dicts with a "name" key
+                public_count = sum(
+                    1 for c in mod_entry
+                    if not (isinstance(c, dict) and c.get("name", "").startswith("_"))
+                )
+            if public_count > 0:
+                grounded = True
+                break
+        if not grounded:
+            ungrounded.append(
+                f"UNGROUNDED: {dim_label} (submodules={submodules})"
+            )
+
+    return sorted(not_check), sorted(ungrounded)
+
+
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def main() -> None:
-    """Run the SC-3 traceability gate and exit with appropriate code."""
+    """Run the SC-3 traceability gate + COMP-02 fdars-grounding gate."""
     rows = _parse_table(_TABLE)
     evidence = _parse_evidence(_EVIDENCE)
+    cap_map = _load_cap_map(_CAP_MAP)
+
+    # SC-3 peer-traceability check
     misses = _check(rows, evidence)
 
-    if misses:
-        for miss in misses:
-            print(miss, file=sys.stderr)
+    # COMP-02 fdars-grounding check
+    not_check_misses, ungrounded_misses = _check_fdars_grounding(rows, cap_map)
+
+    all_failures = sorted(misses) + sorted(not_check_misses) + sorted(ungrounded_misses)
+
+    if all_failures:
+        for failure in all_failures:
+            print(failure, file=sys.stderr)
         sys.exit(1)
 
     print("COMPARISON_TRACE_OK")
