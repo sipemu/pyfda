@@ -1,0 +1,41 @@
+% paper/paper.tex — minimal compiling skeleton for the fdars software paper
+% Bibliography: natbib + BibTeX (plain BibTeX only; CI uses tectonic)
+% The date field is empty intentionally for deterministic output.
+\documentclass[12pt,a4paper]{article}
+
+% Bibliography: natbib + BibTeX (plain BibTeX only)
+\usepackage[numbers,sort&compress]{natbib}
+
+% Basic packages for a software paper
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\title{fdars: Functional Data Analysis in Rust with Python Bindings}
+\author{Simon M\"{u}ller\\
+  \texttt{sm@data-zoo.de}}
+% Empty date for deterministic output.
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  Placeholder abstract — expanded in Phase 88.
+\end{abstract}
+
+\input{sections/intro}
+\input{sections/design}
+\input{sections/represent}
+\input{sections/capabilities}
+\input{sections/comparison}
+\input{sections/casestudies}
+\input{sections/availability}
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}
