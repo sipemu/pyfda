@@ -19,6 +19,8 @@ Run from the repository root::
 Exits 0 and prints ``COMPARISON_TRACE_OK`` when BOTH checks pass.
 Exits 1 and prints one or more of:
   - ``UNSOURCED: <column> / <dimension> (<state>)`` for SC-3 peer gaps.
+  - ``STATE_MISMATCH: <column> / <dimension> (table=checkmark, best_evidence=partial)``
+    when the table claims full support but every evidence entry is only partial.
   - ``FDARS_NOT_CHECK: <dimension>`` when an fdars cell is not ``\\checkmark``.
   - ``UNGROUNDED: <dimension> (submodules=<tuple>)`` when no backing submodule
     has ≥1 public callable in the map.
@@ -311,8 +313,9 @@ def _check(
     Returns
     -------
     list[str]
-        Each entry describes one unsourced cell:
-        ``"UNSOURCED: <column> / <dimension> (<state>)"``.
+        Each entry describes one unsourced or state-mismatched cell:
+        ``"UNSOURCED: <column> / <dimension> (<state>)"`` or
+        ``"STATE_MISMATCH: <column> / <dimension> (table=checkmark, best_evidence=partial)"``.
     """
     misses: list[str] = []
 
@@ -329,12 +332,19 @@ def _check(
 
             # A family cell is evidenced if AT LEAST ONE member package has a
             # claim for this dimension with a non-none state.
+            # Also track the *best* evidence state to detect STATE_MISMATCH when
+            # the table shows checkmark but all evidence is only partial.
             evidenced = False
+            best_state = "none"
             for pkg in member_pkgs:
                 # Direct lookup
-                if evidence.get(pkg, {}).get(dim_label, "none") != "none":
+                ev_direct = evidence.get(pkg, {}).get(dim_label, "none")
+                if ev_direct != "none":
                     evidenced = True
-                    break
+                    if ev_direct == "checkmark":
+                        best_state = "checkmark"
+                    elif ev_direct == "partial" and best_state != "checkmark":
+                        best_state = "partial"
                 # Case-insensitive and prefix match (e.g. "fda 6.3.0" for "fda")
                 for ek, eclaims in evidence.items():
                     # Match if evidence section name equals pkg or starts with pkg
@@ -342,15 +352,24 @@ def _check(
                     ek_lower = ek.lower()
                     pkg_lower = pkg.lower()
                     if ek_lower == pkg_lower or ek_lower.startswith(pkg_lower + " "):
-                        if eclaims.get(dim_label, "none") != "none":
+                        ev = eclaims.get(dim_label, "none")
+                        if ev != "none":
                             evidenced = True
-                            break
-                if evidenced:
-                    break
+                            if ev == "checkmark":
+                                best_state = "checkmark"
+                            elif ev == "partial" and best_state != "checkmark":
+                                best_state = "partial"
 
             if not evidenced:
                 state_label = "checkmark" if state == "checkmark" else "partial"
                 misses.append(f"UNSOURCED: {col_name} / {dim_label} ({state_label})")
+            elif state == "checkmark" and best_state == "partial":
+                # Table claims full support but every evidence entry is only partial —
+                # this is a state-level mismatch: the evidence does not justify checkmark.
+                misses.append(
+                    f"STATE_MISMATCH: {col_name} / {dim_label} "
+                    f"(table=checkmark, best_evidence=partial)"
+                )
 
     return sorted(misses)
 
