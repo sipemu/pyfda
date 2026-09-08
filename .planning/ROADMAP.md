@@ -46,7 +46,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 **Plans**: 2 plans
 
 - [x] 85-01-PLAN.md — Reproducible figure pipeline (tracer): paper_utils.py reusing docs_fig.py + data_path(), seeded figure script, one-command Makefile runner, determinism gate (empty git diff)
-- [ ] 85-02-PLAN.md — LaTeX manuscript skeleton (article + natbib/BibTeX, seven section stubs, no timestamps) + cffconvert-valid CITATION.cff
+- [x] 85-02-PLAN.md — LaTeX manuscript skeleton (article + natbib/BibTeX, seven section stubs, no timestamps) + cffconvert-valid CITATION.cff
 
 ### Phase 86: Single-Source-of-Truth Wiring + CI Gate
 

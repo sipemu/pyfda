@@ -4,17 +4,17 @@ milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 85
 current_phase_name: Manuscript Scaffold + Pipeline Infrastructure
-status: executing
-stopped_at: Completed 85-01-PLAN.md (3/3 tasks; PIPE-01 + PIPE-02 gates passed)
-last_updated: "2026-09-08T20:44:50.524Z"
+status: verifying
+stopped_at: Completed 85-02-PLAN.md (2/2 tasks; TEX_OK + CFF_OK gates passed)
+last_updated: "2026-09-08T20:49:33.548Z"
 last_activity: 2026-09-08
 last_activity_desc: Phase 85 execution started
-state_head: 2ac41b8ddaef6ce78d466a597b7f60c23673f7b1
+state_head: 2cfa12fdb6f9c7a7715f28306821a58d59f366df
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 Phase: 85 (Manuscript Scaffold + Pipeline Infrastructure) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-08 — Phase 85 execution started
 
 ## Performance Metrics
@@ -63,6 +63,7 @@ Last activity: 2026-09-08 — Phase 85 execution started
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 85 P01 | 2 | 3 tasks | 5 files |
+| Phase 85 P85-02 | 3 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,9 @@ Recent decisions affecting current work:
 - [Phase 85]: Import fig/FDARS_COLORS from docs_fig (not reimplemented) — reuses established Agg+rcParams block via import side-effect
 - [Phase 85]: save_figure() passes metadata={"CreationDate": None} suppressing PDF timestamp so git diff paper/figures/ is empty on re-run (PIPE-02)
 - [Phase 85]: Makefile paper targets use plain python (same convention as docs targets); no tectonic invocation — PDF compile is CI-only (Phase 86)
+- [Phase 85]: natbib+BibTeX only (NOT biblatex/biber) — tectonic silently emits [?] citations under biber; locked before first paper.tex commit
+- [Phase 85]: \date{} left empty in paper.tex — no timestamp macros anywhere in paper.tex or section stubs; deterministic output enforced
+- [Phase 85]: CITATION.cff preferred-citation doi field omitted entirely until Phase 90 assigns arXiv ID; identifiers.type=url used instead to avoid schema validation failure
 
 ### Pending Todos
 
@@ -131,8 +135,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-08T20:44:50.509Z
-Stopped at: Completed 85-01-PLAN.md (3/3 tasks; PIPE-01 + PIPE-02 gates passed)
+Last session: 2026-09-08T20:49:33.531Z
+Stopped at: Completed 85-02-PLAN.md (2/2 tasks; TEX_OK + CFF_OK gates passed)
 Resume file: None
 
 ## Operator Next Steps

@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 4
+open_count: 13
 waived_count: 0
 fixed_count: 0
-total_count: 4
-last_updated: 2026-09-07T19:26:35.119Z
+total_count: 13
+last_updated: 2026-09-08T20:49:45.297Z
 ---
 
 # Broken Windows Ledger
@@ -19,6 +19,15 @@ last_updated: 2026-09-07T19:26:35.119Z
 | 2 | 76 | stub | docs/examples/frechet-density-regression.md |  | No stubs present — all fences produce live outputs | open |  | 2026-09-05T21:47:16.350Z |  |
 | 3 | 77 | deviation | docs/analyze/index.md |  | Gallery card visual order + thumbnail display requires human review in Phase 79 | open |  | 2026-09-05T23:03:31.725Z |  |
 | 4 | 83 | deviation | scripts/generate_capability_dataset.py |  | Task 3 verify command grep scope broader than intent — align_cluster_fd legitimately in Full API Reference; provenance section correctly clean (section-scoped check confirms) | open |  | 2026-09-07T19:26:35.119Z |  |
+| 5 | 85 | stub | paper/paper.tex |  | Abstract placeholder — expanded in Phase 88 | open |  | 2026-09-08T20:49:43.659Z |  |
+| 6 | 85 | stub | paper/refs.bib |  | Stub placeholder entry — gen_refs_bib.py regenerates in Phase 86 | open |  | 2026-09-08T20:49:43.791Z |  |
+| 7 | 85 | stub | paper/sections/intro.tex |  | Placeholder section — expanded in later phases | open |  | 2026-09-08T20:49:44.006Z |  |
+| 8 | 85 | stub | paper/sections/design.tex |  | Placeholder section — expanded in later phases | open |  | 2026-09-08T20:49:44.288Z |  |
+| 9 | 85 | stub | paper/sections/represent.tex |  | Placeholder section — expanded in later phases | open |  | 2026-09-08T20:49:44.544Z |  |
+| 10 | 85 | stub | paper/sections/capabilities.tex |  | Placeholder section — expanded in later phases | open |  | 2026-09-08T20:49:44.800Z |  |
+| 11 | 85 | stub | paper/sections/comparison.tex |  | Placeholder section — expanded in later phases | open |  | 2026-09-08T20:49:44.967Z |  |
+| 12 | 85 | stub | paper/sections/casestudies.tex |  | Placeholder section — expanded in later phases | open |  | 2026-09-08T20:49:45.106Z |  |
+| 13 | 85 | stub | paper/sections/availability.tex |  | Placeholder section — expanded in later phases | open |  | 2026-09-08T20:49:45.297Z |  |
 
 ````json
 [
@@ -68,6 +77,114 @@ last_updated: 2026-09-07T19:26:35.119Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-09-07T19:26:35.119Z",
+    "resolved_at": null
+  },
+  {
+    "id": 5,
+    "kind": "stub",
+    "phase": "85",
+    "file": "paper/paper.tex",
+    "line": null,
+    "description": "Abstract placeholder — expanded in Phase 88",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-08T20:49:43.659Z",
+    "resolved_at": null
+  },
+  {
+    "id": 6,
+    "kind": "stub",
+    "phase": "85",
+    "file": "paper/refs.bib",
+    "line": null,
+    "description": "Stub placeholder entry — gen_refs_bib.py regenerates in Phase 86",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-08T20:49:43.791Z",
+    "resolved_at": null
+  },
+  {
+    "id": 7,
+    "kind": "stub",
+    "phase": "85",
+    "file": "paper/sections/intro.tex",
+    "line": null,
+    "description": "Placeholder section — expanded in later phases",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-08T20:49:44.006Z",
+    "resolved_at": null
+  },
+  {
+    "id": 8,
+    "kind": "stub",
+    "phase": "85",
+    "file": "paper/sections/design.tex",
+    "line": null,
+    "description": "Placeholder section — expanded in later phases",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-08T20:49:44.288Z",
+    "resolved_at": null
+  },
+  {
+    "id": 9,
+    "kind": "stub",
+    "phase": "85",
+    "file": "paper/sections/represent.tex",
+    "line": null,
+    "description": "Placeholder section — expanded in later phases",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-08T20:49:44.544Z",
+    "resolved_at": null
+  },
+  {
+    "id": 10,
+    "kind": "stub",
+    "phase": "85",
+    "file": "paper/sections/capabilities.tex",
+    "line": null,
+    "description": "Placeholder section — expanded in later phases",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-08T20:49:44.800Z",
+    "resolved_at": null
+  },
+  {
+    "id": 11,
+    "kind": "stub",
+    "phase": "85",
+    "file": "paper/sections/comparison.tex",
+    "line": null,
+    "description": "Placeholder section — expanded in later phases",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-08T20:49:44.967Z",
+    "resolved_at": null
+  },
+  {
+    "id": 12,
+    "kind": "stub",
+    "phase": "85",
+    "file": "paper/sections/casestudies.tex",
+    "line": null,
+    "description": "Placeholder section — expanded in later phases",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-08T20:49:45.106Z",
+    "resolved_at": null
+  },
+  {
+    "id": 13,
+    "kind": "stub",
+    "phase": "85",
+    "file": "paper/sections/availability.tex",
+    "line": null,
+    "description": "Placeholder section — expanded in later phases",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-08T20:49:45.297Z",
     "resolved_at": null
   }
 ]

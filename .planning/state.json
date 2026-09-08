@@ -1,12 +1,43 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v14.0",
-  "phases": [],
+  "milestone": "v14.0 — fdars Software Paper — arXiv Preprint",
+  "phases": [
+    {
+      "number": "85",
+      "name": "Manuscript Scaffold + Pipeline Infrastructure",
+      "status": "pending"
+    },
+    {
+      "number": "86",
+      "name": "Single-Source-of-Truth Wiring + CI Gate",
+      "status": "pending"
+    },
+    {
+      "number": "87",
+      "name": "Comparison Table + Evidence File",
+      "status": "pending"
+    },
+    {
+      "number": "88",
+      "name": "Front Matter, Design/Architecture & Capability Tour",
+      "status": "pending"
+    },
+    {
+      "number": "89",
+      "name": "Case Studies + Reproducible Figures",
+      "status": "pending"
+    },
+    {
+      "number": "90",
+      "name": "Close Gate + Citable Release",
+      "status": "pending"
+    }
+  ],
   "next": {
-    "command": "/gsd:discuss-phase",
-    "label": "Discuss the first phase",
-    "reason": "Project initialized — plan your first phase"
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step (verify)",
+    "reason": "Phase 85 of 6 · ready to verify"
   },
-  "updated_at": "2026-09-08T19:05:28.468Z"
+  "updated_at": "2026-09-08T20:49:17.706Z"
 }
