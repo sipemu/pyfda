@@ -7,15 +7,20 @@ emitted.
 
 Usage
 -----
-::
+Generate mode (writes paper/refs.bib)::
 
     python paper/code/gen_refs_bib.py
+
+Check mode (exits 1 if the committed file differs from a fresh derivation)::
+
+    python paper/code/gen_refs_bib.py --check
 
 The script is stdlib-only (``json``, ``pathlib``, ``sys``).  The cite-key for
 each entry IS the paper-key verbatim — no name-parsing transformation is
 applied.  Authors are joined with `` and ``.  Titles are double-braced
-(``{{...}}``) to preserve case under ``\\bibliographystyle{plain}``.  The
-``doi`` and ``url`` lines are emitted only when non-empty.
+(``{{...}}``) to preserve case under ``\\bibliographystyle{plain}``.  Fields
+(author, title, year, doi, url) are omitted when empty to avoid invalid
+BibTeX like ``year = {None},`` or ``author = {}``.
 """
 from __future__ import annotations
 
@@ -82,8 +87,16 @@ def _entry(key: str, paper: dict) -> str:
     return "\n".join(lines)
 
 
-def main() -> None:
-    """Load the references map and write paper/refs.bib."""
+def _build_content() -> tuple[str, int, int]:
+    """Load the references map and derive the full refs.bib content.
+
+    Returns
+    -------
+    tuple[str, int, int]
+        ``(content, n_entries, n_skipped)`` where *content* is the full file
+        text, *n_entries* is the number of emitted entries, and *n_skipped*
+        is the number of ``_uncurated`` entries that were omitted.
+    """
     refs = json.loads(_REF_MAP.read_text())
     papers = refs.get("papers", {})
 
@@ -96,8 +109,32 @@ def main() -> None:
         entries.append(_entry(key, papers[key]))
 
     content = _HEADER + "\n\n".join(entries) + "\n"
-    _OUT.write_text(content)
-    print(f"Written {_OUT} ({len(entries)} entries, {skipped} uncurated skipped)")
+    return content, len(entries), skipped
+
+
+def main() -> None:
+    """Entry point: generate or check refs.bib."""
+    check_mode = "--check" in sys.argv
+    content, n_entries, n_skipped = _build_content()
+
+    if check_mode:
+        if not _OUT.exists():
+            print(
+                f"DRIFT: {_OUT} does not exist — run without --check to generate.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        committed = _OUT.read_text()
+        if committed != content:
+            print(
+                f"DRIFT: {_OUT} is stale — re-run gen_refs_bib.py and commit.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        print("gen_refs_bib: OK (no drift)")
+    else:
+        _OUT.write_text(content)
+        print(f"Written {_OUT} ({n_entries} entries, {n_skipped} uncurated skipped)")
 
 
 if __name__ == "__main__":

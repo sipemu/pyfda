@@ -37,6 +37,9 @@ jobs:
       - name: Assert coverage macros (PIPE-03 drift gate)
         run: python paper/code/assert_coverage.py --check
 
+      - name: Assert refs.bib not stale (PIPE-04 drift gate)
+        run: python paper/code/gen_refs_bib.py --check
+
       - name: Regenerate refs.bib (PIPE-04)
         run: python paper/code/gen_refs_bib.py
 
