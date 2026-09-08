@@ -50,5 +50,6 @@ paper-refs:  ## Regenerate paper/refs.bib from _references_map.json
 paper-check:  ## Run the CI drift gates locally (exits 1 if any file is stale)
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/assert_coverage.py --check
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_refs_bib.py --check
+	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/check_comparison.py
 
 paper: paper-figures paper-coverage paper-refs  ## Run the one-command reproducible paper pipeline

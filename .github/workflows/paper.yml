@@ -43,6 +43,9 @@ jobs:
       - name: Regenerate refs.bib (PIPE-04)
         run: python paper/code/gen_refs_bib.py
 
+      - name: Check comparison traceability + fdars grounding (COMP)
+        run: python paper/code/check_comparison.py
+
       - name: Setup tectonic
         uses: wtfjoke/setup-tectonic@eb29fd68b7d3f76011906b6e45ea4320c8de5d2f  # v4
         with:
