@@ -65,14 +65,14 @@ def data_path(name: str) -> Path:
     data-reuse lock).  This keeps a single authoritative copy and avoids
     size-doubling committed data in ``paper/``.
     """
-    p = Path(name)
-    if p.is_absolute() or ".." in p.parts:
+    root = Path(__file__).resolve().parent.parent.parent
+    data_dir = (root / "docs" / "data").resolve()
+    resolved = (data_dir / name).resolve()
+    if not resolved.is_relative_to(data_dir):
         raise ValueError(
             f"data_path: name must be a plain filename, got {name!r}. "
             "Traversal and absolute paths are not permitted."
         )
-    root = Path(__file__).resolve().parent.parent.parent
-    resolved = root / "docs" / "data" / name
     if not resolved.exists():
         raise FileNotFoundError(f"dataset not found: {resolved}")
     return resolved
