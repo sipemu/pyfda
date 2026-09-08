@@ -31,7 +31,8 @@ preferred-citation:
       given-names: "Simon"
       email: "sm@data-zoo.de"
   year: 2026
+  journal: "arXiv preprint"   # TODO: update to venue/journal name at submission (Phase 90)
   identifiers:
     - type: url
-      value: "https://github.com/sipemu/pyfda"
-      description: "Repository (arXiv URL added at submission)"
+      value: "https://arxiv.org/abs/PLACEHOLDER"   # TODO: replace with actual arXiv ID at submission (Phase 90)
+      description: "arXiv preprint URL (assigned at submission)"
