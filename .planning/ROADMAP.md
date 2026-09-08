@@ -60,7 +60,10 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
   3. `.github/workflows/paper.yml` is path-filtered to `paper/**` + `_capability_map.json` + `_references_map.json` + `docs/data/**`, runs the reproducible pipeline offline as a hard gate, then compiles the PDF via `tectonic` (`wtfjoke/setup-tectonic@v4`).
   4. Introducing a drift (e.g. a stale hardcoded count or a missing ref) causes the CI gate to fail rather than pass silently.
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+- [ ] 86-01-PLAN.md — Generators + machine-derived outputs (tracer): `assert_coverage.py` (six coverage macros + `--check` drift gate) + `gen_refs_bib.py` (47 `@misc` entries), commit `coverage_counts.tex` + regenerated `refs.bib`, `\input{coverage_counts}` in `paper.tex`, extend `make paper`
+- [ ] 86-02-PLAN.md — CI gate: `.github/workflows/paper.yml` path-filtered to `paper/**` + both JSON maps + `docs/data/**`, offline pipeline hard gate before tectonic PDF compile, drift-fires negative test
 
 ### Phase 87: Comparison Table + Evidence File
 
@@ -124,7 +127,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 85. Manuscript Scaffold + Pipeline Infrastructure | 2/2 | Complete    | 2026-09-08 |
-| 86. Single-Source-of-Truth Wiring + CI Gate | 0/0 | Not started | - |
+| 86. Single-Source-of-Truth Wiring + CI Gate | 0/2 | Not started | - |
 | 87. Comparison Table + Evidence File | 0/0 | Not started | - |
 | 88. Front Matter, Design/Architecture & Capability Tour | 0/0 | Not started | - |
 | 89. Case Studies + Reproducible Figures | 0/0 | Not started | - |
