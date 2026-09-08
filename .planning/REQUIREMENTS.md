@@ -22,8 +22,8 @@ Requirements for this milestone. Each maps to exactly one roadmap phase. A writi
 
 - [x] **PIPE-01**: `paper/code/` reproducible pipeline with a one-command runner (Makefile target) that regenerates every figure and table; `paper_utils.py` reuses `scripts/docs_fig.py` (`fig()`/colors) and resolves `docs/data/` via a `data_path()` helper (no data duplication)
 - [x] **PIPE-02**: Deterministic figure generation — `matplotlib` `Agg` backend, module-top rcParams, per-figure `np.random.seed`, PDF output with suppressed `CreationDate` metadata; re-running the pipeline leaves `git diff paper/figures/` empty
-- [ ] **PIPE-03**: `assert_coverage.py` derives coverage counts (public + total callables) from `_capability_map.json`, writes `coverage_counts.tex` macros consumed by the manuscript, and exits non-zero on drift (no hardcoded integers in `.tex`)
-- [ ] **PIPE-04**: `gen_refs_bib.py` generates `paper/refs.bib` from `_references_map.json` (paper-key → cite-key, authors joined, DOI/URL fields), with a resolved strategy for the missing `journal` field (add venue during a curation pass, or emit `@misc`)
+- [x] **PIPE-03**: `assert_coverage.py` derives coverage counts (public + total callables) from `_capability_map.json`, writes `coverage_counts.tex` macros consumed by the manuscript, and exits non-zero on drift (no hardcoded integers in `.tex`)
+- [x] **PIPE-04**: `gen_refs_bib.py` generates `paper/refs.bib` from `_references_map.json` (paper-key → cite-key, authors joined, DOI/URL fields), with a resolved strategy for the missing `journal` field (add venue during a curation pass, or emit `@misc`)
 
 ### Comparison (COMP)
 
@@ -86,8 +86,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | MANU-08 | Phase 85 | Complete |
 | PIPE-01 | Phase 85 | Complete |
 | PIPE-02 | Phase 85 | Complete |
-| PIPE-03 | Phase 86 | Pending |
-| PIPE-04 | Phase 86 | Pending |
+| PIPE-03 | Phase 86 | Complete |
+| PIPE-04 | Phase 86 | Complete |
 | COMP-01 | Phase 87 | Pending |
 | COMP-02 | Phase 87 | Pending |
 | CASE-01 | Phase 89 | Pending |

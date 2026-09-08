@@ -4,17 +4,17 @@ milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 86
 current_phase_name: Single-Source-of-Truth Wiring + CI Gate
-status: planning
-stopped_at: Phase 85 complete, ready to plan Phase 86
-last_updated: "2026-09-08T21:02:02.328Z"
+status: executing
+stopped_at: "Completed 86-01: assert_coverage.py + gen_refs_bib.py + Makefile wiring"
+last_updated: "2026-09-08T21:23:24.184Z"
 last_activity: 2026-09-08
-last_activity_desc: Phase 85 complete, transitioned to Phase 86
-state_head: 849c48fb7ee51bfa688a9dc8ea7715ca06796763
+last_activity_desc: Phase 86 execution started
+state_head: e9cc50aae1951b77b4d1e23dabdba57f638de3b2
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-08)
 
 **Core value:** A submission-ready arXiv software paper that makes `fdars`'s breadth and method-accuracy provably clear — every code snippet runs against the current API, every number is machine-derived from the live capability/reference maps, and every figure/table is regenerable by a single command.
-**Current focus:** Phase 85 — Manuscript Scaffold + Pipeline Infrastructure
+**Current focus:** Phase 86 — Single-Source-of-Truth Wiring + CI Gate
 
 ## Current Position
 
-Phase: 86 — Single-Source-of-Truth Wiring + CI Gate
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-08 — Phase 85 complete, transitioned to Phase 86
+Phase: 86 (Single-Source-of-Truth Wiring + CI Gate) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-09-08 — Phase 86 execution started
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Last activity: 2026-09-08 — Phase 85 complete, transitioned to Phase 86
 |------|----------|-------|-------|
 | Phase 85 P01 | 2 | 3 tasks | 5 files |
 | Phase 85 P85-02 | 3 | 2 tasks | 10 files |
+| Phase 86 P86-01 | 3 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Recent decisions affecting current work:
 - [Phase 85]: natbib+BibTeX only (NOT biblatex/biber) — tectonic silently emits [?] citations under biber; locked before first paper.tex commit
 - [Phase 85]: \date{} left empty in paper.tex — no timestamp macros anywhere in paper.tex or section stubs; deterministic output enforced
 - [Phase 85]: CITATION.cff preferred-citation doi field omitted entirely until Phase 90 assigns arXiv ID; identifiers.type=url used instead to avoid schema validation failure
+- [Phase 86]: assert_coverage.py mirrors _coverage_counts() from generate_capability_dataset.py exactly; sorted macro keys ensure byte-identical re-runs (PIPE-03)
+- [Phase 86]: gen_refs_bib.py emits @misc for all 47 non-uncurated entries (no journal/booktitle in map); cite-key = paper-key verbatim; double-braced titles; conditional doi/url (PIPE-04)
 
 ### Pending Todos
 
@@ -135,8 +138,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-08T20:49:33.531Z
-Stopped at: Phase 85 complete, ready to plan Phase 86
+Last session: 2026-09-08T21:23:24.139Z
+Stopped at: Completed 86-01: assert_coverage.py + gen_refs_bib.py + Makefile wiring
 Resume file: None
 
 ## Operator Next Steps
