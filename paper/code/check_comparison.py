@@ -1,0 +1,337 @@
+"""SC-3 traceability gate: every non-fdars checkmark/partial cell traces to evidence.
+
+Parses ``paper/sections/comparison_table.tex`` and ``paper/comparison_evidence.md``
+to verify that every non-fdars covered cell (``\\checkmark`` or ``\\textit{partial}``)
+in the comparison table has at least one matching claim line in the evidence file.
+
+Usage
+-----
+Run from the repository root::
+
+    python paper/code/check_comparison.py
+
+Exits 0 and prints ``COMPARISON_TRACE_OK`` when the evidence+table pair is complete.
+Exits 1 and prints ``UNSOURCED: <column> / <dimension> (<state>)`` for each gap.
+
+Notes
+-----
+- The first data column (fdars) is skipped — the fdars column is grounded from
+  ``_capability_map.json`` in Plan 87-02, not from the evidence file.
+- The trailing ``sklearn-compatible API`` and ``Language`` rows are excluded from
+  the traceability requirement (they are not capability dimensions).
+- Dimension labels are matched by exact normalized string equality (whitespace
+  stripped, ``\\&`` replaced with ``&``).
+- A family cell is considered evidenced if AT LEAST ONE member package has a
+  matching (dimension-label, state != —) claim line in its section.
+"""
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+_REPO = Path(__file__).resolve().parent.parent.parent
+_TABLE = _REPO / "paper" / "sections" / "comparison_table.tex"
+_EVIDENCE = _REPO / "paper" / "comparison_evidence.md"
+
+# ── Column definitions ────────────────────────────────────────────────────────
+# Order matches the tabular column order in comparison_table.tex (0-indexed).
+# Col 0: Capability label (not a data column)
+# Col 1: fdars  — SKIPPED (grounded from _capability_map.json)
+# Cols 2-6: peer families
+_PEER_COLS: list[tuple[str, list[str]]] = [
+    ("scikit-fda", ["scikit-fda"]),
+    ("FDApy", ["FDApy"]),
+    ("R (fda / fda.usc / refund)", ["fda", "fda.usc", "refund"]),
+    ("funData / tidyfun", ["funData", "tidyfun"]),
+    ("Matlab (fdaM / PACE)", ["fdaM", "PACE"]),
+]
+
+# Rows that are NOT capability dimensions — excluded from traceability check.
+_NON_CAPABILITY_ROWS = {
+    "sklearn-compatible api",
+    "language",
+}
+
+# ── Normalization helpers ─────────────────────────────────────────────────────
+
+def _norm(s: str) -> str:
+    """Normalize a dimension label for comparison.
+
+    Strips surrounding whitespace, replaces ``\\&`` with ``&``, and removes
+    LaTeX accent macros such as ``\\'{e}`` → ``e``.
+
+    Parameters
+    ----------
+    s : str
+        Raw label string (from LaTeX or Markdown).
+
+    Returns
+    -------
+    str
+        Normalized label suitable for equality comparison.
+    """
+    t = s.strip()
+    t = t.replace(r"\&", "&").replace("\\&", "&")
+    # Remove LaTeX accent macros: \'{X}, \`{X}, \"{X}, \^{X}, \~{X}, \={X}
+    t = re.sub(r"\\[`'^\"~=]?\{([a-zA-Z])\}", r"\1", t)
+    # Also handle non-braced forms: \'e → e
+    t = re.sub(r"\\[`'^\"~=]([a-zA-Z])", r"\1", t)
+    return t
+
+
+def _cell_state(cell: str) -> str:
+    """Determine the coverage state of a LaTeX table cell token.
+
+    Parameters
+    ----------
+    cell : str
+        Stripped cell content from the LaTeX tabular row.
+
+    Returns
+    -------
+    str
+        One of ``"checkmark"``, ``"partial"``, or ``"none"``.
+    """
+    if r"\checkmark" in cell:
+        return "checkmark"
+    if r"\textit{partial}" in cell or "partial" in cell.lower():
+        return "partial"
+    return "none"
+
+
+# ── Table parser ─────────────────────────────────────────────────────────────
+
+def _parse_table(path: Path) -> list[tuple[str, list[str]]]:
+    """Parse the LaTeX comparison table into (dimension_label, [cell_states]) rows.
+
+    Only returns rows for capability dimensions (excludes trailing metadata rows).
+    Cell states are returned for ALL columns including fdars (col index 1).
+
+    Parameters
+    ----------
+    path : Path
+        Path to ``comparison_table.tex``.
+
+    Returns
+    -------
+    list of (label, states)
+        Each element is a (normalized dimension label, list of cell states) tuple.
+        The list has six entries: [fdars, scikit-fda, FDApy, R-family, fun/tidy, Matlab].
+    """
+    text = path.read_text(encoding="utf-8")
+
+    # Collect raw row lines — lines ending with \\ that are NOT header/rule lines
+    # and appear between \midrule ... \bottomrule.
+    # We use a line-by-line state machine: collect cells after the first \midrule,
+    # stop at \bottomrule.
+
+    rows: list[tuple[str, list[str]]] = []
+    in_body = False
+    current_cells: list[str] = []
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+
+        if r"\toprule" in line or r"\midrule" in line:
+            in_body = True
+            current_cells = []
+            continue
+        if r"\bottomrule" in line:
+            break
+        if not in_body:
+            continue
+
+        # Skip structural lines (empty, comment, begin/end)
+        if not line or line.startswith("%") or line.startswith("\\begin") or line.startswith("\\end"):
+            continue
+
+        # Accumulate cells; a row ends when a line contains \\
+        current_cells.append(line)
+
+        if line.rstrip().endswith("\\\\"):
+            # Reconstruct the full row text and split on unescaped &
+            row_text = " ".join(current_cells)
+            current_cells = []
+
+            # Remove trailing \\
+            row_text = row_text.rstrip()
+            if row_text.endswith("\\\\"):
+                row_text = row_text[:-2]
+
+            # Split on & that is NOT preceded by \ (escaped ampersands in labels)
+            # Replace \& with a sentinel, split on &, then restore sentinel.
+            _SENTINEL = "\x00AMP\x00"
+            row_text_safe = row_text.replace(r"\&", _SENTINEL)
+            raw_parts = row_text_safe.split("&")
+            parts = [p.replace(_SENTINEL, r"\&") for p in raw_parts]
+            if len(parts) < 2:
+                continue
+
+            raw_label = _norm(parts[0])
+            # Strip \textbf{} from label for comparison
+            clean_label = re.sub(r"\\textbf\{([^}]+)\}", r"\1", raw_label).strip()
+            if clean_label.lower() in _NON_CAPABILITY_ROWS:
+                continue
+            # Also skip header rows (e.g. the column-header row)
+            if clean_label.lower() in {"capability", "\\textbf{capability}"}:
+                continue
+            label = clean_label
+
+            cell_states = [_cell_state(p) for p in parts[1:]]
+            rows.append((label, cell_states))
+
+    return rows
+
+
+# ── Evidence parser ───────────────────────────────────────────────────────────
+
+def _parse_evidence(path: Path) -> dict[str, dict[str, str]]:
+    """Parse the evidence file into a mapping of package → dimension → state.
+
+    Parameters
+    ----------
+    path : Path
+        Path to ``comparison_evidence.md``.
+
+    Returns
+    -------
+    dict[str, dict[str, str]]
+        Outer key: package section name (e.g. ``"scikit-fda"``).
+        Inner key: normalized dimension label.
+        Value: one of ``"checkmark"``, ``"partial"``, or ``"none"``.
+    """
+    text = path.read_text(encoding="utf-8")
+    result: dict[str, dict[str, str]] = {}
+    current_pkg: str | None = None
+    in_claims = False
+
+    for line in text.splitlines():
+        # Package section header: ## <name> (not ###)
+        m_pkg = re.match(r"^## +(.+)$", line)
+        if m_pkg:
+            raw_pkg = m_pkg.group(1).strip()
+            # Skip sub-section headers that look like package names but aren't
+            # (e.g. "## scikit-fda" is a top-level package section)
+            current_pkg = raw_pkg
+            in_claims = False
+            if current_pkg not in result:
+                result[current_pkg] = {}
+            continue
+
+        # Claims sub-section
+        if re.match(r"^### +Claims", line):
+            in_claims = True
+            continue
+
+        # Another ### sub-section resets claims mode
+        if re.match(r"^### ", line) and not re.match(r"^### +Claims", line):
+            in_claims = False
+            continue
+
+        # Parse claim table rows: | Dimension | Cell | ... |
+        if in_claims and current_pkg and line.startswith("|"):
+            parts = [p.strip() for p in line.split("|")]
+            # parts[0] is empty (before first |), parts[-1] is empty (after last |)
+            if len(parts) < 4:
+                continue
+            dim_raw = parts[1]
+            cell_raw = parts[2]
+
+            # Skip header and separator rows
+            if not dim_raw or dim_raw.startswith("-") or dim_raw.lower() == "dimension":
+                continue
+
+            dim = _norm(dim_raw)
+            if "checkmark" in cell_raw.lower() or cell_raw.strip() == "✓":
+                state = "checkmark"
+            elif "partial" in cell_raw.lower():
+                state = "partial"
+            else:
+                state = "none"
+
+            result[current_pkg][dim] = state
+
+    return result
+
+
+# ── Traceability check ────────────────────────────────────────────────────────
+
+def _check(
+    rows: list[tuple[str, list[str]]],
+    evidence: dict[str, dict[str, str]],
+) -> list[str]:
+    """Return a sorted list of unsourced cell descriptions.
+
+    Parameters
+    ----------
+    rows : list of (label, states)
+        Parsed table rows from :func:`_parse_table`.
+    evidence : dict
+        Parsed evidence from :func:`_parse_evidence`.
+
+    Returns
+    -------
+    list[str]
+        Each entry describes one unsourced cell:
+        ``"UNSOURCED: <column> / <dimension> (<state>)"``.
+    """
+    misses: list[str] = []
+
+    for dim_label, states in rows:
+        # states[0] = fdars (skip), states[1..5] = peer families
+        for col_idx, (col_name, member_pkgs) in enumerate(_PEER_COLS):
+            # col_idx 0 → table states index 1+0 = 1 (fdars already in states[0])
+            state_idx = col_idx + 1  # offset by 1 for fdars col
+            if state_idx >= len(states):
+                continue
+            state = states[state_idx]
+            if state not in ("checkmark", "partial"):
+                continue
+
+            # A family cell is evidenced if AT LEAST ONE member package has a
+            # claim for this dimension with a non-none state.
+            evidenced = False
+            for pkg in member_pkgs:
+                # Direct lookup
+                if evidence.get(pkg, {}).get(dim_label, "none") != "none":
+                    evidenced = True
+                    break
+                # Case-insensitive and prefix match (e.g. "fda 6.3.0" for "fda")
+                for ek, eclaims in evidence.items():
+                    # Match if evidence section name equals pkg or starts with pkg
+                    # (handles "fda 6.3.0" matching package key "fda")
+                    ek_lower = ek.lower()
+                    pkg_lower = pkg.lower()
+                    if ek_lower == pkg_lower or ek_lower.startswith(pkg_lower + " "):
+                        if eclaims.get(dim_label, "none") != "none":
+                            evidenced = True
+                            break
+                if evidenced:
+                    break
+
+            if not evidenced:
+                state_label = "checkmark" if state == "checkmark" else "partial"
+                misses.append(f"UNSOURCED: {col_name} / {dim_label} ({state_label})")
+
+    return sorted(misses)
+
+
+# ── Entry point ───────────────────────────────────────────────────────────────
+
+def main() -> None:
+    """Run the SC-3 traceability gate and exit with appropriate code."""
+    rows = _parse_table(_TABLE)
+    evidence = _parse_evidence(_EVIDENCE)
+    misses = _check(rows, evidence)
+
+    if misses:
+        for miss in misses:
+            print(miss, file=sys.stderr)
+        sys.exit(1)
+
+    print("COMPARISON_TRACE_OK")
+
+
+if __name__ == "__main__":
+    main()
