@@ -1,144 +1,151 @@
 # Project Research Summary
 
-**Project:** pyfda — v13.0 Scientific Provenance & Cross-Language Implementations
-**Domain:** Curated scientific-citation + cross-language-implementation reference data over the existing `fdars` capability-discovery system (LLM-free MCP tool + Agent Skill + MkDocs/`llms.txt`)
-**Researched:** 2026-09-07
-**Confidence:** HIGH (stack/architecture/pitfalls grounded in the shipped v12.0 code; features MEDIUM — canonical papers web-verified, some contested attributions flagged)
+**Project:** pyfda — v14.0 fdars Software Paper (arXiv Preprint)
+**Domain:** Academic software-description paper + reproducible figure/table artifact
+**Researched:** 2026-09-08
+**Confidence:** HIGH
 
 ## Executive Summary
 
-v13.0 extends fdars so that for every public callable (~409 across ~30 submodules) the AI surfaces return **grounded scientific provenance** — foundational papers with author-verified DOIs/URLs — plus **cross-language implementation pointers** (R, Python, Matlab). The decisive insight across all four research streams is that **curation is paper-level, not callable-level**: the ~409 callables collapse onto ~40–100 foundational papers, so the authoring unit is the paper (with a callable index), not 409 separate entries. Attribution must, however, be keyed at the **sub-method** level — 14+ distinct paper lineages span the surface, so module-level citation is insufficient (e.g. band depth vs. modified band depth are different papers within `depth`).
+v14.0 delivers an FDApy-style arXiv software paper introducing the `fdars` package, foregrounding **breadth** (437 callables across 31 modules) and **method-accuracy/correctness** — explicitly no performance benchmarks. The Python FDA gap is real and citable: only scikit-fda (largely one-dimensional; no FTS/Fréchet/SPM/conformal) and FDApy (FPCA + dimension reduction only) exist, while fdars covers ≥18 capability families with no Python equivalent, plus a scikit-learn estimator layer (28 estimators) and a unique grounded AI-advisor + scientific-provenance layer. The paper is backed by a fully reproducible pipeline (a Python figure/table generator + CI `tectonic` PDF compile) fed from two committed single-source-of-truth JSON files (`_capability_map.json` for coverage, `_references_map.json` for the bibliography), so numeric claims cannot silently drift.
 
-The recommended approach is a **direct extension of v12.0's proven GATE-04 pattern**, not a new architecture: a committed static side-file `python/fdars/_references_map.json` (mirroring `_capability_curation.json`), paper-keyed with a `callable_index` for O(1) lookup, read by a new **LLM-free** MCP tool `fdars_method_references()` via `importlib.resources`. A GATE-05 three-way guard-sync (mirroring GATE-04) keeps the references index, the frozenset, and the tests synchronized. The hybrid "curated-preferred, LLM-fallback-flagged-as-ungrounded" protocol lives **only in the extended `fdars-capabilities` skill** — the MCP tool itself never synthesizes. Zero new runtime dependencies (`json` + `importlib.resources` are stdlib).
+Experts build these papers as a plain `article`-class LaTeX manuscript whose every code snippet flows from executed scripts (never copy-pasted) and whose every number is a machine-derived macro. The recommended approach mirrors the project's proven v12/v13 patterns: derive denominators, don't hardcode; default coverage claims to honest/partial; and gate correctness with a blocking human read-through (the same shape that caught 9 citation bugs in v13).
 
-The milestone-gating risk is **citation correctness**: a wrong attribution (crediting a variant to the wrong paper, wrong year/authors, textbook where a primary source belongs) is a correctness failure against the project's "provably correct" core value — not a style nit. Research already surfaced one such trap: **Fraiman & Muniz depth is 2001 (TEST), not the widely-miscited 1991.** Prevention is an author-verification workflow (each entry checked against its DOI landing page before commit) plus a **blocking human citation-accuracy review** before the docs surface ships. The secondary gating risks are LLM-free-boundary erosion (structural guards, not promises) and coverage dishonesty (report `N/409` explicitly; uncovered callables return `{"curated": false}`, never silence).
+**Primary risk:** stale API snippets and hardcoded coverage counts drifting from the live JSON after the manuscript is written — mitigated by deriving all numeric claims at build time (`\input{counts.tex}` macros) and executing every snippet through a hard pipeline gate before LaTeX compiles. **Secondary risk:** inaccurate peer-package comparison rows inviting reviewer rejection — mitigated by grounding the comparison table in a version-stamped `comparison_evidence.md`, human-reviewed at close.
 
 ## Key Findings
 
 ### Recommended Stack
 
-A **bespoke minimal JSON** (`_references_map.json`) with two top-level keys — `papers` (slug-keyed: title/authors/year/doi/url/venue) and a `callable_index` (`"module.callable"` → paper keys + cross-language pointers) — consistent with the existing `_capability_map.json` / `_capability_curation.json` shapes. CSL-JSON (citation-rendering, over-nested) and BibTeX (string format needing a parser) are both wrong for a lookup store. **No new dependencies.**
+Plain `\documentclass[12pt]{article}` (no custom `.sty`) matching the FDApy reference exactly — venue-agnostic, reshapeable to JOSS/JSS later. Bibliography via **natbib + BibTeX, not biblatex + biber**: tectonic has documented, unfixed biber version-mismatch failures in CI (silently produces `[?]` citations). arXiv's Nov-2025 rule change accepts raw `.bib` directly (no pre-compiled `.bbl`), but natbib+bibtex avoids all ambiguity. PDF compiles **only in CI** (no local TeX) via `wtfjoke/setup-tectonic@v4` (tectonic 0.17.x), in a standalone `paper.yml` workflow path-filtered to `paper/**`.
 
 **Core technologies:**
-- **Plain JSON + `importlib.resources.files()`**: data home + offline load — the exact pattern shipped at `fdars_list_capabilities` (server.py). Stdlib, 3.9-safe.
-- **`re` + `urllib.parse` (stdlib)**: offline DOI structural gate (`^10\.\d{4,9}/\S+$`) + URL well-formedness for CI; an optional online resolve is gated behind `FDARS_ONLINE_CHECKS=1` and must never run in `pytest`/`mkdocs build`.
-- **`maturin [tool.maturin] include`**: ship the new package-data JSON (existing `data/*.csv` include confirms the syntax).
-- **pytest (no `jsonschema`)**: schema validity, callable-index-vs-capability-map completeness, LLM-free boundary, structural DOI/URL gate.
+- **LaTeX `article` class + natbib + BibTeX** — manuscript — venue-agnostic, tectonic-compatible, no biber failure mode
+- **tectonic 0.17.x via `wtfjoke/setup-tectonic@v4`** — CI PDF compile — single-binary, no local TeX needed, caches packages
+- **Python + matplotlib (`Agg`) + Makefile** — reproducible figure/table pipeline — no Snakemake/DVC (20+ deps for zero benefit on a linear pipeline); determinism via `use("Agg")`, module-top rcParams, per-figure `np.random.seed(42)`, PDF output with suppressed `CreationDate` metadata
+- **stdlib Python generators** — `gen_refs_bib.py` (bib from `_references_map.json`), `assert_coverage.py`/`gen_counts.py` (coverage macros from `_capability_map.json`) — no new deps
+- **CITATION.cff 1.2.0** — citable-release metadata — validate with `cffconvert --validate`
 
 ### Expected Features
 
-The FDA literature landscape (see FEATURES.md — 24 family sections + 3 cross-language tables) is the authoring backbone.
+Section skeleton grounded in FDApy (arXiv:2101.11003) and scikit-fda (JSS 2024): Intro → FDA background → Data representation → Software design/architecture → Capability tour by family → Comparison with related software → Case studies → Availability → Conclusion → References.
 
 **Must have (table stakes):**
-- Foundational paper(s) with author-verified DOI/year for each family with a clear single root — FPCA (Ramsay & Silverman; Yao–Müller–Wang 2005 PACE), depth (Fraiman & Muniz **2001**; López-Pintado & Romo 2009 band depth; Tukey 1975 halfspace), Fréchet regression (Petersen & Müller 2019), elastic registration (Srivastava/Marron), GAK (Cuturi 2011), shapelets (Ye & Keogh 2009), FTS (Hyndman & Shang; Aue et al.).
-- Cross-language pointers per family: R (`fda`, `fda.usc`, `refund`, `funData`/`MFPCA`, `fdapace`, `elasticFDA`, `funFEM`, `fdaoutlier`), Python (`scikit-fda`, with honest gaps), Matlab (`fdaM`, PACE) — package + representative function + stable URL.
+- Statement of need / the Python FDA gap, with peer-package comparison
+- Data-representation model (`Fdata`, argvals/grids, irregular/sparse)
+- Capability tour by family with minimal runnable examples
+- ≥3 real-dataset case studies with figures
+- Honest, machine-derived coverage numbers
 
-**Should have (differentiators):**
-- 13 families where fdars' provenance is uniquely valuable because implementations are scattered/research-code-only or cross-language gaps exist (Fréchet regression, density/LQD FDA, ITP, MFPCA, FTS — no mature Python; depth/outlier/MFPCA/FTS — no Matlab toolbox).
-- Explicit "no implementation in language X" statements — honest gaps are a feature.
+**Should have (competitive differentiators):**
+- Formal comparison table (≈23 capability rows × ~8 package columns: scikit-fda, FDApy, R fda/fda.usc/refund, funData/tidyfun, Matlab fdaM/PACE)
+- The unique fdars story: PACE/sparse FPCA, sklearn compatibility (28 estimators, full `check_estimator`), grounded AI advisor + provenance layer, Rust/zero-copy design (qualitative)
 
-**Defer / anti-features:**
-- Six families are **anti-features for single citation** and must return an explicit "no curated entry — ungrounded synthesis permitted, flag it" sentinel: functional depth (category, 7+ variants), scoring metrics (no FDA root), SPM (extension not primary), seasonal (heterogeneous: STL/SSA/Lomb–Scargle/Matrix Profile), XAI/explain (standard ML), conformal (frontier, no consensus root).
-- Full 100% callable coverage — partial-but-honest `N/409` is acceptable this milestone; the tail rides the flagged LLM fallback.
+**Defer / exclude:**
+- Performance benchmarks — explicitly out of scope per user
+- JOSS short-form draft — arXiv preprint is primary; can reshape later
 
 ### Architecture Approach
 
-A separate committed side-file, not a capability-map extension (extending the auto-generated map would break the SKILL no-drift boundary). Paper-keyed schema + flat `callable_index` in the same identifier space as `_capability_curation.json`. The MCP tool is a pure static lookup returning `{"curated": true, papers[], cross_language[], coverage: "N/409"}` or `{"curated": false, "sentinel": "NO_CURATED_ENTRY"}`. Docs/`llms.txt` emit offline from the committed JSON via a `--references` flag on `generate_capability_dataset.py` (no `fdars` import at build). The skill carries the hybrid protocol.
+`paper/` sits at repo root, peer to `docs/`/`examples/` (it is not a docs page). The figure pipeline **reuses** `scripts/docs_fig.py` via import (adds `scripts/` to `sys.path`, reuses `fig()`/`FDARS_COLORS`, adds a PNG/PDF `save_fig()` helper) and reuses `docs/data/` via a `data_path()` resolver — no copy, no symlink. Single-source-of-truth wiring: `assert_coverage.py` re-derives (public, total) counts from `_capability_map.json` and writes `coverage_counts.tex` macros, exiting non-zero on drift; `gen_refs_bib.py` emits `refs.bib` from `_references_map.json`. A standalone `paper.yml` CI job (path-filtered to `paper/**` + both JSON files + `docs/data/**`) runs the pipeline as the hard gate, then compiles with tectonic.
 
 **Major components:**
-1. **`python/fdars/_references_map.json`** — curated data home (papers + callable_index + cross-language pointers).
-2. **`fdars_method_references()` MCP tool** — LLM-free static lookup alongside `fdars_list_capabilities`; `_REFERENCES_MODULES` derived from `_CAPABILITY_MODULES` (not re-declared).
-3. **GATE-05 guard-sync** (in `test_guard_sync_version_independent.py`) — internal index consistency, callable-index ⊆ capability map, LLM-free boundary (no `provider`/`model` keys), frozenset literal mirror.
-4. **Docs emit** — `docs/references.md` + per-method References blocks + `llms.txt` provenance section (with coverage fraction), generated offline.
-5. **Extended `fdars-capabilities` SKILL.md** — hybrid curated/flagged-ungrounded protocol; no advisor-skill duplication.
+1. **`paper/` LaTeX manuscript** (`paper.tex`, `refs.bib`, `figures/`, `sections/`) — the deliverable
+2. **`paper/code/` reproducible pipeline** (`build_figures.py`/`generate_all.py`, `paper_utils.py`, `assert_coverage.py`, `gen_refs_bib.py`, Makefile targets) — regenerates every figure + table + numeric macro
+3. **`.github/workflows/paper.yml`** — offline pipeline gate + tectonic PDF compile
+4. **`CITATION.cff` + `comparison_evidence.md`** — citable metadata + version-stamped peer-coverage evidence
 
 ### Critical Pitfalls
 
-1. **Wrong citation / variant conflation (milestone-gating)** — a resolving DOI ≠ correct attribution. Author-verify every entry against its DOI landing page before commit; blocking human citation-accuracy review before docs ship; flag contested attributions rather than forcing one (F&M 2001-not-1991 is the canonical trap).
-2. **LLM-free boundary erosion (milestone-gating)** — the tool must never synthesize; keep it a static `importlib.resources` load with a `curated:false` sentinel, guard-sync asserting no `provider`/`model` keys. Hybrid fallback lives only in the skill, with a machine-readable `grounded: bool` per citation, not prose caveats.
-3. **Coverage dishonesty** — silently-partial coverage read as complete. Report `N/409` in docs, `llms.txt`, and the tool response; uncovered callables signal `{"curated": false}`, never empty/error.
-4. **Guard-sync drift** — derive `_REFERENCES_MODULES` from `_CAPABILITY_MODULES` at import so a future crate-bump adding a submodule can't silently desync; write the guard test in the SAME commit as the tool handler.
-5. **Cross-language inaccuracy / link rot** — fabricated foreign implementations or wrong function names; mark Matlab (fdaM/PACE) pointers `confidence: low` unless individually verified; point URLs at specific function docs, not homepages; structural link gate now, online resolve opt-in only.
+1. **Stale code snippets** (highest risk) — every `.tex` snippet must flow from executed `paper/code/` scripts via `\verbatiminput` / `\input`, never copy-pasted; the pipeline runner is the hard local gate.
+2. **Hardcoded coverage counts drifting from JSON** — derive all numbers as `\input{counts.tex}` macros; `assert_coverage.py` exits non-zero on drift; wired into CI before figures are committed.
+3. **Inaccurate peer-comparison rows** (reviewer-rejection risk) — ground every competitor cell in `comparison_evidence.md` (URL + version + date); blocking human review at close.
+4. **Non-deterministic matplotlib output** — `Agg` backend, fixed rcParams, per-figure seed, PDF with suppressed `CreationDate`; determinism check = empty `git diff paper/figures/` on re-run (FreeType/font variance across platforms is the residual risk — generate/verify in CI).
+5. **tectonic + biblatex silent bib failure** — use natbib + BibTeX; decided before the first `paper.tex` commit.
+6. **arXiv self-containment** — arXiv recompiles source server-side; close-gate must test a clean-dir `pdflatex + bibtex` build with all figures committed to `paper/figures/`.
 
 ## Implications for Roadmap
 
-> Phase numbering **continues from v12.0** (which ended at Phase 79) — suggested phases below are **80–84**. Curation is the critical path; the MCP tool can run parallel to it.
+Based on research, suggested phase structure (continues numbering from v13.0 → **starts at Phase 85**):
 
-### Phase 80: Schema + Data Home + Primary Guard Tests
-**Rationale:** Everything downstream depends on the schema; build it first with a 3–5 paper stub.
-**Delivers:** `_references_map.json` stub, JSON schema + author-verification workflow doc, `pyproject.toml` maturin `include`, GATE-05 **primary** tests (internal consistency + callable-index ⊆ capability map), offline DOI/URL structural gate.
-**Uses:** plain JSON + `importlib.resources`; mirrors `_capability_curation.json`.
-**Avoids:** guard-sync drift (frozenset derived from `_CAPABILITY_MODULES`).
+### Phase 85: Manuscript Scaffold + Pipeline Infrastructure
+**Rationale:** Strict prerequisite — locks the tooling decisions (natbib+BibTeX, plain `article`, no `\today`, macro-driven counts) that every later phase depends on; getting these wrong propagates everywhere.
+**Delivers:** `paper/` tree, `paper.tex` skeleton + section stubs, `CITATION.cff`, `paper/code/` framework, `paper_utils.py`/`data_path()`, Makefile targets, a compiling minimal PDF.
+**Avoids:** Pitfalls 5 (biblatex), 2 (hardcoded counts scaffolding).
 
-### Phase 81: Curation — Paper Registry (bulk / critical path)
-**Rationale:** The milestone's substantive work; longest phase.
-**Delivers:** hand-authored paper-level entries across the families with clear roots + callable_index + R/Python/Matlab pointers; the six anti-feature families wired to the `curated:false` sentinel; explicit `N/409` coverage. Family-by-family, with a small verified sample per family before moving on. Start with one family (depth, ~5 papers/~15 callables) to calibrate authoring velocity.
-**Addresses:** table-stakes + differentiator families from FEATURES.md.
-**Avoids:** citation-correctness pitfall (author-verification before each commit).
+### Phase 86: Single-Source-of-Truth Wiring + CI Gate
+**Rationale:** Make drift tripwires functional before any prose cites numbers, so every authoring phase is protected from day one.
+**Delivers:** `assert_coverage.py` (counts from `_capability_map.json` → `coverage_counts.tex`, non-zero on drift), `gen_refs_bib.py` (`refs.bib` from `_references_map.json`), `.github/workflows/paper.yml` (offline pipeline gate + tectonic compile).
+**Uses:** stdlib generators, tectonic CI. **Implements:** components 2–3. **Avoids:** Pitfalls 1, 2.
 
-### Phase 82: MCP Tool + GATE-05 Complete
-**Rationale:** Can start right after Phase 80's schema; run parallel to Phase 81.
-**Delivers:** `fdars_method_references()` LLM-free lookup, `_REFERENCES_MODULES`, GATE-05 **companion** tests (LLM-free boundary + frozenset mirror), curated/sentinel return shape.
-**Implements:** components 2 + 3.
-**Avoids:** LLM-free boundary erosion.
+### Phase 87: Comparison Table + Evidence File
+**Rationale:** Highest peer-review-rejection risk; must precede the capability tour that references it. Requires a peer-package spot-check gate.
+**Delivers:** `comparison_evidence.md` (version-stamped sources), the ~23×8 comparison table (`\input`-ed), fdars column grounded from `_capability_map.json`.
+**Avoids:** Pitfall 3 (inaccurate comparison).
 
-### Phase 83: Docs + llms.txt + Skill Extension
-**Rationale:** Needs Phase 81 at a meaningful coverage threshold.
-**Delivers:** `docs/references.md` (family-grouped method→paper→implementation), `llms.txt` provenance section w/ coverage fraction, extended `fdars-capabilities` SKILL.md (hybrid protocol), `mkdocs.yml` nav wiring — all emitted offline from committed JSON.
-**Implements:** components 4 + 5.
+### Phase 88: Front Matter + Design/Architecture + Capability Tour
+**Rationale:** Prose sections that need no experiments; unblock writing immediately once infrastructure exists.
+**Delivers:** Abstract, Intro/statement-of-need, FDA background, data-representation, software design (Rust+PyO3, module map, `Fdata`, sklearn, advisor), capability tour by family with minimal runnable snippets.
 
-### Phase 84: Close Gate + Blocking Citation-Accuracy Review
-**Rationale:** Validation only — no new curation/tool work.
-**Delivers:** whole-site `mkdocs build --strict` green offline; GATE-05 all groups green; DOI/URL structural gate green; **blocking human citation-accuracy review** (sample verified against DOI landing pages by a human, not an LLM); coverage report reviewed; grounding invariant + guard-sync confirmed.
-**Avoids:** citation-correctness + coverage-dishonesty pitfalls as the hard close gate.
+### Phase 89: Case Studies + Reproducible Figures
+**Rationale:** Experiment-dependent; depends on `fdars` install in the paper env + verified dataset structures.
+**Delivers:** 3 case studies on `docs/data/` (phoneme/growth → smooth+FPCA+classify; tecator/canadian_weather → registration+regression; canadian_weather_precip → FTS forecast), figure scripts, committed `paper/figures/`.
+
+### Phase 90: Close Gate — Correctness, arXiv Compile, Human Review
+**Rationale:** Final integration; depends on all sections + figures.
+**Delivers:** every-snippet-runs verification, `assert_coverage` re-run (catch late binding additions), determinism check (byte-identical figures on re-run), clean-dir arXiv `pdflatex+bibtex` compile test, blocking human manuscript read-through, `CITATION.cff`/metadata finalization, package-tick decision.
 
 ### Phase Ordering Rationale
-- Schema first unblocks tool + curation in parallel (mirrors v12.0 sequencing).
-- Curation is the critical path and the correctness surface — it gets its own phase with per-family verification, not folded into the tool phase.
-- Guard tests land with the code they guard (GATE-04 lesson), not bolted on later.
-- The blocking human review sits between curation/docs and close — citations are correctness claims, parallel to the standing v6.0 blocking diagram review.
+- Infrastructure (85–86) strictly precedes authoring — no parallel work without the scaffold + drift gates.
+- The comparison table (87) precedes the capability tour that cites it and carries the highest external-review risk, so it's isolated with its own evidence gate.
+- Prose (88) and experiment-driven case studies (89) are largely independent once infrastructure is ready and could overlap.
+- Close (90) is pure integration + the correctness gates the milestone's core value demands.
 
 ### Research Flags
 Phases likely needing deeper research during planning:
-- **Phase 81 (Curation):** cross-reference `fdars-core` source per family to confirm method→paper mapping; resolve the flagged open attributions — `oneway_anova_vstat` (V-stat, tentatively Zhang & Liang 2014), `elastic_changepoint` (root unclear), `align_cluster_fd` (Sangalli 2010 vs. Tucker 2013 — flag, don't pick).
-- **Phase 83 (Docs emit):** test `generate_capability_dataset.py --references` against the Phase 80 stub before finalizing.
+- **Phase 86:** tectonic caching + path-filter behavior (verify cache hit/miss when library changes but `paper/` doesn't) before deploying `paper.yml`.
+- **Phase 87:** peer-package coverage facts (scikit-fda 0.10.x `check_estimator` status, FDApy v1.x, R refund) need a spot-check against CRAN/PyPI/arXiv before the table is finalized.
+- **Phase 89:** `canadian_weather_precip.csv` structure — confirm it supports multi-year slicing for the FTS case study before the figure script is written.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 80 (Schema):** direct application of `_capability_map.json` / `_capability_curation.json`.
-- **Phase 82 (GATE-05):** direct replication of the GATE-04 three-way mirror.
-- **Phase 84 (Close gate):** standard `mkdocs build --strict` + pytest.
+- **Phase 85:** arXiv/LaTeX requirements well-documented; structure mirrors FDApy/scikit-fda.
+- **Phase 88:** routine academic prose; snippet-testing + deterministic matplotlib are proven `docs.yml` patterns.
+- **Phase 90:** human review + arXiv submission rules are documented.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Format/packaging/testing derived from shipped v12.0 code (server.py, guard-sync tests); stdlib-only |
-| Features | MEDIUM | Canonical papers web-verified + DOI spot-checked; some contested attributions & active-research areas flagged |
-| Architecture | HIGH | GATE-05 is a structural mirror of read-in-full GATE-04; side-file pattern confirmed against `_capability_curation.json` |
-| Pitfalls | HIGH | Grounded in the shipped grounding-invariant culture; band-depth/modified-band-depth is a concrete in-repo example |
+| Stack | HIGH | arXiv reqs + tectonic biber issues + matplotlib Agg determinism verified against official docs / issue trackers |
+| Features | MEDIUM-HIGH | Section skeleton grounded in FDApy + scikit-fda JSS; differentiators verified vs `_capability_map.json`; comparison rows MEDIUM pending Phase-87 spot-check |
+| Architecture | HIGH | Layered onto the existing repo; single-source-of-truth + drift tripwire proven in v12–v13; CI mirrors `docs.yml` |
+| Pitfalls | HIGH | Derived from arXiv docs, tectonic issues, matplotlib docs, and shipped v6–v13 gate patterns |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
-- **Contested attributions** (`align_cluster_fd`, `elastic_changepoint`, `oneway_anova_vstat`): resolve during Phase 81 curation against fdars-core source; where genuinely contested, flag in-JSON rather than forcing a single citation.
-- **Matlab pointer verification**: fdaM/PACE function-level stability not individually verified — mark `confidence: low` until checked in Phase 81.
-- **Coverage target**: exact `N/409` threshold for "done" is a Phase-81 decision; partial-but-honest is acceptable, remainder deferrable to a future milestone.
-- **Citation-accuracy reviewer**: the blocking Phase-84 review needs a human domain check (not LLM) — identify the reviewer/sample size at planning.
+- **`journal` field missing in `_references_map.json`** — `gen_refs_bib.py` needs a strategy: add `journal`/venue to `@article` entries during a curation pass, or emit `@misc` for venue-less papers. Resolve in Phase 86.
+- **FTS dataset structure** — verify `canadian_weather_precip.csv` slicing supports the forecast case study. Resolve in Phase 89.
+- **Peer-package coverage verification** — spot-check ≥1 peer package against CRAN/PyPI/arXiv before finalizing the table. Resolve in Phase 87.
+- **matplotlib font portability** — confirm byte-identical PDF figures across macOS + Ubuntu CI (FreeType differences). Handle in Phase 86/89 determinism gate.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Shipped v12.0 code: `python/fdars/mcp/server.py` (`fdars_list_capabilities`, `importlib.resources`), `tests/test_guard_sync_version_independent.py` (GATE-04), `_capability_map.json` / `_capability_curation.json`, `scripts/generate_capability_dataset.py` (`--llmstxt`/`--references` emit).
-- FDA canonical papers verified against publisher pages (Ramsay & Silverman; Petersen & Müller 2019; López-Pintado & Romo 2009 JASA; Cuturi 2011; Ye & Keogh 2009; Yao–Müller–Wang 2005).
+- info.arxiv.org/help/submit_tex.html — arXiv TeX submission requirements (Nov-2025 raw-`.bib` rule)
+- tectonic GitHub issues #35, #53, #866, #930; setup-tectonic #194 — biber/biblatex failure modes
+- matplotlib official docs — `Agg` backend, rcParams, PDF metadata / `svg.hashsalt` determinism
+- CITATION.cff 1.2.0 schema; `cffconvert`
 
 ### Secondary (MEDIUM confidence)
-- CRAN / PyPI / CTAN package inventories for R/Python/Matlab cross-language pointers (stable but function-level naming to be reconfirmed in curation).
-- Fraiman & Muniz **2001 (TEST)** attribution — corrects a widespread 1991 miscitation.
+- arXiv:2101.11003 (FDApy) — section anatomy, case-study conventions, style target
+- scikit-fda JSS 2024 (v109i02) — fuller FDA-paper section structure
+- JOSS paper format + review criteria — "state of the field" expectations
+- CRAN Task View: Functional Data Analysis; PACE description — peer-package coverage (needs spot-check)
 
 ### Tertiary (LOW confidence)
-- Matlab research-code implementations (elastic FDA, PACE variants) — enumeration incomplete; mark low-confidence pending per-entry verification.
-- Frontier-area root papers (conformal, XAI/explain) — no consensus; classified as anti-features for single citation.
+- Abstract-level analysis of peer-package feature coverage — comparison-table cells pending Phase-87 verification
 
 ---
-*Research completed: 2026-09-07*
+*Research completed: 2026-09-08*
 *Ready for roadmap: yes*
