@@ -29,3 +29,16 @@ docs-serve:  ## Live-reload docs server at http://127.0.0.1:8000
 
 docs-clean:
 	rm -rf site
+
+# Paper figure pipeline targets.
+#
+# Requires both scripts/ (for docs_fig) and paper/code/ (for paper_utils)
+# on PYTHONPATH.  PDF compile (tectonic) is CI-only — not invoked here.
+PAPER_PYTHONPATH := scripts:paper/code
+
+.PHONY: paper paper-figures
+
+paper-figures:  ## Regenerate all paper figures deterministically
+	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_figures.py
+
+paper: paper-figures  ## Run the one-command reproducible paper pipeline
