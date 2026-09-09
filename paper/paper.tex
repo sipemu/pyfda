@@ -96,6 +96,12 @@
 % (long \texttt{} identifiers and DOI strings that resist hyphenation).
 \emergencystretch=3em
 
+% Let long code identifiers/paths in \texttt{} wrap: allow a break after every
+% underscore (e.g. python/fdars/_references_map.json breaks at _references / _map,
+% fdars.pace_fpca.irreg_fdata_from_lists at each underscore). No hyphen is
+% inserted — the right behaviour for code tokens.
+\renewcommand{\_}{\textunderscore\allowbreak}
+
 \begin{document}
 \maketitle
 
