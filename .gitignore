@@ -25,6 +25,18 @@ build/
 # mkdocs
 /site/
 
+# Paper build artifacts (figures/ and *.tex sources ARE committed; these are not)
+paper/_arxiv/
+paper/_ci_pdf/
+paper/arxiv-submission.tar.gz
+paper/paper.pdf
+paper/paper.bbl
+paper/paper.aux
+paper/paper.log
+paper/paper.out
+paper/paper.blg
+paper/paper.synctex.gz
+
 # OS
 .DS_Store
 Thumbs.db
