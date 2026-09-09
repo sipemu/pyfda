@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 13
+open_count: 16
 waived_count: 0
 fixed_count: 0
-total_count: 13
-last_updated: 2026-09-08T20:49:45.297Z
+total_count: 16
+last_updated: 2026-09-09T06:04:49.508Z
 ---
 
 # Broken Windows Ledger
@@ -28,6 +28,9 @@ last_updated: 2026-09-08T20:49:45.297Z
 | 11 | 85 | stub | paper/sections/comparison.tex |  | Placeholder section — expanded in later phases | open |  | 2026-09-08T20:49:44.967Z |  |
 | 12 | 85 | stub | paper/sections/casestudies.tex |  | Placeholder section — expanded in later phases | open |  | 2026-09-08T20:49:45.106Z |  |
 | 13 | 85 | stub | paper/sections/availability.tex |  | Placeholder section — expanded in later phases | open |  | 2026-09-08T20:49:45.297Z |  |
+| 14 | 88 | stub | paper/sections/abstract.tex |  | Abstract stub — one-sentence placeholder; expanded in Phase 88 Plan 03 | open |  | 2026-09-09T06:04:44.850Z |  |
+| 15 | 88 | stub | paper/sections/advisor.tex |  | Advisor section stub — title + one sentence; expanded in Phase 88 Plan 04 | open |  | 2026-09-09T06:04:49.388Z |  |
+| 16 | 88 | stub | paper/sections/conclusion.tex |  | Conclusion section stub — title + one sentence; expanded in Phase 88 Plan 05 | open |  | 2026-09-09T06:04:49.508Z |  |
 
 ````json
 [
@@ -185,6 +188,42 @@ last_updated: 2026-09-08T20:49:45.297Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-09-08T20:49:45.297Z",
+    "resolved_at": null
+  },
+  {
+    "id": 14,
+    "kind": "stub",
+    "phase": "88",
+    "file": "paper/sections/abstract.tex",
+    "line": null,
+    "description": "Abstract stub — one-sentence placeholder; expanded in Phase 88 Plan 03",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-09T06:04:44.850Z",
+    "resolved_at": null
+  },
+  {
+    "id": 15,
+    "kind": "stub",
+    "phase": "88",
+    "file": "paper/sections/advisor.tex",
+    "line": null,
+    "description": "Advisor section stub — title + one sentence; expanded in Phase 88 Plan 04",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-09T06:04:49.388Z",
+    "resolved_at": null
+  },
+  {
+    "id": 16,
+    "kind": "stub",
+    "phase": "88",
+    "file": "paper/sections/conclusion.tex",
+    "line": null,
+    "description": "Conclusion section stub — title + one sentence; expanded in Phase 88 Plan 05",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-09T06:04:49.508Z",
     "resolved_at": null
   }
 ]

@@ -96,7 +96,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 
 **Plans**: 5 plans
 
-- [ ] 88-01-PLAN.md — Snippet harness (tracer): `gen_snippets.py` (generate + `--check` drift) proven on the represent family, `\nsklearnestimators` macro, `listings` preamble + section stubs, make/`paper.yml` wiring (maturin build + path-filter widening)
+- [x] 88-01-PLAN.md — Snippet harness (tracer): `gen_snippets.py` (generate + `--check` drift) proven on the represent family, `\nsklearnestimators` macro, `listings` preamble + section stubs, make/`paper.yml` wiring (maturin build + path-filter widening)
 - [ ] 88-02-PLAN.md — Capability tour: all validated family snippets → `paper/snippets/*.tex`, breadth-first `capabilities.tex` family walk
 - [ ] 88-03-PLAN.md — Front matter: abstract + Introduction/statement-of-need + FDA background
 - [ ] 88-04-PLAN.md — Design/architecture + data representation + grounded-advisor/provenance sections

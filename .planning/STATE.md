@@ -4,17 +4,17 @@ milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 88
 current_phase_name: Front Matter, Design/Architecture & Capability Tour
-status: planning
-stopped_at: Phase 87 complete, ready to plan Phase 88
-last_updated: "2026-09-08T22:48:40.203Z"
+status: executing
+stopped_at: "Completed 88-01-PLAN.md (tracer: gen_snippets.py + represent.tex + nsklearnestimators macro + paper scaffold + make/CI wiring)"
+last_updated: "2026-09-09T06:04:33.001Z"
 last_activity: 2026-09-09
-last_activity_desc: Phase 87 complete, transitioned to Phase 88
-state_head: 1edcff9a3ccd76d2716c3dee00799aaea8ac3455
+last_activity_desc: Phase 88 execution started
+state_head: 3d2315c58348c4f8e4520364a0fcf7f84b20bb74
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 11
+  completed_plans: 7
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-08)
 
 **Core value:** A submission-ready arXiv software paper that makes `fdars`'s breadth and method-accuracy provably clear — every code snippet runs against the current API, every number is machine-derived from the live capability/reference maps, and every figure/table is regenerable by a single command.
-**Current focus:** Phase 87 — Comparison Table + Evidence File
+**Current focus:** Phase 88 — Front Matter, Design/Architecture & Capability Tour
 
 ## Current Position
 
-Phase: 88 — Front Matter, Design/Architecture & Capability Tour
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-09 — Phase 87 complete, transitioned to Phase 88
+Phase: 88 (Front Matter, Design/Architecture & Capability Tour) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-09-09 — Phase 88 execution started
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Last activity: 2026-09-09 — Phase 87 complete, transitioned to Phase 88
 | Phase 86-single-source-of-truth-wiring-ci-gate P02 | 2 | 2 tasks | 1 files |
 | Phase 87 P87-01 | 10 | 3 tasks | 5 files |
 | Phase 87 P02 | 5min | 2 tasks | 3 files |
+| Phase 88 P01 | 22 | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,8 @@ Recent decisions affecting current work:
 - [Phase 87]: check_comparison.py SC-3 gate: escaped-ampersand sentinel split + prefix-match evidence lookup for fda 6.3.0 → fda
 - [Phase 87]: DIMENSION_SUBMODULES transcribed from RESEARCH.md §fdars Column Derivation — dimension labels match _parse_table() output after _norm() strips LaTeX accents
 - [Phase 87]: check_comparison.py added to paper-check recipe only (not paper: generation target); paper.yml step placed after gen_refs_bib and before Setup tectonic
+- [Phase 88]: Use LaTeX listings (not minted) for snippet fragments: no -shell-escape, no pygments CI dependency, tectonic-friendly; proven in Phase 88 Plan 01
+- [Phase 88]: Add python/fdars/** + src/** to paper.yml path filter so API changes re-trigger snippet drift gate (Pitfall 5 prevention, Phase 88 Plan 01)
 
 ### Pending Todos
 
@@ -149,8 +152,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-08T22:28:49.730Z
-Stopped at: Phase 87 complete, ready to plan Phase 88
+Last session: 2026-09-09T06:04:32.921Z
+Stopped at: Completed 88-01-PLAN.md (tracer: gen_snippets.py + represent.tex + nsklearnestimators macro + paper scaffold + make/CI wiring)
 Resume file: None
 
 ## Operator Next Steps
