@@ -26,7 +26,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 - [x] **Phase 86: Single-Source-of-Truth Wiring + CI Gate** - `assert_coverage.py` (counts from `_capability_map.json`) + `gen_refs_bib.py` (`refs.bib` from `_references_map.json`) drift tripwires + `.github/workflows/paper.yml` offline gate + tectonic PDF compile (completed 2026-09-08)
 - [x] **Phase 87: Comparison Table + Evidence File** - version-stamped `comparison_evidence.md` (peer spot-check) + the capability-dimension × peer-package comparison table (`\input`-ed, fdars column grounded from `_capability_map.json`) (completed 2026-09-09)
 - [x] **Phase 88: Front Matter, Design/Architecture & Capability Tour** - Abstract, Intro/statement-of-need, FDA background, data-representation, software-design/architecture, advisor+provenance section, and the capability tour with executed-script snippets (completed 2026-09-09)
-- [ ] **Phase 89: Case Studies + Reproducible Figures** - four real-dataset case studies (phoneme/growth, tecator/canadian_weather, canadian_weather_precip FTS, wine/sonar sklearn Pipeline) with committed deterministic figures
+- [ ] **Phase 89: Case Studies + Reproducible Figures** - four real-dataset case studies (phoneme, tecator, canadian_weather_precip FTS, wine sklearn Pipeline) with committed deterministic figures (4 plans)
 - [ ] **Phase 90: Close Gate + Citable Release** - snippet-runs + coverage-drift + determinism gates, clean-dir arXiv `pdflatex+bibtex` compile, blocking human read-through, and the citable 0.13.0 release (bump + tag + CITATION/DOI wiring)
 
 ## Phase Details
@@ -115,7 +115,12 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
   4. Study 4 runs a sklearn `Pipeline` + `GridSearchCV` on wine/sonar showcasing the estimator layer with reproducible committed figures.
   5. Re-running the pipeline leaves `git diff paper/figures/` empty for every case-study figure.
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+- [ ] 89-01-PLAN.md — Study 1 (phoneme) tracer: casestudy1.py smooth+FPCA+classification → committed cs1 figures → casestudy1.tex + casestudies.tex four-\input shell → establish the git diff --exit-code paper/figures/ determinism gate (make + paper.yml) (CASE-01)
+- [ ] 89-02-PLAN.md — Study 2 (tecator) registration + scalar-on-function regression → committed cs2 figures + casestudy2.tex (CASE-02)
+- [ ] 89-03-PLAN.md — Study 3 (canadian_weather_precip) FTS forecast → committed cs3 figures + casestudy3.tex (CASE-03)
+- [ ] 89-04-PLAN.md — Study 4 (wine) sklearn Pipeline + GridSearchCV → committed cs4 figures + casestudy4.tex (CASE-04)
 
 ### Phase 90: Close Gate + Citable Release
 
@@ -139,7 +144,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 | 86. Single-Source-of-Truth Wiring + CI Gate | 2/2 | Complete    | 2026-09-08 |
 | 87. Comparison Table + Evidence File | 2/2 | Complete    | 2026-09-09 |
 | 88. Front Matter, Design/Architecture & Capability Tour | 5/5 | Complete    | 2026-09-09 |
-| 89. Case Studies + Reproducible Figures | 0/0 | Not started | - |
+| 89. Case Studies + Reproducible Figures | 0/4 | Planned | - |
 | 90. Close Gate + Citable Release | 0/0 | Not started | - |
 
 ---
