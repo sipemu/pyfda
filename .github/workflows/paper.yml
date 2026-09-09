@@ -10,6 +10,7 @@ on:
       - "python/fdars/**"
       - "src/**"
       - "docs/data/**"
+      - ".github/workflows/paper.yml"
   pull_request:
     paths:
       - "paper/**"
@@ -18,6 +19,8 @@ on:
       - "python/fdars/**"
       - "src/**"
       - "docs/data/**"
+      - ".github/workflows/paper.yml"
+  workflow_dispatch:
 
 jobs:
   paper:
