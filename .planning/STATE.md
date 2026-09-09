@@ -4,17 +4,17 @@ milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 89
 current_phase_name: Case Studies + Reproducible Figures
-status: executing
-stopped_at: Completed 89-03-PLAN.md (Study 3 FTS forecast)
-last_updated: "2026-09-09T08:07:54.280Z"
+status: verifying
+stopped_at: Completed 89-04-PLAN.md
+last_updated: "2026-09-09T08:42:52.730Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 89 execution started
-state_head: 1eff223b53a46da3b7c48c3dde9cd9378fdc47ff
+state_head: baef6cd7d345bd3d2e974482bb1143d3719c5195
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 15
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 Phase: 89 (Case Studies + Reproducible Figures) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-09 — Phase 89 execution started
 
 ## Performance Metrics
@@ -76,6 +76,7 @@ Last activity: 2026-09-09 — Phase 89 execution started
 | Phase 89-case-studies-reproducible-figures P89-01 | 399 | 3 tasks | 7 files |
 | Phase 89 P02 | 6 | 2 tasks | 4 files |
 | Phase 89 P03 | 480 | 2 tasks | 4 files |
+| Phase 89 P04 | 1950 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,7 @@ Recent decisions affecting current work:
 - [Phase 89]: 89-02: Used karcher_mean on 30-curve subset for efficiency; align_to_target applied to all 240; converged=False expected and documented
 - [Phase 89]: 89-02: Reported CV fold scores honestly including weak fold (0.405); mean CV R2=0.805 reported without adjustment
 - [Phase 89]: Study 3 (CASE-03): ftsm_forecast called on raw Xfts (35x365) not model dict; honest caveat that 35 stations is shallow for FTS
+- [Phase 89]: 89-04: Study-4 wine pipeline uses FPCATransformer -> sklearn LDA (not FPCKNNClassifier — double-FPCA); GridSearchCV n_jobs=1; best CV accuracy 0.961 at n_components=8 (live grid matches research verbatim)
 
 ### Pending Todos
 
@@ -175,8 +177,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-09T08:07:54.176Z
-Stopped at: Completed 89-03-PLAN.md (Study 3 FTS forecast)
+Last session: 2026-09-09T08:42:52.611Z
+Stopped at: Completed 89-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
