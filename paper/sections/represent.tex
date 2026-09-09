@@ -1,5 +1,112 @@
-% paper/sections/represent.tex — Data Representation section stub
-% Expanded in Phase 88.
-\section{Data Representation}
+% paper/sections/represent.tex — Data Representation
+% Written in Phase 88 (Plan 04). Do not edit manually.
 
-Placeholder data representation section — expanded in Phase 88.
+\section{Data Representation}
+\label{sec:represent}
+
+Functional data analysis treats each observation as a function --- a curve,
+surface, or trajectory --- rather than a finite-dimensional vector.
+\texttt{fdars} provides two complementary representations tailored to the two
+most common sampling regimes: densely observed data on a shared grid, and
+sparsely or irregularly observed longitudinal data with per-subject grids of
+differing length.
+
+\subsection{Dense Data: the \texttt{Fdata} Container}
+
+For the common case in which all $n_\mathrm{obs}$ functions are observed at
+the same $n_\mathrm{points}$ grid points, \texttt{fdars} uses the
+\texttt{Fdata} class (\texttt{python/fdars/fdata\_class.py}).  A
+\texttt{Fdata} object bundles:
+
+\begin{itemize}
+  \item \textbf{\texttt{data}} --- an $(n_\mathrm{obs} \times n_\mathrm{points})$
+    NumPy array.  Observations occupy rows; column index runs over the
+    evaluation grid.  The constructor validates shape and raises
+    \texttt{ValueError} when dimensions are inconsistent.
+
+  \item \textbf{\texttt{argvals}} --- a one-dimensional array of $n_\mathrm{points}$
+    grid points (the evaluation abscissae).  When omitted, a uniform grid on
+    $[0, 1]$ is inferred.  For the Berkeley Growth Study, for example,
+    \texttt{argvals} holds the 31 measurement ages (years $1$--$18$).
+
+  \item \textbf{\texttt{rangeval}} --- a two-tuple
+    $(\mathrm{min}, \mathrm{max})$ giving the functional domain.  If not
+    supplied it is derived automatically from \texttt{argvals}.  Methods such
+    as \texttt{deriv} and \texttt{normalize} use \texttt{rangeval} to orient
+    the domain of each functional observation.
+
+  \item \textbf{\texttt{id}} --- an optional sequence of string labels
+    identifying each observation (e.g.\ subject codes).
+
+  \item \textbf{\texttt{names}} --- an optional dictionary carrying
+    axis-label metadata (e.g.\ \texttt{\{"x": "Age (years)", "y":
+    "Height (cm)"\}}).
+
+  \item \textbf{\texttt{metadata}} --- an optional
+    \texttt{pandas.DataFrame} (or dict convertible to one) with one row per
+    observation, storing sample-level covariates such as sex or group
+    membership.
+\end{itemize}
+
+The capability tour (Section~\ref{sec:capabilities}) opens with an executed
+snippet that constructs an \texttt{Fdata} object from the Growth dataset and
+prints its \texttt{repr}; the output confirms the $(n_\mathrm{obs} \times
+n_\mathrm{points})$ shape and the inferred \texttt{rangeval}.  Key read-only
+properties (\texttt{n\_obs}, \texttt{n\_points}, \texttt{rangeval},
+\texttt{data}, \texttt{argvals}) expose the container fields.
+
+\texttt{Fdata} supports standard arithmetic operators (\texttt{+},
+\texttt{-}, \texttt{*}, \texttt{/}) enabling functional arithmetic, a
+\texttt{\_\_getitem\_\_} slice interface for sub-sampling observations, and
+\texttt{\_\_len\_\_} returning \texttt{n\_obs}.  It delegates all
+computationally intensive operations --- mean, depth, FPCA, regression
+transforms --- to the PyO3 binding layer described in Section~\ref{sec:design}.
+
+\subsection{Irregular and Sparse Data: \texttt{PyIrregFdata}}
+\label{subsec:irreg}
+
+Many longitudinal studies produce functional observations sampled at different,
+subject-specific time points --- a regime sometimes called \emph{sparse
+functional data} \citep{yao_muller_wang_2005}.  The dense
+$(n_\mathrm{obs} \times n_\mathrm{points})$ matrix of \texttt{Fdata} is not
+applicable here because the per-subject grids differ in both length and
+location.
+
+\texttt{fdars} represents irregularly sampled functional data through the
+\texttt{fdars.pace\_fpca.PyIrregFdata} container, constructed with the factory
+function:
+
+\begin{verbatim}
+irreg = fdars.pace_fpca.irreg_fdata_from_lists(argvals_list, values_list)
+\end{verbatim}
+
+where \texttt{argvals\_list} is a Python list of per-observation grid arrays
+(each of arbitrary length) and \texttt{values\_list} is the corresponding list
+of observed values.  The result is a \texttt{PyIrregFdata} object that the
+PACE FPCA algorithm (\texttt{fdars.pace\_fpca.pace\_fpca}) accepts as its
+primary input:
+
+\begin{verbatim}
+result = fdars.pace_fpca.pace_fpca(irreg, ncomp=2, bandwidth=0.1)
+\end{verbatim}
+
+PACE (Principal Analysis by Conditional Expectation,
+\citealt{yao_muller_wang_2005}) estimates mean and covariance functions via
+local polynomial smoothing and recovers FPCA scores for each subject even when
+individual trajectories are observed at only a handful of time points.  The
+capability tour (Section~\ref{sec:capabilities}) demonstrates this path with a
+synthetic irregularly sampled dataset; see also the FPCA family snippet.
+
+There is no top-level \texttt{fdars.IrregFdata} class; the public container is
+\texttt{PyIrregFdata} and the sole public constructor is
+\texttt{irreg\_fdata\_from\_lists}.  This design confines the irregular
+representation to the \texttt{pace\_fpca} module, which is the only analysis
+algorithm in \texttt{fdars} that currently operates on ragged input.
+
+\textbf{Differentiator.}  Among Python FDA packages (see
+Table~\ref{tab:comparison}), scikit-fda provides dense FPCA but no PACE sparse
+FPCA; FDApy supports irregular sampling in its FPCA but does not provide the
+breadth of analysis methods available in \texttt{fdars}.  The
+\texttt{PyIrregFdata} + PACE path in \texttt{fdars} thus extends the
+library's applicability to longitudinal cohort data without requiring
+pre-interpolation onto a common grid.
