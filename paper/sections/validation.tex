@@ -3,13 +3,18 @@
 \section{Validation and Correctness}
 \label{sec:validation}
 
+\subsection*{Development methodology disclosure}
+
 \texttt{fdars} and the underlying \texttt{fdars-core} Rust crate were developed
 with substantial assistance from Anthropic's Claude Code, an AI coding assistant.
-Because the implementation is largely AI-generated, independent validation is
-treated as a first-class design constraint rather than an afterthought: every
-layer of the stack is guarded by automated checks that run on each commit,
-and this manuscript is itself a reproducibility artefact whose code snippets and
-figures are regenerated and verified in CI.
+All algorithms, architecture decisions, and final code were specified, reviewed,
+and verified by the author; Claude Code served as an implementation accelerator
+throughout the development lifecycle.  Because much of the implementation was
+produced with AI assistance, independent validation is treated as a first-class
+design constraint rather than an afterthought: every layer of the stack is
+guarded by automated checks that run on each commit, and this manuscript is
+itself a reproducibility artefact whose code snippets and figures are
+regenerated and verified in CI.
 
 \subsection{Rust layer}
 
