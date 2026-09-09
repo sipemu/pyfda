@@ -32,9 +32,9 @@ Figure~\ref{fig:cs1-fpca} shows clear class separation in the PC1--PC2 plane,
 confirming that the dominant modes of variation align with phoneme identity.
 
 \paragraph{Classification.}
-A \texttt{sklearn.\allowbreak pipeline.\allowbreak Pipeline} composed of \texttt{FPCATransformer}
-(4 components) and \texttt{FPCLDAClassifier} (linear discriminant analysis on
-FPCA scores) is evaluated by 5-fold cross-validation
+We evaluate a scikit-learn \texttt{Pipeline} that chains an
+\texttt{FPCATransformer} (4 components) with an \texttt{FPCLDAClassifier}
+(linear discriminant analysis on FPCA scores) by 5-fold cross-validation
 \citep{preda_saporta_2005}.
 The pipeline achieves a mean CV accuracy of 86.3\% on held-out data
 (fold scores: $[0.850, 0.850, 0.863, 0.875, 0.875]$), demonstrating that four
