@@ -7,12 +7,16 @@ on:
       - "paper/**"
       - "python/fdars/_capability_map.json"
       - "python/fdars/_references_map.json"
+      - "python/fdars/**"
+      - "src/**"
       - "docs/data/**"
   pull_request:
     paths:
       - "paper/**"
       - "python/fdars/_capability_map.json"
       - "python/fdars/_references_map.json"
+      - "python/fdars/**"
+      - "src/**"
       - "docs/data/**"
 
 jobs:
@@ -26,25 +30,48 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Python dependencies
-        run: pip install matplotlib numpy
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Create venv and build fdars (maturin develop)
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install maturin numpy pandas scipy scikit-learn matplotlib
+          maturin develop --release
 
       - name: Regenerate figures (PIPE-02 determinism gate)
         env:
           PYTHONPATH: scripts:paper/code
-        run: python paper/code/gen_figures.py
+        run: |
+          . .venv/bin/activate
+          python paper/code/gen_figures.py
 
       - name: Assert coverage macros (PIPE-03 drift gate)
-        run: python paper/code/assert_coverage.py --check
+        run: |
+          . .venv/bin/activate
+          python paper/code/assert_coverage.py --check
 
       - name: Assert refs.bib not stale (PIPE-04 drift gate)
-        run: python paper/code/gen_refs_bib.py --check
+        run: |
+          . .venv/bin/activate
+          python paper/code/gen_refs_bib.py --check
 
       - name: Regenerate refs.bib (PIPE-04)
-        run: python paper/code/gen_refs_bib.py
+        run: |
+          . .venv/bin/activate
+          python paper/code/gen_refs_bib.py
 
       - name: Check comparison traceability + fdars grounding (COMP)
-        run: python paper/code/check_comparison.py
+        run: |
+          . .venv/bin/activate
+          python paper/code/check_comparison.py
+
+      - name: Assert snippets not stale (MANU-05 / GATE-02 drift gate)
+        run: |
+          . .venv/bin/activate
+          PYTHONPATH=scripts:paper/code python paper/code/gen_snippets.py --check
 
       - name: Setup tectonic
         uses: wtfjoke/setup-tectonic@eb29fd68b7d3f76011906b6e45ea4320c8de5d2f  # v4
