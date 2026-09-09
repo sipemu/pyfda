@@ -102,3 +102,10 @@ jobs:
         env:
           SOURCE_DATE_EPOCH: "0"
         run: tectonic paper/paper.tex
+
+      - name: Upload compiled PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-pdf
+          path: paper/paper.pdf
+          if-no-files-found: error
