@@ -51,7 +51,10 @@ public callables organised by method family:
   \item[Representation, basis and smoothing]
     \texttt{fdata}, \texttt{represent}, \texttt{basis}, \texttt{smoothing} ---
     functional object construction, derivative estimation, basis expansion,
-    GCV-penalised smoothing, interpolation, resampling.
+    GCV-penalised smoothing, interpolation, resampling;
+    \texttt{multi\_fdata} --- opaque container for multivariate functional data
+    (\texttt{PyMultiFunData}), grouping multiple \texttt{FdMatrix} components
+    under a single handle for joint analysis.
 
   \item[Alignment]
     \texttt{alignment} --- elastic registration via the square-root slope
@@ -80,9 +83,11 @@ public callables organised by method family:
     scalar-on-function (FPC-based and non-parametric), function-on-function
     regression, and functional additive mixed models.
 
-  \item[Functional time series]
+  \item[Functional time series and seasonal decomposition]
     \texttt{fts} --- functional time-series modelling via the FTSM framework
-    \citep{hyndman_ullah_2007} with multi-step forecasting.
+    \citep{hyndman_ullah_2007} with multi-step forecasting;
+    \texttt{seasonal} --- seasonal decomposition for functional time series
+    (trend, seasonal component, and remainder extraction).
 
   \item[Statistical process monitoring]
     \texttt{spm} --- phase-1 baseline estimation and phase-2 monitoring via
