@@ -11,10 +11,10 @@ Requirements for this milestone. Each maps to exactly one roadmap phase. A writi
 
 - [x] **MANU-01**: `paper/` LaTeX manuscript exists using plain `\documentclass{article}` with **natbib + BibTeX** (not biblatex/biber), authored as `paper.tex` + per-section files, no `\today`/timestamp macros
 - [x] **MANU-02**: Front matter — Abstract, Introduction & statement of need (the Python FDA gap), and a brief FDA-background section
-- [ ] **MANU-03**: Software design & architecture section — Rust core + PyO3 zero-copy, module map, `Fdata` container, sklearn estimator layer (qualitative; no benchmarks)
-- [ ] **MANU-04**: Data-representation model section — `Fdata`, argvals/grids, irregular/sparse (`IrregFdata`) representation
+- [x] **MANU-03**: Software design & architecture section — Rust core + PyO3 zero-copy, module map, `Fdata` container, sklearn estimator layer (qualitative; no benchmarks)
+- [x] **MANU-04**: Data-representation model section — `Fdata`, argvals/grids, irregular/sparse (`IrregFdata`) representation
 - [x] **MANU-05**: Capability tour by method family with minimal runnable code snippets, each snippet sourced from an executed `paper/code/` script (never hand-copied)
-- [ ] **MANU-06**: Dedicated section presenting the grounded **AI advisor + scientific-provenance** layer as a novel contribution absent from peer FDA packages
+- [x] **MANU-06**: Dedicated section presenting the grounded **AI advisor + scientific-provenance** layer as a novel contribution absent from peer FDA packages
 - [ ] **MANU-07**: Availability & installation section (PyPI, extras, Python 3.9–3.14) + Conclusion
 - [x] **MANU-08**: `CITATION.cff` (v1.2.0, `cffconvert`-valid) with a `preferred-citation` block for the arXiv preprint, author block placeholdered to Simon Müller <sm@data-zoo.de>
 
@@ -78,10 +78,10 @@ Which phases cover which requirements. Populated during roadmap creation.
 |-------------|-------|--------|
 | MANU-01 | Phase 85 | Complete |
 | MANU-02 | Phase 88 | Complete |
-| MANU-03 | Phase 88 | Pending |
-| MANU-04 | Phase 88 | Pending |
+| MANU-03 | Phase 88 | Complete |
+| MANU-04 | Phase 88 | Complete |
 | MANU-05 | Phase 88 | Complete |
-| MANU-06 | Phase 88 | Pending |
+| MANU-06 | Phase 88 | Complete |
 | MANU-07 | Phase 88 | Pending |
 | MANU-08 | Phase 85 | Complete |
 | PIPE-01 | Phase 85 | Complete |
