@@ -19,17 +19,17 @@
   \node[layer, fill=blue!10] (python)  at (0, 0)
     {\textbf{Python API layer} (\texttt{fdars})};
   \node[sublabel, below=1pt of python]
-    {Fdata container · sklearn estimators · grounded advisor · dataset loaders};
+    {Fdata container $\cdot$ sklearn estimators $\cdot$ grounded advisor $\cdot$ dataset loaders};
 
   \node[layer, fill=orange!10] (pyo3) at (0,-2.2)
     {\textbf{PyO3 binding layer} (\texttt{fdars.\_native})};
   \node[sublabel, below=1pt of pyo3]
-    {\texttt{\#[pyfunction]} wrappers · \texttt{PyReadonlyArray} views · row\,↔\,col-major (\texttt{convert.rs})};
+    {\texttt{\#[pyfunction]} wrappers $\cdot$ \texttt{PyReadonlyArray} views $\cdot$ row\,$\leftrightarrow$\,col-major (\texttt{convert.rs})};
 
   \node[layer, fill=green!10] (core) at (0,-4.4)
     {\textbf{Rust core} (\texttt{fdars-core})};
   \node[sublabel, below=1pt of core]
-    {\texttt{FdMatrix} (nalgebra) · data-parallel loops (rayon) · \nsubmodules{} algorithm families};
+    {\texttt{FdMatrix} (nalgebra) $\cdot$ data-parallel loops (rayon) $\cdot$ \nsubmodules{} algorithm families};
 
   % Arrows between layers
   \draw[arr] (python.south) -- node[right, font=\footnotesize]
