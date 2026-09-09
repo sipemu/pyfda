@@ -1,0 +1,61 @@
+% paper/sections/casestudy3.tex — Case Study 3: FTS forecast on Canadian weather precipitation
+% Written in Phase 89 (Plan 03). Do not edit manually.
+
+\subsection{Functional Time Series Forecasting: Canadian Weather Precipitation}
+\label{subsec:cs3-fts}
+
+The Canadian weather precipitation dataset records daily precipitation totals at
+35 weather stations over a 365-day annual cycle, yielding a $365 \times 35$
+data matrix.  We treat each station as a single functional observation — a
+365-point daily precipitation curve — and stack them into a $35 \times 365$
+array \texttt{Xfts}.  This casts the problem as functional time series (FTS)
+forecasting \citep{hyndman_ullah_2007,hormann_kokoszka_2010}: the 35 stations
+play the role of the time index, and the goal is to forecast the precipitation
+profile for three additional (hypothetical) stations.
+
+\paragraph{Decomposition.}
+The FTS mean curve and principal components are extracted via
+\texttt{fdars.fts.ftsm(Xfts, ARGd, ncomp=3)}, which fits the functional
+principal component decomposition and a vector autoregressive (VAR) model on
+the FPC scores.  Figure~\ref{fig:cs3-curves} displays the 35 observed station
+precipitation profiles together with the FTS mean curve.
+
+\paragraph{Forecasting.}
+Three-step-ahead forecasting is performed by
+\texttt{fdars.fts.ftsm\_forecast(Xfts, ARGd, h=3, ncomp=3)}, which accepts the
+raw data array and evaluation grid directly and returns a
+\texttt{forecast} array of shape $(3, 365)$.
+Figure~\ref{fig:cs3-forecast} shows the three forecast curves alongside the
+observed mean precipitation profile.
+The full analysis is reproduced exactly by \texttt{paper/code/casestudy3.py},
+which writes both figures deterministically.
+
+\paragraph{Honest caveat.}
+With only 35 stations, the FTS time index is shallow: VAR estimation on 3 FPC
+score series with 35 observations is illustrative rather than statistically
+optimal.  The study demonstrates \texttt{fdars}' FTS interface on a real dataset
+of the correct functional form; practitioners should interpret the forecast
+curves as a software demonstration, not as a validated meteorological model.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/cs3_precip_curves.pdf}
+  \caption{Canadian weather precipitation: 35 station daily precipitation curves
+    (grey traces) and the FTS mean curve (solid, \texttt{ftsm}, 3 components)
+    over a 365-day annual cycle.  Each station contributes one functional
+    observation to the $35 \times 365$ data matrix passed to
+    \texttt{fdars.fts.ftsm}.}
+  \label{fig:cs3-curves}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/cs3_precip_forecast.pdf}
+  \caption{FTS 3-step-ahead forecast of daily precipitation profiles (coloured
+    curves, $h = 1, 2, 3$) alongside the observed FTS mean (dashed grey).
+    The forecast array has shape $(3, 365)$, produced by
+    \texttt{fdars.fts.ftsm\_forecast(Xfts, ARGd, h=3, ncomp=3)}.
+    With 35 observations the result is illustrative; see text for the
+    shallow-sample caveat.}
+  \label{fig:cs3-forecast}
+\end{figure}
