@@ -1,5 +1,27 @@
-% paper/sections/capabilities.tex — Capabilities section stub
-% Expanded in Phase 88.
-\section{Capabilities}
+% paper/sections/capabilities.tex — capability-tour section.
+% Tracer snippet (represent) added in Phase 88 Plan 01.
+% Remaining family snippets appended by Phase 88 Plan 02.
+\section{Capability Tour}
 
-Placeholder capabilities section — expanded in Phase 88.
+fdars exposes \npubliccallables{} public callables across \nsubmodules{}
+submodules, covering the full breadth of functional data analysis methods
+surveyed in Table~\ref{tab:comparison}.
+The \ncoverage{} callables backed by at least one curated peer-reviewed
+reference are tracked in the machine-readable scientific-provenance layer
+(Section~\ref{sec:advisor}).
+The following minimal, executable snippets walk one representative per method
+family; each is sourced from a script that runs against the live fdars API and
+has its output deterministically captured (see \texttt{paper/code/gen\_snippets.py}).
+
+\subsection{Data Representation}
+
+The \texttt{Fdata} container bundles an $(n_\text{obs} \times n_\text{points})$
+observation matrix with a shared evaluation grid (\texttt{argvals}), an optional
+range specification (\texttt{rangeval}), per-observation identifiers, and
+arbitrary metadata.
+The snippet below constructs an \texttt{Fdata} object from the Berkeley growth
+study~\citep{ramsay2005functional} and prints its canonical representation:
+
+\input{snippets/represent}
+
+% --- Plan 88-02 appends remaining family \input lines below this marker ---

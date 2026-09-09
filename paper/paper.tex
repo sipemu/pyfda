@@ -15,6 +15,34 @@
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{adjustbox}
+\usepackage{listings}
+
+% Listing styles for executed capability-tour snippets (paper/snippets/*.tex).
+% fdarsinput  — Python source block: boxed, monospace, keyword highlighting.
+% fdarsoutput — Captured stdout block: plain monospace, no frame.
+\lstdefinestyle{fdarsinput}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+}
+\lstdefinestyle{fdarsoutput}{
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=none,
+}
+% UTF-8 literate map: typeset Fdata repr's en-dash and multiplication sign
+% cleanly inside listings (no special TeX escaping needed in the .tex source).
+\lstset{
+  literate=
+    {--}{{--}}2
+    {–}{{--}}1
+    {×}{{$\times$}}1,
+}
 
 \title{fdars: Functional Data Analysis in Rust with Python Bindings}
 \author{Simon M\"{u}ller\\
@@ -29,7 +57,7 @@
 \maketitle
 
 \begin{abstract}
-  Placeholder abstract — expanded in Phase 88.
+\input{sections/abstract}
 \end{abstract}
 
 \input{sections/intro}
@@ -37,8 +65,10 @@
 \input{sections/represent}
 \input{sections/capabilities}
 \input{sections/comparison}
+\input{sections/advisor}
 \input{sections/casestudies}
 \input{sections/availability}
+\input{sections/conclusion}
 
 \bibliographystyle{plain}
 \bibliography{refs}

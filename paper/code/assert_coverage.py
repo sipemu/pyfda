@@ -1,9 +1,8 @@
 """Generate or check paper/coverage_counts.tex from the committed JSON maps.
 
-Derives six LaTeX ``\\newcommand`` macros from
-``python/fdars/_capability_map.json`` and ``python/fdars/_references_map.json``
-using the same counting semantics as
-``scripts/generate_capability_dataset.py:_coverage_counts()``.
+Derives seven LaTeX ``\\newcommand`` macros from
+``python/fdars/_capability_map.json``, ``python/fdars/_references_map.json``,
+and ``fdars.sklearn.TRIAGE_VERDICTS`` (requires a compiled fdars in the env).
 
 Usage
 -----
@@ -17,12 +16,16 @@ Check mode (exits 1 if the committed file differs from a fresh derivation)::
 
 Macro set emitted
 -----------------
-``\\nsubmodules``      — number of public (non-underscore) module keys
-``\\ncallables``       — total callable entries across all map keys
-``\\npubliccallables`` — callable entries in non-underscore module keys
-``\\nfdata``           — public (non-underscore-prefixed) methods in the ``_Fdata`` key
-``\\ncoverage``        — callables backed by at least one curated paper
-``\\ndocpapers``       — non-``_uncurated`` papers in _references_map.json
+``\\ncallables``         — total callable entries across all map keys
+``\\ncoverage``          — callables backed by at least one curated paper
+``\\ndocpapers``         — non-``_uncurated`` papers in _references_map.json
+``\\nfdata``             — public (non-underscore-prefixed) methods in the ``_Fdata`` key
+``\\npubliccallables``   — callable entries in non-underscore module keys
+``\\nsklearnestimators`` — sklearn estimator classes with verdict "PASS" in TRIAGE_VERDICTS
+                           (machine-derived; DISTINCT from \\ncoverage which counts
+                           callables backed by curated papers — coincidental collision at 28,
+                           see RESEARCH.md §Architecture Facts Pitfall 6)
+``\\nsubmodules``        — number of public (non-underscore) module keys
 """
 from __future__ import annotations
 
@@ -37,7 +40,7 @@ _OUT = _REPO / "paper" / "coverage_counts.tex"
 
 
 def _derive_counts() -> dict[str, int]:
-    """Derive the six coverage macro values from the committed JSON maps.
+    """Derive the seven coverage macro values from the committed JSON maps.
 
     Returns
     -------
@@ -50,6 +53,13 @@ def _derive_counts() -> dict[str, int]:
     exactly.  The ``_Fdata`` key IS included in the ``ncallables`` denominator
     (``sum(len(v) for v in cap.values())`` includes all keys, underscore-prefixed
     or not).  Do NOT subtract ``__init__`` from the total.
+
+    The ``nsklearnestimators`` macro is machine-derived from
+    ``fdars.sklearn.TRIAGE_VERDICTS`` — the count of estimator classes whose
+    Phase 55-58 verdict is ``"PASS"`` after all reclassifications.  It is
+    DISTINCT from ``ncoverage`` (callables backed by curated papers): the two
+    happen to coincide at 28 as of fdars 0.12.0 but measure different surfaces.
+    A compiled ``fdars`` must be importable in the active environment.
     """
     cap = json.loads(_CAP_MAP.read_text())
     refs = json.loads(_REF_MAP.read_text())
@@ -75,12 +85,25 @@ def _derive_counts() -> dict[str, int]:
     # Non-uncurated papers (eligible for refs.bib emission)
     n_docpapers = sum(1 for k in papers if not k.startswith("_uncurated"))
 
+    # sklearn estimators with verdict "PASS" after Phase 55-58 reclassification.
+    # Machine-derived from TRIAGE_VERDICTS — do NOT hardcode the integer.
+    # DISTINCT from ncoverage (curated-paper-backed callables): see module docstring.
+    try:
+        from fdars.sklearn import TRIAGE_VERDICTS  # noqa: PLC0415
+    except ImportError as exc:
+        raise RuntimeError(
+            "assert_coverage.py: cannot import fdars.sklearn.TRIAGE_VERDICTS — "
+            "run under a compiled fdars venv (maturin develop)."
+        ) from exc
+    n_sklearn_estimators = sum(1 for v in TRIAGE_VERDICTS.values() if v == "PASS")
+
     return {
         "ncallables": sum(len(v) for v in cap.values()),
         "ncoverage": n_coverage,
         "ndocpapers": n_docpapers,
         "nfdata": len(fdata_public),
         "npubliccallables": sum(len(cap[k]) for k in public_modules),
+        "nsklearnestimators": n_sklearn_estimators,
         "nsubmodules": len(public_modules),
     }
 
