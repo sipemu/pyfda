@@ -5,16 +5,16 @@ milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 89
 current_phase_name: Case Studies + Reproducible Figures
 status: executing
-stopped_at: Completed 89-02-PLAN.md
-last_updated: "2026-09-09T08:03:29.690Z"
+stopped_at: Completed 89-03-PLAN.md (Study 3 FTS forecast)
+last_updated: "2026-09-09T08:07:54.280Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 89 execution started
-state_head: 5994fe1fd5c973f350d021d2c5b41d443b29204f
+state_head: 1eff223b53a46da3b7c48c3dde9cd9378fdc47ff
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 15
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 ## Current Position
 
 Phase: 89 (Case Studies + Reproducible Figures) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-09-09 — Phase 89 execution started
 
@@ -75,6 +75,7 @@ Last activity: 2026-09-09 — Phase 89 execution started
 | Phase 88-front-matter-design-architecture-capability-tour P05 | 12 | 2 tasks | 2 files |
 | Phase 89-case-studies-reproducible-figures P89-01 | 399 | 3 tasks | 7 files |
 | Phase 89 P02 | 6 | 2 tasks | 4 files |
+| Phase 89 P03 | 480 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,7 @@ Recent decisions affecting current work:
 - [Phase 89]: git diff --exit-code paper/figures/ determinism gate established in CI (paper.yml) and locally (make paper-verify)
 - [Phase 89]: 89-02: Used karcher_mean on 30-curve subset for efficiency; align_to_target applied to all 240; converged=False expected and documented
 - [Phase 89]: 89-02: Reported CV fold scores honestly including weak fold (0.405); mean CV R2=0.805 reported without adjustment
+- [Phase 89]: Study 3 (CASE-03): ftsm_forecast called on raw Xfts (35x365) not model dict; honest caveat that 35 stations is shallow for FTS
 
 ### Pending Todos
 
@@ -173,8 +175,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-09T08:03:29.598Z
-Stopped at: Completed 89-02-PLAN.md
+Last session: 2026-09-09T08:07:54.176Z
+Stopped at: Completed 89-03-PLAN.md (Study 3 FTS forecast)
 Resume file: None
 
 ## Operator Next Steps
