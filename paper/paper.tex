@@ -85,7 +85,10 @@
 \input{sections/availability}
 \input{sections/conclusion}
 
-\bibliographystyle{plain}
+% plainnat (not plain): natbib-compatible numeric style so \citet renders author
+% names ("Ramsay and Silverman [8]"); plain.bst omits the metadata natbib needs
+% and produces "(author?)".
+\bibliographystyle{plainnat}
 \bibliography{refs,refs_manual}
 
 \end{document}
