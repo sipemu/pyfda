@@ -72,3 +72,32 @@ that lack an underscore break point. Fix options (pick one):
 - Long bib DOIs/URLs: xurl should break them; if one still overflows, confirm the entry uses
   `\url`/the generated `url =` field, not a raw `\texttt`.
 Re-verify with the same CI loop; target 0 large (>20pt) overfull hboxes.
+
+## ALSO PENDING: arXiv submission compliance (https://info.arxiv.org/help/submit)
+DONE now: guarded `\ifdefined\pdfoutput\pdfoutput=1\fi` added to paper.tex line 1
+(forces pdflatex/PDF mode on arXiv; no-op under tectonic/XeTeX in CI).
+
+TODO for arXiv-readiness (build an `arxiv` bundle target + verify):
+1. SUBMIT SOURCE, not PDF: arXiv requires LaTeX source for TeX papers. Build a clean
+   tarball containing ONLY: paper.tex, sections/*.tex, snippets/*.tex, coverage_counts.tex,
+   refs.bib, refs_manual.bib, figures/*.pdf, and the generated **paper.bbl**. Exclude
+   paper/code/, .aux/.log/.out/.synctex, _ci_pdf/, comparison_evidence.md, *.md.
+   Add a `make arxiv` target producing `paper/arxiv-submission.tar.gz`.
+2. INCLUDE THE .bbl: arXiv does not reliably run bibtex for `\bibliography{refs,refs_manual}`
+   (two databases). Generate `paper.bbl` (tectonic `--keep-intermediate-files`, or a
+   pdflatex+bibtex pass) and include it in the bundle so references render without arXiv
+   re-running bibtex. Verify the .bbl resolves all 24+ \cite keys.
+3. PACKAGES: all used packages (tikz, pgf, listings, natbib, hyperref, xurl, booktabs,
+   adjustbox, amsmath, amssymb, graphicx, inputenc, fontenc) are in arXiv's TeX Live — OK.
+   Do NOT add exotic/local .sty files.
+4. FIGURES: matplotlib PDFs + TikZ (compiled) — pdflatex-compatible. OK. Keep relative paths
+   (`figures/...`, `sections/...`) — no absolute paths. Confirmed OK.
+5. arXiv compiles with pdflatex+bibtex (NOT tectonic). RESIDUAL RISK: our GATE-03 proxy is
+   tectonic. Ideally do one real pdflatex+bibtex compile of the bundle (Docker texlive image,
+   or arXiv's own sanity check on upload) before announcing. At minimum, the guarded
+   \pdfoutput + standard packages make this low-risk.
+6. METADATA/LICENSE (user does at upload): title, authors (Simon Müller), abstract, primary
+   category (suggest cs.MS "Mathematical Software" or stat.CO), license selection, and the
+   real arXiv id/DOI — then replace the CITATION.cff `PLACEHOLDER` arXiv URL post-assignment.
+7. Size < 50 MB (ours is well under). No `\input`/`\include` of files outside the bundle.
+Verify the bundle compiles clean and references appear, then it is arXiv-ready.
