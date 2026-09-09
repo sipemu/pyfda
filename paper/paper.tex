@@ -9,17 +9,19 @@
 % Basic packages for a software paper
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-% Allow long URLs / DOIs in bibliography to break at arbitrary characters.
-% xurl must be loaded before hyperref to hook into \url properly.
-\PassOptionsToPackage{hyphens}{url}
-\usepackage{hyperref}
-\usepackage{xurl}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
 \usepackage{adjustbox}
 \usepackage{listings}
+% hyperref is loaded LATE (after the packages above) so it patches them correctly.
+% colorlinks makes internal cross-references, citations, and URLs clearly clickable
+% (the default bordered links are easy to miss). xurl loads AFTER hyperref and
+% breaks long URLs/DOIs in the bibliography at arbitrary characters.
+\PassOptionsToPackage{hyphens}{url}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue,linktoc=all]{hyperref}
+\usepackage{xurl}
 
 % Listing styles for executed capability-tour snippets (paper/snippets/*.tex).
 % fdarsinput  — Python source block: boxed, monospace, keyword highlighting.
