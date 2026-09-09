@@ -68,6 +68,9 @@ def main() -> None:
     # GOTCHA (Pitfall 3): ftsm_forecast takes RAW DATA + argvals, NOT the
     # model dict.  Passing the model dict is wrong; always pass Xfts + ARGd.
     # Signature: ftsm_forecast(data, argvals, h=1, ncomp=3)
+    # NOTE (IN-01): ftsm_forecast internally re-fits ftsm from scratch (Rust
+    # API; fts_mod.rs).  The `model` dict above is used only for Figure 1
+    # (mean curve); the two fits are byte-identical given the same inputs.
     # ------------------------------------------------------------------
     fc = fdars.fts.ftsm_forecast(Xfts, ARGd, h=3, ncomp=3)
     # fc keys: forecast, h

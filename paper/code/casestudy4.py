@@ -124,8 +124,10 @@ def main() -> None:
 
     # ------------------------------------------------------------------
     # Figure 2: FPCA scores scatter (PC1 vs PC2) at best n_components
-    # Fit FPCATransformer(n_components=best_nc) independently for a clean
-    # deterministic scatter at the optimal dimensionality.
+    # Equivalent to gs.best_estimator_.named_steps["fpca"].transform(Xw)
+    # since FPCATransformer is deterministic given the same data and
+    # n_components (GridSearchCV refit=True re-fits on the full dataset).
+    # An independent fit is used here for clarity (IN-02).
     # ------------------------------------------------------------------
     fpca_best = FPCATransformer(n_components=best_nc)
     Xw_transformed = fpca_best.fit_transform(Xw)  # (178, best_nc)
