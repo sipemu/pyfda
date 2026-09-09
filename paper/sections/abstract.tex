@@ -1,7 +1,22 @@
-% paper/sections/abstract.tex — abstract stub; expanded in Phase 88 Plan 03.
-fdars is a broad, method-accurate, Rust-accelerated Python library for
-functional data analysis, providing \nsubmodules{} submodules spanning
-representation, smoothing, depth, FPCA, alignment, clustering, classification,
-regression, functional time series, and monitoring, with full scikit-learn
-compatibility (\nsklearnestimators{} estimators passing \texttt{check\_estimator})
-and a grounded AI advisor backed by a machine-readable scientific-provenance layer.
+% paper/sections/abstract.tex — filled in Phase 88 Plan 03 (MANU-02).
+Functional data analysis treats curves, surfaces, and trajectories as the
+primary unit of observation and provides a rich family of methods---smoothing
+and basis representation, registration, depth and outlier detection, functional
+principal component analysis (FPCA), clustering, classification, regression, and
+monitoring---that go beyond what scalar multivariate frameworks offer.
+\texttt{fdars} is a Python library that makes this breadth accessible in a
+single package: \nsubmodules{} submodules exposing \npubliccallables{} public
+callables, all accelerated through a Rust core (\texttt{fdars-core}) via
+PyO3 bindings, with a row-major\,/\,column-major layout conversion at the
+language boundary.
+The library provides full scikit-learn compatibility via \nsklearnestimators{}
+estimators that pass \texttt{check\_estimator}, enabling functional methods to
+compose natively with sklearn pipelines and cross-validation utilities.
+Two contributions absent from existing Python and R functional data analysis
+packages are embedded directly in the library: a grounded AI advisor
+(\texttt{fdars.advisor}) that turns method diagnostic summaries into structured
+parameter recommendations without hallucinating unsupported suggestions, and a
+machine-readable scientific-provenance layer linking each callable to the
+peer-reviewed paper that defines it.
+Together these components aim to lower the barrier to method-accurate functional
+data analysis for both researchers and practitioners.
