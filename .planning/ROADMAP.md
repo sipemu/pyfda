@@ -94,7 +94,13 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
   4. The capability tour walks method families with minimal runnable code snippets, each snippet sourced from an executed `paper/code/` script (never hand-copied).
   5. An Availability & installation section (PyPI, extras, Python 3.9–3.14) and a Conclusion are present.
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+- [ ] 88-01-PLAN.md — Snippet harness (tracer): `gen_snippets.py` (generate + `--check` drift) proven on the represent family, `\nsklearnestimators` macro, `listings` preamble + section stubs, make/`paper.yml` wiring (maturin build + path-filter widening)
+- [ ] 88-02-PLAN.md — Capability tour: all validated family snippets → `paper/snippets/*.tex`, breadth-first `capabilities.tex` family walk
+- [ ] 88-03-PLAN.md — Front matter: abstract + Introduction/statement-of-need + FDA background
+- [ ] 88-04-PLAN.md — Design/architecture + data representation + grounded-advisor/provenance sections
+- [ ] 88-05-PLAN.md — Availability & installation + Conclusion
 
 ### Phase 89: Case Studies + Reproducible Figures
 
@@ -132,7 +138,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 | 85. Manuscript Scaffold + Pipeline Infrastructure | 2/2 | Complete    | 2026-09-08 |
 | 86. Single-Source-of-Truth Wiring + CI Gate | 2/2 | Complete    | 2026-09-08 |
 | 87. Comparison Table + Evidence File | 2/2 | Complete    | 2026-09-09 |
-| 88. Front Matter, Design/Architecture & Capability Tour | 0/0 | Not started | - |
+| 88. Front Matter, Design/Architecture & Capability Tour | 0/5 | Not started | - |
 | 89. Case Studies + Reproducible Figures | 0/0 | Not started | - |
 | 90. Close Gate + Citable Release | 0/0 | Not started | - |
 
