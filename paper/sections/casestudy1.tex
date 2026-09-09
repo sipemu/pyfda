@@ -1,0 +1,67 @@
+% paper/sections/casestudy1.tex — Case Study 1: Phoneme (smoothing, FPCA, classification)
+% Written in Phase 89 (Plan 01). Do not edit manually.
+
+\subsection{Smoothing, FPCA, and Classification: Phoneme Data}
+\label{subsec:cs1-phoneme}
+
+The phoneme dataset consists of 400 log-periodogram curves recorded across 256
+frequency points, representing five phoneme classes (\textit{aa}, \textit{ao},
+\textit{dcl}, \textit{iy}, \textit{sh}) with 80 observations each
+\citep{ferraty_vieu_2006}.  Each curve is a digitised acoustic spectrum, and
+the classification task is to recover the phoneme class from its spectral
+shape.  This study demonstrates three core \texttt{fdars} capabilities in
+sequence: penalised smoothing, functional principal component analysis (FPCA),
+and cross-validated classification.
+
+\paragraph{Smoothing.}
+Raw log-periodogram curves carry measurement noise.  We apply GCV-penalised
+B-spline smoothing (\texttt{fdars.basis.smooth\_basis\_gcv}) with 15 basis
+functions to a representative subset of 20 curves, selecting the penalty
+automatically via generalised cross-validation
+\citep{craven_wahba_1979,eilers_marx_1996}.
+Figure~\ref{fig:cs1-smooth} shows the raw spectra alongside the fitted smooth
+curves for each class; the smoothed curves retain the phoneme-specific spectral
+peaks while suppressing high-frequency noise.
+
+\paragraph{FPCA.}
+FPCA is performed on all 400 curves via \texttt{Fdata.to\_pc(n\_comp=4)}
+\citep{ramsay_silverman_2005}.  The first four principal components explain
+$[69.3, 23.0, 5.4, 2.3]\%$ of total variance, with the first three components
+jointly accounting for 97.7\% of variation.  The scores scatter in
+Figure~\ref{fig:cs1-fpca} shows clear class separation in the PC1--PC2 plane,
+confirming that the dominant modes of variation align with phoneme identity.
+
+\paragraph{Classification.}
+A \texttt{sklearn.pipeline.Pipeline} composed of \texttt{FPCATransformer}
+(4 components) and \texttt{FPCLDAClassifier} (linear discriminant analysis on
+FPCA scores) is evaluated by 5-fold cross-validation
+\citep{preda_saporta_2005}.
+The pipeline achieves a mean CV accuracy of 86.3\% on held-out data
+(fold scores: $[0.850, 0.850, 0.862, 0.875, 0.875]$), demonstrating that four
+functional principal components capture the class-discriminating structure of
+the phoneme spectra.
+The analysis is reproduced exactly by \texttt{paper/code/casestudy1.py}, which
+generates both figures deterministically (re-running the script leaves
+\texttt{git diff paper/figures/} empty).
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/cs1_phoneme_smooth.pdf}
+  \caption{Phoneme log-periodogram spectra (400 curves, 5 classes).
+    Light traces: raw curves (3 per class); bold traces: GCV B-spline smoothed
+    curves (15 basis functions, penalty selected by GCV\@).  Colours identify
+    phoneme classes (\textit{aa}, \textit{ao}, \textit{dcl}, \textit{iy},
+    \textit{sh}).}
+  \label{fig:cs1-smooth}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.75\textwidth]{figures/cs1_phoneme_fpca.pdf}
+  \caption{FPCA scores scatter for the phoneme data (PC1 vs PC2, colour-coded
+    by class).  The first two principal components explain 69.3\% and 23.0\% of
+    variance respectively; the five phoneme classes are well-separated in this
+    projection, consistent with the 86.3\% 5-fold CV classification accuracy
+    achieved by \texttt{FPCATransformer} + \texttt{FPCLDAClassifier}.}
+  \label{fig:cs1-fpca}
+\end{figure}
