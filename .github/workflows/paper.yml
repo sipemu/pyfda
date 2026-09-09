@@ -48,8 +48,27 @@ jobs:
           . .venv/bin/activate
           python paper/code/gen_figures.py
 
-      - name: Assert figures byte-stable (PIPE-02 / CASE SC-5 determinism gate)
-        run: git diff --exit-code paper/figures/
+      - name: Assert figures byte-stable (same-environment determinism; PIPE-02 / CASE SC-5)
+        env:
+          PYTHONPATH: scripts:paper/code
+        run: |
+          . .venv/bin/activate
+          # SC-5 is a SAME-ENVIRONMENT reproducibility guarantee. matplotlib PDF bytes
+          # vary across FreeType/font/platform versions, so CI-regenerated figures are
+          # NOT byte-identical to the locally-committed canonical ones (expected — the
+          # residual risk flagged in the milestone). We therefore do NOT diff against the
+          # committed figures; instead we prove the pipeline is deterministic *within this
+          # runner*: the "Regenerate figures" step above produced run #1; regenerate once
+          # more and require byte-identical output run-to-run (catches unseeded RNG / time
+          # dependence). Then restore the committed canonical figures for the compile.
+          mkdir -p /tmp/figs_run1
+          for f in paper/figures/*.pdf; do cp -f "$f" "/tmp/figs_run1/$(basename "$f")"; done
+          python paper/code/gen_figures.py
+          for f in paper/figures/*.pdf; do
+            cmp -s "$f" "/tmp/figs_run1/$(basename "$f")" || { echo "NON-DETERMINISTIC (same-env): $(basename "$f")"; exit 1; }
+          done
+          echo "SAME_ENV_DETERMINISTIC_OK"
+          git checkout -- paper/figures/
 
       - name: Assert coverage macros (PIPE-03 drift gate)
         run: |
