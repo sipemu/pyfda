@@ -10,7 +10,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase. A writi
 ### Manuscript (MANU)
 
 - [x] **MANU-01**: `paper/` LaTeX manuscript exists using plain `\documentclass{article}` with **natbib + BibTeX** (not biblatex/biber), authored as `paper.tex` + per-section files, no `\today`/timestamp macros
-- [ ] **MANU-02**: Front matter — Abstract, Introduction & statement of need (the Python FDA gap), and a brief FDA-background section
+- [x] **MANU-02**: Front matter — Abstract, Introduction & statement of need (the Python FDA gap), and a brief FDA-background section
 - [ ] **MANU-03**: Software design & architecture section — Rust core + PyO3 zero-copy, module map, `Fdata` container, sklearn estimator layer (qualitative; no benchmarks)
 - [ ] **MANU-04**: Data-representation model section — `Fdata`, argvals/grids, irregular/sparse (`IrregFdata`) representation
 - [x] **MANU-05**: Capability tour by method family with minimal runnable code snippets, each snippet sourced from an executed `paper/code/` script (never hand-copied)
@@ -77,7 +77,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | MANU-01 | Phase 85 | Complete |
-| MANU-02 | Phase 88 | Pending |
+| MANU-02 | Phase 88 | Complete |
 | MANU-03 | Phase 88 | Pending |
 | MANU-04 | Phase 88 | Pending |
 | MANU-05 | Phase 88 | Complete |

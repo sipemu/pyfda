@@ -5,16 +5,16 @@ milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 88
 current_phase_name: Front Matter, Design/Architecture & Capability Tour
 status: executing
-stopped_at: Completed 88-02-PLAN.md (capability tour snippets + capabilities.tex)
-last_updated: "2026-09-09T06:13:24.569Z"
+stopped_at: Completed 88-03-PLAN.md
+last_updated: "2026-09-09T06:17:55.602Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 88 execution started
-state_head: 8eeef7364e33e2f42ce4cb03d63ae4ba806b8d6d
+state_head: 54847a70b4243fee0da6334846246f9fc3cc0b68
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 11
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 ## Current Position
 
 Phase: 88 (Front Matter, Design/Architecture & Capability Tour) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-09-09 — Phase 88 execution started
 
@@ -70,6 +70,7 @@ Last activity: 2026-09-09 — Phase 88 execution started
 | Phase 87 P02 | 5min | 2 tasks | 3 files |
 | Phase 88 P01 | 22 | 3 tasks | 10 files |
 | Phase 88 P02 | 5 | 3 tasks | 15 files |
+| Phase 88 P03 | 90 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,8 @@ Recent decisions affecting current work:
 - [Phase 88]: Use Fdata.depth() over module-level fraiman_muniz_1d — avoids PyO3 contiguous-float64 GOTCHA
 - [Phase 88]: Metric family represented by lp_self_1d; frechet_mean/density_fda mentioned in prose (plumbing-heavy, no clean one-liner per RESEARCH)
 - [Phase 88]: advisor_diag uses build_diagnostics only — LLM-free, offline, deterministic; advise() in prose only (PITFALL 7)
+- [Phase 88]: Intro subdivided into three logical subsections (statement-of-need, FDA-background, contributions) rather than one monolithic section
+- [Phase 88]: All 8 \citep keys in intro.tex verified against refs.bib before use; automated gate INTRO_OK confirms no unresolved keys
 
 ### Pending Todos
 
@@ -156,8 +159,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-09T06:13:24.474Z
-Stopped at: Completed 88-02-PLAN.md (capability tour snippets + capabilities.tex)
+Last session: 2026-09-09T06:17:55.511Z
+Stopped at: Completed 88-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
