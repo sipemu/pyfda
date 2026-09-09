@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
-current_phase: 88
-current_phase_name: Front Matter, Design/Architecture & Capability Tour
-status: verifying
-stopped_at: Completed 88-05-PLAN.md (availability.tex + conclusion.tex)
-last_updated: "2026-09-09T06:27:38.907Z"
+current_phase: 89
+current_phase_name: Case Studies + Reproducible Figures
+status: planning
+stopped_at: Phase 88 complete, ready to plan Phase 89
+last_updated: "2026-09-09T07:15:53.953Z"
 last_activity: 2026-09-09
-last_activity_desc: Phase 88 execution started
-state_head: 38ef63037c38eb81c2313cbe3b4af43abf51c80a
+last_activity_desc: Phase 88 complete, transitioned to Phase 89
+state_head: 26f564a163a145c9e0d538c0bbbe60a1eab4bbba
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 11
   completed_plans: 11
 ---
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Phase: 88 (Front Matter, Design/Architecture & Capability Tour) — EXECUTING
-Plan: 5 of 5
-Status: Phase complete — ready for verification
-Last activity: 2026-09-09 — Phase 88 execution started
+Phase: 89 — Case Studies + Reproducible Figures
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-09 — Phase 88 complete, transitioned to Phase 89
 
 ## Performance Metrics
 
@@ -48,7 +48,7 @@ Last activity: 2026-09-09 — Phase 88 execution started
 | 85 | 2 | - | - |
 | 86 | 2 | - | - |
 | 87 | 2 | - | - |
-| 88 | - | - | - |
+| 88 | 5 | - | - |
 | 89 | - | - | - |
 | 90 | - | - | - |
 
@@ -167,7 +167,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-09T06:27:38.837Z
-Stopped at: Completed 88-05-PLAN.md (availability.tex + conclusion.tex)
+Stopped at: Phase 88 complete, ready to plan Phase 89
 Resume file: None
 
 ## Operator Next Steps

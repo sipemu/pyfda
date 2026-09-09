@@ -21,7 +21,7 @@
     {
       "number": "88",
       "name": "Front Matter, Design/Architecture & Capability Tour",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "89",
@@ -36,8 +36,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 88 of 6 · executing"
+    "label": "Advance to the next step (plan phase 89)",
+    "reason": "Phase 89 of 6 — needs a plan"
   },
-  "updated_at": "2026-09-09T06:13:03.832Z"
+  "updated_at": "2026-09-09T07:15:53.971Z"
 }
