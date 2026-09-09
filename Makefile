@@ -36,7 +36,7 @@ docs-clean:
 # on PYTHONPATH.  PDF compile (tectonic) is CI-only — not invoked here.
 PAPER_PYTHONPATH := scripts:paper/code
 
-.PHONY: paper paper-figures paper-coverage paper-refs paper-snippets paper-check
+.PHONY: paper paper-figures paper-coverage paper-refs paper-snippets paper-check paper-verify
 
 paper-figures:  ## Regenerate all paper figures deterministically
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_figures.py
@@ -55,5 +55,9 @@ paper-check:  ## Run the CI drift gates locally (exits 1 if any file is stale)
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_refs_bib.py --check
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/check_comparison.py
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_snippets.py --check
+
+paper-verify:  ## Regenerate figures and assert byte-stability (SC-5 / CASE determinism hard gate)
+	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_figures.py
+	git diff --exit-code paper/figures/
 
 paper: paper-figures paper-coverage paper-refs paper-snippets  ## Run the one-command reproducible paper pipeline

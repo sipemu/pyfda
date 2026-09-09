@@ -48,6 +48,9 @@ jobs:
           . .venv/bin/activate
           python paper/code/gen_figures.py
 
+      - name: Assert figures byte-stable (PIPE-02 / CASE SC-5 determinism gate)
+        run: git diff --exit-code paper/figures/
+
       - name: Assert coverage macros (PIPE-03 drift gate)
         run: |
           . .venv/bin/activate

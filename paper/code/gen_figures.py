@@ -19,6 +19,7 @@ from pathlib import Path
 import numpy as np
 
 from paper_utils import fig, save_figure
+import casestudy1
 
 # Output directory — relative to this file so the script is location-independent.
 _FIGURES_DIR = Path(__file__).resolve().parent.parent / "figures"
@@ -47,7 +48,23 @@ def _smoke() -> None:
 def main() -> None:
     """Regenerate all paper figures."""
     _smoke()
-    # Phases 88/89 append additional figure calls here.
+    casestudy1.main()
+    # Studies 2-4 (Wave 2) each register their own module.main() call here.
+    try:
+        import casestudy2
+        casestudy2.main()
+    except ImportError:
+        pass
+    try:
+        import casestudy3
+        casestudy3.main()
+    except ImportError:
+        pass
+    try:
+        import casestudy4
+        casestudy4.main()
+    except ImportError:
+        pass
 
 
 if __name__ == "__main__":
