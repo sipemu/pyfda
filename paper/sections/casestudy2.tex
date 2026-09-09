@@ -1,0 +1,73 @@
+% paper/sections/casestudy2.tex — Case Study 2: Tecator (registration, scalar-on-function regression)
+% Written in Phase 89 (Plan 02). Do not edit manually.
+
+\subsection{Registration and Scalar-on-Function Regression: Tecator Data}
+\label{subsec:cs2-tecator}
+
+The tecator dataset consists of 240 near-infrared absorbance spectra of meat
+samples measured at 100 spectral channels, with fat content (ranging from
+0.9\% to 58.5\%) recorded as a scalar response for each sample
+\citep{ramsay_silverman_2005}.  The spectra exhibit phase variability —
+curves that carry the same shape but are shifted or compressed along the
+spectral axis — which motivates a registration step before regression.
+This study demonstrates two additional \texttt{fdars} capabilities:
+elastic curve registration via the square-root velocity framework
+\citep{srivastava_klassen_2016} and scalar-on-function FPC regression
+\citep{preda_saporta_2005}.
+
+\paragraph{Registration.}
+We estimate an elastic Karcher mean from a representative subset of 30 curves
+using \texttt{fdars.alignment.karcher\_mean} (Fisher--Rao gradient descent,
+capped at 20 iterations) and then align all 240 spectra to that mean with
+\texttt{fdars.alignment.align\_to\_target}.  The iteration cap is chosen for
+computational efficiency; convergence is not required for the registration to
+be illustrative \citep{srivastava_klassen_2016}.
+Figure~\ref{fig:cs2-align} shows the 30 raw spectra (grey) alongside their
+registered counterparts and the Karcher mean (highlighted), revealing how
+elastic alignment reduces phase dispersion while preserving the characteristic
+spectral peaks.
+
+\paragraph{Scalar-on-function regression.}
+Fat content is modelled as a linear functional of the spectral curve via FPC
+regression implemented in \texttt{fdars.regression.fregre\_lm} with five
+functional principal components \citep{preda_saporta_2005}.  Fitting on all
+240 samples yields a training $R^2 = 0.929$, confirming that the first five
+spectral modes of variation explain the dominant share of fat-content variance.
+Figure~\ref{fig:cs2-fit} plots actual against fitted fat content; the scatter
+follows the diagonal closely throughout the range, with the reference line
+$y = x$ shown for comparison.
+
+\paragraph{Cross-validation.}
+To assess generalisation, we evaluate \texttt{FPCRegressor} (5 components)
+via 5-fold cross-validation using \texttt{sklearn.model\_selection.cross\_val\_score}.
+The fold-level $R^2$ scores are $[0.903, 0.405, 0.883, 0.922, 0.914]$,
+giving a mean CV $R^2 = 0.805$.  The weak second fold (0.405) reflects genuine
+variability in held-out performance; the mean is reported without adjustment.
+The complete analysis is reproduced deterministically by
+\texttt{paper/code/casestudy2.py}, which writes both figures via the
+\texttt{paper\_utils.save\_figure} harness (re-running the script leaves
+\texttt{git diff paper/figures/} empty).
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/cs2_tecator_align.pdf}
+  \caption{Tecator near-infrared spectra before and after elastic registration
+    (30 of 240 curves shown).  Grey traces: raw spectra exhibiting phase
+    variability.  Coloured traces: spectra aligned to the Karcher mean via
+    the square-root velocity framework \citep{srivastava_klassen_2016}.
+    Bold trace: estimated Karcher mean used as the registration target
+    (alignment iterations capped at 20).}
+  \label{fig:cs2-align}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.75\textwidth]{figures/cs2_tecator_fit.pdf}
+  \caption{Scalar-on-function FPC regression on the tecator data: actual
+    versus fitted fat content for all 240 meat samples
+    (\texttt{fdars.regression.fregre\_lm}, 5 components).  The dashed line
+    marks perfect prediction ($y = x$).  Training $R^2 = 0.929$;
+    5-fold CV $R^2 = 0.805$ (mean; fold scores
+    $[0.903, 0.405, 0.883, 0.922, 0.914]$).}
+  \label{fig:cs2-fit}
+\end{figure}
