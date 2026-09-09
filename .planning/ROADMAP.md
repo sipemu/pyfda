@@ -117,7 +117,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 
 **Plans**: 4 plans
 
-- [ ] 89-01-PLAN.md — Study 1 (phoneme) tracer: casestudy1.py smooth+FPCA+classification → committed cs1 figures → casestudy1.tex + casestudies.tex four-\input shell → establish the git diff --exit-code paper/figures/ determinism gate (make + paper.yml) (CASE-01)
+- [x] 89-01-PLAN.md — Study 1 (phoneme) tracer: casestudy1.py smooth+FPCA+classification → committed cs1 figures → casestudy1.tex + casestudies.tex four-\input shell → establish the git diff --exit-code paper/figures/ determinism gate (make + paper.yml) (CASE-01)
 - [ ] 89-02-PLAN.md — Study 2 (tecator) registration + scalar-on-function regression → committed cs2 figures + casestudy2.tex (CASE-02)
 - [ ] 89-03-PLAN.md — Study 3 (canadian_weather_precip) FTS forecast → committed cs3 figures + casestudy3.tex (CASE-03)
 - [ ] 89-04-PLAN.md — Study 4 (wine) sklearn Pipeline + GridSearchCV → committed cs4 figures + casestudy4.tex (CASE-04)

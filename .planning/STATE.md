@@ -4,17 +4,17 @@ milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 89
 current_phase_name: Case Studies + Reproducible Figures
-status: planning
-stopped_at: Phase 88 complete, ready to plan Phase 89
-last_updated: "2026-09-09T07:15:53.953Z"
+status: executing
+stopped_at: Completed 89-01-PLAN.md (casestudy1 tracer)
+last_updated: "2026-09-09T07:55:16.102Z"
 last_activity: 2026-09-09
-last_activity_desc: Phase 88 complete, transitioned to Phase 89
-state_head: 26f564a163a145c9e0d538c0bbbe60a1eab4bbba
+last_activity_desc: Phase 89 execution started
+state_head: a39917745f291ec99f12c46c9646c3d624b66136
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 15
+  completed_plans: 12
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-08)
 
 **Core value:** A submission-ready arXiv software paper that makes `fdars`'s breadth and method-accuracy provably clear — every code snippet runs against the current API, every number is machine-derived from the live capability/reference maps, and every figure/table is regenerable by a single command.
-**Current focus:** Phase 88 — Front Matter, Design/Architecture & Capability Tour
+**Current focus:** Phase 89 — Case Studies + Reproducible Figures
 
 ## Current Position
 
-Phase: 89 — Case Studies + Reproducible Figures
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-09 — Phase 88 complete, transitioned to Phase 89
+Phase: 89 (Case Studies + Reproducible Figures) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-09-09 — Phase 89 execution started
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Last activity: 2026-09-09 — Phase 88 complete, transitioned to Phase 89
 | Phase 88 P03 | 90 | 2 tasks | 2 files |
 | Phase 88 P04 | 15 | 3 tasks | 3 files |
 | Phase 88-front-matter-design-architecture-capability-tour P05 | 12 | 2 tasks | 2 files |
+| Phase 89-case-studies-reproducible-figures P89-01 | 399 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,9 @@ Recent decisions affecting current work:
 - [Phase 88]: All architecture/provenance counts use macros only (nsubmodules, nsklearnestimators, ndocpapers, ncoverage) — no hardcoded integers
 - [Phase 88]: Verified all availability facts against pyproject.toml; used \nsklearnestimators macro instead of hardcoding 28
 - [Phase 88]: Conclusion uses \npubliccallables, \nsubmodules, \ndocpapers macros only; no hardcoded count integers; roadmap-agnostic framing with no JOSS/JSS venue promises
+- [Phase 89]: CV accuracy reported as live-computed 0.863 (not hardcoded research value 0.882) per T-89-02 mitigation — honest reproducible metric
+- [Phase 89]: casestudies.tex finalized in 89-01; Wave-2 plans add only casestudyN.tex subfiles, no shared-file edits
+- [Phase 89]: git diff --exit-code paper/figures/ determinism gate established in CI (paper.yml) and locally (make paper-verify)
 
 ### Pending Todos
 
@@ -166,9 +170,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-09T06:27:38.837Z
-Stopped at: Phase 88 complete, ready to plan Phase 89
-Resume file: None
+Last session: 2026-09-09T07:55:16.009Z
+Stopped at: Completed 89-01-PLAN.md (casestudy1 tracer)
+Resume file: 89-02-PLAN.md
 
 ## Operator Next Steps
 
