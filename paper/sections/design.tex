@@ -20,8 +20,8 @@ category) exposes \texttt{fdars-core} algorithms to Python via
 \href{https://pyo3.rs}{PyO3}.  Each binding function is annotated
 \texttt{\#[pyfunction]} and accepts NumPy arrays through
 \texttt{PyReadonlyArray} wrappers, which hold a read-only view of the
-caller's array without copying it and release the GIL for the duration of the
-Rust call.
+caller's array for the duration of the Rust call without an extra data copy,
+and prevent concurrent Python mutation of the array during Rust execution.
 
 \textbf{Boundary convention.}  The PyO3 boundary involves a layout conversion:
 NumPy stores two-dimensional arrays in C (row-major) order, while

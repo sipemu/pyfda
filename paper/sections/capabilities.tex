@@ -20,7 +20,7 @@ observation matrix with a shared evaluation grid (\texttt{argvals}), an optional
 range specification (\texttt{rangeval}), per-observation identifiers, and
 arbitrary metadata.
 The snippet below constructs an \texttt{Fdata} object from the Berkeley growth
-study~\citep{ramsay2005functional} and prints its canonical representation:
+study~\citep{ramsay_silverman_2005} and prints its canonical representation:
 
 \input{snippets/represent}
 
@@ -38,11 +38,11 @@ curves, AIC, BIC, and effective degrees of freedom:
 \subsection{Depth and Outlier Detection}
 
 Functional depth ranks observations by centrality relative to the full
-sample~\citep{fraiman2001trimmed}.
+sample~\citep{fraiman_muniz_2001}.
 fdars offers modified band depth, Fraiman--Muniz depth, random Tukey depth,
 and mode depth via the \texttt{Fdata.depth()} method.
 The \texttt{fdars.outliers} submodule adds shape-, magnitude-, and
-amplitude-based outlier detection via MUOD~\citep{dai2019directional}:
+amplitude-based outlier detection via MUOD~\citep{dai_genton_2019}:
 
 \input{snippets/depth}
 
@@ -54,14 +54,14 @@ rotation, singular values, and centred data.
 For sparse or irregularly observed longitudinal data fdars provides PACE
 (principal analysis by conditional expectation) through
 \texttt{fdars.pace\_fpca.irreg\_fdata\_from\_lists} (the \texttt{PyIrregFdata}
-container) and \texttt{fdars.pace\_fpca.pace\_fpca}~\citep{yao2005functional}.
+container) and \texttt{fdars.pace\_fpca.pace\_fpca}~\citep{yao_muller_wang_2005}.
 This distinguishes fdars from peer libraries that support dense FPCA only:
 
 \input{snippets/fpca}
 
 \subsection{Clustering}
 
-Functional $k$-means~\citep{tarpey2003clustering} partitions observations by
+Functional $k$-means~\citep{bouveyron_jacques_2011} partitions observations by
 minimising within-cluster $L^2$ distance in the curve space.
 \texttt{fdars.clustering.kmeans\_fd} accepts a fixed random seed for
 deterministic results and returns cluster assignments, centroids,
@@ -84,7 +84,7 @@ the leading principal components and applies $k$-NN in the score space:
 \texttt{fdars.regression} covers scalar-on-function (SoF) regression via
 functional linear models with FPCA projection (\texttt{fregre\_lm}), PLS
 (\texttt{fregre\_pls}), and robust variants, as well as function-on-function
-(FoF) regression via \texttt{fof\_regression}~\citep{yao2005functional}.
+(FoF) regression via \texttt{fof\_regression}~\citep{yao_muller_wang_2005}.
 The snippet demonstrates SoF regression on the Tecator near-infrared spectra
 dataset, predicting fat content from 100-channel absorbance curves:
 
@@ -114,7 +114,7 @@ limits) are passed as explicit positional arguments to the monitoring function:
 \subsection{Conformal and Tolerance Bands}
 
 \texttt{fdars.tolerance} constructs simultaneous tolerance bands for functional
-data via bootstrap FPCA~\citep{febrero2012statistical}.
+data via bootstrap FPCA~\citep{febrerobande_fdausc_2012}.
 \texttt{fpca\_tolerance\_band} returns upper/lower band curves, a centre curve,
 and the half-width vector; a fixed \texttt{seed} argument makes the bootstrap
 resampling reproducible:
@@ -129,7 +129,7 @@ functional observations.
 Beyond pairwise distances, fdars also provides density-FDA methods (LQD FPCA
 and Wasserstein barycenters) in \texttt{fdars.density\_fda}, and Fr\'echet
 means, regression, and ANOVA for object-valued data in
-\texttt{fdars.frechet}~\citep{petersen2019frechet}; see
+\texttt{fdars.frechet}~\citep{petersen_muller_2019}; see
 Table~\ref{tab:comparison} for the full peer comparison.
 The snippet illustrates the metric family representative:
 
@@ -138,7 +138,7 @@ The snippet illustrates the metric family representative:
 \subsection{Elastic Alignment}
 
 \texttt{fdars.alignment} implements elastic registration under the square-root
-slope function (SRSF) framework~\citep{srivastava2011registration}.
+slope function (SRSF) framework~\citep{srivastava_et_al_2011}.
 \texttt{karcher\_mean} estimates the Karcher mean curve by iteratively
 aligning observations and re-estimating the mean; the returned dict includes
 the aligned data matrix, phase-warping functions ($\gamma$), and a convergence flag:
