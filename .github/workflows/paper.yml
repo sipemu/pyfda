@@ -58,11 +58,6 @@ jobs:
           . .venv/bin/activate
           python paper/code/gen_refs_bib.py --check
 
-      - name: Regenerate refs.bib (PIPE-04)
-        run: |
-          . .venv/bin/activate
-          python paper/code/gen_refs_bib.py
-
       - name: Check comparison traceability + fdars grounding (COMP)
         run: |
           . .venv/bin/activate
