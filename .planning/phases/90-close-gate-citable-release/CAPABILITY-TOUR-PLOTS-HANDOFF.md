@@ -1,6 +1,24 @@
 # Handoff: Add plots + deeper explanations to Capability-Tour sections (4.x)
 
-**Requested by user during Phase 90 GATE-04 review (2026-09-09).** Not yet done.
+**Requested by user during Phase 90 GATE-04 review (2026-09-09).**
+
+> **STATUS 2026-09-09 — ALL THREE PENDING WORKSTREAMS COMPLETE & CI-GREEN.**
+> Delivered on `main` (commits `0a260e3`..`3305278`), both CI jobs green on run
+> `34365988014` (tectonic `paper` + new `arxiv` real-pdflatex job):
+> 1. **Capability-tour plots (4.1–4.13):** 13 method-accurate figures via new
+>    `paper/code/gen_tour_figures.py` (wired into `gen_figures.py`; seeded,
+>    byte-deterministic), each referenced from expanded, honest prose. All 13
+>    visually verified in the compiled PDF (now 43 pp).
+> 2. **Line overflows:** 0 overfull \hbox > 20pt (was 3: 75.9/60.7/29.7pt).
+>    A hard CI gate now enforces this and prints culprits.
+> 3. **arXiv bundle:** `make arxiv` + CI `arxiv` job — real TeX Live
+>    pdflatex+bibtex, generates & bundles `paper.bbl` (resolves all \cite keys),
+>    re-compiles the extracted tarball standalone (43 pp, matches tectonic).
+> Also fixed: tectonic compile was RED (the earlier `\ifdefined\pdfoutput` guard
+> fired under XeTeX and crashed hyperref); re-guarded on `\pdftexversion`.
+> **GATE-04 (human read-through) STILL OPEN — awaiting user approval of the PDF.
+> Do NOT create the `v0.13.0` tag or publish until approved.**
+
 The milestone is otherwise complete and green; this is an additive manuscript enhancement.
 
 ## Goal
