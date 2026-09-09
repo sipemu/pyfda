@@ -5,16 +5,16 @@ milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 89
 current_phase_name: Case Studies + Reproducible Figures
 status: executing
-stopped_at: Completed 89-01-PLAN.md (casestudy1 tracer)
-last_updated: "2026-09-09T07:55:16.102Z"
+stopped_at: Completed 89-02-PLAN.md
+last_updated: "2026-09-09T08:03:29.690Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 89 execution started
-state_head: a39917745f291ec99f12c46c9646c3d624b66136
+state_head: 5994fe1fd5c973f350d021d2c5b41d443b29204f
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 15
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 ## Current Position
 
 Phase: 89 (Case Studies + Reproducible Figures) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-09-09 — Phase 89 execution started
 
@@ -74,6 +74,7 @@ Last activity: 2026-09-09 — Phase 89 execution started
 | Phase 88 P04 | 15 | 3 tasks | 3 files |
 | Phase 88-front-matter-design-architecture-capability-tour P05 | 12 | 2 tasks | 2 files |
 | Phase 89-case-studies-reproducible-figures P89-01 | 399 | 3 tasks | 7 files |
+| Phase 89 P02 | 6 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,8 @@ Recent decisions affecting current work:
 - [Phase 89]: CV accuracy reported as live-computed 0.863 (not hardcoded research value 0.882) per T-89-02 mitigation — honest reproducible metric
 - [Phase 89]: casestudies.tex finalized in 89-01; Wave-2 plans add only casestudyN.tex subfiles, no shared-file edits
 - [Phase 89]: git diff --exit-code paper/figures/ determinism gate established in CI (paper.yml) and locally (make paper-verify)
+- [Phase 89]: 89-02: Used karcher_mean on 30-curve subset for efficiency; align_to_target applied to all 240; converged=False expected and documented
+- [Phase 89]: 89-02: Reported CV fold scores honestly including weak fold (0.405); mean CV R2=0.805 reported without adjustment
 
 ### Pending Todos
 
@@ -170,9 +173,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-09T07:55:16.009Z
-Stopped at: Completed 89-01-PLAN.md (casestudy1 tracer)
-Resume file: 89-02-PLAN.md
+Last session: 2026-09-09T08:03:29.598Z
+Stopped at: Completed 89-02-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 

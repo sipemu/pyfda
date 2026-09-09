@@ -33,7 +33,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase. A writi
 ### Case Studies (CASE)
 
 - [x] **CASE-01**: Study 1 — smooth + FPCA + classification on phoneme/growth (`docs/data/`), with reproducible figures
-- [ ] **CASE-02**: Study 2 — registration + functional/scalar-on-function regression on tecator/canadian_weather, with reproducible figures
+- [x] **CASE-02**: Study 2 — registration + functional/scalar-on-function regression on tecator/canadian_weather, with reproducible figures
 - [ ] **CASE-03**: Study 3 — functional-time-series forecast on `canadian_weather_precip` (dataset structure verified to support the slicing), with reproducible figures
 - [ ] **CASE-04**: Study 4 — sklearn `Pipeline` + `GridSearchCV` on wine/sonar showcasing the estimator layer, with reproducible figures
 
@@ -91,7 +91,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | COMP-01 | Phase 87 | Complete |
 | COMP-02 | Phase 87 | Complete |
 | CASE-01 | Phase 89 | Complete |
-| CASE-02 | Phase 89 | Pending |
+| CASE-02 | Phase 89 | Complete |
 | CASE-03 | Phase 89 | Pending |
 | CASE-04 | Phase 89 | Pending |
 | GATE-01 | Phase 86 | Complete |
