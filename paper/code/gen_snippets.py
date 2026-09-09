@@ -143,9 +143,107 @@ SNIPPETS: list[tuple[str, str]] = [
         print(repr(fd))
         print("mean shape:", fd.mean().shape)
         """),
-    # Wave-2 plans (88-02) will append remaining families here:
-    # basis/smoothing, depth/outliers, fpca/pace, clustering, classification,
-    # regression, fts, spm, tolerance, metric, alignment, advisor, sklearn.
+    # ------------------------------------------------------------------
+    # 2. Basis / smoothing — fdata_to_basis_1d returns (coefs, nbasis) TUPLE;
+    #    smooth_basis_gcv returns a dict.
+    #    growth.csv setup: X (93, 31) float64, ARG len 31.
+    # ------------------------------------------------------------------
+    ("basis", """\
+        import numpy as np, pandas as pd
+        import fdars
+        growth = pd.read_csv(data_path("growth.csv"), index_col=0)
+        ARG = growth.index.values.astype(float)
+        X = growth.values.T.astype(np.float64)
+        res = fdars.basis.fdata_to_basis_1d(X[:5], ARG, n_basis=8, basis_type="bspline")
+        coefs, nbasis = res
+        print("coefficients shape:", coefs.shape, "| n_basis:", nbasis)
+        sm = fdars.basis.smooth_basis_gcv(X[:5], ARG, n_basis=8, basis_type="bspline")
+        print("smoothing keys:", list(sm.keys()))
+        print("fitted shape:", sm["fitted"].shape)
+        """),
+    # ------------------------------------------------------------------
+    # 3. Depth & outliers — use Fdata.depth() method (handles dtype);
+    #    muod(data) takes NO argvals.
+    # ------------------------------------------------------------------
+    ("depth", """\
+        import numpy as np, pandas as pd
+        import fdars
+        from fdars import Fdata
+        growth = pd.read_csv(data_path("growth.csv"), index_col=0)
+        ARG = growth.index.values.astype(float)
+        X = growth.values.T.astype(np.float64)
+        fd = Fdata(X, argvals=ARG)
+        depths = fd.depth(method="fraiman_muniz")
+        print("depths shape:", depths.shape, "| most central obs:", int(np.argmax(depths)))
+        out = fdars.outliers.muod(X)
+        print("shape outliers:", out["shape_outliers"], "| amplitude:", out["amplitude_outliers"])
+        """),
+    # ------------------------------------------------------------------
+    # 4. FPCA (dense) + sparse/irregular PACE FPCA.
+    #    This doubles as the MANU-05 irregular-representation snippet.
+    #    pace_fpca.irreg_fdata_from_lists -> PyIrregFdata -> pace_fpca().
+    # ------------------------------------------------------------------
+    ("fpca", """\
+        import numpy as np, pandas as pd
+        import fdars
+        from fdars import Fdata
+        growth = pd.read_csv(data_path("growth.csv"), index_col=0)
+        ARG = growth.index.values.astype(float)
+        X = growth.values.T.astype(np.float64)
+        fd = Fdata(X, argvals=ARG)
+        pc = fd.to_pc(n_comp=3)
+        print("FPCA scores shape:", pc["scores"].shape, "| singular values:", np.round(pc["singular_values"], 2).tolist())
+        np.random.seed(42)
+        argvals_list = [np.sort(np.random.uniform(1, 18, np.random.randint(5, 15))).tolist() for _ in range(30)]
+        values_list = [np.sin(av).tolist() for av in argvals_list]
+        irreg = fdars.pace_fpca.irreg_fdata_from_lists(argvals_list, values_list)
+        pace = fdars.pace_fpca.pace_fpca(irreg, ncomp=2)
+        print("PACE scores shape:", pace["scores"].shape, "| ncomp:", pace["ncomp"])
+        """),
+    # ------------------------------------------------------------------
+    # 5. Clustering — kmeans_fd(data, argvals, k, seed=42); print
+    #    cluster sizes (int list) and converged (bool), not float tot_withinss.
+    # ------------------------------------------------------------------
+    ("clustering", """\
+        import numpy as np, pandas as pd
+        import fdars
+        growth = pd.read_csv(data_path("growth.csv"), index_col=0)
+        ARG = growth.index.values.astype(float)
+        X = growth.values.T.astype(np.float64)
+        km = fdars.clustering.kmeans_fd(X, ARG, k=3, seed=42)
+        print("cluster sizes:", np.bincount(km["cluster"]).tolist(), "| converged:", km["converged"])
+        """),
+    # ------------------------------------------------------------------
+    # 6. Classification — fclassif_knn(data, labels, ncomp, k);
+    #    labels MUST be int64 ndarray (not list, not uint32);
+    #    phoneme.csv: 400 rows x 256 freq points, 5 classes in row index.
+    # ------------------------------------------------------------------
+    ("classification", """\
+        import numpy as np, pandas as pd
+        import fdars
+        ph = pd.read_csv(data_path("phoneme.csv"), index_col=0)
+        Xp = ph.values.astype(np.float64)
+        labels_str = ph.index.tolist()
+        uniq = list(dict.fromkeys(labels_str))
+        lut = {l: i for i, l in enumerate(uniq)}
+        y = np.array([lut[l] for l in labels_str], dtype=np.int64)
+        res = fdars.classification.fclassif_knn(Xp[:100], y[:100], ncomp=3, k=5)
+        print("accuracy:", res["accuracy"])
+        """),
+    # ------------------------------------------------------------------
+    # 7. Regression (scalar-on-function) — fregre_lm(data, response, n_comp);
+    #    tecator.csv: 240 x 103 (100 spectral channels + moisture/fat/protein).
+    #    FoF regression (fof_regression) is available but mentioned in prose.
+    # ------------------------------------------------------------------
+    ("regression", """\
+        import numpy as np, pandas as pd
+        import fdars
+        tec = pd.read_csv(data_path("tecator.csv"), index_col=0)
+        Xt = tec.iloc[:, :100].values.astype(np.float64)
+        yfat = tec["fat"].values.astype(np.float64)
+        sof = fdars.regression.fregre_lm(Xt, yfat, n_comp=5)
+        print("R^2:", round(sof["r_squared"], 4))
+        """),
 ]
 
 
