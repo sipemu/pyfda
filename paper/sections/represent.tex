@@ -113,14 +113,30 @@ snippet that constructs an \texttt{Fdata} object from the Growth dataset and
 prints its \texttt{repr}; the output confirms the $(n_\mathrm{obs} \times
 n_\mathrm{points})$ shape and the inferred \texttt{rangeval}.  Key read-only
 properties (\texttt{n\_obs}, \texttt{n\_points}, \texttt{rangeval},
-\texttt{data}, \texttt{argvals}) expose the container fields.
+\texttt{data}, \texttt{argvals}) expose the container fields without copying.
+
+\texttt{Fdata} exposes \nfdata{} public methods.  The most commonly used are
+\texttt{mean()} (cross-sectional pointwise mean), \texttt{center()} (subtract
+the mean to produce a centred \texttt{Fdata}), \texttt{deriv(nderiv=1)}
+(numerical differentiation), \texttt{norm()} ($L^2$ norm of each curve),
+\texttt{normalize()} (scale each curve to unit norm), \texttt{depth(method=...)}
+(functional depth via Fraiman--Muniz, band depth, or other methods),
+\texttt{to\_pc(ncomp=...)} (dense FPCA, returning scores, rotation, singular
+values, and centred data), \texttt{to\_basis(type=...)} (basis expansion),
+\texttt{distance(method=...)} (pairwise distance matrix), \texttt{cov()} (Bessel-corrected
+pointwise covariance surface), and \texttt{geometric\_median()} (the $L^1$ functional
+median).  Each method delegates to the appropriate PyO3 binding and returns
+results in consistent format (NumPy arrays or dicts).
 
 \texttt{Fdata} supports standard arithmetic operators (\texttt{+},
 \texttt{-}, \texttt{*}, \texttt{/}) enabling functional arithmetic, a
 \texttt{\_\_getitem\_\_} slice interface for sub-sampling observations, and
-\texttt{\_\_len\_\_} returning \texttt{n\_obs}.  It delegates all
-computationally intensive operations --- mean, depth, FPCA, regression
-transforms --- to the PyO3 binding layer described in Section~\ref{sec:design}.
+\texttt{\_\_len\_\_} returning \texttt{n\_obs}.  Observations can be
+concatenated via \texttt{concat()}, downsampled via \texttt{downsample()},
+imputed via \texttt{impute()}, and interpolated onto a new grid via
+\texttt{interpolate()}.  All computationally intensive operations delegate to
+the PyO3 binding layer described in Section~\ref{sec:design}; the Python class
+holds no redundant copies of the underlying array.
 
 \subsection{Irregular and Sparse Data: \texttt{PyIrregFdata}}
 \label{subsec:irreg}

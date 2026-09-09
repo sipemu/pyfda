@@ -54,16 +54,26 @@ Python mutation without an extra data copy.}
 \textbf{Computation core.}  Numerical algorithms live in the external Rust
 crate \texttt{fdars-core}, which provides the \texttt{FdMatrix} linear-algebra
 abstraction backed by \texttt{nalgebra} and data-parallel loops via
-\texttt{rayon}.  No Python objects cross into this layer; all communication
-occurs through the binding layer described next.
+\texttt{rayon}.  \texttt{fdars-core} 0.14.0 is the minimum required version
+declared in \texttt{Cargo.toml}, compiled with the \texttt{parallel} feature
+to enable rayon-backed parallelism.  No Python objects cross into this layer;
+all communication occurs through the binding layer described next, and
+\texttt{fdars-core} exports no Python-facing symbols.
 
-\textbf{PyO3 binding layer.}  A thin set of Rust modules (one per functional
-category) exposes \texttt{fdars-core} algorithms to Python via
-\href{https://pyo3.rs}{PyO3}.  Each binding function is annotated
+\textbf{PyO3 binding layer.}  A set of \nsubmodules{} Rust modules (one per
+functional category) exposes \texttt{fdars-core} algorithms to Python via
+\href{https://pyo3.rs}{PyO3} 0.28.  Each binding function is annotated
 \texttt{\#[pyfunction]} and accepts NumPy arrays through
 \texttt{PyReadonlyArray} wrappers, which hold a read-only view of the
 caller's array for the duration of the Rust call without an extra data copy,
 and prevent concurrent Python mutation of the array during Rust execution.
+Default parameter values are declared with \texttt{\#[pyo3(signature = (...))]}
+at the function level, allowing idiomatic Python keyword-argument syntax at
+call sites.  All modules are registered via a shared macro
+(\texttt{register\_submodule!}) in \texttt{src/lib.rs} that creates a
+\texttt{PyModule}, calls the module's \texttt{register} function, and attaches
+the submodule to the parent extension --- so adding a new algorithm family
+requires only one new \texttt{\_mod.rs} file and one macro invocation.
 
 \textbf{Boundary convention.}  The PyO3 boundary involves a layout conversion:
 NumPy stores two-dimensional arrays in C (row-major) order, while
@@ -75,14 +85,24 @@ vector required by \texttt{FdMatrix::from\_column\_major}.  The reverse
 function \texttt{fdmatrix\_to\_numpy2d} calls \texttt{to\_row\_major()} before
 allocating the output array.  The \texttt{PyReadonlyArray} wrapper avoids an
 extra data copy for the view itself, but a layout conversion is always present
-at the 2D matrix boundary.
+at the 2D matrix boundary.  Errors from \texttt{fdars-core} propagate as Rust
+\texttt{Result<T, FdarError>} values and are converted to Python
+\texttt{ValueError} exceptions by the helper \texttt{to\_pyresult} in
+\texttt{src/convert.rs}, so users receive descriptive error messages rather
+than opaque panics.
 
 \textbf{Python API layer.}  On top of the native extension, a pure-Python
 layer provides idiomatic Python-level conveniences: the \texttt{Fdata}
-object-oriented container (Section~\ref{sec:represent}), orchestration helpers
-(\texttt{cluster\_optim}, the advisor module), plotting utilities, dataset
-loaders, and the scikit-learn estimator wrappers described in
-Section~\ref{subsec:sklearn}.
+object-oriented container (Section~\ref{sec:represent}), the
+\texttt{cluster\_optim} parameter-search orchestrator, the grounded advisor
+module (Section~\ref{sec:advisor}), plotting utilities (\texttt{fdars.plot}),
+ergonomic dataset loaders (\texttt{fdars.datasets}), and the scikit-learn
+estimator wrappers described in Section~\ref{subsec:sklearn}.  The module
+registry in \texttt{python/fdars/\_\_init\_\_.py} iterates over a fixed list
+of submodule names, attaches each to \texttt{sys.modules}, and injects
+pure-Python helpers into native submodule namespaces via
+\texttt{\_augment.install()}, so both \texttt{fdars.depth.fraiman\_muniz\_1d}
+and \texttt{from fdars.depth import fraiman\_muniz\_1d} resolve correctly.
 
 \subsection{Module Map}
 
@@ -177,12 +197,18 @@ model in detail.
 A pure-Python scikit-learn-compatible layer wraps the most commonly used
 bindings as \texttt{BaseEstimator}/\texttt{TransformerMixin}
 subclasses (\texttt{fdars.sklearn.\_skeletons}).  \nsklearnestimators{}
-estimators pass the full \texttt{check\_estimator} battery, covering
-smoothing and basis transformers, FPCA-based regression and classification,
-depth-based classifiers and outlier detectors, and functional clustering
-estimators (e.g., \texttt{FPCATransformer}, \texttt{FPCRegressor},
-\texttt{FunctionalKMeans}, \texttt{LRTOutlierDetector}).  These estimators
-integrate transparently into \texttt{sklearn.pipeline.Pipeline} and
+estimators pass the full \texttt{check\_estimator} battery
+\citep{pedregosa_sklearn_2011}, covering smoothing and basis transformers,
+FPCA-based regression and classification, depth-based classifiers and outlier
+detectors, and functional clustering estimators (e.g., \texttt{FPCATransformer},
+\texttt{FPCRegressor}, \texttt{FunctionalKMeans}, \texttt{LRTOutlierDetector}).
+
+Conformance with \texttt{check\_estimator} carries concrete guarantees: the
+estimator's \texttt{get\_params}/\texttt{set\_params} round-trip correctly
+(enabling hyperparameter grid search), \texttt{clone} produces an independent
+copy, and each estimator is picklable (required for multi-process cross-validation
+via \texttt{GridSearchCV(n\_jobs=-1)}).  These estimators therefore integrate
+without modification into \texttt{sklearn.pipeline.Pipeline} and
 cross-validation utilities, as illustrated in the capability tour
 (Section~\ref{sec:capabilities}).
 

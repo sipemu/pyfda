@@ -6,7 +6,11 @@
 Functional data analysis (FDA) addresses data where the fundamental observation
 is a curve, surface, or trajectory evaluated over a continuum---temperature
 records over a year, spectroscopic absorption profiles, or gait acceleration
-waveforms.
+waveforms.  Rather than treating each observed value as an independent scalar,
+FDA represents entire trajectories as elements of a function space, enabling
+operations such as depth-based centrality ranking, elastic alignment of phase
+variation, FPCA-based dimension reduction, and scalar- or function-on-function
+regression.
 Practitioners working in Python have relatively few mature options.
 \texttt{scikit-fda}~0.10.1 \citep{ramoscarreno_scikitfda_2024} is the strongest
 existing Python peer: it provides representation and basis smoothing, elastic
@@ -27,7 +31,7 @@ provides scalar- and function-on-function regression and several FPCA variants;
 \texttt{funData}/\texttt{tidyfun} offer data-structure infrastructure.
 No single R package spans all the method families listed in
 Table~\ref{tab:comparison}, and coordinating across these packages requires
-manual data conversion.
+manual data conversion at each interface boundary.
 The Matlab toolkits fdaM (\textasciitilde2014) and PACE (v2.17, 2015) remain in
 partial maintenance and cannot be used in Python workflows without external
 bridges.

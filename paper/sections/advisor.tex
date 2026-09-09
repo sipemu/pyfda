@@ -72,19 +72,23 @@ The advisor exposes three public entry points in \texttt{fdars.advisor}:
     by \texttt{Fdata.to\_pc}) and a method identifier string (e.g.\
     \texttt{"fpca"}, \texttt{"smoothing"}, \texttt{"clustering"}) and
     returns a structured diagnostics dictionary derived entirely from
-    deterministic computation on the result: explained-variance ratios,
-    component count, reconstruction error, convergence flags, and other
-    method-specific diagnostics.  No language model is involved; the
-    diagnostics are fully reproducible given the same result input.
-    Supported methods include \texttt{alignment}, \texttt{basis},
-    \texttt{classification}, \texttt{clustering}, \texttt{depth},
-    \texttt{fpca}, \texttt{frechet}, \texttt{fts}, \texttt{inference},
-    \texttt{outliers}, \texttt{regression}, \texttt{regression\_cv},
-    \texttt{represent}, \texttt{scoring}, \texttt{smoothing}, and
-    \texttt{spm}.  The capability tour (Section~\ref{sec:capabilities})
-    demonstrates \texttt{build\_diagnostics} on an FPCA result; the output
-    includes cumulative variance explained, number of components, and a
-    phase-leakage indicator.
+    deterministic computation on the result.  The content of the diagnostics
+    dict is method-specific: for \texttt{fpca} it includes cumulative
+    explained-variance ratios, component count, reconstruction error,
+    and a phase-leakage indicator; for \texttt{smoothing} it includes GCV
+    score, effective degrees of freedom, AIC/BIC, and residual norm; for
+    \texttt{clustering} it includes within-cluster sum of squares,
+    silhouette score (where applicable), and a convergence flag.  No
+    language model is involved; the diagnostics are fully reproducible given
+    the same result input, and can be inspected, logged, or tested
+    independently of the LLM step.  Supported method identifiers include
+    \texttt{alignment}, \texttt{basis}, \texttt{classification},
+    \texttt{clustering}, \texttt{depth}, \texttt{fpca}, \texttt{frechet},
+    \texttt{fts}, \texttt{inference}, \texttt{outliers}, \texttt{regression},
+    \texttt{regression\_cv}, \texttt{represent}, \texttt{scoring},
+    \texttt{smoothing}, and \texttt{spm}.  The capability tour
+    (Section~\ref{sec:capabilities}) demonstrates \texttt{build\_diagnostics}
+    on an FPCA result.
 
   \item[\texttt{advise(diagnostics, *, task, domain\_context, provider=None,
     model=\ldots) -> Advice}]
@@ -93,29 +97,36 @@ The advisor exposes three public entry points in \texttt{fdars.advisor}:
     result dict directly --- and calls a user-configured language-model
     provider (Anthropic, OpenAI, or Ollama) to generate parameter
     recommendations framed in terms of the supplied task description and
-    domain context.  Because the LLM receives only the structured,
+    domain context.  Provider credentials are entirely the user's
+    responsibility; the library imposes no default provider and does not
+    embed API keys.  Because the LLM receives only the structured,
     deterministic diagnostics as its context, its recommendations trace back
     to computed facts rather than free-form interpretation of raw arrays.
     This \emph{grounding invariant} is what distinguishes the advisor from a
     plain LLM chat interface applied to a data summary: the diagnostics
     constitute an explicit, auditable evidence layer that the language model
-    reasons over.
+    reasons over, and the same diagnostics can be separately inspected by the
+    user to verify that the LLM's advice is consistent with the numbers.
 
   \item[\texttt{auto\_tune(dataset\_id, method, *, target\_metric=None,
     max\_steps=10, guard=True, \ldots)}]
     A closed-loop parameter search that iterates
     \texttt{build\_diagnostics} $\to$ \texttt{advise} $\to$ re-fit in a
-    bounded loop.  The \texttt{guard=True} default activates the
-    \emph{grounding guard}, which rejects any proposed parameter change that
-    cannot be mapped back to a diagnostic fact, preventing unconstrained
-    free-form generation from driving the search.
+    bounded loop (at most \texttt{max\_steps} iterations).  The
+    \texttt{guard=True} default activates the \emph{grounding guard}, which
+    rejects any proposed parameter change that cannot be mapped back to a
+    diagnostic fact using a pattern-matching check on the advisor response
+    text.  The guard prevents unconstrained free-form generation from driving
+    the search and ensures that the loop terminates on a recognisable
+    improvement signal rather than on arbitrary LLM output.
 \end{description}
 
 The design separates the deterministic grounding step (\texttt{build\_diagnostics})
 from the probabilistic recommendation step (\texttt{advise}), ensuring that
 the pipeline can be tested and audited at the boundary between the two.
-Provider credentials are entirely the user's responsibility; the library
-imposes no default provider and does not embed API keys.
+In particular, \texttt{build\_diagnostics} can be unit-tested against known
+result dicts without any LLM dependency, and the diagnostics dict format is
+stable across provider changes.
 
 \subsection{Scientific-Provenance Layer}
 
@@ -126,20 +137,25 @@ to the foundational papers from which its algorithm derives.  The map contains
 covers \ncoverage{} callables with at least one author-verified paper entry.
 Each paper record carries the title, authors, year, identifier, method family,
 the list of \texttt{fdars} callables that implement it, cross-language
-implementation pointers (R, Python, MATLAB equivalents with confidence
-assessments), and a \texttt{curated} boolean indicating whether the entry has
-been manually verified against the primary source.
+implementation pointers (R, Python, and MATLAB equivalents with per-entry
+confidence assessments), and a \texttt{curated} boolean indicating whether the
+entry has been manually verified against the primary source.  Entries marked
+\texttt{curated: false} are present as cross-reference candidates but are
+explicitly flagged so that downstream tooling can distinguish author-verified
+citations from unverified suggestions.
 
 The provenance map is served at runtime through the
-\texttt{fdars\_method\_references} MCP (Model Context Protocol) tool, which
-the \texttt{fdars-advisor} skill registers.  Given a callable name, the tool
-returns the associated paper entries, DOIs, and cross-language pointers ---
-making the provenance queryable by any LLM-based development environment that
-supports MCP without requiring a network call at query time.  The same map
-drives the offline-generated References documentation page in the MkDocs site
-(\texttt{docs/references/}), ensuring that the paper-level provenance visible
-to readers and the provenance queryable by the advisor are always derived from
-the same source of truth.
+\texttt{fdars\_method\_references} MCP (Model Context Protocol) tool
+\citep{anthropic_mcp_2024}, which the \texttt{fdars-advisor} skill registers.
+Given a callable name, the tool returns the associated paper entries, DOIs, and
+cross-language pointers --- making the provenance queryable by any
+MCP-compatible development environment (e.g.\ Claude Desktop, VS Code Copilot)
+without requiring a network call at query time, since the full map is bundled
+with the package.  The same map drives the offline-generated References
+documentation page in the MkDocs site (\texttt{docs/references/}), ensuring
+that the paper-level provenance visible to readers and the provenance queryable
+by the advisor are always derived from the same source of truth and never
+diverge silently.
 
 \subsection{Differentiator}
 

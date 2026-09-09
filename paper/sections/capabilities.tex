@@ -4,15 +4,29 @@
 \section{Capability Tour}
 \label{sec:capabilities}
 
-fdars exposes \npubliccallables{} public callables across \nsubmodules{}
-submodules, covering the full breadth of functional data analysis methods
-surveyed in Table~\ref{tab:comparison}.
+\texttt{fdars} exposes \npubliccallables{} public callables across
+\nsubmodules{} submodules, covering the full breadth of functional data
+analysis methods surveyed in Table~\ref{tab:comparison}.
 The \ncoverage{} callables backed by at least one curated peer-reviewed
 reference are tracked in the machine-readable scientific-provenance layer
 (Section~\ref{sec:advisor}).
+
+Each method family in \texttt{fdars} follows the same boundary convention
+described in Section~\ref{sec:design}: the user constructs or passes an
+\texttt{Fdata} object (or a NumPy array directly for lower-level calls), which
+the PyO3 binding converts to an \texttt{FdMatrix}, forwards to
+\texttt{fdars-core}, and converts back to a NumPy result.  High-level
+\texttt{Fdata} methods wrap this boundary transparently.  The scikit-learn
+estimator layer (Section~\ref{subsec:sklearn}) exposes the same methods as
+stateless \texttt{fit}/\texttt{transform} objects for pipeline composition.
+
 The following minimal, executable snippets walk one representative per method
-family; each is sourced from a script that runs against the live fdars API and
-has its output deterministically captured (see \texttt{paper/code/gen\_snippets.py}).
+family; each is sourced from a script that runs against the live \texttt{fdars}
+API and has its output deterministically captured (see
+\texttt{paper/code/gen\_snippets.py}).  The snippets serve as both
+documentation and regression tests: the CI drift gate (\texttt{make
+paper-check}) verifies that regenerating them produces no diff against the
+committed sources.
 
 \subsection{Data Representation}
 
