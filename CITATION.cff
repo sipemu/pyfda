@@ -17,6 +17,7 @@ authors:
   - family-names: "Müller"
     given-names: "Simon"
     email: "sm@data-zoo.de"
+  - name: "Claude Code (Anthropic)"
 keywords:
   - functional-data-analysis
   - FDA
@@ -30,6 +31,7 @@ preferred-citation:
     - family-names: "Müller"
       given-names: "Simon"
       email: "sm@data-zoo.de"
+    - name: "Claude Code (Anthropic)"
   year: 2026
   journal: "arXiv preprint"   # TODO: update to venue/journal name at submission (Phase 90)
   identifiers:
