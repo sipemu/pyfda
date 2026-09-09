@@ -5,16 +5,16 @@ milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 88
 current_phase_name: Front Matter, Design/Architecture & Capability Tour
 status: executing
-stopped_at: "Completed 88-01-PLAN.md (tracer: gen_snippets.py + represent.tex + nsklearnestimators macro + paper scaffold + make/CI wiring)"
-last_updated: "2026-09-09T06:04:33.001Z"
+stopped_at: Completed 88-02-PLAN.md (capability tour snippets + capabilities.tex)
+last_updated: "2026-09-09T06:13:24.569Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 88 execution started
-state_head: 3d2315c58348c4f8e4520364a0fcf7f84b20bb74
+state_head: 8eeef7364e33e2f42ce4cb03d63ae4ba806b8d6d
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 11
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 ## Current Position
 
 Phase: 88 (Front Matter, Design/Architecture & Capability Tour) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-09-09 — Phase 88 execution started
 
@@ -69,6 +69,7 @@ Last activity: 2026-09-09 — Phase 88 execution started
 | Phase 87 P87-01 | 10 | 3 tasks | 5 files |
 | Phase 87 P02 | 5min | 2 tasks | 3 files |
 | Phase 88 P01 | 22 | 3 tasks | 10 files |
+| Phase 88 P02 | 5 | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,9 @@ Recent decisions affecting current work:
 - [Phase 87]: check_comparison.py added to paper-check recipe only (not paper: generation target); paper.yml step placed after gen_refs_bib and before Setup tectonic
 - [Phase 88]: Use LaTeX listings (not minted) for snippet fragments: no -shell-escape, no pygments CI dependency, tectonic-friendly; proven in Phase 88 Plan 01
 - [Phase 88]: Add python/fdars/** + src/** to paper.yml path filter so API changes re-trigger snippet drift gate (Pitfall 5 prevention, Phase 88 Plan 01)
+- [Phase 88]: Use Fdata.depth() over module-level fraiman_muniz_1d — avoids PyO3 contiguous-float64 GOTCHA
+- [Phase 88]: Metric family represented by lp_self_1d; frechet_mean/density_fda mentioned in prose (plumbing-heavy, no clean one-liner per RESEARCH)
+- [Phase 88]: advisor_diag uses build_diagnostics only — LLM-free, offline, deterministic; advise() in prose only (PITFALL 7)
 
 ### Pending Todos
 
@@ -152,8 +156,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-09T06:04:32.921Z
-Stopped at: Completed 88-01-PLAN.md (tracer: gen_snippets.py + represent.tex + nsklearnestimators macro + paper scaffold + make/CI wiring)
+Last session: 2026-09-09T06:13:24.474Z
+Stopped at: Completed 88-02-PLAN.md (capability tour snippets + capabilities.tex)
 Resume file: None
 
 ## Operator Next Steps
