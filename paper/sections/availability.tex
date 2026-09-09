@@ -1,5 +1,30 @@
-% paper/sections/availability.tex — Availability and Installation section stub
-% Expanded in Phase 88.
+% paper/sections/availability.tex — Availability and Installation section
+% Filled in Phase 88 Plan 05 (MANU-07).
 \section{Availability and Installation}
 
-Placeholder availability and installation section — expanded in Phase 88.
+\texttt{fdars} is available from the Python Package Index (PyPI) and can be
+installed with:
+\begin{verbatim}
+pip install fdars
+\end{verbatim}
+Prebuilt binary wheels are provided for Linux (x86\_64 and aarch64), macOS
+(x86\_64 and aarch64), and Windows (x86\_64).
+The package targets the CPython stable ABI (\texttt{abi3-py39}) and supports
+Python~3.9 through 3.14.
+
+An optional \texttt{plot} extra installs \texttt{matplotlib} for the built-in
+visualisation utilities:
+\begin{verbatim}
+pip install fdars[plot]
+\end{verbatim}
+An optional \texttt{sklearn} extra installs \texttt{scikit-learn} and enables
+the \texttt{fdars.sklearn} estimator layer, which exposes \nsklearnestimators{}
+estimators compatible with the scikit-learn API:
+\begin{verbatim}
+pip install fdars[sklearn]
+\end{verbatim}
+
+The source code is released under the MIT licence and is hosted at
+\url{https://github.com/sipemu/pyfda}.
+Documentation, including worked examples and API reference, is available at
+\url{https://sipemu.github.io/pyfda/}.
