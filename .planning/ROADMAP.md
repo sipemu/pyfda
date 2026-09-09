@@ -134,7 +134,10 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
   3. A blocking human read-through of the manuscript (prose accuracy, comparison table, citations) is approved before close.
   4. A citable 0.13.0 release is prepared: version bumped in `Cargo.toml`/`pyproject.toml`/`__version__`, `CITATION.cff` + arXiv/Zenodo DOI wiring finalized, and a semver `v0.13.0` tag prepared/handed to the user for PyPI publish.
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+- [ ] 90-01-PLAN.md — Release prep (executor-delegatable): bump 0.12.0→0.13.0 across Cargo.toml/pyproject.toml/__version__/\FdarsVersion/CITATION.cff, `maturin develop --release` rebuild, `make paper` regenerate all artifacts, prove GATE-02 green at 0.13.0, atomic commit (GATE-02, REL-01)
+- [ ] 90-02-PLAN.md — Close gate (orchestrator + human): decision-gated push to origin/main → monitor paper.yml CI PDF compile (GATE-03) → blocking human read-through (GATE-04) → hand user the v0.13.0 tag + PyPI publish commands (GATE-03, GATE-04, REL-01)
 
 ## Progress
 
@@ -145,7 +148,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 | 87. Comparison Table + Evidence File | 2/2 | Complete    | 2026-09-09 |
 | 88. Front Matter, Design/Architecture & Capability Tour | 5/5 | Complete    | 2026-09-09 |
 | 89. Case Studies + Reproducible Figures | 4/4 | Complete    | 2026-09-09 |
-| 90. Close Gate + Citable Release | 0/0 | Not started | - |
+| 90. Close Gate + Citable Release | 0/2 | Not started | - |
 
 ---
 
