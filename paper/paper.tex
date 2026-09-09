@@ -1,7 +1,10 @@
 % arXiv: force pdflatex/PDF output mode (arXiv scans the first lines for this).
-% Guarded so it is a no-op under XeTeX/tectonic (our CI), where \pdfoutput is
-% undefined, while arXiv's pdflatex honours it.
-\ifdefined\pdfoutput\pdfoutput=1\fi
+% Guard on \pdftexversion (defined ONLY under pdfTeX, i.e. arXiv's engine), NOT
+% \pdfoutput: tectonic/XeTeX (our CI) also defines \pdfoutput, so guarding on it
+% would set \pdfoutput=1 under XeTeX, make hyperref load the pdfTeX driver
+% (hpdftex.def), and crash on undefined pdfTeX primitives. This form is a no-op
+% under XeTeX/LuaTeX while still exposing the literal \pdfoutput=1 arXiv scans for.
+\ifdefined\pdftexversion\pdfoutput=1\fi
 % paper/paper.tex — fdars software paper (arXiv preprint source).
 % Bibliography: natbib + BibTeX (plainnat.bst; arXiv runs bibtex, CI uses tectonic).
 % The date field is empty intentionally for deterministic output.
