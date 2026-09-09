@@ -152,9 +152,10 @@ location.
 \texttt{fdars.pace\_fpca.PyIrregFdata} container, constructed with the factory
 function:
 
-\begin{verbatim}
-irreg = fdars.pace_fpca.irreg_fdata_from_lists(argvals_list, values_list)
-\end{verbatim}
+\begin{lstlisting}[language=Python,style=fdarsinput]
+from fdars.pace_fpca import irreg_fdata_from_lists
+irreg = irreg_fdata_from_lists(argvals_list, values_list)
+\end{lstlisting}
 
 where \texttt{argvals\_list} is a Python list of per-observation grid arrays
 (each of arbitrary length) and \texttt{values\_list} is the corresponding list
@@ -162,9 +163,9 @@ of observed values.  The result is a \texttt{PyIrregFdata} object that the
 PACE FPCA algorithm (\texttt{fdars.pace\_fpca.pace\_fpca}) accepts as its
 primary input:
 
-\begin{verbatim}
+\begin{lstlisting}[language=Python,style=fdarsinput]
 result = fdars.pace_fpca.pace_fpca(irreg, ncomp=2, bandwidth=0.1)
-\end{verbatim}
+\end{lstlisting}
 
 PACE (Principal Analysis by Conditional Expectation,
 \citealt{yao_muller_wang_2005}) estimates mean and covariance functions via
