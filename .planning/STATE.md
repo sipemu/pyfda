@@ -4,17 +4,17 @@ milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 88
 current_phase_name: Front Matter, Design/Architecture & Capability Tour
-status: executing
-stopped_at: Completed 88-04-PLAN.md (design.tex, represent.tex, advisor.tex)
-last_updated: "2026-09-09T06:24:11.708Z"
+status: verifying
+stopped_at: Completed 88-05-PLAN.md (availability.tex + conclusion.tex)
+last_updated: "2026-09-09T06:27:38.907Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 88 execution started
-state_head: 7689dd0f29d292af90f10fcbe3eb374019b4c01a
+state_head: 38ef63037c38eb81c2313cbe3b4af43abf51c80a
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 Phase: 88 (Front Matter, Design/Architecture & Capability Tour) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-09 — Phase 88 execution started
 
 ## Performance Metrics
@@ -72,6 +72,7 @@ Last activity: 2026-09-09 — Phase 88 execution started
 | Phase 88 P02 | 5 | 3 tasks | 15 files |
 | Phase 88 P03 | 90 | 2 tasks | 2 files |
 | Phase 88 P04 | 15 | 3 tasks | 3 files |
+| Phase 88-front-matter-design-architecture-capability-tour P05 | 12 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,8 @@ Recent decisions affecting current work:
 - [Phase 88]: Described PyO3 boundary as read-only views + layout conversion, not zero-copy, matching convert.rs source
 - [Phase 88]: PyIrregFdata + irreg_fdata_from_lists named verbatim in represent.tex (never bare IrregFdata)
 - [Phase 88]: All architecture/provenance counts use macros only (nsubmodules, nsklearnestimators, ndocpapers, ncoverage) — no hardcoded integers
+- [Phase 88]: Verified all availability facts against pyproject.toml; used \nsklearnestimators macro instead of hardcoding 28
+- [Phase 88]: Conclusion uses \npubliccallables, \nsubmodules, \ndocpapers macros only; no hardcoded count integers; roadmap-agnostic framing with no JOSS/JSS venue promises
 
 ### Pending Todos
 
@@ -163,8 +166,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-09T06:24:11.614Z
-Stopped at: Completed 88-04-PLAN.md (design.tex, represent.tex, advisor.tex)
+Last session: 2026-09-09T06:27:38.837Z
+Stopped at: Completed 88-05-PLAN.md (availability.tex + conclusion.tex)
 Resume file: None
 
 ## Operator Next Steps

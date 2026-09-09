@@ -100,7 +100,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 - [x] 88-02-PLAN.md — Capability tour: all validated family snippets → `paper/snippets/*.tex`, breadth-first `capabilities.tex` family walk
 - [x] 88-03-PLAN.md — Front matter: abstract + Introduction/statement-of-need + FDA background
 - [x] 88-04-PLAN.md — Design/architecture + data representation + grounded-advisor/provenance sections
-- [ ] 88-05-PLAN.md — Availability & installation + Conclusion
+- [x] 88-05-PLAN.md — Availability & installation + Conclusion
 
 ### Phase 89: Case Studies + Reproducible Figures
 

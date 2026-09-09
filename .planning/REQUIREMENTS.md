@@ -15,7 +15,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase. A writi
 - [x] **MANU-04**: Data-representation model section — `Fdata`, argvals/grids, irregular/sparse (`IrregFdata`) representation
 - [x] **MANU-05**: Capability tour by method family with minimal runnable code snippets, each snippet sourced from an executed `paper/code/` script (never hand-copied)
 - [x] **MANU-06**: Dedicated section presenting the grounded **AI advisor + scientific-provenance** layer as a novel contribution absent from peer FDA packages
-- [ ] **MANU-07**: Availability & installation section (PyPI, extras, Python 3.9–3.14) + Conclusion
+- [x] **MANU-07**: Availability & installation section (PyPI, extras, Python 3.9–3.14) + Conclusion
 - [x] **MANU-08**: `CITATION.cff` (v1.2.0, `cffconvert`-valid) with a `preferred-citation` block for the arXiv preprint, author block placeholdered to Simon Müller <sm@data-zoo.de>
 
 ### Pipeline & Single-Source-of-Truth (PIPE)
@@ -82,7 +82,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | MANU-04 | Phase 88 | Complete |
 | MANU-05 | Phase 88 | Complete |
 | MANU-06 | Phase 88 | Complete |
-| MANU-07 | Phase 88 | Pending |
+| MANU-07 | Phase 88 | Complete |
 | MANU-08 | Phase 85 | Complete |
 | PIPE-01 | Phase 85 | Complete |
 | PIPE-02 | Phase 85 | Complete |
