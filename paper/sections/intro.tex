@@ -1,5 +1,75 @@
-% paper/sections/intro.tex — Introduction section stub
-% Expanded in Phase 88.
+% paper/sections/intro.tex — Introduction section, filled in Phase 88 Plan 03 (MANU-02).
 \section{Introduction}
 
-Placeholder introduction — expanded in Phase 88.
+\subsection*{Statement of need}
+
+Functional data analysis (FDA) addresses data where the fundamental observation
+is a curve, surface, or trajectory evaluated over a continuum---temperature
+records over a year, spectroscopic absorption profiles, or gait acceleration
+waveforms.
+Practitioners working in Python have relatively few mature options.
+\texttt{scikit-fda}~0.10.1 \citep{ramsay_silverman_2005} is the strongest
+existing Python peer: it provides representation and basis smoothing, elastic
+registration, functional depth and outlier detection, dense FPCA, clustering,
+classification, and scalar-on-function regression.
+However, as documented in Table~\ref{tab:comparison}, it does not cover
+functional time series forecasting, statistical process monitoring, conformal
+prediction and tolerance bands, density/Fr\'{e}chet/metric-space methods, or
+sparse PACE FPCA; it offers no grounded parameter advisor and no
+scientific-provenance layer.
+\texttt{FDApy}~1.0.3 \citep{happ_greven_2018} focuses on representation,
+multivariate FPCA, and simulation, and does not address the remaining families
+at all.
+In R, the relevant methods are distributed across multiple packages: \texttt{fda}
+covers representation, smoothing, registration, and dense FPCA; \texttt{fda.usc}
+adds depth, classification, and scalar-on-function regression; \texttt{refund}
+provides scalar- and function-on-function regression and several FPCA variants;
+\texttt{funData}/\texttt{tidyfun} offer data-structure infrastructure.
+No single R package spans all the method families listed in
+Table~\ref{tab:comparison}, and coordinating across these packages requires
+manual data conversion.
+The Matlab toolkits fdaM (\textasciitilde2014) and PACE (v2.17, 2015) remain in
+partial maintenance and cannot be used in Python workflows without external
+bridges.
+
+\texttt{fdars} is designed to fill this gap.
+It is the only Python library, to our knowledge, that covers all
+\nsubmodules{} method families---spanning \npubliccallables{} public
+callables---in a single importable package, with scikit-learn compatibility
+and a grounded advisor and scientific-provenance layer absent from all
+compared packages (see Table~\ref{tab:comparison}).
+We make no performance claims here; the design section (\S\ref{sec:design})
+describes the architecture qualitatively.
+
+\subsection*{Background: functional data analysis}
+
+Functional data analysis treats data as realisations of a random process
+$X(t)$, $t \in \mathcal{T}$, where each observation is an element of an
+infinite-dimensional function space rather than a finite-dimensional vector
+\citep{ramsay_silverman_2005,ramsay_dalzell_1991}.
+In practice, observations are recorded at discrete evaluation points and
+represented via basis expansions (B-splines, Fourier), kernel smoothing, or
+directly as dense grids; when observations are sparse and irregular, methods
+such as PACE \citep{yao_muller_wang_2005} recover the latent smooth trajectory
+from noisy longitudinal measurements.
+Functional principal component analysis (FPCA) reduces dimension by projecting
+onto a data-adaptive orthonormal basis of eigenfunctions, playing the role that
+PCA plays in multivariate analysis \citep{ramsay_silverman_2005}.
+Elastic registration \citep{srivastava_klassen_2016,marron_ramsay_sangalli_srivastava_2015}
+separates amplitude from phase variation by aligning curves under a group
+of diffeomorphic reparametrisations before downstream inference.
+Further families---including regression, depth, clustering, functional time
+series \citep{hormann_kokoszka_2010,hyndman_ullah_2007}, and process
+monitoring---extend classical multivariate techniques to the functional
+setting; \citet{ferraty_vieu_2006} and \citet{ramsay_silverman_2005} survey
+the field comprehensively.
+
+\subsection*{Contributions and paper outline}
+
+This paper describes \texttt{fdars}, documenting: (1) the software design and
+Rust/PyO3 architecture (\S\ref{sec:design}); (2) the data-representation model
+and \texttt{Fdata} container (\S\ref{sec:represent}); (3) a capability tour by
+method family, with executed, script-sourced code snippets (\S\ref{sec:capabilities});
+(4) the grounded AI advisor and scientific-provenance contribution, which are
+absent from all compared packages (\S\ref{sec:advisor}); and (5) availability
+and installation information (\S\ref{sec:availability}).
