@@ -62,9 +62,11 @@ to peer-reviewed papers at query time.}
 
 The advisor exposes three public entry points in \texttt{fdars.advisor}:
 
-\begin{description}
-  \item[\texttt{build\_diagnostics(result, method, *, argvals=None, \ldots)}]
-    The \emph{LLM-free grounding step}.  It accepts the result dictionary
+\paragraph{\texttt{build\_diagnostics} --- the LLM-free grounding step.}
+\begin{lstlisting}[style=fdarsinput]
+build_diagnostics(result, method, *, argvals=None, ...)
+\end{lstlisting}
+    It accepts the result dictionary
     returned by an \texttt{fdars} analysis function (e.g.\ the dict returned
     by \texttt{Fdata.to\_pc}) and a method identifier string (e.g.\
     \texttt{"fpca"}, \texttt{"smoothing"}, \texttt{"clustering"}) and
@@ -87,9 +89,11 @@ The advisor exposes three public entry points in \texttt{fdars.advisor}:
     (Section~\ref{sec:capabilities}) demonstrates \texttt{build\_diagnostics}
     on an FPCA result.
 
-  \item[\texttt{advise(diagnostics, *, task, domain\_context, provider=None,
-    model=\ldots) -> Advice}]
-    The \emph{provider-agnostic LLM entry point}.  It accepts the diagnostics
+\paragraph{\texttt{advise} --- the provider-agnostic LLM entry point.}
+\begin{lstlisting}[style=fdarsinput]
+advise(diagnostics, *, task, domain_context, provider=None, model=...) -> Advice
+\end{lstlisting}
+    It accepts the diagnostics
     dict produced by \texttt{build\_diagnostics} --- never raw data or a
     result dict directly --- and calls a user-configured language-model
     provider (Anthropic, OpenAI, or Ollama) to generate parameter
@@ -105,8 +109,10 @@ The advisor exposes three public entry points in \texttt{fdars.advisor}:
     reasons over, and the same diagnostics can be separately inspected by the
     user to verify that the LLM's advice is consistent with the numbers.
 
-  \item[\texttt{auto\_tune(dataset\_id, method, *, target\_metric=None,
-    max\_steps=10, guard=True, \ldots)}]
+\paragraph{\texttt{auto\_tune} --- closed-loop parameter search.}
+\begin{lstlisting}[style=fdarsinput]
+auto_tune(dataset_id, method, *, target_metric=None, max_steps=10, guard=True, ...)
+\end{lstlisting}
     A closed-loop parameter search that iterates
     \texttt{build\_diagnostics} $\to$ \texttt{advise} $\to$ re-fit in a
     bounded loop (at most \texttt{max\_steps} iterations).  The
@@ -116,7 +122,6 @@ The advisor exposes three public entry points in \texttt{fdars.advisor}:
     text.  The guard prevents unconstrained free-form generation from driving
     the search and ensures that the loop terminates on a recognisable
     improvement signal rather than on arbitrary LLM output.
-\end{description}
 
 The design separates the deterministic grounding step (\texttt{build\_diagnostics})
 from the probabilistic recommendation step (\texttt{advise}), ensuring that
