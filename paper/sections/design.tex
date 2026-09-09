@@ -1,5 +1,150 @@
-% paper/sections/design.tex — Software Design and Architecture section stub
-% Expanded in Phase 88.
-\section{Software Design and Architecture}
+% paper/sections/design.tex — Software Design and Architecture
+% Written in Phase 88 (Plan 04). Do not edit manually.
 
-Placeholder software design and architecture section — expanded in Phase 88.
+\section{Software Design and Architecture}
+\label{sec:design}
+
+\subsection{Layered Architecture}
+
+\texttt{fdars} is organised as three cooperating layers (Figure omitted — see
+source repository for a diagram of the component hierarchy).
+
+\textbf{Computation core.}  Numerical algorithms live in the external Rust
+crate \texttt{fdars-core}, which provides the \texttt{FdMatrix} linear-algebra
+abstraction backed by \texttt{nalgebra} and data-parallel loops via
+\texttt{rayon}.  No Python objects cross into this layer; all communication
+occurs through the binding layer described next.
+
+\textbf{PyO3 binding layer.}  A thin set of Rust modules (one per functional
+category) exposes \texttt{fdars-core} algorithms to Python via
+\href{https://pyo3.rs}{PyO3}.  Each binding function is annotated
+\texttt{\#[pyfunction]} and accepts NumPy arrays through
+\texttt{PyReadonlyArray} wrappers, which hold a read-only view of the
+caller's array without copying it and release the GIL for the duration of the
+Rust call.
+
+\textbf{Boundary convention.}  The PyO3 boundary involves a layout conversion:
+NumPy stores two-dimensional arrays in C (row-major) order, while
+\texttt{fdars-core}'s \texttt{FdMatrix} is column-major.  The conversion
+function \texttt{numpy2d\_to\_fdmatrix} (see \texttt{src/convert.rs}) performs
+an explicit element-wise transpose: given an $(n_\mathrm{obs} \times
+n_\mathrm{points})$ NumPy array in C order it builds the column-major flat
+vector required by \texttt{FdMatrix::from\_column\_major}.  The reverse
+function \texttt{fdmatrix\_to\_numpy2d} calls \texttt{to\_row\_major()} before
+allocating the output array.  The \texttt{PyReadonlyArray} wrapper avoids an
+extra data copy for the view itself, but a layout conversion is always present
+at the 2D matrix boundary.
+
+\textbf{Python API layer.}  On top of the native extension, a pure-Python
+layer provides idiomatic Python-level conveniences: the \texttt{Fdata}
+object-oriented container (Section~\ref{sec:represent}), orchestration helpers
+(\texttt{cluster\_optim}, the advisor module), plotting utilities, dataset
+loaders, and the scikit-learn estimator wrappers described in
+Section~\ref{subsec:sklearn}.
+
+\subsection{Module Map}
+
+\texttt{fdars} exposes \nsubmodules{} public submodules and \npubliccallables{}
+public callables organised by method family:
+
+\begin{description}
+  \item[Representation, basis and smoothing]
+    \texttt{fdata}, \texttt{represent}, \texttt{basis}, \texttt{smoothing} ---
+    functional object construction, derivative estimation, basis expansion,
+    GCV-penalised smoothing, interpolation, resampling.
+
+  \item[Alignment]
+    \texttt{alignment} --- elastic registration via the square-root slope
+    function (SRSF) framework \citep{srivastava_et_al_2011}, including
+    pairwise warping and Karcher mean under the elastic metric.
+
+  \item[Depth, outliers and scoring]
+    \texttt{depth}, \texttt{outliers}, \texttt{scoring} --- Fraiman--Muniz
+    depth \citep{fraiman_muniz_2001}, band depth
+    \citep{lopez_pintado_romo_2009}, the outliergram
+    \citep{arribas_gil_romo_2014}, MUOD, and magnitude-shape (MS) detection
+    \citep{dai_genton_2019}.
+
+  \item[FPCA and sparse/longitudinal PACE]
+    \texttt{fdata} (via \texttt{Fdata.to\_pc}), \texttt{pace\_fpca} ---
+    dense FPCA and the PACE algorithm for irregularly observed trajectories
+    \citep{yao_muller_wang_2005}.
+
+  \item[Clustering and classification]
+    \texttt{clustering}, \texttt{classification}, \texttt{shapelet} ---
+    $k$-means for functional data, fuzzy $c$-means, Gaussian mixture models;
+    $k$-NN, LDA, QDA, and DD-classifiers.
+
+  \item[Regression]
+    \texttt{regression}, \texttt{scalar\_on\_function}, \texttt{famm} ---
+    scalar-on-function (FPC-based and non-parametric), function-on-function
+    regression, and functional additive mixed models.
+
+  \item[Functional time series]
+    \texttt{fts} --- functional time-series modelling via the FTSM framework
+    \citep{hyndman_ullah_2007} with multi-step forecasting.
+
+  \item[Statistical process monitoring]
+    \texttt{spm} --- phase-1 baseline estimation and phase-2 monitoring via
+    functional $T^2$ and SPE statistics.
+
+  \item[Conformal prediction and tolerance bands]
+    \texttt{conformal}, \texttt{tolerance} --- FPCA-based tolerance bands and
+    conformal scalar-on-function prediction intervals.
+
+  \item[Density, Fr\'{e}chet and metric]
+    \texttt{density\_fda}, \texttt{frechet}, \texttt{metric} ---
+    log-quantile-density FPCA, Wasserstein barycenter
+    \citep{agueh_carlier_2011}, Fr\'{e}chet mean
+    \citep{petersen_muller_2016}, and $L^p$/DTW distance matrices.
+
+  \item[Inference, explanation and simulation]
+    \texttt{inference}, \texttt{explain}, \texttt{simulation} ---
+    functional ANOVA, permutation and bootstrap tests; shapelet explanation;
+    Gaussian-process and basis-expansion simulation.
+\end{description}
+
+This organisation mirrors the taxonomy used in the comparison table
+(Table~\ref{tab:comparison}); see Section~\ref{sec:comparison} for a
+side-by-side evaluation of method coverage across peer packages.
+
+\subsection{The \texttt{Fdata} Container}
+\label{subsec:fdata}
+
+At the Python level, \texttt{Fdata} is the central object for dense functional
+data.  It bundles the $(n_\mathrm{obs} \times n_\mathrm{points})$ observation
+matrix with a shared evaluation grid (\texttt{argvals}), a domain interval
+(\texttt{rangeval}), optional observation identifiers (\texttt{id}), optional
+variable names (\texttt{names}), and optional sample-level metadata
+(\texttt{metadata}).  The container exposes \nfdata{} public methods ---
+including \texttt{mean}, \texttt{center}, \texttt{depth}, \texttt{to\_pc},
+\texttt{to\_basis}, \texttt{deriv}, \texttt{norm}, \texttt{distance},
+\texttt{cov}, and \texttt{geometric\_median} --- each of which delegates to the
+appropriate binding or pure-Python function and returns results in a consistent
+format (NumPy arrays or dicts).  Section~\ref{sec:represent} describes the data
+model in detail.
+
+\subsection{Scikit-learn Estimator Layer}
+\label{subsec:sklearn}
+
+A pure-Python scikit-learn-compatible layer wraps the most commonly used
+bindings as \texttt{BaseEstimator}/\texttt{TransformerMixin}
+subclasses (\texttt{fdars.sklearn.\_skeletons}).  \nsklearnestimators{}
+estimators pass the full \texttt{check\_estimator} battery, covering
+smoothing and basis transformers, FPCA-based regression and classification,
+depth-based classifiers and outlier detectors, and functional clustering
+estimators (e.g., \texttt{FPCATransformer}, \texttt{FPCRegressor},
+\texttt{FunctionalKMeans}, \texttt{LRTOutlierDetector}).  These estimators
+integrate transparently into \texttt{sklearn.pipeline.Pipeline} and
+cross-validation utilities, as illustrated in the capability tour
+(Section~\ref{sec:capabilities}).
+
+Some methods in \texttt{fdars} are deliberately excluded from the estimator
+layer (13 methods, listed in \texttt{fdars.sklearn.EXCLUDED\_METHODS})
+because their interfaces do not fit the stateless
+\texttt{fit}/\texttt{transform} contract --- for example, paired elastic
+alignment (\texttt{alignment.elastic\_align\_pair}), the Karcher mean
+(\texttt{alignment.karcher\_mean}), and the PACE FPCA
+(\texttt{pace\_fpca.pace\_fpca}, which requires ragged per-observation grids
+rather than a rectangular matrix).  This boundary is documented transparently
+so that users building custom pipelines know which methods to call directly.
