@@ -244,6 +244,116 @@ SNIPPETS: list[tuple[str, str]] = [
         sof = fdars.regression.fregre_lm(Xt, yfat, n_comp=5)
         print("R^2:", round(sof["r_squared"], 4))
         """),
+    # ------------------------------------------------------------------
+    # 8. Functional time series — ftsm_forecast(data, argvals, h, ncomp);
+    #    NOTE: takes RAW data+argvals, NOT a fitted ftsm model dict.
+    #    canadian_weather.csv: 365 days x 35 stations -> .T -> (35, 365).
+    # ------------------------------------------------------------------
+    ("fts", """\
+        import numpy as np, pandas as pd
+        import fdars
+        cw = pd.read_csv(data_path("canadian_weather.csv"), index_col=0)
+        Xfts = cw.T.values.astype(np.float64)
+        ARGd = np.arange(365, dtype=np.float64) + 1.0
+        fc = fdars.fts.ftsm_forecast(Xfts, ARGd, h=3, ncomp=3)
+        print("forecast shape:", fc["forecast"].shape, "| h:", fc["h"])
+        """),
+    # ------------------------------------------------------------------
+    # 9. SPM — spm_phase1 then spm_monitor with UNPACKED positional args
+    #    (NOT the result dict). Print alarm counts as ints.
+    # ------------------------------------------------------------------
+    ("spm", """\
+        import numpy as np, pandas as pd
+        import fdars
+        growth = pd.read_csv(data_path("growth.csv"), index_col=0)
+        ARG = growth.index.values.astype(float)
+        X = growth.values.T.astype(np.float64)
+        p1 = fdars.spm.spm_phase1(X[:46], ARG, ncomp=3, alpha=0.05)
+        mon = fdars.spm.spm_monitor(
+            p1["mean"], p1["loadings"], p1["weights"],
+            p1["eigenvalues"], p1["t2_limit"], p1["spe_limit"],
+            X[46:], ARG,
+        )
+        print("T2 alarms:", int(mon["t2_alarm"].sum()), "| SPE alarms:", int(mon["spe_alarm"].sum()))
+        """),
+    # ------------------------------------------------------------------
+    # 10. Conformal / tolerance — fpca_tolerance_band(data, ncomp, nb, coverage, seed);
+    #     NO argvals, NO alpha kwarg (use coverage=). Seeded -> deterministic.
+    # ------------------------------------------------------------------
+    ("tolerance", """\
+        import numpy as np, pandas as pd
+        import fdars
+        growth = pd.read_csv(data_path("growth.csv"), index_col=0)
+        ARG = growth.index.values.astype(float)
+        X = growth.values.T.astype(np.float64)
+        tol = fdars.tolerance.fpca_tolerance_band(X, ncomp=3, nb=200, coverage=0.95, seed=42)
+        print("tolerance keys:", list(tol.keys()), "| band width shape:", tol["half_width"].shape)
+        """),
+    # ------------------------------------------------------------------
+    # 11. Density / Frechet / metric — lp_self_1d + dtw_self_1d;
+    #     dtw_self_1d(data) takes NO argvals. Round DTW float for stability.
+    #     frechet_mean / density_fda.wasserstein_barycenter covered in prose.
+    # ------------------------------------------------------------------
+    ("metric", """\
+        import numpy as np, pandas as pd
+        import fdars
+        growth = pd.read_csv(data_path("growth.csv"), index_col=0)
+        ARG = growth.index.values.astype(float)
+        X = growth.values.T.astype(np.float64)
+        D = fdars.metric.lp_self_1d(X, ARG, p=2.0)
+        print("L2 distance matrix shape:", D.shape)
+        Ddtw = fdars.metric.dtw_self_1d(X[:10])
+        print("DTW[0,1]:", round(float(Ddtw[0, 1]), 2))
+        """),
+    # ------------------------------------------------------------------
+    # 12. Alignment (elastic) — karcher_mean(data, argvals); 10-obs subset
+    #     for speed. Print keys + converged + aligned_data.shape.
+    # ------------------------------------------------------------------
+    ("alignment", """\
+        import numpy as np, pandas as pd
+        import fdars
+        growth = pd.read_csv(data_path("growth.csv"), index_col=0)
+        ARG = growth.index.values.astype(float)
+        X = growth.values.T.astype(np.float64)
+        km_res = fdars.alignment.karcher_mean(X[:10], ARG)
+        print("karcher keys:", list(km_res.keys()), "| converged:", km_res["converged"])
+        print("aligned shape:", km_res["aligned_data"].shape)
+        """),
+    # ------------------------------------------------------------------
+    # 13. Advisor (LLM-free diagnostics) — build_diagnostics(result, method);
+    #     DO NOT call advise() (needs LLM, non-deterministic, needs API key).
+    #     build_diagnostics is offline and deterministic.
+    # ------------------------------------------------------------------
+    ("advisor_diag", """\
+        import numpy as np, pandas as pd
+        import fdars
+        from fdars import Fdata
+        growth = pd.read_csv(data_path("growth.csv"), index_col=0)
+        ARG = growth.index.values.astype(float)
+        X = growth.values.T.astype(np.float64)
+        fd = Fdata(X, argvals=ARG)
+        pc = fd.to_pc(n_comp=3)
+        diag = fdars.advisor.build_diagnostics(pc, "fpca", argvals=ARG)
+        print("cumulative variance explained:", np.round(diag["cumulative_variance_explained"], 3).tolist())
+        """),
+    # ------------------------------------------------------------------
+    # 14. sklearn estimator layer — FPCATransformer from _skeletons (NOT
+    #     re-exported at fdars.sklearn top level); param is n_components NOT n_comp.
+    #     Pipeline with RidgeCV on tecator; round mean R^2 for float stability.
+    # ------------------------------------------------------------------
+    ("sklearn", """\
+        import numpy as np, pandas as pd
+        from fdars.sklearn._skeletons import FPCATransformer
+        from sklearn.pipeline import Pipeline
+        from sklearn.linear_model import RidgeCV
+        from sklearn.model_selection import cross_val_score
+        tec = pd.read_csv(data_path("tecator.csv"), index_col=0)
+        Xt = tec.iloc[:, :100].values.astype(np.float64)
+        yfat = tec["fat"].values.astype(np.float64)
+        pipe = Pipeline([("fpca", FPCATransformer(n_components=5)), ("ridge", RidgeCV())])
+        scores = cross_val_score(pipe, Xt, yfat, cv=5, scoring="r2")
+        print("mean R^2 (5-fold):", round(float(scores.mean()), 3))
+        """),
 ]
 
 
