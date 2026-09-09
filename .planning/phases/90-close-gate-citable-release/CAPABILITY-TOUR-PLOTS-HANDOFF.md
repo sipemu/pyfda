@@ -56,3 +56,19 @@ Representation, 4.2 Basis/Smoothing, 4.3 Depth/Outliers, 4.4 FPCA, 4.5 Clusterin
   `git push origin v0.13.0` (triggers PyPI publish) — the USER publishes, not the agent.
 - Phase 90 plans: `.planning/phases/90-close-gate-citable-release/90-0{1,2}-PLAN.md`.
 - Latest CI PDF: `paper/_ci_pdf/paper.pdf` (untracked scratch; clean up at close).
+
+## ALSO PENDING: remaining line overflows (GATE-04 feedback 2026-09-09)
+Underscore-break fix landed (`\renewcommand{\_}{\textunderscore\allowbreak}` in paper.tex)
+— overfull hboxes dropped 36→18; the cited `python/fdars/_references_map.json` now wraps.
+~3 larger overflows remain (magnitudes ~30/61/76pt), almost certainly slash-only paths
+(e.g. `docs/references/`, `paper/code/casestudyN.py`) or long DOIs/URLs in the bibliography
+that lack an underscore break point. Fix options (pick one):
+- Make `/` breakable inside `\texttt` WITHOUT globally activating `/` (a global active `/`
+  broke math/URLs — do not do that). Cleanest: wrap the offending path tokens in the `url`
+  package's `\path{...}` (url/xurl already loaded; breaks at `/._`), or add explicit
+  `\allowbreak` after slashes in just the offending tokens.
+- Identify the exact culprits from CI: `gh run view <paper-run-id> --log | grep -A2 'Overfull \\hbox'`
+  — the line after each warning shows the offending text/font run.
+- Long bib DOIs/URLs: xurl should break them; if one still overflows, confirm the entry uses
+  `\url`/the generated `url =` field, not a raw `\texttt`.
+Re-verify with the same CI loop; target 0 large (>20pt) overfull hboxes.
