@@ -19,6 +19,8 @@ Macro set emitted
 ``\\ncallables``         — total callable entries across all map keys
 ``\\ncoverage``          — callables backed by at least one curated paper
 ``\\ndocpapers``         — non-``_uncurated`` papers in _references_map.json
+``\\nexcludedmethods``   — methods in ``fdars.sklearn.EXCLUDED_METHODS`` (interface
+                           constraints that prevent sklearn estimator wrapping)
 ``\\nfdata``             — public (non-underscore-prefixed) methods in the ``_Fdata`` key
 ``\\npubliccallables``   — callable entries in non-underscore module keys
 ``\\nsklearnestimators`` — sklearn estimator classes with verdict "PASS" in TRIAGE_VERDICTS
@@ -89,18 +91,22 @@ def _derive_counts() -> dict[str, int]:
     # Machine-derived from TRIAGE_VERDICTS — do NOT hardcode the integer.
     # DISTINCT from ncoverage (curated-paper-backed callables): see module docstring.
     try:
-        from fdars.sklearn import TRIAGE_VERDICTS  # noqa: PLC0415
+        from fdars.sklearn import TRIAGE_VERDICTS, EXCLUDED_METHODS  # noqa: PLC0415
     except ImportError as exc:
         raise RuntimeError(
             "assert_coverage.py: cannot import fdars.sklearn.TRIAGE_VERDICTS — "
             "run under a compiled fdars venv (maturin develop)."
         ) from exc
     n_sklearn_estimators = sum(1 for v in TRIAGE_VERDICTS.values() if v == "PASS")
+    # Methods excluded from the sklearn estimator layer (interface constraints).
+    # Machine-derived from EXCLUDED_METHODS — do NOT hardcode the integer in prose.
+    n_excluded_methods = len(EXCLUDED_METHODS)
 
     return {
         "ncallables": sum(len(v) for v in cap.values()),
         "ncoverage": n_coverage,
         "ndocpapers": n_docpapers,
+        "nexcludedmethods": n_excluded_methods,
         "nfdata": len(fdata_public),
         "npubliccallables": sum(len(cap[k]) for k in public_modules),
         "nsklearnestimators": n_sklearn_estimators,
@@ -144,7 +150,7 @@ def main() -> None:
                 file=sys.stderr,
             )
             sys.exit(1)
-        committed = _OUT.read_text()
+        committed = _OUT.read_text(encoding="utf-8")
         if committed != content:
             print(
                 f"DRIFT: {_OUT} is stale — re-run assert_coverage.py and commit.",
@@ -153,7 +159,7 @@ def main() -> None:
             sys.exit(1)
         print("assert_coverage: OK (no drift)")
     else:
-        _OUT.write_text(content)
+        _OUT.write_text(content, encoding="utf-8")
         print(f"Written {_OUT}")
 
 
