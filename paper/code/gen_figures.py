@@ -20,6 +20,7 @@ import numpy as np
 
 from paper_utils import fig, save_figure
 import casestudy1
+import gen_tour_figures
 
 # Output directory — relative to this file so the script is location-independent.
 _FIGURES_DIR = Path(__file__).resolve().parent.parent / "figures"
@@ -57,6 +58,9 @@ def main() -> None:
     casestudy3.main()
     import casestudy4
     casestudy4.main()
+    # Capability-tour figures (Section 4): one per method family. Imported at
+    # module top so any ImportError/runtime failure is a hard error (WR-02).
+    gen_tour_figures.main()
 
 
 if __name__ == "__main__":

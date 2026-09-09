@@ -39,6 +39,25 @@ study~\citep{ramsay_silverman_2005} and prints its canonical representation:
 
 \input{snippets/represent}
 
+The printed representation reports the container's shape
+($n_\text{obs} \times n_\text{points}$), its evaluation range, and the attached
+axis names, while \texttt{fd.mean()} returns the pointwise average curve.
+Figure~\ref{fig:tour-represent} plots the full sample together with this mean:
+all curves share a single age grid, the shared-grid convention on which every
+downstream method in this section builds.  Metadata and per-observation
+identifiers travel with the matrix, so a subset or transformed result stays
+self-describing.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/tour_represent}
+  \caption{Berkeley growth study: all height curves (grey) sharing one age
+  grid, with the pointwise sample mean (blue) computed by
+  \texttt{Fdata.mean()}.  The \texttt{Fdata} container bundles this matrix,
+  grid, identifiers, and metadata into one object.}
+  \label{fig:tour-represent}
+\end{figure}
+
 \subsection{Basis Representation and Smoothing}
 
 fdars provides B-spline and Fourier basis expansions for functional data via
@@ -50,6 +69,26 @@ curves, AIC, BIC, and effective degrees of freedom:
 
 \input{snippets/basis}
 
+\texttt{fdata\_to\_basis\_1d} projects each curve onto a fixed-size basis and
+returns the coefficient matrix alongside the basis count, whereas
+\texttt{smooth\_basis\_gcv} additionally \emph{chooses} the smoothing penalty by
+minimising the generalised cross-validation score, trading data fidelity against
+roughness.  Figure~\ref{fig:tour-basis} overlays five raw growth curves with
+their GCV-selected B-spline reconstructions: the fitted curves follow the
+observations closely while suppressing sampling noise, neither interpolating
+every point nor flattening genuine curvature.  The returned AIC/BIC and
+effective degrees of freedom quantify this fit--complexity balance for model
+comparison.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/tour_basis}
+  \caption{B-spline smoothing of five growth curves: raw observations (points)
+  and their reconstructions (lines) with the smoothing dimension selected by
+  generalised cross-validation.}
+  \label{fig:tour-basis}
+\end{figure}
+
 \subsection{Depth and Outlier Detection}
 
 Functional depth ranks observations by centrality relative to the full
@@ -60,6 +99,25 @@ The \texttt{fdars.outliers} submodule adds shape-, magnitude-, and
 amplitude-based outlier detection via MUOD~\citep{dai_genton_2019}:
 
 \input{snippets/depth}
+
+Depth assigns each curve a centrality score relative to the whole sample; the
+curve of maximum depth is the functional median.  MUOD complements this by
+decomposing atypicality into three indices---shape, magnitude, and
+amplitude---so that a curve unusual in \emph{form} is flagged separately from one
+merely shifted in \emph{level}.  Figure~\ref{fig:tour-depth} shades each growth
+curve by its Fraiman--Muniz depth (deeper curves drawn more opaque), highlights
+the functional median, and marks the MUOD-flagged curves in red.  Read honestly,
+depth is a sample-relative ordering and the outlier flags are cutoff-dependent
+\emph{candidates} for inspection rather than definitive verdicts.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/tour_depth}
+  \caption{Growth curves shaded by Fraiman--Muniz depth (deeper curves more
+  opaque).  The deepest curve (orange) is the functional median; curves flagged
+  by MUOD as shape, magnitude, or amplitude outliers are drawn in red.}
+  \label{fig:tour-depth}
+\end{figure}
 
 \subsection{Functional PCA and Sparse/Irregular FPCA}
 \label{sec:fpca-snippet}
@@ -74,6 +132,27 @@ This distinguishes fdars from peer libraries that support dense FPCA only:
 
 \input{snippets/fpca}
 
+The dense path returns scores, the eigenfunction \texttt{rotation} matrix, and
+singular values; the PACE path recovers the same structure from curves observed
+at subject-specific, irregularly spaced times.  The most useful way to read an
+FPCA fit is through its \emph{modes of variation}: the mean curve perturbed by
+$\pm 2$ standard deviations along each eigenfunction.
+Figure~\ref{fig:tour-fpca} shows the first two for the growth data---the
+dominant component is an overall size/level mode, while the second is a timing
+contrast that crosses near mid-adolescence, corresponding to \emph{when} the
+pubertal growth spurt occurs.  The percentage in each panel title is the live
+share of variance that component explains.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/tour_fpca}
+  \caption{First two FPCA modes of variation: the mean growth curve (grey)
+  perturbed by $\pm 2$ standard deviations along each principal eigenfunction.
+  PC1 is an overall-size mode; PC2 is a growth-timing contrast.  Variance shares
+  are computed live from the singular values.}
+  \label{fig:tour-fpca}
+\end{figure}
+
 \subsection{Clustering}
 
 Functional $k$-means~\citep{bouveyron_jacques_2011} partitions observations by
@@ -84,6 +163,25 @@ total within-cluster sum of squares, and a convergence flag:
 
 \input{snippets/clustering}
 
+Each iteration assigns every curve to its nearest centroid in $L^2$ and
+recomputes centroids as within-cluster mean curves, until the assignment
+stabilises.  Figure~\ref{fig:tour-clustering} colours the growth curves by their
+cluster label and overlays the three centroids: the partition separates
+primarily by overall growth level and attained final height.  As with any
+$k$-means, the number of clusters $k$ is supplied by the user and the result is
+a descriptive summary of the sample's dominant variation---not evidence of
+discrete underlying subpopulations.  The fixed \texttt{seed} makes the
+initialisation, and hence the reported partition, reproducible.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/tour_clustering}
+  \caption{Functional $k$-means ($k = 3$, fixed seed): thin curves are cluster
+  members, bold curves the cluster centroids.  Cluster sizes are shown in the
+  legend.}
+  \label{fig:tour-clustering}
+\end{figure}
+
 \subsection{Classification}
 
 fdars provides functional linear discriminant analysis, functional
@@ -93,6 +191,24 @@ The FPCA-$k$NN classifier (\texttt{fclassif\_knn}) projects observations onto
 the leading principal components and applies $k$-NN in the score space:
 
 \input{snippets/classification}
+
+Projecting onto a handful of principal components before applying $k$-NN keeps
+the classifier robust to the high dimensionality of raw curves while retaining
+the between-class signal.  Figure~\ref{fig:tour-classification} shows why this
+works on the phoneme data: the five class-mean log-periodogram spectra are
+visibly distinct in both amplitude and spectral shape, so a low-dimensional FPCA
+projection preserves enough separation for accurate assignment.  The snippet
+reports held-out accuracy on a subset; the same classifier is evaluated under
+full cross-validation in Case Study~1 (Section~\ref{sec:casestudies}).
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/tour_classification}
+  \caption{Class-mean log-periodogram spectra for the five phonemes.  The
+  visible separation across the frequency band is the signal the FPCA-$k$NN
+  classifier projects onto and exploits.}
+  \label{fig:tour-classification}
+\end{figure}
 
 \subsection{Regression}
 
@@ -105,15 +221,53 @@ dataset, predicting fat content from 100-channel absorbance curves:
 
 \input{snippets/regression}
 
+\texttt{fregre\_lm} projects the predictor curves onto their leading FPCA
+components, fits an ordinary linear model in that score space, and returns the
+fitted values, residuals, the reconstructed coefficient function $\beta(t)$, and
+the coefficient of determination.  Figure~\ref{fig:tour-regression} plots fitted
+against observed fat content: points cluster tightly along the identity line,
+with the scatter widening at high fat content where the sample thins.  The
+$R^2$ shown in the figure is computed live from the fit.  PLS and robust
+variants (for collinear or contaminated predictors) and function-on-function
+regression share the same call convention.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/tour_regression}
+  \caption{Scalar-on-function regression of Tecator fat content on the
+  100-channel absorbance curves: fitted vs observed values with the live
+  $R^2$.  The dashed line marks a perfect fit.}
+  \label{fig:tour-regression}
+\end{figure}
+
 \subsection{Functional Time Series}
 
 The \texttt{fdars.fts} submodule implements functional time-series models
 (FTSM) for data in which the observed unit is a curve indexed over time
 (e.g.\ daily temperature profiles across years).
 \texttt{ftsm\_forecast} takes the raw data matrix and grid directly and
-returns multi-step-ahead curve forecasts with associated prediction bands:
+returns multi-step-ahead curve forecasts:
 
 \input{snippets/fts}
+
+FTSM decomposes the observed curve sequence into functional principal
+components, models the temporal dynamics of the resulting score series, and
+reconstructs the next $h$ curves from the forecast scores.
+Figure~\ref{fig:tour-fts} overlays the three forecast curves on the historical
+sequence: the forecasts retain the dominant seasonal temperature profile shared
+by the input curves.  Because the reconstruction is low-rank, the forecasts
+capture the leading modes of variation rather than fine day-to-day fluctuation
+---the honest cost of the dimension reduction that makes curve forecasting
+tractable.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/tour_fts}
+  \caption{FTSM forecast of the next three curves (bold) over the historical
+  curve sequence (grey), reconstructed from three functional principal
+  components.}
+  \label{fig:tour-fts}
+\end{figure}
 
 \subsection{Statistical Process Monitoring}
 
@@ -126,6 +280,25 @@ limits) are passed as explicit positional arguments to the monitoring function:
 
 \input{snippets/spm}
 
+Phase~1 characterises in-control variation from a reference set of curves and
+derives the $T^2$ and SPE control limits; Phase~2 then scores each new curve on
+these two statistics and flags any that exceed a limit.
+Figure~\ref{fig:tour-spm} shows the resulting $T^2$ chart, with out-of-control
+curves marked in red above the upper control limit.  For this illustration the
+Phase-2 ``batch'' is simply the second half of the same growth sample, so the
+alarms reflect ordinary between-subject variability rather than a genuine
+process fault---the figure demonstrates the charting mechanics, not a real
+monitoring incident.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/tour_spm}
+  \caption{Phase-2 Hotelling $T^2$ control chart: the per-curve $T^2$ statistic
+  against the Phase-1 upper control limit (UCL).  Curves exceeding the UCL are
+  flagged (red).}
+  \label{fig:tour-spm}
+\end{figure}
+
 \subsection{Conformal and Tolerance Bands}
 
 \texttt{fdars.tolerance} constructs simultaneous tolerance bands for functional
@@ -135,6 +308,24 @@ and the half-width vector; a fixed \texttt{seed} argument makes the bootstrap
 resampling reproducible:
 
 \input{snippets/tolerance}
+
+The band is built by repeatedly resampling an FPCA model and calibrating a
+half-width so that the resulting envelope is expected to contain the target
+fraction of curves \emph{simultaneously} across the whole grid---a stronger
+guarantee than a pointwise interval.  Figure~\ref{fig:tour-tolerance} draws the
+95\% band over the growth sample: most curves fall inside it, and the band
+widens through adolescence where between-subject spread is largest.  The
+coverage is a bootstrap estimate rather than an exact finite-sample guarantee,
+and the fixed \texttt{seed} pins the reported band.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/tour_tolerance}
+  \caption{Bootstrap-FPCA 95\% simultaneous tolerance band (shaded) with its
+  centre curve, drawn over the growth sample.  The band widens where
+  between-subject variability grows.}
+  \label{fig:tour-tolerance}
+\end{figure}
 
 \subsection{Metrics, Density, and Fr\'echet Analysis}
 
@@ -150,6 +341,23 @@ The snippet illustrates the metric family representative:
 
 \input{snippets/metric}
 
+\texttt{lp\_self\_1d} integrates the pointwise $L^p$ difference between every
+pair of curves, while \texttt{dtw\_self\_1d} instead allows elastic time-warping
+before measuring distance.  Figure~\ref{fig:tour-metric} renders the $L^2$
+distance matrix as a heatmap: the dark diagonal is each curve's zero
+self-distance, and the off-diagonal block structure exposes groups of mutually
+similar growth trajectories.  Such a distance matrix is the shared input to
+downstream methods---clustering, $k$-NN classification, and multidimensional
+scaling---so the metric family underpins much of the rest of the tour.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.74\linewidth]{figures/tour_metric}
+  \caption{Pairwise $L^2$ distance matrix over the growth curves.  The dark
+  diagonal is self-distance; off-diagonal blocks mark groups of similar curves.}
+  \label{fig:tour-metric}
+\end{figure}
+
 \subsection{Elastic Alignment}
 
 \texttt{fdars.alignment} implements elastic registration under the square-root
@@ -159,6 +367,26 @@ aligning observations and re-estimating the mean; the returned dict includes
 the aligned data matrix, phase-warping functions ($\gamma$), and a convergence flag:
 
 \input{snippets/alignment}
+
+Elastic registration separates two kinds of variation that ordinary averaging
+conflates: \emph{amplitude} (how high a feature is) and \emph{phase} (when it
+occurs).  \texttt{karcher\_mean} iterates between warping each curve onto the
+current mean under the SRSF metric and re-estimating that mean.
+Figure~\ref{fig:tour-alignment} contrasts ten growth curves before and after
+alignment: post-registration the shared features line up, tightening the bundle,
+while the warping functions $\gamma$ record exactly how each curve's time axis
+was deformed.  Alignment therefore trades phase for amplitude---the $\gamma$
+functions are not a nuisance by-product but a first-class output describing the
+phase variation that was removed.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/tour_alignment}
+  \caption{Elastic SRSF registration of ten growth curves, before (left) and
+  after (right) Karcher-mean alignment.  The red curve is the estimated Karcher
+  mean; alignment tightens the sample by removing phase variation.}
+  \label{fig:tour-alignment}
+\end{figure}
 
 \subsection{Grounded AI Advisor (LLM-Free Diagnostics)}
 
@@ -172,6 +400,26 @@ Section~\ref{sec:advisor}.
 The snippet demonstrates the offline diagnostic step for FPCA:
 
 \input{snippets/advisor_diag}
+
+The diagnostic reduces a full result dict to the small set of scalars a
+practitioner would actually inspect---here, the per-component and cumulative
+variance explained.  Figure~\ref{fig:tour-advisor} plots exactly these
+quantities as a scree chart: the first component dominates and the cumulative
+curve saturates quickly, which is the concrete signal the advisor uses to
+recommend how many components to retain.  Because every number is computed from
+the data rather than generated by a language model, the resulting guidance is
+\emph{grounded}: the optional \texttt{advise()} step passes these diagnostics to
+an LLM only to phrase and contextualise a recommendation the numbers already
+support (Section~\ref{sec:advisor}).
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/tour_advisor}
+  \caption{The advisor's offline FPCA diagnostic: per-component (bars) and
+  cumulative (line) variance explained.  These are the exact, computed
+  quantities its grounded, LLM-free guidance reasons over.}
+  \label{fig:tour-advisor}
+\end{figure}
 
 \subsection{scikit-learn Compatibility}
 \label{sec:sklearn-snippet}
