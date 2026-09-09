@@ -12,7 +12,6 @@
   font=\small,
   layer/.style={draw, rounded corners=4pt, minimum width=10.5cm, minimum height=1.35cm,
                 align=center, inner sep=6pt},
-  desc/.style={font=\footnotesize\itshape},
   arr/.style={{Stealth[length=5pt]}-{Stealth[length=5pt]}, thick},
   crosslbl/.style={font=\footnotesize, align=left, fill=white, inner sep=2pt},
 ]
@@ -20,13 +19,13 @@
   % so they never collide with the boundary-crossing arrow labels.
   \node[layer, fill=blue!10] (python) at (0,0)
     {\textbf{Python API layer} (\texttt{fdars})\\[2pt]
-     {\desc Fdata container $\cdot$ sklearn estimators $\cdot$ grounded advisor $\cdot$ dataset loaders}};
+     {\footnotesize\itshape Fdata container $\cdot$ sklearn estimators $\cdot$ grounded advisor $\cdot$ dataset loaders}};
   \node[layer, fill=orange!10, below=2cm of python] (pyo3)
     {\textbf{PyO3 binding layer} (\texttt{fdars.\_native})\\[2pt]
-     {\desc \texttt{\#[pyfunction]} wrappers $\cdot$ \texttt{PyReadonlyArray} views $\cdot$ row\,$\leftrightarrow$\,col-major}};
+     {\footnotesize\itshape \texttt{\#[pyfunction]} wrappers $\cdot$ \texttt{PyReadonlyArray} views $\cdot$ row\,$\leftrightarrow$\,col-major}};
   \node[layer, fill=green!10, below=2cm of pyo3] (core)
     {\textbf{Rust core} (\texttt{fdars-core})\\[2pt]
-     {\desc \texttt{FdMatrix} (nalgebra) $\cdot$ data-parallel loops (rayon) $\cdot$ \nsubmodules{} algorithm families}};
+     {\footnotesize\itshape \texttt{FdMatrix} (nalgebra) $\cdot$ data-parallel loops (rayon) $\cdot$ \nsubmodules{} algorithm families}};
 
   % One bidirectional arrow per boundary, with a single centred label.
   \draw[arr] (python) -- (pyo3)
