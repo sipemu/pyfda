@@ -1,0 +1,66 @@
+% paper/sections/validation.tex — Validation and Correctness section
+% Added in Phase 90 (GATE-04 revision).
+\section{Validation and Correctness}
+\label{sec:validation}
+
+\texttt{fdars} and the underlying \texttt{fdars-core} Rust crate were developed
+with substantial assistance from Anthropic's Claude Code, an AI coding assistant.
+Because the implementation is largely AI-generated, independent validation is
+treated as a first-class design constraint rather than an afterthought: every
+layer of the stack is guarded by automated checks that run on each commit,
+and this manuscript is itself a reproducibility artefact whose code snippets and
+figures are regenerated and verified in CI.
+
+\subsection{Rust layer}
+
+The numerical algorithms reside in the \texttt{fdars-core} crate.
+The PyO3 binding layer (\texttt{pyfda}) is held to consistent code-quality
+standards enforced in CI: \texttt{cargo fmt --check} enforces formatting,
+\texttt{cargo clippy -- -D warnings} promotes warnings to errors, and
+\texttt{cargo test} runs the binding-layer unit tests against both the current
+stable Rust toolchain and the declared MSRV (Rust~1.83).
+
+\subsection{Python test suite}
+
+The \texttt{tests/} directory is exercised by \texttt{pytest} on every CI run
+across Python~3.9 through~3.14.
+Tests cover the \texttt{Fdata} container, numerical operations (smoothing,
+depth, alignment, regression, monitoring, covariance sampling), the AI advisor
+and MCP server, and the ergonomic dataset loaders.
+
+\subsection{Cross-language parity}
+
+\texttt{tests/test\_r\_parity.py} validates \texttt{fdars} numerical outputs
+against known-correct mathematical ground truth, mirroring the smoke-test
+properties used when the R-parity bindings were added.
+Tests span seven batches covering depth measures, \textsc{L}$^2$ inner products,
+Simpson integration, landmark registration, nonparametric regression, functional
+monitoring (CUSUM and EWMA), elastic changepoint detection, and prediction
+metrics.
+Each test checks a mathematically verifiable property---integrals of known
+functions, determinism under fixed seeds, correct output shapes, and expected
+statistical behaviour (e.g.\ that a CUSUM chart detects a known mean shift)---
+complementing the scientific-provenance map (\ndocpapers{} peer-reviewed method
+papers documented in \texttt{\_references\_map.json}).
+
+\subsection{scikit-learn API compliance}
+
+\nsklearnestimators{} estimators in \texttt{fdars.sklearn} pass the
+scikit-learn \texttt{check\_estimator} conformance suite
+\citep{pedregosa_sklearn_2011}, run from \texttt{tests/sklearn/} in CI across
+all supported Python versions.
+Passing \texttt{check\_estimator} guarantees that the estimators honour
+scikit-learn's fit--predict contract, are picklable, and compose correctly
+inside \texttt{Pipeline} and \texttt{GridSearchCV}.
+
+\subsection{Reproducibility as validation}
+
+This manuscript is itself a validation artefact.
+Every code snippet in Section~\ref{sec:capabilities} and every figure in
+Section~\ref{sec:casestudies} is produced by a committed \texttt{paper/code/}
+script.
+CI drift gates (\texttt{make paper-check}) verify that regenerating snippets,
+coverage macros, and the reference bibliography leaves no diff against the
+committed sources; \texttt{make paper-verify} confirms byte-stable figure
+reproduction in the same Python environment.
+No printed example can silently diverge from the live API.
