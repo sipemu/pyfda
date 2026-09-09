@@ -1,0 +1,69 @@
+% paper/sections/casestudy4.tex — Case Study 4: Wine (composable sklearn Pipeline + GridSearchCV)
+% Written in Phase 89 (Plan 04). Do not edit manually.
+
+\subsection{Composable scikit-learn Pipelines: Wine Data}
+\label{subsec:cs4-wine}
+
+The wine dataset comprises 178 samples described by 13 chemical measurements,
+partitioned into three cultivar classes (59, 71, and 48 samples respectively).
+This study demonstrates a different facet of \texttt{fdars}: rather than a
+single functional method, it showcases the \emph{composability} of the
+\texttt{fdars} scikit-learn estimator layer, which exposes
+\nsklearnestimators{} estimators that plug natively into
+\texttt{sklearn.pipeline.Pipeline} and \texttt{sklearn.model\_selection.\allowbreak
+GridSearchCV} \citep{ramoscarreno_scikitfda_2024}.  Here each 13-measurement
+sample is treated as a short functional profile subjected to \emph{functional
+preprocessing}; this is not a traditional functional-data interpretation of the
+wine measurements, but it exercises the estimator interface exactly as a genuine
+functional problem would.
+
+\paragraph{Pipeline.}
+We compose an \texttt{fdars} \texttt{FPCATransformer} --- which projects each
+sample onto its leading functional principal components
+\citep{ramsay_silverman_2005} --- with a vanilla
+\texttt{sklearn.discriminant\_analysis.\allowbreak LinearDiscriminantAnalysis}
+classifier \citep{preda_saporta_2005}.  Because \texttt{FPCATransformer} obeys
+the scikit-learn transformer contract, this heterogeneous pipeline (an
+\texttt{fdars} transformer feeding an off-the-shelf scikit-learn estimator)
+requires no glue code.
+
+\paragraph{Hyperparameter tuning.}
+The number of retained principal components is tuned by
+\texttt{GridSearchCV} over the grid $\{2, 3, 5, 8\}$, using 5-fold
+cross-validation with a single worker to guarantee deterministic split
+ordering.  Mean cross-validated accuracy rises monotonically with the number of
+retained components: $0.697$, $0.759$, $0.916$, and $0.961$ for $2$, $3$, $5$,
+and $8$ components respectively (Figure~\ref{fig:cs4-gridsearch}).  The best
+configuration retains eight components and attains a mean 5-fold CV accuracy of
+$0.961$.  Figure~\ref{fig:cs4-scores} shows the FPCA scores of the best
+estimator projected onto their first two components, coloured by cultivar; the
+three classes form well-separated groups, consistent with the high
+cross-validated accuracy.
+
+The analysis is reproduced exactly by \texttt{paper/code/casestudy4.py}, which
+computes all reported accuracies live and generates both figures
+deterministically (re-running the script leaves \texttt{git diff paper/figures/}
+empty).
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.75\textwidth]{figures/cs4_wine_gridsearch.pdf}
+  \caption{\texttt{GridSearchCV} tuning of the FPCA dimensionality for the wine
+    pipeline (\texttt{FPCATransformer} + \texttt{LinearDiscriminantAnalysis}).
+    Bars show mean 5-fold cross-validated accuracy for each number of retained
+    functional principal components; accuracy increases with dimensionality, and
+    the best configuration retains eight components (dashed line marks the best
+    accuracy).}
+  \label{fig:cs4-gridsearch}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.75\textwidth]{figures/cs4_wine_scores.pdf}
+  \caption{FPCA scores for the wine data at the best \texttt{GridSearchCV}
+    configuration (first two of eight retained components), coloured by cultivar
+    class.  The three cultivars form well-separated groups, consistent with the
+    cross-validated classification accuracy achieved by the composed
+    \texttt{FPCATransformer} + \texttt{LinearDiscriminantAnalysis} pipeline.}
+  \label{fig:cs4-scores}
+\end{figure}
