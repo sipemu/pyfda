@@ -136,7 +136,7 @@ Active milestone: **v14.0 — fdars Software Paper — arXiv Preprint** (Phases 
 
 **Plans**: 2 plans
 
-- [ ] 90-01-PLAN.md — Release prep (executor-delegatable): bump 0.12.0→0.13.0 across Cargo.toml/pyproject.toml/__version__/\FdarsVersion/CITATION.cff, `maturin develop --release` rebuild, `make paper` regenerate all artifacts, prove GATE-02 green at 0.13.0, atomic commit (GATE-02, REL-01)
+- [x] 90-01-PLAN.md — Release prep (executor-delegatable): bump 0.12.0→0.13.0 across Cargo.toml/pyproject.toml/__version__/\FdarsVersion/CITATION.cff, `maturin develop --release` rebuild, `make paper` regenerate all artifacts, prove GATE-02 green at 0.13.0, atomic commit (GATE-02, REL-01)
 - [ ] 90-02-PLAN.md — Close gate (orchestrator + human): decision-gated push to origin/main → monitor paper.yml CI PDF compile (GATE-03) → blocking human read-through (GATE-04) → hand user the v0.13.0 tag + PyPI publish commands (GATE-03, GATE-04, REL-01)
 
 ## Progress

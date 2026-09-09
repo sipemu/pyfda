@@ -40,13 +40,13 @@ Requirements for this milestone. Each maps to exactly one roadmap phase. A writi
 ### Build, CI & Close Gate (GATE)
 
 - [x] **GATE-01**: Standalone `.github/workflows/paper.yml` — path-filtered to `paper/**` + `_capability_map.json` + `_references_map.json` + `docs/data/**`; runs the reproducible pipeline offline as a hard gate, then compiles the PDF via `tectonic` (`wtfjoke/setup-tectonic@v4`)
-- [ ] **GATE-02**: Correctness gate — every manuscript code snippet executes against the current `fdars`; `assert_coverage.py` re-run green (catches late binding additions); determinism check passes (byte-identical figures on re-run)
+- [x] **GATE-02**: Correctness gate — every manuscript code snippet executes against the current `fdars`; `assert_coverage.py` re-run green (catches late binding additions); determinism check passes (byte-identical figures on re-run)
 - [ ] **GATE-03**: arXiv self-containment — a clean-directory `pdflatex + bibtex` compile of the submission sources succeeds with all figures committed under `paper/figures/`
 - [ ] **GATE-04**: Blocking human manuscript read-through approved (accuracy of prose, comparison table, and citations) before close
 
 ### Release (REL)
 
-- [ ] **REL-01**: Citable **0.13.0** package release paired with the paper — version bump (`Cargo.toml`/`pyproject.toml`/`__version__`), `CITATION.cff` + arXiv/Zenodo DOI wiring, semver `v0.13.0` tag prepared/handed to user for PyPI publish
+- [x] **REL-01**: Citable **0.13.0** package release paired with the paper — version bump (`Cargo.toml`/`pyproject.toml`/`__version__`), `CITATION.cff` + arXiv/Zenodo DOI wiring, semver `v0.13.0` tag prepared/handed to user for PyPI publish
 
 ## Future Requirements
 
@@ -95,10 +95,10 @@ Which phases cover which requirements. Populated during roadmap creation.
 | CASE-03 | Phase 89 | Complete |
 | CASE-04 | Phase 89 | Complete |
 | GATE-01 | Phase 86 | Complete |
-| GATE-02 | Phase 90 | Pending |
+| GATE-02 | Phase 90 | Complete |
 | GATE-03 | Phase 90 | Pending |
 | GATE-04 | Phase 90 | Pending |
-| REL-01 | Phase 90 | Pending |
+| REL-01 | Phase 90 | Complete |
 
 **Coverage:**
 

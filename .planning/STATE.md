@@ -4,17 +4,17 @@ milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 90
 current_phase_name: Close Gate + Citable Release
-status: planning
-stopped_at: Phase 89 complete, ready to plan Phase 90
-last_updated: "2026-09-09T09:08:43.082Z"
+status: executing
+stopped_at: Completed 90-01-PLAN.md (release prep 0.13.0)
+last_updated: "2026-09-09T09:59:13.070Z"
 last_activity: 2026-09-09
-last_activity_desc: Phase 89 complete, transitioned to Phase 90
-state_head: 70ed480ac7f2689ec28c8bef05415912f74d53d9
+last_activity_desc: Phase 90 execution started
+state_head: 6f96975e882434828844ad357814b4f732ab197f
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 15
-  completed_plans: 15
+  total_plans: 17
+  completed_plans: 16
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-08)
 
 **Core value:** A submission-ready arXiv software paper that makes `fdars`'s breadth and method-accuracy provably clear — every code snippet runs against the current API, every number is machine-derived from the live capability/reference maps, and every figure/table is regenerable by a single command.
-**Current focus:** Phase 89 — Case Studies + Reproducible Figures
+**Current focus:** Phase 90 — Close Gate + Citable Release
 
 ## Current Position
 
-Phase: 90 — Close Gate + Citable Release
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-09 — Phase 89 complete, transitioned to Phase 90
+Phase: 90 (Close Gate + Citable Release) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-09-09 — Phase 90 execution started
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Last activity: 2026-09-09 — Phase 89 complete, transitioned to Phase 90
 | Phase 89 P02 | 6 | 2 tasks | 4 files |
 | Phase 89 P03 | 480 | 2 tasks | 4 files |
 | Phase 89 P04 | 1950 | 2 tasks | 4 files |
+| Phase 90-close-gate-citable-release P01 | 237s | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,8 @@ Recent decisions affecting current work:
 - [Phase 89]: 89-02: Reported CV fold scores honestly including weak fold (0.405); mean CV R2=0.805 reported without adjustment
 - [Phase 89]: Study 3 (CASE-03): ftsm_forecast called on raw Xfts (35x365) not model dict; honest caveat that 35 stations is shallow for FTS
 - [Phase 89]: 89-04: Study-4 wine pipeline uses FPCATransformer -> sklearn LDA (not FPCKNNClassifier — double-FPCA); GridSearchCV n_jobs=1; best CV accuracy 0.961 at n_components=8 (live grid matches research verbatim)
+- [Phase 90]: arXiv URL stays literal PLACEHOLDER in CITATION.cff — no fabricated DOI or arXiv ID (honesty constraint, T-90-02)
+- [Phase 90]: Single atomic commit for 0.13.0 release prep; GATE-02 proven green before commit
 
 ### Pending Todos
 
@@ -177,8 +180,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-09T08:42:52.611Z
-Stopped at: Phase 89 complete, ready to plan Phase 90
+Last session: 2026-09-09T09:59:12.938Z
+Stopped at: Completed 90-01-PLAN.md (release prep 0.13.0)
 Resume file: None
 
 ## Operator Next Steps
