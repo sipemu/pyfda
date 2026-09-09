@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
-current_phase: 89
-current_phase_name: Case Studies + Reproducible Figures
-status: verifying
-stopped_at: Completed 89-04-PLAN.md
-last_updated: "2026-09-09T08:42:52.730Z"
+current_phase: 90
+current_phase_name: Close Gate + Citable Release
+status: planning
+stopped_at: Phase 89 complete, ready to plan Phase 90
+last_updated: "2026-09-09T09:08:43.082Z"
 last_activity: 2026-09-09
-last_activity_desc: Phase 89 execution started
-state_head: baef6cd7d345bd3d2e974482bb1143d3719c5195
+last_activity_desc: Phase 89 complete, transitioned to Phase 90
+state_head: 70ed480ac7f2689ec28c8bef05415912f74d53d9
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
   completed_plans: 15
 ---
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Phase: 89 (Case Studies + Reproducible Figures) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-09-09 — Phase 89 execution started
+Phase: 90 — Close Gate + Citable Release
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-09 — Phase 89 complete, transitioned to Phase 90
 
 ## Performance Metrics
 
@@ -49,7 +49,7 @@ Last activity: 2026-09-09 — Phase 89 execution started
 | 86 | 2 | - | - |
 | 87 | 2 | - | - |
 | 88 | 5 | - | - |
-| 89 | - | - | - |
+| 89 | 4 | - | - |
 | 90 | - | - | - |
 
 **Recent Trend:**
@@ -178,7 +178,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-09T08:42:52.611Z
-Stopped at: Completed 89-04-PLAN.md
+Stopped at: Phase 89 complete, ready to plan Phase 90
 Resume file: None
 
 ## Operator Next Steps

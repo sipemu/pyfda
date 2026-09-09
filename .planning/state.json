@@ -26,7 +26,7 @@
     {
       "number": "89",
       "name": "Case Studies + Reproducible Figures",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "90",
@@ -36,8 +36,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step (plan phase 89)",
-    "reason": "Phase 89 of 6 — needs a plan"
+    "label": "Advance to the next step (plan phase 90)",
+    "reason": "Phase 90 of 6 — needs a plan"
   },
-  "updated_at": "2026-09-09T07:15:53.971Z"
+  "updated_at": "2026-09-09T09:08:43.103Z"
 }
