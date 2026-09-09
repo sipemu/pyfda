@@ -24,4 +24,148 @@ study~\citep{ramsay2005functional} and prints its canonical representation:
 
 \input{snippets/represent}
 
-% --- Plan 88-02 appends remaining family \input lines below this marker ---
+\subsection{Basis Representation and Smoothing}
+
+fdars provides B-spline and Fourier basis expansions for functional data via
+\texttt{fdars.basis}.
+\texttt{fdata\_to\_basis\_1d} returns a \texttt{(coefficients, n\_basis)} tuple,
+while \texttt{smooth\_basis\_gcv} selects the smoothing penalty via
+generalised cross-validation and returns a dict including the fitted
+curves, AIC, BIC, and effective degrees of freedom:
+
+\input{snippets/basis}
+
+\subsection{Depth and Outlier Detection}
+
+Functional depth ranks observations by centrality relative to the full
+sample~\citep{fraiman2001trimmed}.
+fdars offers modified band depth, Fraiman--Muniz depth, random Tukey depth,
+and mode depth via the \texttt{Fdata.depth()} method.
+The \texttt{fdars.outliers} submodule adds shape-, magnitude-, and
+amplitude-based outlier detection via MUOD~\citep{dai2019directional}:
+
+\input{snippets/depth}
+
+\subsection{Functional PCA and Sparse/Irregular FPCA}
+\label{sec:fpca-snippet}
+
+Dense FPCA is available via \texttt{Fdata.to\_pc()}, which returns scores,
+rotation, singular values, and centred data.
+For sparse or irregularly observed longitudinal data fdars provides PACE
+(principal analysis by conditional expectation) through
+\texttt{fdars.pace\_fpca.irreg\_fdata\_from\_lists} (the \texttt{PyIrregFdata}
+container) and \texttt{fdars.pace\_fpca.pace\_fpca}~\citep{yao2005functional}.
+This distinguishes fdars from peer libraries that support dense FPCA only:
+
+\input{snippets/fpca}
+
+\subsection{Clustering}
+
+Functional $k$-means~\citep{tarpey2003clustering} partitions observations by
+minimising within-cluster $L^2$ distance in the curve space.
+\texttt{fdars.clustering.kmeans\_fd} accepts a fixed random seed for
+deterministic results and returns cluster assignments, centroids,
+total within-cluster sum of squares, and a convergence flag:
+
+\input{snippets/clustering}
+
+\subsection{Classification}
+
+fdars provides functional linear discriminant analysis, functional
+$k$-nearest neighbours, depth-based DD-classifiers, and elastic-distance
+classifiers through \texttt{fdars.classification}.
+The FPCA-$k$NN classifier (\texttt{fclassif\_knn}) projects observations onto
+the leading principal components and applies $k$-NN in the score space:
+
+\input{snippets/classification}
+
+\subsection{Regression}
+
+\texttt{fdars.regression} covers scalar-on-function (SoF) regression via
+functional linear models with FPCA projection (\texttt{fregre\_lm}), PLS
+(\texttt{fregre\_pls}), and robust variants, as well as function-on-function
+(FoF) regression via \texttt{fof\_regression}~\citep{yao2005functional}.
+The snippet demonstrates SoF regression on the Tecator near-infrared spectra
+dataset, predicting fat content from 100-channel absorbance curves:
+
+\input{snippets/regression}
+
+\subsection{Functional Time Series}
+
+The \texttt{fdars.fts} submodule implements functional time-series models
+(FTSM) for data in which the observed unit is a curve indexed over time
+(e.g.\ daily temperature profiles across years).
+\texttt{ftsm\_forecast} takes the raw data matrix and grid directly and
+returns multi-step-ahead curve forecasts with associated prediction bands:
+
+\input{snippets/fts}
+
+\subsection{Statistical Process Monitoring}
+
+\texttt{fdars.spm} adapts Hotelling $T^2$ and squared prediction error (SPE)
+control charts to functional data by first estimating in-control variation
+via \texttt{spm\_phase1} and then monitoring new batches with
+\texttt{spm\_monitor}.
+Phase-1 output components (mean, loadings, weights, eigenvalues, and control
+limits) are passed as explicit positional arguments to the monitoring function:
+
+\input{snippets/spm}
+
+\subsection{Conformal and Tolerance Bands}
+
+\texttt{fdars.tolerance} constructs simultaneous tolerance bands for functional
+data via bootstrap FPCA~\citep{febrero2012statistical}.
+\texttt{fpca\_tolerance\_band} returns upper/lower band curves, a centre curve,
+and the half-width vector; a fixed \texttt{seed} argument makes the bootstrap
+resampling reproducible:
+
+\input{snippets/tolerance}
+
+\subsection{Metrics, Density, and Fr\'echet Analysis}
+
+\texttt{fdars.metric} provides $L^p$ pairwise distance matrices
+(\texttt{lp\_self\_1d}) and dynamic time warping (\texttt{dtw\_self\_1d}) for
+functional observations.
+Beyond pairwise distances, fdars also provides density-FDA methods (LQD FPCA
+and Wasserstein barycenters) in \texttt{fdars.density\_fda}, and Fr\'echet
+means, regression, and ANOVA for object-valued data in
+\texttt{fdars.frechet}~\citep{petersen2019frechet}; see
+Table~\ref{tab:comparison} for the full peer comparison.
+The snippet illustrates the metric family representative:
+
+\input{snippets/metric}
+
+\subsection{Elastic Alignment}
+
+\texttt{fdars.alignment} implements elastic registration under the square-root
+slope function (SRSF) framework~\citep{srivastava2011registration}.
+\texttt{karcher\_mean} estimates the Karcher mean curve by iteratively
+aligning observations and re-estimating the mean; the returned dict includes
+the aligned data matrix, phase-warping functions ($\gamma$), and a convergence flag:
+
+\input{snippets/alignment}
+
+\subsection{Grounded AI Advisor (LLM-Free Diagnostics)}
+
+\texttt{fdars.advisor.build\_diagnostics} computes method-specific structured
+diagnostics from any fdars result dict in a fully offline, deterministic
+manner---no LLM provider is required.
+The LLM-assisted \texttt{advise()} function takes these diagnostics and a
+user-specified task description and queries a configured language model to
+generate grounded parameter recommendations; it is described further in
+Section~\ref{sec:advisor}.
+The snippet demonstrates the offline diagnostic step for FPCA:
+
+\input{snippets/advisor_diag}
+
+\subsection{scikit-learn Compatibility}
+\label{sec:sklearn-snippet}
+
+fdars exposes \nsklearnestimators{} scikit-learn-compatible estimators
+(all passing \texttt{check\_estimator}) through
+\texttt{fdars.sklearn.\_skeletons}, spanning smoothers, transformers,
+regressors, classifiers, clusterers, and outlier detectors.
+Estimators compose with the standard \texttt{Pipeline} API, enabling
+functional preprocessing steps inside any scikit-learn workflow:
+
+\input{snippets/sklearn}
