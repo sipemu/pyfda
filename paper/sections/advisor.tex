@@ -1,5 +1,5 @@
 % paper/sections/advisor.tex — Grounded AI Advisor and Scientific Provenance
-% Written in Phase 88 (Plan 04). Do not edit manually.
+% Written in Phase 88 (Plan 04). TikZ advisor-flow diagram added in Phase 90.
 % Key entry points: build_diagnostics, advise, auto_tune, fdars_method_references MCP tool
 
 \section{Grounded AI Advisor and Scientific Provenance}
@@ -15,6 +15,51 @@ methodological knowledge.  \texttt{fdars} addresses this through a
 \emph{grounded parameter advisor} paired with a \emph{scientific-provenance
 layer}, both absent from peer FDA packages (see Table~\ref{tab:comparison} and
 the evidence in \texttt{paper/comparison\_evidence.md}).
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw, rounded corners=3pt, minimum width=2.6cm, minimum height=0.9cm,
+              text centered, inner sep=5pt},
+  prov/.style={draw, rounded corners=3pt, minimum width=2.6cm, minimum height=0.9cm,
+               text centered, inner sep=5pt, fill=purple!10, dashed},
+  arr/.style={-{Stealth[length=5pt]}, thick},
+  node distance=0.5cm and 1.3cm,
+]
+  \node[box, fill=gray!15] (result) {\texttt{fdars} result dict};
+  \node[box, fill=blue!10, right=of result] (diag)
+    {\texttt{build\_diagnostics}};
+  \node[box, fill=orange!10, right=of diag] (advise) {\texttt{advise}};
+  \node[box, fill=orange!15, below=0.5cm of advise] (tune)
+    {\texttt{auto\_tune}};
+  \node[prov, below=0.5cm of diag] (prov)
+    {provenance map\\\texttt{fdars\_method\_references}};
+
+  \draw[arr] (result) -- (diag)
+    node[midway, above, font=\footnotesize] {result dict};
+  \draw[arr] (diag) -- (advise)
+    node[midway, above, font=\footnotesize] {diagnostics};
+  \draw[arr, dashed] (diag) -- (tune);
+  \draw[arr, dashed] (advise) -- (tune)
+    node[midway, right, font=\footnotesize] {loop};
+  \draw[arr, dashed] (prov) -- (diag)
+    node[midway, right, font=\footnotesize, align=center]
+    {paper\\\& method\\refs};
+
+  \node[font=\footnotesize\itshape, above=2pt of diag] {LLM-free};
+  \node[font=\footnotesize\itshape, above=2pt of advise] {provider-agnostic LLM};
+\end{tikzpicture}
+\caption{Advisor and scientific-provenance data flow.
+\texttt{build\_diagnostics} is entirely deterministic (no LLM);
+\texttt{advise} queries a user-configured language-model provider using only
+the structured diagnostics as context;
+\texttt{auto\_tune} iterates both in a bounded closed-loop.
+The provenance map (\texttt{\_references\_map.json}) feeds
+\texttt{fdars\_method\_references}, an MCP tool that resolves callable names
+to peer-reviewed papers at query time.}
+\label{fig:advisor}
+\end{figure}
 
 \subsection{The Grounded Advisor}
 

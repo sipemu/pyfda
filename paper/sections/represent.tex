@@ -1,5 +1,5 @@
 % paper/sections/represent.tex — Data Representation
-% Written in Phase 88 (Plan 04). Do not edit manually.
+% Written in Phase 88 (Plan 04). TikZ data-model diagram added in Phase 90.
 
 \section{Data Representation}
 \label{sec:represent}
@@ -11,12 +11,72 @@ most common sampling regimes: densely observed data on a shared grid, and
 sparsely or irregularly observed longitudinal data with per-subject grids of
 differing length.
 
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  mat/.style={draw, fill=blue!8, minimum width=4.2cm, minimum height=2.2cm,
+              inner sep=4pt},
+  field/.style={draw, fill=gray!10, rounded corners=2pt,
+                minimum width=2.6cm, minimum height=0.7cm,
+                text centered, inner sep=4pt},
+  irreg/.style={draw, fill=purple!8, rounded corners=2pt, dashed,
+                minimum width=2.6cm, minimum height=0.7cm,
+                text centered, inner sep=4pt},
+  arr/.style={-{Stealth[length=5pt]}, thick},
+  node distance=0.35cm and 0.6cm,
+]
+  % observation matrix
+  \node[mat] (matrix) {%
+    \begin{tabular}{c}
+      $n_\mathrm{obs} \times n_\mathrm{points}$\\[2pt]
+      \texttt{data} (NumPy)\\[4pt]
+      \footnotesize row $i$ = curve $i$\\
+      \footnotesize col $j$ = grid point $t_j$
+    \end{tabular}};
+
+  % shared argvals bar below matrix
+  \node[field, below=0.35cm of matrix] (argvals)
+    {\texttt{argvals}: $t_1, t_2, \ldots, t_p$};
+  \node[field, below=0.3cm of argvals] (rangeval)
+    {\texttt{rangeval}: $(a, b)$};
+
+  % right-hand side fields
+  \node[field, right=0.8cm of matrix, yshift=0.5cm] (id)
+    {\texttt{id}: observation labels};
+  \node[field, below=0.3cm of id] (names)
+    {\texttt{names}: axis labels};
+  \node[field, below=0.3cm of names] (meta)
+    {\texttt{metadata}: per-obs covariates};
+
+  % irregular variant note
+  \node[irreg, below=0.3cm of rangeval] (irreg)
+    {\texttt{PyIrregFdata}: per-obs grids (PACE)};
+
+  % arrows
+  \draw[arr] (matrix.south) -- (argvals.north);
+  \draw[arr] (argvals.south) -- (rangeval.north);
+  \draw[arr] (matrix.east) -- (id.west);
+  \draw[arr] (matrix.east) -- (names.west);
+  \draw[arr] (matrix.east) -- (meta.west);
+  \draw[arr, dashed] (rangeval.south) -- (irreg.north)
+    node[midway, right, font=\footnotesize] {irregular regime};
+\end{tikzpicture}
+\caption{The \texttt{Fdata} data model.  An $(n_\mathrm{obs} \times
+n_\mathrm{points})$ NumPy observation matrix shares a common \texttt{argvals}
+evaluation grid and domain \texttt{rangeval}, with optional per-observation
+\texttt{id}, axis \texttt{names}, and sample-level \texttt{metadata}.
+For irregularly sampled data, \texttt{PyIrregFdata} stores per-observation
+grids of differing length, consumed exclusively by the PACE FPCA algorithm.}
+\label{fig:datamodel}
+\end{figure}
+
 \subsection{Dense Data: the \texttt{Fdata} Container}
 
 For the common case in which all $n_\mathrm{obs}$ functions are observed at
 the same $n_\mathrm{points}$ grid points, \texttt{fdars} uses the
-\texttt{Fdata} class (\texttt{python/fdars/fdata\_class.py}).  A
-\texttt{Fdata} object bundles:
+\texttt{Fdata} class (\texttt{python/fdars/fdata\_class.py})
+(Figure~\ref{fig:datamodel}).  A \texttt{Fdata} object bundles:
 
 \begin{itemize}
   \item \textbf{\texttt{data}} --- an $(n_\mathrm{obs} \times n_\mathrm{points})$

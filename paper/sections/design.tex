@@ -1,13 +1,55 @@
 % paper/sections/design.tex — Software Design and Architecture
-% Written in Phase 88 (Plan 04). Do not edit manually.
+% Written in Phase 88 (Plan 04). TikZ architecture diagram added in Phase 90.
 
 \section{Software Design and Architecture}
 \label{sec:design}
 
 \subsection{Layered Architecture}
 
-\texttt{fdars} is organised as three cooperating layers (Figure omitted — see
-source repository for a diagram of the component hierarchy).
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  layer/.style={draw, rounded corners=4pt, minimum width=8cm, minimum height=1.1cm,
+                text centered, inner sep=6pt},
+  sublabel/.style={font=\footnotesize\itshape},
+  arr/.style={-{Stealth[length=6pt]}, thick},
+]
+  % Layer boxes (stacked top-to-bottom)
+  \node[layer, fill=blue!10] (python)  at (0, 0)
+    {\textbf{Python API layer} (\texttt{fdars})};
+  \node[sublabel, below=1pt of python]
+    {Fdata container · sklearn estimators · grounded advisor · dataset loaders};
+
+  \node[layer, fill=orange!10] (pyo3) at (0,-2.2)
+    {\textbf{PyO3 binding layer} (\texttt{fdars.\_native})};
+  \node[sublabel, below=1pt of pyo3]
+    {\texttt{\#[pyfunction]} wrappers · \texttt{PyReadonlyArray} views · row\,↔\,col-major (\texttt{convert.rs})};
+
+  \node[layer, fill=green!10] (core) at (0,-4.4)
+    {\textbf{Rust core} (\texttt{fdars-core})};
+  \node[sublabel, below=1pt of core]
+    {\texttt{FdMatrix} (nalgebra) · data-parallel loops (rayon) · \nsubmodules{} algorithm families};
+
+  % Arrows between layers
+  \draw[arr] (python.south) -- node[right, font=\footnotesize]
+    {Python objects} (pyo3.north);
+  \draw[arr] (pyo3.north) -- node[left, font=\footnotesize]
+    {NumPy arrays} (python.south);
+  \draw[arr] (pyo3.south) -- node[right, font=\footnotesize]
+    {\texttt{FdMatrix}} (core.north);
+  \draw[arr] (core.north) -- node[left, font=\footnotesize]
+    {results} (pyo3.south);
+\end{tikzpicture}
+\caption{Three-layer architecture of \texttt{fdars}.  NumPy arrays cross the
+PyO3 boundary with a row-major $\to$ column-major layout conversion
+(\texttt{src/convert.rs}); \texttt{PyReadonlyArray} wrappers prevent concurrent
+Python mutation without an extra data copy.}
+\label{fig:architecture}
+\end{figure}
+
+\texttt{fdars} is organised as three cooperating layers
+(Figure~\ref{fig:architecture}).
 
 \textbf{Computation core.}  Numerical algorithms live in the external Rust
 crate \texttt{fdars-core}, which provides the \texttt{FdMatrix} linear-algebra
