@@ -26,25 +26,51 @@
 \usepackage{xurl}
 
 % Listing styles for executed capability-tour snippets (paper/snippets/*.tex).
-% fdarsinput  — Python source block: boxed, monospace, keyword highlighting.
-% fdarsoutput — Captured stdout block: plain monospace, no frame.
+% fdarsinput  — Python source block: light-tinted box, syntax highlighting.
+% fdarsoutput — Captured stdout block: grey, left-ruled, visually attached below.
+% Colours (xcolor is pulled in by tikz).
+\definecolor{codeback}{RGB}{247,248,250}
+\definecolor{codeframe}{RGB}{203,213,225}
+\definecolor{codekw}{RGB}{37,99,235}
+\definecolor{codestr}{RGB}{22,128,61}
+\definecolor{codecom}{RGB}{107,114,128}
+\definecolor{codeout}{RGB}{243,244,246}
 \lstdefinestyle{fdarsinput}{
   language=Python,
   basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekw}\bfseries,
+  stringstyle=\color{codestr},
+  commentstyle=\color{codecom}\itshape,
+  backgroundcolor=\color{codeback},
+  frame=single,
+  rulecolor=\color{codeframe},
+  framesep=7pt,
+  xleftmargin=11pt,
+  xrightmargin=4pt,
   columns=fullflexible,
   keepspaces=true,
   showstringspaces=false,
   breaklines=true,
   breakatwhitespace=false,
-  frame=single,
+  breakindent=0pt,
+  postbreak=\mbox{\textcolor{codecom}{$\hookrightarrow$}\space},
+  aboveskip=1.0\medskipamount,
+  belowskip=0.3\medskipamount,
 }
 \lstdefinestyle{fdarsoutput}{
-  basicstyle=\ttfamily\small,
+  basicstyle=\ttfamily\small\color{black!78},
+  backgroundcolor=\color{codeout},
+  frame=leftline,
+  rulecolor=\color{codeframe},
+  framesep=7pt,
+  xleftmargin=11pt,
+  xrightmargin=4pt,
   columns=fullflexible,
   keepspaces=true,
   breaklines=true,
   breakatwhitespace=false,
-  frame=none,
+  aboveskip=0.2\medskipamount,
+  belowskip=1.0\medskipamount,
 }
 % UTF-8 literate map: typeset Fdata repr's en-dash and multiplication sign
 % cleanly inside listings (no special TeX escaping needed in the .tex source).

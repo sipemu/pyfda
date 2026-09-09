@@ -10,36 +10,29 @@
 \centering
 \begin{tikzpicture}[
   font=\small,
-  layer/.style={draw, rounded corners=4pt, minimum width=8cm, minimum height=1.1cm,
-                text centered, inner sep=6pt},
-  sublabel/.style={font=\footnotesize\itshape},
-  arr/.style={-{Stealth[length=6pt]}, thick},
+  layer/.style={draw, rounded corners=4pt, minimum width=10.5cm, minimum height=1.35cm,
+                align=center, inner sep=6pt},
+  desc/.style={font=\footnotesize\itshape},
+  arr/.style={{Stealth[length=5pt]}-{Stealth[length=5pt]}, thick},
+  crosslbl/.style={font=\footnotesize, align=left, fill=white, inner sep=2pt},
 ]
-  % Layer boxes (stacked top-to-bottom)
-  \node[layer, fill=blue!10] (python)  at (0, 0)
-    {\textbf{Python API layer} (\texttt{fdars})};
-  \node[sublabel, below=1pt of python]
-    {Fdata container $\cdot$ sklearn estimators $\cdot$ grounded advisor $\cdot$ dataset loaders};
+  % Layer boxes (stacked top-to-bottom); descriptions live INSIDE each box
+  % so they never collide with the boundary-crossing arrow labels.
+  \node[layer, fill=blue!10] (python) at (0,0)
+    {\textbf{Python API layer} (\texttt{fdars})\\[2pt]
+     {\desc Fdata container $\cdot$ sklearn estimators $\cdot$ grounded advisor $\cdot$ dataset loaders}};
+  \node[layer, fill=orange!10, below=2cm of python] (pyo3)
+    {\textbf{PyO3 binding layer} (\texttt{fdars.\_native})\\[2pt]
+     {\desc \texttt{\#[pyfunction]} wrappers $\cdot$ \texttt{PyReadonlyArray} views $\cdot$ row\,$\leftrightarrow$\,col-major}};
+  \node[layer, fill=green!10, below=2cm of pyo3] (core)
+    {\textbf{Rust core} (\texttt{fdars-core})\\[2pt]
+     {\desc \texttt{FdMatrix} (nalgebra) $\cdot$ data-parallel loops (rayon) $\cdot$ \nsubmodules{} algorithm families}};
 
-  \node[layer, fill=orange!10] (pyo3) at (0,-2.2)
-    {\textbf{PyO3 binding layer} (\texttt{fdars.\_native})};
-  \node[sublabel, below=1pt of pyo3]
-    {\texttt{\#[pyfunction]} wrappers $\cdot$ \texttt{PyReadonlyArray} views $\cdot$ row\,$\leftrightarrow$\,col-major (\texttt{convert.rs})};
-
-  \node[layer, fill=green!10] (core) at (0,-4.4)
-    {\textbf{Rust core} (\texttt{fdars-core})};
-  \node[sublabel, below=1pt of core]
-    {\texttt{FdMatrix} (nalgebra) $\cdot$ data-parallel loops (rayon) $\cdot$ \nsubmodules{} algorithm families};
-
-  % Arrows between layers
-  \draw[arr] (python.south) -- node[right, font=\footnotesize]
-    {Python objects} (pyo3.north);
-  \draw[arr] (pyo3.north) -- node[left, font=\footnotesize]
-    {NumPy arrays} (python.south);
-  \draw[arr] (pyo3.south) -- node[right, font=\footnotesize]
-    {\texttt{FdMatrix}} (core.north);
-  \draw[arr] (core.north) -- node[left, font=\footnotesize]
-    {results} (pyo3.south);
+  % One bidirectional arrow per boundary, with a single centred label.
+  \draw[arr] (python) -- (pyo3)
+    node[crosslbl, midway] {NumPy arrays $\leftrightarrow$ Python objects};
+  \draw[arr] (pyo3) -- (core)
+    node[crosslbl, midway] {\texttt{FdMatrix} $\leftrightarrow$ results (\texttt{convert.rs})};
 \end{tikzpicture}
 \caption{Three-layer architecture of \texttt{fdars}.  NumPy arrays cross the
 PyO3 boundary with a row-major $\to$ column-major layout conversion

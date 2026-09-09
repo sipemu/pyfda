@@ -20,35 +20,32 @@ the evidence in \texttt{paper/comparison\_evidence.md}).
 \centering
 \begin{tikzpicture}[
   font=\small,
-  box/.style={draw, rounded corners=3pt, minimum width=2.6cm, minimum height=0.9cm,
-              text centered, align=center, inner sep=5pt},
-  prov/.style={draw, rounded corners=3pt, minimum width=2.6cm, minimum height=0.9cm,
-               text centered, align=center, inner sep=5pt, fill=purple!10, dashed},
+  box/.style={draw, rounded corners=3pt, minimum width=2.8cm, minimum height=0.95cm,
+              align=center, inner sep=5pt},
+  prov/.style={draw, rounded corners=3pt, minimum width=3.8cm, minimum height=0.95cm,
+               align=center, inner sep=5pt, fill=purple!10, dashed},
   arr/.style={-{Stealth[length=5pt]}, thick},
-  node distance=0.5cm and 1.3cm,
+  node distance=1.0cm and 1.6cm,
 ]
-  \node[box, fill=gray!15] (result) {\texttt{fdars} result dict};
-  \node[box, fill=blue!10, right=of result] (diag)
-    {\texttt{build\_diagnostics}};
+  \node[box, fill=gray!15] (result) {\texttt{fdars}\\result dict};
+  \node[box, fill=blue!10, right=of result] (diag) {\texttt{build\_diagnostics}};
   \node[box, fill=orange!10, right=of diag] (advise) {\texttt{advise}};
-  \node[box, fill=orange!15, below=0.5cm of advise] (tune)
-    {\texttt{auto\_tune}};
-  \node[prov, below=0.5cm of diag] (prov)
+  \node[box, fill=orange!15, below=1.4cm of advise] (tune) {\texttt{auto\_tune}};
+  \node[prov, below=1.9cm of diag] (prov)
     {provenance map\\\texttt{fdars\_method\_references}};
 
   \draw[arr] (result) -- (diag)
-    node[midway, above, font=\footnotesize] {result dict};
+    node[midway, above, font=\footnotesize] {result};
   \draw[arr] (diag) -- (advise)
     node[midway, above, font=\footnotesize] {diagnostics};
-  \draw[arr, dashed] (diag) -- (tune);
   \draw[arr, dashed] (advise) -- (tune)
     node[midway, right, font=\footnotesize] {loop};
+  \draw[arr, dashed] (tune) to[out=200,in=-20] (diag);
   \draw[arr, dashed] (prov) -- (diag)
-    node[midway, right, font=\footnotesize, align=center]
-    {paper\\\& method\\refs};
+    node[midway, left, font=\footnotesize] {refs};
 
-  \node[font=\footnotesize\itshape, above=2pt of diag] {LLM-free};
-  \node[font=\footnotesize\itshape, above=2pt of advise] {provider-agnostic LLM};
+  \node[font=\footnotesize\itshape, above=4pt of diag] {LLM-free};
+  \node[font=\footnotesize\itshape, above=4pt of advise] {provider-agnostic LLM};
 \end{tikzpicture}
 \caption{Advisor and scientific-provenance data flow.
 \texttt{build\_diagnostics} is entirely deterministic (no LLM);
