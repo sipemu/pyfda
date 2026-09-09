@@ -49,22 +49,14 @@ def main() -> None:
     """Regenerate all paper figures."""
     _smoke()
     casestudy1.main()
-    # Studies 2-4 (Wave 2) each register their own module.main() call here.
-    try:
-        import casestudy2
-        casestudy2.main()
-    except ImportError:
-        pass
-    try:
-        import casestudy3
-        casestudy3.main()
-    except ImportError:
-        pass
-    try:
-        import casestudy4
-        casestudy4.main()
-    except ImportError:
-        pass
+    # Studies 2-4: imported directly so any ImportError or runtime failure
+    # surfaces as a hard error (no silent swallow — WR-02).
+    import casestudy2
+    casestudy2.main()
+    import casestudy3
+    casestudy3.main()
+    import casestudy4
+    casestudy4.main()
 
 
 if __name__ == "__main__":
