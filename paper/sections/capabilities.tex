@@ -253,19 +253,25 @@ returns multi-step-ahead curve forecasts:
 FTSM decomposes the observed curve sequence into functional principal
 components, models the temporal dynamics of the resulting score series, and
 reconstructs the next $h$ curves from the forecast scores.
-Figure~\ref{fig:tour-fts} overlays the three forecast curves on the historical
+Figure~\ref{fig:tour-fts} overlays the three forecast curves on the input
 sequence: the forecasts retain the dominant seasonal temperature profile shared
 by the input curves.  Because the reconstruction is low-rank, the forecasts
 capture the leading modes of variation rather than fine day-to-day fluctuation
 ---the honest cost of the dimension reduction that makes curve forecasting
 tractable.
+The curves shown are the Canadian weather stations, used here as an illustrative
+ordered sequence rather than a genuine temporal index; the forecast therefore
+demonstrates the \texttt{fdars.fts} interface rather than a substantive
+prediction.  Case Study~\ref{subsec:cs3-fts} applies the same method with this
+limitation stated in full.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_fts}
-  \caption{FTSM forecast of the next three curves (bold) over the historical
-  curve sequence (grey), reconstructed from three functional principal
-  components.}
+  \caption{FTSM forecast of the next three curves (bold) over the input curve
+  sequence (grey, the 35 Canadian weather stations), reconstructed from three
+  functional principal components.  The station ordering is an illustrative,
+  not temporal, index (see Case Study~\ref{subsec:cs3-fts}).}
   \label{fig:tour-fts}
 \end{figure}
 
