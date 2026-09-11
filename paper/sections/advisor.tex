@@ -64,7 +64,9 @@ The advisor exposes three public entry points in \texttt{fdars.advisor}:
 
 \paragraph{\texttt{build\_diagnostics} --- the LLM-free grounding step.}
 \begin{lstlisting}[style=fdarsinput]
-build_diagnostics(result, method, *, argvals=None, ...)
+build_diagnostics(
+    result, method, *, argvals=None, ...
+)
 \end{lstlisting}
     It accepts the result dictionary
     returned by an \texttt{fdars} analysis function (e.g.\ the dict returned
@@ -91,7 +93,10 @@ build_diagnostics(result, method, *, argvals=None, ...)
 
 \paragraph{\texttt{advise} --- the provider-agnostic LLM entry point.}
 \begin{lstlisting}[style=fdarsinput]
-advise(diagnostics, *, task, domain_context, provider=None, model=...) -> Advice
+advise(
+    diagnostics, *, task, domain_context,
+    provider=None, model=...,
+) -> Advice
 \end{lstlisting}
     It accepts the diagnostics
     dict produced by \texttt{build\_diagnostics} --- never raw data or a
@@ -111,7 +116,10 @@ advise(diagnostics, *, task, domain_context, provider=None, model=...) -> Advice
 
 \paragraph{\texttt{auto\_tune} --- closed-loop parameter search.}
 \begin{lstlisting}[style=fdarsinput]
-auto_tune(dataset_id, method, *, target_metric=None, max_steps=10, guard=True, ...)
+auto_tune(
+    dataset_id, method, *, target_metric=None,
+    max_steps=10, guard=True, ...
+)
 \end{lstlisting}
     A closed-loop parameter search that iterates
     \texttt{build\_diagnostics} $\to$ \texttt{advise} $\to$ re-fit in a
