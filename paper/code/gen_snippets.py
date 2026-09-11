@@ -253,15 +253,18 @@ SNIPPETS: list[tuple[str, str]] = [
     # ------------------------------------------------------------------
     # 8. Functional time series — ftsm_forecast(data, argvals, h, ncomp);
     #    NOTE: takes RAW data+argvals, NOT a fitted ftsm model dict.
-    #    canadian_weather.csv: 365 days x 35 stations -> .T -> (35, 365).
+    #    pm10_graz.csv: 48 half-hours x 182 consecutive days -> .T -> (182, 48).
+    #    A genuine functional time series: each curve is one day's diurnal PM10
+    #    profile, so forecasting the next day's curve is substantive. sqrt is
+    #    the standard variance-stabilising transform for this dataset.
     # ------------------------------------------------------------------
     ("fts", """\
         import numpy as np, pandas as pd
         import fdars
-        cw = pd.read_csv(data_path("canadian_weather.csv"), index_col=0)
-        Xfts = cw.T.values.astype(np.float64)
-        ARGd = np.arange(365, dtype=np.float64) + 1.0
-        fc = fdars.fts.ftsm_forecast(Xfts, ARGd, h=3, ncomp=3)
+        pm = pd.read_csv(data_path("pm10_graz.csv"), index_col=0)
+        X = pm.T.values.astype(np.float64)        # (182 days, 48 half-hours)
+        ARG = pm.index.values.astype(np.float64)  # 48 half-hourly intervals
+        fc = fdars.fts.ftsm_forecast(np.sqrt(X), ARG, h=3, ncomp=3)
         print("forecast shape:", fc["forecast"].shape, "| h:", fc["h"])
         """),
     # ------------------------------------------------------------------

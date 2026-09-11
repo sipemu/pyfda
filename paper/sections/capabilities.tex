@@ -243,35 +243,35 @@ regression share the same call convention.
 \subsection{Functional Time Series}
 
 The \texttt{fdars.fts} submodule implements functional time-series models
-(FTSM) for data in which the observed unit is a curve indexed over time
-(e.g.\ daily temperature profiles across years).
+(FTSM) for data whose observed unit is a curve indexed by time---for example
+one diurnal air-pollution profile per day.
 \texttt{ftsm\_forecast} takes the raw data matrix and grid directly and
 returns multi-step-ahead curve forecasts:
 
 \input{snippets/fts}
 
 FTSM decomposes the observed curve sequence into functional principal
-components, models the temporal dynamics of the resulting score series, and
-reconstructs the next $h$ curves from the forecast scores.
-Figure~\ref{fig:tour-fts} overlays the three forecast curves on the input
-sequence: the forecasts retain the dominant seasonal temperature profile shared
-by the input curves.  Because the reconstruction is low-rank, the forecasts
-capture the leading modes of variation rather than fine day-to-day fluctuation
----the honest cost of the dimension reduction that makes curve forecasting
-tractable.
-The curves shown are the Canadian weather stations, used here as an illustrative
-ordered sequence rather than a genuine temporal index; the forecast therefore
-demonstrates the \texttt{fdars.fts} interface rather than a substantive
-prediction.  Case Study~\ref{subsec:cs3-fts} applies the same method with this
-limitation stated in full.
+components, models the temporal dynamics of the resulting score series with a
+vector autoregression, and reconstructs the next $h$ curves from the forecast
+scores.
+Figure~\ref{fig:tour-fts} shows a genuine example: the Graz PM10
+dataset~\citep{aue_norinho_hormann_2015} records 48 half-hourly PM10
+concentrations per day over 182 consecutive days, so the curves form a real
+temporal sequence and forecasting the next day's diurnal profile is a
+substantive task.  The three forecast curves---back-transformed from the
+variance-stabilising square-root scale---sit within the envelope of observed
+days and preserve the characteristic diurnal shape.  Because the reconstruction
+is low-rank, the forecasts capture the leading modes of variation rather than
+fine minute-to-minute fluctuation.  Case Study~\ref{subsec:cs3-fts} validates
+these next-day forecasts against held-out days and simple baselines.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_fts}
-  \caption{FTSM forecast of the next three curves (bold) over the input curve
-  sequence (grey, the 35 Canadian weather stations), reconstructed from three
-  functional principal components.  The station ordering is an illustrative,
-  not temporal, index (see Case Study~\ref{subsec:cs3-fts}).}
+  \caption{FTSM forecast of the next three daily PM10 curves (bold) over the
+  182 observed daily curves (grey) from the Graz dataset.  Each curve is one
+  day's diurnal PM10 profile; the next-day forecasts are validated against
+  held-out days in Case Study~\ref{subsec:cs3-fts}.}
   \label{fig:tour-fts}
 \end{figure}
 

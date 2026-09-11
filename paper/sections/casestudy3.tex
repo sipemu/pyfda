@@ -1,61 +1,67 @@
-% paper/sections/casestudy3.tex — Case Study 3: FTS forecast on Canadian weather precipitation
-% Written in Phase 89 (Plan 03). Do not edit manually.
+% paper/sections/casestudy3.tex — Case Study 3: FTS next-day forecast of PM10 air pollution.
+% Numbers below are produced deterministically by paper/code/casestudy3.py.
 
-\subsection{Functional Time Series Forecasting: Canadian Weather Precipitation}
+\subsection{Functional Time Series Forecasting: Daily PM10 Air Pollution}
 \label{subsec:cs3-fts}
 
-The Canadian weather precipitation dataset records daily precipitation totals at
-35 weather stations over a 365-day annual cycle, yielding a $365 \times 35$
-data matrix.  We treat each station as a single functional observation — a
-365-point daily precipitation curve — and stack them into a $35 \times 365$
-array \texttt{Xfts}.  This casts the problem as functional time series (FTS)
-forecasting \citep{hyndman_ullah_2007,hormann_kokoszka_2010}: the 35 stations
-play the role of the time index, and the goal is to forecast the precipitation
-profile for three additional (hypothetical) stations.
+The Graz PM10 dataset~\citep{aue_norinho_hormann_2015} records the
+concentration of airborne particulate matter (aerodynamic diameter
+$<10\,\mu$m, in $\mu$g/m$^3$) at half-hourly resolution at the Graz-Mitte
+station, from 2010-10-01 to 2011-03-31.  Reshaping the record into one curve
+per day gives a genuine functional time series: 182 consecutive daily curves,
+each a 48-point diurnal PM10 profile.  Unlike a cross-sectional collection, the
+curves are ordered in real calendar time, so forecasting \emph{the next day's}
+pollution profile is a substantive task~\citep{hyndman_ullah_2007,hormann_kokoszka_2010}.
+We model on the variance-stabilising square-root scale (as recommended for this
+dataset) and back-transform forecasts to $\mu$g/m$^3$.
 
 \paragraph{Decomposition.}
 The FTS mean curve and principal components are extracted via
-\texttt{fdars.fts.ftsm(Xfts, ARGd, ncomp=3)}, which fits the functional
-principal component decomposition and a vector autoregressive (VAR) model on
-the FPC scores.  Figure~\ref{fig:cs3-curves} displays the 35 observed station
-precipitation profiles together with the FTS mean curve.
+\texttt{fdars.fts.ftsm(X, ARG, ncomp=3)}, which fits the functional principal
+component decomposition and a vector autoregressive (VAR) model on the FPC
+score series.  Figure~\ref{fig:cs3-curves} shows the 175 training-day curves
+together with the FTS mean, exposing the characteristic diurnal structure and
+the wide day-to-day amplitude variation the model must capture.
 
-\paragraph{Forecasting.}
-Three-step-ahead forecasting is performed by
-\texttt{fdars.\allowbreak fts.\allowbreak ftsm\_forecast(Xfts, ARGd, h=3, ncomp=3)},
-which accepts the raw data array and evaluation grid directly and returns a
-\texttt{forecast} array of shape $(3, 365)$.
-Figure~\ref{fig:cs3-forecast} shows the three forecast curves alongside the
-observed mean precipitation profile.
-The full analysis is reproduced exactly by \texttt{paper/code/casestudy3.py},
-which writes both figures deterministically.
+\paragraph{Out-of-sample forecast and validation.}
+We hold out the final $H = 7$ days (2011-03-25 to 2011-03-31), fit the model on
+the preceding 175 days, and forecast $H$ days ahead with
+\texttt{fdars.\allowbreak fts.\allowbreak ftsm\_forecast(X, ARG, h=7, ncomp=3)}.
+Each forecast curve is compared to the corresponding held-out actual curve by
+root-mean-square error (RMSE, $\mu$g/m$^3$), against two baselines:
+\emph{climatology} (the training mean curve) and \emph{persistence} (the last
+observed day).  Averaged over the seven held-out days the FTS forecast attains a
+mean RMSE of $13.68$, beating both climatology ($15.52$) and persistence
+($17.17$); at the one-day-ahead horizon the margin is largest ($6.08$ versus
+$10.60$ and $11.27$).  Figure~\ref{fig:cs3-forecast} shows the one-day-ahead
+forecast against the actual and climatology curves (left) and the RMSE at each
+horizon (right).  The full analysis is reproduced exactly by
+\texttt{paper/code/casestudy3.py}, which writes both figures deterministically.
 
 \paragraph{Honest caveat.}
-With only 35 stations, the FTS time index is shallow: VAR estimation on 3 FPC
-score series with 35 observations is illustrative rather than statistically
-optimal.  The study demonstrates \texttt{fdars}' FTS interface on a real dataset
-of the correct functional form; practitioners should interpret the forecast
-curves as a software demonstration, not as a validated meteorological model.
+Forecast skill decays with horizon: the FTS advantage over climatology is clear
+at short horizons but narrows further out, where a low-rank curve model cannot
+anticipate day-specific pollution events.  The study is an honest,
+reproducible demonstration that \texttt{fdars}' FTS interface produces
+skilful next-day functional forecasts on a real temporal dataset --- not a
+claim of state-of-the-art air-quality forecasting.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.85\textwidth]{figures/cs3_precip_curves.pdf}
-  \caption{Canadian weather precipitation: 35 station daily precipitation curves
-    (grey traces) and the FTS mean curve (solid, \texttt{ftsm}, 3 components)
-    over a 365-day annual cycle.  Each station contributes one functional
-    observation to the $35 \times 365$ data matrix passed to
-    \texttt{fdars.fts.ftsm}.}
+  \includegraphics[width=0.85\textwidth]{figures/cs3_pm10_curves.pdf}
+  \caption{Graz PM10: the 175 training-day diurnal curves (grey) and the FTS
+    mean curve (solid, \texttt{ftsm}, 3 components).  Each day contributes one
+    48-point functional observation; the $x$-axis is the hour of day.}
   \label{fig:cs3-curves}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.85\textwidth]{figures/cs3_precip_forecast.pdf}
-  \caption{FTS 3-step-ahead forecast of daily precipitation profiles (coloured
-    curves, $h = 1, 2, 3$) alongside the observed FTS mean (dashed grey).
-    The forecast array has shape $(3, 365)$, produced by
-    \texttt{fdars.fts.ftsm\_forecast(Xfts, ARGd, h=3, ncomp=3)}.
-    With 35 observations the result is illustrative; see text for the
-    shallow-sample caveat.}
+  \includegraphics[width=0.95\textwidth]{figures/cs3_pm10_forecast.pdf}
+  \caption{Out-of-sample validation of the FTS next-day PM10 forecast (7 held-out
+    days).  \emph{Left:} the one-day-ahead forecast (2011-03-25) against the
+    actual curve and the climatology baseline.  \emph{Right:} RMSE
+    ($\mu$g/m$^3$) at each forecast horizon for the FTS model, climatology, and
+    persistence; the FTS forecast leads at short horizons.}
   \label{fig:cs3-forecast}
 \end{figure}

@@ -17,6 +17,7 @@ Each loader returns `(argvals, X, meta)`: a shared 1-D grid, an
 | `phoneme.csv` | `load_phoneme()` | 400 × 256 | ElemStatLearn phoneme data | Public / redistributable (ESL) |
 | `wine.csv` | `load_wine()` | 178 × 13 | UCI Wine dataset | CC BY 4.0 (UCI) |
 | `sonar.csv` | `load_sonar()` | 208 × 60 | UCI Connectionist Bench (Sonar) | CC BY 4.0 (UCI) |
+| `pm10_graz.csv` | _(read directly)_ | 182 × 48 | `pm_10_GR`, R `ftsa` package | GPL-3 |
 | _(synthetic)_ | `load_penicillin()` | 46 × 200 | Simulated in `docs_data.py` | n/a (generated) |
 
 ## Details
@@ -90,6 +91,21 @@ index (1..60), `X` of shape `(208, 60)`, and `meta` with `label`.
 - Source: UCI ML Repository, Connectionist Bench (Sonar, Mines vs. Rocks)
   (<https://archive.ics.uci.edu/dataset/151/connectionist+bench+sonar+mines+vs+rocks>).
 - License: CC BY 4.0 (UCI).
+
+### `pm10_graz.csv` — Graz PM10 air pollution (functional time series)
+Half-hourly **PM10 concentration (µg/m³)** at the **Graz-Mitte** station,
+Austria, from **2010-10-01 to 2011-03-31**. Reshaped into one curve per day:
+**48 half-hourly points × 182 consecutive days** — a genuine functional *time*
+series (curves ordered in calendar time), used for the FTS forecasting example
+(§4.8) and Case Study 3. Wide format: column `halfhour` (interval 1–48) plus one
+column per day, headed by the ISO date (`2010-10-01`…`2011-03-31`). Read directly
+with `pandas` (`pd.read_csv(..., index_col=0).T` → `(182, 48)`); no loader in
+`fdars.datasets`. A square-root transform is the standard variance stabiliser.
+
+- Source: `pm_10_GR` from the R `ftsa` package
+  (<https://cran.r-project.org/package=ftsa>), the FTS-prediction benchmark of
+  Aue, Norinho & Hörmann (2015, *JASA* 110(509):378–392).
+- License: GPL-3 (the `ftsa` package license).
 
 ### `load_penicillin()` — SYNTHETIC fermentation batches
 **Simulated** penicillin-concentration trajectories (no CSV; generated

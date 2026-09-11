@@ -246,28 +246,31 @@ def tour_regression() -> None:
 
 
 def tour_fts() -> None:
-    """4.8 Functional Time Series — input curves and FTSM forecast curves.
+    """4.8 Functional Time Series — daily PM10 curves and next-day forecasts.
 
-    ``ftsm_forecast`` projects the input curve sequence onto its leading
-    components and forecasts the next ``h`` curves; the forecasts are overlaid
-    in bold over the (light) historical curves.
+    The Graz PM10 dataset is a genuine functional time series: one diurnal
+    pollution curve per day for 182 consecutive days.  ``ftsm_forecast`` fits an
+    FPCA + score-VAR model and forecasts the next ``h`` daily curves, overlaid in
+    bold over the (light) observed daily curves.
     """
     np.random.seed(42)
-    cw = pd.read_csv(data_path("canadian_weather.csv"), index_col=0)
-    Xfts = cw.T.values.astype(np.float64)
-    ARGd = np.arange(365, dtype=np.float64) + 1.0
-    fc = fdars.fts.ftsm_forecast(Xfts, ARGd, h=3, ncomp=3)
-    forecast = fc["forecast"]        # (3, 365)
+    pm = pd.read_csv(data_path("pm10_graz.csv"), index_col=0)
+    X = pm.T.values.astype(np.float64)          # (182 days, 48 half-hours)
+    ARG = pm.index.values.astype(np.float64)    # half-hour interval 1..48
+    hours = (ARG - 1) * 0.5                      # hour of day 0.0 .. 23.5
+    fc = fdars.fts.ftsm_forecast(np.sqrt(X), ARG, h=3, ncomp=3)
+    forecast = fc["forecast"] ** 2              # back-transform to ug/m3
 
     f, ax = fig()
-    for i in range(Xfts.shape[0]):
-        ax.plot(ARGd, Xfts[i], color=FDARS_COLORS[6], alpha=0.18, linewidth=0.5)
+    for i in range(X.shape[0]):
+        ax.plot(hours, X[i], color=FDARS_COLORS[6], alpha=0.12, linewidth=0.5)
     for j in range(forecast.shape[0]):
-        ax.plot(ARGd, forecast[j], color=FDARS_COLORS[j], linewidth=1.8,
-                label=f"Forecast h={j + 1}")
-    ax.set_xlabel("Day of year")
-    ax.set_ylabel("Temperature (°C)")
-    ax.set_title(f"FTSM forecast of the next {fc['h']} curves (3 components)")
+        ax.plot(hours, forecast[j], color=FDARS_COLORS[j], linewidth=1.9,
+                label=f"Forecast day+{j + 1}")
+    ax.set_xlabel("Hour of day")
+    ax.set_ylabel("PM10 (ug/m$^3$)")
+    ax.set_xticks([0, 6, 12, 18, 24])
+    ax.set_title(f"FTSM forecast of the next {fc['h']} daily PM10 curves (Graz)")
     ax.legend()
     save_figure(f, _FIGURES_DIR / "tour_fts.pdf")
 
