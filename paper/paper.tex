@@ -89,6 +89,13 @@
   aboveskip=0.35\medskipamount,
   belowskip=1.0\medskipamount,
 }
+% Heading for a code-signature panel.  \paragraph is a run-in heading with a
+% negative trailing skip, which pulls a following lstlisting up onto the heading
+% line (the panel's top rule then collides with the heading text).  This macro
+% is a bold lead-in on its OWN line, kept with the panel below it.
+\newcommand{\sigheading}[1]{%
+  \par\medskip\noindent\textbf{#1}\par\nopagebreak\smallskip\nopagebreak}
+
 % UTF-8 literate map: typeset Fdata repr's en-dash and multiplication sign
 % cleanly inside listings (no special TeX escaping needed in the .tex source).
 \lstset{

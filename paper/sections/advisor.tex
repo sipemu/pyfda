@@ -62,7 +62,7 @@ to peer-reviewed papers at query time.}
 
 The advisor exposes three public entry points in \texttt{fdars.advisor}:
 
-\paragraph{\texttt{build\_diagnostics} --- the LLM-free grounding step.}
+\sigheading{\texttt{build\_diagnostics} --- the LLM-free grounding step.}
 \begin{lstlisting}[style=fdarsinput]
 build_diagnostics(
     result, method, *, argvals=None, ...
@@ -91,7 +91,7 @@ build_diagnostics(
     (Section~\ref{sec:capabilities}) demonstrates \texttt{build\_diagnostics}
     on an FPCA result.
 
-\paragraph{\texttt{advise} --- the provider-agnostic LLM entry point.}
+\sigheading{\texttt{advise} --- the provider-agnostic LLM entry point.}
 \begin{lstlisting}[style=fdarsinput]
 advise(
     diagnostics, *, task, domain_context,
@@ -114,7 +114,7 @@ advise(
     reasons over, and the same diagnostics can be separately inspected by the
     user to verify that the LLM's advice is consistent with the numbers.
 
-\paragraph{\texttt{auto\_tune} --- closed-loop parameter search.}
+\sigheading{\texttt{auto\_tune} --- closed-loop parameter search.}
 \begin{lstlisting}[style=fdarsinput]
 auto_tune(
     dataset_id, method, *, target_metric=None,
