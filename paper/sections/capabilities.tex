@@ -375,22 +375,26 @@ the aligned data matrix, phase-warping functions ($\gamma$), and a convergence f
 \input{snippets/alignment}
 
 Elastic registration separates two kinds of variation that ordinary averaging
-conflates: \emph{amplitude} (how high a feature is) and \emph{phase} (when it
-occurs).  \texttt{karcher\_mean} iterates between warping each curve onto the
-current mean under the SRSF metric and re-estimating that mean.
-Figure~\ref{fig:tour-alignment} contrasts ten growth curves before and after
-alignment: post-registration the shared features line up, tightening the bundle,
-while the warping functions $\gamma$ record exactly how each curve's time axis
-was deformed.  Alignment therefore trades phase for amplitude---the $\gamma$
-functions are not a nuisance by-product but a first-class output describing the
-phase variation that was removed.
+conflates: \emph{amplitude} (how large a feature is) and \emph{phase} (when it
+occurs).  The classic illustration is the Berkeley growth study: each girl's
+growth-\emph{velocity} curve---the derivative of her smoothed height curve---has
+a pubertal growth spurt, but the spurt occurs at a different age for each child.
+Figure~\ref{fig:tour-alignment} shows the consequence.  Before registration the
+spurt peaks are spread across ages, so the cross-sectional mean (red, left)
+smears them into a low, rounded bump; after \texttt{karcher\_mean} registration
+the curves tighten and the Karcher mean (red, right) recovers a sharp spurt at
+its true amplitude.  The returned warping functions $\gamma$ record exactly how
+each curve's age axis was deformed---a first-class output describing the phase
+variation that was removed, not a nuisance by-product.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{figures/tour_alignment}
-  \caption{Elastic SRSF registration of ten growth curves, before (left) and
-  after (right) Karcher-mean alignment.  The red curve is the estimated Karcher
-  mean; alignment tightens the sample by removing phase variation.}
+  \caption{Elastic SRSF registration of Berkeley girls' growth-velocity curves
+  (ages 5--18), before (left) and after (right) \texttt{karcher\_mean}
+  alignment.  Registering the pubertal-spurt peak tightens the sample; the
+  Karcher mean (red, right) recovers a sharp spurt that the naive
+  cross-sectional mean (red, left) smears out.}
   \label{fig:tour-alignment}
 \end{figure}
 

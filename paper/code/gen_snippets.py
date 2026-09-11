@@ -315,18 +315,25 @@ SNIPPETS: list[tuple[str, str]] = [
         print("DTW[0,1]:", round(float(Ddtw[0, 1]), 2))
         """),
     # ------------------------------------------------------------------
-    # 12. Alignment (elastic) — karcher_mean(data, argvals); 10-obs subset
-    #     for speed. Print keys + converged + aligned_data.shape.
+    # 12. Alignment (elastic) — the classic Ramsay-Silverman example: register
+    #     growth-VELOCITY curves so the pubertal-spurt peak (which occurs at
+    #     different ages) lines up. Smooth -> differentiate -> karcher_mean.
+    #     Berkeley girls (cols 39:93). Deterministic (no RNG).
     # ------------------------------------------------------------------
     ("alignment", """\
         import numpy as np, pandas as pd
         import fdars
+        from fdars import Fdata
         growth = pd.read_csv(data_path("growth.csv"), index_col=0)
         ARG = growth.index.values.astype(float)
-        X = growth.values.T.astype(np.float64)
-        km_res = fdars.alignment.karcher_mean(X[:10], ARG)
-        print("karcher keys:", list(km_res.keys()), "| converged:", km_res["converged"])
-        print("aligned shape:", km_res["aligned_data"].shape)
+        girls = growth.values.T[39:].astype(np.float64)   # 54 Berkeley girls
+        # Smooth heights, then differentiate to growth-velocity curves.
+        sm = fdars.basis.smooth_basis_gcv(girls, ARG, n_basis=12, basis_type="bspline")
+        vel = Fdata(sm["fitted"], argvals=ARG).deriv().data
+        # Elastic registration of the velocity curves (aligns the spurt peak).
+        res = fdars.alignment.karcher_mean(vel, ARG, max_iter=50)
+        print("karcher keys:", list(res.keys()))
+        print("aligned shape:", res["aligned_data"].shape, "| warping gammas:", res["gammas"].shape)
         """),
     # ------------------------------------------------------------------
     # 13. Advisor (LLM-free diagnostics) — build_diagnostics(result, method);

@@ -2,14 +2,19 @@
 \begin{lstlisting}[language=Python,style=fdarsinput]
 import numpy as np, pandas as pd
 import fdars
+from fdars import Fdata
 growth = pd.read_csv(data_path("growth.csv"), index_col=0)
 ARG = growth.index.values.astype(float)
-X = growth.values.T.astype(np.float64)
-km_res = fdars.alignment.karcher_mean(X[:10], ARG)
-print("karcher keys:", list(km_res.keys()), "| converged:", km_res["converged"])
-print("aligned shape:", km_res["aligned_data"].shape)
+girls = growth.values.T[39:].astype(np.float64)   # 54 Berkeley girls
+# Smooth heights, then differentiate to growth-velocity curves.
+sm = fdars.basis.smooth_basis_gcv(girls, ARG, n_basis=12, basis_type="bspline")
+vel = Fdata(sm["fitted"], argvals=ARG).deriv().data
+# Elastic registration of the velocity curves (aligns the spurt peak).
+res = fdars.alignment.karcher_mean(vel, ARG, max_iter=50)
+print("karcher keys:", list(res.keys()))
+print("aligned shape:", res["aligned_data"].shape, "| warping gammas:", res["gammas"].shape)
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]
-karcher keys: ['mean', 'mean_srsf', 'aligned_data', 'gammas', 'n_iter', 'converged'] | converged: False
-aligned shape: (10, 31)
+karcher keys: ['mean', 'mean_srsf', 'aligned_data', 'gammas', 'n_iter', 'converged']
+aligned shape: (54, 31) | warping gammas: (54, 31)
 \end{lstlisting}

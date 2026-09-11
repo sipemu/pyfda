@@ -359,31 +359,46 @@ def tour_metric() -> None:
 
 
 def tour_alignment() -> None:
-    """4.12 Elastic Alignment — curves before and after Karcher-mean warping.
+    """4.12 Elastic Alignment — growth-velocity (pubertal-spurt) registration.
 
-    ``karcher_mean`` separates amplitude from phase via SRSF registration; the
-    two panels show the raw curves and their phase-aligned counterparts.
+    The classic Ramsay--Silverman example: Berkeley girls' growth-velocity
+    curves show the pubertal growth spurt at different ages.  ``karcher_mean``
+    registers them under the SRSF metric so the spurt peaks align, and the
+    Karcher mean recovers a sharp common shape that the naive cross-sectional
+    mean smears out.  Smooth heights, differentiate, then align.
     """
     np.random.seed(42)
     X, ARG = _growth()
-    sub = X[:10]
-    res = fdars.alignment.karcher_mean(sub, ARG)
-    aligned = res["aligned_data"]    # (10, n_points)
+    # Berkeley girls (columns 39:93); smooth then differentiate to velocity.
+    girls = X[39:]
+    sm = fdars.basis.smooth_basis_gcv(
+        girls, ARG, n_basis=12, basis_type="bspline"
+    )["fitted"]
+    vel = Fdata(sm, argvals=ARG).deriv().data
+    # Focus on ages >= 5, where the spurt (not the infant velocity decline) is
+    # the dominant feature; show a representative 20-curve subset for clarity.
+    mask = ARG >= 5.0
+    Ar, Vr = ARG[mask], vel[:20, mask]
+    res = fdars.alignment.karcher_mean(Vr, Ar, max_iter=50)
+    aligned = res["aligned_data"]
 
     f, axes = fig(1, 2, figsize=(7.5, 3.6), sharey=True)
-    for i in range(sub.shape[0]):
-        axes[0].plot(ARG, sub[i], color=FDARS_COLORS[0], alpha=0.6, linewidth=0.9)
-        axes[1].plot(ARG, aligned[i], color=FDARS_COLORS[2], alpha=0.6,
+    for i in range(Vr.shape[0]):
+        axes[0].plot(Ar, Vr[i], color=FDARS_COLORS[0], alpha=0.5, linewidth=0.9)
+        axes[1].plot(Ar, aligned[i], color=FDARS_COLORS[2], alpha=0.5,
                      linewidth=0.9)
-    axes[0].plot(ARG, res["mean"], color=FDARS_COLORS[3], linewidth=2.2,
+    axes[0].plot(Ar, Vr.mean(axis=0), color=FDARS_COLORS[3], linewidth=2.4,
+                 label="Cross-sec. mean")
+    axes[1].plot(Ar, res["mean"], color=FDARS_COLORS[3], linewidth=2.4,
                  label="Karcher mean")
-    axes[1].plot(ARG, res["mean"], color=FDARS_COLORS[3], linewidth=2.2)
     axes[0].set_title("Before alignment")
     axes[1].set_title("After elastic alignment")
     for ax in axes:
         ax.set_xlabel("Age (years)")
-    axes[0].set_ylabel("Height (cm)")
+    axes[0].set_ylabel("Growth velocity (cm/yr)")
     axes[0].legend(fontsize=8)
+    axes[1].legend(fontsize=8)
+    f.suptitle("Berkeley girls: growth-velocity spurt registration", y=1.02)
     save_figure(f, _FIGURES_DIR / "tour_alignment.pdf")
 
 
