@@ -384,6 +384,49 @@ def tour_alignment() -> None:
     save_figure(f, _FIGURES_DIR / "tour_alignment.pdf")
 
 
+def tour_warping() -> None:
+    """4.12 Elastic Alignment (companion) — SRSF warping functions by sex.
+
+    Registering all Berkeley children's growth-velocity curves to a common
+    Karcher template returns one warping function gamma per child.  Coloured by
+    sex, the gammas separate: girls' gammas lie below the identity (their
+    developmental events are reached at an earlier age than the template) and
+    boys' above --- the ~2-year-earlier maturation of girls expressed as pure
+    phase variation, distinct from any amplitude difference.
+    """
+    np.random.seed(42)
+    X, ARG = _growth()
+    # growth.csv column order: 39 boys (M01..M39) then 54 girls (F01..F54).
+    n_boys = 39
+    sm = fdars.basis.smooth_basis_gcv(
+        X, ARG, n_basis=12, basis_type="bspline"
+    )["fitted"]
+    vel = Fdata(sm, argvals=ARG).deriv().data
+    mask = ARG >= 5.0
+    Ar, V = ARG[mask], vel[:, mask]
+    res = fdars.alignment.karcher_mean(V, Ar, max_iter=50)
+    gam = res["gammas"]                     # (93, len(Ar)) warping functions
+    boys, girls = gam[:n_boys], gam[n_boys:]
+
+    f, ax = fig()
+    for g in boys:
+        ax.plot(Ar, g, color=FDARS_COLORS[0], alpha=0.20, linewidth=0.6)
+    for g in girls:
+        ax.plot(Ar, g, color=FDARS_COLORS[1], alpha=0.20, linewidth=0.6)
+    ax.plot(Ar, Ar, color=DIMGREY, linestyle="--", linewidth=1.2,
+            label="Identity (no warp)", zorder=2)
+    ax.plot(Ar, boys.mean(axis=0), color=FDARS_COLORS[0], linewidth=2.8,
+            label=f"Boys mean (n={n_boys})", zorder=5)
+    ax.plot(Ar, girls.mean(axis=0), color=FDARS_COLORS[1], linewidth=2.8,
+            label=f"Girls mean (n={X.shape[0] - n_boys})", zorder=5)
+    ax.set_xlabel("Age (years)")
+    ax.set_ylabel(r"Warped age $\gamma$(age)")
+    ax.set_title("Elastic warping functions by sex (growth velocity)")
+    clean_ax(ax, frame=True)
+    brand_legend(ax, loc="upper left")
+    save_figure(f, _FIGURES_DIR / "tour_warping.pdf")
+
+
 def tour_advisor() -> None:
     """4.13 Grounded AI Advisor — FPCA scree diagnostic from build_diagnostics."""
     np.random.seed(42)
@@ -428,6 +471,7 @@ TOUR_FIGURES = [
     tour_tolerance,
     tour_metric,
     tour_alignment,
+    tour_warping,
     tour_advisor,
 ]
 
