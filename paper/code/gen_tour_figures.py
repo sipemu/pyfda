@@ -250,7 +250,14 @@ def tour_regression() -> None:
     tec = pd.read_csv(data_path("tecator.csv"), index_col=0)
     Xt = tec.iloc[:, :100].values.astype(np.float64)
     yfat = tec["fat"].values.astype(np.float64)
-    sof = fdars.regression.fregre_lm(Xt, yfat, n_comp=5)
+    WAV = np.arange(1, 101, dtype=float)
+    # 2nd-derivative spectra (standard NIR preprocessing): smooth then
+    # differentiate twice to expose the fat absorption bands.
+    sm = fdars.basis.smooth_basis_gcv(
+        Xt, WAV, n_basis=40, basis_type="bspline"
+    )["fitted"]
+    d2 = Fdata(sm, argvals=WAV).deriv().deriv().data
+    sof = fdars.regression.fregre_lm(d2, yfat, n_comp=15)
     fitted = sof["fitted_values"]
     r2 = sof["r_squared"]
     rmse = float(np.sqrt(np.mean((yfat - fitted) ** 2)))

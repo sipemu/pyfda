@@ -27,6 +27,7 @@ from paper_utils import (
 )
 
 import fdars
+from fdars import Fdata
 from fdars.sklearn._skeletons import FPCRegressor
 from sklearn.model_selection import cross_val_score
 
@@ -75,22 +76,26 @@ def main() -> None:
     Xa = aligned["aligned_data"]   # (240, 100)
 
     # ------------------------------------------------------------------
-    # Step 2: Scalar-on-function FPC regression
+    # Step 2: Scalar-on-function FPC regression on 2nd-DERIVATIVE spectra.
+    # Standard NIR preprocessing: smooth the absorbance curves with a B-spline
+    # basis, then differentiate twice to remove baseline/scatter and expose the
+    # fat absorption bands.  This substantially lifts R^2 over the raw spectra.
     # NOTE: fregre_lm uses n_comp (NOT n_components — different from FPCRegressor)
-    # NOTE: result key is "fitted_values" (NOT "fitted" — unlike to_pc which uses "fitted")
+    # NOTE: result key is "fitted_values" (NOT "fitted" — unlike to_pc's "fitted")
     # ------------------------------------------------------------------
-    sof = fdars.regression.fregre_lm(Xt, yfat, n_comp=5)
+    sm = fdars.basis.smooth_basis_gcv(
+        Xt, ARGt, n_basis=40, basis_type="bspline")["fitted"]
+    d2 = Fdata(sm, argvals=ARGt).deriv().deriv().data   # 2nd-derivative spectra
+    sof = fdars.regression.fregre_lm(d2, yfat, n_comp=15)
     r2_train = float(sof["r_squared"])
     fitted = sof["fitted_values"]   # (240,)
     print("train R2:", round(r2_train, 3))
 
     # ------------------------------------------------------------------
-    # Step 3: FPCRegressor 5-fold cross-validation
+    # Step 3: FPCRegressor 5-fold cross-validation (on the same 2nd-deriv spectra)
     # NOTE: FPCRegressor uses n_components (NOT n_comp — sklearn convention)
     # ------------------------------------------------------------------
-    cv = cross_val_score(FPCRegressor(n_components=5), Xt, yfat, cv=5, scoring="r2")
-    # REAL OUTPUT: [0.903, 0.405, 0.883, 0.922, 0.914]  mean: 0.805
-    # Fold 2 (idx=1) has a low R^2 — reported honestly as the mean
+    cv = cross_val_score(FPCRegressor(n_components=15), d2, yfat, cv=5, scoring="r2")
     cv_mean = float(cv.mean())
     print("CV R2:", round(cv_mean, 3))
     print("CV fold scores:", [round(float(s), 3) for s in cv])

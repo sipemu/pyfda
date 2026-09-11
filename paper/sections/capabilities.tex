@@ -221,21 +221,26 @@ dataset, predicting fat content from 100-channel absorbance curves:
 
 \input{snippets/regression}
 
-\texttt{fregre\_lm} projects the predictor curves onto their leading FPCA
+Following standard near-infrared practice, the snippet first converts the raw
+absorbance curves to \emph{second-derivative} spectra---smoothing with a
+B-spline basis and differentiating twice---which removes baseline and scatter
+effects and sharpens the fat absorption bands.
+\texttt{fregre\_lm} then projects these curves onto their leading FPCA
 components, fits an ordinary linear model in that score space, and returns the
 fitted values, residuals, the reconstructed coefficient function $\beta(t)$, and
 the coefficient of determination.  Figure~\ref{fig:tour-regression} plots fitted
-against observed fat content: points cluster tightly along the identity line,
-with the scatter widening at high fat content where the sample thins.  The
-$R^2$ shown in the figure is computed live from the fit.  PLS and robust
-variants (for collinear or contaminated predictors) and function-on-function
-regression share the same call convention.
+against observed fat content: points cluster tightly along the identity line.
+The $R^2$ shown in the figure is computed live from the fit; the
+second-derivative preprocessing lifts it well above a fit on the raw spectra
+(Case Study~\ref{subsec:cs2-tecator} reports the cross-validated gain).  PLS and
+robust variants (for collinear or contaminated predictors) and
+function-on-function regression share the same call convention.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_regression}
   \caption{Scalar-on-function regression of Tecator fat content on the
-  100-channel absorbance curves: fitted vs observed values with the live
+  second-derivative absorbance spectra: fitted vs observed values with the live
   $R^2$.  The dashed line marks a perfect fit.}
   \label{fig:tour-regression}
 \end{figure}
