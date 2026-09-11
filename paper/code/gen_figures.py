@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 
-from paper_utils import fig, save_figure
+from paper_utils import fig, save_figure, style_setup, clean_ax, brand_legend
 import casestudy1
 import gen_tour_figures
 
@@ -37,10 +37,12 @@ def _smoke() -> None:
     x = np.arange(len(y))
 
     f, ax = fig()
-    ax.plot(x, y)
+    ax.plot(x, y, label="Random walk")
     ax.set_title("Smoke test — deterministic random walk")
     ax.set_xlabel("Step")
     ax.set_ylabel("Cumulative value")
+    clean_ax(ax, frame=True)
+    brand_legend(ax)
 
     _FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     save_figure(f, _FIGURES_DIR / "smoke.pdf")
@@ -48,6 +50,7 @@ def _smoke() -> None:
 
 def main() -> None:
     """Regenerate all paper figures."""
+    style_setup()
     _smoke()
     casestudy1.main()
     # Studies 2-4: imported directly so any ImportError or runtime failure

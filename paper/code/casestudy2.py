@@ -21,7 +21,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from paper_utils import fig, FDARS_COLORS, save_figure, data_path
+from paper_utils import (
+    fig, FDARS_COLORS, save_figure, data_path,
+    style_setup, clean_ax, brand_legend, metric_box, DIMGREY,
+)
 
 import fdars
 from fdars.sklearn._skeletons import FPCRegressor
@@ -47,6 +50,7 @@ def main() -> None:
     (Pitfall 4 in 89-RESEARCH).
     """
     np.random.seed(42)
+    style_setup()
 
     # ------------------------------------------------------------------
     # Load tecator data (240 meat samples x 100 spectral channels, fat response)
@@ -123,7 +127,8 @@ def main() -> None:
         "Tecator near-infrared spectra: raw and elastically registered\n"
         "(30 curves shown; alignment iterations capped at 20)"
     )
-    ax1.legend(fontsize=7)
+    clean_ax(ax1, frame=True)
+    brand_legend(ax1, fontsize=7)
     save_figure(f1, _FIGURES_DIR / "cs2_tecator_align.pdf")
 
     # ------------------------------------------------------------------
@@ -131,23 +136,26 @@ def main() -> None:
     # Demonstrates the quality of the scalar-on-function FPC regression.
     # ------------------------------------------------------------------
     f2, ax2 = fig()
-    ax2.scatter(yfat, fitted, color=FDARS_COLORS[0], s=14, alpha=0.65,
-                label="Meat samples")
     # Reference line y = x
     lo = float(min(yfat.min(), fitted.min()))
     hi = float(max(yfat.max(), fitted.max()))
     margin = (hi - lo) * 0.04
     ref_vals = np.array([lo - margin, hi + margin])
-    ax2.plot(ref_vals, ref_vals, color="0.4", linewidth=1.2,
-             linestyle="--", label="Perfect fit ($y = x$)")
+    ax2.plot(ref_vals, ref_vals, color=DIMGREY, linewidth=1.2,
+             linestyle="--", label="Perfect fit ($y = x$)", zorder=1)
+    ax2.scatter(yfat, fitted, color=FDARS_COLORS[0], s=14, alpha=0.7,
+                edgecolors="none", label="Meat samples", zorder=3)
     ax2.set_xlabel("Actual fat content (%)")
     ax2.set_ylabel("Fitted fat content (%)")
-    ax2.set_title(
-        "Scalar-on-function regression: actual vs fitted fat content\n"
-        r"Training $R^2 = " + str(round(r2_train, 3)) + r"$; "
-        r"5-fold CV $R^2 = " + str(round(cv_mean, 3)) + r"$ (mean)"
+    ax2.set_title("Scalar-on-function regression: actual vs fitted fat content")
+    clean_ax(ax2, frame=True)
+    metric_box(
+        ax2,
+        f"Training $R^2$ = {round(r2_train, 3)}\n"
+        f"5-fold CV $R^2$ = {round(cv_mean, 3)}",
+        loc="upper left",
     )
-    ax2.legend(fontsize=7)
+    brand_legend(ax2, fontsize=8, loc="lower right")
     save_figure(f2, _FIGURES_DIR / "cs2_tecator_fit.pdf")
 
 

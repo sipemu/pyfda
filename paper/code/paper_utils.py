@@ -32,8 +32,132 @@ if str(_SCRIPTS) not in sys.path:
 from docs_fig import fig, FDARS_COLORS  # noqa: E402
 
 import matplotlib.pyplot as plt  # noqa: E402
+import seaborn as sns  # noqa: E402
 
-__all__ = ["fig", "FDARS_COLORS", "data_path", "save_figure"]
+__all__ = [
+    "fig",
+    "FDARS_COLORS",
+    "data_path",
+    "save_figure",
+    "style_setup",
+    "clean_ax",
+    "panel_frame",
+    "brand_legend",
+    "metric_box",
+    "DIMGREY",
+    "LIGHTGREY",
+]
+
+# ---------------------------------------------------------------------------
+# matplotlib-skill aesthetic (tvhahn/matplotlib-skill), applied with the fdars
+# brand palette.  We adopt the skill's LAYOUT invariants — seaborn whitegrid +
+# DejaVu Sans, full despine, dimgrey text/ticks, subtle panel frames, framed
+# white legends, metric boxes — but keep FDARS_COLORS as the data palette so the
+# paper stays visually consistent with the docs site.  Determinism is preserved:
+# seaborn's theme is deterministic, fonts are fixed (DejaVu Sans), and
+# ``save_figure`` still strips the PDF CreationDate (byte-stable re-runs).
+# ---------------------------------------------------------------------------
+DIMGREY = "dimgrey"
+LIGHTGREY = "lightgrey"
+
+
+def style_setup() -> None:
+    """Install the skill's theme with the brand palette (call before plotting).
+
+    Idempotent and deterministic — safe to call once per figure script.  Applies
+    ``sns.set_theme`` (whitegrid, DejaVu Sans), then overrides the colour cycle
+    with ``FDARS_COLORS`` and softens text/ticks to ``dimgrey`` per the skill's
+    invariants.
+    """
+    sns.set_theme(font_scale=1.0, style="whitegrid", font="DejaVu Sans")
+    plt.rcParams.update(
+        {
+            "figure.figsize": (7.5, 4.0),
+            "figure.dpi": 150,
+            "savefig.transparent": True,
+            "axes.prop_cycle": plt.cycler(color=FDARS_COLORS),
+            "axes.titlecolor": DIMGREY,
+            "axes.titleweight": "600",
+            "axes.labelcolor": DIMGREY,
+            "text.color": DIMGREY,
+            "xtick.color": DIMGREY,
+            "ytick.color": DIMGREY,
+            "xtick.labelcolor": DIMGREY,
+            "ytick.labelcolor": DIMGREY,
+            "axes.edgecolor": LIGHTGREY,
+            "legend.frameon": False,
+            "font.size": 11,
+            "axes.titlesize": 12.5,
+            # FND-03 parity: deterministic element IDs (no effect on PDF bytes,
+            # kept for consistency with the docs pipeline).
+            "svg.hashsalt": "fdars-docs",
+        }
+    )
+
+
+def clean_ax(ax, *, grid: bool = False, grid_axis: str = "both",
+             frame: bool = False) -> None:
+    """Apply the skill's per-axes cleanup: despine, degrid, soften ticks.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes to clean.
+    grid : bool, optional
+        Re-enable a light grid (skill convention for bar-like charts).  Default
+        False (fully degridded, per "despine, degrid, then add back").
+    grid_axis : str, optional
+        Which axis the grid applies to when ``grid`` is True (``"x"``/``"y"``/
+        ``"both"``).
+    frame : bool, optional
+        Draw a subtle panel frame (lightgrey) around the axes patch — used for
+        curves/scatter clouds that float in the coordinate space.
+    """
+    sns.despine(ax=ax, left=True, bottom=True)
+    if grid:
+        ax.grid(True, alpha=0.7, linewidth=0.8, axis=grid_axis)
+    else:
+        ax.grid(False)
+    ax.tick_params(axis="both", which="both", length=0, labelcolor=DIMGREY)
+    if frame:
+        panel_frame(ax)
+
+
+def panel_frame(ax) -> None:
+    """Draw the skill's subtle lightgrey panel frame via the axes patch."""
+    ax.patch.set_edgecolor(LIGHTGREY)
+    ax.patch.set_linewidth(0.8)
+
+
+def brand_legend(ax, **kwargs):
+    """``ax.legend`` with the skill's framed white-box defaults."""
+    kwargs.setdefault("frameon", True)
+    kwargs.setdefault("facecolor", "white")
+    kwargs.setdefault("framealpha", 0.8)
+    kwargs.setdefault("edgecolor", LIGHTGREY)
+    kwargs.setdefault("labelcolor", DIMGREY)
+    return ax.legend(**kwargs)
+
+
+def metric_box(ax, text: str, *, loc: str = "upper left",
+               fontsize: float = 9.5) -> None:
+    """Place a skill-style metric annotation (e.g. ``$R^2$``) inside *ax*.
+
+    Positioned just inside a corner using axis-fraction coordinates; text is
+    ``dimgrey`` with no visible box (the skill's transparent metric box).
+    """
+    corners = {
+        "upper left": (0.03, 0.97, "top", "left"),
+        "upper right": (0.97, 0.97, "top", "right"),
+        "lower left": (0.03, 0.03, "bottom", "left"),
+        "lower right": (0.97, 0.03, "bottom", "right"),
+    }
+    x, y, va, ha = corners[loc]
+    ax.text(
+        x, y, text, transform=ax.transAxes, color=DIMGREY, fontsize=fontsize,
+        va=va, ha=ha, fontweight="medium",
+        bbox={"facecolor": "white", "alpha": 0.0, "pad": 4},
+    )
 
 
 def data_path(name: str) -> Path:

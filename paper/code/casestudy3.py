@@ -35,7 +35,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from paper_utils import fig, FDARS_COLORS, save_figure, data_path
+from paper_utils import (
+    fig, FDARS_COLORS, save_figure, data_path,
+    style_setup, clean_ax, brand_legend, DIMGREY,
+)
 
 import fdars
 
@@ -57,6 +60,7 @@ def main() -> None:
     step); the seed is a belt-and-suspenders guard for byte-stable output.
     """
     np.random.seed(42)
+    style_setup()
 
     # ------------------------------------------------------------------
     # Load PM10: CSV is (48 half-hours x 182 days); transpose so each row is
@@ -112,8 +116,8 @@ def main() -> None:
     f1, ax1 = fig()
     for i in range(train.shape[0]):
         label = f"Daily curves (n={train.shape[0]})" if i == 0 else None
-        ax1.plot(hours, train[i], color="#999999", linewidth=0.5,
-                 alpha=0.35, label=label)
+        ax1.plot(hours, train[i], color=FDARS_COLORS[6], linewidth=0.5,
+                 alpha=0.30, label=label)
     ax1.plot(hours, mean_curve, color=FDARS_COLORS[0], linewidth=2.4,
              label="FTS mean", zorder=5)
     ax1.set_xlabel("Hour of day")
@@ -123,7 +127,8 @@ def main() -> None:
         "Graz PM10: daily diurnal curves and FTS mean\n"
         "(ftsm, 3 components; 2010-10-01 to 2011-03-24 training)"
     )
-    ax1.legend(fontsize=8)
+    clean_ax(ax1, frame=True)
+    brand_legend(ax1, fontsize=8)
     save_figure(f1, _FIGURES_DIR / "cs3_pm10_curves.pdf")
 
     # ------------------------------------------------------------------
@@ -143,8 +148,10 @@ def main() -> None:
     axL.set_xlabel("Hour of day")
     axL.set_ylabel("PM10 (ug/m$^3$)")
     axL.set_xticks([0, 6, 12, 18, 24])
-    axL.set_title(f"1-day-ahead forecast ({dates[-_H]})")
-    axL.legend(fontsize=8)
+    axL.set_title(r"$\bf{(a)}$ " + f"1-day-ahead forecast ({dates[-_H]})",
+                  loc="left", fontsize=11)
+    clean_ax(axL, frame=True)
+    brand_legend(axL, fontsize=8)
 
     horizon = np.arange(1, _H + 1)
     axR.plot(horizon, fts_rmse, color=FDARS_COLORS[0], marker="o",
@@ -156,12 +163,14 @@ def main() -> None:
     axR.set_xlabel("Forecast horizon (days ahead)")
     axR.set_ylabel("RMSE (ug/m$^3$)")
     axR.set_xticks(horizon)
-    axR.set_title("Out-of-sample RMSE by horizon")
-    axR.legend(fontsize=8)
+    axR.set_title(r"$\bf{(b)}$ Out-of-sample RMSE by horizon", loc="left",
+                  fontsize=11)
+    clean_ax(axR, frame=True)
+    brand_legend(axR, fontsize=8)
 
     f2.suptitle(
         "FTS next-day PM10 forecast validation (Graz, 7 held-out days)",
-        y=1.03,
+        y=1.03, color=DIMGREY,
     )
     save_figure(f2, _FIGURES_DIR / "cs3_pm10_forecast.pdf")
 

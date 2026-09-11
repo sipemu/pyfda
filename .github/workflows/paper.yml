@@ -41,7 +41,7 @@ jobs:
         run: |
           python -m venv .venv
           . .venv/bin/activate
-          pip install maturin numpy pandas scipy scikit-learn matplotlib
+          pip install maturin numpy pandas scipy scikit-learn matplotlib seaborn
           maturin develop --release
 
       - name: Regenerate figures (PIPE-02 determinism gate)

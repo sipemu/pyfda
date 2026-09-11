@@ -5,6 +5,10 @@ Each visualises the *live* output of that method family's representative example
 (the same validated call shapes captured in ``gen_snippets.py``), writing a
 deterministic PDF to ``paper/figures/tour_<family>.pdf``.
 
+Styling follows the matplotlib-skill aesthetic (tvhahn/matplotlib-skill) applied
+with the fdars brand palette: whitegrid + full despine, dimgrey text/ticks,
+subtle panel frames, framed white legends, metric boxes (see ``paper_utils``).
+
 Run via::
 
     PYTHONPATH=scripts:paper/code python paper/code/gen_tour_figures.py
@@ -12,9 +16,9 @@ Run via::
 or through ``gen_figures.py`` (wired into ``main()`` so ``make paper`` and the
 CI determinism gate cover these figures automatically).
 
-Determinism rules (per PIPE-02): every function seeds ``np.random.seed(42)``
-before any stochastic draw, and ``save_figure`` strips the PDF ``CreationDate``
-so consecutive runs are byte-identical within one environment.
+Determinism (PIPE-02): every function seeds ``np.random.seed(42)`` before any
+stochastic draw, and ``save_figure`` strips the PDF ``CreationDate`` so
+consecutive runs are byte-identical within one environment.
 """
 from __future__ import annotations
 
@@ -26,9 +30,23 @@ import pandas as pd
 import fdars
 from fdars import Fdata
 
-from paper_utils import fig, FDARS_COLORS, save_figure, data_path
+from paper_utils import (
+    fig,
+    FDARS_COLORS,
+    save_figure,
+    data_path,
+    style_setup,
+    clean_ax,
+    brand_legend,
+    metric_box,
+    DIMGREY,
+)
 
 _FIGURES_DIR = Path(__file__).resolve().parent.parent / "figures"
+
+# Neutral grey for supporting (non-primary) curves, per the skill's "grey is a
+# color" principle.  FDARS_COLORS[6] is the brand grey.
+_GREY = FDARS_COLORS[6]
 
 
 def _growth() -> tuple[np.ndarray, np.ndarray]:
@@ -40,12 +58,7 @@ def _growth() -> tuple[np.ndarray, np.ndarray]:
 
 
 def tour_represent() -> None:
-    """4.1 Data Representation — raw growth curves with the sample mean.
-
-    Shows what an ``Fdata`` container holds: an (n_obs x n_points) matrix of
-    height curves sharing one age grid, and the pointwise mean the container
-    computes via ``fd.mean()``.
-    """
+    """4.1 Data Representation — raw growth curves with the sample mean."""
     np.random.seed(42)
     X, ARG = _growth()
     fd = Fdata(X, argvals=ARG)
@@ -53,21 +66,18 @@ def tour_represent() -> None:
 
     f, ax = fig()
     for row in X:
-        ax.plot(ARG, row, color=FDARS_COLORS[6], alpha=0.28, linewidth=0.6)
+        ax.plot(ARG, row, color=_GREY, alpha=0.28, linewidth=0.6)
     ax.plot(ARG, mean, color=FDARS_COLORS[0], linewidth=2.6, label="Sample mean")
     ax.set_xlabel("Age (years)")
     ax.set_ylabel("Height (cm)")
     ax.set_title(f"Berkeley growth study: {X.shape[0]} height curves + mean")
-    ax.legend()
+    clean_ax(ax, frame=True)
+    brand_legend(ax)
     save_figure(f, _FIGURES_DIR / "tour_represent.pdf")
 
 
 def tour_basis() -> None:
-    """4.2 Basis Representation and Smoothing — raw vs GCV-smoothed curves.
-
-    Overlays five raw height curves with their B-spline basis reconstructions
-    selected by generalised cross-validation (``smooth_basis_gcv``).
-    """
+    """4.2 Basis Representation and Smoothing — raw vs GCV-smoothed curves."""
     np.random.seed(42)
     X, ARG = _growth()
     sub = X[:5]
@@ -84,16 +94,13 @@ def tour_basis() -> None:
     ax.set_xlabel("Age (years)")
     ax.set_ylabel("Height (cm)")
     ax.set_title("B-spline smoothing (8 basis functions, GCV penalty)")
-    ax.legend()
+    clean_ax(ax, frame=True)
+    brand_legend(ax)
     save_figure(f, _FIGURES_DIR / "tour_basis.pdf")
 
 
 def tour_depth() -> None:
-    """4.3 Depth and Outlier Detection — curves shaded by Fraiman--Muniz depth.
-
-    Darker curves are more central; the deepest (median) curve is highlighted,
-    and MUOD-flagged shape/amplitude/magnitude outliers are drawn in red.
-    """
+    """4.3 Depth and Outlier Detection — curves shaded by Fraiman--Muniz depth."""
     np.random.seed(42)
     X, ARG = _growth()
     fd = Fdata(X, argvals=ARG)
@@ -106,7 +113,6 @@ def tour_depth() -> None:
         | set(out["magnitude_outliers"])
     )
 
-    # Normalise depth to [0, 1] for alpha shading (deeper -> more opaque).
     d = depths.astype(float)
     dn = (d - d.min()) / (d.max() - d.min() + 1e-12)
 
@@ -126,57 +132,52 @@ def tour_depth() -> None:
     ax.set_title(
         f"Fraiman--Muniz depth shading; {len(outlier_idx)} MUOD outlier(s)"
     )
-    ax.legend()
+    clean_ax(ax, frame=True)
+    brand_legend(ax)
     save_figure(f, _FIGURES_DIR / "tour_depth.pdf")
 
 
 def tour_fpca() -> None:
-    """4.4 Functional PCA — mean curve and the first two modes of variation.
-
-    Each mode is the mean perturbed by +/- 2 SD along a principal eigenfunction
-    (``rotation`` column scaled by its singular value), the standard FDA way to
-    read what each component captures.
-    """
+    """4.4 Functional PCA — mean curve and the first two modes of variation."""
     np.random.seed(42)
     X, ARG = _growth()
     fd = Fdata(X, argvals=ARG)
     pc = fd.to_pc(n_comp=3)
     mean = pc["mean"]
-    rot = pc["rotation"]              # (n_points, 3)
+    rot = pc["rotation"]
     sv = pc["singular_values"]
     n = X.shape[0]
-    # Per-component score SD ~ singular_value / sqrt(n-1); perturb mean by +/-2 SD.
     sd = sv / np.sqrt(max(n - 1, 1))
     prop = sv ** 2 / float(np.sum(sv ** 2))
 
     f, axes = fig(1, 2, figsize=(7.5, 3.6))
     for k, ax in enumerate(axes):
         pert = 2.0 * sd[k] * rot[:, k]
-        ax.plot(ARG, mean, color=FDARS_COLORS[6], linewidth=1.8, label="Mean")
+        ax.plot(ARG, mean, color=_GREY, linewidth=1.8, label="Mean")
         ax.plot(ARG, mean + pert, color=FDARS_COLORS[0], linewidth=1.4,
                 linestyle="--", label="Mean + 2 SD")
         ax.plot(ARG, mean - pert, color=FDARS_COLORS[1], linewidth=1.4,
                 linestyle=":", label="Mean - 2 SD")
-        ax.set_title(f"PC{k + 1} ({prop[k] * 100:.1f}% variance)")
+        ax.set_title(r"$\bf{(%s)}$ " % chr(ord("a") + k)
+                     + f"PC{k + 1} ({prop[k] * 100:.1f}% variance)",
+                     loc="left", fontsize=11)
         ax.set_xlabel("Age (years)")
+        clean_ax(ax, frame=True)
         if k == 0:
             ax.set_ylabel("Height (cm)")
-            ax.legend(fontsize=8)
-    f.suptitle("FPCA modes of variation (Berkeley growth)", y=1.02)
+            brand_legend(ax, fontsize=8)
+    f.suptitle("FPCA modes of variation (Berkeley growth)", y=1.03,
+               color=DIMGREY)
     save_figure(f, _FIGURES_DIR / "tour_fpca.pdf")
 
 
 def tour_clustering() -> None:
-    """4.5 Clustering — functional k-means partition with cluster centroids.
-
-    Curves are coloured by their k-means assignment (k=3, seed=42) and each
-    cluster's centroid curve is overlaid in bold.
-    """
+    """4.5 Clustering — functional k-means partition with cluster centroids."""
     np.random.seed(42)
     X, ARG = _growth()
     km = fdars.clustering.kmeans_fd(X, ARG, k=3, seed=42)
     cluster = km["cluster"]
-    centers = km["centers"]          # (3, n_points)
+    centers = km["centers"]
     sizes = np.bincount(cluster)
 
     f, ax = fig()
@@ -189,16 +190,13 @@ def tour_clustering() -> None:
     ax.set_xlabel("Age (years)")
     ax.set_ylabel("Height (cm)")
     ax.set_title("Functional k-means (k=3) with cluster centroids")
-    ax.legend()
+    clean_ax(ax, frame=True)
+    brand_legend(ax)
     save_figure(f, _FIGURES_DIR / "tour_clustering.pdf")
 
 
 def tour_classification() -> None:
-    """4.6 Classification — per-class mean phoneme log-periodogram spectra.
-
-    The FPCA-kNN classifier separates phoneme classes; this plot shows why it
-    can: the class-mean spectra are visibly distinct across the frequency band.
-    """
+    """4.6 Classification — per-class mean phoneme log-periodogram spectra."""
     np.random.seed(42)
     ph = pd.read_csv(data_path("phoneme.csv"), index_col=0)
     Xp = ph.values.astype(np.float64)
@@ -214,16 +212,13 @@ def tour_classification() -> None:
     ax.set_xlabel("Frequency (log-periodogram index)")
     ax.set_ylabel("Mean log-amplitude")
     ax.set_title(f"Class-mean spectra for {len(uniq)} phonemes")
-    ax.legend(title="Phoneme", ncol=2, fontsize=8, title_fontsize=8)
+    clean_ax(ax, frame=True)
+    brand_legend(ax, title="Phoneme", ncol=2, fontsize=8, title_fontsize=8)
     save_figure(f, _FIGURES_DIR / "tour_classification.pdf")
 
 
 def tour_regression() -> None:
-    """4.7 Regression — observed vs fitted fat content (scalar-on-function).
-
-    ``fregre_lm`` regresses fat on the 100-channel Tecator absorbance curves via
-    FPCA projection; the scatter shows fitted vs observed with the live R^2.
-    """
+    """4.7 Regression — observed vs fitted fat content (scalar-on-function)."""
     np.random.seed(42)
     tec = pd.read_csv(data_path("tecator.csv"), index_col=0)
     Xt = tec.iloc[:, :100].values.astype(np.float64)
@@ -231,39 +226,37 @@ def tour_regression() -> None:
     sof = fdars.regression.fregre_lm(Xt, yfat, n_comp=5)
     fitted = sof["fitted_values"]
     r2 = sof["r_squared"]
+    rmse = float(np.sqrt(np.mean((yfat - fitted) ** 2)))
 
     lo = float(min(yfat.min(), fitted.min()))
     hi = float(max(yfat.max(), fitted.max()))
     f, ax = fig()
-    ax.plot([lo, hi], [lo, hi], color=FDARS_COLORS[6], linewidth=1.2,
-            linestyle="--", label="Perfect fit")
-    ax.scatter(yfat, fitted, color=FDARS_COLORS[0], s=14, alpha=0.7)
+    ax.plot([lo, hi], [lo, hi], color=DIMGREY, linewidth=1.2,
+            linestyle="--", label="Perfect fit", zorder=1)
+    ax.scatter(yfat, fitted, color=FDARS_COLORS[0], s=18, alpha=0.75,
+               edgecolors="none", zorder=3)
     ax.set_xlabel("Observed fat content (%)")
     ax.set_ylabel("Fitted fat content (%)")
-    ax.set_title(f"Scalar-on-function regression (Tecator), $R^2$ = {r2:.3f}")
-    ax.legend()
+    ax.set_title("Scalar-on-function regression (Tecator)")
+    clean_ax(ax, frame=True)
+    metric_box(ax, f"RMSE = {rmse:.2f}\n$R^2$ = {r2:.3f}", loc="upper left")
+    brand_legend(ax, loc="lower right")
     save_figure(f, _FIGURES_DIR / "tour_regression.pdf")
 
 
 def tour_fts() -> None:
-    """4.8 Functional Time Series — daily PM10 curves and next-day forecasts.
-
-    The Graz PM10 dataset is a genuine functional time series: one diurnal
-    pollution curve per day for 182 consecutive days.  ``ftsm_forecast`` fits an
-    FPCA + score-VAR model and forecasts the next ``h`` daily curves, overlaid in
-    bold over the (light) observed daily curves.
-    """
+    """4.8 Functional Time Series — daily PM10 curves and next-day forecasts."""
     np.random.seed(42)
     pm = pd.read_csv(data_path("pm10_graz.csv"), index_col=0)
-    X = pm.T.values.astype(np.float64)          # (182 days, 48 half-hours)
-    ARG = pm.index.values.astype(np.float64)    # half-hour interval 1..48
-    hours = (ARG - 1) * 0.5                      # hour of day 0.0 .. 23.5
+    X = pm.T.values.astype(np.float64)
+    ARG = pm.index.values.astype(np.float64)
+    hours = (ARG - 1) * 0.5
     fc = fdars.fts.ftsm_forecast(np.sqrt(X), ARG, h=3, ncomp=3)
-    forecast = fc["forecast"] ** 2              # back-transform to ug/m3
+    forecast = fc["forecast"] ** 2
 
     f, ax = fig()
     for i in range(X.shape[0]):
-        ax.plot(hours, X[i], color=FDARS_COLORS[6], alpha=0.12, linewidth=0.5)
+        ax.plot(hours, X[i], color=_GREY, alpha=0.12, linewidth=0.5)
     for j in range(forecast.shape[0]):
         ax.plot(hours, forecast[j], color=FDARS_COLORS[j], linewidth=1.9,
                 label=f"Forecast day+{j + 1}")
@@ -271,17 +264,13 @@ def tour_fts() -> None:
     ax.set_ylabel("PM10 (ug/m$^3$)")
     ax.set_xticks([0, 6, 12, 18, 24])
     ax.set_title(f"FTSM forecast of the next {fc['h']} daily PM10 curves (Graz)")
-    ax.legend()
+    clean_ax(ax, frame=True)
+    brand_legend(ax)
     save_figure(f, _FIGURES_DIR / "tour_fts.pdf")
 
 
 def tour_spm() -> None:
-    """4.9 Statistical Process Monitoring — Hotelling T^2 control chart.
-
-    Phase-1 estimates in-control variation on the first half of the curves;
-    Phase-2 monitors the rest. The T^2 statistic per monitored curve is plotted
-    against its control limit, with out-of-control points flagged.
-    """
+    """4.9 Statistical Process Monitoring — Hotelling T^2 control chart."""
     np.random.seed(42)
     X, ARG = _growth()
     p1 = fdars.spm.spm_phase1(X[:46], ARG, ncomp=3, alpha=0.05)
@@ -300,21 +289,18 @@ def tour_spm() -> None:
             markersize=3, label="$T^2$ statistic")
     ax.scatter(idx[alarm], t2[alarm], color=FDARS_COLORS[3], s=42, zorder=5,
                label="Out-of-control")
-    ax.axhline(limit, color=FDARS_COLORS[3], linestyle="--", linewidth=1.2,
+    ax.axhline(limit, color=DIMGREY, linestyle="--", linewidth=1.2,
                label=f"UCL = {limit:.2f}")
     ax.set_xlabel("Monitored curve index (Phase 2)")
     ax.set_ylabel("Hotelling $T^2$")
     ax.set_title(f"$T^2$ control chart: {int(alarm.sum())} alarm(s)")
-    ax.legend()
+    clean_ax(ax, frame=True)
+    brand_legend(ax)
     save_figure(f, _FIGURES_DIR / "tour_spm.pdf")
 
 
 def tour_tolerance() -> None:
-    """4.10 Conformal and Tolerance Bands — 95% simultaneous tolerance band.
-
-    ``fpca_tolerance_band`` bootstraps an FPCA model to build a band expected to
-    contain a target fraction of curves; the shaded band is drawn over the data.
-    """
+    """4.10 Conformal and Tolerance Bands — 95% simultaneous tolerance band."""
     np.random.seed(42)
     X, ARG = _growth()
     tol = fdars.tolerance.fpca_tolerance_band(
@@ -323,7 +309,7 @@ def tour_tolerance() -> None:
 
     f, ax = fig()
     for row in X:
-        ax.plot(ARG, row, color=FDARS_COLORS[6], alpha=0.22, linewidth=0.5)
+        ax.plot(ARG, row, color=_GREY, alpha=0.22, linewidth=0.5)
     ax.fill_between(ARG, tol["lower"], tol["upper"], color=FDARS_COLORS[0],
                     alpha=0.18, label="95% tolerance band")
     ax.plot(ARG, tol["center"], color=FDARS_COLORS[0], linewidth=2.0,
@@ -333,50 +319,43 @@ def tour_tolerance() -> None:
     ax.set_xlabel("Age (years)")
     ax.set_ylabel("Height (cm)")
     ax.set_title("Bootstrap FPCA 95% simultaneous tolerance band")
-    ax.legend()
+    clean_ax(ax, frame=True)
+    brand_legend(ax)
     save_figure(f, _FIGURES_DIR / "tour_tolerance.pdf")
 
 
 def tour_metric() -> None:
-    """4.11 Metrics, Density, and Frechet Analysis — L2 distance heatmap.
-
-    ``lp_self_1d`` computes the pairwise $L^2$ distance matrix over the growth
-    curves; the heatmap exposes the block structure of similar curves.
-    """
+    """4.11 Metrics, Density, and Frechet Analysis — L2 distance heatmap."""
     np.random.seed(42)
     X, ARG = _growth()
     D = fdars.metric.lp_self_1d(X, ARG, p=2.0)
 
     f, ax = fig()
     im = ax.imshow(D, cmap="viridis", origin="lower", aspect="auto")
+    # Heatmap: full despine, no grid, no panel frame (the cell grid is the edge).
+    import seaborn as sns
+    sns.despine(ax=ax, left=True, bottom=True, right=True, top=True)
     ax.grid(False)
+    ax.tick_params(axis="both", which="both", length=0, labelcolor=DIMGREY)
     ax.set_xlabel("Curve index")
     ax.set_ylabel("Curve index")
     ax.set_title(f"Pairwise $L^2$ distance matrix ({D.shape[0]} curves)")
     cbar = f.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_label("$L^2$ distance")
+    cbar.set_label("$L^2$ distance", color=DIMGREY)
+    cbar.ax.tick_params(labelcolor=DIMGREY, length=0)
+    cbar.outline.set_edgecolor(FDARS_COLORS[6])
     save_figure(f, _FIGURES_DIR / "tour_metric.pdf")
 
 
 def tour_alignment() -> None:
-    """4.12 Elastic Alignment — growth-velocity (pubertal-spurt) registration.
-
-    The classic Ramsay--Silverman example: Berkeley girls' growth-velocity
-    curves show the pubertal growth spurt at different ages.  ``karcher_mean``
-    registers them under the SRSF metric so the spurt peaks align, and the
-    Karcher mean recovers a sharp common shape that the naive cross-sectional
-    mean smears out.  Smooth heights, differentiate, then align.
-    """
+    """4.12 Elastic Alignment — growth-velocity (pubertal-spurt) registration."""
     np.random.seed(42)
     X, ARG = _growth()
-    # Berkeley girls (columns 39:93); smooth then differentiate to velocity.
     girls = X[39:]
     sm = fdars.basis.smooth_basis_gcv(
         girls, ARG, n_basis=12, basis_type="bspline"
     )["fitted"]
     vel = Fdata(sm, argvals=ARG).deriv().data
-    # Focus on ages >= 5, where the spurt (not the infant velocity decline) is
-    # the dominant feature; show a representative 20-curve subset for clarity.
     mask = ARG >= 5.0
     Ar, Vr = ARG[mask], vel[:20, mask]
     res = fdars.alignment.karcher_mean(Vr, Ar, max_iter=50)
@@ -391,24 +370,22 @@ def tour_alignment() -> None:
                  label="Cross-sec. mean")
     axes[1].plot(Ar, res["mean"], color=FDARS_COLORS[3], linewidth=2.4,
                  label="Karcher mean")
-    axes[0].set_title("Before alignment")
-    axes[1].set_title("After elastic alignment")
+    axes[0].set_title(r"$\bf{(a)}$ Before alignment", loc="left", fontsize=11)
+    axes[1].set_title(r"$\bf{(b)}$ After elastic alignment", loc="left",
+                      fontsize=11)
     for ax in axes:
         ax.set_xlabel("Age (years)")
+        clean_ax(ax, frame=True)
     axes[0].set_ylabel("Growth velocity (cm/yr)")
-    axes[0].legend(fontsize=8)
-    axes[1].legend(fontsize=8)
-    f.suptitle("Berkeley girls: growth-velocity spurt registration", y=1.02)
+    brand_legend(axes[0], fontsize=8)
+    brand_legend(axes[1], fontsize=8)
+    f.suptitle("Berkeley girls: growth-velocity spurt registration", y=1.03,
+               color=DIMGREY)
     save_figure(f, _FIGURES_DIR / "tour_alignment.pdf")
 
 
 def tour_advisor() -> None:
-    """4.13 Grounded AI Advisor — FPCA scree diagnostic from build_diagnostics.
-
-    The offline ``build_diagnostics`` step returns the per-component and
-    cumulative variance the advisor reasons over; this scree plot is exactly
-    what grounds its (LLM-free) component-count guidance.
-    """
+    """4.13 Grounded AI Advisor — FPCA scree diagnostic from build_diagnostics."""
     np.random.seed(42)
     X, ARG = _growth()
     fd = Fdata(X, argvals=ARG)
@@ -420,17 +397,20 @@ def tour_advisor() -> None:
 
     f, ax = fig()
     ax.bar(comps, ratio * 100, color=FDARS_COLORS[0], alpha=0.75,
-           label="Per-component")
+           label="Per-component", zorder=2)
     ax.plot(comps, cum * 100, color=FDARS_COLORS[1], marker="o", linewidth=1.8,
-            label="Cumulative")
+            label="Cumulative", zorder=3)
     for x, y in zip(comps, cum * 100):
         ax.annotate(f"{y:.1f}%", (x, y), textcoords="offset points",
-                    xytext=(0, 7), ha="center", fontsize=8)
+                    xytext=(0, 8), ha="center", fontsize=8, color=DIMGREY)
     ax.set_xticks(comps)
+    ax.set_ylim(0, 108)
     ax.set_xlabel("Principal component")
     ax.set_ylabel("Variance explained (%)")
     ax.set_title("Advisor FPCA diagnostic: variance scree")
-    ax.legend()
+    # Bar chart: keep a light horizontal grid to read percentages.
+    clean_ax(ax, grid=True, grid_axis="y")
+    brand_legend(ax, loc="center right")
     save_figure(f, _FIGURES_DIR / "tour_advisor.pdf")
 
 
@@ -454,6 +434,7 @@ TOUR_FIGURES = [
 
 def main() -> None:
     """Regenerate every capability-tour figure."""
+    style_setup()
     _FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     for func in TOUR_FIGURES:
         func()

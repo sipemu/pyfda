@@ -29,7 +29,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from paper_utils import fig, FDARS_COLORS, save_figure, data_path
+from paper_utils import (
+    fig, FDARS_COLORS, save_figure, data_path,
+    style_setup, clean_ax, brand_legend, metric_box, DIMGREY,
+)
 
 from fdars.sklearn._skeletons import FPCATransformer
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
@@ -47,6 +50,7 @@ def main() -> None:
     nondeterminism; KFold(5, shuffle=False) is also deterministic.
     """
     np.random.seed(42)
+    style_setup()
 
     # ------------------------------------------------------------------
     # Load wine data (178 samples x 13 features; index IS the class: 1,2,3)
@@ -110,6 +114,7 @@ def main() -> None:
             ha="center",
             va="bottom",
             fontsize=8,
+            color=DIMGREY,
         )
     ax1.set_xlabel("Number of FPCA components")
     ax1.set_ylabel("Mean 5-fold CV accuracy")
@@ -118,8 +123,9 @@ def main() -> None:
         "Best: n = " + str(best_nc)
         + ", CV accuracy = " + str(best_acc)
     )
-    ax1.set_ylim(0.0, 1.05)
-    ax1.axhline(best_acc, color="gray", linewidth=0.8, linestyle="--")
+    ax1.set_ylim(0.0, 1.08)
+    ax1.axhline(best_acc, color=DIMGREY, linewidth=0.8, linestyle="--")
+    clean_ax(ax1, grid=True, grid_axis="y")
     save_figure(f1, _FIGURES_DIR / "cs4_wine_gridsearch.pdf")
 
     # ------------------------------------------------------------------
@@ -153,7 +159,8 @@ def main() -> None:
         + str(best_nc)
         + " components, best GridSearchCV)"
     )
-    ax2.legend(title="Wine class", fontsize=7, title_fontsize=7)
+    clean_ax(ax2, frame=True)
+    brand_legend(ax2, title="Wine class", fontsize=7, title_fontsize=7)
     save_figure(f2, _FIGURES_DIR / "cs4_wine_scores.pdf")
 
 

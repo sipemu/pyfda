@@ -20,7 +20,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from paper_utils import fig, FDARS_COLORS, save_figure, data_path
+from paper_utils import (
+    fig, FDARS_COLORS, save_figure, data_path,
+    style_setup, clean_ax, brand_legend, metric_box,
+)
 
 import fdars
 from fdars.sklearn._skeletons import FPCATransformer, FPCLDAClassifier
@@ -38,6 +41,7 @@ def main() -> None:
     all deterministic; no additional random_state arguments are required.
     """
     np.random.seed(42)
+    style_setup()
 
     # ------------------------------------------------------------------
     # Load phoneme data (400 obs x 256 frequency points, 5 balanced classes)
@@ -127,7 +131,8 @@ def main() -> None:
     ax1.set_xlabel("Frequency (log-periodogram index)")
     ax1.set_ylabel("Log-amplitude")
     ax1.set_title("Phoneme log-periodogram spectra: raw and GCV-smoothed")
-    ax1.legend(title="Phoneme", fontsize=7, title_fontsize=7)
+    clean_ax(ax1, frame=True)
+    brand_legend(ax1, title="Phoneme", fontsize=7, title_fontsize=7)
     save_figure(f1, _FIGURES_DIR / "cs1_phoneme_smooth.pdf")
 
     # ------------------------------------------------------------------
@@ -153,12 +158,17 @@ def main() -> None:
     ax2.set_ylabel(
         f"PC2 ({round(float(prop_var[1]) * 100, 1)}% var. explained)"
     )
+    ax2.set_title("Phoneme FPCA scores (PC1 vs PC2)")
+    clean_ax(ax2, frame=True)
     # Use round(acc, 3) for consistent %-display with the printed CV accuracy.
-    ax2.set_title(
-        "Phoneme FPCA scores (PC1 vs PC2)\n"
-        "5-fold CV accuracy: " + str(round(round(acc, 3) * 100, 1)) + "%"
+    metric_box(
+        ax2,
+        "5-fold CV accuracy: "
+        + str(round(round(acc, 3) * 100, 1)) + "%",
+        loc="upper right",
     )
-    ax2.legend(title="Phoneme", fontsize=7, title_fontsize=7)
+    brand_legend(ax2, title="Phoneme", fontsize=7, title_fontsize=7,
+                 loc="lower right")
     save_figure(f2, _FIGURES_DIR / "cs1_phoneme_fpca.pdf")
 
 
