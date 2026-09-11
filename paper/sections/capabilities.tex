@@ -48,7 +48,7 @@ downstream method in this section builds.  Metadata and per-observation
 identifiers travel with the matrix, so a subset or transformed result stays
 self-describing.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_represent}
   \caption{Berkeley growth study: all height curves (grey) sharing one age
@@ -80,7 +80,7 @@ every point nor flattening genuine curvature.  The returned AIC/BIC and
 effective degrees of freedom quantify this fit--complexity balance for model
 comparison.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_basis}
   \caption{B-spline smoothing of five growth curves: raw observations (points)
@@ -110,7 +110,7 @@ the functional median, and marks the MUOD-flagged curves in red.  Read honestly,
 depth is a sample-relative ordering and the outlier flags are cutoff-dependent
 \emph{candidates} for inspection rather than definitive verdicts.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_depth}
   \caption{Growth curves shaded by Fraiman--Muniz depth (deeper curves more
@@ -143,7 +143,7 @@ contrast that crosses near mid-adolescence, corresponding to \emph{when} the
 pubertal growth spurt occurs.  The percentage in each panel title is the live
 share of variance that component explains.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\linewidth]{figures/tour_fpca}
   \caption{First two FPCA modes of variation: the mean growth curve (grey)
@@ -173,7 +173,7 @@ a descriptive summary of the sample's dominant variation---not evidence of
 discrete underlying subpopulations.  The fixed \texttt{seed} makes the
 initialisation, and hence the reported partition, reproducible.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_clustering}
   \caption{Functional $k$-means ($k = 3$, fixed seed): thin curves are cluster
@@ -201,7 +201,7 @@ projection preserves enough separation for accurate assignment.  The snippet
 reports held-out accuracy on a subset; the same classifier is evaluated under
 full cross-validation in Case Study~1 (Section~\ref{sec:casestudies}).
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_classification}
   \caption{Class-mean log-periodogram spectra for the five phonemes.  The
@@ -231,7 +231,7 @@ $R^2$ shown in the figure is computed live from the fit.  PLS and robust
 variants (for collinear or contaminated predictors) and function-on-function
 regression share the same call convention.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_regression}
   \caption{Scalar-on-function regression of Tecator fat content on the
@@ -265,7 +265,7 @@ is low-rank, the forecasts capture the leading modes of variation rather than
 fine minute-to-minute fluctuation.  Case Study~\ref{subsec:cs3-fts} validates
 these next-day forecasts against held-out days and simple baselines.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_fts}
   \caption{FTSM forecast of the next three daily PM10 curves (bold) over the
@@ -296,7 +296,7 @@ alarms reflect ordinary between-subject variability rather than a genuine
 process fault---the figure demonstrates the charting mechanics, not a real
 monitoring incident.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_spm}
   \caption{Phase-2 Hotelling $T^2$ control chart: the per-curve $T^2$ statistic
@@ -324,7 +324,7 @@ widens through adolescence where between-subject spread is largest.  The
 coverage is a bootstrap estimate rather than an exact finite-sample guarantee,
 and the fixed \texttt{seed} pins the reported band.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_tolerance}
   \caption{Bootstrap-FPCA 95\% simultaneous tolerance band (shaded) with its
@@ -356,7 +356,7 @@ similar growth trajectories.  Such a distance matrix is the shared input to
 downstream methods---clustering, $k$-NN classification, and multidimensional
 scaling---so the metric family underpins much of the rest of the tour.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.74\linewidth]{figures/tour_metric}
   \caption{Pairwise $L^2$ distance matrix over the growth curves.  The dark
@@ -387,7 +387,7 @@ its true amplitude.  The returned warping functions $\gamma$ record exactly how
 each curve's age axis was deformed---a first-class output describing the phase
 variation that was removed, not a nuisance by-product.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\linewidth]{figures/tour_alignment}
   \caption{Elastic SRSF registration of Berkeley girls' growth-velocity curves
@@ -422,7 +422,7 @@ the data rather than generated by a language model, the resulting guidance is
 an LLM only to phrase and contextualise a recommendation the numbers already
 support (Section~\ref{sec:advisor}).
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.82\linewidth]{figures/tour_advisor}
   \caption{The advisor's offline FPCA diagnostic: per-component (bars) and
