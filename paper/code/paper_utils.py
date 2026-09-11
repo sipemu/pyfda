@@ -95,29 +95,34 @@ def style_setup() -> None:
     )
 
 
-def clean_ax(ax, *, grid: bool = False, grid_axis: str = "both",
+def clean_ax(ax, *, grid: bool = True, grid_axis: str = "both",
              frame: bool = False) -> None:
-    """Apply the skill's per-axes cleanup: despine, degrid, soften ticks.
+    """Apply the skill's per-axes cleanup: despine, soften ticks, keep a grid.
+
+    We adopt the skill's despine + dimgrey + panel-frame conventions but retain
+    a subtle reference grid (the skill's "degrid" default was dropped by request
+    — grid lines aid reading values off functional curves).
 
     Parameters
     ----------
     ax : matplotlib.axes.Axes
         Axes to clean.
     grid : bool, optional
-        Re-enable a light grid (skill convention for bar-like charts).  Default
-        False (fully degridded, per "despine, degrid, then add back").
+        Draw a light reference grid.  Default True.  Pass ``False`` only where a
+        grid is genuinely unwanted (e.g. heatmaps).
     grid_axis : str, optional
-        Which axis the grid applies to when ``grid`` is True (``"x"``/``"y"``/
-        ``"both"``).
+        Which axis the grid applies to (``"x"``/``"y"``/``"both"``).  Default
+        ``"both"``; bar-like charts pass ``"y"``.
     frame : bool, optional
         Draw a subtle panel frame (lightgrey) around the axes patch — used for
         curves/scatter clouds that float in the coordinate space.
     """
     sns.despine(ax=ax, left=True, bottom=True)
     if grid:
-        ax.grid(True, alpha=0.7, linewidth=0.8, axis=grid_axis)
+        ax.grid(True, alpha=0.4, linewidth=0.6, axis=grid_axis)
     else:
         ax.grid(False)
+    ax.set_axisbelow(True)
     ax.tick_params(axis="both", which="both", length=0, labelcolor=DIMGREY)
     if frame:
         panel_frame(ax)
