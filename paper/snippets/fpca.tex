@@ -8,15 +8,23 @@ ARG = growth.index.values.astype(float)
 X = growth.values.T.astype(np.float64)
 fd = Fdata(X, argvals=ARG)
 pc = fd.to_pc(n_comp=3)
-print("FPCA scores shape:", pc["scores"].shape, "| singular values:", np.round(pc["singular_values"], 2).tolist())
+sv = np.round(pc["singular_values"], 2).tolist()
+print("FPCA scores shape:", pc["scores"].shape)
+print("singular values:", sv)
 np.random.seed(42)
-argvals_list = [np.sort(np.random.uniform(1, 18, np.random.randint(5, 15))).tolist() for _ in range(30)]
+sizes = np.random.randint(5, 15, size=30)
+argvals_list = [
+    np.sort(np.random.uniform(1, 18, s)).tolist() for s in sizes
+]
 values_list = [np.sin(av).tolist() for av in argvals_list]
 irreg = irreg_fdata_from_lists(argvals_list, values_list)
 pace = pace_fpca(irreg, ncomp=2)
-print("PACE scores shape:", pace["scores"].shape, "| ncomp:", pace["ncomp"])
+print("PACE scores shape:", pace["scores"].shape)
+print("ncomp:", pace["ncomp"])
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]
-FPCA scores shape: (93, 3) | singular values: [227.54, 93.02, 43.73]
-PACE scores shape: (30, 2) | ncomp: 2
+FPCA scores shape: (93, 3)
+singular values: [227.54, 93.02, 43.73]
+PACE scores shape: (30, 2)
+ncomp: 2
 \end{lstlisting}

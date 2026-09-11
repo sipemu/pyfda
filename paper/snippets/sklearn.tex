@@ -8,7 +8,10 @@ from sklearn.model_selection import cross_val_score
 tec = pd.read_csv(data_path("tecator.csv"), index_col=0)
 Xt = tec.iloc[:, :100].values.astype(np.float64)
 yfat = tec["fat"].values.astype(np.float64)
-pipe = Pipeline([("fpca", FPCATransformer(n_components=5)), ("ridge", RidgeCV())])
+pipe = Pipeline([
+    ("fpca", FPCATransformer(n_components=5)),
+    ("ridge", RidgeCV()),
+])
 scores = cross_val_score(pipe, Xt, yfat, cv=5, scoring="r2")
 print("mean R^2 (5-fold):", round(float(scores.mean()), 3))
 \end{lstlisting}

@@ -5,9 +5,12 @@ import fdars
 growth = pd.read_csv(data_path("growth.csv"), index_col=0)
 ARG = growth.index.values.astype(float)
 X = growth.values.T.astype(np.float64)
-tol = fdars.tolerance.fpca_tolerance_band(X, ncomp=3, nb=200, coverage=0.95, seed=42)
-print("tolerance keys:", list(tol.keys()), "| band width shape:", tol["half_width"].shape)
+tol = fdars.tolerance.fpca_tolerance_band(
+    X, ncomp=3, nb=200, coverage=0.95, seed=42)
+print("tolerance keys:", list(tol.keys()))
+print("band half-width shape:", tol["half_width"].shape)
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]
-tolerance keys: ['upper', 'lower', 'center', 'half_width'] | band width shape: (31,)
+tolerance keys: ['upper', 'lower', 'center', 'half_width']
+band half-width shape: (31,)
 \end{lstlisting}

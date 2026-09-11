@@ -9,7 +9,8 @@ X = growth.values.T.astype(np.float64)
 fd = Fdata(X, argvals=ARG)
 pc = fd.to_pc(n_comp=3)
 diag = fdars.advisor.build_diagnostics(pc, "fpca", argvals=ARG)
-print("cumulative variance explained:", np.round(diag["cumulative_variance_explained"], 3).tolist())
+cum = np.round(diag["cumulative_variance_explained"], 3).tolist()
+print("cumulative variance explained:", cum)
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]
 cumulative variance explained: [0.831, 0.969, 1.0]

@@ -11,8 +11,10 @@ mon = fdars.spm.spm_monitor(
     p1["eigenvalues"], p1["t2_limit"], p1["spe_limit"],
     X[46:], ARG,
 )
-print("T2 alarms:", int(mon["t2_alarm"].sum()), "| SPE alarms:", int(mon["spe_alarm"].sum()))
+print("T2 alarms:", int(mon["t2_alarm"].sum()))
+print("SPE alarms:", int(mon["spe_alarm"].sum()))
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]
-T2 alarms: 5 | SPE alarms: 2
+T2 alarms: 5
+SPE alarms: 2
 \end{lstlisting}

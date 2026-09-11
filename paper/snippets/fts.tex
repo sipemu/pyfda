@@ -3,8 +3,8 @@
 import numpy as np, pandas as pd
 import fdars
 pm = pd.read_csv(data_path("pm10_graz.csv"), index_col=0)
-X = pm.T.values.astype(np.float64)        # (182 days, 48 half-hours)
-ARG = pm.index.values.astype(np.float64)  # 48 half-hourly intervals
+X = pm.T.values.astype(np.float64)        # 182 days x 48 half-hours
+ARG = pm.index.values.astype(np.float64)  # half-hour intervals
 fc = fdars.fts.ftsm_forecast(np.sqrt(X), ARG, h=3, ncomp=3)
 print("forecast shape:", fc["forecast"].shape, "| h:", fc["h"])
 \end{lstlisting}

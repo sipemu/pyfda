@@ -5,7 +5,8 @@ from fdars import Fdata
 growth = pd.read_csv(data_path("growth.csv"), index_col=0)
 ARG = growth.index.values.astype(float)
 X = growth.values.T.astype(np.float64)
-fd = Fdata(X, argvals=ARG, names={"x": "Age (years)", "y": "Height (cm)"})
+fd = Fdata(X, argvals=ARG,
+           names={"x": "Age (years)", "y": "Height (cm)"})
 print(repr(fd))
 print("mean shape:", fd.mean().shape)
 \end{lstlisting}

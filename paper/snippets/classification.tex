@@ -8,7 +8,8 @@ labels_str = ph.index.tolist()
 uniq = list(dict.fromkeys(labels_str))
 lut = {l: i for i, l in enumerate(uniq)}
 y = np.array([lut[l] for l in labels_str], dtype=np.int64)
-res = fdars.classification.fclassif_knn(Xp[:100], y[:100], ncomp=3, k=5)
+res = fdars.classification.fclassif_knn(
+    Xp[:100], y[:100], ncomp=3, k=5)
 print("accuracy:", res["accuracy"])
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]

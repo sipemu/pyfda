@@ -6,8 +6,10 @@ growth = pd.read_csv(data_path("growth.csv"), index_col=0)
 ARG = growth.index.values.astype(float)
 X = growth.values.T.astype(np.float64)
 km = fdars.clustering.kmeans_fd(X, ARG, k=3, seed=42)
-print("cluster sizes:", np.bincount(km["cluster"]).tolist(), "| converged:", km["converged"])
+print("cluster sizes:", np.bincount(km["cluster"]).tolist())
+print("converged:", km["converged"])
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]
-cluster sizes: [56, 22, 15] | converged: True
+cluster sizes: [56, 22, 15]
+converged: True
 \end{lstlisting}

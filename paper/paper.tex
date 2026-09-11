@@ -40,49 +40,53 @@
 % fdarsinput  — Python source block: light-tinted box, syntax highlighting.
 % fdarsoutput — Captured stdout block: grey, left-ruled, visually attached below.
 % Colours (xcolor is pulled in by tikz).
-\definecolor{codeback}{RGB}{247,248,250}
-\definecolor{codeframe}{RGB}{203,213,225}
+\definecolor{codeback}{RGB}{248,249,251}   % input panel: very light blue-grey
+\definecolor{codeframe}{RGB}{210,216,224}  % thin soft border
 \definecolor{codekw}{RGB}{37,99,235}
 \definecolor{codestr}{RGB}{22,128,61}
 \definecolor{codecom}{RGB}{107,114,128}
-\definecolor{codeout}{RGB}{243,244,246}
+\definecolor{codeout}{RGB}{241,243,246}    % output panel: slightly greyer
+\definecolor{codeoutrule}{RGB}{148,163,184} % output left accent bar
+% Common geometry for both panels: footnotesize mono, thin frame, generous
+% inner padding, breakable long lines with an indented hooked continuation.
+\lstdefinestyle{fdarscommon}{
+  basicstyle=\ttfamily\footnotesize,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=false,
+  breakindent=1.6em,
+  framesep=7pt,
+  framexleftmargin=7pt,
+  xleftmargin=7pt,
+  xrightmargin=7pt,
+  framerule=0.5pt,
+  postbreak=\mbox{\textcolor{codecom}{$\hookrightarrow$}\space},
+}
+% fdarsinput — Python source: syntax-highlighted, light panel, full thin frame.
 \lstdefinestyle{fdarsinput}{
+  style=fdarscommon,
   language=Python,
-  basicstyle=\ttfamily\small,
   keywordstyle=\color{codekw}\bfseries,
   stringstyle=\color{codestr},
   commentstyle=\color{codecom}\itshape,
   backgroundcolor=\color{codeback},
   frame=single,
   rulecolor=\color{codeframe},
-  framesep=5pt,
-  framexleftmargin=5pt,
-  xleftmargin=10pt,
-  xrightmargin=13pt,
-  columns=fullflexible,
-  keepspaces=true,
-  showstringspaces=false,
-  breaklines=true,
-  breakatwhitespace=false,
-  breakindent=0pt,
-  postbreak=\mbox{\textcolor{codecom}{$\hookrightarrow$}\space},
   aboveskip=1.0\medskipamount,
-  belowskip=0.3\medskipamount,
+  belowskip=0.35\medskipamount,
 }
+% fdarsoutput — captured stdout: greyer panel, thicker coloured left accent bar,
+% visually attached below the input block.
 \lstdefinestyle{fdarsoutput}{
-  basicstyle=\ttfamily\small\color{black!78},
+  style=fdarscommon,
+  basicstyle=\ttfamily\footnotesize\color{black!70},
   backgroundcolor=\color{codeout},
   frame=leftline,
-  rulecolor=\color{codeframe},
-  framesep=5pt,
-  framexleftmargin=5pt,
-  xleftmargin=10pt,
-  xrightmargin=13pt,
-  columns=fullflexible,
-  keepspaces=true,
-  breaklines=true,
-  breakatwhitespace=false,
-  aboveskip=0.2\medskipamount,
+  framerule=2pt,
+  rulecolor=\color{codeoutrule},
+  aboveskip=0.35\medskipamount,
   belowskip=1.0\medskipamount,
 }
 % UTF-8 literate map: typeset Fdata repr's en-dash and multiplication sign

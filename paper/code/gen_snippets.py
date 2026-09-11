@@ -145,7 +145,8 @@ SNIPPETS: list[tuple[str, str]] = [
         growth = pd.read_csv(data_path("growth.csv"), index_col=0)
         ARG = growth.index.values.astype(float)
         X = growth.values.T.astype(np.float64)
-        fd = Fdata(X, argvals=ARG, names={"x": "Age (years)", "y": "Height (cm)"})
+        fd = Fdata(X, argvals=ARG,
+                   names={"x": "Age (years)", "y": "Height (cm)"})
         print(repr(fd))
         print("mean shape:", fd.mean().shape)
         """),
@@ -160,10 +161,12 @@ SNIPPETS: list[tuple[str, str]] = [
         growth = pd.read_csv(data_path("growth.csv"), index_col=0)
         ARG = growth.index.values.astype(float)
         X = growth.values.T.astype(np.float64)
-        res = fdars.basis.fdata_to_basis_1d(X[:5], ARG, n_basis=8, basis_type="bspline")
+        res = fdars.basis.fdata_to_basis_1d(
+            X[:5], ARG, n_basis=8, basis_type="bspline")
         coefs, nbasis = res
         print("coefficients shape:", coefs.shape, "| n_basis:", nbasis)
-        sm = fdars.basis.smooth_basis_gcv(X[:5], ARG, n_basis=8, basis_type="bspline")
+        sm = fdars.basis.smooth_basis_gcv(
+            X[:5], ARG, n_basis=8, basis_type="bspline")
         print("smoothing keys:", list(sm.keys()))
         print("fitted shape:", sm["fitted"].shape)
         """),
@@ -180,9 +183,11 @@ SNIPPETS: list[tuple[str, str]] = [
         X = growth.values.T.astype(np.float64)
         fd = Fdata(X, argvals=ARG)
         depths = fd.depth(method="fraiman_muniz")
-        print("depths shape:", depths.shape, "| most central obs:", int(np.argmax(depths)))
+        print("depths shape:", depths.shape)
+        print("most central obs:", int(np.argmax(depths)))
         out = fdars.outliers.muod(X)
-        print("shape outliers:", out["shape_outliers"], "| amplitude:", out["amplitude_outliers"])
+        print("shape outliers:", out["shape_outliers"])
+        print("amplitude outliers:", out["amplitude_outliers"])
         """),
     # ------------------------------------------------------------------
     # 4. FPCA (dense) + sparse/irregular PACE FPCA.
@@ -198,13 +203,19 @@ SNIPPETS: list[tuple[str, str]] = [
         X = growth.values.T.astype(np.float64)
         fd = Fdata(X, argvals=ARG)
         pc = fd.to_pc(n_comp=3)
-        print("FPCA scores shape:", pc["scores"].shape, "| singular values:", np.round(pc["singular_values"], 2).tolist())
+        sv = np.round(pc["singular_values"], 2).tolist()
+        print("FPCA scores shape:", pc["scores"].shape)
+        print("singular values:", sv)
         np.random.seed(42)
-        argvals_list = [np.sort(np.random.uniform(1, 18, np.random.randint(5, 15))).tolist() for _ in range(30)]
+        sizes = np.random.randint(5, 15, size=30)
+        argvals_list = [
+            np.sort(np.random.uniform(1, 18, s)).tolist() for s in sizes
+        ]
         values_list = [np.sin(av).tolist() for av in argvals_list]
         irreg = irreg_fdata_from_lists(argvals_list, values_list)
         pace = pace_fpca(irreg, ncomp=2)
-        print("PACE scores shape:", pace["scores"].shape, "| ncomp:", pace["ncomp"])
+        print("PACE scores shape:", pace["scores"].shape)
+        print("ncomp:", pace["ncomp"])
         """),
     # ------------------------------------------------------------------
     # 5. Clustering — kmeans_fd(data, argvals, k, seed=42); print
@@ -217,7 +228,8 @@ SNIPPETS: list[tuple[str, str]] = [
         ARG = growth.index.values.astype(float)
         X = growth.values.T.astype(np.float64)
         km = fdars.clustering.kmeans_fd(X, ARG, k=3, seed=42)
-        print("cluster sizes:", np.bincount(km["cluster"]).tolist(), "| converged:", km["converged"])
+        print("cluster sizes:", np.bincount(km["cluster"]).tolist())
+        print("converged:", km["converged"])
         """),
     # ------------------------------------------------------------------
     # 6. Classification — fclassif_knn(data, labels, ncomp, k);
@@ -233,7 +245,8 @@ SNIPPETS: list[tuple[str, str]] = [
         uniq = list(dict.fromkeys(labels_str))
         lut = {l: i for i, l in enumerate(uniq)}
         y = np.array([lut[l] for l in labels_str], dtype=np.int64)
-        res = fdars.classification.fclassif_knn(Xp[:100], y[:100], ncomp=3, k=5)
+        res = fdars.classification.fclassif_knn(
+            Xp[:100], y[:100], ncomp=3, k=5)
         print("accuracy:", res["accuracy"])
         """),
     # ------------------------------------------------------------------
@@ -262,8 +275,8 @@ SNIPPETS: list[tuple[str, str]] = [
         import numpy as np, pandas as pd
         import fdars
         pm = pd.read_csv(data_path("pm10_graz.csv"), index_col=0)
-        X = pm.T.values.astype(np.float64)        # (182 days, 48 half-hours)
-        ARG = pm.index.values.astype(np.float64)  # 48 half-hourly intervals
+        X = pm.T.values.astype(np.float64)        # 182 days x 48 half-hours
+        ARG = pm.index.values.astype(np.float64)  # half-hour intervals
         fc = fdars.fts.ftsm_forecast(np.sqrt(X), ARG, h=3, ncomp=3)
         print("forecast shape:", fc["forecast"].shape, "| h:", fc["h"])
         """),
@@ -283,7 +296,8 @@ SNIPPETS: list[tuple[str, str]] = [
             p1["eigenvalues"], p1["t2_limit"], p1["spe_limit"],
             X[46:], ARG,
         )
-        print("T2 alarms:", int(mon["t2_alarm"].sum()), "| SPE alarms:", int(mon["spe_alarm"].sum()))
+        print("T2 alarms:", int(mon["t2_alarm"].sum()))
+        print("SPE alarms:", int(mon["spe_alarm"].sum()))
         """),
     # ------------------------------------------------------------------
     # 10. Conformal / tolerance — fpca_tolerance_band(data, ncomp, nb, coverage, seed);
@@ -295,8 +309,10 @@ SNIPPETS: list[tuple[str, str]] = [
         growth = pd.read_csv(data_path("growth.csv"), index_col=0)
         ARG = growth.index.values.astype(float)
         X = growth.values.T.astype(np.float64)
-        tol = fdars.tolerance.fpca_tolerance_band(X, ncomp=3, nb=200, coverage=0.95, seed=42)
-        print("tolerance keys:", list(tol.keys()), "| band width shape:", tol["half_width"].shape)
+        tol = fdars.tolerance.fpca_tolerance_band(
+            X, ncomp=3, nb=200, coverage=0.95, seed=42)
+        print("tolerance keys:", list(tol.keys()))
+        print("band half-width shape:", tol["half_width"].shape)
         """),
     # ------------------------------------------------------------------
     # 11. Density / Frechet / metric — lp_self_1d + dtw_self_1d;
@@ -328,12 +344,14 @@ SNIPPETS: list[tuple[str, str]] = [
         ARG = growth.index.values.astype(float)
         girls = growth.values.T[39:].astype(np.float64)   # 54 Berkeley girls
         # Smooth heights, then differentiate to growth-velocity curves.
-        sm = fdars.basis.smooth_basis_gcv(girls, ARG, n_basis=12, basis_type="bspline")
+        sm = fdars.basis.smooth_basis_gcv(
+            girls, ARG, n_basis=12, basis_type="bspline")
         vel = Fdata(sm["fitted"], argvals=ARG).deriv().data
         # Elastic registration of the velocity curves (aligns the spurt peak).
         res = fdars.alignment.karcher_mean(vel, ARG, max_iter=50)
         print("karcher keys:", list(res.keys()))
-        print("aligned shape:", res["aligned_data"].shape, "| warping gammas:", res["gammas"].shape)
+        print("aligned shape:", res["aligned_data"].shape)
+        print("warping gammas:", res["gammas"].shape)
         """),
     # ------------------------------------------------------------------
     # 13. Advisor (LLM-free diagnostics) — build_diagnostics(result, method);
@@ -350,7 +368,8 @@ SNIPPETS: list[tuple[str, str]] = [
         fd = Fdata(X, argvals=ARG)
         pc = fd.to_pc(n_comp=3)
         diag = fdars.advisor.build_diagnostics(pc, "fpca", argvals=ARG)
-        print("cumulative variance explained:", np.round(diag["cumulative_variance_explained"], 3).tolist())
+        cum = np.round(diag["cumulative_variance_explained"], 3).tolist()
+        print("cumulative variance explained:", cum)
         """),
     # ------------------------------------------------------------------
     # 14. sklearn estimator layer — FPCATransformer from _skeletons (NOT
@@ -366,7 +385,10 @@ SNIPPETS: list[tuple[str, str]] = [
         tec = pd.read_csv(data_path("tecator.csv"), index_col=0)
         Xt = tec.iloc[:, :100].values.astype(np.float64)
         yfat = tec["fat"].values.astype(np.float64)
-        pipe = Pipeline([("fpca", FPCATransformer(n_components=5)), ("ridge", RidgeCV())])
+        pipe = Pipeline([
+            ("fpca", FPCATransformer(n_components=5)),
+            ("ridge", RidgeCV()),
+        ])
         scores = cross_val_score(pipe, Xt, yfat, cv=5, scoring="r2")
         print("mean R^2 (5-fold):", round(float(scores.mean()), 3))
         """),

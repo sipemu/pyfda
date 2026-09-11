@@ -8,11 +8,15 @@ ARG = growth.index.values.astype(float)
 X = growth.values.T.astype(np.float64)
 fd = Fdata(X, argvals=ARG)
 depths = fd.depth(method="fraiman_muniz")
-print("depths shape:", depths.shape, "| most central obs:", int(np.argmax(depths)))
+print("depths shape:", depths.shape)
+print("most central obs:", int(np.argmax(depths)))
 out = fdars.outliers.muod(X)
-print("shape outliers:", out["shape_outliers"], "| amplitude:", out["amplitude_outliers"])
+print("shape outliers:", out["shape_outliers"])
+print("amplitude outliers:", out["amplitude_outliers"])
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]
-depths shape: (93,) | most central obs: 43
-shape outliers: [41, 55, 70] | amplitude: [0, 28]
+depths shape: (93,)
+most central obs: 43
+shape outliers: [41, 55, 70]
+amplitude outliers: [0, 28]
 \end{lstlisting}
