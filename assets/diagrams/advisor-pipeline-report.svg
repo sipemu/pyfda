@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Pipeline Diagnostic Report" aria-labelledby="t-piprep d-piprep">
+  <title id="t-piprep">Pipeline Diagnostic Report</title>
+  <desc id="d-piprep">Illustrates the pipeline diagnostic report: per-stage diagnostic blocks are kept separate and not merged, Python-computed cross-stage caveats are appended before the LLM call, and the LLM produces grounded narration only — never computing diagnostics itself.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="26" text-anchor="middle">Pipeline Diagnostic Report</text>
+  <text class="sub" x="360" y="44" text-anchor="middle">per-stage blocks (never merged) → Python cross-stage caveats → union grounding → LLM narrates only</text>
+
+  <!-- ===== Row 1: Four ordered pipeline stages ===== -->
+
+  <!-- Stage 1: represent -->
+  <rect x="20" y="64" width="148" height="68" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="94" y="84" text-anchor="middle" fill="#3f51b5">represent</text>
+  <text class="mono" x="94" y="102" text-anchor="middle" fill="#1a1a2e">build_diagnostics</text>
+  <text class="sm" x="94" y="118" text-anchor="middle">{label:"represent",</text>
+  <text class="sm" x="94" y="130" text-anchor="middle">imputed_fraction:…}</text>
+
+  <!-- Arrow represent → smooth -->
+  <line x1="168" y1="98" x2="188" y2="98" stroke="#495057" stroke-width="1.5" marker-end="url(#arrdark)"/>
+
+  <!-- Stage 2: smooth -->
+  <rect x="188" y="64" width="148" height="68" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="262" y="84" text-anchor="middle" fill="#3f51b5">smooth</text>
+  <text class="mono" x="262" y="102" text-anchor="middle" fill="#1a1a2e">build_diagnostics</text>
+  <text class="sm" x="262" y="118" text-anchor="middle">{label:"smooth",</text>
+  <text class="sm" x="262" y="130" text-anchor="middle">optimal_gcv:…}</text>
+
+  <!-- Arrow smooth → cluster/regress -->
+  <line x1="336" y1="98" x2="356" y2="98" stroke="#495057" stroke-width="1.5" marker-end="url(#arrdark)"/>
+
+  <!-- Stage 3: cluster/regress -->
+  <rect x="356" y="64" width="148" height="68" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="430" y="84" text-anchor="middle" fill="#3f51b5">cluster/regress</text>
+  <text class="mono" x="430" y="102" text-anchor="middle" fill="#1a1a2e">build_diagnostics</text>
+  <text class="sm" x="430" y="118" text-anchor="middle">{label:"fpca",</text>
+  <text class="sm" x="430" y="130" text-anchor="middle">cumulative_variance:…}</text>
+
+  <!-- Arrow cluster/regress → monitor -->
+  <line x1="504" y1="98" x2="524" y2="98" stroke="#495057" stroke-width="1.5" marker-end="url(#arrdark)"/>
+
+  <!-- Stage 4: monitor -->
+  <rect x="524" y="64" width="172" height="68" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="610" y="84" text-anchor="middle" fill="#3f51b5">monitor</text>
+  <text class="mono" x="610" y="102" text-anchor="middle" fill="#1a1a2e">build_diagnostics</text>
+  <text class="sm" x="610" y="118" text-anchor="middle">{label:"outliers",</text>
+  <text class="sm" x="610" y="130" text-anchor="middle">outlier_fraction:…}</text>
+
+  <!-- Note: blocks kept separate -->
+  <text class="sm" x="360" y="150" text-anchor="middle" fill="#6c757d">list of {label, diagnostics} blocks — NEVER flat-merged into one dict</text>
+
+  <!-- ===== Row 2: _compute_cross_stage_caveats (Python, before LLM) ===== -->
+  <rect x="20" y="166" width="680" height="100" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="360" y="186" text-anchor="middle" fill="#495057">_compute_cross_stage_caveats(blocks) — deterministic Python rule table, runs BEFORE LLM call</text>
+
+  <!-- Rule R1 -->
+  <rect x="36" y="196" width="198" height="56" rx="8" fill="#fff" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="mono" x="135" y="215" text-anchor="middle" fill="#dc3545">R1: imputed_fraction</text>
+  <text class="sm" x="135" y="231" text-anchor="middle">represent high imputation</text>
+  <text class="sm" x="135" y="244" text-anchor="middle">→ FPCA/clustering caveat</text>
+
+  <!-- Rule R2 -->
+  <rect x="254" y="196" width="198" height="56" rx="8" fill="#fff" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="mono" x="353" y="215" text-anchor="middle" fill="#dc3545">R2: outlier_fraction</text>
+  <text class="sm" x="353" y="231" text-anchor="middle">outliers high fraction/count</text>
+  <text class="sm" x="353" y="244" text-anchor="middle">→ downstream caveat</text>
+
+  <!-- Rule R3 -->
+  <rect x="472" y="196" width="212" height="56" rx="8" fill="#fff" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="mono" x="578" y="215" text-anchor="middle" fill="#dc3545">R3: cumulative_variance</text>
+  <text class="sm" x="578" y="231" text-anchor="middle">fpca low last variance</text>
+  <text class="sm" x="578" y="244" text-anchor="middle">→ clustering caveat</text>
+
+  <!-- Arrows: stages → _compute_cross_stage_caveats -->
+  <line x1="94" y1="132" x2="94" y2="164" stroke="#6c757d" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrgrey)"/>
+  <line x1="262" y1="132" x2="262" y2="164" stroke="#6c757d" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrgrey)"/>
+  <line x1="430" y1="132" x2="430" y2="164" stroke="#6c757d" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrgrey)"/>
+  <line x1="610" y1="132" x2="610" y2="164" stroke="#6c757d" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrgrey)"/>
+
+  <!-- ===== Row 3: LLM narration panel (orange accent) ===== -->
+  <rect x="20" y="292" width="680" height="164" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="34" y="312" fill="#fd7e14">LLM — grounded narration only (cannot invent caveats; caveats are Python-authoritative)</text>
+
+  <!-- Union grounding box -->
+  <rect x="36" y="320" width="200" height="60" rx="8" fill="#f8f9fa" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="lab" x="136" y="340" text-anchor="middle" fill="#495057">Union grounding</text>
+  <text class="mono" x="136" y="358" text-anchor="middle" fill="#1a1a2e">_check_grounding_pipeline</text>
+  <text class="sm" x="136" y="373" text-anchor="middle">once against {"_stages":[…]}</text>
+
+  <!-- LLM call box -->
+  <rect x="264" y="320" width="192" height="60" rx="8" fill="#f8f9fa" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="lab" x="360" y="340" text-anchor="middle" fill="#495057">LLM narrative call</text>
+  <text class="mono" x="360" y="358" text-anchor="middle" fill="#fd7e14">complete_structured</text>
+  <text class="sm" x="360" y="373" text-anchor="middle">(PipelineReport)</text>
+
+  <!-- Result box -->
+  <rect x="484" y="320" width="200" height="60" rx="8" fill="#f8f9fa" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="lab" x="584" y="340" text-anchor="middle" fill="#495057">PipelineReport result</text>
+  <text class="sm" x="584" y="358" text-anchor="middle">stages + narrative + caveats</text>
+  <text class="sm" x="584" y="373" text-anchor="middle">caveats = Python-computed (auth.)</text>
+
+  <!-- Python caveats attached label -->
+  <rect x="200" y="396" width="320" height="40" rx="8" fill="#f8f9fa" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="sm" x="360" y="414" text-anchor="middle" fill="#fd7e14">Python-computed caveats re-attached authoritatively after narration</text>
+  <text class="sm" x="360" y="428" text-anchor="middle">LLM narrates why stages matter — cannot alter or invent caveat values</text>
+
+  <!-- Arrows within LLM panel -->
+  <line x1="236" y1="350" x2="262" y2="350" stroke="#fd7e14" stroke-width="1.5" marker-end="url(#arrorange)"/>
+  <line x1="456" y1="350" x2="482" y2="350" stroke="#fd7e14" stroke-width="1.5" marker-end="url(#arrorange)"/>
+
+  <!-- Arrow: caveats → LLM panel -->
+  <line x1="360" y1="266" x2="360" y2="290" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+  <!-- Label above the arrow -->
+  <text class="sm" x="360" y="284" text-anchor="middle" fill="#fd7e14">caveats computed</text>
+
+  <!-- Arrow: stages list → union grounding -->
+  <line x1="136" y1="266" x2="136" y2="318" stroke="#495057" stroke-width="1.5" marker-end="url(#arrdark)"/>
+
+  <!-- ===== Defs ===== -->
+  <defs>
+    <marker id="arrorange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+    <marker id="arrgrey" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#6c757d"/>
+    </marker>
+    <marker id="arrdark" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+  </defs>
+</svg>

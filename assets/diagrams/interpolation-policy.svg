@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Spline Interpolation — Extrapolation Policy"
+     aria-labelledby="interpolation-policy-title interpolation-policy-desc">
+  <title id="interpolation-policy-title">Spline Interpolation — Extrapolation Policy</title>
+  <desc id="interpolation-policy-desc">Shows four policies governing queries outside the curve's domain: Boundary (clamp to the boundary value), Exception (raise ValueError — no silent extrapolation), Fill (return a user-specified constant), and Periodic (wrap modulo the domain length L), illustrating how fdars explicitly controls out-of-domain behaviour.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Spline Interpolation — Extrapolation Policy</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Query points beyond the domain are handled per policy — never silently extrapolated</text>
+
+  <!-- 4 panels: Boundary | Exception | Fill | Periodic -->
+  <!-- Panel widths: each ~164px with 8px gaps; left margin 8 -->
+
+  <!-- PANEL 1: Boundary (clamp) -->
+  <rect x="8" y="62" width="164" height="218" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="90" y="82" text-anchor="middle" fill="#495057">Boundary</text>
+  <text class="mono" x="90" y="97" text-anchor="middle" fill="#6c757d">clamp</text>
+
+  <!-- Domain: x=18..126, y-axis at x=18, baseline y=250 -->
+  <!-- Original curve within domain [18..126] -->
+  <g transform="translate(18,110)">
+    <!-- x-axis -->
+    <line x1="0" y1="120" x2="144" y2="120" stroke="#ced4da" stroke-width="1.2"/>
+    <!-- Domain boundary markers -->
+    <line x1="22" y1="0" x2="22" y2="120" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".6"/>
+    <line x1="100" y1="0" x2="100" y2="120" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".6"/>
+    <!-- t_min / t_max labels -->
+    <text class="sm" x="22" y="133" text-anchor="middle">t₀</text>
+    <text class="sm" x="100" y="133" text-anchor="middle">t₁</text>
+    <!-- Curve within domain -->
+    <path d="M22 90 C38 90 50 30 62 32 C74 34 82 80 100 70" stroke="#3f51b5" stroke-width="2.4" stroke-linecap="round"/>
+    <!-- Boundary extension: flat horizontal from domain endpoints -->
+    <!-- Left extension: from x=0 to x=22, y=90 (left boundary value) -->
+    <path d="M0 90 L22 90" stroke="#3f51b5" stroke-width="2.0" stroke-dasharray="5 3" stroke-linecap="round" stroke-opacity=".7"/>
+    <!-- Right extension: from x=100 to x=144, y=70 (right boundary value) -->
+    <path d="M100 70 L144 70" stroke="#3f51b5" stroke-width="2.0" stroke-dasharray="5 3" stroke-linecap="round" stroke-opacity=".7"/>
+    <!-- Clamp dots at boundary -->
+    <circle cx="22" cy="90" r="4" fill="#3f51b5"/>
+    <circle cx="100" cy="70" r="4" fill="#3f51b5"/>
+    <text class="sm" x="72" y="10" text-anchor="middle" fill="#3f51b5">flat clamp</text>
+  </g>
+
+  <!-- PANEL 2: Exception (raises) -->
+  <rect x="180" y="62" width="164" height="218" rx="10" fill="#f8f9fa" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="262" y="82" text-anchor="middle" fill="#dc3545">Exception</text>
+  <text class="mono" x="262" y="97" text-anchor="middle" fill="#dc3545">raises ValueError</text>
+
+  <g transform="translate(190,110)">
+    <line x1="0" y1="120" x2="144" y2="120" stroke="#ced4da" stroke-width="1.2"/>
+    <line x1="22" y1="0" x2="22" y2="120" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".6"/>
+    <line x1="100" y1="0" x2="100" y2="120" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".6"/>
+    <text class="sm" x="22" y="133" text-anchor="middle">t₀</text>
+    <text class="sm" x="100" y="133" text-anchor="middle">t₁</text>
+    <!-- Curve within domain only -->
+    <path d="M22 90 C38 90 50 30 62 32 C74 34 82 80 100 70" stroke="#3f51b5" stroke-width="2.4" stroke-linecap="round"/>
+    <!-- Stop markers at both boundaries (red octagon-style stops) -->
+    <!-- Left stop marker -->
+    <polygon points="4,96 4,84 12,80 20,84 20,96 12,100" fill="#dc3545" stroke="#fff" stroke-width="1"/>
+    <text x="12" y="93" text-anchor="middle" fill="#fff" style="font:700 9px system-ui,sans-serif">!</text>
+    <!-- Right stop marker -->
+    <polygon points="102,76 102,64 110,60 118,64 118,76 110,80" fill="#dc3545" stroke="#fff" stroke-width="1"/>
+    <text x="110" y="73" text-anchor="middle" fill="#fff" style="font:700 9px system-ui,sans-serif">!</text>
+    <!-- No extrapolated curve — forbidden zone shading -->
+    <rect x="0" y="0" width="22" height="120" fill="#dc3545" fill-opacity=".06" rx="0"/>
+    <rect x="100" y="0" width="44" height="120" fill="#dc3545" fill-opacity=".06" rx="0"/>
+    <text class="sm" x="11" y="55" text-anchor="middle" fill="#dc3545" style="font:700 9px system-ui,sans-serif">✕</text>
+    <text class="sm" x="122" y="55" text-anchor="middle" fill="#dc3545" style="font:700 9px system-ui,sans-serif">✕</text>
+  </g>
+
+  <!-- PANEL 3: Fill -->
+  <rect x="352" y="62" width="164" height="218" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="434" y="82" text-anchor="middle" fill="#fd7e14">Fill</text>
+  <text class="mono" x="434" y="97" text-anchor="middle" fill="#fd7e14">constant value</text>
+
+  <g transform="translate(362,110)">
+    <line x1="0" y1="120" x2="144" y2="120" stroke="#ced4da" stroke-width="1.2"/>
+    <line x1="22" y1="0" x2="22" y2="120" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".6"/>
+    <line x1="100" y1="0" x2="100" y2="120" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".6"/>
+    <text class="sm" x="22" y="133" text-anchor="middle">t₀</text>
+    <text class="sm" x="100" y="133" text-anchor="middle">t₁</text>
+    <!-- Fill constant level dashed reference line -->
+    <line x1="0" y1="108" x2="144" y2="108" stroke="#fd7e14" stroke-width="1.2" stroke-dasharray="4 3" stroke-opacity=".6"/>
+    <text class="sm" x="68" y="103" text-anchor="middle" fill="#fd7e14">fill_value = 0</text>
+    <!-- Curve within domain -->
+    <path d="M22 90 C38 90 50 30 62 32 C74 34 82 80 100 70" stroke="#3f51b5" stroke-width="2.4" stroke-linecap="round"/>
+    <!-- Fill extensions: drop to fill_value outside domain -->
+    <path d="M0 108 L22 108" stroke="#fd7e14" stroke-width="2.0" stroke-linecap="round"/>
+    <path d="M100 108 L144 108" stroke="#fd7e14" stroke-width="2.0" stroke-linecap="round"/>
+    <!-- Vertical drops at boundaries -->
+    <line x1="22" y1="90" x2="22" y2="108" stroke="#fd7e14" stroke-width="1.4" stroke-dasharray="2 2"/>
+    <line x1="100" y1="70" x2="100" y2="108" stroke="#fd7e14" stroke-width="1.4" stroke-dasharray="2 2"/>
+  </g>
+
+  <!-- PANEL 4: Periodic (wrap) -->
+  <rect x="524" y="62" width="188" height="218" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="618" y="82" text-anchor="middle" fill="#198754">Periodic</text>
+  <text class="mono" x="618" y="97" text-anchor="middle" fill="#198754">wrap modulo L</text>
+
+  <g transform="translate(534,110)">
+    <line x1="0" y1="120" x2="168" y2="120" stroke="#ced4da" stroke-width="1.2"/>
+    <!-- Domain period 1: x=10..88 -->
+    <line x1="10" y1="0" x2="10" y2="120" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".6"/>
+    <line x1="88" y1="0" x2="88" y2="120" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".6"/>
+    <line x1="166" y1="0" x2="166" y2="120" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".5"/>
+    <text class="sm" x="10" y="133" text-anchor="middle">t₀</text>
+    <text class="sm" x="88" y="133" text-anchor="middle">t₁</text>
+    <text class="sm" x="166" y="133" text-anchor="middle">t₀+2L</text>
+    <!-- Original curve within domain [10..88] -->
+    <path d="M10 90 C26 90 38 30 50 32 C62 34 70 80 88 70" stroke="#3f51b5" stroke-width="2.4" stroke-linecap="round"/>
+    <!-- Periodic repetition beyond domain: same shape shifted by L=78 -->
+    <path d="M88 90 C104 90 116 30 128 32 C140 34 148 80 166 70" stroke="#198754" stroke-width="2.0" stroke-linecap="round" stroke-opacity=".75" stroke-dasharray="5 2"/>
+    <!-- Wrap indicator arrow at t1 → repeats from t0 -->
+    <path d="M88 50 Q128 20 88 50" fill="none" stroke="#198754" stroke-width="1.4" stroke-opacity=".5"/>
+    <text class="sm" x="49" y="12" text-anchor="middle" fill="#198754">period L repeats</text>
+  </g>
+</svg>

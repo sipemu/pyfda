@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Andrews clustering">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none">
+    <path d="M30 60 C90 40 150 54 210 40 C245 32 275 44 298 38" stroke-width="3"/>
+    <path d="M30 66 C90 48 150 62 210 48 C245 40 275 52 298 46" stroke-width="2" stroke-opacity=".85"/>
+    <path d="M30 54 C90 34 150 48 210 32 C245 24 275 36 298 30" stroke-width="2" stroke-opacity=".85"/>
+  </g>
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none" stroke-opacity=".6">
+    <path d="M30 96 C90 90 150 100 210 88 C245 82 275 92 298 86" stroke-width="3"/>
+    <path d="M30 90 C90 84 150 94 210 82 C245 76 275 86 298 80" stroke-width="2"/>
+    <path d="M30 102 C90 96 150 106 210 94 C245 88 275 98 298 92" stroke-width="2"/>
+  </g>
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none" stroke-opacity=".32">
+    <path d="M30 126 C90 138 150 124 210 134 C245 138 275 128 298 134" stroke-width="3"/>
+    <path d="M30 134 C90 144 150 132 210 140 C245 144 275 136 298 142" stroke-width="2"/>
+  </g>
+</svg>

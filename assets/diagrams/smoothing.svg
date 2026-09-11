@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Smoothing: Recovering the Signal Behind the Noise"
+     aria-labelledby="smoothing-title smoothing-desc">
+  <title id="smoothing-title">Smoothing: Recovering the Signal Behind the Noise</title>
+  <desc id="smoothing-desc">Shows how nadaraya_watson() and related kernel/P-spline smoothers convert a noisy discrete signal into a smooth functional representation, separating measurement error from the underlying signal for downstream operations like derivatives and distances.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Smoothing: Recovering the Signal Behind the Noise</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Turn noisy discrete samples into a smooth functional representation</text>
+
+  <!-- Panel 1: noisy curve -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Noisy Curve</text>
+  <text class="sm" x="122" y="112" text-anchor="middle">signal + measurement error</text>
+  <g transform="translate(44,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 92 L8 70 L16 100 L24 62 L32 84 L40 54 L48 82 L56 48 L64 74 L72 44 L80 68 L88 40 L96 66 L104 36 L112 60 L120 34 L128 58 L136 40 L144 62 L152 44 L156 58" stroke="#6c757d" stroke-width="1.3"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#0d6efd">nadaraya_watson()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">local averaging</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="16">kernel · knn smoother</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="48">basis expansion</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="80">P-spline · auto bw</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: smooth curve -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#0d6efd">Smooth Curve</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">noise removed, signal kept</text>
+  <g transform="translate(520,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 86 C40 62 80 44 120 38 C138 36 150 44 156 50" stroke="#0d6efd" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text class="sm" x="598" y="250" text-anchor="middle" fill="#6c757d">ready for derivatives &amp; distances</text>
+</svg>

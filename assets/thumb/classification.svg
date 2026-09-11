@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Functional classification">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 108 C90 96 150 70 210 52 C245 42 275 40 298 38" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 108 C90 118 150 132 210 128 C245 126 275 132 298 130" stroke="#dc3545" stroke-opacity=".38" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="240" cy="44" r="4" fill="#dc3545"/>
+  <circle cx="266" cy="40" r="4" fill="#dc3545"/>
+  <circle cx="240" cy="132" r="4" fill="#dc3545" fill-opacity=".4"/>
+  <circle cx="266" cy="128" r="4" fill="#dc3545" fill-opacity=".4"/>
+  <text x="40" y="60" fill="#dc3545" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">A</text>
+  <text x="40" y="140" fill="#dc3545" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".45">B</text>
+</svg>

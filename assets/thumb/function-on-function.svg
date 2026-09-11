@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Function-on-function surface">
+  <line x1="50" y1="155" x2="278" y2="155" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="50" y1="155" x2="50" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M50 28 L278 28 L278 155" stroke="#dc3545" stroke-opacity=".2" stroke-width="1.2"/>
+  <path d="M96 135 C130 118 170 118 240 135" stroke="#dc3545" stroke-opacity=".28" stroke-width="1.4"/>
+  <path d="M78 112 C115 88 180 88 256 112" stroke="#dc3545" stroke-opacity=".36" stroke-width="1.6"/>
+  <path d="M62 82 C102 52 185 52 272 82" stroke="#dc3545" stroke-opacity=".44" stroke-width="1.8"/>
+  <path d="M54 50 C95 28 190 28 278 50" stroke="#dc3545" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
+</svg>

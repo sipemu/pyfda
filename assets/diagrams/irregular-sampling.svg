@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Irregular Sampling: Recovering a Common Grid"
+     aria-labelledby="irregular-sampling-title irregular-sampling-desc">
+  <title id="irregular-sampling-title">Irregular Sampling: Recovering a Common Grid</title>
+  <desc id="irregular-sampling-desc">Shows how curves observed on ragged per-subject grids (sparse, uneven points) are smoothed and re-evaluated on a common grid, producing the tidy (n_obs, n_points) matrix required by all fdars operations such as means, distances, depth, and FPCA.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Irregular Sampling: Recovering a Common Grid</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Smooth each ragged curve onto a shared grid, then proceed as usual</text>
+
+  <!-- Panel 1: sparse uneven points -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Sparse, Uneven Points</text>
+  <text class="sm" x="122" y="112" text-anchor="middle">each curve on its own grid</text>
+  <g transform="translate(44,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <g fill="#6c757d">
+      <circle cx="8" cy="90" r="3"/><circle cx="46" cy="66" r="3"/><circle cx="72" cy="74" r="3"/><circle cx="126" cy="44" r="3"/>
+    </g>
+    <g fill="#adb5bd">
+      <circle cx="22" cy="104" r="3"/><circle cx="88" cy="86" r="3"/><circle cx="110" cy="94" r="3"/><circle cx="150" cy="72" r="3"/>
+    </g>
+    <g stroke="#ced4da" stroke-dasharray="3 3" stroke-width="1">
+      <line x1="8" y1="120" x2="8" y2="90"/><line x1="46" y1="120" x2="46" y2="66"/><line x1="126" y1="120" x2="126" y2="44"/>
+    </g>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#0d6efd">smooth → regrid</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">per-curve onto shared t</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="16">kernel smoother</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="48">basis expansion</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#b6d0ff"/>
+    <text class="sm" x="12" y="80">evaluate on common grid</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: curves on common grid -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#eaf1ff" stroke="#0d6efd" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#0d6efd">Common Grid</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">tidy (n_obs, n_points) matrix</text>
+  <g transform="translate(520,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <g stroke="#ced4da" stroke-width="1">
+      <line x1="26" y1="20" x2="26" y2="120"/><line x1="52" y1="20" x2="52" y2="120"/><line x1="78" y1="20" x2="78" y2="120"/><line x1="104" y1="20" x2="104" y2="120"/><line x1="130" y1="20" x2="130" y2="120"/>
+    </g>
+    <path d="M0 84 C40 50 80 96 120 52 C138 40 150 58 156 52" stroke="#0d6efd" stroke-opacity=".5" stroke-width="1.8"/>
+    <path d="M0 96 C40 68 80 78 120 70 C138 62 150 80 156 72" stroke="#0d6efd" stroke-width="2.6" stroke-linecap="round"/>
+    <g fill="#0d6efd">
+      <circle cx="26" cy="68" r="2.4"/><circle cx="52" cy="80" r="2.4"/><circle cx="78" cy="86" r="2.4"/><circle cx="104" cy="74" r="2.4"/><circle cx="130" cy="66" r="2.4"/>
+    </g>
+  </g>
+  <text class="sm" x="598" y="250" text-anchor="middle" fill="#6c757d">means · distances · depth · FPCA</text>
+</svg>

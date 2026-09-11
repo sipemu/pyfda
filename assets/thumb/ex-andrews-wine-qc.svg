@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Andrews QC control chart">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="52" x2="298" y2="52" stroke="#3f51b5" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="6 5"/>
+  <line x1="30" y1="128" x2="298" y2="128" stroke="#3f51b5" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="6 5"/>
+  <line x1="30" y1="90" x2="298" y2="90" stroke="#3f51b5" stroke-opacity=".25" stroke-width="1.4"/>
+  <path d="M44 96 L80 82 L116 100 L152 84 L188 98 L224 38 L260 92 L296 100" stroke="#3f51b5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#3f51b5" fill-opacity=".7"><circle cx="44" cy="96" r="3"/><circle cx="80" cy="82" r="3"/><circle cx="116" cy="100" r="3"/><circle cx="152" cy="84" r="3"/><circle cx="188" cy="98" r="3"/><circle cx="260" cy="92" r="3"/><circle cx="296" cy="100" r="3"/></g>
+  <circle cx="224" cy="38" r="5.5" fill="#fff" stroke="#3f51b5" stroke-width="3"/>
+  <text x="240" y="47" fill="#3f51b5" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">UCL</text>
+</svg>

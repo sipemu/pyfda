@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Andrews Wine Intro: Row → Curve Encoding" aria-labelledby="ex-andrews-wine-intro-title ex-andrews-wine-intro-desc">
+  <title id="ex-andrews-wine-intro-title">Andrews Wine Intro: Row → Curve Encoding</title>
+  <desc id="ex-andrews-wine-intro-desc">The Andrews transformation encodes each wine's feature vector as a Fourier-based curve, preserving Euclidean distances (Parseval property); the mean curve per cultivar and the functional median then summarize the class profiles.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Andrews Wine Intro: Row → Curve Encoding</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">z-score 13 columns · Andrews transform · Parseval isometry preserved · central curve = central wine</text>
+
+  <!-- Panel 1: 13-column row -->
+  <rect x="24" y="60" width="136" height="140" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="92" y="79" text-anchor="middle" fill="#495057">13-D wine row</text>
+  <text class="sm" x="92" y="95" text-anchor="middle">alcohol, malic acid,</text>
+  <text class="sm" x="92" y="109" text-anchor="middle">ash, flavanoids,</text>
+  <text class="sm" x="92" y="123" text-anchor="middle">proline, … (13 cols)</text>
+  <!-- Bar chart mini -->
+  <rect x="34" y="143" width="6" height="30" fill="#3f51b5" opacity="0.7"/>
+  <rect x="45" y="153" width="6" height="20" fill="#e8710a" opacity="0.7"/>
+  <rect x="56" y="148" width="6" height="25" fill="#198754" opacity="0.7"/>
+  <rect x="67" y="159" width="6" height="14" fill="#dc3545" opacity="0.7"/>
+  <rect x="78" y="145" width="6" height="28" fill="#6f42c1" opacity="0.7"/>
+  <rect x="89" y="155" width="6" height="18" fill="#0dcaf0" opacity="0.7"/>
+  <rect x="100" y="150" width="6" height="23" fill="#3f51b5" opacity="0.7"/>
+  <text class="sm" x="92" y="185" text-anchor="middle">Step 1: z-score each</text>
+  <text class="sm" x="92" y="199" text-anchor="middle">column (essential)</text>
+
+  <!-- Arrow 1 -->
+  <line x1="160" y1="130" x2="184" y2="130" stroke="#666" stroke-width="1.5"/>
+  <polygon points="180,126 188,130 180,134" fill="#666"/>
+  <text class="sm" x="172" y="122" text-anchor="middle" fill="#6c757d">f_x(t)</text>
+
+  <!-- Panel 2: Andrews transform -->
+  <rect x="188" y="60" width="184" height="140" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="280" y="79" text-anchor="middle" fill="#fd7e14">Andrews transform</text>
+  <text class="sm" x="280" y="95" text-anchor="middle">f_x(t) = x₁/√2 + x₂sin(t)</text>
+  <text class="sm" x="280" y="109" text-anchor="middle">+ x₃cos(t) + x₄sin(2t) + …</text>
+  <text class="sm" x="280" y="125" text-anchor="middle">t ∈ [−π, π] · 160 points</text>
+  <!-- Smooth Andrews curve -->
+  <path d="M196 175 Q210 150 224 142 Q238 134 252 136 Q266 140 280 148 Q294 156 308 168 Q322 180 348 188 Q364 190 372 186" stroke="#fd7e14" stroke-width="2.2" fill="none"/>
+  <text class="sm" x="280" y="196" text-anchor="middle">numpy only — no fdars binding</text>
+
+  <!-- Arrow 2 -->
+  <line x1="372" y1="130" x2="396" y2="130" stroke="#666" stroke-width="1.5"/>
+  <polygon points="392,126 400,130 392,134" fill="#666"/>
+
+  <!-- Panel 3: lp_self_1d distance + mean_1d -->
+  <rect x="400" y="60" width="200" height="140" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="500" y="79" text-anchor="middle" fill="#495057">fdars tools on curves</text>
+  <text class="sm" x="500" y="97" text-anchor="middle">metric.lp_self_1d:</text>
+  <text class="sm" x="500" y="111" text-anchor="middle">||f_x−f_y||_L2 = √π·||x−y||_2</text>
+  <text class="mono" x="500" y="128" text-anchor="middle" fill="#198754">Parseval identity holds</text>
+  <text class="sm" x="500" y="145" text-anchor="middle">(verified on 15,753 pairs)</text>
+  <text class="sm" x="500" y="162" text-anchor="middle">fdata.mean_1d + modified_band_1d:</text>
+  <text class="sm" x="500" y="176" text-anchor="middle">deepest curve = central wine</text>
+  <text class="sm" x="500" y="192" text-anchor="middle">per-cultivar functional boxplot</text>
+
+  <!-- Arrow 3 -->
+  <line x1="600" y1="130" x2="624" y2="130" stroke="#666" stroke-width="1.5"/>
+  <polygon points="620,126 628,130 620,134" fill="#666"/>
+
+  <!-- Panel 4: Result -->
+  <rect x="628" y="60" width="68" height="140" rx="8" fill="#fd7e14" stroke="none"/>
+  <text class="lab" x="662" y="79" text-anchor="middle" fill="white">Full</text>
+  <text class="lab" x="662" y="94" text-anchor="middle" fill="white">fdars</text>
+  <text class="lab" x="662" y="109" text-anchor="middle" fill="white">toolbox</text>
+  <text class="sm" x="662" y="126" text-anchor="middle" fill="white">depth</text>
+  <text class="sm" x="662" y="140" text-anchor="middle" fill="white">cluster</text>
+  <text class="sm" x="662" y="154" text-anchor="middle" fill="white">SPM</text>
+  <text class="sm" x="662" y="168" text-anchor="middle" fill="white">tolerance</text>
+  <text class="sm" x="662" y="184" text-anchor="middle" fill="white">bands</text>
+
+  <!-- Bottom note -->
+  <text class="sm" x="360" y="228" text-anchor="middle">Cultivar mean curves (via mean_1d) peel apart cleanly: Barolo high near t=0 (proline/flavanoids), Barbera low</text>
+  <text class="sm" x="360" y="244" text-anchor="middle">Functional boxplot per cultivar (modified_band_1d): Grignolino widest band → most heterogeneous</text>
+  <text class="sm" x="360" y="260" text-anchor="middle">Distance isometry makes functional depth/clustering conclusions exact: central curve ↔ central wine</text>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Alignment comparison">
+  <g stroke="#fd7e14" fill="none">
+    <rect x="34" y="46" width="76" height="88" rx="4" stroke-opacity=".4" stroke-width="1.6"/>
+    <rect x="122" y="46" width="76" height="88" rx="4" stroke-opacity=".4" stroke-width="1.6"/>
+    <rect x="210" y="46" width="76" height="88" rx="4" stroke-opacity=".4" stroke-width="1.6"/>
+  </g>
+  <path d="M42 112 C58 60 86 116 102 78" stroke="#fd7e14" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M42 122 C58 74 86 128 102 92" stroke="#fd7e14" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M130 100 C146 66 174 66 190 100" stroke="#fd7e14" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M130 110 C146 80 174 80 190 110" stroke="#fd7e14" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M218 116 C238 72 258 72 278 116" stroke="#fd7e14" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M218 108 C238 64 258 64 278 108" stroke="#fd7e14" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

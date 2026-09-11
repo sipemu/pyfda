@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Custom plotting">
+  <defs><linearGradient id="cp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d6efd" stop-opacity=".18"/><stop offset="1" stop-color="#0d6efd" stop-opacity="0"/></linearGradient></defs>
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#0d6efd" stroke-opacity=".5" stroke-width="1.4">
+    <line x1="92" y1="150" x2="92" y2="155"/><line x1="154" y1="150" x2="154" y2="155"/><line x1="216" y1="150" x2="216" y2="155"/><line x1="278" y1="150" x2="278" y2="155"/>
+    <line x1="30" y1="112" x2="25" y2="112"/><line x1="30" y1="74" x2="25" y2="74"/>
+  </g>
+  <path d="M30 108 C90 58 150 132 210 84 C245 58 275 96 298 78 L298 150 L30 150 Z" fill="url(#cp)"/>
+  <path d="M30 108 C90 58 150 132 210 84 C245 58 275 96 298 78" stroke="#0d6efd" stroke-width="3" stroke-linecap="round"/>
+  <rect x="212" y="40" width="14" height="8" rx="2" fill="#0d6efd" fill-opacity=".8"/>
+  <text x="230" y="47" fill="#0d6efd" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">f(t)</text>
+</svg>

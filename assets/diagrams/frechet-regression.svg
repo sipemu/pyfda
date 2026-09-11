@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none"
+     role="img" aria-label="Fréchet Regression — conditional metric-space mean concept"
+     aria-labelledby="frechet-title frechet-desc">
+  <title id="frechet-title">Fréchet Regression</title>
+  <desc id="frechet-desc">Illustrates Fréchet regression: response objects living in a non-Euclidean metric space (e.g. SPD manifold) are summarised by the conditional Fréchet mean — the minimiser of a weighted sum of squared metric distances — as a function of scalar Euclidean predictors.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Fréchet Regression</text>
+  <text class="sub" x="360" y="48" text-anchor="middle">m̂(x) = arg min Σᵢ wᵢ(x) d(y, Yᵢ)² — conditional barycenter in a non-Euclidean metric space</text>
+
+  <!-- ===== Panel 1: Scalar predictor + response objects ===== -->
+  <rect x="16" y="66" width="192" height="168" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="112" y="86" text-anchor="middle" fill="#495057">Observations</text>
+  <text class="sm" x="112" y="104" text-anchor="middle">scalar X_i ∈ ℝ,  Y_i ∈ ℳ</text>
+
+  <!-- Scatter dots: x-axis left/right, y-axis = "object" (shown as circles with varying sizes) -->
+  <!-- SPD matrices depicted as ellipses on the manifold -->
+  <circle cx="52"  cy="150" r="10" fill="none" stroke="#3f51b5" stroke-width="1.8"/>
+  <ellipse cx="52"  cy="150" rx="7" ry="4" fill="none" stroke="#3f51b5" stroke-width="1.0" opacity="0.5"/>
+
+  <circle cx="84"  cy="162" r="12" fill="none" stroke="#3f51b5" stroke-width="1.8"/>
+  <ellipse cx="84"  cy="162" rx="9" ry="5" fill="none" stroke="#3f51b5" stroke-width="1.0" opacity="0.5"/>
+
+  <circle cx="120" cy="148" r="14" fill="none" stroke="#3f51b5" stroke-width="1.8"/>
+  <ellipse cx="120" cy="148" rx="11" ry="6" fill="none" stroke="#3f51b5" stroke-width="1.0" opacity="0.5"/>
+
+  <circle cx="154" cy="158" r="11" fill="none" stroke="#3f51b5" stroke-width="1.8"/>
+  <ellipse cx="154" cy="158" rx="8" ry="4" fill="none" stroke="#3f51b5" stroke-width="1.0" opacity="0.5"/>
+
+  <circle cx="190" cy="144" r="15" fill="none" stroke="#3f51b5" stroke-width="1.8"/>
+  <ellipse cx="190" cy="144" rx="12" ry="7" fill="none" stroke="#3f51b5" stroke-width="1.0" opacity="0.5"/>
+
+  <!-- x-axis -->
+  <line x1="28" y1="220" x2="200" y2="220" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="114" y="232" text-anchor="middle">X (scalar predictor)</text>
+
+  <!-- Arrow: data → model -->
+  <line x1="208" y1="150" x2="236" y2="150" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-fre)"/>
+
+  <!-- ===== Panel 2: Central orange panel — metric space / weight computation ===== -->
+  <rect x="240" y="66" width="240" height="168" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="360" y="86" text-anchor="middle" fill="#fd7e14">Metric Space ℳ + Weights</text>
+  <text class="mono" x="360" y="104" text-anchor="middle" fill="#6c757d">frechet_mean / frechet_global_reg</text>
+
+  <!-- Manifold curve (conceptual curved space) -->
+  <path d="M256 190 Q290 155 330 148 Q370 141 410 155 Q440 165 464 182" stroke="#ced4da" stroke-width="1.4" fill="none" stroke-dasharray="5 3"/>
+  <text class="sm" x="360" y="215" text-anchor="middle" fill="#6c757d">metric space manifold</text>
+
+  <!-- Objects on manifold -->
+  <circle cx="278" cy="183" r="8" fill="none" stroke="#3f51b5" stroke-width="1.6" opacity="0.6"/>
+  <circle cx="318" cy="158" r="10" fill="none" stroke="#3f51b5" stroke-width="1.6" opacity="0.75"/>
+  <circle cx="360" cy="148" r="12" fill="none" stroke="#3f51b5" stroke-width="2.0"/>
+  <circle cx="402" cy="155" r="10" fill="none" stroke="#3f51b5" stroke-width="1.6" opacity="0.75"/>
+  <circle cx="442" cy="172" r="8" fill="none" stroke="#3f51b5" stroke-width="1.6" opacity="0.6"/>
+
+  <!-- Fréchet mean highlighted -->
+  <circle cx="360" cy="148" r="14" fill="none" stroke="#fd7e14" stroke-width="2.4"/>
+  <text class="sm" x="360" y="135" text-anchor="middle" fill="#fd7e14">m̂(x)</text>
+
+  <!-- Metric distance lines -->
+  <line x1="278" y1="183" x2="354" y2="150" stroke="#495057" stroke-width="1.0" stroke-dasharray="3 2" opacity="0.5"/>
+  <line x1="318" y1="158" x2="352" y2="149" stroke="#495057" stroke-width="1.0" stroke-dasharray="3 2" opacity="0.5"/>
+  <line x1="402" y1="155" x2="368" y2="149" stroke="#495057" stroke-width="1.0" stroke-dasharray="3 2" opacity="0.5"/>
+  <line x1="442" y1="172" x2="368" y2="152" stroke="#495057" stroke-width="1.0" stroke-dasharray="3 2" opacity="0.5"/>
+
+  <!-- Weight labels -->
+  <text class="sm" x="260" y="125" fill="#495057">wᵢ(x)</text>
+  <text class="sm" x="440" y="125" fill="#495057">wᵢ(x)</text>
+
+  <!-- Arrow: result out -->
+  <line x1="480" y1="150" x2="508" y2="150" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-fre)"/>
+
+  <!-- ===== Panel 3: Conditional Fréchet mean output ===== -->
+  <rect x="512" y="66" width="192" height="168" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="608" y="86" text-anchor="middle" fill="#495057">Predicted Object</text>
+  <text class="sm" x="608" y="104" text-anchor="middle">m̂(x) ∈ ℳ</text>
+
+  <!-- SPD matrix result — show as a matrix grid -->
+  <text class="sm" x="608" y="132" text-anchor="middle" fill="#fd7e14">SPD space (d=2):</text>
+  <rect x="556" y="140" width="104" height="56" rx="6" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.5"/>
+  <!-- Matrix entries -->
+  <text class="mono" x="586" y="162" text-anchor="middle" fill="#fd7e14">a  b</text>
+  <text class="mono" x="586" y="180" text-anchor="middle" fill="#fd7e14">b  c</text>
+  <text class="sm" x="668" y="162" text-anchor="start" fill="#6c757d">a,c&gt;0</text>
+  <text class="sm" x="668" y="178" text-anchor="start" fill="#6c757d">sym.</text>
+
+  <text class="sm" x="608" y="215" text-anchor="middle">shape (d, d)</text>
+  <text class="sm" x="608" y="228" text-anchor="middle" fill="#6c757d">np.asarray(result)</text>
+
+  <!-- ===== Bottom: function API strip ===== -->
+  <line x1="16" y1="252" x2="704" y2="252" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="lab" x="360" y="276" text-anchor="middle" fill="#495057">Function Family — fdars.frechet</text>
+
+  <!-- frechet_mean card -->
+  <rect x="16" y="288" width="162" height="96" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="97" y="308" text-anchor="middle" fill="#fd7e14">frechet_mean</text>
+  <text class="sm" x="97" y="326" text-anchor="middle">Unconditional mean</text>
+  <text class="sm" x="97" y="342" text-anchor="middle">spaces: spd · spherical</text>
+  <text class="sm" x="97" y="358" text-anchor="middle">· correlation</text>
+  <text class="sm" x="97" y="374" text-anchor="middle">returns naked ARRAY</text>
+
+  <!-- frechet_global_reg card -->
+  <rect x="190" y="288" width="162" height="96" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="271" y="308" text-anchor="middle" fill="#3f51b5">frechet_global_reg</text>
+  <text class="sm" x="271" y="326" text-anchor="middle">Global weights</text>
+  <text class="sm" x="271" y="342" text-anchor="middle">polynomial in X</text>
+  <text class="sm" x="271" y="358" text-anchor="middle">predicted (n_out, m)</text>
+  <text class="sm" x="271" y="374" text-anchor="middle">returns dict</text>
+
+  <!-- frechet_local_reg card -->
+  <rect x="364" y="288" width="162" height="96" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="445" y="308" text-anchor="middle" fill="#198754">frechet_local_reg</text>
+  <text class="sm" x="445" y="326" text-anchor="middle">Local kernel weights</text>
+  <text class="sm" x="445" y="342" text-anchor="middle">required bandwidth</text>
+  <text class="sm" x="445" y="358" text-anchor="middle">predicted (n_out, m)</text>
+  <text class="sm" x="445" y="374" text-anchor="middle">returns dict</text>
+
+  <!-- frechet_anova card -->
+  <rect x="538" y="288" width="166" height="96" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="621" y="308" text-anchor="middle" fill="#6f42c1">frechet_anova</text>
+  <text class="sm" x="621" y="326" text-anchor="middle">Permutation ANOVA</text>
+  <text class="sm" x="621" y="342" text-anchor="middle">group labels 0..k</text>
+  <text class="sm" x="621" y="358" text-anchor="middle">statistic + p_value</text>
+  <text class="sm" x="621" y="374" text-anchor="middle">9-key dict</text>
+
+  <!-- Bottom info strip -->
+  <line x1="16" y1="400" x2="704" y2="400" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="360" y="422" text-anchor="middle">frechet_mean returns the mean object directly (array, not dict) — wrap with np.asarray()</text>
+  <text class="sm" x="360" y="442" text-anchor="middle">SPD inputs: A @ A.T + I construction guarantees positive-definite diagonal</text>
+  <text class="sm" x="360" y="462" text-anchor="middle" fill="#6c757d">Metric spaces: "spd" · "spherical" · "correlation"  ·  Petersen &amp; Müller (2019)</text>
+
+  <defs>
+    <marker id="arr-fre" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+  </defs>
+</svg>

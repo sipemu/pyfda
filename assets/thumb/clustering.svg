@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Clustering">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#6f42c1" stroke-linecap="round" fill="none">
+    <path d="M30 70 C90 46 150 58 210 40 C245 30 275 44 298 36" stroke-width="3"/>
+    <path d="M30 80 C90 56 150 66 210 50 C245 42 275 54 298 46" stroke-width="2" stroke-opacity=".85"/>
+    <path d="M30 60 C90 38 150 50 210 32 C245 24 275 36 298 28" stroke-width="2" stroke-opacity=".85"/>
+  </g>
+  <g stroke="#6f42c1" stroke-linecap="round" fill="none" stroke-opacity=".55">
+    <path d="M30 118 C90 132 150 116 210 128 C245 134 275 122 298 130" stroke-width="3"/>
+    <path d="M30 128 C90 142 150 126 210 138 C245 144 275 132 298 140" stroke-width="2"/>
+    <path d="M30 108 C90 122 150 106 210 118 C245 124 275 112 298 120" stroke-width="2"/>
+  </g>
+  <g stroke="#6f42c1" stroke-linecap="round" fill="none" stroke-opacity=".3">
+    <path d="M30 96 C90 88 150 100 210 86 C245 78 275 90 298 82" stroke-width="3"/>
+    <path d="M30 88 C90 80 150 92 210 78 C245 70 275 82 298 74" stroke-width="2"/>
+  </g>
+</svg>

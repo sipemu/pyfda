@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Andrews transformation">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <g fill="#198754" fill-opacity=".8">
+    <circle cx="48" cy="62" r="3.2"/><circle cx="66" cy="86" r="3.2"/><circle cx="52" cy="104" r="3.2"/><circle cx="76" cy="68" r="3.2"/><circle cx="60" cy="126" r="3.2"/><circle cx="84" cy="108" r="3.2"/>
+  </g>
+  <path d="M104 90 C124 82 132 82 152 90" stroke="#198754" stroke-opacity=".7" stroke-width="1.8"/>
+  <path d="M148 84 L154 91 L146 94 Z" fill="#198754" fill-opacity=".7"/>
+  <g stroke="#198754" stroke-linecap="round" fill="none">
+    <path d="M170 74 C210 44 250 104 298 66" stroke-width="3"/>
+    <path d="M170 100 C210 132 250 60 298 100" stroke-width="2" stroke-opacity=".6"/>
+    <path d="M170 118 C210 96 250 132 298 108" stroke-width="2" stroke-opacity=".45"/>
+  </g>
+</svg>

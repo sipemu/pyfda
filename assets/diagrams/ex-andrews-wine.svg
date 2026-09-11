@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Andrews Wine: Outlier Detection Pipeline" aria-labelledby="ex-andrews-wine-title ex-andrews-wine-desc">
+  <title id="ex-andrews-wine-title">Andrews Wine: Outlier Detection Pipeline</title>
+  <desc id="ex-andrews-wine-desc">Four complementary outlier detectors (depth, magnitude-shape MS-plot, outliergram, and likelihood-ratio test) are applied to wine Andrews curves; a consensus rule flags samples flagged by multiple independent methods as reliable outliers.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Andrews Wine: Outlier Detection Pipeline</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">13-D rows → Andrews curves → four functional detectors → flagged bottles cross-checked vs Mahalanobis</text>
+
+  <!-- Panel 1: Input encoding -->
+  <rect x="24" y="60" width="152" height="100" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="100" y="80" text-anchor="middle" fill="#495057">178 wine rows</text>
+  <text class="sm" x="100" y="96" text-anchor="middle">13 chemicals, z-scored</text>
+  <!-- Mini Andrews curves for 3 cultivars -->
+  <path d="M32 148 Q48 132 64 126 Q80 120 96 124 Q112 128 128 138 Q144 148 160 152" stroke="#8B0000" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <path d="M32 145 Q48 136 64 132 Q80 128 96 130 Q112 134 128 142 Q144 150 160 154" stroke="#DAA520" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <path d="M32 140 Q48 142 64 146 Q80 150 96 152 Q112 154 128 150 Q144 144 160 140" stroke="#2E8B57" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <text class="sm" x="100" y="168" text-anchor="middle">Andrews curves (178×160)</text>
+
+  <!-- Arrow right to detector grid -->
+  <line x1="176" y1="110" x2="200" y2="110" stroke="#666" stroke-width="1.5"/>
+  <polygon points="196,106 204,110 196,114" fill="#666"/>
+
+  <!-- Header: 4 detector panels in 2x2 -->
+
+  <!-- Detector 1: modified_band_1d (depth) -->
+  <rect x="204" y="60" width="234" height="88" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="321" y="79" text-anchor="middle" fill="#3f51b5">depth.modified_band_1d</text>
+  <text class="sm" x="321" y="95" text-anchor="middle">MBD: fraction of domain inside band pairs</text>
+  <text class="sm" x="321" y="109" text-anchor="middle">Returns centrality score ∈ [0,1] per curve</text>
+  <text class="mono" x="321" y="126" text-anchor="middle" fill="#3f51b5">shallow tail → candidate outliers</text>
+  <text class="sm" x="321" y="141" text-anchor="middle">ranking; no yes/no verdict</text>
+
+  <!-- Detector 2: magnitude_shape -->
+  <rect x="452" y="60" width="244" height="88" rx="8" fill="#f0f7ff" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="lab" x="574" y="79" text-anchor="middle" fill="#6f42c1">outliers.magnitude_shape</text>
+  <text class="sm" x="574" y="95" text-anchor="middle">Two axes: magnitude vs shape outlyingness</text>
+  <text class="sm" x="574" y="109" text-anchor="middle">robust z-score combined → top 6 flagged</text>
+  <text class="mono" x="574" y="126" text-anchor="middle" fill="#6f42c1">wine 81: shape · others: magnitude</text>
+  <text class="sm" x="574" y="141" text-anchor="middle">mostly magnitude axis (shifted up/down)</text>
+
+  <!-- Detector 3: outliergram -->
+  <rect x="204" y="162" width="234" height="88" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="321" y="181" text-anchor="middle" fill="#fd7e14">outliers.outliergram</text>
+  <text class="sm" x="321" y="197" text-anchor="middle">MBD vs modified epigraph index (MEI)</text>
+  <text class="sm" x="321" y="211" text-anchor="middle">parabolic reference band → boolean flag</text>
+  <text class="mono" x="321" y="228" text-anchor="middle" fill="#dc3545">flags wines 69 + 95 (Grignolino)</text>
+  <text class="sm" x="321" y="243" text-anchor="middle">shape outliers: extreme magnesium</text>
+
+  <!-- Detector 4: detect_outliers_lrt -->
+  <rect x="452" y="162" width="244" height="88" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="574" y="181" text-anchor="middle" fill="#495057">outliers.detect_outliers_lrt</text>
+  <text class="sm" x="574" y="197" text-anchor="middle">Bootstrap likelihood-ratio threshold</text>
+  <text class="sm" x="574" y="211" text-anchor="middle">distributional test at α=0.05</text>
+  <text class="mono" x="574" y="228" text-anchor="middle" fill="#495057">flags 0 wines on clean data</text>
+  <text class="sm" x="574" y="243" text-anchor="middle">strictest detector — no significant outliers</text>
+
+  <!-- Arrow down to cross-check -->
+  <line x1="104" y1="162" x2="104" y2="270" stroke="#666" stroke-width="1.2" stroke-dasharray="4,3"/>
+
+  <!-- Cross-check panel -->
+  <rect x="24" y="270" width="152" height="90" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="100" y="289" text-anchor="middle" fill="#495057">Mahalanobis</text>
+  <text class="sm" x="100" y="305" text-anchor="middle">χ²₁₃ cutoff (97.5%)</text>
+  <text class="sm" x="100" y="319" text-anchor="middle">classical baseline</text>
+  <text class="sm" x="100" y="335" text-anchor="middle">agrees on magnitude</text>
+  <text class="sm" x="100" y="349" text-anchor="middle">outliers; misses shape</text>
+
+  <!-- Arrow right from cross-check to consensus -->
+  <line x1="176" y1="315" x2="200" y2="315" stroke="#666" stroke-width="1.5"/>
+  <polygon points="196,311 204,315 196,319" fill="#666"/>
+
+  <!-- Arrows from detectors down to consensus -->
+  <line x1="321" y1="250" x2="321" y2="270" stroke="#666" stroke-width="1.2"/>
+  <line x1="574" y1="250" x2="574" y2="270" stroke="#666" stroke-width="1.2"/>
+
+  <!-- Consensus panel -->
+  <rect x="204" y="270" width="492" height="90" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="450" y="290" text-anchor="middle" fill="#3f51b5">Consensus: three detectors flag the same atypical bottles</text>
+  <text class="sm" x="450" y="307" text-anchor="middle">Wines 69+95: magnesium → shape anomaly; outliergram + depth + MS agree</text>
+  <text class="sm" x="450" y="323" text-anchor="middle">Wine 121: magnitude shift · LRT declines (mild shape ≠ distributional outlier)</text>
+  <text class="sm" x="450" y="340" text-anchor="middle">Functional shape axis catches what Mahalanobis misses · magnitude flags agree</text>
+  <text class="sm" x="450" y="356" text-anchor="middle">Multiple detectors recommended — each mode has its own best detector</text>
+
+  <!-- Result strip -->
+  <line x1="40" y1="378" x2="680" y2="378" stroke="#ced4da" stroke-width="1.0" stroke-dasharray="4,3"/>
+
+  <rect x="24" y="388" width="168" height="46" rx="6" fill="#3f51b5" stroke="none"/>
+  <text class="lab" x="108" y="406" text-anchor="middle" fill="white">Depth ranking</text>
+  <text class="mono" x="108" y="422" text-anchor="middle" fill="#FFD700">central wine found</text>
+
+  <rect x="206" y="388" width="168" height="46" rx="6" fill="#6f42c1" stroke="none"/>
+  <text class="lab" x="290" y="406" text-anchor="middle" fill="white">MS-plot</text>
+  <text class="mono" x="290" y="422" text-anchor="middle" fill="white">magnitude / shape axes</text>
+
+  <rect x="388" y="388" width="148" height="46" rx="6" fill="#fd7e14" stroke="none"/>
+  <text class="lab" x="462" y="406" text-anchor="middle" fill="white">Outliergram</text>
+  <text class="mono" x="462" y="422" text-anchor="middle" fill="white">wines 69 + 95 flagged</text>
+
+  <rect x="550" y="388" width="146" height="46" rx="6" fill="#6c757d" stroke="none"/>
+  <text class="lab" x="623" y="406" text-anchor="middle" fill="white">LRT</text>
+  <text class="mono" x="623" y="422" text-anchor="middle" fill="white">0 flagged at α=0.05</text>
+</svg>

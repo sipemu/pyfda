@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Canadian Temperature: Annual Cycle Detection &amp; Decomposition" aria-labelledby="ex-canadian-seasonal-title ex-canadian-seasonal-desc">
+  <title id="ex-canadian-seasonal-title">Canadian Temperature: Annual Cycle Detection &amp; Decomposition</title>
+  <desc id="ex-canadian-seasonal-desc">The Canadian temperature seasonal example detects the annual 365-day cycle using four period detectors, decomposes it with STL and SSA, and classifies the Edmonton series as StableSeasonal: peak timing is constant while the mean level rises.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Canadian Temperature: Annual Cycle Detection &amp; Decomposition</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">8-year Edmonton series · four period detectors · STL + SSA decomposition · seasonal strength</text>
+
+  <!-- === Row 1 === -->
+
+  <!-- Panel 1: 8-year series -->
+  <rect x="24" y="60" width="164" height="100" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="106" y="80" text-anchor="middle" fill="#495057">8-year Edmonton series</text>
+  <!-- Repeating annual waves with upward trend -->
+  <path d="M32 145 Q40 115 48 108 Q56 101 64 115 Q72 130 80 148 Q88 118 96 110 Q104 103 112 117 Q120 132 128 150 Q136 120 144 112 Q152 105 160 119 Q168 133 176 152" stroke="#3f51b5" stroke-width="1.6" fill="none"/>
+  <text class="sm" x="106" y="150" text-anchor="middle">+0.3°C/yr trend · +3%/yr</text>
+  <text class="sm" x="106" y="164" text-anchor="middle">amplitude · noise σ=1.5°C</text>
+
+  <!-- Arrow right -->
+  <line x1="188" y1="110" x2="210" y2="110" stroke="#666" stroke-width="1.5"/>
+  <polygon points="206,106 214,110 206,114" fill="#666"/>
+
+  <!-- Panel 2: Period detectors -->
+  <rect x="214" y="60" width="222" height="100" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="325" y="80" text-anchor="middle" fill="#fd7e14">Period Detectors</text>
+  <text class="sm" x="325" y="96" text-anchor="middle">estimate_period_fft — dominant FFT peak</text>
+  <text class="sm" x="325" y="110" text-anchor="middle">autoperiod — FFT + autocorrelation</text>
+  <text class="sm" x="325" y="124" text-anchor="middle">cfd_autoperiod — detrend + cluster peaks</text>
+  <text class="sm" x="325" y="138" text-anchor="middle">sazed — ensemble vote (5 sub-methods)</text>
+  <text class="mono" x="325" y="154" text-anchor="middle" fill="#fd7e14">→ all 4 return 365 days</text>
+
+  <!-- Arrow right -->
+  <line x1="436" y1="110" x2="458" y2="110" stroke="#666" stroke-width="1.5"/>
+  <polygon points="454,106 462,110 454,114" fill="#666"/>
+
+  <!-- Panel 3: Lomb-Scargle -->
+  <rect x="462" y="60" width="234" height="100" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="579" y="80" text-anchor="middle" fill="#495057">lomb_scargle_fdata</text>
+  <text class="sm" x="579" y="97" text-anchor="middle">Power spectrum over candidate periods</text>
+  <!-- Periodogram spike at 365 -->
+  <line x1="474" y1="150" x2="474" y2="100" stroke="#ced4da" stroke-width="1.0"/>
+  <line x1="474" y1="150" x2="688" y2="150" stroke="#ced4da" stroke-width="1.0"/>
+  <path d="M474 150 L500 148 L514 147 L528 148 L542 150 L546 149 L548 145 L550 118 L552 100 L554 118 L556 145 L558 148 L560 150 L600 150 L640 150 L688 150" stroke="#3f51b5" stroke-width="1.8" fill="none"/>
+  <line x1="552" y1="100" x2="552" y2="150" stroke="#dc3545" stroke-width="1.0" stroke-dasharray="3,2"/>
+  <text class="sm" x="579" y="162" text-anchor="middle">dominant spike at 365 d · harmonics tiny</text>
+
+  <!-- === Row 2 === -->
+
+  <!-- Horizontal connector -->
+  <line x1="106" y1="160" x2="106" y2="190" stroke="#666" stroke-width="1.5"/>
+  <polygon points="102,186 106,194 110,186" fill="#666"/>
+
+  <!-- Panel 4: STL -->
+  <rect x="24" y="194" width="164" height="130" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="106" y="214" text-anchor="middle" fill="#fd7e14">stl_decompose(fd, 365)</text>
+  <text class="sm" x="106" y="230" text-anchor="middle">Seasonal–Trend via Loess</text>
+  <text class="sm" x="106" y="246" text-anchor="middle">additive · lossless</text>
+  <!-- Three component mini-lines -->
+  <path d="M32 262 Q 60 255 90 252 Q 120 249 152 248 Q 172 250 188 254" stroke="#3f51b5" stroke-width="1.8" fill="none"/>
+  <text class="sm" x="106" y="277" text-anchor="middle" fill="#3f51b5">trend (recovered +0.3°C/yr)</text>
+  <path d="M32 291 Q 44 278 56 285 Q 68 292 80 282 Q 92 272 104 282 Q 116 292 128 285 Q 140 278 152 290 Q 164 300 176 293" stroke="#198754" stroke-width="1.6" fill="none"/>
+  <text class="sm" x="106" y="306" text-anchor="middle" fill="#198754">seasonal component</text>
+  <text class="sm" x="106" y="320" text-anchor="middle" fill="#dc3545">+ remainder (noise)</text>
+
+  <!-- Arrow right to SSA -->
+  <line x1="188" y1="260" x2="210" y2="260" stroke="#666" stroke-width="1.5"/>
+  <polygon points="206,256 214,260 206,264" fill="#666"/>
+
+  <!-- Panel 5: SSA -->
+  <rect x="214" y="194" width="220" height="130" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="324" y="214" text-anchor="middle" fill="#3f51b5">ssa_fdata(fd, window=730)</text>
+  <text class="sm" x="324" y="230" text-anchor="middle">Singular Spectrum Analysis</text>
+  <text class="sm" x="324" y="246" text-anchor="middle">trajectory matrix → SVD</text>
+  <text class="sm" x="324" y="262" text-anchor="middle">near-tied component pair</text>
+  <text class="sm" x="324" y="276" text-anchor="middle">= fingerprint of periodicity</text>
+  <text class="mono" x="324" y="293" text-anchor="middle" fill="#3f51b5">components 1–2: ~89%</text>
+  <text class="sm" x="324" y="310" text-anchor="middle">of total variance</text>
+
+  <!-- Arrow right to seasonal strength -->
+  <line x1="434" y1="260" x2="456" y2="260" stroke="#666" stroke-width="1.5"/>
+  <polygon points="452,256 460,260 452,264" fill="#666"/>
+
+  <!-- Panel 6: Seasonal strength + classification -->
+  <rect x="460" y="194" width="236" height="130" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="578" y="214" text-anchor="middle" fill="#495057">seasonal_strength + classify</text>
+  <text class="sm" x="578" y="230" text-anchor="middle">variance method: F_S = 1 − Var(R)/Var(S+R)</text>
+  <text class="sm" x="578" y="246" text-anchor="middle">spectral method (FFT-based power ratio)</text>
+  <text class="mono" x="578" y="264" text-anchor="middle" fill="#198754">strength ≈ 0.97 (both methods)</text>
+  <text class="mono" x="578" y="281" text-anchor="middle" fill="#198754">classify → StableSeasonal</text>
+  <text class="sm" x="578" y="298" text-anchor="middle">has_stable_timing = True</text>
+  <text class="sm" x="578" y="314" text-anchor="middle">detect_peaks: all stations peak day 202–221</text>
+
+  <!-- === Row 3: Result strip === -->
+  <line x1="40" y1="344" x2="680" y2="344" stroke="#ced4da" stroke-width="1.0" stroke-dasharray="4,3"/>
+
+  <!-- Result boxes -->
+  <rect x="24" y="354" width="200" height="46" rx="6" fill="#3f51b5" stroke="none"/>
+  <text class="lab" x="124" y="372" text-anchor="middle" fill="white">Period = 365 days</text>
+  <text class="mono" x="124" y="388" text-anchor="middle" fill="#FFD700">All 4 detectors agree</text>
+
+  <rect x="238" y="354" width="198" height="46" rx="6" fill="#fd7e14" stroke="none"/>
+  <text class="lab" x="337" y="372" text-anchor="middle" fill="white">Trend + seasonal isolated</text>
+  <text class="mono" x="337" y="388" text-anchor="middle" fill="white">STL recovers +0.3°C/yr</text>
+
+  <rect x="450" y="354" width="246" height="56" rx="6" fill="#198754" stroke="none"/>
+  <text class="lab" x="573" y="372" text-anchor="middle" fill="white">StableSeasonal · timing fixed</text>
+  <text class="mono" x="573" y="387" text-anchor="middle" fill="white">peak day stable;</text>
+  <text class="mono" x="573" y="401" text-anchor="middle" fill="white">mean level rises</text>
+
+  <!-- Bottom note -->
+  <text class="sm" x="360" y="430" text-anchor="middle">analyze_peak_timing: summer peak day stable at ~214 · rising temperature trend ≠ shifting timing</text>
+  <text class="sm" x="360" y="446" text-anchor="middle">matrix_profile_fdata confirms 365-day motif period from shape-based nearest-neighbour distances</text>
+</svg>

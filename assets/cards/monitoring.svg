@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Monitoring">
+  <line x1="28" y1="150" x2="292" y2="150" stroke="#6610f2" stroke-opacity=".35" stroke-width="1.5"/>
+  <line x1="28" y1="150" x2="28" y2="26" stroke="#6610f2" stroke-opacity=".35" stroke-width="1.5"/>
+  <!-- control limits -->
+  <line x1="28" y1="52" x2="292" y2="52" stroke="#6610f2" stroke-opacity=".5" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <line x1="28" y1="132" x2="292" y2="132" stroke="#6610f2" stroke-opacity=".5" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <line x1="28" y1="92" x2="292" y2="92" stroke="#6610f2" stroke-opacity=".3" stroke-width="1.2"/>
+  <!-- monitored statistic path -->
+  <path d="M40 100 L70 84 L100 104 L130 78 L160 96 L190 70 L220 40 L250 88 L278 100" stroke="#6610f2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="40" cy="100" r="3.5" fill="#6610f2"/>
+  <circle cx="70" cy="84" r="3.5" fill="#6610f2"/>
+  <circle cx="100" cy="104" r="3.5" fill="#6610f2"/>
+  <circle cx="130" cy="78" r="3.5" fill="#6610f2"/>
+  <circle cx="160" cy="96" r="3.5" fill="#6610f2"/>
+  <circle cx="190" cy="70" r="3.5" fill="#6610f2"/>
+  <!-- out-of-control point -->
+  <circle cx="220" cy="40" r="6" fill="#fff" stroke="#dc3545" stroke-width="3"/>
+  <circle cx="250" cy="88" r="3.5" fill="#6610f2"/>
+  <circle cx="278" cy="100" r="3.5" fill="#6610f2"/>
+</svg>

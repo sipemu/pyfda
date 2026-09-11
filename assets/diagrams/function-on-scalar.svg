@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Function-on-Scalar Regression" aria-labelledby="function-on-scalar-title function-on-scalar-desc">
+  <title id="function-on-scalar-title">Function-on-Scalar Regression</title>
+  <desc id="function-on-scalar-desc">Function-on-scalar regression uses fosr() to fit a smooth coefficient curve β(t) per scalar predictor, producing one fitted response curve ŷ(t) per group or treatment level.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Function-on-Scalar Regression</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Scalar predictors x shape an entire response curve y(t)</text>
+
+  <!-- Panel 1: scalar predictors / group labels -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Scalar / Group x</text>
+  <g transform="translate(52,116)">
+    <rect x="0" y="0" width="120" height="26" rx="6" fill="#fff" stroke="#ced4da"/>
+    <circle cx="16" cy="13" r="6" fill="#495057"/>
+    <text class="sm" x="30" y="17">group A · x=0</text>
+    <rect x="0" y="34" width="120" height="26" rx="6" fill="#fff" stroke="#ced4da"/>
+    <circle cx="16" cy="47" r="6" fill="#adb5bd"/>
+    <text class="sm" x="30" y="51">group B · x=1</text>
+    <rect x="0" y="68" width="120" height="26" rx="6" fill="#fff" stroke="#ced4da"/>
+    <text class="sm" x="12" y="85">dose · age · …</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#dc3545">fosr(y, X)</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Penalised β(t) per predictor</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="16">Roughness penalty λ</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="48">FPC · fosr_fpc</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="12" y="80">ANOVA · fanova</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: fitted response curves -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">Fitted Curves ŷ(t)</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">one curve per group</text>
+  <g transform="translate(520,124)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="120" x2="0" y2="8" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 92 C40 60 80 106 120 74 C138 60 150 80 156 72" stroke="#495057" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M0 64 C40 32 80 78 120 46 C138 32 150 52 156 44" stroke="#dc3545" stroke-width="2.4" stroke-linecap="round"/>
+    <text class="sm" x="120" y="104" fill="#495057">A</text>
+    <text class="sm" x="120" y="42" fill="#dc3545">B</text>
+  </g>
+</svg>

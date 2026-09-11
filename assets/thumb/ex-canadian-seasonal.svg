@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Canadian seasonal cycle">
+  <defs><linearGradient id="csg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3f51b5" stop-opacity=".16"/><stop offset="1" stop-color="#3f51b5" stop-opacity="0"/></linearGradient></defs>
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 90 C46 50 62 50 78 90 C94 130 110 130 126 90 C142 50 158 50 174 90 C190 130 206 130 222 90 C238 50 254 50 270 90 C282 120 290 120 298 96 L298 150 L30 150 Z" fill="url(#csg)"/>
+  <path d="M30 90 C46 50 62 50 78 90 C94 130 110 130 126 90 C142 50 158 50 174 90 C190 130 206 130 222 90 C238 50 254 50 270 90 C282 120 290 120 298 96" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+</svg>

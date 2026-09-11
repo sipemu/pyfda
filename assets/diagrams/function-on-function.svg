@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none"
+     role="img" aria-label="Function-on-Function Regression — beta-surface concept"
+     aria-labelledby="fof-title fof-desc">
+  <title id="fof-title">Function-on-Function Regression</title>
+  <desc id="fof-desc">Illustrates the FoF regression model: a predictor functional observation X(s) is mapped through a bivariate coefficient surface beta(s,t) to produce a response functional observation Y(t), with the surface estimated via FPCA decomposition.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Function-on-Function Regression</text>
+  <text class="sub" x="360" y="48" text-anchor="middle">Y(t) = α(t) + ∫ β(s,t) X(s) ds — coefficient surface maps predictor curve → response curve</text>
+
+  <!-- ===== Panel 1: Predictor curve X(s) ===== -->
+  <rect x="16" y="66" width="172" height="160" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="102" y="86" text-anchor="middle" fill="#495057">Predictor X(s)</text>
+  <text class="mono" x="102" y="104" text-anchor="middle" fill="#6c757d">x_data (n, m_x)</text>
+  <!-- Predictor curves (multiple obs) -->
+  <path d="M28 170 Q57 148 86 158 Q115 168 144 150 Q162 140 182 144" stroke="#3f51b5" stroke-width="1.4" fill="none" opacity="0.4"/>
+  <path d="M28 174 Q57 154 86 165 Q115 176 144 157 Q162 147 182 151" stroke="#3f51b5" stroke-width="1.6" fill="none" opacity="0.55"/>
+  <path d="M28 178 Q57 158 86 171 Q115 184 144 165 Q162 154 182 158" stroke="#3f51b5" stroke-width="1.9" fill="none" opacity="0.75"/>
+  <path d="M28 181 Q57 161 86 175 Q115 188 144 168 Q162 157 182 162" stroke="#3f51b5" stroke-width="2.2" fill="none"/>
+  <!-- s-axis -->
+  <line x1="28" y1="212" x2="182" y2="212" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="105" y="224" text-anchor="middle">s (predictor grid)</text>
+
+  <!-- Arrow 1: X → β surface -->
+  <line x1="188" y1="148" x2="216" y2="148" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-fof)"/>
+
+  <!-- ===== Panel 2: Coefficient surface β(s,t) — central orange panel ===== -->
+  <rect x="220" y="66" width="280" height="160" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="360" y="86" text-anchor="middle" fill="#fd7e14">Coefficient Surface β(s, t)</text>
+  <text class="mono" x="360" y="104" text-anchor="middle" fill="#6c757d">beta_surface shape (m_y, m_x)</text>
+
+  <!-- Surface visualization: grid of colored cells suggesting a 2D surface -->
+  <!-- Row 1 -->
+  <rect x="240" y="112" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.15"/>
+  <rect x="275" y="112" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.30"/>
+  <rect x="310" y="112" width="32" height="22" rx="3" fill="#e8710a" opacity="0.45"/>
+  <rect x="345" y="112" width="32" height="22" rx="3" fill="#e8710a" opacity="0.60"/>
+  <rect x="380" y="112" width="32" height="22" rx="3" fill="#e8710a" opacity="0.35"/>
+  <rect x="415" y="112" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.25"/>
+  <rect x="450" y="112" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.10"/>
+  <!-- Row 2 -->
+  <rect x="240" y="137" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.25"/>
+  <rect x="275" y="137" width="32" height="22" rx="3" fill="#e8710a" opacity="0.50"/>
+  <rect x="310" y="137" width="32" height="22" rx="3" fill="#e8710a" opacity="0.70"/>
+  <rect x="345" y="137" width="32" height="22" rx="3" fill="#e8710a" opacity="0.80"/>
+  <rect x="380" y="137" width="32" height="22" rx="3" fill="#e8710a" opacity="0.55"/>
+  <rect x="415" y="137" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.35"/>
+  <rect x="450" y="137" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.15"/>
+  <!-- Row 3 -->
+  <rect x="240" y="162" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.20"/>
+  <rect x="275" y="162" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.40"/>
+  <rect x="310" y="162" width="32" height="22" rx="3" fill="#e8710a" opacity="0.45"/>
+  <rect x="345" y="162" width="32" height="22" rx="3" fill="#e8710a" opacity="0.55"/>
+  <rect x="380" y="162" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.40"/>
+  <rect x="415" y="162" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.20"/>
+  <rect x="450" y="162" width="32" height="22" rx="3" fill="#3f51b5" opacity="0.10"/>
+
+  <!-- Axis labels -->
+  <text class="sm" x="360" y="205" text-anchor="middle">s →   (rows = t, cols = s)</text>
+
+  <!-- Arrow 2: β → Y -->
+  <line x1="500" y1="148" x2="528" y2="148" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-fof)"/>
+
+  <!-- ===== Panel 3: Response curve Y(t) ===== -->
+  <rect x="532" y="66" width="172" height="160" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="618" y="86" text-anchor="middle" fill="#495057">Response Y(t)</text>
+  <text class="mono" x="618" y="104" text-anchor="middle" fill="#6c757d">y_data (n, m_y)</text>
+  <!-- Response curves (fitted + actual) -->
+  <path d="M546 170 Q575 155 604 162 Q633 169 662 155 Q678 148 698 150" stroke="#198754" stroke-width="1.4" fill="none" opacity="0.4"/>
+  <path d="M546 173 Q575 158 604 167 Q633 174 662 160 Q678 152 698 154" stroke="#198754" stroke-width="1.7" fill="none" opacity="0.6"/>
+  <path d="M546 177 Q575 162 604 172 Q633 179 662 164 Q678 157 698 160" stroke="#198754" stroke-width="2.0" fill="none" opacity="0.8"/>
+  <path d="M546 180 Q575 165 604 176 Q633 183 662 168 Q678 162 698 165" stroke="#198754" stroke-width="2.3" fill="none"/>
+  <!-- t-axis -->
+  <line x1="546" y1="212" x2="698" y2="212" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="622" y="224" text-anchor="middle">t (response grid)</text>
+
+  <!-- ===== Bottom: FPCA decomposition strip ===== -->
+  <line x1="16" y1="244" x2="704" y2="244" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="lab" x="360" y="268" text-anchor="middle" fill="#495057">FPCA Decomposition — fof_regression(x_data, y_data, x_argvals, y_argvals, ncomp_x, ncomp_y)</text>
+
+  <!-- FPCA X panel -->
+  <rect x="16" y="280" width="160" height="88" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="96" y="300" text-anchor="middle" fill="#3f51b5">FPCA on X</text>
+  <text class="sm" x="96" y="318" text-anchor="middle">ncomp_x basis functions</text>
+  <text class="sm" x="96" y="334" text-anchor="middle">scores β_x shape</text>
+  <text class="sm" x="96" y="350" text-anchor="middle">(n, ncomp_x)</text>
+  <text class="sm" x="96" y="362" text-anchor="middle" fill="#6c757d">grid m_x</text>
+
+  <!-- Arrow down to coef matrix -->
+  <line x1="176" y1="324" x2="212" y2="324" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-fof)"/>
+
+  <!-- Coef matrix panel -->
+  <rect x="216" y="280" width="176" height="88" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="304" y="300" text-anchor="middle" fill="#fd7e14">Coef Matrix</text>
+  <text class="sm" x="304" y="318" text-anchor="middle">shape (ncomp_x, ncomp_y)</text>
+  <text class="sm" x="304" y="336" text-anchor="middle">maps X scores → Y scores</text>
+  <text class="sm" x="304" y="354" text-anchor="middle">→ reconstructed as</text>
+  <text class="sm" x="304" y="366" text-anchor="middle">beta_surface (m_y, m_x)</text>
+
+  <!-- Arrow to FPCA Y -->
+  <line x1="392" y1="324" x2="428" y2="324" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-fof)"/>
+
+  <!-- FPCA Y panel -->
+  <rect x="432" y="280" width="160" height="88" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="512" y="300" text-anchor="middle" fill="#198754">FPCA on Y</text>
+  <text class="sm" x="512" y="318" text-anchor="middle">ncomp_y basis functions</text>
+  <text class="sm" x="512" y="334" text-anchor="middle">fitted shape</text>
+  <text class="sm" x="512" y="350" text-anchor="middle">(n, m_y)</text>
+  <text class="sm" x="512" y="362" text-anchor="middle" fill="#6c757d">grid m_y</text>
+
+  <!-- predict_fof panel -->
+  <rect x="604" y="280" width="100" height="88" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="654" y="300" text-anchor="middle" fill="#6f42c1">predict_fof</text>
+  <text class="sm" x="654" y="318" text-anchor="middle">new_x →</text>
+  <text class="sm" x="654" y="334" text-anchor="middle">y_hat</text>
+  <text class="sm" x="654" y="350" text-anchor="middle">(n_new, m_y)</text>
+
+  <!-- Bottom strip info -->
+  <line x1="16" y1="384" x2="704" y2="384" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="360" y="404" text-anchor="middle">fof_cv → selects optimal (ncomp_x, ncomp_y) via K-fold CV on MSE</text>
+  <text class="sm" x="360" y="424" text-anchor="middle">fof_re_regression / predict_fof_re — mixed-effects variant for repeated-measures designs</text>
+  <text class="sm" x="360" y="444" text-anchor="middle" fill="#6c757d">Non-square fixture convention: n ≠ m_x ≠ m_y (transposition guard)</text>
+
+  <defs>
+    <marker id="arr-fof" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+  </defs>
+</svg>

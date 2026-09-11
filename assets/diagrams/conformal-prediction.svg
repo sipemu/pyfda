@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Conformal Prediction: Guaranteed Intervals" aria-labelledby="conformal-prediction-title conformal-prediction-desc">
+  <title id="conformal-prediction-title">Conformal Prediction: Guaranteed Intervals</title>
+  <desc id="conformal-prediction-desc">Conformal prediction uses a calibration set of residuals to construct a distribution-free prediction interval ŷ ± q that contains the true scalar response with guaranteed 1−α coverage.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Conformal Prediction: Guaranteed Intervals</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">A calibration set turns any fit into a distribution-free interval</text>
+
+  <!-- Panel 1: model + calibration -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Model + Calibration</text>
+  <g transform="translate(44,112)">
+    <line x1="0" y1="112" x2="156" y2="112" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="0" y1="0" x2="0" y2="112" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="6" y1="104" x2="150" y2="26" stroke="#495057" stroke-width="2"/>
+    <circle cx="30" cy="90" r="3" fill="#4a90d9"/>
+    <circle cx="60" cy="76" r="3" fill="#4a90d9"/>
+    <circle cx="90" cy="62" r="3" fill="#4a90d9"/>
+    <circle cx="46" cy="70" r="3.4" fill="#e8710a"/>
+    <circle cx="112" cy="56" r="3.4" fill="#e8710a"/>
+    <circle cx="132" cy="30" r="3.4" fill="#e8710a"/>
+    <text class="sm" x="0" y="130" fill="#4a90d9">■ train</text>
+    <text class="sm" x="78" y="130" fill="#e8710a">■ calib</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#dc3545">conformal_fregre_lm()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Split-conformal recipe</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="16">Calibration residuals</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="48">(1−α) quantile</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f1b8bf"/>
+    <text class="sm" x="12" y="80">P(y∈Ĉ) ≥ 1−α</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: prediction interval -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">Prediction Interval</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">point ŷ with a band</text>
+  <g transform="translate(524,124)">
+    <line x1="0" y1="110" x2="150" y2="110" stroke="#adb5bd" stroke-width="1.2"/>
+    <rect x="20" y="30" width="110" height="52" rx="6" fill="#dc3545" fill-opacity=".14"/>
+    <line x1="20" y1="30" x2="130" y2="30" stroke="#dc3545" stroke-width="2"/>
+    <line x1="20" y1="82" x2="130" y2="82" stroke="#dc3545" stroke-width="2"/>
+    <line x1="75" y1="30" x2="75" y2="82" stroke="#dc3545" stroke-width="1.4"/>
+    <circle cx="75" cy="56" r="5" fill="#dc3545"/>
+    <text class="sm" x="40" y="128">ŷ ± interval</text>
+  </g>
+</svg>

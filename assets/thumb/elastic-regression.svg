@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Elastic regression">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 120 C70 118 92 52 118 52 C144 52 150 132 176 132 C200 132 210 70 236 70" stroke="#dc3545" stroke-opacity=".4" stroke-width="2" stroke-dasharray="5 5"/>
+  <path d="M60 116 C100 114 118 46 144 46 C170 46 178 128 204 128 C228 128 240 66 266 66" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+  <path d="M150 100 C168 96 180 98 196 100" stroke="#dc3545" stroke-opacity=".7" stroke-width="1.6"/>
+  <path d="M196 100 l-7 -4 M196 100 l-6 5" stroke="#dc3545" stroke-opacity=".7" stroke-width="1.6" stroke-linecap="round"/>
+  <text x="60" y="140" fill="#dc3545" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">align</text>
+</svg>

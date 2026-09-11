@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Canadian weather by region">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none" stroke-width="2.4">
+    <path d="M30 100 C70 52 110 44 150 52 C190 60 230 54 298 92"/>
+    <path d="M30 108 C70 62 110 54 150 62 C190 70 230 64 298 100" stroke-opacity=".8"/>
+  </g>
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none" stroke-width="2.4" stroke-opacity=".38">
+    <path d="M30 132 C70 92 110 84 150 92 C190 100 230 96 298 126"/>
+    <path d="M30 140 C70 102 110 94 150 102 C190 110 230 106 298 134"/>
+  </g>
+</svg>
