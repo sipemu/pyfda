@@ -343,12 +343,16 @@ SNIPPETS: list[tuple[str, str]] = [
         growth = pd.read_csv(data_path("growth.csv"), index_col=0)
         ARG = growth.index.values.astype(float)
         girls = growth.values.T[39:].astype(np.float64)   # 54 Berkeley girls
-        # Smooth heights, then differentiate to growth-velocity curves.
+        # Smooth to B-spline coefficients, re-evaluate on a DENSE age grid
+        # (the 31-age grid is too coarse for a stable velocity), then differentiate.
         sm = fdars.basis.smooth_basis_gcv(
             girls, ARG, n_basis=12, basis_type="bspline")
-        vel = Fdata(sm["fitted"], argvals=ARG).deriv().data
+        dense = np.linspace(ARG.min(), ARG.max(), 120)
+        fit = fdars.basis.basis_to_fdata_1d(
+            sm["coefficients"], dense, 12, "bspline")
+        vel = Fdata(fit, argvals=dense).deriv().data
         # Elastic registration of the velocity curves (aligns the spurt peak).
-        res = fdars.alignment.karcher_mean(vel, ARG, max_iter=50)
+        res = fdars.alignment.karcher_mean(vel, dense, max_iter=50)
         print("karcher keys:", list(res.keys()))
         print("aligned shape:", res["aligned_data"].shape)
         print("warping gammas:", res["gammas"].shape)

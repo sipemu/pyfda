@@ -57,6 +57,33 @@ def _growth() -> tuple[np.ndarray, np.ndarray]:
     return x, arg
 
 
+# Berkeley heights are sampled on only 31 ages (biannual after age 8), too coarse
+# for a stable finite-difference velocity.  For the derivative-based analyses
+# (alignment, warping) we smooth to B-spline coefficients and re-evaluate the fit
+# on a dense age grid before differentiating, which resolves the pubertal spurt
+# cleanly.  n_boys=39 (columns M01..M39), then 54 girls (F01..F54).
+_DENSE_N = 120
+
+
+def _growth_velocity_dense(n_basis: int = 12):
+    """Return ``(dense_age, velocity, n_boys)`` on a dense grid.
+
+    Smooth the Berkeley height curves with a GCV B-spline penalty, evaluate the
+    fit on ``_DENSE_N`` equally spaced ages spanning the original range, then
+    differentiate to growth-velocity curves.
+    """
+    X, ARG = _growth()
+    sm = fdars.basis.smooth_basis_gcv(
+        X, ARG, n_basis=n_basis, basis_type="bspline"
+    )
+    dense = np.linspace(float(ARG.min()), float(ARG.max()), _DENSE_N)
+    fit = fdars.basis.basis_to_fdata_1d(
+        sm["coefficients"], dense, n_basis, "bspline"
+    )
+    vel = Fdata(fit, argvals=dense).deriv().data
+    return dense, vel, 39
+
+
 def tour_represent() -> None:
     """4.1 Data Representation — raw growth curves with the sample mean."""
     np.random.seed(42)
@@ -350,14 +377,10 @@ def tour_metric() -> None:
 def tour_alignment() -> None:
     """4.12 Elastic Alignment — growth-velocity (pubertal-spurt) registration."""
     np.random.seed(42)
-    X, ARG = _growth()
-    girls = X[39:]
-    sm = fdars.basis.smooth_basis_gcv(
-        girls, ARG, n_basis=12, basis_type="bspline"
-    )["fitted"]
-    vel = Fdata(sm, argvals=ARG).deriv().data
-    mask = ARG >= 5.0
-    Ar, Vr = ARG[mask], vel[:20, mask]
+    dense, vel, n_boys = _growth_velocity_dense()
+    girls_vel = vel[n_boys:]                 # 54 Berkeley girls, dense grid
+    mask = dense >= 5.0
+    Ar, Vr = dense[mask], girls_vel[:20, mask]
     res = fdars.alignment.karcher_mean(Vr, Ar, max_iter=50)
     aligned = res["aligned_data"]
 
@@ -395,15 +418,9 @@ def tour_warping() -> None:
     phase variation, distinct from any amplitude difference.
     """
     np.random.seed(42)
-    X, ARG = _growth()
-    # growth.csv column order: 39 boys (M01..M39) then 54 girls (F01..F54).
-    n_boys = 39
-    sm = fdars.basis.smooth_basis_gcv(
-        X, ARG, n_basis=12, basis_type="bspline"
-    )["fitted"]
-    vel = Fdata(sm, argvals=ARG).deriv().data
-    mask = ARG >= 5.0
-    Ar, V = ARG[mask], vel[:, mask]
+    dense, vel, n_boys = _growth_velocity_dense()   # dense grid, all 93 children
+    mask = dense >= 5.0
+    Ar, V = dense[mask], vel[:, mask]
     res = fdars.alignment.karcher_mean(V, Ar, max_iter=50)
     gam = res["gammas"]                     # (93, len(Ar)) warping functions
     boys, girls = gam[:n_boys], gam[n_boys:]
@@ -418,7 +435,7 @@ def tour_warping() -> None:
     ax.plot(Ar, boys.mean(axis=0), color=FDARS_COLORS[0], linewidth=2.8,
             label=f"Boys mean (n={n_boys})", zorder=5)
     ax.plot(Ar, girls.mean(axis=0), color=FDARS_COLORS[1], linewidth=2.8,
-            label=f"Girls mean (n={X.shape[0] - n_boys})", zorder=5)
+            label=f"Girls mean (n={girls.shape[0]})", zorder=5)
     ax.set_xlabel("Age (years)")
     ax.set_ylabel(r"Warped age $\gamma$(age)")
     ax.set_title("Elastic warping functions by sex (growth velocity)")
