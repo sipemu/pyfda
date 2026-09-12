@@ -1,5 +1,27 @@
 # Milestones
 
+## v14.0 fdars Software Paper — arXiv Preprint (Shipped: 2026-09-12)
+
+**Phases completed:** 6 phases, 17 plans, 27 tasks
+
+**Key accomplishments:**
+
+- Deterministic PDF figure pipeline using docs_fig.py import + seeded draws + suppressed CreationDate, proven byte-identical by git diff gate on committed smoke.pdf.
+- Two stdlib-only generator scripts wire `_capability_map.json` + `_references_map.json` to the manuscript — six `\newcommand` macros via `coverage_counts.tex` (PIPE-03 drift tripwire) and 47 `@misc` BibTeX entries in `refs.bib` (PIPE-04), consumed via `\input{coverage_counts}` and `\bibliography{refs}`, regenerable with `make paper`.
+- Standalone `paper.yml` GitHub Actions workflow path-filtered to the paper and both JSON maps, running the offline pipeline (gen_figures → assert_coverage --check → gen_refs_bib) as a hard gate before `tectonic paper/paper.tex`, making GATE-01 a live CI check.
+- Concise 5-sentence abstract + 3-part introduction grounding the Python FDA gap in Phase 87 evidence, with 8 resolving \citep keys and breadth via \nsubmodules/\npubliccallables macros.
+- Availability section (PyPI/plot/sklearn extras/Python 3.9-3.14/MIT) and conclusion (breadth macros + advisor + provenance, roadmap-agnostic) written and verified against pyproject.toml.
+- GCV B-spline smoothing + 4-component FPCA + FPCATransformer/FPCLDAClassifier 5-fold CV (86.3% accuracy) on phoneme data, with two deterministic committed figures and a git diff --exit-code paper/figures/ gate established in CI.
+- Functional time-series decomposition (ftsm, 3 components) + 3-step-ahead forecast (ftsm_forecast) on transposed canadian_weather_precip (35 stations × 365 days), with two byte-stable committed figures and an honest shallow-sample caveat in LaTeX.
+- A composable `FPCATransformer` + sklearn `LinearDiscriminantAnalysis` pipeline tuned by `GridSearchCV(n_jobs=1)` over FPCA dimensionality on the wine dataset (best 5-fold CV accuracy 0.961 at n_components=8), with two deterministic committed figures and an honest narrative subsection showcasing the `fdars` scikit-learn estimator layer.
+- Version bumped 0.12.0 -> 0.13.0 across all 5 source files, fdars rebuilt via maturin, GATE-02 proven green at 0.13.0 with 0 dangling citations and empty figure diff
+
+**Requirements:** 23/23 v14.0 requirements complete (MANU, PIPE, COMP, CASE, GATE, REL — mapped to Phases 85–90). All six phases `phase_complete` + `verification_status: passed`. Milestone audit PASSED (`.planning/milestones/v14.0-MILESTONE-AUDIT.md`).
+
+**Closeout:** verified_closeout. Pre-release `scientific-writing` manuscript audit ran before GATE-04, fixing a stale `fdars-core` version string (0.14.0 → 0.33.0) and dropping a malformed uncited bib stub; CI re-verified green. Blocking human read-through (GATE-04) approved 2026-09-12. REL-01 `v0.13.0` tag + PyPI publish handed to the user (tag not yet on origin at close). Known verification overrides: 0 newly acknowledged, 2 carried forward from a prior close (see STATE.md Deferred Items).
+
+---
+
 ## v13.0 Scientific Provenance & Cross-Language Implementations (Shipped: 2026-09-07)
 
 **Phases completed:** 5 phases, 11 plans, 21 tasks

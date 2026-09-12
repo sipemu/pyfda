@@ -2,19 +2,19 @@
 gsd_state_version: "1.0"
 milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
-current_phase: 90
-current_phase_name: Close Gate + Citable Release
-status: executing
+status: Awaiting next milestone
 stopped_at: context exhaustion at 75% (2026-09-12)
-last_updated: "2026-09-12T20:01:50.047Z"
-last_activity: 2026-09-09
-last_activity_desc: Phase 90 execution started
-state_head: 6dfdc287ebff01f5a4bbbce0b8dc577fb375f3fb
+last_updated: "2026-09-12T20:57:20.278Z"
+last_activity: 2026-09-12
+last_activity_desc: Milestone v14.0 completed and archived
+state_head: 1bb79c50b35a62c2b9c799e36fb1656b0877c112
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 17
-  completed_plans: 16
+  completed_plans: 17
+current_phase: 90
+current_phase_name: Close Gate + Citable Release
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Phase: 90 (Close Gate + Citable Release) — EXECUTING
-Plan: 2 of 2
-Status: Ready to execute
-Last activity: 2026-09-09 — Phase 90 execution started
+Phase: Milestone v14.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-09-12 — Milestone v14.0 completed and archived
 
 ## Performance Metrics
 
@@ -186,4 +186,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Review the roadmap (`.planning/ROADMAP.md`), then plan Phase 85 with `/gsd-plan-phase 85`
+- Start the next milestone with /gsd-new-milestone

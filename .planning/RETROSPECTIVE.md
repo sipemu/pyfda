@@ -271,6 +271,39 @@ A code + docs + skill milestone (no `fdars-core` bump) giving every fdars AI sur
 
 ---
 
+## Milestone: v14.0 — fdars Software Paper — arXiv Preprint
+
+**Shipped:** 2026-09-12
+**Phases:** 6 (85–90) | **Plans:** 17 | **Tasks:** 27
+
+### What Was Built
+A submission-ready arXiv software paper under a new `paper/` tree (LaTeX `article`, natbib+BibTeX) with a fully reproducible, offline, single-source-of-truth pipeline — a writing + reproducible-code milestone, no `fdars-core` bump. Coverage counts are `\input{coverage_counts.tex}` macros derived from `_capability_map.json` (`assert_coverage.py`); the bibliography is generated from `_references_map.json` (`gen_refs_bib.py`); every code snippet flows from an executed `paper/code/` script (`gen_snippets.py --check`). Front matter + design/architecture + data-representation + capability tour + AI-advisor/provenance sections; a grounded comparison table (`comparison_evidence.md`, version-stamped peer sources, `check_comparison.py` traceability gate); four reproducible case studies (phoneme FPCA+LDA CV 0.863, tecator registration+regression, canadian-weather FTS forecast, wine sklearn Pipeline+GridSearchCV CV 0.961) with byte-stable committed figures. A standalone `.github/workflows/paper.yml` runs the offline drift gates then compiles the PDF via tectonic (GATE-01) plus a real-pdflatex+bibtex arXiv-bundle job proving self-containment (GATE-03). Package tick 0.12.0 → 0.13.0; `v0.13.0` tag/publish handed to the user. 23/23 requirements.
+
+### What Worked
+- **Infrastructure-first phase ordering.** Building the drift tripwires (coverage macros + refs.bib generation + CI gate) in Phases 85–86 *before* any prose cited a number meant every later claim was machine-checked as it was written — no hand-copied integers, no stale counts survived to close.
+- **CI as the integration test.** The single green `paper.yml` run exercises every cross-phase seam end-to-end (macros → snippets → comparison → figures → tectonic → arXiv-bundle with `.bbl` resolving every `\cite`). The milestone audit used that run as its integration evidence rather than a file-reading agent — an executable proof beats static inspection.
+- **Pre-release manuscript audit before the human gate.** Re-scoping the deeper `scientific-writing` audit into Phase 90 *before* GATE-04 (rather than a separate post-release v15) caught a stale `fdars-core 0.14.0` version claim (Cargo.toml pins 0.33.0) and a malformed uncited bib stub — fixed and CI-re-verified before anything went public. Auditing the citable artifact before release avoided an arXiv v2 / patched release.
+- **Honest deferrals held.** The CITATION.cff arXiv-URL stayed a marked PLACEHOLDER (no fabricated DOI); the live CV metric (0.863) was reported instead of the research value (0.882); the FTS shallow-sample caveat was kept in the LaTeX.
+
+### What Was Inefficient
+- **The tag hand-off round-tripped.** REL-01 reserves the `v0.13.0` tag push to the user; a "done" came back before the tag was actually on origin, so the orchestrator had to surface the discrepancy and proceed with REL-01 as hand-off-pending rather than shipped. A tag-existence check is cheap and worth doing before trusting the signal.
+- **The audit's own severity rating under-called the real bug.** The `scientific-writing` pass rated the stale-version finding LOW ("confirm it matches Cargo.toml") when it was in fact a rendered factual error; the value came from a human reading the finding against the source, not the tool's score.
+
+### Patterns Established
+- **Single source of truth, machine-derived, drift-gated — extended from docs to a paper.** Every number in the manuscript traces to `_capability_map.json` / `_references_map.json` / an executed script, with `--check` gates that fail CI on drift. No prose number is authored by hand.
+- **Pre-release audit as a close-phase step.** For a citable/public artifact, run the content audit (claims/consistency/lint registries) *inside* the close phase, before the blocking human read-through — not as a follow-on milestone.
+
+### Key Lessons
+- When a milestone's core value is "provably correct," the reproducible pipeline + CI compile is the enforcement mechanism; the human gate then reviews a small, honest, structurally-safe artifact.
+- A tool's severity score is a prompt for human judgment, not a verdict — the important fix this milestone was the one the audit rated LOW.
+
+### Cost Observations
+- Model mix: orchestrator opus; the pre-release audit delegated to a single general-purpose subagent (registries + CLI runs + findings report).
+- Resumed mid-Phase-90 (context-exhaustion handoff) via `/gsd-autonomous`; the automatable close gates (push, CI) were already green, so the run's real work was the audit + lifecycle.
+- Notable: delegating the audit build kept the orchestrator context lean while the subagent read the whole paper and ran five CLIs.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution

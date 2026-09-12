@@ -8,7 +8,9 @@ pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-da
 
 The documentation — diagrams first, examples second — must make functional data analysis in `fdars` visually clear and provably correct: every diagram faithfully depicts what the method actually does, and every example runs against the current API.
 
-## Current Milestone: v14.0 fdars Software Paper — arXiv Preprint
+## Last Shipped Milestone: v14.0 fdars Software Paper — arXiv Preprint (shipped 2026-09-12)
+
+**Delivered:** a submission-ready arXiv software paper under a new `paper/` tree (LaTeX `article`, natbib+BibTeX) with a fully reproducible, offline, single-source-of-truth pipeline — every coverage count is a `\input{coverage_counts.tex}` macro derived from `_capability_map.json` (`assert_coverage.py`), the bibliography is generated from `_references_map.json` (`gen_refs_bib.py`), and every code snippet flows from an executed `paper/code/` script. Front matter + design/architecture + data-representation + capability tour + AI-advisor/provenance sections; a grounded comparison-with-related-software table (`comparison_evidence.md`, version-stamped peer sources); four reproducible case studies (phoneme FPCA+LDA CV 0.863; tecator registration+regression; canadian-weather FTS forecast; wine sklearn Pipeline+GridSearchCV CV 0.961) with byte-stable committed figures. A standalone `.github/workflows/paper.yml` runs the offline drift gates then compiles the PDF via tectonic (GATE-01) plus a real-pdflatex+bibtex arXiv-bundle job proving self-containment (GATE-03). Pre-release `scientific-writing` audit (registries under `paper/audit/`) before the blocking human read-through (GATE-04, approved); package tick 0.12.0 → 0.13.0 with `CITATION.cff` (arXiv-URL placeholdered), `v0.13.0` tag/publish handed to user (REL-01). 23/23 requirements; 6 phases (85–90), 17 plans. Full detail: `.planning/milestones/v14.0-ROADMAP.md`.
 
 **Goal:** Produce a submission-ready arXiv software paper introducing the `fdars` package (FDApy-style — cf. arXiv:2101.11003), backed by a fully reproducible figure/table pipeline, foregrounding **breadth of FDA method coverage** and **method-accuracy/correctness** as the differentiators, with the Rust/zero-copy architecture and the unique grounded-AI-advisor + scientific-provenance layers as design highlights. A writing + reproducible-code milestone — no `fdars-core` bump, no new numerical bindings.
 
@@ -210,15 +212,15 @@ _All 21 requirements validated; suite 560 passed / 4 skipped; whole-site `mkdocs
 
 ### Active
 
-**v14.0 — fdars Software Paper — arXiv Preprint (scoped 2026-09-08; writing + reproducible code, no crate bump):**
+**v14.0 — fdars Software Paper — arXiv Preprint (Phases 85–90, shipped 2026-09-12; writing + reproducible code, no crate bump):**
 
-- [ ] Manuscript scaffold — `paper/` LaTeX source (arXiv `article`, self-contained), FDApy-style section skeleton, author/metadata block, `refs.bib` generated from `_references_map.json`
-- [ ] Software design & architecture section — Rust core + PyO3 zero-copy, module map, `Fdata` container, sklearn layer, AI advisor/provenance (qualitative, no benchmarks)
-- [ ] Capability tour + comparison-with-related-software table — coverage grounded in the live `_capability_map.json`; feature comparison vs scikit-fda / FDApy / R fda·fda.usc·refund
-- [ ] Illustrative case studies on real `docs/data/` datasets — narrative worked examples with result figures
-- [ ] Reproducible artifact — `paper/code/` one-command runner regenerating every figure + table against current `fdars` (offline, seeded, deterministic), figures committed to `paper/figures/`
-- [ ] Citable-release companion — `CITATION.cff` + arXiv-ready metadata
-- [ ] Close gate — reproducible pipeline green offline; every manuscript snippet executes against current `fdars`; PDF compile via CI `tectonic`; blocking human manuscript read-through approved
+- [x] Manuscript scaffold — `paper/` LaTeX source (arXiv `article`, self-contained), FDApy-style section skeleton, author/metadata block, `refs.bib` generated from `_references_map.json` — Phase 85 (MANU-01/08, PIPE-01/02)
+- [x] Software design & architecture section — Rust core + PyO3 zero-copy, module map, `Fdata` container, sklearn layer, AI advisor/provenance (qualitative, no benchmarks) — Phase 88 (MANU-02..07)
+- [x] Capability tour + comparison-with-related-software table — coverage grounded in the live `_capability_map.json`; feature comparison vs scikit-fda / FDApy / R fda·fda.usc·refund — Phases 87/88 (COMP-01/02, PIPE-03/04)
+- [x] Illustrative case studies on real `docs/data/` datasets — narrative worked examples with result figures — Phase 89 (CASE-01..04)
+- [x] Reproducible artifact — `paper/code/` one-command runner regenerating every figure + table against current `fdars` (offline, seeded, deterministic), figures committed to `paper/figures/` — Phases 85/89 (PIPE-01/02)
+- [x] Citable-release companion — `CITATION.cff` + arXiv-ready metadata; pkg 0.12.0 → 0.13.0 (REL-01, tag/publish handed to user) — Phase 90
+- [x] Close gate — reproducible pipeline green offline; every manuscript snippet executes against current `fdars`; PDF compile via CI `tectonic` + real-pdflatex arXiv-bundle self-containment; blocking human manuscript read-through approved — Phase 90 (GATE-01..04)
 
 **v13.0 — Scientific Provenance & Cross-Language Implementations (Phases 80–84, shipped 2026-09-07; code + docs + skill, no crate bump):**
 
@@ -362,6 +364,8 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-08 — STARTED milestone v14.0 (fdars Software Paper — arXiv Preprint) via /gsd-new-milestone. FDApy-style software paper (arXiv preprint) introducing the `fdars` package, foregrounding breadth of FDA method coverage + method-accuracy/correctness (no benchmarks), backed by a fully reproducible figure/table pipeline in `paper/code/` running against the current API. Writing + reproducible-code milestone — no `fdars-core` bump, no new bindings; reuses `docs/data/` datasets, `_capability_map.json` (coverage) and `_references_map.json` (bibliography). Local hard gate = Python reproducible pipeline; PDF compile via CI tectonic; blocking human manuscript read-through before close. Next: `/gsd-plan-phase` after roadmap.*
+*Last updated: 2026-09-12 — SHIPPED milestone v14.0 (fdars Software Paper — arXiv Preprint) via /gsd-autonomous. Writing + reproducible-code milestone, no `fdars-core` bump: a submission-ready arXiv paper under `paper/` (LaTeX article, natbib+BibTeX) with a fully reproducible offline single-source-of-truth pipeline (coverage macros from `_capability_map.json`, bibliography from `_references_map.json`, every snippet from an executed `paper/code/` script), a grounded comparison table, four reproducible case studies, and a standalone `paper.yml` CI (tectonic + real-pdflatex arXiv-bundle self-containment). Pre-release `scientific-writing` audit fixed a stale `fdars-core` version string + a malformed bib stub; blocking human read-through approved (GATE-04); pkg 0.12.0 → 0.13.0, `v0.13.0` tag/publish handed to user. 23/23 requirements; 6 phases (85–90), 17 plans. Next: `/gsd-new-milestone`.*
+
+*Prior update: 2026-09-08 — STARTED milestone v14.0 via /gsd-new-milestone (FDApy-style arXiv software paper, reproducible figure/table pipeline; no crate bump).*
 
 *Prior update: 2026-09-07 — SHIPPED milestone v13.0 (Scientific Provenance & Cross-Language Implementations) via /gsd-autonomous. Code + docs + skill, no `fdars-core` bump: a curated paper-level references map (`_references_map.json`, 57 papers / 243 callable→paper entries, honest 28/437 coverage) with R/Python/Matlab implementation pointers, a provably LLM-free `fdars_method_references` MCP tool (GATE-05 mirror), an extended `fdars-capabilities` skill (hybrid curated/flagged-`grounded:false` protocol), and an offline-emitted References docs surface + `llms.txt` provenance section. 22/22 requirements validated; whole-site `mkdocs build --strict` green offline; blocking human citation-accuracy review approved; pkg 0.11.0 → 0.12.0. Next: `/gsd-new-milestone`.*
