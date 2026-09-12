@@ -1,9 +1,10 @@
 """Generate paper/refs.bib from python/fdars/_references_map.json.
 
 All entries use ``@misc`` (the map has no ``journal``, ``booktitle``, or
-``publisher`` fields).  Uncurated placeholder entries (keys starting with
-``_uncurated``) are skipped; exactly 47 curated/non-uncurated entries are
-emitted.
+``publisher`` fields).  Two classes of record are skipped: uncurated
+placeholder keys (starting with ``_uncurated``) and empty-payload stubs (no
+``title``, ``authors``, or ``year`` — these can only emit a malformed
+``@misc`` carrying a lone ``note``).  Exactly 46 entries are emitted.
 
 Usage
 -----
@@ -106,7 +107,15 @@ def _build_content() -> tuple[str, int, int]:
         if key.startswith("_uncurated"):
             skipped += 1
             continue
-        entries.append(_entry(key, papers[key]))
+        paper = papers[key]
+        # Skip records with no bibliographic payload (no title, author, or
+        # year): they can only emit a malformed @misc carrying a lone note,
+        # which is dead weight (never renders under \bibliographystyle{plain}
+        # unless cited, and no such stub is cited).
+        if not (paper.get("title") or paper.get("authors") or paper.get("year")):
+            skipped += 1
+            continue
+        entries.append(_entry(key, paper))
 
     content = _HEADER + "\n\n".join(entries) + "\n"
     return content, len(entries), skipped

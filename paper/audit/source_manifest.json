@@ -1,0 +1,1070 @@
+{
+  "schema_version": "1.0",
+  "sources": [
+    {
+      "evidence_id": "E001",
+      "source_type": "journal_article",
+      "title": "Barycenters in the Wasserstein space",
+      "authors": [
+        "Agueh, M.",
+        "Carlier, G."
+      ],
+      "identifiers": {
+        "doi": "10.1137/100805741",
+        "url": "https://epubs.siam.org/doi/10.1137/100805741"
+      },
+      "locator": "paper/refs.bib:@agueh_carlier_2011",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2011
+    },
+    {
+      "evidence_id": "E002",
+      "source_type": "journal_article",
+      "title": "Shape outlier detection and visualization for functional data: the outliergram",
+      "authors": [
+        "Arribas-Gil, A.",
+        "Romo, J."
+      ],
+      "identifiers": {
+        "doi": "10.1093/biostatistics/kxu006",
+        "url": "https://academic.oup.com/biostatistics/article/15/4/603/269095"
+      },
+      "locator": "paper/refs.bib:@arribas_gil_romo_2014",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2014
+    },
+    {
+      "evidence_id": "E003",
+      "source_type": "conference_paper",
+      "title": "Differentiable Divergences Between Time Series",
+      "authors": [
+        "Blondel, M.",
+        "Mensch, A.",
+        "Vert, J.P."
+      ],
+      "identifiers": {
+        "url": "https://arxiv.org/abs/2201.12484"
+      },
+      "locator": "paper/refs.bib:@blondel_et_al_2021",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2021
+    },
+    {
+      "evidence_id": "E004",
+      "source_type": "journal_article",
+      "title": "The discriminative functional mixture model for a comparative analysis of bike sharing systems",
+      "authors": [
+        "Bouveyron, C.",
+        "Côme, E.",
+        "Jacques, J."
+      ],
+      "identifiers": {
+        "doi": "10.1214/15-AOAS861",
+        "url": "https://projecteuclid.org/journals/annals-of-applied-statistics/volume-9/issue-4/The-discriminative-functional-mixture-model-for-a-comparative-analysis-of/10.1214/15-AOAS861.full"
+      },
+      "locator": "paper/refs.bib:@bouveyron_et_al_2015",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2015
+    },
+    {
+      "evidence_id": "E005",
+      "source_type": "journal_article",
+      "title": "Model-based clustering of time series in group-specific functional subspaces",
+      "authors": [
+        "Bouveyron, C.",
+        "Jacques, J."
+      ],
+      "identifiers": {
+        "doi": "10.1007/s11634-011-0095-6",
+        "url": "https://link.springer.com/article/10.1007/s11634-011-0095-6"
+      },
+      "locator": "paper/refs.bib:@bouveyron_jacques_2011",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2011
+    },
+    {
+      "evidence_id": "E006",
+      "source_type": "journal_article",
+      "title": "Functional clustering and identifying substructures of longitudinal data",
+      "authors": [
+        "Chiou, J.M.",
+        "Li, P.L."
+      ],
+      "identifiers": {
+        "doi": "10.1111/j.1467-9868.2007.00605.x",
+        "url": "https://rss.onlinelibrary.wiley.com/doi/full/10.1111/j.1467-9868.2007.00605.x"
+      },
+      "locator": "paper/refs.bib:@chiou_li_2007",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2007
+    },
+    {
+      "evidence_id": "E007",
+      "source_type": "journal_article",
+      "title": "Multivariate functional halfspace depth",
+      "authors": [
+        "Claeskens, G.",
+        "Hubert, M.",
+        "Slaets, L.",
+        "Vakili, K."
+      ],
+      "identifiers": {
+        "doi": "10.1080/01621459.2013.856795",
+        "url": "https://www.tandfonline.com/doi/abs/10.1080/01621459.2013.856795"
+      },
+      "locator": "paper/refs.bib:@claeskens_hubert_slaets_2014",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2014
+    },
+    {
+      "evidence_id": "E008",
+      "source_type": "journal_article",
+      "title": "Smoothing noisy data with spline functions",
+      "authors": [
+        "Craven, P.",
+        "Wahba, G."
+      ],
+      "identifiers": {
+        "doi": "10.1007/BF01404567",
+        "url": "https://link.springer.com/article/10.1007/BF01404567"
+      },
+      "locator": "paper/refs.bib:@craven_wahba_1979",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 1979
+    },
+    {
+      "evidence_id": "E009",
+      "source_type": "journal_article",
+      "title": "A simple multiway ANOVA for functional data",
+      "authors": [
+        "Cuesta-Albertos, J.A.",
+        "Febrero-Bande, M."
+      ],
+      "identifiers": {
+        "doi": "10.1007/s11749-010-0185-3",
+        "url": "https://link.springer.com/article/10.1007/s11749-010-0185-3"
+      },
+      "locator": "paper/refs.bib:@cuesta_albertos_febrero_2010",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2010
+    },
+    {
+      "evidence_id": "E010",
+      "source_type": "chapter",
+      "title": "Impartial trimmed means for functional data",
+      "authors": [
+        "Cuesta-Albertos, J.A.",
+        "Fraiman, R."
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-3-7908-2349-3_12",
+        "url": "https://link.springer.com/chapter/10.1007/978-3-7908-2349-3_12"
+      },
+      "locator": "paper/refs.bib:@cuesta_albertos_fraiman_2009",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2009
+    },
+    {
+      "evidence_id": "E011",
+      "source_type": "journal_article",
+      "title": "An ANOVA test for functional data",
+      "authors": [
+        "Cuevas, A.",
+        "Febrero, M.",
+        "Fraiman, R."
+      ],
+      "identifiers": {
+        "doi": "10.1016/j.csda.2003.10.021",
+        "url": "https://www.sciencedirect.com/science/article/abs/pii/S0167947303001567"
+      },
+      "locator": "paper/refs.bib:@cuevas_febrero_fraiman_2004",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2004
+    },
+    {
+      "evidence_id": "E012",
+      "source_type": "journal_article",
+      "title": "Robust estimation and classification for functional data via projection-based depth notions",
+      "authors": [
+        "Cuevas, A.",
+        "Febrero, M.",
+        "Fraiman, R."
+      ],
+      "identifiers": {
+        "doi": "10.1007/s00180-007-0053-0",
+        "url": "https://link.springer.com/article/10.1007/s00180-007-0053-0"
+      },
+      "locator": "paper/refs.bib:@cuevas_febrero_fraiman_2007",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2007
+    },
+    {
+      "evidence_id": "E013",
+      "source_type": "conference_paper",
+      "title": "Fast global alignment kernels",
+      "authors": [
+        "Cuturi, M."
+      ],
+      "identifiers": {
+        "doi": "10.5555/3104482.3104599",
+        "url": "https://dl.acm.org/doi/10.5555/3104482.3104599"
+      },
+      "locator": "paper/refs.bib:@cuturi_2011",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2011
+    },
+    {
+      "evidence_id": "E014",
+      "source_type": "conference_paper",
+      "title": "Soft-DTW: a differentiable loss function for time-series",
+      "authors": [
+        "Cuturi, M.",
+        "Blondel, M."
+      ],
+      "identifiers": {
+        "url": "https://proceedings.mlr.press/v70/cuturi17a.html"
+      },
+      "locator": "paper/refs.bib:@cuturi_blondel_2017",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2017
+    },
+    {
+      "evidence_id": "E015",
+      "source_type": "journal_article",
+      "title": "dabo_gijbels_2010",
+      "authors": [
+        "dabo_gijbels_2010"
+      ],
+      "identifiers": {},
+      "locator": "paper/refs.bib:@dabo_gijbels_2010",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      }
+    },
+    {
+      "evidence_id": "E016",
+      "source_type": "journal_article",
+      "title": "Directional outlyingness for multivariate functional data",
+      "authors": [
+        "Dai, W.",
+        "Genton, M.G."
+      ],
+      "identifiers": {
+        "doi": "10.1016/j.csda.2018.03.017",
+        "url": "https://www.sciencedirect.com/science/article/abs/pii/S016794731830077X"
+      },
+      "locator": "paper/refs.bib:@dai_genton_2019",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2019
+    },
+    {
+      "evidence_id": "E017",
+      "source_type": "journal_article",
+      "title": "Simultaneous confidence bands for nonparametric regression with functional data",
+      "authors": [
+        "Degras, D."
+      ],
+      "identifiers": {
+        "doi": "10.5705/ss.2009.207",
+        "url": "https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N412.html"
+      },
+      "locator": "paper/refs.bib:@degras_2011",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2011
+    },
+    {
+      "evidence_id": "E018",
+      "source_type": "journal_article",
+      "title": "Flexible smoothing with B-splines and penalties",
+      "authors": [
+        "Eilers, P.H.C.",
+        "Marx, B.D."
+      ],
+      "identifiers": {
+        "doi": "10.1214/ss/1038425655",
+        "url": "https://projecteuclid.org/journals/statistical-science/volume-11/issue-2/Flexible-smoothing-with-B-splines-and-penalties/10.1214/ss/1038425655.full"
+      },
+      "locator": "paper/refs.bib:@eilers_marx_1996",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 1996
+    },
+    {
+      "evidence_id": "E019",
+      "source_type": "journal_article",
+      "title": "Outlier detection in functional data by depth measures with application to identify abnormal NOx levels",
+      "authors": [
+        "Febrero, M.",
+        "Galeano, P.",
+        "González-Manteiga, W."
+      ],
+      "identifiers": {
+        "doi": "10.1002/env.878",
+        "url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/env.878"
+      },
+      "locator": "paper/refs.bib:@febrero_galeano_gonzalez_2008",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2008
+    },
+    {
+      "evidence_id": "E020",
+      "source_type": "book",
+      "title": "Nonparametric Functional Data Analysis",
+      "authors": [
+        "Ferraty, F.",
+        "Vieu, P."
+      ],
+      "identifiers": {
+        "doi": "10.1007/0-387-36620-2",
+        "url": "https://link.springer.com/book/10.1007/0-387-36620-2"
+      },
+      "locator": "paper/refs.bib:@ferraty_vieu_2006",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2006
+    },
+    {
+      "evidence_id": "E021",
+      "source_type": "journal_article",
+      "title": "Trimmed means for functional data",
+      "authors": [
+        "Fraiman, R.",
+        "Muniz, G."
+      ],
+      "identifiers": {
+        "doi": "10.1007/BF02595706",
+        "url": "https://link.springer.com/article/10.1007/BF02595706"
+      },
+      "locator": "paper/refs.bib:@fraiman_muniz_2001",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2001
+    },
+    {
+      "evidence_id": "E022",
+      "source_type": "journal_article",
+      "title": "Robust functional estimation using the median and spherical principal components",
+      "authors": [
+        "Gervini, D."
+      ],
+      "identifiers": {
+        "doi": "10.1093/biomet/asn031",
+        "url": "https://academic.oup.com/biomet/article/95/3/587/217534"
+      },
+      "locator": "paper/refs.bib:@gervini_2008",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2008
+    },
+    {
+      "evidence_id": "E023",
+      "source_type": "journal_article",
+      "title": "Multivariate functional principal component analysis for data observed on different (dimensional) domains",
+      "authors": [
+        "Happ, C.",
+        "Greven, S."
+      ],
+      "identifiers": {
+        "doi": "10.1080/01621459.2016.1273115",
+        "url": "https://www.tandfonline.com/doi/abs/10.1080/01621459.2016.1273115"
+      },
+      "locator": "paper/refs.bib:@happ_greven_2018",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2018
+    },
+    {
+      "evidence_id": "E024",
+      "source_type": "journal_article",
+      "title": "Weakly dependent functional data",
+      "authors": [
+        "Hörmann, S.",
+        "Kokoszka, P."
+      ],
+      "identifiers": {
+        "doi": "10.1214/09-AOS768",
+        "url": "https://projecteuclid.org/journals/annals-of-statistics/volume-38/issue-3/Weakly-dependent-functional-data/10.1214/09-AOS768.full"
+      },
+      "locator": "paper/refs.bib:@hormann_kokoszka_2010",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2010
+    },
+    {
+      "evidence_id": "E025",
+      "source_type": "journal_article",
+      "title": "Robust forecasting of mortality and fertility rates: a functional data approach",
+      "authors": [
+        "Hyndman, R.J.",
+        "Ullah, M.S."
+      ],
+      "identifiers": {
+        "doi": "10.1016/j.csda.2006.07.028",
+        "url": "https://www.sciencedirect.com/science/article/abs/pii/S0167947306002775"
+      },
+      "locator": "paper/refs.bib:@hyndman_ullah_2007",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2007
+    },
+    {
+      "evidence_id": "E026",
+      "source_type": "journal_article",
+      "title": "On the concept of depth for functional data",
+      "authors": [
+        "López-Pintado, S.",
+        "Romo, J."
+      ],
+      "identifiers": {
+        "doi": "10.1198/jasa.2009.0108",
+        "url": "https://www.tandfonline.com/doi/abs/10.1198/jasa.2009.0108"
+      },
+      "locator": "paper/refs.bib:@lopez_pintado_romo_2009",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2009
+    },
+    {
+      "evidence_id": "E027",
+      "source_type": "journal_article",
+      "title": "Functional Data Analysis of Amplitude and Phase Variation",
+      "authors": [
+        "Marron, J.S.",
+        "Ramsay, J.O.",
+        "Sangalli, L.M.",
+        "Srivastava, A."
+      ],
+      "identifiers": {
+        "doi": "10.1214/15-STS524",
+        "url": "https://projecteuclid.org/journals/statistical-science/volume-30/issue-4/Functional-Data-Analysis-of-Amplitude-and-Phase-Variation/10.1214/15-STS524.full"
+      },
+      "locator": "paper/refs.bib:@marron_ramsay_sangalli_srivastava_2015",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2015
+    },
+    {
+      "evidence_id": "E028",
+      "source_type": "journal_article",
+      "title": "Generalized functional linear models",
+      "authors": [
+        "Müller, H.G.",
+        "Stadtmüller, U."
+      ],
+      "identifiers": {
+        "doi": "10.1214/009053604000001156",
+        "url": "https://projecteuclid.org/journals/annals-of-statistics/volume-33/issue-2/Generalized-functional-linear-models/10.1214/009053604000001156.full"
+      },
+      "locator": "paper/refs.bib:@muller_stadtmuller_2005",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2005
+    },
+    {
+      "evidence_id": "E029",
+      "source_type": "journal_article",
+      "title": "On Estimating Regression (Nadaraya); Smooth Regression Analysis (Watson)",
+      "authors": [
+        "Nadaraya, E.A.",
+        "Watson, G.S."
+      ],
+      "identifiers": {},
+      "locator": "paper/refs.bib:@nadaraya_watson_1964",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 1964
+    },
+    {
+      "evidence_id": "E030",
+      "source_type": "journal_article",
+      "title": "Extremal depth for functional data and applications",
+      "authors": [
+        "Narisetty, N.N.",
+        "Nair, V.N."
+      ],
+      "identifiers": {
+        "doi": "10.1080/01621459.2015.1110033",
+        "url": "https://www.tandfonline.com/doi/full/10.1080/01621459.2015.1110033"
+      },
+      "locator": "paper/refs.bib:@narisetty_nair_2016",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2016
+    },
+    {
+      "evidence_id": "E031",
+      "source_type": "journal_article",
+      "title": "Fourier analysis of stationary time series in function space",
+      "authors": [
+        "Panaretos, V.M.",
+        "Tavakoli, S."
+      ],
+      "identifiers": {
+        "doi": "10.1214/13-AOS1086",
+        "url": "https://projecteuclid.org/journals/annals-of-statistics/volume-41/issue-2/Fourier-analysis-of-stationary-time-series-in-function-space/10.1214/13-AOS1086.full"
+      },
+      "locator": "paper/refs.bib:@panaretos_tavakoli_2013",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2013
+    },
+    {
+      "evidence_id": "E032",
+      "source_type": "journal_article",
+      "title": "Functional data analysis for density functions by transformation to a Hilbert space",
+      "authors": [
+        "Petersen, A.",
+        "Müller, H.G."
+      ],
+      "identifiers": {
+        "doi": "10.1214/15-AOS1363",
+        "url": "https://projecteuclid.org/journals/annals-of-statistics/volume-44/issue-1/Functional-data-analysis-for-density-functions-by-transformation-to-a/10.1214/15-AOS1363.full"
+      },
+      "locator": "paper/refs.bib:@petersen_muller_2016",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2016
+    },
+    {
+      "evidence_id": "E033",
+      "source_type": "journal_article",
+      "title": "Fréchet regression for random objects with Euclidean predictors",
+      "authors": [
+        "Petersen, A.",
+        "Müller, H.G."
+      ],
+      "identifiers": {
+        "doi": "10.1214/17-AOS1624",
+        "url": "https://projecteuclid.org/journals/annals-of-statistics/volume-47/issue-2/Fr%c3%a9chet-regression-for-random-objects-with-Euclidean-predictors/10.1214/17-AOS1624.full"
+      },
+      "locator": "paper/refs.bib:@petersen_muller_2019",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2019
+    },
+    {
+      "evidence_id": "E034",
+      "source_type": "journal_article",
+      "title": "The interval testing procedure: A general framework for inference in functional data analysis",
+      "authors": [
+        "Pini, A.",
+        "Vantini, S."
+      ],
+      "identifiers": {
+        "doi": "10.1111/biom.12476",
+        "url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/biom.12476"
+      },
+      "locator": "paper/refs.bib:@pini_vantini_2016",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2016
+    },
+    {
+      "evidence_id": "E035",
+      "source_type": "journal_article",
+      "title": "PLS regression on a stochastic process",
+      "authors": [
+        "Preda, C.",
+        "Saporta, G."
+      ],
+      "identifiers": {
+        "doi": "10.1016/j.csda.2004.07.002",
+        "url": "https://www.sciencedirect.com/science/article/abs/pii/S0167947304002208"
+      },
+      "locator": "paper/refs.bib:@preda_saporta_2005",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2005
+    },
+    {
+      "evidence_id": "E036",
+      "source_type": "journal_article",
+      "title": "Some tools for functional data analysis",
+      "authors": [
+        "Ramsay, J.O.",
+        "Dalzell, C.J."
+      ],
+      "identifiers": {
+        "doi": "10.1111/j.2517-6161.1991.tb01844.x",
+        "url": "https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.2517-6161.1991.tb01844.x"
+      },
+      "locator": "paper/refs.bib:@ramsay_dalzell_1991",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 1991
+    },
+    {
+      "evidence_id": "E037",
+      "source_type": "book",
+      "title": "Functional Data Analysis",
+      "authors": [
+        "Ramsay, J.O.",
+        "Silverman, B.W."
+      ],
+      "identifiers": {
+        "doi": "10.1007/b98888",
+        "url": "https://link.springer.com/book/10.1007/b98888"
+      },
+      "locator": "paper/refs.bib:@ramsay_silverman_2005",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2005
+    },
+    {
+      "evidence_id": "E038",
+      "source_type": "journal_article",
+      "title": "Dynamic programming algorithm optimization for spoken word recognition",
+      "authors": [
+        "Sakoe, H.",
+        "Chiba, S."
+      ],
+      "identifiers": {
+        "doi": "10.1109/TASSP.1978.1163055",
+        "url": "https://ieeexplore.ieee.org/document/1163055"
+      },
+      "locator": "paper/refs.bib:@sakoe_chiba_1978",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 1978
+    },
+    {
+      "evidence_id": "E039",
+      "source_type": "journal_article",
+      "title": "Functional additive mixed models",
+      "authors": [
+        "Scheipl, F.",
+        "Staicu, A.M.",
+        "Greven, S."
+      ],
+      "identifiers": {
+        "doi": "10.1080/10618600.2014.901914",
+        "url": "https://www.tandfonline.com/doi/abs/10.1080/10618600.2014.901914"
+      },
+      "locator": "paper/refs.bib:@scheipl_staicu_greven_2015",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2015
+    },
+    {
+      "evidence_id": "E040",
+      "source_type": "preprint",
+      "title": "Registration of functional data using Fisher-Rao metric",
+      "authors": [
+        "Srivastava, A.",
+        "Wu, W.",
+        "Kurtek, S.",
+        "Klassen, E.",
+        "Marron, J.S."
+      ],
+      "identifiers": {
+        "url": "https://arxiv.org/abs/1103.3817"
+      },
+      "locator": "paper/refs.bib:@srivastava_et_al_2011",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2011
+    },
+    {
+      "evidence_id": "E041",
+      "source_type": "book",
+      "title": "Functional and Shape Data Analysis",
+      "authors": [
+        "Srivastava, A.",
+        "Klassen, E.P."
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-1-4939-4020-2",
+        "url": "https://link.springer.com/book/10.1007/978-1-4939-4020-2"
+      },
+      "locator": "paper/refs.bib:@srivastava_klassen_2016",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2016
+    },
+    {
+      "evidence_id": "E042",
+      "source_type": "journal_article",
+      "title": "Functional boxplots",
+      "authors": [
+        "Sun, Y.",
+        "Genton, M.G."
+      ],
+      "identifiers": {
+        "doi": "10.1198/jcgs.2011.09224",
+        "url": "https://www.tandfonline.com/doi/abs/10.1198/jcgs.2011.09224"
+      },
+      "locator": "paper/refs.bib:@sun_genton_2011",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2011
+    },
+    {
+      "evidence_id": "E043",
+      "source_type": "journal_article",
+      "title": "Generative models for functional data using phase and amplitude separation",
+      "authors": [
+        "Tucker, J.D.",
+        "Wu, W.",
+        "Srivastava, A."
+      ],
+      "identifiers": {
+        "doi": "10.1016/j.csda.2012.12.001",
+        "url": "https://www.sciencedirect.com/science/article/abs/pii/S0167947312004227"
+      },
+      "locator": "paper/refs.bib:@tucker_wu_srivastava_2013",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2013
+    },
+    {
+      "evidence_id": "E044",
+      "source_type": "journal_article",
+      "title": "Elastic functional changepoint detection of climate impacts from localized sources",
+      "authors": [
+        "Tucker, J.D.",
+        "Yarger, D."
+      ],
+      "identifiers": {
+        "doi": "10.1002/env.2826",
+        "url": "https://onlinelibrary.wiley.com/doi/10.1002/env.2826"
+      },
+      "locator": "paper/refs.bib:@tucker_yarger_2024",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2024
+    },
+    {
+      "evidence_id": "E045",
+      "source_type": "journal_article",
+      "title": "Multivariate functional additive mixed models",
+      "authors": [
+        "Volkmann, A.",
+        "Stöcker, A.",
+        "Scheipl, F.",
+        "Greven, S."
+      ],
+      "identifiers": {
+        "doi": "10.1177/1471082X211056158",
+        "url": "https://journals.sagepub.com/doi/full/10.1177/1471082X211056158"
+      },
+      "locator": "paper/refs.bib:@volkmann_et_al_2023",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2023
+    },
+    {
+      "evidence_id": "E046",
+      "source_type": "journal_article",
+      "title": "Functional data analysis for sparse longitudinal data",
+      "authors": [
+        "Yao, F.",
+        "Müller, H.G.",
+        "Wang, J.L."
+      ],
+      "identifiers": {
+        "doi": "10.1198/016214504000001745",
+        "url": "https://www.tandfonline.com/doi/abs/10.1198/016214504000001745"
+      },
+      "locator": "paper/refs.bib:@yao_muller_wang_2005",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2005
+    },
+    {
+      "evidence_id": "E047",
+      "source_type": "conference_paper",
+      "title": "Time series shapelets: a new primitive for data mining",
+      "authors": [
+        "Ye, L.",
+        "Keogh, E."
+      ],
+      "identifiers": {
+        "doi": "10.1145/1557019.1557122",
+        "url": "https://dl.acm.org/doi/10.1145/1557019.1557122"
+      },
+      "locator": "paper/refs.bib:@ye_keogh_2009",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2009
+    },
+    {
+      "evidence_id": "E048",
+      "source_type": "journal_article",
+      "title": "scikit-fda: A Python Package for Functional Data Analysis",
+      "authors": [
+        "Ramos-Carre{\\~n}o, Carlos",
+        "Torrecilla, Jos{\\'e} L.",
+        "Carbajo-Berrocal, Miguel",
+        "Marcos, Pablo",
+        "Su{\\'a}rez, Alberto"
+      ],
+      "identifiers": {},
+      "locator": "paper/refs_manual.bib:@ramoscarreno_scikitfda_2024",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2024
+    },
+    {
+      "evidence_id": "E049",
+      "source_type": "journal_article",
+      "title": "Statistical Computing in Functional Data Analysis: The R Package fda.usc",
+      "authors": [
+        "Febrero-Bande, Manuel",
+        "Oviedo de la Fuente, Manuel"
+      ],
+      "identifiers": {},
+      "locator": "paper/refs_manual.bib:@febrerobande_fdausc_2012",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2012
+    },
+    {
+      "evidence_id": "E050",
+      "source_type": "journal_article",
+      "title": "Scikit-learn: Machine Learning in Python",
+      "authors": [
+        "Pedregosa, Fabian",
+        "Varoquaux, Ga{\\\"e}l",
+        "Gramfort, Alexandre",
+        "Michel, Vincent",
+        "Thirion, Bertrand",
+        "Grisel, Olivier",
+        "Blondel, Mathieu",
+        "Prettenhofer, Peter",
+        "Weiss, Ron",
+        "Dubourg, Vincent",
+        "Vanderplas, Jake",
+        "Passos, Alexandre",
+        "Cournapeau, David",
+        "Brucher, Matthieu",
+        "Perrot, Matthieu",
+        "Duchesnay, {\\'E}douard"
+      ],
+      "identifiers": {},
+      "locator": "paper/refs_manual.bib:@pedregosa_sklearn_2011",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2011
+    },
+    {
+      "evidence_id": "E051",
+      "source_type": "journal_article",
+      "title": "On the Prediction of Stationary Functional Time Series",
+      "authors": [
+        "Aue, Alexander",
+        "Norinho, Diogo Dubart",
+        "H{\\\"o}rmann, Siegfried"
+      ],
+      "identifiers": {},
+      "locator": "paper/refs_manual.bib:@aue_norinho_hormann_2015",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2015
+    },
+    {
+      "evidence_id": "E052",
+      "source_type": "other",
+      "title": "Model Context Protocol",
+      "authors": [
+        "Anthropic"
+      ],
+      "identifiers": {
+        "url": "https://modelcontextprotocol.io"
+      },
+      "locator": "paper/refs_manual.bib:@anthropic_mcp_2024",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      },
+      "year": 2024
+    },
+    {
+      "evidence_id": "E100",
+      "source_type": "software",
+      "title": "fdars: Functional Data Analysis in Rust with Python Bindings",
+      "authors": [
+        "Müller, Simon"
+      ],
+      "year": 2026,
+      "identifiers": {
+        "url": "https://github.com/sipemu/pyfda"
+      },
+      "locator": "paper/paper.tex (this manuscript, package under audit)",
+      "confidentiality": "public",
+      "verification": {
+        "status": "unverified",
+        "source_opened": false
+      }
+    }
+  ]
+}

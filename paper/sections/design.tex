@@ -46,7 +46,7 @@ Python mutation without an extra data copy.}
 \textbf{Computation core.}  Numerical algorithms live in the external Rust
 crate \texttt{fdars-core}, which provides the \texttt{FdMatrix} linear-algebra
 abstraction backed by \texttt{nalgebra} and data-parallel loops via
-\texttt{rayon}.  \texttt{fdars-core} 0.14.0 is the minimum required version
+\texttt{rayon}.  \texttt{fdars-core} 0.33.0 is the minimum required version
 declared in \texttt{Cargo.toml}, compiled with the \texttt{parallel} feature
 to enable rayon-backed parallelism.  No Python objects cross into this layer;
 all communication occurs through the binding layer described next, and

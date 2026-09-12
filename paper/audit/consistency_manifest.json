@@ -1,0 +1,870 @@
+{
+  "schema_version": "1.0",
+  "numeric_facts": [
+    {
+      "fact_id": "N001",
+      "concept": "public_callables",
+      "section": "abstract",
+      "value": 409,
+      "unit": "count",
+      "analysis_set": "fdars_api",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N002",
+      "concept": "public_callables",
+      "section": "intro",
+      "value": 409,
+      "unit": "count",
+      "analysis_set": "fdars_api",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N003",
+      "concept": "public_callables",
+      "section": "capabilities",
+      "value": 409,
+      "unit": "count",
+      "analysis_set": "fdars_api",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N004",
+      "concept": "public_callables",
+      "section": "conclusion",
+      "value": 409,
+      "unit": "count",
+      "analysis_set": "fdars_api",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N010",
+      "concept": "submodules_or_families",
+      "section": "abstract",
+      "value": 30,
+      "unit": "count",
+      "analysis_set": "fdars_api",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N011",
+      "concept": "submodules_or_families",
+      "section": "intro",
+      "value": 30,
+      "unit": "count",
+      "analysis_set": "fdars_api",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N012",
+      "concept": "submodules_or_families",
+      "section": "capabilities",
+      "value": 30,
+      "unit": "count",
+      "analysis_set": "fdars_api",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N013",
+      "concept": "submodules_or_families",
+      "section": "design",
+      "value": 30,
+      "unit": "count",
+      "analysis_set": "fdars_api",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N014",
+      "concept": "submodules_or_families",
+      "section": "conclusion",
+      "value": 30,
+      "unit": "count",
+      "analysis_set": "fdars_api",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N020",
+      "concept": "sklearn_estimators",
+      "section": "abstract",
+      "value": 28,
+      "unit": "count",
+      "analysis_set": "fdars_sklearn",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N021",
+      "concept": "sklearn_estimators",
+      "section": "capabilities",
+      "value": 28,
+      "unit": "count",
+      "analysis_set": "fdars_sklearn",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N022",
+      "concept": "sklearn_estimators",
+      "section": "casestudy4",
+      "value": 28,
+      "unit": "count",
+      "analysis_set": "fdars_sklearn",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N023",
+      "concept": "sklearn_estimators",
+      "section": "validation",
+      "value": 28,
+      "unit": "count",
+      "analysis_set": "fdars_sklearn",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N024",
+      "concept": "sklearn_estimators",
+      "section": "availability",
+      "value": 28,
+      "unit": "count",
+      "analysis_set": "fdars_sklearn",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N030",
+      "concept": "doc_papers",
+      "section": "advisor",
+      "value": 47,
+      "unit": "count",
+      "analysis_set": "provenance_map",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N031",
+      "concept": "doc_papers",
+      "section": "validation",
+      "value": 47,
+      "unit": "count",
+      "analysis_set": "provenance_map",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N032",
+      "concept": "doc_papers",
+      "section": "conclusion",
+      "value": 47,
+      "unit": "count",
+      "analysis_set": "provenance_map",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N040",
+      "concept": "coverage_callables",
+      "section": "capabilities",
+      "value": 28,
+      "unit": "count",
+      "analysis_set": "provenance_map",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N041",
+      "concept": "coverage_callables",
+      "section": "advisor",
+      "value": 28,
+      "unit": "count",
+      "analysis_set": "provenance_map",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N050",
+      "concept": "phoneme_pc1_var",
+      "section": "casestudy1_prose",
+      "value": 69.3,
+      "unit": "percent",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N051",
+      "concept": "phoneme_pc1_var",
+      "section": "casestudy1_caption",
+      "value": 69.3,
+      "unit": "percent",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N052",
+      "concept": "phoneme_pc2_var",
+      "section": "casestudy1_prose",
+      "value": 23.0,
+      "unit": "percent",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N053",
+      "concept": "phoneme_pc2_var",
+      "section": "casestudy1_caption",
+      "value": 23.0,
+      "unit": "percent",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N054",
+      "concept": "phoneme_cv_accuracy",
+      "section": "casestudy1_prose",
+      "value": 86.3,
+      "unit": "percent",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N055",
+      "concept": "phoneme_cv_accuracy",
+      "section": "casestudy1_caption",
+      "value": 86.3,
+      "unit": "percent",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N056",
+      "concept": "phoneme_pc123_var",
+      "section": "casestudy1_prose",
+      "value": 97.7,
+      "unit": "percent",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N057",
+      "concept": "phoneme_n_curves",
+      "section": "casestudy1_prose",
+      "value": 400,
+      "unit": "count",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E019"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N058",
+      "concept": "phoneme_n_curves",
+      "section": "casestudy1_caption",
+      "value": 400,
+      "unit": "count",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E019"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N059",
+      "concept": "phoneme_n_points",
+      "section": "casestudy1_prose",
+      "value": 256,
+      "unit": "count",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E019"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N060",
+      "concept": "phoneme_n_classes",
+      "section": "casestudy1_prose",
+      "value": 5,
+      "unit": "count",
+      "analysis_set": "phoneme",
+      "evidence_ids": [
+        "E019"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N070",
+      "concept": "tecator_train_r2",
+      "section": "casestudy2_prose",
+      "value": 0.974,
+      "unit": "ratio",
+      "analysis_set": "tecator",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N071",
+      "concept": "tecator_train_r2",
+      "section": "casestudy2_caption",
+      "value": 0.974,
+      "unit": "ratio",
+      "analysis_set": "tecator",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N072",
+      "concept": "tecator_train_r2",
+      "section": "capabilities_tour",
+      "value": 0.974,
+      "unit": "ratio",
+      "analysis_set": "tecator",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N073",
+      "concept": "tecator_cv_r2",
+      "section": "casestudy2_prose",
+      "value": 0.928,
+      "unit": "ratio",
+      "analysis_set": "tecator",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N074",
+      "concept": "tecator_cv_r2",
+      "section": "casestudy2_caption",
+      "value": 0.928,
+      "unit": "ratio",
+      "analysis_set": "tecator",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N075",
+      "concept": "tecator_n_samples",
+      "section": "casestudy2_prose",
+      "value": 240,
+      "unit": "count",
+      "analysis_set": "tecator",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N076",
+      "concept": "tecator_n_channels",
+      "section": "casestudy2_prose",
+      "value": 100,
+      "unit": "count",
+      "analysis_set": "tecator",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N077",
+      "concept": "tecator_n_components",
+      "section": "casestudy2_prose",
+      "value": 15,
+      "unit": "count",
+      "analysis_set": "tecator",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N078",
+      "concept": "tecator_n_components",
+      "section": "casestudy2_caption",
+      "value": 15,
+      "unit": "count",
+      "analysis_set": "tecator",
+      "evidence_ids": [
+        "E037"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N080",
+      "concept": "pm10_fts_rmse",
+      "section": "casestudy3_prose",
+      "value": 13.68,
+      "unit": "ug_m3",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N081",
+      "concept": "pm10_clim_rmse",
+      "section": "casestudy3_prose",
+      "value": 15.52,
+      "unit": "ug_m3",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N082",
+      "concept": "pm10_persist_rmse",
+      "section": "casestudy3_prose",
+      "value": 17.17,
+      "unit": "ug_m3",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N083",
+      "concept": "pm10_fts_day1_rmse",
+      "section": "casestudy3_prose",
+      "value": 6.08,
+      "unit": "ug_m3",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N084",
+      "concept": "pm10_n_days",
+      "section": "casestudy3_prose",
+      "value": 182,
+      "unit": "count",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N085",
+      "concept": "pm10_n_days",
+      "section": "capabilities_tour",
+      "value": 182,
+      "unit": "count",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N086",
+      "concept": "pm10_points_per_day",
+      "section": "casestudy3_prose",
+      "value": 48,
+      "unit": "count",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N087",
+      "concept": "pm10_points_per_day",
+      "section": "capabilities_tour",
+      "value": 48,
+      "unit": "count",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N088",
+      "concept": "pm10_train_days",
+      "section": "casestudy3_prose",
+      "value": 175,
+      "unit": "count",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N089",
+      "concept": "pm10_train_days",
+      "section": "casestudy3_caption",
+      "value": 175,
+      "unit": "count",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N090",
+      "concept": "pm10_holdout_days",
+      "section": "casestudy3_prose",
+      "value": 7,
+      "unit": "count",
+      "analysis_set": "pm10",
+      "evidence_ids": [
+        "E051"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N100",
+      "concept": "wine_best_cv_accuracy",
+      "section": "casestudy4_prose_tuning",
+      "value": 0.961,
+      "unit": "ratio",
+      "analysis_set": "wine",
+      "evidence_ids": [
+        "E050"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N101",
+      "concept": "wine_best_cv_accuracy",
+      "section": "casestudy4_prose_best",
+      "value": 0.961,
+      "unit": "ratio",
+      "analysis_set": "wine",
+      "evidence_ids": [
+        "E050"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N102",
+      "concept": "wine_n_samples",
+      "section": "casestudy4_prose",
+      "value": 178,
+      "unit": "count",
+      "analysis_set": "wine",
+      "evidence_ids": [
+        "E050"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N103",
+      "concept": "wine_n_features",
+      "section": "casestudy4_prose",
+      "value": 13,
+      "unit": "count",
+      "analysis_set": "wine",
+      "evidence_ids": [
+        "E050"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    },
+    {
+      "fact_id": "N110",
+      "concept": "binding_modules",
+      "section": "design",
+      "value": 30,
+      "unit": "count",
+      "analysis_set": "pyo3_layer",
+      "evidence_ids": [
+        "E100"
+      ],
+      "numerator": null,
+      "denominator": null,
+      "sample_size": null
+    }
+  ],
+  "methods": [
+    {
+      "method_id": "M001",
+      "name": "FPCA + LDA pipeline (phoneme classification)",
+      "analysis_intent": "confirmatory",
+      "protocol_status": "prespecified",
+      "outcome_ids": [
+        "O001"
+      ]
+    },
+    {
+      "method_id": "M002",
+      "name": "FPC scalar-on-function regression (tecator fat)",
+      "analysis_intent": "confirmatory",
+      "protocol_status": "prespecified",
+      "outcome_ids": [
+        "O002"
+      ]
+    },
+    {
+      "method_id": "M003",
+      "name": "FTSM next-day forecast (PM10)",
+      "analysis_intent": "confirmatory",
+      "protocol_status": "prespecified",
+      "outcome_ids": [
+        "O003"
+      ]
+    },
+    {
+      "method_id": "M004",
+      "name": "FPCATransformer + LDA GridSearchCV (wine)",
+      "analysis_intent": "confirmatory",
+      "protocol_status": "prespecified",
+      "outcome_ids": [
+        "O004"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "result_id": "R001",
+      "method_id": "M001",
+      "outcome_id": "O001",
+      "analysis_intent": "confirmatory",
+      "sample_size": 400,
+      "evidence_ids": [
+        "E037"
+      ],
+      "reported_sections": [
+        "casestudy1_prose",
+        "casestudy1_caption"
+      ]
+    },
+    {
+      "result_id": "R002",
+      "method_id": "M002",
+      "outcome_id": "O002",
+      "analysis_intent": "confirmatory",
+      "sample_size": 240,
+      "evidence_ids": [
+        "E037"
+      ],
+      "reported_sections": [
+        "casestudy2_prose",
+        "casestudy2_caption"
+      ]
+    },
+    {
+      "result_id": "R003",
+      "method_id": "M003",
+      "outcome_id": "O003",
+      "analysis_intent": "confirmatory",
+      "sample_size": 182,
+      "evidence_ids": [
+        "E051"
+      ],
+      "reported_sections": [
+        "casestudy3_prose",
+        "casestudy3_caption"
+      ]
+    },
+    {
+      "result_id": "R004",
+      "method_id": "M004",
+      "outcome_id": "O004",
+      "analysis_intent": "confirmatory",
+      "sample_size": 178,
+      "evidence_ids": [
+        "E050"
+      ],
+      "reported_sections": [
+        "casestudy4_prose"
+      ]
+    }
+  ]
+}
