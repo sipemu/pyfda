@@ -1,15 +1,15 @@
 ---
-gsd_state_version: 1.0
+gsd_state_version: "1.0"
 milestone: v14.0
 milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 90
 current_phase_name: Close Gate + Citable Release
 status: executing
-stopped_at: Completed 90-01-PLAN.md (release prep 0.13.0)
-last_updated: "2026-09-09T09:59:13.070Z"
+stopped_at: context exhaustion at 75% (2026-09-12)
+last_updated: "2026-09-12T20:01:50.047Z"
 last_activity: 2026-09-09
 last_activity_desc: Phase 90 execution started
-state_head: 6f96975e882434828844ad357814b4f732ab197f
+state_head: 6dfdc287ebff01f5a4bbbce0b8dc577fb375f3fb
 progress:
   total_phases: 6
   completed_phases: 5
@@ -180,8 +180,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-09T09:59:12.938Z
-Stopped at: Completed 90-01-PLAN.md (release prep 0.13.0)
+Last session: 2026-09-12T20:01:49.890Z
+Stopped at: context exhaustion at 75% (2026-09-12)
 Resume file: None
 
 ## Operator Next Steps
