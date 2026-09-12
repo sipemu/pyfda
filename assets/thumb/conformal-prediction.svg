@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Conformal prediction">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 74 C90 40 150 96 210 62 C245 44 275 68 298 54 L298 90 C275 104 245 80 210 98 C150 132 90 76 30 110 Z" fill="#dc3545" fill-opacity=".16"/>
+  <path d="M30 92 C90 58 150 114 210 80 C245 62 275 86 298 72" stroke="#dc3545" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="4 4"/>
+  <path d="M30 56 C90 22 150 78 210 44 C245 26 275 50 298 36" stroke="#dc3545" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="4 4"/>
+  <path d="M30 74 C90 40 150 96 210 62 C245 44 275 68 298 54" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="210" cy="62" r="4" fill="#fff" stroke="#dc3545" stroke-width="2.5"/>
+</svg>

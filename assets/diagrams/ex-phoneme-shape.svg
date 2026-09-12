@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Phoneme Spectra: Shape Distance and When Elastic Methods Help" aria-labelledby="ex-phoneme-shape-title ex-phoneme-shape-desc">
+  <title id="ex-phoneme-shape-title">Phoneme Spectra: Shape Distance and When Elastic Methods Help</title>
+  <desc id="ex-phoneme-shape-desc">When alignment_quality reveals high phase variability in phoneme spectra, shape_self_distance_matrix outperforms the L² distance matrix; kmedoids clustering on shape distances achieves higher purity than L²-based clustering, confirming elastic methods help when phase variation is large.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Phoneme Spectra: Shape Distance and When Elastic Methods Help</text>
+  <text class="sub" x="360" y="38" text-anchor="middle">load_phoneme · alignment_quality phase fraction · shape_self_distance_matrix vs lp_self_1d</text>
+  <text class="sub" x="360" y="52" text-anchor="middle">shape_mean per class · kmedoids_from_distances purity comparison · L² beats elastic here</text>
+
+  <!-- Dataset panel -->
+  <rect x="24" y="62" width="196" height="72" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="82" text-anchor="middle" fill="#495057">load_phoneme</text>
+  <text class="sm" x="122" y="97" text-anchor="middle">5 phoneme classes: aa/ao/dcl/iy/sh</text>
+  <text class="sm" x="122" y="111" text-anchor="middle">log-periodograms · 256 freq bins</text>
+  <text class="sm" x="122" y="125" text-anchor="middle">50 curves (10/class) for distance/cluster</text>
+
+  <!-- Arrow -->
+  <line x1="220" y1="98" x2="246" y2="98" stroke="#666" stroke-width="1.5"/>
+  <polygon points="242,94 250,98 242,102" fill="#666"/>
+
+  <!-- Phase fraction panel -->
+  <rect x="250" y="62" width="220" height="72" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="360" y="82" text-anchor="middle" fill="#fd7e14">alignment_quality per class</text>
+  <text class="sm" x="360" y="97" text-anchor="middle">phase_amplitude_ratio: 16–28% per class</text>
+  <text class="sm" x="357" y="111" text-anchor="middle">ratio &gt; 15% → seems to favour elastic</text>
+  <text class="sm" x="357" y="125" text-anchor="middle">but per-class ratio misleads at pooled level</text>
+
+  <!-- Arrow -->
+  <line x1="470" y1="98" x2="496" y2="98" stroke="#fd7e14" stroke-width="1.5"/>
+  <polygon points="492,94 500,98 492,102" fill="#fd7e14"/>
+
+  <!-- shape_mean panel -->
+  <rect x="500" y="62" width="196" height="72" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="598" y="82" text-anchor="middle" fill="#495057">shape_mean per class</text>
+  <text class="sm" x="598" y="97" text-anchor="middle">elastic Karcher mean (max_iter=15)</text>
+  <text class="sm" x="598" y="111" text-anchor="middle">canonical spectral profile per phoneme</text>
+  <text class="sm" x="598" y="125" text-anchor="middle">5 distinct profiles (aa/ao/sh/iy/dcl)</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="150" x2="680" y2="150" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+  <text class="sub" x="360" y="168" text-anchor="middle">Distance matrices compared: block-diagonal = good class separation</text>
+
+  <!-- L2 distance panel -->
+  <rect x="24" y="178" width="318" height="80" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="183" y="198" text-anchor="middle" fill="#3f51b5">lp_self_1d (p=2.0) — L² distance</text>
+  <text class="sm" x="183" y="213" text-anchor="middle">frequency axis fixed · point-by-point comparison</text>
+  <text class="sm" x="183" y="227" text-anchor="middle">heatmap: clean block-diagonal (classes L²-close)</text>
+  <text class="mono" x="183" y="245" text-anchor="middle" fill="#3f51b5">GOOD class separation · MDS: tight clusters</text>
+
+  <!-- Shape distance panel -->
+  <rect x="378" y="178" width="318" height="80" rx="8" fill="#fff0f5" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="537" y="198" text-anchor="middle" fill="#dc3545">shape_self_distance_matrix — elastic</text>
+  <text class="sm" x="537" y="213" text-anchor="middle">Fisher–Rao distance: warps frequency axis</text>
+  <text class="sm" x="537" y="227" text-anchor="middle">heatmap: muddier — warp collapses peak positions</text>
+  <text class="mono" x="537" y="245" text-anchor="middle" fill="#dc3545">POOR class separation · MDS: classes bleed</text>
+
+  <!-- Divider 2 -->
+  <line x1="40" y1="274" x2="680" y2="274" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+  <text class="sub" x="360" y="292" text-anchor="middle">Clustering purity: kmedoids_from_distances + hierarchical_cut</text>
+
+  <!-- Cluster results -->
+  <rect x="24" y="302" width="200" height="70" rx="8" fill="#3f51b5" stroke="none"/>
+  <text class="lab" x="124" y="322" text-anchor="middle" fill="white">k-medoids (L²)</text>
+  <text class="mono" x="124" y="342" text-anchor="middle" fill="#FFD700">purity ≈ 84% ★</text>
+  <text class="sm" x="124" y="360" text-anchor="middle" fill="white">peak positions matter</text>
+
+  <rect x="260" y="302" width="200" height="70" rx="8" fill="#dc3545" stroke="none"/>
+  <text class="lab" x="360" y="322" text-anchor="middle" fill="white">k-medoids (elastic)</text>
+  <text class="mono" x="360" y="342" text-anchor="middle" fill="white">purity ≈ 38%</text>
+  <text class="sm" x="360" y="360" text-anchor="middle" fill="white">warp erases peak position</text>
+
+  <rect x="496" y="302" width="200" height="70" rx="8" fill="#6c757d" stroke="none"/>
+  <text class="lab" x="596" y="322" text-anchor="middle" fill="white">hierarchical (elastic)</text>
+  <text class="mono" x="596" y="342" text-anchor="middle" fill="white">purity ≈ 48%</text>
+  <text class="sm" x="596" y="360" text-anchor="middle" fill="white">between, still behind L²</text>
+
+  <!-- Bottom note -->
+  <text class="sub" x="360" y="404" text-anchor="middle">Lesson: when peak POSITION is the signal, L² wins — elastic alignment erases that information</text>
+  <text class="sub" x="360" y="420" text-anchor="middle">High per-class ratio ≠ elastic helps pooled — between-class variation here is amplitude, not phase</text>
+</svg>

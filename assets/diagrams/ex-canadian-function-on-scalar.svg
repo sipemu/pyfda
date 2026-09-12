@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Function-on-Scalar Regression: latitude → β(t)" aria-labelledby="ex-canadian-function-on-scalar-title ex-canadian-function-on-scalar-desc">
+  <title id="ex-canadian-function-on-scalar-title">Function-on-Scalar Regression: latitude → β(t)</title>
+  <desc id="ex-canadian-function-on-scalar-desc">fosr fits a smooth coefficient curve β_lat(t) from station latitude, showing how the latitude effect on temperature varies by season; predict_fosr returns full fitted curves for hypothetical stations at any latitude.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Function-on-Scalar Regression: latitude → β(t)</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">fosr fits a coefficient curve per predictor · predict_fosr returns a full temperature trajectory for any lat</text>
+
+  <!-- Panel 1: Scalar predictor -->
+  <rect x="24" y="60" width="138" height="130" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="93" y="80" text-anchor="middle" fill="#495057">Scalar predictors</text>
+  <text class="sm" x="93" y="96" text-anchor="middle">latitude (°N) per station</text>
+  <text class="sm" x="93" y="110" text-anchor="middle">z-scored: latz</text>
+  <text class="sm" x="93" y="128" text-anchor="middle">design matrix:</text>
+  <text class="mono" x="93" y="145" text-anchor="middle" fill="#495057">[1, latz]  (n×2)</text>
+  <text class="sm" x="93" y="165" text-anchor="middle">response: temp</text>
+  <text class="sm" x="93" y="179" text-anchor="middle">curves (35 × 365)</text>
+
+  <!-- Arrow 1 -->
+  <line x1="162" y1="125" x2="186" y2="125" stroke="#666" stroke-width="1.5"/>
+  <polygon points="182,121 190,125 182,129" fill="#666"/>
+
+  <!-- Panel 2: fosr -->
+  <rect x="190" y="60" width="190" height="130" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="285" y="80" text-anchor="middle" fill="#fd7e14">fosr(temp, design, λ_=0.01)</text>
+  <text class="sm" x="285" y="97" text-anchor="middle">Penalised function-on-scalar fit</text>
+  <text class="sm" x="285" y="113" text-anchor="middle">one β(t) per predictor column</text>
+  <text class="mono" x="285" y="132" text-anchor="middle" fill="#D55E00">β_intercept(t)</text>
+  <text class="mono" x="285" y="148" text-anchor="middle" fill="#D55E00">β_lat(t)  ← latitude effect</text>
+  <text class="sm" x="285" y="167" text-anchor="middle">roughness penalty λ_ smooths β(t)</text>
+  <text class="mono" x="285" y="183" text-anchor="middle" fill="#495057">R² = 0.47</text>
+
+  <!-- Arrow 2: to coefficient panel -->
+  <line x1="380" y1="125" x2="404" y2="125" stroke="#D55E00" stroke-width="1.5"/>
+  <polygon points="400,121 408,125 400,129" fill="#D55E00"/>
+
+  <!-- Panel 3: β(t) coefficient curve -->
+  <rect x="408" y="60" width="148" height="130" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="482" y="80" text-anchor="middle" fill="#495057">β_lat(t) curve</text>
+  <!-- Negative dipping curve in winter months -->
+  <path d="M416 100 Q 430 106 444 126 Q 458 147 472 148 Q 486 148 500 128 Q 514 108 528 103 Q 542 99 548 97" stroke="#D55E00" stroke-width="2.5" fill="none"/>
+  <line x1="416" y1="125" x2="548" y2="125" stroke="#ced4da" stroke-width="1.0" stroke-dasharray="3,2"/>
+  <text class="sm" x="482" y="152" text-anchor="middle">negative all year:</text>
+  <text class="sm" x="482" y="166" text-anchor="middle">north → colder</text>
+  <text class="sm" x="482" y="183" text-anchor="middle">largest Jan (−7°C/SD)</text>
+
+  <!-- Arrow 3: to predict -->
+  <line x1="556" y1="125" x2="580" y2="125" stroke="#666" stroke-width="1.5"/>
+  <polygon points="576,121 584,125 576,129" fill="#666"/>
+
+  <!-- Panel 4: predict_fosr result -->
+  <rect x="584" y="60" width="112" height="130" rx="8" fill="#D55E00" stroke="none"/>
+  <text class="lab" x="640" y="80" text-anchor="middle" fill="white">predict_fosr</text>
+  <!-- Two predicted curves: warm south (amber), cold north (blue) -->
+  <path d="M592 150 Q 606 118 620 110 Q 634 102 648 110 Q 662 118 676 148" stroke="#FFD700" stroke-width="2.2" fill="none"/>
+  <path d="M592 162 Q 606 140 620 134 Q 634 128 648 136 Q 662 146 676 162" stroke="#aef0ff" stroke-width="2.2" fill="none"/>
+  <text class="sm" x="640" y="175" text-anchor="middle" fill="white">southern (warm)</text>
+  <text class="sm" x="640" y="189" text-anchor="middle" fill="#aef0ff">northern (cold)</text>
+
+  <!-- Bottom note -->
+  <text class="sm" x="360" y="222" text-anchor="middle">Curves converge in summer; diverge sharply in winter — the seasonal signature of β_lat(t) made concrete as full predicted trajectories</text>
+  <text class="sm" x="360" y="238" text-anchor="middle">A single regression on the annual mean would hide this seasonal variation entirely</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Scalar-on-function regression">
+  <defs><linearGradient id="sof" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dc3545" stop-opacity=".18"/><stop offset="1" stop-color="#dc3545" stop-opacity="0"/></linearGradient></defs>
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M42 118 C90 60 140 130 190 84 C222 56 250 96 280 76 L280 150 L42 150 Z" fill="url(#sof)"/>
+  <path d="M42 118 C90 60 140 130 190 84 C222 56 250 96 280 76" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+  <path d="M280 76 C288 74 292 70 296 64" stroke="#dc3545" stroke-opacity=".55" stroke-width="1.6" stroke-dasharray="4 4"/>
+  <circle cx="30" cy="64" r="5" fill="#dc3545"/>
+  <text x="196" y="60" fill="#dc3545" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">y</text>
+</svg>

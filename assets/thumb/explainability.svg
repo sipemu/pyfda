@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Explainability">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M150 90 C168 60 200 44 232 44 C258 44 272 56 290 62 L290 90 Z" fill="#dc3545" fill-opacity=".18"/>
+  <path d="M30 92 C70 90 100 96 130 92 C150 90 150 90 150 90 C168 60 200 44 232 44 C258 44 274 58 298 62" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+  <text x="196" y="80" fill="#dc3545" font-family="system-ui,sans-serif" font-size="13" font-weight="700" opacity=".8">β(t)</text>
+</svg>

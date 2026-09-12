@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Streaming depth">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="120" x2="298" y2="120" stroke="#198754" stroke-opacity=".25" stroke-width="1.4" stroke-dasharray="6 5"/>
+  <path d="M30 118 L58 122 L86 116 L114 124 L142 118 L170 122 L198 116 L226 120 L244 40 L262 118 L298 120" stroke="#198754" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="244" cy="40" r="5.5" fill="#fff" stroke="#198754" stroke-width="3"/>
+  <text x="200" y="54" fill="#198754" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">alert</text>
+</svg>

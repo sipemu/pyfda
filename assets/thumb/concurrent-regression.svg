@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Concurrent regression coefficient">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="89" x2="298" y2="89" stroke="#dc3545" stroke-opacity=".3" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <path d="M30 68 C70 52 100 118 150 125 C185 130 210 75 250 58 C268 50 285 64 298 72" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Learn">
+  <defs>
+    <linearGradient id="lrn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d6efd" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#0d6efd" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="28" y1="150" x2="292" y2="150" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.5"/>
+  <line x1="28" y1="150" x2="28" y2="26" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.5"/>
+  <path d="M28 118 C80 60 120 128 160 96 C210 56 250 108 292 70" stroke="#0d6efd" stroke-opacity=".30" stroke-width="2" stroke-linecap="round"/>
+  <path d="M28 132 C80 96 120 60 168 110 C214 156 250 72 292 92" stroke="#0d6efd" stroke-opacity=".30" stroke-width="2" stroke-linecap="round"/>
+  <path d="M28 104 C78 138 126 44 172 82 C214 116 252 44 292 58 L292 150 L28 150 Z" fill="url(#lrn)"/>
+  <path d="M28 104 C78 138 126 44 172 82 C214 116 252 44 292 58" stroke="#0d6efd" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="28" cy="104" r="4.5" fill="#0d6efd"/>
+  <circle cx="172" cy="82" r="4.5" fill="#fff" stroke="#0d6efd" stroke-width="2.5"/>
+  <circle cx="292" cy="58" r="4.5" fill="#0d6efd"/>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Andrews transform">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <g fill="#3f51b5" fill-opacity=".7">
+    <circle cx="48" cy="60" r="4"/><circle cx="70" cy="60" r="4"/><circle cx="48" cy="86" r="4"/><circle cx="70" cy="86" r="4"/><circle cx="48" cy="112" r="4"/><circle cx="70" cy="112" r="4"/>
+  </g>
+  <path d="M120 90 l30 0 M144 82 l8 8 -8 8" stroke="#3f51b5" stroke-opacity=".6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M182 96 C210 52 238 128 266 74 C280 50 292 82 298 66" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+  <path d="M182 112 C210 78 238 140 266 100 C280 84 292 104 298 92" stroke="#3f51b5" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>
+</svg>

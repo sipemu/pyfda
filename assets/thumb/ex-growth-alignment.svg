@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Growth alignment">
+  <defs><linearGradient id="ega" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3f51b5" stop-opacity=".16"/><stop offset="1" stop-color="#3f51b5" stop-opacity="0"/></linearGradient></defs>
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 140 C120 130 170 118 196 46" stroke="#3f51b5" stroke-opacity=".3" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M30 142 C130 136 176 124 196 46" stroke="#3f51b5" stroke-opacity=".3" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M30 144 C140 140 182 128 196 46 C210 40 230 44 298 40 L298 150 L30 150 Z" fill="url(#ega)"/>
+  <path d="M30 144 C140 140 182 128 196 46" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="196" cy="46" r="4.5" fill="#fff" stroke="#3f51b5" stroke-width="2.5"/>
+</svg>

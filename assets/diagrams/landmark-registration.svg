@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Landmark Registration: Pinning Features to Targets"
+     aria-labelledby="landmark-registration-title landmark-registration-desc">
+  <title id="landmark-registration-title">Landmark Registration: Pinning Features to Targets</title>
+  <desc id="landmark-registration-desc">Shows how register(γ) detects user-marked peak/valley landmarks (orange dots), computes a target time as the mean of landmark times across curves, then applies a monotone interpolation warp to pin each landmark to its common target position.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Landmark Registration: Pinning Features to Targets</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Detect landmarks, then warp each curve so they land at common times</text>
+
+  <!-- Panel 1: curves with marked landmarks -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Marked Landmarks</text>
+  <g transform="translate(44,112)">
+    <line x1="0" y1="116" x2="156" y2="116" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 114 C24 114 34 40 50 40 C66 40 74 114 88 114 C104 114 114 66 128 66 C140 66 148 96 156 96" stroke="#495057" stroke-opacity=".4" stroke-width="1.8"/>
+    <path d="M0 114 C34 114 44 56 60 56 C76 56 84 114 100 114 C118 114 128 82 140 82 C148 82 152 100 156 100" stroke="#495057" stroke-opacity=".4" stroke-width="1.8"/>
+    <circle cx="50" cy="40" r="3.5" fill="#fd7e14"/>
+    <circle cx="128" cy="66" r="3.5" fill="#fd7e14"/>
+    <circle cx="60" cy="56" r="3.5" fill="#fd7e14"/>
+    <circle cx="140" cy="82" r="3.5" fill="#fd7e14"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#fd7e14">register(&#947;)</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Warp to common targets</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="16">detect peaks/valleys</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="48">target = mean(times)</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="80">monotone interp warp</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: registered curves -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#fd7e14">Registered Curves</text>
+  <g transform="translate(520,112)">
+    <line x1="0" y1="116" x2="156" y2="116" stroke="#adb5bd" stroke-width="1.2"/>
+    <line x1="48" y1="24" x2="48" y2="116" stroke="#fd7e14" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".7"/>
+    <line x1="120" y1="54" x2="120" y2="116" stroke="#fd7e14" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".7"/>
+    <path d="M0 114 C24 114 34 30 48 30 C62 30 72 114 84 114 C102 114 110 54 120 54 C132 54 148 100 156 100" stroke="#fd7e14" stroke-opacity=".45" stroke-width="1.6"/>
+    <path d="M0 114 C24 114 34 34 48 34 C62 34 72 114 84 114 C102 114 110 58 120 58 C132 58 148 100 156 100" stroke="#fd7e14" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="48" cy="30" r="3.5" fill="#fd7e14"/>
+    <circle cx="120" cy="54" r="3.5" fill="#fd7e14"/>
+  </g>
+  <text class="sm" x="598" y="250" text-anchor="middle" fill="#6c757d">landmarks aligned</text>
+</svg>

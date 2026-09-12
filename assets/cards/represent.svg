@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Represent">
+  <line x1="28" y1="150" x2="292" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.5"/>
+  <line x1="28" y1="150" x2="28" y2="26" stroke="#198754" stroke-opacity=".35" stroke-width="1.5"/>
+  <!-- basis eigenfunctions -->
+  <path d="M28 120 C70 60 118 60 160 120 C202 180 250 180 292 120" stroke="#198754" stroke-opacity=".35" stroke-width="2"/>
+  <path d="M28 96 C60 150 92 42 124 96 C156 150 188 42 220 96 C252 150 280 60 292 96" stroke="#198754" stroke-opacity=".35" stroke-width="2"/>
+  <!-- reconstructed curve -->
+  <path d="M28 108 C74 52 108 128 150 92 C196 52 236 116 292 66" stroke="#198754" stroke-width="3" stroke-linecap="round"/>
+  <!-- coefficient bars -->
+  <rect x="44" y="118" width="12" height="32" rx="2" fill="#198754" fill-opacity=".85"/>
+  <rect x="66" y="96" width="12" height="54" rx="2" fill="#198754" fill-opacity=".6"/>
+  <rect x="88" y="128" width="12" height="22" rx="2" fill="#198754" fill-opacity=".4"/>
+  <circle cx="28" cy="108" r="4" fill="#198754"/>
+  <circle cx="292" cy="66" r="4" fill="#198754"/>
+</svg>

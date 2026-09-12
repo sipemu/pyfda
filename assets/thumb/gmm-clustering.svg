@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="GMM clustering">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <ellipse cx="118" cy="82" rx="58" ry="40" fill="#6f42c1" fill-opacity=".12"/>
+  <ellipse cx="118" cy="82" rx="58" ry="40" fill="none" stroke="#6f42c1" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <ellipse cx="204" cy="104" rx="52" ry="34" fill="#6f42c1" fill-opacity=".2"/>
+  <ellipse cx="204" cy="104" rx="52" ry="34" fill="none" stroke="#6f42c1" stroke-opacity=".55" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <g fill="#6f42c1" fill-opacity=".5">
+    <circle cx="96" cy="70" r="3.2"/><circle cx="128" cy="60" r="3.2"/><circle cx="112" cy="96" r="3.2"/><circle cx="140" cy="88" r="3.2"/>
+  </g>
+  <g fill="#6f42c1" fill-opacity=".8">
+    <circle cx="190" cy="96" r="3.2"/><circle cx="216" cy="112" r="3.2"/><circle cx="204" cy="90" r="3.2"/><circle cx="228" cy="102" r="3.2"/>
+  </g>
+</svg>

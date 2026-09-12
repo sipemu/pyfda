@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Cross-validation">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="150" y1="150" x2="150" y2="112" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4" stroke-dasharray="4 4"/>
+  <path d="M40 44 C70 88 110 108 150 112 C210 118 250 122 292 128" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="150" cy="112" r="5.5" fill="#fff" stroke="#dc3545" stroke-width="3"/>
+  <text x="128" y="104" fill="#dc3545" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">k*</text>
+</svg>

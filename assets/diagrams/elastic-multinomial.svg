@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Elastic Multinomial Classification (K = 3 classes)" aria-labelledby="elastic-multinomial-title elastic-multinomial-desc">
+  <title id="elastic-multinomial-title">Elastic Multinomial Classification (K = 3 classes)</title>
+  <desc id="elastic-multinomial-desc">Elastic multinomial classification trains K one-vs-rest binary elastic classifiers and combines their scores via softmax to assign each input curve to one of K classes.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="26" text-anchor="middle">Elastic Multinomial Classification (K = 3 classes)</text>
+  <text class="sub" x="360" y="44" text-anchor="middle">K one-vs-rest binary elastic classifiers · scores combined via softmax into class probabilities</text>
+
+  <!-- Input functional data panel -->
+  <rect x="14" y="68" width="120" height="306" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="74" y="92" text-anchor="middle" fill="#495057">Functional</text>
+  <text class="lab" x="74" y="108" text-anchor="middle" fill="#495057">Data</text>
+  <text class="mono" x="74" y="128" text-anchor="middle" fill="#6c757d" font-size="10">X: (n, m)</text>
+  <!-- Wavy input curves -->
+  <path d="M26 188 C50 178 70 198 100 184 C118 176 128 184 134 180" stroke="#3f51b5" stroke-width="1.6" opacity="0.7"/>
+  <path d="M26 208 C50 198 70 218 100 204 C118 196 128 204 134 200" stroke="#e8710a" stroke-width="1.6" opacity="0.7"/>
+  <path d="M26 228 C50 218 70 238 100 224 C118 216 128 224 134 220" stroke="#198754" stroke-width="1.6" opacity="0.7"/>
+  <path d="M26 248 C50 238 70 258 100 244 C118 236 128 244 134 240" stroke="#6c757d" stroke-width="1.0" opacity="0.5"/>
+  <text class="sm" x="74" y="330" text-anchor="middle">SRSF transform</text>
+  <text class="sm" x="74" y="344" text-anchor="middle">+ elastic align</text>
+
+  <!-- Arrow from input to OvR models -->
+  <line x1="134" y1="221" x2="156" y2="221" stroke="#495057" stroke-width="2.0"/>
+  <polygon points="156,215 168,221 156,227" fill="#495057"/>
+
+  <!-- OvR binary classifiers panel (orange accent) -->
+  <rect x="168" y="68" width="256" height="306" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="296" y="92" text-anchor="middle" fill="#fd7e14">One-vs-Rest Binary Classifiers</text>
+
+  <!-- OvR model 1: class 0 (aa) -->
+  <rect x="180" y="108" width="232" height="74" rx="6" fill="#f8f9fa" stroke="#3f51b5" stroke-width="1.4"/>
+  <text class="mono" x="194" y="129" fill="#3f51b5" font-size="10">OvR 1</text>
+  <text class="sm" x="296" y="138" text-anchor="middle" fill="#1a1a2e">class 0 (aa) vs rest</text>
+  <text class="sm" x="296" y="160" text-anchor="middle" fill="#495057">elastic binary classifier → score s₁</text>
+
+  <!-- OvR model 2: class 1 (ao) -->
+  <rect x="180" y="206" width="232" height="74" rx="6" fill="#f8f9fa" stroke="#e8710a" stroke-width="1.4"/>
+  <text class="mono" x="194" y="227" fill="#e8710a" font-size="10">OvR 2</text>
+  <text class="sm" x="296" y="236" text-anchor="middle" fill="#1a1a2e">class 1 (ao) vs rest</text>
+  <text class="sm" x="296" y="258" text-anchor="middle" fill="#495057">elastic binary classifier → score s₂</text>
+
+  <!-- OvR model 3: class 2 (dcl) -->
+  <rect x="180" y="304" width="232" height="74" rx="6" fill="#f8f9fa" stroke="#198754" stroke-width="1.4"/>
+  <text class="mono" x="194" y="325" fill="#198754" font-size="10">OvR 3</text>
+  <text class="sm" x="296" y="334" text-anchor="middle" fill="#1a1a2e">class 2 (dcl) vs rest</text>
+  <text class="sm" x="296" y="356" text-anchor="middle" fill="#495057">elastic binary classifier → score s₃</text>
+
+  <!-- Arrow from OvR to softmax -->
+  <line x1="424" y1="221" x2="446" y2="221" stroke="#495057" stroke-width="2.0"/>
+  <polygon points="446,215 458,221 446,227" fill="#495057"/>
+
+  <!-- Softmax aggregation panel -->
+  <rect x="458" y="118" width="122" height="196" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="519" y="142" text-anchor="middle" fill="#fd7e14">Softmax</text>
+  <text class="sm" x="519" y="164" text-anchor="middle">s₁, s₂, s₃</text>
+  <line x1="480" y1="174" x2="558" y2="174" stroke="#ced4da" stroke-width="1.0"/>
+  <text class="sm" x="519" y="194" text-anchor="middle" fill="#1a1a2e">P(y=k | x)</text>
+  <text class="sm" x="519" y="212" text-anchor="middle" fill="#495057">= exp(sₖ)</text>
+  <text class="sm" x="519" y="228" text-anchor="middle" fill="#495057">/ Σ exp(sⱼ)</text>
+  <text class="mono" x="519" y="272" text-anchor="middle" fill="#6c757d" font-size="10">(n, K) probs</text>
+  <text class="mono" x="519" y="292" text-anchor="middle" fill="#6c757d" font-size="10">argmax → class</text>
+
+  <!-- Arrow from softmax to output -->
+  <line x1="580" y1="221" x2="600" y2="221" stroke="#495057" stroke-width="2.0"/>
+  <polygon points="600,215 612,221 600,227" fill="#495057"/>
+
+  <!-- Output panel -->
+  <rect x="612" y="118" width="94" height="196" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="659" y="142" text-anchor="middle" fill="#495057">Output</text>
+  <text class="sm" x="659" y="168" text-anchor="middle">predicted</text>
+  <text class="sm" x="659" y="184" text-anchor="middle">class (n,)</text>
+  <line x1="626" y1="198" x2="692" y2="198" stroke="#ced4da" stroke-width="1.0"/>
+  <text class="sm" x="659" y="216" text-anchor="middle">train</text>
+  <text class="sm" x="659" y="232" text-anchor="middle">accuracy</text>
+  <line x1="626" y1="248" x2="692" y2="248" stroke="#ced4da" stroke-width="1.0"/>
+  <text class="sm" x="659" y="268" text-anchor="middle">proba</text>
+  <text class="sm" x="659" y="284" text-anchor="middle">(n, K)</text>
+</svg>

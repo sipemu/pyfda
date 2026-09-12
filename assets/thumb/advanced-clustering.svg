@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Advanced clustering">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#6f42c1" stroke-linecap="round" fill="none">
+    <path d="M30 62 C80 40 140 52 200 38 C240 30 270 42 298 34" stroke-width="3"/>
+    <path d="M30 70 C80 50 140 60 200 46 C240 38 270 50 298 42" stroke-width="2" stroke-opacity=".8"/>
+    <path d="M30 54 C80 34 140 44 200 30 C240 24 270 36 298 28" stroke-width="2" stroke-opacity=".65"/>
+  </g>
+  <g stroke="#6f42c1" stroke-linecap="round" fill="none" stroke-opacity=".55">
+    <path d="M30 120 C80 108 140 118 200 106 C240 99 270 110 298 104" stroke-width="3"/>
+    <path d="M30 130 C80 118 140 128 200 116 C240 109 270 120 298 114" stroke-width="2"/>
+  </g>
+  <path d="M30 92 C80 84 140 98 200 86 C240 78 270 90 298 80" stroke="#6f42c1" stroke-opacity=".35" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 140 C100 136 200 142 298 138" stroke="#6f42c1" stroke-opacity=".2" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="4 4"/>
+</svg>

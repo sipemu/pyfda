@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Functional boxplot">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 50 C90 28 160 74 210 50 C255 32 278 56 298 42 L298 130 C278 116 255 140 210 120 C160 144 90 98 30 120 Z" fill="#6f42c1" fill-opacity=".07"/>
+  <path d="M30 50 C90 28 160 74 210 50 C255 32 278 56 298 42" stroke="#6f42c1" stroke-opacity=".3" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <path d="M30 120 C90 98 160 144 210 120 C255 140 278 116 298 130" stroke="#6f42c1" stroke-opacity=".3" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <path d="M30 66 C90 46 160 90 210 66 C255 48 278 72 298 58 L298 114 C278 100 255 124 210 104 C160 130 90 82 30 104 Z" fill="#6f42c1" fill-opacity=".13"/>
+  <path d="M30 85 C90 64 160 108 210 84 C255 66 278 90 298 76" stroke="#6f42c1" stroke-width="3" stroke-linecap="round"/>
+  <path d="M40 38 C62 28 82 26 104 30" stroke="#6f42c1" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>
+</svg>

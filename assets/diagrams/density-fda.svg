@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none"
+     role="img" aria-label="Density FDA — LQD transform pipeline"
+     aria-labelledby="dens-title dens-desc">
+  <title id="dens-title">Density FDA</title>
+  <desc id="dens-desc">Shows the Log-Quantile-Density (LQD) pipeline: density functions in Bayes space are normalized, transformed to unconstrained LQD space, then subjected to FPCA and Wasserstein barycenter computation.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="30" text-anchor="middle">Density FDA</text>
+  <text class="sub" x="360" y="50" text-anchor="middle">LQD transform pipeline: densities → unconstrained L² space → FPCA</text>
+
+  <!-- ===== Panel 1: Input densities ===== -->
+  <rect x="16" y="68" width="168" height="160" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="100" y="90" text-anchor="middle" fill="#1a1a2e">Density Functions</text>
+  <text class="sm" x="100" y="106" text-anchor="middle">f(t) ≥ 0, ∫f dt = 1</text>
+  <!-- density curves (bell-like shapes, different peaks) -->
+  <path d="M28 210 Q60 130 100 120 Q140 130 172 210" stroke="#3f51b5" stroke-width="2.0" fill="none"/>
+  <path d="M28 210 Q50 150 80 135 Q110 150 172 210" stroke="#e8710a" stroke-width="1.6" fill="none" opacity="0.7"/>
+  <path d="M28 210 Q80 135 120 130 Q155 135 172 210" stroke="#198754" stroke-width="1.6" fill="none" opacity="0.7"/>
+  <!-- x-axis -->
+  <line x1="28" y1="212" x2="172" y2="212" stroke="#ced4da" stroke-width="1.2"/>
+
+  <!-- Arrow 1 → normalize -->
+  <line x1="184" y1="148" x2="210" y2="148" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-dens)"/>
+  <text class="sm" x="197" y="143" text-anchor="middle">normalize</text>
+
+  <!-- ===== Panel 2: LQD Transform (orange accent) ===== -->
+  <rect x="214" y="68" width="168" height="160" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="298" y="90" text-anchor="middle" fill="#fd7e14">LQD Transform</text>
+  <text class="mono" x="298" y="108" text-anchor="middle" fill="#fd7e14">ψ(u) = log(1/f(Q(u)))</text>
+  <!-- lqd curves: unconstrained, can go negative -->
+  <path d="M226 170 Q250 130 298 148 Q346 165 382 140" stroke="#3f51b5" stroke-width="2.0" fill="none"/>
+  <path d="M226 175 Q250 140 298 158 Q346 175 382 150" stroke="#e8710a" stroke-width="1.6" fill="none" opacity="0.7"/>
+  <path d="M226 165 Q250 125 298 140 Q346 160 382 130" stroke="#198754" stroke-width="1.6" fill="none" opacity="0.7"/>
+  <!-- reference zero line -->
+  <line x1="226" y1="185" x2="382" y2="185" stroke="#ced4da" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <text class="sm" x="370" y="198" text-anchor="end">0</text>
+  <!-- label -->
+  <text class="sm" x="298" y="218" text-anchor="middle">L²([0,1]) — no constraints</text>
+
+  <!-- Arrow 2 → outputs -->
+  <line x1="382" y1="148" x2="408" y2="108" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-dens)"/>
+  <line x1="382" y1="168" x2="408" y2="268" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-dens)"/>
+
+  <!-- ===== Panel 3: FPCA (top right) ===== -->
+  <rect x="412" y="68" width="292" height="148" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="558" y="90" text-anchor="middle" fill="#1a1a2e">FPCA in LQD Space</text>
+  <text class="mono" x="558" y="108" text-anchor="middle" fill="#6c757d">lqd_fpca(density_matrix, argvals)</text>
+  <!-- PC1 loadings curve -->
+  <path d="M424 160 Q480 120 558 130 Q636 140 692 165" stroke="#3f51b5" stroke-width="2.4" fill="none"/>
+  <!-- PC2 loadings curve -->
+  <path d="M424 180 Q480 165 530 140 Q580 115 692 140" stroke="#e8710a" stroke-width="1.6" fill="none" opacity="0.8"/>
+  <text class="sm" x="428" y="153" fill="#3f51b5">PC 1</text>
+  <text class="sm" x="428" y="176" fill="#e8710a">PC 2</text>
+  <!-- keys -->
+  <text class="sm" x="558" y="198" text-anchor="middle">Returns: scores (n,k) · loadings · fve · ncomp</text>
+
+  <!-- ===== Panel 4: Wasserstein barycenter (bottom right) ===== -->
+  <rect x="412" y="228" width="292" height="148" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="558" y="248" text-anchor="middle" fill="#1a1a2e">Wasserstein Barycenter</text>
+  <text class="mono" x="558" y="266" text-anchor="middle" fill="#6c757d">wasserstein_barycenter(densities, t)</text>
+  <!-- input densities faint -->
+  <path d="M424 340 Q480 280 520 270 Q560 280 692 340" stroke="#3f51b5" stroke-width="1.4" fill="none" opacity="0.4"/>
+  <path d="M424 340 Q460 295 500 280 Q560 275 692 340" stroke="#e8710a" stroke-width="1.4" fill="none" opacity="0.4"/>
+  <path d="M424 340 Q490 275 540 265 Q600 270 692 340" stroke="#198754" stroke-width="1.4" fill="none" opacity="0.4"/>
+  <!-- barycenter bold -->
+  <path d="M424 340 Q475 278 525 270 Q580 275 692 340" stroke="#1a1a2e" stroke-width="2.4" fill="none"/>
+  <text class="sm" x="558" y="362" text-anchor="middle">Geometric mean in Wasserstein space</text>
+
+  <!-- ===== Bottom: Inversion note ===== -->
+  <rect x="16" y="248" width="168" height="76" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="100" y="268" text-anchor="middle" fill="#1a1a2e">Inversion</text>
+  <text class="mono" x="100" y="286" text-anchor="middle" fill="#6c757d">inverse_lqd(lqd, t)</text>
+  <text class="sm" x="100" y="304" text-anchor="middle">ψ → f (density)</text>
+
+  <!-- Arrow from panel 2 to inversion -->
+  <line x1="298" y1="228" x2="220" y2="248" stroke="#495057" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#arr-dens)"/>
+
+  <!-- ===== Bottom summary bar ===== -->
+  <rect x="16" y="346" width="688" height="50" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="360" y="366" text-anchor="middle" fill="#fd7e14">Single-vector convention</text>
+  <text class="sm" x="360" y="384" text-anchor="middle">normalize_density / lqd_transform / inverse_lqd each return a naked 1D array — apply element-wise per density</text>
+
+  <!-- Arrow defs -->
+  <defs>
+    <marker id="arr-dens" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7" fill="#495057"/>
+    </marker>
+  </defs>
+</svg>

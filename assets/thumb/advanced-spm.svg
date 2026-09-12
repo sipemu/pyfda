@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Advanced SPM">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6610f2" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6610f2" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="46" x2="222" y2="46" stroke="#6610f2" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="6 5"/>
+  <line x1="30" y1="110" x2="222" y2="110" stroke="#6610f2" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="6 5"/>
+  <path d="M30 88 C54 84 62 92 86 82 C110 74 118 88 142 70 C166 56 174 66 198 50 C210 44 216 42 222 40" stroke="#6610f2" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="222" cy="40" r="5" fill="#fff" stroke="#6610f2" stroke-width="3"/>
+  <g fill="#6610f2" fill-opacity=".55">
+    <rect x="248" y="94" width="12" height="42" rx="2"/>
+    <rect x="266" y="70" width="12" height="66" rx="2"/>
+    <rect x="284" y="112" width="12" height="24" rx="2"/>
+  </g>
+</svg>
