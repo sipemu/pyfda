@@ -50,7 +50,7 @@ self-describing.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_represent}
+  \includegraphics[width=\linewidth]{figures/tour_represent}
   \caption{Berkeley growth study: all height curves (grey) sharing one age
   grid, with the pointwise sample mean (blue) computed by
   \texttt{Fdata.mean()}.  The \texttt{Fdata} container bundles this matrix,
@@ -82,7 +82,7 @@ comparison.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_basis}
+  \includegraphics[width=\linewidth]{figures/tour_basis}
   \caption{B-spline smoothing of five growth curves: raw observations (points)
   and their reconstructions (lines) with the smoothing dimension selected by
   generalised cross-validation.}
@@ -112,7 +112,7 @@ depth is a sample-relative ordering and the outlier flags are cutoff-dependent
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_depth}
+  \includegraphics[width=\linewidth]{figures/tour_depth}
   \caption{Growth curves shaded by Fraiman--Muniz depth (deeper curves more
   opaque).  The deepest curve (orange) is the functional median; curves flagged
   by MUOD as shape, magnitude, or amplitude outliers are drawn in red.}
@@ -175,7 +175,7 @@ initialisation, and hence the reported partition, reproducible.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_clustering}
+  \includegraphics[width=\linewidth]{figures/tour_clustering}
   \caption{Functional $k$-means ($k = 3$, fixed seed): thin curves are cluster
   members, bold curves the cluster centroids.  Cluster sizes are shown in the
   legend.}
@@ -203,7 +203,7 @@ full cross-validation in Case Study~1 (Section~\ref{sec:casestudies}).
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_classification}
+  \includegraphics[width=\linewidth]{figures/tour_classification}
   \caption{Class-mean log-periodogram spectra for the five phonemes.  The
   visible separation across the frequency band is the signal the FPCA-$k$NN
   classifier projects onto and exploits.}
@@ -238,7 +238,7 @@ function-on-function regression share the same call convention.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_regression}
+  \includegraphics[width=\linewidth]{figures/tour_regression}
   \caption{Scalar-on-function regression of Tecator fat content on the
   second-derivative absorbance spectra: fitted vs observed values with the live
   $R^2$.  The dashed line marks a perfect fit.}
@@ -272,7 +272,7 @@ these next-day forecasts against held-out days and simple baselines.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_fts}
+  \includegraphics[width=\linewidth]{figures/tour_fts}
   \caption{FTSM forecast of the next three daily PM10 curves (bold) over the
   182 observed daily curves (grey) from the Graz dataset.  Each curve is one
   day's diurnal PM10 profile; the next-day forecasts are validated against
@@ -303,7 +303,7 @@ monitoring incident.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_spm}
+  \includegraphics[width=\linewidth]{figures/tour_spm}
   \caption{Phase-2 Hotelling $T^2$ control chart: the per-curve $T^2$ statistic
   against the Phase-1 upper control limit (UCL).  Curves exceeding the UCL are
   flagged (red).}
@@ -331,7 +331,7 @@ and the fixed \texttt{seed} pins the reported band.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_tolerance}
+  \includegraphics[width=\linewidth]{figures/tour_tolerance}
   \caption{Bootstrap-FPCA 95\% simultaneous tolerance band (shaded) with its
   centre curve, drawn over the growth sample.  The band widens where
   between-subject variability grows.}
@@ -363,7 +363,7 @@ scaling---so the metric family underpins much of the rest of the tour.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.74\linewidth]{figures/tour_metric}
+  \includegraphics[width=\linewidth]{figures/tour_metric}
   \caption{Pairwise $L^2$ distance matrix over the growth curves.  The dark
   diagonal is self-distance; off-diagonal blocks mark groups of similar curves.}
   \label{fig:tour-metric}
@@ -419,7 +419,7 @@ template); deviations below it mark earlier development, above it later.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_warping}
+  \includegraphics[width=\linewidth]{figures/tour_warping}
   \caption{SRSF warping functions $\gamma$ from registering all Berkeley
   children's growth-velocity curves to a common Karcher template, coloured by
   sex (thin curves: individuals; bold: per-sex mean).  Girls' warping functions
@@ -455,7 +455,7 @@ support (Section~\ref{sec:advisor}).
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{figures/tour_advisor}
+  \includegraphics[width=\linewidth]{figures/tour_advisor}
   \caption{The advisor's offline FPCA diagnostic: per-component (bars) and
   cumulative (line) variance explained.  These are the exact, computed
   quantities its grounded, LLM-free guidance reasons over.}
