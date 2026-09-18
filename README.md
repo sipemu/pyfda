@@ -113,6 +113,28 @@ pip install "fdars[plot]"      # matplotlib plotting helpers
 - **`[advisor]`** enables the offline diagnostics + grounded `advise()` layer; provider
   extras (`[openai]`, `[gemini]`, `[ollama]`) swap the LLM backend.
 
+## Claude Code plugin (Agent Skills)
+
+This repo doubles as a [Claude Code](https://claude.com/claude-code) plugin
+marketplace. Two Agent Skills ship with it:
+
+- **`fdars-capabilities`** — discover the full API surface: list modules and callables,
+  get a call signature and one-line purpose, and find the right method for a task.
+- **`fdars-advisor`** — grounded parameter tuning and before/after diagnostics
+  (clustering, smoothing, FPCA, alignment, depth, outliers, classification, regression, SPM).
+
+Install them from the built-in marketplace:
+
+```text
+/plugin marketplace add sipemu/pyfda
+/plugin install fdars@pyfda
+```
+
+They then appear as `/fdars:fdars-capabilities` and `/fdars:fdars-advisor` and are
+auto-invoked from their descriptions. `fdars-advisor` needs the `fdars` package
+installed in the skill's execution environment (see **Optional extras** above and the
+skill's `SKILL.md`).
+
 ## Development
 
 ```sh

@@ -1,0 +1,20 @@
+{
+  "name": "pyfda",
+  "description": "Claude Code plugin marketplace for fdars — functional data analysis for Python (Rust-backed). Ships the fdars-capabilities and fdars-advisor Agent Skills.",
+  "owner": {
+    "name": "Simon Müller",
+    "email": "sm@data-zoo.de",
+    "url": "https://github.com/sipemu/pyfda"
+  },
+  "plugins": [
+    {
+      "name": "fdars",
+      "source": "./.claude",
+      "description": "fdars functional data analysis Agent Skills: fdars-capabilities (discover the full API surface — modules, callables, signatures, method-for-task) and fdars-advisor (grounded parameter tuning + before/after diagnostics for clustering, smoothing, FPCA, alignment, depth, outliers, classification, regression, SPM).",
+      "version": "0.13.0",
+      "homepage": "https://sipemu.github.io/pyfda/",
+      "license": "MIT",
+      "keywords": ["functional-data-analysis", "fdars", "statistics", "skills"]
+    }
+  ]
+}

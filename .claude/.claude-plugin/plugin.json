@@ -1,0 +1,12 @@
+{
+  "name": "fdars",
+  "description": "fdars functional data analysis Agent Skills (capability discovery + grounded parameter advisor)",
+  "version": "0.13.0",
+  "author": {
+    "name": "Simon Müller",
+    "email": "sm@data-zoo.de"
+  },
+  "homepage": "https://sipemu.github.io/pyfda/",
+  "license": "MIT",
+  "skills": "./skills"
+}

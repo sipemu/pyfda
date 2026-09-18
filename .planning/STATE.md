@@ -187,3 +187,9 @@ Resume file: None
 ## Operator Next Steps
 
 - Start the next milestone with /gsd-new-milestone
+
+## Quick Tasks Completed
+
+| Date | Slug | Status | Summary |
+|------|------|--------|---------|
+| 2026-09-18 | fdars-plugin-marketplace | complete ✓ | In-repo Claude Code plugin marketplace (`.claude-plugin/marketplace.json` + `.claude/.claude-plugin/plugin.json`) exposing the fdars-advisor + fdars-capabilities skills via `source: "./.claude"`; README note added; `claude plugin validate .` passed |
