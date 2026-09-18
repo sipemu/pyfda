@@ -3,6 +3,7 @@
 [![CI](https://github.com/sipemu/pyfda/actions/workflows/ci.yml/badge.svg)](https://github.com/sipemu/pyfda/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/fdars)](https://pypi.org/project/fdars/)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-AI_skills_plugin-8A2BE2)](#claude-code-plugin-agent-skills)
 ![Status: Experimental](https://img.shields.io/badge/status-experimental-orange)
 
 High-performance Functional Data Analysis for Python, powered by a Rust backend ([fdars-core](https://github.com/sipemu/fdars)).
