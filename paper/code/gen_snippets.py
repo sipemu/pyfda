@@ -192,6 +192,10 @@ SNIPPETS: list[tuple[str, str]] = [
     # ------------------------------------------------------------------
     # 4. FPCA (dense) + sparse/irregular PACE FPCA.
     #    This doubles as the MANU-05 irregular-representation snippet.
+    #    PACE demo: sparsify the SAME growth curves (8 random ages of 31 per
+    #    child), fit PACE on the age domain (work_grid = ARG, NOT the default
+    #    [0, 1] grid), and compare its BLUP scores / reconstructed trajectories
+    #    with the dense fit on the full data.  bandwidth in years; sigma2 in cm^2.
     #    pace_fpca.irreg_fdata_from_lists -> PyIrregFdata -> pace_fpca().
     # ------------------------------------------------------------------
     ("fpca", """\
@@ -201,21 +205,22 @@ SNIPPETS: list[tuple[str, str]] = [
         growth = pd.read_csv(data_path("growth.csv"), index_col=0)
         ARG = growth.index.values.astype(float)
         X = growth.values.T.astype(np.float64)
-        fd = Fdata(X, argvals=ARG)
-        pc = fd.to_pc(n_comp=3)
-        sv = np.round(pc["singular_values"], 2).tolist()
+        pc = Fdata(X, argvals=ARG).to_pc(n_comp=3)
         print("FPCA scores shape:", pc["scores"].shape)
-        print("singular values:", sv)
+        print("singular values:", np.round(pc["singular_values"], 2).tolist())
+        # Sparsify: keep 8 random ages (of 31) per child, then fit PACE.
         np.random.seed(42)
-        sizes = np.random.randint(5, 15, size=30)
-        argvals_list = [
-            np.sort(np.random.uniform(1, 18, s)).tolist() for s in sizes
-        ]
-        values_list = [np.sin(av).tolist() for av in argvals_list]
-        irreg = irreg_fdata_from_lists(argvals_list, values_list)
-        pace = pace_fpca(irreg, ncomp=2)
-        print("PACE scores shape:", pace["scores"].shape)
-        print("ncomp:", pace["ncomp"])
+        idx = [np.sort(np.random.choice(31, 8, replace=False)) for _ in X]
+        irreg = irreg_fdata_from_lists(
+            [ARG[i].tolist() for i in idx],
+            [X[k, i].tolist() for k, i in enumerate(idx)])
+        pace = pace_fpca(irreg, ncomp=2, bandwidth=0.5, sigma2=0.25,
+                         work_grid=ARG.tolist())
+        r = [abs(np.corrcoef(pace["scores"][:, k], pc["scores"][:, k])[0, 1])
+             for k in range(2)]
+        rmse = np.sqrt(np.mean((pace["fitted"] - X) ** 2))
+        print("PACE vs dense score correlation:", np.round(r, 3).tolist())
+        print("PACE trajectory RMSE vs full data (cm):", round(float(rmse), 2))
         """),
     # ------------------------------------------------------------------
     # 5. Clustering — kmeans_fd(data, argvals, k, seed=42); print
@@ -320,6 +325,8 @@ SNIPPETS: list[tuple[str, str]] = [
             X, ncomp=3, nb=200, coverage=0.95, seed=42)
         print("tolerance keys:", list(tol.keys()))
         print("band half-width shape:", tol["half_width"].shape)
+        inside = ((X >= tol["lower"]) & (X <= tol["upper"])).all(axis=1)
+        print("curves fully inside band:", int(inside.sum()), "of", len(X))
         """),
     # ------------------------------------------------------------------
     # 11. Density / Frechet / metric — lp_self_1d + dtw_self_1d;
@@ -359,8 +366,9 @@ SNIPPETS: list[tuple[str, str]] = [
             sm["coefficients"], dense, 12, "bspline")
         vel = Fdata(fit, argvals=dense).deriv().data
         # Elastic registration of the velocity curves (aligns the spurt peak).
-        res = fdars.alignment.karcher_mean(vel, dense, max_iter=50)
+        res = fdars.alignment.karcher_mean(vel, dense, max_iter=200)
         print("karcher keys:", list(res.keys()))
+        print("converged:", res["converged"], "| iterations:", res["n_iter"])
         print("aligned shape:", res["aligned_data"].shape)
         print("warping gammas:", res["gammas"].shape)
         """),
@@ -380,7 +388,8 @@ SNIPPETS: list[tuple[str, str]] = [
         pc = fd.to_pc(n_comp=3)
         diag = fdars.advisor.build_diagnostics(pc, "fpca", argvals=ARG)
         cum = np.round(diag["cumulative_variance_explained"], 3).tolist()
-        print("cumulative variance explained:", cum)
+        print("cumulative share of total variance:", cum)
+        print("denominator:", diag["variance_denominator"])
         """),
     # ------------------------------------------------------------------
     # 14. sklearn estimator layer — FPCATransformer via the public fdars.sklearn path (NOT

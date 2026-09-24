@@ -29,10 +29,15 @@ the functional-time-series prediction benchmark of Aue, Norinho & Hormann
 
 Run with::
 
-    PYTHONPATH=scripts:paper/code python paper/code/casestudy3.py
+    PYTHONPATH=scripts:paper/code python paper/code/casestudy3.py          # figures + numbers
+    PYTHONPATH=scripts:paper/code python paper/code/casestudy3.py --check  # numbers drift gate
+
+Every number quoted in paper/sections/casestudy3.tex is written to
+paper/sections/cs3_numbers.tex (see cs_numbers.py).
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -45,11 +50,16 @@ from paper_utils import (
 
 import fdars
 
+from cs_numbers import emit, fmt
+
 _FIGURES_DIR = Path(__file__).resolve().parent.parent / "figures"
 
 # Forecast horizon (days) and number of rolling forecast origins.
 _H = 7
 _N_ORIGINS = 30
+_NCOMP = 3
+# Aue, Norinho & Hormann (2015) drop the New-Year week and analyse 175 curves.
+_N_ANH = 175
 
 
 def _rmse(a: np.ndarray, b: np.ndarray) -> float:
@@ -57,8 +67,11 @@ def _rmse(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.sqrt(np.mean((a - b) ** 2)))
 
 
-def main() -> None:
+def main(check: bool = False) -> int:
     """Run the Study-3 FTS forecast + validation and write two figures.
+
+    With ``check=True`` only the number macros are recomputed and compared with
+    the committed file (no figures are written); returns 1 on drift.
 
     ftsm / ftsm_forecast are deterministic (FPCA followed by an independent
     univariate AR model per score series, fitted by Yule-Walker with AIC order
@@ -81,7 +94,7 @@ def main() -> None:
     # FTS decomposition of the full record (sqrt scale) for Figure 1.
     # ------------------------------------------------------------------
     n_days = Xpm.shape[0]
-    model = fdars.fts.ftsm(np.sqrt(Xpm), ARG, ncomp=3)
+    model = fdars.fts.ftsm(np.sqrt(Xpm), ARG, ncomp=_NCOMP)
     mean_curve = model["mean"] ** 2                 # back to ug/m3 for display
 
     # ------------------------------------------------------------------
@@ -95,7 +108,7 @@ def main() -> None:
     per_err = np.zeros((_N_ORIGINS, _H))
     for i, t in enumerate(origins):
         past = Xpm[:t]
-        fc = fdars.fts.ftsm_forecast(np.sqrt(past), ARG, h=_H, ncomp=3)
+        fc = fdars.fts.ftsm_forecast(np.sqrt(past), ARG, h=_H, ncomp=_NCOMP)
         pred = fc["forecast"] ** 2                  # (H, 48) ug/m3
         clim, persist = past.mean(axis=0), past[-1]
         for k in range(_H):
@@ -126,6 +139,36 @@ def main() -> None:
     print("per-horizon FTS:", np.round(fts_err.mean(axis=0), 2).tolist())
     print("per-horizon Clim:", np.round(clim_err.mean(axis=0), 2).tolist())
     print("per-horizon Pers:", np.round(per_err.mean(axis=0), 2).tolist())
+
+    # ------------------------------------------------------------------
+    # Every number quoted in casestudy3.tex (letters-only macro names).
+    # ------------------------------------------------------------------
+    m_f, m_c, m_p = (e.mean(axis=0) for e in (fts_err, clim_err, per_err))
+    macros = {
+        "csThreeNDays": str(n_days),
+        "csThreeNPoints": str(Xpm.shape[1]),
+        "csThreeFirstDate": dates[0],
+        "csThreeLastDate": dates[-1],
+        "csThreeNAnh": str(_N_ANH),
+        "csThreeNComp": str(_NCOMP),
+        "csThreeNOrigins": str(len(origins)),
+        "csThreeFirstOrigin": dates[origins[0]],
+        "csThreeLastOrigin": dates[origins[-1]],
+        "csThreeH": str(_H),
+        "csThreeOneFts": fmt(m_f[0], 2),
+        "csThreeOneClim": fmt(m_c[0], 2),
+        "csThreeOnePers": fmt(m_p[0], 2),
+        "csThreeWinsClim": str(int((fts_err[:, 0] < clim_err[:, 0]).sum())),
+        "csThreeWinsPers": str(int((fts_err[:, 0] < per_err[:, 0]).sum())),
+        "csThreeAllFts": fmt(fts_err.mean(), 2),
+        "csThreeAllClim": fmt(clim_err.mean(), 2),
+        "csThreeAllPers": fmt(per_err.mean(), 2),
+        "csThreeGapOne": fmt(m_c[0] - m_f[0], 1),
+        "csThreeGapLast": fmt(m_c[-1] - m_f[-1], 1),
+    }
+    status = emit("cs3_numbers.tex", "casestudy3.py", macros, check=check)
+    if check:
+        return status
 
     _FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -198,7 +241,8 @@ def main() -> None:
         y=1.03, color=DIMGREY,
     )
     save_figure(f2, _FIGURES_DIR / "cs3_pm10_forecast.pdf")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main(check="--check" in sys.argv))

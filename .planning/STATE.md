@@ -1,18 +1,18 @@
 ---
 gsd_state_version: "1.0"
 milestone: v14.0
-milestone_name: fdars Software Paper — arXiv Preprint
 status: Awaiting next milestone
-stopped_at: context exhaustion at 75% (2026-09-12)
-last_updated: "2026-09-12T20:57:20.278Z"
+stopped_at: context exhaustion at 75% (2026-09-24)
+last_updated: "2026-09-24T19:45:06.117Z"
 last_activity: 2026-09-12
 last_activity_desc: Milestone v14.0 completed and archived
-state_head: 1bb79c50b35a62c2b9c799e36fb1656b0877c112
+state_head: 0633abc92821621eb8189385a81ca9925d251ea3
 progress:
   total_phases: 6
   completed_phases: 6
   total_plans: 17
   completed_plans: 17
+milestone_name: fdars Software Paper — arXiv Preprint
 current_phase: 90
 current_phase_name: Close Gate + Citable Release
 ---
@@ -180,8 +180,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-12T20:01:49.890Z
-Stopped at: context exhaustion at 75% (2026-09-12)
+Last session: 2026-09-24T19:45:06.018Z
+Stopped at: context exhaustion at 75% (2026-09-24)
 Resume file: None
 
 ## Operator Next Steps

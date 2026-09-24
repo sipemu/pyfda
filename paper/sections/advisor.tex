@@ -41,8 +41,9 @@ the evidence in \texttt{paper/comparison\_evidence.md}).
   \draw[arr, dashed] (advise) -- (tune)
     node[midway, right, font=\footnotesize] {loop};
   \draw[arr, dashed] (tune) to[out=200,in=-20] (diag);
-  \draw[arr, dashed] (prov) -- (diag)
-    node[midway, left, font=\footnotesize] {refs};
+  \node[box, fill=gray!10, left=of prov] (mcp) {MCP client\\(query by callable)};
+  \draw[arr, dashed] (prov) -- (mcp)
+    node[midway, above, font=\footnotesize] {refs};
 
   \node[font=\footnotesize\itshape, above=4pt of diag] {LLM-free};
   \node[font=\footnotesize\itshape, above=4pt of advise] {provider-agnostic LLM};
@@ -54,13 +55,16 @@ the structured diagnostics as context;
 \texttt{auto\_tune} iterates both in a bounded closed-loop.
 The provenance map (\texttt{\_references\_map.json}) feeds
 \texttt{fdars\_method\_references}, an MCP tool that resolves callable names
-to peer-reviewed papers at query time.}
+to peer-reviewed papers at query time; this path is independent of the
+advisor loop.}
 \label{fig:advisor}
 \end{figure}
 
 \subsection{The Grounded Advisor}
 
-The advisor exposes three public entry points in \texttt{fdars.advisor}:
+The advisor's three core entry points in \texttt{fdars.advisor} are listed
+below; further helpers include \texttt{compare\_methods} (comparative method
+selection over several candidate diagnostics) and \texttt{pipeline\_report}:
 
 \sigheading{\texttt{build\_diagnostics} --- the LLM-free grounding step.}
 \begin{lstlisting}[style=fdarsinput]
@@ -74,12 +78,17 @@ build_diagnostics(
     \texttt{"fpca"}, \texttt{"smoothing"}, \texttt{"clustering"}) and
     returns a structured diagnostics dictionary derived entirely from
     deterministic computation on the result.  The content of the diagnostics
-    dict is method-specific: for \texttt{fpca} it includes cumulative
-    explained-variance ratios, component count, reconstruction error,
-    and a phase-leakage indicator; for \texttt{smoothing} it includes GCV
-    score, effective degrees of freedom, AIC/BIC, and residual norm; for
-    \texttt{clustering} it includes within-cluster sum of squares,
-    silhouette score (where applicable), and a convergence flag.  No
+    dict is method-specific: for \texttt{fpca} it includes the eigenvalues,
+    the component count, per-component and cumulative explained-variance
+    ratios expressed as shares of the total variance (computed from the
+    result's centred data and quadrature weights; a
+    \texttt{variance\_denominator} field records when a result lacks these
+    and the ratios fall back to shares of the retained components), and a
+    phase-leakage indicator (the share of retained variance outside the first
+    component); for \texttt{smoothing} it includes the GCV curve and its
+    optimum, effective degrees of freedom, and AIC/BIC approximations; for
+    \texttt{clustering} it includes $k$, cluster sizes and means, and
+    amplitude and phase separation between clusters.  No
     language model is involved; the diagnostics are fully reproducible given
     the same result input, and can be inspected, logged, or tested
     independently of the LLM step.  Supported method identifiers include
@@ -103,9 +112,14 @@ advise(
     result dict directly --- and calls a user-configured language-model
     provider (Anthropic, OpenAI or an OpenAI-compatible endpoint, Google
     Gemini, or a local Ollama server) to generate parameter recommendations
-    framed in terms of the supplied task description and domain context.  Provider credentials are entirely the user's
-    responsibility; the library imposes no default provider and does not
-    embed API keys.  Because the LLM receives only the structured,
+    framed in terms of the supplied task description and domain context.  The
+    provider defaults to Anthropic unless overridden by the
+    \texttt{provider} argument or the \texttt{FDARS\_ADVISOR\_PROVIDER}
+    environment variable; the model is taken from the \texttt{model}
+    argument, else the \texttt{FDARS\_ADVISOR\_MODEL} environment variable,
+    else the chosen provider's default (\texttt{claude-opus-4-8} for
+    Anthropic).  API keys are read
+    from the user's environment and are never embedded in the library.  Because the LLM receives only the structured,
     deterministic diagnostics as its context, its recommendations trace back
     to computed facts rather than free-form interpretation of raw arrays.
     This \emph{grounding invariant} is what distinguishes the advisor from a
@@ -130,10 +144,14 @@ auto_tune(
     A closed-loop parameter search that iterates
     \texttt{build\_diagnostics} $\to$ \texttt{advise} $\to$ re-fit in a
     bounded loop (at most \texttt{max\_steps} iterations).  With the
-    default \texttt{guard=True}, a method-specific guard re-checks secondary
-    diagnostics after every re-fit---for example, FPCA tuning stops if the
-    phase-leakage indicator exceeds 0.5---so the loop cannot improve its target
-    metric at the expense of other quality measures.  The loop stops when the
+    default \texttt{guard=True}, a method-specific guard re-checks one
+    secondary diagnostic after every re-fit---FPCA tuning stops if the
+    phase-leakage indicator exceeds 0.5, smoothing tuning if the effective
+    degrees of freedom exceed $0.9\,n$, basis-penalty tuning if the optimal
+    GCV score degrades by more than 20\%, and clustering tuning on a cluster
+    of size below 2---so the loop cannot improve its target metric by
+    violating that guarded diagnostic; other quality measures are not
+    checked.  The loop stops when the
     step budget is exhausted, when the guard is violated, when proposed
     parameters revisit or oscillate, or after a run of non-improving steps;
     every number it acts on is computed by \texttt{fdars}.
@@ -148,10 +166,12 @@ stable across provider changes.
 \subsection{How the Advisor Is Evaluated---and What Is Not Evaluated}
 
 The advisor's deterministic parts are tested offline in CI with a stub
-language-model provider.  An evaluation suite checks two properties on
-constructed data with a known correct answer: comparative method selection
-must pick the known-best method, and the tuning loop must move the target
-metric in the improving direction and terminate within its budget.  A
+language-model provider.  An offline evaluation suite checks, on synthetic
+diagnostics with a known best value, that comparative method selection
+(\texttt{compare\_methods}) returns the best-scoring method, and, with
+injected diagnostics that improve by construction, that the tuning loop
+accepts improving steps and terminates within its budget; neither test fits
+real data.  A
 separate regression suite exercises the grounding check on valid citations
 (rounded values, negative numbers, indices, scientific notation) and on
 fabricated ones, which must be rejected.  A live-provider smoke test exists
@@ -167,18 +187,21 @@ quality.
 \subsection{Scientific-Provenance Layer}
 
 \texttt{fdars} ships a machine-readable provenance map,
-\texttt{python/fdars/\_references\_map.json}, that links each public callable
-to the foundational papers from which its algorithm derives.  The map contains
-\ndocpapers{} curated-eligible papers (with DOIs or arXiv identifiers); at
+\texttt{python/fdars/\_references\_map.json}, that links public callables
+(243 of the \ncallables{} at present) to candidate foundational papers from
+which their algorithms derive.  Besides 10 placeholder records grouping
+not-yet-attributed callables, the map contains \ndocpapers{} candidate papers
+(44 with DOIs or arXiv identifiers), of which 6 are author-verified; at
 present \ncoverage{} of the \ncallables{} callables (\npubliccallables{} module
-functions plus the \texttt{Fdata} methods) have at least one author-verified
-paper entry, so coverage is deliberately partial and honest rather than
-complete.
-Each paper record carries the title, authors, year, identifier, method family,
-the list of \texttt{fdars} callables that implement it, cross-language
-implementation pointers (R, Python, and MATLAB equivalents with per-entry
-confidence assessments), and a \texttt{curated} boolean indicating whether the
-entry has been manually verified against the primary source.  Entries marked
+callables plus the 28 \texttt{Fdata} entries: \nfdata{} public methods and the
+constructor) have at least one author-verified paper entry, so coverage is
+deliberately partial and honest rather than complete.
+Each paper record carries the title, authors, year, DOI and/or URL,
+publication type, the \texttt{fdars} callables that implement it, notes, and
+a \texttt{curated} boolean indicating whether the entry has been manually
+verified against the primary source; where available (24 of the \ndocpapers{} candidate papers)
+it also carries cross-language implementation pointers (R, Python,
+occasionally MATLAB) with confidence ratings.  Entries marked
 \texttt{curated: false} are present as cross-reference candidates but are
 explicitly flagged so that downstream tooling can distinguish author-verified
 citations from unverified suggestions.
@@ -190,11 +213,11 @@ Given a callable name, the tool returns the associated paper entries, DOIs, and
 cross-language pointers --- making the provenance queryable by any
 MCP-compatible development environment (e.g.\ Claude Desktop, VS Code Copilot)
 without requiring a network call at query time, since the full map is bundled
-with the package.  The same map drives the offline-generated References
-documentation page in the MkDocs site (\texttt{docs/references/}), ensuring
-that the paper-level provenance visible to readers and the provenance queryable
-by the advisor are always derived from the same source of truth and never
-diverge silently.
+with the package.  The same map is used to generate the References
+documentation page of the MkDocs site (\texttt{docs/references.md}), so the
+paper-level provenance visible to readers and the provenance served through
+the MCP server are built from one source of truth (regenerating the page is
+a manual step).
 
 \subsection{Differentiator}
 

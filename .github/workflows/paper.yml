@@ -9,6 +9,8 @@ on:
       - "python/fdars/_references_map.json"
       - "python/fdars/**"
       - "src/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
       - "docs/data/**"
       - ".github/workflows/paper.yml"
   pull_request:
@@ -18,6 +20,8 @@ on:
       - "python/fdars/_references_map.json"
       - "python/fdars/**"
       - "src/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
       - "docs/data/**"
       - ".github/workflows/paper.yml"
   workflow_dispatch:
@@ -97,6 +101,15 @@ jobs:
         run: |
           . .venv/bin/activate
           PYTHONPATH=scripts:paper/code python paper/code/crossimpl.py --check
+
+      - name: Assert case-study number macros not stale (generated-numbers drift gate)
+        run: |
+          . .venv/bin/activate
+          # The figure steps above re-run casestudyN.main(), which rewrites
+          # paper/sections/csN_numbers.tex; restore the committed macro files first so
+          # the gate compares fresh numbers against what is actually committed.
+          git checkout -- paper/sections/cs1_numbers.tex paper/sections/cs2_numbers.tex paper/sections/cs3_numbers.tex paper/sections/cs4_numbers.tex
+          PYTHONPATH=scripts:paper/code python paper/code/check_cs_numbers.py
 
       - name: Setup tectonic
         uses: wtfjoke/setup-tectonic@eb29fd68b7d3f76011906b6e45ea4320c8de5d2f  # v4

@@ -10,6 +10,8 @@
   journal = {Journal of Statistical Software},
   year    = {2024},
   volume  = {109},
+  number  = {2},
+  doi     = {10.18637/jss.v109.i02},
 }
 
 @article{febrerobande_fdausc_2012,
@@ -18,6 +20,9 @@
   journal = {Journal of Statistical Software},
   year    = {2012},
   volume  = {51},
+  number  = {4},
+  pages   = {1--28},
+  doi     = {10.18637/jss.v051.i04},
 }
 
 @article{pedregosa_sklearn_2011,
@@ -42,6 +47,7 @@
   volume  = {110},
   number  = {509},
   pages   = {378--392},
+  doi     = {10.1080/01621459.2014.909317},
 }
 
 @misc{anthropic_mcp_2024,
@@ -57,13 +63,15 @@
 % --- package database; fields absent from those sources (e.g. page ranges
 % --- Crossref does not record) are deliberately omitted rather than guessed.
 
-@misc{golovkine_fdapy_2021,
-  author        = {Golovkine, Steven},
-  title         = {{FDApy: a Python package for functional data}},
-  year          = {2021},
-  eprint        = {2101.11003},
-  archivePrefix = {arXiv},
-  url           = {https://arxiv.org/abs/2101.11003},
+@article{golovkine_fdapy_2025,
+  author  = {Golovkine, Steven},
+  title   = {{FDApy: a Python package for functional data}},
+  journal = {Journal of Open Source Software},
+  year    = {2025},
+  volume  = {10},
+  number  = {107},
+  pages   = {7526},
+  doi     = {10.21105/joss.07526},
 }
 
 @article{azcorra_muod_2018,
@@ -134,9 +142,10 @@
 
 @article{tuddenham_snyder_1954,
   author  = {Tuddenham, R. D. and Snyder, M. M.},
-  title   = {{Physical growth of California boys and girls from birth to age 18}},
+  title   = {{Physical growth of California boys and girls from birth to eighteen years}},
   journal = {University of California Publications in Child Development},
   volume  = {1},
+  number  = {2},
   pages   = {183--364},
   year    = {1954},
 }
@@ -194,4 +203,101 @@
   title  = {{fdaoutlier: Outlier Detection Tools for Functional Data Analysis}},
   note   = {R package version 0.2.1},
   url    = {https://CRAN.R-project.org/package=fdaoutlier},
+}
+
+% --- Peer FDA software cited in the introduction (added in the referee-response
+% --- pass). Sources: R citation() / CRAN package database (Authors@R, aut roles;
+% --- version; publication year) and CRAN DOIs resolved via doi.org; Crossref for
+% --- the book and journal articles.
+
+@manual{r_fda,
+  author = {Ramsay, James},
+  title  = {{fda: Functional Data Analysis}},
+  year   = {2025},
+  note   = {R package version 6.3.0},
+  url    = {https://CRAN.R-project.org/package=fda},
+  doi    = {10.32614/CRAN.package.fda},
+}
+
+@book{ramsay_hooker_graves_2009,
+  author    = {Ramsay, James and Hooker, Giles and Graves, Spencer},
+  title     = {{Functional Data Analysis with R and MATLAB}},
+  publisher = {Springer New York},
+  year      = {2009},
+  doi       = {10.1007/978-0-387-98185-7},
+}
+
+@manual{r_refund,
+  author = {Goldsmith, Jeff and Scheipl, Fabian and Huang, Lei and Wrobel, Julia
+            and others},
+  title  = {{refund: Regression with Functional Data}},
+  year   = {2026},
+  note   = {R package version 0.1-40},
+  url    = {https://CRAN.R-project.org/package=refund},
+  doi    = {10.32614/CRAN.package.refund},
+}
+
+@article{happkurz_fundata_2020,
+  author  = {Happ-Kurz, Clara},
+  title   = {{Object-Oriented Software for Functional Data}},
+  journal = {Journal of Statistical Software},
+  year    = {2020},
+  volume  = {93},
+  number  = {5},
+  doi     = {10.18637/jss.v093.i05},
+}
+
+@manual{r_tidyfun,
+  author = {Scheipl, Fabian and Goldsmith, Jeff and Wrobel, Julia},
+  title  = {{tidyfun: Tidy Functional Data Wrangling and Visualization}},
+  year   = {2026},
+  note   = {R package version 0.2.0},
+  url    = {https://CRAN.R-project.org/package=tidyfun},
+  doi    = {10.32614/CRAN.package.tidyfun},
+}
+
+@manual{r_tf,
+  author = {Scheipl, Fabian and Goldsmith, Jeff and M{\"u}cke, Maximilian},
+  title  = {{tf: S3 Classes and Methods for Tidy Functional Data}},
+  year   = {2026},
+  note   = {R package version 0.5.0},
+  url    = {https://CRAN.R-project.org/package=tf},
+  doi    = {10.32614/CRAN.package.tf},
+}
+
+
+% --- Added by the second review pass (verified via Crossref).
+
+@article{dai_genton_2018,
+  author  = {Dai, Wenlin and Genton, Marc G.},
+  title   = {{Multivariate Functional Data Visualization and Outlier Detection}},
+  journal = {Journal of Computational and Graphical Statistics},
+  volume  = {27},
+  number  = {4},
+  pages   = {923--934},
+  year    = {2018},
+  doi     = {10.1080/10618600.2018.1473781},
+}
+
+@article{ojo_fast_muod_2022,
+  author  = {Ojo, Oluwasegun Taiwo and Fern{\'a}ndez Anta, Antonio and Lillo, Rosa E.
+             and Sguera, Carlo},
+  title   = {{Detecting and classifying outliers in big functional data}},
+  journal = {Advances in Data Analysis and Classification},
+  volume  = {16},
+  number  = {3},
+  pages   = {725--760},
+  year    = {2022},
+  doi     = {10.1007/s11634-021-00460-9},
+}
+
+@article{dubey_muller_2019,
+  author  = {Dubey, Paromita and M{\"u}ller, Hans-Georg},
+  title   = {{Fr{\'e}chet analysis of variance for random objects}},
+  journal = {Biometrika},
+  volume  = {106},
+  number  = {4},
+  pages   = {803--821},
+  year    = {2019},
+  doi     = {10.1093/biomet/asz052}
 }

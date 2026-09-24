@@ -175,7 +175,11 @@ def tour_fpca() -> None:
     sv = pc["singular_values"]
     n = X.shape[0]
     sd = sv / np.sqrt(max(n - 1, 1))
-    prop = sv ** 2 / float(np.sum(sv ** 2))
+    # Share of TOTAL variance: the denominator is the full weighted sum of
+    # squares of the centred data (= sum of ALL squared singular values of the
+    # weighted SVD), not just the three retained components.
+    total_ss = float(np.sum(pc["weights"] * pc["centered"] ** 2))
+    prop = sv ** 2 / total_ss
 
     f, axes = fig(1, 2, figsize=(7.5, 3.6))
     for k, ax in enumerate(axes):
@@ -186,7 +190,7 @@ def tour_fpca() -> None:
         ax.plot(ARG, mean - pert, color=FDARS_COLORS[1], linewidth=1.4,
                 linestyle=":", label="Mean - 2 SD")
         ax.set_title(r"$\bf{(%s)}$ " % chr(ord("a") + k)
-                     + f"PC{k + 1} ({prop[k] * 100:.1f}% variance)",
+                     + f"PC{k + 1} ({prop[k] * 100:.1f}% of total variance)",
                      loc="left", fontsize=11)
         ax.set_xlabel("Age (years)")
         clean_ax(ax, frame=True)
@@ -352,7 +356,9 @@ def tour_tolerance() -> None:
     ax.plot(ARG, tol["lower"], color=FDARS_COLORS[0], linewidth=1.0, alpha=0.7)
     ax.set_xlabel("Age (years)")
     ax.set_ylabel("Height (cm)")
-    ax.set_title("Bootstrap FPCA 95% simultaneous tolerance band")
+    inside = int(((X >= tol["lower"]) & (X <= tol["upper"])).all(axis=1).sum())
+    ax.set_title("95% simultaneous tolerance band (FPCA parametric bootstrap); "
+                 f"{inside}/{X.shape[0]} curves inside", fontsize=10)
     clean_ax(ax, frame=True)
     brand_legend(ax)
     save_figure(f, _FIGURES_DIR / "tour_tolerance.pdf")
@@ -388,7 +394,8 @@ def tour_alignment() -> None:
     girls_vel = vel[n_boys:]                 # 54 Berkeley girls, dense grid
     mask = dense >= 5.0
     Ar, Vr = dense[mask], girls_vel[:20, mask]
-    res = fdars.alignment.karcher_mean(Vr, Ar, max_iter=50)
+    # max_iter=200: the iteration converges (converged=True after 86 steps).
+    res = fdars.alignment.karcher_mean(Vr, Ar, max_iter=200)
     aligned = res["aligned_data"]
 
     f, axes = fig(1, 2, figsize=(7.5, 3.6), sharey=True)
@@ -409,7 +416,8 @@ def tour_alignment() -> None:
     axes[0].set_ylabel("Growth velocity (cm/yr)")
     brand_legend(axes[0], fontsize=8)
     brand_legend(axes[1], fontsize=8)
-    f.suptitle("Berkeley girls: growth-velocity spurt registration", y=1.03,
+    f.suptitle(f"{Vr.shape[0]} Berkeley girls: growth-velocity spurt registration",
+               y=1.03,
                color=DIMGREY)
     save_figure(f, _FIGURES_DIR / "tour_alignment.pdf")
 
@@ -428,6 +436,8 @@ def tour_warping() -> None:
     dense, vel, n_boys = _growth_velocity_dense()   # dense grid, all 93 children
     mask = dense >= 5.0
     Ar, V = dense[mask], vel[:, mask]
+    # Capped at 50 iterations (converged=False for all 93 curves); the sex
+    # contrast in the gammas is already stable at this point (see paper text).
     res = fdars.alignment.karcher_mean(V, Ar, max_iter=50)
     gam = res["gammas"]                     # (93, len(Ar)) warping functions
     boys, girls = gam[:n_boys], gam[n_boys:]
@@ -473,8 +483,8 @@ def tour_advisor() -> None:
     ax.set_xticks(comps)
     ax.set_ylim(0, 108)
     ax.set_xlabel("Principal component")
-    ax.set_ylabel("Variance explained (%)")
-    ax.set_title("Advisor FPCA diagnostic: variance scree")
+    ax.set_ylabel("Share of total variance (%)")
+    ax.set_title("Advisor FPCA diagnostic: variance scree (3 retained PCs)")
     # Bar chart: keep a light horizontal grid to read percentages.
     clean_ax(ax, grid=True, grid_axis="y")
     brand_legend(ax, loc="center right")

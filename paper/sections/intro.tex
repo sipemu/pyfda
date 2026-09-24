@@ -15,26 +15,32 @@ Practitioners working in Python have relatively few mature options.
 \texttt{scikit-fda}~0.10.1 \citep{ramoscarreno_scikitfda_2024} is the strongest
 existing Python peer: it provides representation and basis smoothing, elastic
 registration, functional depth and outlier detection, dense FPCA, clustering,
-classification, and scalar-on-function regression.
+classification, and scalar-on-function, function-on-scalar, concurrent and
+historical function-on-function regression.
 However, as documented in Table~\ref{tab:comparison}, it does not cover
 functional time series forecasting, statistical process monitoring, conformal
 prediction and tolerance bands, density or Fr\'{e}chet analysis of
 object-valued data, or sparse PACE FPCA; it offers no grounded parameter advisor and no
 scientific-provenance layer.
-\texttt{FDApy}~1.0.3 \citep{golovkine_fdapy_2021} focuses on representation,
+\texttt{FDApy}~1.0.3 \citep{golovkine_fdapy_2025} focuses on representation,
 multivariate FPCA, and simulation, and does not address the remaining families
 at all.
 In R, the relevant methods are distributed across multiple packages: \texttt{fda}
-covers representation, smoothing, registration, and dense FPCA; \texttt{fda.usc}
-adds depth, classification, and scalar-on-function regression; \texttt{refund}
-provides scalar- and function-on-function regression and several FPCA variants;
-\texttt{funData}/\texttt{tidyfun} offer data-structure infrastructure.
+\citep{r_fda,ramsay_hooker_graves_2009} covers representation, smoothing,
+registration, and dense FPCA; \texttt{fda.usc} \citep{febrerobande_fdausc_2012}
+adds depth, classification, scalar-on-function regression, and hypothesis
+tests; \texttt{refund} \citep{r_refund} provides scalar- and
+function-on-function regression and several FPCA variants;
+\texttt{funData} \citep{happkurz_fundata_2020} and \texttt{tidyfun}
+\citep{r_tidyfun}, with its companion \texttt{tf} \citep{r_tf}, offer
+data-structure infrastructure, and \texttt{tf} adds depth and registration.
 No single R package spans all the method families listed in
 Table~\ref{tab:comparison}, and coordinating across these packages requires
 manual data conversion at each interface boundary.
-The Matlab toolkits fdaM (\textasciitilde2014) and PACE (v2.17, 2015) remain in
-partial maintenance and cannot be used in Python workflows without external
-bridges.
+The Matlab toolkits fdaM \citep{ramsay_hooker_graves_2009} (last release 2017)
+and PACE \citep{yao_muller_wang_2005} (v2.17, 2015; its methods have since been
+ported in part to the R package \texttt{fdapace}) are no longer actively
+developed and cannot be used in Python workflows without external bridges.
 
 Several individual areas are, however, served well by specialised packages:
 \texttt{fdapace} \citep{r_fdapace} for sparse FPCA, \texttt{ftsa}

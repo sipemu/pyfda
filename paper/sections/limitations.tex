@@ -7,8 +7,10 @@
     but we report no benchmarks; claims about computational performance would
     need a separate, carefully controlled study.
   \item \textbf{Partial provenance.}  Only \ncoverage{} of \ncallables{}
-    callables currently have curated, author-verified paper entries; the rest
-    carry candidate references flagged \texttt{curated: false}.
+    callables (including \texttt{Fdata} methods) currently have curated,
+    author-verified paper entries.  Of the rest, 215 carry only candidate
+    references flagged \texttt{curated: false} (for 80 of these the candidate
+    is an empty placeholder entry), and 194 have no reference entry yet.
   \item \textbf{Advisor quality is unmeasured.}  The advisor's grounding
     invariant is enforced and tested, but the usefulness of the recommendations
     a real language model produces has not been evaluated

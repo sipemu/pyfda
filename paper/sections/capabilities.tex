@@ -40,9 +40,10 @@ study~\citep{tuddenham_snyder_1954,ramsay_silverman_2005} and prints its canonic
 
 \input{snippets/represent}
 
-The printed representation reports the container's shape
-($n_\text{obs} \times n_\text{points}$), its evaluation range, and the attached
-axis names, while \texttt{fd.mean()} returns the pointwise average curve.
+The printed representation reports the container's dimensionality, its shape
+($n_\text{obs} \times n_\text{points}$) and its evaluation range; the axis
+names are stored on the object for labelling plots, and \texttt{fd.mean()}
+returns the pointwise average curve.
 Figure~\ref{fig:tour-represent} plots the full sample together with this mean:
 all curves share a single age grid, the shared-grid convention on which every
 downstream method in this section builds.  Metadata and per-observation
@@ -75,9 +76,12 @@ returns the coefficient matrix alongside the basis count, whereas
 \texttt{smooth\_basis\_gcv} additionally \emph{chooses} the smoothing penalty by
 minimising the generalised cross-validation score, trading data fidelity against
 roughness.  Figure~\ref{fig:tour-basis} overlays five raw growth curves with
-their GCV-selected B-spline reconstructions: the fitted curves follow the
-observations closely while suppressing sampling noise, neither interpolating
-every point nor flattening genuine curvature.  The returned AIC/BIC and
+their B-spline reconstructions under the GCV-selected penalty: the fitted
+curves capture the overall growth trajectory, but with only eight basis
+functions they partly smooth over the pubertal spurt (residuals of up to about
+3.5\,cm).  The basis dimension bounds how much curvature the GCV-chosen penalty
+can retain, so it should be chosen generously when sharp features matter.  The
+returned AIC/BIC and
 effective degrees of freedom quantify this fit--complexity balance for model
 comparison.
 
@@ -85,8 +89,8 @@ comparison.
   \centering
   \includegraphics[width=\linewidth]{figures/tour_basis}
   \caption{B-spline smoothing of five growth curves: raw observations (points)
-  and their reconstructions (lines) with the smoothing dimension selected by
-  generalised cross-validation.}
+  and their reconstructions (lines) from an 8-function B-spline basis whose
+  roughness penalty is selected by generalised cross-validation.}
   \label{fig:tour-basis}
 \end{figure}
 
@@ -98,7 +102,9 @@ fdars offers Fraiman--Muniz, band, modal, random-projection, and random Tukey
 depths via the \texttt{Fdata.depth()} method, and modified band depth
 \citep{lopez_pintado_romo_2009} via \texttt{depth.modified\_band\_1d}.
 The \texttt{fdars.outliers} submodule adds shape-, magnitude-, and
-amplitude-based outlier detection via MUOD~\citep{azcorra_muod_2018}:
+amplitude-based outlier detection via the Fast-MUOD
+variant~\citep{ojo_fast_muod_2022} of MUOD~\citep{azcorra_muod_2018}, which
+scores each curve by regressing it on the pointwise mean curve:
 
 \input{snippets/depth}
 
@@ -106,9 +112,10 @@ Depth assigns each curve a centrality score relative to the whole sample; the
 curve of maximum depth is the functional median.  MUOD complements this by
 decomposing atypicality into three indices---shape, magnitude, and
 amplitude---so that a curve unusual in \emph{form} is flagged separately from one
-merely shifted in \emph{level}.  Figure~\ref{fig:tour-depth} shades each growth
+merely shifted in \emph{level}; each index is flagged at its upper boxplot (IQR)
+fence.  Figure~\ref{fig:tour-depth} shades each growth
 curve by its Fraiman--Muniz depth (deeper curves drawn more opaque), highlights
-the functional median, and marks the MUOD-flagged curves in red.  Read honestly,
+the functional median, and marks the Fast-MUOD-flagged curves in red.  Read honestly,
 depth is a sample-relative ordering and the outlier flags are cutoff-dependent
 \emph{candidates} for inspection rather than definitive verdicts.
 
@@ -117,7 +124,7 @@ depth is a sample-relative ordering and the outlier flags are cutoff-dependent
   \includegraphics[width=\linewidth]{figures/tour_depth}
   \caption{Growth curves shaded by Fraiman--Muniz depth (deeper curves more
   opaque).  The deepest curve (orange) is the functional median; curves flagged
-  by MUOD as shape, magnitude, or amplitude outliers are drawn in red.}
+  by Fast-MUOD as shape, magnitude, or amplitude outliers are drawn in red.}
   \label{fig:tour-depth}
 \end{figure}
 
@@ -130,28 +137,37 @@ For sparse or irregularly observed longitudinal data fdars provides PACE
 (principal analysis by conditional expectation) through
 \texttt{fdars.pace\_fpca.irreg\_fdata\_from\_lists} (the \texttt{PyIrregFdata}
 container) and \texttt{fdars.pace\_fpca.pace\_fpca}~\citep{yao_muller_wang_2005}.
-This distinguishes fdars from peer libraries that support dense FPCA only:
+Of the Python peers in Table~\ref{tab:comparison}, scikit-fda supports FPCA
+for densely observed curves only:
 
 \input{snippets/fpca}
 
 The dense path returns scores, the eigenfunction \texttt{rotation} matrix, and
-singular values; the PACE path recovers the same structure from curves observed
-at subject-specific, irregularly spaced times.  The most useful way to read an
+singular values.  The PACE path returns the analogous quantities (mean,
+eigenfunctions, eigenvalues, conditional-expectation scores and fitted
+trajectories with pointwise bands) for curves observed at subject-specific,
+irregularly spaced times.  The snippet illustrates it by artificially
+sparsifying the growth data to 8 randomly chosen ages (of 31) per child and
+fitting PACE on the age domain: its scores correlate with the dense-data scores
+at 0.98 (PC1) and 0.89 (PC2), and its reconstructed trajectories stay within
+about 2.7\,cm (RMSE) of the full observations, although each child contributes
+only a quarter of the measurements.  The measurement-error variance
+\texttt{sigma2} is supplied by the user rather than estimated.  The most useful way to read an
 FPCA fit is through its \emph{modes of variation}: the mean curve perturbed by
 $\pm 2$ standard deviations along each eigenfunction.
 Figure~\ref{fig:tour-fpca} shows the first two for the growth data---the
 dominant component is an overall size/level mode, while the second is a timing
 contrast that crosses near mid-adolescence, corresponding to \emph{when} the
-pubertal growth spurt occurs.  The percentage in each panel title is the live
-share of variance that component explains.
+pubertal growth spurt occurs.  The percentage in each panel title is that
+component's share of the \emph{total} variance of the sample, computed live.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\linewidth]{figures/tour_fpca}
   \caption{First two FPCA modes of variation: the mean growth curve (grey)
   perturbed by $\pm 2$ standard deviations along each principal eigenfunction.
-  PC1 is an overall-size mode; PC2 is a growth-timing contrast.  Variance shares
-  are computed live from the singular values.}
+  PC1 is an overall-size mode; PC2 is a growth-timing contrast.  Percentages
+  are shares of the total sample variance, computed live from the fit.}
   \label{fig:tour-fpca}
 \end{figure}
 
@@ -197,19 +213,22 @@ the leading principal components and applies $k$-NN in the score space:
 Projecting onto a handful of principal components before applying $k$-NN keeps
 the classifier robust to the high dimensionality of raw curves while retaining
 the between-class signal.  Figure~\ref{fig:tour-classification} shows why this
-works on the phoneme data: the five class-mean log-periodogram spectra are
-visibly distinct in both amplitude and spectral shape, so a low-dimensional FPCA
-projection preserves enough separation for accurate assignment.  The snippet
-reports held-out accuracy on a subset; Case Study~1
+works, and where it struggles, on the phoneme data: the class-mean
+log-periodogram spectra of \textit{sh}, \textit{iy} and \textit{dcl} are
+distinct from each other and from the two back vowels, whereas \textit{aa} and
+\textit{ao} nearly overlap.  A low-dimensional FPCA projection therefore
+separates most classes well, and \textit{aa} versus \textit{ao} is the main
+source of error.  The snippet reports leave-one-out $k$NN accuracy on the first
+100 curves (with the unsupervised FPCA projection fitted on all 100); Case Study~1
 (Section~\ref{subsec:cs1-phoneme}) evaluates a closely related pipeline---FPCA
 followed by linear discriminant analysis---under full cross-validation.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\linewidth]{figures/tour_classification}
-  \caption{Class-mean log-periodogram spectra for the five phonemes.  The
-  visible separation across the frequency band is the signal the FPCA-$k$NN
-  classifier projects onto and exploits.}
+  \caption{Class-mean log-periodogram spectra for the five phonemes.  Most
+  classes separate across the frequency band; the vowels \textit{aa} and
+  \textit{ao} nearly coincide and account for most FPCA-$k$NN errors.}
   \label{fig:tour-classification}
 \end{figure}
 
@@ -227,8 +246,9 @@ dataset, predicting fat content from 100-channel absorbance curves:
 
 Following standard near-infrared practice, the snippet first converts the raw
 absorbance curves to \emph{second-derivative} spectra---smoothing with a
-B-spline basis and differentiating twice---which removes baseline and scatter
-effects and sharpens the fat absorption bands.
+B-spline basis and differentiating twice---which removes additive baseline offsets and linear baseline trends
+(including the additive part of light-scatter effects) and sharpens the fat
+absorption bands.
 \texttt{fregre\_lm} then projects these curves onto their leading FPCA
 components, fits an ordinary linear model in that score space, and returns the
 fitted values, residuals, the reconstructed coefficient function $\beta(t)$, and
@@ -273,7 +293,7 @@ variance-stabilising square-root scale used for these data by
 \citet{aue_norinho_hormann_2015}---sit within the envelope of observed
 days and preserve the characteristic diurnal shape.  Because the reconstruction
 is low-rank, the forecasts capture the leading modes of variation rather than
-fine minute-to-minute fluctuation.  Case Study~\ref{subsec:cs3-fts} validates
+fine half-hour-to-half-hour fluctuations.  Case Study~\ref{subsec:cs3-fts} validates
 such forecasts over 30 rolling forecast origins against simple baselines.
 
 \begin{figure}[H]
@@ -301,10 +321,11 @@ Phase~1 characterises in-control variation from a reference set of curves and
 derives the $T^2$ and SPE control limits; Phase~2 then scores each new curve on
 these two statistics and flags any that exceed a limit.
 Figure~\ref{fig:tour-spm} shows the resulting $T^2$ chart, with out-of-control
-curves marked in red above the upper control limit.  For this illustration the
-Phase-2 ``batch'' is simply the second half of the same growth sample, so the
-alarms reflect ordinary between-subject variability rather than a genuine
-process fault---the figure demonstrates the charting mechanics, not a real
+curves marked in red above the upper control limit.  For this illustration
+Phase~1 uses the first 46 growth curves (39 boys and 7 girls) and Phase~2 the
+remaining 47 (all girls), so the five $T^2$ alarms (about 2.4 would be expected
+by chance at $\alpha = 0.05$) reflect between-subject variability plus a shift
+in sex composition rather than a genuine process fault---the figure demonstrates the charting mechanics, not a real
 monitoring incident.
 
 \begin{figure}[H]
@@ -318,28 +339,32 @@ monitoring incident.
 
 \subsection{Conformal and Tolerance Bands}
 
-\texttt{fdars.tolerance} constructs simultaneous tolerance bands for functional
-data via bootstrap FPCA~\citep{febrerobande_fdausc_2012}.
+\texttt{fdars.tolerance} constructs tolerance bands for functional data by a
+parametric bootstrap from an FPCA model.
 \texttt{fpca\_tolerance\_band} returns upper/lower band curves, a centre curve,
 and the half-width vector; a fixed \texttt{seed} argument makes the bootstrap
-resampling reproducible:
+simulation reproducible:
 
 \input{snippets/tolerance}
 
-The band is built by repeatedly resampling an FPCA model and calibrating a
-half-width so that the resulting envelope is expected to contain the target
-fraction of curves \emph{simultaneously} across the whole grid---a stronger
-guarantee than a pointwise interval.  Figure~\ref{fig:tour-tolerance} draws the
-95\% band over the growth sample: most curves fall inside it, and the band
-widens through adolescence where between-subject spread is largest.  The
-coverage is a bootstrap estimate rather than an exact finite-sample guarantee,
-and the fixed \texttt{seed} pins the reported band.
+The band is centred on the pointwise sample mean, and its half-width is a
+constant multiple of the pointwise sample standard deviation.  The multiple is
+calibrated by a parametric bootstrap: Gaussian FPC scores are simulated from the
+fitted FPCA model, and the multiple is chosen so that, with probability 0.95, an
+entire simulated sample of $n$ curves lies inside the band over the whole grid.
+This makes it a conservative \emph{simultaneous} band rather than one that
+contains 95\% of individual curves.  Figure~\ref{fig:tour-tolerance} draws the
+band over the growth sample: all 93 curves fall inside it, and the band widens
+steadily with age, following the growing between-subject spread in height,
+which is largest at the end of the observation period (age~18).  The coverage
+is a simulation estimate under the Gaussian FPCA model rather than an exact
+finite-sample guarantee, and the fixed \texttt{seed} pins the reported band.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\linewidth]{figures/tour_tolerance}
-  \caption{Bootstrap-FPCA 95\% simultaneous tolerance band (shaded) with its
-  centre curve, drawn over the growth sample.  The band widens where
+  \caption{95\% simultaneous tolerance band from an FPCA parametric bootstrap
+  (shaded) with its centre curve, drawn over the growth sample.  The band widens where
   between-subject variability grows.}
   \label{fig:tour-tolerance}
 \end{figure}
@@ -351,8 +376,9 @@ and the fixed \texttt{seed} pins the reported band.
 functional observations.
 Beyond pairwise distances, fdars also provides density-FDA methods (LQD FPCA
 and Wasserstein barycenters) in \texttt{fdars.density\_fda}, and Fr\'echet
-means, regression, and ANOVA for object-valued data in
-\texttt{fdars.frechet}~\citep{petersen_muller_2019}; see
+means and regression~\citep{petersen_muller_2019} and Fr\'echet
+ANOVA~\citep{dubey_muller_2019} for object-valued data in
+\texttt{fdars.frechet}; see
 Table~\ref{tab:comparison} for the full peer comparison.
 The snippet illustrates the metric family representative:
 
@@ -381,7 +407,8 @@ scaling---so the metric family underpins much of the rest of the tour.
 slope function (SRSF) framework~\citep{srivastava_et_al_2011}.
 \texttt{karcher\_mean} estimates the Karcher mean curve by iteratively
 aligning observations and re-estimating the mean; the returned dict includes
-the aligned data matrix, phase-warping functions ($\gamma$), and a convergence flag:
+the aligned data matrix, phase-warping functions ($\gamma$), the iteration
+count, and a convergence flag (here reached after 121 of at most 200 iterations):
 
 \input{snippets/alignment}
 
@@ -401,8 +428,9 @@ variation that was removed, not a nuisance by-product.
 \begin{figure}[H]
   \centering
   \includegraphics[width=\linewidth]{figures/tour_alignment}
-  \caption{Elastic SRSF registration of Berkeley girls' growth-velocity curves
-  (ages 5--18), before (left) and after (right) \texttt{karcher\_mean}
+  \caption{Elastic SRSF registration of the growth-velocity curves of 20
+  Berkeley girls (ages 5--18; velocities from a B-spline smooth of all 93
+  children), before (left) and after (right) \texttt{karcher\_mean}
   alignment.  Registering the pubertal-spurt peak tightens the sample; the
   Karcher mean (red, right) recovers a sharp spurt that the naive
   cross-sectional mean (red, left) smears out.}
@@ -422,6 +450,10 @@ variation---a timing difference the warping functions make explicit and
 quantifiable, separate from any difference in spurt amplitude.  The identity
 diagonal marks a child who needs no warping (developmental clock exactly on the
 template); deviations below it mark earlier development, above it later.
+For all 93 children the Karcher iteration is capped at 50 steps and the flag
+reports \texttt{converged=False}; the sex contrast is already stable at that
+point (the mean boys--girls gap between the warping functions is 1.53 years
+after 50 iterations and 1.63 after 300).
 
 \begin{figure}[H]
   \centering
@@ -438,7 +470,9 @@ template); deviations below it mark earlier development, above it later.
 \subsection{Grounded AI Advisor (LLM-Free Diagnostics)}
 
 \texttt{fdars.advisor.build\_diagnostics} computes method-specific structured
-diagnostics from any fdars result dict in a fully offline, deterministic
+diagnostics from the result dicts of sixteen supported method families
+(alignment, FPCA, smoothing, clustering, depth, outliers, classification,
+regression, monitoring, and others) in a fully offline, deterministic
 manner---no LLM provider is required.
 The LLM-assisted \texttt{advise()} function takes these diagnostics and a
 user-specified task description and queries a configured language model to
@@ -450,10 +484,11 @@ The snippet demonstrates the offline diagnostic step for FPCA:
 
 The diagnostic reduces a full result dict to the small set of scalars a
 practitioner would actually inspect---here, the per-component and cumulative
-variance explained.  Figure~\ref{fig:tour-advisor} plots exactly these
-quantities as a scree chart: the first component dominates and the cumulative
-curve saturates quickly, which is the concrete signal the advisor uses to
-recommend how many components to retain.  Because every number is computed from
+share of the \emph{total} variance captured by the retained components.
+Figure~\ref{fig:tour-advisor} plots exactly these quantities as a scree chart:
+the first component alone captures 81\% of the total variance, and the three
+retained components together 97.5\%, so the remaining 2.5\% is what a
+larger \texttt{n\_comp} could still add.  Because every number is computed from
 the data rather than generated by a language model, the resulting guidance is
 \emph{grounded}: the optional \texttt{advise()} step passes these diagnostics to
 an LLM only to phrase and contextualise a recommendation the numbers already
@@ -463,7 +498,8 @@ support (Section~\ref{sec:advisor}).
   \centering
   \includegraphics[width=\linewidth]{figures/tour_advisor}
   \caption{The advisor's offline FPCA diagnostic: per-component (bars) and
-  cumulative (line) variance explained.  These are the exact, computed
+  cumulative (line) share of the total variance for the three retained
+  components.  These are the exact, computed
   quantities its grounded, LLM-free guidance reasons over.}
   \label{fig:tour-advisor}
 \end{figure}

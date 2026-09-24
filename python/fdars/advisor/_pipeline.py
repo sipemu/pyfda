@@ -410,7 +410,7 @@ def build_pipeline_report(
     argvals=None,
     run_llm: bool = True,
     domain_context: str = "",
-    model: str = "claude-opus-4-8",
+    model: "str | None" = None,
     provider: "str | object | None" = None,
     **kwargs,
 ) -> dict:
@@ -587,7 +587,7 @@ def pipeline_report(
     *,
     argvals=None,
     domain_context: str = "",
-    model: str = "claude-opus-4-8",
+    model: "str | None" = None,
     provider: "str | object | None" = None,
     thresholds: "dict | None" = None,
     **kwargs,
@@ -624,7 +624,8 @@ def pipeline_report(
         Free-text domain description included in the LLM user message to help
         ground the narration in the study context.
     model : str, optional
-        LLM model identifier.  Default ``"claude-opus-4-8"``.
+        Model identifier.  ``None`` (default) resolves ``FDARS_ADVISOR_MODEL``,
+        then the provider's default (``"claude-opus-4-8"`` for Anthropic).
     provider : str or Provider or None, optional
         LLM provider.  ``None`` (default) uses the Anthropic default via
         ``resolve_provider``.  Pass a mock provider in tests.

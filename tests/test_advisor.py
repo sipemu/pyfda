@@ -301,12 +301,14 @@ class TestBuildDiagnosticsOffline:
         # Compute expected dict inline from the original fpca.py logic
         denom = max(n_obs - 1, 1)
         eigenvalues = (sv ** 2) / denom
+        # This fixture carries no centred data, so the builder falls back to
+        # the retained-eigenvalue denominator and labels it as such.
         total_var = float(eigenvalues.sum())
         evr = eigenvalues / total_var
         cum_list = [float(v) for v in np.cumsum(evr)]
         n_comp = 3
-        leading_var = float(evr[0])
-        remaining_var = float(evr[1:].sum())
+        evr_retained = eigenvalues / float(eigenvalues.sum())
+        remaining_var = float(evr_retained[1:].sum())
         phase_leakage_indicator = float(remaining_var)
         expected = {
             "method": "fpca",
@@ -316,6 +318,7 @@ class TestBuildDiagnosticsOffline:
             "explained_variance_ratio": [float(v) for v in evr],
             "cumulative_variance_explained": cum_list,
             "total_variance": total_var,
+            "variance_denominator": "retained_components",
             "phase_leakage_indicator": phase_leakage_indicator,
             "phase_leakage_flagged": bool(phase_leakage_indicator > 0.5),
             # pace_fpca branch keys (ADV-05 Group B) — None for standard FPCA input

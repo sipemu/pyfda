@@ -6,25 +6,26 @@ from fdars.pace_fpca import irreg_fdata_from_lists, pace_fpca
 growth = pd.read_csv(data_path("growth.csv"), index_col=0)
 ARG = growth.index.values.astype(float)
 X = growth.values.T.astype(np.float64)
-fd = Fdata(X, argvals=ARG)
-pc = fd.to_pc(n_comp=3)
-sv = np.round(pc["singular_values"], 2).tolist()
+pc = Fdata(X, argvals=ARG).to_pc(n_comp=3)
 print("FPCA scores shape:", pc["scores"].shape)
-print("singular values:", sv)
+print("singular values:", np.round(pc["singular_values"], 2).tolist())
+# Sparsify: keep 8 random ages (of 31) per child, then fit PACE.
 np.random.seed(42)
-sizes = np.random.randint(5, 15, size=30)
-argvals_list = [
-    np.sort(np.random.uniform(1, 18, s)).tolist() for s in sizes
-]
-values_list = [np.sin(av).tolist() for av in argvals_list]
-irreg = irreg_fdata_from_lists(argvals_list, values_list)
-pace = pace_fpca(irreg, ncomp=2)
-print("PACE scores shape:", pace["scores"].shape)
-print("ncomp:", pace["ncomp"])
+idx = [np.sort(np.random.choice(31, 8, replace=False)) for _ in X]
+irreg = irreg_fdata_from_lists(
+    [ARG[i].tolist() for i in idx],
+    [X[k, i].tolist() for k, i in enumerate(idx)])
+pace = pace_fpca(irreg, ncomp=2, bandwidth=0.5, sigma2=0.25,
+                 work_grid=ARG.tolist())
+r = [abs(np.corrcoef(pace["scores"][:, k], pc["scores"][:, k])[0, 1])
+     for k in range(2)]
+rmse = np.sqrt(np.mean((pace["fitted"] - X) ** 2))
+print("PACE vs dense score correlation:", np.round(r, 3).tolist())
+print("PACE trajectory RMSE vs full data (cm):", round(float(rmse), 2))
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]
 FPCA scores shape: (93, 3)
 singular values: [227.54, 93.02, 43.73]
-PACE scores shape: (30, 2)
-ncomp: 2
+PACE vs dense score correlation: [0.983, 0.889]
+PACE trajectory RMSE vs full data (cm): 2.72
 \end{lstlisting}

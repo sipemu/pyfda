@@ -15,10 +15,15 @@ Writes two deterministic committed figures to paper/figures/:
 
 Run with::
 
-    PYTHONPATH=scripts:paper/code python paper/code/casestudy2.py
+    PYTHONPATH=scripts:paper/code python paper/code/casestudy2.py          # figures + numbers
+    PYTHONPATH=scripts:paper/code python paper/code/casestudy2.py --check  # numbers drift gate
+
+Every number quoted in paper/sections/casestudy2.tex is written to
+paper/sections/cs2_numbers.tex (see cs_numbers.py).
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -34,11 +39,20 @@ from fdars import Fdata
 from fdars.sklearn import FPCRegressor
 from sklearn.model_selection import cross_val_score
 
+from cs_numbers import emit, fmt
+
+_N_KARCHER = 30        # curves used to estimate the Karcher mean
+_KARCHER_ITER = 20     # Fisher-Rao gradient-descent iteration cap
+_N_COMP = 15           # FPC regression components
+
 _FIGURES_DIR = Path(__file__).resolve().parent.parent / "figures"
 
 
-def main() -> None:
+def main(check: bool = False) -> int:
     """Run the Study-2 pipeline and write two deterministic figures.
+
+    With ``check=True`` only the number macros are recomputed and compared with
+    the committed file (no figures are written); returns 1 on drift.
 
     Seeds the RNG first (per Determinism Pinning Summary in 89-RESEARCH).
     karcher_mean and fregre_lm are deterministic (iterative / linear algebra);
@@ -69,7 +83,8 @@ def main() -> None:
     # km["converged"] is False when max_iter=20 is reached (expected; not an error).
     # The aligned result is still valid — do not treat this as a failure condition.
     # ------------------------------------------------------------------
-    km = fdars.alignment.karcher_mean(Xt[:30], ARGt, max_iter=20)
+    km = fdars.alignment.karcher_mean(Xt[:_N_KARCHER], ARGt,
+                                     max_iter=_KARCHER_ITER)
     # km keys: mean, mean_srsf, aligned_data, gammas, n_iter, converged
     print("karcher_mean converged:", km["converged"], "(max_iter=20; expected False)")
 
@@ -81,7 +96,8 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Step 2: Scalar-on-function FPC regression on 2nd-DERIVATIVE spectra.
     # Standard NIR preprocessing: smooth the absorbance curves with a B-spline
-    # basis, then differentiate twice to remove baseline/scatter and expose the
+    # basis, then differentiate twice to remove additive baseline offsets and
+    # linear slopes (not multiplicative scatter) and expose the
     # fat absorption bands.  This substantially lifts R^2 over the raw spectra.
     # NOTE: fregre_lm uses n_comp (NOT n_components — different from FPCRegressor)
     # NOTE: result key is "fitted_values" (NOT "fitted" — unlike to_pc's "fitted")
@@ -89,7 +105,7 @@ def main() -> None:
     sm = fdars.basis.smooth_basis_gcv(
         Xt, ARGt, n_basis=40, basis_type="bspline")["fitted"]
     d2 = Fdata(sm, argvals=ARGt).deriv().deriv().data   # 2nd-derivative spectra
-    sof = fdars.regression.fregre_lm(d2, yfat, n_comp=15)
+    sof = fdars.regression.fregre_lm(d2, yfat, n_comp=_N_COMP)
     r2_train = float(sof["r_squared"])
     fitted = sof["fitted_values"]   # (240,)
     print("train R2:", round(r2_train, 3))
@@ -98,7 +114,8 @@ def main() -> None:
     # Step 3: FPCRegressor 5-fold cross-validation (on the same 2nd-deriv spectra)
     # NOTE: FPCRegressor uses n_components (NOT n_comp — sklearn convention)
     # ------------------------------------------------------------------
-    cv = cross_val_score(FPCRegressor(n_components=15), d2, yfat, cv=5, scoring="r2")
+    cv = cross_val_score(FPCRegressor(n_components=_N_COMP), d2, yfat, cv=5,
+                         scoring="r2")
     cv_mean = float(cv.mean())
     print("CV R2:", round(cv_mean, 3))
     print("CV fold scores:", [round(float(s), 3) for s in cv])
@@ -109,7 +126,7 @@ def main() -> None:
     #  - the same two representations after elastic registration.
     # ------------------------------------------------------------------
     def _cv(X: np.ndarray) -> float:
-        return float(cross_val_score(FPCRegressor(n_components=15), X, yfat,
+        return float(cross_val_score(FPCRegressor(n_components=_N_COMP), X, yfat,
                                      cv=5, scoring="r2").mean())
 
     def _d2(X: np.ndarray) -> np.ndarray:
@@ -117,13 +134,39 @@ def main() -> None:
             X, ARGt, n_basis=40, basis_type="bspline")["fitted"]
         return Fdata(smx, argvals=ARGt).deriv().deriv().data
 
-    r2_raw = float(fdars.regression.fregre_lm(Xt, yfat, n_comp=15)["r_squared"])
+    r2_raw = float(fdars.regression.fregre_lm(Xt, yfat,
+                                              n_comp=_N_COMP)["r_squared"])
     cv_raw = _cv(Xt)
     cv_reg_raw = _cv(Xa)
     cv_reg_d2 = _cv(_d2(Xa))
     print("raw spectra: train R2", round(r2_raw, 3), "CV R2", round(cv_raw, 3))
     print("registered spectra CV R2: raw", round(cv_reg_raw, 3),
           "2nd-deriv", round(cv_reg_d2, 3))
+
+    # ------------------------------------------------------------------
+    # Every number quoted in casestudy2.tex (letters-only macro names).
+    # ------------------------------------------------------------------
+    macros = {
+        "csTwoNSamples": str(Xt.shape[0]),
+        "csTwoNChannels": str(Xt.shape[1]),
+        "csTwoFatMin": fmt(yfat.min(), 1),
+        "csTwoFatMax": fmt(yfat.max(), 1),
+        "csTwoNKarcher": str(_N_KARCHER),
+        "csTwoKarcherIter": str(_KARCHER_ITER),
+        "csTwoKarcherConverged": "yes" if km["converged"] else "no",
+        "csTwoNComp": str(_N_COMP),
+        "csTwoTrainRtwo": fmt(r2_train, 3),
+        "csTwoTrainRtwoRaw": fmt(r2_raw, 3),
+        "csTwoCVRtwo": fmt(cv_mean, 3),
+        "csTwoCVFolds": ", ".join(fmt(v, 3) for v in cv),
+        "csTwoCVRtwoRaw": fmt(cv_raw, 3),
+        "csTwoCVRtwoRegRaw": fmt(cv_reg_raw, 3),
+        "csTwoCVRtwoRegDtwo": fmt(cv_reg_d2, 3),
+        "csTwoNShown": "30",
+    }
+    status = emit("cs2_numbers.tex", "casestudy2.py", macros, check=check)
+    if check:
+        return status
 
     # ------------------------------------------------------------------
     # Create output directory
@@ -135,7 +178,7 @@ def main() -> None:
     # Shows what elastic registration does to the spectral curves.
     # Use a representative subset (30 curves) to keep the plot readable.
     # ------------------------------------------------------------------
-    n_show = 30
+    n_show = int(macros["csTwoNShown"])
     mean_color = FDARS_COLORS[0]   # highlight the Karcher mean prominently
     aligned_color = FDARS_COLORS[1]
 
@@ -155,7 +198,7 @@ def main() -> None:
     ax1.set_ylabel("Absorbance")
     ax1.set_title(
         "Tecator near-infrared spectra: raw and elastically registered\n"
-        "(30 curves shown; alignment iterations capped at 20)"
+        f"({n_show} curves shown; alignment iterations capped at {_KARCHER_ITER})"
     )
     clean_ax(ax1, frame=True)
     brand_legend(ax1, fontsize=7)
@@ -181,14 +224,15 @@ def main() -> None:
     clean_ax(ax2, frame=True)
     metric_box(
         ax2,
-        f"Training $R^2$ = {round(r2_train, 3)}\n"
-        f"5-fold CV $R^2$ = {round(cv_mean, 3)}\n"
-        f"(raw spectra: CV $R^2$ = {round(cv_raw, 3)})",
+        f"Training $R^2$ = {macros['csTwoTrainRtwo']}\n"
+        f"5-fold CV $R^2$ = {macros['csTwoCVRtwo']}\n"
+        f"(raw spectra: CV $R^2$ = {macros['csTwoCVRtwoRaw']})",
         loc="upper left",
     )
     brand_legend(ax2, fontsize=8, loc="lower right")
     save_figure(f2, _FIGURES_DIR / "cs2_tecator_fit.pdf")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main(check="--check" in sys.argv))

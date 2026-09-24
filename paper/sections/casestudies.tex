@@ -1,5 +1,5 @@
 % paper/sections/casestudies.tex — Case Studies section shell
-% Written in Phase 89 (Plan 01). Do not edit manually.
+% Written in Phase 89 (Plan 01); revised in the referee pass (generated numbers).
 % Each per-study subsection is owned by its own \input file.
 % Wave-2 studies (2--4) each add their own casestudyN.tex; this file is FINAL.
 \section{Case Studies}
@@ -10,8 +10,11 @@ smoothing and functional principal component analysis, elastic registration
 with scalar-on-function regression, functional time-series forecasting, and
 composable scikit-learn pipelines with hyperparameter search.  Each study is
 reproduced by a committed \texttt{paper/code/casestudyN.py} script that
-generates the accompanying figures deterministically; re-running any script
-leaves \texttt{git diff paper/figures/} empty.
+generates the accompanying figures and writes every number quoted in the text
+to a \LaTeX{} macro file (\texttt{paper/sections/csN\_numbers.tex}); a CI drift gate
+recomputes the numbers and fails if a committed macro file is stale.  Figure
+generation is deterministic: re-running a script in the same environment
+reproduces its figures byte for byte.
 
 \input{sections/casestudy1}
 \input{sections/casestudy2}

@@ -15,13 +15,15 @@ fit = fdars.basis.basis_to_fdata_1d(
     sm["coefficients"], dense, 12, "bspline")
 vel = Fdata(fit, argvals=dense).deriv().data
 # Elastic registration of the velocity curves (aligns the spurt peak).
-res = fdars.alignment.karcher_mean(vel, dense, max_iter=50)
+res = fdars.alignment.karcher_mean(vel, dense, max_iter=200)
 print("karcher keys:", list(res.keys()))
+print("converged:", res["converged"], "| iterations:", res["n_iter"])
 print("aligned shape:", res["aligned_data"].shape)
 print("warping gammas:", res["gammas"].shape)
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]
 karcher keys: ['mean', 'mean_srsf', 'aligned_data', 'gammas', 'n_iter', 'converged']
+converged: True | iterations: 121
 aligned shape: (54, 120)
 warping gammas: (54, 120)
 \end{lstlisting}

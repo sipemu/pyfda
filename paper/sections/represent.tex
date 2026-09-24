@@ -85,22 +85,24 @@ the same $n_\mathrm{points}$ grid points, \texttt{fdars} uses the
     \texttt{ValueError} when dimensions are inconsistent.
 
   \item \textbf{\texttt{argvals}} --- a one-dimensional array of $n_\mathrm{points}$
-    grid points (the evaluation abscissae).  When omitted, a uniform grid on
-    $[0, 1]$ is inferred.  For the Berkeley Growth Study \citep{tuddenham_snyder_1954}, for example,
+    grid points (the evaluation abscissae).  When omitted, the integer index
+    grid $0, 1, \ldots, n_\mathrm{points}-1$ is used (for 2-D data the grids
+    are inferred from the array shape).  For the Berkeley Growth Study \citep{tuddenham_snyder_1954}, for example,
     \texttt{argvals} holds the 31 measurement ages (years $1$--$18$).
 
   \item \textbf{\texttt{rangeval}} --- a two-tuple
     $(\mathrm{min}, \mathrm{max})$ giving the functional domain.  If not
-    supplied it is derived automatically from \texttt{argvals}.  Methods such
-    as \texttt{deriv} and \texttt{normalize} use \texttt{rangeval} to orient
-    the domain of each functional observation.
+    supplied it is derived automatically from \texttt{argvals}; it is
+    propagated to derived objects and used, e.g., by \texttt{resample()} to
+    build a uniform grid over the domain.
 
   \item \textbf{\texttt{id}} --- an optional sequence of string labels
     identifying each observation (e.g.\ subject codes).
 
   \item \textbf{\texttt{names}} --- an optional dictionary carrying
-    axis-label metadata (e.g.\ \texttt{\{"x": "Age (years)", "y":
-    "Height (cm)"\}}).
+    plot-label metadata with keys \texttt{main}, \texttt{xlab},
+    \texttt{ylab} (and \texttt{zlab} for 2-D data), e.g.\
+    \texttt{\{"xlab": "Age (years)", "ylab": "Height (cm)"\}}.
 
   \item \textbf{\texttt{metadata}} --- an optional
     \texttt{pandas.DataFrame} (or dict convertible to one) with one row per
@@ -111,22 +113,28 @@ the same $n_\mathrm{points}$ grid points, \texttt{fdars} uses the
 The capability tour (Section~\ref{sec:capabilities}) opens with an executed
 snippet that constructs an \texttt{Fdata} object from the Growth dataset and
 prints its \texttt{repr}; the output confirms the $(n_\mathrm{obs} \times
-n_\mathrm{points})$ shape and the inferred \texttt{rangeval}.  Key read-only
-properties (\texttt{n\_obs}, \texttt{n\_points}, \texttt{rangeval},
-\texttt{data}, \texttt{argvals}) expose the container fields without copying.
+n_\mathrm{points})$ shape and the inferred \texttt{rangeval}.  The read-only
+properties \texttt{n\_obs}, \texttt{n\_points} and \texttt{shape}, together
+with the plain attributes \texttt{data}, \texttt{argvals} and
+\texttt{rangeval}, expose the container fields without copying.
 
 \texttt{Fdata} exposes \nfdata{} public methods.  The most commonly used are
 \texttt{mean()} (cross-sectional pointwise mean), \texttt{center()} (subtract
 the mean to produce a centred \texttt{Fdata}), \texttt{deriv(nderiv=1)}
 (numerical differentiation), \texttt{norm()} ($L^2$ norm of each curve),
-\texttt{normalize()} (scale each curve to unit norm), \texttt{depth(method=...)}
+\texttt{normalize(method=...)} (column centring or scaling, e.g.\
+autoscaling, Pareto or range scaling, or per-curve centring and
+standardisation), \texttt{depth(method=...)}
 (functional depth via Fraiman--Muniz, band depth, or other methods),
 \texttt{to\_pc(n\_comp=...)} (dense FPCA, returning scores, rotation, singular
-values, and centred data), \texttt{to\_basis(type=...)} (basis expansion),
+values, and centred data), \texttt{to\_basis(n\_basis, basis\_type=...)} (B-spline or Fourier basis
+expansion),
 \texttt{distance(method=...)} (pairwise distance matrix), \texttt{cov()} (Bessel-corrected
 pointwise covariance surface), and \texttt{geometric\_median()} (the $L^1$ functional
-median).  Each method delegates to the appropriate PyO3 binding and returns
-results in consistent format (NumPy arrays or dicts).
+median).  Most of these methods delegate to the appropriate PyO3 binding
+(a few, such as \texttt{int\_simpson}, \texttt{concat} and \texttt{copy}, are
+implemented in NumPy) and return results in a consistent format (NumPy arrays,
+dicts or new \texttt{Fdata} objects).
 
 \texttt{Fdata} supports standard arithmetic operators (\texttt{+},
 \texttt{-}, \texttt{*}, \texttt{/}) enabling functional arithmetic, a
@@ -164,15 +172,26 @@ PACE FPCA algorithm (\texttt{fdars.pace\_fpca.pace\_fpca}) accepts as its
 primary input:
 
 \begin{lstlisting}[language=Python,style=fdarsinput]
-result = fdars.pace_fpca.pace_fpca(irreg, ncomp=2, bandwidth=0.1)
+result = fdars.pace_fpca.pace_fpca(
+    irreg, ncomp=2, bandwidth=1.0,
+    work_grid=np.linspace(lo, hi, 51).tolist())
 \end{lstlisting}
 
 PACE (Principal Analysis by Conditional Expectation,
-\citealt{yao_muller_wang_2005}) estimates mean and covariance functions via
-local polynomial smoothing and recovers FPCA scores for each subject even when
-individual trajectories are observed at only a handful of time points.  The
-capability tour (Section~\ref{sec:capabilities}) demonstrates this path with a
-synthetic irregularly sampled dataset; see also the FPCA family snippet.
+\citealt{yao_muller_wang_2005}) estimates mean and covariance functions by
+kernel smoothing of the pooled observations and recovers FPCA scores for each
+subject by conditional expectation, even when individual trajectories are
+observed at only a handful of time points.  \texttt{fdars} implements a
+variant of the published estimator: mean and covariance are estimated with a
+Gaussian-kernel Nadaraya--Watson (local-constant) smoother rather than local
+linear smoothing, and the measurement-error variance $\sigma^2$ is a
+user-specified parameter (\texttt{sigma2}, default $0.01$) rather than being
+estimated from the data.  The evaluation grid \texttt{work\_grid} defaults to
+51 points on $[0, 1]$, so for data observed on another domain
+$[\mathit{lo}, \mathit{hi}]$ it must be passed explicitly, as above, together
+with a bandwidth suited to that scale.  The capability tour
+(Section~\ref{sec:capabilities}) demonstrates this path with a synthetic
+irregularly sampled dataset; see also the FPCA family snippet.
 
 There is no top-level \texttt{fdars.IrregFdata} class; the public container is
 \texttt{PyIrregFdata} and the sole public constructor is

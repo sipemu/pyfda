@@ -330,7 +330,7 @@ def compare_methods(
     *,
     metric: "str | None" = None,
     domain_context: str = "",
-    model: str = "claude-opus-4-8",
+    model: "str | None" = None,
     provider: "str | object | None" = None,
     run_llm: bool = True,
     argvals=None,

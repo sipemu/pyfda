@@ -27,30 +27,40 @@ implementations (Table~\ref{tab:crossimpl}).  The reference outputs were
 computed once with \texttt{fda.usc} \citep{febrerobande_fdausc_2012},
 \texttt{roahd} \citep{r_roahd}, \texttt{fdasrvf} \citep{r_fdasrvf}, and
 \texttt{fdapace} \citep{r_fdapace} and committed together with their inputs;
-the \texttt{fdars} side is recomputed on every CI run and a drift gate fails
-if the table changes.
+the \texttt{fdars} side is recomputed by CI whenever the paper, the binding
+sources, or the data change, and a drift gate fails if the table changes.
+All numbers quoted in this subsection are written by the same script.
 
 \input{sections/crossimpl_table}
 
 Fraiman--Muniz depth agrees to machine precision.  Modified band depth
-produces the same ranking with value differences of at most $0.012$.  The
-elastic Karcher mean matches \texttt{fdasrvf} to within 1.7\% in relative
+agrees closely but not exactly in ranking (Spearman $\rho=\ciMbdRho$; the
+same deepest curve; \ciMbdMoved{} of the \ciMbdN{} curves change rank, none by
+more than \ciMbdMaxShift{} positions), with value differences of at most
+$\ciMbdMaxDiff$.  The
+elastic Karcher mean matches \texttt{fdasrvf} to within \ciKarcherRel\% in relative
 $L^2$ norm, and both recover the sharp common peak that the cross-sectional
 mean flattens.  The remaining differences trace to documented modelling
-choices rather than errors.  The $L^2$ distances differ by up to 7\% because
+choices rather than errors.  The $L^2$ distances differ by up to \ciLtwoMaxRel\% because
 \texttt{fda.usc} integrates with the trapezoid rule, which we reproduce
 exactly, whereas \texttt{fdars} uses a higher-order composite rule that
-integrates quadratics exactly on the non-uniform growth grid.  The same
-quadrature weighting explains the small FPCA differences.  For PACE, both
+integrates quadratics exactly on the non-uniform growth grid.  The small FPCA
+differences have a related cause: \texttt{fda.usc}'s \texttt{fdata2pc}
+performs an unweighted singular value decomposition that treats all grid
+points equally, ignoring the non-uniform spacing of the growth ages, whereas
+\texttt{fdars} applies quadrature weights; an unweighted decomposition
+reproduces the \texttt{fda.usc} eigenfunctions (minimum
+$|\cos| = \ciFpcaUnweightedCos$).  For PACE, both
 libraries use a Gaussian kernel with the same bandwidth, but \texttt{fdars}
 smooths the mean with a local-constant (Nadaraya--Watson) estimator where
 \texttt{fdapace} uses local-linear smoothing; the eigenfunctions nevertheless
-agree closely ($|\cos| \geq 0.99$) and both eigenvalue estimates are close to
+agree closely ($|\cos| \geq \ciPaceMinCos$) and both eigenvalue estimates are close to
 the true values.
 
 \subsection{Rust layer}
 
-The numerical algorithms reside in the \texttt{fdars-core} crate, which ships
+The numerical algorithms reside in the \texttt{fdars-core} crate, which, at
+version 0.33.0 (the version used by \texttt{fdars} 0.13.0), ships
 3{,}260 Rust unit and integration tests.  The PyO3 binding crate
 (\texttt{pyfda}) contains no Rust unit tests of its own---it is tested from
 Python---and CI enforces its code quality: \texttt{cargo fmt --check} checks
@@ -60,16 +70,16 @@ and the declared minimum supported Rust version (1.83).
 
 \subsection{Python test suite}
 
-The \texttt{tests/} directory (5{,}700 tests) is exercised by \texttt{pytest}
+At version 0.13.0 the \texttt{tests/} directory holds about 5{,}700 tests; it is exercised by \texttt{pytest}
 on every CI run across Python~3.9 through~3.14.
 Tests cover the \texttt{Fdata} container, numerical operations (smoothing,
 depth, alignment, regression, monitoring, covariance sampling), the advisor
 and MCP server, and the dataset loaders.
 
-\subsection{Property-based numerical tests}
+\subsection{Known-answer and behavioural unit tests}
 
-\texttt{tests/test\_r\_parity.py} checks mathematically verifiable properties
-of the outputs---integrals of known functions, determinism under fixed seeds,
+\texttt{tests/test\_r\_parity.py} contains example-based unit tests with
+fixed inputs that check mathematically verifiable properties of the outputs---integrals of known functions, determinism under fixed seeds,
 correct output shapes, and expected statistical behaviour (for example, that a
 CUSUM chart detects a known mean shift).  Despite the file name, these tests do
 not compare against R; that comparison is the one reported in
@@ -85,16 +95,22 @@ scikit-learn \texttt{check\_estimator} conformance suite
 \citep{pedregosa_sklearn_2011}, run from \texttt{tests/sklearn/} in CI across
 all supported Python versions.
 Passing \texttt{check\_estimator} means that the estimators honour
-scikit-learn's fit--predict contract, are picklable, and compose correctly
-inside \texttt{Pipeline} and \texttt{GridSearchCV}.
+scikit-learn's estimator contract (fit/predict/transform semantics, cloning,
+parameter handling, pickling); separate tests in \texttt{tests/sklearn/}
+exercise them inside \texttt{Pipeline} and \texttt{GridSearchCV}.
 
 \subsection{Reproducibility as validation}
 
 This manuscript is itself a validation artefact.
 Every code snippet in Section~\ref{sec:capabilities}, every figure, and every
 number in Section~\ref{sec:casestudies} and Table~\ref{tab:crossimpl} is
-produced by a committed \texttt{paper/code/} script.
-CI drift gates verify that regenerating the snippets, the coverage macros, the
-bibliography, and the agreement table leaves no diff against the committed
-sources, and that the figures regenerate byte-identically.
-No printed example can silently diverge from the live API.
+produced by a committed \texttt{paper/code/} script; the case-study numbers
+are written by those scripts as \LaTeX{} macro files rather than typed by
+hand.  CI drift gates verify that regenerating the snippets, the coverage
+macros, the bibliography, the agreement table, and the case-study numbers
+leaves no diff against the committed sources, and that figure generation is
+deterministic (two consecutive regenerations on the same CI runner are
+byte-identical; because PDF bytes depend on font and library versions, the
+committed figures themselves are not compared).
+A printed snippet or number therefore cannot silently diverge from the live
+API without failing CI.

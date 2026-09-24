@@ -13,15 +13,18 @@ API.  The table deliberately omits single-purpose packages that are strong in
 one area---\texttt{fdapace}, \texttt{ftsa}, \texttt{funcharts},
 \texttt{frechet}, \texttt{fdasrvf}, \texttt{roahd}, and \texttt{fdaoutlier}
 (introduced in Section~1)---several of which match or exceed \textbf{fdars} in
-depth within their niche; four of them serve as references for the agreement
-checks in Section~\ref{sec:validation}.  The R column therefore understates the
+depth within their niche; three of them (\texttt{fdapace}, \texttt{fdasrvf},
+\texttt{roahd}), together with \texttt{fda.usc}, serve as references for the
+agreement checks in Section~\ref{sec:validation}.  The R column therefore understates the
 R ecosystem as a whole: what it lacks is a single package, or a single data
 model, spanning all rows.  Conversely, the mature peers have strengths the table
 does not capture, such as scikit-fda's documentation and the mixed-model depth
 of \texttt{refund}.
-Where capability evidence for peer packages was ambiguous, coverage is resolved
-conservatively (partial rather than $\checkmark$, --- rather than partial);
-all non-\textbf{fdars} cells are sourced in \texttt{paper/comparison\_evidence.md}.
+Where capability evidence for peer packages was ambiguous, cells were rated
+down (partial rather than $\checkmark$, --- rather than partial).  Because this
+favours \textbf{fdars}, every non-\textbf{fdars} cell is sourced, with the
+function names or documentation it rests on, in
+\texttt{paper/comparison\_evidence.md}, so that readers can check it.
 
 Table~\ref{tab:comparison} summarises the capability coverage of \textbf{fdars}
 against the most widely used Python and R functional data analysis packages and

@@ -10,8 +10,10 @@ fd = Fdata(X, argvals=ARG)
 pc = fd.to_pc(n_comp=3)
 diag = fdars.advisor.build_diagnostics(pc, "fpca", argvals=ARG)
 cum = np.round(diag["cumulative_variance_explained"], 3).tolist()
-print("cumulative variance explained:", cum)
+print("cumulative share of total variance:", cum)
+print("denominator:", diag["variance_denominator"])
 \end{lstlisting}
 \begin{lstlisting}[style=fdarsoutput]
-cumulative variance explained: [0.831, 0.969, 1.0]
+cumulative share of total variance: [0.81, 0.945, 0.975]
+denominator: total
 \end{lstlisting}

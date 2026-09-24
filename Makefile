@@ -70,6 +70,7 @@ paper-check:  ## Run the CI drift gates locally (exits 1 if any file is stale)
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/check_comparison.py
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_snippets.py --check
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/crossimpl.py --check
+	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/check_cs_numbers.py
 
 paper-verify:  ## Regenerate figures and assert byte-stability (SC-5 / CASE determinism hard gate)
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_figures.py

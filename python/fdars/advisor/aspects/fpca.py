@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from fdars.advisor.aspects._utils import _eigenvalues_to_variance_cumulative
+from fdars.advisor.aspects._utils import _eigenvalues_to_variance_cumulative  # noqa: F401 (re-exported for callers)
 
 
 def _build_fpca_diagnostics(raw: dict) -> dict:
@@ -40,14 +40,32 @@ def _build_fpca_diagnostics(raw: dict) -> dict:
 
         # Eigenvalues = singular_values^2 / (n-1), matching FPCAResult.explained_variance
         eigenvalues = (sv ** 2) / denom
-        total_var = float(eigenvalues.sum())
+        retained_var = float(eigenvalues.sum())
+
+        # Denominator for the explained-variance ratios.  It must be the TOTAL
+        # variance of the data, not the sum of the retained eigenvalues --
+        # otherwise the cumulative share always ends at 1.0 whatever n_comp is,
+        # which made the diagnostic (and auto_tune's FPCA target) uninformative.
+        # fdars FPCA results carry the centred data and quadrature weights, and
+        # sum(w * centered**2) equals the sum of ALL squared singular values of
+        # the weighted SVD, so the true total is recoverable.  Results without
+        # those keys fall back to the retained sum, recorded explicitly.
+        centered_raw = raw.get("centered")
+        if centered_raw is not None:
+            centered = np.asarray(centered_raw, dtype=float)
+            weights_raw = raw.get("weights")
+            w = (np.asarray(weights_raw, dtype=float)
+                 if weights_raw is not None else np.ones(centered.shape[-1]))
+            total_var = float((centered ** 2 * w).sum()) / denom
+            denominator = "total"
+        else:
+            total_var = retained_var
+            denominator = "retained_components"
         if total_var > 0.0:
             evr = eigenvalues / total_var
         else:
             evr = np.zeros_like(eigenvalues)
-
-        # Delegate cumulative variance to the shared helper (reused by spm.py).
-        cum_list = _eigenvalues_to_variance_cumulative(eigenvalues)
+        cum_list = [float(v) for v in np.cumsum(evr)]
 
         diag["n_components"] = n_comp
         diag["n_obs"] = n_obs
@@ -55,6 +73,7 @@ def _build_fpca_diagnostics(raw: dict) -> dict:
         diag["explained_variance_ratio"] = [float(v) for v in evr]
         diag["cumulative_variance_explained"] = cum_list
         diag["total_variance"] = total_var
+        diag["variance_denominator"] = denominator
 
         # Phase-leakage indicator: a deterministic scalar that signals when a
         # linear/vertical FPCA is absorbing phase variation.  The indicator is
@@ -65,8 +84,10 @@ def _build_fpca_diagnostics(raw: dict) -> dict:
         # decomposition rather than being handled by elastic alignment.
         # Guard: with only one component the indicator is 0.0 (no higher comps).
         if n_comp > 1:
-            leading_var = float(evr[0])
-            remaining_var = float(evr[1:].sum())
+            # Share of the RETAINED variance outside the first component
+            # (unchanged semantics; the tuning guard thresholds this at 0.5).
+            evr_retained = eigenvalues / retained_var if retained_var > 0.0 else evr
+            remaining_var = float(evr_retained[1:].sum())
             # Fraction of total variance NOT explained by the first component.
             phase_leakage_indicator = float(remaining_var)
         else:
@@ -82,6 +103,7 @@ def _build_fpca_diagnostics(raw: dict) -> dict:
         diag["explained_variance_ratio"] = None
         diag["cumulative_variance_explained"] = None
         diag["total_variance"] = None
+        diag["variance_denominator"] = None
         diag["phase_leakage_indicator"] = None
         diag["phase_leakage_flagged"] = None
 

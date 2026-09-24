@@ -18,10 +18,15 @@ Writes two deterministic committed figures to paper/figures/:
 
 Run with::
 
-    PYTHONPATH=scripts:paper/code python paper/code/casestudy4.py
+    PYTHONPATH=scripts:paper/code python paper/code/casestudy4.py          # figures + numbers
+    PYTHONPATH=scripts:paper/code python paper/code/casestudy4.py --check  # numbers drift gate
+
+Every number quoted in paper/sections/casestudy4.tex is written to
+paper/sections/cs4_numbers.tex (see cs_numbers.py).
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -42,6 +47,8 @@ from sklearn.model_selection import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer
 
+from cs_numbers import emit, fmt
+
 _FIGURES_DIR = Path(__file__).resolve().parent.parent / "figures"
 
 _DS = datasets.load_growth()
@@ -59,8 +66,11 @@ def velocity(X: np.ndarray) -> np.ndarray:
     return Fdata(smooth, argvals=_AGES).deriv().data
 
 
-def main() -> None:
+def main(check: bool = False) -> int:
     """Run the nested-CV pipeline study and write two deterministic figures.
+
+    With ``check=True`` only the number macros are recomputed and compared with
+    the committed file (no figures are written); returns 1 on drift.
 
     All cross-validation splitters are seeded and ``GridSearchCV`` runs with
     ``n_jobs=1``, so split order and results are reproducible.
@@ -87,7 +97,8 @@ def main() -> None:
     reps = {"height": "passthrough", "velocity": FunctionTransformer(velocity)}
     n_grid = [2, 3, 4, 6]
     grid = {"rep": list(reps.values()), "fpca__n_components": n_grid}
-    inner = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+    n_inner, n_outer, n_rep = 5, 5, 10
+    inner = StratifiedKFold(n_splits=n_inner, shuffle=True, random_state=0)
     search = GridSearchCV(pipe, grid, cv=inner, scoring="accuracy",
                           refit=True, n_jobs=1)
 
@@ -109,7 +120,8 @@ def main() -> None:
     # Nested CV: the entire GridSearchCV is the estimator being evaluated.
     # Baselines are scored with the identical outer splitter.
     # ------------------------------------------------------------------
-    outer = RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=1)
+    outer = RepeatedStratifiedKFold(n_splits=n_outer, n_repeats=n_rep,
+                                    random_state=1)
     nested = cross_val_score(search, X, y, cv=outer, scoring="accuracy")
     i12 = int(np.argmin(np.abs(_AGES - 12.0)))
     base18 = cross_val_score(LogisticRegression(max_iter=1000), X[:, [-1]], y,
@@ -123,6 +135,43 @@ def main() -> None:
           f"+/- {base18.std():.3f}")
     print(f"baseline height@12+@18:          {base2.mean():.3f} "
           f"+/- {base2.std():.3f}")
+
+    # ------------------------------------------------------------------
+    # Every number quoted in casestudy4.tex (letters-only macro names).
+    # ``+/-`` values are standard deviations over the outer folds.
+    # ------------------------------------------------------------------
+    words = {2: "Two", 3: "Three", 4: "Four", 6: "Six"}
+    macros = {
+        "csFourNChildren": str(X.shape[0]),
+        "csFourNBoys": str(int((1 - y).sum())),
+        "csFourNGirls": str(int(y.sum())),
+        "csFourNAges": str(X.shape[1]),
+        "csFourAgeMin": fmt(_AGES.min(), 0),
+        "csFourAgeMax": fmt(_AGES.max(), 0),
+        "csFourGrid": ", ".join(str(k) for k in n_grid),
+        "csFourNInner": str(n_inner),
+        "csFourNOuter": str(n_outer),
+        "csFourNRep": str(n_rep),
+        "csFourNOuterFolds": str(len(nested)),
+    }
+    for name in reps:
+        for k, v in zip(n_grid, scores[name]):
+            macros[f"csFour{name.capitalize()}{words[k]}"] = fmt(v, 3)
+    macros.update({
+        "csFourBestRep": best_rep,
+        "csFourBestK": str(best_k),
+        "csFourBestKWord": {2: "two", 3: "three", 4: "four", 6: "six"}[best_k],
+        "csFourNested": fmt(nested.mean(), 3),
+        "csFourNestedSd": fmt(nested.std(), 3),
+        "csFourBaseEighteen": fmt(base18.mean(), 3),
+        "csFourBaseEighteenSd": fmt(base18.std(), 3),
+        "csFourBaseTwo": fmt(base2.mean(), 3),
+        "csFourBaseTwoSd": fmt(base2.std(), 3),
+        "csFourAgeEarly": fmt(_AGES[i12], 0),
+    })
+    status = emit("cs4_numbers.tex", "casestudy4.py", macros, check=check)
+    if check:
+        return status
 
     _FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -183,7 +232,8 @@ def main() -> None:
                f"$\\pm$ {nested.std():.3f}", loc="upper left")
     brand_legend(ax2, fontsize=7, loc="lower right")
     save_figure(f2, _FIGURES_DIR / "cs4_growth_scores.pdf")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main(check="--check" in sys.argv))

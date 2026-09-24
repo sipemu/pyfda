@@ -413,7 +413,7 @@ def advise(
     *,
     task: str,
     domain_context: str,
-    model: str = "claude-opus-4-8",
+    model: "str | None" = None,
     provider: "str | object | None" = None,
     aspect: str = "",
 ) -> Advice:
@@ -437,7 +437,8 @@ def advise(
         Free-text description of the problem domain, dataset, or analysis goal.
         Helps the model ground its interpretation in the user's context.
     model : str, optional
-        Claude model identifier.  Default ``"claude-opus-4-8"``.
+        Model identifier.  ``None`` (default) resolves ``FDARS_ADVISOR_MODEL``,
+        then the provider's default (``"claude-opus-4-8"`` for Anthropic).
     provider : str or Provider or None, optional
         LLM provider.  ``None`` (default) reproduces today's Anthropic behavior
         exactly.  Pass a provider name (``"anthropic"``) or an existing
@@ -500,7 +501,7 @@ def describe_cluster_differences(
     *,
     argvals=None,
     domain_context: str = "",
-    model: str = "claude-opus-4-8",
+    model: "str | None" = None,
     run_llm: bool = True,
     provider: "str | object | None" = None,
     **kwargs,
@@ -548,7 +549,8 @@ def describe_cluster_differences(
         Free-text description of the problem domain or analysis goal.
         Passed to :func:`advise` to help ground the interpretation.
     model : str, optional
-        Claude model identifier.  Default ``"claude-opus-4-8"``.
+        Model identifier.  ``None`` (default) resolves ``FDARS_ADVISOR_MODEL``,
+        then the provider's default (``"claude-opus-4-8"`` for Anthropic).
     run_llm : bool, optional
         When ``True`` (default), call :func:`advise` and return an
         :class:`Advice` object.  When ``False``, return the raw clustering
@@ -626,7 +628,7 @@ def auto_tune(
     target_metric: "str | None" = None,
     max_steps: int = 10,
     domain_context: str = "",
-    model: str = "claude-opus-4-8",
+    model: "str | None" = None,
     provider: "str | object | None" = None,
     guard: bool = True,
     # Test seams: injectable run_method and build_diagnostics (same as run_tuning_loop)
@@ -673,7 +675,8 @@ def auto_tune(
     domain_context : str, optional
         Free-text description of the problem domain passed to ``advise()``.
     model : str, optional
-        LLM model identifier (default ``"claude-opus-4-8"``).
+        Model identifier (``None`` resolves ``FDARS_ADVISOR_MODEL``, then the
+        provider's default, ``"claude-opus-4-8"`` for Anthropic).
     provider : str or Provider or None, optional
         LLM provider forwarded to ``advise()``.  ``None`` uses the Anthropic
         default.  Pass a fake ``Provider`` instance for offline testing — no
