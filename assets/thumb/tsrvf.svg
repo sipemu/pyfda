@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="TSRVF representation">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M34 120 C60 60 84 128 110 88 C126 62 138 96 148 84" stroke="#fd7e14" stroke-width="3" stroke-linecap="round"/>
+  <path d="M162 84 C180 78 190 78 208 84" stroke="#fd7e14" stroke-opacity=".7" stroke-width="1.8"/>
+  <path d="M204 78 L210 85 L202 88 Z" fill="#fd7e14" fill-opacity=".7"/>
+  <path d="M232 128 L292 52" stroke="#fd7e14" stroke-width="3" stroke-linecap="round"/>
+  <path d="M224 118 L266 68 L300 96 L258 146 Z" fill="#fd7e14" fill-opacity=".12" stroke="#fd7e14" stroke-opacity=".4" stroke-width="1.4"/>
+  <text x="238" y="146" fill="#fd7e14" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">q(t)</text>
+</svg>

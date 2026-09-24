@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Biopharma batch trajectories">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none" stroke-opacity=".4" stroke-width="2">
+    <path d="M30 140 C90 108 150 78 210 60 C245 50 275 46 298 44"/>
+    <path d="M30 142 C90 112 150 82 210 64 C245 54 275 50 298 48"/>
+    <path d="M30 138 C90 104 150 74 210 56 C245 46 275 42 298 40"/>
+  </g>
+  <path d="M30 141 C90 116 150 100 210 104 C245 108 275 120 298 132" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="298" cy="132" r="4.5" fill="#fff" stroke="#3f51b5" stroke-width="2.5"/>
+  <text x="212" y="128" fill="#3f51b5" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".8">faulty</text>
+</svg>

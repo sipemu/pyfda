@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="Elastic Alignment: Removing Phase to Recover a Sharp Mean"
+     aria-labelledby="elastic-alignment-title elastic-alignment-desc">
+  <title id="elastic-alignment-title">Elastic Alignment: Removing Phase to Recover a Sharp Mean</title>
+  <desc id="elastic-alignment-desc">Shows how karcher_mean() uses the Fisher-Rao / SRSF framework to iteratively warp curves to a common template, converting a blurred cross-sectional mean (from phase variation) into a sharp aligned mean with a phase γ(t) inset showing the estimated time warps.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Elastic Alignment: Removing Phase to Recover a Sharp Mean</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Warp curves to a common template; the mean recovers a sharp profile</text>
+
+  <!-- Panel 1: misaligned peaks -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Misaligned Peaks</text>
+  <g transform="translate(44,108)">
+    <line x1="0" y1="120" x2="156" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 118 C30 118 44 40 60 40 C76 40 84 118 100 118 C120 118 130 70 144 70 C152 70 156 96 156 96" stroke="#495057" stroke-opacity=".35" stroke-width="1.6"/>
+    <path d="M0 118 C40 118 54 54 72 54 C88 54 98 118 112 118 C130 118 138 84 150 84 C154 84 156 100 156 100" stroke="#495057" stroke-opacity=".35" stroke-width="1.6"/>
+    <path d="M0 118 C24 118 36 30 52 30 C68 30 78 118 92 118 C114 118 122 60 138 60 C148 60 156 92 156 92" stroke="#495057" stroke-opacity=".35" stroke-width="1.6"/>
+    <path d="M0 120 C50 120 60 100 78 100 C96 100 104 120 122 120" stroke="#6c757d" stroke-width="2.4" stroke-dasharray="4 3"/>
+  </g>
+  <text class="sm" x="122" y="248" text-anchor="middle" fill="#6c757d">blurred mean</text>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#fd7e14">karcher_mean()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Fisher-Rao / SRSF</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="16">SRSF representation</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="48">Warp search (DP)</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="12" y="80">Iterate to template</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: aligned + warps -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#fd7e14">Aligned + Warps &#947;</text>
+  <g transform="translate(516,108)">
+    <line x1="0" y1="70" x2="96" y2="70" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 68 C22 68 32 12 48 12 C64 12 74 68 96 68" stroke="#fd7e14" stroke-opacity=".4" stroke-width="1.4"/>
+    <path d="M0 68 C22 68 32 16 48 16 C64 16 74 68 96 68" stroke="#fd7e14" stroke-opacity=".4" stroke-width="1.4"/>
+    <path d="M0 68 C22 68 32 14 48 14 C64 14 74 68 96 68" stroke="#fd7e14" stroke-width="2.8" stroke-linecap="round"/>
+  </g>
+  <text class="sm" x="564" y="200" text-anchor="middle" fill="#fd7e14">sharp mean</text>
+  <g transform="translate(624,120)">
+    <rect x="0" y="0" width="56" height="56" rx="4" fill="#fff" stroke="#f8d7b8"/>
+    <line x1="0" y1="56" x2="56" y2="0" stroke="#ced4da" stroke-width="1" stroke-dasharray="3 3"/>
+    <path d="M0 56 C18 46 30 30 40 16 C46 8 52 4 56 0" stroke="#fd7e14" stroke-width="2"/>
+    <path d="M0 56 C22 52 34 34 44 20 C50 12 54 4 56 0" stroke="#fd7e14" stroke-opacity=".5" stroke-width="1.6"/>
+  </g>
+  <text class="sm" x="652" y="192" text-anchor="middle" fill="#6c757d">phase &#947;(t)</text>
+</svg>

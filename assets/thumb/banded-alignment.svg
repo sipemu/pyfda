@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Banded elastic alignment">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="298" y2="28" stroke="#fd7e14" stroke-opacity=".25" stroke-width="1.4"/>
+  <line x1="30" y1="122" x2="270" y2="28" stroke="#fd7e14" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="6 5"/>
+  <line x1="58" y1="150" x2="298" y2="50" stroke="#fd7e14" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="6 5"/>
+  <path d="M30 148 C80 140 110 118 148 92 C186 66 220 50 260 36 C274 31 286 29 298 28" stroke="#fd7e14" stroke-width="3" stroke-linecap="round"/>
+</svg>

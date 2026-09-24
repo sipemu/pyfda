@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Phoneme class-mean spectra">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 60 C74 44 118 96 162 78 C206 62 250 108 298 96" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 78 C74 64 118 112 162 94 C206 80 250 120 298 108" stroke="#3f51b5" stroke-opacity=".65" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M30 96 C74 84 118 124 162 110 C206 98 250 130 298 120" stroke="#3f51b5" stroke-opacity=".42" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M30 112 C74 102 118 134 162 124 C206 114 250 138 298 132" stroke="#3f51b5" stroke-opacity=".25" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none"
+     role="img" aria-label="Additive Scalar-on-Function Regression — FAM concept"
+     aria-labelledby="asof-title asof-desc">
+  <title id="asof-title">Additive Scalar-on-Function Regression</title>
+  <desc id="asof-desc">Illustrates the Functional Additive Model: functional predictor curves are projected onto FPCA basis functions to obtain scalar scores, which feed separate smooth component functions whose outputs sum to the scalar response prediction.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Additive Scalar-on-Function Regression</text>
+  <text class="sub" x="360" y="48" text-anchor="middle">y = α + Σ f_k(⟨X, φ_k⟩) + ε — smooth partial effects of FPC scores sum to scalar response</text>
+
+  <!-- ===== Panel 1: Functional predictor X(t) ===== -->
+  <rect x="16" y="66" width="168" height="164" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="100" y="86" text-anchor="middle" fill="#495057">Functional Predictor</text>
+  <text class="mono" x="100" y="104" text-anchor="middle" fill="#6c757d">X(t)  data (n, m)</text>
+
+  <!-- Functional curves -->
+  <path d="M28 166 Q57 148 86 158 Q115 168 152 150 Q162 145 178 148" stroke="#3f51b5" stroke-width="1.4" fill="none" opacity="0.38"/>
+  <path d="M28 172 Q57 153 86 164 Q115 175 152 157 Q162 151 178 154" stroke="#3f51b5" stroke-width="1.7" fill="none" opacity="0.58"/>
+  <path d="M28 177 Q57 158 86 170 Q115 181 152 163 Q162 157 178 161" stroke="#3f51b5" stroke-width="2.0" fill="none" opacity="0.78"/>
+  <path d="M28 181 Q57 162 86 175 Q115 186 152 168 Q162 161 178 165" stroke="#3f51b5" stroke-width="2.3" fill="none"/>
+
+  <!-- t-axis -->
+  <line x1="28" y1="216" x2="178" y2="216" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="103" y="228" text-anchor="middle">t (evaluation grid)</text>
+
+  <!-- Arrow: data → FPCA -->
+  <line x1="184" y1="148" x2="212" y2="148" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-asof)"/>
+
+  <!-- ===== Panel 2: FPCA basis functions (orange) ===== -->
+  <rect x="216" y="66" width="172" height="164" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="302" y="86" text-anchor="middle" fill="#fd7e14">FPCA Basis φ_k(t)</text>
+  <text class="mono" x="302" y="104" text-anchor="middle" fill="#6c757d">fam(data, y, argvals)</text>
+
+  <!-- Basis function 1 -->
+  <text class="sm" x="228" y="124" fill="#495057">φ₁(t)</text>
+  <path d="M228 138 Q255 120 280 128 Q305 136 340 124 Q362 118 382 122" stroke="#3f51b5" stroke-width="2.2" fill="none"/>
+
+  <!-- Basis function 2 -->
+  <text class="sm" x="228" y="158" fill="#495057">φ₂(t)</text>
+  <path d="M228 172 Q248 180 268 168 Q290 155 315 165 Q345 178 382 168" stroke="#198754" stroke-width="2.0" fill="none"/>
+
+  <!-- Basis function 3 -->
+  <text class="sm" x="228" y="192" fill="#495057">φ₃(t)</text>
+  <path d="M228 206 Q250 195 270 210 Q295 226 320 208 Q350 190 382 202" stroke="#dc3545" stroke-width="1.7" fill="none" stroke-dasharray="4 3"/>
+
+  <!-- Projection labels -->
+  <text class="sm" x="302" y="230" text-anchor="middle">ncomp = 3 basis functions</text>
+
+  <!-- Arrow: scores out -->
+  <line x1="388" y1="148" x2="416" y2="148" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-asof)"/>
+
+  <!-- ===== Panel 3: Smooth component effects f_k ===== -->
+  <rect x="420" y="66" width="172" height="164" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="506" y="86" text-anchor="middle" fill="#495057">Smooth Effects f_k</text>
+  <text class="sm" x="506" y="104" text-anchor="middle">f_k(score_k) per component</text>
+
+  <!-- Smooth component 1 -->
+  <text class="sm" x="432" y="124" fill="#3f51b5">f₁(β₁)</text>
+  <path d="M432 138 Q452 128 472 133 Q492 138 512 132 Q532 126 572 130" stroke="#3f51b5" stroke-width="2.2" fill="none"/>
+
+  <!-- Smooth component 2 -->
+  <text class="sm" x="432" y="158" fill="#198754">f₂(β₂)</text>
+  <path d="M432 172 Q450 178 470 166 Q492 153 515 164 Q545 177 572 168" stroke="#198754" stroke-width="2.0" fill="none"/>
+
+  <!-- Smooth component 3 -->
+  <text class="sm" x="432" y="192" fill="#dc3545">f₃(β₃)</text>
+  <path d="M432 206 Q453 196 474 210 Q498 226 525 208 Q548 192 572 200" stroke="#dc3545" stroke-width="1.7" fill="none" stroke-dasharray="4 3"/>
+
+  <text class="sm" x="506" y="226" text-anchor="middle" fill="#fd7e14">kernel-smoothed</text>
+
+  <!-- Arrow: sum → response -->
+  <line x1="592" y1="148" x2="620" y2="148" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-asof)"/>
+
+  <!-- ===== Panel 4: Scalar response ===== -->
+  <rect x="624" y="66" width="80" height="164" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="664" y="90" text-anchor="middle" fill="#495057">ŷ</text>
+  <text class="sm" x="664" y="108" text-anchor="middle">α +</text>
+  <text class="sm" x="664" y="124" text-anchor="middle">f₁(β₁) +</text>
+  <text class="sm" x="664" y="140" text-anchor="middle">f₂(β₂) +</text>
+  <text class="sm" x="664" y="156" text-anchor="middle">f₃(β₃)</text>
+  <text class="sm" x="664" y="176" text-anchor="middle">scalar</text>
+  <text class="sm" x="664" y="192" text-anchor="middle">(n,)</text>
+
+  <!-- ===== Bottom: Function grid ===== -->
+  <line x1="16" y1="248" x2="704" y2="248" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="lab" x="360" y="272" text-anchor="middle" fill="#495057">Function Family — fdars.scalar_on_function</text>
+
+  <!-- fam card -->
+  <rect x="16" y="284" width="158" height="88" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="95" y="305" text-anchor="middle" fill="#fd7e14">fam</text>
+  <text class="sm" x="95" y="323" text-anchor="middle">Functional Additive</text>
+  <text class="sm" x="95" y="339" text-anchor="middle">Model · 7-key dict</text>
+  <text class="sm" x="95" y="355" text-anchor="middle">intercept, fitted,</text>
+  <text class="sm" x="95" y="365" text-anchor="middle">residuals, r_squared</text>
+
+  <!-- fregre_gsam card -->
+  <rect x="186" y="284" width="158" height="88" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="265" y="305" text-anchor="middle" fill="#3f51b5">fregre_gsam</text>
+  <text class="sm" x="265" y="323" text-anchor="middle">Generalized Scalar</text>
+  <text class="sm" x="265" y="339" text-anchor="middle">Additive Model</text>
+  <text class="sm" x="265" y="355" text-anchor="middle">same 7 keys as fam</text>
+  <text class="sm" x="265" y="365" text-anchor="middle">non-Gaussian links</text>
+
+  <!-- fregre_gkam card -->
+  <rect x="356" y="284" width="158" height="88" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="435" y="305" text-anchor="middle" fill="#198754">fregre_gkam</text>
+  <text class="sm" x="435" y="323" text-anchor="middle">Generalized Kernel</text>
+  <text class="sm" x="435" y="339" text-anchor="middle">Additive Model</text>
+  <text class="sm" x="435" y="355" text-anchor="middle">multi-predictor list</text>
+  <text class="sm" x="435" y="365" text-anchor="middle">fitted + bandwidths</text>
+
+  <!-- variable_selection card -->
+  <rect x="526" y="284" width="178" height="88" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="615" y="305" text-anchor="middle" fill="#6f42c1">variable_selection</text>
+  <text class="sm" x="615" y="323" text-anchor="middle">Penalized predictor</text>
+  <text class="sm" x="615" y="339" text-anchor="middle">selection · group_lasso</text>
+  <text class="sm" x="615" y="355" text-anchor="middle">active_predictors (p,)</text>
+  <text class="sm" x="615" y="365" text-anchor="middle">+ model_selection_ncomp</text>
+
+  <!-- Bottom info strip -->
+  <line x1="16" y1="388" x2="704" y2="388" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="360" y="410" text-anchor="middle">model_selection_ncomp → selects optimal ncomp via AIC / BIC / GCV criteria</text>
+  <text class="sm" x="360" y="432" text-anchor="middle">scalar_covariates: optional (n, p) matrix for additional numeric predictors</text>
+  <text class="sm" x="360" y="454" text-anchor="middle" fill="#6c757d">All functions in fdars.scalar_on_function  ·  Non-square fixture convention: n ≠ m</text>
+
+  <defs>
+    <marker id="arr-asof" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+  </defs>
+</svg>

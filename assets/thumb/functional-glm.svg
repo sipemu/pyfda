@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Functional GLM">
+  <line x1="30" y1="150" x2="115" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 90 C50 55 80 120 115 80" stroke="#dc3545" stroke-opacity=".7" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M125 89 L152 89" stroke="#dc3545" stroke-opacity=".5" stroke-width="1.6"/>
+  <path d="M148 85 L155 89 L148 93 Z" fill="#dc3545" fill-opacity=".5"/>
+  <circle cx="195" cy="58" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+  <circle cx="225" cy="56" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+  <circle cx="255" cy="60" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+  <circle cx="200" cy="128" r="3.5" fill="#dc3545" fill-opacity=".45"/>
+  <circle cx="235" cy="132" r="3.5" fill="#dc3545" fill-opacity=".45"/>
+  <circle cx="265" cy="128" r="3.5" fill="#dc3545" fill-opacity=".45"/>
+  <path d="M168 138 C185 120 210 80 240 62 C262 50 282 50 298 48" stroke="#dc3545" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

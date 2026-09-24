@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Shape analysis">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 118 C88 44 130 44 164 88 C198 132 240 96 298 68" stroke="#fd7e14" stroke-opacity=".3" stroke-width="1.6"/>
+  <path d="M30 104 C88 34 130 30 164 74 C198 118 240 82 298 54" stroke="#fd7e14" stroke-opacity=".3" stroke-width="1.6"/>
+  <path d="M30 130 C88 56 130 56 164 100 C198 144 240 108 298 80" stroke="#fd7e14" stroke-opacity=".3" stroke-width="1.6"/>
+  <path d="M30 116 C88 44 130 42 164 86 C198 130 240 94 298 66" stroke="#fd7e14" stroke-width="3" stroke-linecap="round"/>
+  <text x="196" y="132" fill="#fd7e14" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">mean</text>
+</svg>

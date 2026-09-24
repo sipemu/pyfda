@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Canadian Weather: Multi-Method Overview" aria-labelledby="ex-canadian-weather-title ex-canadian-weather-desc">
+  <title id="ex-canadian-weather-title">Canadian Weather: Multi-Method Overview</title>
+  <desc id="ex-canadian-weather-desc">The Canadian weather example applies a multi-method pipeline: FOSR fits coefficient curves for geographic predictors, fanova tests regional differences, and functional classification assigns each station to a climate region.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Canadian Weather: Multi-Method Overview</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">fanova tests regional differences · fosr fits β(t) from geography · fclassif recovers region</text>
+
+  <!-- Dataset panel -->
+  <rect x="24" y="62" width="160" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="104" y="82" text-anchor="middle" fill="#495057">Dataset</text>
+  <text class="sm" x="104" y="98" text-anchor="middle">35 stations · 365 days</text>
+  <text class="sm" x="104" y="112" text-anchor="middle">temp + precip curves</text>
+  <text class="sm" x="104" y="126" text-anchor="middle">4 regions · lat/lon</text>
+
+  <!-- Inline mini curves (4 region colors) -->
+  <!-- Arctic: red, Atlantic: blue, Continental: orange, Pacific: green -->
+  <path d="M30 142 Q 44 125 58 128 Q 72 131 86 122 Q 100 113 114 110 Q 128 107 142 115 Q 156 123 170 135" stroke="#dc3545" stroke-width="1.8" fill="none"/>
+  <path d="M30 148 Q 44 138 58 136 Q 72 134 86 130 Q 100 126 114 124 Q 128 126 142 130 Q 156 136 170 145" stroke="#3f51b5" stroke-width="1.8" fill="none"/>
+  <path d="M30 152 Q 44 145 58 140 Q 72 136 86 132 Q 100 130 114 134 Q 128 140 142 146 Q 156 152 170 158" stroke="#e8710a" stroke-width="1.8" fill="none"/>
+  <path d="M30 150 Q 44 143 58 140 Q 72 137 86 136 Q 100 137 114 140 Q 128 143 142 147 Q 156 150 170 154" stroke="#198754" stroke-width="1.8" fill="none"/>
+
+  <!-- Arrow right from dataset -->
+  <line x1="184" y1="102" x2="210" y2="102" stroke="#666" stroke-width="1.5"/>
+  <polygon points="206,98 214,102 206,106" fill="#666"/>
+
+  <!-- FOSR panel (middle-top) -->
+  <rect x="214" y="62" width="200" height="80" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="314" y="82" text-anchor="middle" fill="#fd7e14">fosr / fosr_fpc</text>
+  <text class="sm" x="314" y="97" text-anchor="middle">Function-on-scalar regression</text>
+  <text class="mono" x="314" y="112" text-anchor="middle" fill="#495057">β_lat(t)  β_lon(t)</text>
+  <text class="sm" x="314" y="128" text-anchor="middle">λ_ penalty · R² ≈ 0.47→0.81</text>
+
+  <!-- Arrow right to predict -->
+  <line x1="414" y1="102" x2="438" y2="102" stroke="#fd7e14" stroke-width="1.5"/>
+  <polygon points="434,98 442,102 434,106" fill="#fd7e14"/>
+
+  <!-- predict_fosr panel -->
+  <rect x="442" y="62" width="180" height="80" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="532" y="82" text-anchor="middle" fill="#fd7e14">predict_fosr</text>
+  <text class="sm" x="532" y="98" text-anchor="middle">New lat/lon → predicted</text>
+  <text class="sm" x="532" y="112" text-anchor="middle">temperature curve</text>
+  <text class="sm" x="532" y="127" text-anchor="middle">Montreal · Northern BC · Yukon</text>
+
+  <!-- Arrow down from dataset to fanova -->
+  <line x1="104" y1="162" x2="104" y2="196" stroke="#666" stroke-width="1.5"/>
+  <polygon points="100,192 104,200 108,192" fill="#666"/>
+
+  <!-- fanova panel -->
+  <rect x="24" y="200" width="286" height="80" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="167" y="220" text-anchor="middle" fill="#3f51b5">fanova</text>
+  <text class="sm" x="167" y="236" text-anchor="middle">Functional ANOVA: permutation F-test across 4 regions</text>
+  <text class="mono" x="167" y="251" text-anchor="middle" fill="#3f51b5">F ≈ 22.5 · p = 0.002</text>
+  <text class="sm" x="167" y="267" text-anchor="middle">Regions significantly differ · F(t) highest in winter</text>
+
+  <!-- Arrow right from fanova -->
+  <line x1="310" y1="240" x2="334" y2="240" stroke="#3f51b5" stroke-width="1.5"/>
+  <polygon points="330,236 338,240 330,244" fill="#3f51b5"/>
+
+  <!-- Pairwise FANOVA panel -->
+  <rect x="338" y="200" width="110" height="80" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="393" y="220" text-anchor="middle" fill="#3f51b5">Pairwise fanova</text>
+  <text class="sm" x="393" y="236" text-anchor="middle">Each region pair</text>
+  <text class="sm" x="393" y="252" text-anchor="middle">Arctic–Pacific: largest</text>
+  <text class="sm" x="393" y="268" text-anchor="middle">Atl–Pacific: smallest</text>
+
+  <!-- Arrow down from fosr to fclassif zone -->
+  <line x1="532" y1="162" x2="532" y2="196" stroke="#666" stroke-width="1.5"/>
+  <polygon points="528,192 532,200 536,192" fill="#666"/>
+
+  <!-- fclassif panel -->
+  <rect x="462" y="200" width="234" height="80" rx="8" fill="#f0fff4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="579" y="220" text-anchor="middle" fill="#198754">fclassif_cv / fclassif_lda</text>
+  <text class="sm" x="579" y="236" text-anchor="middle">FPCA scores → LDA region classifier</text>
+  <text class="mono" x="579" y="251" text-anchor="middle" fill="#198754">CV accuracy ≈ 86%</text>
+  <text class="sm" x="579" y="267" text-anchor="middle">Arctic + Pacific perfect · Atl/Con confused</text>
+
+  <!-- Divider line -->
+  <line x1="40" y1="302" x2="680" y2="302" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Results row label -->
+  <text class="sub" x="360" y="322" text-anchor="middle">Results</text>
+
+  <!-- Result box 1: fanova result -->
+  <rect x="24" y="330" width="196" height="52" rx="6" fill="#3f51b5" stroke="none"/>
+  <text class="lab" x="122" y="350" text-anchor="middle" fill="white">Regional means differ</text>
+  <text class="mono" x="122" y="368" text-anchor="middle" fill="#FFD700">F(t) peaks Jan–Mar, Sep–Dec</text>
+
+  <!-- Result box 2: FOSR result -->
+  <rect x="234" y="330" width="196" height="52" rx="6" fill="#fd7e14" stroke="none"/>
+  <text class="lab" x="332" y="350" text-anchor="middle" fill="white">Latitude drives winter</text>
+  <text class="mono" x="332" y="368" text-anchor="middle" fill="white">β_lat(t) most negative Jan</text>
+
+  <!-- Result box 3: classification result -->
+  <rect x="444" y="330" width="252" height="52" rx="6" fill="#198754" stroke="none"/>
+  <text class="lab" x="570" y="350" text-anchor="middle" fill="white">Region from curve shape</text>
+  <text class="mono" x="570" y="368" text-anchor="middle" fill="white">86% CV · 5 FPC components</text>
+
+  <!-- Bottom note -->
+  <text class="sm" x="360" y="410" text-anchor="middle">Precipitation repeats workflow on log-transformed mm: FANOVA confirms regional diffs (F≈14, p=0.002)</text>
+  <text class="sm" x="360" y="426" text-anchor="middle">FOSR R²=0.25 (weaker than temperature) · latitude effect persists but explains less variance</text>
+</svg>

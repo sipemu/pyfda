@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Missing value imputation">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 120 C70 100 100 72 140 68" stroke="#198754" stroke-width="3" stroke-linecap="round"/>
+  <path d="M140 68 C160 66 180 70 200 74" stroke="#198754" stroke-opacity=".5" stroke-width="2" stroke-dasharray="6 5"/>
+  <path d="M200 74 C240 80 270 90 298 84" stroke="#198754" stroke-width="3" stroke-linecap="round"/>
+</svg>

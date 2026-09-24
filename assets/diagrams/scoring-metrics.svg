@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Functional Scoring Metrics" aria-labelledby="t-score d-score">
+  <title id="t-score">Functional Scoring Metrics</title>
+  <desc id="d-score">Illustrates how functional scoring metrics — MSE, MAE, RMSE, R², and others — reduce predicted vs true curve pairs to scalar scores by integrating the residual region; includes warnings for metrics (MAPE, MSLE) that reject near-zero or negative true values.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Functional Scoring Metrics</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Residual |y_true − y_pred| integrated via Simpson's rule → single scalar score per metric</text>
+
+  <!-- PANEL 1: Curves with shaded residual region (left, wide) -->
+  <rect x="18" y="60" width="400" height="218" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="218" y="82" text-anchor="middle" fill="#495057">Predicted vs True Curves</text>
+
+  <g transform="translate(40, 98)">
+    <!-- x-axis -->
+    <line x1="0" y1="158" x2="356" y2="158" stroke="#ced4da" stroke-width="1.2"/>
+    <!-- Labels -->
+    <text class="sm" x="178" y="176" text-anchor="middle">t (domain)</text>
+    <text class="sm" x="-12" y="80" text-anchor="middle" transform="rotate(-90,-12,80)">value</text>
+
+    <!-- Shaded error region between y_true and y_pred -->
+    <!-- Region fills where pred is below true and where pred is above -->
+    <path d="M0 140 C60 120 100 80 160 62 C220 44 280 50 356 40
+             L356 56 C280 66 220 62 160 80 C100 100 60 140 0 158 Z"
+          fill="#dc3545" fill-opacity=".12"/>
+
+    <!-- Additional bump region where pred overshoots -->
+    <path d="M180 80 C220 62 260 58 310 52 C330 50 345 48 356 46
+             L356 56 C345 57 330 60 310 62 C260 68 220 72 180 95 Z"
+          fill="#dc3545" fill-opacity=".08"/>
+
+    <!-- y_true (bold dark) -->
+    <path d="M0 140 C60 118 100 76 160 58 C220 40 280 44 356 36"
+          stroke="#1a1a2e" stroke-width="2.8" stroke-linecap="round"/>
+
+    <!-- y_pred (dashed red) -->
+    <path d="M0 158 C60 140 100 100 160 80 C220 62 280 62 356 56"
+          stroke="#dc3545" stroke-width="2.2" stroke-dasharray="7 4" stroke-linecap="round"/>
+
+    <!-- Residual bracket annotation (at t ≈ 0.45) -->
+    <line x1="162" y1="58" x2="162" y2="80" stroke="#dc3545" stroke-width="1.4"/>
+    <line x1="158" y1="58" x2="166" y2="58" stroke="#dc3545" stroke-width="1.4"/>
+    <line x1="158" y1="80" x2="166" y2="80" stroke="#dc3545" stroke-width="1.4"/>
+    <text class="sm" x="172" y="72" fill="#dc3545">|ε(t)|</text>
+
+    <!-- Legend -->
+    <line x1="0" y1="10" x2="28" y2="10" stroke="#1a1a2e" stroke-width="2.8"/>
+    <text class="sm" x="33" y="14">y_true (n curves)</text>
+    <line x1="0" y1="28" x2="28" y2="28" stroke="#dc3545" stroke-width="2.2" stroke-dasharray="7 4"/>
+    <text class="sm" x="33" y="32" fill="#dc3545">y_pred (predicted)</text>
+    <rect x="180" y="3" width="14" height="10" fill="#dc3545" fill-opacity=".25" rx="2"/>
+    <text class="sm" x="198" y="13">∫|ε(t)| dt (shaded)</text>
+
+    <!-- Simpson integration annotation at bottom -->
+    <text class="sm" x="178" y="148" text-anchor="middle" fill="#6c757d">integrated over [t₀, t₁] via Simpson's rule</text>
+  </g>
+
+  <!-- PANEL 2: Scalar score results (right, method panel) -->
+  <rect x="432" y="60" width="270" height="218" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="567" y="82" text-anchor="middle" fill="#fd7e14">Domain-Integrated Scores</text>
+  <text class="sm" x="567" y="100" text-anchor="middle">each collapses ∫ → single scalar</text>
+
+  <!-- Score rows -->
+  <g transform="translate(452, 108)">
+    <!-- MAE row -->
+    <rect x="0" y="0" width="230" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="mono" x="10" y="16" fill="#fd7e14">functional_mae</text>
+    <text class="sm" x="220" y="16" text-anchor="end" fill="#495057">∫|ε| dt / n</text>
+
+    <!-- MSE row -->
+    <rect x="0" y="28" width="230" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="mono" x="10" y="44" fill="#fd7e14">functional_mse</text>
+    <text class="sm" x="220" y="44" text-anchor="end" fill="#495057">∫ε² dt / n</text>
+
+    <!-- EV row -->
+    <rect x="0" y="56" width="230" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="mono" x="10" y="72" fill="#fd7e14">explained_variance</text>
+    <text class="sm" x="220" y="72" text-anchor="end" fill="#495057">1 − SS_res/SS_tot</text>
+
+    <!-- Separator -->
+    <line x1="0" y1="88" x2="230" y2="88" stroke="#f8d7b8" stroke-width="1.2"/>
+
+    <!-- MAPE row — domain restriction warning -->
+    <rect x="0" y="94" width="230" height="24" rx="6" fill="#fff" stroke="#ced4da"/>
+    <text class="mono" x="10" y="110" fill="#6c757d">functional_mape</text>
+    <text class="sm" x="220" y="110" text-anchor="end" fill="#6c757d">∫|ε|/|y| dt</text>
+
+    <!-- MSLE row — domain restriction warning -->
+    <rect x="0" y="122" width="230" height="24" rx="6" fill="#fff" stroke="#ced4da"/>
+    <text class="mono" x="10" y="138" fill="#6c757d">functional_msle</text>
+    <text class="sm" x="220" y="138" text-anchor="end" fill="#6c757d">∫(log1p diff)² dt</text>
+
+    <!-- Domain restriction note -->
+    <text class="sm" x="0" y="154" fill="#dc3545">⚠ MAPE: rejects |y_true| ≈ 0</text>
+    <text class="sm" x="0" y="167" fill="#dc3545">⚠ MSLE: rejects values ≤ −1</text>
+  </g>
+</svg>

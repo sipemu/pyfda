@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Tolerance vs conformal bands">
+  <line x1="164" y1="28" x2="164" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 54 C90 36 132 80 158 58 L158 122 C132 144 90 100 30 118 Z" fill="#3f51b5" fill-opacity=".1"/>
+  <path d="M30 54 C90 36 132 80 158 58" stroke="#3f51b5" stroke-opacity=".5" stroke-width="1.6"/>
+  <path d="M30 118 C90 100 132 144 158 122" stroke="#3f51b5" stroke-opacity=".5" stroke-width="1.6"/>
+  <path d="M30 86 C90 68 132 112 158 90" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+  <path d="M166 66 C210 50 254 80 294 70 L294 116 C254 128 210 98 166 114 Z" fill="#3f51b5" fill-opacity=".1"/>
+  <path d="M166 66 C210 50 254 80 294 70" stroke="#3f51b5" stroke-opacity=".5" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M166 114 C210 98 254 128 294 116" stroke="#3f51b5" stroke-opacity=".5" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M166 90 C210 74 254 104 294 93" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+</svg>

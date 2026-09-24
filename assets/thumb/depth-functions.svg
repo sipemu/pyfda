@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Depth functions">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 118 C90 66 150 150 210 92 C245 62 275 108 298 84 L298 116 C275 138 245 96 210 122 C150 176 90 100 30 148 Z" fill="#198754" fill-opacity=".12"/>
+  <path d="M30 108 C90 60 150 140 210 84 C245 56 275 98 298 76 L298 100 C275 120 245 82 210 108 C150 158 90 90 30 132 Z" fill="#198754" fill-opacity=".18"/>
+  <path d="M30 104 C90 56 150 136 210 86 C245 58 275 100 298 80" stroke="#198754" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="210" cy="86" r="4" fill="#fff" stroke="#198754" stroke-width="2.5"/>
+</svg>

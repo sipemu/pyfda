@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Regression diagnostics">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="90" x2="298" y2="90" stroke="#dc3545" stroke-opacity=".25" stroke-width="1.4"/>
+  <g fill="#dc3545" fill-opacity=".6">
+    <circle cx="52" cy="82" r="3.2"/><circle cx="78" cy="98" r="3.2"/><circle cx="96" cy="76" r="3.2"/>
+    <circle cx="118" cy="100" r="3.2"/><circle cx="140" cy="84" r="3.2"/><circle cx="164" cy="94" r="3.2"/>
+    <circle cx="188" cy="78" r="3.2"/><circle cx="212" cy="96" r="3.2"/><circle cx="236" cy="86" r="3.2"/>
+  </g>
+  <circle cx="268" cy="42" r="4.5" fill="#dc3545"/>
+  <circle cx="268" cy="42" r="10" fill="none" stroke="#dc3545" stroke-width="2" stroke-opacity=".7"/>
+  <text x="200" y="42" fill="#dc3545" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">leverage</text>
+</svg>

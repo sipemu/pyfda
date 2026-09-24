@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Uncertainty quantification">
+  <defs><linearGradient id="uq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dc3545" stop-opacity=".22"/><stop offset="1" stop-color="#dc3545" stop-opacity=".05"/></linearGradient></defs>
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 60 C90 34 150 90 210 62 C245 46 275 74 298 56 L298 116 C275 134 245 106 210 122 C150 150 90 94 30 120 Z" fill="url(#uq)"/>
+  <path d="M30 60 C90 34 150 90 210 62 C245 46 275 74 298 56" stroke="#dc3545" stroke-opacity=".4" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M30 120 C90 94 150 150 210 122 C245 106 275 134 298 116" stroke="#dc3545" stroke-opacity=".4" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M30 90 C90 64 150 120 210 92 C245 76 275 104 298 86" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+</svg>
