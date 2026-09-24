@@ -49,11 +49,11 @@ of their \csOneAaAoTotal{} curves.
 \paragraph{Classification.}
 We evaluate a scikit-learn \texttt{Pipeline} that chains an \texttt{fdars}
 \texttt{FPCATransformer} (\csOneNComp{} components) with scikit-learn's
-\texttt{LinearDiscriminantAnalysis} by 5-fold stratified cross-validation, so
+\texttt{Linear\allowbreak Discriminant\allowbreak Analysis} by 5-fold stratified cross-validation, so
 that FPCA is fitted once per training fold.  The pipeline achieves a mean CV
 accuracy of \csOneCVAcc\% on held-out data (fold scores:
-$[\csOneCVFolds]$); the one-step \texttt{fdars} classifier
-\texttt{FPCLDAClassifier(ncomp=\csOneNComp)}, which performs the FPCA
+\csOneCVFolds); the one-step \texttt{fdars} classifier
+\texttt{FPCLDAClassifier(\allowbreak ncomp=\csOneNComp)}, which performs the FPCA
 internally, gives the same mean accuracy (\csOneCVAccFPCLDA\%) on the same
 folds.  The remaining errors are concentrated in the \textit{aa}/\textit{ao}
 pair noted above.
