@@ -84,7 +84,7 @@ DIMENSION_SUBMODULES: dict[str, tuple[str, ...]] = {
     "Statistical process monitoring": ("spm",),
     "Inference / hypothesis testing": ("inference",),
     "Conformal prediction & tolerance bands": ("conformal", "tolerance"),
-    "Density / Frechet / metric-space": ("density_fda", "frechet", "metric"),
+    "Density / Frechet (object-valued data)": ("density_fda", "frechet"),
     "Simulation & datasets": ("simulation", "datasets"),
     "Grounded advisor + scientific provenance": ("explain",),
 }

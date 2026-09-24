@@ -86,7 +86,7 @@ the same $n_\mathrm{points}$ grid points, \texttt{fdars} uses the
 
   \item \textbf{\texttt{argvals}} --- a one-dimensional array of $n_\mathrm{points}$
     grid points (the evaluation abscissae).  When omitted, a uniform grid on
-    $[0, 1]$ is inferred.  For the Berkeley Growth Study, for example,
+    $[0, 1]$ is inferred.  For the Berkeley Growth Study \citep{tuddenham_snyder_1954}, for example,
     \texttt{argvals} holds the 31 measurement ages (years $1$--$18$).
 
   \item \textbf{\texttt{rangeval}} --- a two-tuple
@@ -121,7 +121,7 @@ the mean to produce a centred \texttt{Fdata}), \texttt{deriv(nderiv=1)}
 (numerical differentiation), \texttt{norm()} ($L^2$ norm of each curve),
 \texttt{normalize()} (scale each curve to unit norm), \texttt{depth(method=...)}
 (functional depth via Fraiman--Muniz, band depth, or other methods),
-\texttt{to\_pc(ncomp=...)} (dense FPCA, returning scores, rotation, singular
+\texttt{to\_pc(n\_comp=...)} (dense FPCA, returning scores, rotation, singular
 values, and centred data), \texttt{to\_basis(type=...)} (basis expansion),
 \texttt{distance(method=...)} (pairwise distance matrix), \texttt{cov()} (Bessel-corrected
 pointwise covariance surface), and \texttt{geometric\_median()} (the $L^1$ functional

@@ -26,7 +26,7 @@ from paper_utils import (
 )
 
 import fdars
-from fdars.sklearn._skeletons import FPCATransformer, FPCLDAClassifier
+from fdars.sklearn import FPCATransformer, FPCLDAClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_val_score
 

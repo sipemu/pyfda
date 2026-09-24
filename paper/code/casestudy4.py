@@ -1,167 +1,188 @@
-"""Case Study 4: sklearn Pipeline + GridSearchCV on Wine Data.
+"""Case Study 4: Composable scikit-learn pipelines on the Berkeley growth data.
 
-Runs the validated Study-4 pipeline against fdars 0.12.0:
-1. Load wine.csv (178 samples x 13 features, 3 classes).
-2. Build a Pipeline of FPCATransformer + sklearn LinearDiscriminantAnalysis.
-3. Tune the FPCA dimensionality via GridSearchCV (n_components in {2, 3, 5, 8}).
-4. Report honest best CV accuracy and grid results.
+Classifies each child's sex from their height curve with a pipeline that chains
+an (optional) fdars velocity step, an fdars ``FPCATransformer`` and a stock
+scikit-learn ``LinearDiscriminantAnalysis``.  ``GridSearchCV`` chooses both the
+functional *representation* (height vs growth velocity) and the number of FPCA
+components; the whole search is wrapped in an outer repeated cross-validation
+(nested CV) so the reported accuracy is not biased by the model selection.
+
+Two scalar baselines are scored under the identical outer CV:
+- logistic regression on the final (age-18) height;
+- logistic regression on the heights at ages 12 and 18 (an expert's hand-picked
+  "before and after puberty" pair).
 
 Writes two deterministic committed figures to paper/figures/:
-- cs4_wine_gridsearch.pdf  -- mean CV accuracy vs n_components (bar chart)
-- cs4_wine_scores.pdf      -- FPCA scores scatter (PC1 vs PC2) coloured by class
+- cs4_growth_gridsearch.pdf -- inner-CV accuracy per (representation, n_components)
+- cs4_growth_scores.pdf     -- FPCA scores of the selected model, coloured by sex
 
 Run with::
 
     PYTHONPATH=scripts:paper/code python paper/code/casestudy4.py
-
-Design notes:
-- Pipeline is FPCATransformer -> sklearn LDA, NOT FPCATransformer -> FPCKNNClassifier.
-  FPCKNNClassifier applies FPCA internally, so chaining with FPCATransformer
-  double-applies FPCA and degrades accuracy (89-RESEARCH Pitfall 2).
-- Wine class labels are 1-indexed (1, 2, 3); subtract 1 for 0-indexed int64
-  (89-RESEARCH Pitfall 5; sklearn convention).
-- n_jobs=1 in GridSearchCV prevents parallel-ordering nondeterminism (Pitfall 7).
 """
 from __future__ import annotations
 
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 
 from paper_utils import (
-    fig, FDARS_COLORS, save_figure, data_path,
+    fig, FDARS_COLORS, save_figure,
     style_setup, clean_ax, brand_legend, metric_box, DIMGREY,
 )
 
-from fdars.sklearn._skeletons import FPCATransformer
+import fdars
+from fdars import Fdata, datasets
+from fdars.sklearn import FPCATransformer
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import (
+    GridSearchCV, RepeatedStratifiedKFold, StratifiedKFold, cross_val_score,
+)
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import FunctionTransformer
 
 _FIGURES_DIR = Path(__file__).resolve().parent.parent / "figures"
 
+_DS = datasets.load_growth()
+_AGES = np.asarray(_DS.data.argvals, dtype=np.float64)       # 31 ages, 1..18
+
+
+def velocity(X: np.ndarray) -> np.ndarray:
+    """Growth-velocity curves: GCV B-spline smoothing then first derivative.
+
+    A module-level function so the ``FunctionTransformer`` wrapping it is
+    clonable/picklable inside ``GridSearchCV``.
+    """
+    smooth = fdars.basis.smooth_basis_gcv(
+        X, _AGES, n_basis=12, basis_type="bspline")["fitted"]
+    return Fdata(smooth, argvals=_AGES).deriv().data
+
 
 def main() -> None:
-    """Run the Study-4 GridSearchCV pipeline and write two deterministic figures.
+    """Run the nested-CV pipeline study and write two deterministic figures.
 
-    Seeds the RNG first (per Determinism Pinning Summary in 89-RESEARCH).
-    LDA is deterministic; n_jobs=1 in GridSearchCV prevents parallel-ordering
-    nondeterminism; KFold(5, shuffle=False) is also deterministic.
+    All cross-validation splitters are seeded and ``GridSearchCV`` runs with
+    ``n_jobs=1``, so split order and results are reproducible.
     """
     np.random.seed(42)
     style_setup()
 
-    # ------------------------------------------------------------------
-    # Load wine data (178 samples x 13 features; index IS the class: 1,2,3)
-    # ------------------------------------------------------------------
-    wn = pd.read_csv(data_path("wine.csv"), index_col=0)
-    Xw = wn.values.astype(np.float64)                        # (178, 13)
-    # Subtract 1: convert 1-indexed class labels to 0-indexed int64
-    # (Pitfall 5 — sklearn convention; LDA works with both but 0-indexed is standard)
-    yw = np.array(wn.index.tolist(), dtype=np.int64) - 1     # 0, 1, 2
+    X = np.asarray(_DS.data.data, dtype=np.float64)            # (93, 31)
+    sex = _DS.data.metadata["sex"].astype(str).str.lower()
+    y = sex.str.startswith("f").astype(int).to_numpy()          # 1 = girl
+    print("children:", X.shape[0], "girls:", int(y.sum()),
+          "boys:", int((1 - y).sum()))
 
     # ------------------------------------------------------------------
-    # Build Pipeline: FPCATransformer -> sklearn LinearDiscriminantAnalysis
-    # GOTCHA: FPCATransformer uses n_components (sklearn convention)
-    # DO NOT use FPCKNNClassifier here — it re-applies FPCA (Pitfall 2)
-    # n_jobs=1 for GridSearchCV determinism (Pitfall 7)
+    # Pipeline: [representation] -> fdars FPCA -> sklearn LDA.
+    # The "rep" step is either passthrough (height curves) or the velocity
+    # transformer; GridSearchCV treats it as an ordinary hyperparameter.
     # ------------------------------------------------------------------
     pipe = Pipeline([
-        ("fpca", FPCATransformer(n_components=3)),
+        ("rep", "passthrough"),
+        ("fpca", FPCATransformer(argvals=_AGES, n_components=2)),
         ("lda", LinearDiscriminantAnalysis()),
     ])
+    reps = {"height": "passthrough", "velocity": FunctionTransformer(velocity)}
+    n_grid = [2, 3, 4, 6]
+    grid = {"rep": list(reps.values()), "fpca__n_components": n_grid}
+    inner = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+    search = GridSearchCV(pipe, grid, cv=inner, scoring="accuracy",
+                          refit=True, n_jobs=1)
 
-    param_grid = {"fpca__n_components": [2, 3, 5, 8]}
-    gs = GridSearchCV(
-        pipe, param_grid, cv=5, scoring="accuracy", refit=True, n_jobs=1
-    )
-    gs.fit(Xw, yw)
-
-    # Real output from 89-RESEARCH:
-    #   best_params_: {'fpca__n_components': 8}  best_score_: 0.961
-    #   mean_test_score: [0.697, 0.759, 0.916, 0.961] for n_components = 2, 3, 5, 8
-    best_acc = round(float(gs.best_score_), 3)
-    best_nc = int(gs.best_params_["fpca__n_components"])
-    print("best:", gs.best_params_, best_acc)
-
-    mean_scores = gs.cv_results_["mean_test_score"]
-    n_components_grid = param_grid["fpca__n_components"]
+    # Selection on the full sample (drives Figure 1 and the chosen model).
+    search.fit(X, y)
+    res = search.cv_results_
+    scores = {name: [] for name in reps}
+    for params, s in zip(res["params"], res["mean_test_score"]):
+        name = "height" if params["rep"] == "passthrough" else "velocity"
+        scores[name].append(float(s))
+    best_rep = ("height" if search.best_params_["rep"] == "passthrough"
+                else "velocity")
+    best_k = int(search.best_params_["fpca__n_components"])
+    print("inner-CV accuracy:", {k: [round(v, 3) for v in vs]
+                                 for k, vs in scores.items()})
+    print("selected:", best_rep, best_k)
 
     # ------------------------------------------------------------------
-    # Create output directory
+    # Nested CV: the entire GridSearchCV is the estimator being evaluated.
+    # Baselines are scored with the identical outer splitter.
     # ------------------------------------------------------------------
+    outer = RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=1)
+    nested = cross_val_score(search, X, y, cv=outer, scoring="accuracy")
+    i12 = int(np.argmin(np.abs(_AGES - 12.0)))
+    base18 = cross_val_score(LogisticRegression(max_iter=1000), X[:, [-1]], y,
+                             cv=outer, scoring="accuracy")
+    base2 = cross_val_score(LogisticRegression(max_iter=1000),
+                            X[:, [i12, X.shape[1] - 1]], y,
+                            cv=outer, scoring="accuracy")
+    print(f"nested CV (functional pipeline): {nested.mean():.3f} "
+          f"+/- {nested.std():.3f}")
+    print(f"baseline height@18:              {base18.mean():.3f} "
+          f"+/- {base18.std():.3f}")
+    print(f"baseline height@12+@18:          {base2.mean():.3f} "
+          f"+/- {base2.std():.3f}")
+
     _FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
     # ------------------------------------------------------------------
-    # Figure 1: mean CV accuracy vs n_components (bar chart)
+    # Figure 1: inner-CV accuracy per representation x n_components.
     # ------------------------------------------------------------------
     f1, ax1 = fig()
-    bars = ax1.bar(
-        [str(n) for n in n_components_grid],
-        mean_scores,
-        color=FDARS_COLORS[:len(n_components_grid)],
-        width=0.6,
-        edgecolor="white",
-        linewidth=0.5,
-    )
-    # Annotate each bar with its mean accuracy value
-    for bar, score in zip(bars, mean_scores):
-        ax1.text(
-            bar.get_x() + bar.get_width() / 2.0,
-            bar.get_height() + 0.008,
-            str(round(float(score), 3)),
-            ha="center",
-            va="bottom",
-            fontsize=8,
-            color=DIMGREY,
-        )
+    width = 0.38
+    xpos = np.arange(len(n_grid))
+    for j, (name, color) in enumerate((("height", FDARS_COLORS[0]),
+                                       ("velocity", FDARS_COLORS[1]))):
+        bars = ax1.bar(xpos + (j - 0.5) * width, scores[name], width=width,
+                       color=color, edgecolor="white", linewidth=0.5,
+                       label=f"{name.capitalize()} curves")
+        for bar, s in zip(bars, scores[name]):
+            ax1.text(bar.get_x() + bar.get_width() / 2.0, s + 0.006,
+                     f"{s:.3f}", ha="center", va="bottom", fontsize=7,
+                     color=DIMGREY)
+    ax1.axhline(base18.mean(), color=DIMGREY, linestyle=":", linewidth=1.2,
+                label=f"Baseline: final height ({base18.mean():.3f})")
+    ax1.set_xticks(xpos)
+    ax1.set_xticklabels([str(k) for k in n_grid])
     ax1.set_xlabel("Number of FPCA components")
     ax1.set_ylabel("Mean 5-fold CV accuracy")
-    ax1.set_title(
-        "GridSearchCV: FPCATransformer + LDA on wine data\n"
-        "Best: n = " + str(best_nc)
-        + ", CV accuracy = " + str(best_acc)
-    )
-    ax1.set_ylim(0.0, 1.08)
-    ax1.axhline(best_acc, color=DIMGREY, linewidth=0.8, linestyle="--")
-    clean_ax(ax1, grid=True, grid_axis="y")
-    save_figure(f1, _FIGURES_DIR / "cs4_wine_gridsearch.pdf")
+    ax1.set_ylim(0.75, 1.03)
+    ax1.set_title("GridSearchCV over representation and FPCA dimension\n"
+                  "(Berkeley growth: classify sex from the growth curve)")
+    clean_ax(ax1, frame=True)
+    brand_legend(ax1, fontsize=7, loc="lower right")
+    save_figure(f1, _FIGURES_DIR / "cs4_growth_gridsearch.pdf")
 
     # ------------------------------------------------------------------
-    # Figure 2: FPCA scores scatter (PC1 vs PC2) at best n_components
-    # Equivalent to gs.best_estimator_.named_steps["fpca"].transform(Xw)
-    # since FPCATransformer is deterministic given the same data and
-    # n_components (GridSearchCV refit=True re-fits on the full dataset).
-    # An independent fit is used here for clarity (IN-02).
+    # Figure 2: FPCA scores of the selected (refit) model, coloured by sex,
+    # with the LDA decision boundary in the PC1-PC2 plane.
     # ------------------------------------------------------------------
-    fpca_best = FPCATransformer(n_components=best_nc)
-    Xw_transformed = fpca_best.fit_transform(Xw)  # (178, best_nc)
-
-    class_names = ["Class 1", "Class 2", "Class 3"]
-    colors = FDARS_COLORS[:3]
-
+    best = search.best_estimator_
+    Z = best[:-1].transform(X)                        # (93, best_k) scores
+    lda = best.named_steps["lda"]
     f2, ax2 = fig()
-    for ci, (cname, col) in enumerate(zip(class_names, colors)):
-        mask = yw == ci
-        ax2.scatter(
-            Xw_transformed[mask, 0],
-            Xw_transformed[mask, 1],
-            color=col,
-            s=18,
-            alpha=0.75,
-            label=cname,
-        )
-    ax2.set_xlabel("FPCA component 1")
-    ax2.set_ylabel("FPCA component 2")
-    ax2.set_title(
-        "Wine data: FPCA scores (n = "
-        + str(best_nc)
-        + " components, best GridSearchCV)"
-    )
+    for lab, name, color, marker in ((0, "Boys", FDARS_COLORS[0], "o"),
+                                     (1, "Girls", FDARS_COLORS[3], "s")):
+        m = y == lab
+        ax2.scatter(Z[m, 0], Z[m, 1], s=22, alpha=0.8, color=color,
+                    marker=marker, edgecolors="none",
+                    label=f"{name} (n={int(m.sum())})")
+    if best_k == 2:
+        w, b = lda.coef_[0], float(lda.intercept_[0])
+        xs = np.linspace(Z[:, 0].min(), Z[:, 0].max(), 50)
+        ax2.plot(xs, -(w[0] * xs + b) / w[1], color=DIMGREY, linestyle="--",
+                 linewidth=1.2, label="LDA boundary")
+        ax2.set_ylim(Z[:, 1].min() * 1.15, Z[:, 1].max() * 1.15)
+    ax2.set_xlabel("FPC 1 score (overall size)")
+    ax2.set_ylabel("FPC 2 score (growth timing)")
+    ax2.set_title(f"Selected model: {best_rep} curves, {best_k} FPCA "
+                  "components + LDA")
     clean_ax(ax2, frame=True)
-    brand_legend(ax2, title="Wine class", fontsize=7, title_fontsize=7)
-    save_figure(f2, _FIGURES_DIR / "cs4_wine_scores.pdf")
+    metric_box(ax2, f"Nested CV accuracy\n{nested.mean():.3f} "
+               f"$\\pm$ {nested.std():.3f}", loc="upper left")
+    brand_legend(ax2, fontsize=7, loc="lower right")
+    save_figure(f2, _FIGURES_DIR / "cs4_growth_scores.pdf")
 
 
 if __name__ == "__main__":

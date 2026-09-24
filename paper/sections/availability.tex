@@ -3,8 +3,8 @@
 \section{Availability and Installation}
 \label{sec:availability}
 
-\texttt{fdars} is available from the Python Package Index (PyPI) and can be
-installed with:
+This paper describes \texttt{fdars}~\FdarsVersion{}.  The package is available
+from the Python Package Index (PyPI) and can be installed with:
 \begin{verbatim}
 pip install fdars
 \end{verbatim}
@@ -16,14 +16,21 @@ Python~3.9 through 3.14.
 An optional \texttt{plot} extra installs \texttt{matplotlib} for the built-in
 visualisation utilities:
 \begin{verbatim}
-pip install fdars[plot]
+pip install "fdars[plot]"
 \end{verbatim}
 An optional \texttt{sklearn} extra installs \texttt{scikit-learn} and enables
 the \texttt{fdars.sklearn} estimator layer, which exposes \nsklearnestimators{}
 estimators compatible with the scikit-learn API:
 \begin{verbatim}
-pip install fdars[sklearn]
+pip install "fdars[sklearn]"
 \end{verbatim}
+
+The advisor and MCP server are installed with the \texttt{advisor} and
+\texttt{mcp} extras; provider-specific extras (\texttt{openai},
+\texttt{gemini}, \texttt{ollama}) select the language-model backend.
+The paper's reproduction scripts, reference data, and agreement checks live in
+the \texttt{paper/} directory of the repository, and a \texttt{CITATION.cff}
+file gives the preferred citation.
 
 The source code is released under the MIT licence and is hosted at
 \url{https://github.com/sipemu/pyfda}.

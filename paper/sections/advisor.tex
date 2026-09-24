@@ -101,9 +101,9 @@ advise(
     It accepts the diagnostics
     dict produced by \texttt{build\_diagnostics} --- never raw data or a
     result dict directly --- and calls a user-configured language-model
-    provider (Anthropic, OpenAI, or Ollama) to generate parameter
-    recommendations framed in terms of the supplied task description and
-    domain context.  Provider credentials are entirely the user's
+    provider (Anthropic, OpenAI or an OpenAI-compatible endpoint, Google
+    Gemini, or a local Ollama server) to generate parameter recommendations
+    framed in terms of the supplied task description and domain context.  Provider credentials are entirely the user's
     responsibility; the library imposes no default provider and does not
     embed API keys.  Because the LLM receives only the structured,
     deterministic diagnostics as its context, its recommendations trace back
@@ -113,6 +113,12 @@ advise(
     constitute an explicit, auditable evidence layer that the language model
     reasons over, and the same diagnostics can be separately inspected by the
     user to verify that the LLM's advice is consistent with the numbers.
+    The invariant is also enforced mechanically: before \texttt{advise}
+    returns, a grounding check extracts every numeric value cited in the
+    advice's evidence and requires it to equal a diagnostic value at the
+    citation's own precision; otherwise the call fails, with no retry.
+    Qualitative statements pass unchecked, so the guard stops fabricated
+    statistics but cannot verify the reasoning that connects them.
 
 \sigheading{\texttt{auto\_tune} --- closed-loop parameter search.}
 \begin{lstlisting}[style=fdarsinput]
@@ -123,13 +129,14 @@ auto_tune(
 \end{lstlisting}
     A closed-loop parameter search that iterates
     \texttt{build\_diagnostics} $\to$ \texttt{advise} $\to$ re-fit in a
-    bounded loop (at most \texttt{max\_steps} iterations).  The
-    \texttt{guard=True} default activates the \emph{grounding guard}, which
-    rejects any proposed parameter change that cannot be mapped back to a
-    diagnostic fact using a pattern-matching check on the advisor response
-    text.  The guard prevents unconstrained free-form generation from driving
-    the search and ensures that the loop terminates on a recognisable
-    improvement signal rather than on arbitrary LLM output.
+    bounded loop (at most \texttt{max\_steps} iterations).  With the
+    default \texttt{guard=True}, a method-specific guard re-checks secondary
+    diagnostics after every re-fit---for example, FPCA tuning stops if the
+    phase-leakage indicator exceeds 0.5---so the loop cannot improve its target
+    metric at the expense of other quality measures.  The loop stops when the
+    step budget is exhausted, when the guard is violated, when proposed
+    parameters revisit or oscillate, or after a run of non-improving steps;
+    every number it acts on is computed by \texttt{fdars}.
 
 The design separates the deterministic grounding step (\texttt{build\_diagnostics})
 from the probabilistic recommendation step (\texttt{advise}), ensuring that
@@ -138,13 +145,35 @@ In particular, \texttt{build\_diagnostics} can be unit-tested against known
 result dicts without any LLM dependency, and the diagnostics dict format is
 stable across provider changes.
 
+\subsection{How the Advisor Is Evaluated---and What Is Not Evaluated}
+
+The advisor's deterministic parts are tested offline in CI with a stub
+language-model provider.  An evaluation suite checks two properties on
+constructed data with a known correct answer: comparative method selection
+must pick the known-best method, and the tuning loop must move the target
+metric in the improving direction and terminate within its budget.  A
+separate regression suite exercises the grounding check on valid citations
+(rounded values, negative numbers, indices, scientific notation) and on
+fabricated ones, which must be rejected.  A live-provider smoke test exists
+but runs only when an API key is supplied, so it is not part of CI.
+
+We have \emph{not} measured the quality or usefulness of the recommendations
+a real language model produces---there is no benchmark against expert choices
+and no user study---and the advice may vary between providers and model
+versions.  The contribution claimed here is therefore the grounded
+architecture and its enforced invariant, not demonstrated recommendation
+quality.
+
 \subsection{Scientific-Provenance Layer}
 
 \texttt{fdars} ships a machine-readable provenance map,
 \texttt{python/fdars/\_references\_map.json}, that links each public callable
 to the foundational papers from which its algorithm derives.  The map contains
-\ndocpapers{} curated-eligible papers (with DOIs or arXiv identifiers) and
-covers \ncoverage{} callables with at least one author-verified paper entry.
+\ndocpapers{} curated-eligible papers (with DOIs or arXiv identifiers); at
+present \ncoverage{} of the \ncallables{} callables (\npubliccallables{} module
+functions plus the \texttt{Fdata} methods) have at least one author-verified
+paper entry, so coverage is deliberately partial and honest rather than
+complete.
 Each paper record carries the title, authors, year, identifier, method family,
 the list of \texttt{fdars} callables that implement it, cross-language
 implementation pointers (R, Python, and MATLAB equivalents with per-entry
@@ -155,8 +184,8 @@ explicitly flagged so that downstream tooling can distinguish author-verified
 citations from unverified suggestions.
 
 The provenance map is served at runtime through the
-\texttt{fdars\_method\_references} MCP (Model Context Protocol) tool
-\citep{anthropic_mcp_2024}, which the \texttt{fdars-advisor} skill registers.
+\texttt{fdars\_method\_references} tool of the package's Model Context
+Protocol (MCP) server \citep{anthropic_mcp_2024}, \texttt{fdars.mcp}.
 Given a callable name, the tool returns the associated paper entries, DOIs, and
 cross-language pointers --- making the provenance queryable by any
 MCP-compatible development environment (e.g.\ Claude Desktop, VS Code Copilot)

@@ -27,11 +27,69 @@ except ImportError as _e:
 from fdars.sklearn._base import _BaseFdarsEstimator  # noqa: E402
 from fdars.sklearn._coverage import EXCLUDED_METHODS, TRIAGE_VERDICTS  # noqa: E402
 
+from fdars.sklearn._skeletons import (  # noqa: E402
+    BSplineSmoother,
+    BasisRepresentation,
+    DDClassifier,
+    DepthTransformer,
+    DepthgramDetector,
+    ElasticMultinomialClassifier,
+    FPCATransformer,
+    FPCKNNClassifier,
+    FPCLDAClassifier,
+    FPCQDAClassifier,
+    FPCRegressor,
+    FunctionalGMM,
+    FunctionalKMeans,
+    FuzzyFunctionalCMeans,
+    GLMRegressor,
+    Imputer,
+    LRTOutlierDetector,
+    LocalPolynomialSmoother,
+    LogisticFPCClassifier,
+    MUODDetector,
+    MagnitudeShapeDetector,
+    NonparametricRegressor,
+    NormTransformer,
+    OutliergramDetector,
+    PLSRegressor,
+    RobustFPCRegressor,
+    SplineInterpolator,
+    TVDMSSDetector,
+)
+
+# The 28 estimators that pass check_estimator, re-exported so the documented
+# ``from fdars.sklearn import FPCATransformer`` works (they live in _skeletons).
 __all__ = [
     "_BaseFdarsEstimator",
     "EXCLUDED_METHODS",
     "TRIAGE_VERDICTS",
+    "BSplineSmoother",
+    "BasisRepresentation",
+    "DDClassifier",
+    "DepthTransformer",
+    "DepthgramDetector",
+    "ElasticMultinomialClassifier",
+    "FPCATransformer",
+    "FPCKNNClassifier",
+    "FPCLDAClassifier",
+    "FPCQDAClassifier",
+    "FPCRegressor",
+    "FunctionalGMM",
+    "FunctionalKMeans",
+    "FuzzyFunctionalCMeans",
+    "GLMRegressor",
+    "Imputer",
+    "LRTOutlierDetector",
+    "LocalPolynomialSmoother",
+    "LogisticFPCClassifier",
+    "MUODDetector",
+    "MagnitudeShapeDetector",
+    "NonparametricRegressor",
+    "NormTransformer",
+    "OutliergramDetector",
+    "PLSRegressor",
+    "RobustFPCRegressor",
+    "SplineInterpolator",
+    "TVDMSSDetector",
 ]
-# Individual estimator classes (FPCATransformer etc.) are imported directly
-# from fdars.sklearn._skeletons until Phases 56-58 reorganise them into
-# family submodules.

@@ -5,8 +5,8 @@
 \label{sec:capabilities}
 
 \texttt{fdars} exposes \npubliccallables{} public callables across
-\nsubmodules{} submodules, covering the full breadth of functional data
-analysis methods surveyed in Table~\ref{tab:comparison}.
+\nsubmodules{} submodules, covering all fourteen capability areas of
+Table~\ref{tab:comparison}.
 The \ncoverage{} callables backed by at least one curated peer-reviewed
 reference are tracked in the machine-readable scientific-provenance layer
 (Section~\ref{sec:advisor}).
@@ -18,7 +18,8 @@ the PyO3 binding converts to an \texttt{FdMatrix}, forwards to
 \texttt{fdars-core}, and converts back to a NumPy result.  High-level
 \texttt{Fdata} methods wrap this boundary transparently.  The scikit-learn
 estimator layer (Section~\ref{subsec:sklearn}) exposes the same methods as
-stateless \texttt{fit}/\texttt{transform} objects for pipeline composition.
+\texttt{fit}/\texttt{transform}/\texttt{predict} estimators for pipeline
+composition.
 
 The following minimal, executable snippets walk one representative per method
 family; each is sourced from a script that runs against the live \texttt{fdars}
@@ -35,7 +36,7 @@ observation matrix with a shared evaluation grid (\texttt{argvals}), an optional
 range specification (\texttt{rangeval}), per-observation identifiers, and
 arbitrary metadata.
 The snippet below constructs an \texttt{Fdata} object from the Berkeley growth
-study~\citep{ramsay_silverman_2005} and prints its canonical representation:
+study~\citep{tuddenham_snyder_1954,ramsay_silverman_2005} and prints its canonical representation:
 
 \input{snippets/represent}
 
@@ -93,10 +94,11 @@ comparison.
 
 Functional depth ranks observations by centrality relative to the full
 sample~\citep{fraiman_muniz_2001}.
-fdars offers modified band depth, Fraiman--Muniz depth, random Tukey depth,
-and mode depth via the \texttt{Fdata.depth()} method.
+fdars offers Fraiman--Muniz, band, modal, random-projection, and random Tukey
+depths via the \texttt{Fdata.depth()} method, and modified band depth
+\citep{lopez_pintado_romo_2009} via \texttt{depth.modified\_band\_1d}.
 The \texttt{fdars.outliers} submodule adds shape-, magnitude-, and
-amplitude-based outlier detection via MUOD~\citep{dai_genton_2019}:
+amplitude-based outlier detection via MUOD~\citep{azcorra_muod_2018}:
 
 \input{snippets/depth}
 
@@ -155,7 +157,7 @@ share of variance that component explains.
 
 \subsection{Clustering}
 
-Functional $k$-means~\citep{bouveyron_jacques_2011} partitions observations by
+Functional $k$-means~\citep{tarpey_kinateder_2003} partitions observations by
 minimising within-cluster $L^2$ distance in the curve space.
 \texttt{fdars.clustering.kmeans\_fd} accepts a fixed random seed for
 deterministic results and returns cluster assignments, centroids,
@@ -198,8 +200,9 @@ the between-class signal.  Figure~\ref{fig:tour-classification} shows why this
 works on the phoneme data: the five class-mean log-periodogram spectra are
 visibly distinct in both amplitude and spectral shape, so a low-dimensional FPCA
 projection preserves enough separation for accurate assignment.  The snippet
-reports held-out accuracy on a subset; the same classifier is evaluated under
-full cross-validation in Case Study~1 (Section~\ref{sec:casestudies}).
+reports held-out accuracy on a subset; Case Study~1
+(Section~\ref{subsec:cs1-phoneme}) evaluates a closely related pipeline---FPCA
+followed by linear discriminant analysis---under full cross-validation.
 
 \begin{figure}[H]
   \centering
@@ -213,9 +216,10 @@ full cross-validation in Case Study~1 (Section~\ref{sec:casestudies}).
 \subsection{Regression}
 
 \texttt{fdars.regression} covers scalar-on-function (SoF) regression via
-functional linear models with FPCA projection (\texttt{fregre\_lm}), PLS
-(\texttt{fregre\_pls}), and robust variants, as well as function-on-function
-(FoF) regression via \texttt{fof\_regression}~\citep{yao_muller_wang_2005}.
+functional principal component regression (\texttt{fregre\_lm}), functional
+partial least squares (\texttt{fregre\_pls})~\citep{reiss_ogden_2007}, and
+robust variants, as well as function-on-function (FoF) regression via
+\texttt{fof\_regression}~\citep{yao_muller_wang_2005b}.
 The snippet demonstrates SoF regression on the Tecator near-infrared spectra
 dataset, predicting fat content from 100-channel absorbance curves:
 
@@ -230,9 +234,10 @@ components, fits an ordinary linear model in that score space, and returns the
 fitted values, residuals, the reconstructed coefficient function $\beta(t)$, and
 the coefficient of determination.  Figure~\ref{fig:tour-regression} plots fitted
 against observed fat content: points cluster tightly along the identity line.
-The $R^2$ shown in the figure is computed live from the fit; the
-second-derivative preprocessing lifts it well above a fit on the raw spectra
-(Case Study~\ref{subsec:cs2-tecator} reports the cross-validated gain).  PLS and
+The $R^2$ shown in the figure is computed live from the fit.  With fifteen
+components the raw spectra already fit well, so the preprocessing adds a small
+but consistent gain (Case Study~\ref{subsec:cs2-tecator} quantifies it under
+cross-validation).  PLS and
 robust variants (for collinear or contaminated predictors) and
 function-on-function regression share the same call convention.
 
@@ -256,19 +261,20 @@ returns multi-step-ahead curve forecasts:
 \input{snippets/fts}
 
 FTSM decomposes the observed curve sequence into functional principal
-components, models the temporal dynamics of the resulting score series with a
-vector autoregression, and reconstructs the next $h$ curves from the forecast
-scores.
+components, fits an independent univariate autoregressive model to each score
+series (Yule--Walker estimation, order chosen by AIC), and reconstructs the next
+$h$ curves from the forecast scores.
 Figure~\ref{fig:tour-fts} shows a genuine example: the Graz PM10
 dataset~\citep{aue_norinho_hormann_2015} records 48 half-hourly PM10
 concentrations per day over 182 consecutive days, so the curves form a real
 temporal sequence and forecasting the next day's diurnal profile is a
 substantive task.  The three forecast curves---back-transformed from the
-variance-stabilising square-root scale---sit within the envelope of observed
+variance-stabilising square-root scale used for these data by
+\citet{aue_norinho_hormann_2015}---sit within the envelope of observed
 days and preserve the characteristic diurnal shape.  Because the reconstruction
 is low-rank, the forecasts capture the leading modes of variation rather than
 fine minute-to-minute fluctuation.  Case Study~\ref{subsec:cs3-fts} validates
-these next-day forecasts against held-out days and simple baselines.
+such forecasts over 30 rolling forecast origins against simple baselines.
 
 \begin{figure}[H]
   \centering
@@ -466,10 +472,15 @@ support (Section~\ref{sec:advisor}).
 \label{sec:sklearn-snippet}
 
 fdars exposes \nsklearnestimators{} scikit-learn-compatible estimators
-(all passing \texttt{check\_estimator}) through
-\texttt{fdars.sklearn.\_skeletons}, spanning smoothers, transformers,
-regressors, classifiers, clusterers, and outlier detectors.
+(all passing \texttt{check\_estimator}) through \texttt{fdars.sklearn},
+spanning smoothers, transformers, regressors, classifiers, clusterers, and
+outlier detectors.
 Estimators compose with the standard \texttt{Pipeline} API, enabling
 functional preprocessing steps inside any scikit-learn workflow:
 
 \input{snippets/sklearn}
+
+Here an \texttt{fdars} \texttt{FPCATransformer} feeds scikit-learn's own
+\texttt{RidgeCV} inside a standard \texttt{Pipeline}, and the pipeline is
+scored by \texttt{cross\_val\_score} without any adapter code.  Case
+Study~\ref{subsec:cs4-growth} tunes such a pipeline with \texttt{GridSearchCV}.

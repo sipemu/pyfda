@@ -36,7 +36,7 @@ docs-clean:
 # on PYTHONPATH.  PDF compile (tectonic) is CI-only — not invoked here.
 PAPER_PYTHONPATH := scripts:paper/code
 
-.PHONY: paper paper-figures paper-coverage paper-refs paper-snippets paper-check paper-verify arxiv
+.PHONY: paper paper-figures paper-coverage paper-refs paper-snippets paper-crossimpl paper-check paper-verify arxiv
 
 # arXiv submission bundle.
 #   Contents (per https://info.arxiv.org/help/submit): LaTeX SOURCE only — no
@@ -61,11 +61,15 @@ paper-refs:  ## Regenerate paper/refs.bib from _references_map.json
 paper-snippets:  ## Regenerate paper/snippets/*.tex from executed fdars snippets (MANU-05)
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_snippets.py
 
+paper-crossimpl:  ## Regenerate the fdars-vs-R agreement table (references: crossimpl_ref.R)
+	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/crossimpl.py
+
 paper-check:  ## Run the CI drift gates locally (exits 1 if any file is stale)
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/assert_coverage.py --check
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_refs_bib.py --check
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/check_comparison.py
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_snippets.py --check
+	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/crossimpl.py --check
 
 paper-verify:  ## Regenerate figures and assert byte-stability (SC-5 / CASE determinism hard gate)
 	PYTHONPATH=$(PAPER_PYTHONPATH) python paper/code/gen_figures.py

@@ -18,10 +18,10 @@ registration, functional depth and outlier detection, dense FPCA, clustering,
 classification, and scalar-on-function regression.
 However, as documented in Table~\ref{tab:comparison}, it does not cover
 functional time series forecasting, statistical process monitoring, conformal
-prediction and tolerance bands, density/Fr\'{e}chet/metric-space methods, or
-sparse PACE FPCA; it offers no grounded parameter advisor and no
+prediction and tolerance bands, density or Fr\'{e}chet analysis of
+object-valued data, or sparse PACE FPCA; it offers no grounded parameter advisor and no
 scientific-provenance layer.
-\texttt{FDApy}~1.0.3 \citep{happ_greven_2018} focuses on representation,
+\texttt{FDApy}~1.0.3 \citep{golovkine_fdapy_2021} focuses on representation,
 multivariate FPCA, and simulation, and does not address the remaining families
 at all.
 In R, the relevant methods are distributed across multiple packages: \texttt{fda}
@@ -36,14 +36,25 @@ The Matlab toolkits fdaM (\textasciitilde2014) and PACE (v2.17, 2015) remain in
 partial maintenance and cannot be used in Python workflows without external
 bridges.
 
-\texttt{fdars} is designed to fill this gap.
-It is the only Python library, to our knowledge, that covers all
-\nsubmodules{} method families---spanning \npubliccallables{} public
-callables---in a single importable package, with scikit-learn compatibility
-and a grounded advisor and scientific-provenance layer absent from all
-compared packages (see Table~\ref{tab:comparison}).
-We make no performance claims here; the design section (\S\ref{sec:design})
-describes the architecture qualitatively.
+Several individual areas are, however, served well by specialised packages:
+\texttt{fdapace} \citep{r_fdapace} for sparse FPCA, \texttt{ftsa}
+\citep{r_ftsa} for functional time series, \texttt{funcharts}
+\citep{capezza_funcharts_2023} for functional control charts,
+\texttt{frechet} \citep{r_frechet} for Fr\'{e}chet regression,
+\texttt{fdasrvf} \citep{r_fdasrvf} for elastic analysis, and \texttt{roahd}
+and \texttt{fdaoutlier} \citep{r_roahd,r_fdaoutlier} for depth and outlier
+detection.
+
+\texttt{fdars} does not aim to supersede these tools in their own niches.
+Its contribution is integration: to our knowledge it is the only Python
+library that covers all fourteen capability areas of
+Table~\ref{tab:comparison} behind one data model and one API---\npubliccallables{}
+public callables in \nsubmodules{} submodules---with scikit-learn
+compatibility, a grounded parameter advisor, and a scientific-provenance map.
+We make no performance claims; the design section (\S\ref{sec:design})
+describes the architecture qualitatively, and \S\ref{sec:validation} checks
+numerical agreement with independent implementations, including several of
+the packages above.
 
 \subsection*{Background: functional data analysis}
 
@@ -70,10 +81,12 @@ the field comprehensively.
 
 \subsection*{Contributions and paper outline}
 
-This paper describes \texttt{fdars}, documenting: (1) the software design and
-Rust/PyO3 architecture (\S\ref{sec:design}); (2) the data-representation model
-and \texttt{Fdata} container (\S\ref{sec:represent}); (3) a capability tour by
-method family, with executed, script-sourced code snippets (\S\ref{sec:capabilities});
-(4) the grounded AI advisor and scientific-provenance contribution, which are
-absent from all compared packages (\S\ref{sec:advisor}); and (5) availability
-and installation information (\S\ref{sec:availability}).
+The rest of the paper covers: the software design and Rust/PyO3 architecture
+(\S\ref{sec:design}); the data-representation model (\S\ref{sec:represent});
+a capability tour by method family, with executed, script-sourced code snippets
+(\S\ref{sec:capabilities}); a comparison with related software
+(\S\ref{sec:comparison}); the grounded advisor and scientific-provenance map
+(\S\ref{sec:advisor}); four case studies on real data
+(\S\ref{sec:casestudies}); validation, including agreement with independent
+implementations (\S\ref{sec:validation}); limitations
+(\S\ref{sec:limitations}); and availability (\S\ref{sec:availability}).

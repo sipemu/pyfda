@@ -31,7 +31,7 @@
 | Statistical process monitoring | — | Not found in paper or API listing | https://fda.readthedocs.io/en/stable/apilist.html |
 | Inference / hypothesis testing | partial | API: ANOVA (one-way), Hotelling T²; limited compared to full inference suite | arXiv:2211.02566 §3; https://fda.readthedocs.io/en/stable/apilist.html |
 | Conformal prediction & tolerance bands | — | Not found in paper or API listing | https://fda.readthedocs.io/en/stable/apilist.html |
-| Density / Frechet / metric-space | — | Not found in paper or API listing | https://fda.readthedocs.io/en/stable/apilist.html |
+| Density / Frechet (object-valued data) | — | No density-FDA or Fréchet analysis found. (Distance metrics exist in `skfda.misc.metrics`, but this row covers object-valued data, not pairwise distances.) | https://fda.readthedocs.io/en/stable/apilist.html |
 | Simulation & datasets | ✓ | Paper §3.1: make_gaussian_process, make_multimodal_samples; fetch_phoneme, fetch_growth, fetch_weather, fetch_cran, fetch_ucr | arXiv:2211.02566 §3.1 |
 | Grounded advisor + scientific provenance | — | No grounded parameter advisor or scientific-provenance layer in scikit-fda | arXiv:2211.02566; https://fda.readthedocs.io/en/stable/ |
 
@@ -63,7 +63,7 @@
 | Statistical process monitoring | — | Not confirmed | https://fdapy.readthedocs.io/en/stable/ |
 | Inference / hypothesis testing | — | Not confirmed | https://fdapy.readthedocs.io/en/stable/ |
 | Conformal prediction & tolerance bands | — | Not confirmed | https://fdapy.readthedocs.io/en/stable/ |
-| Density / Frechet / metric-space | — | Not confirmed | https://fdapy.readthedocs.io/en/stable/ |
+| Density / Frechet (object-valued data) | — | Not confirmed | https://fdapy.readthedocs.io/en/stable/ |
 | Simulation & datasets | ✓ | Docs: "large simulation toolbox, based on basis decomposition" | https://fdapy.readthedocs.io/en/stable/ |
 | Grounded advisor + scientific provenance | — | No grounded advisor or provenance layer | https://fdapy.readthedocs.io/en/stable/ |
 
@@ -94,7 +94,7 @@
 | Statistical process monitoring | — | Not found | https://cran.r-project.org/web/packages/fda/index.html |
 | Inference / hypothesis testing | partial | F-tests for functional linear models; limited | https://cran.r-project.org/web/packages/fda/index.html |
 | Conformal prediction & tolerance bands | — | Not found | https://cran.r-project.org/web/packages/fda/index.html |
-| Density / Frechet / metric-space | — | Not found | https://cran.r-project.org/web/packages/fda/index.html |
+| Density / Frechet (object-valued data) | — | Not found | https://cran.r-project.org/web/packages/fda/index.html |
 | Simulation & datasets | ✓ | CRAN: "data sets and script files working many examples including all but one of the 76 figures" | https://cran.r-project.org/web/packages/fda/index.html |
 | Grounded advisor + scientific provenance | — | No grounded advisor or provenance layer | https://cran.r-project.org/web/packages/fda/index.html |
 
@@ -125,7 +125,7 @@
 | Statistical process monitoring | — | Not found | https://rdrr.io/cran/fda.usc/man/fda.usc-package.html |
 | Inference / hypothesis testing | partial | F-tests and goodness-of-fit for functional linear models; ANOVA; limited scope | https://rdrr.io/cran/fda.usc/man/fda.usc-package.html |
 | Conformal prediction & tolerance bands | — | Not found | https://rdrr.io/cran/fda.usc/man/fda.usc-package.html |
-| Density / Frechet / metric-space | — | Not found | https://rdrr.io/cran/fda.usc/man/fda.usc-package.html |
+| Density / Frechet (object-valued data) | — | No density-FDA or Fréchet analysis found. (`metric.lp` and the `semimetric.*` family provide distances, which this row does not cover.) | https://rdrr.io/cran/fda.usc/man/fda.usc-package.html |
 | Simulation & datasets | partial | Datasets included; simulation methods not the primary focus | https://rdrr.io/cran/fda.usc/man/fda.usc-package.html |
 | Grounded advisor + scientific provenance | — | No grounded advisor or provenance layer | https://rdrr.io/cran/fda.usc/man/fda.usc-package.html |
 
@@ -156,7 +156,7 @@
 | Statistical process monitoring | — | Not found | https://cran.r-project.org/web/packages/refund/index.html |
 | Inference / hypothesis testing | partial | Inference within regression models (Wald tests, confidence bands); not standalone hypothesis testing module | https://cran.r-project.org/web/packages/refund/index.html |
 | Conformal prediction & tolerance bands | — | Not found | https://cran.r-project.org/web/packages/refund/index.html |
-| Density / Frechet / metric-space | — | Not found | https://cran.r-project.org/web/packages/refund/index.html |
+| Density / Frechet (object-valued data) | — | Not found | https://cran.r-project.org/web/packages/refund/index.html |
 | Simulation & datasets | partial | Some datasets bundled; no dedicated simulation toolbox | https://cran.r-project.org/web/packages/refund/index.html |
 | Grounded advisor + scientific provenance | — | No grounded advisor or provenance layer | https://cran.r-project.org/web/packages/refund/index.html |
 
@@ -187,7 +187,7 @@
 | Statistical process monitoring | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
 | Inference / hypothesis testing | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
 | Conformal prediction & tolerance bands | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
-| Density / Frechet / metric-space | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
+| Density / Frechet (object-valued data) | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
 | Simulation & datasets | partial | funData: utility simulation via MFPCA; tidyfun: limited | https://cran.r-project.org/web/packages/funData/index.html |
 | Grounded advisor + scientific provenance | — | No grounded advisor or provenance layer | https://cran.r-project.org/web/packages/funData/index.html |
 
@@ -217,7 +217,7 @@
 | Statistical process monitoring | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
 | Inference / hypothesis testing | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
 | Conformal prediction & tolerance bands | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
-| Density / Frechet / metric-space | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
+| Density / Frechet (object-valued data) | — | Not found | https://cran.r-project.org/web/views/FunctionalData.html |
 | Simulation & datasets | partial | funData: utility simulation via MFPCA; tidyfun: limited | https://cran.r-project.org/web/packages/tidyfun/index.html |
 | Grounded advisor + scientific provenance | — | No grounded advisor or provenance layer | https://cran.r-project.org/web/packages/tidyfun/index.html |
 
@@ -247,7 +247,7 @@
 | Statistical process monitoring | — | Not found | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/ |
 | Inference / hypothesis testing | — | Not confirmed | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/ |
 | Conformal prediction & tolerance bands | — | Not found | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/ |
-| Density / Frechet / metric-space | — | Not found | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/ |
+| Density / Frechet (object-valued data) | — | Not found | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/ |
 | Simulation & datasets | partial | fdaM: datasets from Ramsay & Silverman textbook; PACE: limited simulation | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/; https://anson.ucdavis.edu/~mueller/data/pace.html |
 | Grounded advisor + scientific provenance | — | No grounded advisor or provenance layer | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/ |
 
@@ -277,6 +277,6 @@
 | Statistical process monitoring | — | Not found | https://anson.ucdavis.edu/~mueller/data/pace.html |
 | Inference / hypothesis testing | — | Not confirmed | https://anson.ucdavis.edu/~mueller/data/pace.html |
 | Conformal prediction & tolerance bands | — | Not found | https://anson.ucdavis.edu/~mueller/data/pace.html |
-| Density / Frechet / metric-space | — | Not found | https://anson.ucdavis.edu/~mueller/data/pace.html |
+| Density / Frechet (object-valued data) | — | Not found | https://anson.ucdavis.edu/~mueller/data/pace.html |
 | Simulation & datasets | partial | fdaM: datasets from Ramsay & Silverman textbook; PACE: limited simulation | https://anson.ucdavis.edu/~mueller/data/pace.html |
 | Grounded advisor + scientific provenance | — | No grounded advisor or provenance layer | https://anson.ucdavis.edu/~mueller/data/pace.html |

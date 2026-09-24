@@ -7,18 +7,21 @@ forecasting the next day's curve is a substantive task, not an illustration.
 Pipeline:
 1. Load pm10_graz.csv: 48 half-hourly PM10 concentrations (ug/m3) per day for
    182 consecutive days (Graz-Mitte, 2010-10-01 .. 2011-03-31).
-2. Variance-stabilising square-root transform (per the dataset documentation).
-3. Hold out the last H=7 days. Fit ftsm on the training days; forecast H days
-   ahead with ftsm_forecast (GOTCHA: takes the raw data array, not the model
-   dict) and back-transform (square) to ug/m3.
-4. Validate: RMSE of the FTS forecast vs the held-out actual curves, compared
-   against two baselines --- climatology (training mean curve) and persistence
-   (last training day).
+2. Variance-stabilising square-root transform, as applied to this dataset by
+   Aue, Norinho & Hormann (2015).
+3. Rolling-origin evaluation: for each of the last 30 forecast origins, fit on
+   all days before the origin (expanding window) and forecast H=7 days ahead
+   with ftsm_forecast (GOTCHA: takes the raw data array, not the model dict);
+   back-transform (square) to ug/m3.
+4. Validate: RMSE of each forecast curve against the actual curve, averaged over
+   origins per horizon, compared against climatology (mean curve of the days
+   before the origin) and persistence (the day before the origin).
 
 Writes two deterministic committed figures to paper/figures/:
-- cs3_pm10_curves.pdf   -- training daily PM10 curves (grey) + FTS mean curve
-- cs3_pm10_forecast.pdf -- (left) 1-day-ahead forecast vs actual vs climatology;
-                           (right) RMSE by forecast horizon, FTS vs baselines
+- cs3_pm10_curves.pdf   -- all daily PM10 curves (grey) + FTS mean curve
+- cs3_pm10_forecast.pdf -- (left) 1-day-ahead forecast vs actual vs climatology
+                           at the final origin; (right) mean RMSE by horizon over
+                           the 30 rolling origins, FTS vs baselines (+/- 1 SE)
 
 Data source: Graz-Mitte PM10, distributed with the R ``ftsa`` package (GPL-3);
 the functional-time-series prediction benchmark of Aue, Norinho & Hormann
@@ -44,8 +47,9 @@ import fdars
 
 _FIGURES_DIR = Path(__file__).resolve().parent.parent / "figures"
 
-# Number of days held out at the end of the record for out-of-sample validation.
+# Forecast horizon (days) and number of rolling forecast origins.
 _H = 7
+_N_ORIGINS = 30
 
 
 def _rmse(a: np.ndarray, b: np.ndarray) -> float:
@@ -56,8 +60,9 @@ def _rmse(a: np.ndarray, b: np.ndarray) -> float:
 def main() -> None:
     """Run the Study-3 FTS forecast + validation and write two figures.
 
-    ftsm / ftsm_forecast are deterministic (FPCA + VAR on scores, no stochastic
-    step); the seed is a belt-and-suspenders guard for byte-stable output.
+    ftsm / ftsm_forecast are deterministic (FPCA followed by an independent
+    univariate AR model per score series, fitted by Yule-Walker with AIC order
+    selection; no stochastic step); the seed is a belt-and-suspenders guard.
     """
     np.random.seed(42)
     style_setup()
@@ -73,38 +78,54 @@ def main() -> None:
     hours = (ARG - 1) * 0.5                         # hour of day 0.0 .. 23.5
 
     # ------------------------------------------------------------------
-    # Train / held-out split (last _H days are out-of-sample).
-    # Model in sqrt space (variance stabilisation), back-transform for errors.
+    # FTS decomposition of the full record (sqrt scale) for Figure 1.
     # ------------------------------------------------------------------
-    train, actual = Xpm[:-_H], Xpm[-_H:]           # (175,48), (7,48)
-    train_sqrt = np.sqrt(train)
-
-    # FTS decomposition (mean curve + FPCs) for Figure 1.
-    model = fdars.fts.ftsm(train_sqrt, ARG, ncomp=3)
+    n_days = Xpm.shape[0]
+    model = fdars.fts.ftsm(np.sqrt(Xpm), ARG, ncomp=3)
     mean_curve = model["mean"] ** 2                 # back to ug/m3 for display
 
-    # H-step-ahead forecast. GOTCHA: ftsm_forecast takes RAW data + argvals,
-    # not the model dict; it re-fits ftsm internally.
-    fc = fdars.fts.ftsm_forecast(train_sqrt, ARG, h=_H, ncomp=3)
-    pred = fc["forecast"] ** 2                      # (7,48) ug/m3
+    # ------------------------------------------------------------------
+    # Rolling-origin evaluation.  Origin t = index of the first forecast day;
+    # the model sees days [0, t) only (expanding window).  The last origin is
+    # chosen so that all _H forecast days exist.
+    # ------------------------------------------------------------------
+    origins = list(range(n_days - _H - _N_ORIGINS + 1, n_days - _H + 1))
+    fts_err = np.zeros((_N_ORIGINS, _H))
+    clim_err = np.zeros((_N_ORIGINS, _H))
+    per_err = np.zeros((_N_ORIGINS, _H))
+    for i, t in enumerate(origins):
+        past = Xpm[:t]
+        fc = fdars.fts.ftsm_forecast(np.sqrt(past), ARG, h=_H, ncomp=3)
+        pred = fc["forecast"] ** 2                  # (H, 48) ug/m3
+        clim, persist = past.mean(axis=0), past[-1]
+        for k in range(_H):
+            actual_k = Xpm[t + k]
+            fts_err[i, k] = _rmse(pred[k], actual_k)
+            clim_err[i, k] = _rmse(clim, actual_k)
+            per_err[i, k] = _rmse(persist, actual_k)
+    last_pred, last_clim = pred, clim               # final origin, for Fig. 2a
+    last_t = origins[-1]
 
-    # Baselines: climatology (training mean curve) and persistence (last day).
-    clim = train.mean(axis=0)
-    persist = train[-1]
-
-    fts_rmse = np.array([_rmse(pred[k], actual[k]) for k in range(_H)])
-    clim_rmse = np.array([_rmse(clim, actual[k]) for k in range(_H)])
-    per_rmse = np.array([_rmse(persist, actual[k]) for k in range(_H)])
+    def _se(e: np.ndarray) -> np.ndarray:
+        return e.std(axis=0, ddof=1) / np.sqrt(e.shape[0])
 
     # Deterministic numbers consumed by casestudy3.tex prose.
-    print("held-out days:", dates[-_H:])
-    print("FTS   mean RMSE:", round(float(fts_rmse.mean()), 2))
-    print("Clim  mean RMSE:", round(float(clim_rmse.mean()), 2))
-    print("Persist mean RMSE:", round(float(per_rmse.mean()), 2))
-    print("day+1 RMSE  FTS/Clim/Persist:",
-          round(float(fts_rmse[0]), 2),
-          round(float(clim_rmse[0]), 2),
-          round(float(per_rmse[0]), 2))
+    print("origins:", len(origins), "first forecast days:",
+          dates[origins[0]], "..", dates[origins[-1]])
+    print("mean RMSE over all horizons  FTS/Clim/Persist:",
+          round(float(fts_err.mean()), 2), round(float(clim_err.mean()), 2),
+          round(float(per_err.mean()), 2))
+    print("1-day-ahead mean RMSE        FTS/Clim/Persist:",
+          round(float(fts_err[:, 0].mean()), 2),
+          round(float(clim_err[:, 0].mean()), 2),
+          round(float(per_err[:, 0].mean()), 2))
+    print("1-day-ahead wins: FTS beats climatology on",
+          int((fts_err[:, 0] < clim_err[:, 0]).sum()), "/", len(origins),
+          "origins; beats persistence on",
+          int((fts_err[:, 0] < per_err[:, 0]).sum()), "/", len(origins))
+    print("per-horizon FTS:", np.round(fts_err.mean(axis=0), 2).tolist())
+    print("per-horizon Clim:", np.round(clim_err.mean(axis=0), 2).tolist())
+    print("per-horizon Pers:", np.round(per_err.mean(axis=0), 2).tolist())
 
     _FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -114,9 +135,9 @@ def main() -> None:
     # day-to-day amplitude variation the FTS model summarises.
     # ------------------------------------------------------------------
     f1, ax1 = fig()
-    for i in range(train.shape[0]):
-        label = f"Daily curves (n={train.shape[0]})" if i == 0 else None
-        ax1.plot(hours, train[i], color=FDARS_COLORS[6], linewidth=0.5,
+    for i in range(n_days):
+        label = f"Daily curves (n={n_days})" if i == 0 else None
+        ax1.plot(hours, Xpm[i], color=FDARS_COLORS[6], linewidth=0.5,
                  alpha=0.30, label=label)
     ax1.plot(hours, mean_curve, color=FDARS_COLORS[0], linewidth=2.4,
              label="FTS mean", zorder=5)
@@ -125,7 +146,7 @@ def main() -> None:
     ax1.set_xticks([0, 6, 12, 18, 24])
     ax1.set_title(
         "Graz PM10: daily diurnal curves and FTS mean\n"
-        "(ftsm, 3 components; 2010-10-01 to 2011-03-24 training)"
+        "(ftsm, 3 components; 2010-10-01 to 2011-03-31)"
     )
     clean_ax(ax1, frame=True)
     brand_legend(ax1, fontsize=8)
@@ -139,37 +160,41 @@ def main() -> None:
     # ------------------------------------------------------------------
     f2, (axL, axR) = fig(1, 2, figsize=(7.6, 3.6))
 
-    axL.plot(hours, actual[0], color=FDARS_COLORS[3], linewidth=2.0,
+    axL.plot(hours, Xpm[last_t], color=FDARS_COLORS[3], linewidth=2.0,
              label="Actual")
-    axL.plot(hours, pred[0], color=FDARS_COLORS[0], linewidth=2.0,
+    axL.plot(hours, last_pred[0], color=FDARS_COLORS[0], linewidth=2.0,
              linestyle="--", label="FTS forecast")
-    axL.plot(hours, clim, color=FDARS_COLORS[6], linewidth=1.4,
+    axL.plot(hours, last_clim, color=FDARS_COLORS[6], linewidth=1.4,
              linestyle=":", label="Climatology")
     axL.set_xlabel("Hour of day")
     axL.set_ylabel("PM10 (ug/m$^3$)")
     axL.set_xticks([0, 6, 12, 18, 24])
-    axL.set_title(r"$\bf{(a)}$ " + f"1-day-ahead forecast ({dates[-_H]})",
+    axL.set_title(r"$\bf{(a)}$ " + f"1-day-ahead forecast ({dates[last_t]})",
                   loc="left", fontsize=11)
     clean_ax(axL, frame=True)
     brand_legend(axL, fontsize=8)
 
     horizon = np.arange(1, _H + 1)
-    axR.plot(horizon, fts_rmse, color=FDARS_COLORS[0], marker="o",
-             linewidth=1.8, label="FTS")
-    axR.plot(horizon, clim_rmse, color=FDARS_COLORS[6], marker="s",
-             linewidth=1.4, linestyle=":", label="Climatology")
-    axR.plot(horizon, per_rmse, color=FDARS_COLORS[1], marker="^",
-             linewidth=1.4, linestyle="--", label="Persistence")
+    for err, color, marker, ls, name in (
+            (fts_err, FDARS_COLORS[0], "o", "-", "FTS"),
+            (clim_err, FDARS_COLORS[6], "s", ":", "Climatology"),
+            (per_err, FDARS_COLORS[1], "^", "--", "Persistence")):
+        m, se = err.mean(axis=0), _se(err)
+        axR.plot(horizon, m, color=color, marker=marker, linewidth=1.6,
+                 linestyle=ls, label=name)
+        axR.fill_between(horizon, m - se, m + se, color=color, alpha=0.12,
+                         linewidth=0)
     axR.set_xlabel("Forecast horizon (days ahead)")
-    axR.set_ylabel("RMSE (ug/m$^3$)")
+    axR.set_ylabel("Mean RMSE (ug/m$^3$)")
     axR.set_xticks(horizon)
-    axR.set_title(r"$\bf{(b)}$ Out-of-sample RMSE by horizon", loc="left",
-                  fontsize=11)
+    axR.set_title(r"$\bf{(b)}$ " + f"RMSE by horizon ({len(origins)} origins)",
+                  loc="left", fontsize=11)
     clean_ax(axR, frame=True)
     brand_legend(axR, fontsize=8)
 
     f2.suptitle(
-        "FTS next-day PM10 forecast validation (Graz, 7 held-out days)",
+        "FTS PM10 forecast validation (Graz, rolling-origin, "
+        f"{len(origins)} origins, $\\pm$1 SE)",
         y=1.03, color=DIMGREY,
     )
     save_figure(f2, _FIGURES_DIR / "cs3_pm10_forecast.pdf")

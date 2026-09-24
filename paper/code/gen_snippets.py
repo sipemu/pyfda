@@ -383,13 +383,13 @@ SNIPPETS: list[tuple[str, str]] = [
         print("cumulative variance explained:", cum)
         """),
     # ------------------------------------------------------------------
-    # 14. sklearn estimator layer — FPCATransformer from _skeletons (NOT
-    #     re-exported at fdars.sklearn top level); param is n_components NOT n_comp.
+    # 14. sklearn estimator layer — FPCATransformer via the public fdars.sklearn path (NOT
+    #     the _skeletons private path); param is n_components NOT n_comp.
     #     Pipeline with RidgeCV on tecator; round mean R^2 for float stability.
     # ------------------------------------------------------------------
     ("sklearn", """\
         import numpy as np, pandas as pd
-        from fdars.sklearn._skeletons import FPCATransformer
+        from fdars.sklearn import FPCATransformer
         from sklearn.pipeline import Pipeline
         from sklearn.linear_model import RidgeCV
         from sklearn.model_selection import cross_val_score

@@ -1,0 +1,299 @@
+{
+  "agueh_carlier_2011": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "SIAM Journal on Mathematical Analysis",
+    "number": "2",
+    "pages": "904--924",
+    "volume": "43"
+  },
+  "arribas_gil_romo_2014": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Biostatistics",
+    "number": "4",
+    "pages": "603--619",
+    "volume": "15"
+  },
+  "bouveyron_et_al_2015": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "The Annals of Applied Statistics",
+    "number": "4",
+    "volume": "9"
+  },
+  "bouveyron_jacques_2011": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Advances in Data Analysis and Classification",
+    "number": "4",
+    "pages": "281--300",
+    "volume": "5"
+  },
+  "chiou_li_2007": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Journal of the Royal Statistical Society Series B: Statistical Methodology",
+    "number": "4",
+    "pages": "679--699",
+    "volume": "69"
+  },
+  "claeskens_hubert_slaets_2014": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Journal of the American Statistical Association",
+    "number": "505",
+    "pages": "411--423",
+    "volume": "109"
+  },
+  "craven_wahba_1979": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Numerische Mathematik",
+    "number": "4",
+    "pages": "377--403",
+    "volume": "31"
+  },
+  "cuesta_albertos_febrero_2010": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "TEST",
+    "number": "3",
+    "pages": "537--557",
+    "volume": "19"
+  },
+  "cuevas_febrero_fraiman_2004": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Computational Statistics & Data Analysis",
+    "number": "1",
+    "pages": "111--122",
+    "volume": "47"
+  },
+  "cuevas_febrero_fraiman_2007": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Computational Statistics",
+    "number": "3",
+    "pages": "481--496",
+    "volume": "22"
+  },
+  "dai_genton_2019": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Computational Statistics & Data Analysis",
+    "pages": "50--65",
+    "volume": "131"
+  },
+  "degras_2011": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Statistica Sinica",
+    "number": "4",
+    "volume": "21"
+  },
+  "eilers_marx_1996": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Statistical Science",
+    "number": "2",
+    "volume": "11"
+  },
+  "febrero_galeano_gonzalez_2008": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Environmetrics",
+    "number": "4",
+    "pages": "331--345",
+    "volume": "19"
+  },
+  "ferraty_vieu_2006": {
+    "crossref_type": "book",
+    "entry_type": "book",
+    "publisher": "Springer New York"
+  },
+  "fraiman_muniz_2001": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Test",
+    "number": "2",
+    "pages": "419--440",
+    "volume": "10"
+  },
+  "gervini_2008": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Biometrika",
+    "number": "3",
+    "pages": "587--600",
+    "volume": "95"
+  },
+  "happ_greven_2018": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Journal of the American Statistical Association",
+    "number": "522",
+    "pages": "649--659",
+    "volume": "113"
+  },
+  "hormann_kokoszka_2010": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "The Annals of Statistics",
+    "number": "3",
+    "volume": "38"
+  },
+  "hyndman_ullah_2007": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Computational Statistics & Data Analysis",
+    "number": "10",
+    "pages": "4942--4956",
+    "volume": "51"
+  },
+  "lopez_pintado_romo_2009": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Journal of the American Statistical Association",
+    "number": "486",
+    "pages": "718--734",
+    "volume": "104"
+  },
+  "marron_ramsay_sangalli_srivastava_2015": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Statistical Science",
+    "number": "4",
+    "volume": "30"
+  },
+  "muller_stadtmuller_2005": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "The Annals of Statistics",
+    "number": "2",
+    "volume": "33"
+  },
+  "narisetty_nair_2016": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Journal of the American Statistical Association",
+    "number": "516",
+    "pages": "1705--1714",
+    "volume": "111"
+  },
+  "panaretos_tavakoli_2013": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "The Annals of Statistics",
+    "number": "2",
+    "volume": "41"
+  },
+  "petersen_muller_2016": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "The Annals of Statistics",
+    "number": "1",
+    "volume": "44"
+  },
+  "petersen_muller_2019": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "The Annals of Statistics",
+    "number": "2",
+    "volume": "47"
+  },
+  "pini_vantini_2016": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Biometrics",
+    "number": "3",
+    "pages": "835--845",
+    "volume": "72"
+  },
+  "preda_saporta_2005": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Computational Statistics & Data Analysis",
+    "number": "4",
+    "pages": "1020--1038",
+    "volume": "49"
+  },
+  "ramsay_dalzell_1991": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Journal of the Royal Statistical Society Series B: Statistical Methodology",
+    "number": "3",
+    "pages": "539--561",
+    "volume": "53"
+  },
+  "ramsay_silverman_2005": {
+    "crossref_type": "book",
+    "entry_type": "book",
+    "publisher": "Springer New York"
+  },
+  "sakoe_chiba_1978": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "IEEE Transactions on Acoustics, Speech, and Signal Processing",
+    "number": "1",
+    "pages": "43--49",
+    "volume": "26"
+  },
+  "scheipl_staicu_greven_2015": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Journal of Computational and Graphical Statistics",
+    "number": "2",
+    "pages": "477--501",
+    "volume": "24"
+  },
+  "srivastava_klassen_2016": {
+    "crossref_type": "book",
+    "entry_type": "book",
+    "publisher": "Springer New York"
+  },
+  "sun_genton_2011": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Journal of Computational and Graphical Statistics",
+    "number": "2",
+    "pages": "316--334",
+    "volume": "20"
+  },
+  "tucker_wu_srivastava_2013": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Computational Statistics & Data Analysis",
+    "pages": "50--66",
+    "volume": "61"
+  },
+  "tucker_yarger_2024": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Environmetrics",
+    "number": "1",
+    "volume": "35"
+  },
+  "volkmann_et_al_2023": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Statistical Modelling",
+    "number": "4",
+    "pages": "303--326",
+    "volume": "23"
+  },
+  "yao_muller_wang_2005": {
+    "crossref_type": "journal-article",
+    "entry_type": "article",
+    "journal": "Journal of the American Statistical Association",
+    "number": "470",
+    "pages": "577--590",
+    "volume": "100"
+  },
+  "ye_keogh_2009": {
+    "booktitle": "Proceedings of the 15th ACM SIGKDD international conference on Knowledge discovery and data mining",
+    "crossref_type": "proceedings-article",
+    "entry_type": "inproceedings",
+    "pages": "947--956"
+  }
+}

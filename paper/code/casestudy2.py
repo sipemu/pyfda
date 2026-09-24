@@ -1,10 +1,13 @@
 """Case Study 2: Registration and Scalar-on-Function Regression on Tecator Data.
 
-Runs the validated Study-2 pipeline against fdars 0.12.0:
+Runs the Study-2 pipeline against fdars 0.13.0:
 1. Elastic Karcher-mean registration (karcher_mean + align_to_target) on near-infrared
    meat spectra from the tecator dataset.
-2. Scalar-on-function FPC regression (fregre_lm, 5 components) to predict fat content.
-3. 5-fold cross-validated regression (FPCRegressor) to assess generalisation.
+2. Scalar-on-function FPC regression (fregre_lm, 15 components) to predict fat content
+   from raw and second-derivative spectra.
+3. 5-fold cross-validated regression (FPCRegressor) to assess generalisation, for
+   both unregistered and registered spectra -- registration moves the absorption
+   bands whose positions encode composition, so it is expected to hurt here.
 
 Writes two deterministic committed figures to paper/figures/:
 - cs2_tecator_align.pdf  -- raw spectra + aligned spectra with Karcher mean highlighted
@@ -28,7 +31,7 @@ from paper_utils import (
 
 import fdars
 from fdars import Fdata
-from fdars.sklearn._skeletons import FPCRegressor
+from fdars.sklearn import FPCRegressor
 from sklearn.model_selection import cross_val_score
 
 _FIGURES_DIR = Path(__file__).resolve().parent.parent / "figures"
@@ -101,6 +104,28 @@ def main() -> None:
     print("CV fold scores:", [round(float(s), 3) for s in cv])
 
     # ------------------------------------------------------------------
+    # Baselines consumed by casestudy2.tex prose:
+    #  - raw (unsmoothed, undifferentiated) absorbance spectra;
+    #  - the same two representations after elastic registration.
+    # ------------------------------------------------------------------
+    def _cv(X: np.ndarray) -> float:
+        return float(cross_val_score(FPCRegressor(n_components=15), X, yfat,
+                                     cv=5, scoring="r2").mean())
+
+    def _d2(X: np.ndarray) -> np.ndarray:
+        smx = fdars.basis.smooth_basis_gcv(
+            X, ARGt, n_basis=40, basis_type="bspline")["fitted"]
+        return Fdata(smx, argvals=ARGt).deriv().deriv().data
+
+    r2_raw = float(fdars.regression.fregre_lm(Xt, yfat, n_comp=15)["r_squared"])
+    cv_raw = _cv(Xt)
+    cv_reg_raw = _cv(Xa)
+    cv_reg_d2 = _cv(_d2(Xa))
+    print("raw spectra: train R2", round(r2_raw, 3), "CV R2", round(cv_raw, 3))
+    print("registered spectra CV R2: raw", round(cv_reg_raw, 3),
+          "2nd-deriv", round(cv_reg_d2, 3))
+
+    # ------------------------------------------------------------------
     # Create output directory
     # ------------------------------------------------------------------
     _FIGURES_DIR.mkdir(parents=True, exist_ok=True)
@@ -157,7 +182,8 @@ def main() -> None:
     metric_box(
         ax2,
         f"Training $R^2$ = {round(r2_train, 3)}\n"
-        f"5-fold CV $R^2$ = {round(cv_mean, 3)}",
+        f"5-fold CV $R^2$ = {round(cv_mean, 3)}\n"
+        f"(raw spectra: CV $R^2$ = {round(cv_raw, 3)})",
         loc="upper left",
     )
     brand_legend(ax2, fontsize=8, loc="lower right")

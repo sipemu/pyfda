@@ -33,10 +33,10 @@
   \draw[arr] (pyo3) -- (core)
     node[crosslbl, midway] {\texttt{FdMatrix} $\leftrightarrow$ results (\texttt{convert.rs})};
 \end{tikzpicture}
-\caption{Three-layer architecture of \texttt{fdars}.  NumPy arrays cross the
-PyO3 boundary with a row-major $\to$ column-major layout conversion
-(\texttt{src/convert.rs}); \texttt{PyReadonlyArray} wrappers prevent concurrent
-Python mutation without an extra data copy.}
+\caption{Three-layer architecture of \texttt{fdars}.  \texttt{PyReadonlyArray}
+wrappers give the Rust side a read-only view of the caller's NumPy arrays; 2D
+arrays are then copied once into the column-major layout that \texttt{FdMatrix}
+expects (\texttt{src/convert.rs}).}
 \label{fig:architecture}
 \end{figure}
 
@@ -65,7 +65,7 @@ call sites.  All modules are registered via a shared macro
 (\texttt{register\_submodule!}) in \texttt{src/lib.rs} that creates a
 \texttt{PyModule}, calls the module's \texttt{register} function, and attaches
 the submodule to the parent extension --- so adding a new algorithm family
-requires only one new \texttt{\_mod.rs} file and one macro invocation.
+requires only one new Rust module and one registration line.
 
 \textbf{Boundary convention.}  The PyO3 boundary involves a layout conversion:
 NumPy stores two-dimensional arrays in C (row-major) order, while
@@ -90,11 +90,9 @@ object-oriented container (Section~\ref{sec:represent}), the
 module (Section~\ref{sec:advisor}), plotting utilities (\texttt{fdars.plot}),
 ergonomic dataset loaders (\texttt{fdars.datasets}), and the scikit-learn
 estimator wrappers described in Section~\ref{subsec:sklearn}.  The module
-registry in \texttt{python/fdars/\_\_init\_\_.py} iterates over a fixed list
-of submodule names, attaches each to \texttt{sys.modules}, and injects
-pure-Python helpers into native submodule namespaces via
-\texttt{\_augment.install()}, so both \texttt{fdars.depth.fraiman\_muniz\_1d}
-and \texttt{from fdars.depth import fraiman\_muniz\_1d} resolve correctly.
+package initialiser registers every native submodule and adds pure-Python
+helpers to its namespace, so both \texttt{fdars.depth.fraiman\_muniz\_1d} and
+\texttt{from fdars.depth import fraiman\_muniz\_1d} work as users expect.
 
 \subsection{Module Map}
 
@@ -119,8 +117,8 @@ public callables organised by method family:
     \texttt{depth}, \texttt{outliers}, \texttt{scoring} --- Fraiman--Muniz
     depth \citep{fraiman_muniz_2001}, band depth
     \citep{lopez_pintado_romo_2009}, the outliergram
-    \citep{arribas_gil_romo_2014}, MUOD, and magnitude-shape (MS) detection
-    \citep{dai_genton_2019}.
+    \citep{arribas_gil_romo_2014}, MUOD \citep{azcorra_muod_2018}, and
+    magnitude-shape (MS) detection \citep{dai_genton_2019}.
 
   \item[FPCA and sparse/longitudinal PACE]
     \texttt{fdata} (via \texttt{Fdata.to\_pc}), \texttt{pace\_fpca} ---
@@ -129,8 +127,10 @@ public callables organised by method family:
 
   \item[Clustering and classification]
     \texttt{clustering}, \texttt{classification}, \texttt{shapelet} ---
-    $k$-means for functional data, fuzzy $c$-means, Gaussian mixture models;
-    $k$-NN, LDA, QDA, and DD-classifiers.
+    functional $k$-means \citep{tarpey_kinateder_2003}, fuzzy $c$-means,
+    Gaussian mixtures, elastic-alignment clustering, DBSCAN, and FunFEM;
+    FPCA-based $k$-NN, LDA and QDA, kernel and DD-classifiers, and an elastic
+    multinomial classifier.
 
   \item[Regression]
     \texttt{regression}, \texttt{scalar\_on\_function}, \texttt{famm} ---
@@ -139,7 +139,9 @@ public callables organised by method family:
 
   \item[Functional time series and seasonal decomposition]
     \texttt{fts} --- functional time-series modelling via the FTSM framework
-    \citep{hyndman_ullah_2007} with multi-step forecasting;
+    \citep{hyndman_ullah_2007}: FPCA of the curve sequence followed by an
+    independent univariate autoregression on each score series, with
+    multi-step forecasting;
     \texttt{seasonal} --- seasonal decomposition for functional time series
     (trend, seasonal component, and remainder extraction).
 
@@ -153,9 +155,9 @@ public callables organised by method family:
 
   \item[Density, Fr\'{e}chet and metric]
     \texttt{density\_fda}, \texttt{frechet}, \texttt{metric} ---
-    log-quantile-density FPCA, Wasserstein barycenter
-    \citep{agueh_carlier_2011}, Fr\'{e}chet mean
-    \citep{petersen_muller_2016}, and $L^p$/DTW distance matrices.
+    log-quantile-density FPCA \citep{petersen_muller_2016}, Wasserstein
+    barycenter \citep{agueh_carlier_2011}, Fr\'{e}chet means and regression
+    \citep{petersen_muller_2019}, and $L^p$/DTW distance matrices.
 
   \item[Inference, explanation and simulation]
     \texttt{inference}, \texttt{explain}, \texttt{simulation} ---
@@ -170,25 +172,18 @@ side-by-side evaluation of method coverage across peer packages.
 \subsection{The \texttt{Fdata} Container}
 \label{subsec:fdata}
 
-At the Python level, \texttt{Fdata} is the central object for dense functional
-data.  It bundles the $(n_\mathrm{obs} \times n_\mathrm{points})$ observation
-matrix with a shared evaluation grid (\texttt{argvals}), a domain interval
-(\texttt{rangeval}), optional observation identifiers (\texttt{id}), optional
-variable names (\texttt{names}), and optional sample-level metadata
-(\texttt{metadata}).  The container exposes \nfdata{} public methods ---
-including \texttt{mean}, \texttt{center}, \texttt{depth}, \texttt{to\_pc},
-\texttt{to\_basis}, \texttt{deriv}, \texttt{norm}, \texttt{distance},
-\texttt{cov}, and \texttt{geometric\_median} --- each of which delegates to the
-appropriate binding or pure-Python function and returns results in a consistent
-format (NumPy arrays or dicts).  Section~\ref{sec:represent} describes the data
-model in detail.
+At the Python level, dense functional data are held in the \texttt{Fdata}
+container, which bundles the observation matrix with its evaluation grid,
+identifiers, and sample-level metadata and exposes \nfdata{} methods that
+delegate to the binding layer.  Section~\ref{sec:represent} describes it in
+full.
 
 \subsection{Scikit-learn Estimator Layer}
 \label{subsec:sklearn}
 
-A pure-Python scikit-learn-compatible layer wraps the most commonly used
-bindings as \texttt{BaseEstimator}/\texttt{TransformerMixin}
-subclasses (\texttt{fdars.sklearn.\_skeletons}).  \nsklearnestimators{}
+A pure-Python scikit-learn-compatible layer (\texttt{fdars.sklearn}, installed
+with the \texttt{[sklearn]} extra) wraps the most commonly used bindings as
+estimator classes.  \nsklearnestimators{}
 estimators pass the full \texttt{check\_estimator} battery
 \citep{pedregosa_sklearn_2011}, covering smoothing and basis transformers,
 FPCA-based regression and classification, depth-based classifiers and outlier
@@ -206,8 +201,8 @@ cross-validation utilities, as illustrated in the capability tour
 
 Some methods in \texttt{fdars} are deliberately excluded from the estimator
 layer (\nexcludedmethods{} methods, listed in \texttt{fdars.sklearn.EXCLUDED\_METHODS})
-because their interfaces do not fit the stateless
-\texttt{fit}/\texttt{transform} contract --- for example, paired elastic
+because their interfaces do not fit the
+\texttt{fit}/\texttt{transform}/\texttt{predict} contract --- for example, paired elastic
 alignment (\texttt{alignment.elastic\_align\_pair}), the Karcher mean
 (\texttt{alignment.karcher\_mean}), and the PACE FPCA
 (\texttt{pace\_fpca.pace\_fpca}, which requires ragged per-observation grids

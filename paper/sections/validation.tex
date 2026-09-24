@@ -1,5 +1,5 @@
 % paper/sections/validation.tex — Validation and Correctness section
-% Added in Phase 90 (GATE-04 revision).
+% Revised in the pre-arXiv review pass (cross-implementation agreement added).
 \section{Validation and Correctness}
 \label{sec:validation}
 
@@ -12,41 +12,71 @@ and verified by the author; Claude Code served as an implementation accelerator
 throughout the development lifecycle.  Because much of the implementation was
 produced with AI assistance, independent validation is treated as a first-class
 design constraint rather than an afterthought: every layer of the stack is
-guarded by automated checks that run on each commit, and this manuscript is
-itself a reproducibility artefact whose code snippets and figures are
-regenerated and verified in CI.
+guarded by automated checks that run on each commit, results are compared with
+independent implementations (Section~\ref{subsec:crossimpl}), and this
+manuscript is itself a reproducibility artefact whose code snippets and figures
+are regenerated and verified in CI.
+
+\subsection{Agreement with independent implementations}
+\label{subsec:crossimpl}
+
+Unit tests show that code does what its author intended; they cannot show that
+the author's intent matches the literature.  We therefore compare six
+\texttt{fdars} methods with established, independently written R
+implementations (Table~\ref{tab:crossimpl}).  The reference outputs were
+computed once with \texttt{fda.usc} \citep{febrerobande_fdausc_2012},
+\texttt{roahd} \citep{r_roahd}, \texttt{fdasrvf} \citep{r_fdasrvf}, and
+\texttt{fdapace} \citep{r_fdapace} and committed together with their inputs;
+the \texttt{fdars} side is recomputed on every CI run and a drift gate fails
+if the table changes.
+
+\input{sections/crossimpl_table}
+
+Fraiman--Muniz depth agrees to machine precision.  Modified band depth
+produces the same ranking with value differences of at most $0.012$.  The
+elastic Karcher mean matches \texttt{fdasrvf} to within 1.7\% in relative
+$L^2$ norm, and both recover the sharp common peak that the cross-sectional
+mean flattens.  The remaining differences trace to documented modelling
+choices rather than errors.  The $L^2$ distances differ by up to 7\% because
+\texttt{fda.usc} integrates with the trapezoid rule, which we reproduce
+exactly, whereas \texttt{fdars} uses a higher-order composite rule that
+integrates quadratics exactly on the non-uniform growth grid.  The same
+quadrature weighting explains the small FPCA differences.  For PACE, both
+libraries use a Gaussian kernel with the same bandwidth, but \texttt{fdars}
+smooths the mean with a local-constant (Nadaraya--Watson) estimator where
+\texttt{fdapace} uses local-linear smoothing; the eigenfunctions nevertheless
+agree closely ($|\cos| \geq 0.99$) and both eigenvalue estimates are close to
+the true values.
 
 \subsection{Rust layer}
 
-The numerical algorithms reside in the \texttt{fdars-core} crate.
-The PyO3 binding layer (\texttt{pyfda}) is held to consistent code-quality
-standards enforced in CI: \texttt{cargo fmt --check} enforces formatting,
-\texttt{cargo clippy -- -D warnings} promotes warnings to errors, and
-\texttt{cargo test} runs the binding-layer unit tests against both the current
-stable Rust toolchain and the declared MSRV (Rust~1.83).
+The numerical algorithms reside in the \texttt{fdars-core} crate, which ships
+3{,}260 Rust unit and integration tests.  The PyO3 binding crate
+(\texttt{pyfda}) contains no Rust unit tests of its own---it is tested from
+Python---and CI enforces its code quality: \texttt{cargo fmt --check} checks
+formatting, \texttt{cargo clippy -- -D warnings} promotes warnings to errors,
+and \texttt{cargo test} builds the crate on both the current stable toolchain
+and the declared minimum supported Rust version (1.83).
 
 \subsection{Python test suite}
 
-The \texttt{tests/} directory is exercised by \texttt{pytest} on every CI run
-across Python~3.9 through~3.14.
+The \texttt{tests/} directory (5{,}700 tests) is exercised by \texttt{pytest}
+on every CI run across Python~3.9 through~3.14.
 Tests cover the \texttt{Fdata} container, numerical operations (smoothing,
-depth, alignment, regression, monitoring, covariance sampling), the AI advisor
-and MCP server, and the ergonomic dataset loaders.
+depth, alignment, regression, monitoring, covariance sampling), the advisor
+and MCP server, and the dataset loaders.
 
-\subsection{Cross-language parity}
+\subsection{Property-based numerical tests}
 
-\texttt{tests/test\_r\_parity.py} validates \texttt{fdars} numerical outputs
-against known-correct mathematical ground truth, mirroring the smoke-test
-properties used when the R-parity bindings were added.
-Tests span seven batches covering depth measures, \textsc{L}$^2$ inner products,
-Simpson integration, landmark registration, nonparametric regression, functional
-monitoring (CUSUM and EWMA), elastic changepoint detection, and prediction
-metrics.
-Each test checks a mathematically verifiable property---integrals of known
-functions, determinism under fixed seeds, correct output shapes, and expected
-statistical behaviour (e.g.\ that a CUSUM chart detects a known mean shift)---
-complementing the scientific-provenance map (\ndocpapers{} peer-reviewed method
-papers documented in \texttt{\_references\_map.json}).
+\texttt{tests/test\_r\_parity.py} checks mathematically verifiable properties
+of the outputs---integrals of known functions, determinism under fixed seeds,
+correct output shapes, and expected statistical behaviour (for example, that a
+CUSUM chart detects a known mean shift).  Despite the file name, these tests do
+not compare against R; that comparison is the one reported in
+Table~\ref{tab:crossimpl}.  They span depth measures, $L^2$ inner products,
+Simpson integration, landmark registration, nonparametric regression,
+functional monitoring (CUSUM and EWMA), elastic changepoint detection, and
+prediction metrics.
 
 \subsection{scikit-learn API compliance}
 
@@ -54,18 +84,17 @@ papers documented in \texttt{\_references\_map.json}).
 scikit-learn \texttt{check\_estimator} conformance suite
 \citep{pedregosa_sklearn_2011}, run from \texttt{tests/sklearn/} in CI across
 all supported Python versions.
-Passing \texttt{check\_estimator} guarantees that the estimators honour
+Passing \texttt{check\_estimator} means that the estimators honour
 scikit-learn's fit--predict contract, are picklable, and compose correctly
 inside \texttt{Pipeline} and \texttt{GridSearchCV}.
 
 \subsection{Reproducibility as validation}
 
 This manuscript is itself a validation artefact.
-Every code snippet in Section~\ref{sec:capabilities} and every figure in
-Section~\ref{sec:casestudies} is produced by a committed \texttt{paper/code/}
-script.
-CI drift gates (\texttt{make paper-check}) verify that regenerating snippets,
-coverage macros, and the reference bibliography leaves no diff against the
-committed sources; \texttt{make paper-verify} confirms byte-stable figure
-reproduction in the same Python environment.
+Every code snippet in Section~\ref{sec:capabilities}, every figure, and every
+number in Section~\ref{sec:casestudies} and Table~\ref{tab:crossimpl} is
+produced by a committed \texttt{paper/code/} script.
+CI drift gates verify that regenerating the snippets, the coverage macros, the
+bibliography, and the agreement table leaves no diff against the committed
+sources, and that the figures regenerate byte-identically.
 No printed example can silently diverge from the live API.

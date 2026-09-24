@@ -1,0 +1,26 @@
+% paper/sections/limitations.tex — added in the pre-arXiv review pass.
+\section{Limitations}
+\label{sec:limitations}
+
+\begin{itemize}
+  \item \textbf{No performance claims.}  The Rust core is designed for speed,
+    but we report no benchmarks; claims about computational performance would
+    need a separate, carefully controlled study.
+  \item \textbf{Partial provenance.}  Only \ncoverage{} of \ncallables{}
+    callables currently have curated, author-verified paper entries; the rest
+    carry candidate references flagged \texttt{curated: false}.
+  \item \textbf{Advisor quality is unmeasured.}  The advisor's grounding
+    invariant is enforced and tested, but the usefulness of the recommendations
+    a real language model produces has not been evaluated
+    (Section~\ref{sec:advisor}), and the \texttt{advise} step requires an
+    external model provider.
+  \item \textbf{Scope of irregular data.}  Sparse, irregularly sampled data are
+    supported only through PACE FPCA; the other methods expect curves on a
+    common grid.
+  \item \textbf{Limited external validation.}  Six methods are checked against
+    independent implementations (Table~\ref{tab:crossimpl}); the remainder rely
+    on unit and property tests.
+  \item \textbf{Development model.}  The library was written by a single
+    maintainer with substantial AI assistance (Section~\ref{sec:validation});
+    long-term maintenance depends on community uptake.
+\end{itemize}

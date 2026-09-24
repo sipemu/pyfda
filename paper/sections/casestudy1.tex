@@ -7,7 +7,7 @@
 The phoneme dataset consists of 400 log-periodogram curves recorded across 256
 frequency points, representing five phoneme classes (\textit{aa}, \textit{ao},
 \textit{dcl}, \textit{iy}, \textit{sh}) with 80 observations each
-\citep{ferraty_vieu_2006}.  Each curve is a digitised acoustic spectrum, and
+\citep{hastie_buja_tibshirani_1995,ferraty_vieu_2006}.  Each curve is a digitised acoustic spectrum, and
 the classification task is to recover the phoneme class from its spectral
 shape.  This study demonstrates three core \texttt{fdars} capabilities in
 sequence: penalised smoothing, functional principal component analysis (FPCA),
@@ -34,8 +34,7 @@ confirming that the dominant modes of variation align with phoneme identity.
 \paragraph{Classification.}
 We evaluate a scikit-learn \texttt{Pipeline} that chains an
 \texttt{FPCATransformer} (4 components) with an \texttt{FPCLDAClassifier}
-(linear discriminant analysis on FPCA scores) by 5-fold cross-validation
-\citep{preda_saporta_2005}.
+(linear discriminant analysis on FPCA scores) by 5-fold cross-validation.
 The pipeline achieves a mean CV accuracy of 86.3\% on held-out data
 (fold scores: $[0.850, 0.850, 0.863, 0.875, 0.875]$), demonstrating that four
 functional principal components capture the class-discriminating structure of
@@ -44,7 +43,7 @@ The analysis is reproduced exactly by \texttt{paper/code/casestudy1.py}, which
 generates both figures deterministically (re-running the script leaves
 \texttt{git diff paper/figures/} empty).
 
-\begin{figure}[H]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=\textwidth]{figures/cs1_phoneme_smooth.pdf}
   \caption{Phoneme log-periodogram spectra (400 curves, 5 classes).
@@ -55,7 +54,7 @@ generates both figures deterministically (re-running the script leaves
   \label{fig:cs1-smooth}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=\textwidth]{figures/cs1_phoneme_fpca.pdf}
   \caption{FPCA scores scatter for the phoneme data (PC1 vs PC2, colour-coded

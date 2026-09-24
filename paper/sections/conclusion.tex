@@ -2,20 +2,23 @@
 % Filled in Phase 88 Plan 05 (MANU-07).
 \section{Conclusion}
 
-\texttt{fdars} is a broad, method-accurate, Rust-backed Python library for
-functional data analysis.
-It exposes \npubliccallables{} public callables across \nsubmodules{} method
-families---spanning representation, basis smoothing, elastic alignment, functional
+\texttt{fdars} is a broad, Rust-backed Python library for functional data
+analysis.
+It exposes \npubliccallables{} public callables across \nsubmodules{}
+submodules---spanning representation, basis smoothing, elastic alignment, functional
 depth and outlier detection, FPCA (dense and sparse PACE), clustering,
 classification, scalar- and function-on-function regression, functional time
 series, statistical process monitoring, conformal prediction, density and
-Fr\'{e}chet methods, and metric computations---together with a full
-scikit-learn-compatible estimator layer, as documented in Table~\ref{tab:comparison}.
-Two contributions distinguish \texttt{fdars} from all peer FDA packages surveyed
-in that table: a grounded parameter-advisor module that structures method
+Fr\'{e}chet methods, and metric computations---together with a scikit-learn-compatible estimator layer of
+\nsklearnestimators{} estimators, as documented in Table~\ref{tab:comparison}.
+Where we could check it against independent implementations, its numerics
+agree with them or differ only through documented modelling choices
+(Table~\ref{tab:crossimpl}).
+Two components were not found in any of the packages we compared: a grounded parameter-advisor module that structures method
 diagnostics into an LLM-interpretable representation for context-aware guidance,
 and a machine-readable scientific-provenance layer linking \ndocpapers{}
-documented papers to the callables they underpin via a queryable MCP tool.
+documented papers to the callables they underpin (\ncoverage{} callables
+curated so far) via a queryable MCP tool.
 The library is under active development; the \texttt{fdars} codebase, issue
 tracker, and documentation are maintained at
 \url{https://github.com/sipemu/pyfda}.
