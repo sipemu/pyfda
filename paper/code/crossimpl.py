@@ -167,7 +167,7 @@ def _render(rows: list[tuple[str, str, str, str]]) -> str:
         "implementations. fdars is recomputed on every CI run against frozen "
         "reference outputs; $\\rho$ is Spearman rank correlation.}\n"
         "\\label{tab:crossimpl}\n"
-        "\\begin{tabular}{p{0.19\\linewidth}p{0.27\\linewidth}p{0.24\\linewidth}p{0.22\\linewidth}}\n"
+        "\\begin{tabular}{*{4}{>{\\raggedright\\arraybackslash}p{0.22\\linewidth}}}\n"
         "\\toprule\n\\textbf{Method (data)} & \\textbf{fdars vs reference} & "
         "\\textbf{Agreement} & \\textbf{Remark} \\\\\n\\midrule\n"
         f"{body}\n\\bottomrule\n\\end{{tabular}}\n\\end{{table}}\n")
