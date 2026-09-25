@@ -69,7 +69,9 @@ the submodule to the parent extension --- so adding a new algorithm family
 requires a new Rust module (declared and registered in \texttt{src/lib.rs})
 and an entry in the package initialiser's submodule list.  Together with three
 pure-Python modules (\texttt{covariance}, \texttt{datasets},
-\texttt{metrics}), the package exposes \nsubmodules{} public submodules.
+\texttt{metrics}), the package exposes \nsubmodules{} public analysis
+submodules (in addition to the \texttt{advisor}, \texttt{sklearn},
+\texttt{plot}, \texttt{mcp}, and \texttt{results} packages).
 
 \textbf{Boundary convention.}  The PyO3 boundary involves a layout conversion:
 NumPy stores two-dimensional arrays in C (row-major) order, while
@@ -100,7 +102,9 @@ helpers to its namespace, so both \texttt{fdars.depth.fraiman\_muniz\_1d} and
 
 \subsection{Module Map}
 
-\texttt{fdars} exposes \nsubmodules{} public submodules; the capability map
+\texttt{fdars} exposes \nsubmodules{} public analysis submodules (in
+addition to the \texttt{advisor}, \texttt{sklearn}, \texttt{plot},
+\texttt{mcp}, and \texttt{results} packages); the capability map
 bundled with the package catalogues \npubliccallables{} public module
 callables, organised by method family below (the pure-Python
 \texttt{datasets}, \texttt{covariance} and \texttt{metrics} helper modules
@@ -111,9 +115,11 @@ provide dataset loaders, covariance kernels and evaluation metrics):
     \texttt{fdata}, \texttt{represent}, \texttt{basis}, \texttt{smoothing} ---
     functional object construction, derivative estimation, basis expansion,
     GCV-penalised smoothing, interpolation, resampling;
-    \texttt{multi\_fdata} --- opaque container for multivariate functional data
-    (\texttt{PyMultiFunData}), grouping multiple \texttt{FdMatrix} components
-    under a single handle for joint analysis.
+    \texttt{multi\_fdata} --- an opaque container (\texttt{PyMultiFunData})
+    that groups several functional components, each with its own evaluation
+    grid, over the same set of observations; at present it can only be
+    inspected (\texttt{n\_obs}, \texttt{n\_components}), and no analysis
+    routine accepts it as input.
 
   \item[Alignment]
     \texttt{alignment} --- elastic registration via the square-root slope
@@ -126,8 +132,10 @@ provide dataset loaders, covariance kernels and evaluation metrics):
     \citep{lopez_pintado_romo_2009}, an outliergram-style MEI/MBD shape-outlier
     detector adapted from \citet{arribas_gil_romo_2014} (the parabola is fitted
     to the data by least squares rather than taken from the published
-    theoretical bound), the Fast-MUOD variant \citep{ojo_fast_muod_2022} of
-    MUOD \citep{azcorra_muod_2018}, and a magnitude/shape outlyingness
+    theoretical bound), a Fast-MUOD-style detector adapted from
+    \citet{ojo_fast_muod_2022} (itself a variant of MUOD,
+    \citealp{azcorra_muod_2018}) that uses the pointwise mean rather than the
+    pointwise median as the reference curve, and a magnitude/shape outlyingness
     decomposition (magnitude $= 1 -$ modified band depth, shape $=$ distance
     of the normalised centred curve from the mean direction) that returns
     scores only and is in the spirit of, but not identical to, the MS-plot of
@@ -136,7 +144,8 @@ provide dataset loaders, covariance kernels and evaluation metrics):
     MSLE, explained variance).
 
   \item[FPCA and sparse/longitudinal PACE]
-    \texttt{fdata} (via \texttt{Fdata.to\_pc}), \texttt{pace\_fpca} ---
+    \texttt{regression.fpca} (also available as \texttt{Fdata.to\_pc}),
+    \texttt{pace\_fpca} ---
     dense FPCA and the PACE algorithm for irregularly observed trajectories
     \citep{yao_muller_wang_2005}.
 
@@ -220,10 +229,11 @@ cross-validation utilities, as illustrated in the capability tour
 
 Some methods in \texttt{fdars} are deliberately excluded from the estimator
 layer (\nexcludedmethods{} methods, listed in \texttt{fdars.sklearn.EXCLUDED\_METHODS})
-because their interfaces do not fit the
-\texttt{fit}/\texttt{transform}/\texttt{predict} contract --- for example, paired elastic
-alignment (\texttt{alignment.elastic\_align\_pair}), the Karcher mean
-(\texttt{alignment.karcher\_mean}), and the PACE FPCA
-(\texttt{pace\_fpca.pace\_fpca}, which requires ragged per-observation grids
-rather than a rectangular matrix).  This boundary is documented transparently
+because they cannot satisfy the scikit-learn estimator contract --- for
+example, paired elastic alignment
+(\texttt{alignment.elastic\_align\_pair}) and the Karcher mean
+(\texttt{alignment.karcher\_mean}) produce batch-dependent outputs that fail
+scikit-learn's subset-invariance check, and the PACE FPCA
+(\texttt{pace\_fpca.pace\_fpca}) requires ragged per-observation grids
+rather than a rectangular matrix.  This boundary is documented transparently
 so that users building custom pipelines know which methods to call directly.

@@ -10,7 +10,8 @@ This study showcases the \emph{composability} of the \texttt{fdars}
 scikit-learn layer on a genuinely functional problem: predicting a child's sex
 from their growth curve.  The Berkeley growth study
 \citep{tuddenham_snyder_1954}, in the version distributed with the R
-\texttt{fda} package \citep{ramsay_silverman_2005}, records the heights of
+\texttt{fda} package \citep{r_fda} and analysed by
+\citet{ramsay_silverman_2005}, records the heights of
 \csFourNChildren{} children (\csFourNBoys{} boys, \csFourNGirls{} girls) at
 \csFourNAges{} ages between \csFourAgeMin{} and \csFourAgeMax{} years.  Adult height alone separates the
 sexes only partly; the timing of the pubertal growth spurt---earlier in
@@ -34,7 +35,7 @@ Height curves score higher than velocity curves at every dimension
 $\csFourHeightFour$, $\csFourHeightSix$ for $\csFourGrid$ components, against
 $\csFourVelocityTwo$, $\csFourVelocityThree$, $\csFourVelocityFour$,
 $\csFourVelocitySix$ for velocity), and the search selects \csFourBestRep{}
-curves with \csFourBestKWord{} components.  Because a score used for selection is optimistically biased, we
+curves with \csFourBestKWord{} components\csFourBestTie{}.  Because a score used for selection is optimistically biased, we
 evaluate the \emph{entire} search by nested cross-validation (an outer
 stratified \csFourNOuter-fold split repeated \csFourNRep{} times).  Because the
 inner search may choose different configurations in different outer folds,

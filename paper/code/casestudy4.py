@@ -116,6 +116,29 @@ def main(check: bool = False) -> int:
                                  for k, vs in scores.items()})
     print("selected:", best_rep, best_k)
 
+    # Exact ties with the selected configuration.  GridSearchCV keeps the first
+    # rank-1 configuration in grid order, so a tie must be reported as such.
+    kword = {2: "two", 3: "three", 4: "four", 6: "six"}
+    best_idx = int(search.best_index_)
+    tied = [i for i, r in enumerate(res["rank_test_score"])
+            if r == 1 and i != best_idx]
+    if tied:
+        tied_desc = []
+        for i in tied:
+            name = ("height" if res["params"][i]["rep"] == "passthrough"
+                    else "velocity")
+            k = int(res["params"][i]["fpca__n_components"])
+            tied_desc.append(kword[k] if name == best_rep
+                             else f"{name} curves with {kword[k]}")
+        smaller = all(int(res["params"][i]["fpca__n_components"]) > best_k
+                      for i in tied)
+        best_tie = (" (tied with " + ", ".join(tied_desc)
+                    + r"; \texttt{GridSearchCV} keeps the first of the tied "
+                    "configurations in grid order"
+                    + (", here the smaller model)" if smaller else ")"))
+    else:
+        best_tie = ""
+
     # ------------------------------------------------------------------
     # Nested CV: the entire GridSearchCV is the estimator being evaluated.
     # Baselines are scored with the identical outer splitter.
@@ -161,6 +184,7 @@ def main(check: bool = False) -> int:
         "csFourBestRep": best_rep,
         "csFourBestK": str(best_k),
         "csFourBestKWord": {2: "two", 3: "three", 4: "four", 6: "six"}[best_k],
+        "csFourBestTie": best_tie,
         "csFourNested": fmt(nested.mean(), 3),
         "csFourNestedSd": fmt(nested.std(), 3),
         "csFourBaseEighteen": fmt(base18.mean(), 3),

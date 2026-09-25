@@ -27,7 +27,7 @@ multivariate FPCA, and simulation, and does not address the remaining families
 at all.
 In R, the relevant methods are distributed across multiple packages: \texttt{fda}
 \citep{r_fda,ramsay_hooker_graves_2009} covers representation, smoothing,
-registration, and dense FPCA; \texttt{fda.usc} \citep{febrerobande_fdausc_2012}
+registration, and FPCA; \texttt{fda.usc} \citep{febrerobande_fdausc_2012}
 adds depth, classification, scalar-on-function regression, and hypothesis
 tests; \texttt{refund} \citep{r_refund} provides scalar- and
 function-on-function regression and several FPCA variants;
@@ -54,8 +54,10 @@ detection.
 \texttt{fdars} does not aim to supersede these tools in their own niches.
 Its contribution is integration: to our knowledge it is the only Python
 library that covers all fourteen capability areas of
-Table~\ref{tab:comparison} behind one data model and one API---\npubliccallables{}
-public callables in \nsubmodules{} submodules---with scikit-learn
+Table~\ref{tab:comparison} in one package with a common NumPy-based data
+model (dense \texttt{Fdata}, plus an irregular container for sparse data) and
+one API---\npubliccallables{} public callables in \nsubmodules{} analysis
+submodules---with scikit-learn
 compatibility, a grounded parameter advisor, and a scientific-provenance map.
 We make no performance claims; the design section (\S\ref{sec:design})
 describes the architecture qualitatively, and \S\ref{sec:validation} checks
@@ -82,8 +84,8 @@ of diffeomorphic reparametrisations before downstream inference.
 Further families---including regression, depth, clustering, functional time
 series \citep{hormann_kokoszka_2010,hyndman_ullah_2007}, and process
 monitoring---extend classical multivariate techniques to the functional
-setting; \citet{ferraty_vieu_2006} and \citet{ramsay_silverman_2005} survey
-the field comprehensively.
+setting; \citet{ramsay_silverman_2005} give a comprehensive treatment of the
+field, and \citet{ferraty_vieu_2006} cover its nonparametric side.
 
 \subsection*{Contributions and paper outline}
 

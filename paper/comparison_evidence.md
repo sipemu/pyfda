@@ -1,7 +1,7 @@
 # Comparison Evidence
 
 **Generated:** 2026-09-08
-**Access date (all URLs):** 2026-09-08
+**Access dates:** 2026-09-08 unless a row states otherwise (latest 2026-09-24)
 
 ---
 
@@ -83,13 +83,13 @@
 
 | Dimension | Cell | Justification | Source |
 |-----------|------|---------------|--------|
-| Representation / basis smoothing | ✓ | CRAN: "functions for smoothing, plotting and simple regression models"; B-spline, Fourier, polynomial basis | https://cran.r-project.org/web/packages/fda/index.html |
+| Representation / basis smoothing | ✓ | CRAN FunctionalData Task View: "functions for smoothing, plotting and simple regression models"; B-spline, Fourier, polynomial basis | https://cran.r-project.org/web/views/FunctionalData.html |
 | Registration / alignment | ✓ | fda reference manual: register.fd / landmarkreg — landmark and continuous registration (Ramsay & Silverman (2005), ch. 7); shift and warping | https://cran.r-project.org/web/views/FunctionalData.html; https://cran.r-project.org/web/packages/fda/fda.pdf |
-| Depth & outlier detection | partial | Functional boxplot included; depth measures limited compared to fda.usc; "functional boxplot for descriptives and outlier detection" | https://cran.r-project.org/web/views/FunctionalData.html |
-| FPCA / covariance / PACE sparse FPCA | ✓ | fda reference manual: pca.fd — FPCA on functional objects; covariance surface; no PACE sparse FPCA (PACE implemented via fdapace, not fda) | https://cran.r-project.org/web/views/FunctionalData.html; https://cran.r-project.org/web/packages/fda/fda.pdf |
+| Depth & outlier detection | partial | Exports fbplot / boxplot.fd (functional boxplot); depth measures limited compared to fda.usc | ls("package:fda") on fda 6.3.0 |
+| FPCA / covariance / PACE sparse FPCA | ✓ | fda reference manual: pca.fd (FPCA on fd objects); covPACE / pcaPACE / scoresPACE (PACE-style covariance smoothing and FPCA from unsmoothed data) | https://cran.r-project.org/web/views/FunctionalData.html; https://cran.r-project.org/web/packages/fda/fda.pdf |
 | Clustering | — | Not a primary feature of fda package; clustering attributed to other packages | https://cran.r-project.org/web/views/FunctionalData.html |
 | Classification | — | Not a primary feature | https://cran.r-project.org/web/views/FunctionalData.html |
-| Functional regression (SoF / FoF) | partial | CRAN: "simple regression models"; scalar-on-function via basis; advanced regression in refund | https://cran.r-project.org/web/packages/fda/index.html |
+| Functional regression (SoF / FoF) | partial | CRAN FunctionalData Task View: "simple regression models"; scalar-on-function via basis; advanced regression in refund | https://cran.r-project.org/web/views/FunctionalData.html |
 | Functional time series | — | Not found in fda package | https://cran.r-project.org/web/packages/fda/index.html |
 | Statistical process monitoring | — | Not found | https://cran.r-project.org/web/packages/fda/index.html |
 | Inference / hypothesis testing | partial | Exports Fperm.fd (permutation F-test for functional linear models) and tperm.fd (permutation t-test for two groups of functional data) | ls("package:fda") on fda 6.3.0 |
@@ -179,7 +179,7 @@
 | Representation / basis smoothing | ✓ | funData: "S4 classes for univariate and multivariate functional data and utility functions"; tidyfun: tf S3 vectors with smoothing support | https://cran.r-project.org/web/packages/funData/index.html; https://cran.r-project.org/web/views/FunctionalData.html |
 | Registration / alignment | ✓ | tf 0.5.0 (attached by tidyfun, which Depends: tf (>= 0.5.0)) exports tf_register (method = "srvf", "srvf_mv", "cc", "affine", "landmark"), tf_register_shape (elastic shape registration), tf_estimate_warps, tf_warp | tf 0.5.0 NAMESPACE and man/tf_register.Rd (CRAN tarball); https://cran.r-project.org/package=tf |
 | Depth & outlier detection | partial | tf 0.5.0 exports tf_depth (depth = "MBD", "MHI", "FM", "FSD", "RPD") and tf_fmedian; tidyfun 0.2.0 exports geom_fboxplot / stat_fboxplot (functional boxplots); no dedicated outlier-detection procedures | tf 0.5.0 and tidyfun 0.2.0 NAMESPACE, tf man/tf_depth.Rd (CRAN tarballs) |
-| FPCA / covariance / PACE sparse FPCA | partial | funData works with companion MFPCA package (separate package); not built-in | https://cran.r-project.org/web/packages/funData/index.html |
+| FPCA / covariance / PACE sparse FPCA | partial | tf 0.5.0 (attached by tidyfun) provides built-in FPCA via tfb_fpc / tfb_mfpc (fpc_wsvd; complete or partially missing data on a common grid); funData relies on the separate MFPCA package; no built-in sparse/PACE FPCA (tfb_fpc can wrap an external method such as refund::fpca.sc) | tf 0.5.0 NAMESPACE and man/tfb_fpc.Rd (CRAN tarball); https://cran.r-project.org/web/packages/funData/index.html |
 | Clustering | — | Not a feature of funData or tidyfun | https://cran.r-project.org/web/views/FunctionalData.html |
 | Classification | — | Not a feature | https://cran.r-project.org/web/views/FunctionalData.html |
 | Functional regression (SoF / FoF) | — | Not a primary feature | https://cran.r-project.org/web/views/FunctionalData.html |
@@ -210,7 +210,7 @@
 | Representation / basis smoothing | ✓ | tidyfun: tf S3 vectors with smoothing support; funData: "S4 classes for univariate and multivariate functional data and utility functions" | https://cran.r-project.org/web/packages/tidyfun/index.html; https://cran.r-project.org/web/views/FunctionalData.html |
 | Registration / alignment | ✓ | tf 0.5.0 (attached by tidyfun, which Depends: tf (>= 0.5.0)) exports tf_register (method = "srvf", "srvf_mv", "cc", "affine", "landmark"), tf_register_shape (elastic shape registration), tf_estimate_warps, tf_warp | tf 0.5.0 NAMESPACE and man/tf_register.Rd (CRAN tarball); https://cran.r-project.org/package=tf |
 | Depth & outlier detection | partial | tf 0.5.0 exports tf_depth (depth = "MBD", "MHI", "FM", "FSD", "RPD") and tf_fmedian; tidyfun 0.2.0 exports geom_fboxplot / stat_fboxplot (functional boxplots); no dedicated outlier-detection procedures | tf 0.5.0 and tidyfun 0.2.0 NAMESPACE, tf man/tf_depth.Rd (CRAN tarballs) |
-| FPCA / covariance / PACE sparse FPCA | partial | funData works with companion MFPCA package (separate package); not built-in | https://cran.r-project.org/web/packages/funData/index.html |
+| FPCA / covariance / PACE sparse FPCA | partial | tf 0.5.0 (attached by tidyfun) provides built-in FPCA via tfb_fpc / tfb_mfpc (fpc_wsvd; complete or partially missing data on a common grid); funData relies on the separate MFPCA package; no built-in sparse/PACE FPCA (tfb_fpc can wrap an external method such as refund::fpca.sc) | tf 0.5.0 NAMESPACE and man/tfb_fpc.Rd (CRAN tarball); https://cran.r-project.org/web/packages/funData/index.html |
 | Clustering | — | Not a feature of funData or tidyfun | https://cran.r-project.org/web/views/FunctionalData.html |
 | Classification | — | Not a feature | https://cran.r-project.org/web/views/FunctionalData.html |
 | Functional regression (SoF / FoF) | — | Not a primary feature | https://cran.r-project.org/web/views/FunctionalData.html |

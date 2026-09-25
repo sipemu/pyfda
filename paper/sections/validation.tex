@@ -34,10 +34,14 @@ All numbers quoted in this subsection are written by the same script.
 \input{sections/crossimpl_table}
 
 Fraiman--Muniz depth agrees to machine precision.  Modified band depth
-agrees closely but not exactly in ranking (Spearman $\rho=\ciMbdRho$; the
+agrees closely but not exactly (Spearman $\rho=\ciMbdRho$; the
 same deepest curve; \ciMbdMoved{} of the \ciMbdN{} curves change rank, none by
-more than \ciMbdMaxShift{} positions), with value differences of at most
-$\ciMbdMaxDiff$.  The
+more than \ciMbdMaxShift{} positions; value differences of at most
+$\ciMbdMaxDiff$).  The difference comes from ties in the growth heights, which
+are recorded to 0.1\,cm: \texttt{fdars} matches a direct evaluation of the
+L\'opez-Pintado--Romo definition to machine precision, whereas
+\texttt{roahd}'s fast rank-based formula assigns tied values their average
+rank.  The
 elastic Karcher mean matches \texttt{fdasrvf} to within \ciKarcherRel\% in relative
 $L^2$ norm, and both recover the sharp common peak that the cross-sectional
 mean flattens.  The remaining differences trace to documented modelling
@@ -52,8 +56,9 @@ points equally, ignoring the non-uniform spacing of the growth ages, whereas
 reproduces the \texttt{fda.usc} eigenfunctions (minimum
 $|\cos| = \ciFpcaUnweightedCos$).  For PACE, both
 libraries use a Gaussian kernel with the same bandwidth, but \texttt{fdars}
-smooths the mean with a local-constant (Nadaraya--Watson) estimator where
-\texttt{fdapace} uses local-linear smoothing; the eigenfunctions nevertheless
+smooths both the mean and the covariance surface with local-constant
+(Nadaraya--Watson) estimators, where \texttt{fdapace} uses local-linear
+smoothing (and, by default, also drops the diagonal raw covariances); the eigenfunctions nevertheless
 agree closely ($|\cos| \geq \ciPaceMinCos$) and both eigenvalue estimates are close to
 the true values.
 
@@ -102,8 +107,8 @@ exercise them inside \texttt{Pipeline} and \texttt{GridSearchCV}.
 \subsection{Reproducibility as validation}
 
 This manuscript is itself a validation artefact.
-Every code snippet in Section~\ref{sec:capabilities}, every figure, and every
-number in Section~\ref{sec:casestudies} and Table~\ref{tab:crossimpl} is
+Every code snippet in Section~\ref{sec:capabilities}, every data figure (the
+three schematic diagrams are drawn directly in TikZ), and every number in Section~\ref{sec:casestudies} and Table~\ref{tab:crossimpl} is
 produced by a committed \texttt{paper/code/} script; the case-study numbers
 are written by those scripts as \LaTeX{} macro files rather than typed by
 hand.  CI drift gates verify that regenerating the snippets, the coverage

@@ -140,8 +140,9 @@ dicts or new \texttt{Fdata} objects).
 \texttt{-}, \texttt{*}, \texttt{/}) enabling functional arithmetic, a
 \texttt{\_\_getitem\_\_} slice interface for sub-sampling observations, and
 \texttt{\_\_len\_\_} returning \texttt{n\_obs}.  Observations can be
-concatenated via \texttt{concat()}, downsampled via \texttt{downsample()},
-imputed via \texttt{impute()}, and interpolated onto a new grid via
+concatenated via \texttt{concat()}; curves can be resampled onto a coarser
+uniform grid via \texttt{downsample()}, have missing values imputed via
+\texttt{impute()}, and be interpolated onto a new grid via
 \texttt{interpolate()}.  All computationally intensive operations delegate to
 the PyO3 binding layer described in Section~\ref{sec:design}; the Python class
 holds no redundant copies of the underlying array.

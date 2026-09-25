@@ -149,7 +149,9 @@ auto_tune(
     default \texttt{guard=True}, a method-specific guard re-checks one
     secondary diagnostic after every re-fit---FPCA tuning stops if the
     phase-leakage indicator exceeds 0.5, smoothing tuning if the effective
-    degrees of freedom exceed $0.9\,n$, basis-penalty tuning if the optimal
+    degrees of freedom exceed 0.9 times the number of observed curves in
+    the registered dataset (this guard is skipped when that count is
+    unavailable), basis-penalty tuning if the optimal
     GCV score degrades by more than 20\%, and clustering tuning on a cluster
     of size below 2---so the loop cannot improve its target metric by
     violating that guarded diagnostic; other quality measures are not
@@ -189,10 +191,11 @@ quality.
 \subsection{Scientific-Provenance Layer}
 
 \texttt{fdars} ships a machine-readable provenance map,
-\texttt{python/fdars/\_references\_map.json}, that links public callables
-(243 of the \ncallables{} at present) to candidate foundational papers from
-which their algorithms derive.  Besides 10 placeholder records grouping
-not-yet-attributed callables, the map contains \ndocpapers{} candidate papers
+\texttt{python/fdars/\_references\_map.json}, that indexes 243 of
+the \ncallables{} public callables; 163 of them are linked to at least one
+candidate foundational paper from which their algorithms derive, and the
+remaining 80 appear only in 10 placeholder records grouping
+not-yet-attributed callables.  The map contains \ndocpapers{} candidate papers
 (44 with DOIs or arXiv identifiers), of which 6 are author-verified; at
 present \ncoverage{} of the \ncallables{} callables (\npubliccallables{} module
 callables plus the 28 \texttt{Fdata} entries: \nfdata{} public methods and the

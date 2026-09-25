@@ -146,7 +146,7 @@ SNIPPETS: list[tuple[str, str]] = [
         ARG = growth.index.values.astype(float)
         X = growth.values.T.astype(np.float64)
         fd = Fdata(X, argvals=ARG,
-                   names={"x": "Age (years)", "y": "Height (cm)"})
+                   names={"xlab": "Age (years)", "ylab": "Height (cm)"})
         print(repr(fd))
         print("mean shape:", fd.mean().shape)
         """),

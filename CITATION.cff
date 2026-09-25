@@ -3,13 +3,13 @@ message: "If you use fdars, please cite the software paper."
 type: software
 title: fdars
 version: "0.13.0"
-date-released: "2026-09-09"
+date-released: 2026-09-25
 license: MIT
 repository-code: "https://github.com/sipemu/pyfda"
 url: "https://sipemu.github.io/pyfda/"
 abstract: >
   fdars is a Python package for functional data analysis backed by a
-  Rust computation core (fdars-core) via PyO3 zero-copy bindings.
+  Rust computation core (fdars-core) via PyO3 bindings.
   It covers FDA representation, smoothing, alignment, depth, inference,
   regression, clustering, and monitoring, with a scikit-learn-compatible
   estimator layer and a grounded AI advisor.
@@ -33,8 +33,4 @@ preferred-citation:
       email: "sm@data-zoo.de"
       affiliation: "DataZoo GmbH"
   year: 2026
-  journal: "arXiv preprint"   # TODO: update to venue/journal name at submission (Phase 90)
-  identifiers:
-    - type: url
-      value: "https://arxiv.org/abs/PLACEHOLDER"   # TODO: replace with actual arXiv ID at submission (Phase 90)
-      description: "arXiv preprint URL (assigned at submission)"
+  journal: "arXiv preprint"

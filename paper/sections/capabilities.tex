@@ -5,7 +5,7 @@
 \label{sec:capabilities}
 
 \texttt{fdars} exposes \npubliccallables{} public callables across
-\nsubmodules{} submodules, covering all fourteen capability areas of
+\nsubmodules{} analysis submodules, covering all fourteen capability areas of
 Table~\ref{tab:comparison}.
 The \ncoverage{} callables backed by at least one curated peer-reviewed
 reference are tracked in the machine-readable scientific-provenance layer
@@ -102,9 +102,11 @@ fdars offers Fraiman--Muniz, band, modal, random-projection, and random Tukey
 depths via the \texttt{Fdata.depth()} method, and modified band depth
 \citep{lopez_pintado_romo_2009} via \texttt{depth.modified\_band\_1d}.
 The \texttt{fdars.outliers} submodule adds shape-, magnitude-, and
-amplitude-based outlier detection via the Fast-MUOD
-variant~\citep{ojo_fast_muod_2022} of MUOD~\citep{azcorra_muod_2018}, which
-scores each curve by regressing it on the pointwise mean curve:
+amplitude-based outlier detection with a Fast-MUOD-style
+detector~\citep{ojo_fast_muod_2022} derived from MUOD~\citep{azcorra_muod_2018}.
+It scores each curve by regressing it on a single reference curve; fdars uses
+the pointwise mean as that reference, whereas Fast-MUOD as published uses the
+pointwise or $L^1$ median:
 
 \input{snippets/depth}
 
@@ -115,7 +117,7 @@ amplitude---so that a curve unusual in \emph{form} is flagged separately from on
 merely shifted in \emph{level}; each index is flagged at its upper boxplot (IQR)
 fence.  Figure~\ref{fig:tour-depth} shades each growth
 curve by its Fraiman--Muniz depth (deeper curves drawn more opaque), highlights
-the functional median, and marks the Fast-MUOD-flagged curves in red.  Read honestly,
+the functional median, and marks the curves flagged by the MUOD detector in red.  Read honestly,
 depth is a sample-relative ordering and the outlier flags are cutoff-dependent
 \emph{candidates} for inspection rather than definitive verdicts.
 
@@ -124,7 +126,7 @@ depth is a sample-relative ordering and the outlier flags are cutoff-dependent
   \includegraphics[width=\linewidth]{figures/tour_depth}
   \caption{Growth curves shaded by Fraiman--Muniz depth (deeper curves more
   opaque).  The deepest curve (orange) is the functional median; curves flagged
-  by Fast-MUOD as shape, magnitude, or amplitude outliers are drawn in red.}
+  by the MUOD detector as shape, magnitude, or amplitude outliers are drawn in red.}
   \label{fig:tour-depth}
 \end{figure}
 
@@ -138,7 +140,8 @@ For sparse or irregularly observed longitudinal data fdars provides PACE
 \texttt{fdars.pace\_fpca.irreg\_fdata\_from\_lists} (the \texttt{PyIrregFdata}
 container) and \texttt{fdars.pace\_fpca.pace\_fpca}~\citep{yao_muller_wang_2005}.
 Of the Python peers in Table~\ref{tab:comparison}, scikit-fda supports FPCA
-for densely observed curves only:
+for densely observed curves only, while FDApy also offers PACE scoring for
+irregularly sampled curves:
 
 \input{snippets/fpca}
 
@@ -244,7 +247,7 @@ dataset, predicting fat content from 100-channel absorbance curves:
 
 \input{snippets/regression}
 
-Following standard near-infrared practice, the snippet first converts the raw
+Following standard near-infrared practice~\citep{rinnan_2009}, the snippet first converts the raw
 absorbance curves to \emph{second-derivative} spectra---smoothing with a
 B-spline basis and differentiating twice---which removes additive baseline offsets and linear baseline trends
 (including the additive part of light-scatter effects) and sharpens the fat
@@ -354,8 +357,8 @@ fitted FPCA model, and the multiple is chosen so that, with probability 0.95, an
 entire simulated sample of $n$ curves lies inside the band over the whole grid.
 This makes it a conservative \emph{simultaneous} band rather than one that
 contains 95\% of individual curves.  Figure~\ref{fig:tour-tolerance} draws the
-band over the growth sample: all 93 curves fall inside it, and the band widens
-steadily with age, following the growing between-subject spread in height,
+band over the growth sample: all 93 curves fall inside it, and apart from a slight
+narrowing before age~2 the band widens with age, following the growing between-subject spread in height,
 which is largest at the end of the observation period (age~18).  The coverage
 is a simulation estimate under the Gaussian FPCA model rather than an exact
 finite-sample guarantee, and the fixed \texttt{seed} pins the reported band.

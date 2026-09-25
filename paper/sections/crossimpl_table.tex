@@ -20,7 +20,7 @@
 \midrule
 Fraiman--Muniz depth (growth, $n=93$) & \texttt{depth.fraiman\_muniz\_1d} vs fda.usc~2.2.0 \texttt{depth.FM} & max $|\Delta|$ $<10^{-12}$; $\rho=1.000$ & exact; fdars \texttt{scale=True} $\equiv$ fda.usc \texttt{scale=FALSE} \\
 \addlinespace
-Modified band depth (growth) & \texttt{depth.modified\_band\_1d} vs roahd~1.4.3 \texttt{MBD} & $\rho=0.999$; max $|\Delta|=0.012$ & near-identical ranking (same deepest curve; 31 of 93 ranks differ, by at most 4); small value differences \\
+Modified band depth (growth) & \texttt{depth.modified\_band\_1d} vs roahd~1.4.3 \texttt{MBD} & $\rho=0.999$; max $|\Delta|=0.012$ & near-identical ranking (same deepest curve; 31 of 93 ranks differ, by at most 4); fdars $=$ exact definition; roahd rank formula with mid-ranks for ties \\
 \addlinespace
 Dense FPCA, 4 components (growth) & \texttt{Fdata.to\_pc} vs fda.usc~2.2.0 \texttt{fdata2pc} & eigenfunction $|\cos|$ 0.972--1.000; PC1 share 81.0\% vs 80.4\% & fda.usc uses an unweighted SVD (reproduced by one: min $|\cos|=1.000$); fdars applies quadrature weights on the non-uniform grid \\
 \addlinespace
@@ -28,7 +28,7 @@ $L^2$ distance matrix (growth) & \texttt{metric.lp\_self\_1d} vs fda.usc~2.2.0 \
 \addlinespace
 Elastic Karcher mean (20 phase-shifted bumps) & \texttt{alignment.karcher\_mean} vs fdasrvf~2.5.0 \texttt{time\_warping} & rel.\ $L^2$ diff.\ 1.7\%; peak 0.949 vs 0.950 & cross-sectional mean peak is 0.511 \\
 \addlinespace
-PACE sparse FPCA (120 curves, 4--8 obs.\ each) & \texttt{pace\_fpca.pace\_fpca} vs fdapace~0.6.0 \texttt{FPCA} & eigenfunction $|\cos|$ 0.993, 0.992; $\hat\lambda=(3.96, 0.86)$ vs $(3.69, 0.99)$ & true $\lambda=(4, 1)$; same Gaussian kernel and bandwidth, but fdars smooths local-constant, fdapace local-linear \\
+PACE sparse FPCA (120 curves, 4--8 obs.\ each) & \texttt{pace\_fpca.pace\_fpca} vs fdapace~0.6.0 \texttt{FPCA} & eigenfunction $|\cos|$ 0.993, 0.992; $\hat\lambda=(3.96, 0.86)$ vs $(3.69, 0.99)$ & true $\lambda=(4, 1)$; same Gaussian kernel and bandwidth, but fdars smooths mean and covariance local-constant, fdapace local-linear \\
 \bottomrule
 \end{tabular}
 \end{table}

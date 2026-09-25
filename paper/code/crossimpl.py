@@ -84,6 +84,23 @@ def _rows() -> list[tuple[str, str, str, str]]:
     n_moved = int(np.sum(rank_f != rank_r))
     max_shift = int(np.max(np.abs(rank_f - rank_r)))
     same_deepest = int(np.argmax(mbd)) == int(np.argmax(mbd_r))
+    # The growth heights are recorded to 0.1 cm and contain many ties.  fdars
+    # must match a direct evaluation of the Lopez-Pintado--Romo definition
+    # (all pairs i<j, inclusive bands); roahd's fast formula instead uses
+    # mid-ranks for tied values, which explains the residual value gap.
+    n_obs = X.shape[0]
+    mbd_exact = np.zeros(n_obs)
+    for i in range(n_obs):
+        lo = np.minimum(X[i], X[i + 1:])
+        hi = np.maximum(X[i], X[i + 1:])
+        inside = (X[None, :, :] >= lo[:, None, :]) & (X[None, :, :] <= hi[:, None, :])
+        mbd_exact += inside.mean(axis=2).sum(axis=0)
+    mbd_exact /= n_obs * (n_obs - 1) / 2
+    assert np.abs(mbd - mbd_exact).max() < 1e-10, "fdars MBD != exact definition"
+    ranks = np.apply_along_axis(rankdata, 0, X)
+    mbd_midrank = ((((n_obs - ranks) * (ranks - 1)).mean(axis=1) + n_obs - 1)
+                   / (n_obs * (n_obs - 1) / 2))
+    assert np.abs(mbd_midrank - mbd_r).max() < 1e-10, "roahd MBD != mid-rank formula"
     _MACROS.update({
         "ciMbdRho": f"{spearmanr(mbd, mbd_r)[0]:.3f}",
         "ciMbdMaxDiff": f"{np.abs(mbd - mbd_r).max():.3f}",
@@ -98,7 +115,7 @@ def _rows() -> list[tuple[str, str, str, str]]:
         (r"near-identical ranking ("
          + (r"same deepest curve; " if same_deepest else r"different deepest curve; ")
          + rf"{n_moved} of {len(mbd)} ranks differ, by at most {max_shift}); "
-         r"small value differences"),
+         r"fdars $=$ exact definition; roahd rank formula with mid-ranks for ties"),
     ))
 
     # 3. Dense FPCA vs fda.usc::fdata2pc.
@@ -178,7 +195,7 @@ def _rows() -> list[tuple[str, str, str, str]]:
         rf"eigenfunction $|\cos|$ {pc_cos[0]:.3f}, {pc_cos[1]:.3f}; "
         rf"$\hat\lambda=({lam[0]:.2f}, {lam[1]:.2f})$ vs $({lam_r[0]:.2f}, {lam_r[1]:.2f})$",
         r"true $\lambda=(4, 1)$; same Gaussian kernel and bandwidth, but fdars "
-        r"smooths local-constant, fdapace local-linear",
+        r"smooths mean and covariance local-constant, fdapace local-linear",
     ))
     return rows
 
