@@ -98,8 +98,9 @@ comparison.
 
 Functional depth ranks observations by centrality relative to the full
 sample~\citep{fraiman_muniz_2001}.
-fdars offers Fraiman--Muniz, band, modal, random-projection, and random Tukey
-depths via the \texttt{Fdata.depth()} method, and modified band depth
+fdars offers Fraiman--Muniz \citep{fraiman_muniz_2001}, band, modal and
+random-projection \citep{cuevas_febrero_fraiman_2007}, and random Tukey
+\citep{cuesta_albertos_nieto_reyes_2008} depths via the \texttt{Fdata.depth()} method, and modified band depth
 \citep{lopez_pintado_romo_2009} via \texttt{depth.modified\_band\_1d}.
 The \texttt{fdars.outliers} submodule adds shape-, magnitude-, and
 amplitude-based outlier detection with a Fast-MUOD-style
@@ -206,7 +207,8 @@ initialisation, and hence the reported partition, reproducible.
 \subsection{Classification}
 
 fdars provides functional linear discriminant analysis, functional
-$k$-nearest neighbours, depth-based DD-classifiers, and elastic-distance
+$k$-nearest neighbours, depth-based (maximum-depth, i.e.\ DD-plot
+diagonal-rule) classifiers, and elastic-distance
 classifiers through \texttt{fdars.classification}.
 The FPCA-$k$NN classifier (\texttt{fclassif\_knn}) projects observations onto
 the leading principal components and applies $k$-NN in the score space:
@@ -259,10 +261,10 @@ the coefficient of determination.  Figure~\ref{fig:tour-regression} plots fitted
 against observed fat content: points cluster tightly along the identity line.
 The $R^2$ shown in the figure is computed live from the fit.  With fifteen
 components the raw spectra already fit well, so the preprocessing adds a small
-but consistent gain (Case Study~\ref{subsec:cs2-tecator} quantifies it under
-cross-validation).  PLS and
-robust variants (for collinear or contaminated predictors) and
-function-on-function regression share the same call convention.
+but consistent gain (Case Study~2 (Section~\ref{subsec:cs2-tecator}) quantifies it under
+cross-validation).  PLS (for collinear predictors), Huber and $L^1$ robust variants (which
+downweight outlying responses), and function-on-function regression share
+the same call convention.
 
 \begin{figure}[H]
   \centering
@@ -296,7 +298,7 @@ variance-stabilising square-root scale used for these data by
 \citet{aue_norinho_hormann_2015}---sit within the envelope of observed
 days and preserve the characteristic diurnal shape.  Because the reconstruction
 is low-rank, the forecasts capture the leading modes of variation rather than
-fine half-hour-to-half-hour fluctuations.  Case Study~\ref{subsec:cs3-fts} validates
+fine half-hour-to-half-hour fluctuations.  Case Study~3 (Section~\ref{subsec:cs3-fts}) validates
 such forecasts over 30 rolling forecast origins against simple baselines.
 
 \begin{figure}[H]
@@ -305,14 +307,15 @@ such forecasts over 30 rolling forecast origins against simple baselines.
   \caption{FTSM forecast of the next three daily PM10 curves (bold) over the
   182 observed daily curves (grey) from the Graz dataset.  Each curve is one
   day's diurnal PM10 profile; the next-day forecasts are validated against
-  held-out days in Case Study~\ref{subsec:cs3-fts}.}
+  held-out days in Case Study~3 (Section~\ref{subsec:cs3-fts}).}
   \label{fig:tour-fts}
 \end{figure}
 
 \subsection{Statistical Process Monitoring}
 
-\texttt{fdars.spm} adapts Hotelling $T^2$ and squared prediction error (SPE)
-control charts to functional data by first estimating in-control variation
+\texttt{fdars.spm} implements FPCA-based Hotelling $T^2$ and squared
+prediction error (SPE) control charts for functional data
+\citep[e.g.][]{colosimo_pacella_2010,capezza_funcharts_2023} by first estimating in-control variation
 via \texttt{spm\_phase1} and then monitoring new batches with
 \texttt{spm\_monitor}.
 Phase-1 output components (mean, loadings, weights, eigenvalues, and control
@@ -325,10 +328,12 @@ derives the $T^2$ and SPE control limits; Phase~2 then scores each new curve on
 these two statistics and flags any that exceed a limit.
 Figure~\ref{fig:tour-spm} shows the resulting $T^2$ chart, with out-of-control
 curves marked in red above the upper control limit.  For this illustration
-Phase~1 uses the first 46 growth curves (39 boys and 7 girls) and Phase~2 the
-remaining 47 (all girls), so the five $T^2$ alarms (about 2.4 would be expected
-by chance at $\alpha = 0.05$) reflect between-subject variability plus a shift
-in sex composition rather than a genuine process fault---the figure demonstrates the charting mechanics, not a real
+Phase~1 uses the first 46 growth curves (39 boys and 7 girls;
+\texttt{spm\_phase1} estimates the FPCA on a random half of them and
+calibrates the SPE limit on the other half) and Phase~2 the remaining 47 (all
+girls).  The five $T^2$ alarms (nominally about 2.4 at $\alpha = 0.05$, using
+the asymptotic $\chi^2$ limit) reflect between-subject variability, a shift
+in sex composition and the small Phase-1 sample rather than a genuine process fault---the figure demonstrates the charting mechanics, not a real
 monitoring incident.
 
 \begin{figure}[H]
@@ -392,9 +397,14 @@ pair of curves, while \texttt{dtw\_self\_1d} instead allows elastic time-warping
 before measuring distance.  Figure~\ref{fig:tour-metric} renders the $L^2$
 distance matrix as a heatmap: the dark diagonal is each curve's zero
 self-distance, and the off-diagonal block structure exposes groups of mutually
-similar growth trajectories.  Such a distance matrix is the shared input to
-downstream methods---clustering, $k$-NN classification, and multidimensional
-scaling---so the metric family underpins much of the rest of the tour.
+similar growth trajectories.  Such a distance matrix is the direct input to
+fdars's distance-based methods, including $k$-medoids and hierarchical
+clustering (\texttt{alignment.\allowbreak kmedoids\_\allowbreak from\_\allowbreak distances},
+\texttt{alignment.\allowbreak hierarchical\_\allowbreak from\_\allowbreak distances}), $k$-NN and
+kernel classification (\texttt{classification.\allowbreak knn\_\allowbreak classify\_\allowbreak from\_\allowbreak distances}),
+nonparametric regression (\texttt{regression.\allowbreak fregre\_np}) and silhouette
+scores, and can equally be passed to external tools such as
+multidimensional scaling.
 
 \begin{figure}[H]
   \centering
@@ -522,4 +532,4 @@ functional preprocessing steps inside any scikit-learn workflow:
 Here an \texttt{fdars} \texttt{FPCATransformer} feeds scikit-learn's own
 \texttt{RidgeCV} inside a standard \texttt{Pipeline}, and the pipeline is
 scored by \texttt{cross\_val\_score} without any adapter code.  Case
-Study~\ref{subsec:cs4-growth} tunes such a pipeline with \texttt{GridSearchCV}.
+Study~4 (Section~\ref{subsec:cs4-growth}) tunes such a pipeline with \texttt{GridSearchCV}.

@@ -18,7 +18,8 @@ Macro set emitted
 -----------------
 ``\\ncallables``         — total callable entries across all map keys
 ``\\ncoverage``          — callables backed by at least one curated paper
-``\\ndocpapers``         — non-``_uncurated`` papers in _references_map.json
+``\\ndocpapers``         — non-``_uncurated`` papers with bibliographic content
+                           (title/authors/year) in _references_map.json
 ``\\nexcludedmethods``   — methods in ``fdars.sklearn.EXCLUDED_METHODS`` (interface
                            constraints that prevent sklearn estimator wrapping)
 ``\\nfdata``             — public (non-underscore-prefixed) methods in the ``_Fdata`` key
@@ -84,8 +85,14 @@ def _derive_counts() -> dict[str, int]:
         if any(pk in curated_keys for pk in pks)
     )
 
-    # Non-uncurated papers (eligible for refs.bib emission)
-    n_docpapers = sum(1 for k in papers if not k.startswith("_uncurated"))
+    # Non-uncurated papers with bibliographic content (title, authors, or
+    # year).  Mirrors gen_refs_bib.py, which skips both ``_uncurated``
+    # placeholders and empty-payload stubs; an empty stub is not a paper.
+    n_docpapers = sum(
+        1 for k, p in papers.items()
+        if not k.startswith("_uncurated")
+        and (p.get("title") or p.get("authors") or p.get("year"))
+    )
 
     # sklearn estimators with verdict "PASS" after Phase 55-58 reclassification.
     # Machine-derived from TRIAGE_VERDICTS — do NOT hardcode the integer.

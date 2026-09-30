@@ -239,7 +239,7 @@
 |-----------|------|---------------|--------|
 | Representation / basis smoothing | ✓ | fdaM: basis-expansion framework mirroring R fda; B-spline, Fourier (create_bspline_basis.m, create_fourier_basis.m, smooth_basis.m) | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/fdaM.zip |
 | Registration / alignment | ✓ | fdaM: landmark and continuous registration following Ramsay & Silverman (landmarkreg.m, register_fd.m) | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/fdaM.zip |
-| Depth & outlier detection | — | Not a focus of either fdaM or PACE | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/ |
+| Depth & outlier detection | partial | fdaM: fbplot.m (band depth BD2/MBD, functional boxplot, returns indices of outlying curves); no other depth measures or outlier procedures; PACE: none | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/fdaM.zip |
 | FPCA / covariance / PACE sparse FPCA | ✓ | PACE: "Functional Principal Component Analysis (FPCA)...for sparsely or densely sampled random trajectories" — the defining capability | https://anson.ucdavis.edu/~mueller/data/pace.html |
 | Clustering | partial | PACE item (14): "Generalized functional distances for sparsely sampled functional data, which can be used for functional clustering and other distance-based applications"; no dedicated clustering routine | https://anson.ucdavis.edu/~mueller/data/pace.html |
 | Classification | partial | PACE item (8): generalized functional linear regression "can also be used for classification of functional data via binary regression (PACE-GLM)"; no dedicated classifiers | https://anson.ucdavis.edu/~mueller/data/pace.html |
@@ -269,7 +269,7 @@
 |-----------|------|---------------|--------|
 | Representation / basis smoothing | ✓ | PACE item (1): "Fitting of both sparsely and densely sampled random functions from noisy measurements by Functional Principal Component Analysis (FPCA)" — FPCA-based representation with local-linear smoothing | https://anson.ucdavis.edu/~mueller/data/pace.html |
 | Registration / alignment | ✓ | PACE item (13): "Time-synchronization based on pairwise warping (alignment, registration) for both sparsely and densely sampled functions (PACE-WARP)" | https://anson.ucdavis.edu/~mueller/data/pace.html |
-| Depth & outlier detection | — | Not a focus of either fdaM or PACE | https://anson.ucdavis.edu/~mueller/data/pace.html |
+| Depth & outlier detection | partial | fdaM: fbplot.m (band depth BD2/MBD, functional boxplot, returns indices of outlying curves); no other depth measures or outlier procedures; PACE: none | https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/fdaM.zip |
 | FPCA / covariance / PACE sparse FPCA | ✓ | PACE: "Functional Principal Component Analysis (FPCA)...for sparsely or densely sampled random trajectories" — the defining capability | https://anson.ucdavis.edu/~mueller/data/pace.html |
 | Clustering | partial | PACE item (14): "Generalized functional distances for sparsely sampled functional data, which can be used for functional clustering and other distance-based applications"; no dedicated clustering routine | https://anson.ucdavis.edu/~mueller/data/pace.html |
 | Classification | partial | PACE item (8): generalized functional linear regression "can also be used for classification of functional data via binary regression (PACE-GLM)"; no dedicated classifiers | https://anson.ucdavis.edu/~mueller/data/pace.html |

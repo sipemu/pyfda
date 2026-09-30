@@ -16,8 +16,10 @@ one curve per day gives a genuine functional time series: \csThreeNDays{}
 consecutive daily curves, each a \csThreeNPoints-point diurnal PM10 profile.  We
 use all \csThreeNDays{} curves, whereas \citet{aue_norinho_hormann_2015} remove
 the New-Year week, adjust for weekday effects, and analyse \csThreeNAnh.  Unlike a cross-sectional collection, the
-curves are ordered in real calendar time and serially dependent
-\citep{hormann_kokoszka_2010}, so forecasting \emph{the next day's}
+curves are ordered in real calendar time and serially dependent, as the
+functional autoregressive analysis of these data by
+\citet{aue_norinho_hormann_2015} shows (see \citealp{hormann_kokoszka_2010}
+for the theory of weakly dependent functional data), so forecasting \emph{the next day's}
 pollution profile is a substantive task~\citep{hyndman_ullah_2007,aue_norinho_hormann_2015}.
 Following \citet{aue_norinho_hormann_2015}, we model the data on the
 variance-stabilising square-root scale and back-transform forecasts to

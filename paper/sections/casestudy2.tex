@@ -14,10 +14,11 @@ capabilities---elastic registration under the square-root slope function
 (SRSF) framework \citep{srivastava_klassen_2016} and scalar-on-function
 functional principal component regression \citep{reiss_ogden_2007}---and uses
 the pair to make a methodological point: registration should be applied only
-when phase variation is a nuisance, and in near-infrared spectra it is not.
+when phase variation is a nuisance, and in these near-infrared spectra (for
+predicting fat content) it is not.
 
 \paragraph{Registration.}
-We estimate an elastic Karcher mean from a representative subset of \csTwoNKarcher{} curves
+We estimate an elastic Karcher mean from the first \csTwoNKarcher{} curves (a subset, for speed)
 using \texttt{fdars.alignment.karcher\_mean}, with the Fisher--Rao gradient
 descent capped at \csTwoKarcherIter{} iterations for speed (it had not met its tolerance when
 stopped), and align all \csTwoNSamples{} spectra to that mean with

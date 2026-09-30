@@ -130,11 +130,14 @@ advise(
     reasons over, and the same diagnostics can be separately inspected by the
     user to verify that the LLM's advice is consistent with the numbers.
     The invariant is also enforced mechanically: before \texttt{advise}
-    returns, a grounding check extracts every numeric value cited in the
-    advice's evidence and requires it to equal a diagnostic value at the
-    citation's own precision; otherwise the call fails, with no retry.
-    Qualitative statements pass unchecked, so the guard stops fabricated
-    statistics but cannot verify the reasoning that connects them.
+    returns, a grounding check extracts the numeric values cited in the
+    advice's evidence and requires each to equal some diagnostic value at
+    the citation's own precision; otherwise the call fails, with no retry.
+    The check is value-based, not field-based: it rejects numbers that match
+    no diagnostic, but it cannot detect a number attributed to the wrong
+    quantity or a coarse value that coincides with an unrelated diagnostic,
+    and qualitative statements and the reasoning that connects the numbers
+    pass unchecked.
 
 \sigheading{\texttt{auto\_tune} --- closed-loop parameter search.}
 \begin{lstlisting}[style=fdarsinput]
@@ -192,16 +195,18 @@ quality.
 
 \texttt{fdars} ships a machine-readable provenance map,
 \texttt{python/fdars/\_references\_map.json}, that indexes 243 of
-the \ncallables{} public callables; 163 of them are linked to at least one
-candidate foundational paper from which their algorithms derive, and the
-remaining 80 appear only in 10 placeholder records grouping
-not-yet-attributed callables.  The map contains \ndocpapers{} candidate papers
-(44 with DOIs or arXiv identifiers), of which 6 are author-verified; at
+the \ncallables{} public callables; 159 of them are linked to at least one
+identified candidate foundational paper from which their algorithms derive,
+4 (the functional spatial depths) only to a record whose source is not yet
+identified, and the remaining 80 appear only in 10 placeholder records
+grouping not-yet-attributed callables.  The map contains \ndocpapers{}
+identified candidate papers (44 with DOIs or arXiv identifiers) plus that
+unattributed stub, of which 6 are author-verified; at
 present \ncoverage{} of the \ncallables{} callables (\npubliccallables{} module
 callables plus the 28 \texttt{Fdata} entries: \nfdata{} public methods and the
 constructor) have at least one author-verified paper entry, so coverage is
 deliberately partial and honest rather than complete.
-Each paper record carries the title, authors, year, DOI and/or URL,
+Paper records carry, where known, the title, authors, year, DOI and/or URL,
 publication type, the \texttt{fdars} callables that implement it, notes, and
 a \texttt{curated} boolean indicating whether the entry has been manually
 verified against the primary source; where available (24 of the \ndocpapers{} candidate papers)
@@ -209,7 +214,9 @@ it also carries cross-language implementation pointers (R, Python,
 occasionally MATLAB) with confidence ratings.  Entries marked
 \texttt{curated: false} are present as cross-reference candidates but are
 explicitly flagged so that downstream tooling can distinguish author-verified
-citations from unverified suggestions.
+citations from unverified suggestions.  Uncurated entries may therefore
+differ from the attributions used in this paper, which were checked against
+the primary sources.
 
 The provenance map is served at runtime through the
 \texttt{fdars\_method\_references} tool of the package's Model Context
@@ -221,8 +228,8 @@ without requiring a network call at query time, since the full map is bundled
 with the package.  The same map is used to generate the References
 documentation page of the MkDocs site (\texttt{docs/references.md}), so the
 paper-level provenance visible to readers and the provenance served through
-the MCP server are built from one source of truth (regenerating the page is
-a manual step).
+the MCP server are generated from one source file (the page is regenerated
+manually and can lag the bundled map).
 
 \subsection{Differentiator}
 

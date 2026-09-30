@@ -26,8 +26,10 @@ scikit-learn \texttt{FunctionTransformer}), an \texttt{fdars}
 \texttt{LinearDiscriminantAnalysis}.  \texttt{GridSearchCV} treats the
 representation as an ordinary hyperparameter alongside the number of FPCA
 components, $\{\csFourGrid\}$, using seeded stratified \csFourNInner-fold
-cross-validation.  No adapter code is needed: every step obeys the
-scikit-learn estimator contract.
+cross-validation.  No custom estimator classes are needed: apart from a
+short user-defined velocity function wrapped in scikit-learn's stock
+\texttt{FunctionTransformer}, every step is an off-the-shelf estimator that
+obeys the scikit-learn estimator contract.
 
 \paragraph{Results.}
 Height curves score higher than velocity curves at every dimension

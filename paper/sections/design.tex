@@ -163,8 +163,9 @@ provide dataset loaders, covariance kernels and evaluation metrics):
     regression, and functional additive mixed models.
 
   \item[Functional time series and seasonal decomposition]
-    \texttt{fts} --- functional time-series modelling via the FTSM framework
-    \citep{hyndman_ullah_2007}: FPCA of the curve sequence followed by an
+    \texttt{fts} --- functional time-series forecasting after the FTSM approach
+    of \citet{hyndman_ullah_2007}, in a simplified form (no pre-smoothing,
+    non-robust FPCA): FPCA of the curve sequence followed by an
     independent univariate autoregression on each score series, with
     multi-step forecasting;
     \texttt{seasonal} --- period estimation, peak detection, seasonal-strength

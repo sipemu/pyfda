@@ -14,16 +14,18 @@ pass \texttt{check\_estimator}, so functional methods compose with scikit-learn
 pipelines and cross-validation.
 Two further components were not found in any of the packages we compared: a
 grounded parameter advisor (\texttt{fdars.advisor}) that reasons over
-deterministic, library-computed diagnostics and rejects any advice citing a
-numeric value not present in them, and a machine-readable
+deterministic, library-computed diagnostics and rejects any advice whose
+cited evidence contains a numeric value that does not match one of those
+diagnostics at the citation's precision, and a machine-readable
 scientific-provenance map that links callables to the publications
 defining them (currently \ncoverage{} callables with curated, author-verified
 entries).
 We describe the architecture and data model, compare coverage with Python, R,
 and MATLAB software, check numerical agreement against independent reference
 implementations, and illustrate the library in four case studies on real data.
-Every code snippet, figure, case-study result, and cross-implementation
-comparison in this paper is produced by committed, executed scripts;
+Every code snippet, data figure, case-study result, and cross-implementation
+comparison in this paper is produced by committed, executed scripts (the one
+schematic diagram, in Section~\ref{sec:advisor}, is hand-drawn in TikZ);
 continuous integration checks the snippets, case-study numbers, and the
 \texttt{fdars} side of the agreement table for drift, and checks that figure
 generation is deterministic.

@@ -23,8 +23,8 @@ cross-validated classification.
 \paragraph{Smoothing.}
 Raw log-periodogram curves carry measurement noise.  We apply roughness-penalised
 B-spline smoothing (\texttt{fdars.basis.smooth\_basis\_gcv}) with
-\csOneSmoothNBasis{} basis functions to a representative subset of
-\csOneSmoothN{} curves, selecting the penalty automatically via generalised
+\csOneSmoothNBasis{} basis functions to a class-balanced subset of
+\csOneSmoothN{} curves (the first four of each class), selecting the penalty automatically via generalised
 cross-validation \citep{craven_wahba_1979,ramsay_silverman_2005}.
 Figure~\ref{fig:cs1-smooth} shows the raw spectra alongside the fitted smooth
 curves for each class; the smoothed curves retain the phoneme-specific spectral
