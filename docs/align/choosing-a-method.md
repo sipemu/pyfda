@@ -195,7 +195,7 @@ The lesson is the rule of thumb behind the decision tree: **pick the smallest wa
 
     **Method-specific traps**
 
-    - **Landmark detection matches by order** and `landmark_detect_and_register` truncates every curve to the smallest detection count; `landmark_register` returns all-zero warps (not the identity) on invalid input.
+    - **Landmark detection matches by order** and `landmark_detect_and_register` raises if any curve has fewer than `expected_count` features; `landmark_register` returns all-zero warps (not the identity) on invalid input.
     - **The closed-curve start-point search is heuristic** (coarse, then fine).
     - **`elastic_partial_match` distances** are not comparable across window lengths.
     - **`elastic_depth` is not a lens depth**: it is $1/(1 + \text{mean distance})$, separately for amplitude and phase, which live on different scales.

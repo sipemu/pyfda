@@ -104,7 +104,7 @@ The unregistered mean (left) is a low, broad hump: it averages spurts that happe
 `landmark_detect_and_register` is convenient, but it pairs features **by order**: it keeps the *first* `expected_count` detected features of each curve, in time order, and registers them. Two consequences:
 
 - A spurious early feature (a pre-pubertal bump) becomes "landmark 1" for that curve, and every later pairing shifts.
-- `expected_count=0` keeps **no** features: the curves come back unregistered and `target_landmarks` is empty. Always pass the number of landmarks you want.
+- Every curve must have at least `expected_count` detected features (default 1). If one has fewer, the call raises `ValueError` rather than registering on mismatched landmarks; `expected_count=0` is rejected too.
 
 ```python exec="1" source="above" result="text"
 import numpy as np
@@ -119,9 +119,12 @@ ratio = lambda R: np.var(np.asarray(R), 0).mean() / np.var(V, 0).mean()
 
 counts = [len(A.detect_landmarks(v, t, kind="peak", min_prominence=1.0)) for v in V]
 print(f"peaks detected per curve: {counts}")
-for k in (0, 1):
-    r = A.landmark_detect_and_register(V, t, kind="peak", min_prominence=1.0, expected_count=k)
-    print(f"expected_count={k}: target {np.round(r['target_landmarks'], 2)}, variance after/before {ratio(r['registered']):.2f}")
+r = A.landmark_detect_and_register(V, t, kind="peak", min_prominence=1.0, expected_count=1)
+print(f"expected_count=1: target {np.round(r['target_landmarks'], 2)}, variance after/before {ratio(r['registered']):.2f}")
+try:
+    A.landmark_detect_and_register(V, t, kind="peak", min_prominence=1.0, expected_count=2)
+except ValueError as e:
+    print(f"expected_count=2: ValueError: {e}")
 print("FDARS_FENCE_OK")
 ```
 
