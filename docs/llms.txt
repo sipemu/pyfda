@@ -688,7 +688,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 
 ## Scientific Provenance & Cross-Language Implementations
 
-Coverage: 28 of 580 callables (including 28 Fdata class methods) have curated primary-paper entries.
+Coverage: 94 of 580 callables (including 28 Fdata class methods) have curated primary-paper entries.
 Uncurated callables are absent from this section. A consumer MAY synthesize
 provenance for uncurated callables but MUST flag each synthesized citation as
 ungrounded (grounded: false) — never present synthesized provenance as curated.
@@ -702,14 +702,22 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 
 - `alignment.amplitude_distance` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
 - `alignment.elastic_align_pair` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.elastic_changepoint` — Tucker, J.D., Yarger, D. (2024) doi:10.1002/env.2826 ; Python: fdasrsf.ElasticChangePoint / R: fdasrvf::elastic.changepoint
 - `alignment.elastic_cross_distance_matrix` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
 - `alignment.elastic_decomposition` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
 - `alignment.elastic_distance` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.elastic_phase_amplitude_test` — Anderson, M.J. (2001) doi:10.1111/j.1442-9993.2001.01070.pp.x ; R: vegan::adonis2
 - `alignment.elastic_self_distance_matrix` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.gauss_model` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
+- `alignment.horiz_fpca` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
+- `alignment.jfpca_fit` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
+- `alignment.joint_fpca` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
+- `alignment.joint_gauss_model` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
 - `alignment.karcher_mean` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
 - `alignment.phase_distance` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
 - `alignment.srsf_inverse` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
 - `alignment.srsf_transform` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.vert_fpca` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
 
 ### fdars.basis
 
@@ -720,6 +728,18 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `basis.pspline_fit_gcv` — Eilers, P.H.C., Marx, B.D. (1996) doi:10.1214/ss/1038425655 ; Python: scikit-fda.BSplineSmoother / R: mgcv::s(..., bs="ps")
 - `basis.smooth_basis_aic` — Eilers, P.H.C., Marx, B.D. (1996) doi:10.1214/ss/1038425655 ; Python: scikit-fda.BSplineSmoother / R: mgcv::s(..., bs="ps")
 - `basis.smooth_basis_gcv` — Eilers, P.H.C., Marx, B.D. (1996) doi:10.1214/ss/1038425655 ; Python: scikit-fda.BSplineSmoother / R: mgcv::s(..., bs="ps")
+- `basis.wavelet_decompose` — Daubechies, I. (1992) doi:10.1137/1.9781611970104 ; Python: PyWavelets.wavedec
+- `basis.wavelet_decompose_matrix` — Daubechies, I. (1992) doi:10.1137/1.9781611970104 ; Python: PyWavelets.wavedec
+- `basis.wavelet_max_level` — Daubechies, I. (1992) doi:10.1137/1.9781611970104 ; Python: PyWavelets.wavedec
+- `basis.wavelet_reconstruct` — Daubechies, I. (1992) doi:10.1137/1.9781611970104 ; Python: PyWavelets.wavedec
+
+### fdars.clustering
+
+- `clustering.align_cluster_fd` — Sangalli, L.M., Secchi, P., Vantini, S., Vitelli, V. (2010) doi:10.1016/j.csda.2009.12.008 ; R: fdasrvf::kmeans_align
+- `clustering.dtw_kmeans` — Petitjean, F., Ketterlin, A., Gançarski, P. (2011) doi:10.1016/j.patcog.2010.09.013 ; Python: tslearn.dtw_barycenter_averaging / R: dtwclust::DBA
+- `clustering.dtw_kmeans_multivariate` — Petitjean, F., Ketterlin, A., Gançarski, P. (2011) doi:10.1016/j.patcog.2010.09.013 ; Python: tslearn.dtw_barycenter_averaging / R: dtwclust::DBA
+- `clustering.kshape_fd` — Paparrizos, J., Gravano, L. (2015) doi:10.1145/2723372.2737793 ; Python: tslearn.KShape / R: dtwclust::SBD
+- `clustering.sbd_kmedoids` — Paparrizos, J., Gravano, L. (2015) doi:10.1145/2723372.2737793 ; Python: tslearn.KShape / R: dtwclust::SBD
 
 ### fdars.depth
 
@@ -728,10 +748,125 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `depth.fraiman_muniz_2d` — Fraiman, R., Muniz, G. (2001) doi:10.1007/BF02595706 ; Python: scikit-fda.fraiman_muniz_depth / R: fda.usc::depth.FM
 - `depth.modified_band_1d` — López-Pintado, S., Romo, J. (2009) doi:10.1198/jasa.2009.0108 ; Python: scikit-fda.BandDepth / R: fda.usc::depth.mode
 
+### fdars.inference
+
+- `inference.permanova` — Anderson, M.J. (2001) doi:10.1111/j.1442-9993.2001.01070.pp.x ; R: vegan::adonis2
+
 ### fdars.metric
 
+- `metric.PyGakGramTrain` — Cuturi, M. (2011) ; Python: tslearn.gak / R: dtwclust::GAK
+- `metric.dtw_barycenter_averaging` — Petitjean, F., Ketterlin, A., Gançarski, P. (2011) doi:10.1016/j.patcog.2010.09.013 ; Python: tslearn.dtw_barycenter_averaging / R: dtwclust::DBA
+- `metric.dtw_barycenter_averaging_multivariate` — Petitjean, F., Ketterlin, A., Gançarski, P. (2011) doi:10.1016/j.patcog.2010.09.013 ; Python: tslearn.dtw_barycenter_averaging / R: dtwclust::DBA
+- `metric.dtw_cross_1d` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_distance_early_abandon` — Herrmann, M., Webb, G.I. (2021) doi:10.1007/s10618-021-00782-4
+- `metric.dtw_distance_multivariate` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_distance_windowed` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_k_nearest_neighbors` — Keogh, E. (2002) doi:10.1016/B978-155860869-6/50043-3 ; Python: tslearn.lb_keogh / R: dtwclust::lb_keogh
+- `metric.dtw_k_nearest_neighbors` — Herrmann, M., Webb, G.I. (2021) doi:10.1007/s10618-021-00782-4
+- `metric.dtw_nearest_neighbor` — Keogh, E. (2002) doi:10.1016/B978-155860869-6/50043-3 ; Python: tslearn.lb_keogh / R: dtwclust::lb_keogh
+- `metric.dtw_nearest_neighbor` — Herrmann, M., Webb, G.I. (2021) doi:10.1007/s10618-021-00782-4
+- `metric.dtw_pairwise_distance_multivariate` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_path` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_path_multivariate` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_self_1d` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_window_mask` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.elastic_ts_alignment_path` — Keogh, E.J., Pazzani, M.J. (2001) doi:10.1137/1.9781611972719.1 ; Python: aeon.ddtw_distance
+- `metric.elastic_ts_alignment_path` — Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. (2011) doi:10.1016/j.patcog.2010.09.022 ; Python: aeon.wdtw_distance
+- `metric.elastic_ts_alignment_path` — Herrmann, M., Webb, G.I. (2023) doi:10.1016/j.patcog.2023.109333 ; Python: aeon.adtw_distance
+- `metric.elastic_ts_alignment_path` — Chen, L., Ng, R. (2004) doi:10.1016/B978-012088469-8.50070-X ; Python: aeon.erp_distance
+- `metric.elastic_ts_alignment_path` — Chen, L., Özsu, M.T., Oria, V. (2005) doi:10.1145/1066157.1066213 ; Python: aeon.edr_distance
+- `metric.elastic_ts_alignment_path` — Marteau, P.F. (2009) doi:10.1109/TPAMI.2008.76 ; Python: aeon.twe_distance
+- `metric.elastic_ts_alignment_path` — Stefan, A., Athitsos, V., Das, G. (2013) doi:10.1109/TKDE.2012.88 ; Python: aeon.msm_distance
+- `metric.elastic_ts_alignment_path` — Vlachos, M., Kollios, G., Gunopulos, D. (2002) doi:10.1109/ICDE.2002.994784 ; Python: aeon.lcss_distance
+- `metric.elastic_ts_alignment_path` — Zhao, J., Itti, L. (2018) doi:10.1016/j.patcog.2017.09.020 ; Python: aeon.shape_dtw_distance
+- `metric.elastic_ts_alignment_path_multivariate` — Keogh, E.J., Pazzani, M.J. (2001) doi:10.1137/1.9781611972719.1 ; Python: aeon.ddtw_distance
+- `metric.elastic_ts_alignment_path_multivariate` — Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. (2011) doi:10.1016/j.patcog.2010.09.022 ; Python: aeon.wdtw_distance
+- `metric.elastic_ts_alignment_path_multivariate` — Herrmann, M., Webb, G.I. (2023) doi:10.1016/j.patcog.2023.109333 ; Python: aeon.adtw_distance
+- `metric.elastic_ts_alignment_path_multivariate` — Chen, L., Ng, R. (2004) doi:10.1016/B978-012088469-8.50070-X ; Python: aeon.erp_distance
+- `metric.elastic_ts_alignment_path_multivariate` — Chen, L., Özsu, M.T., Oria, V. (2005) doi:10.1145/1066157.1066213 ; Python: aeon.edr_distance
+- `metric.elastic_ts_alignment_path_multivariate` — Marteau, P.F. (2009) doi:10.1109/TPAMI.2008.76 ; Python: aeon.twe_distance
+- `metric.elastic_ts_alignment_path_multivariate` — Stefan, A., Athitsos, V., Das, G. (2013) doi:10.1109/TKDE.2012.88 ; Python: aeon.msm_distance
+- `metric.elastic_ts_alignment_path_multivariate` — Vlachos, M., Kollios, G., Gunopulos, D. (2002) doi:10.1109/ICDE.2002.994784 ; Python: aeon.lcss_distance
+- `metric.elastic_ts_alignment_path_multivariate` — Zhao, J., Itti, L. (2018) doi:10.1016/j.patcog.2017.09.020 ; Python: aeon.shape_dtw_distance
+- `metric.elastic_ts_cost_matrix` — Keogh, E.J., Pazzani, M.J. (2001) doi:10.1137/1.9781611972719.1 ; Python: aeon.ddtw_distance
+- `metric.elastic_ts_cost_matrix` — Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. (2011) doi:10.1016/j.patcog.2010.09.022 ; Python: aeon.wdtw_distance
+- `metric.elastic_ts_cost_matrix` — Herrmann, M., Webb, G.I. (2023) doi:10.1016/j.patcog.2023.109333 ; Python: aeon.adtw_distance
+- `metric.elastic_ts_cost_matrix` — Chen, L., Ng, R. (2004) doi:10.1016/B978-012088469-8.50070-X ; Python: aeon.erp_distance
+- `metric.elastic_ts_cost_matrix` — Chen, L., Özsu, M.T., Oria, V. (2005) doi:10.1145/1066157.1066213 ; Python: aeon.edr_distance
+- `metric.elastic_ts_cost_matrix` — Marteau, P.F. (2009) doi:10.1109/TPAMI.2008.76 ; Python: aeon.twe_distance
+- `metric.elastic_ts_cost_matrix` — Stefan, A., Athitsos, V., Das, G. (2013) doi:10.1109/TKDE.2012.88 ; Python: aeon.msm_distance
+- `metric.elastic_ts_cost_matrix` — Vlachos, M., Kollios, G., Gunopulos, D. (2002) doi:10.1109/ICDE.2002.994784 ; Python: aeon.lcss_distance
+- `metric.elastic_ts_cost_matrix` — Zhao, J., Itti, L. (2018) doi:10.1016/j.patcog.2017.09.020 ; Python: aeon.shape_dtw_distance
+- `metric.elastic_ts_cost_matrix_multivariate` — Keogh, E.J., Pazzani, M.J. (2001) doi:10.1137/1.9781611972719.1 ; Python: aeon.ddtw_distance
+- `metric.elastic_ts_cost_matrix_multivariate` — Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. (2011) doi:10.1016/j.patcog.2010.09.022 ; Python: aeon.wdtw_distance
+- `metric.elastic_ts_cost_matrix_multivariate` — Herrmann, M., Webb, G.I. (2023) doi:10.1016/j.patcog.2023.109333 ; Python: aeon.adtw_distance
+- `metric.elastic_ts_cost_matrix_multivariate` — Chen, L., Ng, R. (2004) doi:10.1016/B978-012088469-8.50070-X ; Python: aeon.erp_distance
+- `metric.elastic_ts_cost_matrix_multivariate` — Chen, L., Özsu, M.T., Oria, V. (2005) doi:10.1145/1066157.1066213 ; Python: aeon.edr_distance
+- `metric.elastic_ts_cost_matrix_multivariate` — Marteau, P.F. (2009) doi:10.1109/TPAMI.2008.76 ; Python: aeon.twe_distance
+- `metric.elastic_ts_cost_matrix_multivariate` — Stefan, A., Athitsos, V., Das, G. (2013) doi:10.1109/TKDE.2012.88 ; Python: aeon.msm_distance
+- `metric.elastic_ts_cost_matrix_multivariate` — Vlachos, M., Kollios, G., Gunopulos, D. (2002) doi:10.1109/ICDE.2002.994784 ; Python: aeon.lcss_distance
+- `metric.elastic_ts_cost_matrix_multivariate` — Zhao, J., Itti, L. (2018) doi:10.1016/j.patcog.2017.09.020 ; Python: aeon.shape_dtw_distance
+- `metric.elastic_ts_distance` — Keogh, E.J., Pazzani, M.J. (2001) doi:10.1137/1.9781611972719.1 ; Python: aeon.ddtw_distance
+- `metric.elastic_ts_distance` — Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. (2011) doi:10.1016/j.patcog.2010.09.022 ; Python: aeon.wdtw_distance
+- `metric.elastic_ts_distance` — Herrmann, M., Webb, G.I. (2023) doi:10.1016/j.patcog.2023.109333 ; Python: aeon.adtw_distance
+- `metric.elastic_ts_distance` — Chen, L., Ng, R. (2004) doi:10.1016/B978-012088469-8.50070-X ; Python: aeon.erp_distance
+- `metric.elastic_ts_distance` — Chen, L., Özsu, M.T., Oria, V. (2005) doi:10.1145/1066157.1066213 ; Python: aeon.edr_distance
+- `metric.elastic_ts_distance` — Marteau, P.F. (2009) doi:10.1109/TPAMI.2008.76 ; Python: aeon.twe_distance
+- `metric.elastic_ts_distance` — Stefan, A., Athitsos, V., Das, G. (2013) doi:10.1109/TKDE.2012.88 ; Python: aeon.msm_distance
+- `metric.elastic_ts_distance` — Vlachos, M., Kollios, G., Gunopulos, D. (2002) doi:10.1109/ICDE.2002.994784 ; Python: aeon.lcss_distance
+- `metric.elastic_ts_distance` — Zhao, J., Itti, L. (2018) doi:10.1016/j.patcog.2017.09.020 ; Python: aeon.shape_dtw_distance
+- `metric.elastic_ts_distance_multivariate` — Keogh, E.J., Pazzani, M.J. (2001) doi:10.1137/1.9781611972719.1 ; Python: aeon.ddtw_distance
+- `metric.elastic_ts_distance_multivariate` — Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. (2011) doi:10.1016/j.patcog.2010.09.022 ; Python: aeon.wdtw_distance
+- `metric.elastic_ts_distance_multivariate` — Herrmann, M., Webb, G.I. (2023) doi:10.1016/j.patcog.2023.109333 ; Python: aeon.adtw_distance
+- `metric.elastic_ts_distance_multivariate` — Chen, L., Ng, R. (2004) doi:10.1016/B978-012088469-8.50070-X ; Python: aeon.erp_distance
+- `metric.elastic_ts_distance_multivariate` — Chen, L., Özsu, M.T., Oria, V. (2005) doi:10.1145/1066157.1066213 ; Python: aeon.edr_distance
+- `metric.elastic_ts_distance_multivariate` — Marteau, P.F. (2009) doi:10.1109/TPAMI.2008.76 ; Python: aeon.twe_distance
+- `metric.elastic_ts_distance_multivariate` — Stefan, A., Athitsos, V., Das, G. (2013) doi:10.1109/TKDE.2012.88 ; Python: aeon.msm_distance
+- `metric.elastic_ts_distance_multivariate` — Vlachos, M., Kollios, G., Gunopulos, D. (2002) doi:10.1109/ICDE.2002.994784 ; Python: aeon.lcss_distance
+- `metric.elastic_ts_distance_multivariate` — Zhao, J., Itti, L. (2018) doi:10.1016/j.patcog.2017.09.020 ; Python: aeon.shape_dtw_distance
+- `metric.elastic_ts_pairwise_distance` — Keogh, E.J., Pazzani, M.J. (2001) doi:10.1137/1.9781611972719.1 ; Python: aeon.ddtw_distance
+- `metric.elastic_ts_pairwise_distance` — Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. (2011) doi:10.1016/j.patcog.2010.09.022 ; Python: aeon.wdtw_distance
+- `metric.elastic_ts_pairwise_distance` — Herrmann, M., Webb, G.I. (2023) doi:10.1016/j.patcog.2023.109333 ; Python: aeon.adtw_distance
+- `metric.elastic_ts_pairwise_distance` — Chen, L., Ng, R. (2004) doi:10.1016/B978-012088469-8.50070-X ; Python: aeon.erp_distance
+- `metric.elastic_ts_pairwise_distance` — Chen, L., Özsu, M.T., Oria, V. (2005) doi:10.1145/1066157.1066213 ; Python: aeon.edr_distance
+- `metric.elastic_ts_pairwise_distance` — Marteau, P.F. (2009) doi:10.1109/TPAMI.2008.76 ; Python: aeon.twe_distance
+- `metric.elastic_ts_pairwise_distance` — Stefan, A., Athitsos, V., Das, G. (2013) doi:10.1109/TKDE.2012.88 ; Python: aeon.msm_distance
+- `metric.elastic_ts_pairwise_distance` — Vlachos, M., Kollios, G., Gunopulos, D. (2002) doi:10.1109/ICDE.2002.994784 ; Python: aeon.lcss_distance
+- `metric.elastic_ts_pairwise_distance` — Zhao, J., Itti, L. (2018) doi:10.1016/j.patcog.2017.09.020 ; Python: aeon.shape_dtw_distance
+- `metric.elastic_ts_pairwise_distance_multivariate` — Keogh, E.J., Pazzani, M.J. (2001) doi:10.1137/1.9781611972719.1 ; Python: aeon.ddtw_distance
+- `metric.elastic_ts_pairwise_distance_multivariate` — Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. (2011) doi:10.1016/j.patcog.2010.09.022 ; Python: aeon.wdtw_distance
+- `metric.elastic_ts_pairwise_distance_multivariate` — Herrmann, M., Webb, G.I. (2023) doi:10.1016/j.patcog.2023.109333 ; Python: aeon.adtw_distance
+- `metric.elastic_ts_pairwise_distance_multivariate` — Chen, L., Ng, R. (2004) doi:10.1016/B978-012088469-8.50070-X ; Python: aeon.erp_distance
+- `metric.elastic_ts_pairwise_distance_multivariate` — Chen, L., Özsu, M.T., Oria, V. (2005) doi:10.1145/1066157.1066213 ; Python: aeon.edr_distance
+- `metric.elastic_ts_pairwise_distance_multivariate` — Marteau, P.F. (2009) doi:10.1109/TPAMI.2008.76 ; Python: aeon.twe_distance
+- `metric.elastic_ts_pairwise_distance_multivariate` — Stefan, A., Athitsos, V., Das, G. (2013) doi:10.1109/TKDE.2012.88 ; Python: aeon.msm_distance
+- `metric.elastic_ts_pairwise_distance_multivariate` — Vlachos, M., Kollios, G., Gunopulos, D. (2002) doi:10.1109/ICDE.2002.994784 ; Python: aeon.lcss_distance
+- `metric.elastic_ts_pairwise_distance_multivariate` — Zhao, J., Itti, L. (2018) doi:10.1016/j.patcog.2017.09.020 ; Python: aeon.shape_dtw_distance
+- `metric.gak` — Cuturi, M. (2011) ; Python: tslearn.gak / R: dtwclust::GAK
+- `metric.gak_gram_matrix` — Cuturi, M. (2011) ; Python: tslearn.gak / R: dtwclust::GAK
+- `metric.gak_gram_predict` — Cuturi, M. (2011) ; Python: tslearn.gak / R: dtwclust::GAK
+- `metric.gak_gram_train` — Cuturi, M. (2011) ; Python: tslearn.gak / R: dtwclust::GAK
+- `metric.gak_triangular` — Cuturi, M. (2011) ; Python: tslearn.gak / R: dtwclust::GAK
+- `metric.lb_enhanced` — Tan, C.W., Petitjean, F., Webb, G.I. (2019) doi:10.1137/1.9781611975673.59
+- `metric.lb_envelope` — Keogh, E. (2002) doi:10.1016/B978-155860869-6/50043-3 ; Python: tslearn.lb_keogh / R: dtwclust::lb_keogh
+- `metric.lb_envelope_windowed` — Keogh, E. (2002) doi:10.1016/B978-155860869-6/50043-3 ; Python: tslearn.lb_keogh / R: dtwclust::lb_keogh
+- `metric.lb_improved` — Lemire, D. (2009) doi:10.1016/j.patcog.2008.11.030 ; R: dtwclust::lb_improved
+- `metric.lb_keogh` — Keogh, E. (2002) doi:10.1016/B978-155860869-6/50043-3 ; Python: tslearn.lb_keogh / R: dtwclust::lb_keogh
+- `metric.lb_kim` — Kim, S.W., Park, S., Chu, W.W. (2001) doi:10.1109/ICDE.2001.914875
+- `metric.lb_webb` — Webb, G.I., Petitjean, F. (2021) doi:10.1016/j.patcog.2021.107895
+- `metric.sbd` — Paparrizos, J., Gravano, L. (2015) doi:10.1145/2723372.2737793 ; Python: tslearn.KShape / R: dtwclust::SBD
+- `metric.sbd_distance_matrix` — Paparrizos, J., Gravano, L. (2015) doi:10.1145/2723372.2737793 ; Python: tslearn.KShape / R: dtwclust::SBD
+- `metric.sigma_gak` — Cuturi, M. (2011) ; Python: tslearn.gak / R: dtwclust::GAK
+- `metric.soft_dtw_alignment` — Cuturi, M., Blondel, M. (2017) ; Python: tslearn.soft_dtw
+- `metric.soft_dtw_barycenter` — Cuturi, M., Blondel, M. (2017) ; Python: tslearn.soft_dtw
 - `metric.soft_dtw_cross_1d` — Cuturi, M., Blondel, M. (2017) ; Python: tslearn.soft_dtw
+- `metric.soft_dtw_distance_windowed` — Cuturi, M., Blondel, M. (2017) ; Python: tslearn.soft_dtw
 - `metric.soft_dtw_self_1d` — Cuturi, M., Blondel, M. (2017) ; Python: tslearn.soft_dtw
+
+### fdars.pace_fpca
+
+- `pace_fpca.design_criterion` — Ji, H., Müller, H.G. (2017) doi:10.1111/rssb.12192 ; R: fdapace::FOptDes
+- `pace_fpca.optimal_design` — Ji, H., Müller, H.G. (2017) doi:10.1111/rssb.12192 ; R: fdapace::FOptDes
 
 ### fdars.regression
 
@@ -739,7 +874,20 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `regression.fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 - `regression.predict_fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 
-> 552 of 580 total callables are not yet curated and are absent from this section.
+### fdars.scalar_on_function
+
+- `scalar_on_function.lpeer` — Kundu, M.G., Harezlak, J., Randolph, T.W. (2016) doi:10.1177/1471082X15626291 ; R: refund::lpeer
+- `scalar_on_function.peer` — Randolph, T.W., Harezlak, J., Feng, Z. (2012) doi:10.1214/12-EJS676 ; R: refund::peer
+- `scalar_on_function.wcr` — Reiss, P.T., Huo, L., Zhao, Y., Kelly, C., Ogden, R.T. (2015) doi:10.1214/15-AOAS829 ; R: refund.wave::wcr
+- `scalar_on_function.wnet` — Zhao, Y., Ogden, R.T., Reiss, P.T. (2012) doi:10.1080/10618600.2012.679241 ; R: refund.wave::wnet
+
+### fdars.tolerance
+
+- `tolerance.elastic_conformal_anomaly` — Vovk, V., Gammerman, A., Shafer, G. (2005) doi:10.1007/b106715
+- `tolerance.elastic_conformal_anomaly` — Adams, J., Berman, B., Michalenko, J., Tucker, J.D. (2025)
+- `tolerance.elastic_nonconformity` — Adams, J., Berman, B., Michalenko, J., Tucker, J.D. (2025)
+
+> 486 of 580 total callables are not yet curated and are absent from this section.
 > A consumer MAY synthesize provenance for these callables but MUST structurally
 > flag each synthesized citation as ungrounded: { "grounded": false } per citation.
 > Never present synthesized provenance as curated data from this file.

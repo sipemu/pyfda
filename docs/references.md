@@ -2,12 +2,12 @@
 
 > Curated primary paper references for fdars functional data analysis methods.  
 > Generated offline from `python/fdars/_references_map.json`.  
-> **28/580 callables** have at least one curated primary-paper entry.  
+> **94/580 callables** have at least one curated primary-paper entry.  
 > Uncurated callables are absent; see the [AI Capability Map](ai-capability-map.md) for the full callable surface.
 
 ## Coverage
 
-**28 of 580 public callables** have at least one curated primary-paper entry.
+**94 of 580 public callables** have at least one curated primary-paper entry.
 Remaining callables have contested attribution, no single primary paper, or are pending Phase-84 human DOI-landing-page verification.
 See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
@@ -117,7 +117,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.csda.2012.12.001` |
 | URL | [https://www.sciencedirect.com/science/article/abs/pii/S01...](https://www.sciencedirect.com/science/article/abs/pii/S0167947312004227) |
 | Type | journal |
-| Status | Pending DOI verification |
+| Status | Curated |
 
 **Callables implementing this method:**
 
@@ -126,6 +126,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 - `alignment.joint_fpca` — Joint (amplitude + phase) FPCA.
 - `alignment.gauss_model` — Generate random curves from a fitted Gaussian model on aligned data.
 - `alignment.joint_gauss_model` — Generate random curves from a joint Gaussian model preserving amplitude-phase correlation.
+- `alignment.jfpca_fit` — Fit a reusable joint amplitude + phase FPCA (jfPCA) model for out-of-sample projection.
 
 **Cross-language implementations:**
 
@@ -145,7 +146,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1002/env.2826` |
 | URL | [https://onlinelibrary.wiley.com/doi/10.1002/env.2826](https://onlinelibrary.wiley.com/doi/10.1002/env.2826) |
 | Type | journal |
-| Status | Pending DOI verification |
+| Status | Curated |
 
 **Callables implementing this method:**
 
@@ -161,6 +162,32 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 ---
 
 ### fdars.basis — Basis representations — B-spline, Fourier, functional PCA
+
+#### Daubechies, I. (1992) — Ten Lectures on Wavelets
+
+| Field | Value |
+|-------|-------|
+| Authors | Daubechies, I. |
+| Year | 1992 |
+| DOI | `doi:10.1137/1.9781611970104` |
+| URL | [https://doi.org/10.1137/1.9781611970104](https://doi.org/10.1137/1.9781611970104) |
+| Type | book |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `basis.wavelet_decompose` — Multi-level orthogonal discrete wavelet transform (Mallat pyramid) of one signal.
+- `basis.wavelet_decompose_matrix` — Multi-level discrete wavelet transform of every row (curve) of a matrix.
+- `basis.wavelet_reconstruct` — Inverse discrete wavelet transform: rebuild a signal from its coefficient pyramid.
+- `basis.wavelet_max_level` — Maximum useful DWT depth for a signal length and wavelet family.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `PyWavelets` | `wavedec` | high |
+
+---
 
 #### Eilers, P.H.C., Marx, B.D. (1996) — Flexible smoothing with B-splines and penalties
 
@@ -274,6 +301,29 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | Language | Package | Function | Confidence |
 |----------|---------|----------|------------|
 | R | `fdapace` | `kCFC` | high |
+
+---
+
+#### Sangalli, L.M., Secchi, P., Vantini, S., Vitelli, V. (2010) — k-mean alignment for curve clustering
+
+| Field | Value |
+|-------|-------|
+| Authors | Sangalli, L.M., Secchi, P., Vantini, S., Vitelli, V. |
+| Year | 2010 |
+| DOI | `doi:10.1016/j.csda.2009.12.008` |
+| URL | [https://doi.org/10.1016/j.csda.2009.12.008](https://doi.org/10.1016/j.csda.2009.12.008) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `clustering.align_cluster_fd` — Elastic-alignment functional clustering.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `fdasrvf` | `kmeans_align` | high |
 
 ---
 
@@ -676,6 +726,30 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
 ### fdars.inference — Functional inference — two-sample tests, interval-wise testing
 
+#### Anderson, M.J. (2001) — A new method for non-parametric multivariate analysis of variance
+
+| Field | Value |
+|-------|-------|
+| Authors | Anderson, M.J. |
+| Year | 2001 |
+| DOI | `doi:10.1111/j.1442-9993.2001.01070.pp.x` |
+| URL | [https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x](https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `inference.permanova` — PERMANOVA (Anderson 2001) permutation test of group differences on a distance matrix.
+- `alignment.elastic_phase_amplitude_test` — Separate PERMANOVA tests of group differences in amplitude and in phase.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `vegan` | `adonis2` | high |
+
+---
+
 #### Cuesta-Albertos, J.A., Febrero-Bande, M. (2010) — A simple multiway ANOVA for functional data
 
 | Field | Value |
@@ -781,16 +855,75 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
 ---
 
+#### Chen, L., Ng, R. (2004) — On The Marriage of Lp-norms and Edit Distance
+
+| Field | Value |
+|-------|-------|
+| Authors | Chen, L., Ng, R. |
+| Year | 2004 |
+| DOI | `doi:10.1016/B978-012088469-8.50070-X` |
+| URL | [https://doi.org/10.1016/B978-012088469-8.50070-X](https://doi.org/10.1016/B978-012088469-8.50070-X) |
+| Type | conference |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.elastic_ts_distance` — Elastic distance between two series from the aeon family (DDTW, WDTW, ERP, EDR, TWE, MSM, LCSS, shape-DTW...).
+- `metric.elastic_ts_pairwise_distance` — Pairwise elastic-distance matrix of a set of curves (aeon `<metric>_pairwise_distance`).
+- `metric.elastic_ts_cost_matrix` — Accumulated elastic-distance cost matrix of two series (aeon `<metric>_cost_matrix`).
+- `metric.elastic_ts_alignment_path` — Optimal elastic-distance alignment path and distance (aeon `<metric>_alignment_path`).
+- `metric.elastic_ts_distance_multivariate` — Elastic distance between two multivariate (d, m) series (aeon multichannel semantics).
+- `metric.elastic_ts_pairwise_distance_multivariate` — Pairwise elastic-distance matrix of a collection of multivariate series.
+- `metric.elastic_ts_cost_matrix_multivariate` — Accumulated elastic-distance cost matrix of two multivariate (d, m) series.
+- `metric.elastic_ts_alignment_path_multivariate` — Optimal elastic-distance alignment path and distance of two multivariate (d, m) series.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `aeon` | `erp_distance` | high |
+
+---
+
+#### Chen, L., Özsu, M.T., Oria, V. (2005) — Robust and fast similarity search for moving object trajectories
+
+| Field | Value |
+|-------|-------|
+| Authors | Chen, L., Özsu, M.T., Oria, V. |
+| Year | 2005 |
+| DOI | `doi:10.1145/1066157.1066213` |
+| URL | [https://doi.org/10.1145/1066157.1066213](https://doi.org/10.1145/1066157.1066213) |
+| Type | conference |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.elastic_ts_distance` — Elastic distance between two series from the aeon family (DDTW, WDTW, ERP, EDR, TWE, MSM, LCSS, shape-DTW...).
+- `metric.elastic_ts_pairwise_distance` — Pairwise elastic-distance matrix of a set of curves (aeon `<metric>_pairwise_distance`).
+- `metric.elastic_ts_cost_matrix` — Accumulated elastic-distance cost matrix of two series (aeon `<metric>_cost_matrix`).
+- `metric.elastic_ts_alignment_path` — Optimal elastic-distance alignment path and distance (aeon `<metric>_alignment_path`).
+- `metric.elastic_ts_distance_multivariate` — Elastic distance between two multivariate (d, m) series (aeon multichannel semantics).
+- `metric.elastic_ts_pairwise_distance_multivariate` — Pairwise elastic-distance matrix of a collection of multivariate series.
+- `metric.elastic_ts_cost_matrix_multivariate` — Accumulated elastic-distance cost matrix of two multivariate (d, m) series.
+- `metric.elastic_ts_alignment_path_multivariate` — Optimal elastic-distance alignment path and distance of two multivariate (d, m) series.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `aeon` | `edr_distance` | high |
+
+---
+
 #### Cuturi, M. (2011) — Fast global alignment kernels
 
 | Field | Value |
 |-------|-------|
 | Authors | Cuturi, M. |
 | Year | 2011 |
-| DOI | `doi:10.5555/3104482.3104599` |
-| URL | [https://dl.acm.org/doi/10.5555/3104482.3104599](https://dl.acm.org/doi/10.5555/3104482.3104599) |
+| URL | [https://icml.cc/2011/papers/489_icmlpaper.pdf](https://icml.cc/2011/papers/489_icmlpaper.pdf) |
 | Type | conference |
-| Status | Pending DOI verification |
+| Status | Curated |
 
 **Callables implementing this method:**
 
@@ -800,6 +933,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 - `metric.gak_gram_predict` — Compute the GAK Gram matrix between new data and the training set.
 - `metric.sigma_gak` — Heuristic GAK bandwidth: median pairwise Euclidean distance, floored at 1e-8.
 - `metric.PyGakGramTrain` — Opaque handle wrapping fdars-core GakGramTrain for incremental GAK Gram computation.
+- `metric.gak_triangular` — Triangular Global Alignment Kernel (Cuturi 2011) between two 1-D series.
 
 **Cross-language implementations:**
 
@@ -824,12 +958,276 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
 - `metric.soft_dtw_self_1d` — Soft-DTW distance matrix (self) for 1D data.
 - `metric.soft_dtw_cross_1d` — Soft-DTW cross distance for 1D data.
+- `metric.soft_dtw_barycenter` — Soft-DTW barycenter of a set of curves (L-BFGS with random restarts).
+- `metric.soft_dtw_alignment` — Soft-DTW value plus the expected alignment matrix (tslearn soft_dtw_alignment).
+- `metric.soft_dtw_distance_windowed` — Soft-DTW value between two series under an optional global window.
 
 **Cross-language implementations:**
 
 | Language | Package | Function | Confidence |
 |----------|---------|----------|------------|
 | Python | `tslearn` | `soft_dtw` | high |
+
+---
+
+#### Herrmann, M., Webb, G.I. (2021) — Early abandoning and pruning for elastic distances including dynamic time warping
+
+| Field | Value |
+|-------|-------|
+| Authors | Herrmann, M., Webb, G.I. |
+| Year | 2021 |
+| DOI | `doi:10.1007/s10618-021-00782-4` |
+| URL | [https://doi.org/10.1007/s10618-021-00782-4](https://doi.org/10.1007/s10618-021-00782-4) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.dtw_distance_early_abandon` — Early-abandoning windowed DTW: the distance, or None once it must exceed `cutoff`.
+- `metric.dtw_nearest_neighbor` — Exact 1-NN search under windowed DTW with a lower-bound cascade (UCR-suite style).
+- `metric.dtw_k_nearest_neighbors` — Exact k-NN search under windowed DTW with a lower-bound cascade.
+
+---
+
+#### Herrmann, M., Webb, G.I. (2023) — Amercing: An intuitive and effective constraint for dynamic time warping
+
+| Field | Value |
+|-------|-------|
+| Authors | Herrmann, M., Webb, G.I. |
+| Year | 2023 |
+| DOI | `doi:10.1016/j.patcog.2023.109333` |
+| URL | [https://doi.org/10.1016/j.patcog.2023.109333](https://doi.org/10.1016/j.patcog.2023.109333) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.elastic_ts_distance` — Elastic distance between two series from the aeon family (DDTW, WDTW, ERP, EDR, TWE, MSM, LCSS, shape-DTW...).
+- `metric.elastic_ts_pairwise_distance` — Pairwise elastic-distance matrix of a set of curves (aeon `<metric>_pairwise_distance`).
+- `metric.elastic_ts_cost_matrix` — Accumulated elastic-distance cost matrix of two series (aeon `<metric>_cost_matrix`).
+- `metric.elastic_ts_alignment_path` — Optimal elastic-distance alignment path and distance (aeon `<metric>_alignment_path`).
+- `metric.elastic_ts_distance_multivariate` — Elastic distance between two multivariate (d, m) series (aeon multichannel semantics).
+- `metric.elastic_ts_pairwise_distance_multivariate` — Pairwise elastic-distance matrix of a collection of multivariate series.
+- `metric.elastic_ts_cost_matrix_multivariate` — Accumulated elastic-distance cost matrix of two multivariate (d, m) series.
+- `metric.elastic_ts_alignment_path_multivariate` — Optimal elastic-distance alignment path and distance of two multivariate (d, m) series.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `aeon` | `adtw_distance` | high |
+
+---
+
+#### Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. (2011) — Weighted dynamic time warping for time series classification
+
+| Field | Value |
+|-------|-------|
+| Authors | Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. |
+| Year | 2011 |
+| DOI | `doi:10.1016/j.patcog.2010.09.022` |
+| URL | [https://doi.org/10.1016/j.patcog.2010.09.022](https://doi.org/10.1016/j.patcog.2010.09.022) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.elastic_ts_distance` — Elastic distance between two series from the aeon family (DDTW, WDTW, ERP, EDR, TWE, MSM, LCSS, shape-DTW...).
+- `metric.elastic_ts_pairwise_distance` — Pairwise elastic-distance matrix of a set of curves (aeon `<metric>_pairwise_distance`).
+- `metric.elastic_ts_cost_matrix` — Accumulated elastic-distance cost matrix of two series (aeon `<metric>_cost_matrix`).
+- `metric.elastic_ts_alignment_path` — Optimal elastic-distance alignment path and distance (aeon `<metric>_alignment_path`).
+- `metric.elastic_ts_distance_multivariate` — Elastic distance between two multivariate (d, m) series (aeon multichannel semantics).
+- `metric.elastic_ts_pairwise_distance_multivariate` — Pairwise elastic-distance matrix of a collection of multivariate series.
+- `metric.elastic_ts_cost_matrix_multivariate` — Accumulated elastic-distance cost matrix of two multivariate (d, m) series.
+- `metric.elastic_ts_alignment_path_multivariate` — Optimal elastic-distance alignment path and distance of two multivariate (d, m) series.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `aeon` | `wdtw_distance` | high |
+
+---
+
+#### Keogh, E. (2002) — Exact indexing of dynamic time warping
+
+| Field | Value |
+|-------|-------|
+| Authors | Keogh, E. |
+| Year | 2002 |
+| DOI | `doi:10.1016/B978-155860869-6/50043-3` |
+| URL | [https://doi.org/10.1016/B978-155860869-6/50043-3](https://doi.org/10.1016/B978-155860869-6/50043-3) |
+| Type | conference |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.lb_keogh` — LB_Keogh lower bound on the windowed DTW distance between a query and a candidate.
+- `metric.lb_envelope` — LB_Keogh envelope of a series for a Sakoe-Chiba band of the given radius.
+- `metric.lb_envelope_windowed` — LB_Keogh envelope of a candidate series under any DTW window, for a query length.
+- `metric.dtw_nearest_neighbor` — Exact 1-NN search under windowed DTW with a lower-bound cascade (UCR-suite style).
+- `metric.dtw_k_nearest_neighbors` — Exact k-NN search under windowed DTW with a lower-bound cascade.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `tslearn` | `lb_keogh` | high |
+| R | `dtwclust` | `lb_keogh` | high |
+
+---
+
+#### Keogh, E.J., Pazzani, M.J. (2001) — Derivative Dynamic Time Warping
+
+| Field | Value |
+|-------|-------|
+| Authors | Keogh, E.J., Pazzani, M.J. |
+| Year | 2001 |
+| DOI | `doi:10.1137/1.9781611972719.1` |
+| URL | [https://doi.org/10.1137/1.9781611972719.1](https://doi.org/10.1137/1.9781611972719.1) |
+| Type | conference |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.elastic_ts_distance` — Elastic distance between two series from the aeon family (DDTW, WDTW, ERP, EDR, TWE, MSM, LCSS, shape-DTW...).
+- `metric.elastic_ts_pairwise_distance` — Pairwise elastic-distance matrix of a set of curves (aeon `<metric>_pairwise_distance`).
+- `metric.elastic_ts_cost_matrix` — Accumulated elastic-distance cost matrix of two series (aeon `<metric>_cost_matrix`).
+- `metric.elastic_ts_alignment_path` — Optimal elastic-distance alignment path and distance (aeon `<metric>_alignment_path`).
+- `metric.elastic_ts_distance_multivariate` — Elastic distance between two multivariate (d, m) series (aeon multichannel semantics).
+- `metric.elastic_ts_pairwise_distance_multivariate` — Pairwise elastic-distance matrix of a collection of multivariate series.
+- `metric.elastic_ts_cost_matrix_multivariate` — Accumulated elastic-distance cost matrix of two multivariate (d, m) series.
+- `metric.elastic_ts_alignment_path_multivariate` — Optimal elastic-distance alignment path and distance of two multivariate (d, m) series.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `aeon` | `ddtw_distance` | high |
+
+---
+
+#### Kim, S.W., Park, S., Chu, W.W. (2001) — An index-based approach for similarity search supporting time warping in large sequence databases
+
+| Field | Value |
+|-------|-------|
+| Authors | Kim, S.W., Park, S., Chu, W.W. |
+| Year | 2001 |
+| DOI | `doi:10.1109/ICDE.2001.914875` |
+| URL | [https://doi.org/10.1109/ICDE.2001.914875](https://doi.org/10.1109/ICDE.2001.914875) |
+| Type | conference |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.lb_kim` — LB_Kim lower bound on DTW from first / last / min / max features (O(1) after O(n)).
+
+---
+
+#### Lemire, D. (2009) — Faster retrieval with a two-pass dynamic-time-warping lower bound
+
+| Field | Value |
+|-------|-------|
+| Authors | Lemire, D. |
+| Year | 2009 |
+| DOI | `doi:10.1016/j.patcog.2008.11.030` |
+| URL | [https://doi.org/10.1016/j.patcog.2008.11.030](https://doi.org/10.1016/j.patcog.2008.11.030) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.lb_improved` — LB_Improved lower bound on windowed DTW (Lemire 2009), at least as tight as LB_Keogh.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `dtwclust` | `lb_improved` | high |
+
+---
+
+#### Marteau, P.F. (2009) — Time Warp Edit Distance with Stiffness Adjustment for Time Series Matching
+
+| Field | Value |
+|-------|-------|
+| Authors | Marteau, P.F. |
+| Year | 2009 |
+| DOI | `doi:10.1109/TPAMI.2008.76` |
+| URL | [https://doi.org/10.1109/TPAMI.2008.76](https://doi.org/10.1109/TPAMI.2008.76) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.elastic_ts_distance` — Elastic distance between two series from the aeon family (DDTW, WDTW, ERP, EDR, TWE, MSM, LCSS, shape-DTW...).
+- `metric.elastic_ts_pairwise_distance` — Pairwise elastic-distance matrix of a set of curves (aeon `<metric>_pairwise_distance`).
+- `metric.elastic_ts_cost_matrix` — Accumulated elastic-distance cost matrix of two series (aeon `<metric>_cost_matrix`).
+- `metric.elastic_ts_alignment_path` — Optimal elastic-distance alignment path and distance (aeon `<metric>_alignment_path`).
+- `metric.elastic_ts_distance_multivariate` — Elastic distance between two multivariate (d, m) series (aeon multichannel semantics).
+- `metric.elastic_ts_pairwise_distance_multivariate` — Pairwise elastic-distance matrix of a collection of multivariate series.
+- `metric.elastic_ts_cost_matrix_multivariate` — Accumulated elastic-distance cost matrix of two multivariate (d, m) series.
+- `metric.elastic_ts_alignment_path_multivariate` — Optimal elastic-distance alignment path and distance of two multivariate (d, m) series.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `aeon` | `twe_distance` | high |
+
+---
+
+#### Paparrizos, J., Gravano, L. (2015) — k-Shape: Efficient and Accurate Clustering of Time Series
+
+| Field | Value |
+|-------|-------|
+| Authors | Paparrizos, J., Gravano, L. |
+| Year | 2015 |
+| DOI | `doi:10.1145/2723372.2737793` |
+| URL | [https://doi.org/10.1145/2723372.2737793](https://doi.org/10.1145/2723372.2737793) |
+| Type | conference |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.sbd` — Shape-based distance (Paparrizos and Gravano 2015) and the optimal signed lag.
+- `metric.sbd_distance_matrix` — Pairwise shape-based distance matrix of a set of curves.
+- `clustering.kshape_fd` — k-Shape clustering of curves by shape-based distance (Paparrizos & Gravano 2015).
+- `clustering.sbd_kmedoids` — k-medoids clustering of curves on the shape-based distance (SBD) matrix.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `tslearn` | `KShape` | high |
+| R | `dtwclust` | `SBD` | high |
+
+---
+
+#### Petitjean, F., Ketterlin, A., Gançarski, P. (2011) — A global averaging method for dynamic time warping, with applications to clustering
+
+| Field | Value |
+|-------|-------|
+| Authors | Petitjean, F., Ketterlin, A., Gançarski, P. |
+| Year | 2011 |
+| DOI | `doi:10.1016/j.patcog.2010.09.013` |
+| URL | [https://doi.org/10.1016/j.patcog.2010.09.013](https://doi.org/10.1016/j.patcog.2010.09.013) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.dtw_barycenter_averaging` — DTW Barycenter Averaging (DBA, Petitjean et al. 2011) of a set of curves.
+- `metric.dtw_barycenter_averaging_multivariate` — DTW Barycenter Averaging of multivariate (d, m) series (tslearn DBA on (n, sz, d) data).
+- `clustering.dtw_kmeans` — DTW k-means clustering with DBA centroids (tslearn TimeSeriesKMeans(metric="dtw")).
+- `clustering.dtw_kmeans_multivariate` — DTW k-means of multivariate (d, m) series with multivariate DBA centroids.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `tslearn` | `dtw_barycenter_averaging` | high |
+| R | `dtwclust` | `DBA` | high |
 
 ---
 
@@ -842,12 +1240,18 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1109/TASSP.1978.1163055` |
 | URL | [https://ieeexplore.ieee.org/document/1163055](https://ieeexplore.ieee.org/document/1163055) |
 | Type | journal |
-| Status | Pending DOI verification |
+| Status | Curated |
 
 **Callables implementing this method:**
 
 - `metric.dtw_self_1d` — DTW distance matrix (self) for 1D data.
 - `metric.dtw_cross_1d` — DTW cross distance for 1D data.
+- `metric.dtw_distance_windowed` — DTW distance between two series under an optional global window (O(m) memory).
+- `metric.dtw_window_mask` — Boolean admissibility grid of a DTW global window for series lengths n and m.
+- `metric.dtw_path` — DTW optimal warping path and accumulated cost under an optional global window.
+- `metric.dtw_path_multivariate` — Dependent multichannel DTW optimal warping path and accumulated cost.
+- `metric.dtw_distance_multivariate` — Dependent multichannel DTW distance between two (d, m) series.
+- `metric.dtw_pairwise_distance_multivariate` — Pairwise dependent multichannel DTW distance matrix of a collection of series.
 
 **Cross-language implementations:**
 
@@ -855,6 +1259,130 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 |----------|---------|----------|------------|
 | Python | `tslearn` | `dtw` | high |
 | R | `dtw` | `dtw` | high |
+
+---
+
+#### Stefan, A., Athitsos, V., Das, G. (2013) — The Move-Split-Merge Metric for Time Series
+
+| Field | Value |
+|-------|-------|
+| Authors | Stefan, A., Athitsos, V., Das, G. |
+| Year | 2013 |
+| DOI | `doi:10.1109/TKDE.2012.88` |
+| URL | [https://doi.org/10.1109/TKDE.2012.88](https://doi.org/10.1109/TKDE.2012.88) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.elastic_ts_distance` — Elastic distance between two series from the aeon family (DDTW, WDTW, ERP, EDR, TWE, MSM, LCSS, shape-DTW...).
+- `metric.elastic_ts_pairwise_distance` — Pairwise elastic-distance matrix of a set of curves (aeon `<metric>_pairwise_distance`).
+- `metric.elastic_ts_cost_matrix` — Accumulated elastic-distance cost matrix of two series (aeon `<metric>_cost_matrix`).
+- `metric.elastic_ts_alignment_path` — Optimal elastic-distance alignment path and distance (aeon `<metric>_alignment_path`).
+- `metric.elastic_ts_distance_multivariate` — Elastic distance between two multivariate (d, m) series (aeon multichannel semantics).
+- `metric.elastic_ts_pairwise_distance_multivariate` — Pairwise elastic-distance matrix of a collection of multivariate series.
+- `metric.elastic_ts_cost_matrix_multivariate` — Accumulated elastic-distance cost matrix of two multivariate (d, m) series.
+- `metric.elastic_ts_alignment_path_multivariate` — Optimal elastic-distance alignment path and distance of two multivariate (d, m) series.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `aeon` | `msm_distance` | high |
+
+---
+
+#### Tan, C.W., Petitjean, F., Webb, G.I. (2019) — Elastic bands across the path: A new framework and method to lower bound DTW
+
+| Field | Value |
+|-------|-------|
+| Authors | Tan, C.W., Petitjean, F., Webb, G.I. |
+| Year | 2019 |
+| DOI | `doi:10.1137/1.9781611975673.59` |
+| URL | [https://doi.org/10.1137/1.9781611975673.59](https://doi.org/10.1137/1.9781611975673.59) |
+| Type | conference |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.lb_enhanced` — LB_Enhanced lower bound on windowed DTW (Tan et al. 2019) with v boundary bands.
+
+---
+
+#### Vlachos, M., Kollios, G., Gunopulos, D. (2002) — Discovering similar multidimensional trajectories
+
+| Field | Value |
+|-------|-------|
+| Authors | Vlachos, M., Kollios, G., Gunopulos, D. |
+| Year | 2002 |
+| DOI | `doi:10.1109/ICDE.2002.994784` |
+| URL | [https://doi.org/10.1109/ICDE.2002.994784](https://doi.org/10.1109/ICDE.2002.994784) |
+| Type | conference |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.elastic_ts_distance` — Elastic distance between two series from the aeon family (DDTW, WDTW, ERP, EDR, TWE, MSM, LCSS, shape-DTW...).
+- `metric.elastic_ts_pairwise_distance` — Pairwise elastic-distance matrix of a set of curves (aeon `<metric>_pairwise_distance`).
+- `metric.elastic_ts_cost_matrix` — Accumulated elastic-distance cost matrix of two series (aeon `<metric>_cost_matrix`).
+- `metric.elastic_ts_alignment_path` — Optimal elastic-distance alignment path and distance (aeon `<metric>_alignment_path`).
+- `metric.elastic_ts_distance_multivariate` — Elastic distance between two multivariate (d, m) series (aeon multichannel semantics).
+- `metric.elastic_ts_pairwise_distance_multivariate` — Pairwise elastic-distance matrix of a collection of multivariate series.
+- `metric.elastic_ts_cost_matrix_multivariate` — Accumulated elastic-distance cost matrix of two multivariate (d, m) series.
+- `metric.elastic_ts_alignment_path_multivariate` — Optimal elastic-distance alignment path and distance of two multivariate (d, m) series.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `aeon` | `lcss_distance` | high |
+
+---
+
+#### Webb, G.I., Petitjean, F. (2021) — Tight lower bounds for dynamic time warping
+
+| Field | Value |
+|-------|-------|
+| Authors | Webb, G.I., Petitjean, F. |
+| Year | 2021 |
+| DOI | `doi:10.1016/j.patcog.2021.107895` |
+| URL | [https://doi.org/10.1016/j.patcog.2021.107895](https://doi.org/10.1016/j.patcog.2021.107895) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.lb_webb` — LB_Webb lower bound on windowed DTW (Webb and Petitjean 2021).
+
+---
+
+#### Zhao, J., Itti, L. (2018) — shapeDTW: Shape Dynamic Time Warping
+
+| Field | Value |
+|-------|-------|
+| Authors | Zhao, J., Itti, L. |
+| Year | 2018 |
+| DOI | `doi:10.1016/j.patcog.2017.09.020` |
+| URL | [https://doi.org/10.1016/j.patcog.2017.09.020](https://doi.org/10.1016/j.patcog.2017.09.020) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.elastic_ts_distance` — Elastic distance between two series from the aeon family (DDTW, WDTW, ERP, EDR, TWE, MSM, LCSS, shape-DTW...).
+- `metric.elastic_ts_pairwise_distance` — Pairwise elastic-distance matrix of a set of curves (aeon `<metric>_pairwise_distance`).
+- `metric.elastic_ts_cost_matrix` — Accumulated elastic-distance cost matrix of two series (aeon `<metric>_cost_matrix`).
+- `metric.elastic_ts_alignment_path` — Optimal elastic-distance alignment path and distance (aeon `<metric>_alignment_path`).
+- `metric.elastic_ts_distance_multivariate` — Elastic distance between two multivariate (d, m) series (aeon multichannel semantics).
+- `metric.elastic_ts_pairwise_distance_multivariate` — Pairwise elastic-distance matrix of a collection of multivariate series.
+- `metric.elastic_ts_cost_matrix_multivariate` — Accumulated elastic-distance cost matrix of two multivariate (d, m) series.
+- `metric.elastic_ts_alignment_path_multivariate` — Optimal elastic-distance alignment path and distance of two multivariate (d, m) series.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| Python | `aeon` | `shape_dtw_distance` | high |
 
 ---
 
@@ -926,6 +1454,30 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 ---
 
 ### fdars.pace_fpca — PACE: Principal Analysis by Conditional Expectation for sparse data
+
+#### Ji, H., Müller, H.G. (2017) — Optimal Designs for Longitudinal and Functional Data
+
+| Field | Value |
+|-------|-------|
+| Authors | Ji, H., Müller, H.G. |
+| Year | 2017 |
+| DOI | `doi:10.1111/rssb.12192` |
+| URL | [https://doi.org/10.1111/rssb.12192](https://doi.org/10.1111/rssb.12192) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `pace_fpca.optimal_design` — Greedy optimal design: choose the work-grid points that best reduce a PACE criterion.
+- `pace_fpca.design_criterion` — Score a set of design points (work-grid indices) against a fitted PACE model.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `fdapace` | `FOptDes` | high |
+
+---
 
 #### Yao, F., Müller, H.G., Wang, J.L. (2005) — Functional data analysis for sparse longitudinal data
 
@@ -1022,6 +1574,100 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
 ---
 
+### fdars.scalar_on_function — Scalar-on-function regression with regularisation
+
+#### Kundu, M.G., Harezlak, J., Randolph, T.W. (2016) — Longitudinal functional models with structured penalties
+
+| Field | Value |
+|-------|-------|
+| Authors | Kundu, M.G., Harezlak, J., Randolph, T.W. |
+| Year | 2016 |
+| DOI | `doi:10.1177/1471082X15626291` |
+| URL | [https://doi.org/10.1177/1471082X15626291](https://doi.org/10.1177/1471082X15626291) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `scalar_on_function.lpeer` — Longitudinal PEER: structured-penalty regression with a subject random intercept.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `refund` | `lpeer` | high |
+
+---
+
+#### Randolph, T.W., Harezlak, J., Feng, Z. (2012) — Structured penalties for functional linear models—partially empirical eigenvectors for regression
+
+| Field | Value |
+|-------|-------|
+| Authors | Randolph, T.W., Harezlak, J., Feng, Z. |
+| Year | 2012 |
+| DOI | `doi:10.1214/12-EJS676` |
+| URL | [https://doi.org/10.1214/12-EJS676](https://doi.org/10.1214/12-EJS676) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `scalar_on_function.peer` — PEER structured-penalty scalar-on-function regression with GCV / REML / fixed lambda.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `refund` | `peer` | high |
+
+---
+
+#### Reiss, P.T., Huo, L., Zhao, Y., Kelly, C., Ogden, R.T. (2015) — Wavelet-domain regression and predictive inference in psychiatric neuroimaging
+
+| Field | Value |
+|-------|-------|
+| Authors | Reiss, P.T., Huo, L., Zhao, Y., Kelly, C., Ogden, R.T. |
+| Year | 2015 |
+| DOI | `doi:10.1214/15-AOAS829` |
+| URL | [https://doi.org/10.1214/15-AOAS829](https://doi.org/10.1214/15-AOAS829) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `scalar_on_function.wcr` — Wavelet-domain scalar-on-function regression (PCR or PLS on DWT coefficients).
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `refund.wave` | `wcr` | high |
+
+---
+
+#### Zhao, Y., Ogden, R.T., Reiss, P.T. (2012) — Wavelet-based LASSO in functional linear regression
+
+| Field | Value |
+|-------|-------|
+| Authors | Zhao, Y., Ogden, R.T., Reiss, P.T. |
+| Year | 2012 |
+| DOI | `doi:10.1080/10618600.2012.679241` |
+| URL | [https://doi.org/10.1080/10618600.2012.679241](https://doi.org/10.1080/10618600.2012.679241) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `scalar_on_function.wnet` — Wavelet-domain elastic-net scalar-on-function regression with cross-validated lambda.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `refund.wave` | `wnet` | high |
+
+---
+
 ### fdars.shapelet — Functional shapelets — pattern-based classification and feature learning
 
 #### Ye, L., Keogh, E. (2009) — Time series shapelets: a new primitive for data mining
@@ -1112,5 +1758,41 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | Language | Package | Function | Confidence |
 |----------|---------|----------|------------|
 | R | `MFPCA` | `MFPCA` | high |
+
+---
+
+### fdars.tolerance — Functional tolerance bands — simultaneous and pointwise coverage
+
+#### Adams, J., Berman, B., Michalenko, J., Tucker, J.D. (2025) — Conformal Anomaly Detection for Functional Data with Elastic Distance Metrics
+
+| Field | Value |
+|-------|-------|
+| Authors | Adams, J., Berman, B., Michalenko, J., Tucker, J.D. |
+| Year | 2025 |
+| URL | [https://arxiv.org/abs/2504.01172](https://arxiv.org/abs/2504.01172) |
+| Type | preprint |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `tolerance.elastic_conformal_anomaly` — Inductive conformal anomaly detection with elastic amplitude / phase nonconformity scores.
+- `tolerance.elastic_nonconformity` — Elastic nonconformity score of one curve against a template.
+
+---
+
+#### Vovk, V., Gammerman, A., Shafer, G. (2005) — Algorithmic Learning in a Random World
+
+| Field | Value |
+|-------|-------|
+| Authors | Vovk, V., Gammerman, A., Shafer, G. |
+| Year | 2005 |
+| DOI | `doi:10.1007/b106715` |
+| URL | [https://doi.org/10.1007/b106715](https://doi.org/10.1007/b106715) |
+| Type | book |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `tolerance.elastic_conformal_anomaly` — Inductive conformal anomaly detection with elastic amplitude / phase nonconformity scores.
 
 ---

@@ -101,20 +101,8 @@
           "confidence": "low"
         }
       },
-      "notes": "SRSF framework via Fisher-Rao metric; arXiv:1103.3817. NOT the TPAMI SRV/shape paper. Extended in 81-04 to cover additional distance/decomposition callables. align_cluster_fd moved to _uncurated_align_cluster_fd_2026-09 sentinel (contested attribution — see that entry).",
+      "notes": "SRSF framework via Fisher-Rao metric; arXiv:1103.3817. NOT the TPAMI SRV/shape paper. Extended in 81-04 to cover additional distance/decomposition callables. align_cluster_fd is attributed to sangalli_et_al_2010 (cited by fdars-core clustering_advanced.rs); the former _uncurated_align_cluster_fd_2026-09 sentinel was removed 2026-11-26.",
       "curated": true
-    },
-    "_uncurated_align_cluster_fd_2026-09": {
-      "title": "",
-      "authors": [],
-      "year": null,
-      "url": "",
-      "type": "preprint",
-      "callables": [
-        "clustering.align_cluster_fd"
-      ],
-      "notes": "Contested attribution — no single curated:true pick permitted per Phase-81 milestone rule. Primary candidate: Srivastava et al. 2011 (arXiv:1103.3817) for the SRSF/Karcher-mean framework used in elastic k-means clustering. fdars-core 0.33.0 alignment/clustering.rs cites arXiv:1103.3817 in module doc, but align_cluster_fd is a clustering callable not directly introduced in that alignment paper. No standalone clustering paper identified that covers this exact elastic k-means-in-SRSF-metric method. curated:false — contested; do not promote to single curated:true until fdars-core source confirms the primary reference unambiguously.",
-      "curated": false
     },
     "ramsay_dalzell_1991": {
       "title": "Some tools for functional data analysis",
@@ -673,7 +661,8 @@
         "alignment.horiz_fpca",
         "alignment.joint_fpca",
         "alignment.gauss_model",
-        "alignment.joint_gauss_model"
+        "alignment.joint_gauss_model",
+        "alignment.jfpca_fit"
       ],
       "cross_language": {
         "Python": {
@@ -689,8 +678,8 @@
           "confidence": "high"
         }
       },
-      "notes": "Introduces generative models for functional data using phase/amplitude separation: vertical FPCA (vert_fpca), horizontal FPCA (horiz_fpca), joint FPCA (joint_fpca), and Gaussian process models (gauss_model, joint_gauss_model) in the SRSF framework. [CITED: sciencedirect.com — arXiv:1212.1791; CSDA 58:222-236, 2013.] DOI 10.1016/j.csda.2012.12.001 is [ASSUMED] — plausible from web search description; not landing-page-verified this session. curated:false until Phase 84 direct DOI-landing-page personal verification.",
-      "curated": false
+      "notes": "Introduces generative models for functional data using phase/amplitude separation: vertical FPCA (vert_fpca), horizontal FPCA (horiz_fpca), joint FPCA (joint_fpca, and its reusable fit/transform model jfpca_fit), and Gaussian process models (gauss_model, joint_gauss_model) in the SRSF framework. CSDA 61:50-66, May 2013 (arXiv:1212.1791). [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.csda.2012.12.001 — title, author list, year, volume 61 and pages 50-66 match; an earlier note giving 'CSDA 58:222-236' was wrong.] fdasrvf::jointFPCA additionally cites Lee & Jung (arXiv:1603.01775) for the combined amplitude+phase analysis.",
+      "curated": true
     },
     "marron_ramsay_sangalli_srivastava_2015": {
       "title": "Functional Data Analysis of Amplitude and Phase Variation",
@@ -746,8 +735,8 @@
           "confidence": "high"
         }
       },
-      "notes": "Introduces elastic functional changepoint detection in curve sequences using the SRSF framework. Won the 2024 Wiley-TIES Best Environmetrics Paper Award. [CITED: onlinelibrary.wiley.com/doi/10.1002/env.2826 — Environmetrics 2024, DOI 10.1002/env.2826.] arXiv preprint 2022 (arXiv:2211.12687); published year 2024. fdars-core alignment/changepoint.rs cites Tucker & Yarger 2024 Environmetrics in module doc. curated:false until Phase 84 direct DOI-landing-page personal verification.",
-      "curated": false
+      "notes": "Introduces elastic functional changepoint detection in curve sequences using the SRSF framework. Environmetrics 35(1):e2826. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1002/env.2826 — title and authors match; published online 2023-10-24, issue (print) February 2024.] Year 2024 is the journal issue year per the schema rule (not the online-first date); fdars-core elastic_changepoint.rs says 'Tucker & Yarger (2023)', which is the online-first year of the same paper. arXiv preprint 2022 (arXiv:2211.12687).",
+      "curated": true
     },
     "_uncurated_alignment_variants_2026-09": {
       "title": "",
@@ -811,7 +800,13 @@
       "type": "journal",
       "callables": [
         "metric.dtw_self_1d",
-        "metric.dtw_cross_1d"
+        "metric.dtw_cross_1d",
+        "metric.dtw_distance_windowed",
+        "metric.dtw_window_mask",
+        "metric.dtw_path",
+        "metric.dtw_path_multivariate",
+        "metric.dtw_distance_multivariate",
+        "metric.dtw_pairwise_distance_multivariate"
       ],
       "cross_language": {
         "R": {
@@ -827,15 +822,14 @@
           "confidence": "high"
         }
       },
-      "notes": "Introduces Dynamic Time Warping (DTW) for time-series comparison via dynamic programming. [CITED: ieeexplore.ieee.org — IEEE TASSP Vol 26, No 1, 1978, DOI 10.1109/TASSP.1978.1163055.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
-      "curated": false
+      "notes": "Introduces Dynamic Time Warping (DTW) for time-series comparison via dynamic programming, with the Sakoe-Chiba band global constraint. IEEE TASSP 26(1):43-49, 1978. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1109/TASSP.1978.1163055 — title, author list and year match the registry record.] Windowed / path / multivariate DTW callables added 2026-11-26 (the window also offers the Itakura parallelogram, which is not from this paper).",
+      "curated": true
     },
     "cuturi_2011": {
       "title": "Fast global alignment kernels",
       "authors": ["Cuturi, M."],
       "year": 2011,
-      "doi": "10.5555/3104482.3104599",
-      "url": "https://dl.acm.org/doi/10.5555/3104482.3104599",
+      "url": "https://icml.cc/2011/papers/489_icmlpaper.pdf",
       "type": "conference",
       "callables": [
         "metric.gak",
@@ -843,7 +837,8 @@
         "metric.gak_gram_train",
         "metric.gak_gram_predict",
         "metric.sigma_gak",
-        "metric.PyGakGramTrain"
+        "metric.PyGakGramTrain",
+        "metric.gak_triangular"
       ],
       "cross_language": {
         "R": {
@@ -859,8 +854,8 @@
           "confidence": "high"
         }
       },
-      "notes": "Introduces the Global Alignment Kernel (GAK) for time-series — a positive definite kernel from soft-DTW alignment. [CITED: dl.acm.org/doi/10.5555/3104482.3104599 — ICML 2011 proceedings. DOI prefix 10.5555 (4 digits) matches GATE-05 C regex.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
-      "curated": false
+      "notes": "Introduces the triangular Global Alignment Kernel (TGAK) for time series — a positive definite kernel summing over all DTW alignments, with the triangular parameter T. ICML 2011. [VERIFIED 2026-11-26: title and sole author read from the ICML 2011 proceedings PDF icml.cc/2011/papers/489_icmlpaper.pdf.] The former DOI 10.5555/3104482.3104599 was removed: it is an ACM-internal identifier that does not resolve at doi.org (HTTP 404) and is not in Crossref. gak_triangular added 2026-11-26 (fdars-core metric/gak.rs cites Cuturi 2011 for T).",
+      "curated": true
     },
     "cuturi_blondel_2017": {
       "title": "Soft-DTW: a differentiable loss function for time-series",
@@ -871,7 +866,10 @@
       "type": "conference",
       "callables": [
         "metric.soft_dtw_self_1d",
-        "metric.soft_dtw_cross_1d"
+        "metric.soft_dtw_cross_1d",
+        "metric.soft_dtw_barycenter",
+        "metric.soft_dtw_alignment",
+        "metric.soft_dtw_distance_windowed"
       ],
       "cross_language": {
         "Python": {
@@ -881,7 +879,7 @@
           "confidence": "high"
         }
       },
-      "notes": "Introduces soft-DTW as a differentiable loss function for time-series. ICML 2017 (PMLR v70). NO journal DOI — PMLR proceedings have no DOI assigned. doi:'' with curated:true is allowed by GATE-05 C (empty doi is skipped by the gate). [CITED: proceedings.mlr.press/v70/cuturi17a.html — confirmed via web search.] soft-DTW divergence (div variants) moved to blondel_et_al_2021 which is their primary paper.",
+      "notes": "Introduces soft-DTW as a differentiable loss function for time-series, including soft-DTW barycenters and the expected alignment matrix (gradient). ICML 2017 (PMLR v70). NO journal DOI — PMLR proceedings have no DOI assigned. doi:'' with curated:true is allowed by GATE-05 C (empty doi is skipped by the gate). [CITED: proceedings.mlr.press/v70/cuturi17a.html — confirmed via web search.] soft-DTW divergence (div variants) moved to blondel_et_al_2021 which is their primary paper. soft_dtw_barycenter, soft_dtw_alignment and soft_dtw_distance_windowed added 2026-11-26.",
       "curated": true
     },
     "blondel_et_al_2021": {
@@ -1185,6 +1183,623 @@
       ],
       "notes": "Extends FAMM to the multivariate functional setting (multiFAMM). FAMM lineage is clear (NOT contested per 81-RESEARCH §3.15). [CITED: journals.sagepub.com — Stat. Modelling Vol 22, 2022/2023, DOI 10.1177/1471082X211056158.] curated:false until Phase 84 direct DOI-landing-page personal verification.",
       "curated": false
+    },
+    "randolph_harezlak_feng_2012": {
+      "title": "Structured penalties for functional linear models—partially empirical eigenvectors for regression",
+      "authors": ["Randolph, T.W.", "Harezlak, J.", "Feng, Z."],
+      "year": 2012,
+      "doi": "10.1214/12-EJS676",
+      "url": "https://doi.org/10.1214/12-EJS676",
+      "type": "journal",
+      "callables": [
+        "scalar_on_function.peer"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "refund",
+          "function": "peer",
+          "url": "https://rdrr.io/cran/refund/man/peer.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces PEER (partially empirical eigenvectors for regression): scalar-on-function regression with a structured (decomposition-based) penalty, of which ridge and second-difference penalties are special cases. Electronic Journal of Statistics 6:323-353. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1214/12-EJS676 — title, author list and year match the registry record.] refund::peer cites this paper.",
+      "curated": true
+    },
+    "kundu_harezlak_randolph_2016": {
+      "title": "Longitudinal functional models with structured penalties",
+      "authors": ["Kundu, M.G.", "Harezlak, J.", "Randolph, T.W."],
+      "year": 2016,
+      "doi": "10.1177/1471082X15626291",
+      "url": "https://doi.org/10.1177/1471082X15626291",
+      "type": "journal",
+      "callables": [
+        "scalar_on_function.lpeer"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "refund",
+          "function": "lpeer",
+          "url": "https://rdrr.io/cran/refund/man/lpeer.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Extends PEER to longitudinal designs (repeated functional predictors per subject, subject random effects): LPEER. Statistical Modelling 16(2):114-139. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1177/1471082X15626291 — title, author list and year match the registry record.] refund::lpeer cites the arXiv preprint (arXiv:1211.4763) of this paper.",
+      "curated": true
+    },
+    "reiss_et_al_2015": {
+      "title": "Wavelet-domain regression and predictive inference in psychiatric neuroimaging",
+      "authors": ["Reiss, P.T.", "Huo, L.", "Zhao, Y.", "Kelly, C.", "Ogden, R.T."],
+      "year": 2015,
+      "doi": "10.1214/15-AOAS829",
+      "url": "https://doi.org/10.1214/15-AOAS829",
+      "type": "journal",
+      "callables": [
+        "scalar_on_function.wcr"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "refund.wave",
+          "function": "wcr",
+          "url": "https://rdrr.io/cran/refund.wave/man/wcr.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Wavelet-domain scalar-on-function regression by principal component regression / partial least squares on DWT coefficients (the refund.wave `wcr` method). Annals of Applied Statistics 9(2):1076-1101. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1214/15-AOAS829 — title, author list and year match the registry record.] refund.wave::wcr cites this paper (as the 2014 preprint).",
+      "curated": true
+    },
+    "zhao_ogden_reiss_2012": {
+      "title": "Wavelet-based LASSO in functional linear regression",
+      "authors": ["Zhao, Y.", "Ogden, R.T.", "Reiss, P.T."],
+      "year": 2012,
+      "doi": "10.1080/10618600.2012.679241",
+      "url": "https://doi.org/10.1080/10618600.2012.679241",
+      "type": "journal",
+      "callables": [
+        "scalar_on_function.wnet"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "refund.wave",
+          "function": "wnet",
+          "url": "https://rdrr.io/cran/refund.wave/man/wnet.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Sparse (L1-penalized) functional linear regression in the wavelet domain; wnet's elastic net generalizes the LASSO penalty. JCGS 21(3):600-617. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1080/10618600.2012.679241 — title, author list and year match the registry record.] refund.wave::wnet cites this paper. Not mapped to wcr (PCR/PLS, see reiss_et_al_2015).",
+      "curated": true
+    },
+    "petitjean_ketterlin_gancarski_2011": {
+      "title": "A global averaging method for dynamic time warping, with applications to clustering",
+      "authors": ["Petitjean, F.", "Ketterlin, A.", "Gançarski, P."],
+      "year": 2011,
+      "doi": "10.1016/j.patcog.2010.09.013",
+      "url": "https://doi.org/10.1016/j.patcog.2010.09.013",
+      "type": "journal",
+      "callables": [
+        "metric.dtw_barycenter_averaging",
+        "metric.dtw_barycenter_averaging_multivariate",
+        "clustering.dtw_kmeans",
+        "clustering.dtw_kmeans_multivariate"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "tslearn",
+          "function": "dtw_barycenter_averaging",
+          "url": "https://tslearn.readthedocs.io/en/stable/gen_modules/barycenters/tslearn.barycenters.dtw_barycenter_averaging.html",
+          "confidence": "high"
+        },
+        "R": {
+          "package": "dtwclust",
+          "function": "DBA",
+          "url": "https://rdrr.io/cran/dtwclust/man/DBA.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces DTW Barycenter Averaging (DBA) and its use as the centroid update of DTW k-means. Pattern Recognition 44(3):678-693. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2010.09.013 — title, author list and year match the registry record.] fdars-core metric/dba.rs cites this paper; dtw_kmeans.rs uses DBA centroids.",
+      "curated": true
+    },
+    "paparrizos_gravano_2015": {
+      "title": "k-Shape: Efficient and Accurate Clustering of Time Series",
+      "authors": ["Paparrizos, J.", "Gravano, L."],
+      "year": 2015,
+      "doi": "10.1145/2723372.2737793",
+      "url": "https://doi.org/10.1145/2723372.2737793",
+      "type": "conference",
+      "callables": [
+        "metric.sbd",
+        "metric.sbd_distance_matrix",
+        "clustering.kshape_fd",
+        "clustering.sbd_kmedoids"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "tslearn",
+          "function": "KShape",
+          "url": "https://tslearn.readthedocs.io/en/stable/gen_modules/clustering/tslearn.clustering.KShape.html",
+          "confidence": "high"
+        },
+        "R": {
+          "package": "dtwclust",
+          "function": "SBD",
+          "url": "https://rdrr.io/cran/dtwclust/man/SBD.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces the shape-based distance (SBD, normalized cross-correlation) and k-Shape clustering with shape-extraction centroids. Proceedings of ACM SIGMOD 2015, pp. 1855-1870. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1145/2723372.2737793 — title, author list and year match the registry record; Crossref lists the title as 'k-Shape', the full title is from tslearn/dtwclust docs and Semantic Scholar.] fdars-core kshape.rs and metric/sbd.rs cite this paper. sbd_kmedoids is k-medoids on the SBD matrix (SBD part attributed here).",
+      "curated": true
+    },
+    "kim_park_chu_2001": {
+      "title": "An index-based approach for similarity search supporting time warping in large sequence databases",
+      "authors": ["Kim, S.W.", "Park, S.", "Chu, W.W."],
+      "year": 2001,
+      "doi": "10.1109/ICDE.2001.914875",
+      "url": "https://doi.org/10.1109/ICDE.2001.914875",
+      "type": "conference",
+      "callables": [
+        "metric.lb_kim"
+      ],
+      "notes": "Introduces the LB_Kim lower bound on DTW (first/last/min/max features). Proceedings 17th International Conference on Data Engineering (ICDE 2001), pp. 607-614. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1109/ICDE.2001.914875 — title, author list and year match the registry record; year from Semantic Scholar (Crossref record has no date; ICDE 17 = 2001).] fdars-core metric/dtw_lb.rs cites Kim, Park & Chu 2001.",
+      "curated": true
+    },
+    "keogh_2002": {
+      "title": "Exact indexing of dynamic time warping",
+      "authors": ["Keogh, E."],
+      "year": 2002,
+      "doi": "10.1016/B978-155860869-6/50043-3",
+      "url": "https://doi.org/10.1016/B978-155860869-6/50043-3",
+      "type": "conference",
+      "callables": [
+        "metric.lb_keogh",
+        "metric.lb_envelope",
+        "metric.lb_envelope_windowed",
+        "metric.dtw_nearest_neighbor",
+        "metric.dtw_k_nearest_neighbors"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "tslearn",
+          "function": "lb_keogh",
+          "url": "https://tslearn.readthedocs.io/en/stable/gen_modules/metrics/tslearn.metrics.lb_keogh.html",
+          "confidence": "high"
+        },
+        "R": {
+          "package": "dtwclust",
+          "function": "lb_keogh",
+          "url": "https://rdrr.io/cran/dtwclust/man/lb_keogh.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces the LB_Keogh envelope lower bound for DTW and its use for exact nearest-neighbour search. VLDB 2002, pp. 406-417. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/B978-155860869-6/50043-3 — title, author list and year match the registry record.] Not the 2005 KAIS journal version (Keogh & Ratanamahatana). fdars-core metric/dtw_lb.rs cites Keogh 2002; the NN search cascades LB_Kim/LB_Keogh/tighter bounds before (early-abandoning) DTW.",
+      "curated": true
+    },
+    "lemire_2009": {
+      "title": "Faster retrieval with a two-pass dynamic-time-warping lower bound",
+      "authors": ["Lemire, D."],
+      "year": 2009,
+      "doi": "10.1016/j.patcog.2008.11.030",
+      "url": "https://doi.org/10.1016/j.patcog.2008.11.030",
+      "type": "journal",
+      "callables": [
+        "metric.lb_improved"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "dtwclust",
+          "function": "lb_improved",
+          "url": "https://rdrr.io/cran/dtwclust/man/lb_improved.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces LB_Improved, the two-pass DTW lower bound (>= LB_Keogh). Pattern Recognition 42(9):2169-2180. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2008.11.030 — title, author list and year match the registry record.] fdars-core metric/dtw_lb.rs cites Lemire 2009.",
+      "curated": true
+    },
+    "tan_petitjean_webb_2019": {
+      "title": "Elastic bands across the path: A new framework and method to lower bound DTW",
+      "authors": ["Tan, C.W.", "Petitjean, F.", "Webb, G.I."],
+      "year": 2019,
+      "doi": "10.1137/1.9781611975673.59",
+      "url": "https://doi.org/10.1137/1.9781611975673.59",
+      "type": "conference",
+      "callables": [
+        "metric.lb_enhanced"
+      ],
+      "notes": "Introduces LB_Enhanced (elastic bands at both path ends plus LB_Keogh in the middle). Proceedings of the 2019 SIAM International Conference on Data Mining (SDM), pp. 522-530. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1137/1.9781611975673.59 — title, author list and year match the registry record.] fdars-core metric/dtw_lb.rs cites Tan, Petitjean & Webb 2019.",
+      "curated": true
+    },
+    "webb_petitjean_2021": {
+      "title": "Tight lower bounds for dynamic time warping",
+      "authors": ["Webb, G.I.", "Petitjean, F."],
+      "year": 2021,
+      "doi": "10.1016/j.patcog.2021.107895",
+      "url": "https://doi.org/10.1016/j.patcog.2021.107895",
+      "type": "journal",
+      "callables": [
+        "metric.lb_webb"
+      ],
+      "notes": "Introduces LB_Webb (always >= LB_Keogh). Pattern Recognition 115:107895. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2021.107895 — title, author list and year match the registry record.] fdars-core metric/dtw_lb.rs cites this paper.",
+      "curated": true
+    },
+    "herrmann_webb_2021": {
+      "title": "Early abandoning and pruning for elastic distances including dynamic time warping",
+      "authors": ["Herrmann, M.", "Webb, G.I."],
+      "year": 2021,
+      "doi": "10.1007/s10618-021-00782-4",
+      "url": "https://doi.org/10.1007/s10618-021-00782-4",
+      "type": "journal",
+      "callables": [
+        "metric.dtw_distance_early_abandon",
+        "metric.dtw_nearest_neighbor",
+        "metric.dtw_k_nearest_neighbors"
+      ],
+      "notes": "Introduces EAPrunedDTW: exact DTW that prunes and early-abandons against a cutoff; the NN searches use it after the lower-bound cascade. Data Mining and Knowledge Discovery 35(6):2577-2601. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1007/s10618-021-00782-4 — title, author list and year match the registry record.] fdars-core metric/dtw_lb.rs cites Herrmann & Webb 2021.",
+      "curated": true
+    },
+    "keogh_pazzani_2001": {
+      "title": "Derivative Dynamic Time Warping",
+      "authors": ["Keogh, E.J.", "Pazzani, M.J."],
+      "year": 2001,
+      "doi": "10.1137/1.9781611972719.1",
+      "url": "https://doi.org/10.1137/1.9781611972719.1",
+      "type": "conference",
+      "callables": [
+        "metric.elastic_ts_distance",
+        "metric.elastic_ts_pairwise_distance",
+        "metric.elastic_ts_cost_matrix",
+        "metric.elastic_ts_alignment_path",
+        "metric.elastic_ts_distance_multivariate",
+        "metric.elastic_ts_pairwise_distance_multivariate",
+        "metric.elastic_ts_cost_matrix_multivariate",
+        "metric.elastic_ts_alignment_path_multivariate"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "aeon",
+          "function": "ddtw_distance",
+          "url": "https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.distances.ddtw_distance.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces derivative DTW (DDTW). Proceedings of the 2001 SIAM International Conference on Data Mining, pp. 1-11. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1137/1.9781611972719.1 — title, author list and year match the registry record; aeon's docstring says 2002, the registry and the SDM 2001 proceedings say 2001.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'ddtw' option.",
+      "curated": true
+    },
+    "jeong_jeong_omitaomu_2011": {
+      "title": "Weighted dynamic time warping for time series classification",
+      "authors": ["Jeong, Y.S.", "Jeong, M.K.", "Omitaomu, O.A."],
+      "year": 2011,
+      "doi": "10.1016/j.patcog.2010.09.022",
+      "url": "https://doi.org/10.1016/j.patcog.2010.09.022",
+      "type": "journal",
+      "callables": [
+        "metric.elastic_ts_distance",
+        "metric.elastic_ts_pairwise_distance",
+        "metric.elastic_ts_cost_matrix",
+        "metric.elastic_ts_alignment_path",
+        "metric.elastic_ts_distance_multivariate",
+        "metric.elastic_ts_pairwise_distance_multivariate",
+        "metric.elastic_ts_cost_matrix_multivariate",
+        "metric.elastic_ts_alignment_path_multivariate"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "aeon",
+          "function": "wdtw_distance",
+          "url": "https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.distances.wdtw_distance.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces weighted DTW (WDTW, logistic weight on |i-j|) and its derivative variant WDDTW. Pattern Recognition 44(9):2231-2240. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2010.09.022 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'wdtw' / 'wddtw' option.",
+      "curated": true
+    },
+    "herrmann_webb_2023": {
+      "title": "Amercing: An intuitive and effective constraint for dynamic time warping",
+      "authors": ["Herrmann, M.", "Webb, G.I."],
+      "year": 2023,
+      "doi": "10.1016/j.patcog.2023.109333",
+      "url": "https://doi.org/10.1016/j.patcog.2023.109333",
+      "type": "journal",
+      "callables": [
+        "metric.elastic_ts_distance",
+        "metric.elastic_ts_pairwise_distance",
+        "metric.elastic_ts_cost_matrix",
+        "metric.elastic_ts_alignment_path",
+        "metric.elastic_ts_distance_multivariate",
+        "metric.elastic_ts_pairwise_distance_multivariate",
+        "metric.elastic_ts_cost_matrix_multivariate",
+        "metric.elastic_ts_alignment_path_multivariate"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "aeon",
+          "function": "adtw_distance",
+          "url": "https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.distances.adtw_distance.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces amerced DTW (ADTW: a fixed penalty per non-diagonal step). Pattern Recognition 137:109333. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2023.109333 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'adtw' option.",
+      "curated": true
+    },
+    "chen_ng_2004": {
+      "title": "On The Marriage of Lp-norms and Edit Distance",
+      "authors": ["Chen, L.", "Ng, R."],
+      "year": 2004,
+      "doi": "10.1016/B978-012088469-8.50070-X",
+      "url": "https://doi.org/10.1016/B978-012088469-8.50070-X",
+      "type": "conference",
+      "callables": [
+        "metric.elastic_ts_distance",
+        "metric.elastic_ts_pairwise_distance",
+        "metric.elastic_ts_cost_matrix",
+        "metric.elastic_ts_alignment_path",
+        "metric.elastic_ts_distance_multivariate",
+        "metric.elastic_ts_pairwise_distance_multivariate",
+        "metric.elastic_ts_cost_matrix_multivariate",
+        "metric.elastic_ts_alignment_path_multivariate"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "aeon",
+          "function": "erp_distance",
+          "url": "https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.distances.erp_distance.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces edit distance with real penalty (ERP). Proceedings of VLDB 2004, pp. 792-803. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/B978-012088469-8.50070-X — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'erp' option.",
+      "curated": true
+    },
+    "chen_ozsu_oria_2005": {
+      "title": "Robust and fast similarity search for moving object trajectories",
+      "authors": ["Chen, L.", "Özsu, M.T.", "Oria, V."],
+      "year": 2005,
+      "doi": "10.1145/1066157.1066213",
+      "url": "https://doi.org/10.1145/1066157.1066213",
+      "type": "conference",
+      "callables": [
+        "metric.elastic_ts_distance",
+        "metric.elastic_ts_pairwise_distance",
+        "metric.elastic_ts_cost_matrix",
+        "metric.elastic_ts_alignment_path",
+        "metric.elastic_ts_distance_multivariate",
+        "metric.elastic_ts_pairwise_distance_multivariate",
+        "metric.elastic_ts_cost_matrix_multivariate",
+        "metric.elastic_ts_alignment_path_multivariate"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "aeon",
+          "function": "edr_distance",
+          "url": "https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.distances.edr_distance.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces edit distance on real sequences (EDR). Proceedings of ACM SIGMOD 2005, pp. 491-502. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1145/1066157.1066213 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'edr' option.",
+      "curated": true
+    },
+    "marteau_2009": {
+      "title": "Time Warp Edit Distance with Stiffness Adjustment for Time Series Matching",
+      "authors": ["Marteau, P.F."],
+      "year": 2009,
+      "doi": "10.1109/TPAMI.2008.76",
+      "url": "https://doi.org/10.1109/TPAMI.2008.76",
+      "type": "journal",
+      "callables": [
+        "metric.elastic_ts_distance",
+        "metric.elastic_ts_pairwise_distance",
+        "metric.elastic_ts_cost_matrix",
+        "metric.elastic_ts_alignment_path",
+        "metric.elastic_ts_distance_multivariate",
+        "metric.elastic_ts_pairwise_distance_multivariate",
+        "metric.elastic_ts_cost_matrix_multivariate",
+        "metric.elastic_ts_alignment_path_multivariate"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "aeon",
+          "function": "twe_distance",
+          "url": "https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.distances.twe_distance.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces the time warp edit distance (TWE). IEEE TPAMI 31(2):306-318. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1109/TPAMI.2008.76 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'twe' option.",
+      "curated": true
+    },
+    "stefan_athitsos_das_2013": {
+      "title": "The Move-Split-Merge Metric for Time Series",
+      "authors": ["Stefan, A.", "Athitsos, V.", "Das, G."],
+      "year": 2013,
+      "doi": "10.1109/TKDE.2012.88",
+      "url": "https://doi.org/10.1109/TKDE.2012.88",
+      "type": "journal",
+      "callables": [
+        "metric.elastic_ts_distance",
+        "metric.elastic_ts_pairwise_distance",
+        "metric.elastic_ts_cost_matrix",
+        "metric.elastic_ts_alignment_path",
+        "metric.elastic_ts_distance_multivariate",
+        "metric.elastic_ts_pairwise_distance_multivariate",
+        "metric.elastic_ts_cost_matrix_multivariate",
+        "metric.elastic_ts_alignment_path_multivariate"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "aeon",
+          "function": "msm_distance",
+          "url": "https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.distances.msm_distance.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces the move-split-merge (MSM) metric. IEEE TKDE 25(6):1425-1438. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1109/TKDE.2012.88 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'msm' option.",
+      "curated": true
+    },
+    "vlachos_kollios_gunopulos_2002": {
+      "title": "Discovering similar multidimensional trajectories",
+      "authors": ["Vlachos, M.", "Kollios, G.", "Gunopulos, D."],
+      "year": 2002,
+      "doi": "10.1109/ICDE.2002.994784",
+      "url": "https://doi.org/10.1109/ICDE.2002.994784",
+      "type": "conference",
+      "callables": [
+        "metric.elastic_ts_distance",
+        "metric.elastic_ts_pairwise_distance",
+        "metric.elastic_ts_cost_matrix",
+        "metric.elastic_ts_alignment_path",
+        "metric.elastic_ts_distance_multivariate",
+        "metric.elastic_ts_pairwise_distance_multivariate",
+        "metric.elastic_ts_cost_matrix_multivariate",
+        "metric.elastic_ts_alignment_path_multivariate"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "aeon",
+          "function": "lcss_distance",
+          "url": "https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.distances.lcss_distance.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces the longest-common-subsequence (LCSS) similarity for trajectories/time series. Proceedings 18th International Conference on Data Engineering (ICDE 2002), pp. 673-684. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1109/ICDE.2002.994784 — title, author list and year match the registry record; year from Semantic Scholar (Crossref record has no date; ICDE 18 = 2002).] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'lcss' option.",
+      "curated": true
+    },
+    "zhao_itti_2018": {
+      "title": "shapeDTW: Shape Dynamic Time Warping",
+      "authors": ["Zhao, J.", "Itti, L."],
+      "year": 2018,
+      "doi": "10.1016/j.patcog.2017.09.020",
+      "url": "https://doi.org/10.1016/j.patcog.2017.09.020",
+      "type": "journal",
+      "callables": [
+        "metric.elastic_ts_distance",
+        "metric.elastic_ts_pairwise_distance",
+        "metric.elastic_ts_cost_matrix",
+        "metric.elastic_ts_alignment_path",
+        "metric.elastic_ts_distance_multivariate",
+        "metric.elastic_ts_pairwise_distance_multivariate",
+        "metric.elastic_ts_cost_matrix_multivariate",
+        "metric.elastic_ts_alignment_path_multivariate"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "aeon",
+          "function": "shape_dtw_distance",
+          "url": "https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.distances.shape_dtw_distance.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces shape DTW (DTW on local subsequence shape descriptors). Pattern Recognition 74:171-184. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2017.09.020 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'shape_dtw' option.",
+      "curated": true
+    },
+    "anderson_2001": {
+      "title": "A new method for non-parametric multivariate analysis of variance",
+      "authors": ["Anderson, M.J."],
+      "year": 2001,
+      "doi": "10.1111/j.1442-9993.2001.01070.pp.x",
+      "url": "https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x",
+      "type": "journal",
+      "callables": [
+        "inference.permanova",
+        "alignment.elastic_phase_amplitude_test"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "vegan",
+          "function": "adonis2",
+          "url": "https://rdrr.io/cran/vegan/man/adonis.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces PERMANOVA: distance-based pseudo-F with a permutation p-value. Austral Ecology 26(1):32-46. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1111/j.1442-9993.2001.01070.pp.x — title, author list and year match the registry record.] fdars-core inference/permanova.rs cites Anderson (2001); alignment/phase_amplitude_test.rs runs this one-way PERMANOVA on elastic amplitude and Fisher-Rao phase distance matrices.",
+      "curated": true
+    },
+    "ji_muller_2017": {
+      "title": "Optimal Designs for Longitudinal and Functional Data",
+      "authors": ["Ji, H.", "Müller, H.G."],
+      "year": 2017,
+      "doi": "10.1111/rssb.12192",
+      "url": "https://doi.org/10.1111/rssb.12192",
+      "type": "journal",
+      "callables": [
+        "pace_fpca.optimal_design",
+        "pace_fpca.design_criterion"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdapace",
+          "function": "FOptDes",
+          "url": "https://rdrr.io/cran/fdapace/man/FOptDes.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Optimal designs (trajectory-recovery and FPC-score criteria) for sparse longitudinal/functional data under the PACE model. JRSS-B 79(3):859-876. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1111/rssb.12192 — title, author list and year match the registry record.] fdars-core optimal_design.rs cites Ji & Müller (2017); fdapace::FOptDes cites the same paper.",
+      "curated": true
+    },
+    "sangalli_et_al_2010": {
+      "title": "k-mean alignment for curve clustering",
+      "authors": ["Sangalli, L.M.", "Secchi, P.", "Vantini, S.", "Vitelli, V."],
+      "year": 2010,
+      "doi": "10.1016/j.csda.2009.12.008",
+      "url": "https://doi.org/10.1016/j.csda.2009.12.008",
+      "type": "journal",
+      "callables": [
+        "clustering.align_cluster_fd"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdasrvf",
+          "function": "kmeans_align",
+          "url": "https://rdrr.io/cran/fdasrvf/man/kmeans_align.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces k-mean alignment: joint clustering and alignment of curves, alternating template estimation and warp-plus-assignment steps. CSDA 54(5):1219-1233. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.csda.2009.12.008 — title, author list and year match the registry record; Crossref drops the italic 'k' from the title.] fdars-core clustering_advanced.rs cites Sangalli et al. (2010) for align_cluster_fd (together with the fdasrvf elastic k-means variant built on Srivastava et al. 2011); fdasrvf::kmeans_align cites both. Replaces the former _uncurated_align_cluster_fd_2026-09 sentinel now that the core source names this paper.",
+      "curated": true
+    },
+    "daubechies_1992": {
+      "title": "Ten Lectures on Wavelets",
+      "authors": ["Daubechies, I."],
+      "year": 1992,
+      "doi": "10.1137/1.9781611970104",
+      "url": "https://doi.org/10.1137/1.9781611970104",
+      "type": "book",
+      "callables": [
+        "basis.wavelet_decompose",
+        "basis.wavelet_decompose_matrix",
+        "basis.wavelet_reconstruct",
+        "basis.wavelet_max_level"
+      ],
+      "cross_language": {
+        "Python": {
+          "package": "PyWavelets",
+          "function": "wavedec",
+          "url": "https://pywavelets.readthedocs.io/en/latest/ref/dwt-discrete-wavelet-transform.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Reference monograph for compactly supported orthonormal (Daubechies) wavelets and their filter banks; fdars-core wavelet/ implements Haar/db1-db10 DWT analysis/synthesis. SIAM CBMS-NSF Regional Conference Series in Applied Mathematics 61. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1137/1.9781611970104 — title, author list and year match the registry record.]",
+      "curated": true
+    },
+    "vovk_gammerman_shafer_2005": {
+      "title": "Algorithmic Learning in a Random World",
+      "authors": ["Vovk, V.", "Gammerman, A.", "Shafer, G."],
+      "year": 2005,
+      "doi": "10.1007/b106715",
+      "url": "https://doi.org/10.1007/b106715",
+      "type": "book",
+      "callables": [
+        "tolerance.elastic_conformal_anomaly"
+      ],
+      "notes": "Monograph introducing conformal prediction and conformal p-values; the inductive (split) conformal p-value used by elastic_conformal_anomaly comes from this framework. Springer, 1st ed. 2005 (ISBN 0-387-00152-2). [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1007/b106715 — title and year 2005; the registry record has no author list, authors confirmed via OpenLibrary and the ACM SIGACT News review (doi 10.1145/1189056.1189065).] Not the 2022 2nd edition (doi 10.1007/978-3-031-06649-8).",
+      "curated": true
+    },
+    "adams_et_al_2025": {
+      "title": "Conformal Anomaly Detection for Functional Data with Elastic Distance Metrics",
+      "authors": ["Adams, J.", "Berman, B.", "Michalenko, J.", "Tucker, J.D."],
+      "year": 2025,
+      "url": "https://arxiv.org/abs/2504.01172",
+      "type": "preprint",
+      "callables": [
+        "tolerance.elastic_conformal_anomaly",
+        "tolerance.elastic_nonconformity"
+      ],
+      "notes": "Inductive conformal anomaly detection for functional data with elastic amplitude/phase nonconformity scores against a Karcher-mean template. arXiv:2504.01172 (stat.ME, 2025). [VERIFIED 2026-11-26: arXiv API export.arxiv.org/api/query?id_list=2504.01172 — title, authors and date match; no journal version found in Crossref (an OSTI report record 10.2172/3547221 exists, not a peer-reviewed venue).]",
+      "curated": true
     }
   },
   "callable_index": {
@@ -1203,7 +1818,6 @@
     "alignment.amplitude_distance": ["srivastava_et_al_2011"],
     "alignment.phase_distance": ["srivastava_et_al_2011"],
     "alignment.elastic_decomposition": ["srivastava_et_al_2011"],
-    "clustering.align_cluster_fd": ["_uncurated_align_cluster_fd_2026-09"],
     "clustering.kmeans_fd": ["chiou_li_2007"],
     "clustering.kcfc_cluster": ["chiou_li_2007"],
     "clustering.funfem_cluster": ["bouveyron_et_al_2015"],
@@ -1430,6 +2044,58 @@
     "multi_fdata.multi_fdata_from_components": ["happ_greven_2018"],
     "famm.dense_flmm": ["scheipl_staicu_greven_2015"],
     "famm.fast_fmm": ["scheipl_staicu_greven_2015"],
-    "famm.multi_famm": ["volkmann_et_al_2023"]
+    "famm.multi_famm": ["volkmann_et_al_2023"],
+    "scalar_on_function.peer": ["randolph_harezlak_feng_2012"],
+    "scalar_on_function.lpeer": ["kundu_harezlak_randolph_2016"],
+    "scalar_on_function.wcr": ["reiss_et_al_2015"],
+    "scalar_on_function.wnet": ["zhao_ogden_reiss_2012"],
+    "metric.dtw_barycenter_averaging": ["petitjean_ketterlin_gancarski_2011"],
+    "metric.dtw_barycenter_averaging_multivariate": ["petitjean_ketterlin_gancarski_2011"],
+    "clustering.dtw_kmeans": ["petitjean_ketterlin_gancarski_2011"],
+    "clustering.dtw_kmeans_multivariate": ["petitjean_ketterlin_gancarski_2011"],
+    "metric.sbd": ["paparrizos_gravano_2015"],
+    "metric.sbd_distance_matrix": ["paparrizos_gravano_2015"],
+    "clustering.kshape_fd": ["paparrizos_gravano_2015"],
+    "clustering.sbd_kmedoids": ["paparrizos_gravano_2015"],
+    "metric.lb_kim": ["kim_park_chu_2001"],
+    "metric.lb_keogh": ["keogh_2002"],
+    "metric.lb_envelope": ["keogh_2002"],
+    "metric.lb_envelope_windowed": ["keogh_2002"],
+    "metric.dtw_nearest_neighbor": ["keogh_2002", "herrmann_webb_2021"],
+    "metric.dtw_k_nearest_neighbors": ["keogh_2002", "herrmann_webb_2021"],
+    "metric.lb_improved": ["lemire_2009"],
+    "metric.lb_enhanced": ["tan_petitjean_webb_2019"],
+    "metric.lb_webb": ["webb_petitjean_2021"],
+    "metric.dtw_distance_early_abandon": ["herrmann_webb_2021"],
+    "metric.elastic_ts_distance": ["keogh_pazzani_2001", "jeong_jeong_omitaomu_2011", "herrmann_webb_2023", "chen_ng_2004", "chen_ozsu_oria_2005", "marteau_2009", "stefan_athitsos_das_2013", "vlachos_kollios_gunopulos_2002", "zhao_itti_2018"],
+    "metric.elastic_ts_pairwise_distance": ["keogh_pazzani_2001", "jeong_jeong_omitaomu_2011", "herrmann_webb_2023", "chen_ng_2004", "chen_ozsu_oria_2005", "marteau_2009", "stefan_athitsos_das_2013", "vlachos_kollios_gunopulos_2002", "zhao_itti_2018"],
+    "metric.elastic_ts_cost_matrix": ["keogh_pazzani_2001", "jeong_jeong_omitaomu_2011", "herrmann_webb_2023", "chen_ng_2004", "chen_ozsu_oria_2005", "marteau_2009", "stefan_athitsos_das_2013", "vlachos_kollios_gunopulos_2002", "zhao_itti_2018"],
+    "metric.elastic_ts_alignment_path": ["keogh_pazzani_2001", "jeong_jeong_omitaomu_2011", "herrmann_webb_2023", "chen_ng_2004", "chen_ozsu_oria_2005", "marteau_2009", "stefan_athitsos_das_2013", "vlachos_kollios_gunopulos_2002", "zhao_itti_2018"],
+    "metric.elastic_ts_distance_multivariate": ["keogh_pazzani_2001", "jeong_jeong_omitaomu_2011", "herrmann_webb_2023", "chen_ng_2004", "chen_ozsu_oria_2005", "marteau_2009", "stefan_athitsos_das_2013", "vlachos_kollios_gunopulos_2002", "zhao_itti_2018"],
+    "metric.elastic_ts_pairwise_distance_multivariate": ["keogh_pazzani_2001", "jeong_jeong_omitaomu_2011", "herrmann_webb_2023", "chen_ng_2004", "chen_ozsu_oria_2005", "marteau_2009", "stefan_athitsos_das_2013", "vlachos_kollios_gunopulos_2002", "zhao_itti_2018"],
+    "metric.elastic_ts_cost_matrix_multivariate": ["keogh_pazzani_2001", "jeong_jeong_omitaomu_2011", "herrmann_webb_2023", "chen_ng_2004", "chen_ozsu_oria_2005", "marteau_2009", "stefan_athitsos_das_2013", "vlachos_kollios_gunopulos_2002", "zhao_itti_2018"],
+    "metric.elastic_ts_alignment_path_multivariate": ["keogh_pazzani_2001", "jeong_jeong_omitaomu_2011", "herrmann_webb_2023", "chen_ng_2004", "chen_ozsu_oria_2005", "marteau_2009", "stefan_athitsos_das_2013", "vlachos_kollios_gunopulos_2002", "zhao_itti_2018"],
+    "inference.permanova": ["anderson_2001"],
+    "alignment.elastic_phase_amplitude_test": ["anderson_2001"],
+    "pace_fpca.optimal_design": ["ji_muller_2017"],
+    "pace_fpca.design_criterion": ["ji_muller_2017"],
+    "clustering.align_cluster_fd": ["sangalli_et_al_2010"],
+    "basis.wavelet_decompose": ["daubechies_1992"],
+    "basis.wavelet_decompose_matrix": ["daubechies_1992"],
+    "basis.wavelet_reconstruct": ["daubechies_1992"],
+    "basis.wavelet_max_level": ["daubechies_1992"],
+    "tolerance.elastic_conformal_anomaly": ["vovk_gammerman_shafer_2005", "adams_et_al_2025"],
+    "tolerance.elastic_nonconformity": ["adams_et_al_2025"],
+    "metric.gak_triangular": ["cuturi_2011"],
+    "metric.soft_dtw_barycenter": ["cuturi_blondel_2017"],
+    "metric.soft_dtw_alignment": ["cuturi_blondel_2017"],
+    "metric.soft_dtw_distance_windowed": ["cuturi_blondel_2017"],
+    "metric.dtw_distance_windowed": ["sakoe_chiba_1978"],
+    "metric.dtw_window_mask": ["sakoe_chiba_1978"],
+    "metric.dtw_path": ["sakoe_chiba_1978"],
+    "metric.dtw_path_multivariate": ["sakoe_chiba_1978"],
+    "metric.dtw_distance_multivariate": ["sakoe_chiba_1978"],
+    "metric.dtw_pairwise_distance_multivariate": ["sakoe_chiba_1978"],
+    "alignment.jfpca_fit": ["tucker_wu_srivastava_2013"]
   }
 }

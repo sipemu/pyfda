@@ -228,37 +228,37 @@ Treat this as a starting point for manual verification only — it has NOT been
 confirmed against fdars-core source code or DOI landing pages."
 ```
 
-**Walkthrough C — `curated: false` Hit (Pending): `clustering.align_cluster_fd` (Path B)**
+**Walkthrough C — `curated: false` Hit (Pending): `clustering.dbscan_fd` (Path B)**
 
-`clustering.align_cluster_fd` is indexed in `callable_index` but its sole backing
-paper is `_uncurated_align_cluster_fd_2026-09` with `curated: false`.
+`clustering.dbscan_fd` is indexed in `callable_index` but its sole backing
+paper is the sentinel `_uncurated_clustering_tail_2026-09` with `curated: false`.
 
 ```
-User: What paper backs clustering.align_cluster_fd?
+User: What paper backs clustering.dbscan_fd?
 
-Step 1: call fdars_method_references("clustering.align_cluster_fd")
+Step 1: call fdars_method_references("clustering.dbscan_fd")
 
 Return:
 {
-  "method": "clustering.align_cluster_fd",
+  "method": "clustering.dbscan_fd",
   "curated": False,
   "papers": [
     {
-      "paper_key": "_uncurated_align_cluster_fd_2026-09",
+      "paper_key": "_uncurated_clustering_tail_2026-09",
       "title": "",
       "authors": [],
       "year": null,
       "curated": False
     }
   ],
-  "coverage": "28/580",
+  "coverage": "94/580",
   "version": "..."
 }
 
 Step 2: curated: False (all papers curated:false) → Path B
-Response: "clustering.align_cluster_fd has a candidate attribution pending
-Phase-84 human DOI-landing-page verification. Attribution is contested —
-no single curated primary paper confirmed.
+Response: "clustering.dbscan_fd has no curated primary paper yet — it adapts a
+general (non-FDA-specific) method and its attribution is pending
+verification.
 
   { "grounded": false, "source": "pending_verification" }
 

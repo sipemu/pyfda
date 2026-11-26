@@ -467,6 +467,9 @@ _ALLOWED_DOMAINS = frozenset({
     "epubs.siam.org",             # SIAM (Agueh & Carlier 2011 Wasserstein)
     "icml.cc",                    # ICML (alternative Cuturi 2011 landing page)
     "www.stat.ucdavis.edu",       # UC Davis PACE Matlab tool
+    # fdars-core 0.48 additions — cross-language package docs (Python)
+    "www.aeon-toolkit.org",       # aeon (elastic time-series distances)
+    "pywavelets.readthedocs.io",  # PyWavelets (DWT)
 })
 
 

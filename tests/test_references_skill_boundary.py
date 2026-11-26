@@ -53,8 +53,8 @@ def test_references_curated_hit_returns_curated_true():
 def test_references_curated_false_hit_returns_path_b():
     """SKILL-02 Path B: curated:false indexed callable returns curated:False without sentinel.
 
-    ``clustering.align_cluster_fd`` is in ``callable_index`` but its sole
-    backing paper (``_uncurated_align_cluster_fd_2026-09``) has ``curated: false``.
+    ``clustering.dbscan_fd`` is in ``callable_index`` but its sole
+    backing paper (``_uncurated_clustering_tail_2026-09``) has ``curated: false``.
     Per Path B, the response must have ``curated: False`` and NO
     ``"NO_CURATED_ENTRY"`` sentinel — the callable IS indexed, just not yet
     DOI-verified.
@@ -62,10 +62,10 @@ def test_references_curated_false_hit_returns_path_b():
     pytest.importorskip("mcp", reason="mcp not installed (Python 3.9 or fdars[mcp] absent)")
     from fdars.mcp.server import fdars_method_references  # noqa: PLC0415
 
-    result = fdars_method_references("clustering.align_cluster_fd")
+    result = fdars_method_references("clustering.dbscan_fd")
 
     assert result["curated"] is False, (
-        "Expected curated:False for clustering.align_cluster_fd "
+        "Expected curated:False for clustering.dbscan_fd "
         "(all backing papers are curated:false)"
     )
     assert result.get("sentinel") != "NO_CURATED_ENTRY", (
