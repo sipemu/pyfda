@@ -4,7 +4,7 @@ Which registration method should you reach for? `fdars` (via its Python bindings
 
 - **Elastic alignment** ([`karcher_mean`](elastic-alignment.md#group-alignment-karcher-mean)) -- global optimization by dynamic programming in SRSF space; smooth warps, no feature detection.
 - **Landmark registration** (numpy, from [Landmark Registration](landmark-registration.md)) -- feature-based piecewise-linear warping; interpretable, needs reliable landmarks.
-- **Constrained elastic** ([`elastic_align_pair_constrained`](advanced-alignment.md#landmark-constrained)) -- elastic optimization that passes *through* landmark anchors; smooth *and* feature-aware.
+- **Constrained elastic** ([`elastic_align_pair_constrained`](landmark-registration.md#landmarks-elastic-between-them)) -- elastic optimization that passes *through* landmark anchors; smooth *and* feature-aware.
 - **TSRVF** ([`tsrvf_transform`](tsrvf.md)) -- not an alignment per se, but a linearization of elastic alignment for downstream PCA/regression/clustering.
 
 This page runs the first three on the same datasets, quantifies what they do to the mean and the variance, and gives a decision guide.
@@ -458,7 +458,7 @@ Each panel isolates a regime where the method choice matters, and the sharpened 
 | No prior on which features correspond; smooth timing differences | **Elastic** (`karcher_mean`) |
 | Want a principled metric / amplitude-phase decomposition | **Elastic** + [Shape Analysis](shape-analysis.md) |
 | Well-defined, domain-meaningful features; need guaranteed correspondence | **Landmark** ([Landmark Registration](landmark-registration.md)) |
-| Features must align exactly *and* the warp between them should be smooth | **Constrained** ([`elastic_align_pair_constrained`](advanced-alignment.md#landmark-constrained)) |
+| Features must align exactly *and* the warp between them should be smooth | **Constrained** ([`elastic_align_pair_constrained`](landmark-registration.md#landmarks-elastic-between-them)) |
 | PCA / regression / clustering on aligned curves | **Elastic** + [TSRVF](tsrvf.md) |
 
 ### Pitfalls

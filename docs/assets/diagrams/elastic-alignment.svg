@@ -2,7 +2,7 @@
      aria-label="Elastic Alignment: Removing Phase to Recover a Sharp Mean"
      aria-labelledby="elastic-alignment-title elastic-alignment-desc">
   <title id="elastic-alignment-title">Elastic Alignment: Removing Phase to Recover a Sharp Mean</title>
-  <desc id="elastic-alignment-desc">Shows how karcher_mean() uses the Fisher-Rao / SRSF framework to iteratively warp curves to a common template, converting a blurred cross-sectional mean (from phase variation) into a sharp aligned mean with a phase γ(t) inset showing the estimated time warps.</desc>
+  <desc id="elastic-alignment-desc">Shows how karcher_mean() works in SRSF space q = sign(f')sqrt|f'|: it starts from the curve nearest the mean SRSF, aligns every curve by dynamic programming under the action (q o gamma)sqrt(gamma'), averages the aligned SRSFs and centres the warps, iterating until the mean stops moving, converting a blurred cross-sectional mean (from phase variation) into a sharp aligned mean with a phase γ(t) inset showing the estimated time warps.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -32,15 +32,20 @@
   <!-- Panel 2: method -->
   <rect x="272" y="70" width="176" height="188" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
   <text class="mono" x="360" y="98" text-anchor="middle" fill="#fd7e14">karcher_mean()</text>
-  <text class="sm" x="360" y="118" text-anchor="middle">Fisher-Rao / SRSF</text>
-  <g transform="translate(292,132)">
-    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
-    <text class="sm" x="12" y="16">SRSF representation</text>
-    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
-    <text class="sm" x="12" y="48">Warp search (DP)</text>
-    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#f8d7b8"/>
-    <text class="sm" x="12" y="80">Iterate to template</text>
+  <text class="sm" x="360" y="116" text-anchor="middle">q = sign(f&#8242;)&#8730;|f&#8242;|</text>
+  <g transform="translate(284,126)">
+    <rect x="0" y="0" width="152" height="22" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="8" y="15">init: nearest-mean curve</text>
+    <rect x="0" y="27" width="152" height="22" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="8" y="42">DP: (q&#8728;&#947;)&#8730;&#947;&#8242; &#8594; template</text>
+    <rect x="0" y="54" width="152" height="22" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="8" y="69">L&#178; mean of aligned q</text>
+    <rect x="0" y="81" width="152" height="22" rx="6" fill="#fff" stroke="#f8d7b8"/>
+    <text class="sm" x="8" y="96">centre warps, iterate</text>
   </g>
+  <path d="M437 218 C446 218 446 164 441 164" stroke="#fd7e14" stroke-width="1.4"/>
+  <path d="M437 164 l6 -3.5 v7 z" fill="#fd7e14"/>
+  <text class="sm" x="360" y="248" text-anchor="middle">until the mean stops moving</text>
 
   <!-- Arrow 2 -->
   <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>

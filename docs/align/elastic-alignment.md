@@ -178,7 +178,13 @@ $$
 \gamma^\* = \arg\min_{\gamma\in\Gamma}\;\big\lVert q_1 - (q_2\circ\gamma)\sqrt{\dot\gamma}\,\big\rVert_{L^2},
 $$
 
-solved by dynamic programming in $O(m^2)$. The aligned function is $f_2\circ\gamma^\*$, and the **elastic distance** is the residual $L^2$ norm. It satisfies all metric axioms and is invariant to reparameterization: $d_e(f_1,f_2)=d_e(f_1\circ\gamma, f_2\circ\gamma)$ for any $\gamma\in\Gamma$.
+The aligned function is $f_2\circ\gamma^\*$, and the **elastic distance** is the residual $L^2$ norm. On the continuous problem it is a metric on curves modulo warping and is invariant to simultaneous reparameterization: $d_e(f_1,f_2)=d_e(f_1\circ\gamma, f_2\circ\gamma)$ for any $\gamma\in\Gamma$.
+
+How fdars computes it:
+
+- **The search uses normalised SRSFs.** The warp minimises $\lVert \bar q_1 - (\bar q_2\circ\gamma)\sqrt{\dot\gamma}\rVert^2 + \lambda P(\gamma)$ with $\bar q_j = q_j/\lVert q_j\rVert$, so the choice of warp does not depend on the overall size of the curves. The reported `distance` is then computed from the **un-normalised** SRSFs, by re-differentiating the warped curve $f_2\circ\gamma^\*$, so it is in the units of the data.
+- **The optimiser** is a dynamic program over a discretised $\Gamma$ by default (globally optimal among warps with slopes between 1/7 and 7), or a Riemannian quasi-Newton method; both, the penalties $P$ and their weight $\lambda$ are described on [Elastic Optimisers & Penalties](elastic-optimisers.md). Every function on this page has a `*_with_config` twin taking those options.
+- **The discretised distance is only approximately symmetric.** `elastic_align_pair(f1, f2)` warps `f2` onto `f1`, and the DP is one-sided. On coarse grids $d(f_1,f_2)$ and $d(f_2,f_1)$ can differ a lot: for a one-bump and a two-bump curve, 0.56 vs 0.94 at $m = 30$, 0.86 vs 0.94 at $m = 101$, 0.92 vs 0.94 at $m = 301$. The gap closes as the grid is refined. The distance-matrix functions compute the upper triangle and mirror it, so their output is symmetric by construction. On coarse grids, use $\tfrac12(d_{12} + d_{21})$ or refine the grid.
 
 ### Amplitude-phase decomposition and variance reduction
 
@@ -203,7 +209,15 @@ $$
 \mu^\* = \arg\min_{\mu\in\mathcal{F}}\;\sum_{i=1}^n d_e(\mu, f_i)^2.
 $$
 
-Because $d_e$ accounts for reparameterization, $\mu^\*$ is a *shape-preserving* average. The algorithm iterates: (1) initialize $\hat\mu$ at the cross-sectional mean, (2) align every curve to $\hat\mu$, (3) update $\hat\mu$ to the mean of the aligned curves, and (4) repeat until $\hat\mu$ stops moving -- typically 5-20 iterations.
+Because $d_e$ accounts for reparameterization, $\mu^\*$ is a *shape-preserving* average. `karcher_mean` computes it in SRSF space as follows:
+
+1. **Template.** Start from the observed curve whose SRSF is nearest the pointwise mean SRSF.
+2. **Pre-centring.** Align all curves to it, and move the template by the inverse of the mean warp (`SqrtMeanInverse`: the Karcher mean of the $\psi_i=\sqrt{\dot\gamma_i}$ on the sphere, inverted), so that the starting template sits in the "average" time frame.
+3. **Iterate.** Align every curve to the current mean SRSF $\mu_q$ and set $\mu_q \leftarrow \frac1n\sum_i (q_i\circ\gamma_i)\sqrt{\dot\gamma_i}$, the $L^2$ mean of the aligned SRSFs. Stop when the relative change of $\mu_q$ is below `tol`. When $m > 50$ and `max_iter` $\ge 10$, the first half of the iterations runs on a grid four times coarser (coarse-to-fine), which is much cheaper.
+4. **Post-centring.** Compose the mean and all warps with the inverse of the mean warp, so that the warps average to the identity and the mean is not drifted early or late.
+5. **Back to a curve.** The mean curve is `srsf_inverse` of $\mu_q$, anchored at the cross-sectional mean value at the first grid point.
+
+`converged=False` is reported, not raised: check it and raise `max_iter` if needed. The result depends (weakly) on the starting template; there is no restart.
 
 ---
 
@@ -235,7 +249,7 @@ print(f"Max alignment residual: {np.max(np.abs(f1 - f2_aligned)):.6f}")
 | `distance` | `float` | Elastic distance after alignment |
 
 !!! tip "Regularization"
-    Increase `lambda_` to penalize complex warping functions and obtain smoother alignments. `0.0` allows unconstrained warping; values around `0.01`--`1.0` give moderate regularization. See [Advanced Alignment](advanced-alignment.md) for penalty variants and cross-validated selection.
+    Increase `lambda_` to penalize complex warping functions and obtain smoother alignments. `0.0` allows unconstrained warping; around `0.01` the warps become much smoother, and by `1.0` they are often close to the identity. The right value depends on the data: see [Elastic Optimisers & Penalties](elastic-optimisers.md#warp-penalties) for the four penalty forms, the RBFGS optimiser and the scale of $\lambda$.
 
 ---
 
@@ -304,37 +318,44 @@ print(render(f))
 
 The blue cross-sectional mean is shorter and wider than any real bump -- averaging shifted peaks pointwise smears them out. The red Karcher mean instead keeps the true peak height and width, because it averages *shapes* after warping rather than heights at fixed times. This height loss is the single clearest symptom of ignoring phase.
 
-### Karcher median (robust central shape)
+### Robust centres: Karcher median and trimmed mean
 
-The Karcher **median** replaces the squared elastic distance with the unsquared distance, producing a more robust central tendency.
+The Karcher mean minimises a sum of *squared* distances, so a few gross outliers can pull it away from the bulk of the sample. Two robust alternatives:
 
-```python
-from fdars.alignment import karcher_median
+- **`karcher_median`** approximately minimises $\sum_i d_e(\mu, f_i)$ (unsquared) by a Weiszfeld iteration: start from a one-iteration Karcher mean, weight each curve by $w_i \propto 1/d_i$, update the estimate as the weighted mean of the **aligned curves** (not of the SRSFs), re-align, and repeat until the SRSF of the estimate stops changing. Each iteration costs about $2n$ alignments.
+- **`robust_karcher_mean`** computes a Karcher mean, drops the `ceil(n * trim_fraction)` farthest curves (keeping at least two), and recomputes the mean from the rest; all curves are then re-aligned to it. `weights` are 1 for kept and 0 for trimmed curves.
 
-result = karcher_median(fd.data, t, lambda_=0.0, max_iter=20, tol=1e-3)
-mu_median = result["mean"]       # elastic median
-weights   = result["weights"]    # observation weights, shape (n,)
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.alignment import karcher_mean, karcher_median, robust_karcher_mean
+
+rng = np.random.default_rng(42)
+n, m = 30, 101
+t = np.linspace(0, 1, m)
+bump = lambda c: np.exp(-((t - c) ** 2) / (2 * 0.12 ** 2))
+data = np.array([rng.normal(3.0, 0.3) * bump(rng.normal(0.5, 0.08)) for _ in range(n)])
+data[0] += 2.0 * np.exp(-((t - 0.2) ** 2) / 0.002)   # spurious early spike
+data[1] *= -0.6                                        # flipped, depressed
+
+mean = np.asarray(karcher_mean(data, t, max_iter=15)["mean"])
+med = karcher_median(data, t, max_iter=15)
+trim = robust_karcher_mean(data, t, trim_fraction=0.1, max_iter=15)
+
+f, ax = fig()
+ax.plot(t, data.T, color="#adb5bd", lw=0.7, alpha=0.4)
+ax.plot(t, mean, color="#dc3545", lw=2.2, label="Karcher mean")
+ax.plot(t, np.asarray(med["mean"]), color="#3f51b5", lw=2.2, label="Karcher median")
+ax.plot(t, np.asarray(trim["mean"]), color="#198754", lw=2.2, ls="--", label="trimmed mean (10%)")
+ax.set(title="Robust vs. standard elastic central shape", xlabel="t", ylabel="f(t)")
+ax.legend(fontsize=9)
+print(render(f))
+w = np.asarray(med["weights"])
+print(f"<p>median weights of the two outliers: {w[0]:.3f}, {w[1]:.3f} (median of all weights {np.median(w):.3f}); "
+      f"curves trimmed: {list(np.flatnonzero(np.asarray(trim['weights']) == 0))}</p>")
 ```
 
-The result has the same keys as `karcher_mean`, plus `weights` -- the iteratively reweighted importance of each observation.
-
-### Robust (trimmed) Karcher mean
-
-When the sample contains outliers, the **robust Karcher mean** down-weights or excludes the most extreme observations.
-
-```python
-from fdars.alignment import robust_karcher_mean
-
-result = robust_karcher_mean(
-    fd.data, t, lambda_=0.0, max_iter=20, tol=1e-3,
-    trim_fraction=0.1,  # discard the 10% most distant curves
-)
-mu_robust = result["mean"]
-weights   = result["weights"]  # zero for trimmed observations
-```
-
-!!! warning
-    Setting `trim_fraction` too high removes legitimate variation. Start at `0.05`--`0.10` and increase only if diagnostics confirm heavy contamination.
+The spike and the flipped curve pull the plain Karcher mean; the median down-weights them and the trimmed mean drops them. Both return the keys of `karcher_mean` plus `weights`; `karcher_median_with_config` and `robust_karcher_mean_with_config` take the optimiser options. Setting `trim_fraction` too high removes legitimate variation: start at 0.05–0.10.
 
 ---
 
@@ -397,11 +418,12 @@ print(f"Compressed near t in {compressed[[0, -1]] if compressed.size else '(none
 
 ## Elastic distance and its decomposition
 
-Compute the elastic (Fisher-Rao) distance between two curves without returning the warp explicitly, then split it into orthogonal amplitude and phase components:
+Compute the elastic (Fisher-Rao) distance between two curves without returning the warp explicitly, and the two quantities that describe what the alignment did:
 
-$$
-d_{\text{elastic}}^2 = d_{\text{amplitude}}^2 + d_{\text{phase}}^2.
-$$
+- the **amplitude distance** is the elastic distance itself, the residual after optimal warping: `amplitude_distance(f1, f2) == elastic_distance(f1, f2)`;
+- the **phase distance** measures the optimal warp, $d_{\text{phase}} = \arccos\bigl(\int_0^1 \sqrt{\dot\gamma^\*}\bigr)$, the Fisher–Rao distance of $\gamma^\*$ from the identity.
+
+They are two separate summaries (one of the residual, one of the warp), not an orthogonal split of a total distance.
 
 ```python
 from fdars.alignment import elastic_distance, amplitude_distance, phase_distance
@@ -415,7 +437,7 @@ print(f"Phase distance:     {d_phase:.4f}")
 print(f"Total (elastic):    {d_total:.4f}")
 ```
 
-For phase-shifted sine curves most of the distance comes from phase (timing), with little amplitude distance -- the shapes are similar once aligned.
+For two phase-shifted sines both are non-zero: the warp cannot move a periodic feature across the fixed end points $\gamma(0)=0$, $\gamma(1)=1$, so some of the shift remains as amplitude. Use the closed-curve aligner (below) for periodic signals.
 
 The single-pair version, `elastic_decomposition`, returns the aligned curve *and* both distances in one call:
 
@@ -444,7 +466,7 @@ t = np.linspace(0, 1, m)
 data = np.array([np.sin(2 * np.pi * (t - rng.uniform(-0.1, 0.1))) for _ in range(n)])
 
 D = np.asarray(elastic_self_distance_matrix(data, t, lambda_=0.0))
-print("Symmetric:    ", bool(np.max(np.abs(D - D.T)) < 1e-8))
+print("Symmetric:    ", bool(np.max(np.abs(D - D.T)) < 1e-8), "(upper triangle mirrored)")
 print("Zero diagonal:", bool(np.max(np.abs(np.diag(D))) < 1e-8))
 
 # Classical MDS embedding of the elastic distances
@@ -541,8 +563,11 @@ print(f"Flagged idx  : {list(np.asarray(diag['flagged_indices']))}")
 |-----|-------------|
 | `health_score` | Overall alignment health in $[0,1]$ (1 = all curves healthy) |
 | `flagged_indices` / `n_flagged` | Curves failing a diagnostic threshold |
+| `flagged` | Per-curve flags |
 | `warp_complexity` / `warp_smoothness` | Per-curve warp metrics |
 | `residuals` | Per-curve post-alignment residual |
+
+The thresholds are `over_alignment_threshold` (warp complexity), `max_bending_energy` (warp smoothness), `min_improvement_ratio` and `under_alignment_threshold`. Note that the last one is applied as a minimum *distance* (curves whose post-alignment residual is below it count as suspiciously perfect), not as the ratio its name suggests.
 
 `pairwise_consistency` complements this by checking whether alignment is internally coherent across triplets of curves; a low value can signal subgroups with genuinely different shapes.
 
@@ -614,7 +639,39 @@ print(render(f))
 The read is intuitive: shifted bumps align almost perfectly; the mixed case leaves *real* amplitude variance behind (not a failure); pure-amplitude data yields identity warps (VR $\approx 0$); and forcing unrelated shapes into register produces little or even negative VR -- a signal to use [depth](../represent/depth-functions.md) or distance methods instead.
 
 !!! warning "Smooth noisy data first"
-    The SRSF transform differentiates the curve, so measurement noise gets amplified and drives spurious warping. Pre-smooth noisy curves (e.g. with a [B-spline basis](../represent/basis-representation.md) or a [kernel smoother](../learn/smoothing.md)) before aligning. A minimum of 50--100 grid points is also recommended -- coarse grids limit the dynamic-programming resolution.
+    The SRSF transform differentiates the curve, so measurement noise gets amplified and drives spurious warping. Pre-smooth noisy curves before aligning: with `srsf_presmooth` (next section), a [B-spline basis](../represent/basis-representation.md) or a [kernel smoother](../learn/smoothing.md). The aligners do **not** smooth for you. A minimum of 50--100 grid points is also recommended -- coarse grids limit the dynamic-programming resolution and make the distance asymmetric.
+
+### Pre-smoothing for SRSFs
+
+`srsf_presmooth(data, argvals, smoothing=..., passes=...)` returns smoothed curves, and `srsf_transform_smoothed` their SRSFs, with the two smoothers of fdasrvf:
+
+- `smoothing="box", passes=k`: $k$ passes of a three-point moving average (fdasrvf `smooth.data`; 25 passes is its default);
+- `smoothing="spline"`: a smoothing spline (fdasrvf `f_to_srvf(smooth=TRUE)`);
+- `smoothing="none"` (default): unchanged.
+
+Smooth, align the smoothed curves, then apply the warps to whatever version of the curves you need. Below, 20 curves with known smooth warps get white noise; the warps estimated from raw and from pre-smoothed data are applied to the *clean* curves, so the remaining variance measures how well the phase was recovered:
+
+```python exec="1" source="above" result="text"
+import numpy as np
+from fdars import alignment as A
+
+rng = np.random.default_rng(0)
+m = 101
+t = np.linspace(0, 1, m)
+mu = lambda s: np.exp(-(s - 0.35) ** 2 / 0.01) + 0.7 * np.exp(-(s - 0.7) ** 2 / 0.006)
+clean = np.array([mu(t + rng.uniform(-0.4, 0.4) * t * (1 - t)) for _ in range(20)])
+noisy = clean + 0.05 * rng.standard_normal(clean.shape)
+
+for label, X in [("raw", noisy),
+                 ("box filter, 25 passes", A.srsf_presmooth(noisy, t, smoothing="box", passes=25)),
+                 ("smoothing spline", A.srsf_presmooth(noisy, t, smoothing="spline"))]:
+    gammas = np.asarray(A.karcher_mean(X, t)["gammas"])
+    reg = np.array([A.reparameterize_curve(c, t, g) for c, g in zip(clean, gammas)])
+    print(f"{label:22s} variance of the warped clean curves / before: {np.var(reg, 0).mean() / np.var(clean, 0).mean():.4f}")
+print("FDARS_FENCE_OK")
+```
+
+Warps estimated from the raw noisy curves leave five to six times more phase variance in the signal than warps estimated after either smoother.
 
 ---
 
@@ -695,8 +752,8 @@ The two distances correlate strongly on clean phase-shifted data. When amplitude
 !!! info "Choosing a method"
     Use **elastic alignment** for localized features with independent timing shifts and when you need a principled mean (`karcher_mean` -- DTW has no equivalent). A plain **DTW distance** is fine for clustering when the metric property is not required, and is more robust on very noisy signals without pre-smoothing.
 
-!!! note "Periodic / circular data (binding gap)"
-    The R package exposes a `periodic=True` mode (circular rotation + elastic alignment) for curves on a ring where $f(0)=f(1)$. The `fdars` Python bindings enforce fixed boundaries $\gamma(0)=0,\ \gamma(1)=1$ and have **no periodic-alignment binding**. For circular data with large phase offsets, pre-rotate each curve (e.g. so its global maximum lands at a fixed grid position) before calling `karcher_mean`; the fixed-boundary warp then only cleans up the residual.
+!!! note "Periodic / circular data"
+    `karcher_mean` and `elastic_align_pair` keep the end points fixed, $\gamma(0)=0$, $\gamma(1)=1$, so they cannot move a feature of a periodic signal across the boundary. For one period of a cyclic signal use `elastic_align_pair_closed` / `karcher_mean_closed`, which also search over the starting point; see [Advanced Elastic Alignment](advanced-alignment.md#6-closed-and-periodic-curves).
 
 ---
 
@@ -817,7 +874,7 @@ print(f"Curves 0 vs 1  amplitude {d_a:.4f}  phase {d_p:.4f}  elastic {D[0, 1]:.4
 
 ---
 
-See [Advanced Alignment](advanced-alignment.md) for penalized, constrained, closed, and multiresolution aligners and cross-validated $\lambda$; [Landmark Registration](landmark-registration.md) for the classical feature-based approach; [TSRVF](tsrvf.md) for linearized statistics on aligned curves; and [Shape Analysis](shape-analysis.md) for elastic FPCA and depth.
+See [Elastic Optimisers & Penalties](elastic-optimisers.md) for DP, RBFGS, penalties and the band; [Advanced Alignment](advanced-alignment.md) for closed, partial, multiresolution and generative tools and the choice of $\lambda$; [Choosing an Alignment Method](choosing-a-method.md) for when another warp class fits better; [Landmark Registration](landmark-registration.md) for the classical feature-based approach; [TSRVF](tsrvf.md) for linearized statistics on aligned curves; and [Shape Analysis](shape-analysis.md) for elastic FPCA and depth.
 
 ## References
 

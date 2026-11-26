@@ -1,15 +1,15 @@
 # Shape Analysis
 
-Two curves can look different point-by-point yet share the same *shape* -- when the difference is only a matter of parameterization (timing), a vertical baseline shift, or an overall magnitude. Shape analysis studies the geometry of functional data *after* factoring out such nuisance transformations. The formal device is a **quotient space**: curves that differ only by a nuisance transformation are identified as the same point. The elastic (Fisher-Rao) framework, via the SRSF representation, makes this quotient geometry computable.
+Two curves can look different point-by-point yet share the same *shape* -- when the difference is only a matter of parameterization (timing), a vertical baseline shift, or an overall magnitude. This page covers real-valued (1-D) curves; for outlines and trajectories in $\mathbb{R}^d$, where rotation and scale are nuisance too, use the `curve_shape_*` functions (documented on the forthcoming *Shapes of Curves in R^d* page). Shape analysis studies the geometry of functional data *after* factoring out such nuisance transformations. The formal device is a **quotient space**: curves that differ only by a nuisance transformation are identified as the same point. The elastic (Fisher-Rao) framework, via the SRSF representation, makes this quotient geometry computable.
 
 `fdars` provides tools for shape representatives and distances (this quotient geometry), for the **shape mean** (a Karcher mean in quotient space), and -- going beyond the quotient basics -- for elastic depth and elastic FPCA that decompose variability into amplitude and phase components.
 
 
 | Function | Role |
 |----------|------|
-| `shape_distance` | Elastic distance between curves modulo warping |
+| `shape_distance` | Elastic distance between two curves modulo warping (equals `elastic_distance`) |
 | `shape_mean` | Karcher mean (average shape) in a chosen quotient |
-| `shape_self_distance_matrix` | All pairwise shape distances (for clustering/MDS) |
+| `shape_self_distance_matrix` | All pairwise distances in a chosen quotient (for clustering/MDS) |
 | `reparameterize_curve` | Apply a warp $\gamma$ to a curve (move within an orbit) |
 
 A sample of curves that share a common *shape* but differ in amplitude and timing (left) collapses onto a single sharp template once the warping is factored out. The elastic **mean shape** -- the Karcher mean under the Fisher-Rao metric (right, orange) -- recovers that template, whereas the naive cross-sectional mean (right, dashed) is flattened by the phase spread.
@@ -182,7 +182,7 @@ $$
 d(q_1,q_2)=\cos^{-1}\!\Bigl(\langle q_1,q_2\rangle_{\mathbb{L}^2}\Bigr),
 $$
 
-and the **shape (elastic) distance** minimizes this over the warping orbit of one curve:
+and the shape distance of the classical theory minimises this arc length over the warping orbit of one curve:
 
 $$
 d_{\mathrm{shape}}\bigl([f_1],[f_2]\bigr)
@@ -192,7 +192,9 @@ d\bigl(q_1,\;(q_2,\gamma)\bigr)
 \cos^{-1}\!\Bigl(\bigl\langle q_1,\,(q_2\circ\gamma)\sqrt{\dot\gamma}\bigr\rangle\Bigr).
 $$
 
-Because the action is by isometries, this infimum is a genuine distance on the quotient $\mathcal{F}/\Gamma$: it is symmetric, non-negative, zero exactly when the orbits coincide, and satisfies the triangle inequality. The optimization over $\gamma$ is solved by dynamic programming. `curve_geodesic` returns the whole minimizing path, not just its endpoints.
+Because the action is by isometries, this infimum is a genuine distance on the quotient $\mathcal{F}/\Gamma$: it is symmetric, non-negative, zero exactly when the orbits coincide, and satisfies the triangle inequality.
+
+Two practical remarks. First, the 1-D functions on this page (`shape_distance`, `elastic_distance`) report the $L^2$ version, $\inf_\gamma \lVert q_1 - (q_2,\gamma)\rVert$, on the un-normalised SRSFs; the arc-length (sphere) version is used when scale is quotiented out, as in the `curve_shape_*` functions with `scale=True`. Second, the infimum is computed by a discretised optimiser (dynamic programming by default), which makes the computed distance only approximately symmetric; see [Elastic Alignment](elastic-alignment.md#alignment-as-optimization). `curve_geodesic` returns a whole path, not just its endpoints.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -226,7 +228,7 @@ print(render(f_))
 print(f"total shape geodesic distance: {darc[-1]:.4f}")
 ```
 
-The right panel is the cleanest diagnostic: the cumulative arc length grows **linearly** in the path parameter, the signature of a constant-speed geodesic connecting the unimodal and bimodal shapes. In curve space (left) the path deforms the single bump toward the two-bump end; because the geodesic lives in the reparameterization quotient, the reconstructed intermediates stay close to the start shape until the second bump emerges near the far end, so the linear arc-length growth is the more reliable evidence of the geodesic than any single intermediate curve.
+The right panel is the cleanest diagnostic: the cumulative arc length grows **linearly** in the path parameter, the signature of a constant-speed geodesic. In curve space (left) the intermediates are drawn in $f_1$'s time frame: `curve_geodesic` first aligns $f_2$ to $f_1$ and interpolates the amplitude between $f_1$ and the *aligned* $f_2\circ\gamma$, so the final curve is that aligned version (its bumps sit where $f_1$'s features are), not $f_2$ itself. The phase part of the path is carried by the returned `warps`.
 
 ### The Karcher mean as a shape average
 
@@ -243,7 +245,7 @@ It is computed by alternating between (i) aligning every curve's SRSF to the cur
 
 ## Shape distance (quotient space)
 
-The **shape distance** measures how different two curves are in the quotient space obtained by modding out the group of warping functions. Unlike the raw elastic distance, the shape distance factors out both amplitude scaling and phase variation, leaving only the intrinsic "shape" of the curve.
+The **shape distance** measures how different two curves are in the quotient space obtained by modding out the group of warping functions. `shape_distance(f1, f2, argvals, lambda_=0.0)` uses the reparameterisation quotient only, so it equals `elastic_distance` (it also returns the warp and the aligned curve). It removes phase and vertical offsets (the SRSF ignores those), **not** amplitude scale: `shape_distance(f, 1.5 * f)` is not zero. To quotient out scale, use `shape_self_distance_matrix` or `shape_mean` with `quotient="reparameterization_translation_scale"` (below).
 
 ```python
 import numpy as np
@@ -267,17 +269,36 @@ f2_aligned = result["f2_aligned"]   # f2 after alignment
 | `f2_aligned` | `ndarray (m,)` | Second curve aligned to first |
 
 !!! info "Shape vs. elastic distance"
-    The elastic distance preserves amplitude differences. The shape distance removes them, so two curves with identical shape but different heights have shape distance near zero.
+    For 1-D curves, `shape_distance` and `elastic_distance` are the same number. Amplitude differences are preserved by both; only the scale quotient of the matrix and mean functions removes (approximately) an overall size factor.
 
 ### Orbits and quotient choices
 
 Each curve belongs to an **orbit** -- the set of all curves reachable from it by the nuisance transformations. `reparameterize_curve` moves a curve *within* its reparameterization orbit by applying a warp $\gamma$; the shape tools compare curves *across* orbits. The quotient controls which transformations are factored out:
 
-| `quotient` | Factors out | Use when |
-|------------|-------------|----------|
-| `"reparameterization"` | Warping (timing differences) | Curves traversed at different speeds |
-| `"translation"` | Vertical baseline shifts | Curves at different baselines |
-| `"scale"` | Reparameterization + magnitude | Curves of different overall size |
+| `quotient` | Factors out | Effect in fdars |
+|------------|-------------|----------------|
+| `"reparameterization"` (default) | warping (timing) | the elastic distance and Karcher mean |
+| `"reparameterization_translation"` | + vertical offset | each curve's integral mean is subtracted first; distances are **unchanged** (the SRSF already ignores offsets), only the returned mean is centred |
+| `"reparameterization_translation_scale"` | + overall size | each centred curve is also divided by the $L^2$ norm of its SRSF; this is an **approximate** scale quotient (it rescales the SRSF by $1/\sqrt{\lVert q\rVert}$, so representatives are not unit-norm and scaled copies end up close, not identical) |
+
+!!! warning "Spell the quotient exactly"
+    Any other string, including the shorthand `"translation"` or `"scale"`, silently falls back to `"reparameterization"`. Use the full names above.
+
+```python exec="1" source="above" result="text"
+import numpy as np
+from fdars.alignment import shape_self_distance_matrix, shape_mean
+
+t = np.linspace(0, 1, 101)
+f = np.sin(2 * np.pi * t)
+X = np.array([f, 1.5 * f, 0.5 * f + 2, np.sin(2 * np.pi * t ** 1.3)])   # scaled, scaled+shifted, warped
+for q in ("reparameterization", "reparameterization_translation", "reparameterization_translation_scale"):
+    d = np.asarray(shape_self_distance_matrix(X, t, quotient=q))[0, 1:]
+    mean = np.asarray(shape_mean(X, t, quotient=q)["mean"])
+    print(f"{q:37s} d(f, .) = {np.round(d, 3)}   mean level {mean.mean():+.3f}")
+print("FDARS_FENCE_OK")
+```
+
+The warped copy (last column) is close to $f$ under every quotient. The scaled copies stay at the same distance under the first two quotients; the scale quotient brings them closer, but not to zero.
 
 ```python
 from fdars.alignment import reparameterize_curve
@@ -352,14 +373,14 @@ The within-group distance is small because the only within-group difference -- p
 `shape_mean` returns the same keys as `karcher_mean` (`mean`, `mean_srsf`, `aligned_data`, `gammas`, `n_iter`, `converged`); pass `quotient=` to choose which nuisance to factor out.
 
 !!! tip "Best practices"
-    - Pick the quotient to match the nuisance: `"reparameterization"` for timing, add `"translation"`/`"scale"` for baseline/magnitude.
+    - Pick the quotient to match the nuisance: `"reparameterization"` for timing; `"reparameterization_translation_scale"` when overall size is nuisance too (approximate). Spell the names in full.
     - Check `shape_mean`'s `converged`; raise `max_iter` if it is `False`.
     - Use `lambda_ > 0` to prevent extreme warps on noisy or sparse data.
     - Smooth curves on a common grid before analysis, and inspect the returned `gammas` to gauge how much reparameterization was needed.
 
 ### Uncertainty of the mean shape
 
-A point estimate of the mean shape is not enough — we want a **confidence band** around it. `shape_confidence_interval` bootstraps the sample: it resamples curves with replacement, recomputes the shape mean of each resample, and reports pointwise percentile bands of those bootstrap means. Because the mean is estimated *after* factoring out phase, the band reflects genuine shape (amplitude-in-quotient) uncertainty rather than being inflated by misalignment.
+A point estimate of the mean shape is not enough — we want a **confidence band** around it. `shape_confidence_interval` bootstraps the sample: it resamples curves with replacement, recomputes the Karcher mean of each resample, aligns each bootstrap mean to the full-sample mean, and reports pointwise percentile bands of those aligned means. It uses the reparameterisation quotient only. Because the mean is estimated *after* factoring out phase, the band reflects genuine shape (amplitude-in-quotient) uncertainty rather than being inflated by misalignment.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -412,7 +433,7 @@ The orange band traces where the mean shape is precisely pinned (narrow) versus 
 
 ## Elastic depth
 
-**Elastic depth** ranks functional observations from center to periphery using the elastic metric. It decomposes into amplitude and phase components, enabling separate outlier detection in each source of variability.
+**Elastic depth** ranks functional observations from center to periphery using the elastic metric. It decomposes into amplitude and phase components, enabling separate outlier detection in each source of variability. Each depth is $1/(1 + \bar d_i)$, with $\bar d_i$ the mean amplitude (or phase) distance of curve $i$ to the others, and `combined_depth` is the geometric mean of the two. This is a distance-based centrality, not the lens depth of the literature, and amplitude and phase distances live on different scales, so the combination weights them unevenly.
 
 ```python
 import numpy as np
@@ -531,6 +552,8 @@ print(f"Amplitude variance explained: {cum_var[-1]*100:.1f}%")
 | `cumulative_variance` | `ndarray (k,)` | Cumulative proportion of variance |
 | `mean_q` | `ndarray (m+1,)` | Mean SRSF |
 
+The extra $(m+1)$-th coordinate augments each SRSF with the curve's value at one point (as in fdasrvf, so that vertical level is part of the amplitude); fdars takes that value at the **midpoint** of the grid, not at $t_0$ as its doc comment says.
+
 ### Horizontal (phase) FPCA
 
 Extracts the principal modes of **phase** variation from the estimated warping functions.
@@ -648,7 +671,8 @@ print(f"  Phase depth: {depth['phase_depth'][median_idx]:.4f}")
 ## See also
 
 - [Elastic alignment](elastic-alignment.md) — the pairwise/`karcher_mean` machinery underlying the shape mean.
-- [Amplitude & phase](alignment-comparison.md) — the separated distances that shape distance and elastic depth are built from.
+- [Comparing Methods](alignment-comparison.md) and [Choosing an Alignment Method](choosing-a-method.md).
+- [TSRVF](tsrvf.md) — linear statistics in the tangent space at the mean.
 - `fdars.tolerance` — simultaneous confidence/tolerance bands for aligned means.
 
 ## References
