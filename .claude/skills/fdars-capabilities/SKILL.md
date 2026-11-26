@@ -185,7 +185,7 @@ Return:
       "curated": True
     }
   ],
-  "coverage": "28/580",
+  "coverage": "143/580",
   "version": "..."
 }
 
@@ -251,7 +251,7 @@ Return:
       "curated": False
     }
   ],
-  "coverage": "94/580",
+  "coverage": "143/580",
   "version": "..."
 }
 

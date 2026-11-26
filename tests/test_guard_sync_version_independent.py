@@ -657,6 +657,8 @@ def test_references_map_anti_feature_families_absent():
     - ``depth.functional_depth`` (category dispatcher — attribution belongs to sub-methods)
 
     Allowed exceptions:
+    - ``conformal.partial_conformal_*`` and ``explain.elastic_pfi`` /
+      ``explain.veesa_pipeline`` (FDA-specific papers; see ``anti_feature_allowlist``)
     - ``spm.mfpca`` IS in callable_index (Happ & Greven 2018 — Pitfall 7 in references-schema.md)
     - Per-sub-method depth callables (fraiman_muniz, band, modified_band, modal, etc.) ARE curated
 
@@ -672,10 +674,27 @@ def test_references_map_anti_feature_families_absent():
     # Anti-feature module prefixes — ALL callables in these modules must be absent
     anti_feature_modules = frozenset({"explain", "metrics", "scoring", "conformal", "seasonal"})
 
+    # Per-callable exceptions inside anti-feature modules. These implement
+    # FDA-specific papers (not general ML frameworks), so they carry curated
+    # provenance: partial-curve conformal prediction (Wang, Kurtek & Zhang 2026)
+    # and the VEESA pipeline (Goode et al. 2026). The family-level ban holds for
+    # every other callable in these modules.
+    anti_feature_allowlist = frozenset({
+        "conformal.partial_conformal_fit",
+        "conformal.partial_conformal_fit_with_template",
+        "conformal.partial_conformal_predict",
+        "conformal.partial_conformal_predict_observed",
+        "conformal.partial_conformal_select_bandwidth",
+        "explain.elastic_pfi",
+        "explain.veesa_pipeline",
+    })
+
     violations: list[str] = []
 
     # Check: no callable from the five fully-excluded modules appears in callable_index
     for key in keys:
+        if key in anti_feature_allowlist:
+            continue
         module = key.split(".", 1)[0]
         if module in anti_feature_modules:
             violations.append(

@@ -688,7 +688,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 
 ## Scientific Provenance & Cross-Language Implementations
 
-Coverage: 94 of 580 callables (including 28 Fdata class methods) have curated primary-paper entries.
+Coverage: 143 of 580 callables (including 28 Fdata class methods) have curated primary-paper entries.
 Uncurated callables are absent from this section. A consumer MAY synthesize
 provenance for uncurated callables but MUST flag each synthesized citation as
 ungrounded (grounded: false) — never present synthesized provenance as curated.
@@ -700,23 +700,81 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 
 ### fdars.alignment
 
+- `alignment.ab_closure_residual` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.ab_elastic_distance_pl` — Bauer, M., Charon, N., Klassen, E., Kurtek, S., Needham, T., Pierron, T. (2024) doi:10.1007/s00332-024-10035-5
+- `alignment.ab_elastic_distance_pl` — Lahiri, S., Robinson, D., Klassen, E. (2015) doi:10.4310/GIC.2015.v2.n3.a1
+- `alignment.ab_elastic_match_pl` — Bauer, M., Charon, N., Klassen, E., Kurtek, S., Needham, T., Pierron, T. (2024) doi:10.1007/s00332-024-10035-5
+- `alignment.ab_elastic_match_pl` — Lahiri, S., Robinson, D., Klassen, E. (2015) doi:10.4310/GIC.2015.v2.n3.a1
+- `alignment.ab_project_closed` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.ab_transform` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.ab_transform_inverse` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.amplitude_boxplot_from_aligned` — Xie, W., Kurtek, S., Bharath, K., Sun, Y. (2017) doi:10.1080/01621459.2016.1256813
 - `alignment.amplitude_distance` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.bayesian_align_group` — Lu, Y., Herbei, R., Kurtek, S. (2017) doi:10.1080/10618600.2017.1336444 ; R: fdasrvf::time_warping_bayes
+- `alignment.bayesian_align_group` — Beskos, A., Pinski, F.J., Sanz-Serna, J.M., Stuart, A.M. (2011) doi:10.1016/j.spa.2011.06.003
+- `alignment.bayesian_align_pair` — Cheng, W., Dryden, I.L., Huang, X. (2016) doi:10.1214/15-BA957 ; R: fdasrvf::pair_align_functions_bayes
+- `alignment.continuous_registration` — Ramsay, J.O., Li, X. (1998) doi:10.1111/1467-9868.00129
+- `alignment.curve_shape_align_pair` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.curve_shape_align_pair` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_boxplot` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_boxplot_from_aligned` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_confidence_interval` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.curve_shape_confidence_interval` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_depth` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.curve_shape_depth` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_distance` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.curve_shape_distance` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_karcher_covariance` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_karcher_mean` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.curve_shape_karcher_mean` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_karcher_median` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.curve_shape_karcher_median` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_outlier_detection` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.curve_shape_outlier_detection` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_pca` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_self_distance_matrix` — Needham, T., Kurtek, S. (2020) doi:10.1137/19M1265132
+- `alignment.curve_shape_self_distance_matrix` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_tangent_to_curve` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.curve_shape_tsrvf` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
 - `alignment.elastic_align_pair` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.elastic_align_pair_closed` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.elastic_boxplots` — Xie, W., Kurtek, S., Bharath, K., Sun, Y. (2017) doi:10.1080/01621459.2016.1256813
 - `alignment.elastic_changepoint` — Tucker, J.D., Yarger, D. (2024) doi:10.1002/env.2826 ; Python: fdasrsf.ElasticChangePoint / R: fdasrvf::elastic.changepoint
 - `alignment.elastic_cross_distance_matrix` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
 - `alignment.elastic_decomposition` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
 - `alignment.elastic_distance` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.elastic_dpmeans` — Kulis, B., Jordan, M.I. (2012) ; R: fdasrvf::dpmeans_align
 - `alignment.elastic_phase_amplitude_test` — Anderson, M.J. (2001) doi:10.1111/j.1442-9993.2001.01070.pp.x ; R: vegan::adonis2
+- `alignment.elastic_phase_boxplot` — Xie, W., Kurtek, S., Bharath, K., Sun, Y. (2017) doi:10.1080/01621459.2016.1256813
 - `alignment.elastic_self_distance_matrix` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
 - `alignment.gauss_model` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
+- `alignment.gfpca_two_step` — Gertheiss, J., Goldsmith, J., Staicu, A.M. (2017) doi:10.1016/j.csda.2016.07.010 ; R: registr::gfpca_twoStep
+- `alignment.gfpca_two_step` — Hall, P., Müller, H.G., Yao, F. (2008) doi:10.1111/j.1467-9868.2008.00656.x
+- `alignment.gfpca_variational` — Wrobel, J., Zipunnikov, V., Schrack, J., Goldsmith, J. (2019) doi:10.1111/biom.12963 ; R: registr::register_fpca
+- `alignment.gfpca_variational` — Jaakkola, T.S., Jordan, M.I. (1997) ; R: registr::bfpca
 - `alignment.horiz_fpca` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
 - `alignment.jfpca_fit` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
 - `alignment.joint_fpca` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
 - `alignment.joint_gauss_model` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
 - `alignment.karcher_mean` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.karcher_mean_closed` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.pairwise_synchronization` — Tang, R., Müller, H.G. (2008) doi:10.1093/biomet/asn047 ; R: fdapace::WFDA
+- `alignment.phase_boxplot` — López-Pintado, S., Romo, J. (2009) doi:10.1198/jasa.2009.0108 ; Python: scikit-fda.BandDepth / R: fda.usc::depth.mode
+- `alignment.phase_boxplot_classify` — López-Pintado, S., Romo, J. (2009) doi:10.1198/jasa.2009.0108 ; Python: scikit-fda.BandDepth / R: fda.usc::depth.mode
 - `alignment.phase_distance` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.register_expfam` — Wrobel, J., Zipunnikov, V., Schrack, J., Goldsmith, J. (2019) doi:10.1111/biom.12963 ; R: registr::register_fpca
+- `alignment.register_expfam` — Wrobel, J., Bauer, A. (2021) doi:10.21105/joss.02964
+- `alignment.register_fpca` — Wrobel, J., Zipunnikov, V., Schrack, J., Goldsmith, J. (2019) doi:10.1111/biom.12963 ; R: registr::register_fpca
+- `alignment.register_fpca` — Wrobel, J., Bauer, A. (2021) doi:10.21105/joss.02964
+- `alignment.register_fpca_regular` — Wrobel, J., Zipunnikov, V., Schrack, J., Goldsmith, J. (2019) doi:10.1111/biom.12963 ; R: registr::register_fpca
+- `alignment.register_fpca_regular` — Wrobel, J., Bauer, A. (2021) doi:10.21105/joss.02964
+- `alignment.sparse_curves_from_irreg` — Steyer, L., Stöcker, A., Greven, S. (2023) doi:10.1111/biom.13706 ; R: elasdics::align_curves
+- `alignment.sparse_elastic_align_pair` — Steyer, L., Stöcker, A., Greven, S. (2023) doi:10.1111/biom.13706 ; R: elasdics::align_curves
+- `alignment.sparse_elastic_mean` — Steyer, L., Stöcker, A., Greven, S. (2023) doi:10.1111/biom.13706 ; R: elasdics::align_curves
 - `alignment.srsf_inverse` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
 - `alignment.srsf_transform` — Srivastava, A., Wu, W., Kurtek, S., Klassen, E., Marron, J.S. (2011) ; Matlab: fdasrvf_MATLAB.multiple_align_functions / Python: fdasrsf.fdawarp / R: fdasrvf::multiple_align_functions
+- `alignment.tsrvf_transform` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
+- `alignment.tsrvf_transform_with_method` — Srivastava, A., Klassen, E.P. (2016) doi:10.1007/978-1-4939-4020-2
 - `alignment.vert_fpca` — Tucker, J.D., Wu, W., Srivastava, A. (2013) doi:10.1016/j.csda.2012.12.001 ; Python: fdasrsf.fdavpca / R: fdasrvf::jointFPCA
 
 ### fdars.basis
@@ -741,12 +799,25 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `clustering.kshape_fd` — Paparrizos, J., Gravano, L. (2015) doi:10.1145/2723372.2737793 ; Python: tslearn.KShape / R: dtwclust::SBD
 - `clustering.sbd_kmedoids` — Paparrizos, J., Gravano, L. (2015) doi:10.1145/2723372.2737793 ; Python: tslearn.KShape / R: dtwclust::SBD
 
+### fdars.conformal
+
+- `conformal.partial_conformal_fit` — Wang, F., Kurtek, S., Zhang, Y. (2026) doi:10.1080/10618600.2026.2634823
+- `conformal.partial_conformal_fit_with_template` — Wang, F., Kurtek, S., Zhang, Y. (2026) doi:10.1080/10618600.2026.2634823
+- `conformal.partial_conformal_predict` — Wang, F., Kurtek, S., Zhang, Y. (2026) doi:10.1080/10618600.2026.2634823
+- `conformal.partial_conformal_predict_observed` — Wang, F., Kurtek, S., Zhang, Y. (2026) doi:10.1080/10618600.2026.2634823
+- `conformal.partial_conformal_select_bandwidth` — Wang, F., Kurtek, S., Zhang, Y. (2026) doi:10.1080/10618600.2026.2634823
+
 ### fdars.depth
 
 - `depth.band_1d` — López-Pintado, S., Romo, J. (2009) doi:10.1198/jasa.2009.0108 ; Python: scikit-fda.BandDepth / R: fda.usc::depth.mode
 - `depth.fraiman_muniz_1d` — Fraiman, R., Muniz, G. (2001) doi:10.1007/BF02595706 ; Python: scikit-fda.fraiman_muniz_depth / R: fda.usc::depth.FM
 - `depth.fraiman_muniz_2d` — Fraiman, R., Muniz, G. (2001) doi:10.1007/BF02595706 ; Python: scikit-fda.fraiman_muniz_depth / R: fda.usc::depth.FM
 - `depth.modified_band_1d` — López-Pintado, S., Romo, J. (2009) doi:10.1198/jasa.2009.0108 ; Python: scikit-fda.BandDepth / R: fda.usc::depth.mode
+
+### fdars.explain
+
+- `explain.elastic_pfi` — Goode, K., Tucker, J.D., Ries, D., Hofmann, H. (2026) doi:10.6339/25-JDS1212
+- `explain.veesa_pipeline` — Goode, K., Tucker, J.D., Ries, D., Hofmann, H. (2026) doi:10.6339/25-JDS1212
 
 ### fdars.inference
 
@@ -760,16 +831,22 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `metric.dtw_cross_1d` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
 - `metric.dtw_distance_early_abandon` — Herrmann, M., Webb, G.I. (2021) doi:10.1007/s10618-021-00782-4
 - `metric.dtw_distance_multivariate` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_distance_multivariate` — Itakura, F. (1975) doi:10.1109/TASSP.1975.1162641
 - `metric.dtw_distance_windowed` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_distance_windowed` — Itakura, F. (1975) doi:10.1109/TASSP.1975.1162641
 - `metric.dtw_k_nearest_neighbors` — Keogh, E. (2002) doi:10.1016/B978-155860869-6/50043-3 ; Python: tslearn.lb_keogh / R: dtwclust::lb_keogh
 - `metric.dtw_k_nearest_neighbors` — Herrmann, M., Webb, G.I. (2021) doi:10.1007/s10618-021-00782-4
 - `metric.dtw_nearest_neighbor` — Keogh, E. (2002) doi:10.1016/B978-155860869-6/50043-3 ; Python: tslearn.lb_keogh / R: dtwclust::lb_keogh
 - `metric.dtw_nearest_neighbor` — Herrmann, M., Webb, G.I. (2021) doi:10.1007/s10618-021-00782-4
 - `metric.dtw_pairwise_distance_multivariate` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_pairwise_distance_multivariate` — Itakura, F. (1975) doi:10.1109/TASSP.1975.1162641
 - `metric.dtw_path` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_path` — Itakura, F. (1975) doi:10.1109/TASSP.1975.1162641
 - `metric.dtw_path_multivariate` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_path_multivariate` — Itakura, F. (1975) doi:10.1109/TASSP.1975.1162641
 - `metric.dtw_self_1d` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
 - `metric.dtw_window_mask` — Sakoe, H., Chiba, S. (1978) doi:10.1109/TASSP.1978.1163055 ; Python: tslearn.dtw / R: dtw::dtw
+- `metric.dtw_window_mask` — Itakura, F. (1975) doi:10.1109/TASSP.1975.1162641
 - `metric.elastic_ts_alignment_path` — Keogh, E.J., Pazzani, M.J. (2001) doi:10.1137/1.9781611972719.1 ; Python: aeon.ddtw_distance
 - `metric.elastic_ts_alignment_path` — Jeong, Y.S., Jeong, M.K., Omitaomu, O.A. (2011) doi:10.1016/j.patcog.2010.09.022 ; Python: aeon.wdtw_distance
 - `metric.elastic_ts_alignment_path` — Herrmann, M., Webb, G.I. (2023) doi:10.1016/j.patcog.2023.109333 ; Python: aeon.adtw_distance
@@ -887,7 +964,7 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `tolerance.elastic_conformal_anomaly` — Adams, J., Berman, B., Michalenko, J., Tucker, J.D. (2025)
 - `tolerance.elastic_nonconformity` — Adams, J., Berman, B., Michalenko, J., Tucker, J.D. (2025)
 
-> 486 of 580 total callables are not yet curated and are absent from this section.
+> 437 of 580 total callables are not yet curated and are absent from this section.
 > A consumer MAY synthesize provenance for these callables but MUST structurally
 > flag each synthesized citation as ungrounded: { "grounded": false } per citation.
 > Never present synthesized provenance as curated data from this file.

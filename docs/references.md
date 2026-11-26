@@ -2,12 +2,12 @@
 
 > Curated primary paper references for fdars functional data analysis methods.  
 > Generated offline from `python/fdars/_references_map.json`.  
-> **94/580 callables** have at least one curated primary-paper entry.  
+> **143/580 callables** have at least one curated primary-paper entry.  
 > Uncurated callables are absent; see the [AI Capability Map](ai-capability-map.md) for the full callable surface.
 
 ## Coverage
 
-**94 of 580 public callables** have at least one curated primary-paper entry.
+**143 of 580 public callables** have at least one curated primary-paper entry.
 Remaining callables have contested attribution, no single primary paper, or are pending Phase-84 human DOI-landing-page verification.
 See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
@@ -37,6 +37,189 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
 ### fdars.alignment — Elastic alignment, SRSF registration, Karcher mean, elastic FPCA
 
+#### Bauer, M., Charon, N., Klassen, E., Kurtek, S., Needham, T., Pierron, T. (2024) — Elastic Metrics on Spaces of Euclidean Curves: Theory and Algorithms
+
+| Field | Value |
+|-------|-------|
+| Authors | Bauer, M., Charon, N., Klassen, E., Kurtek, S., Needham, T., Pierron, T. |
+| Year | 2024 |
+| DOI | `doi:10.1007/s00332-024-10035-5` |
+| URL | [https://doi.org/10.1007/s00332-024-10035-5](https://doi.org/10.1007/s00332-024-10035-5) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.ab_elastic_distance_pl` — Exact (a, b) elastic distance between two piecewise-linear curves.
+- `alignment.ab_elastic_match_pl` — Exact (a, b) elastic matching of two piecewise-linear curves (polygons).
+
+---
+
+#### Beskos, A., Pinski, F.J., Sanz-Serna, J.M., Stuart, A.M. (2011) — Hybrid Monte Carlo on Hilbert spaces
+
+| Field | Value |
+|-------|-------|
+| Authors | Beskos, A., Pinski, F.J., Sanz-Serna, J.M., Stuart, A.M. |
+| Year | 2011 |
+| DOI | `doi:10.1016/j.spa.2011.06.003` |
+| URL | [https://doi.org/10.1016/j.spa.2011.06.003](https://doi.org/10.1016/j.spa.2011.06.003) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.bayesian_align_group` — Bayesian group alignment by MCMC with posterior credible bands for warps and template.
+
+---
+
+#### Cheng, W., Dryden, I.L., Huang, X. (2016) — Bayesian Registration of Functions and Curves
+
+| Field | Value |
+|-------|-------|
+| Authors | Cheng, W., Dryden, I.L., Huang, X. |
+| Year | 2016 |
+| DOI | `doi:10.1214/15-BA957` |
+| URL | [https://doi.org/10.1214/15-BA957](https://doi.org/10.1214/15-BA957) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.bayesian_align_pair` — Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `fdasrvf` | `pair_align_functions_bayes` | high |
+
+---
+
+#### Gertheiss, J., Goldsmith, J., Staicu, A.M. (2017) — A note on modeling sparse exponential-family functional response curves
+
+| Field | Value |
+|-------|-------|
+| Authors | Gertheiss, J., Goldsmith, J., Staicu, A.M. |
+| Year | 2017 |
+| DOI | `doi:10.1016/j.csda.2016.07.010` |
+| URL | [https://doi.org/10.1016/j.csda.2016.07.010](https://doi.org/10.1016/j.csda.2016.07.010) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.gfpca_two_step` — Two-step generalized FPCA of exponential-family curves (registr ``gfpca_twoStep``).
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `registr` | `gfpca_twoStep` | high |
+
+---
+
+#### Hall, P., Müller, H.G., Yao, F. (2008) — Modelling Sparse Generalized Longitudinal Observations with Latent Gaussian Processes
+
+| Field | Value |
+|-------|-------|
+| Authors | Hall, P., Müller, H.G., Yao, F. |
+| Year | 2008 |
+| DOI | `doi:10.1111/j.1467-9868.2008.00656.x` |
+| URL | [https://doi.org/10.1111/j.1467-9868.2008.00656.x](https://doi.org/10.1111/j.1467-9868.2008.00656.x) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.gfpca_two_step` — Two-step generalized FPCA of exponential-family curves (registr ``gfpca_twoStep``).
+
+---
+
+#### Jaakkola, T.S., Jordan, M.I. (1997) — A Variational Approach to Bayesian Logistic Regression Models and their Extensions
+
+| Field | Value |
+|-------|-------|
+| Authors | Jaakkola, T.S., Jordan, M.I. |
+| Year | 1997 |
+| URL | [https://proceedings.mlr.press/r1/jaakkola97a.html](https://proceedings.mlr.press/r1/jaakkola97a.html) |
+| Type | conference |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.gfpca_variational` — Generalized FPCA of exponential-family curves by variational EM (registr ``bfpca`` / ``fpca_gauss``).
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `registr` | `bfpca` | high |
+
+---
+
+#### Kulis, B., Jordan, M.I. (2012) — Revisiting k-means: New Algorithms via Bayesian Nonparametrics
+
+| Field | Value |
+|-------|-------|
+| Authors | Kulis, B., Jordan, M.I. |
+| Year | 2012 |
+| URL | [https://icml.cc/2012/papers/291.pdf](https://icml.cc/2012/papers/291.pdf) |
+| Type | conference |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.elastic_dpmeans` — Elastic DP-means clustering: the number of clusters follows from a distance penalty.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `fdasrvf` | `dpmeans_align` | high |
+
+---
+
+#### Lahiri, S., Robinson, D., Klassen, E. (2015) — Precise matching of PL curves in R^N in the square root velocity framework
+
+| Field | Value |
+|-------|-------|
+| Authors | Lahiri, S., Robinson, D., Klassen, E. |
+| Year | 2015 |
+| DOI | `doi:10.4310/GIC.2015.v2.n3.a1` |
+| URL | [https://doi.org/10.4310/GIC.2015.v2.n3.a1](https://doi.org/10.4310/GIC.2015.v2.n3.a1) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.ab_elastic_distance_pl` — Exact (a, b) elastic distance between two piecewise-linear curves.
+- `alignment.ab_elastic_match_pl` — Exact (a, b) elastic matching of two piecewise-linear curves (polygons).
+
+---
+
+#### Lu, Y., Herbei, R., Kurtek, S. (2017) — Bayesian Registration of Functions With a Gaussian Process Prior
+
+| Field | Value |
+|-------|-------|
+| Authors | Lu, Y., Herbei, R., Kurtek, S. |
+| Year | 2017 |
+| DOI | `doi:10.1080/10618600.2017.1336444` |
+| URL | [https://doi.org/10.1080/10618600.2017.1336444](https://doi.org/10.1080/10618600.2017.1336444) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.bayesian_align_group` — Bayesian group alignment by MCMC with posterior credible bands for warps and template.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `fdasrvf` | `time_warping_bayes` | high |
+
+---
+
 #### Marron, J.S., Ramsay, J.O., Sangalli, L.M., Srivastava, A. (2015) — Functional Data Analysis of Amplitude and Phase Variation
 
 | Field | Value |
@@ -52,6 +235,51 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
 - `alignment.alignment_quality` — Comprehensive alignment quality metrics.
 - `alignment.diagnose_alignment` — Diagnose alignment quality for every curve after Karcher mean computation.
+
+---
+
+#### Needham, T., Kurtek, S. (2020) — Simplifying Transforms for General Elastic Metrics on the Space of Plane Curves
+
+| Field | Value |
+|-------|-------|
+| Authors | Needham, T., Kurtek, S. |
+| Year | 2020 |
+| DOI | `doi:10.1137/19M1265132` |
+| URL | [https://doi.org/10.1137/19M1265132](https://doi.org/10.1137/19M1265132) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.ab_transform` — Kurtek-Needham F-transform of a planar curve for the (a, b) elastic metric.
+- `alignment.ab_transform_inverse` — Inverse of ``ab_transform``: the planar curve starting at the origin with transform ``f``.
+- `alignment.ab_closure_residual` — Closure residual c(1) − c(0) of the planar curve an (a, b) F-transform represents.
+- `alignment.ab_project_closed` — Project a planar (a, b) F-transform onto the closed-curve manifold, preserving its L² norm.
+- `alignment.curve_shape_align_pair` — Align curve ``beta2`` to ``beta1`` in elastic shape space (rotation, scale, seed, warp).
+- `alignment.curve_shape_distance` — Elastic shape distance between two R^d curves under the chosen quotient.
+- `alignment.curve_shape_self_distance_matrix` — Symmetric matrix of pairwise elastic shape distances between R^d curves.
+- `alignment.curve_shape_karcher_mean` — Karcher (Fréchet) mean shape of R^d curves in elastic shape space.
+- `alignment.curve_shape_karcher_median` — Karcher (geometric) median shape of R^d curves in elastic shape space.
+- `alignment.curve_shape_depth` — Elastic amplitude and phase depth of R^d curves.
+- `alignment.curve_shape_outlier_detection` — Shape outlier detection for R^d curves by distance to the Karcher median (or mean).
+- `alignment.curve_shape_confidence_interval` — Confidence region of the centre shape of R^d curves (bootstrap or fdasrvf model-based).
+
+---
+
+#### Ramsay, J.O., Li, X. (1998) — Curve Registration
+
+| Field | Value |
+|-------|-------|
+| Authors | Ramsay, J.O., Li, X. |
+| Year | 1998 |
+| DOI | `doi:10.1111/1467-9868.00129` |
+| URL | [https://doi.org/10.1111/1467-9868.00129](https://doi.org/10.1111/1467-9868.00129) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.continuous_registration` — Ramsay-Li continuous registration with smooth monotone warps (R fda register.fd).
 
 ---
 
@@ -97,7 +325,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1007/978-1-4939-4020-2` |
 | URL | [https://link.springer.com/book/10.1007/978-1-4939-4020-2](https://link.springer.com/book/10.1007/978-1-4939-4020-2) |
 | Type | book |
-| Status | Pending DOI verification |
+| Status | Curated |
 
 **Callables implementing this method:**
 
@@ -105,6 +333,68 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 - `alignment.tsrvf_transform_with_method` — TSRVF transform with configurable transport method.
 - `alignment.karcher_mean_closed` — Karcher mean for closed (periodic) curves.
 - `alignment.elastic_align_pair_closed` — Align closed (periodic) curve f2 to f1 with rotation search.
+- `alignment.curve_shape_align_pair` — Align curve ``beta2`` to ``beta1`` in elastic shape space (rotation, scale, seed, warp).
+- `alignment.curve_shape_distance` — Elastic shape distance between two R^d curves under the chosen quotient.
+- `alignment.curve_shape_self_distance_matrix` — Symmetric matrix of pairwise elastic shape distances between R^d curves.
+- `alignment.curve_shape_karcher_mean` — Karcher (Fréchet) mean shape of R^d curves in elastic shape space.
+- `alignment.curve_shape_karcher_median` — Karcher (geometric) median shape of R^d curves in elastic shape space.
+- `alignment.curve_shape_depth` — Elastic amplitude and phase depth of R^d curves.
+- `alignment.curve_shape_outlier_detection` — Shape outlier detection for R^d curves by distance to the Karcher median (or mean).
+- `alignment.curve_shape_confidence_interval` — Confidence region of the centre shape of R^d curves (bootstrap or fdasrvf model-based).
+- `alignment.curve_shape_boxplot` — Elastic shape box plot of the curves summarised by a Karcher median (fdasrvf ``curve_boxplot``).
+- `alignment.curve_shape_boxplot_from_aligned` — Elastic shape box plot from SRVFs and curves already aligned to a median.
+- `alignment.curve_shape_karcher_covariance` — Sample covariance of the Karcher shooting vectors (tangent space at the mean).
+- `alignment.curve_shape_pca` — Principal component analysis of curve shapes in the tangent space at the Karcher mean.
+- `alignment.curve_shape_tsrvf` — TSRVF of R^d curves: align to the Karcher mean and map into its tangent space.
+- `alignment.curve_shape_tangent_to_curve` — Map a tangent vector at the Karcher mean back to a curve (inverse of ``curve_shape_tsrvf``).
+
+---
+
+#### Steyer, L., Stöcker, A., Greven, S. (2023) — Elastic Analysis of Irregularly or Sparsely Sampled Curves
+
+| Field | Value |
+|-------|-------|
+| Authors | Steyer, L., Stöcker, A., Greven, S. |
+| Year | 2023 |
+| DOI | `doi:10.1111/biom.13706` |
+| URL | [https://doi.org/10.1111/biom.13706](https://doi.org/10.1111/biom.13706) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.sparse_elastic_align_pair` — Elastic alignment of two sparsely observed curves treated as polygons (elasdics ``align_curves``).
+- `alignment.sparse_elastic_mean` — Elastic (Fréchet) mean of sparsely observed curves with a spline SRV (elasdics ``compute_elastic_mean``).
+- `alignment.sparse_curves_from_irreg` — Convert 1-D irregular functional data into sparse curves for the sparse elastic functions.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `elasdics` | `align_curves` | low |
+
+---
+
+#### Tang, R., Müller, H.G. (2008) — Pairwise curve synchronization for functional data
+
+| Field | Value |
+|-------|-------|
+| Authors | Tang, R., Müller, H.G. |
+| Year | 2008 |
+| DOI | `doi:10.1093/biomet/asn047` |
+| URL | [https://doi.org/10.1093/biomet/asn047](https://doi.org/10.1093/biomet/asn047) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.pairwise_synchronization` — Tang-Mueller pairwise curve synchronisation (R fdapace WFDA).
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `fdapace` | `WFDA` | high |
 
 ---
 
@@ -158,6 +448,70 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 |----------|---------|----------|------------|
 | Python | `fdasrsf` | `ElasticChangePoint` | high |
 | R | `fdasrvf` | `elastic.changepoint` | high |
+
+---
+
+#### Wrobel, J., Bauer, A. (2021) — registr 2.0: Incomplete Curve Registration for Exponential Family Functional Data
+
+| Field | Value |
+|-------|-------|
+| Authors | Wrobel, J., Bauer, A. |
+| Year | 2021 |
+| DOI | `doi:10.21105/joss.02964` |
+| URL | [https://doi.org/10.21105/joss.02964](https://doi.org/10.21105/joss.02964) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.register_fpca` — Joint registration and generalized FPCA of exponential-family curves (registr ``register_fpca``).
+- `alignment.register_fpca_regular` — Joint registration and generalized FPCA of exponential-family curves on a common grid.
+- `alignment.register_expfam` — One exponential-family registration pass of every curve to a population-mean template (registr ``registr``).
+
+---
+
+#### Wrobel, J., Zipunnikov, V., Schrack, J., Goldsmith, J. (2019) — Registration for Exponential Family Functional Data
+
+| Field | Value |
+|-------|-------|
+| Authors | Wrobel, J., Zipunnikov, V., Schrack, J., Goldsmith, J. |
+| Year | 2019 |
+| DOI | `doi:10.1111/biom.12963` |
+| URL | [https://doi.org/10.1111/biom.12963](https://doi.org/10.1111/biom.12963) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.register_fpca` — Joint registration and generalized FPCA of exponential-family curves (registr ``register_fpca``).
+- `alignment.register_fpca_regular` — Joint registration and generalized FPCA of exponential-family curves on a common grid.
+- `alignment.register_expfam` — One exponential-family registration pass of every curve to a population-mean template (registr ``registr``).
+- `alignment.gfpca_variational` — Generalized FPCA of exponential-family curves by variational EM (registr ``bfpca`` / ``fpca_gauss``).
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `registr` | `register_fpca` | low |
+
+---
+
+#### Xie, W., Kurtek, S., Bharath, K., Sun, Y. (2017) — A Geometric Approach to Visualization of Variability in Functional Data
+
+| Field | Value |
+|-------|-------|
+| Authors | Xie, W., Kurtek, S., Bharath, K., Sun, Y. |
+| Year | 2017 |
+| DOI | `doi:10.1080/01621459.2016.1256813` |
+| URL | [https://doi.org/10.1080/01621459.2016.1256813](https://doi.org/10.1080/01621459.2016.1256813) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `alignment.elastic_boxplots` — Elastic amplitude and phase functional box plots (fdasrsf ``ampbox`` / ``phbox``).
+- `alignment.amplitude_boxplot_from_aligned` — Elastic amplitude box plot from curves already aligned to a median.
+- `alignment.elastic_phase_boxplot` — Elastic phase box plot of warping functions on the Hilbert sphere.
 
 ---
 
@@ -327,6 +681,29 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
 ---
 
+### fdars.conformal — Conformal prediction and classification bands
+
+#### Wang, F., Kurtek, S., Zhang, Y. (2026) — Joint Registration and Conformal Prediction for Partially Observed Functional Data
+
+| Field | Value |
+|-------|-------|
+| Authors | Wang, F., Kurtek, S., Zhang, Y. |
+| Year | 2026 |
+| DOI | `doi:10.1080/10618600.2026.2634823` |
+| URL | [https://doi.org/10.1080/10618600.2026.2634823](https://doi.org/10.1080/10618600.2026.2634823) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `conformal.partial_conformal_fit` — Fit the partial-curve conformal model: random split, elastic Karcher template, registration.
+- `conformal.partial_conformal_fit_with_template` — Fit the partial-curve conformal model with a supplied template (all curves calibrate).
+- `conformal.partial_conformal_predict` — Conformal amplitude band and phase set for a curve observed on a grid prefix.
+- `conformal.partial_conformal_predict_observed` — Conformal amplitude band and phase set for a curve observed on a prefix, fragments or sparse times.
+- `conformal.partial_conformal_select_bandwidth` — Held-out bandwidth selection for partial-curve conformal prediction.
+
+---
+
 ### fdars.density_fda — Density-based functional data analysis and Wasserstein distances
 
 #### Agueh, M., Carlier, G. (2011) — Barycenters in the Wasserstein space
@@ -466,6 +843,8 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
 - `depth.band_1d` — Band depth for 1D functional data.
 - `depth.modified_band_1d` — Modified band depth for 1D functional data.
+- `alignment.phase_boxplot` — Phase (warping) box plot for functional data.
+- `alignment.phase_boxplot_classify` — Classify new warping functions against a phase box plot fitted on ``gammas``.
 
 **Cross-language implementations:**
 
@@ -513,6 +892,26 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | Language | Package | Function | Confidence |
 |----------|---------|----------|------------|
 | R | `fdaoutlier` | `functional_boxplot` | high |
+
+---
+
+### fdars.explain — Functional explainability — SHAP, FCI, GRAD-CAM, and attribution maps
+
+#### Goode, K., Tucker, J.D., Ries, D., Hofmann, H. (2026) — Explainable Machine Learning for Functional Data
+
+| Field | Value |
+|-------|-------|
+| Authors | Goode, K., Tucker, J.D., Ries, D., Hofmann, H. |
+| Year | 2026 |
+| DOI | `doi:10.6339/25-JDS1212` |
+| URL | [https://doi.org/10.6339/25-JDS1212](https://doi.org/10.6339/25-JDS1212) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `explain.elastic_pfi` — Model-agnostic permutation feature importance over jfPCA (or any) PC scores.
+- `explain.veesa_pipeline` — End-to-end VEESA pipeline: jfPCA fit, exact training scores, then elastic PFI.
 
 ---
 
@@ -1016,6 +1415,28 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | Language | Package | Function | Confidence |
 |----------|---------|----------|------------|
 | Python | `aeon` | `adtw_distance` | high |
+
+---
+
+#### Itakura, F. (1975) — Minimum prediction residual principle applied to speech recognition
+
+| Field | Value |
+|-------|-------|
+| Authors | Itakura, F. |
+| Year | 1975 |
+| DOI | `doi:10.1109/TASSP.1975.1162641` |
+| URL | [https://doi.org/10.1109/TASSP.1975.1162641](https://doi.org/10.1109/TASSP.1975.1162641) |
+| Type | journal |
+| Status | Curated |
+
+**Callables implementing this method:**
+
+- `metric.dtw_window_mask` — Boolean admissibility grid of a DTW global window for series lengths n and m.
+- `metric.dtw_distance_windowed` — DTW distance between two series under an optional global window (O(m) memory).
+- `metric.dtw_path` — DTW optimal warping path and accumulated cost under an optional global window.
+- `metric.dtw_path_multivariate` — Dependent multichannel DTW optimal warping path and accumulated cost.
+- `metric.dtw_distance_multivariate` — Dependent multichannel DTW distance between two (d, m) series.
+- `metric.dtw_pairwise_distance_multivariate` — Pairwise dependent multichannel DTW distance matrix of a collection of series.
 
 ---
 

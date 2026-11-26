@@ -38,7 +38,9 @@
       "type": "journal",
       "callables": [
         "depth.band_1d",
-        "depth.modified_band_1d"
+        "depth.modified_band_1d",
+        "alignment.phase_boxplot",
+        "alignment.phase_boxplot_classify"
       ],
       "cross_language": {
         "R": {
@@ -54,7 +56,7 @@
           "confidence": "high"
         }
       },
-      "notes": "Introduces band depth (BD) and modified band depth (MBD) in the same paper.",
+      "notes": "Introduces band depth (BD) and modified band depth (MBD) in the same paper. alignment.phase_boxplot / phase_boxplot_classify (added 2026-11-27) rank warping functions by MBD; fdars-core alignment/phase_boxplot.rs cites this paper.",
       "curated": true
     },
     "srivastava_et_al_2011": {
@@ -706,10 +708,24 @@
         "alignment.tsrvf_transform",
         "alignment.tsrvf_transform_with_method",
         "alignment.karcher_mean_closed",
-        "alignment.elastic_align_pair_closed"
+        "alignment.elastic_align_pair_closed",
+        "alignment.curve_shape_align_pair",
+        "alignment.curve_shape_distance",
+        "alignment.curve_shape_self_distance_matrix",
+        "alignment.curve_shape_karcher_mean",
+        "alignment.curve_shape_karcher_median",
+        "alignment.curve_shape_depth",
+        "alignment.curve_shape_outlier_detection",
+        "alignment.curve_shape_confidence_interval",
+        "alignment.curve_shape_boxplot",
+        "alignment.curve_shape_boxplot_from_aligned",
+        "alignment.curve_shape_karcher_covariance",
+        "alignment.curve_shape_pca",
+        "alignment.curve_shape_tsrvf",
+        "alignment.curve_shape_tangent_to_curve"
       ],
-      "notes": "Springer textbook on functional and shape data analysis. Covers transported SRSF (TSRVF) for closed curves and Karcher mean computation on closed curves. [CITED: link.springer.com — Srivastava & Klassen 2016, Springer Series in Statistics.] DOI 10.1007/978-1-4939-4020-2 is [ASSUMED] — plausible from web search; not landing-page-verified this session. curated:false until Phase 84 direct DOI-landing-page personal verification.",
-      "curated": false
+      "notes": "Springer textbook on functional and shape data analysis. Covers transported SRSF (TSRVF) for closed curves, Karcher means, and SRV elastic shape analysis of R^d curves (ch. 5-6). [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1007/978-1-4939-4020-2 — title, authors (Srivastava, Anuj; Klassen, Eric P.) and year 2016 match; Springer New York.] curve_shape_* callables added 2026-11-27: fdars-core alignment/curve_shape/mod.rs cites this book (ch. 5-6) as its reference; the optional (a,b) elastic metric is needham_kurtek_2020.",
+      "curated": true
     },
     "tucker_yarger_2024": {
       "title": "Elastic functional changepoint detection of climate impacts from localized sources",
@@ -748,7 +764,6 @@
         "alignment.elastic_align_pair_multires",
         "alignment.elastic_align_pair_constrained",
         "alignment.elastic_align_pair_penalized",
-        "alignment.bayesian_align_pair",
         "alignment.shape_mean",
         "alignment.shape_distance",
         "alignment.shape_self_distance_matrix",
@@ -785,10 +800,9 @@
         "alignment.pairwise_consistency",
         "alignment.pairwise_correlation_score",
         "alignment.peak_persistence",
-        "alignment.phase_boxplot",
         "alignment.shape_confidence_interval"
       ],
-      "notes": "Specialized alignment variants and utility callables without a clear single-paper primary root. Includes: multi-resolution/constrained/penalized elastic alignment variants (extend Srivastava et al. 2011 SRSF framework); Bayesian alignment (Kurtek 2017 or similar — unconfirmed); shape callables (Srivastava & Klassen 2016 book — unconfirmed against fdars-core source); horiz_fpns (FPNS method — unclear primary); robust Karcher mean (extends Srivastava et al. 2011 — unconfirmed); elastic/warp utility callables; hierarchical/kmedoids clustering utilities; warp diagnostics. All deferred to REF-FUT-01 for per-method source confirmation. curated:false.",
+      "notes": "bayesian_align_pair (cheng_dryden_huang_2016) and phase_boxplot (lopez_pintado_romo_2009) moved out 2026-11-27. Specialized alignment variants and utility callables without a clear single-paper primary root. Includes: multi-resolution/constrained/penalized elastic alignment variants (extend Srivastava et al. 2011 SRSF framework); shape callables (Srivastava & Klassen 2016 book — unconfirmed against fdars-core source); horiz_fpns (FPNS method — unclear primary); robust Karcher mean (extends Srivastava et al. 2011 — unconfirmed); elastic/warp utility callables; hierarchical/kmedoids clustering utilities; warp diagnostics. All deferred to REF-FUT-01 for per-method source confirmation. curated:false.",
       "curated": false
     },
     "sakoe_chiba_1978": {
@@ -1800,6 +1814,347 @@
       ],
       "notes": "Inductive conformal anomaly detection for functional data with elastic amplitude/phase nonconformity scores against a Karcher-mean template. arXiv:2504.01172 (stat.ME, 2025). [VERIFIED 2026-11-26: arXiv API export.arxiv.org/api/query?id_list=2504.01172 — title, authors and date match; no journal version found in Crossref (an OSTI report record 10.2172/3547221 exists, not a peer-reviewed venue).]",
       "curated": true
+    },
+    "wang_kurtek_zhang_2026": {
+      "title": "Joint Registration and Conformal Prediction for Partially Observed Functional Data",
+      "authors": ["Wang, F.", "Kurtek, S.", "Zhang, Y."],
+      "year": 2026,
+      "doi": "10.1080/10618600.2026.2634823",
+      "url": "https://doi.org/10.1080/10618600.2026.2634823",
+      "type": "journal",
+      "callables": [
+        "conformal.partial_conformal_fit",
+        "conformal.partial_conformal_fit_with_template",
+        "conformal.partial_conformal_predict",
+        "conformal.partial_conformal_predict_observed",
+        "conformal.partial_conformal_select_bandwidth"
+      ],
+      "notes": "Split-conformal amplitude bands (SFCP) and phase sets (SFCPP) for a partially observed curve, with elastic registration to a Karcher template and Nadaraya-Watson prediction from the observed prefix. JCGS 35(4):1537-1547 (online 2026-04-14; PMC13160368). [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1080/10618600.2026.2634823 — title, author list and year match the registry record.] fdars-core conformal/partial.rs implements this paper. FDA-specific, so allowlisted against the conformal anti-feature family (CURATE-04 exception).",
+      "curated": true
+    },
+    "goode_et_al_2026": {
+      "title": "Explainable Machine Learning for Functional Data",
+      "authors": ["Goode, K.", "Tucker, J.D.", "Ries, D.", "Hofmann, H."],
+      "year": 2026,
+      "doi": "10.6339/25-JDS1212",
+      "url": "https://doi.org/10.6339/25-JDS1212",
+      "type": "journal",
+      "callables": [
+        "explain.elastic_pfi",
+        "explain.veesa_pipeline"
+      ],
+      "notes": "Introduces the VEESA (Variable importance Explainable Elastic Shape Analysis) pipeline: elastic (joint amplitude+phase) FPCA inputs, permutation feature importance over the PC scores, and explanations mapped back to the data space. Journal of Data Science 24(1):125-145. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.6339/25-JDS1212 — title, author list and year match the registry record; the JDS landing page meta (citation_volume 24, issue 1, citation_year 2025) confirms the venue, and confirms the paper describes VEESA.] Published online 2025-12-16; year 2026 is the print issue date (Crossref published-print 2026-01-01), per the schema rule. arXiv preprint 2501.07602 ('An Explainable Pipeline for Machine Learning with Functional Data'). The R package veesa implements it. FDA-specific, so allowlisted against the explain anti-feature family (CURATE-04 exception).",
+      "curated": true
+    },
+    "needham_kurtek_2020": {
+      "title": "Simplifying Transforms for General Elastic Metrics on the Space of Plane Curves",
+      "authors": ["Needham, T.", "Kurtek, S."],
+      "year": 2020,
+      "doi": "10.1137/19M1265132",
+      "url": "https://doi.org/10.1137/19M1265132",
+      "type": "journal",
+      "callables": [
+        "alignment.ab_transform",
+        "alignment.ab_transform_inverse",
+        "alignment.ab_closure_residual",
+        "alignment.ab_project_closed",
+        "alignment.curve_shape_align_pair",
+        "alignment.curve_shape_distance",
+        "alignment.curve_shape_self_distance_matrix",
+        "alignment.curve_shape_karcher_mean",
+        "alignment.curve_shape_karcher_median",
+        "alignment.curve_shape_depth",
+        "alignment.curve_shape_outlier_detection",
+        "alignment.curve_shape_confidence_interval"
+      ],
+      "notes": "Introduces the F-transform that pulls the L2 metric back to the general (a,b) first-order elastic metric on plane curves, including the closed-curve condition. SIAM J. Imaging Sciences 13(1):445-473. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1137/19M1265132 — title, author list and year match the registry record.] fdars-core alignment/curve_shape/mod.rs cites this paper. Mapped to the curve_shape_* callables that accept the (a,b) elastic metric option (their SRV default is srivastava_klassen_2016).",
+      "curated": true
+    },
+    "bauer_et_al_2024": {
+      "title": "Elastic Metrics on Spaces of Euclidean Curves: Theory and Algorithms",
+      "authors": ["Bauer, M.", "Charon, N.", "Klassen, E.", "Kurtek, S.", "Needham, T.", "Pierron, T."],
+      "year": 2024,
+      "doi": "10.1007/s00332-024-10035-5",
+      "url": "https://doi.org/10.1007/s00332-024-10035-5",
+      "type": "journal",
+      "callables": [
+        "alignment.ab_elastic_distance_pl",
+        "alignment.ab_elastic_match_pl"
+      ],
+      "notes": "Theory and algorithms for general elastic metrics on curves, including the exact (a,b) distance between piecewise-linear curves modulo reparametrisation (Sec. 4.1). Journal of Nonlinear Science 34(3):56. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1007/s00332-024-10035-5 — title, author list and year match the registry record.] fdars-core alignment/curve_shape/pl_exact.rs cites this paper.",
+      "curated": true
+    },
+    "lahiri_robinson_klassen_2015": {
+      "title": "Precise matching of PL curves in R^N in the square root velocity framework",
+      "authors": ["Lahiri, S.", "Robinson, D.", "Klassen, E."],
+      "year": 2015,
+      "doi": "10.4310/GIC.2015.v2.n3.a1",
+      "url": "https://doi.org/10.4310/GIC.2015.v2.n3.a1",
+      "type": "journal",
+      "callables": [
+        "alignment.ab_elastic_distance_pl",
+        "alignment.ab_elastic_match_pl"
+      ],
+      "notes": "Exact (discretisation-free) SRV matching of piecewise-linear curves. Geometry, Imaging and Computing 2(3):133-186. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.4310/GIC.2015.v2.n3.a1 — title, author list and year match the registry record; Crossref gives the title with LaTeX '$\\\\mathbb{R}^N$', written here as R^N.] fdars-core pl_exact.rs adapts this precise-matching algorithm for the (a,b) case.",
+      "curated": true
+    },
+    "steyer_stocker_greven_2023": {
+      "title": "Elastic Analysis of Irregularly or Sparsely Sampled Curves",
+      "authors": ["Steyer, L.", "Stöcker, A.", "Greven, S."],
+      "year": 2023,
+      "doi": "10.1111/biom.13706",
+      "url": "https://doi.org/10.1111/biom.13706",
+      "type": "journal",
+      "callables": [
+        "alignment.sparse_elastic_align_pair",
+        "alignment.sparse_elastic_mean",
+        "alignment.sparse_curves_from_irreg"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "elasdics",
+          "function": "align_curves",
+          "url": "https://rdrr.io/cran/elasdics/man/align_curves.html",
+          "confidence": "low"
+        }
+      },
+      "notes": "Elastic (SRV) alignment and Fréchet means for irregularly or sparsely sampled curves treated as polygons, with spline SRV means. Biometrics 79(3):2103-2115 (online 2022-06-14; print issue 2023). [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1111/biom.13706 — title, author list and year match the registry record.] fdars-core alignment/sparse/mod.rs cites Steyer, Stöcker & Greven 2023 and ports R elasdics.",
+      "curated": true
+    },
+    "wrobel_et_al_2019": {
+      "title": "Registration for Exponential Family Functional Data",
+      "authors": ["Wrobel, J.", "Zipunnikov, V.", "Schrack, J.", "Goldsmith, J."],
+      "year": 2019,
+      "doi": "10.1111/biom.12963",
+      "url": "https://doi.org/10.1111/biom.12963",
+      "type": "journal",
+      "callables": [
+        "alignment.register_fpca",
+        "alignment.register_fpca_regular",
+        "alignment.register_expfam",
+        "alignment.gfpca_variational"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "registr",
+          "function": "register_fpca",
+          "url": "https://rdrr.io/cran/registr/man/register_fpca.html",
+          "confidence": "low"
+        }
+      },
+      "notes": "Joint registration and generalized FPCA for exponential-family (e.g. binary) functional data, including the variational binary FPCA used by gfpca_variational. Biometrics 75(1):48-57 (online 2018-08-21; print 2019). [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1111/biom.12963 — title, author list and year match the registry record.] NOTE: fdars-core alignment/expfam/mod.rs cites this as 'JCGS 28(4)', which is wrong — the registry and R registr give Biometrics 75(1).",
+      "curated": true
+    },
+    "wrobel_bauer_2021": {
+      "title": "registr 2.0: Incomplete Curve Registration for Exponential Family Functional Data",
+      "authors": ["Wrobel, J.", "Bauer, A."],
+      "year": 2021,
+      "doi": "10.21105/joss.02964",
+      "url": "https://doi.org/10.21105/joss.02964",
+      "type": "journal",
+      "callables": [
+        "alignment.register_fpca",
+        "alignment.register_fpca_regular",
+        "alignment.register_expfam"
+      ],
+      "notes": "registr 2.0 software paper: incomplete-curve registration (the `incompleteness` / `lambda_inc` options) and two-step GFPCA for exponential-family functional data. Journal of Open Source Software 6(61):2964. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.21105/joss.02964 — title, author list and year match the registry record.] fdars-core alignment/expfam/mod.rs cites Wrobel & Bauer 2021 and ports registr 2.2.1.",
+      "curated": true
+    },
+    "gertheiss_goldsmith_staicu_2017": {
+      "title": "A note on modeling sparse exponential-family functional response curves",
+      "authors": ["Gertheiss, J.", "Goldsmith, J.", "Staicu, A.M."],
+      "year": 2017,
+      "doi": "10.1016/j.csda.2016.07.010",
+      "url": "https://doi.org/10.1016/j.csda.2016.07.010",
+      "type": "journal",
+      "callables": [
+        "alignment.gfpca_two_step"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "registr",
+          "function": "gfpca_twoStep",
+          "url": "https://rdrr.io/cran/registr/man/gfpca_twoStep.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Two-step generalized FPCA for sparse exponential-family curves (latent covariance, then score estimation). CSDA 105:46-52. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1016/j.csda.2016.07.010 — title, author list and year match the registry record.] R registr::gfpca_twoStep cites this paper. NOTE: fdars-core alignment/expfam/twostep.rs cites it as '*Stat* 6(1)', a wrong venue.",
+      "curated": true
+    },
+    "hall_muller_yao_2008": {
+      "title": "Modelling Sparse Generalized Longitudinal Observations with Latent Gaussian Processes",
+      "authors": ["Hall, P.", "Müller, H.G.", "Yao, F."],
+      "year": 2008,
+      "doi": "10.1111/j.1467-9868.2008.00656.x",
+      "url": "https://doi.org/10.1111/j.1467-9868.2008.00656.x",
+      "type": "journal",
+      "callables": [
+        "alignment.gfpca_two_step"
+      ],
+      "notes": "Latent-Gaussian-process covariance estimation for sparse generalized (e.g. binary) longitudinal data, used as gfpca_two_step's covariance step. JRSS-B 70(4):703-723. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1111/j.1467-9868.2008.00656.x — title, author list and year match the registry record.] fdars-core twostep.rs cites Hall, Müller & Yao 2008 (registr `cov_hall`); registr::gfpca_twoStep cites it too.",
+      "curated": true
+    },
+    "jaakkola_jordan_1997": {
+      "title": "A Variational Approach to Bayesian Logistic Regression Models and their Extensions",
+      "authors": ["Jaakkola, T.S.", "Jordan, M.I."],
+      "year": 1997,
+      "url": "https://proceedings.mlr.press/r1/jaakkola97a.html",
+      "type": "conference",
+      "callables": [
+        "alignment.gfpca_variational"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "registr",
+          "function": "bfpca",
+          "url": "https://rdrr.io/cran/registr/man/bfpca.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Variational lower bound for the logistic likelihood, used by the variational-EM binary GFPCA. Sixth International Workshop on Artificial Intelligence and Statistics (AISTATS 1997), PMLR R1:283-294. No DOI (PMLR). [VERIFIED 2026-11-27: proceedings.mlr.press/r1/jaakkola97a.html citation meta — title, authors, pages 283-294, date 1997.] fdars-core alignment/expfam/gfpca.rs cites Jaakkola & Jordan 1997; registr::bfpca cites it.",
+      "curated": true
+    },
+    "tang_muller_2008": {
+      "title": "Pairwise curve synchronization for functional data",
+      "authors": ["Tang, R.", "Müller, H.G."],
+      "year": 2008,
+      "doi": "10.1093/biomet/asn047",
+      "url": "https://doi.org/10.1093/biomet/asn047",
+      "type": "journal",
+      "callables": [
+        "alignment.pairwise_synchronization"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdapace",
+          "function": "WFDA",
+          "url": "https://rdrr.io/cran/fdapace/man/WFDA.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Pairwise curve synchronisation: warps from pairwise alignments averaged into each curve's time-synchronising map. Biometrika 95(4):875-889. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1093/biomet/asn047 — title, author list and year match the registry record; Crossref has only an online date, the 2008 issue year is from vol 95(4).] fdars-core alignment/wfda.rs cites this paper; fdapace::WFDA cites it.",
+      "curated": true
+    },
+    "lu_herbei_kurtek_2017": {
+      "title": "Bayesian Registration of Functions With a Gaussian Process Prior",
+      "authors": ["Lu, Y.", "Herbei, R.", "Kurtek, S."],
+      "year": 2017,
+      "doi": "10.1080/10618600.2017.1336444",
+      "url": "https://doi.org/10.1080/10618600.2017.1336444",
+      "type": "journal",
+      "callables": [
+        "alignment.bayesian_align_group"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdasrvf",
+          "function": "time_warping_bayes",
+          "url": "https://rdrr.io/cran/fdasrvf/man/time_warping_bayes.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Bayesian multiple registration with warps on the Hilbert sphere and a Gaussian-process template prior, sampled by MCMC. JCGS 26(4):894-904. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1080/10618600.2017.1336444 — title, author list and year match the registry record.] fdars-core alignment/bayesian_group.rs names Lu, Herbei & Kurtek (via fdasrvf time_warping_bayes, which cites this paper).",
+      "curated": true
+    },
+    "beskos_et_al_2011": {
+      "title": "Hybrid Monte Carlo on Hilbert spaces",
+      "authors": ["Beskos, A.", "Pinski, F.J.", "Sanz-Serna, J.M.", "Stuart, A.M."],
+      "year": 2011,
+      "doi": "10.1016/j.spa.2011.06.003",
+      "url": "https://doi.org/10.1016/j.spa.2011.06.003",
+      "type": "journal",
+      "callables": [
+        "alignment.bayesian_align_group"
+      ],
+      "notes": "Infinite-dimensional (prior-preconditioned) Hamiltonian Monte Carlo, used by bayesian_align_group's HMC sampler option. Stochastic Processes and their Applications 121(10):2201-2230. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1016/j.spa.2011.06.003 — title, author list and year match the registry record.] fdars-core alignment/bayesian_group.rs and bayesian_group_hmc.rs cite Beskos et al. 2011.",
+      "curated": true
+    },
+    "cheng_dryden_huang_2016": {
+      "title": "Bayesian Registration of Functions and Curves",
+      "authors": ["Cheng, W.", "Dryden, I.L.", "Huang, X."],
+      "year": 2016,
+      "doi": "10.1214/15-BA957",
+      "url": "https://doi.org/10.1214/15-BA957",
+      "type": "journal",
+      "callables": [
+        "alignment.bayesian_align_pair"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdasrvf",
+          "function": "pair_align_functions_bayes",
+          "url": "https://rdrr.io/cran/fdasrvf/man/pair_align_functions_bayes.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Bayesian pairwise registration of functions and curves with MCMC over warping functions. Bayesian Analysis 11(2):447-475. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1214/15-BA957 — title, author list and year match the registry record.] fdars-core alignment/bayesian.rs cites no paper; it implements the pCN-on-the-Hilbert-sphere pairwise sampler of fdasrvf::pair_align_functions_bayes, whose documentation cites this paper. Removed bayesian_align_pair from _uncurated_alignment_variants_2026-09.",
+      "curated": true
+    },
+    "xie_et_al_2017": {
+      "title": "A Geometric Approach to Visualization of Variability in Functional Data",
+      "authors": ["Xie, W.", "Kurtek, S.", "Bharath, K.", "Sun, Y."],
+      "year": 2017,
+      "doi": "10.1080/01621459.2016.1256813",
+      "url": "https://doi.org/10.1080/01621459.2016.1256813",
+      "type": "journal",
+      "callables": [
+        "alignment.elastic_boxplots",
+        "alignment.amplitude_boxplot_from_aligned",
+        "alignment.elastic_phase_boxplot"
+      ],
+      "notes": "Elastic amplitude and phase functional box plots built after elastic alignment. JASA 112(519):979-993. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1080/01621459.2016.1256813 — title, author list and year match the registry record.] fdars-core alignment/elastic_boxplot.rs cites Xie, Kurtek, Bharath & Sun (2017).",
+      "curated": true
+    },
+    "kulis_jordan_2012": {
+      "title": "Revisiting k-means: New Algorithms via Bayesian Nonparametrics",
+      "authors": ["Kulis, B.", "Jordan, M.I."],
+      "year": 2012,
+      "url": "https://icml.cc/2012/papers/291.pdf",
+      "type": "conference",
+      "callables": [
+        "alignment.elastic_dpmeans"
+      ],
+      "cross_language": {
+        "R": {
+          "package": "fdasrvf",
+          "function": "dpmeans_align",
+          "url": "https://rdrr.io/cran/fdasrvf/man/dpmeans_align.html",
+          "confidence": "high"
+        }
+      },
+      "notes": "Introduces DP-means (k-means with a cluster-creation penalty from the Dirichlet-process small-variance limit). ICML 2012 (29th International Conference on Machine Learning). No DOI. [VERIFIED 2026-11-27: title and authors read from the ICML 2012 proceedings PDF icml.cc/2012/papers/291.pdf and the arXiv API record 1111.0352.] fdars-core alignment/dpmeans.rs cites Kulis & Jordan (2012); fdasrvf::dpmeans_align cites it.",
+      "curated": true
+    },
+    "ramsay_li_1998": {
+      "title": "Curve Registration",
+      "authors": ["Ramsay, J.O.", "Li, X."],
+      "year": 1998,
+      "doi": "10.1111/1467-9868.00129",
+      "url": "https://doi.org/10.1111/1467-9868.00129",
+      "type": "journal",
+      "callables": [
+        "alignment.continuous_registration"
+      ],
+      "notes": "Continuous registration with smooth monotone warps and the minimum-eigenvalue fitting criterion. JRSS-B 60(2):351-363. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1111/1467-9868.00129 — title, author list and year match the registry record.] fdars-core alignment/continuous.rs cites Ramsay & Li 1998 for the minimum-eigenvalue criterion and ports R fda::register.fd (whose help page cites only the Ramsay books, so no cross_language entry).",
+      "curated": true
+    },
+    "itakura_1975": {
+      "title": "Minimum prediction residual principle applied to speech recognition",
+      "authors": ["Itakura, F."],
+      "year": 1975,
+      "doi": "10.1109/TASSP.1975.1162641",
+      "url": "https://doi.org/10.1109/TASSP.1975.1162641",
+      "type": "journal",
+      "callables": [
+        "metric.dtw_window_mask",
+        "metric.dtw_distance_windowed",
+        "metric.dtw_path",
+        "metric.dtw_path_multivariate",
+        "metric.dtw_distance_multivariate",
+        "metric.dtw_pairwise_distance_multivariate"
+      ],
+      "notes": "Introduces the Itakura parallelogram slope constraint for DTW. IEEE TASSP 23(1):67-72. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1109/TASSP.1975.1162641 — title, author list and year match the registry record.] Mapped to the DTW callables whose `window` argument offers 'itakura' (metric/window.rs), alongside sakoe_chiba_1978 for the band option.",
+      "curated": true
     }
   },
   "callable_index": {
@@ -1881,7 +2236,7 @@
     "alignment.elastic_align_pair_multires": ["_uncurated_alignment_variants_2026-09"],
     "alignment.elastic_align_pair_constrained": ["_uncurated_alignment_variants_2026-09"],
     "alignment.elastic_align_pair_penalized": ["_uncurated_alignment_variants_2026-09"],
-    "alignment.bayesian_align_pair": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.bayesian_align_pair": ["cheng_dryden_huang_2016"],
     "alignment.shape_mean": ["_uncurated_alignment_variants_2026-09"],
     "alignment.shape_distance": ["_uncurated_alignment_variants_2026-09"],
     "alignment.shape_self_distance_matrix": ["_uncurated_alignment_variants_2026-09"],
@@ -1918,7 +2273,7 @@
     "alignment.pairwise_consistency": ["_uncurated_alignment_variants_2026-09"],
     "alignment.pairwise_correlation_score": ["_uncurated_alignment_variants_2026-09"],
     "alignment.peak_persistence": ["_uncurated_alignment_variants_2026-09"],
-    "alignment.phase_boxplot": ["_uncurated_alignment_variants_2026-09"],
+    "alignment.phase_boxplot": ["lopez_pintado_romo_2009"],
     "alignment.shape_confidence_interval": ["_uncurated_alignment_variants_2026-09"],
     "_Fdata.to_pc": ["ramsay_dalzell_1991"],
     "regression.fregre_lm": ["ramsay_dalzell_1991"],
@@ -2090,12 +2445,55 @@
     "metric.soft_dtw_barycenter": ["cuturi_blondel_2017"],
     "metric.soft_dtw_alignment": ["cuturi_blondel_2017"],
     "metric.soft_dtw_distance_windowed": ["cuturi_blondel_2017"],
-    "metric.dtw_distance_windowed": ["sakoe_chiba_1978"],
-    "metric.dtw_window_mask": ["sakoe_chiba_1978"],
-    "metric.dtw_path": ["sakoe_chiba_1978"],
-    "metric.dtw_path_multivariate": ["sakoe_chiba_1978"],
-    "metric.dtw_distance_multivariate": ["sakoe_chiba_1978"],
-    "metric.dtw_pairwise_distance_multivariate": ["sakoe_chiba_1978"],
-    "alignment.jfpca_fit": ["tucker_wu_srivastava_2013"]
+    "metric.dtw_distance_windowed": ["sakoe_chiba_1978", "itakura_1975"],
+    "metric.dtw_window_mask": ["sakoe_chiba_1978", "itakura_1975"],
+    "metric.dtw_path": ["sakoe_chiba_1978", "itakura_1975"],
+    "metric.dtw_path_multivariate": ["sakoe_chiba_1978", "itakura_1975"],
+    "metric.dtw_distance_multivariate": ["sakoe_chiba_1978", "itakura_1975"],
+    "metric.dtw_pairwise_distance_multivariate": ["sakoe_chiba_1978", "itakura_1975"],
+    "alignment.jfpca_fit": ["tucker_wu_srivastava_2013"],
+    "conformal.partial_conformal_fit": ["wang_kurtek_zhang_2026"],
+    "conformal.partial_conformal_fit_with_template": ["wang_kurtek_zhang_2026"],
+    "conformal.partial_conformal_predict": ["wang_kurtek_zhang_2026"],
+    "conformal.partial_conformal_predict_observed": ["wang_kurtek_zhang_2026"],
+    "conformal.partial_conformal_select_bandwidth": ["wang_kurtek_zhang_2026"],
+    "explain.elastic_pfi": ["goode_et_al_2026"],
+    "explain.veesa_pipeline": ["goode_et_al_2026"],
+    "alignment.ab_transform": ["needham_kurtek_2020"],
+    "alignment.ab_transform_inverse": ["needham_kurtek_2020"],
+    "alignment.ab_closure_residual": ["needham_kurtek_2020"],
+    "alignment.ab_project_closed": ["needham_kurtek_2020"],
+    "alignment.curve_shape_align_pair": ["needham_kurtek_2020", "srivastava_klassen_2016"],
+    "alignment.curve_shape_distance": ["needham_kurtek_2020", "srivastava_klassen_2016"],
+    "alignment.curve_shape_self_distance_matrix": ["needham_kurtek_2020", "srivastava_klassen_2016"],
+    "alignment.curve_shape_karcher_mean": ["needham_kurtek_2020", "srivastava_klassen_2016"],
+    "alignment.curve_shape_karcher_median": ["needham_kurtek_2020", "srivastava_klassen_2016"],
+    "alignment.curve_shape_depth": ["needham_kurtek_2020", "srivastava_klassen_2016"],
+    "alignment.curve_shape_outlier_detection": ["needham_kurtek_2020", "srivastava_klassen_2016"],
+    "alignment.curve_shape_confidence_interval": ["needham_kurtek_2020", "srivastava_klassen_2016"],
+    "alignment.ab_elastic_distance_pl": ["bauer_et_al_2024", "lahiri_robinson_klassen_2015"],
+    "alignment.ab_elastic_match_pl": ["bauer_et_al_2024", "lahiri_robinson_klassen_2015"],
+    "alignment.sparse_elastic_align_pair": ["steyer_stocker_greven_2023"],
+    "alignment.sparse_elastic_mean": ["steyer_stocker_greven_2023"],
+    "alignment.sparse_curves_from_irreg": ["steyer_stocker_greven_2023"],
+    "alignment.register_fpca": ["wrobel_et_al_2019", "wrobel_bauer_2021"],
+    "alignment.register_fpca_regular": ["wrobel_et_al_2019", "wrobel_bauer_2021"],
+    "alignment.register_expfam": ["wrobel_et_al_2019", "wrobel_bauer_2021"],
+    "alignment.gfpca_variational": ["wrobel_et_al_2019", "jaakkola_jordan_1997"],
+    "alignment.gfpca_two_step": ["gertheiss_goldsmith_staicu_2017", "hall_muller_yao_2008"],
+    "alignment.pairwise_synchronization": ["tang_muller_2008"],
+    "alignment.bayesian_align_group": ["lu_herbei_kurtek_2017", "beskos_et_al_2011"],
+    "alignment.elastic_boxplots": ["xie_et_al_2017"],
+    "alignment.amplitude_boxplot_from_aligned": ["xie_et_al_2017"],
+    "alignment.elastic_phase_boxplot": ["xie_et_al_2017"],
+    "alignment.elastic_dpmeans": ["kulis_jordan_2012"],
+    "alignment.continuous_registration": ["ramsay_li_1998"],
+    "alignment.phase_boxplot_classify": ["lopez_pintado_romo_2009"],
+    "alignment.curve_shape_boxplot": ["srivastava_klassen_2016"],
+    "alignment.curve_shape_boxplot_from_aligned": ["srivastava_klassen_2016"],
+    "alignment.curve_shape_karcher_covariance": ["srivastava_klassen_2016"],
+    "alignment.curve_shape_pca": ["srivastava_klassen_2016"],
+    "alignment.curve_shape_tsrvf": ["srivastava_klassen_2016"],
+    "alignment.curve_shape_tangent_to_curve": ["srivastava_klassen_2016"]
   }
 }
