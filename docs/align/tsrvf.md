@@ -63,22 +63,24 @@ $$
 
 Under this map the Fisher-Rao elastic metric becomes the ordinary $L^2$ metric, so distances and geodesics can be computed with straightforward $L^2$ geometry. However, SRVFs of *misaligned* curves still differ by their warping, so their $L^2$ average blurs phase structure just like a cross-sectional mean.
 
-The TSRVF construction fixes this in two steps:
+`tsrvf_transform` builds the representation in four steps:
 
-1. **Align.** Compute the Karcher mean $\mu$ under the elastic metric and the optimal warp $\gamma_i$ that registers each curve to $\mu$.
-2. **Transport.** Represent each aligned curve by its SRVF and parallel-transport it to the tangent space at $\mu_q$ (the mean's SRVF). The transported vectors
+1. **Align.** Compute the elastic Karcher mean and the warp $\gamma_i$ that registers each curve to it; the aligned SRSFs are $\tilde q_i=(q_i\circ\gamma_i)\sqrt{\dot\gamma_i}$.
+2. **Smooth.** Smooth each aligned SRSF with a Nadaraya–Watson kernel smoother of bandwidth two grid spacings. This step is specific to fdars (fdasrvf does not do it); it removes the DP's staircase artefacts from the derivative-based SRSFs.
+3. **Normalise.** Divide each SRSF (and the mean SRSF) by its $L^2$ norm, so that all of them lie on the unit Hilbert sphere. The norms are returned as `srsf_norms` and `mean_srsf_norm`, so no amplitude information is lost.
+4. **Log map.** Map each normalised SRSF to the tangent space at the normalised mean $\bar q=\mu_q/\lVert\mu_q\rVert$:
 
    $$
-   v_i \;=\; \log_{\mu_q}\!\big(q_i \circ \gamma_i\big)
+   v_i \;=\; \log_{\bar q}\!\big(\tilde q_i/\lVert\tilde q_i\rVert\big).
    $$
 
-   are the **tangent vectors** returned by the transform. They live in a single Euclidean space $T_{\mu_q}$, so their sample mean, covariance, and principal components are meaningful.
+   These are the **tangent vectors** returned by the transform. They live in a single Euclidean space $T_{\bar q}$, so their sample mean, covariance and principal components are meaningful.
 
 Because $v_i$ are ordinary vectors, downstream analysis -- regression on scores, Gaussian modelling, hypothesis tests -- can proceed with classical multivariate tools while still respecting the elastic geometry that generated the data.
 
 ### The log and exp maps on the sphere
 
-Unit SRSFs live on the Hilbert sphere $\mathbb{S}^\infty\subset L^2$, where the log map has a closed form. Writing $\tilde q_i=(q_i\circ\gamma_i)\sqrt{\dot\gamma_i}$ for the aligned SRSF, $\bar q$ for the mean SRSF, and $\theta_i=\cos^{-1}\langle\tilde q_i,\bar q\rangle_{L^2}$ for the geodesic angle between them, the tangent vector is
+Unit SRSFs live on the Hilbert sphere $\mathbb{S}^\infty\subset L^2$, where the log map has a closed form. Writing $\tilde q_i$ for the smoothed, normalised aligned SRSF, $\bar q$ for the normalised mean SRSF, and $\theta_i=\cos^{-1}\langle\tilde q_i,\bar q\rangle_{L^2}$ for the geodesic angle between them, the tangent vector is
 
 $$
 v_i = \log_{\bar q}(\tilde q_i) = \frac{\theta_i}{\sin\theta_i}\,\big(\tilde q_i - \cos\theta_i\,\bar q\big),
@@ -90,11 +92,14 @@ $$
 \tilde q = \exp_{\bar q}(v) = \cos(\lVert v\rVert)\,\bar q + \sin(\lVert v\rVert)\,\frac{v}{\lVert v\rVert},
 $$
 
-and `srsf_inverse` then turns $\tilde q$ back into a curve (using the recovered $f_i(0)$). This exp map is exactly the reconstruction used in the [Inverse transform](#inverse-transform-reconstruction) section below.
+multiplying by the stored norm `srsf_norms[i]` restores the scale, and `srsf_inverse` then turns the SRSF back into a curve (using the recovered $f_i(0)$). This is the reconstruction used in the [Inverse transform](#inverse-transform-reconstruction) section below. Note that `mean_srsf` is returned *un-normalised*: divide it by `mean_srsf_norm` before using it as the base point.
 
-### Log-map vs. shooting representation
+### Transport methods
 
-`tsrvf_transform_with_method` exposes the choice of how curves are mapped into the tangent space. The `log_map` method uses the Riemannian logarithm at $\mu_q$ (the default, geometrically exact for the sphere of unit SRSFs); alternative shooting-based representations trade a small amount of fidelity for speed and are useful when only the linear scores matter.
+`tsrvf_transform_with_method(..., method=...)` selects how the vectors are carried to the tangent space at the mean. Use `method="log_map"` (the default, and what `tsrvf_transform` does): it is the exact Riemannian logarithm on the unit sphere.
+
+!!! warning "The ladder transports are under review"
+    `method="pole_ladder"` and `method="schilds_ladder"` are meant to approximate parallel transport and should give vectors close to `log_map`. In fdars-core 0.48 they do not: the pole ladder returns (numerically) zero vectors for every curve, and Schild's ladder returns exactly twice the `log_map` vectors. Do not use them until this is fixed upstream.
 
 ---
 
@@ -131,9 +136,9 @@ converged  = res["converged"]         # bool
 |-----|------|-------------|
 | `tangent_vectors` | `ndarray (n, m)` | Transported SRVF tangent vectors $v_i$ |
 | `mean` | `ndarray (m,)` | Karcher mean function $\mu$ |
-| `mean_srsf` | `ndarray (m,)` | Mean SRSF $\mu_q$ (the tangent-space origin) |
-| `mean_srsf_norm` | `float` | Norm of the mean SRSF |
-| `srsf_norms` | `ndarray (n,)` | SRSF norm of each curve |
+| `mean_srsf` | `ndarray (m,)` | Mean SRSF $\mu_q$, un-normalised; the base point is $\mu_q/\lVert\mu_q\rVert$ |
+| `mean_srsf_norm` | `float` | $\lVert\mu_q\rVert$ |
+| `srsf_norms` | `ndarray (n,)` | Norm of each aligned, smoothed SRSF (multiply back after the exp map) |
 | `initial_values` | `ndarray (n,)` | Recovered $f_i(0)$ (SRSF drops the offset) |
 | `gammas` | `ndarray (n, m)` | Optimal warps to the mean |
 | `converged` | `bool` | Whether the Karcher mean converged |
@@ -143,7 +148,7 @@ To select the tangent-space mapping explicitly, use the method variant:
 ```python
 from fdars.alignment import tsrvf_transform_with_method
 
-res = tsrvf_transform_with_method(data, t, method="log_map")   # or a shooting method
+res = tsrvf_transform_with_method(data, t, method="log_map")   # the only reliable method in 0.48
 V = res["tangent_vectors"]     # same keys as tsrvf_transform
 ```
 
@@ -227,14 +232,16 @@ pc1 = Wt[0]
 sd1 = S[0] / np.sqrt(len(V))          # score std along PC1
 
 def exp_map(v, mu_q, t):
+    # exp map at the *normalised* mean SRSF (a point on the unit sphere)
+    base = mu_q / np.sqrt(np.trapezoid(mu_q ** 2, t))
     norm = np.sqrt(np.trapezoid(v ** 2, t))
     if norm < 1e-9:
-        return mu_q.copy()
-    return np.cos(norm) * mu_q + np.sin(norm) * (v / norm)
+        return base
+    return np.cos(norm) * base + np.sin(norm) * (v / norm)
 
 f, ax = fig()
 for c, col in [(-1.5, "#3f51b5"), (0.0, "#e8710a"), (1.5, "#198754")]:
-    q = exp_map(c * sd1 * pc1, mu_q, t)
+    q = float(res["mean_srsf_norm"]) * exp_map(c * sd1 * pc1, mu_q, t)   # restore the scale
     curve = srsf_inverse(q, t, initial_value=iv)
     lab = r"$\mu$" if c == 0 else fr"$\mu {'+' if c > 0 else '-'} {abs(c)}\sigma\,\mathrm{{PC}}_1$"
     ax.plot(t, curve, color=col, lw=2.2 if c == 0 else 1.6, label=lab)
@@ -294,7 +301,7 @@ TSRVF FPCA typically needs fewer components: it has already removed phase variat
 
 ## Inverse transform (reconstruction)
 
-The transform is invertible -- aligned curves can be rebuilt from their tangent vectors via the [exponential map](#the-log-and-exp-maps-on-the-sphere). There is **no dedicated `tsrvf_inverse` binding** in the Python surface, but the reconstruction is two transparent lines: apply the exp map to get the aligned SRSF, then `srsf_inverse` (with the recovered initial value) to get the curve.
+Aligned curves can be rebuilt from their tangent vectors via the [exponential map](#the-log-and-exp-maps-on-the-sphere). There is **no dedicated `tsrvf_inverse` binding** in the Python surface, but the reconstruction is three transparent steps: apply the exp map at the normalised mean, multiply by the stored norm `srsf_norms[i]`, then `srsf_inverse` (with the recovered initial value). The result matches the aligned curve up to the Nadaraya–Watson smoothing of step 2, which slightly flattens sharp features.
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -316,12 +323,15 @@ mu_q = np.asarray(res["mean_srsf"])
 iv = np.asarray(res["initial_values"])
 
 def exp_map(v, mu_q, t):
+    # exp map at the *normalised* mean SRSF (a point on the unit sphere)
+    base = mu_q / np.sqrt(np.trapezoid(mu_q ** 2, t))
     norm = np.sqrt(np.trapezoid(v ** 2, t))
     if norm < 1e-9:
-        return mu_q.copy()
-    return np.cos(norm) * mu_q + np.sin(norm) * (v / norm)
+        return base
+    return np.cos(norm) * base + np.sin(norm) * (v / norm)
 
-recon = np.array([srsf_inverse(exp_map(V[i], mu_q, t), t, initial_value=float(iv[i]))
+norms = np.asarray(res["srsf_norms"])
+recon = np.array([srsf_inverse(norms[i] * exp_map(V[i], mu_q, t), t, initial_value=float(iv[i]))
                   for i in range(n)])
 mu = np.asarray(res["mean"])
 
@@ -368,12 +378,15 @@ Reconstruction from PC scores works the same way: form a tangent vector as mean-
 
     # (2) exp map + srsf_inverse reconstructs the common shape
     def exp_map(v, mu_q, t):
+        # exp map at the *normalised* mean SRSF (a point on the unit sphere)
+        base = mu_q / np.sqrt(np.trapezoid(mu_q ** 2, t))
         norm = np.sqrt(np.trapezoid(v ** 2, t))
         if norm < 1e-9:
-            return mu_q.copy()
-        return np.cos(norm) * mu_q + np.sin(norm) * (v / norm)
+            return base
+        return np.cos(norm) * base + np.sin(norm) * (v / norm)
 
-    recon = np.array([srsf_inverse(exp_map(V[i], mu_q, t), t, initial_value=float(iv[i]))
+    norms = np.asarray(res["srsf_norms"])
+    recon = np.array([srsf_inverse(norms[i] * exp_map(V[i], mu_q, t), t, initial_value=float(iv[i]))
                       for i in range(n)])
     rel_err = np.max(np.abs(recon - mu)) / np.ptp(base)
     assert rel_err < 0.1, rel_err
@@ -395,6 +408,9 @@ Both invariants hold: the tangent vectors are orthogonal to $\mu_q$ to machine p
 | Classification | TSRVF scores as features |
 
 The one-liner: TSRVF converts a nonlinear shape-analysis problem into a standard multivariate one, at the cost of a single up-front alignment step.
+
+!!! info "Curves in the plane or in R^d"
+    For outlines and trajectories, where rotation and scale are also nuisance, the shape-space module has its own transform, `curve_shape_tsrvf(model, curves)`, which maps curves to the tangent space at a `curve_shape_karcher_mean` model; `curve_shape_tangent_to_curve` maps back.
 
 !!! info "Relationship to elastic FPCA"
     `tsrvf_transform` supplies the transported representation that vertical (amplitude) FPCA operates on. If you want ready-made eigenfunctions and cumulative-variance summaries, use [`vert_fpca`](shape-analysis.md#elastic-fpca); use the raw tangent vectors here when you need full control over the downstream linear model.

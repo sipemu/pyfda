@@ -103,14 +103,21 @@ nav:
     - Distance Metrics: represent/distance-metrics.md
   - Align:
     - align/index.md
+    - Choosing an Alignment Method: align/choosing-a-method.md
     - Shift Registration: align/shift-registration.md
-    - Elastic Alignment: align/elastic-alignment.md
-    - Advanced Elastic Alignment: align/advanced-alignment.md
-    - Banded Elastic Alignment: align/banded-alignment.md
+    - Affine & Dilation Registration: align/affine-registration.md
     - Landmark Registration: align/landmark-registration.md
+    - Continuous Registration: align/continuous-registration.md
+    - Elastic Alignment: align/elastic-alignment.md
+    - Elastic Optimisers & Penalties: align/elastic-optimisers.md
+    - Banded Elastic Alignment: align/banded-alignment.md
+    - Advanced Elastic Alignment: align/advanced-alignment.md
     - TSRVF: align/tsrvf.md
+    - Shape Analysis (1-D): align/shape-analysis.md
+    # Docs batches 4-5 insert here (plan §3.1): curve-shapes, sparse-elastic,
+    # expfam-registration, pairwise-synchronization, bayesian-alignment, dtw,
+    # alignment-inference; keep Comparing Methods last.
     - Comparing Methods: align/alignment-comparison.md
-    - Shape Analysis: align/shape-analysis.md
   - Regression:
     - regression/index.md
     - Scalar-on-Function: regression/scalar-on-function.md
