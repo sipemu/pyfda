@@ -1157,13 +1157,41 @@
       "purpose": "Opaque handle wrapping fdars-core GakGramTrain for incremental GAK Gram computation.",
       "sig": "(...)"
     },
+    "dtw_barycenter_averaging": {
+      "purpose": "DTW Barycenter Averaging (DBA, Petitjean et al. 2011) of a set of curves.",
+      "sig": "(data, max_iter=30, tol=1e-05, window='none', radius=None, window_fraction=None, max_slope=None, init=None, barycenter_size=None, weights=None)"
+    },
     "dtw_cross_1d": {
       "purpose": "DTW cross distance for 1D data.",
       "sig": "(data1, data2, p=2.0, w=0)"
     },
+    "dtw_distance_early_abandon": {
+      "purpose": "Early-abandoning windowed DTW: the distance, or None once it must exceed `cutoff`.",
+      "sig": "(x, y, cutoff, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
+    "dtw_distance_windowed": {
+      "purpose": "DTW distance between two series under an optional global window (O(m) memory).",
+      "sig": "(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
+    "dtw_k_nearest_neighbors": {
+      "purpose": "Exact k-NN search under windowed DTW with a lower-bound cascade.",
+      "sig": "(queries, references, k=1, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
+    "dtw_nearest_neighbor": {
+      "purpose": "Exact 1-NN search under windowed DTW with a lower-bound cascade (UCR-suite style).",
+      "sig": "(queries, references, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
+    "dtw_path": {
+      "purpose": "DTW optimal warping path and accumulated cost under an optional global window.",
+      "sig": "(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
     "dtw_self_1d": {
       "purpose": "DTW distance matrix (self) for 1D data.",
       "sig": "(data, p=2.0, w=0)"
+    },
+    "dtw_window_mask": {
+      "purpose": "Boolean admissibility grid of a DTW global window for series lengths n and m.",
+      "sig": "(n, m, window='none', radius=None, window_fraction=None, max_slope=None)"
     },
     "fourier_cross_1d": {
       "purpose": "Fourier coefficient distance (cross).",
@@ -1179,7 +1207,7 @@
     },
     "gak_gram_matrix": {
       "purpose": "Global Alignment Kernel Gram matrix (one-shot, symmetric).",
-      "sig": "(data, sigma=None)"
+      "sig": "(data, sigma=None, triangular=0)"
     },
     "gak_gram_predict": {
       "purpose": "Compute the GAK Gram matrix between new data and the training set.",
@@ -1187,7 +1215,11 @@
     },
     "gak_gram_train": {
       "purpose": "Fit a GAK Gram handle for incremental train/predict computation.",
-      "sig": "(data, sigma=None)"
+      "sig": "(data, sigma=None, triangular=0)"
+    },
+    "gak_triangular": {
+      "purpose": "Triangular Global Alignment Kernel (Cuturi 2011) between two 1-D series.",
+      "sig": "(x, y, sigma, triangular=0)"
     },
     "hausdorff_cross_1d": {
       "purpose": "Hausdorff cross distance for 1D data.",
@@ -1221,6 +1253,34 @@
       "purpose": "Simpson's-rule integral of each curve.",
       "sig": "(data, argvals=None)"
     },
+    "lb_enhanced": {
+      "purpose": "LB_Enhanced lower bound on windowed DTW (Tan et al. 2019) with v boundary bands.",
+      "sig": "(x, y, v, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
+    "lb_envelope": {
+      "purpose": "LB_Keogh envelope of a series for a Sakoe-Chiba band of the given radius.",
+      "sig": "(x, radius)"
+    },
+    "lb_envelope_windowed": {
+      "purpose": "LB_Keogh envelope of a candidate series under any DTW window, for a query length.",
+      "sig": "(y, query_len, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
+    "lb_improved": {
+      "purpose": "LB_Improved lower bound on windowed DTW (Lemire 2009), at least as tight as LB_Keogh.",
+      "sig": "(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
+    "lb_keogh": {
+      "purpose": "LB_Keogh lower bound on the windowed DTW distance between a query and a candidate.",
+      "sig": "(query, candidate, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
+    "lb_kim": {
+      "purpose": "LB_Kim lower bound on DTW from first / last / min / max features (O(1) after O(n)).",
+      "sig": "(x, y, p=2.0)"
+    },
+    "lb_webb": {
+      "purpose": "LB_Webb lower bound on windowed DTW (Webb and Petitjean 2021).",
+      "sig": "(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
     "lp_cross_1d": {
       "purpose": "Lp distance matrix (cross) between two 1D functional datasets.",
       "sig": "(data1, data2, argvals, p=2.0)"
@@ -1237,13 +1297,33 @@
       "purpose": "Lp distance matrix (self) for 2D functional data.",
       "sig": "(data, argvals_s, argvals_t, p=2.0)"
     },
+    "sbd": {
+      "purpose": "Shape-based distance (Paparrizos and Gravano 2015) and the optimal cyclic lag.",
+      "sig": "(x, y)"
+    },
+    "sbd_distance_matrix": {
+      "purpose": "Pairwise shape-based distance matrix of a set of curves.",
+      "sig": "(data)"
+    },
     "sigma_gak": {
       "purpose": "Heuristic GAK bandwidth: median pairwise Euclidean distance, floored at 1e-8.",
       "sig": "(data)"
     },
+    "soft_dtw_alignment": {
+      "purpose": "Soft-DTW value plus the expected alignment matrix (tslearn soft_dtw_alignment).",
+      "sig": "(x, y, gamma=1.0, window='none', radius=None, window_fraction=None, max_slope=None)"
+    },
+    "soft_dtw_barycenter": {
+      "purpose": "Soft-DTW barycenter of a set of curves (L-BFGS with random restarts).",
+      "sig": "(data, gamma=1.0, max_iter=100, tol=1e-06, n_restarts=10, seed=0)"
+    },
     "soft_dtw_cross_1d": {
       "purpose": "Soft-DTW cross distance for 1D data.",
       "sig": "(data1, data2, gamma=1.0)"
+    },
+    "soft_dtw_distance_windowed": {
+      "purpose": "Soft-DTW value between two series under an optional global window.",
+      "sig": "(x, y, gamma=1.0, window='none', radius=None, window_fraction=None, max_slope=None)"
     },
     "soft_dtw_div_cross_1d": {
       "purpose": "Soft-DTW divergence cross distance.",

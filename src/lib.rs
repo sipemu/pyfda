@@ -6,6 +6,7 @@
 use pyo3::prelude::*;
 
 mod convert;
+mod options;
 
 mod alignment_mod;
 mod basis_mod;
@@ -20,6 +21,7 @@ mod fdata_mod;
 mod frechet_mod;
 mod fts_mod;
 mod inference_mod;
+mod metric_dtw_mod;
 mod metric_mod;
 mod multi_fdata_mod;
 mod outliers_mod;

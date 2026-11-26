@@ -9,17 +9,18 @@ use fdars_core::metric::gak::{
 use fdars_core::metric::LpDomain;
 use fdars_core::Dim;
 
-/// Build a GakConfig from an optional sigma value.
+/// Build a GakConfig from an optional sigma value and the triangular band T.
 ///
 /// GakConfig is #[non_exhaustive], so struct literal syntax is not available
 /// from outside the crate.  This helper constructs the config via the provided
-/// public constructors (with_sigma / Default).
+/// public constructors (with_sigma / Default / with_triangular).
 #[inline]
-fn make_gak_config(sigma: Option<f64>) -> GakConfig {
+fn make_gak_config(sigma: Option<f64>, triangular: usize) -> GakConfig {
     match sigma {
         Some(s) => GakConfig::with_sigma(s),
         None => GakConfig::default(),
     }
+    .with_triangular(triangular)
 }
 use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::*;
@@ -38,6 +39,7 @@ use pyo3::prelude::*;
 ///   - `.gram` — (n_train, n_train) numpy array (the training Gram matrix)
 ///   - `.sigma` — the resolved bandwidth (float > 0)
 ///   - `.n_train` — number of training observations (int)
+///   - `.triangular` — triangular band parameter T (int, 0 = no band)
 #[pyclass(name = "PyGakGramTrain")]
 pub struct PyGakGramTrain {
     pub inner: GakGramTrain,
@@ -61,6 +63,12 @@ impl PyGakGramTrain {
     #[getter]
     pub fn n_train(&self) -> usize {
         self.inner.gram.nrows()
+    }
+
+    /// Triangular band parameter T used for training (0 = no band).
+    #[getter]
+    pub fn triangular(&self) -> usize {
+        self.inner.triangular
     }
 }
 
@@ -120,6 +128,8 @@ pub fn sigma_gak<'py>(_py: Python<'py>, data: PyReadonlyArray2<'py, f64>) -> PyR
 ///     2D array of shape (n, m) — rows are observations.
 /// sigma : float, optional
 ///     Bandwidth.  If None (default), selected automatically via `sigma_gak`.
+/// triangular : int, optional
+///     Triangular GAK band T (default 0 = no band); see `gak_triangular`.
 ///
 /// Returns
 /// -------
@@ -127,14 +137,15 @@ pub fn sigma_gak<'py>(_py: Python<'py>, data: PyReadonlyArray2<'py, f64>) -> PyR
 ///     Symmetric PSD Gram matrix of shape (n, n) with unit diagonal.
 ///     Directly usable as a precomputed kernel with sklearn.
 #[pyfunction]
-#[pyo3(signature = (data, sigma=None))]
+#[pyo3(signature = (data, sigma=None, triangular=0))]
 pub fn gak_gram_matrix<'py>(
     py: Python<'py>,
     data: PyReadonlyArray2<'py, f64>,
     sigma: Option<f64>,
+    triangular: usize,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let config = make_gak_config(sigma);
+    let config = make_gak_config(sigma, triangular);
     let result = to_pyresult(core_gak_gram_matrix(&mat, &config))?;
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
@@ -151,6 +162,8 @@ pub fn gak_gram_matrix<'py>(
 ///     Training data, shape (n_train, m).
 /// sigma : float, optional
 ///     Bandwidth.  If None (default), selected automatically via `sigma_gak`.
+/// triangular : int, optional
+///     Triangular GAK band T (default 0 = no band); see `gak_triangular`.
 ///
 /// Returns
 /// -------
@@ -158,14 +171,15 @@ pub fn gak_gram_matrix<'py>(
 ///     Opaque handle storing the training Gram, sigma, and auxiliary structures
 ///     needed by `gak_gram_predict`.
 #[pyfunction]
-#[pyo3(signature = (data, sigma=None))]
+#[pyo3(signature = (data, sigma=None, triangular=0))]
 pub fn gak_gram_train<'py>(
     py: Python<'py>,
     data: PyReadonlyArray2<'py, f64>,
     sigma: Option<f64>,
+    triangular: usize,
 ) -> PyResult<Py<PyGakGramTrain>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let config = make_gak_config(sigma);
+    let config = make_gak_config(sigma, triangular);
     let inner = to_pyresult(core_gak_gram_train(&mat, &config))?;
     Py::new(py, PyGakGramTrain { inner })
 }
@@ -717,5 +731,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(gak_gram_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(gak_gram_train, m)?)?;
     m.add_function(wrap_pyfunction!(gak_gram_predict, m)?)?;
+    crate::metric_dtw_mod::register(m)?;
     Ok(())
 }

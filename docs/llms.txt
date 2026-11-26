@@ -1,6 +1,6 @@
 # fdars — Functional Data Analysis for Python
 
-> High-performance functional data analysis toolkit powered by Rust via PyO3. Provides depth measures, basis representations, smoothing, clustering, elastic alignment, regression (scalar-on-function, function-on-scalar, Fréchet), outlier detection, functional time series, seasonal decomposition, SPM control charts, conformal prediction, density FDA, and more. 30 public submodules, 409 public callables.
+> High-performance functional data analysis toolkit powered by Rust via PyO3. Provides depth measures, basis representations, smoothing, clustering, elastic alignment, regression (scalar-on-function, function-on-scalar, Fréchet), outlier detection, functional time series, seasonal decomposition, SPM control charts, conformal prediction, density FDA, and more. 30 public submodules, 429 public callables.
 
 [Documentation](https://sipemu.github.io/pyfda/)
 [Reference](https://sipemu.github.io/pyfda/reference/)
@@ -335,17 +335,25 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `inference.t_perm_test(data_a, data_b, argvals, n_perm=999, seed=None)` — Functional two-sample permutation *t*-test.
 - `inference.two_sample_mean_test(data_a, data_b, argvals, ncomp=5)` — Functional two-sample mean-equality test via Hotelling-T² on a shared FPC
 
-### fdars.metric (26 functions)
+### fdars.metric (46 functions)
 
 - `metric.PyGakGramTrain(...)` — Opaque handle wrapping fdars-core GakGramTrain for incremental GAK Gram computation.
+- `metric.dtw_barycenter_averaging(data, max_iter=30, tol=1e-05, window='none', radius=None, window_fraction=None, max_slope=None, init=None, barycenter_size=None, weights=None)` — DTW Barycenter Averaging (DBA, Petitjean et al. 2011) of a set of curves.
 - `metric.dtw_cross_1d(data1, data2, p=2.0, w=0)` — DTW cross distance for 1D data.
+- `metric.dtw_distance_early_abandon(x, y, cutoff, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` — Early-abandoning windowed DTW: the distance, or None once it must exceed `cutoff`.
+- `metric.dtw_distance_windowed(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` — DTW distance between two series under an optional global window (O(m) memory).
+- `metric.dtw_k_nearest_neighbors(queries, references, k=1, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` — Exact k-NN search under windowed DTW with a lower-bound cascade.
+- `metric.dtw_nearest_neighbor(queries, references, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` — Exact 1-NN search under windowed DTW with a lower-bound cascade (UCR-suite style).
+- `metric.dtw_path(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` — DTW optimal warping path and accumulated cost under an optional global window.
 - `metric.dtw_self_1d(data, p=2.0, w=0)` — DTW distance matrix (self) for 1D data.
+- `metric.dtw_window_mask(n, m, window='none', radius=None, window_fraction=None, max_slope=None)` — Boolean admissibility grid of a DTW global window for series lengths n and m.
 - `metric.fourier_cross_1d(data1, data2, n_basis=5)` — Fourier coefficient distance (cross).
 - `metric.fourier_self_1d(data, n_basis=5)` — Fourier coefficient distance (self) for 1D data.
 - `metric.gak(x, y, sigma)` — Global Alignment Kernel between two 1-D time series.
-- `metric.gak_gram_matrix(data, sigma=None)` — Global Alignment Kernel Gram matrix (one-shot, symmetric).
+- `metric.gak_gram_matrix(data, sigma=None, triangular=0)` — Global Alignment Kernel Gram matrix (one-shot, symmetric).
 - `metric.gak_gram_predict(train, new_data)` — Compute the GAK Gram matrix between new data and the training set.
-- `metric.gak_gram_train(data, sigma=None)` — Fit a GAK Gram handle for incremental train/predict computation.
+- `metric.gak_gram_train(data, sigma=None, triangular=0)` — Fit a GAK Gram handle for incremental train/predict computation.
+- `metric.gak_triangular(x, y, sigma, triangular=0)` — Triangular Global Alignment Kernel (Cuturi 2011) between two 1-D series.
 - `metric.hausdorff_cross_1d(data1, data2, argvals)` — Hausdorff cross distance for 1D data.
 - `metric.hausdorff_cross_2d(data1, data2, argvals_s, argvals_t)` — Hausdorff cross distance for 2D data.
 - `metric.hausdorff_self_1d(data, argvals)` — Hausdorff distance matrix (self) for 1D data.
@@ -354,12 +362,24 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `metric.hshift_self_1d(data, argvals, max_shift=0)` — Horizontal shift distance (self) for 1D data.
 - `metric.inprod(data1, data2, argvals=None)` — Inner product between two functional data sets (Simpson-integrated).
 - `metric.int_simpson(data, argvals=None)` — Simpson's-rule integral of each curve.
+- `metric.lb_enhanced(x, y, v, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` — LB_Enhanced lower bound on windowed DTW (Tan et al. 2019) with v boundary bands.
+- `metric.lb_envelope(x, radius)` — LB_Keogh envelope of a series for a Sakoe-Chiba band of the given radius.
+- `metric.lb_envelope_windowed(y, query_len, window='none', radius=None, window_fraction=None, max_slope=None)` — LB_Keogh envelope of a candidate series under any DTW window, for a query length.
+- `metric.lb_improved(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` — LB_Improved lower bound on windowed DTW (Lemire 2009), at least as tight as LB_Keogh.
+- `metric.lb_keogh(query, candidate, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` — LB_Keogh lower bound on the windowed DTW distance between a query and a candidate.
+- `metric.lb_kim(x, y, p=2.0)` — LB_Kim lower bound on DTW from first / last / min / max features (O(1) after O(n)).
+- `metric.lb_webb(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` — LB_Webb lower bound on windowed DTW (Webb and Petitjean 2021).
 - `metric.lp_cross_1d(data1, data2, argvals, p=2.0)` — Lp distance matrix (cross) between two 1D functional datasets.
 - `metric.lp_cross_2d(data1, data2, argvals_s, argvals_t, p=2.0)` — Lp cross distance for 2D data.
 - `metric.lp_self_1d(data, argvals, p=2.0)` — Lp distance matrix (self) for 1D functional data.
 - `metric.lp_self_2d(data, argvals_s, argvals_t, p=2.0)` — Lp distance matrix (self) for 2D functional data.
+- `metric.sbd(x, y)` — Shape-based distance (Paparrizos and Gravano 2015) and the optimal cyclic lag.
+- `metric.sbd_distance_matrix(data)` — Pairwise shape-based distance matrix of a set of curves.
 - `metric.sigma_gak(data)` — Heuristic GAK bandwidth: median pairwise Euclidean distance, floored at 1e-8.
+- `metric.soft_dtw_alignment(x, y, gamma=1.0, window='none', radius=None, window_fraction=None, max_slope=None)` — Soft-DTW value plus the expected alignment matrix (tslearn soft_dtw_alignment).
+- `metric.soft_dtw_barycenter(data, gamma=1.0, max_iter=100, tol=1e-06, n_restarts=10, seed=0)` — Soft-DTW barycenter of a set of curves (L-BFGS with random restarts).
 - `metric.soft_dtw_cross_1d(data1, data2, gamma=1.0)` — Soft-DTW cross distance for 1D data.
+- `metric.soft_dtw_distance_windowed(x, y, gamma=1.0, window='none', radius=None, window_fraction=None, max_slope=None)` — Soft-DTW value between two series under an optional global window.
 - `metric.soft_dtw_div_cross_1d(data1, data2, gamma=1.0)` — Soft-DTW divergence cross distance.
 - `metric.soft_dtw_div_self_1d(data, gamma=1.0)` — Soft-DTW divergence distance matrix (self) for 1D data.
 - `metric.soft_dtw_self_1d(data, gamma=1.0)` — Soft-DTW distance matrix (self) for 1D data.
@@ -545,7 +565,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 
 ## Scientific Provenance & Cross-Language Implementations
 
-Coverage: 28 of 437 callables (including 28 Fdata class methods) have curated primary-paper entries.
+Coverage: 28 of 457 callables (including 28 Fdata class methods) have curated primary-paper entries.
 Uncurated callables are absent from this section. A consumer MAY synthesize
 provenance for uncurated callables but MUST flag each synthesized citation as
 ungrounded (grounded: false) — never present synthesized provenance as curated.
@@ -596,7 +616,7 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `regression.fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 - `regression.predict_fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 
-> 409 of 437 total callables are not yet curated and are absent from this section.
+> 429 of 457 total callables are not yet curated and are absent from this section.
 > A consumer MAY synthesize provenance for these callables but MUST structurally
 > flag each synthesized citation as ungrounded: { "grounded": false } per citation.
 > Never present synthesized provenance as curated data from this file.

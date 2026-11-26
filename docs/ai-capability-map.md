@@ -2,7 +2,7 @@
 
 This page is the human-readable companion to the machine-readable [`llms.txt`](https://sipemu.github.io/pyfda/llms.txt) digest. It lists every public callable in the `fdars` library, grouped by submodule.
 
-**30 submodules &middot; 409 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
+**30 submodules &middot; 429 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
 
 ## Module Index
 
@@ -23,7 +23,7 @@ This page is the human-readable companion to the machine-readable [`llms.txt`](h
 | [`fdars.frechet`](#frechet) | Fréchet regression for metric-space responses | 4 |
 | [`fdars.fts`](#fts) | Functional time series — forecasting, correlation, spectral analysis | 13 |
 | [`fdars.inference`](#inference) | Functional inference — two-sample tests, interval-wise testing | 11 |
-| [`fdars.metric`](#metric) | Functional distance and similarity metrics — L2, L1, Mahalanobis, DTW | 26 |
+| [`fdars.metric`](#metric) | Functional distance and similarity metrics — L2, L1, Mahalanobis, DTW | 46 |
 | [`fdars.metrics`](#metrics) | Regression and classification scoring metrics for functional outputs | 5 |
 | [`fdars.multi_fdata`](#multi_fdata) | Multi-domain functional data — paired domains, joint analysis | 2 |
 | [`fdars.outliers`](#outliers) | Functional outlier detection — depth-based, magnitude, shape outliers | 8 |
@@ -432,14 +432,22 @@ Functional distance and similarity metrics — L2, L1, Mahalanobis, DTW.
 | Function | Signature | Purpose |
 |----------|-----------|---------|
 | `PyGakGramTrain` | `(...)` | Opaque handle wrapping fdars-core GakGramTrain for incremental GAK Gram computation. |
+| `dtw_barycenter_averaging` | `(data, max_iter=30, tol=1e-05, window='none', radius=None, window_fraction=None, max_slope=None, init=None, barycenter_size=None, weights=None)` | DTW Barycenter Averaging (DBA, Petitjean et al. 2011) of a set of curves. |
 | `dtw_cross_1d` | `(data1, data2, p=2.0, w=0)` | DTW cross distance for 1D data. |
+| `dtw_distance_early_abandon` | `(x, y, cutoff, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Early-abandoning windowed DTW: the distance, or None once it must exceed `cutoff`. |
+| `dtw_distance_windowed` | `(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | DTW distance between two series under an optional global window (O(m) memory). |
+| `dtw_k_nearest_neighbors` | `(queries, references, k=1, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Exact k-NN search under windowed DTW with a lower-bound cascade. |
+| `dtw_nearest_neighbor` | `(queries, references, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Exact 1-NN search under windowed DTW with a lower-bound cascade (UCR-suite style). |
+| `dtw_path` | `(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | DTW optimal warping path and accumulated cost under an optional global window. |
 | `dtw_self_1d` | `(data, p=2.0, w=0)` | DTW distance matrix (self) for 1D data. |
+| `dtw_window_mask` | `(n, m, window='none', radius=None, window_fraction=None, max_slope=None)` | Boolean admissibility grid of a DTW global window for series lengths n and m. |
 | `fourier_cross_1d` | `(data1, data2, n_basis=5)` | Fourier coefficient distance (cross). |
 | `fourier_self_1d` | `(data, n_basis=5)` | Fourier coefficient distance (self) for 1D data. |
 | `gak` | `(x, y, sigma)` | Global Alignment Kernel between two 1-D time series. |
-| `gak_gram_matrix` | `(data, sigma=None)` | Global Alignment Kernel Gram matrix (one-shot, symmetric). |
+| `gak_gram_matrix` | `(data, sigma=None, triangular=0)` | Global Alignment Kernel Gram matrix (one-shot, symmetric). |
 | `gak_gram_predict` | `(train, new_data)` | Compute the GAK Gram matrix between new data and the training set. |
-| `gak_gram_train` | `(data, sigma=None)` | Fit a GAK Gram handle for incremental train/predict computation. |
+| `gak_gram_train` | `(data, sigma=None, triangular=0)` | Fit a GAK Gram handle for incremental train/predict computation. |
+| `gak_triangular` | `(x, y, sigma, triangular=0)` | Triangular Global Alignment Kernel (Cuturi 2011) between two 1-D series. |
 | `hausdorff_cross_1d` | `(data1, data2, argvals)` | Hausdorff cross distance for 1D data. |
 | `hausdorff_cross_2d` | `(data1, data2, argvals_s, argvals_t)` | Hausdorff cross distance for 2D data. |
 | `hausdorff_self_1d` | `(data, argvals)` | Hausdorff distance matrix (self) for 1D data. |
@@ -448,12 +456,24 @@ Functional distance and similarity metrics — L2, L1, Mahalanobis, DTW.
 | `hshift_self_1d` | `(data, argvals, max_shift=0)` | Horizontal shift distance (self) for 1D data. |
 | `inprod` | `(data1, data2, argvals=None)` | Inner product between two functional data sets (Simpson-integrated). |
 | `int_simpson` | `(data, argvals=None)` | Simpson's-rule integral of each curve. |
+| `lb_enhanced` | `(x, y, v, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | LB_Enhanced lower bound on windowed DTW (Tan et al. 2019) with v boundary bands. |
+| `lb_envelope` | `(x, radius)` | LB_Keogh envelope of a series for a Sakoe-Chiba band of the given radius. |
+| `lb_envelope_windowed` | `(y, query_len, window='none', radius=None, window_fraction=None, max_slope=None)` | LB_Keogh envelope of a candidate series under any DTW window, for a query length. |
+| `lb_improved` | `(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | LB_Improved lower bound on windowed DTW (Lemire 2009), at least as tight as LB_Keogh. |
+| `lb_keogh` | `(query, candidate, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | LB_Keogh lower bound on the windowed DTW distance between a query and a candidate. |
+| `lb_kim` | `(x, y, p=2.0)` | LB_Kim lower bound on DTW from first / last / min / max features (O(1) after O(n)). |
+| `lb_webb` | `(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | LB_Webb lower bound on windowed DTW (Webb and Petitjean 2021). |
 | `lp_cross_1d` | `(data1, data2, argvals, p=2.0)` | Lp distance matrix (cross) between two 1D functional datasets. |
 | `lp_cross_2d` | `(data1, data2, argvals_s, argvals_t, p=2.0)` | Lp cross distance for 2D data. |
 | `lp_self_1d` | `(data, argvals, p=2.0)` | Lp distance matrix (self) for 1D functional data. |
 | `lp_self_2d` | `(data, argvals_s, argvals_t, p=2.0)` | Lp distance matrix (self) for 2D functional data. |
+| `sbd` | `(x, y)` | Shape-based distance (Paparrizos and Gravano 2015) and the optimal cyclic lag. |
+| `sbd_distance_matrix` | `(data)` | Pairwise shape-based distance matrix of a set of curves. |
 | `sigma_gak` | `(data)` | Heuristic GAK bandwidth: median pairwise Euclidean distance, floored at 1e-8. |
+| `soft_dtw_alignment` | `(x, y, gamma=1.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Soft-DTW value plus the expected alignment matrix (tslearn soft_dtw_alignment). |
+| `soft_dtw_barycenter` | `(data, gamma=1.0, max_iter=100, tol=1e-06, n_restarts=10, seed=0)` | Soft-DTW barycenter of a set of curves (L-BFGS with random restarts). |
 | `soft_dtw_cross_1d` | `(data1, data2, gamma=1.0)` | Soft-DTW cross distance for 1D data. |
+| `soft_dtw_distance_windowed` | `(x, y, gamma=1.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Soft-DTW value between two series under an optional global window. |
 | `soft_dtw_div_cross_1d` | `(data1, data2, gamma=1.0)` | Soft-DTW divergence cross distance. |
 | `soft_dtw_div_self_1d` | `(data, gamma=1.0)` | Soft-DTW divergence distance matrix (self) for 1D data. |
 | `soft_dtw_self_1d` | `(data, gamma=1.0)` | Soft-DTW distance matrix (self) for 1D data. |
