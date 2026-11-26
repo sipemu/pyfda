@@ -681,7 +681,7 @@
         }
       },
       "notes": "Introduces generative models for functional data using phase/amplitude separation: vertical FPCA (vert_fpca), horizontal FPCA (horiz_fpca), joint FPCA (joint_fpca, and its reusable fit/transform model jfpca_fit), and Gaussian process models (gauss_model, joint_gauss_model) in the SRSF framework. CSDA 61:50-66, May 2013 (arXiv:1212.1791). [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.csda.2012.12.001 — title, author list, year, volume 61 and pages 50-66 match; an earlier note giving 'CSDA 58:222-236' was wrong.] fdasrvf::jointFPCA additionally cites Lee & Jung (arXiv:1603.01775) for the combined amplitude+phase analysis.",
-      "curated": true
+      "curated": false
     },
     "marron_ramsay_sangalli_srivastava_2015": {
       "title": "Functional Data Analysis of Amplitude and Phase Variation",
@@ -725,7 +725,7 @@
         "alignment.curve_shape_tangent_to_curve"
       ],
       "notes": "Springer textbook on functional and shape data analysis. Covers transported SRSF (TSRVF) for closed curves, Karcher means, and SRV elastic shape analysis of R^d curves (ch. 5-6). [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1007/978-1-4939-4020-2 — title, authors (Srivastava, Anuj; Klassen, Eric P.) and year 2016 match; Springer New York.] curve_shape_* callables added 2026-11-27: fdars-core alignment/curve_shape/mod.rs cites this book (ch. 5-6) as its reference; the optional (a,b) elastic metric is needham_kurtek_2020.",
-      "curated": true
+      "curated": false
     },
     "tucker_yarger_2024": {
       "title": "Elastic functional changepoint detection of climate impacts from localized sources",
@@ -752,7 +752,7 @@
         }
       },
       "notes": "Introduces elastic functional changepoint detection in curve sequences using the SRSF framework. Environmetrics 35(1):e2826. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1002/env.2826 — title and authors match; published online 2023-10-24, issue (print) February 2024.] Year 2024 is the journal issue year per the schema rule (not the online-first date); fdars-core elastic_changepoint.rs says 'Tucker & Yarger (2023)', which is the online-first year of the same paper. arXiv preprint 2022 (arXiv:2211.12687).",
-      "curated": true
+      "curated": false
     },
     "_uncurated_alignment_variants_2026-09": {
       "title": "",
@@ -837,7 +837,7 @@
         }
       },
       "notes": "Introduces Dynamic Time Warping (DTW) for time-series comparison via dynamic programming, with the Sakoe-Chiba band global constraint. IEEE TASSP 26(1):43-49, 1978. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1109/TASSP.1978.1163055 — title, author list and year match the registry record.] Windowed / path / multivariate DTW callables added 2026-11-26 (the window also offers the Itakura parallelogram, which is not from this paper).",
-      "curated": true
+      "curated": false
     },
     "cuturi_2011": {
       "title": "Fast global alignment kernels",
@@ -869,7 +869,7 @@
         }
       },
       "notes": "Introduces the triangular Global Alignment Kernel (TGAK) for time series — a positive definite kernel summing over all DTW alignments, with the triangular parameter T. ICML 2011. [VERIFIED 2026-11-26: title and sole author read from the ICML 2011 proceedings PDF icml.cc/2011/papers/489_icmlpaper.pdf.] The former DOI 10.5555/3104482.3104599 was removed: it is an ACM-internal identifier that does not resolve at doi.org (HTTP 404) and is not in Crossref. gak_triangular added 2026-11-26 (fdars-core metric/gak.rs cites Cuturi 2011 for T).",
-      "curated": true
+      "curated": false
     },
     "cuturi_blondel_2017": {
       "title": "Soft-DTW: a differentiable loss function for time-series",
@@ -1217,7 +1217,7 @@
         }
       },
       "notes": "Introduces PEER (partially empirical eigenvectors for regression): scalar-on-function regression with a structured (decomposition-based) penalty, of which ridge and second-difference penalties are special cases. Electronic Journal of Statistics 6:323-353. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1214/12-EJS676 — title, author list and year match the registry record.] refund::peer cites this paper.",
-      "curated": true
+      "curated": false
     },
     "kundu_harezlak_randolph_2016": {
       "title": "Longitudinal functional models with structured penalties",
@@ -1238,7 +1238,7 @@
         }
       },
       "notes": "Extends PEER to longitudinal designs (repeated functional predictors per subject, subject random effects): LPEER. Statistical Modelling 16(2):114-139. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1177/1471082X15626291 — title, author list and year match the registry record.] refund::lpeer cites the arXiv preprint (arXiv:1211.4763) of this paper.",
-      "curated": true
+      "curated": false
     },
     "reiss_et_al_2015": {
       "title": "Wavelet-domain regression and predictive inference in psychiatric neuroimaging",
@@ -1259,7 +1259,7 @@
         }
       },
       "notes": "Wavelet-domain scalar-on-function regression by principal component regression / partial least squares on DWT coefficients (the refund.wave `wcr` method). Annals of Applied Statistics 9(2):1076-1101. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1214/15-AOAS829 — title, author list and year match the registry record.] refund.wave::wcr cites this paper (as the 2014 preprint).",
-      "curated": true
+      "curated": false
     },
     "zhao_ogden_reiss_2012": {
       "title": "Wavelet-based LASSO in functional linear regression",
@@ -1280,7 +1280,7 @@
         }
       },
       "notes": "Sparse (L1-penalized) functional linear regression in the wavelet domain; wnet's elastic net generalizes the LASSO penalty. JCGS 21(3):600-617. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1080/10618600.2012.679241 — title, author list and year match the registry record.] refund.wave::wnet cites this paper. Not mapped to wcr (PCR/PLS, see reiss_et_al_2015).",
-      "curated": true
+      "curated": false
     },
     "petitjean_ketterlin_gancarski_2011": {
       "title": "A global averaging method for dynamic time warping, with applications to clustering",
@@ -1310,7 +1310,7 @@
         }
       },
       "notes": "Introduces DTW Barycenter Averaging (DBA) and its use as the centroid update of DTW k-means. Pattern Recognition 44(3):678-693. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2010.09.013 — title, author list and year match the registry record.] fdars-core metric/dba.rs cites this paper; dtw_kmeans.rs uses DBA centroids.",
-      "curated": true
+      "curated": false
     },
     "paparrizos_gravano_2015": {
       "title": "k-Shape: Efficient and Accurate Clustering of Time Series",
@@ -1340,7 +1340,7 @@
         }
       },
       "notes": "Introduces the shape-based distance (SBD, normalized cross-correlation) and k-Shape clustering with shape-extraction centroids. Proceedings of ACM SIGMOD 2015, pp. 1855-1870. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1145/2723372.2737793 — title, author list and year match the registry record; Crossref lists the title as 'k-Shape', the full title is from tslearn/dtwclust docs and Semantic Scholar.] fdars-core kshape.rs and metric/sbd.rs cite this paper. sbd_kmedoids is k-medoids on the SBD matrix (SBD part attributed here).",
-      "curated": true
+      "curated": false
     },
     "kim_park_chu_2001": {
       "title": "An index-based approach for similarity search supporting time warping in large sequence databases",
@@ -1353,7 +1353,7 @@
         "metric.lb_kim"
       ],
       "notes": "Introduces the LB_Kim lower bound on DTW (first/last/min/max features). Proceedings 17th International Conference on Data Engineering (ICDE 2001), pp. 607-614. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1109/ICDE.2001.914875 — title, author list and year match the registry record; year from Semantic Scholar (Crossref record has no date; ICDE 17 = 2001).] fdars-core metric/dtw_lb.rs cites Kim, Park & Chu 2001.",
-      "curated": true
+      "curated": false
     },
     "keogh_2002": {
       "title": "Exact indexing of dynamic time warping",
@@ -1384,7 +1384,7 @@
         }
       },
       "notes": "Introduces the LB_Keogh envelope lower bound for DTW and its use for exact nearest-neighbour search. VLDB 2002, pp. 406-417. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/B978-155860869-6/50043-3 — title, author list and year match the registry record.] Not the 2005 KAIS journal version (Keogh & Ratanamahatana). fdars-core metric/dtw_lb.rs cites Keogh 2002; the NN search cascades LB_Kim/LB_Keogh/tighter bounds before (early-abandoning) DTW.",
-      "curated": true
+      "curated": false
     },
     "lemire_2009": {
       "title": "Faster retrieval with a two-pass dynamic-time-warping lower bound",
@@ -1405,7 +1405,7 @@
         }
       },
       "notes": "Introduces LB_Improved, the two-pass DTW lower bound (>= LB_Keogh). Pattern Recognition 42(9):2169-2180. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2008.11.030 — title, author list and year match the registry record.] fdars-core metric/dtw_lb.rs cites Lemire 2009.",
-      "curated": true
+      "curated": false
     },
     "tan_petitjean_webb_2019": {
       "title": "Elastic bands across the path: A new framework and method to lower bound DTW",
@@ -1418,7 +1418,7 @@
         "metric.lb_enhanced"
       ],
       "notes": "Introduces LB_Enhanced (elastic bands at both path ends plus LB_Keogh in the middle). Proceedings of the 2019 SIAM International Conference on Data Mining (SDM), pp. 522-530. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1137/1.9781611975673.59 — title, author list and year match the registry record.] fdars-core metric/dtw_lb.rs cites Tan, Petitjean & Webb 2019.",
-      "curated": true
+      "curated": false
     },
     "webb_petitjean_2021": {
       "title": "Tight lower bounds for dynamic time warping",
@@ -1431,7 +1431,7 @@
         "metric.lb_webb"
       ],
       "notes": "Introduces LB_Webb (always >= LB_Keogh). Pattern Recognition 115:107895. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2021.107895 — title, author list and year match the registry record.] fdars-core metric/dtw_lb.rs cites this paper.",
-      "curated": true
+      "curated": false
     },
     "herrmann_webb_2021": {
       "title": "Early abandoning and pruning for elastic distances including dynamic time warping",
@@ -1446,7 +1446,7 @@
         "metric.dtw_k_nearest_neighbors"
       ],
       "notes": "Introduces EAPrunedDTW: exact DTW that prunes and early-abandons against a cutoff; the NN searches use it after the lower-bound cascade. Data Mining and Knowledge Discovery 35(6):2577-2601. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1007/s10618-021-00782-4 — title, author list and year match the registry record.] fdars-core metric/dtw_lb.rs cites Herrmann & Webb 2021.",
-      "curated": true
+      "curated": false
     },
     "keogh_pazzani_2001": {
       "title": "Derivative Dynamic Time Warping",
@@ -1474,7 +1474,7 @@
         }
       },
       "notes": "Introduces derivative DTW (DDTW). Proceedings of the 2001 SIAM International Conference on Data Mining, pp. 1-11. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1137/1.9781611972719.1 — title, author list and year match the registry record; aeon's docstring says 2002, the registry and the SDM 2001 proceedings say 2001.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'ddtw' option.",
-      "curated": true
+      "curated": false
     },
     "jeong_jeong_omitaomu_2011": {
       "title": "Weighted dynamic time warping for time series classification",
@@ -1502,7 +1502,7 @@
         }
       },
       "notes": "Introduces weighted DTW (WDTW, logistic weight on |i-j|) and its derivative variant WDDTW. Pattern Recognition 44(9):2231-2240. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2010.09.022 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'wdtw' / 'wddtw' option.",
-      "curated": true
+      "curated": false
     },
     "herrmann_webb_2023": {
       "title": "Amercing: An intuitive and effective constraint for dynamic time warping",
@@ -1530,7 +1530,7 @@
         }
       },
       "notes": "Introduces amerced DTW (ADTW: a fixed penalty per non-diagonal step). Pattern Recognition 137:109333. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2023.109333 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'adtw' option.",
-      "curated": true
+      "curated": false
     },
     "chen_ng_2004": {
       "title": "On The Marriage of Lp-norms and Edit Distance",
@@ -1558,7 +1558,7 @@
         }
       },
       "notes": "Introduces edit distance with real penalty (ERP). Proceedings of VLDB 2004, pp. 792-803. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/B978-012088469-8.50070-X — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'erp' option.",
-      "curated": true
+      "curated": false
     },
     "chen_ozsu_oria_2005": {
       "title": "Robust and fast similarity search for moving object trajectories",
@@ -1586,7 +1586,7 @@
         }
       },
       "notes": "Introduces edit distance on real sequences (EDR). Proceedings of ACM SIGMOD 2005, pp. 491-502. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1145/1066157.1066213 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'edr' option.",
-      "curated": true
+      "curated": false
     },
     "marteau_2009": {
       "title": "Time Warp Edit Distance with Stiffness Adjustment for Time Series Matching",
@@ -1614,7 +1614,7 @@
         }
       },
       "notes": "Introduces the time warp edit distance (TWE). IEEE TPAMI 31(2):306-318. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1109/TPAMI.2008.76 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'twe' option.",
-      "curated": true
+      "curated": false
     },
     "stefan_athitsos_das_2013": {
       "title": "The Move-Split-Merge Metric for Time Series",
@@ -1642,7 +1642,7 @@
         }
       },
       "notes": "Introduces the move-split-merge (MSM) metric. IEEE TKDE 25(6):1425-1438. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1109/TKDE.2012.88 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'msm' option.",
-      "curated": true
+      "curated": false
     },
     "vlachos_kollios_gunopulos_2002": {
       "title": "Discovering similar multidimensional trajectories",
@@ -1670,7 +1670,7 @@
         }
       },
       "notes": "Introduces the longest-common-subsequence (LCSS) similarity for trajectories/time series. Proceedings 18th International Conference on Data Engineering (ICDE 2002), pp. 673-684. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1109/ICDE.2002.994784 — title, author list and year match the registry record; year from Semantic Scholar (Crossref record has no date; ICDE 18 = 2002).] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'lcss' option.",
-      "curated": true
+      "curated": false
     },
     "zhao_itti_2018": {
       "title": "shapeDTW: Shape Dynamic Time Warping",
@@ -1698,7 +1698,7 @@
         }
       },
       "notes": "Introduces shape DTW (DTW on local subsequence shape descriptors). Pattern Recognition 74:171-184. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.patcog.2017.09.020 — title, author list and year match the registry record.] Mapped to every metric.elastic_ts_* callable as one of nine co-primary papers: these callables dispatch on `metric` across the aeon elastic-distance family, and this paper is the primary for the 'shape_dtw' option.",
-      "curated": true
+      "curated": false
     },
     "anderson_2001": {
       "title": "A new method for non-parametric multivariate analysis of variance",
@@ -1720,7 +1720,7 @@
         }
       },
       "notes": "Introduces PERMANOVA: distance-based pseudo-F with a permutation p-value. Austral Ecology 26(1):32-46. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1111/j.1442-9993.2001.01070.pp.x — title, author list and year match the registry record.] fdars-core inference/permanova.rs cites Anderson (2001); alignment/phase_amplitude_test.rs runs this one-way PERMANOVA on elastic amplitude and Fisher-Rao phase distance matrices.",
-      "curated": true
+      "curated": false
     },
     "ji_muller_2017": {
       "title": "Optimal Designs for Longitudinal and Functional Data",
@@ -1742,7 +1742,7 @@
         }
       },
       "notes": "Optimal designs (trajectory-recovery and FPC-score criteria) for sparse longitudinal/functional data under the PACE model. JRSS-B 79(3):859-876. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1111/rssb.12192 — title, author list and year match the registry record.] fdars-core optimal_design.rs cites Ji & Müller (2017); fdapace::FOptDes cites the same paper.",
-      "curated": true
+      "curated": false
     },
     "sangalli_et_al_2010": {
       "title": "k-mean alignment for curve clustering",
@@ -1763,7 +1763,7 @@
         }
       },
       "notes": "Introduces k-mean alignment: joint clustering and alignment of curves, alternating template estimation and warp-plus-assignment steps. CSDA 54(5):1219-1233. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1016/j.csda.2009.12.008 — title, author list and year match the registry record; Crossref drops the italic 'k' from the title.] fdars-core clustering_advanced.rs cites Sangalli et al. (2010) for align_cluster_fd (together with the fdasrvf elastic k-means variant built on Srivastava et al. 2011); fdasrvf::kmeans_align cites both. Replaces the former _uncurated_align_cluster_fd_2026-09 sentinel now that the core source names this paper.",
-      "curated": true
+      "curated": false
     },
     "daubechies_1992": {
       "title": "Ten Lectures on Wavelets",
@@ -1787,7 +1787,7 @@
         }
       },
       "notes": "Reference monograph for compactly supported orthonormal (Daubechies) wavelets and their filter banks; fdars-core wavelet/ implements Haar/db1-db10 DWT analysis/synthesis. SIAM CBMS-NSF Regional Conference Series in Applied Mathematics 61. [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1137/1.9781611970104 — title, author list and year match the registry record.]",
-      "curated": true
+      "curated": false
     },
     "vovk_gammerman_shafer_2005": {
       "title": "Algorithmic Learning in a Random World",
@@ -1800,7 +1800,7 @@
         "tolerance.elastic_conformal_anomaly"
       ],
       "notes": "Monograph introducing conformal prediction and conformal p-values; the inductive (split) conformal p-value used by elastic_conformal_anomaly comes from this framework. Springer, 1st ed. 2005 (ISBN 0-387-00152-2). [VERIFIED 2026-11-26: Crossref api.crossref.org/works/10.1007/b106715 — title and year 2005; the registry record has no author list, authors confirmed via OpenLibrary and the ACM SIGACT News review (doi 10.1145/1189056.1189065).] Not the 2022 2nd edition (doi 10.1007/978-3-031-06649-8).",
-      "curated": true
+      "curated": false
     },
     "adams_et_al_2025": {
       "title": "Conformal Anomaly Detection for Functional Data with Elastic Distance Metrics",
@@ -1813,7 +1813,7 @@
         "tolerance.elastic_nonconformity"
       ],
       "notes": "Inductive conformal anomaly detection for functional data with elastic amplitude/phase nonconformity scores against a Karcher-mean template. arXiv:2504.01172 (stat.ME, 2025). [VERIFIED 2026-11-26: arXiv API export.arxiv.org/api/query?id_list=2504.01172 — title, authors and date match; no journal version found in Crossref (an OSTI report record 10.2172/3547221 exists, not a peer-reviewed venue).]",
-      "curated": true
+      "curated": false
     },
     "wang_kurtek_zhang_2026": {
       "title": "Joint Registration and Conformal Prediction for Partially Observed Functional Data",
@@ -1830,7 +1830,7 @@
         "conformal.partial_conformal_select_bandwidth"
       ],
       "notes": "Split-conformal amplitude bands (SFCP) and phase sets (SFCPP) for a partially observed curve, with elastic registration to a Karcher template and Nadaraya-Watson prediction from the observed prefix. JCGS 35(4):1537-1547 (online 2026-04-14; PMC13160368). [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1080/10618600.2026.2634823 — title, author list and year match the registry record.] fdars-core conformal/partial.rs implements this paper. FDA-specific, so allowlisted against the conformal anti-feature family (CURATE-04 exception).",
-      "curated": true
+      "curated": false
     },
     "goode_et_al_2026": {
       "title": "Explainable Machine Learning for Functional Data",
@@ -1844,7 +1844,7 @@
         "explain.veesa_pipeline"
       ],
       "notes": "Introduces the VEESA (Variable importance Explainable Elastic Shape Analysis) pipeline: elastic (joint amplitude+phase) FPCA inputs, permutation feature importance over the PC scores, and explanations mapped back to the data space. Journal of Data Science 24(1):125-145. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.6339/25-JDS1212 — title, author list and year match the registry record; the JDS landing page meta (citation_volume 24, issue 1, citation_year 2025) confirms the venue, and confirms the paper describes VEESA.] Published online 2025-12-16; year 2026 is the print issue date (Crossref published-print 2026-01-01), per the schema rule. arXiv preprint 2501.07602 ('An Explainable Pipeline for Machine Learning with Functional Data'). The R package veesa implements it. FDA-specific, so allowlisted against the explain anti-feature family (CURATE-04 exception).",
-      "curated": true
+      "curated": false
     },
     "needham_kurtek_2020": {
       "title": "Simplifying Transforms for General Elastic Metrics on the Space of Plane Curves",
@@ -1868,7 +1868,7 @@
         "alignment.curve_shape_confidence_interval"
       ],
       "notes": "Introduces the F-transform that pulls the L2 metric back to the general (a,b) first-order elastic metric on plane curves, including the closed-curve condition. SIAM J. Imaging Sciences 13(1):445-473. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1137/19M1265132 — title, author list and year match the registry record.] fdars-core alignment/curve_shape/mod.rs cites this paper. Mapped to the curve_shape_* callables that accept the (a,b) elastic metric option (their SRV default is srivastava_klassen_2016).",
-      "curated": true
+      "curated": false
     },
     "bauer_et_al_2024": {
       "title": "Elastic Metrics on Spaces of Euclidean Curves: Theory and Algorithms",
@@ -1882,7 +1882,7 @@
         "alignment.ab_elastic_match_pl"
       ],
       "notes": "Theory and algorithms for general elastic metrics on curves, including the exact (a,b) distance between piecewise-linear curves modulo reparametrisation (Sec. 4.1). Journal of Nonlinear Science 34(3):56. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1007/s00332-024-10035-5 — title, author list and year match the registry record.] fdars-core alignment/curve_shape/pl_exact.rs cites this paper.",
-      "curated": true
+      "curated": false
     },
     "lahiri_robinson_klassen_2015": {
       "title": "Precise matching of PL curves in R^N in the square root velocity framework",
@@ -1896,7 +1896,7 @@
         "alignment.ab_elastic_match_pl"
       ],
       "notes": "Exact (discretisation-free) SRV matching of piecewise-linear curves. Geometry, Imaging and Computing 2(3):133-186. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.4310/GIC.2015.v2.n3.a1 — title, author list and year match the registry record; Crossref gives the title with LaTeX '$\\\\mathbb{R}^N$', written here as R^N.] fdars-core pl_exact.rs adapts this precise-matching algorithm for the (a,b) case.",
-      "curated": true
+      "curated": false
     },
     "steyer_stocker_greven_2023": {
       "title": "Elastic Analysis of Irregularly or Sparsely Sampled Curves",
@@ -1919,7 +1919,7 @@
         }
       },
       "notes": "Elastic (SRV) alignment and Fréchet means for irregularly or sparsely sampled curves treated as polygons, with spline SRV means. Biometrics 79(3):2103-2115 (online 2022-06-14; print issue 2023). [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1111/biom.13706 — title, author list and year match the registry record.] fdars-core alignment/sparse/mod.rs cites Steyer, Stöcker & Greven 2023 and ports R elasdics.",
-      "curated": true
+      "curated": false
     },
     "wrobel_et_al_2019": {
       "title": "Registration for Exponential Family Functional Data",
@@ -1943,7 +1943,7 @@
         }
       },
       "notes": "Joint registration and generalized FPCA for exponential-family (e.g. binary) functional data, including the variational binary FPCA used by gfpca_variational. Biometrics 75(1):48-57 (online 2018-08-21; print 2019). [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1111/biom.12963 — title, author list and year match the registry record.] NOTE: fdars-core alignment/expfam/mod.rs cites this as 'JCGS 28(4)', which is wrong — the registry and R registr give Biometrics 75(1).",
-      "curated": true
+      "curated": false
     },
     "wrobel_bauer_2021": {
       "title": "registr 2.0: Incomplete Curve Registration for Exponential Family Functional Data",
@@ -1958,7 +1958,7 @@
         "alignment.register_expfam"
       ],
       "notes": "registr 2.0 software paper: incomplete-curve registration (the `incompleteness` / `lambda_inc` options) and two-step GFPCA for exponential-family functional data. Journal of Open Source Software 6(61):2964. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.21105/joss.02964 — title, author list and year match the registry record.] fdars-core alignment/expfam/mod.rs cites Wrobel & Bauer 2021 and ports registr 2.2.1.",
-      "curated": true
+      "curated": false
     },
     "gertheiss_goldsmith_staicu_2017": {
       "title": "A note on modeling sparse exponential-family functional response curves",
@@ -1979,7 +1979,7 @@
         }
       },
       "notes": "Two-step generalized FPCA for sparse exponential-family curves (latent covariance, then score estimation). CSDA 105:46-52. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1016/j.csda.2016.07.010 — title, author list and year match the registry record.] R registr::gfpca_twoStep cites this paper. NOTE: fdars-core alignment/expfam/twostep.rs cites it as '*Stat* 6(1)', a wrong venue.",
-      "curated": true
+      "curated": false
     },
     "hall_muller_yao_2008": {
       "title": "Modelling Sparse Generalized Longitudinal Observations with Latent Gaussian Processes",
@@ -1992,7 +1992,7 @@
         "alignment.gfpca_two_step"
       ],
       "notes": "Latent-Gaussian-process covariance estimation for sparse generalized (e.g. binary) longitudinal data, used as gfpca_two_step's covariance step. JRSS-B 70(4):703-723. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1111/j.1467-9868.2008.00656.x — title, author list and year match the registry record.] fdars-core twostep.rs cites Hall, Müller & Yao 2008 (registr `cov_hall`); registr::gfpca_twoStep cites it too.",
-      "curated": true
+      "curated": false
     },
     "jaakkola_jordan_1997": {
       "title": "A Variational Approach to Bayesian Logistic Regression Models and their Extensions",
@@ -2012,7 +2012,7 @@
         }
       },
       "notes": "Variational lower bound for the logistic likelihood, used by the variational-EM binary GFPCA. Sixth International Workshop on Artificial Intelligence and Statistics (AISTATS 1997), PMLR R1:283-294. No DOI (PMLR). [VERIFIED 2026-11-27: proceedings.mlr.press/r1/jaakkola97a.html citation meta — title, authors, pages 283-294, date 1997.] fdars-core alignment/expfam/gfpca.rs cites Jaakkola & Jordan 1997; registr::bfpca cites it.",
-      "curated": true
+      "curated": false
     },
     "tang_muller_2008": {
       "title": "Pairwise curve synchronization for functional data",
@@ -2033,7 +2033,7 @@
         }
       },
       "notes": "Pairwise curve synchronisation: warps from pairwise alignments averaged into each curve's time-synchronising map. Biometrika 95(4):875-889. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1093/biomet/asn047 — title, author list and year match the registry record; Crossref has only an online date, the 2008 issue year is from vol 95(4).] fdars-core alignment/wfda.rs cites this paper; fdapace::WFDA cites it.",
-      "curated": true
+      "curated": false
     },
     "lu_herbei_kurtek_2017": {
       "title": "Bayesian Registration of Functions With a Gaussian Process Prior",
@@ -2054,7 +2054,7 @@
         }
       },
       "notes": "Bayesian multiple registration with warps on the Hilbert sphere and a Gaussian-process template prior, sampled by MCMC. JCGS 26(4):894-904. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1080/10618600.2017.1336444 — title, author list and year match the registry record.] fdars-core alignment/bayesian_group.rs names Lu, Herbei & Kurtek (via fdasrvf time_warping_bayes, which cites this paper).",
-      "curated": true
+      "curated": false
     },
     "beskos_et_al_2011": {
       "title": "Hybrid Monte Carlo on Hilbert spaces",
@@ -2067,7 +2067,7 @@
         "alignment.bayesian_align_group"
       ],
       "notes": "Infinite-dimensional (prior-preconditioned) Hamiltonian Monte Carlo, used by bayesian_align_group's HMC sampler option. Stochastic Processes and their Applications 121(10):2201-2230. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1016/j.spa.2011.06.003 — title, author list and year match the registry record.] fdars-core alignment/bayesian_group.rs and bayesian_group_hmc.rs cite Beskos et al. 2011.",
-      "curated": true
+      "curated": false
     },
     "cheng_dryden_huang_2016": {
       "title": "Bayesian Registration of Functions and Curves",
@@ -2088,7 +2088,7 @@
         }
       },
       "notes": "Bayesian pairwise registration of functions and curves with MCMC over warping functions. Bayesian Analysis 11(2):447-475. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1214/15-BA957 — title, author list and year match the registry record.] fdars-core alignment/bayesian.rs cites no paper; it implements the pCN-on-the-Hilbert-sphere pairwise sampler of fdasrvf::pair_align_functions_bayes, whose documentation cites this paper. Removed bayesian_align_pair from _uncurated_alignment_variants_2026-09.",
-      "curated": true
+      "curated": false
     },
     "xie_et_al_2017": {
       "title": "A Geometric Approach to Visualization of Variability in Functional Data",
@@ -2103,7 +2103,7 @@
         "alignment.elastic_phase_boxplot"
       ],
       "notes": "Elastic amplitude and phase functional box plots built after elastic alignment. JASA 112(519):979-993. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1080/01621459.2016.1256813 — title, author list and year match the registry record.] fdars-core alignment/elastic_boxplot.rs cites Xie, Kurtek, Bharath & Sun (2017).",
-      "curated": true
+      "curated": false
     },
     "kulis_jordan_2012": {
       "title": "Revisiting k-means: New Algorithms via Bayesian Nonparametrics",
@@ -2123,7 +2123,7 @@
         }
       },
       "notes": "Introduces DP-means (k-means with a cluster-creation penalty from the Dirichlet-process small-variance limit). ICML 2012 (29th International Conference on Machine Learning). No DOI. [VERIFIED 2026-11-27: title and authors read from the ICML 2012 proceedings PDF icml.cc/2012/papers/291.pdf and the arXiv API record 1111.0352.] fdars-core alignment/dpmeans.rs cites Kulis & Jordan (2012); fdasrvf::dpmeans_align cites it.",
-      "curated": true
+      "curated": false
     },
     "ramsay_li_1998": {
       "title": "Curve Registration",
@@ -2136,7 +2136,7 @@
         "alignment.continuous_registration"
       ],
       "notes": "Continuous registration with smooth monotone warps and the minimum-eigenvalue fitting criterion. JRSS-B 60(2):351-363. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1111/1467-9868.00129 — title, author list and year match the registry record.] fdars-core alignment/continuous.rs cites Ramsay & Li 1998 for the minimum-eigenvalue criterion and ports R fda::register.fd (whose help page cites only the Ramsay books, so no cross_language entry).",
-      "curated": true
+      "curated": false
     },
     "itakura_1975": {
       "title": "Minimum prediction residual principle applied to speech recognition",
@@ -2154,7 +2154,7 @@
         "metric.dtw_pairwise_distance_multivariate"
       ],
       "notes": "Introduces the Itakura parallelogram slope constraint for DTW. IEEE TASSP 23(1):67-72. [VERIFIED 2026-11-27: Crossref api.crossref.org/works/10.1109/TASSP.1975.1162641 — title, author list and year match the registry record.] Mapped to the DTW callables whose `window` argument offers 'itakura' (metric/window.rs), alongside sakoe_chiba_1978 for the band option.",
-      "curated": true
+      "curated": false
     }
   },
   "callable_index": {

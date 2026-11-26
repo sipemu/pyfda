@@ -2,12 +2,12 @@
 
 > Curated primary paper references for fdars functional data analysis methods.  
 > Generated offline from `python/fdars/_references_map.json`.  
-> **143/580 callables** have at least one curated primary-paper entry.  
+> **33/580 callables** have at least one curated primary-paper entry.  
 > Uncurated callables are absent; see the [AI Capability Map](ai-capability-map.md) for the full callable surface.
 
 ## Coverage
 
-**143 of 580 public callables** have at least one curated primary-paper entry.
+**33 of 580 public callables** have at least one curated primary-paper entry.
 Remaining callables have contested attribution, no single primary paper, or are pending Phase-84 human DOI-landing-page verification.
 See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 
@@ -46,7 +46,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1007/s00332-024-10035-5` |
 | URL | [https://doi.org/10.1007/s00332-024-10035-5](https://doi.org/10.1007/s00332-024-10035-5) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -64,7 +64,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.spa.2011.06.003` |
 | URL | [https://doi.org/10.1016/j.spa.2011.06.003](https://doi.org/10.1016/j.spa.2011.06.003) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -81,7 +81,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1214/15-BA957` |
 | URL | [https://doi.org/10.1214/15-BA957](https://doi.org/10.1214/15-BA957) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -104,7 +104,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.csda.2016.07.010` |
 | URL | [https://doi.org/10.1016/j.csda.2016.07.010](https://doi.org/10.1016/j.csda.2016.07.010) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -127,7 +127,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1111/j.1467-9868.2008.00656.x` |
 | URL | [https://doi.org/10.1111/j.1467-9868.2008.00656.x](https://doi.org/10.1111/j.1467-9868.2008.00656.x) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -143,7 +143,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | Year | 1997 |
 | URL | [https://proceedings.mlr.press/r1/jaakkola97a.html](https://proceedings.mlr.press/r1/jaakkola97a.html) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -165,7 +165,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | Year | 2012 |
 | URL | [https://icml.cc/2012/papers/291.pdf](https://icml.cc/2012/papers/291.pdf) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -188,7 +188,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.4310/GIC.2015.v2.n3.a1` |
 | URL | [https://doi.org/10.4310/GIC.2015.v2.n3.a1](https://doi.org/10.4310/GIC.2015.v2.n3.a1) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -206,7 +206,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1080/10618600.2017.1336444` |
 | URL | [https://doi.org/10.1080/10618600.2017.1336444](https://doi.org/10.1080/10618600.2017.1336444) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -247,7 +247,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1137/19M1265132` |
 | URL | [https://doi.org/10.1137/19M1265132](https://doi.org/10.1137/19M1265132) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -275,7 +275,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1111/1467-9868.00129` |
 | URL | [https://doi.org/10.1111/1467-9868.00129](https://doi.org/10.1111/1467-9868.00129) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -325,7 +325,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1007/978-1-4939-4020-2` |
 | URL | [https://link.springer.com/book/10.1007/978-1-4939-4020-2](https://link.springer.com/book/10.1007/978-1-4939-4020-2) |
 | Type | book |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -359,7 +359,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1111/biom.13706` |
 | URL | [https://doi.org/10.1111/biom.13706](https://doi.org/10.1111/biom.13706) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -384,7 +384,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1093/biomet/asn047` |
 | URL | [https://doi.org/10.1093/biomet/asn047](https://doi.org/10.1093/biomet/asn047) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -407,7 +407,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.csda.2012.12.001` |
 | URL | [https://www.sciencedirect.com/science/article/abs/pii/S01...](https://www.sciencedirect.com/science/article/abs/pii/S0167947312004227) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -436,7 +436,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1002/env.2826` |
 | URL | [https://onlinelibrary.wiley.com/doi/10.1002/env.2826](https://onlinelibrary.wiley.com/doi/10.1002/env.2826) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -460,7 +460,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.21105/joss.02964` |
 | URL | [https://doi.org/10.21105/joss.02964](https://doi.org/10.21105/joss.02964) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -479,7 +479,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1111/biom.12963` |
 | URL | [https://doi.org/10.1111/biom.12963](https://doi.org/10.1111/biom.12963) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -505,7 +505,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1080/01621459.2016.1256813` |
 | URL | [https://doi.org/10.1080/01621459.2016.1256813](https://doi.org/10.1080/01621459.2016.1256813) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -526,7 +526,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1137/1.9781611970104` |
 | URL | [https://doi.org/10.1137/1.9781611970104](https://doi.org/10.1137/1.9781611970104) |
 | Type | book |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -667,7 +667,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.csda.2009.12.008` |
 | URL | [https://doi.org/10.1016/j.csda.2009.12.008](https://doi.org/10.1016/j.csda.2009.12.008) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -692,7 +692,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1080/10618600.2026.2634823` |
 | URL | [https://doi.org/10.1080/10618600.2026.2634823](https://doi.org/10.1080/10618600.2026.2634823) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -906,7 +906,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.6339/25-JDS1212` |
 | URL | [https://doi.org/10.6339/25-JDS1212](https://doi.org/10.6339/25-JDS1212) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1134,7 +1134,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1111/j.1442-9993.2001.01070.pp.x` |
 | URL | [https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x](https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1263,7 +1263,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/B978-012088469-8.50070-X` |
 | URL | [https://doi.org/10.1016/B978-012088469-8.50070-X](https://doi.org/10.1016/B978-012088469-8.50070-X) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1293,7 +1293,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1145/1066157.1066213` |
 | URL | [https://doi.org/10.1145/1066157.1066213](https://doi.org/10.1145/1066157.1066213) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1322,7 +1322,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | Year | 2011 |
 | URL | [https://icml.cc/2011/papers/489_icmlpaper.pdf](https://icml.cc/2011/papers/489_icmlpaper.pdf) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1378,7 +1378,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1007/s10618-021-00782-4` |
 | URL | [https://doi.org/10.1007/s10618-021-00782-4](https://doi.org/10.1007/s10618-021-00782-4) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1397,7 +1397,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.patcog.2023.109333` |
 | URL | [https://doi.org/10.1016/j.patcog.2023.109333](https://doi.org/10.1016/j.patcog.2023.109333) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1427,7 +1427,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1109/TASSP.1975.1162641` |
 | URL | [https://doi.org/10.1109/TASSP.1975.1162641](https://doi.org/10.1109/TASSP.1975.1162641) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1449,7 +1449,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.patcog.2010.09.022` |
 | URL | [https://doi.org/10.1016/j.patcog.2010.09.022](https://doi.org/10.1016/j.patcog.2010.09.022) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1479,7 +1479,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/B978-155860869-6/50043-3` |
 | URL | [https://doi.org/10.1016/B978-155860869-6/50043-3](https://doi.org/10.1016/B978-155860869-6/50043-3) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1507,7 +1507,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1137/1.9781611972719.1` |
 | URL | [https://doi.org/10.1137/1.9781611972719.1](https://doi.org/10.1137/1.9781611972719.1) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1537,7 +1537,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1109/ICDE.2001.914875` |
 | URL | [https://doi.org/10.1109/ICDE.2001.914875](https://doi.org/10.1109/ICDE.2001.914875) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1554,7 +1554,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.patcog.2008.11.030` |
 | URL | [https://doi.org/10.1016/j.patcog.2008.11.030](https://doi.org/10.1016/j.patcog.2008.11.030) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1577,7 +1577,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1109/TPAMI.2008.76` |
 | URL | [https://doi.org/10.1109/TPAMI.2008.76](https://doi.org/10.1109/TPAMI.2008.76) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1607,7 +1607,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1145/2723372.2737793` |
 | URL | [https://doi.org/10.1145/2723372.2737793](https://doi.org/10.1145/2723372.2737793) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1634,7 +1634,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.patcog.2010.09.013` |
 | URL | [https://doi.org/10.1016/j.patcog.2010.09.013](https://doi.org/10.1016/j.patcog.2010.09.013) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1661,7 +1661,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1109/TASSP.1978.1163055` |
 | URL | [https://ieeexplore.ieee.org/document/1163055](https://ieeexplore.ieee.org/document/1163055) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1692,7 +1692,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1109/TKDE.2012.88` |
 | URL | [https://doi.org/10.1109/TKDE.2012.88](https://doi.org/10.1109/TKDE.2012.88) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1722,7 +1722,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1137/1.9781611975673.59` |
 | URL | [https://doi.org/10.1137/1.9781611975673.59](https://doi.org/10.1137/1.9781611975673.59) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1739,7 +1739,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1109/ICDE.2002.994784` |
 | URL | [https://doi.org/10.1109/ICDE.2002.994784](https://doi.org/10.1109/ICDE.2002.994784) |
 | Type | conference |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1769,7 +1769,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.patcog.2021.107895` |
 | URL | [https://doi.org/10.1016/j.patcog.2021.107895](https://doi.org/10.1016/j.patcog.2021.107895) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1786,7 +1786,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1016/j.patcog.2017.09.020` |
 | URL | [https://doi.org/10.1016/j.patcog.2017.09.020](https://doi.org/10.1016/j.patcog.2017.09.020) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -1885,7 +1885,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1111/rssb.12192` |
 | URL | [https://doi.org/10.1111/rssb.12192](https://doi.org/10.1111/rssb.12192) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -2006,7 +2006,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1177/1471082X15626291` |
 | URL | [https://doi.org/10.1177/1471082X15626291](https://doi.org/10.1177/1471082X15626291) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -2029,7 +2029,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1214/12-EJS676` |
 | URL | [https://doi.org/10.1214/12-EJS676](https://doi.org/10.1214/12-EJS676) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -2052,7 +2052,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1214/15-AOAS829` |
 | URL | [https://doi.org/10.1214/15-AOAS829](https://doi.org/10.1214/15-AOAS829) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -2075,7 +2075,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1080/10618600.2012.679241` |
 | URL | [https://doi.org/10.1080/10618600.2012.679241](https://doi.org/10.1080/10618600.2012.679241) |
 | Type | journal |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -2192,7 +2192,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | Year | 2025 |
 | URL | [https://arxiv.org/abs/2504.01172](https://arxiv.org/abs/2504.01172) |
 | Type | preprint |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
@@ -2210,7 +2210,7 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | DOI | `doi:10.1007/b106715` |
 | URL | [https://doi.org/10.1007/b106715](https://doi.org/10.1007/b106715) |
 | Type | book |
-| Status | Curated |
+| Status | Pending DOI verification |
 
 **Callables implementing this method:**
 
