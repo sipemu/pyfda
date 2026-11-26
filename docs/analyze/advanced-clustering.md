@@ -162,6 +162,7 @@ kfc = kcfc_cluster(data, argvals, k=2, ncomp=3, max_iter=50, seed=42)
 | `reconstruction_errors` | `(n, k)` float | Per-observation per-cluster FPCA reconstruction error |
 | `iterations` | `int` | Number of iterations performed |
 | `converged` | `bool` | Whether the algorithm converged |
+| `dilations`, `shifts` | `(n,)` float or `None` | Linear warps $h_i(t) = \text{dilation}_i\,t + \text{shift}_i$; `None` for `"elastic"` |
 
 ```python exec="1" source="above"
 import numpy as np
@@ -290,6 +291,7 @@ ac = align_cluster_fd(
     elastic_lambda=0.0,        # regularization for full elastic distance
     karcher_max_iter=15,
     karcher_tol=1e-4,
+    warp_class="elastic",      # or "none", "shift", "dilation", "affine"
 )
 ```
 
@@ -306,6 +308,8 @@ ac = align_cluster_fd(
 | `elastic_lambda` | `float` | `0.0` | Regularization when `use_amplitude_only=False` |
 | `karcher_max_iter` | `int` | `15` | Max Karcher-mean iterations per template update |
 | `karcher_tol` | `float` | `1e-4` | Karcher-mean convergence tolerance |
+| `warp_class` | `str` | `"elastic"` | `"elastic"` (SRSF alignment, Karcher-mean templates) or a linear warp class: `"none"`, `"shift"`, `"dilation"`, `"affine"` |
+| `affine_*`, `max_dilation`, `max_shift`, `center_warps` | — | see docstring | Options of the linear warp classes (metric, domain, extrapolation, bounds, optimiser); ignored for `"elastic"` |
 
 **Returns** a dictionary:
 
@@ -316,6 +320,9 @@ ac = align_cluster_fd(
 | `distances` | `(n, k)` float | Elastic distance from each observation to each template |
 | `iterations` | `int` | Number of iterations performed |
 | `converged` | `bool` | Whether the algorithm converged |
+| `dilations`, `shifts` | `(n,)` float or `None` | Linear warps $h_i(t) = \text{dilation}_i\,t + \text{shift}_i$; `None` for `"elastic"` |
+
+**Linear warp classes.** With `warp_class` set to `"shift"`, `"dilation"` or `"affine"`, each curve is registered to its cluster template by a linear time map $h_i(t) = a_i t + b_i$ (shift only, scaling only, or both, bounded by `max_shift` and `max_dilation`), following the k-means alignment of the R package fdacluster (Sangalli et al. 2010). `"none"` disables alignment, which leaves k-means under the dissimilarity chosen by `affine_metric`. Linear warps cannot absorb local timing differences the way elastic warps do. In return they are cheap, keep the curves' shape intact, and return interpretable per-curve `shifts` and `dilations`. The alignment step is the Align section's `affine_registration`.
 
 !!! warning "Full elastic distance is significantly slower"
     Setting `use_amplitude_only=False` enables full elastic distance computation, which
@@ -362,6 +369,7 @@ them automatically — they may represent genuine rare patterns.
 - [Clustering](clustering.md) — basic k-means and fuzzy c-means as the baseline methods
 - [GMM Clustering](gmm-clustering.md) — model-based Gaussian mixture clustering
 - [Elastic Clustering](elastic-clustering.md) — elastic distance approach (related to `align_cluster_fd`)
+- [Time-Series Clustering](time-series-clustering.md) — k-Shape, SBD k-medoids and DTW k-means
 - [Outlier Detection](outlier-detection.md) — DBSCAN-FD noise points as outlier candidates
 - [Analyze index](index.md)
 
@@ -369,6 +377,8 @@ them automatically — they may represent genuine rare patterns.
 
 - Ester, M., Kriegel, H.-P., Sander, J. and Xu, X. (1996). A density-based algorithm for
   discovering clusters in large spatial databases with noise. *KDD* 96(34), 226–231.
+- Sangalli, L. M., Secchi, P., Vantini, S. and Vitelli, V. (2010). k-mean alignment for curve
+  clustering. *Computational Statistics & Data Analysis* 54(5), 1219–1233.
 - Chiou, J.-M. and Li, P.-L. (2007). Functional clustering and identifying substructures
   of longitudinal data. *Journal of the Royal Statistical Society: Series B* 69(4), 679–699.
 - Bouveyron, C. and Jacques, J. (2011). Model-based clustering of time series in group-specific

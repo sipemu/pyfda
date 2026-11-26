@@ -540,6 +540,8 @@ the current `fdars` implementation.
 | `fregre_pls` | predictive signal lives in low-variance modes | fast | high |
 | `fregre_np` | relationship may be nonlinear | moderate | low |
 | `fregre_huber` / `fregre_l1` | outliers in curves or response | fast | high |
+| `peer` / `lpeer` | prior shape for $\hat\beta(t)$, or repeated curves per subject ([PEER & Wavelet Regression](peer-wavelet-regression.md)) | fast | high |
+| `wcr` / `wnet` | $\beta(t)$ with jumps or isolated local features ([PEER & Wavelet Regression](peer-wavelet-regression.md#wavelet-domain-regression)) | fast / moderate | high |
 
 **Recommended workflow**
 

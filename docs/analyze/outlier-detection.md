@@ -20,6 +20,7 @@ complementary detectors, each best at a different quadrant of this space.
 | Likelihood-ratio test | `detect_outliers_lrt` | magnitude | 1-D distance vs. bootstrap threshold |
 | Outliergram | `outliergram` | shape | MEI–MBD plane, parabolic boundary |
 | Magnitude–shape plot | `magnitude_shape` | magnitude **and** shape | 2-D directional-outlyingness plane |
+| Elastic conformal anomaly | `tolerance.elastic_conformal_anomaly` | amplitude **or** timing (phase), against a clean reference set | conformal p-value per curve |
 
 ---
 
@@ -657,11 +658,48 @@ print("FDARS_FENCE_OK")
 
 The four detectors return overlapping but not identical flag sets, confirming that they screen different aspects of functional outlyingness. `tvdmss` and `depthgram` are particularly sensitive to magnitude shifts; `sequential_transform_outliers` catches shape anomalies through the derivative transforms (`"d1"`, `"d2"`); `muod` separates magnitude, shape, and amplitude outlyingness into independent axes.
 
+## Elastic conformal anomaly detection
+
+The detectors above rank curves *within* one sample. A common monitoring task is different: a set of known-good **calibration** curves is available, and each new curve should be flagged if it is unusual relative to them, with a controlled false-alarm rate. `tolerance.elastic_conformal_anomaly` is an inductive conformal detector for that setting. Its nonconformity scores come from elastic (SRSF) alignment, so you can choose whether *shape*, *timing* or both count as anomalous.
+
+1. A template is fitted: by default the Karcher mean of the calibration curves (`max_iter`, `tol`), or pass `template=`.
+2. Every calibration and test curve is scored against the template with `variant=`:
+    - `"amplitude"`: the elastic amplitude distance, i.e. the shape difference after optimal alignment; timing is ignored;
+    - `"phase"`: the geodesic distance of the optimal warp from the identity; only timing counts;
+    - `"combined"` (default): $\sqrt{\text{amplitude}^2 + \text{phase}^2}$.
+3. A test curve with score $s$ gets the conformal p-value $p = \big(1 + \#\{\text{calibration scores} \ge s\}\big) / (n_{\text{cal}} + 1)$ and is flagged when $p \le \alpha$.
+
+If the test curves are exchangeable with the calibration curves (no anomaly), each is flagged with probability at most $\alpha$. The result holds `p_values`, `scores`, `flags` and `threshold`, the calibrated $(1-\alpha)$ score quantile. `tolerance.elastic_nonconformity(curve, template, argvals, variant=...)` returns the score of a single curve.
+
+```python exec="1" source="above" result="text"
+import numpy as np
+from fdars.tolerance import elastic_conformal_anomaly
+
+rng = np.random.default_rng(8)
+t = np.linspace(0, 1, 60)
+def curve(height=1.0, delay=0.0):
+    h = height * rng.uniform(0.9, 1.1)
+    c = 0.5 + delay + rng.uniform(-0.03, 0.03)
+    return h * np.exp(-0.5 * ((t - c) / 0.1) ** 2)
+
+calibration = np.array([curve() for _ in range(25)])
+test = np.array([curve() for _ in range(5)]                  # 5 normal curves
+                + [curve(height=1.6)]                        # too tall
+                + [curve(delay=0.2)])                        # too late
+for variant in ("amplitude", "phase", "combined"):
+    r = elastic_conformal_anomaly(calibration, test, t, variant=variant, alpha=0.1)
+    print(f"{variant:9s} p = {np.round(r['p_values'], 2)}  flags = {r['flags'].astype(int)}")
+print("FDARS_FENCE_OK")
+```
+
+The last two test curves are the anomalies. The amplitude score flags only the tall curve, because alignment removes the delay. The phase score flags only the late curve. The combined score flags both. With 25 calibration curves the smallest possible p-value is $1/26 \approx 0.04$, so `alpha` must be at least that for anything to be flagged.
+
 ## See also
 
 - [Tolerance bands](tolerance-bands.md) -- a curve outside a tolerance band is, by
   construction, an outlier relative to the fitted population.
 - `fdars.depth` -- the band-depth and epigraph-index machinery underlying the outliergram.
+- [Partial-Curve Conformal Prediction](../regression/partial-conformal.md) -- conformal bands for curves that are only partly observed.
 
 ## References
 
@@ -679,3 +717,8 @@ The four detectors return overlapping but not identical flag sets, confirming th
 4. Hyndman, R. J., and Shang, H. L. (2010). "Rainbow plots, bagplots, and boxplots for
    functional data." *Journal of Computational and Graphical Statistics*, 19(1), 29–45. —
    functional depth ranking and visual outlier diagnostics.
+5. Vovk, V., Gammerman, A., and Shafer, G. (2005). *Algorithmic Learning in a Random World*.
+   Springer. — conformal p-values and their validity under exchangeability, the basis of
+   `elastic_conformal_anomaly`.
+6. Srivastava, A., and Klassen, E. P. (2016). *Functional and Shape Data Analysis*.
+   Springer. — the elastic amplitude and phase distances used as nonconformity scores.

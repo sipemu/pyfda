@@ -414,6 +414,8 @@ single group.
 - [Elastic clustering](elastic-clustering.md) -- clustering that separates amplitude from
   phase before grouping.
 - [Outlier detection](outlier-detection.md) -- dedicated functional outlier methods.
+- [Time-series clustering](time-series-clustering.md) -- k-Shape, SBD k-medoids and DTW k-means for
+  curves that share a shape but differ in gain, offset or timing.
 
 ## References
 

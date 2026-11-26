@@ -143,3 +143,16 @@ for i, comp in enumerate(decomp["components"]):
     print(f"FPC {i+1}: coeff={decomp['coefficients'][i]:.3f}, "
           f"var_prop={decomp['variance_proportion'][i]:.3f}")
 ```
+
+---
+
+## Elastic permutation importance (VEESA)
+
+See [Explainability](../regression/explainability.md#elastic-explanations-jfpca-permutation-importance-veesa).
+
+| Function | Returns |
+|----------|---------|
+| `elastic_pfi(scores, y, predict, metric=None, n_repeats=10, seed=42)` | `importance`, `baseline_metric`, `permuted_metric` |
+| `veesa_pipeline(data, argvals, y, predict, ncomp=3, balance_c=None, lambda_=0.0, max_iter=20, metric=None, n_repeats=10, seed=42)` | `model`, `jfpca`, `training_scores`, `pfi` |
+
+The jfPCA model itself is `alignment.jfpca_fit(data, argvals, ncomp=3, balance_c=None, lambda_=0.0, max_iter=20)`.

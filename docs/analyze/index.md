@@ -35,6 +35,11 @@ The Analyze module collects the tools you reach for once your curves are represe
 <div class="fdars-gallery-title">Advanced Clustering</div>
 <div class="fdars-gallery-desc">Density-based, structure-aware, and alignment-coupled clustering methods.</div>
 </a>
+<a class="fdars-gallery-item" href="time-series-clustering/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/time-series-clustering.svg" alt="">
+<div class="fdars-gallery-title">Time-Series Clustering</div>
+<div class="fdars-gallery-desc">k-Shape, SBD k-medoids, and DTW k-means with DBA centroids.</div>
+</a>
 <a class="fdars-gallery-item" href="outlier-detection/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/outlier-detection.svg" alt="">
 <div class="fdars-gallery-title">Outlier Detection</div>

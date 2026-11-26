@@ -424,3 +424,35 @@ Horizontal shift cross-distance.
 | Returns | Type | Description |
 |---------|------|-------------|
 | dist | `ndarray (n1, n2)` | Distance matrix |
+
+---
+
+## DTW toolkit and elastic time-series distances
+
+Signatures only; see the guide pages for parameters, semantics and worked examples. Every function with `window=` also takes `radius=`, `window_fraction=` and `max_slope=` (see [DTW Search & Averaging](../represent/dtw-toolkit.md#global-windows)).
+
+| Function | Returns | Guide |
+|----------|---------|-------|
+| `dtw_path(x, y, p=2.0, window="none")` | `{"path", "cost"}` | [DTW toolkit](../represent/dtw-toolkit.md#paths-and-windowed-distances) |
+| `dtw_distance_windowed(x, y, p=2.0, window="none")` | `float` | [DTW toolkit](../represent/dtw-toolkit.md#paths-and-windowed-distances) |
+| `dtw_window_mask(n, m, window="none")` | bool `(n, m)` | [DTW toolkit](../represent/dtw-toolkit.md#global-windows) |
+| `soft_dtw_distance_windowed(x, y, gamma=1.0, window="none")` | `float` | [DTW toolkit](../represent/dtw-toolkit.md#paths-and-windowed-distances) |
+| `soft_dtw_alignment(x, y, gamma=1.0, window="none")` | `{"value", "alignment"}` | [DTW toolkit](../represent/dtw-toolkit.md#paths-and-windowed-distances) |
+| `soft_dtw_barycenter(data, gamma=1.0, max_iter=100, tol=1e-6, n_restarts=10, seed=0)` | `{"barycenter", "n_iter", "converged"}` | [DTW toolkit](../represent/dtw-toolkit.md#averaging-under-dtw) |
+| `dtw_barycenter_averaging(data, max_iter=30, tol=1e-5, window="none", init=None, barycenter_size=None, weights=None)` | `{"barycenter", "cost", "n_iter", "converged"}` | [DTW toolkit](../represent/dtw-toolkit.md#averaging-under-dtw) |
+| `lb_kim(x, y, p=2.0)`, `lb_keogh(query, candidate, ...)`, `lb_improved(x, y, ...)`, `lb_webb(x, y, ...)`, `lb_enhanced(x, y, v, ...)` | `float` | [DTW toolkit](../represent/dtw-toolkit.md#lower-bounds-and-early-abandoning) |
+| `lb_envelope(x, radius)`, `lb_envelope_windowed(y, query_len, window="none")` | `{"lower", "upper"}` | [DTW toolkit](../represent/dtw-toolkit.md#lower-bounds-and-early-abandoning) |
+| `dtw_distance_early_abandon(x, y, cutoff, p=2.0, window="none")` | `float` or `None` | [DTW toolkit](../represent/dtw-toolkit.md#lower-bounds-and-early-abandoning) |
+| `dtw_nearest_neighbor(queries, references, p=2.0, window="none")` | `{"indices", "distances", "stats"}` | [DTW toolkit](../represent/dtw-toolkit.md#exact-nearest-neighbour-search) |
+| `dtw_k_nearest_neighbors(queries, references, k=1, p=2.0, window="none")` | `{"indices", "distances", "stats"}` | [DTW toolkit](../represent/dtw-toolkit.md#exact-nearest-neighbour-search) |
+| `gak_triangular(x, y, sigma, triangular=0)` | `float` | [DTW toolkit](../represent/dtw-toolkit.md#triangular-global-alignment-kernel) |
+| `dtw_distance_multivariate`, `dtw_path_multivariate`, `dtw_pairwise_distance_multivariate`, `dtw_barycenter_averaging_multivariate` | as the univariate versions, on `(d, m)` series | [DTW toolkit](../represent/dtw-toolkit.md#multichannel-dtw) |
+| `elastic_ts_distance(x, y, metric, ...)` | `float` | [Elastic distances](../represent/elastic-ts-distances.md) |
+| `elastic_ts_pairwise_distance(data, metric, other=None, ...)` | `(n, n)` or `(n, n_other)` | [Elastic distances](../represent/elastic-ts-distances.md) |
+| `elastic_ts_cost_matrix(x, y, metric, ...)` | cost matrix | [Elastic distances](../represent/elastic-ts-distances.md) |
+| `elastic_ts_alignment_path(x, y, metric, ...)` | `{"path", "distance"}` | [Elastic distances](../represent/elastic-ts-distances.md) |
+| `elastic_ts_*_multivariate(...)` | as above, on `(d, m)` series | [Elastic distances](../represent/elastic-ts-distances.md#multichannel-series) |
+| `sbd(x, y)` | `{"distance", "shift"}` | [Elastic distances](../represent/elastic-ts-distances.md#shape-based-distance-sbd) |
+| `sbd_distance_matrix(data)` | `(n, n)` | [Elastic distances](../represent/elastic-ts-distances.md#shape-based-distance-sbd) |
+
+`gak_gram_matrix(data, sigma=None, triangular=0)` and `gak_gram_train(data, sigma=None, triangular=0)` take the triangular band parameter `T` as well; `gak_gram_predict` reuses the training value.

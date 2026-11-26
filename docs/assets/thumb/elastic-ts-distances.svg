@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Elastic time-series distances">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 70 L70 50 L110 74 L150 44 L190 70 L230 52 L270 66 L298 58" stroke="#198754" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M30 124 L70 104 L110 128 L150 98 L170 136 L190 124 L230 106 L270 120 L298 112" stroke="#198754" stroke-opacity=".55" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <g stroke="#198754" stroke-opacity=".6" stroke-width="1.4" stroke-dasharray="3 3">
+    <line x1="70" y1="50" x2="70" y2="104"/><line x1="110" y1="74" x2="110" y2="128"/><line x1="150" y1="44" x2="150" y2="98"/><line x1="190" y1="70" x2="190" y2="124"/><line x1="230" y1="52" x2="230" y2="106"/>
+  </g>
+  <circle cx="170" cy="136" r="5" fill="#fff" stroke="#198754" stroke-width="2.5"/>
+  <text x="182" y="160" fill="#198754" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">gap</text>
+</svg>

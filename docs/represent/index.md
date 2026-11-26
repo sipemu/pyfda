@@ -30,6 +30,11 @@ The Represent module brings together the core tools for analyzing functional dat
 <div class="fdars-gallery-title">PACE FPCA</div>
 <div class="fdars-gallery-desc">FPCA via conditional expectation for sparse, irregularly sampled curves.</div>
 </a>
+<a class="fdars-gallery-item" href="optimal-design/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/optimal-design.svg" alt="">
+<div class="fdars-gallery-title">Optimal Sampling Design</div>
+<div class="fdars-gallery-desc">Choose when to measure a new subject from a fitted PACE model.</div>
+</a>
 <a class="fdars-gallery-item" href="interpolation/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/interpolation.svg" alt="">
 <div class="fdars-gallery-title">Spline Interpolation</div>
@@ -59,6 +64,16 @@ The Represent module brings together the core tools for analyzing functional dat
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/distance-metrics.svg" alt="">
 <div class="fdars-gallery-title">Distance Metrics</div>
 <div class="fdars-gallery-desc">Lp, Hausdorff, DTW, Soft-DTW, Fourier, and horizontal-shift distances.</div>
+</a>
+<a class="fdars-gallery-item" href="dtw-toolkit/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/dtw-toolkit.svg" alt="">
+<div class="fdars-gallery-title">DTW Search & Averaging</div>
+<div class="fdars-gallery-desc">Windows, lower bounds, exact k-NN search, DBA and soft-DTW barycenters.</div>
+</a>
+<a class="fdars-gallery-item" href="elastic-ts-distances/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/elastic-ts-distances.svg" alt="">
+<div class="fdars-gallery-title">Elastic Time-Series Distances</div>
+<div class="fdars-gallery-desc">ERP, EDR, TWE, MSM, LCSS, weighted and shape DTW, and SBD.</div>
 </a>
 </div>
 

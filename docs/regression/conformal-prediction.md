@@ -619,6 +619,7 @@ for alpha in [0.05, 0.10, 0.20]:
 
 - [Uncertainty quantification](uncertainty-quantification.md) — bootstrap/analytic bands; contrast with the finite-sample guarantee here.
 - [Conformal classification](conformal-classification.md) — the same split-conformal machinery for label sets.
+- [Partial-curve conformal](partial-conformal.md) — bands and warp sets for the unobserved remainder of a partly observed curve.
 - [Cross-validation](cross-validation.md) — honest error estimation feeding the nonconformity scores.
 
 ## References

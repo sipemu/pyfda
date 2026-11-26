@@ -94,6 +94,7 @@ nav:
     - Functional PCA: represent/fpca.md
     - Elastic FPCA: represent/elastic-fpca.md
     - PACE FPCA: represent/pace-fpca.md
+    - Optimal Sampling Design: represent/optimal-design.md
     - Basis Representation: represent/basis-representation.md
     - Interpolation: represent/interpolation.md
     - Imputation: represent/imputation.md
@@ -101,6 +102,8 @@ nav:
     - Depth Functions: represent/depth-functions.md
     - Streaming Depth: represent/streaming-depth.md
     - Distance Metrics: represent/distance-metrics.md
+    - DTW Search & Averaging: represent/dtw-toolkit.md
+    - Elastic Time-Series Distances: represent/elastic-ts-distances.md
   - Align:
     - align/index.md
     - Choosing an Alignment Method: align/choosing-a-method.md
@@ -121,6 +124,7 @@ nav:
   - Regression:
     - regression/index.md
     - Scalar-on-Function: regression/scalar-on-function.md
+    - PEER & Wavelet Regression: regression/peer-wavelet-regression.md
     - Function-on-Scalar: regression/function-on-scalar.md
     - Classification: regression/classification.md
     - Elastic Regression: regression/elastic-regression.md
@@ -130,6 +134,7 @@ nav:
     - Uncertainty Quantification: regression/uncertainty-quantification.md
     - Explainability: regression/explainability.md
     - Conformal Prediction: regression/conformal-prediction.md
+    - Partial-Curve Conformal: regression/partial-conformal.md
     - Conformal Classification: regression/conformal-classification.md
     - Robust Regression: regression/robust-regression.md
     - Concurrent Regression: regression/concurrent-regression.md
@@ -150,6 +155,7 @@ nav:
     - Functional Time Series: analyze/functional-time-series.md
     - Density FDA: analyze/density-fda.md
     - Advanced Clustering: analyze/advanced-clustering.md
+    - Time-Series Clustering: analyze/time-series-clustering.md
     - Multi-Domain FDA: analyze/multi-domain.md
     - Shapelets: analyze/shapelets.md
     - Tolerance Bands: analyze/tolerance-bands.md

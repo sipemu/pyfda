@@ -106,3 +106,17 @@ result = fdars.conformal_classif(X_train, y_train, X_test, classifier="lda")
 for i, pset in enumerate(result["prediction_sets"]):
     print(f"  Obs {i}: possible classes = {pset}")
 ```
+
+---
+
+## Partial-curve conformal prediction
+
+See [Partial-Curve Conformal Prediction](../regression/partial-conformal.md).
+
+| Function | Returns |
+|----------|---------|
+| `partial_conformal_fit(data, argvals, alpha=0.1, cal_fraction=0.5, seed=42, distance="l2", bandwidth=None, lambda_=0.0, karcher_max_iter=20, karcher_tol=1e-3, n_phase_radii=25, band="pointwise", band_scale=None, tuning_fraction=None, bandwidth_candidates=None)` | `PyPartialConformalModel` |
+| `partial_conformal_fit_with_template(calibration, argvals, template, ...)` | `PyPartialConformalModel` |
+| `partial_conformal_predict(model, observed, alpha=None)` | amplitude band, phase set, registration and bandwidth details |
+| `partial_conformal_predict_observed(model, values, observation="prefix", n_observed=None, fragments=None, times=None, alpha=None)` | as above, for prefix, fragment or sparse observation |
+| `partial_conformal_select_bandwidth(tuning_model, observation="prefix", n_observed=None, fragments=None, times=None)` | `bandwidth`, `candidates`, `mean_width`, `n_tuning` |

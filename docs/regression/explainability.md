@@ -832,6 +832,89 @@ up with observed frequencies — a well-calibrated classifier whose stated confi
 at face value. Deviations above the diagonal would signal under-confidence and points below it
 over-confidence; the low Brier score in the title summarizes this closeness in a single number.
 
+## Elastic explanations: jfPCA + permutation importance (VEESA)
+
+All tools above explain a model in terms of ordinary FPC scores, which mix amplitude (*how high*) and phase (*when*) variation. If the response may depend on timing, explain it in **elastic** coordinates instead. The VEESA workflow of Goode, Tucker & Ries does this in three steps:
+
+1. **Joint amplitude–phase FPCA.** `alignment.jfpca_fit(data, argvals, ncomp=3, balance_c=None, lambda_=0.0, max_iter=20)` aligns the curves to their Karcher mean and runs a joint FPCA on the aligned SRSFs and the warping functions' shooting vectors, with the phase block weighted by `balance_c`. It returns the training `scores` and a reusable `model`. `model.transform(new_curves)` projects new curves; `model.score_training()` reproduces the training scores exactly; `model.principal_directions(k, c_values)` shows what component `k` does to the aligned curve (`amplitude_curves`) and to the warp (`phase_curves`) at the mean $\pm c$ standard deviations.
+2. **Any model of the scores**, e.g. a scikit-learn regressor or classifier.
+3. **Permutation importance.** `explain.elastic_pfi(scores, y, predict, metric=None, n_repeats=10, seed=42)` permutes one score column at a time and records how much the metric of your `predict` callable changes. `metric` is `"mse"` (default), `"mae"`, `"accuracy"` or a callable `f(y_true, y_pred)` where higher is better. `importance` is `baseline_metric - permuted_metric`, so for the loss metrics `"mse"`/`"mae"` an **informative component has a negative importance**.
+
+Below, the response depends only on the *timing* of a peak, while the peak *height* varies as well.
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from sklearn.linear_model import LinearRegression
+from fdars.alignment import jfpca_fit
+from fdars.explain import elastic_pfi
+
+rng = np.random.default_rng(10)
+n, m = 30, 51
+t = np.linspace(0, 1, m)
+height = rng.uniform(0.7, 1.3, n)
+timing = rng.uniform(0.35, 0.65, n)
+X = height[:, None] * np.exp(-0.5 * ((t - timing[:, None]) / 0.08) ** 2)
+y = 3 * (timing - 0.5) + 0.05 * rng.standard_normal(n)     # the response depends on timing only
+
+fit = jfpca_fit(X, t, ncomp=3, balance_c=1.0)
+scores = fit["model"].score_training()["scores"]           # (n, 3) joint amplitude+phase scores
+reg = LinearRegression().fit(scores, y)                     # any model of the scores works
+pfi = elastic_pfi(scores, y, reg.predict, n_repeats=20, seed=0)
+
+f, (a0, a1, a2) = fig(1, 3, figsize=(13.5, 3.5))
+cols = ["#3f51b5", "#1a1a2e", "#e8710a"]
+d1 = fit["model"].principal_directions(0, [-1.0, 0.0, 1.0])
+for g, col in zip(d1["phase_curves"], cols):
+    a0.plot(t, g - t, color=col, lw=2.0)
+a0.set(title="Component 1: warp, gamma(t) - t", xlabel="t")
+d2 = fit["model"].principal_directions(1, [-1.0, 0.0, 1.0])
+for c, col in zip(d2["amplitude_curves"], cols):
+    a1.plot(t, c, color=col, lw=2.0)
+a1.set(title="Component 2: aligned curve", xlabel="t")
+a2.bar([f"PC {k + 1}" for k in range(3)], -pfi["importance"], color="#3f51b5")
+a2.set(title="Permutation importance", ylabel="MSE increase")
+print(render(f))
+r_t = [abs(np.corrcoef(scores[:, k], timing)[0, 1]) for k in range(3)]
+r_h = [abs(np.corrcoef(scores[:, k], height)[0, 1]) for k in range(3)]
+print(f"<p>|corr| with timing: {np.round(r_t, 2).tolist()}, with height: {np.round(r_h, 2).tolist()}; "
+      f"baseline MSE {pfi['baseline_metric']:.4f}; importance {np.round(pfi['importance'], 4).tolist()}</p>")
+print("FDARS_FENCE_OK")
+```
+
+Component 1 is a pure phase mode: it shifts the peak earlier or later. Component 2 is a pure amplitude mode: it changes the height. Permuting component 1 raises the MSE from 0.002 to about 0.12; permuting the others changes nothing. So the model uses timing, not height. A standard FPCA would spread the timing effect over several components that also carry height.
+
+!!! tip "Set `balance_c` when timing may matter"
+    `balance_c=None` picks the phase weight by a golden-section search on $[0, 10]$ that minimises the joint reconstruction error. Because the phase block is multiplied by $c$, that search tends to favour small $c$. On the data above it chooses $c \approx 0.0003$, which effectively drops phase from the decomposition. Fix `balance_c` (here 1.0) or compare a few values when the response may depend on timing. Tracked upstream as [sipemu/fdars#84](https://github.com/sipemu/fdars/issues/84).
+
+`explain.veesa_pipeline(data, argvals, y, predict, ...)` runs the three steps in one call: jfPCA fit, exact training scores, then permutation importance. `predict` receives the jfPCA training scores, so it must already be a model of those scores. In practice, fit the jfPCA and your model first (as above) and use `elastic_pfi`; the pipeline is convenient when the predictor is known up front, e.g. a fixed scoring rule.
+
+```python exec="1" source="above" result="text"
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from fdars.alignment import jfpca_fit
+from fdars.explain import elastic_pfi, veesa_pipeline
+
+rng = np.random.default_rng(10)
+t = np.linspace(0, 1, 51)
+height, timing = rng.uniform(0.7, 1.3, 30), rng.uniform(0.35, 0.65, 30)
+X = height[:, None] * np.exp(-0.5 * ((t - timing[:, None]) / 0.08) ** 2)
+y = 3 * (timing - 0.5) + 0.05 * rng.standard_normal(30)
+
+scores = jfpca_fit(X, t, ncomp=3, balance_c=1.0)["scores"]
+reg = LinearRegression().fit(scores, y)
+out = veesa_pipeline(X, t, y, reg.predict, ncomp=3, balance_c=1.0, n_repeats=20, seed=0)
+two_step = elastic_pfi(scores, y, reg.predict, n_repeats=20, seed=0)
+print("keys:", sorted(out))
+print("pipeline importance:", np.round(out["pfi"]["importance"], 4))
+print("same as two-step   :", np.allclose(out["pfi"]["importance"], two_step["importance"]))
+r2 = lambda a, b: 1 - np.mean((a - b) ** 2) / np.var(a)          # custom metric, higher = better
+print("R2-based importance:", np.round(elastic_pfi(scores, y, reg.predict, metric=r2)["importance"], 3))
+print("FDARS_FENCE_OK")
+```
+
+With a custom "higher is better" metric such as $R^2$, informative components get a **positive** importance.
+
 ## Notes and limitations
 
 !!! note "Everything happens in FPC-score space"
@@ -857,6 +940,9 @@ over-confidence; the low Brier score in the title summarizes this closeness in a
 ## References
 
 - Apley, D. W., & Zhu, J. (2020). *Visualizing the effects of predictor variables in black box supervised learning models.* Journal of the Royal Statistical Society: Series B, 82(4), 1059–1086.
+- Breiman, L. (2001). *Random forests.* Machine Learning, 45(1), 5–32.
 - Goldstein, A., Kapelner, A., Bleich, J., & Pitkin, E. (2015). *Peeking inside the black box: Visualizing statistical learning with plots of individual conditional expectation.* Journal of Computational and Graphical Statistics, 24(1), 44–65.
+- Goode, K., Tucker, J. D., & Ries, D. The VEESA pipeline (elastic shape analysis with permutation feature importance); reference implementation: R package `veesa`, github.com/sandialabs/veesa.
 - Lundberg, S. M., & Lee, S.-I. (2017). *A unified approach to interpreting model predictions.* Advances in Neural Information Processing Systems, 30.
 - Ribeiro, M. T., Singh, S., & Guestrin, C. (2016). *"Why should I trust you?": Explaining the predictions of any classifier.* Proceedings of KDD 2016.
+- Tucker, J. D., Wu, W., & Srivastava, A. (2013). *Generative models for functional data using phase and amplitude separation.* Computational Statistics & Data Analysis, 61, 50–66.

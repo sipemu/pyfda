@@ -206,7 +206,30 @@ print(f"PC 1 alignment: corr(dense, pace)={corr_pc1:.3f} (close to ±1 when PACE
 print("FDARS_FENCE_OK")
 ```
 
+## Keeping the fitted model: `pace_fpca_fit`
+
+`pace_fpca` returns a plain dict. `pace_fpca_fit` takes the same arguments but returns a model handle that later functions can reuse. Its getters are `ncomp`, `argvals` (the work grid), `eigenvalues` and `sigma2`, and `to_dict()` gives the same dict as `pace_fpca`. The handle feeds the design functions `design_criterion` and `optimal_design`, which choose when to measure a new subject; see [Optimal Sampling Design](optimal-design.md).
+
+```python exec="1" source="above" result="text"
+import numpy as np
+import fdars.pace_fpca as pf
+
+rng = np.random.default_rng(42)
+argvals_list = [np.sort(rng.uniform(0, 1, rng.integers(5, 9))) for _ in range(15)]
+values_list = [rng.normal(1, 0.5) * np.sin(2 * np.pi * av) + rng.normal(0, 0.15, len(av))
+               for av in argvals_list]                 # random amplitude per curve
+handle = pf.irreg_fdata_from_lists(argvals_list, values_list)
+
+model = pf.pace_fpca_fit(handle, ncomp=2, bandwidth=0.2, sigma2=0.05)
+res = pf.pace_fpca(handle, ncomp=2, bandwidth=0.2, sigma2=0.05)
+print(f"ncomp={model.ncomp}, work grid {len(model.argvals)} points, eigenvalues {np.round(model.eigenvalues, 3)}")
+print("same result as pace_fpca:", np.allclose(model.to_dict()["eigenvalues"], res["eigenvalues"]))
+print("best single visit time:", pf.optimal_design(model, budget=1)["selected_argvals"])
+print("FDARS_FENCE_OK")
+```
+
 ## References
 
 1. Yao, F., Müller, H.-G. & Wang, J.-L. (2005). Functional data analysis for sparse longitudinal data. *Journal of the American Statistical Association*, 100(470), 577–590.
 2. Hall, P., Müller, H.-G. & Wang, J.-L. (2006). Properties of principal component methods for functional and longitudinal data analysis. *The Annals of Statistics*, 34(3), 1493–1517.
+3. Ji, H. & Müller, H.-G. (2017). Optimal designs for longitudinal and functional data. *Journal of the Royal Statistical Society: Series B*, 79(3), 859–876.

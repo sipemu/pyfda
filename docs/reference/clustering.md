@@ -148,3 +148,18 @@ Calinski-Harabasz index (variance ratio criterion) from a precomputed distance m
 ```python
 ch = fdars.calinski_harabasz(D, result["cluster"].astype(np.int64))
 ```
+
+---
+
+## Time-series clusterers
+
+See [Time-Series Clustering](../analyze/time-series-clustering.md) for the methods, parameters and examples.
+
+| Function | Returns |
+|----------|---------|
+| `kshape_fd(data, n_clusters=2, n_init=10, max_iter=100, tol=1e-6, seed=0)` | `centroids`, `cluster`, `inertia`, `iter`, `converged`, `n_init_best`, `model` (`predict`) |
+| `sbd_kmedoids(data, k=2, max_iter=100, seed=42)` | `labels`, `medoid_indices`, `within_distances`, `total_within_distance`, `n_iter`, `converged` |
+| `dtw_kmeans(data, n_clusters=2, n_init=10, max_iter=50, tol=1e-6, seed=0, window="none", init=None, dba_max_iter=30, dba_tol=1e-5)` | `centroids`, `cluster`, `inertia`, `iter`, `converged`, `n_init_best`, `model` (`predict`) |
+| `dtw_kmeans_multivariate(data, ...)` | as `dtw_kmeans`, with `centroids` a list of `(d, m)` arrays |
+
+`align_cluster_fd` also accepts `warp_class` (`"elastic"`, `"none"`, `"shift"`, `"dilation"`, `"affine"`) and the linear-warp options; see [Advanced Clustering](../analyze/advanced-clustering.md#align-and-cluster-simultaneous-alignment-and-clustering).

@@ -117,3 +117,14 @@ result = fdars.equivalence_test(group1, group2, delta=0.5, alpha=0.05)
 if result["equivalent"]:
     print(f"Groups are equivalent (p={result['p_value']:.4f})")
 ```
+
+---
+
+## Elastic conformal anomaly detection
+
+See [Outlier Detection](../analyze/outlier-detection.md#elastic-conformal-anomaly-detection).
+
+| Function | Returns |
+|----------|---------|
+| `elastic_nonconformity(curve, template, argvals, lambda_=0.0, variant="combined")` | `float` |
+| `elastic_conformal_anomaly(calibration, test, argvals, variant="combined", alpha=0.1, lambda_=0.0, max_iter=20, tol=1e-4, template=None)` | `p_values`, `scores`, `flags`, `threshold` |

@@ -15,6 +15,11 @@ The Regression module covers the full spectrum of supervised learning with funct
 <div class="fdars-gallery-title">Scalar-on-Function</div>
 <div class="fdars-gallery-desc">FPC linear, PLS, and nonparametric regression with a scalar response.</div>
 </a>
+<a class="fdars-gallery-item" href="peer-wavelet-regression/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/peer-wavelet-regression.svg" alt="">
+<div class="fdars-gallery-title">PEER & Wavelet Regression</div>
+<div class="fdars-gallery-desc">Structured penalties, longitudinal PEER, and wavelet-domain PCR, PLS and elastic net.</div>
+</a>
 <a class="fdars-gallery-item" href="function-on-scalar/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/function-on-scalar.svg" alt="">
 <div class="fdars-gallery-title">Function-on-Scalar</div>
@@ -84,6 +89,11 @@ The Regression module covers the full spectrum of supervised learning with funct
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/conformal-prediction.svg" alt="">
 <div class="fdars-gallery-title">Conformal Prediction</div>
 <div class="fdars-gallery-desc">Distribution-free prediction intervals with split conformal.</div>
+</a>
+<a class="fdars-gallery-item" href="partial-conformal/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/partial-conformal.svg" alt="">
+<div class="fdars-gallery-title">Partial-Curve Conformal</div>
+<div class="fdars-gallery-desc">Amplitude bands and phase sets for partly observed curves.</div>
 </a>
 <a class="fdars-gallery-item" href="conformal-classification/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/conformal-classification.svg" alt="">

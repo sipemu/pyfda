@@ -260,3 +260,16 @@ Cross-validated selection of the number of basis functions.
 result = fdars.basis_nbasis_cv(data, t, nbasis_min=5, nbasis_max=30)
 print(f"Best: {result['optimal_nbasis']} basis functions")
 ```
+
+---
+
+## Wavelet transform
+
+See [Basis Representation](../represent/basis-representation.md#wavelet-decomposition).
+
+| Function | Returns |
+|----------|---------|
+| `wavelet_decompose(signal, wavelet="db4", mode="periodic", level=None)` | `approx`, `details` (finest first), `levels`, `signal_len`, `wavelet`, `mode`, `coeffs` handle |
+| `wavelet_decompose_matrix(data, wavelet="db4", mode="periodic", level=None)` | list of the above, one per row |
+| `wavelet_reconstruct(coeffs, approx=None, details=None)` | reconstructed signal, optionally from replacement bands |
+| `wavelet_max_level(signal_len, wavelet="db4")` | `int` |

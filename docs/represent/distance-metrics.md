@@ -138,10 +138,10 @@ from fdars.metric import hausdorff_self_2d, hausdorff_cross_2d
 DTW finds the optimal nonlinear alignment between two sequences that minimizes the total cost. Unlike $L^p$ distances, DTW is invariant to local time shifts.
 
 $$
-d_{\mathrm{DTW}}(X, Y) = \min_{\pi} \left( \sum_{(i,j) \in \pi} |X(t_i) - Y(t_j)|^p \right)^{1/p}
+d_{\mathrm{DTW}}(X, Y) = \min_{\pi} \sum_{(i,j) \in \pi} |X(t_i) - Y(t_j)|^p
 $$
 
-where $\pi$ is a monotone warping path.
+where $\pi$ is a monotone warping path. fdars reports this accumulated cost **without** a $p$-th root (tslearn and dtaidistance report the square root for $p = 2$). DTW is not a true metric: it can violate the triangle inequality.
 
 ```python
 from fdars.metric import dtw_self_1d, dtw_cross_1d
@@ -434,13 +434,20 @@ The heatmap confirms the narrative: the L2-L1 cell is near 1.0 (they rank pairs 
 
 ---
 
+## More DTW tools and elastic time-series distances
+
+The `*_self_1d` / `*_cross_1d` functions above return whole distance matrices. Two further pages cover the rest of the time-series toolkit in `fdars.metric`:
+
+- [DTW Search & Averaging](dtw-toolkit.md): Sakoe-Chiba and Itakura windows, the optimal warping path, lower bounds (LB_Kim, LB_Keogh, LB_Improved, LB_Webb, LB_Enhanced), early-abandoning DTW, exact 1-NN and k-NN search, DTW barycenter averaging, soft-DTW alignment and barycenter, the triangular Global Alignment Kernel and multichannel DTW.
+- [Elastic Time-Series Distances](elastic-ts-distances.md): the aeon family of elastic distances (derivative, weighted and amerced DTW, ERP, EDR, TWE, MSM, LCSS and shape-DTW) behind one `metric=` interface, and the shape-based distance (SBD) of k-Shape.
+
 ## Metric properties comparison
 
 | Metric | True metric | Shift invariant | Scale invariant | Handles phase variation | Speed |
 |:---|:---:|:---:|:---:|:---:|:---:|
 | $L^p$ | Yes | No | No | No | Very fast |
 | Hausdorff | Yes | No | No | Partially | Fast |
-| DTW | Yes | No | No | Yes | Moderate |
+| DTW | No | No | No | Yes | Moderate |
 | Soft-DTW | No | No | No | Yes | Moderate |
 | Soft-DTW Divergence | Semi | No | No | Yes | Moderate |
 | Fourier | Yes | Partially | No | No | Fast |
@@ -448,6 +455,8 @@ The heatmap confirms the narrative: the L2-L1 cell is near 1.0 (they rank pairs 
 | Elastic (Fisher-Rao) | Yes | No | No | Yes (optimal) | Slow |
 | Amplitude | Semi | No | No | Yes | Slow |
 | Phase | Yes | No | No | Yes | Slow |
+| ERP / TWE / MSM | Yes | No | No | Yes | Moderate |
+| SBD | No | Yes | Yes | Rigid shift only | Fast |
 
 ---
 
@@ -467,8 +476,8 @@ Is the misalignment a simple global shift?
   NO  --> continue
 
 Do you need a true metric?
-  YES --> DTW (with Sakoe-Chiba band) or Elastic distance
-  NO  --> Soft-DTW (differentiable, good for optimization)
+  YES --> ERP / TWE / MSM (elastic_ts_distance) or Elastic distance
+  NO  --> DTW (with Sakoe-Chiba band), or Soft-DTW (differentiable)
 
 Do you need amplitude/phase decomposition?
   YES --> Elastic framework (amplitude_distance + phase_distance)
@@ -557,6 +566,20 @@ reg = fregre_np(D, response, h=0.0)  # h=0 -> automatic bandwidth
 | `hshift_self_1d(data, argvals, max_shift)` | `max_shift=0` | Horizontal shift self |
 | `hshift_cross_1d(data1, data2, argvals, max_shift)` | `max_shift=0` | Horizontal shift cross |
 
+### `fdars.metric` (DTW toolkit and elastic time-series family)
+
+| Function | Description |
+|----------|-------------|
+| `dtw_path`, `dtw_distance_windowed`, `dtw_window_mask` | Warping path, windowed DTW cost, window admissibility grid |
+| `soft_dtw_distance_windowed`, `soft_dtw_alignment`, `soft_dtw_barycenter` | Windowed soft-DTW, expected alignment matrix, soft-DTW barycenter |
+| `dtw_barycenter_averaging` (+ `_multivariate`) | DTW Barycenter Averaging (DBA) |
+| `lb_kim`, `lb_keogh`, `lb_improved`, `lb_webb`, `lb_enhanced`, `lb_envelope`, `lb_envelope_windowed` | DTW lower bounds and envelopes |
+| `dtw_distance_early_abandon`, `dtw_nearest_neighbor`, `dtw_k_nearest_neighbors` | Early-abandoning DTW and exact DTW nearest-neighbour search |
+| `gak_triangular` | Triangular Global Alignment Kernel (`triangular=` also on `gak_gram_matrix` / `gak_gram_train`) |
+| `dtw_distance_multivariate`, `dtw_path_multivariate`, `dtw_pairwise_distance_multivariate` | Dependent multichannel DTW |
+| `elastic_ts_distance`, `elastic_ts_pairwise_distance`, `elastic_ts_cost_matrix`, `elastic_ts_alignment_path` (+ `_multivariate`) | aeon elastic distances, selected by `metric=` |
+| `sbd`, `sbd_distance_matrix` | Shape-based distance and its matrix |
+
 ### `fdars.alignment` (elastic distances)
 
 | Function | Key parameters | Description |
@@ -579,5 +602,6 @@ reg = fregre_np(D, response, h=0.0)  # h=0 -> automatic bandwidth
 - Berndt, D.J. and Clifford, J. (1994). Using Dynamic Time Warping to find patterns in time series. *KDD Workshop*, 359-370.
 - Cuturi, M. and Blondel, M. (2017). Soft-DTW: a differentiable loss function for time-series. *ICML 34*, 894-903.
 - Ferraty, F. and Vieu, P. (2006). *Nonparametric Functional Data Analysis*. Springer.
+- Paparrizos, J. and Gravano, L. (2015). k-Shape: efficient and accurate clustering of time series. *SIGMOD 2015*, 1855-1870.
 - Sakoe, H. and Chiba, S. (1978). Dynamic programming algorithm optimization for spoken word recognition. *IEEE TASSP* 26(1), 43-49.
 - Srivastava, A. and Klassen, E. (2016). *Functional and Shape Data Analysis*. Springer.

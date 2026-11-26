@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Partial-Curve Conformal Prediction" aria-labelledby="partial-conformal-title partial-conformal-desc">
+  <title id="partial-conformal-title">Partial-Curve Conformal Prediction</title>
+  <desc id="partial-conformal-desc">Fully observed reference curves are split: the training part gives an elastic template and the calibration part is registered to it, giving aligned curves and warps. A new curve observed only on a prefix is compared with the calibration curves on that prefix; kernel weights and calibrated residuals give an amplitude band for the aligned complete curve and a prediction set for its warp, both with 1 minus alpha coverage.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Partial-Curve Conformal Prediction</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">From the observed part of a curve to coverage-guaranteed sets for the rest</text>
+
+  <!-- Panel 1: split and register -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Split &amp; Register</text>
+  <g transform="translate(40,108)">
+    <rect x="0" y="0" width="164" height="40" rx="6" fill="#fff" stroke="#ced4da"/>
+    <text class="sm" x="10" y="16">training curves</text>
+    <text class="sm" x="10" y="31">→ elastic template f̄</text>
+    <rect x="0" y="50" width="164" height="54" rx="6" fill="#fff" stroke="#ced4da"/>
+    <text class="sm" x="10" y="66">calibration curves,</text>
+    <text class="sm" x="10" y="81">registered to f̄:</text>
+    <text class="sm" x="10" y="96">aligned Y_i and warps γ_i</text>
+    <text class="sm" x="0" y="128">template never sees the</text>
+    <text class="sm" x="0" y="142">calibration curves</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: predict from the prefix -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="360" y="94" text-anchor="middle" fill="#dc3545">Predict From the Prefix</text>
+  <text class="sm" x="360" y="112" text-anchor="middle">for a new, partly observed curve</text>
+  <g transform="translate(290,124)">
+    <rect x="0" y="0" width="140" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="10" y="16">distances on the prefix</text>
+    <rect x="0" y="32" width="140" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="10" y="48">kernel-weighted Y_i, γ_i</text>
+    <rect x="0" y="64" width="140" height="24" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="10" y="80">calibrate residuals</text>
+  </g>
+  <text class="sm" x="360" y="240" text-anchor="middle">coverage ≥ 1 − α, any n</text>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: amplitude band and phase set -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">Band + Phase Set</text>
+  <g transform="translate(516,106)">
+    <path d="M70 28 C96 10 116 30 136 50 C148 60 158 58 164 56 L164 84 C158 86 148 90 136 80 C116 62 96 44 70 52 Z" fill="#dc3545" fill-opacity=".16"/>
+    <path d="M0 76 C24 74 44 52 70 40" stroke="#1a1a2e" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M70 40 C96 26 116 48 136 66 C148 74 158 72 164 70" stroke="#dc3545" stroke-width="1.6" stroke-dasharray="4 4"/>
+    <line x1="70" y1="96" x2="70" y2="4" stroke="#495057" stroke-width="1.2" stroke-dasharray="2 3"/>
+    <text class="sm" x="0" y="94">observed</text>
+    <text class="sm" x="80" y="94">amplitude band</text>
+    <rect x="96" y="104" width="68" height="42" fill="#fff" stroke="#f1c2c8"/>
+    <line x1="96" y1="146" x2="164" y2="104" stroke="#adb5bd" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <path d="M96 146 C118 122 140 110 164 104" stroke="#3f51b5" stroke-width="1.2" stroke-opacity=".5"/>
+    <path d="M96 146 C116 128 138 114 164 104" stroke="#3f51b5" stroke-width="2"/>
+    <path d="M96 146 C114 136 136 120 164 104" stroke="#3f51b5" stroke-width="1.2" stroke-opacity=".5"/>
+    <text class="sm" x="0" y="122">set of</text>
+    <text class="sm" x="0" y="136">warps γ</text>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="PEER and wavelet regression">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="104" x2="298" y2="104" stroke="#dc3545" stroke-opacity=".25" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <path d="M100 104 L100 52 L140 52 L140 104 Z" fill="#dc3545" fill-opacity=".16"/>
+  <path d="M210 104 L210 138 L232 138 L232 104 Z" fill="#dc3545" fill-opacity=".16"/>
+  <path d="M30 104 L100 104 L100 52 L140 52 L140 104 L210 104 L210 138 L232 138 L232 104 L298 104" stroke="#dc3545" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M30 100 C70 108 86 60 118 56 C150 52 160 112 190 110 C206 108 214 132 224 132 C240 132 250 98 298 106" stroke="#dc3545" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="4 4"/>
+  <text x="246" y="62" fill="#dc3545" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">β(t)</text>
+</svg>

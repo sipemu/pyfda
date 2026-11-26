@@ -1,12 +1,13 @@
 # Functional Inference
 
-Functional inference extends classical hypothesis testing to data where each observation is a curve. Instead of comparing scalar means with a $t$-test, you compare mean *functions*; instead of a pointwise confidence interval, you build a band that covers the entire domain simultaneously. The `fdars.inference` module provides three families of procedures:
+Functional inference extends classical hypothesis testing to data where each observation is a curve. Instead of comparing scalar means with a $t$-test, you compare mean *functions*; instead of a pointwise confidence interval, you build a band that covers the entire domain simultaneously. The `fdars.inference` module provides four families of procedures:
 
 | Family | Functions | What it tests | Returns |
 |---|---|---|---|
 | **Two-sample tests** | `t_perm_test`, `f_perm_test`, `two_sample_mean_test` | Equal mean curves between two groups | `{"statistic", "p_value", "n_perm"}` |
 | **Simultaneous confidence bands** | `mean_scb`, `scb_two_sample_test` | Coverage of the mean curve / mean-difference curve | `{"lower","upper","center","half_width"}` or `{"statistic","p_value","n_perm"}` |
 | **One-way functional ANOVA** | `oneway_anova_vstat` | Equal mean curves across $k \ge 2$ groups | `{"statistic", "p_value", "n_perm"}` |
+| **PERMANOVA** | `permanova` | No group difference under **any** distance matrix ($k \ge 2$ groups) | `{"statistic", "p_value", "r_squared", "ss_*", "df_*", "n_perm"}` |
 
 ---
 
@@ -309,9 +310,69 @@ print("FDARS_FENCE_OK")
 
 ---
 
+## PERMANOVA on a distance matrix
+
+The tests above compare mean curves in $L^2$. **PERMANOVA** (Anderson 2001) only needs a matrix of pairwise distances, so you choose what "different" means: $L^2$ for overall differences, an elastic amplitude distance for differences in shape after alignment, a phase distance for differences in timing, DTW or SBD for time series.
+
+### Theory
+
+For $N$ observations in $k$ groups of sizes $n_g$ with distances $d_{ij}$, the sums of squares are computed from the distances alone,
+
+$$
+SS_T = \frac{1}{N}\sum_{i<j} d_{ij}^2, \qquad
+SS_W = \sum_g \frac{1}{n_g}\sum_{\substack{i<j\\ i,j \in g}} d_{ij}^2, \qquad
+SS_A = SS_T - SS_W ,
+$$
+
+and the pseudo-$F$ statistic is
+
+$$
+F = \frac{SS_A/(k-1)}{SS_W/(N-k)}, \qquad R^2 = SS_A / SS_T .
+$$
+
+For Euclidean distances this is the classical one-way ANOVA $F$ on the points; for other distances it compares group centroids in the space the distance defines. The p-value is $(1 + \#\{F^* \ge F\})/(n_{\text{perm}} + 1)$ over `n_perm` random relabellings of the groups. Each permutation is seeded from `seed`, so results are reproducible. The statistic, sums of squares and $R^2$ match R's `vegan::adonis2` for a single factor.
+
+| Parameter | Default | Description |
+|---|---|---|
+| `dist` | — | symmetric `(n, n)` distance matrix with zero diagonal |
+| `labels` | — | non-negative integer group labels (any integer dtype), at least 2 groups and $N > k$ |
+| `n_perm` | `999` | permutations; `0` skips them and reports `p_value = 1.0` |
+| `seed` | `42` | permutation seed |
+
+The 24 curves below fall into three groups that differ **only in when** the peak occurs; peak heights vary within each group.
+
+```python exec="1" source="above" result="text"
+import numpy as np
+import fdars.inference as fi
+from fdars.metric import lp_self_1d
+from fdars.alignment import amplitude_self_distance_matrix, phase_self_distance_matrix
+
+rng = np.random.default_rng(12)
+t = np.linspace(0, 1, 60)
+groups = np.repeat([0, 1, 2], 8)
+X = np.array([rng.uniform(0.8, 1.2)                                  # height varies within groups
+              * np.exp(-0.5 * ((t - 0.45 - 0.05 * g - rng.normal(0, 0.01)) / 0.08) ** 2)
+              for g in groups])                                     # peak at 0.45, 0.50, 0.55
+
+for name, D in [("L2", lp_self_1d(X, t)),
+                ("elastic amplitude", amplitude_self_distance_matrix(X, t)),
+                ("elastic phase", phase_self_distance_matrix(X, t))]:
+    r = fi.permanova(np.asarray(D), groups, n_perm=999, seed=1)
+    print(f"{name:18s} pseudo-F={r['statistic']:6.2f}  R2={r['r_squared']:.2f}  p={r['p_value']:.3f}")
+print("FDARS_FENCE_OK")
+```
+
+The $L^2$ test detects a difference but cannot say what kind. The elastic decomposition can: after alignment the group shapes are indistinguishable (amplitude: $p \approx 0.4$), while the timing differs strongly (phase: $R^2 = 0.86$). The Align section's `elastic_phase_amplitude_test` runs both tests, plus a joint one, from the raw curves in one call.
+
+!!! warning "Location or spread?"
+    PERMANOVA tests whether the group centroids differ, but with unbalanced group sizes it is also sensitive to differences in **dispersion** (Anderson 2001). If one group is merely more variable, a significant result does not imply that its centre is shifted.
+
+---
+
 ## References
 
 1. Ramsay, J. O., and Silverman, B. W. (2005). *Functional Data Analysis*, 2nd ed. Springer. — Chapter 13: statistical inference for functional data; the basis for `t_perm_test` and `f_perm_test`.
 2. Degras, D. (2011). "Simultaneous confidence bands for nonparametric regression with functional data." *Statistica Sinica*, 21(4), 1735–1765. — multiplier bootstrap SCB methodology behind `mean_scb` and `scb_two_sample_test`.
 3. Zhang, J.-T. (2014). *Analysis of Variance for Functional Data*. CRC Press. — the asymptotic V-statistic for functional ANOVA underlying `oneway_anova_vstat`.
 4. Phipson, B., and Smyth, G. K. (2010). "Permutation P-values should never be zero: calculating exact P-values when permutations are randomly drawn." *Statistical Applications in Genetics and Molecular Biology*, 9(1). — justification of the `(#perm ≥ T_obs + 1) / (n_perm + 1)` convention.
+5. Anderson, M. J. (2001). "A new method for non-parametric multivariate analysis of variance." *Austral Ecology*, 26(1), 32–46. — the distance-based pseudo-F behind `permanova`.

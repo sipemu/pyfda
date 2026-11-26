@@ -474,6 +474,61 @@ print(render(f))
 
 The CV-selected B-spline (green) and the GCV P-spline (purple) both hug the dashed true signal, whereas the small fixed basis (cyan) visibly oversmooths and misses the second harmonic. This is the practical payoff of letting a criterion choose the complexity rather than fixing it too low.
 
+## Wavelet decomposition
+
+B-splines and Fourier functions are smooth and global, so a sharp, local feature needs many of them. The **discrete wavelet transform** (DWT) instead represents a signal by coefficients that are localised in both time and scale: a jump or a short burst affects only a few coefficients at each level. `fdars.basis` provides the orthogonal Daubechies DWT used by the [wavelet regression](../regression/peer-wavelet-regression.md#wavelet-domain-regression) estimators.
+
+| Function | Returns |
+|---|---|
+| `wavelet_decompose(signal, wavelet="db4", mode="periodic", level=None)` | `{"approx", "details", "levels", "signal_len", "wavelet", "mode", "coeffs"}` |
+| `wavelet_decompose_matrix(data, ...)` | one such dict per row of an `(n, m)` matrix |
+| `wavelet_reconstruct(coeffs, approx=None, details=None)` | the signal, optionally from modified bands |
+| `wavelet_max_level(signal_len, wavelet="db4")` | the deepest useful level |
+
+- `wavelet` is `"haar"` (= `"db1"`) or `"db2"` … `"db10"`; longer filters give smoother wavelets.
+- `mode` handles the ends: `"periodic"` wraps the signal around; `"symmetric"` mirrors it at each end.
+- `level=None` uses the deepest useful level, $\lfloor \log_2(n / (L - 1)) \rfloor$ for a filter of length $L$ ($\lfloor \log_2 n \rfloor$ for Haar).
+- `details` is ordered **finest first**: `details[0]` is level 1, the highest frequencies.
+- `coeffs` is an opaque handle for `wavelet_reconstruct`. Without replacements it inverts the transform to rounding error. Pass modified `approx` or `details` arrays of the same lengths to rebuild a filtered signal; the handle itself is never changed.
+
+The classic use is **denoising** (Donoho & Johnstone 1994). Estimate the noise level from the finest details, shrink every detail coefficient towards zero by the universal threshold $\hat\sigma\sqrt{2\log n}$, and invert:
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars.basis import wavelet_decompose, wavelet_reconstruct, wavelet_max_level
+
+rng = np.random.default_rng(11)
+n = 128
+t = np.arange(n) / n
+signal = np.sin(4 * np.pi * t) + np.where((t > 0.6) & (t < 0.7), 1.5, 0.0)   # smooth wave + a block
+noisy = signal + 0.25 * rng.standard_normal(n)
+
+dec = wavelet_decompose(noisy, wavelet="db4")           # deepest useful level
+sigma = np.median(np.abs(dec["details"][0])) / 0.6745   # noise level from the finest details
+thr = sigma * np.sqrt(2 * np.log(n))                    # universal threshold
+soft = lambda d: np.sign(d) * np.maximum(np.abs(d) - thr, 0.0)
+denoised = wavelet_reconstruct(dec["coeffs"], details=[soft(d) for d in dec["details"]])
+
+f, ax = fig(figsize=(8, 3.4))
+ax.plot(t, noisy, color="#6c757d", lw=0.9, alpha=0.6, label="noisy")
+ax.plot(t, signal, color="#1a1a2e", lw=2.0, ls="--", label="true signal")
+ax.plot(t, denoised, color="#198754", lw=2.2, label="db4, soft-thresholded details")
+ax.set(title="Wavelet denoising by soft thresholding", xlabel="t")
+ax.legend(fontsize=8.5)
+print(render(f))
+rmse = lambda a: np.sqrt(np.mean((a - signal) ** 2))
+kept = sum(int(np.count_nonzero(soft(d))) for d in dec["details"])
+print(f"<p>levels: {dec['levels']} (max for n={n}: {wavelet_max_level(n, 'db4')}); band lengths: approx "
+      f"{len(dec['approx'])}, details {[len(d) for d in dec['details']]}; "
+      f"exact inverse: {np.allclose(wavelet_reconstruct(dec['coeffs']), noisy)}; "
+      f"detail coefficients kept: {kept} of {sum(len(d) for d in dec['details'])}; "
+      f"RMSE noisy {rmse(noisy):.3f} → denoised {rmse(denoised):.3f}</p>")
+print("FDARS_FENCE_OK")
+```
+
+Soft thresholding sets all but a handful of the 120 detail coefficients to zero. The reconstruction removes most of the noise in the smooth parts and keeps the block, with its edges somewhat rounded by the db4 filter; `"haar"` keeps jumps sharper at the cost of a blocky smooth part.
+
 ## Recommendations
 
 | Situation | Recommended approach |
@@ -484,6 +539,7 @@ The CV-selected B-spline (green) and the GCV P-spline (purple) both hug the dash
 | Fast processing | Fixed basis type and count (`fdata_to_basis_1d`) |
 | Don't know the family | `select_basis_auto_1d` (chooses type + count) |
 | Robust selection | `basis_nbasis_cv` with `criterion="cv"` and `n_folds` |
+| Jumps, bursts or other local features | Wavelet decomposition (`wavelet_decompose`) with thresholding |
 
 ## API summary
 
@@ -499,6 +555,10 @@ The CV-selected B-spline (green) and the GCV P-spline (purple) both hug the dash
 | `basis_nbasis_cv(data, argvals, ...)` | Cross-validated basis count selection |
 | `smooth_basis_gcv(data, argvals, n_basis, ...)` | Basis smoothing with GCV penalty selection |
 | `constant_basis(argvals)` | Constant (intercept) basis — all-ones vector |
+| `wavelet_decompose(signal, wavelet, mode, level)` | Multi-level discrete wavelet transform of one signal |
+| `wavelet_decompose_matrix(data, wavelet, mode, level)` | Wavelet transform of every row of a matrix |
+| `wavelet_reconstruct(coeffs, approx=None, details=None)` | Inverse wavelet transform, optionally from modified bands |
+| `wavelet_max_level(signal_len, wavelet)` | Deepest useful decomposition level |
 
 All functions are imported from `fdars.basis`.
 
@@ -507,4 +567,6 @@ All functions are imported from `fdars.basis`.
 - Ramsay, J.O., Silverman, B.W. (2005). *Functional Data Analysis*, 2nd ed. Springer.
 - Eilers, P.H.C., Marx, B.D. (1996). *Flexible smoothing with B-splines and penalties.* Statistical Science 11(2), 89-121.
 - de Boor, C. (1978). *A Practical Guide to Splines.* Springer.
+- Daubechies, I. (1992). *Ten Lectures on Wavelets.* SIAM.
+- Donoho, D.L., Johnstone, I.M. (1994). *Ideal spatial adaptation by wavelet shrinkage.* Biometrika 81(3), 425-455.
 - Craven, P., Wahba, G. (1979). *Smoothing noisy data with spline functions: estimating the correct degree of smoothing by the method of generalized cross-validation.* Numerische Mathematik 31(4), 377-403.

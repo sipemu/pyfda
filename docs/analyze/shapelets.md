@@ -283,18 +283,21 @@ maximally similar to itself) and is directly usable as a precomputed kernel with
 ### GAK API
 
 ```python
-from fdars.metric import gak, sigma_gak, gak_gram_matrix, gak_gram_train, gak_gram_predict
+from fdars.metric import gak, gak_triangular, sigma_gak, gak_gram_matrix, gak_gram_train, gak_gram_predict
 ```
 
 | Function | Signature | Returns |
 |----------|-----------|---------|
 | `sigma_gak(data)` | `data (n, m)` | `float` — heuristic bandwidth (median pairwise distance) |
 | `gak(x, y, sigma)` | two 1D arrays + float | `float` — single kernel value |
-| `gak_gram_matrix(data, sigma=None)` | `(n, m)` + optional float | `(n, n)` symmetric PSD Gram matrix |
-| `gak_gram_train(data, sigma=None)` | `(n, m)` + optional float | `PyGakGramTrain` opaque handle |
+| `gak_triangular(x, y, sigma, triangular=0)` | two 1D arrays + float + int | `float` — kernel value restricted to the band $\lvert i-j\rvert < T$ |
+| `gak_gram_matrix(data, sigma=None, triangular=0)` | `(n, m)` + optional float + int | `(n, n)` symmetric PSD Gram matrix |
+| `gak_gram_train(data, sigma=None, triangular=0)` | `(n, m)` + optional float + int | `PyGakGramTrain` opaque handle (`.triangular` getter) |
 | `gak_gram_predict(train_handle, new_data)` | handle + `(n_test, m)` | `(n_test, n_train)` Gram matrix |
 
 Pass `sigma=None` to any function to use the automatic `sigma_gak` heuristic.
+
+`triangular=T` is Cuturi's (2011) *triangular* GAK: only alignments that stay within $\lvert i - j\rvert < T$ of the diagonal contribute, which is faster and makes curves whose features are far apart in time less similar. The kernel remains positive semi-definite. `T = 0` (the default) disables the band and reproduces the plain GAK; `gak_gram_predict` reuses the training handle's `T`. See [DTW Search & Averaging](../represent/dtw-toolkit.md#triangular-global-alignment-kernel) for a comparison.
 
 ```python exec="1" source="above"
 import numpy as np
