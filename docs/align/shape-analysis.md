@@ -282,7 +282,7 @@ Each curve belongs to an **orbit** -- the set of all curves reachable from it by
 | `"reparameterization_translation_scale"` | + overall size | each centred curve is also divided by the $L^2$ norm of its SRSF; this is an **approximate** scale quotient (it rescales the SRSF by $1/\sqrt{\lVert q\rVert}$, so representatives are not unit-norm and scaled copies end up close, not identical) |
 
 !!! warning "Spell the quotient exactly"
-    Any other string, including the shorthand `"translation"` or `"scale"`, silently falls back to `"reparameterization"`. Use the full names above.
+    Any other string, including the shorthand `"translation"` or `"scale"`, raises `ValueError`. Use the full names above. (Older fdars versions silently fell back to `"reparameterization"` for unknown strings, so code that passed `"translation"` or `"scale"` computed the plain elastic quotient.)
 
 ```python exec="1" source="above" result="text"
 import numpy as np

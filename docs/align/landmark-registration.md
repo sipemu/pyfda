@@ -16,7 +16,7 @@ From left to right: peaks found by `detect_landmarks` and matched by order; the 
 |---|---|
 | `detect_landmarks(curve, argvals, kind="peak", min_prominence=0.0)` | Finds features in one curve: `kind` is `"peak"`, `"valley"`, `"zero_crossing"`, `"inflection"` or `"custom"`. Returns a list of dicts with `position`, `kind`, `value`, `prominence`, in time order. |
 | `landmark_register(data, argvals, landmarks, target=None)` | Warps each curve so that its landmarks (one list per curve) map to `target` (default: per-landmark mean). Returns `registered`, `gammas`, `landmarks`, `target_landmarks`. |
-| `landmark_detect_and_register(data, argvals, kind="peak", min_prominence=0.0, expected_count=...)` | Detection plus registration in one call, using the **first** `expected_count` features of each curve. |
+| `landmark_detect_and_register(data, argvals, kind="peak", min_prominence=0.0, expected_count=1)` | Detection plus registration in one call, using the **first** `expected_count` features of each curve (raises `ValueError` if a curve has fewer). |
 | `elastic_align_pair_constrained_with_config(f1, f2, argvals, landmark_targets, landmark_sources, ...)` | Elastic (SRSF) alignment of `f2` to `f1` whose warp passes through given landmark pairs. |
 
 ---
