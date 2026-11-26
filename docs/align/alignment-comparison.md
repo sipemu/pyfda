@@ -1,76 +1,145 @@
 # Comparing Alignment Methods
 
-Which registration method should you reach for? `fdars` (via its Python bindings and a little numpy) gives you four strategies with different trade-offs:
-
-- **Elastic alignment** ([`karcher_mean`](elastic-alignment.md#group-alignment-karcher-mean)) -- global optimization by dynamic programming in SRSF space; smooth warps, no feature detection.
-- **Landmark registration** (numpy, from [Landmark Registration](landmark-registration.md)) -- feature-based piecewise-linear warping; interpretable, needs reliable landmarks.
-- **Constrained elastic** ([`elastic_align_pair_constrained`](landmark-registration.md#landmarks-elastic-between-them)) -- elastic optimization that passes *through* landmark anchors; smooth *and* feature-aware.
-- **TSRVF** ([`tsrvf_transform`](tsrvf.md)) -- not an alignment per se, but a linearization of elastic alignment for downstream PCA/regression/clustering.
-
-This page runs the first three on the same datasets, quantifies what they do to the mean and the variance, and gives a decision guide.
-
-The headline result: on phase-varying data all three collapse the phase spread and sharpen the mean, while the naive cross-sectional mean stays flattened.
-
+[Choosing an Alignment Method](choosing-a-method.md) argues from the assumptions of each method. This page is the evidence: eight registrations of **one** sample whose true warps are known, scored on how well they recover those warps, how much variance they remove, how much warping they apply and how long they take; then the same methods on the Berkeley growth velocities, where the truth is unknown but one feature (the pubertal growth spurt) is. Later sections take a closer look at elastic, landmark and constrained elastic alignment, the metrics used to score them, and the regimes where each fails.
 
 ![Comparing Alignment Methods — concept diagram](../assets/diagrams/alignment-comparison.svg){ .fdars-diagram }
 
-```python exec="1" html="1"
+Eight registrations of one mixed-warp sample; the lowest variance is not always the best warp.
+
+---
+
+## Bake-off on simulated data with known warps
+
+Twenty-four two-bump curves, each warped by a **mixture** of a shift, a change of tempo and a smooth non-linear bend, $w_i(t) = a_i t + b_i + c_i\,t(1-t)$, with ±10 % amplitude scaling and white noise. No method's warp class matches exactly: shift and affine models miss the bend, the elastic and continuous classes cannot shift the end points, landmark registration sees only the two peaks, and pairwise synchronisation uses two-knot piecewise-linear warps.
+
+Scores (interior $t \in [0.15, 0.85]$):
+
+- **warp error**: mean $\lvert\hat h_i - h_i\rvert$ against the true registering warp, after removing the common warp no method can identify ($\times 10^{-3}$);
+- **variance ratio**: total pointwise variance of the registered curves over that of the raw curves;
+- **complexity**: mean Fisher–Rao distance of the estimated warps from the identity (`warp_complexity`; "—" for shift and affine warps, which are not warps of $[0,1]$ onto itself);
+- **time** in seconds.
+
+```python exec="1" source="above" result="text"
+import time
 import numpy as np
-from scipy.signal import find_peaks
-from docs_fig import fig, render
-from fdars.alignment import karcher_mean, elastic_align_pair_constrained
+from fdars import alignment as A
 
-rng = np.random.default_rng(9)
-n, m = 16, 150
+rng = np.random.default_rng(11)
+n, m = 24, 101
 t = np.linspace(0, 1, m)
-base = np.exp(-((t - 0.35) ** 2) / 0.006) + 0.8 * np.exp(-((t - 0.70) ** 2) / 0.006)
+mu = lambda s: np.exp(-(s - 0.35) ** 2 / 0.008) + 0.7 * np.exp(-(s - 0.68) ** 2 / 0.01)
+X, H = [], []
+for _ in range(n):
+    b, a, c = rng.uniform(-0.04, 0.04), rng.uniform(0.93, 1.07), rng.uniform(-0.4, 0.4)
+    w = a * t + b + c * t * (1 - t)                          # shift + tempo + bend
+    X.append(rng.uniform(0.9, 1.1) * mu(w) + 0.02 * rng.standard_normal(m))
+    H.append(np.interp(t, w, t))                             # true registering warp
+X, H = np.array(X), np.array(H)
+inner = (t > 0.15) & (t < 0.85)
 
-data = np.zeros((n, m))
-for i in range(n):
-    w = t ** rng.uniform(0.7, 1.5)
-    data[i] = np.interp(t, (w - w.min()) / np.ptp(w), base)
+def iterative_shift():
+    seed = A.least_squares_shift_registration(X, t, 0.15)["shifts"]
+    r = A.iterative_shift_registration(X, t, initial=seed, max_iter=20, tol=1e-6)
+    return t - r["shifts"][:, None]
 
-# --- Elastic ---
-elastic = np.asarray(karcher_mean(data, t, lambda_=0.0, max_iter=20, tol=1e-4)["aligned_data"])
+def affine():
+    r = A.affine_registration(X, t)
+    return (t - r["shifts"][:, None]) / r["dilations"][:, None]
 
-# --- Landmark (numpy) ---
-def top_peaks(y, k, mp=0.2):
-    idx, props = find_peaks(y, prominence=mp)
-    order = np.argsort(props["prominences"])[::-1][:k]
-    return np.sort(t[idx[order]])
-
-L = np.array([top_peaks(r, 2) for r in data])
-target = L.mean(0)
-
-def register(y, s):
-    kt = np.concatenate(([0.0], target, [1.0]))
-    ks = np.concatenate(([0.0], s, [1.0]))
-    return np.interp(np.interp(t, kt, ks), t, y)
-
-landmark = np.array([register(data[i], L[i]) for i in range(n)])
-
-# --- Constrained elastic (pin peaks, optimize between) ---
-ref = data[0]
-constrained = np.array([
-    np.asarray(elastic_align_pair_constrained(ref, data[i], t, target, L[i], lambda_=0.0)["f_aligned"])
-    for i in range(n)])
-
-panels = [("No alignment", data, "#3f51b5", "#dc3545"),
-          ("Elastic (Karcher)", elastic, "#198754", "#e8710a"),
-          ("Landmark (numpy)", landmark, "#6f42c1", "#e8710a"),
-          ("Constrained elastic", constrained, "#0dcaf0", "#e8710a")]
-
-f, axes = fig(ncols=4, figsize=(13.5, 3.4))
-for ax, (title, arr, c, cm) in zip(axes, panels):
-    ax.plot(t, arr.T, color=c, lw=0.9, alpha=0.4)
-    ax.plot(t, arr.mean(0), color=cm, lw=2.2, label="mean")
-    ax.set(title=title, xlabel="t", ylim=(-0.1, 2.0))
-    ax.legend(fontsize=8)
-axes[0].set(ylabel="f(t)")
-print(render(f))
+methods = {
+    "none":               (lambda: np.tile(t, (n, 1)), True),
+    "iterative shift":    (iterative_shift, False),
+    "affine":             (affine, False),
+    "landmark (2 peaks)": (lambda: A.landmark_detect_and_register(X, t, kind="peak", min_prominence=0.2,
+                                                                  expected_count=2)["gammas"], True),
+    "continuous":         (lambda: A.continuous_registration(X, t, lambda_=1e-3, max_template_iter=5)["warps"], True),
+    "elastic DP":         (lambda: A.karcher_mean(X, t)["gammas"], True),
+    "elastic RBFGS+l2":   (lambda: A.karcher_mean_with_config(X, t, method="rbfgs", lambda_=0.01)["gammas"], True),
+    "pairwise sync":      (lambda: A.pairwise_synchronization(X, t)["warps"], True),
+}
+print(f"{'method':20s} {'warp error':>10s} {'var ratio':>9s} {'complexity':>10s} {'time s':>7s}")
+for name, (fit, interval_warp) in methods.items():
+    t0 = time.perf_counter()
+    W = np.asarray(fit())
+    dt = time.perf_counter() - t0
+    R = np.array([np.interp(w, t, x) for w, x in zip(W, X)])          # registered curves x_i(h_i(t))
+    err = 1000 * np.abs(((W - W.mean(0)) - (H - H.mean(0)))[:, inner]).mean()
+    vr = R[:, inner].var(0).sum() / X[:, inner].var(0).sum()
+    cx = f"{np.mean([A.warp_complexity(w, t) for w in W]):10.3f}" if interval_warp else f"{'—':>10s}"
+    print(f"{name:20s} {err:10.2f} {vr:9.3f} {cx} {dt:7.3f}")
+print("FDARS_FENCE_OK")
 ```
 
-The three aligners each recover a sharp two-peak mean; the constrained method matches the elastic one here because the peaks are the dominant features.
+How to read it:
+
+- **Rigid models fall short when the phase is not rigid.** A pure shift cannot follow the tempo change and the bend (error ×5 the best). The affine model gets the shift and the tempo and comes close.
+- **The flexible methods recover the warps best**, and they do it with very different amounts of warping. The elastic DP reaches the lowest variance ratio but applies three to four times as much warping as the other flexible methods for the same accuracy: it also "explains" part of the noise and amplitude scaling as phase. The penalised RBFGS variant warps far less and is about as accurate; penalised continuous registration is as accurate with the least warping of all.
+- **Lowest variance is not best warps.** Variance reduction rewards any warp that makes curves look alike, including over-registration. When the warps themselves matter (timing estimates, phase statistics), judge methods by warp plausibility, not by how flat the registered sample looks.
+- **Landmark registration** is competitive because the two peaks carry most of the timing here; it is the cheapest flexible method.
+- **Pairwise synchronisation** is limited by its two-knot warps on this smooth design; its strength is noisy data ([Pairwise Synchronisation](pairwise-synchronization.md#example-robustness-to-noise)).
+
+---
+
+## Bake-off on the growth data
+
+The first 30 girls of the Berkeley growth study, height velocity from age 3 to 18 (smoothing-spline derivative of the heights). There are no true warps, but one feature has a well-defined timing: the age of peak growth velocity (PGV) in the pubertal spurt. A good registration lines it up; the table reports the standard deviation of the PGV age across the registered curves (1.1 years before registration), next to the variance ratio and the warp complexity. The landmark method registers the PGV ages, detected as the maximum between ages 9 and 15, to their mean.
+
+```python exec="1" source="above" result="text"
+import time
+import numpy as np
+from scipy.interpolate import make_smoothing_spline
+from docs_data import load_growth
+from fdars import alignment as A
+
+age, heights, meta = load_growth()
+girls = heights[(meta["sex"] == "female").to_numpy()][:30]
+a = np.linspace(3, 18, 101)
+V = np.array([make_smoothing_spline(age, h, lam=0.5).derivative()(a) for h in girls])   # cm / year
+n = len(V)
+inner = (a > 4) & (a < 17)
+spurt = (a > 9) & (a < 15)
+u = (a - a[0]) / (a[-1] - a[0])                       # [0, 1] grid for warp_complexity
+
+def iterative_shift():
+    seed = A.least_squares_shift_registration(V, a, 2.0)["shifts"]
+    r = A.iterative_shift_registration(V, a, initial=seed, max_iter=20, tol=1e-4)
+    return a - r["shifts"][:, None]
+
+def affine():
+    r = A.affine_registration(V, a)
+    return (a - r["shifts"][:, None]) / r["dilations"][:, None]
+
+def landmark():
+    pgv = [[a[spurt][np.argmax(v[spurt])]] for v in V]
+    return A.landmark_register(V, a, pgv)["gammas"]
+
+methods = {
+    "none":             (lambda: np.tile(a, (n, 1)), True),
+    "iterative shift":  (iterative_shift, False),
+    "affine":           (affine, False),
+    "landmark (PGV)":   (landmark, True),
+    "continuous":       (lambda: A.continuous_registration(V, a, lambda_=1e-2, max_template_iter=5)["warps"], True),
+    "elastic DP":       (lambda: A.karcher_mean(V, a)["gammas"], True),
+    "elastic RBFGS+l2": (lambda: A.karcher_mean_with_config(V, a, method="rbfgs", lambda_=0.01)["gammas"], True),
+    "pairwise sync":    (lambda: A.pairwise_synchronization(V, a)["warps"], True),
+}
+print(f"{'method':18s} {'sd PGV age':>10s} {'var ratio':>9s} {'complexity':>10s} {'time s':>7s}")
+for name, (fit, interval_warp) in methods.items():
+    t0 = time.perf_counter()
+    W = np.asarray(fit())
+    dt = time.perf_counter() - t0
+    R = np.array([np.interp(w, a, v) for w, v in zip(W, V)])
+    sd_pgv = np.std([a[spurt][np.argmax(r[spurt])] for r in R])
+    vr = R[:, inner].var(0).sum() / V[:, inner].var(0).sum()
+    cx = f"{np.mean([A.warp_complexity((w - a[0]) / (a[-1] - a[0]), u) for w in W]):10.3f}" if interval_warp else f"{'—':>10s}"
+    print(f"{name:18s} {sd_pgv:10.2f} {vr:9.3f} {cx} {dt:7.3f}")
+print("FDARS_FENCE_OK")
+```
+
+- **Landmark and elastic registration line up the spurt** (PGV-age spread below 0.1 years); the penalised RBFGS variant does so with less than half the warping of the elastic DP.
+- **Continuous registration removes the most variance but leaves the spurt spread** (about half a year): its criterion is dominated by the large, steeply falling velocities of early childhood, so it spends its smooth warp there. This is the "lowest variance is not best" lesson on real data, and a reminder to check the registration on the feature you care about.
+- **Shift and affine** halve the PGV spread; children differ in tempo as well as timing, but not in one global linear way.
+- **Pairwise synchronisation** sits in between; its two-knot warps cannot follow both the infancy decline and the spurt.
 
 ---
 
@@ -445,6 +514,8 @@ Each panel isolates a regime where the method choice matters, and the sharpened 
 ---
 
 ## Decision guide
+
+The tables below compare the three methods examined in detail on this page. For every method, including shift, affine, continuous, sparse, likelihood-based, Bayesian and DTW alignment, use the decision tree on [Choosing an Alignment Method](choosing-a-method.md).
 
 | | Warping | Automation | Cost | Smoothness | Feature control |
 |--|---------|-----------|------|-----------|-----------------|

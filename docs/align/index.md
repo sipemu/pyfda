@@ -22,7 +22,7 @@ Functional observations vary in two ways: *amplitude* (how tall or deep the feat
 <a class="fdars-gallery-item" href="alignment-comparison/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/alignment-comparison.svg" alt="">
 <div class="fdars-gallery-title">Comparing Methods</div>
-<div class="fdars-gallery-desc">No alignment vs elastic vs landmark, side by side.</div>
+<div class="fdars-gallery-desc">Eight aligners on one sample with known warps and on the growth data.</div>
 </a>
 </div>
 
@@ -126,11 +126,31 @@ Functional observations vary in two ways: *amplitude* (how tall or deep the feat
 </a>
 </div>
 
+## Time series
+
+<div class="fdars-gallery fdars-sec-align">
+<a class="fdars-gallery-item" href="dtw/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/dtw.svg" alt="">
+<div class="fdars-gallery-title">Dynamic Time Warping</div>
+<div class="fdars-gallery-desc">DTW paths as discrete warps, windows, soft-DTW and DBA; when to prefer elastic alignment.</div>
+</a>
+</div>
+
+## After alignment
+
+<div class="fdars-gallery fdars-sec-align">
+<a class="fdars-gallery-item" href="alignment-inference/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/alignment-inference.svg" alt="">
+<div class="fdars-gallery-title">Inference after Alignment</div>
+<div class="fdars-gallery-desc">Amplitude/phase PERMANOVA, elastic box plots, depth, outliers, DP-means and partial-curve conformal.</div>
+</a>
+</div>
+
 !!! info "Scope"
 
     - **Real-valued curves on one shared grid** (`argvals`) are supported by every family on these pages.
     - **Irregular or incomplete grids** are handled by `register_fpca` (curves observed on their own grids, optionally cut off at the start or end) and by the sparse elastic functions `sparse_elastic_align_pair` / `sparse_elastic_mean`. `elastic_partial_match` matches a short curve to a sub-interval of a longer one.
     - **Curves in $\mathbb{R}^d$**: the shape-space functions `curve_shape_*` quotient out translation, scale, rotation, reparametrisation and (for closed curves) the starting point; `karcher_mean_nd_with_config` and the other `*_nd_with_config` functions share one warp across coordinates without rotation or scale invariance.
     - **Non-Gaussian values** (binary, counts, positive-skewed): `register_fpca(family=...)`.
-    - **Time series of different lengths** for search and classification: the DTW family in `fdars.metric`.
+    - **Time series of different lengths** for search and classification: the DTW family in `fdars.metric` ([Dynamic Time Warping](dtw.md)).
     - **Still unsupported:** manifold-valued trajectories other than the shape space (sphere-, SPD- or rotation-valued curves) and density-valued curves. Transform them to an unconstrained space first.

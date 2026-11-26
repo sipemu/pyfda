@@ -439,6 +439,7 @@ The heatmap confirms the narrative: the L2-L1 cell is near 1.0 (they rank pairs 
 The `*_self_1d` / `*_cross_1d` functions above return whole distance matrices. Two further pages cover the rest of the time-series toolkit in `fdars.metric`:
 
 - [DTW Search & Averaging](dtw-toolkit.md): Sakoe-Chiba and Itakura windows, the optimal warping path, lower bounds (LB_Kim, LB_Keogh, LB_Improved, LB_Webb, LB_Enhanced), early-abandoning DTW, exact 1-NN and k-NN search, DTW barycenter averaging, soft-DTW alignment and barycenter, the triangular Global Alignment Kernel and multichannel DTW.
+- [Dynamic Time Warping](../align/dtw.md) (Align section): the DTW path as an alignment, how it differs from elastic registration (DTW warps amplitude differences away), and when not to use DTW on functional data.
 - [Elastic Time-Series Distances](elastic-ts-distances.md): the aeon family of elastic distances (derivative, weighted and amerced DTW, ERP, EDR, TWE, MSM, LCSS and shape-DTW) behind one `metric=` interface, and the shape-based distance (SBD) of k-Shape.
 
 ## Metric properties comparison

@@ -315,6 +315,10 @@ while their differing peak positions confirm that k-medoids selected exemplars o
 - [Clustering](clustering.md) -- $L^2$ k-means, fuzzy c-means, GMM and quality indices.
 - [Model-based clustering](gmm-clustering.md) -- soft assignments via Gaussian mixtures.
 - `fdars.alignment` -- elastic alignment, Karcher means and the SRVF machinery behind these distances.
+- [Advanced Clustering](advanced-clustering.md#align-and-cluster-simultaneous-alignment-and-clustering) -- `align_cluster_fd`: k clusters with joint alignment, elastic or linear (`"shift"`, `"dilation"`, `"affine"`) warp classes.
+- [Inference after Alignment](../align/alignment-inference.md#clustering-without-choosing-k-elastic-dp-means) -- `elastic_dpmeans`: elastic DP-means, where a distance penalty instead of $k$ sets the number of clusters.
+- [Time-series clustering](time-series-clustering.md) -- k-Shape, SBD k-medoids and DTW k-means.
+- [Shapes of Curves in R^d](../align/curve-shapes.md) -- distance matrices of outlines and trajectories modulo rotation and scale, to cluster with `kmedoids_from_distances` or `hierarchical_cut`.
 
 ## References
 

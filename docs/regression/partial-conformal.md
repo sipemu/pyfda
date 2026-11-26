@@ -227,6 +227,12 @@ The fitted model exposes `template`, `calibration_indices`, `training_indices`, 
 !!! warning "What the guarantee does not cover"
     Coverage is marginal over new curves drawn like the calibration curves, and it is about the **registered** curve and the warp to *this* template. It does not cover the raw, unaligned curve, and it does not hold if the new curve comes from a different population (drift) or if its observation pattern depends on its values. With few calibration curves the bands are wide and very small `alpha` is not attainable.
 
+
+## See also
+
+- [Inference after Alignment](../align/alignment-inference.md) — the other tests, box plots and uncertainty tools built on elastic alignment.
+- [Elastic Alignment](../align/elastic-alignment.md) — the Karcher template and the registration these sets refer to.
+
 ## References
 
 1. Wang, Kurtek & Zhang (2026). Joint registration and conformal prediction for partially observed functional data. *Journal of Computational and Graphical Statistics* (PMC13160368).

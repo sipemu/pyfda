@@ -122,7 +122,8 @@ nav:
     - Non-Gaussian Registration: align/expfam-registration.md
     - Pairwise Synchronisation: align/pairwise-synchronization.md
     - Bayesian Alignment: align/bayesian-alignment.md
-    # Docs batch 5 inserts here: dtw, alignment-inference; keep Comparing Methods last.
+    - Dynamic Time Warping: align/dtw.md
+    - Inference after Alignment: align/alignment-inference.md
     - Comparing Methods: align/alignment-comparison.md
   - Regression:
     - regression/index.md

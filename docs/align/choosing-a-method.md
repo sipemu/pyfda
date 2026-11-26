@@ -31,7 +31,7 @@ The classes are nested only loosely: shift ⊂ affine ⊂ $\Gamma$ (all increasi
 **Q0. What is one observation?**
 
 - **A curve in $\mathbb{R}^d$** (an outline, a trajectory, handwriting), where rotation, scale or starting point are nuisance: use the shape-space functions `curve_shape_*` (with `closed=True` for contours, and `warp_optim={"method": "rbfgs"}` with `align_iter >= 4` for an accurate reparametrisation). When bending and stretching should cost differently, pass `metric="elastic"` with weights `a`, `b` (planar curves). For small polygons where an exact distance matters, `ab_elastic_distance_pl`. For a few irregularly placed points per curve, `sparse_elastic_align_pair` / `sparse_elastic_mean`. See [Shapes of Curves in R^d](curve-shapes.md) and [Sparse & Irregular Curves](sparse-elastic.md).
-- **A discrete time series** (possibly of different lengths) where the goal is nearest-neighbour search, classification or clustering, not a warp model: the DTW family (`dtw_*`, `soft_dtw_*`, the elastic time-series distances in `fdars.metric`). DTW returns a *cost*, not a metric.
+- **A discrete time series** (possibly of different lengths) where the goal is nearest-neighbour search, classification or clustering, not a warp model: the DTW family (`dtw_*`, `soft_dtw_*`, the elastic time-series distances in `fdars.metric`). DTW returns a *cost*, not a metric, and it warps amplitude differences away; see [Dynamic Time Warping](dtw.md).
 - **A real-valued function on a common interval**: go to Q1.
 
 **Q1. What kind of values?**
@@ -60,7 +60,7 @@ The classes are nested only loosely: shift ⊂ affine ⊂ $\Gamma$ (all increasi
 - **Large $n \cdot m$.** A band (`band_frac`), the coarse-to-fine Karcher mean (automatic for $m > 50$), or a cheaper warp class.
 - **Outliers.** `karcher_median`, `robust_karcher_mean`; flag them with `elastic_outlier_detection`.
 - **Periodic or closed data.** `karcher_mean_closed` / `elastic_align_pair_closed` (elastic), `periodic=True` (continuous), `extrapolation="periodic"` (shift).
-- **Groups to compare.** Align *all* curves together without labels, then test with `elastic_phase_amplitude_test`.
+- **Groups to compare.** Align *all* curves together without labels, then test with `elastic_phase_amplitude_test` ([Inference after Alignment](alignment-inference.md)).
 
 ---
 
@@ -80,7 +80,12 @@ The classes are nested only loosely: shift ⊂ affine ⊂ $\Gamma$ (all increasi
 | same, `method="rbfgs"` | smooth $\Gamma$ | same + roughness / geodesic penalties | same | same | local optimiser seeded by DP | — | smooth warps, exact landmarks |
 | same, `band_frac>0` | $\Gamma$ ∩ band | same | same | same | $O(\text{iter}\cdot n\, m R \cdot 35)$ | — | long curves, small phase |
 | `karcher_mean_closed` | $\Gamma$ + start-point shift | SRSF $L^2$ | + starting point | Karcher | about $(20 + m/10)$ × DP | — | periodic 1-D signals |
-| `pairwise_synchronization` | piecewise linear | penalised pairwise $L^2$ | — | none | $O(n^2)$ pairwise fits | — | template-free |
+| `curve_shape_*` | $\Gamma$ × rotation × scale (× start point) | arccos on the pre-shape sphere, or $L^2$ | translation, scale, rotation, reparametrisation, start point | Karcher mean or median | `align_iter` × seeds × DP per pair | bootstrap or model-based region, box plot | outlines, trajectories in $\mathbb{R}^d$ |
+| same, `metric="elastic"` | as above, planar | $(a,b)$ elastic metric via the F-transform | as above | as above | as above | as above | bending vs stretching weighted |
+| `ab_elastic_distance_pl` | monotone matchings | exact $(a,b)$ distance of polygons | translation, reparametrisation | — | $O(N_1^2N_2^2(N_1+N_2))$ | — | small polygons, ground truth |
+| `sparse_elastic_*` | closure of $\Gamma$ | polygon-SRV $L^2$ | translation, reparametrisation | spline SRV mean | per curve ∝ points | — | sparse, irregular curves |
+| `register_fpca` | monotone B-spline or two-knot inverse warp | exponential-family likelihood + GFPCA | — | subject-specific GFPCA fit | L-BFGS per curve + GFPCA per round | — | binary, count, incomplete curves |
+| `pairwise_synchronization` | piecewise linear | penalised pairwise $L^2$ | — | none | $O(n^2)$ pairwise fits | — | noisy samples, template-free |
 | `bayesian_align_group` | Fourier tangent warps | posterior | reparametrisation | sampled | MCMC | full posterior, $\hat R$, ESS | warp UQ |
 | DTW family | discrete index paths | accumulated cost (no root) | index warping | none | $O(m^2)$ per pair | — | time-series search, classification |
 
@@ -97,7 +102,7 @@ The classes are nested only loosely: shift ⊂ affine ⊂ $\Gamma$ (all increasi
 7. **For $\mathbb{R}^d$ outlines use `curve_shape_*`, not the `*_nd_with_config` functions.** The `_nd` aligners share one warp across coordinates but have no rotation or scale quotient, and they normalise each coordinate on its own.
 8. **For binary or count curves, `register_fpca` beats aligning `logit(p̂)` or $\sqrt{\text{counts}}$**: it registers on the likelihood scale. Prefer `fpca_type="two_step"` for Gamma and Poisson data, because the variational EM treats them as Gaussian.
 9. **For warp uncertainty, use `bayesian_align_group(sampler="infhmc", n_chains>=4)`** and read $\hat R$ and the ESS; add tempering (`n_temperatures>1`) if the multimodality flags fire. Do not trust single pCN chains without diagnostics.
-10. **When comparing groups, align all curves together without the labels**, then run `elastic_phase_amplitude_test(amplitude_metric="pairwise")`. Per-group templates break the validity of the permutation test.
+10. **When comparing groups, align all curves together without the labels**, then run `elastic_phase_amplitude_test(amplitude_metric="pairwise")`. Per-group templates break the validity of the permutation test, and noisy curves should be pre-smoothed lightly, or SRSF noise leaks phase differences into the amplitude test ([Inference after Alignment](alignment-inference.md#example-phase-only-differences-and-why-noise-matters)).
 
 ---
 
@@ -217,7 +222,11 @@ All pages show warps as registering warps, $\tilde x_i(t) = x_i(h_i(t))$. The fu
 
 - [Shift Registration](shift-registration.md), [Affine Registration](affine-registration.md), [Landmark Registration](landmark-registration.md), [Continuous Registration](continuous-registration.md) — the rigid and parametric families.
 - [Elastic Alignment](elastic-alignment.md), [Elastic Optimisers & Penalties](elastic-optimisers.md), [Advanced Elastic Alignment](advanced-alignment.md), [TSRVF](tsrvf.md), [Shape Analysis (1-D)](shape-analysis.md) — the Fisher–Rao family.
-- [Comparing Methods](alignment-comparison.md) — side-by-side on real data.
+- [Shapes of Curves in R^d](curve-shapes.md), [Sparse & Irregular Curves](sparse-elastic.md), [Non-Gaussian Registration](expfam-registration.md) — special kinds of data.
+- [Pairwise Synchronisation](pairwise-synchronization.md), [Bayesian Alignment](bayesian-alignment.md) — template-free and probabilistic alignment.
+- [Dynamic Time Warping](dtw.md) — DTW as an alignment, and when not to use it.
+- [Inference after Alignment](alignment-inference.md) — tests, box plots, outliers and conformal sets on aligned data.
+- [Comparing Methods](alignment-comparison.md) — eight aligners on one sample with known warps, and on the growth data.
 - [Distance Metrics](../represent/distance-metrics.md) — DTW and other curve distances.
 
 ## References
