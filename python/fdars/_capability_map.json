@@ -514,7 +514,7 @@
     },
     "landmark_detect_and_register": {
       "purpose": "Detect landmarks and register in one call.",
-      "sig": "(data, argvals, kind='peak', min_prominence=0.0, expected_count=0)"
+      "sig": "(data, argvals, kind='peak', min_prominence=0.0, expected_count=1)"
     },
     "landmark_register": {
       "purpose": "Register curves to common landmark positions.",
@@ -1734,7 +1734,7 @@
       "sig": "(data, argvals_s, argvals_t, p=2.0)"
     },
     "sbd": {
-      "purpose": "Shape-based distance (Paparrizos and Gravano 2015) and the optimal cyclic lag.",
+      "purpose": "Shape-based distance (Paparrizos and Gravano 2015) and the optimal signed lag.",
       "sig": "(x, y)"
     },
     "sbd_distance_matrix": {

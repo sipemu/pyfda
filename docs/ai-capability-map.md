@@ -147,7 +147,7 @@ Elastic alignment, SRSF registration, Karcher mean, elastic FPCA.
 | `karcher_median_with_config` | `(data, argvals, max_iter=20, tol=0.001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Elastic Karcher median (Weiszfeld) with a configurable warp optimiser. |
 | `kmedoids_from_distances` | `(dist_mat, k=2, max_iter=100, seed=42)` | K-medoids clustering from a precomputed distance matrix. |
 | `lambda_cv` | `(data, argvals, lambdas=None, n_folds=5, max_iter=15, tol=0.001, seed=42)` | Cross-validation for the elastic alignment regularisation parameter lambda. |
-| `landmark_detect_and_register` | `(data, argvals, kind='peak', min_prominence=0.0, expected_count=0)` | Detect landmarks and register in one call. |
+| `landmark_detect_and_register` | `(data, argvals, kind='peak', min_prominence=0.0, expected_count=1)` | Detect landmarks and register in one call. |
 | `landmark_register` | `(data, argvals, landmarks, target=None)` | Register curves to common landmark positions. |
 | `landmark_shift_deltas` | `(landmarks, location=None)` | Shifts that move each curve's landmark onto a common target: ``delta_i = tau - t_i``. |
 | `landmark_shift_deltas_multi` | `(landmarks, targets=None)` | Least-squares common shift per curve for several landmarks: ``delta_i = mean_k(tau_k - t_ik)``. |
@@ -576,7 +576,7 @@ Functional distance and similarity metrics — L2, L1, Mahalanobis, DTW.
 | `lp_cross_2d` | `(data1, data2, argvals_s, argvals_t, p=2.0)` | Lp cross distance for 2D data. |
 | `lp_self_1d` | `(data, argvals, p=2.0)` | Lp distance matrix (self) for 1D functional data. |
 | `lp_self_2d` | `(data, argvals_s, argvals_t, p=2.0)` | Lp distance matrix (self) for 2D functional data. |
-| `sbd` | `(x, y)` | Shape-based distance (Paparrizos and Gravano 2015) and the optimal cyclic lag. |
+| `sbd` | `(x, y)` | Shape-based distance (Paparrizos and Gravano 2015) and the optimal signed lag. |
 | `sbd_distance_matrix` | `(data)` | Pairwise shape-based distance matrix of a set of curves. |
 | `sigma_gak` | `(data)` | Heuristic GAK bandwidth: median pairwise Euclidean distance, floored at 1e-8. |
 | `soft_dtw_alignment` | `(x, y, gamma=1.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Soft-DTW value plus the expected alignment matrix (tslearn soft_dtw_alignment). |

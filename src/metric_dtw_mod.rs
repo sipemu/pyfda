@@ -834,13 +834,15 @@ pub fn dtw_k_nearest_neighbors<'py>(
 // Shape-based distance (k-Shape)
 // ---------------------------------------------------------------------------
 
-/// Shape-based distance (Paparrizos and Gravano 2015) and the optimal cyclic lag.
+/// Shape-based distance (Paparrizos and Gravano 2015) and the optimal signed lag.
 ///
 /// Parameters
 /// ----------
 /// x, y : numpy.ndarray
 ///     Series (1D), same length m.  Both are z-normalised internally, so the
-///     distance is invariant to offset, positive scaling and cyclic shift.
+///     distance is invariant to offset and positive scaling.  The lag search
+///     uses zero-padded (linear, not circular) cross-correlation, so a shifted
+///     copy scores close to, but not exactly, 0 (the overhang is lost).
 ///
 /// Returns
 /// -------

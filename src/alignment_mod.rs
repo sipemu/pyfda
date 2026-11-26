@@ -1518,7 +1518,13 @@ pub fn shape_mean<'py>(
         "reparameterization_translation_scale" => {
             fdars_core::alignment::ShapeQuotient::ReparameterizationTranslationScale
         }
-        _ => fdars_core::alignment::ShapeQuotient::Reparameterization,
+        "reparameterization" => fdars_core::alignment::ShapeQuotient::Reparameterization,
+        other => {
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "unknown quotient {other:?}; expected 'reparameterization', \
+                 'reparameterization_translation' or 'reparameterization_translation_scale'"
+            )))
+        }
     };
     let result = to_pyresult(fdars_core::alignment::shape_mean(
         &mat, &av, q, lambda_, max_iter, tol,
@@ -1556,7 +1562,13 @@ pub fn shape_self_distance_matrix<'py>(
         "reparameterization_translation_scale" => {
             fdars_core::alignment::ShapeQuotient::ReparameterizationTranslationScale
         }
-        _ => fdars_core::alignment::ShapeQuotient::Reparameterization,
+        "reparameterization" => fdars_core::alignment::ShapeQuotient::Reparameterization,
+        other => {
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "unknown quotient {other:?}; expected 'reparameterization', \
+                 'reparameterization_translation' or 'reparameterization_translation_scale'"
+            )))
+        }
     };
     let result = to_pyresult(fdars_core::alignment::shape_self_distance_matrix(
         &mat, &av, q, lambda_,
@@ -1960,14 +1972,17 @@ pub fn landmark_register<'py>(
 /// min_prominence : float, optional
 ///     Minimum prominence (default 0.0).
 /// expected_count : int, optional
-///     Expected number of landmarks per curve (0 = keep all detected).
+///     Number of landmarks registered per curve (default 1).  The *first*
+///     ``expected_count`` detected features of each curve, in time order, are
+///     paired across curves.  Must be >= 1, and every curve must have at least
+///     that many detected features; otherwise ``ValueError`` is raised.
 ///
 /// Returns
 /// -------
 /// dict
 ///     ``registered``, ``gammas``, ``landmarks``, ``target_landmarks``.
 #[pyfunction]
-#[pyo3(signature = (data, argvals, kind="peak", min_prominence=0.0, expected_count=0))]
+#[pyo3(signature = (data, argvals, kind="peak", min_prominence=0.0, expected_count=1))]
 pub fn landmark_detect_and_register<'py>(
     py: Python<'py>,
     data: PyReadonlyArray2<'py, f64>,
@@ -1979,8 +1994,25 @@ pub fn landmark_detect_and_register<'py>(
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
     let k = parse_landmark_kind(kind)?;
+    if expected_count == 0 {
+        return Err(pyo3::exceptions::PyValueError::new_err(
+            "expected_count must be >= 1 (0 would register no landmarks)",
+        ));
+    }
     let result =
         fdars_core::landmark::detect_and_register(&mat, &av, k, min_prominence, expected_count);
+    if let Some((i, lms)) = result
+        .landmarks
+        .iter()
+        .enumerate()
+        .find(|(_, lms)| lms.len() < expected_count)
+    {
+        return Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "curve {i} has only {} detected landmark(s) but expected_count={expected_count}; \
+             lower expected_count or min_prominence",
+            lms.len()
+        )));
+    }
     landmark_result_to_dict(py, &result)
 }
 
