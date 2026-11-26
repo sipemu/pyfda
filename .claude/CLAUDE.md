@@ -51,7 +51,7 @@ pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-da
 
 ## Key Dependencies
 
-- `fdars-core` 0.14.0 - Core Rust functional data analysis library with `parallel` feature enabled
+- `fdars-core` 0.48.0 - Core Rust functional data analysis library with `parallel` feature enabled
 - `pyo3` 0.28 - Enables Rust functions to be called from Python via ABI3 stable interface
 - `numpy` 0.28 - Enables zero-copy NumPy array conversions between Python and Rust
 - `matplotlib` 3.6+ - Plotting (optional dependency for `plot` extra)
@@ -232,7 +232,7 @@ pyfda is the PyO3 binding layer that exposes the Rust `fdars-core` functional-da
 - Depends on: fdars-core, pyo3, numpy (PyO3 bindings)
 - Used by: Python API layer (all native calls go through here)
 - Purpose: High-performance numerical computation
-- Location: External (Cargo.toml dependency: fdars-core 0.14.0)
+- Location: External (Cargo.toml dependency: fdars-core 0.48.0)
 - Contains: Linear algebra (FdMatrix), algorithms (clustering, depth, regression, etc)
 - Depends on: nalgebra, rayon (for parallel flag), specialized numerical libraries
 - Used by: PyO3 wrapper layer (every native function calls into fdars-core)

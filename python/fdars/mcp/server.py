@@ -871,7 +871,7 @@ def fdars_method_references(method: str) -> dict:
                 "method": "module.callable",
                 "curated": True,          # or False if all backing papers are curated:false
                 "papers": [...],          # projected paper entries (see below)
-                "coverage": "28/437",     # N/T derived from live JSON files
+                "coverage": "28/580",     # N/T derived from live JSON files
                 "version": "0.11.0",
             }
 
