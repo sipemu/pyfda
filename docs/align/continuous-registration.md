@@ -61,6 +61,7 @@ Each curve is registered independently by penalised Gauss–Newton with Levenber
 
 !!! warning "`converged` means 'stopped without error'"
     `converged[i]` is `True` both when the relative decrease fell below `tol` *and* when the Levenberg–Marquardt step control stalled. A stall is usually a (local) optimum, but not always. Do not use the flag as a quality check: inspect `criterion` and the warps instead.
+    Tracked upstream as [sipemu/fdars#83](https://github.com/sipemu/fdars/issues/83).
 
 **Template passes.** By default the target is the cross-sectional mean of the *unregistered* curves, which is blurred. `max_template_iter > 1` re-estimates the target as the mean of the registered curves and registers again (a Procrustes-style loop that R does not offer), stopping when the target changes by less than `template_tol`. The warps are not centred, so the registered sample can drift as a whole.
 

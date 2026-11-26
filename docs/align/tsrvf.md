@@ -100,6 +100,7 @@ multiplying by the stored norm `srsf_norms[i]` restores the scale, and `srsf_inv
 
 !!! warning "The ladder transports are under review"
     `method="pole_ladder"` and `method="schilds_ladder"` are meant to approximate parallel transport and should give vectors close to `log_map`. In fdars-core 0.48 they do not: the pole ladder returns (numerically) zero vectors for every curve, and Schild's ladder returns exactly twice the `log_map` vectors. Do not use them until this is fixed upstream.
+    Tracked upstream as [sipemu/fdars#79](https://github.com/sipemu/fdars/issues/79).
 
 ---
 

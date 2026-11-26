@@ -129,6 +129,7 @@ Between one and four velocity peaks are detected per child. With `expected_count
 
 !!! warning "Invalid input returns zero warps"
     `landmark_register` does not raise on inconsistent input (for example, fewer landmark lists than curves): it returns `gammas` filled with **zeros**, not identity warps, and leaves the curves unregistered. Check that `len(landmarks) == data.shape[0]` and that every curve has the same number of landmarks, or test `gammas[:, -1]` against `argvals[-1]`.
+    Tracked upstream as [sipemu/fdars#78](https://github.com/sipemu/fdars/issues/78).
 
 Other properties to keep in mind:
 

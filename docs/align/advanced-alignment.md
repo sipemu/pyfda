@@ -205,6 +205,7 @@ Dynamic programming costs $O(m^2)$ per pair. `elastic_align_pair_multires` runs 
 
 !!! warning "Gradient refinement is under review"
     In fdars-core 0.48 the refinement steps can make the alignment *worse* rather than better, and they ignore `lambda_`. On a 400-point oscillatory pair the coarse DP alone (`n_refine_steps=0`) reaches an elastic distance of 0.20, the default 10 refinement steps raise it to 1.56, and exact DP gives 0.10. Until this is resolved, use `n_refine_steps=0` (a pure coarse-to-fine DP) and compare against `elastic_align_pair`, or use [RBFGS](elastic-optimisers.md#rbfgs-a-smooth-local-optimiser) or a [band](banded-alignment.md) for long curves.
+    Tracked upstream as [sipemu/fdars#81](https://github.com/sipemu/fdars/issues/81).
 
 ```python exec="1" source="above" result="text"
 import numpy as np
@@ -337,6 +338,7 @@ When curves come from two populations (two sites, two devices), `transfer_alignm
 
 !!! warning "Warp composition order is wrong in fdars-core 0.48"
     The total warp should be $\gamma_i \circ \gamma_B$ (first move into the target mean's frame, then across the bridge), but 0.48 composes $\gamma_B\circ\gamma_i$. On a simple test, the aligned curves miss the source mean by 0.14–0.18 in sup norm, against 0.05–0.07 with the correct order. The reported `distances` re-optimise the warp and hide the error. Until this is fixed upstream, do not use `aligned_data` or `gammas` from `transfer_alignment`; instead align the target curves directly to the source Karcher mean with `align_to_target(target_data, source_mean, t)`.
+    Tracked upstream as [sipemu/fdars#77](https://github.com/sipemu/fdars/issues/77).
 
 ```python
 from fdars.alignment import karcher_mean, align_to_target
@@ -402,6 +404,7 @@ After separating amplitude and phase, you can *generate* new curves by sampling 
 
 !!! warning "`joint_gauss_model` does not keep amplitude–phase correlation"
     `joint_gauss_model` is documented as sampling the joint [amplitude | phase] scores, but in fdars-core 0.48 it draws each score from an independent (diagonal) Gaussian. On training data where peak height and peak location are correlated at 0.999, its samples show a correlation of −0.02. Treat its samples as amplitude and phase drawn *independently*; if the coupling matters, fit `jfpca_fit` and sample its scores with their full covariance yourself.
+    Tracked upstream as [sipemu/fdars#80](https://github.com/sipemu/fdars/issues/80).
 
 ```python exec="1" html="1" source="above"
 import numpy as np
