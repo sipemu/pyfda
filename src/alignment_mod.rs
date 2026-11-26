@@ -2435,5 +2435,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     )?)?;
     crate::alignment_registration_mod::register(m)?;
     crate::curve_shape_mod::register(m)?;
+    crate::alignment_uq_mod::register(m)?;
     Ok(())
 }

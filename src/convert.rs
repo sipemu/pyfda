@@ -48,15 +48,9 @@ pub fn numpy2d_to_fdmatrix(arr: PyReadonlyArray2<'_, f64>) -> PyResult<FdMatrix>
 /// Returns shape (n_obs, n_points).
 pub fn fdmatrix_to_numpy2d<'py>(py: Python<'py>, mat: &FdMatrix) -> Bound<'py, PyArray2<f64>> {
     let (nrows, ncols) = mat.shape();
-    let row_major = mat.to_row_major();
-    // Safety: row_major has exactly nrows * ncols elements
-    PyArray2::from_vec2(
-        py,
-        &(0..nrows)
-            .map(|i| row_major[i * ncols..(i + 1) * ncols].to_vec())
-            .collect::<Vec<_>>(),
-    )
-    .unwrap()
+    // row_major has exactly nrows * ncols elements; a 0 x m matrix stays (0, m)
+    let arr = Array2::from_shape_vec((nrows, ncols), mat.to_row_major()).unwrap();
+    PyArray2::from_owned_array(py, arr)
 }
 
 /// Convert a numpy 1D array to a Vec<f64>.
@@ -72,6 +66,21 @@ pub fn vec_to_numpy1d<'py>(py: Python<'py>, v: Vec<f64>) -> Bound<'py, PyArray1<
 /// Convert a numpy 1D i64 array to Vec<usize>.
 pub fn numpy1d_to_usize_vec(arr: PyReadonlyArray1<'_, i64>) -> Vec<usize> {
     arr.as_array().iter().map(|&x| x as usize).collect()
+}
+
+/// Integer group labels (any integer dtype) → `Vec<usize>`; negative values
+/// raise `ValueError` naming `name`.
+pub fn nonneg_labels(
+    arr: &numpy::PyArrayLike1<'_, i64, numpy::AllowTypeChange>,
+    name: &str,
+) -> PyResult<Vec<usize>> {
+    let a = arr.as_array();
+    if a.iter().any(|&x| x < 0) {
+        return Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "{name} must contain non-negative integer labels; got at least one negative value"
+        )));
+    }
+    Ok(a.iter().map(|&x| x as usize).collect())
 }
 
 /// Convert Vec<usize> to numpy 1D i64 array.

@@ -575,6 +575,133 @@ pub fn exponential_family_tolerance_band<'py>(
     Ok(dict)
 }
 
+fn elastic_score_variant(variant: &str) -> PyResult<fdars_core::tolerance::NonConformityScore> {
+    use fdars_core::tolerance::NonConformityScore;
+    match variant {
+        "amplitude" => Ok(NonConformityScore::AmplitudeElastic),
+        "phase" => Ok(NonConformityScore::PhaseElastic),
+        "combined" => Ok(NonConformityScore::CombinedElastic),
+        _ => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "variant must be 'amplitude', 'phase' or 'combined', got '{variant}'"
+        ))),
+    }
+}
+
+/// Elastic nonconformity score of one curve against a template.
+///
+/// ``"amplitude"``: elastic amplitude distance; ``"phase"``: geodesic
+/// distance of the optimal warp from the identity; ``"combined"``:
+/// sqrt(amplitude^2 + phase^2). Zero for a curve identical to the template.
+///
+/// Parameters
+/// ----------
+/// curve, template : numpy.ndarray
+///     Query curve and reference template, length m.
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// lambda_ : float, optional
+///     Warp penalty (default 0.0).
+/// variant : str, optional
+///     ``"amplitude"``, ``"phase"`` or ``"combined"`` (default).
+///
+/// Returns
+/// -------
+/// float
+#[pyfunction]
+#[pyo3(signature = (curve, template, argvals, lambda_=0.0, variant="combined"))]
+pub fn elastic_nonconformity(
+    curve: PyReadonlyArray1<'_, f64>,
+    template: PyReadonlyArray1<'_, f64>,
+    argvals: PyReadonlyArray1<'_, f64>,
+    lambda_: f64,
+    variant: &str,
+) -> PyResult<f64> {
+    let c = numpy1d_to_vec(curve);
+    let t = numpy1d_to_vec(template);
+    let av = numpy1d_to_vec(argvals);
+    let m = av.len();
+    if c.len() != m || t.len() != m {
+        return Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "curve ({}) and template ({}) must have length len(argvals) = {m}",
+            c.len(),
+            t.len()
+        )));
+    }
+    to_pyresult(fdars_core::tolerance::elastic_nonconformity(
+        &c,
+        &t,
+        &av,
+        lambda_,
+        elastic_score_variant(variant)?,
+    ))
+}
+
+/// Inductive conformal anomaly detection with elastic amplitude / phase nonconformity scores.
+///
+/// Calibration curves are scored against a template (default: their
+/// Karcher mean); each test curve gets the conformal p-value
+/// (1 + #{calibration score >= test score}) / (n_calib + 1) and is flagged
+/// when p <= alpha.
+///
+/// Parameters
+/// ----------
+/// calibration : numpy.ndarray
+///     Reference curves, shape (n_calib, m).
+/// test : numpy.ndarray
+///     Curves to score, shape (n_test, m).
+/// argvals : numpy.ndarray
+///     Evaluation points, length m.
+/// variant : str, optional
+///     ``"amplitude"``, ``"phase"`` or ``"combined"`` (default).
+/// alpha : float, optional
+///     Significance level in (0, 1) (default 0.1).
+/// lambda_ : float, optional
+///     Warp penalty (default 0.0).
+/// max_iter, tol : optional
+///     Karcher mean iterations (default 20) and tolerance (default 1e-4).
+/// template : numpy.ndarray or None, optional
+///     Fixed template of length m (default: Karcher mean of ``calibration``).
+///
+/// Returns
+/// -------
+/// dict
+///     ``p_values``, ``scores`` (n_test,), ``flags`` (bool, n_test),
+///     ``threshold`` (calibrated (1 - alpha) score quantile).
+#[pyfunction]
+#[pyo3(signature = (calibration, test, argvals, variant="combined", alpha=0.1, lambda_=0.0, max_iter=20, tol=1e-4, template=None))]
+pub fn elastic_conformal_anomaly<'py>(
+    py: Python<'py>,
+    calibration: PyReadonlyArray2<'py, f64>,
+    test: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    variant: &str,
+    alpha: f64,
+    lambda_: f64,
+    max_iter: usize,
+    tol: f64,
+    template: Option<PyReadonlyArray1<'py, f64>>,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let cal = numpy2d_to_fdmatrix(calibration)?;
+    let tst = numpy2d_to_fdmatrix(test)?;
+    let av = numpy1d_to_vec(argvals);
+    let mut cfg = fdars_core::tolerance::ConformalAnomalyConfig::default();
+    cfg.variant = elastic_score_variant(variant)?;
+    cfg.alpha = alpha;
+    cfg.lambda = lambda_;
+    cfg.max_iter = max_iter;
+    cfg.tol = tol;
+    cfg.template = template.map(numpy1d_to_vec);
+    let r = to_pyresult(fdars_core::tolerance::elastic_conformal_anomaly(
+        &cal, &tst, &av, &cfg,
+    ))?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("p_values", vec_to_numpy1d(py, r.p_values))?;
+    dict.set_item("scores", vec_to_numpy1d(py, r.scores))?;
+    dict.set_item("flags", bool_vec_to_numpy1d(py, r.flags))?;
+    dict.set_item("threshold", r.threshold)?;
+    Ok(dict)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fpca_tolerance_band, m)?)?;
     m.add_function(wrap_pyfunction!(conformal_prediction_band, m)?)?;
@@ -585,5 +712,7 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(elastic_tolerance_band_with_config, m)?)?;
     m.add_function(wrap_pyfunction!(equivalence_test_one_sample, m)?)?;
     m.add_function(wrap_pyfunction!(exponential_family_tolerance_band, m)?)?;
+    m.add_function(wrap_pyfunction!(elastic_nonconformity, m)?)?;
+    m.add_function(wrap_pyfunction!(elastic_conformal_anomaly, m)?)?;
     Ok(())
 }

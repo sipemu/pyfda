@@ -17,7 +17,7 @@
 //! bootstrap randomness is internal to fdars-core and not externally seeded.
 
 use crate::convert::*;
-use numpy::{PyReadonlyArray1, PyReadonlyArray2};
+use numpy::{AllowTypeChange, PyArrayLike1, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -792,6 +792,72 @@ pub fn itp_flm<'py>(
 }
 
 // ---------------------------------------------------------------------------
+// PERMANOVA on a distance matrix
+// ---------------------------------------------------------------------------
+
+/// PERMANOVA result → dict (shared with ``alignment.elastic_phase_amplitude_test``).
+pub(crate) fn permanova_dict<'py>(
+    py: Python<'py>,
+    r: &fdars_core::inference::PermanovaResult,
+) -> PyResult<Bound<'py, PyDict>> {
+    let d = PyDict::new(py);
+    d.set_item("statistic", r.statistic)?;
+    d.set_item("p_value", r.p_value)?;
+    d.set_item("ss_between", r.ss_between)?;
+    d.set_item("ss_within", r.ss_within)?;
+    d.set_item("ss_total", r.ss_total)?;
+    d.set_item("r_squared", r.r_squared)?;
+    d.set_item("df_between", r.df_between)?;
+    d.set_item("df_within", r.df_within)?;
+    d.set_item("n_perm", r.n_perm)?;
+    Ok(d)
+}
+
+/// PERMANOVA (Anderson 2001) permutation test of group differences on a distance matrix.
+///
+/// The pseudo-F statistic of the between- vs within-group sums of squared
+/// distances; the p-value is ``(1 + #{F_perm >= F}) / (n_perm + 1)`` over
+/// seeded label permutations.
+///
+/// Parameters
+/// ----------
+/// dist : numpy.ndarray
+///     Symmetric distance matrix with zero diagonal, shape (n, n).
+/// labels : numpy.ndarray
+///     Non-negative integer group labels, length n (need not be contiguous;
+///     at least 2 groups and more observations than groups).
+/// n_perm : int, optional
+///     Number of permutations (default 999; 0 skips them, p_value = 1.0).
+/// seed : int, optional
+///     Permutation seed (default 42).
+///
+/// Returns
+/// -------
+/// dict
+///     ``statistic`` (pseudo-F), ``p_value``, ``ss_between``, ``ss_within``,
+///     ``ss_total``, ``r_squared``, ``df_between``, ``df_within``, ``n_perm``.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If ``dist`` is not a valid square symmetric distance matrix, labels
+///     are negative or of the wrong length, or fewer than 2 groups.
+#[pyfunction]
+#[pyo3(signature = (dist, labels, n_perm=999, seed=42))]
+pub fn permanova<'py>(
+    py: Python<'py>,
+    dist: PyReadonlyArray2<'py, f64>,
+    labels: PyArrayLike1<'py, i64, AllowTypeChange>,
+    n_perm: usize,
+    seed: u64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let d = numpy2d_to_fdmatrix(dist)?;
+    let lab = nonneg_labels(&labels, "labels")?;
+    let r = to_pyresult(fdars_core::inference::permanova(&d, &lab, n_perm, seed))?;
+    permanova_dict(py, &r)
+}
+
+// ---------------------------------------------------------------------------
 // Module registration
 // ---------------------------------------------------------------------------
 
@@ -807,5 +873,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(itp_one_pop, m)?)?;
     m.add_function(wrap_pyfunction!(itp_two_pop, m)?)?;
     m.add_function(wrap_pyfunction!(itp_flm, m)?)?;
+    m.add_function(wrap_pyfunction!(permanova, m)?)?;
     Ok(())
 }

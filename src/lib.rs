@@ -10,6 +10,7 @@ mod options;
 
 mod alignment_mod;
 mod alignment_registration_mod;
+mod alignment_uq_mod;
 mod basis_mod;
 mod classification_mod;
 mod clustering_mod;

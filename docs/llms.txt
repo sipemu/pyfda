@@ -1,6 +1,6 @@
 # fdars — Functional Data Analysis for Python
 
-> High-performance functional data analysis toolkit powered by Rust via PyO3. Provides depth measures, basis representations, smoothing, clustering, elastic alignment, regression (scalar-on-function, function-on-scalar, Fréchet), outlier detection, functional time series, seasonal decomposition, SPM control charts, conformal prediction, density FDA, and more. 30 public submodules, 506 public callables.
+> High-performance functional data analysis toolkit powered by Rust via PyO3. Provides depth measures, basis representations, smoothing, clustering, elastic alignment, regression (scalar-on-function, function-on-scalar, Fréchet), outlier detection, functional time series, seasonal decomposition, SPM control charts, conformal prediction, density FDA, and more. 30 public submodules, 531 public callables.
 
 [Documentation](https://sipemu.github.io/pyfda/)
 [Reference](https://sipemu.github.io/pyfda/reference/)
@@ -43,10 +43,13 @@
 
 Each entry: `module.function(signature)` — one-line purpose. Where available, a `When:` note gives guidance on which task this function suits best.
 
-### fdars.alignment (126 functions)
+### fdars.alignment (141 functions)
 
+- `alignment.PyAmplitudeBoxplot(...)` — Opaque handle wrapping a fitted elastic amplitude box plot (AmplitudeBoxplot).
 - `alignment.PyCurveShapeKarcher(...)` — Opaque handle wrapping a curve shape Karcher mean / median (CurveShapeKarcherResult).
 - `alignment.PyCurveShapePca(...)` — Opaque handle wrapping a curve shape PCA (CurveShapePcaResult).
+- `alignment.PyElasticBoxplots(...)` — Opaque handle wrapping a fitted elastic amplitude + phase box plot pair (ElasticBoxplots).
+- `alignment.PyElasticPhaseBoxplot(...)` — Opaque handle wrapping a fitted elastic phase box plot (ElasticPhaseBoxplot).
 - `alignment.PySparseElasticMean(...)` — Opaque handle wrapping a sparse-curve elastic mean (SparseElasticMeanResult).
 - `alignment.ab_closure_residual(f, a, b)` — Closure residual c(1) − c(0) of the planar curve an (a, b) F-transform represents.
 - `alignment.ab_elastic_distance_pl(c1, c2, a, b)` — Exact (a, b) elastic distance between two piecewise-linear curves.
@@ -59,8 +62,10 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `alignment.align_to_target(data, target, argvals, lambda_=0.0)` — Align all curves to a single target curve.
 - `alignment.align_to_target_with_config(data, target, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Align all curves to a single target curve with a configurable warp optimiser.
 - `alignment.alignment_quality(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)` — Comprehensive alignment quality metrics.
+- `alignment.amplitude_boxplot_from_aligned(aligned_data, aligned_srsfs, median, median_srsf, argvals, alpha=0.05, k_a=1.0)` — Elastic amplitude box plot from curves already aligned to a median.
 - `alignment.amplitude_distance(curve1, curve2, argvals, lambda_=0.0)` — Amplitude distance between two curves.
 - `alignment.amplitude_self_distance_matrix(data, argvals, lambda_=0.0)` — Amplitude self distance matrix (same as elastic self distance matrix).
+- `alignment.bayesian_align_group(data, argvals, n_iter=2000, burn_in=1000, thin=1, n_chains=1, seed=42, alpha0=0.1, beta0=0.1, pcn_betas=None, pcn_probs=None, warp_prior_sd=4.0, n_warp_harmonics=10, n_template_basis=30, n_points=0, center_every=100, credible_level=0.95, center_draws=True, init_dp=True, sampler='pcn', hmc_step_size=0.1, hmc_max_leapfrog=10, hmc_adapt=True, hmc_target_accept=0.65, injective_warps=False, n_temperatures=1, pt_min_inv_temp=0.1, return_draws=True)` — Bayesian group alignment by MCMC with posterior credible bands for warps and template.
 - `alignment.bayesian_align_pair(f1, f2, argvals, n_samples=1000, burn_in=200, step_size=0.1, proposal_variance=1.0, seed=42)` — Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere.
 - `alignment.closure_residual(q)` — Closure residual ∫ q‖q‖ dt of an SRVF: the displacement β(1) − β(0) (zero when closed).
 - `alignment.compose_warps(warp1, warp2, argvals)` — Compose two warping functions.
@@ -92,6 +97,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `alignment.elastic_align_pair_nd_with_config(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Elastic alignment of two R^d curves under one shared warp, with a configurable warp optimiser.
 - `alignment.elastic_align_pair_penalized(curve1, curve2, argvals, lambda_=0.0, penalty_type='first_order', second_order_weight=0.1)` — Elastic alignment with configurable penalty type.
 - `alignment.elastic_align_pair_with_config(curve1, curve2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Pairwise elastic alignment of two curves with a configurable warp optimiser.
+- `alignment.elastic_boxplots(data, argvals, lambda_=0.0, alpha=0.05, k_a=1.0)` — Elastic amplitude and phase functional box plots (fdasrsf ``ampbox`` / ``phbox``).
 - `alignment.elastic_changepoint(data, argvals, kind='amplitude', lam=0.0, max_iter=30, n_mc=200, seed=42, ncomp=5, pca_method='joint')` — Detect a distributional changepoint in a sequence of curves (elastic).
 - `alignment.elastic_cross_distance_matrix(data1, data2, argvals, lambda_=0.0)` — Elastic cross distance matrix.
 - `alignment.elastic_cross_distance_matrix_with_band(data1, data2, argvals, lambda_=0.0, band_frac=None)` — Elastic cross-distance matrix with optional Sakoe–Chiba band.
@@ -103,14 +109,20 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `alignment.elastic_distance_closed_with_config(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Elastic distance between two closed curves with a configurable warp optimiser.
 - `alignment.elastic_distance_nd_with_config(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Elastic distance between two R^d curves with a configurable warp optimiser.
 - `alignment.elastic_distance_with_config(curve1, curve2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Elastic (Fisher-Rao) distance between two curves with a configurable warp optimiser.
+- `alignment.elastic_dpmeans(data, argvals, penalty=None, lambda_=0.0, max_iter=20, tol=0.01, align=True, seed=42)` — Elastic DP-means clustering: the number of clusters follows from a distance penalty.
 - `alignment.elastic_logistic(data, argvals, labels, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)` — Elastic logistic regression.
 - `alignment.elastic_outlier_detection(data, argvals, lambda_=0.0, alpha=0.05, use_median=True, threshold_method='tukey', tukey_k=1.5)` — Elastic outlier detection using distances and Tukey fence.
 - `alignment.elastic_partial_match(template, target, argvals_template, argvals_target, lambda_=0.0, min_span=0.5)` — Elastic partial matching: find best-aligned subcurve of a longer curve.
+- `alignment.elastic_phase_amplitude_test(data, argvals, labels, n_perm=999, seed=42, lambda_=0.0, max_iter=20, tol=0.0001, amplitude_metric='pairwise', joint=True)` — Separate PERMANOVA tests of group differences in amplitude and in phase.
+- `alignment.elastic_phase_boxplot(gammas, argvals, alpha=0.05, k_a=1.0)` — Elastic phase box plot of warping functions on the Hilbert sphere.
 - `alignment.elastic_regression(data, argvals, response, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)` — Elastic scalar-on-function regression.
 - `alignment.elastic_self_distance_matrix(data, argvals, lambda_=0.0)` — Elastic self distance matrix.
 - `alignment.elastic_self_distance_matrix_with_band(data, argvals, lambda_=0.0, band_frac=None)` — Elastic self-distance matrix with optional Sakoe–Chiba band.
 - `alignment.elastic_self_distance_matrix_with_config(data, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Elastic self distance matrix with a configurable warp optimiser.
+- `alignment.evaluate_inverse_warp(beta, inner_knots, t_lo, t_hi, t)` — Evaluate one curve's registr inverse warp h^{-1}(t) from its B-spline coefficients.
 - `alignment.gauss_model(data, argvals, ncomp=3, n_samples=100, lambda_=0.0, max_iter=20, tol=0.0001, seed=42)` — Generate random curves from a fitted Gaussian model on aligned data.
+- `alignment.gfpca_two_step(data, family='gaussian', npc=1, kt=8, fpca_max_iter=50, error_thresh=0.0001, seed=1988, psi_init=None, xi_init=None, npc_var_explained=None, npc_min_component_share=None, periodic=False, index_significant_digits=4)` — Two-step generalized FPCA of exponential-family curves (registr ``gfpca_twoStep``).
+- `alignment.gfpca_variational(data, family='gaussian', npc=1, kt=8, fpca_max_iter=50, error_thresh=0.0001, seed=1988, psi_init=None, xi_init=None, npc_var_explained=None, npc_min_component_share=None, periodic=False, index_significant_digits=4)` — Generalized FPCA of exponential-family curves by variational EM (registr ``bfpca`` / ``fpca_gauss``).
 - `alignment.hierarchical_cut(dist_mat, k=2, linkage='single')` — Hierarchical clustering then cut to produce k clusters (convenience function).
 - `alignment.hierarchical_from_distances(dist_mat, linkage='single')` — Hierarchical agglomerative clustering from a precomputed distance matrix.
 - `alignment.horiz_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)` — Horizontal (phase) FPCA.
@@ -146,6 +158,9 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `alignment.phase_distance(curve1, curve2, argvals, lambda_=0.0)` — Phase distance between two curves.
 - `alignment.phase_self_distance_matrix(data, argvals, lambda_=0.0)` — Phase self distance matrix.
 - `alignment.project_closed_srvf(q)` — Project an SRVF onto the closed-curve manifold {q : ∫ q‖q‖ = 0}, preserving its L² norm.
+- `alignment.register_expfam(data, template=None, family='gaussian', kh=4, incompleteness=None, lambda_inc=0.0, warp_max_iter=500, warp_tol=1e-12, gamma_scale_init=1.5, warping='nonparametric', prior_sd=None, kt=8, periodic=False)` — One exponential-family registration pass of every curve to a population-mean template (registr ``registr``).
+- `alignment.register_fpca(data, template=None, family='gaussian', kh=4, incompleteness=None, lambda_inc=0.0, max_iterations=10, warp_max_iter=500, warp_tol=1e-12, gamma_scale_init=1.5, fpca_type='variational_em', warping='nonparametric', prior_sd=None, npc=1, kt=8, fpca_max_iter=50, error_thresh=0.0001, seed=1988, psi_init=None, xi_init=None, npc_var_explained=None, npc_min_component_share=None, periodic=False, index_significant_digits=4)` — Joint registration and generalized FPCA of exponential-family curves (registr ``register_fpca``).
+- `alignment.register_fpca_regular(data, argvals, family='gaussian', kh=4, incompleteness=None, lambda_inc=0.0, max_iterations=10, warp_max_iter=500, warp_tol=1e-12, gamma_scale_init=1.5, fpca_type='variational_em', warping='nonparametric', prior_sd=None, npc=1, kt=8, fpca_max_iter=50, error_thresh=0.0001, seed=1988, psi_init=None, xi_init=None, npc_var_explained=None, npc_min_component_share=None, periodic=False, index_significant_digits=4)` — Joint registration and generalized FPCA of exponential-family curves on a common grid.
 - `alignment.reparameterize_curve(curve, argvals, gamma)` — Apply a warping function to a curve (reparameterize).
 - `alignment.robust_karcher_mean(data, argvals, lambda_=0.0, max_iter=20, tol=0.001, trim_fraction=0.1)` — Robust Karcher mean (trimmed).
 - `alignment.robust_karcher_mean_with_config(data, argvals, max_iter=20, tol=0.001, trim_fraction=0.1, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Trimmed robust Karcher mean with a configurable warp optimiser.
@@ -224,8 +239,10 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `clustering.silhouette_score(dist_matrix, labels)` — Silhouette score for cluster quality assessment (from distance matrix).
 - `clustering.silhouette_score_data(data, argvals, labels)` — Silhouette score for cluster quality assessment (from data and argvals).
 
-### fdars.conformal (7 functions)
+### fdars.conformal (14 functions)
 
+- `conformal.PyPartialConformalModel(...)` — Opaque handle wrapping a fitted partial-curve conformal model (PartialConformalModel).
+- `conformal.PyPartialConformalPrediction(...)` — Opaque handle wrapping one partial-curve conformal prediction (PartialConformalPrediction).
 - `conformal.conformal_classif(data, labels, test_data, ncomp=3, classifier='lda', cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal classification prediction sets.
 - `conformal.conformal_elastic_logistic(data, labels, test_data, argvals, lambda=0.0, cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal elastic logistic regression prediction sets.
 - `conformal.conformal_elastic_pcr(data, response, test_data, argvals, ncomp=3, pca_method="vertical", lambda=0.0, cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal elastic PCR prediction intervals.
@@ -233,6 +250,11 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `conformal.conformal_fregre_lm(data, response, test_data, ncomp=3, cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal regression prediction intervals.
 - `conformal.conformal_fregre_np(data, response, test_data, argvals, cal_fraction=0.25, alpha=0.1, h_func=1.0, h_scalar=1.0, seed=42)` — Conformal nonparametric regression.
 - `conformal.conformal_logistic(data, response, test_data, ncomp=3, max_iter=100, tol=1e-06, cal_fraction=0.25, alpha=0.1, seed=42)` — Conformal logistic regression prediction sets.
+- `conformal.partial_conformal_fit(data, argvals, alpha=0.1, cal_fraction=0.5, seed=42, distance='l2', bandwidth=None, lambda_=0.0, karcher_max_iter=20, karcher_tol=0.001, n_phase_radii=25, band='pointwise', band_scale=None, tuning_fraction=None, bandwidth_candidates=None)` — Fit the partial-curve conformal model: random split, elastic Karcher template, registration.
+- `conformal.partial_conformal_fit_with_template(calibration, argvals, template, alpha=0.1, cal_fraction=0.5, seed=42, distance='l2', bandwidth=None, lambda_=0.0, karcher_max_iter=20, karcher_tol=0.001, n_phase_radii=25, band='pointwise', band_scale=None, tuning_fraction=None, bandwidth_candidates=None)` — Fit the partial-curve conformal model with a supplied template (all curves calibrate).
+- `conformal.partial_conformal_predict(model, observed, alpha=None)` — Conformal amplitude band and phase set for a curve observed on a grid prefix.
+- `conformal.partial_conformal_predict_observed(model, values, observation='prefix', n_observed=None, fragments=None, times=None, alpha=None)` — Conformal amplitude band and phase set for a curve observed on a prefix, fragments or sparse times.
+- `conformal.partial_conformal_select_bandwidth(tuning_model, observation='prefix', n_observed=None, fragments=None, times=None)` — Held-out bandwidth selection for partial-curve conformal prediction.
 
 ### fdars.covariance (14 functions)
 
@@ -386,7 +408,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `fts.spectral_density(data, argvals, bandwidth=None)` — Estimate the spectral density operator of a functional time series.
 - `fts.stationarity_test(data, argvals, n_perm=999, seed=42)` — Test stationarity of functional time series via permutation test. When: Use to test stationarity of a functional time series before fitting FTSM or computing ACF.
 
-### fdars.inference (11 functions)
+### fdars.inference (12 functions)
 
 - `inference.f_perm_test(data_a, data_b, argvals, n_perm=999, seed=None)` — Functional two-sample permutation *F*-test.
 - `inference.flm_f_test(data, response, n_comp=5)` — Functional linear model overall-significance F-test. When: Use to test whether functional linear model coefficients are jointly zero (functional F-test).
@@ -396,6 +418,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `inference.itp_two_pop(data_a, data_b, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` — Interval-wise testing procedure for two functional populations.
 - `inference.mean_scb(data, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` — Simultaneous confidence band for the mean function (Degras). When: Use to construct simultaneous confidence bands for a functional population mean.
 - `inference.oneway_anova_vstat(data, groups, argvals)` — One-way functional ANOVA V-statistic (asymptotic scaled-χ² test).
+- `inference.permanova(dist, labels, n_perm=999, seed=42)` — PERMANOVA (Anderson 2001) permutation test of group differences on a distance matrix.
 - `inference.scb_two_sample_test(data_a, data_b, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` — Two-sample mean-equality test via a simultaneous confidence band for the
 - `inference.t_perm_test(data_a, data_b, argvals, n_perm=999, seed=None)` — Functional two-sample permutation *t*-test.
 - `inference.two_sample_mean_test(data_a, data_b, argvals, ncomp=5)` — Functional two-sample mean-equality test via Hotelling-T² on a shared FPC
@@ -627,9 +650,11 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `spm.t2_pc_significance(contributions, alpha)` — Test per-PC T-squared contributions for Bonferroni-adjusted significance.
 - `spm.western_electric_rules(values, center, sigma)` — Apply Western Electric rules to monitoring data.
 
-### fdars.tolerance (9 functions)
+### fdars.tolerance (11 functions)
 
 - `tolerance.conformal_prediction_band(data, coverage=0.95, cal_fraction=0.25, seed=42)` — Conformal prediction band.
+- `tolerance.elastic_conformal_anomaly(calibration, test, argvals, variant='combined', alpha=0.1, lambda_=0.0, max_iter=20, tol=0.0001, template=None)` — Inductive conformal anomaly detection with elastic amplitude / phase nonconformity scores.
+- `tolerance.elastic_nonconformity(curve, template, argvals, lambda_=0.0, variant='combined')` — Elastic nonconformity score of one curve against a template.
 - `tolerance.elastic_tolerance_band(data, argvals, ncomp=3, nb=200, coverage=0.95, band_type='simultaneous', max_iter=20, seed=42)` — Elastic tolerance band (amplitude only, after alignment).
 - `tolerance.elastic_tolerance_band_with_config(data, argvals, ncomp_amplitude=3, ncomp_phase=3, nb=200, coverage=0.95, band_type='pointwise', max_iter=20, tol=0.0001, seed=42)` — Joint amplitude and phase elastic tolerance bands.
 - `tolerance.equivalence_test(data1, data2, delta, alpha=0.05, nb=1000, seed=42)` — Functional equivalence test (TOST).
@@ -642,7 +667,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 
 ## Scientific Provenance & Cross-Language Implementations
 
-Coverage: 28 of 534 callables (including 28 Fdata class methods) have curated primary-paper entries.
+Coverage: 28 of 559 callables (including 28 Fdata class methods) have curated primary-paper entries.
 Uncurated callables are absent from this section. A consumer MAY synthesize
 provenance for uncurated callables but MUST flag each synthesized citation as
 ungrounded (grounded: false) — never present synthesized provenance as curated.
@@ -693,7 +718,7 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `regression.fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 - `regression.predict_fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 
-> 506 of 534 total callables are not yet curated and are absent from this section.
+> 531 of 559 total callables are not yet curated and are absent from this section.
 > A consumer MAY synthesize provenance for these callables but MUST structurally
 > flag each synthesized citation as ungrounded: { "grounded": false } per citation.
 > Never present synthesized provenance as curated data from this file.

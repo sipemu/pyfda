@@ -118,12 +118,24 @@
     }
   },
   "alignment": {
+    "PyAmplitudeBoxplot": {
+      "purpose": "Opaque handle wrapping a fitted elastic amplitude box plot (AmplitudeBoxplot).",
+      "sig": "(...)"
+    },
     "PyCurveShapeKarcher": {
       "purpose": "Opaque handle wrapping a curve shape Karcher mean / median (CurveShapeKarcherResult).",
       "sig": "(...)"
     },
     "PyCurveShapePca": {
       "purpose": "Opaque handle wrapping a curve shape PCA (CurveShapePcaResult).",
+      "sig": "(...)"
+    },
+    "PyElasticBoxplots": {
+      "purpose": "Opaque handle wrapping a fitted elastic amplitude + phase box plot pair (ElasticBoxplots).",
+      "sig": "(...)"
+    },
+    "PyElasticPhaseBoxplot": {
+      "purpose": "Opaque handle wrapping a fitted elastic phase box plot (ElasticPhaseBoxplot).",
       "sig": "(...)"
     },
     "PySparseElasticMean": {
@@ -174,6 +186,10 @@
       "purpose": "Comprehensive alignment quality metrics.",
       "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)"
     },
+    "amplitude_boxplot_from_aligned": {
+      "purpose": "Elastic amplitude box plot from curves already aligned to a median.",
+      "sig": "(aligned_data, aligned_srsfs, median, median_srsf, argvals, alpha=0.05, k_a=1.0)"
+    },
     "amplitude_distance": {
       "purpose": "Amplitude distance between two curves.",
       "sig": "(curve1, curve2, argvals, lambda_=0.0)"
@@ -181,6 +197,10 @@
     "amplitude_self_distance_matrix": {
       "purpose": "Amplitude self distance matrix (same as elastic self distance matrix).",
       "sig": "(data, argvals, lambda_=0.0)"
+    },
+    "bayesian_align_group": {
+      "purpose": "Bayesian group alignment by MCMC with posterior credible bands for warps and template.",
+      "sig": "(data, argvals, n_iter=2000, burn_in=1000, thin=1, n_chains=1, seed=42, alpha0=0.1, beta0=0.1, pcn_betas=None, pcn_probs=None, warp_prior_sd=4.0, n_warp_harmonics=10, n_template_basis=30, n_points=0, center_every=100, credible_level=0.95, center_draws=True, init_dp=True, sampler='pcn', hmc_step_size=0.1, hmc_max_leapfrog=10, hmc_adapt=True, hmc_target_accept=0.65, injective_warps=False, n_temperatures=1, pt_min_inv_temp=0.1, return_draws=True)"
     },
     "bayesian_align_pair": {
       "purpose": "Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere.",
@@ -307,6 +327,10 @@
       "purpose": "Pairwise elastic alignment of two curves with a configurable warp optimiser.",
       "sig": "(curve1, curve2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
     },
+    "elastic_boxplots": {
+      "purpose": "Elastic amplitude and phase functional box plots (fdasrsf ``ampbox`` / ``phbox``).",
+      "sig": "(data, argvals, lambda_=0.0, alpha=0.05, k_a=1.0)"
+    },
     "elastic_changepoint": {
       "purpose": "Detect a distributional changepoint in a sequence of curves (elastic).",
       "sig": "(data, argvals, kind='amplitude', lam=0.0, max_iter=30, n_mc=200, seed=42, ncomp=5, pca_method='joint')"
@@ -351,6 +375,10 @@
       "purpose": "Elastic (Fisher-Rao) distance between two curves with a configurable warp optimiser.",
       "sig": "(curve1, curve2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
     },
+    "elastic_dpmeans": {
+      "purpose": "Elastic DP-means clustering: the number of clusters follows from a distance penalty.",
+      "sig": "(data, argvals, penalty=None, lambda_=0.0, max_iter=20, tol=0.01, align=True, seed=42)"
+    },
     "elastic_logistic": {
       "purpose": "Elastic logistic regression.",
       "sig": "(data, argvals, labels, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)"
@@ -362,6 +390,14 @@
     "elastic_partial_match": {
       "purpose": "Elastic partial matching: find best-aligned subcurve of a longer curve.",
       "sig": "(template, target, argvals_template, argvals_target, lambda_=0.0, min_span=0.5)"
+    },
+    "elastic_phase_amplitude_test": {
+      "purpose": "Separate PERMANOVA tests of group differences in amplitude and in phase.",
+      "sig": "(data, argvals, labels, n_perm=999, seed=42, lambda_=0.0, max_iter=20, tol=0.0001, amplitude_metric='pairwise', joint=True)"
+    },
+    "elastic_phase_boxplot": {
+      "purpose": "Elastic phase box plot of warping functions on the Hilbert sphere.",
+      "sig": "(gammas, argvals, alpha=0.05, k_a=1.0)"
     },
     "elastic_regression": {
       "purpose": "Elastic scalar-on-function regression.",
@@ -379,9 +415,21 @@
       "purpose": "Elastic self distance matrix with a configurable warp optimiser.",
       "sig": "(data, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
     },
+    "evaluate_inverse_warp": {
+      "purpose": "Evaluate one curve's registr inverse warp h^{-1}(t) from its B-spline coefficients.",
+      "sig": "(beta, inner_knots, t_lo, t_hi, t)"
+    },
     "gauss_model": {
       "purpose": "Generate random curves from a fitted Gaussian model on aligned data.",
       "sig": "(data, argvals, ncomp=3, n_samples=100, lambda_=0.0, max_iter=20, tol=0.0001, seed=42)"
+    },
+    "gfpca_two_step": {
+      "purpose": "Two-step generalized FPCA of exponential-family curves (registr ``gfpca_twoStep``).",
+      "sig": "(data, family='gaussian', npc=1, kt=8, fpca_max_iter=50, error_thresh=0.0001, seed=1988, psi_init=None, xi_init=None, npc_var_explained=None, npc_min_component_share=None, periodic=False, index_significant_digits=4)"
+    },
+    "gfpca_variational": {
+      "purpose": "Generalized FPCA of exponential-family curves by variational EM (registr ``bfpca`` / ``fpca_gauss``).",
+      "sig": "(data, family='gaussian', npc=1, kt=8, fpca_max_iter=50, error_thresh=0.0001, seed=1988, psi_init=None, xi_init=None, npc_var_explained=None, npc_min_component_share=None, periodic=False, index_significant_digits=4)"
     },
     "hierarchical_cut": {
       "purpose": "Hierarchical clustering then cut to produce k clusters (convenience function).",
@@ -523,6 +571,18 @@
     "project_closed_srvf": {
       "purpose": "Project an SRVF onto the closed-curve manifold {q : ∫ q‖q‖ = 0}, preserving its L² norm.",
       "sig": "(q)"
+    },
+    "register_expfam": {
+      "purpose": "One exponential-family registration pass of every curve to a population-mean template (registr ``registr``).",
+      "sig": "(data, template=None, family='gaussian', kh=4, incompleteness=None, lambda_inc=0.0, warp_max_iter=500, warp_tol=1e-12, gamma_scale_init=1.5, warping='nonparametric', prior_sd=None, kt=8, periodic=False)"
+    },
+    "register_fpca": {
+      "purpose": "Joint registration and generalized FPCA of exponential-family curves (registr ``register_fpca``).",
+      "sig": "(data, template=None, family='gaussian', kh=4, incompleteness=None, lambda_inc=0.0, max_iterations=10, warp_max_iter=500, warp_tol=1e-12, gamma_scale_init=1.5, fpca_type='variational_em', warping='nonparametric', prior_sd=None, npc=1, kt=8, fpca_max_iter=50, error_thresh=0.0001, seed=1988, psi_init=None, xi_init=None, npc_var_explained=None, npc_min_component_share=None, periodic=False, index_significant_digits=4)"
+    },
+    "register_fpca_regular": {
+      "purpose": "Joint registration and generalized FPCA of exponential-family curves on a common grid.",
+      "sig": "(data, argvals, family='gaussian', kh=4, incompleteness=None, lambda_inc=0.0, max_iterations=10, warp_max_iter=500, warp_tol=1e-12, gamma_scale_init=1.5, fpca_type='variational_em', warping='nonparametric', prior_sd=None, npc=1, kt=8, fpca_max_iter=50, error_thresh=0.0001, seed=1988, psi_init=None, xi_init=None, npc_var_explained=None, npc_min_component_share=None, periodic=False, index_significant_digits=4)"
     },
     "reparameterize_curve": {
       "purpose": "Apply a warping function to a curve (reparameterize).",
@@ -807,6 +867,14 @@
     }
   },
   "conformal": {
+    "PyPartialConformalModel": {
+      "purpose": "Opaque handle wrapping a fitted partial-curve conformal model (PartialConformalModel).",
+      "sig": "(...)"
+    },
+    "PyPartialConformalPrediction": {
+      "purpose": "Opaque handle wrapping one partial-curve conformal prediction (PartialConformalPrediction).",
+      "sig": "(...)"
+    },
     "conformal_classif": {
       "purpose": "Conformal classification prediction sets.",
       "sig": "(data, labels, test_data, ncomp=3, classifier='lda', cal_fraction=0.25, alpha=0.1, seed=42)"
@@ -834,6 +902,26 @@
     "conformal_logistic": {
       "purpose": "Conformal logistic regression prediction sets.",
       "sig": "(data, response, test_data, ncomp=3, max_iter=100, tol=1e-06, cal_fraction=0.25, alpha=0.1, seed=42)"
+    },
+    "partial_conformal_fit": {
+      "purpose": "Fit the partial-curve conformal model: random split, elastic Karcher template, registration.",
+      "sig": "(data, argvals, alpha=0.1, cal_fraction=0.5, seed=42, distance='l2', bandwidth=None, lambda_=0.0, karcher_max_iter=20, karcher_tol=0.001, n_phase_radii=25, band='pointwise', band_scale=None, tuning_fraction=None, bandwidth_candidates=None)"
+    },
+    "partial_conformal_fit_with_template": {
+      "purpose": "Fit the partial-curve conformal model with a supplied template (all curves calibrate).",
+      "sig": "(calibration, argvals, template, alpha=0.1, cal_fraction=0.5, seed=42, distance='l2', bandwidth=None, lambda_=0.0, karcher_max_iter=20, karcher_tol=0.001, n_phase_radii=25, band='pointwise', band_scale=None, tuning_fraction=None, bandwidth_candidates=None)"
+    },
+    "partial_conformal_predict": {
+      "purpose": "Conformal amplitude band and phase set for a curve observed on a grid prefix.",
+      "sig": "(model, observed, alpha=None)"
+    },
+    "partial_conformal_predict_observed": {
+      "purpose": "Conformal amplitude band and phase set for a curve observed on a prefix, fragments or sparse times.",
+      "sig": "(model, values, observation='prefix', n_observed=None, fragments=None, times=None, alpha=None)"
+    },
+    "partial_conformal_select_bandwidth": {
+      "purpose": "Held-out bandwidth selection for partial-curve conformal prediction.",
+      "sig": "(tuning_model, observation='prefix', n_observed=None, fragments=None, times=None)"
     }
   },
   "covariance": {
@@ -1398,6 +1486,10 @@
     "oneway_anova_vstat": {
       "purpose": "One-way functional ANOVA V-statistic (asymptotic scaled-χ² test).",
       "sig": "(data, groups, argvals)"
+    },
+    "permanova": {
+      "purpose": "PERMANOVA (Anderson 2001) permutation test of group differences on a distance matrix.",
+      "sig": "(dist, labels, n_perm=999, seed=42)"
     },
     "scb_two_sample_test": {
       "purpose": "Two-sample mean-equality test via a simultaneous confidence band for the",
@@ -2190,6 +2282,14 @@
     "conformal_prediction_band": {
       "purpose": "Conformal prediction band.",
       "sig": "(data, coverage=0.95, cal_fraction=0.25, seed=42)"
+    },
+    "elastic_conformal_anomaly": {
+      "purpose": "Inductive conformal anomaly detection with elastic amplitude / phase nonconformity scores.",
+      "sig": "(calibration, test, argvals, variant='combined', alpha=0.1, lambda_=0.0, max_iter=20, tol=0.0001, template=None)"
+    },
+    "elastic_nonconformity": {
+      "purpose": "Elastic nonconformity score of one curve against a template.",
+      "sig": "(curve, template, argvals, lambda_=0.0, variant='combined')"
     },
     "elastic_tolerance_band": {
       "purpose": "Elastic tolerance band (amplitude only, after alignment).",
