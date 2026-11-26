@@ -6,9 +6,9 @@
 //!
 //! This is pyfda's second opaque `#[pyclass]` handle (after `PyIrregFdata`).
 //!
-//! # fdars-core 0.33 — Standalone Container
+//! # fdars-core 0.48 — Standalone Container
 //!
-//! As of fdars-core 0.33, **no** mixed-model (`famm`), multivariate-FPCA
+//! As of fdars-core 0.48, **no** mixed-model (`famm`), multivariate-FPCA
 //! (`spm::mfpca`), or advanced-clustering function accepts `MultiFunData` as an
 //! input parameter.  All three function families take plain `FdMatrix` or
 //! `&[&FdMatrix]` slices.  `PyMultiFunData` is therefore a **standalone
@@ -33,7 +33,7 @@ use pyo3::types::PyList;
 ///
 /// Construct via `fdars.multi_fdata.multi_fdata_from_components(data_list, argvals_list)`.
 ///
-/// As of fdars-core 0.33, no FAMM/MFPCA/clustering function accepts this handle as input —
+/// As of fdars-core 0.48, no FAMM/MFPCA/clustering function accepts this handle as input —
 /// it is a standalone multi-domain container.  Use `n_obs` and `n_components` to inspect it.
 #[pyclass(name = "PyMultiFunData")]
 pub struct PyMultiFunData {

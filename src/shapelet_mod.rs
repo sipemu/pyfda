@@ -227,14 +227,13 @@ pub fn discover_shapelets<'py>(
     let quality_measure = quality_from_str(quality)?;
     let quality_str = quality.to_string();
 
-    let config = ShapeletDiscoveryConfig {
-        min_length,
-        max_length,
-        max_candidates: max_candidates_opt(max_candidates),
-        max_shapelets,
-        quality: quality_measure,
-        seed,
-    };
+    let mut config = ShapeletDiscoveryConfig::default();
+    config.min_length = min_length;
+    config.max_length = max_length;
+    config.max_candidates = max_candidates_opt(max_candidates);
+    config.max_shapelets = max_shapelets;
+    config.quality = quality_measure;
+    config.seed = seed;
 
     let set = to_pyresult(fdars_core::shapelet::discover_shapelets(
         &mat, &label_vec, &config,
@@ -292,14 +291,13 @@ pub fn shapelet_transform_fit<'py>(
     let label_vec = labels_i64_to_usize(labels)?;
     let quality_measure = quality_from_str(quality)?;
 
-    let config = ShapeletDiscoveryConfig {
-        min_length,
-        max_length,
-        max_candidates: max_candidates_opt(max_candidates),
-        max_shapelets,
-        quality: quality_measure,
-        seed,
-    };
+    let mut config = ShapeletDiscoveryConfig::default();
+    config.min_length = min_length;
+    config.max_length = max_length;
+    config.max_candidates = max_candidates_opt(max_candidates);
+    config.max_shapelets = max_shapelets;
+    config.quality = quality_measure;
+    config.seed = seed;
 
     let fit = to_pyresult(fdars_core::shapelet::shapelet_transform_fit(
         &mat, &label_vec, &config,
@@ -407,20 +405,18 @@ pub fn shapelet_classifier_fit<'py>(
     let quality_measure = quality_from_str(quality)?;
     let classifier_variant = classifier_from_str(classifier, k)?;
 
-    let discovery = ShapeletDiscoveryConfig {
-        min_length,
-        max_length,
-        max_candidates: max_candidates_opt(max_candidates),
-        max_shapelets,
-        quality: quality_measure,
-        seed,
-    };
+    let mut discovery = ShapeletDiscoveryConfig::default();
+    discovery.min_length = min_length;
+    discovery.max_length = max_length;
+    discovery.max_candidates = max_candidates_opt(max_candidates);
+    discovery.max_shapelets = max_shapelets;
+    discovery.quality = quality_measure;
+    discovery.seed = seed;
 
-    let config = ShapeletClassifierConfig {
-        discovery,
-        classifier: classifier_variant,
-        ncomp,
-    };
+    let mut config = ShapeletClassifierConfig::default();
+    config.discovery = discovery;
+    config.classifier = classifier_variant;
+    config.ncomp = ncomp;
 
     let fit = to_pyresult(fdars_core::shapelet::shapelet_classifier_fit(
         &mat, &label_vec, &config,

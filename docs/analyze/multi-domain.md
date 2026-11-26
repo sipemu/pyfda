@@ -331,8 +331,8 @@ mfd = multi_fdata_from_components(data_list, argvals_list)
 # mfd.n_components -> number of functional variables
 ```
 
-!!! info "PyMultiFunData is a standalone container in fdars-core 0.33"
-    As of fdars-core 0.33, `PyMultiFunData` is a **standalone** data container only.
+!!! info "PyMultiFunData is a standalone container in fdars-core 0.48"
+    As of fdars-core 0.48, `PyMultiFunData` is a **standalone** data container only.
     No function in `fdars.famm` or `fdars.spm` accepts a `PyMultiFunData` handle as
     input — `dense_flmm` and `multi_famm` both take plain numpy arrays (or lists of
     arrays). Use `PyMultiFunData` for inspection (`mfd.n_obs`, `mfd.n_components`) or

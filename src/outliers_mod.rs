@@ -218,11 +218,10 @@ pub fn tvdmss<'py>(
     central_region_tvd: f64,
 ) -> PyResult<Bound<'py, PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let config = fdars_core::outliers::TvdMssConfig {
-        emp_factor_mss,
-        emp_factor_tvd,
-        central_region_tvd,
-    };
+    let mut config = fdars_core::outliers::TvdMssConfig::default();
+    config.emp_factor_mss = emp_factor_mss;
+    config.emp_factor_tvd = emp_factor_tvd;
+    config.central_region_tvd = central_region_tvd;
     let r = to_pyresult(fdars_core::outliers::tvdmss(&mat, config))?;
     tvdmss_to_pydict(py, r)
 }
@@ -293,7 +292,8 @@ pub fn muod<'py>(
     factor: f64,
 ) -> PyResult<Bound<'py, PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let config = fdars_core::outliers::MuodConfig { factor };
+    let mut config = fdars_core::outliers::MuodConfig::default();
+    config.factor = factor;
     let r = to_pyresult(fdars_core::outliers::muod(&mat, config))?;
     muod_to_pydict(py, r)
 }
@@ -409,10 +409,9 @@ pub fn sequential_transform_outliers<'py>(
         .map(|s| seq_transform_from_str(s))
         .collect::<PyResult<Vec<_>>>()?;
     let dm = depth_method_from_str(depth_method, true, 50, None)?;
-    let config = fdars_core::outliers::SeqTransformConfig {
-        depth_method: dm,
-        emp_factor,
-    };
+    let mut config = fdars_core::outliers::SeqTransformConfig::default();
+    config.depth_method = dm;
+    config.emp_factor = emp_factor;
     let r = to_pyresult(fdars_core::outliers::sequential_transform_outliers(
         &mat, &seq, config,
     ))?;
@@ -486,10 +485,9 @@ pub fn depthgram<'py>(
     boxplot_factor: f64,
 ) -> PyResult<Bound<'py, PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let config = fdars_core::outliers::DepthgramConfig {
-        outliergram_factor,
-        boxplot_factor,
-    };
+    let mut config = fdars_core::outliers::DepthgramConfig::default();
+    config.outliergram_factor = outliergram_factor;
+    config.boxplot_factor = boxplot_factor;
     let r = to_pyresult(fdars_core::outliers::depthgram(&mat, config))?;
     depthgram_to_pydict(py, r)
 }

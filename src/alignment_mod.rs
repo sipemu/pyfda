@@ -105,12 +105,11 @@ pub fn karcher_median<'py>(
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let config = fdars_core::alignment::RobustKarcherConfig {
-        max_iter,
-        tol,
-        lambda: lambda_,
-        trim_fraction: 0.0,
-    };
+    let mut config = fdars_core::alignment::RobustKarcherConfig::default();
+    config.max_iter = max_iter;
+    config.tol = tol;
+    config.lambda = lambda_;
+    config.trim_fraction = 0.0;
     let result = to_pyresult(fdars_core::alignment::karcher_median(&mat, &av, &config))?;
 
     let dict = pyo3::types::PyDict::new(py);
@@ -141,12 +140,11 @@ pub fn robust_karcher_mean<'py>(
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let config = fdars_core::alignment::RobustKarcherConfig {
-        max_iter,
-        tol,
-        lambda: lambda_,
-        trim_fraction,
-    };
+    let mut config = fdars_core::alignment::RobustKarcherConfig::default();
+    config.max_iter = max_iter;
+    config.tol = tol;
+    config.lambda = lambda_;
+    config.trim_fraction = trim_fraction;
     let result = to_pyresult(fdars_core::alignment::robust_karcher_mean(
         &mat, &av, &config,
     ))?;
@@ -749,13 +747,12 @@ pub fn bayesian_align_pair<'py>(
     let c1 = numpy1d_to_vec(f1);
     let c2 = numpy1d_to_vec(f2);
     let av = numpy1d_to_vec(argvals);
-    let config = fdars_core::alignment::BayesianAlignConfig {
-        n_samples,
-        burn_in,
-        step_size,
-        proposal_variance,
-        seed,
-    };
+    let mut config = fdars_core::alignment::BayesianAlignConfig::default();
+    config.n_samples = n_samples;
+    config.burn_in = burn_in;
+    config.step_size = step_size;
+    config.proposal_variance = proposal_variance;
+    config.seed = seed;
     let result = to_pyresult(fdars_core::alignment::bayesian_align_pair(
         &c1, &c2, &av, &config,
     ))?;
@@ -894,7 +891,10 @@ pub fn kmedoids_from_distances<'py>(
     seed: u64,
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(dist_mat)?;
-    let config = fdars_core::alignment::KMedoidsConfig { k, max_iter, seed };
+    let mut config = fdars_core::alignment::KMedoidsConfig::default();
+    config.k = k;
+    config.max_iter = max_iter;
+    config.seed = seed;
     let result = to_pyresult(fdars_core::alignment::kmedoids_from_distances(
         &mat, &config,
     ))?;
@@ -1010,12 +1010,11 @@ pub fn elastic_align_pair_multires<'py>(
     let c1 = numpy1d_to_vec(f1);
     let c2 = numpy1d_to_vec(f2);
     let av = numpy1d_to_vec(argvals);
-    let config = fdars_core::alignment::MultiresConfig {
-        coarsen_factor,
-        n_refine_steps,
-        step_size,
-        lambda: lambda_,
-    };
+    let mut config = fdars_core::alignment::MultiresConfig::default();
+    config.coarsen_factor = coarsen_factor;
+    config.n_refine_steps = n_refine_steps;
+    config.step_size = step_size;
+    config.lambda = lambda_;
     let result = to_pyresult(fdars_core::alignment::elastic_align_pair_multires(
         &c1, &c2, &av, &config,
     ))?;
@@ -1130,12 +1129,11 @@ pub fn diagnose_alignment<'py>(
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
     let karcher = fdars_core::alignment::karcher_mean(&mat, &av, max_iter, tol, lambda_);
-    let config = fdars_core::alignment::DiagnosticConfig {
-        over_alignment_threshold,
-        under_alignment_threshold,
-        max_bending_energy,
-        min_improvement_ratio,
-    };
+    let mut config = fdars_core::alignment::DiagnosticConfig::default();
+    config.over_alignment_threshold = over_alignment_threshold;
+    config.under_alignment_threshold = under_alignment_threshold;
+    config.max_bending_energy = max_bending_energy;
+    config.min_improvement_ratio = min_improvement_ratio;
     let result = to_pyresult(fdars_core::alignment::diagnose_alignment(
         &mat, &karcher, &av, &config,
     ))?;
@@ -1278,13 +1276,12 @@ pub fn lambda_cv<'py>(
         Some(arr) => arr.as_array().to_vec(),
         None => vec![0.0, 0.01, 0.1, 1.0, 10.0],
     };
-    let config = fdars_core::alignment::LambdaCvConfig {
-        lambdas: lams,
-        n_folds,
-        max_iter,
-        tol,
-        seed,
-    };
+    let mut config = fdars_core::alignment::LambdaCvConfig::default();
+    config.lambdas = lams;
+    config.n_folds = n_folds;
+    config.max_iter = max_iter;
+    config.tol = tol;
+    config.seed = seed;
     let result = to_pyresult(fdars_core::alignment::lambda_cv(&mat, &av, &config))?;
 
     let dict = pyo3::types::PyDict::new(py);
@@ -1309,11 +1306,10 @@ pub fn elastic_outlier_detection<'py>(
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let config = fdars_core::alignment::ElasticOutlierConfig {
-        lambda: lambda_,
-        alpha,
-        use_median,
-    };
+    let mut config = fdars_core::alignment::ElasticOutlierConfig::default();
+    config.lambda = lambda_;
+    config.alpha = alpha;
+    config.use_median = use_median;
     let result = to_pyresult(fdars_core::alignment::elastic_outlier_detection(
         &mat, &av, &config,
     ))?;
@@ -1354,10 +1350,9 @@ pub fn elastic_partial_match<'py>(
     let tgt = numpy1d_to_vec(target);
     let av_t = numpy1d_to_vec(argvals_template);
     let av_f = numpy1d_to_vec(argvals_target);
-    let config = fdars_core::alignment::PartialMatchConfig {
-        lambda: lambda_,
-        min_span,
-    };
+    let mut config = fdars_core::alignment::PartialMatchConfig::default();
+    config.lambda = lambda_;
+    config.min_span = min_span;
     let result = to_pyresult(fdars_core::alignment::elastic_partial_match(
         &tmpl, &tgt, &av_t, &av_f, &config,
     ))?;
@@ -1578,14 +1573,13 @@ pub fn shape_confidence_interval<'py>(
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let config = fdars_core::alignment::ShapeCiConfig {
-        n_bootstrap,
-        confidence_level,
-        lambda: lambda_,
-        max_iter,
-        tol,
-        seed,
-    };
+    let mut config = fdars_core::alignment::ShapeCiConfig::default();
+    config.n_bootstrap = n_bootstrap;
+    config.confidence_level = confidence_level;
+    config.lambda = lambda_;
+    config.max_iter = max_iter;
+    config.tol = tol;
+    config.seed = seed;
     let result = to_pyresult(fdars_core::alignment::shape_confidence_interval(
         &mat, &av, &config,
     ))?;
@@ -1618,11 +1612,10 @@ pub fn transfer_alignment<'py>(
     let src = numpy2d_to_fdmatrix(source_data)?;
     let tgt = numpy2d_to_fdmatrix(target_data)?;
     let av = numpy1d_to_vec(argvals);
-    let config = fdars_core::alignment::TransferAlignConfig {
-        lambda: lambda_,
-        max_iter,
-        tol,
-    };
+    let mut config = fdars_core::alignment::TransferAlignConfig::default();
+    config.lambda = lambda_;
+    config.max_iter = max_iter;
+    config.tol = tol;
     let result = to_pyresult(fdars_core::alignment::transfer_alignment(
         &src, &tgt, &av, &config,
     ))?;

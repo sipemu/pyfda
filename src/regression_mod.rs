@@ -30,7 +30,7 @@ pub fn fpca<'py>(
 ) -> PyResult<Bound<'py, PyAny>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = to_pyresult(fdars_core::regression::fdata_to_pc_1d(&mat, n_comp, &av))?;
+    let result = to_pyresult(fdars_core::regression::fdata_to_pc(&mat, n_comp, &av))?;
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("scores", fdmatrix_to_numpy2d(py, &result.scores))?;
@@ -75,7 +75,7 @@ pub fn fpls<'py>(
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
     let resp = numpy1d_to_vec(response);
-    let result = to_pyresult(fdars_core::regression::fdata_to_pls_1d(
+    let result = to_pyresult(fdars_core::regression::fdata_to_pls(
         &mat, &resp, n_comp, &av,
     ))?;
 
@@ -391,7 +391,6 @@ pub fn fosr<'py>(
 /// dict
 ///     f_statistic_t (m,), p_value (float), group_means (k, m),
 ///     global_statistic (float).
-#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 #[pyo3(signature = (data, groups, n_perm=999))]
 pub fn fanova<'py>(
@@ -402,7 +401,9 @@ pub fn fanova<'py>(
 ) -> PyResult<Bound<'py, PyAny>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let grp = numpy1d_to_usize_vec(groups);
-    let result = to_pyresult(fdars_core::function_on_scalar::fanova(&mat, &grp, n_perm))?;
+    let result = to_pyresult(fdars_core::function_on_scalar::fanova_seeded(
+        &mat, &grp, n_perm, 42,
+    ))?;
 
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("f_statistic_t", vec_to_numpy1d(py, result.f_statistic_t))?;

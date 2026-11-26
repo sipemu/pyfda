@@ -148,7 +148,7 @@ pub fn pspline_fit_1d<'py>(
 ) -> PyResult<Bound<'py, PyAny>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = fdars_core::basis::pspline_fit_1d(&mat, &av, n_basis, lambda_, order)
+    let result = fdars_core::basis::pspline_fit(&mat, &av, n_basis, lambda_, order)
         .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("pspline_fit_1d failed"))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
@@ -257,7 +257,7 @@ pub fn select_basis_auto_1d<'py>(
             ))
         }
     };
-    let result = fdars_core::basis::select_basis_auto_1d(
+    let result = fdars_core::basis::select_basis_auto(
         &mat,
         &av,
         crit,
@@ -567,6 +567,7 @@ pub fn basis_nbasis_cv<'py>(
         fdars_core::smooth_basis::BasisCriterion::Cv => "cv",
         fdars_core::smooth_basis::BasisCriterion::Aic => "aic",
         fdars_core::smooth_basis::BasisCriterion::Bic => "bic",
+        _ => "unknown",
     };
     dict.set_item("criterion", crit_str)?;
     Ok(dict.into_any())
@@ -712,7 +713,7 @@ pub fn fourier_fit_1d<'py>(
 ) -> PyResult<Bound<'py, PyAny>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = to_pyresult(fdars_core::basis::fourier_fit_1d(&mat, &av, nbasis))?;
+    let result = to_pyresult(fdars_core::basis::fourier_fit(&mat, &av, nbasis))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("fitted", fdmatrix_to_numpy2d(py, &result.fitted))?;
     dict.set_item(

@@ -6,13 +6,13 @@
 //! - `fast_fmm`   — fast functional mixed model (Wald inference); returns 6-key PyDict.
 //! - `multi_famm` — multi-variable FAMM (list of 2-D arrays); returns 4-key PyDict.
 //!
-//! # fdars-core 0.33 — Plain FdMatrix Inputs Only
+//! # fdars-core 0.48 — Plain FdMatrix Inputs Only
 //!
 //! None of the three FAMM functions accept `MultiFunData`.  All take plain
 //! `FdMatrix` (or `&[FdMatrix]` for `multi_famm`) plus a subject-ID slice and an
 //! optional covariate matrix.  `PyMultiFunData` must NOT be passed here.
 //! MULTI-02 phrase "consume PyMultiFunData where required" is vacuously satisfied:
-//! no 0.33 FAMM function requires it.
+//! no 0.48 FAMM function requires it.
 
 use crate::convert::{
     fdmatrix_to_numpy2d, numpy1d_to_usize_vec, numpy2d_to_fdmatrix, to_pyresult, vec_to_numpy1d,
@@ -90,7 +90,7 @@ fn dense_flmm_result_to_pydict<'py>(
 /// ------
 /// ValueError
 ///     If dimensions are inconsistent, ``random_slopes=True`` is attempted
-///     (not yet implemented in fdars-core 0.33), or convergence fails fatally.
+///     (not yet implemented in fdars-core 0.48), or convergence fails fatally.
 #[pyfunction]
 #[pyo3(signature = (data, subject_ids, covariates=None, ncomp=3, max_iter=50, tol=1e-10))]
 pub fn dense_flmm<'py>(

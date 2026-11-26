@@ -34,11 +34,9 @@ pub fn spm_phase1<'py>(
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let config = fdars_core::spm::SpmConfig {
-        ncomp,
-        alpha,
-        ..Default::default()
-    };
+    let mut config = fdars_core::spm::SpmConfig::default();
+    config.ncomp = ncomp;
+    config.alpha = alpha;
     let result = to_pyresult(fdars_core::spm::spm_phase1(&mat, &av, &config))?;
 
     let dict = pyo3::types::PyDict::new(py);
@@ -388,11 +386,10 @@ pub fn arl0_t2<'py>(
     seed: u64,
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let ev = numpy1d_to_vec(eigenvalues);
-    let config = fdars_core::spm::ArlConfig {
-        n_simulations,
-        max_run_length,
-        seed,
-    };
+    let mut config = fdars_core::spm::ArlConfig::default();
+    config.n_simulations = n_simulations;
+    config.max_run_length = max_run_length;
+    config.seed = seed;
     let result = to_pyresult(fdars_core::spm::arl0_t2(&ev, ucl, &config))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("arl", result.arl)?;
@@ -435,11 +432,10 @@ pub fn arl1_t2<'py>(
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let ev = numpy1d_to_vec(eigenvalues);
     let sh = numpy1d_to_vec(shift);
-    let config = fdars_core::spm::ArlConfig {
-        n_simulations,
-        max_run_length,
-        seed,
-    };
+    let mut config = fdars_core::spm::ArlConfig::default();
+    config.n_simulations = n_simulations;
+    config.max_run_length = max_run_length;
+    config.seed = seed;
     let result = to_pyresult(fdars_core::spm::arl1_t2(&ev, ucl, &sh, &config))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("arl", result.arl)?;
@@ -481,11 +477,10 @@ pub fn arl0_ewma_t2<'py>(
     seed: u64,
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let ev = numpy1d_to_vec(eigenvalues);
-    let config = fdars_core::spm::ArlConfig {
-        n_simulations,
-        max_run_length,
-        seed,
-    };
+    let mut config = fdars_core::spm::ArlConfig::default();
+    config.n_simulations = n_simulations;
+    config.max_run_length = max_run_length;
+    config.seed = seed;
     let result = to_pyresult(fdars_core::spm::arl0_ewma_t2(&ev, ucl, lambda_, &config))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("arl", result.arl)?;
@@ -526,11 +521,10 @@ pub fn arl0_spe<'py>(
     max_run_length: usize,
     seed: u64,
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
-    let config = fdars_core::spm::ArlConfig {
-        n_simulations,
-        max_run_length,
-        seed,
-    };
+    let mut config = fdars_core::spm::ArlConfig::default();
+    config.n_simulations = n_simulations;
+    config.max_run_length = max_run_length;
+    config.seed = seed;
     let result = to_pyresult(fdars_core::spm::arl0_spe(spe_df, spe_scale, ucl, &config))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("arl", result.arl)?;
@@ -673,20 +667,16 @@ pub fn spm_cusum<'py>(
     let train = numpy2d_to_fdmatrix(train_data)?;
     let seq = numpy2d_to_fdmatrix(sequential_data)?;
     let av = numpy1d_to_vec(argvals);
-    let sc = fdars_core::spm::SpmConfig {
-        ncomp,
-        alpha,
-        ..Default::default()
-    };
+    let mut sc = fdars_core::spm::SpmConfig::default();
+    sc.ncomp = ncomp;
+    sc.alpha = alpha;
     let chart = to_pyresult(fdars_core::spm::spm_phase1(&train, &av, &sc))?;
-    let cc = fdars_core::spm::CusumConfig {
-        k,
-        h,
-        ncomp,
-        alpha,
-        multivariate,
-        ..Default::default()
-    };
+    let mut cc = fdars_core::spm::CusumConfig::default();
+    cc.k = k;
+    cc.h = h;
+    cc.ncomp = ncomp;
+    cc.alpha = alpha;
+    cc.multivariate = multivariate;
     let res = to_pyresult(fdars_core::spm::spm_cusum_monitor(&chart, &seq, &av, &cc))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item("cusum_statistic", vec_to_numpy1d(py, res.cusum_statistic))?;
@@ -746,18 +736,14 @@ pub fn spm_ewma<'py>(
     let train = numpy2d_to_fdmatrix(train_data)?;
     let seq = numpy2d_to_fdmatrix(sequential_data)?;
     let av = numpy1d_to_vec(argvals);
-    let sc = fdars_core::spm::SpmConfig {
-        ncomp,
-        alpha,
-        ..Default::default()
-    };
+    let mut sc = fdars_core::spm::SpmConfig::default();
+    sc.ncomp = ncomp;
+    sc.alpha = alpha;
     let chart = to_pyresult(fdars_core::spm::spm_phase1(&train, &av, &sc))?;
-    let ec = fdars_core::spm::EwmaConfig {
-        lambda: lam,
-        ncomp,
-        alpha,
-        ..Default::default()
-    };
+    let mut ec = fdars_core::spm::EwmaConfig::default();
+    ec.lambda = lam;
+    ec.ncomp = ncomp;
+    ec.alpha = alpha;
     let res = to_pyresult(fdars_core::spm::spm_ewma_monitor(&chart, &seq, &av, &ec))?;
     let dict = pyo3::types::PyDict::new(py);
     dict.set_item(
@@ -902,7 +888,9 @@ pub fn mfpca<'py>(
     // Build &[&FdMatrix] slice (mats must outlive refs).
     let refs: Vec<&fdars_core::matrix::FdMatrix> = mats.iter().collect();
 
-    let config = fdars_core::spm::mfpca::MfpcaConfig { ncomp, weighted };
+    let mut config = fdars_core::spm::mfpca::MfpcaConfig::default();
+    config.ncomp = ncomp;
+    config.weighted = weighted;
 
     let result = to_pyresult(fdars_core::spm::mfpca::mfpca(&refs, &config))?;
 

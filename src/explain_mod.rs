@@ -1686,9 +1686,7 @@ pub fn prototype_criticism<'py>(
         let m = mat.ncols();
         (0..m).map(|j| j as f64 / (m - 1).max(1) as f64).collect()
     };
-    let fpca = to_pyresult(fdars_core::regression::fdata_to_pc_1d(
-        &mat, ncomp, &argvals,
-    ))?;
+    let fpca = to_pyresult(fdars_core::regression::fdata_to_pc(&mat, ncomp, &argvals))?;
     let result = to_pyresult(fdars_core::explain::prototype_criticism(
         &fpca,
         ncomp,

@@ -6,6 +6,8 @@ use fdars_core::metric::gak::{
     gak_gram_predict as core_gak_gram_predict, gak_gram_train as core_gak_gram_train,
     sigma_gak as core_sigma_gak, GakConfig, GakGramTrain,
 };
+use fdars_core::metric::LpDomain;
+use fdars_core::Dim;
 
 /// Build a GakConfig from an optional sigma value.
 ///
@@ -219,7 +221,7 @@ pub fn lp_self_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = fdars_core::metric::lp_self_1d(&d, &av, p, &[]);
+    let result = fdars_core::metric::lp_self(&d, LpDomain::OneD { argvals: &av }, p, &[]);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -252,7 +254,7 @@ pub fn lp_cross_1d<'py>(
     let d1 = numpy2d_to_fdmatrix(data1)?;
     let d2 = numpy2d_to_fdmatrix(data2)?;
     let av = numpy1d_to_vec(argvals);
-    let result = fdars_core::metric::lp_cross_1d(&d1, &d2, &av, p, &[]);
+    let result = fdars_core::metric::lp_cross(&d1, &d2, LpDomain::OneD { argvals: &av }, p, &[]);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -269,7 +271,15 @@ pub fn lp_self_2d<'py>(
     let d = numpy2d_to_fdmatrix(data)?;
     let avs = numpy1d_to_vec(argvals_s);
     let avt = numpy1d_to_vec(argvals_t);
-    let result = fdars_core::metric::lp_self_2d(&d, &avs, &avt, p, &[]);
+    let result = fdars_core::metric::lp_self(
+        &d,
+        LpDomain::TwoD {
+            argvals_s: &avs,
+            argvals_t: &avt,
+        },
+        p,
+        &[],
+    );
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -288,7 +298,16 @@ pub fn lp_cross_2d<'py>(
     let d2 = numpy2d_to_fdmatrix(data2)?;
     let avs = numpy1d_to_vec(argvals_s);
     let avt = numpy1d_to_vec(argvals_t);
-    let result = fdars_core::metric::lp_cross_2d(&d1, &d2, &avs, &avt, p, &[]);
+    let result = fdars_core::metric::lp_cross(
+        &d1,
+        &d2,
+        LpDomain::TwoD {
+            argvals_s: &avs,
+            argvals_t: &avt,
+        },
+        p,
+        &[],
+    );
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -301,7 +320,7 @@ pub fn hausdorff_self_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = fdars_core::metric::hausdorff_self_1d(&d, &av);
+    let result = fdars_core::metric::hausdorff_self(&d, &av, None, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -316,7 +335,7 @@ pub fn hausdorff_cross_1d<'py>(
     let d1 = numpy2d_to_fdmatrix(data1)?;
     let d2 = numpy2d_to_fdmatrix(data2)?;
     let av = numpy1d_to_vec(argvals);
-    let result = fdars_core::metric::hausdorff_cross_1d(&d1, &d2, &av);
+    let result = fdars_core::metric::hausdorff_cross(&d1, &d2, &av, None, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -331,7 +350,7 @@ pub fn hausdorff_self_2d<'py>(
     let d = numpy2d_to_fdmatrix(data)?;
     let avs = numpy1d_to_vec(argvals_s);
     let avt = numpy1d_to_vec(argvals_t);
-    let result = fdars_core::metric::hausdorff_self_2d(&d, &avs, &avt);
+    let result = fdars_core::metric::hausdorff_self(&d, &avs, Some(&avt), Dim::Two);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -348,7 +367,7 @@ pub fn hausdorff_cross_2d<'py>(
     let d2 = numpy2d_to_fdmatrix(data2)?;
     let avs = numpy1d_to_vec(argvals_s);
     let avt = numpy1d_to_vec(argvals_t);
-    let result = fdars_core::metric::hausdorff_cross_2d(&d1, &d2, &avs, &avt);
+    let result = fdars_core::metric::hausdorff_cross(&d1, &d2, &avs, Some(&avt), Dim::Two);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -377,7 +396,7 @@ pub fn dtw_self_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let band = if w == 0 { d.ncols() } else { w };
-    let result = fdars_core::metric::dtw_self_1d(&d, p, band);
+    let result = fdars_core::metric::dtw_self(&d, p, band, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -414,7 +433,7 @@ pub fn dtw_cross_1d<'py>(
     } else {
         w
     };
-    let result = fdars_core::metric::dtw_cross_1d(&d1, &d2, p, band);
+    let result = fdars_core::metric::dtw_cross(&d1, &d2, p, band, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -439,7 +458,7 @@ pub fn soft_dtw_self_1d<'py>(
     gamma: f64,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
-    let result = fdars_core::metric::soft_dtw_self_1d(&d, gamma);
+    let result = fdars_core::metric::soft_dtw_self(&d, gamma, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -454,7 +473,7 @@ pub fn soft_dtw_cross_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d1 = numpy2d_to_fdmatrix(data1)?;
     let d2 = numpy2d_to_fdmatrix(data2)?;
-    let result = fdars_core::metric::soft_dtw_cross_1d(&d1, &d2, gamma);
+    let result = fdars_core::metric::soft_dtw_cross(&d1, &d2, gamma, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -467,7 +486,7 @@ pub fn soft_dtw_div_self_1d<'py>(
     gamma: f64,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
-    let result = fdars_core::metric::soft_dtw_div_self_1d(&d, gamma);
+    let result = fdars_core::metric::soft_dtw_div_self(&d, gamma, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -482,7 +501,7 @@ pub fn soft_dtw_div_cross_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d1 = numpy2d_to_fdmatrix(data1)?;
     let d2 = numpy2d_to_fdmatrix(data2)?;
-    let result = fdars_core::metric::soft_dtw_div_cross_1d(&d1, &d2, gamma);
+    let result = fdars_core::metric::soft_dtw_div_cross(&d1, &d2, gamma, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -507,7 +526,7 @@ pub fn fourier_self_1d<'py>(
     n_basis: usize,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
-    let result = fdars_core::metric::fourier_self_1d(&d, n_basis);
+    let result = fdars_core::metric::fourier_self(&d, n_basis, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -522,7 +541,7 @@ pub fn fourier_cross_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let d1 = numpy2d_to_fdmatrix(data1)?;
     let d2 = numpy2d_to_fdmatrix(data2)?;
-    let result = fdars_core::metric::fourier_cross_1d(&d1, &d2, n_basis);
+    let result = fdars_core::metric::fourier_cross(&d1, &d2, n_basis, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -556,7 +575,7 @@ pub fn hshift_self_1d<'py>(
     } else {
         max_shift
     };
-    let result = fdars_core::metric::hshift_self_1d(&d, &av, shift);
+    let result = fdars_core::metric::hshift_self(&d, &av, shift, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -594,7 +613,7 @@ pub fn hshift_cross_1d<'py>(
     } else {
         max_shift
     };
-    let result = fdars_core::metric::hshift_cross_1d(&d1, &d2, &av, shift);
+    let result = fdars_core::metric::hshift_cross(&d1, &d2, &av, shift, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 

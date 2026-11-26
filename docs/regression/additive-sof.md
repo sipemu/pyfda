@@ -268,7 +268,7 @@ sel = variable_selection(predictors, y, argvals_list,
 | `converged` | `bool` | Whether the optimization converged |
 
 Supported penalties: `"group_lasso"` and `"ls"` only. Penalties `"group_mcp"` and
-`"group_scad"` raise `ValueError` (not yet implemented in fdars-core 0.33).
+`"group_scad"` raise `ValueError` (not yet implemented in fdars-core 0.48).
 
 ---
 
@@ -419,7 +419,7 @@ print("FDARS_FENCE_OK")
 
 !!! note "Methods available in the R package but not (yet) in Python"
     The `"group_mcp"` and `"group_scad"` penalty options for `variable_selection`
-    are not yet implemented in fdars-core 0.33 — passing them raises `ValueError`.
+    are not yet implemented in fdars-core 0.48 — passing them raises `ValueError`.
     Only `"group_lasso"` and `"ls"` are supported.
 
 ---

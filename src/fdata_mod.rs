@@ -1,6 +1,8 @@
 //! Functional data operations: mean, center, derivatives, norms, median.
 
 use crate::convert::*;
+use fdars_core::fdata::{DerivDomain, DerivResult};
+use fdars_core::Dim;
 use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::prelude::*;
 
@@ -21,7 +23,7 @@ pub fn mean_1d<'py>(
     data: PyReadonlyArray2<'py, f64>,
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let result = fdars_core::fdata::mean_1d(&mat);
+    let result = fdars_core::fdata::mean(&mat, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -36,14 +38,13 @@ pub fn mean_1d<'py>(
 /// -------
 /// numpy.ndarray
 ///     1D array of length m1*m2.
-#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 pub fn mean_2d<'py>(
     py: Python<'py>,
     data: PyReadonlyArray2<'py, f64>,
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let result = fdars_core::fdata::mean_2d(&mat);
+    let result = fdars_core::fdata::mean(&mat, Dim::Two);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -64,7 +65,7 @@ pub fn center_1d<'py>(
     data: PyReadonlyArray2<'py, f64>,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let mat = numpy2d_to_fdmatrix(data)?;
-    let result = fdars_core::fdata::center_1d(&mat);
+    let result = fdars_core::fdata::center(&mat, Dim::One);
     Ok(fdmatrix_to_numpy2d(py, &result))
 }
 
@@ -93,8 +94,16 @@ pub fn deriv_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = fdars_core::fdata::deriv_1d(&mat, &av, nderiv);
-    Ok(fdmatrix_to_numpy2d(py, &result))
+    let domain = DerivDomain::OneD {
+        argvals: &av,
+        nderiv,
+    };
+    match fdars_core::fdata::deriv(&mat, domain) {
+        DerivResult::OneD(result) => Ok(fdmatrix_to_numpy2d(py, &result)),
+        _ => Err(pyo3::exceptions::PyValueError::new_err(
+            "deriv_1d failed: unexpected derivative result",
+        )),
+    }
 }
 
 /// Compute numerical derivatives of 2D functional data.
@@ -128,11 +137,20 @@ pub fn deriv_2d<'py>(
     let avt = numpy1d_to_vec(argvals_t.clone());
     let m1 = avs.len();
     let m2 = avt.len();
-    let result = fdars_core::fdata::deriv_2d(&mat, &avs, &avt, m1, m2).ok_or_else(|| {
-        pyo3::exceptions::PyValueError::new_err(
-            "deriv_2d failed: check that data columns == m1*m2 and grid sizes >= 2",
-        )
-    })?;
+    let domain = DerivDomain::TwoD {
+        argvals_s: &avs,
+        argvals_t: &avt,
+        m1,
+        m2,
+    };
+    let result = match fdars_core::fdata::deriv(&mat, domain) {
+        DerivResult::TwoD(result) => result,
+        _ => {
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "deriv_2d failed: check that data columns == m1*m2 and grid sizes >= 2",
+            ))
+        }
+    };
     Ok((
         fdmatrix_to_numpy2d(py, &result.ds),
         fdmatrix_to_numpy2d(py, &result.dt),
@@ -165,7 +183,7 @@ pub fn norm_lp_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = fdars_core::fdata::norm_lp_1d(&mat, &av, p);
+    let result = fdars_core::fdata::norm_lp(&mat, &av, p, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -197,7 +215,7 @@ pub fn geometric_median_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = fdars_core::fdata::geometric_median_1d(&mat, &av, max_iter, tol);
+    let result = fdars_core::fdata::geometric_median(&mat, &av, None, max_iter, tol, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -233,7 +251,8 @@ pub fn geometric_median_2d<'py>(
     let mat = numpy2d_to_fdmatrix(data)?;
     let avs = numpy1d_to_vec(argvals_s);
     let avt = numpy1d_to_vec(argvals_t);
-    let result = fdars_core::fdata::geometric_median_2d(&mat, &avs, &avt, max_iter, tol);
+    let result =
+        fdars_core::fdata::geometric_median(&mat, &avs, Some(&avt), max_iter, tol, Dim::Two);
     Ok(vec_to_numpy1d(py, result))
 }
 

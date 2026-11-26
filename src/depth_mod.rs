@@ -2,6 +2,7 @@
 
 use crate::convert::*;
 use fdars_core::depth::DepthMethod;
+use fdars_core::Dim;
 use numpy::{PyArray1, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -32,12 +33,11 @@ pub fn fraiman_muniz_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::fraiman_muniz_1d(&d, &r, scale);
+    let result = fdars_core::depth::fraiman_muniz(&d, &r, scale, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
 /// Fraiman-Muniz depth for 2D functional data.
-#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 #[pyo3(signature = (data, ref_data, scale=true))]
 pub fn fraiman_muniz_2d<'py>(
@@ -48,7 +48,7 @@ pub fn fraiman_muniz_2d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::fraiman_muniz_2d(&d, &r, scale);
+    let result = fdars_core::depth::fraiman_muniz(&d, &r, scale, Dim::Two);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -77,12 +77,11 @@ pub fn modal_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::modal_1d(&d, &r, h);
+    let result = fdars_core::depth::modal(&d, &r, h, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
 /// Modal depth for 2D functional data.
-#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 #[pyo3(signature = (data, ref_data, h=1.0))]
 pub fn modal_2d<'py>(
@@ -93,7 +92,7 @@ pub fn modal_2d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::modal_2d(&d, &r, h);
+    let result = fdars_core::depth::modal(&d, &r, h, Dim::Two);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -122,12 +121,11 @@ pub fn random_projection_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::random_projection_1d(&d, &r, n_proj);
+    let result = fdars_core::depth::random_projection(&d, &r, n_proj, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
 /// Random projection depth for 2D functional data.
-#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 #[pyo3(signature = (data, ref_data, n_proj=50))]
 pub fn random_projection_2d<'py>(
@@ -138,7 +136,7 @@ pub fn random_projection_2d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::random_projection_2d(&d, &r, n_proj);
+    let result = fdars_core::depth::random_projection(&d, &r, n_proj, Dim::Two);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -167,12 +165,11 @@ pub fn random_tukey_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::random_tukey_1d(&d, &r, n_proj);
+    let result = fdars_core::depth::random_tukey(&d, &r, n_proj, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
 /// Random Tukey depth for 2D functional data.
-#[allow(deprecated)] // fdars-core 0.30: soft-deprecated; migration deferred (Phase 66 CONTINGENCY)
 #[pyfunction]
 #[pyo3(signature = (data, ref_data, n_proj=50))]
 pub fn random_tukey_2d<'py>(
@@ -183,7 +180,7 @@ pub fn random_tukey_2d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::random_tukey_2d(&d, &r, n_proj);
+    let result = fdars_core::depth::random_tukey(&d, &r, n_proj, Dim::Two);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -208,7 +205,7 @@ pub fn band_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::band_1d(&d, &r);
+    let result = fdars_core::depth::band(&d, &r, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -233,7 +230,7 @@ pub fn modified_band_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::modified_band_1d(&d, &r);
+    let result = fdars_core::depth::modified_band(&d, &r, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -258,7 +255,7 @@ pub fn modified_epigraph_index_1d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::modified_epigraph_index_1d(&d, &r);
+    let result = fdars_core::depth::modified_epigraph_index(&d, &r, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -288,7 +285,7 @@ pub fn functional_spatial_1d<'py>(
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
     let av = argvals.map(numpy1d_to_vec);
-    let result = fdars_core::depth::functional_spatial_1d(&d, &r, av.as_deref());
+    let result = fdars_core::depth::functional_spatial(&d, &r, av.as_deref(), Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -301,7 +298,7 @@ pub fn functional_spatial_2d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::functional_spatial_2d(&d, &r);
+    let result = fdars_core::depth::functional_spatial(&d, &r, None, Dim::Two);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -334,7 +331,7 @@ pub fn kernel_functional_spatial_1d<'py>(
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
     let av = numpy1d_to_vec(argvals);
-    let result = fdars_core::depth::kernel_functional_spatial_1d(&d, &r, &av, h);
+    let result = fdars_core::depth::kernel_functional_spatial(&d, &r, Some(&av), h, Dim::One);
     Ok(vec_to_numpy1d(py, result))
 }
 
@@ -349,7 +346,7 @@ pub fn kernel_functional_spatial_2d<'py>(
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let d = numpy2d_to_fdmatrix(data)?;
     let r = numpy2d_to_fdmatrix(ref_data)?;
-    let result = fdars_core::depth::kernel_functional_spatial_2d(&d, &r, h);
+    let result = fdars_core::depth::kernel_functional_spatial(&d, &r, None, h, Dim::Two);
     Ok(vec_to_numpy1d(py, result))
 }
 

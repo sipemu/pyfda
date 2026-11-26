@@ -141,12 +141,10 @@ pub fn fclassif_cv<'py>(
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
     let lab = numpy1d_to_usize_vec(labels);
-    let config = fdars_core::classification::ClassifCvConfig {
-        method: method.to_string(),
-        ncomp,
-        nfold,
-        ..Default::default()
-    };
+    let mut config = fdars_core::classification::ClassifCvConfig::default();
+    config.method = method.to_string();
+    config.ncomp = ncomp;
+    config.nfold = nfold;
     let result = to_pyresult(fdars_core::classification::fclassif_cv_with_config(
         &mat, &av, &lab, None, &config,
     ))?;
