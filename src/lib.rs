@@ -25,6 +25,7 @@ mod fdata_mod;
 mod frechet_mod;
 mod fts_mod;
 mod inference_mod;
+mod jfpca_mod;
 mod metric_dtw_mod;
 mod metric_elastic_mod;
 mod metric_mod;

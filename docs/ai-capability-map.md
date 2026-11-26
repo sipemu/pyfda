@@ -2,14 +2,14 @@
 
 This page is the human-readable companion to the machine-readable [`llms.txt`](https://sipemu.github.io/pyfda/llms.txt) digest. It lists every public callable in the `fdars` library, grouped by submodule.
 
-**30 submodules &middot; 531 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
+**30 submodules &middot; 552 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
 
 ## Module Index
 
 | Module | Purpose | Functions |
 |--------|---------|-----------|
-| [`fdars.alignment`](#alignment) | Elastic alignment, SRSF registration, Karcher mean, elastic FPCA | 141 |
-| [`fdars.basis`](#basis) | Basis representations — B-spline, Fourier, functional PCA | 16 |
+| [`fdars.alignment`](#alignment) | Elastic alignment, SRSF registration, Karcher mean, elastic FPCA | 143 |
+| [`fdars.basis`](#basis) | Basis representations — B-spline, Fourier, functional PCA | 21 |
 | [`fdars.classification`](#classification) | Functional classifiers — k-nearest neighbours, SVM, centroid-based | 9 |
 | [`fdars.clustering`](#clustering) | Functional k-means, fuzzy, GMM, and elastic clustering | 18 |
 | [`fdars.conformal`](#conformal) | Conformal prediction and classification bands | 14 |
@@ -17,7 +17,7 @@ This page is the human-readable companion to the machine-readable [`llms.txt`](h
 | [`fdars.datasets`](#datasets) | Built-in datasets — Canadian weather, Tecator, phoneme, growth, and more | 7 |
 | [`fdars.density_fda`](#density_fda) | Density-based functional data analysis and Wasserstein distances | 5 |
 | [`fdars.depth`](#depth) | Functional depth measures — Fraiman-Muniz, band, modal, random-projection | 18 |
-| [`fdars.explain`](#explain) | Functional explainability — SHAP, FCI, GRAD-CAM, and attribution maps | 46 |
+| [`fdars.explain`](#explain) | Functional explainability — SHAP, FCI, GRAD-CAM, and attribution maps | 48 |
 | [`fdars.famm`](#famm) | Functional additive mixed models (FAMM) for longitudinal data | 3 |
 | [`fdars.fdata`](#fdata) | Core functional data operations — mean, deriv, norm, integrate, reconstruct | 15 |
 | [`fdars.frechet`](#frechet) | Fréchet regression for metric-space responses | 4 |
@@ -27,10 +27,10 @@ This page is the human-readable companion to the machine-readable [`llms.txt`](h
 | [`fdars.metrics`](#metrics) | Regression and classification scoring metrics for functional outputs | 5 |
 | [`fdars.multi_fdata`](#multi_fdata) | Multi-domain functional data — paired domains, joint analysis | 2 |
 | [`fdars.outliers`](#outliers) | Functional outlier detection — depth-based, magnitude, shape outliers | 8 |
-| [`fdars.pace_fpca`](#pace_fpca) | PACE: Principal Analysis by Conditional Expectation for sparse data | 3 |
+| [`fdars.pace_fpca`](#pace_fpca) | PACE: Principal Analysis by Conditional Expectation for sparse data | 7 |
 | [`fdars.regression`](#regression) | Functional regression — scalar-on-function, function-on-scalar, GLM | 29 |
 | [`fdars.represent`](#represent) | Dimensionality reduction and functional representation tools | 4 |
-| [`fdars.scalar_on_function`](#scalar_on_function) | Scalar-on-function regression with regularisation | 5 |
+| [`fdars.scalar_on_function`](#scalar_on_function) | Scalar-on-function regression with regularisation | 13 |
 | [`fdars.scoring`](#scoring) | Functional scoring — penalised, tolerance-band, and integrated scores | 5 |
 | [`fdars.seasonal`](#seasonal) | Seasonal functional decomposition and periodic pattern analysis | 18 |
 | [`fdars.shapelet`](#shapelet) | Functional shapelets — pattern-based classification and feature learning | 7 |
@@ -54,6 +54,7 @@ Elastic alignment, SRSF registration, Karcher mean, elastic FPCA.
 | `PyCurveShapePca` | `(...)` | Opaque handle wrapping a curve shape PCA (CurveShapePcaResult). |
 | `PyElasticBoxplots` | `(...)` | Opaque handle wrapping a fitted elastic amplitude + phase box plot pair (ElasticBoxplots). |
 | `PyElasticPhaseBoxplot` | `(...)` | Opaque handle wrapping a fitted elastic phase box plot (ElasticPhaseBoxplot). |
+| `PyJfpcaModel` | `(...)` | Trained joint (amplitude + phase) FPCA model (from `jfpca_fit`). |
 | `PySparseElasticMean` | `(...)` | Opaque handle wrapping a sparse-curve elastic mean (SparseElasticMeanResult). |
 | `ab_closure_residual` | `(f, a, b)` | Closure residual c(1) − c(0) of the planar curve an (a, b) F-transform represents. |
 | `ab_elastic_distance_pl` | `(c1, c2, a, b)` | Exact (a, b) elastic distance between two piecewise-linear curves. |
@@ -133,6 +134,7 @@ Elastic alignment, SRSF registration, Karcher mean, elastic FPCA.
 | `horiz_fpns` | `(data, argvals, ncomp=3, lambda_=0.0, max_iter=20, tol=0.0001)` | Horizontal Functional Principal Nested Spheres (FPNS) analysis. |
 | `invert_warp` | `(warp, argvals)` | Invert a warping function. |
 | `iterative_shift_registration` | `(data, argvals, template=None, max_iter=5, tol=0.01, step_size=1.0, restrict_domain=False, extrapolation='boundary', initial=None)` | Iterative least-squares shift registration to a template (scikit-fda LeastSquaresShiftRegistration). |
+| `jfpca_fit` | `(data, argvals, ncomp=3, balance_c=None, lambda_=0.0, max_iter=20)` | Fit a reusable joint amplitude + phase FPCA (jfPCA) model for out-of-sample projection. |
 | `joint_fpca` | `(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)` | Joint (amplitude + phase) FPCA. |
 | `joint_gauss_model` | `(data, argvals, ncomp=3, n_samples=100, balance_c=1.0, lambda_=0.0, max_iter=20, tol=0.0001, seed=42)` | Generate random curves from a joint Gaussian model preserving amplitude-phase correlation. |
 | `karcher_mean` | `(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)` | Karcher (Frechet) mean under the elastic metric. |
@@ -199,6 +201,7 @@ Basis representations — B-spline, Fourier, functional PCA.
 
 | Function | Signature | Purpose |
 |----------|-----------|---------|
+| `PyWaveletCoeffs` | `(...)` | Opaque handle holding one multi-level DWT coefficient pyramid. |
 | `basis_nbasis_cv` | `(data, argvals, nbasis_min=4, nbasis_max=20, basis_type='bspline', criterion='gcv', n_folds=5, lambda_=0.0)` | Cross-validated selection of number of basis functions. |
 | `basis_to_fdata_1d` | `(coefficients, argvals, n_basis, basis_type='bspline')` | Reconstruct functional data from basis coefficients. |
 | `bspline_basis` | `(argvals, nknots, order=4)` | Evaluate a B-spline basis at given points. |
@@ -215,6 +218,10 @@ Basis representations — B-spline, Fourier, functional PCA.
 | `select_fourier_nbasis_gcv` | `(data, argvals, min_nbasis, max_nbasis)` | Select optimal number of Fourier basis functions via GCV. |
 | `smooth_basis_aic` | `(data, argvals, n_basis, basis_type='bspline', lfd_order=2, log_lambda_min=Ellipsis, log_lambda_max=4.0, n_grid=25)` | Smooth functional data using basis expansion with AIC-optimal lambda. |
 | `smooth_basis_gcv` | `(data, argvals, n_basis, basis_type='bspline', lfd_order=2, log_lambda_min=Ellipsis, log_lambda_max=4.0, n_grid=25)` | Smooth functional data using basis expansion with GCV. |
+| `wavelet_decompose` | `(signal, wavelet='db4', mode='periodic', level=None)` | Multi-level orthogonal discrete wavelet transform (Mallat pyramid) of one signal. |
+| `wavelet_decompose_matrix` | `(data, wavelet='db4', mode='periodic', level=None)` | Multi-level discrete wavelet transform of every row (curve) of a matrix. |
+| `wavelet_max_level` | `(signal_len, wavelet='db4')` | Maximum useful DWT depth for a signal length and wavelet family. |
+| `wavelet_reconstruct` | `(coeffs, approx=None, details=None)` | Inverse discrete wavelet transform: rebuild a signal from its coefficient pyramid. |
 
 ### `fdars.classification` {#classification}
 
@@ -387,6 +394,7 @@ Functional explainability — SHAP, FCI, GRAD-CAM, and attribution maps.
 | `dfbetas_dffits` | `(data, response, ncomp=3)` | DFBETAS and DFFITS diagnostics. |
 | `domain_selection` | `(data, response, ncomp=3, window_width=5, threshold=0.0)` | Domain selection / interval importance (linear model). |
 | `domain_selection_logistic` | `(data, labels, ncomp=3, window_width=5, threshold=0.0)` | Domain selection / interval importance (logistic model). |
+| `elastic_pfi` | `(scores, y, predict, metric=None, n_repeats=10, seed=42)` | Model-agnostic permutation feature importance over jfPCA (or any) PC scores. |
 | `expected_calibration_error` | `(data, labels, ncomp=3, n_bins=10)` | Expected calibration error (ECE, MCE, ACE). |
 | `explanation_stability` | `(data, response, ncomp=3, n_boot=100, seed=42)` | Bootstrap stability analysis (linear model). |
 | `explanation_stability_logistic` | `(data, labels, ncomp=3, n_boot=100, seed=42)` | Bootstrap stability analysis (logistic model). |
@@ -418,6 +426,7 @@ Functional explainability — SHAP, FCI, GRAD-CAM, and attribution maps.
 | `significant_regions_from_se` | `(beta_t, beta_se, z_alpha=1.96)` | Significant regions from beta(t) and its standard error. |
 | `sobol_indices` | `(data, response, ncomp=3)` | Sobol sensitivity indices (linear model). |
 | `sobol_indices_logistic` | `(data, labels, ncomp=3, n_samples=1000, seed=42)` | Sobol sensitivity indices (logistic model, Saltelli MC). |
+| `veesa_pipeline` | `(data, argvals, y, predict, ncomp=3, balance_c=None, lambda_=0.0, max_iter=20, metric=None, n_repeats=10, seed=42)` | End-to-end VEESA pipeline: jfPCA fit, exact training scores, then elastic PFI. |
 
 ### `fdars.famm` {#famm}
 
@@ -629,8 +638,12 @@ PACE: Principal Analysis by Conditional Expectation for sparse data.
 | Function | Signature | Purpose |
 |----------|-----------|---------|
 | `PyIrregFdata` | `(...)` | Opaque handle wrapping fdars-core IrregFdata for irregular/sparse functional data. |
+| `PyPaceFpcaFit` | `(...)` | Fitted PACE FPCA model handle (from `pace_fpca_fit`), consumed by the optimal-design functions. |
+| `design_criterion` | `(model, selected, criterion='trajectory')` | Score a set of design points (work-grid indices) against a fitted PACE model. |
 | `irreg_fdata_from_lists` | `(argvals_list, values_list)` | Build an IrregFdata handle from two Python lists of ragged 1-D arrays. |
+| `optimal_design` | `(model, budget=1, candidate_grid=None, criterion='trajectory')` | Greedy optimal design: choose the work-grid points that best reduce a PACE criterion. |
 | `pace_fpca` | `(data, ncomp=3, bandwidth=0.1, sigma2=0.01, work_grid=None, alpha=0.05)` | Run PACE FPCA on irregular/sparse functional data. |
+| `pace_fpca_fit` | `(data, ncomp=3, bandwidth=0.1, sigma2=0.01, work_grid=None, alpha=0.05)` | Fit PACE FPCA on sparse data and keep the fitted model as a reusable handle. |
 
 ### `fdars.regression` {#regression}
 
@@ -691,11 +704,19 @@ Scalar-on-function regression with regularisation.
 
 | Function | Signature | Purpose |
 |----------|-----------|---------|
+| `PyLocalPeerFit` | `(...)` | Fitted longitudinal PEER model (from `lpeer`); marginal predictions for new curves. |
+| `PyPeerFit` | `(...)` | Fitted PEER model (from `peer`); predicts scalar responses for new curves. |
+| `PyWcrFit` | `(...)` | Fitted wavelet-domain PCR/PLS model (from `wcr`); predicts responses for new curves. |
+| `PyWnetFit` | `(...)` | Fitted wavelet-domain elastic-net model (from `wnet`); predicts responses for new curves. |
 | `fam` | `(data, y, argvals, scalar_covariates=None, ncomp=0, bandwidth=0.0, kernel='gaussian', n_grid_bandwidth=20)` | Fit a Functional Additive Model (FAM) with a single functional predictor. |
 | `fregre_gkam` | `(predictors, y, argvals_list, scalar_covariates=None, bandwidth=0.0, kernel='gaussian', max_iter=50, epsilon=1e-06)` | Fit a Generalised Kernel Additive Model (GKAM) with multiple functional predictors. |
 | `fregre_gsam` | `(data, y, argvals, scalar_covariates=None, ncomp=0, bandwidth=0.0, kernel='gaussian', n_grid_bandwidth=20)` | Fit a Generalised Structured Additive Model (GSAM) with a single functional predictor. |
+| `lpeer` | `(data, y, argvals, subject_ids, penalty='difference', decree_q=None, lambda_=None)` | Longitudinal PEER: structured-penalty regression with a subject random intercept. |
 | `model_selection_ncomp` | `(data, response, max_comp=10, criterion='gcv')` | Select the optimal number of FPC components for scalar-on-function regression. |
+| `peer` | `(data, y, argvals, penalty='difference', decree_q=None, lambda_=None)` | PEER structured-penalty scalar-on-function regression with GCV / REML / fixed lambda. |
 | `variable_selection` | `(predictors, y, argvals_list, scalar_covariates=None, ncomp=3, penalty='group_lasso', lambda_=0.0, max_iter=100, epsilon=1e-05, lambda_n_grid=20)` | Functional variable selection via group-lasso penalised regression. |
+| `wcr` | `(data, y, wavelet='db4', mode='periodic', level=None, ncomp=5, method='pcr')` | Wavelet-domain scalar-on-function regression (PCR or PLS on DWT coefficients). |
+| `wnet` | `(data, y, wavelet='db4', mode='periodic', level=None, alpha=0.5, lambda_grid=None, n_lambda=50, n_folds=5, seed=0, max_iter=1000, tol=1e-06)` | Wavelet-domain elastic-net scalar-on-function regression with cross-validated lambda. |
 
 ### `fdars.scoring` {#scoring}
 

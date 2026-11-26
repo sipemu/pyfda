@@ -9,6 +9,7 @@ use fdars_core::alignment::{
     WarpOptimMethod,
 };
 use fdars_core::metric::DtwWindow;
+use fdars_core::wavelet::{BoundaryMode, WaveletFamily};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -264,6 +265,45 @@ pub fn affine_config(
     cfg.center_warps = center_warps;
     cfg.optim_tol = optim_tol;
     Ok(cfg)
+}
+
+/// Parse a wavelet name: `"haar"` or `"db1"` to `"db10"` (`"db1"` is Haar).
+pub fn wavelet_family(name: &str) -> PyResult<WaveletFamily> {
+    let bad = || unknown("wavelet", name, "'haar', 'db1' .. 'db10'");
+    if name == "haar" {
+        return Ok(WaveletFamily::Haar);
+    }
+    let order: usize = name
+        .strip_prefix("db")
+        .and_then(|o| o.parse().ok())
+        .ok_or_else(bad)?;
+    WaveletFamily::from_db_order(order).map_err(|_| bad())
+}
+
+/// Canonical name of a wavelet family (`"haar"` or `"dbN"`), the inverse of
+/// [`wavelet_family`].
+pub fn wavelet_family_name(family: &WaveletFamily) -> String {
+    match family {
+        WaveletFamily::Daubechies(n) => format!("db{n}"),
+        _ => "haar".to_string(),
+    }
+}
+
+/// Parse a DWT boundary mode: `"periodic"` or `"symmetric"`.
+pub fn boundary_mode(name: &str) -> PyResult<BoundaryMode> {
+    match name {
+        "periodic" => Ok(BoundaryMode::Periodic),
+        "symmetric" => Ok(BoundaryMode::Symmetric),
+        _ => Err(unknown("mode", name, "'periodic', 'symmetric'")),
+    }
+}
+
+/// Canonical name of a DWT boundary mode, the inverse of [`boundary_mode`].
+pub fn boundary_mode_name(mode: BoundaryMode) -> &'static str {
+    match mode {
+        BoundaryMode::Symmetric => "symmetric",
+        _ => "periodic",
+    }
 }
 
 fn unknown(param: &str, got: &str, valid: &str) -> PyErr {

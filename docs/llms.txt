@@ -1,6 +1,6 @@
 # fdars — Functional Data Analysis for Python
 
-> High-performance functional data analysis toolkit powered by Rust via PyO3. Provides depth measures, basis representations, smoothing, clustering, elastic alignment, regression (scalar-on-function, function-on-scalar, Fréchet), outlier detection, functional time series, seasonal decomposition, SPM control charts, conformal prediction, density FDA, and more. 30 public submodules, 531 public callables.
+> High-performance functional data analysis toolkit powered by Rust via PyO3. Provides depth measures, basis representations, smoothing, clustering, elastic alignment, regression (scalar-on-function, function-on-scalar, Fréchet), outlier detection, functional time series, seasonal decomposition, SPM control charts, conformal prediction, density FDA, and more. 30 public submodules, 552 public callables.
 
 [Documentation](https://sipemu.github.io/pyfda/)
 [Reference](https://sipemu.github.io/pyfda/reference/)
@@ -43,13 +43,14 @@
 
 Each entry: `module.function(signature)` — one-line purpose. Where available, a `When:` note gives guidance on which task this function suits best.
 
-### fdars.alignment (141 functions)
+### fdars.alignment (143 functions)
 
 - `alignment.PyAmplitudeBoxplot(...)` — Opaque handle wrapping a fitted elastic amplitude box plot (AmplitudeBoxplot).
 - `alignment.PyCurveShapeKarcher(...)` — Opaque handle wrapping a curve shape Karcher mean / median (CurveShapeKarcherResult).
 - `alignment.PyCurveShapePca(...)` — Opaque handle wrapping a curve shape PCA (CurveShapePcaResult).
 - `alignment.PyElasticBoxplots(...)` — Opaque handle wrapping a fitted elastic amplitude + phase box plot pair (ElasticBoxplots).
 - `alignment.PyElasticPhaseBoxplot(...)` — Opaque handle wrapping a fitted elastic phase box plot (ElasticPhaseBoxplot).
+- `alignment.PyJfpcaModel(...)` — Trained joint (amplitude + phase) FPCA model (from `jfpca_fit`).
 - `alignment.PySparseElasticMean(...)` — Opaque handle wrapping a sparse-curve elastic mean (SparseElasticMeanResult).
 - `alignment.ab_closure_residual(f, a, b)` — Closure residual c(1) − c(0) of the planar curve an (a, b) F-transform represents.
 - `alignment.ab_elastic_distance_pl(c1, c2, a, b)` — Exact (a, b) elastic distance between two piecewise-linear curves.
@@ -129,6 +130,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `alignment.horiz_fpns(data, argvals, ncomp=3, lambda_=0.0, max_iter=20, tol=0.0001)` — Horizontal Functional Principal Nested Spheres (FPNS) analysis.
 - `alignment.invert_warp(warp, argvals)` — Invert a warping function.
 - `alignment.iterative_shift_registration(data, argvals, template=None, max_iter=5, tol=0.01, step_size=1.0, restrict_domain=False, extrapolation='boundary', initial=None)` — Iterative least-squares shift registration to a template (scikit-fda LeastSquaresShiftRegistration).
+- `alignment.jfpca_fit(data, argvals, ncomp=3, balance_c=None, lambda_=0.0, max_iter=20)` — Fit a reusable joint amplitude + phase FPCA (jfPCA) model for out-of-sample projection.
 - `alignment.joint_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)` — Joint (amplitude + phase) FPCA.
 - `alignment.joint_gauss_model(data, argvals, ncomp=3, n_samples=100, balance_c=1.0, lambda_=0.0, max_iter=20, tol=0.0001, seed=42)` — Generate random curves from a joint Gaussian model preserving amplitude-phase correlation.
 - `alignment.karcher_mean(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)` — Karcher (Frechet) mean under the elastic metric. When: Use when you need the Frechet/Karcher mean of a set of curves under elastic (SRSF) warping.
@@ -187,8 +189,9 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `alignment.warp_smoothness(warp, argvals)` — Warp smoothness (bending energy).
 - `alignment.warp_statistics(gammas, argvals, confidence_level=0.95)` — Warp statistics: mean, variance, confidence bands, Karcher mean warp.
 
-### fdars.basis (16 functions)
+### fdars.basis (21 functions)
 
+- `basis.PyWaveletCoeffs(...)` — Opaque handle holding one multi-level DWT coefficient pyramid.
 - `basis.basis_nbasis_cv(data, argvals, nbasis_min=4, nbasis_max=20, basis_type='bspline', criterion='gcv', n_folds=5, lambda_=0.0)` — Cross-validated selection of number of basis functions. When: Use to select the optimal number of B-spline or Fourier basis functions via leave-one-out CV.
 - `basis.basis_to_fdata_1d(coefficients, argvals, n_basis, basis_type='bspline')` — Reconstruct functional data from basis coefficients. When: Use to convert a coefficient matrix + basis object into a functional data matrix on a target grid.
 - `basis.bspline_basis(argvals, nknots, order=4)` — Evaluate a B-spline basis at given points.
@@ -205,6 +208,10 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `basis.select_fourier_nbasis_gcv(data, argvals, min_nbasis, max_nbasis)` — Select optimal number of Fourier basis functions via GCV.
 - `basis.smooth_basis_aic(data, argvals, n_basis, basis_type='bspline', lfd_order=2, log_lambda_min=Ellipsis, log_lambda_max=4.0, n_grid=25)` — Smooth functional data using basis expansion with AIC-optimal lambda.
 - `basis.smooth_basis_gcv(data, argvals, n_basis, basis_type='bspline', lfd_order=2, log_lambda_min=Ellipsis, log_lambda_max=4.0, n_grid=25)` — Smooth functional data using basis expansion with GCV.
+- `basis.wavelet_decompose(signal, wavelet='db4', mode='periodic', level=None)` — Multi-level orthogonal discrete wavelet transform (Mallat pyramid) of one signal.
+- `basis.wavelet_decompose_matrix(data, wavelet='db4', mode='periodic', level=None)` — Multi-level discrete wavelet transform of every row (curve) of a matrix.
+- `basis.wavelet_max_level(signal_len, wavelet='db4')` — Maximum useful DWT depth for a signal length and wavelet family.
+- `basis.wavelet_reconstruct(coeffs, approx=None, details=None)` — Inverse discrete wavelet transform: rebuild a signal from its coefficient pyramid.
 
 ### fdars.classification (9 functions)
 
@@ -312,7 +319,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `depth.random_tukey_1d(data, ref_data, n_proj=50)` — Random Tukey depth for 1D functional data.
 - `depth.random_tukey_2d(data, ref_data, n_proj=50)` — Random Tukey depth for 2D functional data.
 
-### fdars.explain (46 functions)
+### fdars.explain (48 functions)
 
 - `explain.anchor_explanation(data, response, ncomp=3, observation=0, precision_threshold=0.95, n_bins=4)` — Anchor explanation (linear model).
 - `explain.anchor_explanation_logistic(data, labels, ncomp=3, observation=0, precision_threshold=0.95, n_bins=4)` — Anchor explanation (logistic model).
@@ -329,6 +336,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `explain.dfbetas_dffits(data, response, ncomp=3)` — DFBETAS and DFFITS diagnostics.
 - `explain.domain_selection(data, response, ncomp=3, window_width=5, threshold=0.0)` — Domain selection / interval importance (linear model).
 - `explain.domain_selection_logistic(data, labels, ncomp=3, window_width=5, threshold=0.0)` — Domain selection / interval importance (logistic model).
+- `explain.elastic_pfi(scores, y, predict, metric=None, n_repeats=10, seed=42)` — Model-agnostic permutation feature importance over jfPCA (or any) PC scores.
 - `explain.expected_calibration_error(data, labels, ncomp=3, n_bins=10)` — Expected calibration error (ECE, MCE, ACE).
 - `explain.explanation_stability(data, response, ncomp=3, n_boot=100, seed=42)` — Bootstrap stability analysis (linear model).
 - `explain.explanation_stability_logistic(data, labels, ncomp=3, n_boot=100, seed=42)` — Bootstrap stability analysis (logistic model).
@@ -360,6 +368,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `explain.significant_regions_from_se(beta_t, beta_se, z_alpha=1.96)` — Significant regions from beta(t) and its standard error.
 - `explain.sobol_indices(data, response, ncomp=3)` — Sobol sensitivity indices (linear model).
 - `explain.sobol_indices_logistic(data, labels, ncomp=3, n_samples=1000, seed=42)` — Sobol sensitivity indices (logistic model, Saltelli MC).
+- `explain.veesa_pipeline(data, argvals, y, predict, ncomp=3, balance_c=None, lambda_=0.0, max_iter=20, metric=None, n_repeats=10, seed=42)` — End-to-end VEESA pipeline: jfPCA fit, exact training scores, then elastic PFI.
 
 ### fdars.famm (3 functions)
 
@@ -508,11 +517,15 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `outliers.sequential_transform_outliers(data, transforms, depth_method='modified_band', emp_factor=1.5)` — Sequential transform outlier detection.
 - `outliers.tvdmss(data, emp_factor_mss=1.5, emp_factor_tvd=1.5, central_region_tvd=0.5)` — TVD-MSS functional outlier detection.
 
-### fdars.pace_fpca (3 functions)
+### fdars.pace_fpca (7 functions)
 
 - `pace_fpca.PyIrregFdata(...)` — Opaque handle wrapping fdars-core IrregFdata for irregular/sparse functional data.
+- `pace_fpca.PyPaceFpcaFit(...)` — Fitted PACE FPCA model handle (from `pace_fpca_fit`), consumed by the optimal-design functions.
+- `pace_fpca.design_criterion(model, selected, criterion='trajectory')` — Score a set of design points (work-grid indices) against a fitted PACE model.
 - `pace_fpca.irreg_fdata_from_lists(argvals_list, values_list)` — Build an IrregFdata handle from two Python lists of ragged 1-D arrays.
+- `pace_fpca.optimal_design(model, budget=1, candidate_grid=None, criterion='trajectory')` — Greedy optimal design: choose the work-grid points that best reduce a PACE criterion.
 - `pace_fpca.pace_fpca(data, ncomp=3, bandwidth=0.1, sigma2=0.01, work_grid=None, alpha=0.05)` — Run PACE FPCA on irregular/sparse functional data.
+- `pace_fpca.pace_fpca_fit(data, ncomp=3, bandwidth=0.1, sigma2=0.01, work_grid=None, alpha=0.05)` — Fit PACE FPCA on sparse data and keep the fitted model as a reusable handle.
 
 ### fdars.regression (29 functions)
 
@@ -553,13 +566,21 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `represent.spline_interpolate(data, argvals, query_points, order=4)` — Interpolate functional data onto a new set of query points using B-splines.
 - `represent.spline_interpolate_with_policy(data, argvals, query_points, policy='exception', fill_value=0.0, order=4)` — Interpolate functional data with explicit extrapolation control (spline variant).
 
-### fdars.scalar_on_function (5 functions)
+### fdars.scalar_on_function (13 functions)
 
+- `scalar_on_function.PyLocalPeerFit(...)` — Fitted longitudinal PEER model (from `lpeer`); marginal predictions for new curves.
+- `scalar_on_function.PyPeerFit(...)` — Fitted PEER model (from `peer`); predicts scalar responses for new curves.
+- `scalar_on_function.PyWcrFit(...)` — Fitted wavelet-domain PCR/PLS model (from `wcr`); predicts responses for new curves.
+- `scalar_on_function.PyWnetFit(...)` — Fitted wavelet-domain elastic-net model (from `wnet`); predicts responses for new curves.
 - `scalar_on_function.fam(data, y, argvals, scalar_covariates=None, ncomp=0, bandwidth=0.0, kernel='gaussian', n_grid_bandwidth=20)` — Fit a Functional Additive Model (FAM) with a single functional predictor.
 - `scalar_on_function.fregre_gkam(predictors, y, argvals_list, scalar_covariates=None, bandwidth=0.0, kernel='gaussian', max_iter=50, epsilon=1e-06)` — Fit a Generalised Kernel Additive Model (GKAM) with multiple functional predictors.
 - `scalar_on_function.fregre_gsam(data, y, argvals, scalar_covariates=None, ncomp=0, bandwidth=0.0, kernel='gaussian', n_grid_bandwidth=20)` — Fit a Generalised Structured Additive Model (GSAM) with a single functional predictor.
+- `scalar_on_function.lpeer(data, y, argvals, subject_ids, penalty='difference', decree_q=None, lambda_=None)` — Longitudinal PEER: structured-penalty regression with a subject random intercept.
 - `scalar_on_function.model_selection_ncomp(data, response, max_comp=10, criterion='gcv')` — Select the optimal number of FPC components for scalar-on-function regression.
+- `scalar_on_function.peer(data, y, argvals, penalty='difference', decree_q=None, lambda_=None)` — PEER structured-penalty scalar-on-function regression with GCV / REML / fixed lambda.
 - `scalar_on_function.variable_selection(predictors, y, argvals_list, scalar_covariates=None, ncomp=3, penalty='group_lasso', lambda_=0.0, max_iter=100, epsilon=1e-05, lambda_n_grid=20)` — Functional variable selection via group-lasso penalised regression.
+- `scalar_on_function.wcr(data, y, wavelet='db4', mode='periodic', level=None, ncomp=5, method='pcr')` — Wavelet-domain scalar-on-function regression (PCR or PLS on DWT coefficients).
+- `scalar_on_function.wnet(data, y, wavelet='db4', mode='periodic', level=None, alpha=0.5, lambda_grid=None, n_lambda=50, n_folds=5, seed=0, max_iter=1000, tol=1e-06)` — Wavelet-domain elastic-net scalar-on-function regression with cross-validated lambda.
 
 ### fdars.scoring (5 functions)
 
@@ -667,7 +688,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 
 ## Scientific Provenance & Cross-Language Implementations
 
-Coverage: 28 of 559 callables (including 28 Fdata class methods) have curated primary-paper entries.
+Coverage: 28 of 580 callables (including 28 Fdata class methods) have curated primary-paper entries.
 Uncurated callables are absent from this section. A consumer MAY synthesize
 provenance for uncurated callables but MUST flag each synthesized citation as
 ungrounded (grounded: false) — never present synthesized provenance as curated.
@@ -718,7 +739,7 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `regression.fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 - `regression.predict_fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 
-> 531 of 559 total callables are not yet curated and are absent from this section.
+> 552 of 580 total callables are not yet curated and are absent from this section.
 > A consumer MAY synthesize provenance for these callables but MUST structurally
 > flag each synthesized citation as ungrounded: { "grounded": false } per citation.
 > Never present synthesized provenance as curated data from this file.

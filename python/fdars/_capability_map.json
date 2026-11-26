@@ -138,6 +138,10 @@
       "purpose": "Opaque handle wrapping a fitted elastic phase box plot (ElasticPhaseBoxplot).",
       "sig": "(...)"
     },
+    "PyJfpcaModel": {
+      "purpose": "Trained joint (amplitude + phase) FPCA model (from `jfpca_fit`).",
+      "sig": "(...)"
+    },
     "PySparseElasticMean": {
       "purpose": "Opaque handle wrapping a sparse-curve elastic mean (SparseElasticMeanResult).",
       "sig": "(...)"
@@ -455,6 +459,10 @@
       "purpose": "Iterative least-squares shift registration to a template (scikit-fda LeastSquaresShiftRegistration).",
       "sig": "(data, argvals, template=None, max_iter=5, tol=0.01, step_size=1.0, restrict_domain=False, extrapolation='boundary', initial=None)"
     },
+    "jfpca_fit": {
+      "purpose": "Fit a reusable joint amplitude + phase FPCA (jfPCA) model for out-of-sample projection.",
+      "sig": "(data, argvals, ncomp=3, balance_c=None, lambda_=0.0, max_iter=20)"
+    },
     "joint_fpca": {
       "purpose": "Joint (amplitude + phase) FPCA.",
       "sig": "(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)"
@@ -686,6 +694,10 @@
     }
   },
   "basis": {
+    "PyWaveletCoeffs": {
+      "purpose": "Opaque handle holding one multi-level DWT coefficient pyramid.",
+      "sig": "(...)"
+    },
     "basis_nbasis_cv": {
       "purpose": "Cross-validated selection of number of basis functions.",
       "sig": "(data, argvals, nbasis_min=4, nbasis_max=20, basis_type='bspline', criterion='gcv', n_folds=5, lambda_=0.0)",
@@ -751,6 +763,22 @@
     "smooth_basis_gcv": {
       "purpose": "Smooth functional data using basis expansion with GCV.",
       "sig": "(data, argvals, n_basis, basis_type='bspline', lfd_order=2, log_lambda_min=Ellipsis, log_lambda_max=4.0, n_grid=25)"
+    },
+    "wavelet_decompose": {
+      "purpose": "Multi-level orthogonal discrete wavelet transform (Mallat pyramid) of one signal.",
+      "sig": "(signal, wavelet='db4', mode='periodic', level=None)"
+    },
+    "wavelet_decompose_matrix": {
+      "purpose": "Multi-level discrete wavelet transform of every row (curve) of a matrix.",
+      "sig": "(data, wavelet='db4', mode='periodic', level=None)"
+    },
+    "wavelet_max_level": {
+      "purpose": "Maximum useful DWT depth for a signal length and wavelet family.",
+      "sig": "(signal_len, wavelet='db4')"
+    },
+    "wavelet_reconstruct": {
+      "purpose": "Inverse discrete wavelet transform: rebuild a signal from its coefficient pyramid.",
+      "sig": "(coeffs, approx=None, details=None)"
     }
   },
   "classification": {
@@ -1172,6 +1200,10 @@
       "purpose": "Domain selection / interval importance (logistic model).",
       "sig": "(data, labels, ncomp=3, window_width=5, threshold=0.0)"
     },
+    "elastic_pfi": {
+      "purpose": "Model-agnostic permutation feature importance over jfPCA (or any) PC scores.",
+      "sig": "(scores, y, predict, metric=None, n_repeats=10, seed=42)"
+    },
     "expected_calibration_error": {
       "purpose": "Expected calibration error (ECE, MCE, ACE).",
       "sig": "(data, labels, ncomp=3, n_bins=10)"
@@ -1295,6 +1327,10 @@
     "sobol_indices_logistic": {
       "purpose": "Sobol sensitivity indices (logistic model, Saltelli MC).",
       "sig": "(data, labels, ncomp=3, n_samples=1000, seed=42)"
+    },
+    "veesa_pipeline": {
+      "purpose": "End-to-end VEESA pipeline: jfPCA fit, exact training scores, then elastic PFI.",
+      "sig": "(data, argvals, y, predict, ncomp=3, balance_c=None, lambda_=0.0, max_iter=20, metric=None, n_repeats=10, seed=42)"
     }
   },
   "famm": {
@@ -1809,12 +1845,28 @@
       "purpose": "Opaque handle wrapping fdars-core IrregFdata for irregular/sparse functional data.",
       "sig": "(...)"
     },
+    "PyPaceFpcaFit": {
+      "purpose": "Fitted PACE FPCA model handle (from `pace_fpca_fit`), consumed by the optimal-design functions.",
+      "sig": "(...)"
+    },
+    "design_criterion": {
+      "purpose": "Score a set of design points (work-grid indices) against a fitted PACE model.",
+      "sig": "(model, selected, criterion='trajectory')"
+    },
     "irreg_fdata_from_lists": {
       "purpose": "Build an IrregFdata handle from two Python lists of ragged 1-D arrays.",
       "sig": "(argvals_list, values_list)"
     },
+    "optimal_design": {
+      "purpose": "Greedy optimal design: choose the work-grid points that best reduce a PACE criterion.",
+      "sig": "(model, budget=1, candidate_grid=None, criterion='trajectory')"
+    },
     "pace_fpca": {
       "purpose": "Run PACE FPCA on irregular/sparse functional data.",
+      "sig": "(data, ncomp=3, bandwidth=0.1, sigma2=0.01, work_grid=None, alpha=0.05)"
+    },
+    "pace_fpca_fit": {
+      "purpose": "Fit PACE FPCA on sparse data and keep the fitted model as a reusable handle.",
       "sig": "(data, ncomp=3, bandwidth=0.1, sigma2=0.01, work_grid=None, alpha=0.05)"
     }
   },
@@ -1957,6 +2009,22 @@
     }
   },
   "scalar_on_function": {
+    "PyLocalPeerFit": {
+      "purpose": "Fitted longitudinal PEER model (from `lpeer`); marginal predictions for new curves.",
+      "sig": "(...)"
+    },
+    "PyPeerFit": {
+      "purpose": "Fitted PEER model (from `peer`); predicts scalar responses for new curves.",
+      "sig": "(...)"
+    },
+    "PyWcrFit": {
+      "purpose": "Fitted wavelet-domain PCR/PLS model (from `wcr`); predicts responses for new curves.",
+      "sig": "(...)"
+    },
+    "PyWnetFit": {
+      "purpose": "Fitted wavelet-domain elastic-net model (from `wnet`); predicts responses for new curves.",
+      "sig": "(...)"
+    },
     "fam": {
       "purpose": "Fit a Functional Additive Model (FAM) with a single functional predictor.",
       "sig": "(data, y, argvals, scalar_covariates=None, ncomp=0, bandwidth=0.0, kernel='gaussian', n_grid_bandwidth=20)"
@@ -1969,13 +2037,29 @@
       "purpose": "Fit a Generalised Structured Additive Model (GSAM) with a single functional predictor.",
       "sig": "(data, y, argvals, scalar_covariates=None, ncomp=0, bandwidth=0.0, kernel='gaussian', n_grid_bandwidth=20)"
     },
+    "lpeer": {
+      "purpose": "Longitudinal PEER: structured-penalty regression with a subject random intercept.",
+      "sig": "(data, y, argvals, subject_ids, penalty='difference', decree_q=None, lambda_=None)"
+    },
     "model_selection_ncomp": {
       "purpose": "Select the optimal number of FPC components for scalar-on-function regression.",
       "sig": "(data, response, max_comp=10, criterion='gcv')"
     },
+    "peer": {
+      "purpose": "PEER structured-penalty scalar-on-function regression with GCV / REML / fixed lambda.",
+      "sig": "(data, y, argvals, penalty='difference', decree_q=None, lambda_=None)"
+    },
     "variable_selection": {
       "purpose": "Functional variable selection via group-lasso penalised regression.",
       "sig": "(predictors, y, argvals_list, scalar_covariates=None, ncomp=3, penalty='group_lasso', lambda_=0.0, max_iter=100, epsilon=1e-05, lambda_n_grid=20)"
+    },
+    "wcr": {
+      "purpose": "Wavelet-domain scalar-on-function regression (PCR or PLS on DWT coefficients).",
+      "sig": "(data, y, wavelet='db4', mode='periodic', level=None, ncomp=5, method='pcr')"
+    },
+    "wnet": {
+      "purpose": "Wavelet-domain elastic-net scalar-on-function regression with cross-validated lambda.",
+      "sig": "(data, y, wavelet='db4', mode='periodic', level=None, alpha=0.5, lambda_grid=None, n_lambda=50, n_folds=5, seed=0, max_iter=1000, tol=1e-06)"
     }
   },
   "scoring": {

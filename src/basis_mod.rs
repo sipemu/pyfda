@@ -1,8 +1,12 @@
 //! Basis representations and smoothing for functional data.
 
 use crate::convert::*;
+use crate::options::{boundary_mode, boundary_mode_name, wavelet_family, wavelet_family_name};
+use fdars_core::wavelet::WaveletCoeffs;
 use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use pyo3::types::{PyDict, PyList};
 
 /// Evaluate the constant (intercept) basis on a grid of evaluation points.
 ///
@@ -761,6 +765,259 @@ pub fn select_fourier_nbasis_gcv(
     ))
 }
 
+// ---------------------------------------------------------------------------
+// Wavelet DWT primitive
+// ---------------------------------------------------------------------------
+
+/// Opaque handle holding one multi-level DWT coefficient pyramid.
+///
+/// Produced by `wavelet_decompose` / `wavelet_decompose_matrix`; inverted by
+/// `wavelet_reconstruct`. The handle keeps the per-level bookkeeping the
+/// inverse transform needs, which plain arrays cannot carry.
+#[pyclass(name = "PyWaveletCoeffs")]
+pub struct PyWaveletCoeffs {
+    pub inner: WaveletCoeffs,
+}
+
+#[pymethods]
+impl PyWaveletCoeffs {
+    /// Final coarse approximation band.
+    #[getter]
+    pub fn approx<'py>(&self, py: Python<'py>) -> Bound<'py, PyArray1<f64>> {
+        vec_to_numpy1d(py, self.inner.approx().to_vec())
+    }
+
+    /// Detail bands, finest-first (``details[0]`` is level 1).
+    #[getter]
+    pub fn details<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyList>> {
+        details_list(py, &self.inner)
+    }
+
+    /// Number of decomposition levels.
+    #[getter]
+    pub fn levels(&self) -> usize {
+        self.inner.levels()
+    }
+
+    /// Length of the original signal.
+    #[getter]
+    pub fn signal_len(&self) -> usize {
+        self.inner.signal_len()
+    }
+
+    /// Wavelet family name (``"haar"`` or ``"dbN"``).
+    #[getter]
+    pub fn wavelet(&self) -> String {
+        wavelet_family_name(self.inner.family())
+    }
+
+    /// Boundary mode name (``"periodic"`` or ``"symmetric"``).
+    #[getter]
+    pub fn mode(&self) -> &'static str {
+        boundary_mode_name(self.inner.mode())
+    }
+}
+
+fn details_list<'py>(py: Python<'py>, c: &WaveletCoeffs) -> PyResult<Bound<'py, PyList>> {
+    let list = PyList::empty(py);
+    for level in 0..c.levels() {
+        let band = c.detail(level).unwrap_or(&[]).to_vec();
+        list.append(vec_to_numpy1d(py, band))?;
+    }
+    Ok(list)
+}
+
+fn wavelet_coeffs_dict<'py>(py: Python<'py>, c: WaveletCoeffs) -> PyResult<Bound<'py, PyDict>> {
+    let dict = PyDict::new(py);
+    dict.set_item("approx", vec_to_numpy1d(py, c.approx().to_vec()))?;
+    dict.set_item("details", details_list(py, &c)?)?;
+    dict.set_item("levels", c.levels())?;
+    dict.set_item("signal_len", c.signal_len())?;
+    dict.set_item("wavelet", wavelet_family_name(c.family()))?;
+    dict.set_item("mode", boundary_mode_name(c.mode()))?;
+    dict.set_item("coeffs", Py::new(py, PyWaveletCoeffs { inner: c })?)?;
+    Ok(dict)
+}
+
+/// Multi-level orthogonal discrete wavelet transform (Mallat pyramid) of one signal.
+///
+/// Parameters
+/// ----------
+/// signal : numpy.ndarray
+///     Signal, length n (any length; odd lengths are handled by the boundary mode).
+/// wavelet : str, optional
+///     ``"haar"`` or ``"db1"`` .. ``"db10"`` (default ``"db4"``; ``"db1"`` is Haar).
+/// mode : str, optional
+///     Boundary extension: ``"periodic"`` (default) or ``"symmetric"``.
+/// level : int, optional
+///     Decomposition depth in ``1..=wavelet_max_level(n, wavelet)``;
+///     None (default) uses the maximum useful level.
+///
+/// Returns
+/// -------
+/// dict
+///     ``approx`` (coarsest approximation band), ``details`` (list of detail
+///     bands, finest-first: ``details[0]`` is level 1), ``levels``,
+///     ``signal_len``, ``wavelet``, ``mode`` and ``coeffs`` (a
+///     ``PyWaveletCoeffs`` handle for ``wavelet_reconstruct``).
+///
+/// Raises
+/// ------
+/// ValueError
+///     For an empty signal, an unknown wavelet / mode, or an invalid level.
+#[pyfunction]
+#[pyo3(signature = (signal, wavelet="db4", mode="periodic", level=None))]
+pub fn wavelet_decompose<'py>(
+    py: Python<'py>,
+    signal: PyReadonlyArray1<'py, f64>,
+    wavelet: &str,
+    mode: &str,
+    level: Option<usize>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let family = wavelet_family(wavelet)?;
+    let mode = boundary_mode(mode)?;
+    let sig = numpy1d_to_vec(signal);
+    let c = to_pyresult(fdars_core::wavelet::decompose(&sig, family, mode, level))?;
+    wavelet_coeffs_dict(py, c)
+}
+
+/// Multi-level discrete wavelet transform of every row (curve) of a matrix.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Curves, shape (n, m); each row is transformed independently.
+/// wavelet : str, optional
+///     ``"haar"`` or ``"db1"`` .. ``"db10"`` (default ``"db4"``).
+/// mode : str, optional
+///     ``"periodic"`` (default) or ``"symmetric"``.
+/// level : int, optional
+///     Decomposition depth; None (default) uses the maximum useful level.
+///
+/// Returns
+/// -------
+/// list of dict
+///     One dict per row, with the keys of ``wavelet_decompose``.
+///
+/// Raises
+/// ------
+/// ValueError
+///     For an empty matrix, an unknown wavelet / mode, or an invalid level.
+#[pyfunction]
+#[pyo3(signature = (data, wavelet="db4", mode="periodic", level=None))]
+pub fn wavelet_decompose_matrix<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    wavelet: &str,
+    mode: &str,
+    level: Option<usize>,
+) -> PyResult<Bound<'py, PyList>> {
+    let family = wavelet_family(wavelet)?;
+    let mode = boundary_mode(mode)?;
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let all = to_pyresult(fdars_core::wavelet::decompose_matrix(
+        &mat, family, mode, level,
+    ))?;
+    let list = PyList::empty(py);
+    for c in all {
+        list.append(wavelet_coeffs_dict(py, c)?)?;
+    }
+    Ok(list)
+}
+
+/// Inverse discrete wavelet transform: rebuild a signal from its coefficient pyramid.
+///
+/// Parameters
+/// ----------
+/// coeffs : PyWaveletCoeffs
+///     Handle from ``wavelet_decompose`` (``result["coeffs"]``).
+/// approx : numpy.ndarray, optional
+///     Replacement approximation band (same length as ``coeffs.approx``).
+///     None (default) keeps the stored band.
+/// details : list of numpy.ndarray, optional
+///     Replacement detail bands, finest-first, one per level with the stored
+///     lengths (e.g. thresholded bands for wavelet denoising). None (default)
+///     keeps the stored bands.
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     Reconstructed signal, length ``coeffs.signal_len``. Without replacements
+///     this reproduces the decomposed signal to rounding error.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If a replacement band has the wrong count or length.
+#[pyfunction]
+#[pyo3(signature = (coeffs, approx=None, details=None))]
+pub fn wavelet_reconstruct<'py>(
+    py: Python<'py>,
+    coeffs: &PyWaveletCoeffs,
+    approx: Option<PyReadonlyArray1<'py, f64>>,
+    details: Option<Vec<PyReadonlyArray1<'py, f64>>>,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    let mut c = coeffs.inner.clone();
+    if let Some(a) = approx {
+        let a = numpy1d_to_vec(a);
+        if a.len() != c.approx.len() {
+            return Err(PyValueError::new_err(format!(
+                "approx must have length {}, got {}",
+                c.approx.len(),
+                a.len()
+            )));
+        }
+        c.approx = a;
+    }
+    if let Some(d) = details {
+        if d.len() != c.details.len() {
+            return Err(PyValueError::new_err(format!(
+                "details must hold {} bands (one per level), got {}",
+                c.details.len(),
+                d.len()
+            )));
+        }
+        for (level, band) in d.into_iter().enumerate() {
+            let band = numpy1d_to_vec(band);
+            if band.len() != c.details[level].len() {
+                return Err(PyValueError::new_err(format!(
+                    "details[{level}] must have length {}, got {}",
+                    c.details[level].len(),
+                    band.len()
+                )));
+            }
+            c.details[level] = band;
+        }
+    }
+    let signal = to_pyresult(fdars_core::wavelet::reconstruct(&c))?;
+    Ok(vec_to_numpy1d(py, signal))
+}
+
+/// Maximum useful DWT depth for a signal length and wavelet family.
+///
+/// Parameters
+/// ----------
+/// signal_len : int
+///     Signal length n.
+/// wavelet : str, optional
+///     ``"haar"`` or ``"db1"`` .. ``"db10"`` (default ``"db4"``).
+///
+/// Returns
+/// -------
+/// int
+///     ``floor(log2(n / (filter_len - 1)))``; for Haar ``floor(log2(n))``.
+///
+/// Raises
+/// ------
+/// ValueError
+///     If the signal is too short for one level or the wavelet is unknown.
+#[pyfunction]
+#[pyo3(signature = (signal_len, wavelet="db4"))]
+pub fn wavelet_max_level(signal_len: usize, wavelet: &str) -> PyResult<usize> {
+    let family = wavelet_family(wavelet)?;
+    to_pyresult(fdars_core::wavelet::max_level(signal_len, &family))
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(constant_basis, m)?)?;
     m.add_function(wrap_pyfunction!(fdata_to_basis_1d, m)?)?;
@@ -778,5 +1035,10 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(construct_bspline_knots, m)?)?;
     m.add_function(wrap_pyfunction!(fourier_fit_1d, m)?)?;
     m.add_function(wrap_pyfunction!(select_fourier_nbasis_gcv, m)?)?;
+    m.add_class::<PyWaveletCoeffs>()?;
+    m.add_function(wrap_pyfunction!(wavelet_decompose, m)?)?;
+    m.add_function(wrap_pyfunction!(wavelet_decompose_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(wavelet_reconstruct, m)?)?;
+    m.add_function(wrap_pyfunction!(wavelet_max_level, m)?)?;
     Ok(())
 }

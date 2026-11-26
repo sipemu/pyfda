@@ -1,8 +1,15 @@
 //! Explainability methods for functional regression models.
 
 use crate::convert::*;
-use numpy::{PyArray1, PyReadonlyArray1, PyReadonlyArray2};
+use crate::jfpca_mod::{jfpca_model_dict, jfpca_transform_dict, PyJfpcaModel};
+use fdars_core::elastic_pfi::{ElasticPfiResult, PfiMetric};
+use fdars_core::matrix::FdMatrix;
+use fdars_core::FdarError;
+use numpy::{AllowTypeChange, PyArray1, PyArrayLike1, PyReadonlyArray1, PyReadonlyArray2};
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
+use std::sync::{Arc, Mutex};
 
 /// FPC-based permutation importance.
 ///
@@ -2274,6 +2281,265 @@ pub fn andrews_loadings<'py>(
     Ok(dict)
 }
 
+// ---------------------------------------------------------------------------
+// Elastic PFI / VEESA (fdars-core 0.48 `elastic_pfi`)
+// ---------------------------------------------------------------------------
+
+type PyErrSlot = Arc<Mutex<Option<PyErr>>>;
+
+fn store_err(slot: &PyErrSlot, e: PyErr) {
+    if let Ok(mut g) = slot.lock() {
+        g.get_or_insert(e);
+    }
+}
+
+fn has_err(slot: &PyErrSlot) -> bool {
+    slot.lock().map(|g| g.is_some()).unwrap_or(true)
+}
+
+fn take_err(slot: &PyErrSlot) -> Option<PyErr> {
+    slot.lock().ok().and_then(|mut g| g.take())
+}
+
+/// `"mse" | "mae" | "accuracy"` (None = `"mse"`) or a callable
+/// `f(y_true, y_pred) -> float` (higher is better) → `PfiMetric`. A callable's
+/// exception is parked in `slot` and re-raised after the core call.
+fn pfi_metric(metric: Option<&Bound<'_, PyAny>>, slot: &PyErrSlot) -> PyResult<PfiMetric> {
+    let Some(obj) = metric else {
+        return Ok(PfiMetric::Mse);
+    };
+    if let Ok(name) = obj.extract::<String>() {
+        return match name.as_str() {
+            "mse" => Ok(PfiMetric::Mse),
+            "mae" => Ok(PfiMetric::Mae),
+            "accuracy" => Ok(PfiMetric::Accuracy),
+            _ => Err(PyValueError::new_err(format!(
+                "metric must be 'mse', 'mae', 'accuracy' or a callable, got '{name}'"
+            ))),
+        };
+    }
+    if !obj.is_callable() {
+        return Err(PyValueError::new_err(
+            "metric must be 'mse', 'mae', 'accuracy' or a callable",
+        ));
+    }
+    let f: Py<PyAny> = obj.clone().unbind();
+    let slot = Arc::clone(slot);
+    Ok(PfiMetric::Custom(Arc::new(
+        move |y_true: &[f64], y_pred: &[f64]| -> f64 {
+            if has_err(&slot) {
+                return f64::NAN;
+            }
+            Python::attach(|py| {
+                match f
+                    .bind(py)
+                    .call1((
+                        PyArray1::from_slice(py, y_true),
+                        PyArray1::from_slice(py, y_pred),
+                    ))
+                    .and_then(|r| r.extract::<f64>())
+                {
+                    Ok(v) => v,
+                    Err(e) => {
+                        store_err(&slot, e);
+                        f64::NAN
+                    }
+                }
+            })
+        },
+    )))
+}
+
+/// Run `run` with a Rust predictor that calls the Python `predict(scores (n, k)) -> (n,)`.
+///
+/// The first exception (from `predict` or a callable `metric`), or a result
+/// of the wrong length, is re-raised after the core call returns.
+fn with_predict<'py, R>(
+    py: Python<'py>,
+    predict: &Bound<'py, PyAny>,
+    slot: &PyErrSlot,
+    run: impl FnOnce(&dyn Fn(&FdMatrix) -> Vec<f64>) -> Result<R, FdarError>,
+) -> PyResult<R> {
+    if !predict.is_callable() {
+        return Err(PyValueError::new_err(
+            "predict must be a callable mapping scores (n, ncomp) to predictions (n,)",
+        ));
+    }
+    let f = |x: &FdMatrix| -> Vec<f64> {
+        let n = x.nrows();
+        if has_err(slot) {
+            return vec![f64::NAN; n];
+        }
+        let out = predict.call1((fdmatrix_to_numpy2d(py, x),)).and_then(|r| {
+            r.extract::<PyArrayLike1<'py, f64, AllowTypeChange>>()
+                .map(|a| a.as_array().to_vec())
+        });
+        match out {
+            Ok(v) if v.len() == n => v,
+            Ok(v) => {
+                store_err(
+                    slot,
+                    PyValueError::new_err(format!(
+                        "predict must return {n} predictions (one per row of scores), got {}",
+                        v.len()
+                    )),
+                );
+                vec![f64::NAN; n]
+            }
+            Err(e) => {
+                store_err(slot, e);
+                vec![f64::NAN; n]
+            }
+        }
+    };
+    let res = run(&f);
+    if let Some(e) = take_err(slot) {
+        return Err(e);
+    }
+    to_pyresult(res)
+}
+
+fn elastic_pfi_dict<'py>(py: Python<'py>, r: &ElasticPfiResult) -> PyResult<Bound<'py, PyDict>> {
+    let dict = PyDict::new(py);
+    dict.set_item("importance", vec_to_numpy1d(py, r.importance.clone()))?;
+    dict.set_item("baseline_metric", r.baseline_metric)?;
+    dict.set_item(
+        "permuted_metric",
+        vec_to_numpy1d(py, r.permuted_metric.clone()),
+    )?;
+    Ok(dict)
+}
+
+/// Model-agnostic permutation feature importance over jfPCA (or any) PC scores.
+///
+/// Permutes each score column in turn and measures the change in the metric
+/// of the caller's predictor, so any external model (e.g. a scikit-learn
+/// regressor fitted on ``jfpca_fit(...)["scores"]``) can be explained.
+///
+/// Parameters
+/// ----------
+/// scores : numpy.ndarray
+///     Score matrix, shape (n, ncomp), e.g. ``model.score_training()["scores"]``.
+/// y : numpy.ndarray
+///     Response, length n.
+/// predict : callable
+///     ``predict(scores (n, ncomp)) -> predictions (n,)``, e.g. ``reg.predict``.
+///     Called once on the unpermuted scores and ``n_repeats`` times per
+///     component; an exception it raises propagates unchanged.
+/// metric : str or callable, optional
+///     ``"mse"`` (None, the default), ``"mae"``, ``"accuracy"`` (fraction of
+///     ``round(pred) == y``) or ``f(y_true, y_pred) -> float`` (higher = better).
+/// n_repeats : int, optional
+///     Permutations per component (default 10, >= 1).
+/// seed : int, optional
+///     RNG seed (default 42).
+///
+/// Returns
+/// -------
+/// dict
+///     ``importance`` (ncomp,) = ``baseline_metric - permuted_metric``,
+///     ``baseline_metric`` and ``permuted_metric`` (ncomp,). For the loss
+///     metrics ``"mse"`` / ``"mae"`` an informative component has a
+///     **negative** importance; for ``"accuracy"`` and callables a positive one.
+///
+/// Raises
+/// ------
+/// ValueError
+///     For empty scores, ``len(y) != n``, ``n_repeats == 0``, an unknown
+///     metric, or a ``predict`` result of the wrong length.
+#[pyfunction]
+#[pyo3(signature = (scores, y, predict, metric=None, n_repeats=10, seed=42))]
+pub fn elastic_pfi<'py>(
+    py: Python<'py>,
+    scores: PyReadonlyArray2<'py, f64>,
+    y: PyReadonlyArray1<'py, f64>,
+    predict: &Bound<'py, PyAny>,
+    metric: Option<&Bound<'py, PyAny>>,
+    n_repeats: usize,
+    seed: u64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let slot: PyErrSlot = Arc::new(Mutex::new(None));
+    let metric = pfi_metric(metric, &slot)?;
+    let mat = numpy2d_to_fdmatrix(scores)?;
+    let yv = numpy1d_to_vec(y);
+    let r = with_predict(py, predict, &slot, |f| {
+        fdars_core::elastic_pfi::elastic_pfi(&mat, &yv, f, &metric, n_repeats, seed)
+    })?;
+    elastic_pfi_dict(py, &r)
+}
+
+/// End-to-end VEESA pipeline: jfPCA fit, exact training scores, then elastic PFI.
+///
+/// ``predict`` receives the jfPCA training scores, so it must already be a
+/// model of those scores (e.g. a closure over known coefficients). The usual
+/// two-step alternative is ``alignment.jfpca_fit`` → fit any model on
+/// ``model.score_training()["scores"]`` → ``elastic_pfi``.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Curves, shape (n, m).
+/// argvals : numpy.ndarray
+///     Evaluation grid, length m.
+/// y : numpy.ndarray
+///     Response, length n.
+/// predict : callable
+///     ``predict(scores (n, ncomp)) -> predictions (n,)``.
+/// ncomp, balance_c, lambda_, max_iter
+///     As in ``alignment.jfpca_fit`` (defaults 3, None, 0.0, 20).
+/// metric, n_repeats, seed
+///     As in ``elastic_pfi`` (defaults None = ``"mse"``, 10, 42).
+///
+/// Returns
+/// -------
+/// dict
+///     ``model`` (``alignment.PyJfpcaModel``), ``jfpca`` (the ``jfpca_fit``
+///     dict without ``model``), ``training_scores`` (``{scores, aligned,
+///     warping}``) and ``pfi`` (the ``elastic_pfi`` dict).
+///
+/// Raises
+/// ------
+/// ValueError
+///     Propagated from the jfPCA fit and ``elastic_pfi``; an exception raised
+///     by ``predict`` or a callable ``metric`` propagates unchanged.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, y, predict, ncomp=3, balance_c=None, lambda_=0.0, max_iter=20, metric=None, n_repeats=10, seed=42))]
+pub fn veesa_pipeline<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    y: PyReadonlyArray1<'py, f64>,
+    predict: &Bound<'py, PyAny>,
+    ncomp: usize,
+    balance_c: Option<f64>,
+    lambda_: f64,
+    max_iter: usize,
+    metric: Option<&Bound<'py, PyAny>>,
+    n_repeats: usize,
+    seed: u64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let slot: PyErrSlot = Arc::new(Mutex::new(None));
+    let metric = pfi_metric(metric, &slot)?;
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let yv = numpy1d_to_vec(y);
+    let r = with_predict(py, predict, &slot, |f| {
+        fdars_core::elastic_pfi::veesa_pipeline(
+            &mat, &av, ncomp, balance_c, lambda_, max_iter, &yv, f, &metric, n_repeats, seed,
+        )
+    })?;
+
+    let dict = PyDict::new(py);
+    dict.set_item("jfpca", jfpca_model_dict(py, &r.model)?)?;
+    dict.set_item(
+        "training_scores",
+        jfpca_transform_dict(py, &r.training_scores)?,
+    )?;
+    dict.set_item("pfi", elastic_pfi_dict(py, &r.pfi)?)?;
+    dict.set_item("model", Py::new(py, PyJfpcaModel { inner: r.model })?)?;
+    Ok(dict)
+}
+
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(andrews_transform, m)?)?;
     m.add_function(wrap_pyfunction!(andrews_loadings, m)?)?;
@@ -2324,5 +2590,7 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(explanation_stability_logistic, m)?)?;
     m.add_function(wrap_pyfunction!(anchor_explanation, m)?)?;
     m.add_function(wrap_pyfunction!(anchor_explanation_logistic, m)?)?;
+    m.add_function(wrap_pyfunction!(elastic_pfi, m)?)?;
+    m.add_function(wrap_pyfunction!(veesa_pipeline, m)?)?;
     Ok(())
 }
