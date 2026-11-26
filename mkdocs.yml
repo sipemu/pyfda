@@ -117,9 +117,12 @@ nav:
     - Advanced Elastic Alignment: align/advanced-alignment.md
     - TSRVF: align/tsrvf.md
     - Shape Analysis (1-D): align/shape-analysis.md
-    # Docs batches 4-5 insert here (plan §3.1): curve-shapes, sparse-elastic,
-    # expfam-registration, pairwise-synchronization, bayesian-alignment, dtw,
-    # alignment-inference; keep Comparing Methods last.
+    - Shapes of Curves in R^d: align/curve-shapes.md
+    - Sparse & Irregular Curves: align/sparse-elastic.md
+    - Non-Gaussian Registration: align/expfam-registration.md
+    - Pairwise Synchronisation: align/pairwise-synchronization.md
+    - Bayesian Alignment: align/bayesian-alignment.md
+    # Docs batch 5 inserts here: dtw, alignment-inference; keep Comparing Methods last.
     - Comparing Methods: align/alignment-comparison.md
   - Regression:
     - regression/index.md

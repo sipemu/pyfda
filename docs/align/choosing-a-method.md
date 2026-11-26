@@ -30,13 +30,13 @@ The classes are nested only loosely: shift ⊂ affine ⊂ $\Gamma$ (all increasi
 
 **Q0. What is one observation?**
 
-- **A curve in $\mathbb{R}^d$** (an outline, a trajectory, handwriting), where rotation, scale or starting point are nuisance: use the shape-space functions `curve_shape_*` (with `closed=True` for contours, and `warp_optim={"method": "rbfgs"}` with `align_iter >= 4` for an accurate reparametrisation). When bending and stretching should cost differently, pass `metric="elastic"` with weights `a`, `b` (planar curves). For small polygons where an exact distance matters, `ab_elastic_distance_pl`. For a few irregularly placed points per curve, `sparse_elastic_align_pair` / `sparse_elastic_mean`. These are covered on the forthcoming *Shapes of Curves in R^d* and *Sparse & Irregular Curves* pages.
+- **A curve in $\mathbb{R}^d$** (an outline, a trajectory, handwriting), where rotation, scale or starting point are nuisance: use the shape-space functions `curve_shape_*` (with `closed=True` for contours, and `warp_optim={"method": "rbfgs"}` with `align_iter >= 4` for an accurate reparametrisation). When bending and stretching should cost differently, pass `metric="elastic"` with weights `a`, `b` (planar curves). For small polygons where an exact distance matters, `ab_elastic_distance_pl`. For a few irregularly placed points per curve, `sparse_elastic_align_pair` / `sparse_elastic_mean`. See [Shapes of Curves in R^d](curve-shapes.md) and [Sparse & Irregular Curves](sparse-elastic.md).
 - **A discrete time series** (possibly of different lengths) where the goal is nearest-neighbour search, classification or clustering, not a warp model: the DTW family (`dtw_*`, `soft_dtw_*`, the elastic time-series distances in `fdars.metric`). DTW returns a *cost*, not a metric.
 - **A real-valued function on a common interval**: go to Q1.
 
 **Q1. What kind of values?**
 
-- **Binary, counts or positive-skewed** (on/off activity, spike counts): `register_fpca(family="binomial" | "poisson" | "gamma")` registers on the likelihood scale and estimates a generalised FPCA jointly.
+- **Binary, counts or positive-skewed** (on/off activity, spike counts): `register_fpca(family="binomial" | "poisson" | "gamma")` registers on the likelihood scale and estimates a generalised FPCA jointly ([Non-Gaussian Registration](expfam-registration.md)).
 - **Irregular grids or curves cut off at the start or end**: `register_fpca(incompleteness=...)`; to *predict* the unobserved rest with finite-sample guarantees, the partial-curve conformal tools in `fdars.conformal`.
 - **Dense, roughly Gaussian, shared grid**: go to Q2.
 
@@ -51,8 +51,8 @@ The classes are nested only loosely: shift ⊂ affine ⊂ $\Gamma$ (all increasi
 | Features must be pinned, but the timing between them is free | `elastic_align_pair_constrained_with_config(method="rbfgs")` | [Landmark](landmark-registration.md#landmarks-elastic-between-them) |
 | Smooth non-linear phase, classical FDA workflow, amplitude scale varies between curves | `continuous_registration` (`periodic=True` for cyclic data, `r_defaults=True` for R parity) | [Continuous](continuous-registration.md) |
 | General non-linear phase; you need a metric, an amplitude/phase split, elastic FPCA or regression | `karcher_mean_with_config` (DP by default; `method="rbfgs"` with a penalty for smooth warps) | [Elastic](elastic-alignment.md), [Optimisers](elastic-optimisers.md) |
-| No trustworthy template, strongly heterogeneous sample | `pairwise_synchronization` (Tang–Müller) | forthcoming *Pairwise Synchronisation* page |
-| You must report uncertainty in the warps or the template | `bayesian_align_group` (`sampler="infhmc"`, several chains) | forthcoming *Bayesian Alignment* page |
+| Noisy curves or no trustworthy template; simple, low-dimensional phase | `pairwise_synchronization` (Tang–Müller) | [Pairwise Synchronisation](pairwise-synchronization.md) |
+| You must report uncertainty in the warps or the template | `bayesian_align_group` (`sampler="infhmc"`, several chains) | [Bayesian Alignment](bayesian-alignment.md) |
 
 **Q3. Modifiers**, whatever Q2 chose:
 
@@ -208,7 +208,7 @@ All pages show warps as registering warps, $\tilde x_i(t) = x_i(h_i(t))$. The fu
 | `landmark_register` | `gammas`, mapping target time to source time | $x_i(\gamma_i(t))$ |
 | `continuous_registration` | `warps` $h_i$ | $x_i(h_i(t))$ |
 | elastic (`karcher_mean*`, `elastic_align_pair*`) | `gammas` | $x_i(\gamma_i(t))$; `elastic_align_pair(f1, f2)` warps `f2` onto `f1` |
-| `register_fpca` | the **inverse** warp $h_i^{-1}$ | see the forthcoming *Non-Gaussian Registration* page |
+| `register_fpca` | `t_hat`, the **inverse** warp $h_i^{-1}$ at each observation | plot $Y_{ij}$ against $\hat t_{ij}$; see [Non-Gaussian Registration](expfam-registration.md) |
 | `pairwise_synchronization` | `warps` and `inverse_warps` | built from the inverse of the averaged pairwise warps |
 
 ---

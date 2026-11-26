@@ -86,6 +86,46 @@ Functional observations vary in two ways: *amplitude* (how tall or deep the feat
 </a>
 </div>
 
+## Shapes
+
+<div class="fdars-gallery fdars-sec-align">
+<a class="fdars-gallery-item" href="curve-shapes/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/curve-shapes.svg" alt="">
+<div class="fdars-gallery-title">Shapes of Curves in R^d</div>
+<div class="fdars-gallery-desc">Outlines and trajectories modulo translation, scale, rotation, speed and start point.</div>
+</a>
+</div>
+
+## Special data
+
+<div class="fdars-gallery fdars-sec-align">
+<a class="fdars-gallery-item" href="sparse-elastic/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/sparse-elastic.svg" alt="">
+<div class="fdars-gallery-title">Sparse &amp; Irregular Curves</div>
+<div class="fdars-gallery-desc">Elastic distances and spline means from a few irregular points per curve.</div>
+</a>
+<a class="fdars-gallery-item" href="expfam-registration/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/expfam-registration.svg" alt="">
+<div class="fdars-gallery-title">Non-Gaussian Registration</div>
+<div class="fdars-gallery-desc">Binary and count curves registered on the likelihood scale, with GFPCA.</div>
+</a>
+</div>
+
+## Template-free &amp; probabilistic
+
+<div class="fdars-gallery fdars-sec-align">
+<a class="fdars-gallery-item" href="pairwise-synchronization/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/pairwise-synchronization.svg" alt="">
+<div class="fdars-gallery-title">Pairwise Synchronisation</div>
+<div class="fdars-gallery-desc">Tang–Müller: each warp is the inverted average of pairwise warps.</div>
+</a>
+<a class="fdars-gallery-item" href="bayesian-alignment/">
+<img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/bayesian-alignment.svg" alt="">
+<div class="fdars-gallery-title">Bayesian Alignment</div>
+<div class="fdars-gallery-desc">Posterior warps and template by pCN or infHMC, with R̂, ESS and tempering.</div>
+</a>
+</div>
+
 !!! info "Scope"
 
     - **Real-valued curves on one shared grid** (`argvals`) are supported by every family on these pages.

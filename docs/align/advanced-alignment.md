@@ -1,10 +1,10 @@
 # Advanced Elastic Alignment
 
-The baseline [`karcher_mean`](elastic-alignment.md#group-alignment-karcher-mean) and [`elastic_align_pair`](elastic-alignment.md#pairwise-alignment) cover the common case: curves on one interval, aligned by a warp that minimises the elastic (Fisher–Rao) distance. This page collects the variants for special situations: **closed or periodic** curves, a short curve that matches only **part** of a longer one, **multiresolution** alignment, alignment **across two populations**, **geodesic** paths between curves, **generative** models built on the amplitude/phase split, and **automatic choice of $\lambda$**. It also keeps, for now, elastic depth, outlier detection, shape confidence intervals and Bayesian pairwise alignment. Every tool works on the SRSF $q(t)=\operatorname{sign}(\dot f(t))\sqrt{|\dot f(t)|}$, under which the Fisher–Rao metric becomes the $L^2$ metric.
+The baseline [`karcher_mean`](elastic-alignment.md#group-alignment-karcher-mean) and [`elastic_align_pair`](elastic-alignment.md#pairwise-alignment) cover the common case: curves on one interval, aligned by a warp that minimises the elastic (Fisher–Rao) distance. This page collects the variants for special situations: **closed or periodic** curves, a short curve that matches only **part** of a longer one, **multiresolution** alignment, alignment **across two populations**, **geodesic** paths between curves, **generative** models built on the amplitude/phase split, and **automatic choice of $\lambda$**. Every tool works on the SRSF $q(t)=\operatorname{sign}(\dot f(t))\sqrt{|\dot f(t)|}$, under which the Fisher–Rao metric becomes the $L^2$ metric.
 
 ![Advanced Elastic Alignment — concept diagram](../assets/diagrams/advanced-alignment.svg){ .fdars-diagram }
 
-Robust centres (the Karcher median and the trimmed Karcher mean) now live on the [Elastic Alignment](elastic-alignment.md#robust-centres-karcher-median-and-trimmed-mean) page; warp optimisers, penalties and the band on [Elastic Optimisers & Penalties](elastic-optimisers.md). For which aligner to use in the first place, see [Choosing an Alignment Method](choosing-a-method.md).
+Robust centres (the Karcher median and the trimmed Karcher mean) live on the [Elastic Alignment](elastic-alignment.md#robust-centres-karcher-median-and-trimmed-mean) page; warp optimisers, penalties and the band on [Elastic Optimisers & Penalties](elastic-optimisers.md); elastic depth, outlier detection and shape confidence intervals on [Inference after Alignment](alignment-inference.md); Bayesian pairwise and group alignment on [Bayesian Alignment](bayesian-alignment.md). For which aligner to use in the first place, see [Choosing an Alignment Method](choosing-a-method.md).
 
 The non-executed snippets below refer to this simulated sample:
 
@@ -21,185 +21,7 @@ for i in range(n):
 
 ---
 
-## 1. Elastic depth (phase-aware centrality)
-
-Ordinary functional depth ignores phase: two curves can look equally "central" even though one is a time-warped copy of the other. **Elastic depth** measures centrality under the elastic metric and decomposes into amplitude and phase parts, so you can spot a curve that is central in shape but outlying in timing.
-
-```python
-from fdars.alignment import elastic_depth
-
-ed = elastic_depth(data, t, lambda_=0.0)
-amp_depth  = ed["amplitude_depth"]   # (n,)
-ph_depth   = ed["phase_depth"]       # (n,)
-comb_depth = ed["combined_depth"]    # (n,)
-deepest = int(np.argmax(comb_depth))
-print(f"Deepest (most central) curve: {deepest}")
-```
-
-Elastic depth is covered in detail, with figures, on the [Shape Analysis](shape-analysis.md#elastic-depth) page.
-
----
-
-## 2. Outlier detection (amplitude vs. phase)
-
-`elastic_outlier_detection` returns, for every curve, its **amplitude distance** (how unusual its *shape* is) and its **phase distance** (how unusual its *timing* is) relative to a robust reference. Classifying by type means fencing each of these separately -- a plain elastic-distance fence alone will not do it.
-
-!!! warning "The elastic distance is phase-invariant"
-    `out["distances"]` (and the default `out["outlier_indices"]`) measure the **amplitude** distance, which is invariant to time-warping. A curve that is only *shifted in time* has a near-zero amplitude distance, so it slips through that fence. To catch timing outliers you must look at `out["phase_distances"]`. Below we inject one amplitude outlier (curve 3, an enlarged bump) and one phase outlier (curve 7, a time-shifted copy) and recover **both** from the amplitude-vs-phase plane.
-
-```python exec="1" html="1" source="above"
-import numpy as np
-from docs_fig import fig, render
-from fdars.alignment import elastic_outlier_detection
-
-rng = np.random.default_rng(7)
-n, m = 28, 120
-t = np.linspace(0, 1, m)
-base = np.exp(-((t - 0.5) ** 2) / (2 * 0.12 ** 2))
-data = np.array([rng.normal(1, 0.05) * np.interp(
-    t, np.clip(t + rng.normal(0, 0.03), 0, 1), base) for _ in range(n)])
-data[3] *= 1.8                                         # amplitude (shape) outlier
-data[7] = np.interp(t, np.clip(t - 0.18, 0, 1), base)  # phase (timing) outlier
-
-out = elastic_outlier_detection(data, t, alpha=0.05, use_median=True)
-amp = np.asarray(out["amplitude_distances"])   # (n,) shape distance to the reference
-pha = np.asarray(out["phase_distances"])       # (n,) timing distance to the reference
-
-def fence(x):                                  # Tukey upper fence (2.0·IQR)
-    q1, q3 = np.percentile(x, [25, 75]); return q3 + 2.0 * (q3 - q1)
-fa, fp = fence(amp), fence(pha)
-amp_out = np.where(amp > fa)[0]                 # unusual shape
-pha_out = np.where(pha > fp)[0]                 # unusual timing
-
-f, ax = fig()
-ax.scatter(amp, pha, s=26, color="#adb5bd", zorder=2)
-ax.axvline(fa, color="#3f51b5", ls="--", lw=1, label="amplitude fence")
-ax.axhline(fp, color="#e8710a", ls="--", lw=1, label="phase fence")
-for i in amp_out:
-    ax.scatter(amp[i], pha[i], s=70, color="#3f51b5", zorder=3)
-    ax.annotate(f"{i} · shape", (amp[i], pha[i]), (6, 4),
-                textcoords="offset points", fontsize=8, color="#3f51b5")
-for i in pha_out:
-    ax.scatter(amp[i], pha[i], s=70, color="#e8710a", zorder=3)
-    ax.annotate(f"{i} · timing", (amp[i], pha[i]), (6, -11),
-                textcoords="offset points", fontsize=8, color="#e8710a")
-ax.set(title="Outlier type: amplitude (shape) vs phase (timing)",
-       xlabel="amplitude distance", ylabel="phase distance")
-ax.legend(fontsize=8)
-print(render(f))
-
-print("shape (amplitude) outliers:", list(amp_out),
-      " | timing (phase) outliers:", list(pha_out))
-```
-
-Curve 3 lands far to the right (large amplitude distance -> a **shape** outlier) while curve 7 lands high up (large phase distance -> a **timing** outlier). Neither fence alone finds both; the amplitude-vs-phase plane separates them cleanly.
-
-| Key | Description |
-|-----|-------------|
-| `outlier_indices` | Curves past the **amplitude** fence (shape outliers only) |
-| `distances` | Amplitude (elastic) distance of each curve to the reference, shape `(n,)` |
-| `threshold` | Tukey fence on `distances` |
-| `amplitude_distances` / `phase_distances` | Per-curve shape / timing distance to the reference, each shape `(n,)` |
-
----
-
-## 3. Shape confidence intervals
-
-After computing the Karcher mean, how certain is its shape? `shape_confidence_interval` gives a bootstrap band: resample the curves, recompute the Karcher mean of each resample, **align** the bootstrap means to the original mean, and take pointwise percentiles. The alignment step is essential -- without it, phase variability between bootstrap means inflates the band.
-
-```python exec="1" html="1" source="above"
-import numpy as np
-from docs_fig import fig, render
-from fdars.alignment import shape_confidence_interval
-
-rng = np.random.default_rng(3)
-n, m = 25, 120
-t = np.linspace(0, 1, m)
-base = np.exp(-((t - 0.5) ** 2) / (2 * 0.12 ** 2))
-data = np.array([rng.normal(3, 0.4) * np.interp(
-    t, np.clip(t + rng.normal(0, 0.06), 0, 1), base) for _ in range(n)])
-
-ci = shape_confidence_interval(data, t, n_bootstrap=60, confidence_level=0.95,
-                               max_iter=10)
-mu = np.asarray(ci["mean"])
-lo = np.asarray(ci["lower_band"])
-hi = np.asarray(ci["upper_band"])
-
-f, ax = fig()
-ax.fill_between(t, lo, hi, color="#3f51b5", alpha=0.18, label="95% band")
-ax.plot(t, mu, color="#3f51b5", lw=2.2, label="Karcher mean")
-ax.set(title="Bootstrap shape confidence interval",
-       xlabel="t", ylabel="f(t)")
-ax.legend(fontsize=9)
-print(render(f))
-```
-
-The shaded band is the pointwise 95% bootstrap envelope around the Karcher mean: where it is narrow the mean shape is well determined, and where it fans out the sample disagrees about amplitude. Because the resampling happens *after* alignment, the band reflects shape uncertainty rather than leftover phase spread.
-
-| Key | Description |
-|-----|-------------|
-| `mean` | The Karcher mean the band is centered on |
-| `lower_band` / `upper_band` | Pointwise percentile bands, shape `(m,)` |
-| `bootstrap_means` | All bootstrap Karcher means, shape `(n_bootstrap, m)` |
-
----
-
-## 4. Bayesian pairwise alignment
-
-Dynamic-programming alignment gives a *point* estimate of the warp. `bayesian_align_pair` returns a *posterior* over warping functions from a preconditioned Crank–Nicolson (pCN) sampler on the tangent space of the $\psi=\sqrt{\dot\gamma}$ sphere, with credible bands and an acceptance rate for diagnostics.
-
-!!! note "Limits of the pairwise sampler"
-    The noise variance is fixed at 1, so the band width depends on the scale of the data (rescale the curves and the band changes). It runs a single chain with no convergence diagnostics. For calibrated group-level uncertainty use `bayesian_align_group`, which samples the noise variance, runs several chains and reports $\hat R$ and ESS.
-
-```python exec="1" html="1" source="above"
-import numpy as np
-from docs_fig import fig, render
-from fdars.alignment import bayesian_align_pair
-
-t = np.linspace(0, 1, 120)
-base = np.exp(-((t - 0.5) ** 2) / (2 * 0.10 ** 2))
-f1 = base
-f2 = np.interp(t, np.clip(t + 0.08, 0, 1), base)   # phase-shifted target
-
-ba = bayesian_align_pair(f1, f2, t, n_samples=500, burn_in=100, seed=0, step_size=0.85)
-f2_aligned = np.asarray(ba["f_aligned_mean"])
-gam_lo = np.asarray(ba["credible_lower"])
-gam_hi = np.asarray(ba["credible_upper"])
-gam_mean = np.asarray(ba["posterior_mean_gamma"])
-
-f, (a1, a2) = fig(ncols=2, figsize=(9.5, 4.0))
-a1.plot(t, f1, color="#6c757d", lw=2, label="f1 (reference)")
-a1.plot(t, f2, color="#dc3545", lw=1.6, ls="--", label="f2 (original)")
-a1.plot(t, f2_aligned, color="#3f51b5", lw=2, label="f2 (aligned)")
-a1.set(title=f"Bayesian alignment (accept. {float(ba['acceptance_rate']):.2f})",
-       xlabel="t", ylabel="f(t)")
-a1.legend(fontsize=8)
-
-a2.fill_between(t, gam_lo, gam_hi, color="#6f42c1", alpha=0.2, label="95% credible")
-a2.plot(t, gam_mean, color="#6f42c1", lw=2, label="posterior mean $\\gamma$")
-a2.plot([0, 1], [0, 1], color="#6c757d", ls="--", lw=1.2)
-a2.set(title="Posterior over the warp", xlabel="t",
-       ylabel="$\\gamma(t)$", aspect="equal")
-a2.legend(fontsize=8)
-print(render(f))
-```
-
-The left panel shows the aligned `f2` tracking the reference, while the right panel replaces the single point-estimate warp with a full posterior: the purple band is the 95% credible region around the posterior-mean $\gamma$. Where the band hugs the diagonal the timing is confidently identity; where it widens the data are ambiguous about how much to warp -- uncertainty a point estimate simply cannot express.
-
-| Key | Description |
-|-----|-------------|
-| `posterior_gammas` | MCMC draws of the warp, shape `(n_samples, m)` |
-| `posterior_mean_gamma` | Posterior mean warp |
-| `credible_lower` / `credible_upper` | Pointwise credible band on the warp |
-| `acceptance_rate` | MCMC acceptance rate (aim for ~0.2--0.8) |
-| `f_aligned_mean` | `f2` aligned under the posterior-mean warp |
-
-!!! tip "Tuning the sampler"
-    If the acceptance rate is too low, reduce `step_size`; if too high, raise it. Increase `n_samples`/`burn_in` for smoother credible bands.
-
----
-
-## 5. Multiresolution alignment (long curves)
+## 1. Multiresolution alignment (long curves)
 
 Dynamic programming costs $O(m^2)$ per pair. `elastic_align_pair_multires` runs the DP on a grid coarsened by `coarsen_factor`, upsamples the warp, and then takes `n_refine_steps` gradient steps on the full grid.
 
@@ -240,7 +62,7 @@ The coarse DP is more than ten times faster than the exact DP at about twice its
 
 ---
 
-## 6. Closed and periodic curves
+## 2. Closed and periodic curves
 
 A periodic signal (a gait cycle, a daily temperature cycle, a contour traced as a 1-D function) has no canonical starting point: the same cycle can start anywhere. `elastic_align_pair_closed` searches over a circular shift of the start index $\theta$ in addition to the warp,
 
@@ -283,7 +105,7 @@ For curves in the plane (outlines), where rotation and scale are also nuisance, 
 
 ---
 
-## 7. Partial matching (subsequence search)
+## 3. Partial matching (subsequence search)
 
 When only a *portion* of a longer target matches a shorter query, full alignment is wrong. `elastic_partial_match` finds the best-aligned sub-interval of the target. Here a short query pattern is hidden (time-warped and buried in noise) inside a longer target, and the search recovers exactly where it sits.
 
@@ -332,7 +154,7 @@ The orange sub-interval that the search selects overlaps the green planted regio
 
 ---
 
-## 8. Transfer alignment across populations
+## 4. Transfer alignment across populations
 
 When curves come from two populations (two sites, two devices), `transfer_alignment` is meant to map the target curves into the source population's time frame: it computes both Karcher means, a bridging warp $\gamma_B$ that aligns the target mean to the source mean, and each target curve's within-population warp $\gamma_i$, and composes them.
 
@@ -358,7 +180,7 @@ aligned, gammas = res["aligned_data"], res["gammas"]
 
 ---
 
-## 9. Geodesic interpolation between curves
+## 5. Geodesic interpolation between curves
 
 A **geodesic** on the elastic manifold is the shortest path between two curves. `curve_geodesic` first aligns $f_2$ to $f_1$ and then interpolates the *amplitude*: the intermediate curves are built from a path in SRSF space between $q_1$ and the aligned $(q_2\circ\gamma)\sqrt{\dot\gamma}$, in $f_1$'s time frame. The last curve is therefore the **aligned** $f_2\circ\gamma$, not $f_2$ itself, and the phase part of the path is carried by the returned `warps`.
 
@@ -398,7 +220,7 @@ The viridis-graded intermediates start at $f_1$ and end at $f_2$ *aligned to $f_
 
 ---
 
-## 10. Gaussian generative model
+## 6. Gaussian generative model
 
 After separating amplitude and phase, you can *generate* new curves by sampling from the estimated score distributions -- useful for augmentation and simulation. `gauss_model` fits Gaussians to the vertical (amplitude) and horizontal (phase) FPC scores and draws new samples.
 
@@ -442,7 +264,7 @@ The orange synthetic curves occupy the same amplitude-and-timing envelope as the
 
 ---
 
-## 11. Peak persistence for automatic $\lambda$
+## 7. Peak persistence for automatic $\lambda$
 
 Choosing the regularization $\lambda$ is usually ad hoc. **Peak persistence** offers a topological criterion: sweep $\lambda$, track when peaks in the Karcher mean are born and die, and pick the $\lambda$ where persistent (genuine) peaks survive but transient (noise) peaks have merged away.
 
@@ -465,7 +287,7 @@ Cross-validation (next section) optimizes a reconstruction score; peak persisten
 
 ---
 
-## 12. Choosing $\lambda$ by cross-validation
+## 8. Choosing $\lambda$ by cross-validation
 
 `lambda_cv` scores a grid of regularization values by $K$-fold cross-validation over the whole dataset and reports the best one.
 
@@ -524,6 +346,5 @@ See [Elastic Alignment](elastic-alignment.md) for the baseline aligner and the S
 
 ## References
 
-- Cheng, W., Dryden, I.L., Huang, X. (2016). *Bayesian registration of functions and curves.* Bayesian Analysis 11(2):447-481.
 - Tucker, J.D., Wu, W., Srivastava, A. (2013). *Generative models for functional data using phase and amplitude separation.* Computational Statistics & Data Analysis 61:50-66.
 - Srivastava, A., Klassen, E. (2016). *Functional and Shape Data Analysis.* Springer.

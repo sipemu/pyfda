@@ -753,7 +753,7 @@ The two distances correlate strongly on clean phase-shifted data. When amplitude
     Use **elastic alignment** for localized features with independent timing shifts and when you need a principled mean (`karcher_mean` -- DTW has no equivalent). A plain **DTW distance** is fine for clustering when the metric property is not required, and is more robust on very noisy signals without pre-smoothing.
 
 !!! note "Periodic / circular data"
-    `karcher_mean` and `elastic_align_pair` keep the end points fixed, $\gamma(0)=0$, $\gamma(1)=1$, so they cannot move a feature of a periodic signal across the boundary. For one period of a cyclic signal use `elastic_align_pair_closed` / `karcher_mean_closed`, which also search over the starting point; see [Advanced Elastic Alignment](advanced-alignment.md#6-closed-and-periodic-curves).
+    `karcher_mean` and `elastic_align_pair` keep the end points fixed, $\gamma(0)=0$, $\gamma(1)=1$, so they cannot move a feature of a periodic signal across the boundary. For one period of a cyclic signal use `elastic_align_pair_closed` / `karcher_mean_closed`, which also search over the starting point; see [Advanced Elastic Alignment](advanced-alignment.md#2-closed-and-periodic-curves).
 
 ---
 
