@@ -38,7 +38,7 @@ Primary tests (runs on Python 3.9+, no mcp import):
     B: Every ``callable_index`` key resolves in ``_capability_map.json``
        (cross-file resolution check).
     C (primary): DOI regex + URL well-formedness structural gate (SCHEMA-04).
-    Coverage: N/457 fraction derived from ``_capability_map.json``
+    Coverage: N/476 fraction derived from ``_capability_map.json``
        (drift tripwire — fails if the capability map grows without adding refs).
     Anti-feature: Six anti-feature families absent from ``callable_index``
        (CURATE-04).
@@ -558,7 +558,7 @@ def test_references_map_doi_url_structural_gate():
 
 
 # ---------------------------------------------------------------------------
-# COVERAGE TEST — runs on Python 3.9+ — honest N/457 fraction emission
+# COVERAGE TEST — runs on Python 3.9+ — honest N/476 fraction emission
 # ---------------------------------------------------------------------------
 # NOTE: 409 was the stale roadmap-time estimate of the callable count.
 # The real denominator is derived at test-time from _capability_map.json
@@ -568,7 +568,7 @@ def test_references_map_doi_url_structural_gate():
 
 
 def test_references_map_coverage_fraction():
-    """GATE-05 coverage emission: print N/457 fraction derived from _capability_map.json.
+    """GATE-05 coverage emission: print N/476 fraction derived from _capability_map.json.
 
     Loads _references_map.json and _capability_map.json via importlib.resources.
     Computes:
@@ -581,7 +581,7 @@ def test_references_map_coverage_fraction():
     surfacing under pytest -s.
 
     Asserts:
-      - denominator == 457 as a drift tripwire (update this constant if the
+      - denominator == 476 as a drift tripwire (update this constant if the
         capability map legitimately grows — it exists to catch accidental
         capability-map changes, not to block intentional growth).
       - 0 <= numerator <= denominator (sanity bound).
@@ -622,8 +622,8 @@ def test_references_map_coverage_fraction():
     )
 
     # Drift tripwire: update the expected count if capability map legitimately grew
-    assert denominator == 457, (
-        f"_capability_map.json callable count changed: expected 457, got {denominator}. "
+    assert denominator == 476, (
+        f"_capability_map.json callable count changed: expected 476, got {denominator}. "
         "If a crate bump added/removed callables intentionally, update this constant "
         "in test_references_map_coverage_fraction. If unexpected, investigate."
     )

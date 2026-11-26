@@ -575,5 +575,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(kcfc_cluster, m)?)?;
     m.add_function(wrap_pyfunction!(funfem_cluster, m)?)?;
     m.add_function(wrap_pyfunction!(align_cluster_fd, m)?)?;
+    crate::clustering_ts_mod::register(m)?;
     Ok(())
 }

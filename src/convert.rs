@@ -2,7 +2,7 @@
 
 use fdars_core::matrix::FdMatrix;
 use fdars_core::FdarError;
-use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
+use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArray3};
 use pyo3::prelude::*;
 use pyo3::types::{PyList, PyTuple};
 
@@ -132,4 +132,67 @@ pub fn extract_ragged_vecs(list: &Bound<'_, PyList>, caller_name: &str) -> PyRes
             }
         })
         .collect()
+}
+
+/// Convert a numpy 3D array `(n, d, m)` to `n` matrices of shape `d × m`.
+///
+/// Row = coordinate / channel, column = time point: the layout of the
+/// multivariate DTW / elastic-distance functions and the R^d curve functions.
+pub fn numpy3d_to_curves(arr: PyReadonlyArray3<'_, f64>) -> PyResult<Vec<FdMatrix>> {
+    let a = arr.as_array();
+    let (n, d, m) = a.dim();
+    (0..n)
+        .map(|i| {
+            let mut col_major = vec![0.0; d * m];
+            for k in 0..d {
+                for j in 0..m {
+                    col_major[k + j * d] = a[[i, k, j]];
+                }
+            }
+            FdMatrix::from_column_major(col_major, d, m).map_err(to_pyerr)
+        })
+        .collect()
+}
+
+/// Extract a Python list of 2-D float arrays into matrices (ragged shapes allowed).
+///
+/// Error messages name `caller_name` and the offending list index.
+pub fn list_to_fdmatrices(list: &Bound<'_, PyList>, caller_name: &str) -> PyResult<Vec<FdMatrix>> {
+    list.iter()
+        .enumerate()
+        .map(|(i, item)| {
+            let arr = item.extract::<PyReadonlyArray2<f64>>().map_err(|_| {
+                pyo3::exceptions::PyValueError::new_err(format!(
+                    "{caller_name}: element [{i}] must be a 2-D numpy array of dtype float64"
+                ))
+            })?;
+            numpy2d_to_fdmatrix(arr)
+        })
+        .collect()
+}
+
+/// Extract a collection of 2-D series given as a list of `(d, m_i)` arrays or
+/// a 3-D `(n, d, m)` array.
+pub fn series_collection(obj: &Bound<'_, PyAny>, caller_name: &str) -> PyResult<Vec<FdMatrix>> {
+    if let Ok(list) = obj.cast::<PyList>() {
+        return list_to_fdmatrices(list, caller_name);
+    }
+    let arr = obj.extract::<PyReadonlyArray3<f64>>().map_err(|_| {
+        pyo3::exceptions::PyValueError::new_err(format!(
+            "{caller_name}: expected a list of 2-D (d, m) float arrays or a 3-D (n, d, m) float array"
+        ))
+    })?;
+    numpy3d_to_curves(arr)
+}
+
+/// Convert matrices to a Python list of 2-D numpy arrays.
+pub fn fdmatrices_to_pylist<'py>(
+    py: Python<'py>,
+    mats: &[FdMatrix],
+) -> PyResult<Bound<'py, PyList>> {
+    let list = PyList::empty(py);
+    for mat in mats {
+        list.append(fdmatrix_to_numpy2d(py, mat))?;
+    }
+    Ok(list)
 }

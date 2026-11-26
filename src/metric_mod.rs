@@ -732,5 +732,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(gak_gram_train, m)?)?;
     m.add_function(wrap_pyfunction!(gak_gram_predict, m)?)?;
     crate::metric_dtw_mod::register(m)?;
+    crate::metric_elastic_mod::register(m)?;
     Ok(())
 }

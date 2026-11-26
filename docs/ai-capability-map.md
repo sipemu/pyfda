@@ -2,7 +2,7 @@
 
 This page is the human-readable companion to the machine-readable [`llms.txt`](https://sipemu.github.io/pyfda/llms.txt) digest. It lists every public callable in the `fdars` library, grouped by submodule.
 
-**30 submodules &middot; 429 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
+**30 submodules &middot; 448 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
 
 ## Module Index
 
@@ -11,7 +11,7 @@ This page is the human-readable companion to the machine-readable [`llms.txt`](h
 | [`fdars.alignment`](#alignment) | Elastic alignment, SRSF registration, Karcher mean, elastic FPCA | 68 |
 | [`fdars.basis`](#basis) | Basis representations — B-spline, Fourier, functional PCA | 16 |
 | [`fdars.classification`](#classification) | Functional classifiers — k-nearest neighbours, SVM, centroid-based | 9 |
-| [`fdars.clustering`](#clustering) | Functional k-means, fuzzy, GMM, and elastic clustering | 11 |
+| [`fdars.clustering`](#clustering) | Functional k-means, fuzzy, GMM, and elastic clustering | 18 |
 | [`fdars.conformal`](#conformal) | Conformal prediction and classification bands | 7 |
 | [`fdars.covariance`](#covariance) | Kernel covariance functions for Gaussian processes over functions | 14 |
 | [`fdars.datasets`](#datasets) | Built-in datasets — Canadian weather, Tecator, phoneme, growth, and more | 7 |
@@ -23,7 +23,7 @@ This page is the human-readable companion to the machine-readable [`llms.txt`](h
 | [`fdars.frechet`](#frechet) | Fréchet regression for metric-space responses | 4 |
 | [`fdars.fts`](#fts) | Functional time series — forecasting, correlation, spectral analysis | 13 |
 | [`fdars.inference`](#inference) | Functional inference — two-sample tests, interval-wise testing | 11 |
-| [`fdars.metric`](#metric) | Functional distance and similarity metrics — L2, L1, Mahalanobis, DTW | 46 |
+| [`fdars.metric`](#metric) | Functional distance and similarity metrics — L2, L1, Mahalanobis, DTW | 58 |
 | [`fdars.metrics`](#metrics) | Regression and classification scoring metrics for functional outputs | 5 |
 | [`fdars.multi_fdata`](#multi_fdata) | Multi-domain functional data — paired domains, joint analysis | 2 |
 | [`fdars.outliers`](#outliers) | Functional outlier detection — depth-based, magnitude, shape outliers | 8 |
@@ -169,15 +169,22 @@ Functional k-means, fuzzy, GMM, and elastic clustering.
 
 | Function | Signature | Purpose |
 |----------|-----------|---------|
+| `PyDtwKMeansFit` | `(...)` | Opaque handle wrapping a fitted fdars-core DTW k-means model (DtwKMeansResult). |
+| `PyDtwKMeansMultivariateFit` | `(...)` | Opaque handle wrapping a fitted multivariate DTW k-means model. |
+| `PyKShapeFit` | `(...)` | Opaque handle wrapping a fitted fdars-core k-Shape model (KShapeResult). |
 | `align_cluster_fd` | `(data, argvals, k=2, max_iter=20, seed=42, use_amplitude_only=True, elastic_lambda=0.0, karcher_max_iter=15, karcher_tol=0.0001)` | Elastic-alignment functional clustering. |
 | `calinski_harabasz` | `(dist_matrix, labels)` | Calinski-Harabasz index for cluster quality (from distance matrix). |
 | `calinski_harabasz_data` | `(data, argvals, labels)` | Calinski-Harabasz index for cluster quality (from data and argvals). |
 | `dbscan_fd` | `(data, argvals, eps=0.5, min_points=3)` | Density-based spatial clustering of functional data (DBSCAN). |
+| `dtw_kmeans` | `(data, n_clusters=2, n_init=10, max_iter=50, tol=1e-06, seed=0, window='none', radius=None, window_fraction=None, max_slope=None, init=None, dba_max_iter=30, dba_tol=1e-05)` | DTW k-means clustering with DBA centroids (tslearn TimeSeriesKMeans(metric="dtw")). |
+| `dtw_kmeans_multivariate` | `(data, n_clusters=2, n_init=10, max_iter=50, tol=1e-06, seed=0, window='none', radius=None, window_fraction=None, max_slope=None, init=None, dba_max_iter=30, dba_tol=1e-05)` | DTW k-means of multivariate (d, m) series with multivariate DBA centroids. |
 | `funfem_cluster` | `(data, argvals, k=2, ncomp=10, p_disc=0, max_iter=50, tol=1e-06, seed=42)` | Fisher-EM discriminative functional clustering (FunFEM). |
 | `fuzzy_cmeans_fd` | `(data, argvals, k, fuzziness=2.0, max_iter=100, tol=1e-06, seed=42)` | Fuzzy C-means clustering for functional data. |
 | `gmm_cluster` | `(data, argvals, k_range, nbasis=5, max_iter=200, tol=1e-06, seed=42)` | GMM clustering for functional data (via basis projection). |
 | `kcfc_cluster` | `(data, argvals, k=2, ncomp=3, max_iter=50, seed=42)` | K-means with per-cluster FPCA (KCFC) clustering for functional data. |
 | `kmeans_fd` | `(data, argvals, k, max_iter=100, tol=1e-06, seed=42)` | K-means clustering for functional data. |
+| `kshape_fd` | `(data, n_clusters=2, n_init=10, max_iter=100, tol=1e-06, seed=0)` | k-Shape clustering of curves by shape-based distance (Paparrizos & Gravano 2015). |
+| `sbd_kmedoids` | `(data, k=2, max_iter=100, seed=42)` | k-medoids clustering of curves on the shape-based distance (SBD) matrix. |
 | `silhouette_score` | `(dist_matrix, labels)` | Silhouette score for cluster quality assessment (from distance matrix). |
 | `silhouette_score_data` | `(data, argvals, labels)` | Silhouette score for cluster quality assessment (from data and argvals). |
 
@@ -433,14 +440,26 @@ Functional distance and similarity metrics — L2, L1, Mahalanobis, DTW.
 |----------|-----------|---------|
 | `PyGakGramTrain` | `(...)` | Opaque handle wrapping fdars-core GakGramTrain for incremental GAK Gram computation. |
 | `dtw_barycenter_averaging` | `(data, max_iter=30, tol=1e-05, window='none', radius=None, window_fraction=None, max_slope=None, init=None, barycenter_size=None, weights=None)` | DTW Barycenter Averaging (DBA, Petitjean et al. 2011) of a set of curves. |
+| `dtw_barycenter_averaging_multivariate` | `(data, max_iter=30, tol=1e-05, window='none', radius=None, window_fraction=None, max_slope=None, init=None, barycenter_size=None, weights=None)` | DTW Barycenter Averaging of multivariate (d, m) series (tslearn DBA on (n, sz, d) data). |
 | `dtw_cross_1d` | `(data1, data2, p=2.0, w=0)` | DTW cross distance for 1D data. |
 | `dtw_distance_early_abandon` | `(x, y, cutoff, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Early-abandoning windowed DTW: the distance, or None once it must exceed `cutoff`. |
+| `dtw_distance_multivariate` | `(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Dependent multichannel DTW distance between two (d, m) series. |
 | `dtw_distance_windowed` | `(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | DTW distance between two series under an optional global window (O(m) memory). |
 | `dtw_k_nearest_neighbors` | `(queries, references, k=1, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Exact k-NN search under windowed DTW with a lower-bound cascade. |
 | `dtw_nearest_neighbor` | `(queries, references, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Exact 1-NN search under windowed DTW with a lower-bound cascade (UCR-suite style). |
+| `dtw_pairwise_distance_multivariate` | `(data, other=None, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Pairwise dependent multichannel DTW distance matrix of a collection of series. |
 | `dtw_path` | `(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | DTW optimal warping path and accumulated cost under an optional global window. |
+| `dtw_path_multivariate` | `(x, y, p=2.0, window='none', radius=None, window_fraction=None, max_slope=None)` | Dependent multichannel DTW optimal warping path and accumulated cost. |
 | `dtw_self_1d` | `(data, p=2.0, w=0)` | DTW distance matrix (self) for 1D data. |
 | `dtw_window_mask` | `(n, m, window='none', radius=None, window_fraction=None, max_slope=None)` | Boolean admissibility grid of a DTW global window for series lengths n and m. |
+| `elastic_ts_alignment_path` | `(x, y, metric, window='none', radius=None, window_fraction=None, max_slope=None, g=None, warp_penalty=1.0, epsilon=None, nu=0.001, lmbda=1.0, c=1.0, independent=True, descriptor='identity', descriptor_param=None, reach=15)` | Optimal elastic-distance alignment path and distance (aeon `<metric>_alignment_path`). |
+| `elastic_ts_alignment_path_multivariate` | `(x, y, metric, window='none', radius=None, window_fraction=None, max_slope=None, g=None, warp_penalty=1.0, epsilon=None, nu=0.001, lmbda=1.0, c=1.0, independent=True, descriptor='identity', descriptor_param=None, reach=15)` | Optimal elastic-distance alignment path and distance of two multivariate (d, m) series. |
+| `elastic_ts_cost_matrix` | `(x, y, metric, window='none', radius=None, window_fraction=None, max_slope=None, g=None, warp_penalty=1.0, epsilon=None, nu=0.001, lmbda=1.0, c=1.0, independent=True, descriptor='identity', descriptor_param=None, reach=15)` | Accumulated elastic-distance cost matrix of two series (aeon `<metric>_cost_matrix`). |
+| `elastic_ts_cost_matrix_multivariate` | `(x, y, metric, window='none', radius=None, window_fraction=None, max_slope=None, g=None, warp_penalty=1.0, epsilon=None, nu=0.001, lmbda=1.0, c=1.0, independent=True, descriptor='identity', descriptor_param=None, reach=15)` | Accumulated elastic-distance cost matrix of two multivariate (d, m) series. |
+| `elastic_ts_distance` | `(x, y, metric, window='none', radius=None, window_fraction=None, max_slope=None, g=None, warp_penalty=1.0, epsilon=None, nu=0.001, lmbda=1.0, c=1.0, independent=True, descriptor='identity', descriptor_param=None, reach=15)` | Elastic distance between two series from the aeon family (DDTW, WDTW, ERP, EDR, TWE, MSM, LCSS, shape-DTW...). |
+| `elastic_ts_distance_multivariate` | `(x, y, metric, window='none', radius=None, window_fraction=None, max_slope=None, g=None, warp_penalty=1.0, epsilon=None, nu=0.001, lmbda=1.0, c=1.0, independent=True, descriptor='identity', descriptor_param=None, reach=15)` | Elastic distance between two multivariate (d, m) series (aeon multichannel semantics). |
+| `elastic_ts_pairwise_distance` | `(data, metric, other=None, window='none', radius=None, window_fraction=None, max_slope=None, g=None, warp_penalty=1.0, epsilon=None, nu=0.001, lmbda=1.0, c=1.0, independent=True, descriptor='identity', descriptor_param=None, reach=15)` | Pairwise elastic-distance matrix of a set of curves (aeon `<metric>_pairwise_distance`). |
+| `elastic_ts_pairwise_distance_multivariate` | `(data, metric, other=None, window='none', radius=None, window_fraction=None, max_slope=None, g=None, warp_penalty=1.0, epsilon=None, nu=0.001, lmbda=1.0, c=1.0, independent=True, descriptor='identity', descriptor_param=None, reach=15)` | Pairwise elastic-distance matrix of a collection of multivariate series. |
 | `fourier_cross_1d` | `(data1, data2, n_basis=5)` | Fourier coefficient distance (cross). |
 | `fourier_self_1d` | `(data, n_basis=5)` | Fourier coefficient distance (self) for 1D data. |
 | `gak` | `(x, y, sigma)` | Global Alignment Kernel between two 1-D time series. |

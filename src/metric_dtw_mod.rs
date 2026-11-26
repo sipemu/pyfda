@@ -1,5 +1,6 @@
 //! Windowed DTW, DTW lower bounds and nearest-neighbour search, DTW / soft-DTW
-//! barycenters, and shape-based distance (fdars-core 0.48).
+//! barycenters, shape-based distance, and multivariate (d, m) DTW / DBA
+//! (fdars-core 0.48).
 //!
 //! Registered into the existing `fdars.metric` submodule by
 //! `metric_mod::register`; it is not a submodule of its own.
@@ -14,7 +15,7 @@ use fdars_core::metric::{
     dtw_barycenter_averaging as core_dba, DbaConfig, DbaInit, DtwSearchStats,
     SoftDtwBarycenterConfig,
 };
-use numpy::{PyArray2, PyReadonlyArray1, PyReadonlyArray2};
+use numpy::{IntoPyArray, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -23,13 +24,18 @@ use pyo3::types::PyDict;
 // Private helpers
 // ---------------------------------------------------------------------------
 
-/// Warping path `[(i, j), ...]` as an int64 array of shape (L, 2).
-fn path_to_numpy<'py>(py: Python<'py>, path: &[(usize, usize)]) -> Bound<'py, PyArray2<i64>> {
-    let rows: Vec<Vec<i64>> = path
+/// Warping path `[(i, j), ...]` as an int64 array of shape (L, 2) (also (0, 2)).
+pub(crate) fn path_to_numpy<'py>(
+    py: Python<'py>,
+    path: &[(usize, usize)],
+) -> Bound<'py, PyArray2<i64>> {
+    let flat: Vec<i64> = path
         .iter()
-        .map(|&(i, j)| vec![i as i64, j as i64])
+        .flat_map(|&(i, j)| [i as i64, j as i64])
         .collect();
-    PyArray2::from_vec2(py, &rows).unwrap()
+    numpy::ndarray::Array2::from_shape_vec((path.len(), 2), flat)
+        .unwrap()
+        .into_pyarray(py)
 }
 
 /// Nearest-neighbour search counters as a dict.
@@ -879,6 +885,222 @@ pub fn sbd_distance_matrix<'py>(
     Ok(fdmatrix_to_numpy2d(py, &res))
 }
 
+// ---------------------------------------------------------------------------
+// Multivariate DTW and DBA
+// ---------------------------------------------------------------------------
+
+/// Dependent multichannel DTW distance between two (d, m) series.
+///
+/// Parameters
+/// ----------
+/// x : numpy.ndarray
+///     First series, shape (d, n): one channel per row, one time point per
+///     column (aeon layout).
+/// y : numpy.ndarray
+///     Second series, shape (d, m); same number of channels, length may differ.
+/// p : float, optional
+///     Exponent of the local cost ``(sum_c (x_ci - y_cj)^2)^(p/2)``
+///     (default 2.0, the squared Euclidean distance across channels).
+/// window, radius, window_fraction, max_slope
+///     Global window, see `dtw_path`.
+///
+/// Returns
+/// -------
+/// float
+///     Accumulated cost of the optimal admissible path (no root).  With
+///     ``d = 1`` this is bit-identical to `dtw_distance_windowed`.
+#[pyfunction]
+#[pyo3(signature = (x, y, p=2.0, window="none", radius=None, window_fraction=None, max_slope=None))]
+pub fn dtw_distance_multivariate<'py>(
+    x: PyReadonlyArray2<'py, f64>,
+    y: PyReadonlyArray2<'py, f64>,
+    p: f64,
+    window: &str,
+    radius: Option<usize>,
+    window_fraction: Option<f64>,
+    max_slope: Option<f64>,
+) -> PyResult<f64> {
+    let w = dtw_window(window, radius, window_fraction, max_slope)?;
+    to_pyresult(fdars_core::metric::dtw_distance_multivariate(
+        &numpy2d_to_fdmatrix(x)?,
+        &numpy2d_to_fdmatrix(y)?,
+        p,
+        w,
+    ))
+}
+
+/// Dependent multichannel DTW optimal warping path and accumulated cost.
+///
+/// Parameters
+/// ----------
+/// x, y : numpy.ndarray
+///     Series of shape (d, n) and (d, m), channels as rows.
+/// p : float, optional
+///     Exponent of the local cost, see `dtw_distance_multivariate` (default 2.0).
+/// window, radius, window_fraction, max_slope
+///     Global window, see `dtw_path`.
+///
+/// Returns
+/// -------
+/// dict
+///     ``path``: int64 array (L, 2) of matched time-index pairs; ``cost``:
+///     accumulated cost, equal to `dtw_distance_multivariate`.
+#[pyfunction]
+#[pyo3(signature = (x, y, p=2.0, window="none", radius=None, window_fraction=None, max_slope=None))]
+pub fn dtw_path_multivariate<'py>(
+    py: Python<'py>,
+    x: PyReadonlyArray2<'py, f64>,
+    y: PyReadonlyArray2<'py, f64>,
+    p: f64,
+    window: &str,
+    radius: Option<usize>,
+    window_fraction: Option<f64>,
+    max_slope: Option<f64>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let w = dtw_window(window, radius, window_fraction, max_slope)?;
+    let res = to_pyresult(fdars_core::metric::dtw_path_multivariate(
+        &numpy2d_to_fdmatrix(x)?,
+        &numpy2d_to_fdmatrix(y)?,
+        p,
+        w,
+    ))?;
+    let d = PyDict::new(py);
+    d.set_item("path", path_to_numpy(py, &res.path))?;
+    d.set_item("cost", res.cost)?;
+    Ok(d)
+}
+
+/// Pairwise dependent multichannel DTW distance matrix of a collection of series.
+///
+/// Parameters
+/// ----------
+/// data : list of numpy.ndarray or numpy.ndarray
+///     Series as a list of (d, m_i) arrays (lengths may differ) or a 3-D
+///     (n, d, m) array.
+/// other : list of numpy.ndarray or numpy.ndarray, optional
+///     Second collection with the same channel count; default None gives the
+///     self-distance matrix.
+/// p : float, optional
+///     Exponent of the local cost (default 2.0).
+/// window, radius, window_fraction, max_slope
+///     Global window, see `dtw_path` (sized per pair).
+///
+/// Returns
+/// -------
+/// numpy.ndarray
+///     (n, n) symmetric matrix with zero diagonal, or (n, n_other).
+#[pyfunction]
+#[pyo3(signature = (data, other=None, p=2.0, window="none", radius=None, window_fraction=None, max_slope=None))]
+pub fn dtw_pairwise_distance_multivariate<'py>(
+    py: Python<'py>,
+    data: &Bound<'py, PyAny>,
+    other: Option<&Bound<'py, PyAny>>,
+    p: f64,
+    window: &str,
+    radius: Option<usize>,
+    window_fraction: Option<f64>,
+    max_slope: Option<f64>,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let w = dtw_window(window, radius, window_fraction, max_slope)?;
+    let series = series_collection(data, "dtw_pairwise_distance_multivariate: data")?;
+    let other = other
+        .map(|o| series_collection(o, "dtw_pairwise_distance_multivariate: other"))
+        .transpose()?;
+    let res = to_pyresult(fdars_core::metric::dtw_pairwise_distance_multivariate(
+        &series,
+        other.as_deref(),
+        p,
+        w,
+    ))?;
+    Ok(fdmatrix_to_numpy2d(py, &res))
+}
+
+/// DTW Barycenter Averaging of multivariate (d, m) series (tslearn DBA on (n, sz, d) data).
+///
+/// Parameters
+/// ----------
+/// data : list of numpy.ndarray or numpy.ndarray
+///     Series as a list of (d, m_i) arrays (lengths may differ, channel
+///     count may not) or a 3-D (n, d, m) array; all values finite.
+/// max_iter : int, optional
+///     Maximum number of DBA refinement iterations (default 30).
+/// tol : float, optional
+///     Stop when the relative decrease of the mean DTW cost is below `tol`
+///     (default 1e-5).
+/// window, radius, window_fraction, max_slope
+///     Global window used by every alignment, see `dtw_path`.
+/// init : str or numpy.ndarray, optional
+///     Initial barycenter: ``None`` / ``"mean"`` (pointwise mean over the
+///     series reaching each time point, default), ``"medoid"``, or a (d, L)
+///     array used as is.
+/// barycenter_size : int, optional
+///     Length of the barycenter (default: the longest series length for
+///     ``"mean"``, the first series' length for ``"medoid"``, which is
+///     resampled linearly to it).
+/// weights : numpy.ndarray, optional
+///     Non-negative per-series weights (n,), default uniform.
+///
+/// Returns
+/// -------
+/// dict
+///     ``barycenter`` (d, L), ``cost`` (weighted mean multichannel DTW cost),
+///     ``n_iter``, ``converged``.  With ``d = 1`` the result is bit-identical
+///     to `dtw_barycenter_averaging`.
+#[pyfunction]
+#[pyo3(signature = (data, max_iter=30, tol=1e-5, window="none", radius=None, window_fraction=None, max_slope=None, init=None, barycenter_size=None, weights=None))]
+pub fn dtw_barycenter_averaging_multivariate<'py>(
+    py: Python<'py>,
+    data: &Bound<'py, PyAny>,
+    max_iter: usize,
+    tol: f64,
+    window: &str,
+    radius: Option<usize>,
+    window_fraction: Option<f64>,
+    max_slope: Option<f64>,
+    init: Option<&Bound<'py, PyAny>>,
+    barycenter_size: Option<usize>,
+    weights: Option<PyReadonlyArray1<'py, f64>>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let series = series_collection(data, "dtw_barycenter_averaging_multivariate: data")?;
+    let mut config = DbaConfig::default();
+    config.max_iter = max_iter;
+    config.tol = tol;
+    config.window = dtw_window(window, radius, window_fraction, max_slope)?;
+    config.init = match init {
+        None => DbaInit::Mean,
+        Some(obj) => match obj.extract::<String>() {
+            Ok(s) => match s.as_str() {
+                "mean" => DbaInit::Mean,
+                "medoid" => DbaInit::Medoid,
+                _ => {
+                    return Err(PyValueError::new_err(format!(
+                        "init must be 'mean', 'medoid' or a 2-D (d, L) array, got '{s}'"
+                    )))
+                }
+            },
+            Err(_) => {
+                let arr = obj.extract::<PyReadonlyArray2<'py, f64>>().map_err(|_| {
+                    PyValueError::new_err(
+                        "init must be 'mean', 'medoid' or a 2-D (d, L) float array",
+                    )
+                })?;
+                DbaInit::CustomMultivariate(numpy2d_to_fdmatrix(arr)?)
+            }
+        },
+    };
+    config.barycenter_size = barycenter_size;
+    config.weights = weights.map(numpy1d_to_vec);
+    let res = to_pyresult(fdars_core::metric::dtw_barycenter_averaging_multivariate(
+        &series, &config,
+    ))?;
+    let d = PyDict::new(py);
+    d.set_item("barycenter", fdmatrix_to_numpy2d(py, &res.barycenter))?;
+    d.set_item("cost", res.cost)?;
+    d.set_item("n_iter", res.n_iter)?;
+    d.set_item("converged", res.converged)?;
+    Ok(d)
+}
+
 /// Register the DTW / SBD functions into the `metric` submodule.
 pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(dtw_path, m)?)?;
@@ -901,5 +1123,9 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(dtw_k_nearest_neighbors, m)?)?;
     m.add_function(wrap_pyfunction!(sbd, m)?)?;
     m.add_function(wrap_pyfunction!(sbd_distance_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(dtw_distance_multivariate, m)?)?;
+    m.add_function(wrap_pyfunction!(dtw_path_multivariate, m)?)?;
+    m.add_function(wrap_pyfunction!(dtw_pairwise_distance_multivariate, m)?)?;
+    m.add_function(wrap_pyfunction!(dtw_barycenter_averaging_multivariate, m)?)?;
     Ok(())
 }
