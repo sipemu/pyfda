@@ -2,13 +2,13 @@
 
 This page is the human-readable companion to the machine-readable [`llms.txt`](https://sipemu.github.io/pyfda/llms.txt) digest. It lists every public callable in the `fdars` library, grouped by submodule.
 
-**30 submodules &middot; 448 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
+**30 submodules &middot; 475 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
 
 ## Module Index
 
 | Module | Purpose | Functions |
 |--------|---------|-----------|
-| [`fdars.alignment`](#alignment) | Elastic alignment, SRSF registration, Karcher mean, elastic FPCA | 68 |
+| [`fdars.alignment`](#alignment) | Elastic alignment, SRSF registration, Karcher mean, elastic FPCA | 95 |
 | [`fdars.basis`](#basis) | Basis representations — B-spline, Fourier, functional PCA | 16 |
 | [`fdars.classification`](#classification) | Functional classifiers — k-nearest neighbours, SVM, centroid-based | 9 |
 | [`fdars.clustering`](#clustering) | Functional k-means, fuzzy, GMM, and elastic clustering | 18 |
@@ -49,66 +49,93 @@ Elastic alignment, SRSF registration, Karcher mean, elastic FPCA.
 
 | Function | Signature | Purpose |
 |----------|-----------|---------|
+| `affine_registration` | `(data, argvals, warp_class='affine', template=None, metric='l2', domain='full', extrapolation='boundary', max_dilation=0.15, max_shift=0.15, grid_size=21, max_iter=20, tol=1e-06, center_warps=True, optim_tol=1e-10)` | Shift, dilation or affine warp registration ``h_i(t) = a_i t + b_i`` to a template (fdacluster). |
+| `affine_warp_curves` | `(data, argvals, dilations, shifts, extrapolation='boundary')` | Apply linear warps: ``out[i, j] = f_i((t_j - shifts[i]) / dilations[i])``. |
 | `align_to_target` | `(data, target, argvals, lambda_=0.0)` | Align all curves to a single target curve. |
+| `align_to_target_with_config` | `(data, target, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Align all curves to a single target curve with a configurable warp optimiser. |
 | `alignment_quality` | `(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)` | Comprehensive alignment quality metrics. |
 | `amplitude_distance` | `(curve1, curve2, argvals, lambda_=0.0)` | Amplitude distance between two curves. |
 | `amplitude_self_distance_matrix` | `(data, argvals, lambda_=0.0)` | Amplitude self distance matrix (same as elastic self distance matrix). |
 | `bayesian_align_pair` | `(f1, f2, argvals, n_samples=1000, burn_in=200, step_size=0.1, proposal_variance=1.0, seed=42)` | Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere. |
 | `compose_warps` | `(warp1, warp2, argvals)` | Compose two warping functions. |
+| `continuous_registration` | `(data, argvals, target=None, criterion='min_eigenvalue', nbasis=None, norder=None, lambda_=0.0, lfd_order=None, max_iter=None, tol=1e-08, n_fine=None, max_template_iter=1, template_tol=0.0001, initial_coefficients=None, periodic=False, r_defaults=False)` | Ramsay-Li continuous registration with smooth monotone warps (R fda register.fd). |
 | `curve_geodesic` | `(f1, f2, argvals, n_points=10, lambda_=0.0)` | Compute the geodesic path between two 1-D curves in the elastic metric. |
 | `detect_landmarks` | `(curve, argvals, kind='peak', min_prominence=0.0)` | Detect landmarks (peaks, valleys, zero-crossings, inflections) in a curve. |
 | `diagnose_alignment` | `(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001, over_alignment_threshold=1.0, under_alignment_threshold=1e-06, max_bending_energy=100.0, min_improvement_ratio=0.5)` | Diagnose alignment quality for every curve after Karcher mean computation. |
 | `elastic_align_pair` | `(curve1, curve2, argvals, lambda_=0.0)` | Pairwise elastic alignment of two curves. |
 | `elastic_align_pair_closed` | `(f1, f2, argvals, lambda_=0.0)` | Align closed (periodic) curve f2 to f1 with rotation search. |
+| `elastic_align_pair_closed_with_config` | `(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Align a closed (periodic) curve f2 to f1 with rotation search and a configurable warp optimiser. |
 | `elastic_align_pair_constrained` | `(f1, f2, argvals, landmark_targets, landmark_sources, lambda_=0.0)` | Landmark-constrained elastic alignment. |
+| `elastic_align_pair_constrained_with_config` | `(f1, f2, argvals, landmark_targets, landmark_sources, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Landmark-constrained elastic alignment with a configurable warp optimiser. |
 | `elastic_align_pair_multires` | `(f1, f2, argvals, coarsen_factor=4, n_refine_steps=10, step_size=0.01, lambda_=0.0)` | Multi-resolution elastic alignment (coarse DP + gradient refinement). |
+| `elastic_align_pair_nd_with_config` | `(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Elastic alignment of two R^d curves under one shared warp, with a configurable warp optimiser. |
 | `elastic_align_pair_penalized` | `(curve1, curve2, argvals, lambda_=0.0, penalty_type='first_order', second_order_weight=0.1)` | Elastic alignment with configurable penalty type. |
+| `elastic_align_pair_with_config` | `(curve1, curve2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Pairwise elastic alignment of two curves with a configurable warp optimiser. |
 | `elastic_changepoint` | `(data, argvals, kind='amplitude', lam=0.0, max_iter=30, n_mc=200, seed=42, ncomp=5, pca_method='joint')` | Detect a distributional changepoint in a sequence of curves (elastic). |
 | `elastic_cross_distance_matrix` | `(data1, data2, argvals, lambda_=0.0)` | Elastic cross distance matrix. |
 | `elastic_cross_distance_matrix_with_band` | `(data1, data2, argvals, lambda_=0.0, band_frac=None)` | Elastic cross-distance matrix with optional Sakoe–Chiba band. |
+| `elastic_cross_distance_matrix_with_config` | `(data1, data2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Elastic cross distance matrix with a configurable warp optimiser. |
 | `elastic_decomposition` | `(f1, f2, argvals, lambda_=0.0)` | Elastic phase-amplitude decomposition of two curves. |
 | `elastic_depth` | `(data, argvals, lambda_=0.0)` | Elastic depth (depth under elastic metric). |
 | `elastic_distance` | `(curve1, curve2, argvals, lambda_=0.0)` | Elastic (Fisher-Rao) distance between two curves. |
 | `elastic_distance_closed` | `(f1, f2, argvals, lambda_=0.0)` | Elastic distance between two closed curves. |
+| `elastic_distance_closed_with_config` | `(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Elastic distance between two closed curves with a configurable warp optimiser. |
+| `elastic_distance_nd_with_config` | `(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Elastic distance between two R^d curves with a configurable warp optimiser. |
+| `elastic_distance_with_config` | `(curve1, curve2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Elastic (Fisher-Rao) distance between two curves with a configurable warp optimiser. |
 | `elastic_logistic` | `(data, argvals, labels, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)` | Elastic logistic regression. |
-| `elastic_outlier_detection` | `(data, argvals, lambda_=0.0, alpha=0.05, use_median=True)` | Elastic outlier detection using distances and Tukey fence. |
+| `elastic_outlier_detection` | `(data, argvals, lambda_=0.0, alpha=0.05, use_median=True, threshold_method='tukey', tukey_k=1.5)` | Elastic outlier detection using distances and Tukey fence. |
 | `elastic_partial_match` | `(template, target, argvals_template, argvals_target, lambda_=0.0, min_span=0.5)` | Elastic partial matching: find best-aligned subcurve of a longer curve. |
 | `elastic_regression` | `(data, argvals, response, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)` | Elastic scalar-on-function regression. |
 | `elastic_self_distance_matrix` | `(data, argvals, lambda_=0.0)` | Elastic self distance matrix. |
 | `elastic_self_distance_matrix_with_band` | `(data, argvals, lambda_=0.0, band_frac=None)` | Elastic self-distance matrix with optional Sakoe–Chiba band. |
+| `elastic_self_distance_matrix_with_config` | `(data, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Elastic self distance matrix with a configurable warp optimiser. |
 | `gauss_model` | `(data, argvals, ncomp=3, n_samples=100, lambda_=0.0, max_iter=20, tol=0.0001, seed=42)` | Generate random curves from a fitted Gaussian model on aligned data. |
 | `hierarchical_cut` | `(dist_mat, k=2, linkage='single')` | Hierarchical clustering then cut to produce k clusters (convenience function). |
 | `hierarchical_from_distances` | `(dist_mat, linkage='single')` | Hierarchical agglomerative clustering from a precomputed distance matrix. |
 | `horiz_fpca` | `(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)` | Horizontal (phase) FPCA. |
 | `horiz_fpns` | `(data, argvals, ncomp=3, lambda_=0.0, max_iter=20, tol=0.0001)` | Horizontal Functional Principal Nested Spheres (FPNS) analysis. |
 | `invert_warp` | `(warp, argvals)` | Invert a warping function. |
+| `iterative_shift_registration` | `(data, argvals, template=None, max_iter=5, tol=0.01, step_size=1.0, restrict_domain=False, extrapolation='boundary', initial=None)` | Iterative least-squares shift registration to a template (scikit-fda LeastSquaresShiftRegistration). |
 | `joint_fpca` | `(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)` | Joint (amplitude + phase) FPCA. |
 | `joint_gauss_model` | `(data, argvals, ncomp=3, n_samples=100, balance_c=1.0, lambda_=0.0, max_iter=20, tol=0.0001, seed=42)` | Generate random curves from a joint Gaussian model preserving amplitude-phase correlation. |
 | `karcher_mean` | `(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001)` | Karcher (Frechet) mean under the elastic metric. |
 | `karcher_mean_closed` | `(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0)` | Karcher mean for closed (periodic) curves. |
+| `karcher_mean_closed_with_config` | `(data, argvals, max_iter=20, tol=0.0001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Karcher mean for closed (periodic) curves with a configurable warp optimiser. |
+| `karcher_mean_nd_with_config` | `(data, argvals, max_iter=20, tol=0.0001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Karcher mean of R^d curves under shared warps, with a configurable warp optimiser. |
 | `karcher_mean_with_band` | `(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001, band_frac=None)` | Karcher (Fréchet) mean under the elastic metric with optional Sakoe–Chiba band. |
+| `karcher_mean_with_config` | `(data, argvals, max_iter=20, tol=0.0001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Karcher (Frechet) mean under the elastic metric with a configurable warp optimiser. |
 | `karcher_median` | `(data, argvals, lambda_=0.0, max_iter=20, tol=0.001)` | Karcher median under the elastic metric. |
+| `karcher_median_with_config` | `(data, argvals, max_iter=20, tol=0.001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Elastic Karcher median (Weiszfeld) with a configurable warp optimiser. |
 | `kmedoids_from_distances` | `(dist_mat, k=2, max_iter=100, seed=42)` | K-medoids clustering from a precomputed distance matrix. |
 | `lambda_cv` | `(data, argvals, lambdas=None, n_folds=5, max_iter=15, tol=0.001, seed=42)` | Cross-validation for the elastic alignment regularisation parameter lambda. |
 | `landmark_detect_and_register` | `(data, argvals, kind='peak', min_prominence=0.0, expected_count=0)` | Detect landmarks and register in one call. |
 | `landmark_register` | `(data, argvals, landmarks, target=None)` | Register curves to common landmark positions. |
+| `landmark_shift_deltas` | `(landmarks, location=None)` | Shifts that move each curve's landmark onto a common target: ``delta_i = tau - t_i``. |
+| `landmark_shift_deltas_multi` | `(landmarks, targets=None)` | Least-squares common shift per curve for several landmarks: ``delta_i = mean_k(tau_k - t_ik)``. |
+| `landmark_shift_registration` | `(data, argvals, landmarks, location=None, extrapolation='boundary', restrict_domain=False)` | Landmark shift registration: shift each curve so its landmark lands on a common target. |
 | `least_squares_score` | `(registered, argvals)` | Least-squares registration score: mean Simpson-weighted L2 spread of the |
 | `least_squares_shift_registration` | `(data, argvals, max_shift)` | Register curves by a per-curve rigid horizontal shift (least-squares). |
 | `pairwise_consistency` | `(data, argvals, lambda_=0.0, max_triplets=0)` | Pairwise alignment consistency via triplet checks. |
 | `pairwise_correlation_score` | `(registered, argvals)` | Pairwise correlation registration score: mean functional Pearson correlation |
+| `pairwise_synchronization` | `(data, argvals, choice='truncated', subset_prop=0.5, nknots=2, is_pwl=True, seed=666, lambda_=None, cost_measure='pairwise_fit', truncation_quantile=0.9, max_evals=4000, optim_tol=1e-12)` | Tang-Mueller pairwise curve synchronisation (R fdapace WFDA). |
 | `peak_persistence` | `(data, argvals, lambdas, max_iter=10, tol=0.001)` | Peak persistence diagram for choosing the alignment regularisation parameter. |
 | `phase_boxplot` | `(gammas, argvals, factor=1.5)` | Phase (warping) box plot for functional data. |
+| `phase_boxplot_classify` | `(gammas, argvals, new_gammas, factor=1.5)` | Classify new warping functions against a phase box plot fitted on ``gammas``. |
 | `phase_distance` | `(curve1, curve2, argvals, lambda_=0.0)` | Phase distance between two curves. |
 | `phase_self_distance_matrix` | `(data, argvals, lambda_=0.0)` | Phase self distance matrix. |
 | `reparameterize_curve` | `(curve, argvals, gamma)` | Apply a warping function to a curve (reparameterize). |
 | `robust_karcher_mean` | `(data, argvals, lambda_=0.0, max_iter=20, tol=0.001, trim_fraction=0.1)` | Robust Karcher mean (trimmed). |
+| `robust_karcher_mean_with_config` | `(data, argvals, max_iter=20, tol=0.001, trim_fraction=0.1, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Trimmed robust Karcher mean with a configurable warp optimiser. |
 | `shape_confidence_interval` | `(data, argvals, n_bootstrap=200, confidence_level=0.95, lambda_=0.0, max_iter=15, tol=0.001, seed=42)` | Bootstrap confidence intervals for the elastic Karcher mean. |
 | `shape_distance` | `(curve1, curve2, argvals, lambda_=0.0)` | Shape distance (quotient space distance). |
 | `shape_mean` | `(data, argvals, quotient='reparameterization', lambda_=0.0, max_iter=20, tol=0.0001)` | Shape mean of a set of curves. |
 | `shape_self_distance_matrix` | `(data, argvals, quotient='reparameterization', lambda_=0.0)` | Pairwise shape distance matrix. |
+| `shift_curves` | `(data, argvals, shifts, extrapolation='boundary', restrict_domain=False)` | Shift every curve rigidly in time: ``g_i(t) = f_i(t - shifts[i])``. |
 | `sobolev_least_squares_score` | `(registered, argvals, lambda_=0.0)` | Sobolev least-squares registration score: LS spread plus a derivative-penalty |
 | `srsf_inverse` | `(srsf, argvals, initial_value=0.0)` | Inverse SRSF transform. |
+| `srsf_presmooth` | `(data, argvals, smoothing='none', passes=1)` | Pre-smoothed curves, the input that ``srsf_transform_smoothed`` differentiates. |
 | `srsf_transform` | `(curve, argvals)` | SRSF (Square Root Slope Function) transform. |
+| `srsf_transform_smoothed` | `(data, argvals, smoothing='none', passes=1)` | SRSF transform of every curve after optional pre-smoothing (fdasrvf semantics). |
 | `transfer_alignment` | `(source_data, target_data, argvals, lambda_=0.0, max_iter=15, tol=0.001)` | Align curves from a target population to a source population's coordinate system. |
 | `tsrvf_transform` | `(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0)` | TSRVF (Transported SRSF) transform. |
 | `tsrvf_transform_with_method` | `(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0, method='log_map')` | TSRVF transform with configurable transport method. |
@@ -172,7 +199,7 @@ Functional k-means, fuzzy, GMM, and elastic clustering.
 | `PyDtwKMeansFit` | `(...)` | Opaque handle wrapping a fitted fdars-core DTW k-means model (DtwKMeansResult). |
 | `PyDtwKMeansMultivariateFit` | `(...)` | Opaque handle wrapping a fitted multivariate DTW k-means model. |
 | `PyKShapeFit` | `(...)` | Opaque handle wrapping a fitted fdars-core k-Shape model (KShapeResult). |
-| `align_cluster_fd` | `(data, argvals, k=2, max_iter=20, seed=42, use_amplitude_only=True, elastic_lambda=0.0, karcher_max_iter=15, karcher_tol=0.0001)` | Elastic-alignment functional clustering. |
+| `align_cluster_fd` | `(data, argvals, k=2, max_iter=20, seed=42, use_amplitude_only=True, elastic_lambda=0.0, karcher_max_iter=15, karcher_tol=0.0001, warp_class='elastic', affine_metric='l2', affine_domain='full', affine_extrapolation='boundary', max_dilation=0.15, max_shift=0.15, affine_grid_size=21, affine_max_iter=20, affine_tol=1e-06, center_warps=True, affine_optim_tol=1e-10)` | Elastic-alignment functional clustering. |
 | `calinski_harabasz` | `(dist_matrix, labels)` | Calinski-Harabasz index for cluster quality (from distance matrix). |
 | `calinski_harabasz_data` | `(data, argvals, labels)` | Calinski-Harabasz index for cluster quality (from data and argvals). |
 | `dbscan_fd` | `(data, argvals, eps=0.5, min_points=3)` | Density-based spatial clustering of functional data (DBSCAN). |

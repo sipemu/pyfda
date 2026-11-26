@@ -1294,8 +1294,12 @@ pub fn lambda_cv<'py>(
 // ─── Outlier detection ──────────────────────────────────────────────────────
 
 /// Elastic outlier detection using distances and Tukey fence.
+///
+/// ``threshold_method="tukey"`` (default) flags distances above
+/// ``Q3 + tukey_k * IQR``; ``"quantile"`` flags those above the empirical
+/// ``(1 - alpha)`` quantile (``alpha`` is used only by this rule).
 #[pyfunction]
-#[pyo3(signature = (data, argvals, lambda_=0.0, alpha=0.05, use_median=true))]
+#[pyo3(signature = (data, argvals, lambda_=0.0, alpha=0.05, use_median=true, threshold_method="tukey", tukey_k=1.5))]
 pub fn elastic_outlier_detection<'py>(
     py: Python<'py>,
     data: PyReadonlyArray2<'py, f64>,
@@ -1303,6 +1307,8 @@ pub fn elastic_outlier_detection<'py>(
     lambda_: f64,
     alpha: f64,
     use_median: bool,
+    threshold_method: &str,
+    tukey_k: f64,
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
@@ -1310,6 +1316,7 @@ pub fn elastic_outlier_detection<'py>(
     config.lambda = lambda_;
     config.alpha = alpha;
     config.use_median = use_median;
+    config.threshold_method = crate::options::outlier_threshold(threshold_method, tukey_k)?;
     let result = to_pyresult(fdars_core::alignment::elastic_outlier_detection(
         &mat, &av, &config,
     ))?;
@@ -1423,6 +1430,8 @@ pub fn phase_boxplot<'py>(
         usize_vec_to_numpy1d(py, result.outlier_indices),
     )?;
     dict.set_item("factor", result.factor)?;
+    dict.set_item("fence_lower", vec_to_numpy1d(py, result.fence_lower))?;
+    dict.set_item("fence_upper", vec_to_numpy1d(py, result.fence_upper))?;
     Ok(dict)
 }
 
@@ -2424,5 +2433,6 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
         elastic_cross_distance_matrix_with_band,
         m
     )?)?;
+    crate::alignment_registration_mod::register(m)?;
     Ok(())
 }

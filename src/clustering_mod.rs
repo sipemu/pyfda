@@ -507,6 +507,16 @@ pub fn funfem_cluster<'py>(
 ///     Maximum Karcher mean iterations (default 15).
 /// karcher_tol : float, optional
 ///     Karcher mean convergence tolerance (default 1e-4).
+/// warp_class : str, optional
+///     ``"elastic"`` (SRSF alignment with Karcher-mean templates, default),
+///     or a linear warp class of ``alignment.affine_registration``:
+///     ``"none"``, ``"shift"``, ``"dilation"``, ``"affine"`` (fdacluster).
+/// affine_metric, affine_domain, affine_extrapolation, max_dilation, max_shift,
+/// affine_grid_size, affine_max_iter, affine_tol, center_warps, affine_optim_tol
+///     Options of the linear warp classes, as ``metric``, ``domain``,
+///     ``extrapolation``, ``max_dilation``, ``max_shift``, ``grid_size``,
+///     ``max_iter``, ``tol``, ``center_warps``, ``optim_tol`` of
+///     ``alignment.affine_registration`` (ignored for ``"elastic"``).
 ///
 /// Returns
 /// -------
@@ -519,8 +529,10 @@ pub fn funfem_cluster<'py>(
 ///       to each cluster template.
 ///     - iterations: int. Number of iterations performed.
 ///     - converged: bool. Whether the algorithm converged.
+///     - dilations, shifts: numpy.ndarray (n,) of the linear warps
+///       ``h_i(t) = dilations[i] * t + shifts[i]``, or None for ``"elastic"``.
 #[pyfunction]
-#[pyo3(signature = (data, argvals, k=2, max_iter=20, seed=42, use_amplitude_only=true, elastic_lambda=0.0, karcher_max_iter=15, karcher_tol=1e-4))]
+#[pyo3(signature = (data, argvals, k=2, max_iter=20, seed=42, use_amplitude_only=true, elastic_lambda=0.0, karcher_max_iter=15, karcher_tol=1e-4, warp_class="elastic", affine_metric="l2", affine_domain="full", affine_extrapolation="boundary", max_dilation=0.15, max_shift=0.15, affine_grid_size=21, affine_max_iter=20, affine_tol=1e-6, center_warps=true, affine_optim_tol=1e-10))]
 #[allow(clippy::too_many_arguments)]
 pub fn align_cluster_fd<'py>(
     py: Python<'py>,
@@ -533,10 +545,47 @@ pub fn align_cluster_fd<'py>(
     elastic_lambda: f64,
     karcher_max_iter: usize,
     karcher_tol: f64,
+    warp_class: &str,
+    affine_metric: &str,
+    affine_domain: &str,
+    affine_extrapolation: &str,
+    max_dilation: f64,
+    max_shift: f64,
+    affine_grid_size: usize,
+    affine_max_iter: usize,
+    affine_tol: f64,
+    center_warps: bool,
+    affine_optim_tol: f64,
 ) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    use fdars_core::clustering_advanced::AlignClusterWarp;
     let mat = numpy2d_to_fdmatrix(data)?;
     let av = numpy1d_to_vec(argvals);
     let mut config = fdars_core::clustering_advanced::AlignClusterConfig::default();
+    config.warp_class = match warp_class {
+        "elastic" => AlignClusterWarp::Elastic,
+        "none" => AlignClusterWarp::None,
+        "shift" => AlignClusterWarp::Shift,
+        "dilation" => AlignClusterWarp::Dilation,
+        "affine" => AlignClusterWarp::Affine,
+        _ => {
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "warp_class must be one of 'elastic', 'none', 'shift', 'dilation', 'affine', \
+                 got '{warp_class}'"
+            )))
+        }
+    };
+    config.linear_config = crate::options::affine_config(
+        affine_metric,
+        affine_domain,
+        affine_extrapolation,
+        max_dilation,
+        max_shift,
+        affine_grid_size,
+        affine_max_iter,
+        affine_tol,
+        center_warps,
+        affine_optim_tol,
+    )?;
     config.k = k;
     config.max_iter = max_iter;
     config.seed = seed;
@@ -560,6 +609,16 @@ pub fn align_cluster_fd<'py>(
     dict.set_item("distances", fdmatrix_to_numpy2d(py, &result.distances))?;
     dict.set_item("iterations", result.iterations)?;
     dict.set_item("converged", result.converged)?;
+    match result.affine_warps {
+        Some(w) => {
+            dict.set_item("dilations", vec_to_numpy1d(py, w.dilations))?;
+            dict.set_item("shifts", vec_to_numpy1d(py, w.shifts))?;
+        }
+        None => {
+            dict.set_item("dilations", py.None())?;
+            dict.set_item("shifts", py.None())?;
+        }
+    }
     Ok(dict)
 }
 

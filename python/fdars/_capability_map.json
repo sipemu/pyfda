@@ -118,9 +118,21 @@
     }
   },
   "alignment": {
+    "affine_registration": {
+      "purpose": "Shift, dilation or affine warp registration ``h_i(t) = a_i t + b_i`` to a template (fdacluster).",
+      "sig": "(data, argvals, warp_class='affine', template=None, metric='l2', domain='full', extrapolation='boundary', max_dilation=0.15, max_shift=0.15, grid_size=21, max_iter=20, tol=1e-06, center_warps=True, optim_tol=1e-10)"
+    },
+    "affine_warp_curves": {
+      "purpose": "Apply linear warps: ``out[i, j] = f_i((t_j - shifts[i]) / dilations[i])``.",
+      "sig": "(data, argvals, dilations, shifts, extrapolation='boundary')"
+    },
     "align_to_target": {
       "purpose": "Align all curves to a single target curve.",
       "sig": "(data, target, argvals, lambda_=0.0)"
+    },
+    "align_to_target_with_config": {
+      "purpose": "Align all curves to a single target curve with a configurable warp optimiser.",
+      "sig": "(data, target, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
     },
     "alignment_quality": {
       "purpose": "Comprehensive alignment quality metrics.",
@@ -141,6 +153,10 @@
     "compose_warps": {
       "purpose": "Compose two warping functions.",
       "sig": "(warp1, warp2, argvals)"
+    },
+    "continuous_registration": {
+      "purpose": "Ramsay-Li continuous registration with smooth monotone warps (R fda register.fd).",
+      "sig": "(data, argvals, target=None, criterion='min_eigenvalue', nbasis=None, norder=None, lambda_=0.0, lfd_order=None, max_iter=None, tol=1e-08, n_fine=None, max_template_iter=1, template_tol=0.0001, initial_coefficients=None, periodic=False, r_defaults=False)"
     },
     "curve_geodesic": {
       "purpose": "Compute the geodesic path between two 1-D curves in the elastic metric.",
@@ -163,17 +179,33 @@
       "purpose": "Align closed (periodic) curve f2 to f1 with rotation search.",
       "sig": "(f1, f2, argvals, lambda_=0.0)"
     },
+    "elastic_align_pair_closed_with_config": {
+      "purpose": "Align a closed (periodic) curve f2 to f1 with rotation search and a configurable warp optimiser.",
+      "sig": "(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
+    },
     "elastic_align_pair_constrained": {
       "purpose": "Landmark-constrained elastic alignment.",
       "sig": "(f1, f2, argvals, landmark_targets, landmark_sources, lambda_=0.0)"
+    },
+    "elastic_align_pair_constrained_with_config": {
+      "purpose": "Landmark-constrained elastic alignment with a configurable warp optimiser.",
+      "sig": "(f1, f2, argvals, landmark_targets, landmark_sources, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
     },
     "elastic_align_pair_multires": {
       "purpose": "Multi-resolution elastic alignment (coarse DP + gradient refinement).",
       "sig": "(f1, f2, argvals, coarsen_factor=4, n_refine_steps=10, step_size=0.01, lambda_=0.0)"
     },
+    "elastic_align_pair_nd_with_config": {
+      "purpose": "Elastic alignment of two R^d curves under one shared warp, with a configurable warp optimiser.",
+      "sig": "(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
+    },
     "elastic_align_pair_penalized": {
       "purpose": "Elastic alignment with configurable penalty type.",
       "sig": "(curve1, curve2, argvals, lambda_=0.0, penalty_type='first_order', second_order_weight=0.1)"
+    },
+    "elastic_align_pair_with_config": {
+      "purpose": "Pairwise elastic alignment of two curves with a configurable warp optimiser.",
+      "sig": "(curve1, curve2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
     },
     "elastic_changepoint": {
       "purpose": "Detect a distributional changepoint in a sequence of curves (elastic).",
@@ -186,6 +218,10 @@
     "elastic_cross_distance_matrix_with_band": {
       "purpose": "Elastic cross-distance matrix with optional Sakoe–Chiba band.",
       "sig": "(data1, data2, argvals, lambda_=0.0, band_frac=None)"
+    },
+    "elastic_cross_distance_matrix_with_config": {
+      "purpose": "Elastic cross distance matrix with a configurable warp optimiser.",
+      "sig": "(data1, data2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
     },
     "elastic_decomposition": {
       "purpose": "Elastic phase-amplitude decomposition of two curves.",
@@ -203,13 +239,25 @@
       "purpose": "Elastic distance between two closed curves.",
       "sig": "(f1, f2, argvals, lambda_=0.0)"
     },
+    "elastic_distance_closed_with_config": {
+      "purpose": "Elastic distance between two closed curves with a configurable warp optimiser.",
+      "sig": "(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
+    },
+    "elastic_distance_nd_with_config": {
+      "purpose": "Elastic distance between two R^d curves with a configurable warp optimiser.",
+      "sig": "(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
+    },
+    "elastic_distance_with_config": {
+      "purpose": "Elastic (Fisher-Rao) distance between two curves with a configurable warp optimiser.",
+      "sig": "(curve1, curve2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
+    },
     "elastic_logistic": {
       "purpose": "Elastic logistic regression.",
       "sig": "(data, argvals, labels, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)"
     },
     "elastic_outlier_detection": {
       "purpose": "Elastic outlier detection using distances and Tukey fence.",
-      "sig": "(data, argvals, lambda_=0.0, alpha=0.05, use_median=True)"
+      "sig": "(data, argvals, lambda_=0.0, alpha=0.05, use_median=True, threshold_method='tukey', tukey_k=1.5)"
     },
     "elastic_partial_match": {
       "purpose": "Elastic partial matching: find best-aligned subcurve of a longer curve.",
@@ -226,6 +274,10 @@
     "elastic_self_distance_matrix_with_band": {
       "purpose": "Elastic self-distance matrix with optional Sakoe–Chiba band.",
       "sig": "(data, argvals, lambda_=0.0, band_frac=None)"
+    },
+    "elastic_self_distance_matrix_with_config": {
+      "purpose": "Elastic self distance matrix with a configurable warp optimiser.",
+      "sig": "(data, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
     },
     "gauss_model": {
       "purpose": "Generate random curves from a fitted Gaussian model on aligned data.",
@@ -251,6 +303,10 @@
       "purpose": "Invert a warping function.",
       "sig": "(warp, argvals)"
     },
+    "iterative_shift_registration": {
+      "purpose": "Iterative least-squares shift registration to a template (scikit-fda LeastSquaresShiftRegistration).",
+      "sig": "(data, argvals, template=None, max_iter=5, tol=0.01, step_size=1.0, restrict_domain=False, extrapolation='boundary', initial=None)"
+    },
     "joint_fpca": {
       "purpose": "Joint (amplitude + phase) FPCA.",
       "sig": "(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=0.0001)"
@@ -268,13 +324,29 @@
       "purpose": "Karcher mean for closed (periodic) curves.",
       "sig": "(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0)"
     },
+    "karcher_mean_closed_with_config": {
+      "purpose": "Karcher mean for closed (periodic) curves with a configurable warp optimiser.",
+      "sig": "(data, argvals, max_iter=20, tol=0.0001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
+    },
+    "karcher_mean_nd_with_config": {
+      "purpose": "Karcher mean of R^d curves under shared warps, with a configurable warp optimiser.",
+      "sig": "(data, argvals, max_iter=20, tol=0.0001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
+    },
     "karcher_mean_with_band": {
       "purpose": "Karcher (Fréchet) mean under the elastic metric with optional Sakoe–Chiba band.",
       "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001, band_frac=None)"
     },
+    "karcher_mean_with_config": {
+      "purpose": "Karcher (Frechet) mean under the elastic metric with a configurable warp optimiser.",
+      "sig": "(data, argvals, max_iter=20, tol=0.0001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
+    },
     "karcher_median": {
       "purpose": "Karcher median under the elastic metric.",
       "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.001)"
+    },
+    "karcher_median_with_config": {
+      "purpose": "Elastic Karcher median (Weiszfeld) with a configurable warp optimiser.",
+      "sig": "(data, argvals, max_iter=20, tol=0.001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
     },
     "kmedoids_from_distances": {
       "purpose": "K-medoids clustering from a precomputed distance matrix.",
@@ -292,6 +364,18 @@
       "purpose": "Register curves to common landmark positions.",
       "sig": "(data, argvals, landmarks, target=None)"
     },
+    "landmark_shift_deltas": {
+      "purpose": "Shifts that move each curve's landmark onto a common target: ``delta_i = tau - t_i``.",
+      "sig": "(landmarks, location=None)"
+    },
+    "landmark_shift_deltas_multi": {
+      "purpose": "Least-squares common shift per curve for several landmarks: ``delta_i = mean_k(tau_k - t_ik)``.",
+      "sig": "(landmarks, targets=None)"
+    },
+    "landmark_shift_registration": {
+      "purpose": "Landmark shift registration: shift each curve so its landmark lands on a common target.",
+      "sig": "(data, argvals, landmarks, location=None, extrapolation='boundary', restrict_domain=False)"
+    },
     "least_squares_score": {
       "purpose": "Least-squares registration score: mean Simpson-weighted L2 spread of the",
       "sig": "(registered, argvals)"
@@ -308,6 +392,10 @@
       "purpose": "Pairwise correlation registration score: mean functional Pearson correlation",
       "sig": "(registered, argvals)"
     },
+    "pairwise_synchronization": {
+      "purpose": "Tang-Mueller pairwise curve synchronisation (R fdapace WFDA).",
+      "sig": "(data, argvals, choice='truncated', subset_prop=0.5, nknots=2, is_pwl=True, seed=666, lambda_=None, cost_measure='pairwise_fit', truncation_quantile=0.9, max_evals=4000, optim_tol=1e-12)"
+    },
     "peak_persistence": {
       "purpose": "Peak persistence diagram for choosing the alignment regularisation parameter.",
       "sig": "(data, argvals, lambdas, max_iter=10, tol=0.001)"
@@ -315,6 +403,10 @@
     "phase_boxplot": {
       "purpose": "Phase (warping) box plot for functional data.",
       "sig": "(gammas, argvals, factor=1.5)"
+    },
+    "phase_boxplot_classify": {
+      "purpose": "Classify new warping functions against a phase box plot fitted on ``gammas``.",
+      "sig": "(gammas, argvals, new_gammas, factor=1.5)"
     },
     "phase_distance": {
       "purpose": "Phase distance between two curves.",
@@ -332,6 +424,10 @@
       "purpose": "Robust Karcher mean (trimmed).",
       "sig": "(data, argvals, lambda_=0.0, max_iter=20, tol=0.001, trim_fraction=0.1)"
     },
+    "robust_karcher_mean_with_config": {
+      "purpose": "Trimmed robust Karcher mean with a configurable warp optimiser.",
+      "sig": "(data, argvals, max_iter=20, tol=0.001, trim_fraction=0.1, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
+    },
     "shape_confidence_interval": {
       "purpose": "Bootstrap confidence intervals for the elastic Karcher mean.",
       "sig": "(data, argvals, n_bootstrap=200, confidence_level=0.95, lambda_=0.0, max_iter=15, tol=0.001, seed=42)"
@@ -348,6 +444,10 @@
       "purpose": "Pairwise shape distance matrix.",
       "sig": "(data, argvals, quotient='reparameterization', lambda_=0.0)"
     },
+    "shift_curves": {
+      "purpose": "Shift every curve rigidly in time: ``g_i(t) = f_i(t - shifts[i])``.",
+      "sig": "(data, argvals, shifts, extrapolation='boundary', restrict_domain=False)"
+    },
     "sobolev_least_squares_score": {
       "purpose": "Sobolev least-squares registration score: LS spread plus a derivative-penalty",
       "sig": "(registered, argvals, lambda_=0.0)"
@@ -356,9 +456,17 @@
       "purpose": "Inverse SRSF transform.",
       "sig": "(srsf, argvals, initial_value=0.0)"
     },
+    "srsf_presmooth": {
+      "purpose": "Pre-smoothed curves, the input that ``srsf_transform_smoothed`` differentiates.",
+      "sig": "(data, argvals, smoothing='none', passes=1)"
+    },
     "srsf_transform": {
       "purpose": "SRSF (Square Root Slope Function) transform.",
       "sig": "(curve, argvals)"
+    },
+    "srsf_transform_smoothed": {
+      "purpose": "SRSF transform of every curve after optional pre-smoothing (fdasrvf semantics).",
+      "sig": "(data, argvals, smoothing='none', passes=1)"
     },
     "transfer_alignment": {
       "purpose": "Align curves from a target population to a source population's coordinate system.",
@@ -514,7 +622,7 @@
     },
     "align_cluster_fd": {
       "purpose": "Elastic-alignment functional clustering.",
-      "sig": "(data, argvals, k=2, max_iter=20, seed=42, use_amplitude_only=True, elastic_lambda=0.0, karcher_max_iter=15, karcher_tol=0.0001)"
+      "sig": "(data, argvals, k=2, max_iter=20, seed=42, use_amplitude_only=True, elastic_lambda=0.0, karcher_max_iter=15, karcher_tol=0.0001, warp_class='elastic', affine_metric='l2', affine_domain='full', affine_extrapolation='boundary', max_dilation=0.15, max_shift=0.15, affine_grid_size=21, affine_max_iter=20, affine_tol=1e-06, center_warps=True, affine_optim_tol=1e-10)"
     },
     "calinski_harabasz": {
       "purpose": "Calinski-Harabasz index for cluster quality (from distance matrix).",
