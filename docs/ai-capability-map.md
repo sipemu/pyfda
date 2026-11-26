@@ -2,13 +2,13 @@
 
 This page is the human-readable companion to the machine-readable [`llms.txt`](https://sipemu.github.io/pyfda/llms.txt) digest. It lists every public callable in the `fdars` library, grouped by submodule.
 
-**30 submodules &middot; 475 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
+**30 submodules &middot; 506 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
 
 ## Module Index
 
 | Module | Purpose | Functions |
 |--------|---------|-----------|
-| [`fdars.alignment`](#alignment) | Elastic alignment, SRSF registration, Karcher mean, elastic FPCA | 95 |
+| [`fdars.alignment`](#alignment) | Elastic alignment, SRSF registration, Karcher mean, elastic FPCA | 126 |
 | [`fdars.basis`](#basis) | Basis representations — B-spline, Fourier, functional PCA | 16 |
 | [`fdars.classification`](#classification) | Functional classifiers — k-nearest neighbours, SVM, centroid-based | 9 |
 | [`fdars.clustering`](#clustering) | Functional k-means, fuzzy, GMM, and elastic clustering | 18 |
@@ -49,6 +49,15 @@ Elastic alignment, SRSF registration, Karcher mean, elastic FPCA.
 
 | Function | Signature | Purpose |
 |----------|-----------|---------|
+| `PyCurveShapeKarcher` | `(...)` | Opaque handle wrapping a curve shape Karcher mean / median (CurveShapeKarcherResult). |
+| `PyCurveShapePca` | `(...)` | Opaque handle wrapping a curve shape PCA (CurveShapePcaResult). |
+| `PySparseElasticMean` | `(...)` | Opaque handle wrapping a sparse-curve elastic mean (SparseElasticMeanResult). |
+| `ab_closure_residual` | `(f, a, b)` | Closure residual c(1) − c(0) of the planar curve an (a, b) F-transform represents. |
+| `ab_elastic_distance_pl` | `(c1, c2, a, b)` | Exact (a, b) elastic distance between two piecewise-linear curves. |
+| `ab_elastic_match_pl` | `(c1, c2, a, b)` | Exact (a, b) elastic matching of two piecewise-linear curves (polygons). |
+| `ab_project_closed` | `(f, a, b)` | Project a planar (a, b) F-transform onto the closed-curve manifold, preserving its L² norm. |
+| `ab_transform` | `(beta, a, b)` | Kurtek-Needham F-transform of a planar curve for the (a, b) elastic metric. |
+| `ab_transform_inverse` | `(f, a, b)` | Inverse of ``ab_transform``: the planar curve starting at the origin with transform ``f``. |
 | `affine_registration` | `(data, argvals, warp_class='affine', template=None, metric='l2', domain='full', extrapolation='boundary', max_dilation=0.15, max_shift=0.15, grid_size=21, max_iter=20, tol=1e-06, center_warps=True, optim_tol=1e-10)` | Shift, dilation or affine warp registration ``h_i(t) = a_i t + b_i`` to a template (fdacluster). |
 | `affine_warp_curves` | `(data, argvals, dilations, shifts, extrapolation='boundary')` | Apply linear warps: ``out[i, j] = f_i((t_j - shifts[i]) / dilations[i])``. |
 | `align_to_target` | `(data, target, argvals, lambda_=0.0)` | Align all curves to a single target curve. |
@@ -57,9 +66,25 @@ Elastic alignment, SRSF registration, Karcher mean, elastic FPCA.
 | `amplitude_distance` | `(curve1, curve2, argvals, lambda_=0.0)` | Amplitude distance between two curves. |
 | `amplitude_self_distance_matrix` | `(data, argvals, lambda_=0.0)` | Amplitude self distance matrix (same as elastic self distance matrix). |
 | `bayesian_align_pair` | `(f1, f2, argvals, n_samples=1000, burn_in=200, step_size=0.1, proposal_variance=1.0, seed=42)` | Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere. |
+| `closure_residual` | `(q)` | Closure residual ∫ q‖q‖ dt of an SRVF: the displacement β(1) − β(0) (zero when closed). |
 | `compose_warps` | `(warp1, warp2, argvals)` | Compose two warping functions. |
 | `continuous_registration` | `(data, argvals, target=None, criterion='min_eigenvalue', nbasis=None, norder=None, lambda_=0.0, lfd_order=None, max_iter=None, tol=1e-08, n_fine=None, max_template_iter=1, template_tol=0.0001, initial_coefficients=None, periodic=False, r_defaults=False)` | Ramsay-Li continuous registration with smooth monotone warps (R fda register.fd). |
 | `curve_geodesic` | `(f1, f2, argvals, n_points=10, lambda_=0.0)` | Compute the geodesic path between two 1-D curves in the elastic metric. |
+| `curve_shape_align_pair` | `(beta1, beta2, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)` | Align curve ``beta2`` to ``beta1`` in elastic shape space (rotation, scale, seed, warp). |
+| `curve_shape_boxplot` | `(model, alpha=0.05, k_a=1.0)` | Elastic shape box plot of the curves summarised by a Karcher median (fdasrvf ``curve_boxplot``). |
+| `curve_shape_boxplot_from_aligned` | `(median_srvf, aligned_srvfs, aligned_curves, scale=True, alpha=0.05, k_a=1.0)` | Elastic shape box plot from SRVFs and curves already aligned to a median. |
+| `curve_shape_confidence_interval` | `(curves, n_bootstrap=200, confidence_level=0.95, max_iter=15, tol=0.001, seed=42, method='bootstrap', n_components=5, n_samples=100, n_warp_components=5, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)` | Confidence region of the centre shape of R^d curves (bootstrap or fdasrvf model-based). |
+| `curve_shape_depth` | `(curves, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)` | Elastic amplitude and phase depth of R^d curves. |
+| `curve_shape_distance` | `(beta1, beta2, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)` | Elastic shape distance between two R^d curves under the chosen quotient. |
+| `curve_shape_karcher_covariance` | `(model)` | Sample covariance of the Karcher shooting vectors (tangent space at the mean). |
+| `curve_shape_karcher_mean` | `(curves, max_iter=20, tol=0.001, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)` | Karcher (Fréchet) mean shape of R^d curves in elastic shape space. |
+| `curve_shape_karcher_median` | `(curves, max_iter=20, tol=0.001, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)` | Karcher (geometric) median shape of R^d curves in elastic shape space. |
+| `curve_shape_outlier_detection` | `(curves, centre='median', threshold_method='tukey', tukey_k=1.5, alpha=0.05, max_iter=20, tol=0.001, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)` | Shape outlier detection for R^d curves by distance to the Karcher median (or mean). |
+| `curve_shape_pca` | `(model, ncomp=3)` | Principal component analysis of curve shapes in the tangent space at the Karcher mean. |
+| `curve_shape_self_distance_matrix` | `(curves, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)` | Symmetric matrix of pairwise elastic shape distances between R^d curves. |
+| `curve_shape_tangent_to_curve` | `(model, v)` | Map a tangent vector at the Karcher mean back to a curve (inverse of ``curve_shape_tsrvf``). |
+| `curve_shape_tsrvf` | `(model, curves)` | TSRVF of R^d curves: align to the Karcher mean and map into its tangent space. |
+| `curve_srvf` | `(beta, scale=True)` | Square-root velocity function q = β'/√‖β'‖ of an R^d curve on t ∈ [0, 1]. |
 | `detect_landmarks` | `(curve, argvals, kind='peak', min_prominence=0.0)` | Detect landmarks (peaks, valleys, zero-crossings, inflections) in a curve. |
 | `diagnose_alignment` | `(data, argvals, lambda_=0.0, max_iter=20, tol=0.0001, over_alignment_threshold=1.0, under_alignment_threshold=1e-06, max_bending_energy=100.0, min_improvement_ratio=0.5)` | Diagnose alignment quality for every curve after Karcher mean computation. |
 | `elastic_align_pair` | `(curve1, curve2, argvals, lambda_=0.0)` | Pairwise elastic alignment of two curves. |
@@ -115,6 +140,7 @@ Elastic alignment, SRSF registration, Karcher mean, elastic FPCA.
 | `landmark_shift_registration` | `(data, argvals, landmarks, location=None, extrapolation='boundary', restrict_domain=False)` | Landmark shift registration: shift each curve so its landmark lands on a common target. |
 | `least_squares_score` | `(registered, argvals)` | Least-squares registration score: mean Simpson-weighted L2 spread of the |
 | `least_squares_shift_registration` | `(data, argvals, max_shift)` | Register curves by a per-curve rigid horizontal shift (least-squares). |
+| `optimal_rotation` | `(q1, q2, allow_reflection=False)` | Optimal rotation R = argmax ⟨q1, R q2⟩ over SO(d) (or O(d)) by SVD Procrustes. |
 | `pairwise_consistency` | `(data, argvals, lambda_=0.0, max_triplets=0)` | Pairwise alignment consistency via triplet checks. |
 | `pairwise_correlation_score` | `(registered, argvals)` | Pairwise correlation registration score: mean functional Pearson correlation |
 | `pairwise_synchronization` | `(data, argvals, choice='truncated', subset_prop=0.5, nknots=2, is_pwl=True, seed=666, lambda_=None, cost_measure='pairwise_fit', truncation_quantile=0.9, max_evals=4000, optim_tol=1e-12)` | Tang-Mueller pairwise curve synchronisation (R fdapace WFDA). |
@@ -123,6 +149,7 @@ Elastic alignment, SRSF registration, Karcher mean, elastic FPCA.
 | `phase_boxplot_classify` | `(gammas, argvals, new_gammas, factor=1.5)` | Classify new warping functions against a phase box plot fitted on ``gammas``. |
 | `phase_distance` | `(curve1, curve2, argvals, lambda_=0.0)` | Phase distance between two curves. |
 | `phase_self_distance_matrix` | `(data, argvals, lambda_=0.0)` | Phase self distance matrix. |
+| `project_closed_srvf` | `(q)` | Project an SRVF onto the closed-curve manifold {q : ∫ q‖q‖ = 0}, preserving its L² norm. |
 | `reparameterize_curve` | `(curve, argvals, gamma)` | Apply a warping function to a curve (reparameterize). |
 | `robust_karcher_mean` | `(data, argvals, lambda_=0.0, max_iter=20, tol=0.001, trim_fraction=0.1)` | Robust Karcher mean (trimmed). |
 | `robust_karcher_mean_with_config` | `(data, argvals, max_iter=20, tol=0.001, trim_fraction=0.1, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Trimmed robust Karcher mean with a configurable warp optimiser. |
@@ -132,10 +159,14 @@ Elastic alignment, SRSF registration, Karcher mean, elastic FPCA.
 | `shape_self_distance_matrix` | `(data, argvals, quotient='reparameterization', lambda_=0.0)` | Pairwise shape distance matrix. |
 | `shift_curves` | `(data, argvals, shifts, extrapolation='boundary', restrict_domain=False)` | Shift every curve rigidly in time: ``g_i(t) = f_i(t - shifts[i])``. |
 | `sobolev_least_squares_score` | `(registered, argvals, lambda_=0.0)` | Sobolev least-squares registration score: LS spread plus a derivative-penalty |
+| `sparse_curves_from_irreg` | `(data)` | Convert 1-D irregular functional data into sparse curves for the sparse elastic functions. |
+| `sparse_elastic_align_pair` | `(points1, points2, param1=None, param2=None, closed=False, eps=0.01)` | Elastic alignment of two sparsely observed curves treated as polygons (elasdics ``align_curves``). |
+| `sparse_elastic_mean` | `(curves, params=None, knots=None, mean_type='smooth', eps=0.01, max_iter=50, closed=False, pen_factor=100.0, closure_steps=1)` | Elastic (Fréchet) mean of sparsely observed curves with a spline SRV (elasdics ``compute_elastic_mean``). |
 | `srsf_inverse` | `(srsf, argvals, initial_value=0.0)` | Inverse SRSF transform. |
 | `srsf_presmooth` | `(data, argvals, smoothing='none', passes=1)` | Pre-smoothed curves, the input that ``srsf_transform_smoothed`` differentiates. |
 | `srsf_transform` | `(curve, argvals)` | SRSF (Square Root Slope Function) transform. |
 | `srsf_transform_smoothed` | `(data, argvals, smoothing='none', passes=1)` | SRSF transform of every curve after optional pre-smoothing (fdasrvf semantics). |
+| `srvf_to_curve` | `(q)` | Reconstruct a curve from its SRVF, β(t) = ∫₀ᵗ q‖q‖, starting at the origin. |
 | `transfer_alignment` | `(source_data, target_data, argvals, lambda_=0.0, max_iter=15, tol=0.001)` | Align curves from a target population to a source population's coordinate system. |
 | `tsrvf_transform` | `(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0)` | TSRVF (Transported SRSF) transform. |
 | `tsrvf_transform_with_method` | `(data, argvals, max_iter=20, tol=0.0001, lambda_=0.0, method='log_map')` | TSRVF transform with configurable transport method. |

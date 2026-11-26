@@ -1,8 +1,9 @@
 //! Conversion utilities between numpy arrays and fdars-core types.
 
-use fdars_core::matrix::FdMatrix;
+use fdars_core::matrix::{FdCurveSet, FdMatrix};
 use fdars_core::FdarError;
-use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArray3};
+use numpy::ndarray::{Array2, Array3};
+use numpy::{PyArray1, PyArray2, PyArray3, PyReadonlyArray1, PyReadonlyArray2, PyReadonlyArray3};
 use pyo3::prelude::*;
 use pyo3::types::{PyList, PyTuple};
 
@@ -195,4 +196,72 @@ pub fn fdmatrices_to_pylist<'py>(
         list.append(fdmatrix_to_numpy2d(py, mat))?;
     }
     Ok(list)
+}
+
+/// `(d, m)` array → one R^d curve as a set: d coordinate matrices of shape `1 × m`
+/// (the per-curve input of the `*_nd_with_config` functions).
+pub fn nd_curveset_from_curve(arr: PyReadonlyArray2<'_, f64>) -> PyResult<FdCurveSet> {
+    let a = arr.as_array();
+    let dims = a
+        .rows()
+        .into_iter()
+        .map(|row| FdMatrix::from_column_major(row.to_vec(), 1, row.len()).map_err(to_pyerr))
+        .collect::<PyResult<Vec<_>>>()?;
+    Ok(FdCurveSet { dims })
+}
+
+/// `(n, d, m)` array → n single-curve sets (the input of `karcher_mean_nd*`).
+pub fn nd_curvesets_from_numpy3d(arr: PyReadonlyArray3<'_, f64>) -> PyResult<Vec<FdCurveSet>> {
+    let a = arr.as_array();
+    let (n, d, m) = a.dim();
+    (0..n)
+        .map(|i| {
+            let dims = (0..d)
+                .map(|k| {
+                    let row: Vec<f64> = (0..m).map(|j| a[[i, k, j]]).collect();
+                    FdMatrix::from_column_major(row, 1, m).map_err(to_pyerr)
+                })
+                .collect::<PyResult<Vec<_>>>()?;
+            Ok(FdCurveSet { dims })
+        })
+        .collect()
+}
+
+/// A collection of equally shaped `(d, m)` curves (list of 2-D arrays or a
+/// `(n, d, m)` array) → one `FdCurveSet` with d coordinate matrices `n × m`.
+pub fn curve_collection_to_set(obj: &Bound<'_, PyAny>, caller_name: &str) -> PyResult<FdCurveSet> {
+    let curves = series_collection(obj, caller_name)?;
+    to_pyresult(fdars_core::alignment::curves_to_set(&curves))
+}
+
+/// `d` vectors of length m → `(d, m)` array.
+pub fn rows_to_numpy2d<'py>(py: Python<'py>, rows: &[Vec<f64>]) -> Bound<'py, PyArray2<f64>> {
+    let m = rows.first().map_or(0, Vec::len);
+    PyArray2::from_owned_array(
+        py,
+        Array2::from_shape_fn((rows.len(), m), |(k, j)| rows[k][j]),
+    )
+}
+
+/// d coordinate matrices of shape `n × m` → `(n, d, m)` array.
+pub fn curve_dims_to_numpy3d<'py>(py: Python<'py>, dims: &[FdMatrix]) -> Bound<'py, PyArray3<f64>> {
+    let (n, m) = dims.first().map_or((0, 0), FdMatrix::shape);
+    PyArray3::from_owned_array(
+        py,
+        Array3::from_shape_fn((n, dims.len(), m), |(i, k, j)| dims[k][(i, j)]),
+    )
+}
+
+/// `FdCurveSet` → `(n, d, m)` array, `out[i, k, j] = set.dims[k][(i, j)]`.
+pub fn curveset_to_numpy3d<'py>(py: Python<'py>, set: &FdCurveSet) -> Bound<'py, PyArray3<f64>> {
+    curve_dims_to_numpy3d(py, &set.dims)
+}
+
+/// Equally shaped matrices (e.g. n rotations `d × d`) → `(n, r, c)` array.
+pub fn stack_fdmatrices<'py>(py: Python<'py>, mats: &[FdMatrix]) -> Bound<'py, PyArray3<f64>> {
+    let (r, c) = mats.first().map_or((0, 0), FdMatrix::shape);
+    PyArray3::from_owned_array(
+        py,
+        Array3::from_shape_fn((mats.len(), r, c), |(i, a, b)| mats[i][(a, b)]),
+    )
 }

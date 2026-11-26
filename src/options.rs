@@ -11,6 +11,7 @@ use fdars_core::alignment::{
 use fdars_core::metric::DtwWindow;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 
 /// Build a `DtwWindow` from the `window=, radius=, window_fraction=, max_slope=` kwargs.
 ///
@@ -117,6 +118,66 @@ pub fn warp_optim(
     cfg.dp_prune = dp_prune;
     cfg.band_frac = band_frac;
     Ok(cfg)
+}
+
+/// Build a `WarpOptimConfig` from an optional dict holding the flat keys of
+/// [`warp_optim`]: `method`, `lambda_`, `penalty`, `optim_max_iter`, `scl`,
+/// `nbhd_dim`, `dp_scl`, `dp_cost`, `dp_prune`, `band_frac`, `lambda_scale`.
+///
+/// Missing keys take the core defaults; `None` gives `WarpOptimConfig::default()`.
+/// An unknown key raises `ValueError` listing the valid ones.
+pub fn warp_optim_from_dict(dict: Option<&Bound<'_, PyDict>>) -> PyResult<WarpOptimConfig> {
+    const KEYS: [&str; 11] = [
+        "method",
+        "lambda_",
+        "penalty",
+        "optim_max_iter",
+        "scl",
+        "nbhd_dim",
+        "dp_scl",
+        "dp_cost",
+        "dp_prune",
+        "band_frac",
+        "lambda_scale",
+    ];
+    let Some(dict) = dict else {
+        return Ok(WarpOptimConfig::default());
+    };
+    for key in dict.keys() {
+        let key: String = key.extract()?;
+        if !KEYS.contains(&key.as_str()) {
+            return Err(PyValueError::new_err(format!(
+                "warp_optim: unknown key '{key}'; valid keys are {}",
+                KEYS.join(", ")
+            )));
+        }
+    }
+    fn get<'py, T: pyo3::conversion::FromPyObjectOwned<'py>>(
+        dict: &Bound<'py, PyDict>,
+        key: &str,
+        default: T,
+    ) -> PyResult<T> {
+        match dict.get_item(key)? {
+            Some(v) => v.extract::<T>().map_err(|e| {
+                let e: PyErr = e.into();
+                PyValueError::new_err(format!("warp_optim['{key}']: {e}"))
+            }),
+            None => Ok(default),
+        }
+    }
+    warp_optim(
+        &get(dict, "method", "dp".to_string())?,
+        get(dict, "lambda_", 0.0)?,
+        &get(dict, "penalty", "l2gam".to_string())?,
+        get(dict, "optim_max_iter", 30)?,
+        get(dict, "scl", 3)?,
+        get(dict, "nbhd_dim", 7)?,
+        get(dict, "dp_scl", 1)?,
+        &get(dict, "dp_cost", "piecewise_constant".to_string())?,
+        get(dict, "dp_prune", true)?,
+        get(dict, "band_frac", 0.0)?,
+        &get(dict, "lambda_scale", "native".to_string())?,
+    )
 }
 
 /// Parse a shift extrapolation mode: `"boundary"`, `"linear"`, `"periodic"`

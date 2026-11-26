@@ -13,11 +13,11 @@ use fdars_core::alignment::{
     WfdaChoice, WfdaConfig, WfdaCostMeasure,
 };
 use fdars_core::error::FdarError;
-use fdars_core::matrix::{FdCurveSet, FdMatrix};
-use numpy::ndarray::{Array2, Array3};
+use fdars_core::matrix::FdMatrix;
+use numpy::ndarray::Array2;
 use numpy::{
-    AllowTypeChange, PyArray1, PyArray2, PyArray3, PyArrayLike1, PyReadonlyArray1,
-    PyReadonlyArray2, PyReadonlyArray3,
+    AllowTypeChange, PyArray1, PyArray2, PyArrayLike1, PyReadonlyArray1, PyReadonlyArray2,
+    PyReadonlyArray3,
 };
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -27,52 +27,6 @@ use std::cell::RefCell;
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/// `(d, m)` array → one R^d curve: d coordinate matrices of shape `1 × m`.
-fn curve_to_set(arr: PyReadonlyArray2<'_, f64>) -> PyResult<FdCurveSet> {
-    let a = arr.as_array();
-    let dims = a
-        .rows()
-        .into_iter()
-        .map(|row| FdMatrix::from_column_major(row.to_vec(), 1, row.len()).map_err(to_pyerr))
-        .collect::<PyResult<Vec<_>>>()?;
-    Ok(FdCurveSet { dims })
-}
-
-/// `(n, d, m)` array → n single-curve sets (the input of `karcher_mean_nd*`).
-fn curves_to_sets(arr: PyReadonlyArray3<'_, f64>) -> PyResult<Vec<FdCurveSet>> {
-    let a = arr.as_array();
-    let (n, d, m) = a.dim();
-    (0..n)
-        .map(|i| {
-            let dims = (0..d)
-                .map(|k| {
-                    let row: Vec<f64> = (0..m).map(|j| a[[i, k, j]]).collect();
-                    FdMatrix::from_column_major(row, 1, m).map_err(to_pyerr)
-                })
-                .collect::<PyResult<Vec<_>>>()?;
-            Ok(FdCurveSet { dims })
-        })
-        .collect()
-}
-
-/// `d` vectors of length m → `(d, m)` array.
-fn vecs_to_numpy2d<'py>(py: Python<'py>, rows: &[Vec<f64>]) -> Bound<'py, PyArray2<f64>> {
-    let m = rows.first().map_or(0, Vec::len);
-    PyArray2::from_owned_array(
-        py,
-        Array2::from_shape_fn((rows.len(), m), |(k, j)| rows[k][j]),
-    )
-}
-
-/// d coordinate matrices of shape `n × m` → `(n, d, m)` array.
-fn dims_to_numpy3d<'py>(py: Python<'py>, dims: &[FdMatrix]) -> Bound<'py, PyArray3<f64>> {
-    let (n, m) = dims.first().map_or((0, 0), FdMatrix::shape);
-    PyArray3::from_owned_array(
-        py,
-        Array3::from_shape_fn((n, dims.len(), m), |(i, k, j)| dims[k][(i, j)]),
-    )
-}
 
 /// Run `run` with the `ShiftTemplate` described by a Python `template` argument:
 /// `None` or `"mean"` (re-estimated mean), a 1-D array (fixed template), or a
@@ -986,14 +940,14 @@ pub fn elastic_align_pair_nd_with_config<'py>(
         band_frac,
         lambda_scale,
     )?;
-    let s1 = curve_to_set(f1)?;
-    let s2 = curve_to_set(f2)?;
+    let s1 = nd_curveset_from_curve(f1)?;
+    let s2 = nd_curveset_from_curve(f2)?;
     let av = numpy1d_to_vec(argvals);
     let r = to_pyresult(fdars_core::alignment::elastic_align_pair_nd_with_config(
         &s1, &s2, &av, &cfg,
     ))?;
     let dict = PyDict::new(py);
-    dict.set_item("f_aligned", vecs_to_numpy2d(py, &r.f_aligned))?;
+    dict.set_item("f_aligned", rows_to_numpy2d(py, &r.f_aligned))?;
     dict.set_item("gamma", vec_to_numpy1d(py, r.gamma))?;
     dict.set_item("distance", r.distance)?;
     Ok(dict)
@@ -1039,8 +993,8 @@ pub fn elastic_distance_nd_with_config(
         band_frac,
         lambda_scale,
     )?;
-    let s1 = curve_to_set(f1)?;
-    let s2 = curve_to_set(f2)?;
+    let s1 = nd_curveset_from_curve(f1)?;
+    let s2 = nd_curveset_from_curve(f2)?;
     let av = numpy1d_to_vec(argvals);
     to_pyresult(fdars_core::alignment::elastic_distance_nd_with_config(
         &s1, &s2, &av, &cfg,
@@ -1101,16 +1055,16 @@ pub fn karcher_mean_nd_with_config<'py>(
         band_frac,
         lambda_scale,
     )?;
-    let sets = curves_to_sets(data)?;
+    let sets = nd_curvesets_from_numpy3d(data)?;
     let av = numpy1d_to_vec(argvals);
     let r = to_pyresult(fdars_core::alignment::karcher_mean_nd_with_config(
         &sets, &av, max_iter, tol, &cfg,
     ))?;
     let dict = PyDict::new(py);
-    dict.set_item("mean", vecs_to_numpy2d(py, &r.mean))?;
-    dict.set_item("mean_srsf", vecs_to_numpy2d(py, &r.mean_srsf))?;
+    dict.set_item("mean", rows_to_numpy2d(py, &r.mean))?;
+    dict.set_item("mean_srsf", rows_to_numpy2d(py, &r.mean_srsf))?;
     dict.set_item("gammas", fdmatrix_to_numpy2d(py, &r.gammas))?;
-    dict.set_item("aligned_data", dims_to_numpy3d(py, &r.aligned_data))?;
+    dict.set_item("aligned_data", curve_dims_to_numpy3d(py, &r.aligned_data))?;
     dict.set_item("n_iter", r.n_iter)?;
     dict.set_item("converged", r.converged)?;
     Ok(dict)

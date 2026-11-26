@@ -2,14 +2,14 @@
 
 > Curated primary paper references for fdars functional data analysis methods.  
 > Generated offline from `python/fdars/_references_map.json`.  
-> **28/503 callables** have at least one curated primary-paper entry.  
+> **28/534 callables** have at least one curated primary-paper entry.  
 > Uncurated callables are absent; see the [AI Capability Map](ai-capability-map.md) for the full callable surface.
 
 ## Coverage
 
-**28 of 503 public callables** have at least one curated primary-paper entry.
+**28 of 534 public callables** have at least one curated primary-paper entry.
 Remaining callables have contested attribution, no single primary paper, or are pending Phase-84 human DOI-landing-page verification.
-See [AI Capability Map](ai-capability-map.md) for all 503 callables.
+See [AI Capability Map](ai-capability-map.md) for all 534 callables.
 
 ## Methods by Module
 

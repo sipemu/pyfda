@@ -15,6 +15,7 @@ mod classification_mod;
 mod clustering_mod;
 mod clustering_ts_mod;
 mod conformal_mod;
+mod curve_shape_mod;
 mod density_fda_mod;
 mod depth_mod;
 mod explain_mod;

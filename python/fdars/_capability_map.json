@@ -118,6 +118,42 @@
     }
   },
   "alignment": {
+    "PyCurveShapeKarcher": {
+      "purpose": "Opaque handle wrapping a curve shape Karcher mean / median (CurveShapeKarcherResult).",
+      "sig": "(...)"
+    },
+    "PyCurveShapePca": {
+      "purpose": "Opaque handle wrapping a curve shape PCA (CurveShapePcaResult).",
+      "sig": "(...)"
+    },
+    "PySparseElasticMean": {
+      "purpose": "Opaque handle wrapping a sparse-curve elastic mean (SparseElasticMeanResult).",
+      "sig": "(...)"
+    },
+    "ab_closure_residual": {
+      "purpose": "Closure residual c(1) − c(0) of the planar curve an (a, b) F-transform represents.",
+      "sig": "(f, a, b)"
+    },
+    "ab_elastic_distance_pl": {
+      "purpose": "Exact (a, b) elastic distance between two piecewise-linear curves.",
+      "sig": "(c1, c2, a, b)"
+    },
+    "ab_elastic_match_pl": {
+      "purpose": "Exact (a, b) elastic matching of two piecewise-linear curves (polygons).",
+      "sig": "(c1, c2, a, b)"
+    },
+    "ab_project_closed": {
+      "purpose": "Project a planar (a, b) F-transform onto the closed-curve manifold, preserving its L² norm.",
+      "sig": "(f, a, b)"
+    },
+    "ab_transform": {
+      "purpose": "Kurtek-Needham F-transform of a planar curve for the (a, b) elastic metric.",
+      "sig": "(beta, a, b)"
+    },
+    "ab_transform_inverse": {
+      "purpose": "Inverse of ``ab_transform``: the planar curve starting at the origin with transform ``f``.",
+      "sig": "(f, a, b)"
+    },
     "affine_registration": {
       "purpose": "Shift, dilation or affine warp registration ``h_i(t) = a_i t + b_i`` to a template (fdacluster).",
       "sig": "(data, argvals, warp_class='affine', template=None, metric='l2', domain='full', extrapolation='boundary', max_dilation=0.15, max_shift=0.15, grid_size=21, max_iter=20, tol=1e-06, center_warps=True, optim_tol=1e-10)"
@@ -150,6 +186,10 @@
       "purpose": "Bayesian pairwise alignment via pCN MCMC on the Hilbert sphere.",
       "sig": "(f1, f2, argvals, n_samples=1000, burn_in=200, step_size=0.1, proposal_variance=1.0, seed=42)"
     },
+    "closure_residual": {
+      "purpose": "Closure residual ∫ q‖q‖ dt of an SRVF: the displacement β(1) − β(0) (zero when closed).",
+      "sig": "(q)"
+    },
     "compose_warps": {
       "purpose": "Compose two warping functions.",
       "sig": "(warp1, warp2, argvals)"
@@ -161,6 +201,66 @@
     "curve_geodesic": {
       "purpose": "Compute the geodesic path between two 1-D curves in the elastic metric.",
       "sig": "(f1, f2, argvals, n_points=10, lambda_=0.0)"
+    },
+    "curve_shape_align_pair": {
+      "purpose": "Align curve ``beta2`` to ``beta1`` in elastic shape space (rotation, scale, seed, warp).",
+      "sig": "(beta1, beta2, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)"
+    },
+    "curve_shape_boxplot": {
+      "purpose": "Elastic shape box plot of the curves summarised by a Karcher median (fdasrvf ``curve_boxplot``).",
+      "sig": "(model, alpha=0.05, k_a=1.0)"
+    },
+    "curve_shape_boxplot_from_aligned": {
+      "purpose": "Elastic shape box plot from SRVFs and curves already aligned to a median.",
+      "sig": "(median_srvf, aligned_srvfs, aligned_curves, scale=True, alpha=0.05, k_a=1.0)"
+    },
+    "curve_shape_confidence_interval": {
+      "purpose": "Confidence region of the centre shape of R^d curves (bootstrap or fdasrvf model-based).",
+      "sig": "(curves, n_bootstrap=200, confidence_level=0.95, max_iter=15, tol=0.001, seed=42, method='bootstrap', n_components=5, n_samples=100, n_warp_components=5, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)"
+    },
+    "curve_shape_depth": {
+      "purpose": "Elastic amplitude and phase depth of R^d curves.",
+      "sig": "(curves, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)"
+    },
+    "curve_shape_distance": {
+      "purpose": "Elastic shape distance between two R^d curves under the chosen quotient.",
+      "sig": "(beta1, beta2, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)"
+    },
+    "curve_shape_karcher_covariance": {
+      "purpose": "Sample covariance of the Karcher shooting vectors (tangent space at the mean).",
+      "sig": "(model)"
+    },
+    "curve_shape_karcher_mean": {
+      "purpose": "Karcher (Fréchet) mean shape of R^d curves in elastic shape space.",
+      "sig": "(curves, max_iter=20, tol=0.001, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)"
+    },
+    "curve_shape_karcher_median": {
+      "purpose": "Karcher (geometric) median shape of R^d curves in elastic shape space.",
+      "sig": "(curves, max_iter=20, tol=0.001, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)"
+    },
+    "curve_shape_outlier_detection": {
+      "purpose": "Shape outlier detection for R^d curves by distance to the Karcher median (or mean).",
+      "sig": "(curves, centre='median', threshold_method='tukey', tukey_k=1.5, alpha=0.05, max_iter=20, tol=0.001, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)"
+    },
+    "curve_shape_pca": {
+      "purpose": "Principal component analysis of curve shapes in the tangent space at the Karcher mean.",
+      "sig": "(model, ncomp=3)"
+    },
+    "curve_shape_self_distance_matrix": {
+      "purpose": "Symmetric matrix of pairwise elastic shape distances between R^d curves.",
+      "sig": "(curves, rotation=True, allow_reflection=False, scale=True, include_length=False, closed=False, seed_search=True, seed_step=4, reparam=True, lambda_=0.0, align_iter=2, metric='srvf', a=None, b=None, branch_search=False, warp_optim=None)"
+    },
+    "curve_shape_tangent_to_curve": {
+      "purpose": "Map a tangent vector at the Karcher mean back to a curve (inverse of ``curve_shape_tsrvf``).",
+      "sig": "(model, v)"
+    },
+    "curve_shape_tsrvf": {
+      "purpose": "TSRVF of R^d curves: align to the Karcher mean and map into its tangent space.",
+      "sig": "(model, curves)"
+    },
+    "curve_srvf": {
+      "purpose": "Square-root velocity function q = β'/√‖β'‖ of an R^d curve on t ∈ [0, 1].",
+      "sig": "(beta, scale=True)"
     },
     "detect_landmarks": {
       "purpose": "Detect landmarks (peaks, valleys, zero-crossings, inflections) in a curve.",
@@ -384,6 +484,10 @@
       "purpose": "Register curves by a per-curve rigid horizontal shift (least-squares).",
       "sig": "(data, argvals, max_shift)"
     },
+    "optimal_rotation": {
+      "purpose": "Optimal rotation R = argmax ⟨q1, R q2⟩ over SO(d) (or O(d)) by SVD Procrustes.",
+      "sig": "(q1, q2, allow_reflection=False)"
+    },
     "pairwise_consistency": {
       "purpose": "Pairwise alignment consistency via triplet checks.",
       "sig": "(data, argvals, lambda_=0.0, max_triplets=0)"
@@ -415,6 +519,10 @@
     "phase_self_distance_matrix": {
       "purpose": "Phase self distance matrix.",
       "sig": "(data, argvals, lambda_=0.0)"
+    },
+    "project_closed_srvf": {
+      "purpose": "Project an SRVF onto the closed-curve manifold {q : ∫ q‖q‖ = 0}, preserving its L² norm.",
+      "sig": "(q)"
     },
     "reparameterize_curve": {
       "purpose": "Apply a warping function to a curve (reparameterize).",
@@ -452,6 +560,18 @@
       "purpose": "Sobolev least-squares registration score: LS spread plus a derivative-penalty",
       "sig": "(registered, argvals, lambda_=0.0)"
     },
+    "sparse_curves_from_irreg": {
+      "purpose": "Convert 1-D irregular functional data into sparse curves for the sparse elastic functions.",
+      "sig": "(data)"
+    },
+    "sparse_elastic_align_pair": {
+      "purpose": "Elastic alignment of two sparsely observed curves treated as polygons (elasdics ``align_curves``).",
+      "sig": "(points1, points2, param1=None, param2=None, closed=False, eps=0.01)"
+    },
+    "sparse_elastic_mean": {
+      "purpose": "Elastic (Fréchet) mean of sparsely observed curves with a spline SRV (elasdics ``compute_elastic_mean``).",
+      "sig": "(curves, params=None, knots=None, mean_type='smooth', eps=0.01, max_iter=50, closed=False, pen_factor=100.0, closure_steps=1)"
+    },
     "srsf_inverse": {
       "purpose": "Inverse SRSF transform.",
       "sig": "(srsf, argvals, initial_value=0.0)"
@@ -467,6 +587,10 @@
     "srsf_transform_smoothed": {
       "purpose": "SRSF transform of every curve after optional pre-smoothing (fdasrvf semantics).",
       "sig": "(data, argvals, smoothing='none', passes=1)"
+    },
+    "srvf_to_curve": {
+      "purpose": "Reconstruct a curve from its SRVF, β(t) = ∫₀ᵗ q‖q‖, starting at the origin.",
+      "sig": "(q)"
     },
     "transfer_alignment": {
       "purpose": "Align curves from a target population to a source population's coordinate system.",
