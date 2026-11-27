@@ -290,9 +290,9 @@ The band finds the same two intervals and directions as the ITP. It needs no bas
 The ITP tests basis coefficients, so its regions are only as good as the basis:
 
 - **A coarse basis smears the effect over the domain.** The coefficients are a least-squares projection, and a cubic B-spline spans four knot intervals, so a strong local difference also shifts the coefficients of components some distance away. With too few components, components far from the effect reject as well, the adjusted p-values are small almost everywhere, and `itp_two_pop_regions` (or `elastic_local_difference_test`) returns most of the domain, chopped into many short "positive" and "negative" regions by the sign of the *noisy* mean difference. Those directions are not evidence of anything.
-- **Narrow effects have low power.** An effect narrower than the support of a basis function is averaged with null signal in every coefficient that sees it, and the closure then takes the maximum over all intervals containing a component, so a raw p-value near the floor can come with an adjusted p-value well above $\alpha$. This is a property of the procedure, not of the implementation: fdars's closure is validated against R `fdatest`'s `ITP2bspline`.
+- **Effects carried by few components can lose all power in the closure.** The adjusted p-value of a component is the largest p-value over *every* interval that contains it, including long intervals made mostly of null components, which dilute the evidence. An effect that shows up in only a few components, because it is weak, narrow, or falls badly on the knots, can therefore have raw p-values at the floor and adjusted p-values well above $\alpha$. How much this happens depends on `nbasis` in a way that is not monotone. This is a property of the procedure, not of the implementation: fdars's closure is validated against R `fdatest`'s `ITP2bspline`.
 
-On the data of the two previous examples, and on a narrow weak bump, the default `nbasis=15` (components spaced roughly 0.07 apart on $[0, 1]$, for effects 0.25 wide) falls into each trap in turn:
+The fence shows both traps: the data of the two previous examples under different `nbasis` (the default 15 spaces the components roughly 0.07 apart on $[0, 1]$, for effects 0.25 wide), then two single bumps:
 
 ```python exec="1" source="above" result="text"
 import numpy as np
@@ -312,22 +312,29 @@ for nbasis in (15, 25, 40):
     print(f"nbasis={nbasis}: {len(r['regions']):2d} regions covering {flagged:.0%} of the grid")
 print("true effect support: 50% of the grid")
 
-# a narrow, weak effect: a Gaussian bump of height 0.15 and sd 0.01, noise sd 0.1
+# a moderate bump (height 0.5, width 0.1) on a 50-point grid, noise sd 0.1
 rng = np.random.default_rng(0)
-A = rng.normal(0, 0.1, (n, m))
-B = rng.normal(0, 0.1, (n, m)) + 0.15 * np.exp(-(t - 0.5) ** 2 / (2 * 0.01 ** 2))
-r = fi.itp_two_pop(A, B, t, nbasis=15, seed=42)
-print(f"narrow effect: smallest raw p {np.min(r['raw_pvalues']):.3f}, "
-      f"smallest adjusted p {np.min(r['adjusted_pvalues']):.3f}")
+t50 = np.linspace(0, 1, 50)
+A = rng.normal(0, 0.1, (n, 50)) + 0.5 * np.exp(-(((t50 - 0.7) / 0.1) ** 2))
+B = rng.normal(0, 0.1, (n, 50))
+# a narrow, weak bump (height 0.15, sd 0.01) on the 101-point grid, noise sd 0.1
+rng = np.random.default_rng(0)
+A2 = rng.normal(0, 0.1, (n, m))
+B2 = rng.normal(0, 0.1, (n, m)) + 0.15 * np.exp(-(t - 0.5) ** 2 / (2 * 0.01 ** 2))
+for name, (a, b, grid) in {"moderate bump": (A, B, t50), "narrow bump": (A2, B2, t)}.items():
+    for nbasis in (8, 15, 40):
+        r = fi.itp_two_pop(a, b, grid, nbasis=nbasis, seed=42)
+        print(f"{name}, nbasis={nbasis:2d}: smallest raw p {np.min(r['raw_pvalues']):.3f}, "
+              f"smallest adjusted p {np.min(r['adjusted_pvalues']):.3f}")
 print("FDARS_FENCE_OK")
 ```
 
-With 15 components the regions cover 85 % of the grid in 18 pieces, against 50 % for the true effects; 25 or 40 components recover the two effects. The narrow bump is picked up by single coefficients (raw p 0.002), but every interval containing them is diluted by null components, so nothing survives the closure (adjusted p 0.35).
+With 15 components the two strong effects smear into 18 regions covering 85 % of the grid, against 50 % for the true effects; 25 or 40 components recover them. The moderate bump has raw p-values at the floor under every basis, but its adjusted p-value is 0.14 with 15 components and 0.001 with 8 or 40: here the default sits in a dip of the power curve (on three more seeds of the same simulation, 15 components miss the bump at 5 % in two). The narrow, weak bump survives the closure under none of the three bases (adjusted p 0.21–0.37).
 
 Practical rules:
 
-1. Choose `nbasis` from the width of the effects you expect: the spacing of the components, roughly $(t_{\max} - t_{\min}) / \texttt{n\_basis}$, should be at least five times smaller than the narrowest effect (at most what the grid supports; read `n_basis` from the result).
-2. Distrust a result that flags most of the domain in many short regions of alternating direction; increase `nbasis` and look again.
+1. There is no safe default for `nbasis`. Too few components smear a strong effect over the domain; a basis that spreads a modest effect over few of many components can lose it in the closure. Run the test for a few values (for example 8, 15, 25, 40, within what the grid supports; read `n_basis` from the result) and trust regions that are stable across them.
+2. Distrust a result that flags most of the domain in many short regions of alternating direction, and do not read a non-significant ITP as "no difference" when raw p-values are small.
 3. Cross-check the regions with `scb_two_sample_band` (or `test="scb"` in `elastic_local_difference_test`): the band has no basis and fails in different ways.
 
 ---
