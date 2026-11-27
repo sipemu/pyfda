@@ -330,14 +330,11 @@ def test_wcr_symmetric_predict_self_consistent(wcr_data):
     np.testing.assert_allclose(r["fitted_values"], y, atol=0.01)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="fdars-core 0.48: under mode='symmetric' beta_t = reconstruct(coeff_weights) "
-    "truncates the mirror extension instead of applying the adjoint, so "
-    "X @ beta_t + intercept != fitted_values (predict itself is correct)",
-)
 @pytest.mark.parametrize("fit", ["wcr", "wnet"])
 def test_symmetric_beta_t_matches_fitted(wcr_data, fit):
+    """``beta_t`` is the DWT adjoint of ``coeff_weights``, so the time-domain
+    linear predictor reproduces ``fitted_values`` in symmetric mode too
+    (fdars-core 0.48.1, sipemu/fdars#82; 0.48.0 was off by up to ~30)."""
     X, y, _ = wcr_data
     r = sof.wcr(X, y, mode="symmetric", ncomp=5) if fit == "wcr" else sof.wnet(X, y, mode="symmetric")
     np.testing.assert_allclose(X @ r["beta_t"] + r["intercept"], r["fitted_values"], atol=1e-6)
@@ -480,16 +477,24 @@ def test_jfpca_score_training_round_trip(jfpca):
     np.testing.assert_array_equal(st["warping"], r["training_gammas"])
 
 
-def test_jfpca_transform_training_curves(jfpca):
+@pytest.mark.parametrize("balance_c, corr, rel", [(None, 0.995, 0.08), (3e-4, 0.999, 0.03)])
+def test_jfpca_transform_training_curves(jfpca, balance_c, corr, rel):
+    """Re-alignment to the fixed template differs from the Karcher post-centred
+    warps (by up to ~0.14 here, independent of c), so only the well-determined
+    leading component agrees closely.  The warp discrepancy enters the joint
+    score through the phase block ``c * v``: at c ≈ 0 (explicit, or what the
+    0.48.0 automatic choice collapsed to, sipemu/fdars#84) the score is
+    amplitude-only and agrees to corr 0.9998; at the automatic c ≈ 2.4 of
+    0.48.1 the phase discrepancy shows (corr 0.9976, 5.6 % max deviation)."""
     X, r = jfpca
+    if balance_c is not None:
+        r = al.jfpca_fit(X, TJ, ncomp=3, balance_c=balance_c)
     tr = r["model"].transform(X)
     assert tr["scores"].shape == (14, 3)
     assert tr["aligned"].shape == tr["warping"].shape == X.shape
-    # re-alignment to the fixed template differs from the Karcher post-centred
-    # warps, so only the well-determined leading component agrees closely
     s, s0 = tr["scores"][:, 0], r["scores"][:, 0]
-    assert np.corrcoef(s, s0)[0, 1] > 0.999
-    assert np.max(np.abs(s - s0)) < 0.05 * np.max(np.abs(s0))
+    assert np.corrcoef(s, s0)[0, 1] > corr
+    assert np.max(np.abs(s - s0)) < rel * np.max(np.abs(s0))
     # warps are monotone and fix the end points
     assert np.all(np.diff(tr["warping"], axis=1) >= -1e-12)
     np.testing.assert_allclose(tr["warping"][:, [0, -1]], np.tile([0.0, 1.0], (14, 1)), atol=1e-12)

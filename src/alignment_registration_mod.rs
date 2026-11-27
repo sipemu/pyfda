@@ -8,9 +8,9 @@
 use crate::convert::*;
 use crate::options::{affine_config, linear_warp_class, shift_extrapolation, warp_optim};
 use fdars_core::alignment::{
-    ContinuousRegistrationConfig, ContinuousRegistrationCriterion, IterativeShiftConfig,
-    LandmarkLocation, LandmarkShiftConfig, RobustKarcherConfig, ShiftTemplate, SrsfSmoothing,
-    WfdaChoice, WfdaConfig, WfdaCostMeasure,
+    ContinuousRegistrationConfig, ContinuousRegistrationCriterion,
+    ContinuousRegistrationTermination, IterativeShiftConfig, LandmarkLocation, LandmarkShiftConfig,
+    RobustKarcherConfig, ShiftTemplate, SrsfSmoothing, WfdaChoice, WfdaConfig, WfdaCostMeasure,
 };
 use fdars_core::error::FdarError;
 use fdars_core::matrix::FdMatrix;
@@ -1453,13 +1453,13 @@ pub fn landmark_shift_registration<'py>(
 /// dict
 ///     registered_data (n, m), warps (n, m), w_coefficients (n, nbasis),
 ///     w_knots (nbasis + norder,), criterion (n,), target (m,), n_iter (n,),
-///     converged (n,), n_template_iter, shift (n,).
-///
-/// Notes
-/// -----
-/// ``converged[i]`` is also True when the Levenberg-Marquardt step control
-/// stalls (no damping found a strictly decreasing step), not only when the
-/// relative decrease fell below ``tol``.
+///     converged (n,), termination (list of n str), n_template_iter, shift (n,).
+///     ``termination[i]`` is why curve i stopped in the last pass:
+///     ``"converged"`` (tolerance met), ``"stalled"`` (no damped step
+///     decreased the criterion before ``tol`` was met), ``"coef_limit"``
+///     (stalled with a step rejected by the W coefficient limit) or
+///     ``"max_iter"``. ``converged[i]`` is True exactly when
+///     ``termination[i] == "converged"``.
 #[pyfunction]
 #[pyo3(signature = (data, argvals, target=None, criterion="min_eigenvalue", nbasis=None, norder=None, lambda_=0.0, lfd_order=None, max_iter=None, tol=1e-8, n_fine=None, max_template_iter=1, template_tol=1e-4, initial_coefficients=None, periodic=false, r_defaults=false))]
 pub fn continuous_registration<'py>(
@@ -1535,6 +1535,18 @@ pub fn continuous_registration<'py>(
     dict.set_item("target", vec_to_numpy1d(py, r.target))?;
     dict.set_item("n_iter", usize_vec_to_numpy1d(py, r.n_iter))?;
     dict.set_item("converged", bool_vec_to_numpy1d(py, r.converged))?;
+    let termination: Vec<&str> = r
+        .termination
+        .iter()
+        .map(|t| match t {
+            ContinuousRegistrationTermination::Converged => "converged",
+            ContinuousRegistrationTermination::Stalled => "stalled",
+            ContinuousRegistrationTermination::CoefLimit => "coef_limit",
+            ContinuousRegistrationTermination::MaxIter => "max_iter",
+            _ => "unknown",
+        })
+        .collect();
+    dict.set_item("termination", termination)?;
     dict.set_item("n_template_iter", r.n_template_iter)?;
     dict.set_item("shift", vec_to_numpy1d(py, r.shift))?;
     Ok(dict)

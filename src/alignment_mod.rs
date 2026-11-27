@@ -995,6 +995,12 @@ pub fn hierarchical_cut<'py>(
 // ─── Multi-resolution alignment ─────────────────────────────────────────────
 
 /// Multi-resolution elastic alignment (coarse DP + gradient refinement).
+///
+/// The refinement minimises the penalised objective
+/// ``||q1 - SRSF(f2 o gamma)||^2 + lambda_ * sum((dgamma/dt - 1)^2 dt)``
+/// by coordinate steps with backtracking, accepting only strict decreases, so
+/// it never worsens the coarse-DP warp (``n_refine_steps=0`` returns the
+/// coarse warp).
 #[pyfunction]
 #[pyo3(signature = (f1, f2, argvals, coarsen_factor=4, n_refine_steps=10, step_size=0.01, lambda_=0.0))]
 pub fn elastic_align_pair_multires<'py>(
@@ -1941,6 +1947,12 @@ fn landmark_result_to_dict<'py>(
 /// dict
 ///     ``registered`` (n, m), ``gammas`` (n, m), ``landmarks`` (nested list),
 ///     ``target_landmarks`` (length L).
+///
+/// Notes
+/// -----
+/// Inconsistent input (``len(landmarks) != n``, ``len(argvals) != m`` or an
+/// empty ``data``) raises no error: the curves are returned unchanged with
+/// identity warps on ``[argvals[0], argvals[-1]]``.
 #[pyfunction]
 #[pyo3(signature = (data, argvals, landmarks, target=None))]
 pub fn landmark_register<'py>(

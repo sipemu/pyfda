@@ -585,15 +585,28 @@ def test_continuous_template_passes_and_initial(warped):
     assert np.allclose(warm["warps"], r["warps"])
 
 
-def test_continuous_converged_is_true_on_stall(warped):
-    """Documents core behaviour: ``converged`` is also set when the LM step
-    control stalls.  With ``tol=0`` no accepted step can satisfy the relative
-    decrease rule, yet every curve reports ``converged`` well before
-    ``max_iter`` (fdars-core 0.48 ``register_curve``: ``Stalled => converged = true``)."""
+def test_continuous_stall_is_not_converged(warped):
+    """With ``tol=0`` no accepted step can meet the relative-decrease rule, so
+    the LM step control stalls well before ``max_iter``.  Since fdars-core
+    0.48.1 (sipemu/fdars#83) a stall is reported as ``converged=False`` with
+    ``termination="stalled"`` (0.48.0 reported ``converged=True``)."""
     data, _ = warped
     r = A.continuous_registration(data, T51, tol=0.0, max_iter=1000)
     assert np.all(r["n_iter"] < 1000)
-    assert np.all(r["converged"])
+    assert not np.any(r["converged"])
+    assert r["termination"] == ["stalled"] * 3
+
+
+def test_continuous_termination_reasons(warped):
+    data, _ = warped
+    r = A.continuous_registration(data, T51)
+    assert r["termination"] == ["converged"] * 3
+    np.testing.assert_array_equal(r["converged"], True)
+    r = A.continuous_registration(data, T51, tol=0.0, max_iter=1)
+    assert r["termination"] == ["max_iter"] * 3
+    assert not np.any(r["converged"])
+    r = A.continuous_registration(data, T51, max_iter=0)
+    assert r["termination"] == ["max_iter"] * 3
 
 
 @pytest.mark.parametrize(
