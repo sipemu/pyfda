@@ -2,8 +2,8 @@ cff-version: "1.2.0"
 message: "If you use fdars, please cite the software paper."
 type: software
 title: fdars
-version: "0.13.0"
-date-released: 2026-09-25
+version: "0.14.0"
+date-released: 2026-11-27
 license: MIT
 repository-code: "https://github.com/sipemu/pyfda"
 url: "https://sipemu.github.io/pyfda/"
