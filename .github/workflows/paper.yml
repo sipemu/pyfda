@@ -30,8 +30,20 @@ jobs:
   paper:
     name: Paper pipeline + PDF compile
     runs-on: ubuntu-latest
+    env:
+      # The manuscript is the arXiv snapshot paired with this package release.
+      # Its gates (coverage macros, refs.bib, snippets, cross-implementation and
+      # case-study numbers) are checked against the package AS RELEASED, so
+      # later releases on main do not make the frozen paper "stale". Bump this
+      # only together with a deliberate manuscript update.
+      PAPER_PKG_REF: v0.13.0
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pin package source to the paper's release
+        run: git checkout "$PAPER_PKG_REF" -- src python Cargo.toml pyproject.toml scripts
 
       - uses: actions/setup-python@v5
         with:
