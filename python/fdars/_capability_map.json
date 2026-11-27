@@ -383,6 +383,10 @@
       "purpose": "Elastic DP-means clustering: the number of clusters follows from a distance penalty.",
       "sig": "(data, argvals, penalty=None, lambda_=0.0, max_iter=20, tol=0.01, align=True, seed=42)"
     },
+    "elastic_local_difference_test": {
+      "purpose": "Localise where two groups of curves differ, in amplitude and in phase.",
+      "sig": "(data, argvals, labels, test='itp', alpha=0.05, nbasis=15, n_perm=999, seed=42, mapping='dominant', scb_bandwidth=None, scb_nb=999, multiplier='gaussian', phase_representation='displacement', max_iter=20, tol=0.0001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')"
+    },
     "elastic_logistic": {
       "purpose": "Elastic logistic regression.",
       "sig": "(data, argvals, labels, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)"
@@ -1510,9 +1514,17 @@
       "purpose": "Interval-wise testing procedure for a single functional population.",
       "sig": "(data, argvals, mu0=None, basis_type='bspline', nbasis=5, n_perm=999, seed=None)"
     },
+    "itp_pointwise_pvalues": {
+      "purpose": "Map the per-component adjusted p-values of a B-spline ITP to the grid.",
+      "sig": "(result, argvals, mapping='dominant')"
+    },
     "itp_two_pop": {
       "purpose": "Interval-wise testing procedure for two functional populations.",
       "sig": "(data_a, data_b, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)"
+    },
+    "itp_two_pop_regions": {
+      "purpose": "Grid regions where two mean functions differ, by a two-population B-spline ITP.",
+      "sig": "(data_a, data_b, argvals, nbasis=15, n_perm=999, seed=42, alpha=0.05, mapping='dominant')"
     },
     "mean_scb": {
       "purpose": "Simultaneous confidence band for the mean function (Degras).",
@@ -1526,6 +1538,10 @@
     "permanova": {
       "purpose": "PERMANOVA (Anderson 2001) permutation test of group differences on a distance matrix.",
       "sig": "(dist, labels, n_perm=999, seed=42)"
+    },
+    "scb_two_sample_band": {
+      "purpose": "Two-sample SCB for the mean difference and the regions where it excludes zero.",
+      "sig": "(data_a, data_b, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')"
     },
     "scb_two_sample_test": {
       "purpose": "Two-sample mean-equality test via a simultaneous confidence band for the",

@@ -2,14 +2,14 @@
 
 > Curated primary paper references for fdars functional data analysis methods.  
 > Generated offline from `python/fdars/_references_map.json`.  
-> **33/580 callables** have at least one curated primary-paper entry.  
+> **33/584 callables** have at least one curated primary-paper entry.  
 > Uncurated callables are absent; see the [AI Capability Map](ai-capability-map.md) for the full callable surface.
 
 ## Coverage
 
-**33 of 580 public callables** have at least one curated primary-paper entry.
+**33 of 584 public callables** have at least one curated primary-paper entry.
 Remaining callables have contested attribution, no single primary paper, or are pending Phase-84 human DOI-landing-page verification.
-See [AI Capability Map](ai-capability-map.md) for all 580 callables.
+See [AI Capability Map](ai-capability-map.md) for all 584 callables.
 
 ## Methods by Module
 
@@ -92,6 +92,27 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | Language | Package | Function | Confidence |
 |----------|---------|----------|------------|
 | R | `fdasrvf` | `pair_align_functions_bayes` | high |
+
+---
+
+#### Degras, D. (2011) — Simultaneous confidence bands for nonparametric regression with functional data
+
+| Field | Value |
+|-------|-------|
+| Authors | Degras, D. |
+| Year | 2011 |
+| DOI | `doi:10.5705/ss.2009.207` |
+| URL | [https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N...](https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N412.html) |
+| Type | journal |
+| Status | Pending DOI verification |
+
+**Callables implementing this method:**
+
+- `alignment.elastic_local_difference_test` — Localise where two groups of curves differ, in amplitude and in phase.
+- `inference.mean_scb` — Simultaneous confidence band for the mean function (Degras).
+- `inference.scb_two_sample_band` — Two-sample SCB for the mean difference and the regions where it excludes zero.
+- `inference.scb_two_sample_test` — Two-sample mean-equality test via a simultaneous confidence band for the
+- `tolerance.scb_mean_degras` — Simultaneous confidence band (Degras method).
 
 ---
 
@@ -263,6 +284,34 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 - `alignment.curve_shape_depth` — Elastic amplitude and phase depth of R^d curves.
 - `alignment.curve_shape_outlier_detection` — Shape outlier detection for R^d curves by distance to the Karcher median (or mean).
 - `alignment.curve_shape_confidence_interval` — Confidence region of the centre shape of R^d curves (bootstrap or fdasrvf model-based).
+
+---
+
+#### Pini, A., Vantini, S. (2016) — The interval testing procedure: A general framework for inference in functional data analysis
+
+| Field | Value |
+|-------|-------|
+| Authors | Pini, A., Vantini, S. |
+| Year | 2016 |
+| DOI | `doi:10.1111/biom.12476` |
+| URL | [https://onlinelibrary.wiley.com/doi/abs/10.1111/biom.12476](https://onlinelibrary.wiley.com/doi/abs/10.1111/biom.12476) |
+| Type | journal |
+| Status | Pending DOI verification |
+
+**Callables implementing this method:**
+
+- `alignment.elastic_local_difference_test` — Localise where two groups of curves differ, in amplitude and in phase.
+- `inference.itp_flm` — Interval-wise testing procedure for the functional linear model.
+- `inference.itp_one_pop` — Interval-wise testing procedure for a single functional population.
+- `inference.itp_pointwise_pvalues` — Map the per-component adjusted p-values of a B-spline ITP to the grid.
+- `inference.itp_two_pop` — Interval-wise testing procedure for two functional populations.
+- `inference.itp_two_pop_regions` — Grid regions where two mean functions differ, by a two-population B-spline ITP.
+
+**Cross-language implementations:**
+
+| Language | Package | Function | Confidence |
+|----------|---------|----------|------------|
+| R | `fdatest` | `ITP1bspline` | high |
 
 ---
 
@@ -1188,50 +1237,6 @@ See [AI Capability Map](ai-capability-map.md) for all 580 callables.
 | Language | Package | Function | Confidence |
 |----------|---------|----------|------------|
 | R | `fda.usc` | `fanova.onefactor` | high |
-
----
-
-#### Degras, D. (2011) — Simultaneous confidence bands for nonparametric regression with functional data
-
-| Field | Value |
-|-------|-------|
-| Authors | Degras, D. |
-| Year | 2011 |
-| DOI | `doi:10.5705/ss.2009.207` |
-| URL | [https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N...](https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N412.html) |
-| Type | journal |
-| Status | Pending DOI verification |
-
-**Callables implementing this method:**
-
-- `inference.mean_scb` — Simultaneous confidence band for the mean function (Degras).
-- `inference.scb_two_sample_test` — Two-sample mean-equality test via a simultaneous confidence band for the
-- `tolerance.scb_mean_degras` — Simultaneous confidence band (Degras method).
-
----
-
-#### Pini, A., Vantini, S. (2016) — The interval testing procedure: A general framework for inference in functional data analysis
-
-| Field | Value |
-|-------|-------|
-| Authors | Pini, A., Vantini, S. |
-| Year | 2016 |
-| DOI | `doi:10.1111/biom.12476` |
-| URL | [https://onlinelibrary.wiley.com/doi/abs/10.1111/biom.12476](https://onlinelibrary.wiley.com/doi/abs/10.1111/biom.12476) |
-| Type | journal |
-| Status | Pending DOI verification |
-
-**Callables implementing this method:**
-
-- `inference.itp_flm` — Interval-wise testing procedure for the functional linear model.
-- `inference.itp_one_pop` — Interval-wise testing procedure for a single functional population.
-- `inference.itp_two_pop` — Interval-wise testing procedure for two functional populations.
-
-**Cross-language implementations:**
-
-| Language | Package | Function | Confidence |
-|----------|---------|----------|------------|
-| R | `fdatest` | `ITP1bspline` | high |
 
 ---
 

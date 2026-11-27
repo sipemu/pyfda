@@ -1,6 +1,7 @@
 //! Elastic uncertainty quantification and exponential-family registration of
 //! fdars-core 0.48: elastic amplitude / phase box plots, elastic DP-means,
-//! the amplitude / phase PERMANOVA test, Bayesian group alignment (pCN and
+//! the amplitude / phase PERMANOVA test, localised amplitude / phase group
+//! differences (fdars-core 0.48.1), Bayesian group alignment (pCN and
 //! infHMC, parallel tempering, convergence diagnostics) and registr-style
 //! registration of exponential-family curves with generalized FPCA.
 //!
@@ -8,16 +9,21 @@
 //! `alignment_mod::register`; it is not a submodule of its own.
 
 use crate::convert::*;
-use crate::inference_mod::permanova_dict;
+use crate::inference_mod::{
+    difference_regions_list, itp_mapping_from_str, itp_result_to_pydict, permanova_dict,
+};
+use crate::options::warp_optim;
 use crate::pace_fpca_mod::PyIrregFdata;
 use fdars_core::alignment::{
     AmplitudeBoxplot, AmplitudeMetric, BayesianGroupConfig, BayesianGroupResult, BayesianSampler,
     BoxplotClassification, BoxplotRegion, BoxplotSide, CurveIncompleteness, DpMeansConfig,
     ElasticBoxplotConfig, ElasticBoxplots, ElasticPhaseBoxplot, ExpFamRegistration, ExpFamily,
-    FpcaType, GfpcaConfig, GfpcaResult, NpcCriterion, PhaseAmplitudeTestConfig, RegisterFpcaConfig,
-    RegisterFpcaResult, WarpingType,
+    FpcaType, GfpcaConfig, GfpcaResult, LocalDifferenceConfig, LocalDifferenceTest,
+    LocalTestMethod, NpcCriterion, PhaseAmplitudeTestConfig, PhaseRepresentation,
+    RegisterFpcaConfig, RegisterFpcaResult, WarpingType,
 };
 use fdars_core::irreg_fdata::IrregFdata;
+use fdars_core::tolerance::MultiplierDistribution;
 use numpy::{AllowTypeChange, PyArray1, PyArrayLike1, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -643,6 +649,233 @@ pub fn elastic_phase_amplitude_test<'py>(
     d.set_item("alignment", a)?;
     d.set_item("group_labels", usize_vec_to_numpy1d(py, r.group_labels))?;
     d.set_item("group_sizes", usize_vec_to_numpy1d(py, r.group_sizes))?;
+    Ok(d)
+}
+
+// ---------------------------------------------------------------------------
+// Localised amplitude / phase group differences
+// ---------------------------------------------------------------------------
+
+fn local_test_dict<'py>(
+    py: Python<'py>,
+    t: LocalDifferenceTest,
+    timing: bool,
+) -> PyResult<Bound<'py, PyDict>> {
+    let d = PyDict::new(py);
+    d.set_item("regions", difference_regions_list(py, &t.regions, timing)?)?;
+    d.set_item("effect", vec_to_numpy1d(py, t.effect))?;
+    d.set_item(
+        "pointwise_adjusted_pvalues",
+        t.pointwise_adjusted_pvalues.map(|v| vec_to_numpy1d(py, v)),
+    )?;
+    match t.itp {
+        Some(itp) => d.set_item("itp", itp_result_to_pydict(py, itp)?)?,
+        None => d.set_item("itp", py.None())?,
+    }
+    d.set_item("lower", t.lower.map(|v| vec_to_numpy1d(py, v)))?;
+    d.set_item("upper", t.upper.map(|v| vec_to_numpy1d(py, v)))?;
+    Ok(d)
+}
+
+/// Localise where two groups of curves differ, in amplitude and in phase.
+///
+/// 1. All curves are aligned to one elastic Karcher mean (warp optimiser set
+///    by the flat keyword arguments of ``elastic_align_pair_with_config``);
+///    the labels are not seen by the alignment, so the inference that
+///    follows is not biased by it.
+/// 2. **Amplitude**: a local two-sample test on the aligned curves.
+/// 3. **Phase**: the same local test on the warps, as the time displacement
+///    ``gamma_i(t) - t`` (default) or as ``psi_i = sqrt(gamma_i')``.
+///
+/// The local test is the interval-wise testing procedure (``test="itp"``,
+/// Pini & Vantini 2016, as ``inference.itp_two_pop_regions``; interval-wise
+/// error rate <= ``alpha``) or a simultaneous confidence band for the mean
+/// difference (``test="scb"``, as ``inference.scb_two_sample_band``;
+/// family-wise over the grid). Amplitude and phase are tested separately; no
+/// correction across the two is applied. The SCB multiplier bootstrap is
+/// liberal for small groups (about 35/200 null rejections at 10 curves per
+/// group in fdars-core's seeded study, 6/200 at 30); the ITP is conservative.
+///
+/// Group **A** is the smaller label, **B** the larger. Amplitude
+/// ``"positive"``: A's aligned curves lie above B's. Phase (displacement)
+/// ``"positive"``: ``gamma_A(t) - t > gamma_B(t) - t``, i.e. A's features
+/// occur **later** than B's around ``t`` (``timing="a_later"``;
+/// ``"negative"`` is ``"a_earlier"``). Phase (psi) ``"positive"``: A's warps
+/// run faster around ``t``.
+///
+/// Parameters
+/// ----------
+/// data : numpy.ndarray
+///     Curves, shape (n, m), finite.
+/// argvals : numpy.ndarray
+///     Strictly increasing evaluation points, length m >= 3.
+/// labels : numpy.ndarray
+///     Non-negative integer group labels, length n, exactly two distinct
+///     values; at least 2 (ITP) / 3 (SCB) curves per group.
+/// test : str, optional
+///     Local test, ``"itp"`` (default) or ``"scb"``.
+/// alpha : float, optional
+///     Significance level in (0, 1) (default 0.05).
+/// nbasis : int, optional
+///     ITP: requested number of B-spline basis functions (default 15).
+/// n_perm : int, optional
+///     ITP: number of permutations (default 999).
+/// seed : int, optional
+///     ITP: RNG seed (default 42); the phase test uses ``seed + 1``.
+/// mapping : str, optional
+///     ITP: component-to-grid mapping, ``"dominant"`` (default) or
+///     ``"support"`` (see ``inference.itp_pointwise_pvalues``).
+/// scb_bandwidth : float, optional
+///     SCB: smoothing bandwidth in ``argvals`` units (default None = 5% of
+///     the domain length).
+/// scb_nb : int, optional
+///     SCB: multiplier-bootstrap replicates (default 999).
+/// multiplier : str, optional
+///     SCB: ``"gaussian"`` (default) or ``"rademacher"``.
+/// phase_representation : str, optional
+///     ``"displacement"`` (``gamma(t) - t`` in ``argvals`` units, default) or
+///     ``"psi"`` (``sqrt(gamma')`` of the warp rescaled to [0, 1]).
+/// max_iter : int, optional
+///     Karcher mean iterations (default 20, >= 1).
+/// tol : float, optional
+///     Karcher mean tolerance (default 1e-4).
+/// method, lambda_, penalty, optim_max_iter, scl, nbhd_dim, dp_scl, dp_cost, dp_prune, band_frac, lambda_scale
+///     Warp optimiser, as in ``elastic_align_pair_with_config`` (default
+///     classic DP, ``lambda_=0``).
+///
+/// Returns
+/// -------
+/// dict
+///     ``amplitude`` and ``phase``: dicts with ``regions`` (list of dicts
+///     ``{start_idx, end_idx, t_start, t_end, direction,
+///     min_adjusted_pvalue}``; phase regions under ``"displacement"`` also
+///     carry ``timing``), ``effect`` (m,) pointwise ``A - B`` (ITP: raw mean
+///     difference, SCB: smoothed band centre), ``pointwise_adjusted_pvalues``
+///     (m,) and ``itp`` (``itp_two_pop`` dict) for ITP, else None, ``lower``
+///     / ``upper`` (m,) for SCB, else None. ``min_adjusted_pvalue`` is the
+///     smallest ITP p-value in the region (None for SCB). Also
+///     ``phase_data`` (n, m) the tested phase quantity, ``alignment``
+///     (Karcher mean dict: mean, mean_srsf, gammas, aligned_data, n_iter,
+///     converged), ``group_labels`` ``[A, B]`` and ``group_sizes``.
+///
+/// Raises
+/// ------
+/// ValueError
+///     For a length mismatch, m < 3, non-increasing ``argvals``, non-finite
+///     data, not exactly two labels, too few curves per group, ``alpha``
+///     outside (0, 1), ``max_iter == 0``, a non-positive ``scb_bandwidth``,
+///     an invalid warp configuration or an unknown option string.
+#[pyfunction]
+#[pyo3(signature = (data, argvals, labels, test="itp", alpha=0.05, nbasis=15, n_perm=999, seed=42, mapping="dominant", scb_bandwidth=None, scb_nb=999, multiplier="gaussian", phase_representation="displacement", max_iter=20, tol=1e-4, method="dp", lambda_=0.0, penalty="l2gam", optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost="piecewise_constant", dp_prune=true, band_frac=0.0, lambda_scale="native"))]
+pub fn elastic_local_difference_test<'py>(
+    py: Python<'py>,
+    data: PyReadonlyArray2<'py, f64>,
+    argvals: PyReadonlyArray1<'py, f64>,
+    labels: PyArrayLike1<'py, i64, AllowTypeChange>,
+    test: &str,
+    alpha: f64,
+    nbasis: usize,
+    n_perm: usize,
+    seed: u64,
+    mapping: &str,
+    scb_bandwidth: Option<f64>,
+    scb_nb: usize,
+    multiplier: &str,
+    phase_representation: &str,
+    max_iter: usize,
+    tol: f64,
+    method: &str,
+    lambda_: f64,
+    penalty: &str,
+    optim_max_iter: usize,
+    scl: usize,
+    nbhd_dim: usize,
+    dp_scl: usize,
+    dp_cost: &str,
+    dp_prune: bool,
+    band_frac: f64,
+    lambda_scale: &str,
+) -> PyResult<Bound<'py, PyDict>> {
+    let mut cfg = LocalDifferenceConfig::default();
+    cfg.method = match test {
+        "itp" => LocalTestMethod::Itp,
+        "scb" => LocalTestMethod::Scb,
+        _ => {
+            return Err(PyValueError::new_err(format!(
+                "test must be 'itp' or 'scb', got '{test}'"
+            )))
+        }
+    };
+    cfg.phase_representation = match phase_representation {
+        "displacement" => PhaseRepresentation::Displacement,
+        "psi" => PhaseRepresentation::Psi,
+        _ => {
+            return Err(PyValueError::new_err(format!(
+                "phase_representation must be 'displacement' or 'psi', got '{phase_representation}'"
+            )))
+        }
+    };
+    cfg.multiplier = match multiplier {
+        "gaussian" => MultiplierDistribution::Gaussian,
+        "rademacher" => MultiplierDistribution::Rademacher,
+        _ => {
+            return Err(PyValueError::new_err(format!(
+                "multiplier must be 'gaussian' or 'rademacher', got '{multiplier}'"
+            )))
+        }
+    };
+    cfg.mapping = itp_mapping_from_str(mapping)?;
+    cfg.alpha = alpha;
+    cfg.nbasis = nbasis;
+    cfg.n_perm = n_perm;
+    cfg.seed = seed;
+    cfg.scb_bandwidth = scb_bandwidth;
+    cfg.scb_nb = scb_nb;
+    cfg.max_iter = max_iter;
+    cfg.tol = tol;
+    cfg.warp = warp_optim(
+        method,
+        lambda_,
+        penalty,
+        optim_max_iter,
+        scl,
+        nbhd_dim,
+        dp_scl,
+        dp_cost,
+        dp_prune,
+        band_frac,
+        lambda_scale,
+    )?;
+    let mat = numpy2d_to_fdmatrix(data)?;
+    let av = numpy1d_to_vec(argvals);
+    let lab = nonneg_labels(&labels, "labels")?;
+    let r = to_pyresult(fdars_core::alignment::elastic_local_difference_test(
+        &mat, &av, &lab, &cfg,
+    ))?;
+    let timing = cfg.phase_representation == PhaseRepresentation::Displacement;
+    let d = PyDict::new(py);
+    d.set_item("amplitude", local_test_dict(py, r.amplitude, false)?)?;
+    d.set_item("phase", local_test_dict(py, r.phase, timing)?)?;
+    d.set_item("phase_data", fdmatrix_to_numpy2d(py, &r.phase_data))?;
+    let a = PyDict::new(py);
+    a.set_item("mean", vec_to_numpy1d(py, r.alignment.mean))?;
+    a.set_item("mean_srsf", vec_to_numpy1d(py, r.alignment.mean_srsf))?;
+    a.set_item("gammas", fdmatrix_to_numpy2d(py, &r.alignment.gammas))?;
+    a.set_item(
+        "aligned_data",
+        fdmatrix_to_numpy2d(py, &r.alignment.aligned_data),
+    )?;
+    a.set_item("n_iter", r.alignment.n_iter)?;
+    a.set_item("converged", r.alignment.converged)?;
+    d.set_item("alignment", a)?;
+    d.set_item(
+        "group_labels",
+        usize_vec_to_numpy1d(py, r.group_labels.to_vec()),
+    )?;
+    d.set_item(
+        "group_sizes",
+        usize_vec_to_numpy1d(py, r.group_sizes.to_vec()),
+    )?;
     Ok(d)
 }
 
@@ -1559,6 +1792,7 @@ pub fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(elastic_phase_boxplot, m)?)?;
     m.add_function(wrap_pyfunction!(elastic_dpmeans, m)?)?;
     m.add_function(wrap_pyfunction!(elastic_phase_amplitude_test, m)?)?;
+    m.add_function(wrap_pyfunction!(elastic_local_difference_test, m)?)?;
     m.add_function(wrap_pyfunction!(bayesian_align_group, m)?)?;
     m.add_function(wrap_pyfunction!(register_fpca, m)?)?;
     m.add_function(wrap_pyfunction!(register_fpca_regular, m)?)?;

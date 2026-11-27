@@ -1,6 +1,6 @@
 # fdars — Functional Data Analysis for Python
 
-> High-performance functional data analysis toolkit powered by Rust via PyO3. Provides depth measures, basis representations, smoothing, clustering, elastic alignment, regression (scalar-on-function, function-on-scalar, Fréchet), outlier detection, functional time series, seasonal decomposition, SPM control charts, conformal prediction, density FDA, and more. 30 public submodules, 552 public callables.
+> High-performance functional data analysis toolkit powered by Rust via PyO3. Provides depth measures, basis representations, smoothing, clustering, elastic alignment, regression (scalar-on-function, function-on-scalar, Fréchet), outlier detection, functional time series, seasonal decomposition, SPM control charts, conformal prediction, density FDA, and more. 30 public submodules, 556 public callables.
 
 [Documentation](https://sipemu.github.io/pyfda/)
 [Reference](https://sipemu.github.io/pyfda/reference/)
@@ -43,7 +43,7 @@
 
 Each entry: `module.function(signature)` — one-line purpose. Where available, a `When:` note gives guidance on which task this function suits best.
 
-### fdars.alignment (143 functions)
+### fdars.alignment (144 functions)
 
 - `alignment.PyAmplitudeBoxplot(...)` — Opaque handle wrapping a fitted elastic amplitude box plot (AmplitudeBoxplot).
 - `alignment.PyCurveShapeKarcher(...)` — Opaque handle wrapping a curve shape Karcher mean / median (CurveShapeKarcherResult).
@@ -111,6 +111,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `alignment.elastic_distance_nd_with_config(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Elastic distance between two R^d curves with a configurable warp optimiser.
 - `alignment.elastic_distance_with_config(curve1, curve2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Elastic (Fisher-Rao) distance between two curves with a configurable warp optimiser.
 - `alignment.elastic_dpmeans(data, argvals, penalty=None, lambda_=0.0, max_iter=20, tol=0.01, align=True, seed=42)` — Elastic DP-means clustering: the number of clusters follows from a distance penalty.
+- `alignment.elastic_local_difference_test(data, argvals, labels, test='itp', alpha=0.05, nbasis=15, n_perm=999, seed=42, mapping='dominant', scb_bandwidth=None, scb_nb=999, multiplier='gaussian', phase_representation='displacement', max_iter=20, tol=0.0001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` — Localise where two groups of curves differ, in amplitude and in phase.
 - `alignment.elastic_logistic(data, argvals, labels, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)` — Elastic logistic regression.
 - `alignment.elastic_outlier_detection(data, argvals, lambda_=0.0, alpha=0.05, use_median=True, threshold_method='tukey', tukey_k=1.5)` — Elastic outlier detection using distances and Tukey fence.
 - `alignment.elastic_partial_match(template, target, argvals_template, argvals_target, lambda_=0.0, min_span=0.5)` — Elastic partial matching: find best-aligned subcurve of a longer curve.
@@ -417,17 +418,20 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 - `fts.spectral_density(data, argvals, bandwidth=None)` — Estimate the spectral density operator of a functional time series.
 - `fts.stationarity_test(data, argvals, n_perm=999, seed=42)` — Test stationarity of functional time series via permutation test. When: Use to test stationarity of a functional time series before fitting FTSM or computing ACF.
 
-### fdars.inference (12 functions)
+### fdars.inference (15 functions)
 
 - `inference.f_perm_test(data_a, data_b, argvals, n_perm=999, seed=None)` — Functional two-sample permutation *F*-test.
 - `inference.flm_f_test(data, response, n_comp=5)` — Functional linear model overall-significance F-test. When: Use to test whether functional linear model coefficients are jointly zero (functional F-test).
 - `inference.flm_gof_test(data, response, n_comp=5)` — Functional linear model goodness-of-fit test (Ramsey-RESET style).
 - `inference.itp_flm(data, response, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` — Interval-wise testing procedure for the functional linear model.
 - `inference.itp_one_pop(data, argvals, mu0=None, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` — Interval-wise testing procedure for a single functional population.
+- `inference.itp_pointwise_pvalues(result, argvals, mapping='dominant')` — Map the per-component adjusted p-values of a B-spline ITP to the grid.
 - `inference.itp_two_pop(data_a, data_b, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` — Interval-wise testing procedure for two functional populations.
+- `inference.itp_two_pop_regions(data_a, data_b, argvals, nbasis=15, n_perm=999, seed=42, alpha=0.05, mapping='dominant')` — Grid regions where two mean functions differ, by a two-population B-spline ITP.
 - `inference.mean_scb(data, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` — Simultaneous confidence band for the mean function (Degras). When: Use to construct simultaneous confidence bands for a functional population mean.
 - `inference.oneway_anova_vstat(data, groups, argvals)` — One-way functional ANOVA V-statistic (asymptotic scaled-χ² test).
 - `inference.permanova(dist, labels, n_perm=999, seed=42)` — PERMANOVA (Anderson 2001) permutation test of group differences on a distance matrix.
+- `inference.scb_two_sample_band(data_a, data_b, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` — Two-sample SCB for the mean difference and the regions where it excludes zero.
 - `inference.scb_two_sample_test(data_a, data_b, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` — Two-sample mean-equality test via a simultaneous confidence band for the
 - `inference.t_perm_test(data_a, data_b, argvals, n_perm=999, seed=None)` — Functional two-sample permutation *t*-test.
 - `inference.two_sample_mean_test(data_a, data_b, argvals, ncomp=5)` — Functional two-sample mean-equality test via Hotelling-T² on a shared FPC
@@ -688,7 +692,7 @@ Each entry: `module.function(signature)` — one-line purpose. Where available, 
 
 ## Scientific Provenance & Cross-Language Implementations
 
-Coverage: 33 of 580 callables (including 28 Fdata class methods) have curated primary-paper entries.
+Coverage: 33 of 584 callables (including 28 Fdata class methods) have curated primary-paper entries.
 Uncurated callables are absent from this section. A consumer MAY synthesize
 provenance for uncurated callables but MUST flag each synthesized citation as
 ungrounded (grounded: false) — never present synthesized provenance as curated.
@@ -744,7 +748,7 @@ ungrounded (grounded: false) — never present synthesized provenance as curated
 - `regression.fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 - `regression.predict_fregre_lm` — Ramsay, J.O., Dalzell, C.J. (1991) doi:10.1111/j.2517-6161.1991.tb01844.x
 
-> 547 of 580 total callables are not yet curated and are absent from this section.
+> 551 of 584 total callables are not yet curated and are absent from this section.
 > A consumer MAY synthesize provenance for these callables but MUST structurally
 > flag each synthesized citation as ungrounded: { "grounded": false } per citation.
 > Never present synthesized provenance as curated data from this file.

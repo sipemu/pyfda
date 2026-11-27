@@ -464,9 +464,12 @@
       "url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/biom.12476",
       "type": "journal",
       "callables": [
+        "alignment.elastic_local_difference_test",
         "inference.itp_flm",
         "inference.itp_one_pop",
-        "inference.itp_two_pop"
+        "inference.itp_pointwise_pvalues",
+        "inference.itp_two_pop",
+        "inference.itp_two_pop_regions"
       ],
       "cross_language": {
         "R": {
@@ -487,7 +490,9 @@
       "url": "https://www3.stat.sinica.edu.tw/sstest/j21n4/J21N412/J21N412.html",
       "type": "journal",
       "callables": [
+        "alignment.elastic_local_difference_test",
         "inference.mean_scb",
+        "inference.scb_two_sample_band",
         "inference.scb_two_sample_test",
         "tolerance.scb_mean_degras"
       ],
@@ -2361,8 +2366,11 @@
     "outliers.detect_outliers_lrt_with_dist": ["febrero_galeano_gonzalez_2008"],
     "inference.itp_flm": ["pini_vantini_2016"],
     "inference.itp_one_pop": ["pini_vantini_2016"],
+    "inference.itp_pointwise_pvalues": ["pini_vantini_2016"],
     "inference.itp_two_pop": ["pini_vantini_2016"],
+    "inference.itp_two_pop_regions": ["pini_vantini_2016"],
     "inference.mean_scb": ["degras_2011"],
+    "inference.scb_two_sample_band": ["degras_2011"],
     "inference.scb_two_sample_test": ["degras_2011"],
     "tolerance.scb_mean_degras": ["degras_2011"],
     "inference.f_perm_test": ["cuevas_febrero_fraiman_2004"],
@@ -2432,6 +2440,7 @@
     "metric.elastic_ts_alignment_path_multivariate": ["keogh_pazzani_2001", "jeong_jeong_omitaomu_2011", "herrmann_webb_2023", "chen_ng_2004", "chen_ozsu_oria_2005", "marteau_2009", "stefan_athitsos_das_2013", "vlachos_kollios_gunopulos_2002", "zhao_itti_2018"],
     "inference.permanova": ["anderson_2001"],
     "alignment.elastic_phase_amplitude_test": ["anderson_2001"],
+    "alignment.elastic_local_difference_test": ["pini_vantini_2016", "degras_2011"],
     "pace_fpca.optimal_design": ["ji_muller_2017"],
     "pace_fpca.design_criterion": ["ji_muller_2017"],
     "clustering.align_cluster_fd": ["sangalli_et_al_2010"],

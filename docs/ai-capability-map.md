@@ -2,13 +2,13 @@
 
 This page is the human-readable companion to the machine-readable [`llms.txt`](https://sipemu.github.io/pyfda/llms.txt) digest. It lists every public callable in the `fdars` library, grouped by submodule.
 
-**30 submodules &middot; 552 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
+**30 submodules &middot; 556 public callables** — all generated offline from the committed capability map. AI agents: use `fdars_list_capabilities()` (MCP tool) or [llms.txt](https://sipemu.github.io/pyfda/llms.txt) for the machine-readable form.
 
 ## Module Index
 
 | Module | Purpose | Functions |
 |--------|---------|-----------|
-| [`fdars.alignment`](#alignment) | Elastic alignment, SRSF registration, Karcher mean, elastic FPCA | 143 |
+| [`fdars.alignment`](#alignment) | Elastic alignment, SRSF registration, Karcher mean, elastic FPCA | 144 |
 | [`fdars.basis`](#basis) | Basis representations — B-spline, Fourier, functional PCA | 21 |
 | [`fdars.classification`](#classification) | Functional classifiers — k-nearest neighbours, SVM, centroid-based | 9 |
 | [`fdars.clustering`](#clustering) | Functional k-means, fuzzy, GMM, and elastic clustering | 18 |
@@ -22,7 +22,7 @@ This page is the human-readable companion to the machine-readable [`llms.txt`](h
 | [`fdars.fdata`](#fdata) | Core functional data operations — mean, deriv, norm, integrate, reconstruct | 15 |
 | [`fdars.frechet`](#frechet) | Fréchet regression for metric-space responses | 4 |
 | [`fdars.fts`](#fts) | Functional time series — forecasting, correlation, spectral analysis | 13 |
-| [`fdars.inference`](#inference) | Functional inference — two-sample tests, interval-wise testing | 12 |
+| [`fdars.inference`](#inference) | Functional inference — two-sample tests, interval-wise testing | 15 |
 | [`fdars.metric`](#metric) | Functional distance and similarity metrics — L2, L1, Mahalanobis, DTW | 58 |
 | [`fdars.metrics`](#metrics) | Regression and classification scoring metrics for functional outputs | 5 |
 | [`fdars.multi_fdata`](#multi_fdata) | Multi-domain functional data — paired domains, joint analysis | 2 |
@@ -115,6 +115,7 @@ Elastic alignment, SRSF registration, Karcher mean, elastic FPCA.
 | `elastic_distance_nd_with_config` | `(f1, f2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Elastic distance between two R^d curves with a configurable warp optimiser. |
 | `elastic_distance_with_config` | `(curve1, curve2, argvals, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Elastic (Fisher-Rao) distance between two curves with a configurable warp optimiser. |
 | `elastic_dpmeans` | `(data, argvals, penalty=None, lambda_=0.0, max_iter=20, tol=0.01, align=True, seed=42)` | Elastic DP-means clustering: the number of clusters follows from a distance penalty. |
+| `elastic_local_difference_test` | `(data, argvals, labels, test='itp', alpha=0.05, nbasis=15, n_perm=999, seed=42, mapping='dominant', scb_bandwidth=None, scb_nb=999, multiplier='gaussian', phase_representation='displacement', max_iter=20, tol=0.0001, method='dp', lambda_=0.0, penalty='l2gam', optim_max_iter=30, scl=3, nbhd_dim=7, dp_scl=1, dp_cost='piecewise_constant', dp_prune=True, band_frac=0.0, lambda_scale='native')` | Localise where two groups of curves differ, in amplitude and in phase. |
 | `elastic_logistic` | `(data, argvals, labels, ncomp_beta=10, lambda_=0.0, max_iter=20, tol=0.0001)` | Elastic logistic regression. |
 | `elastic_outlier_detection` | `(data, argvals, lambda_=0.0, alpha=0.05, use_median=True, threshold_method='tukey', tukey_k=1.5)` | Elastic outlier detection using distances and Tukey fence. |
 | `elastic_partial_match` | `(template, target, argvals_template, argvals_target, lambda_=0.0, min_span=0.5)` | Elastic partial matching: find best-aligned subcurve of a longer curve. |
@@ -512,10 +513,13 @@ Functional inference — two-sample tests, interval-wise testing.
 | `flm_gof_test` | `(data, response, n_comp=5)` | Functional linear model goodness-of-fit test (Ramsey-RESET style). |
 | `itp_flm` | `(data, response, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` | Interval-wise testing procedure for the functional linear model. |
 | `itp_one_pop` | `(data, argvals, mu0=None, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` | Interval-wise testing procedure for a single functional population. |
+| `itp_pointwise_pvalues` | `(result, argvals, mapping='dominant')` | Map the per-component adjusted p-values of a B-spline ITP to the grid. |
 | `itp_two_pop` | `(data_a, data_b, argvals, basis_type='bspline', nbasis=5, n_perm=999, seed=None)` | Interval-wise testing procedure for two functional populations. |
+| `itp_two_pop_regions` | `(data_a, data_b, argvals, nbasis=15, n_perm=999, seed=42, alpha=0.05, mapping='dominant')` | Grid regions where two mean functions differ, by a two-population B-spline ITP. |
 | `mean_scb` | `(data, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` | Simultaneous confidence band for the mean function (Degras). |
 | `oneway_anova_vstat` | `(data, groups, argvals)` | One-way functional ANOVA V-statistic (asymptotic scaled-χ² test). |
 | `permanova` | `(dist, labels, n_perm=999, seed=42)` | PERMANOVA (Anderson 2001) permutation test of group differences on a distance matrix. |
+| `scb_two_sample_band` | `(data_a, data_b, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` | Two-sample SCB for the mean difference and the regions where it excludes zero. |
 | `scb_two_sample_test` | `(data_a, data_b, argvals, bandwidth, nb=200, confidence=0.95, multiplier='gaussian')` | Two-sample mean-equality test via a simultaneous confidence band for the |
 | `t_perm_test` | `(data_a, data_b, argvals, n_perm=999, seed=None)` | Functional two-sample permutation *t*-test. |
 | `two_sample_mean_test` | `(data_a, data_b, argvals, ncomp=5)` | Functional two-sample mean-equality test via Hotelling-T² on a shared FPC |
