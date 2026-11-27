@@ -68,6 +68,84 @@ The phase test detects the timing difference. On the **raw** curves the amplitud
 
 ---
 
+## Localised differences: where do the groups differ?
+
+`elastic_phase_amplitude_test` answers *whether* the groups differ in amplitude or phase, with one p-value each. `elastic_local_difference_test(data, argvals, labels, test="itp")` answers *where*, and in which direction:
+
+1. it aligns all curves to one elastic Karcher mean, **without** the labels (the golden rule above), with the same warp options as `elastic_align_pair_with_config`;
+2. **amplitude**: it runs a local two-sample test on the aligned curves;
+3. **phase**: it runs the same local test on the warps, as the time displacement $\gamma_i(t) - t$ (default, in `argvals` units) or as $\psi_i = \sqrt{\gamma_i'}$ (`phase_representation="psi"`).
+
+The local test is either the **interval-wise testing procedure** (`test="itp"`, Pini & Vantini 2016, as [`itp_two_pop_regions`](../inference/interval-inference.md#where-do-the-means-differ-itp_two_pop_regions)), which controls the interval-wise error rate at `alpha`, or a **simultaneous confidence band** for the mean difference (`test="scb"`, Degras 2011, as [`scb_two_sample_band`](../inference/interval-inference.md#simultaneous-band-for-the-difference-scb_two_sample_band)), which is family-wise over the grid. Amplitude and phase are tested separately, with no correction across the two.
+
+Each of `result["amplitude"]` and `result["phase"]` holds `regions`, a list of contiguous grid intervals with `t_start`, `t_end`, `direction` and (ITP) `min_adjusted_pvalue`, plus the pointwise `effect` (A − B) and, for ITP, the pointwise adjusted p-values. Group **A** is the smaller label, B the larger:
+
+| Part | `direction="positive"` | `direction="negative"` |
+|---|---|---|
+| amplitude | A's aligned curves lie **above** B's | A below B |
+| phase, displacement | A's features occur **later** (`timing="a_later"`) | A's features occur earlier (`timing="a_earlier"`) |
+| phase, `psi` | A's warps run faster around $t$ | A's warps run slower |
+
+Below, two groups of 20 curves share a two-peak shape with individual timing jitter. Group 1 (B) has a **taller first peak** (a localised amplitude difference near $t = 0.3$) and a **later second peak** (a localised timing difference near $t = 0.7$):
+
+```python exec="1" html="1" source="above"
+import numpy as np
+from docs_fig import fig, render
+from fdars import alignment as A
+
+m = 101
+t = np.linspace(0, 1, m)
+bump = lambda s, c: np.exp(-(s - c) ** 2 / 0.004)
+rng = np.random.default_rng(1)
+X, labels = [], []
+for g in (0, 1):
+    for _ in range(20):
+        s = t + rng.normal(0, 0.02) * np.sin(np.pi * t)            # individual timing jitter
+        h1 = rng.normal(1.0 + 0.3 * g, 0.08)                      # group 1: taller first peak
+        c2 = 0.68 + 0.04 * g + rng.normal(0, 0.01)                # group 1: later second peak
+        X.append(h1 * bump(s, 0.3) + 0.8 * bump(s, c2) + 0.005 * rng.standard_normal(m))
+        labels.append(g)
+X = np.asarray(A.srsf_presmooth(np.array(X), t, smoothing="box", passes=5))
+labels = np.array(labels)
+
+res = {test: A.elastic_local_difference_test(X, t, labels, test=test, nbasis=30) for test in ("itp", "scb")}
+
+r = res["itp"]
+aligned, phase = np.asarray(r["alignment"]["aligned_data"]), np.asarray(r["phase_data"])
+f, (a1, a2) = fig(ncols=2, figsize=(10, 3.6))
+for ax, Y, part, title, ylab in ((a1, aligned, "amplitude", "Amplitude: aligned curves", "f"),
+                                 (a2, phase, "phase", "Phase: displacement $\\gamma_i(t) - t$", "time shift")):
+    for reg in r[part]["regions"]:
+        ax.axvspan(reg["t_start"], reg["t_end"], color="#ffc107", alpha=0.3, lw=0)
+    ax.plot(t, Y[labels == 0].mean(0), color="#3f51b5", lw=2, label="group 0 (A)")
+    ax.plot(t, Y[labels == 1].mean(0), color="#e8710a", lw=2, label="group 1 (B)")
+    ax.set(title=title, xlabel="t", ylabel=ylab)
+a1.legend(fontsize=8)
+print(render(f))
+
+rows = "".join(
+    f"<tr><td>{test.upper()}</td><td>{part}</td><td>[{g['t_start']:.2f}, {g['t_end']:.2f}]</td>"
+    f"<td>{g.get('timing') or g['direction']}</td>"
+    f"<td>{'' if g['min_adjusted_pvalue'] is None else format(g['min_adjusted_pvalue'], '.3f')}</td></tr>"
+    for test, rr in res.items() for part in ("amplitude", "phase") for g in rr[part]["regions"])
+print("<table><tr><th>test</th><th>part</th><th>region</th><th>direction</th><th>min adj. p</th></tr>"
+      f"{rows}</table>")
+```
+
+Both tests find the amplitude difference around the first peak, with group 0 *below* group 1, and the timing difference around the second peak, with group 0 *earlier* (the shaded regions in the plot are the ITP ones). The phase regions are wider than the peak itself: once the second peak is later, the displacement $\gamma(t) - t$ differs on the whole stretch of time that has to be stretched or compressed to move it, not only at the peak. The SCB also flags a sliver of amplitude around $t = 0.51$; it comes from the timing difference (it stays if the planted amplitude difference is removed from the simulation, and goes if the timing difference is removed): a single label-free alignment does not absorb a group-level timing difference completely, and a little of it shows up as amplitude next to the moved feature. Removing either planted difference removes the corresponding phase or amplitude regions.
+
+!!! warning "Choose `nbasis` for the width of the effect"
+    The ITP tests B-spline coefficients, so its resolution is set by the spacing of the components, and with a strong effect and too few components, components far from the effect reject as well. Here the peaks are about 0.1 wide, so the example uses `nbasis=30`. With the default `nbasis=15` the amplitude test flags most of the domain, split into short alternating "above" and "below" regions by the sign of the noisy mean difference; those directions are not supported by the data. See [Power and resolution of the ITP](../inference/interval-inference.md#power-and-resolution-of-the-itp), and cross-check with `test="scb"`.
+
+When to use which:
+
+- **`elastic_phase_amplitude_test`** for a single global decision (do the groups differ at all, in amplitude, in phase?); it uses the full elastic distances and has no basis to tune.
+- **`elastic_local_difference_test`** to locate and sign the differences. Use `test="itp"` for interval-wise error control and adjusted p-values (it is conservative), `test="scb"` for a band that is family-wise over the grid and needs no basis (its multiplier bootstrap is liberal for small groups: about 35 of 200 null data sets rejected at 10 curves per group in fdars-core's study, 6 of 200 at 30).
+
+The same pre-smoothing advice as for the global test applies: SRSF noise leaks phase differences into the amplitude part.
+
+---
+
 ## Elastic box plots
 
 The **elastic functional box plots** of Xie, Kurtek, Bharath & Sun (2017) (ports of fdasrsf `ampbox` / `phbox`) summarise amplitude and phase separately, after aligning the sample to its Karcher **median**:
@@ -238,6 +316,7 @@ The functions are `partial_conformal_fit`, `partial_conformal_predict`, `partial
 | Question | Tool | Notes |
 |---|---|---|
 | Do groups differ, in amplitude or in timing? | `elastic_phase_amplitude_test` | label-free alignment; pre-smooth lightly; p-values coupled |
+| Where do they differ, and in which direction? | `elastic_local_difference_test` | label-free alignment; ITP regions (choose `nbasis` for the effect width) or SCB band |
 | Any distance, any grouping | `fdars.inference.permanova` | [Functional Inference](../inference/functional-inference.md#permanova-on-a-distance-matrix) |
 | Visual summary, outliers by type | `elastic_boxplots` (+ `classify`) | amplitude and phase separately |
 | Simple phase fences | `phase_boxplot` | band depth on $\gamma$, Euclidean |
@@ -259,4 +338,6 @@ The functions are `partial_conformal_fit`, `partial_conformal_predict`, `partial
 - López-Pintado, S., Romo, J. (2009). On the concept of depth for functional data. *Journal of the American Statistical Association* 104(486), 718–734.
 - Kulis, B., Jordan, M. I. (2012). Revisiting k-means: new algorithms via Bayesian nonparametrics. *Proceedings of the 29th International Conference on Machine Learning (ICML)*.
 - Wang, F., Kurtek, S., Zhang, Y. (2026). Joint registration and conformal prediction for partially observed functional data. *Journal of Computational and Graphical Statistics* 35(4), 1537–1547.
+- Pini, A., Vantini, S. (2016). The interval testing procedure: a general framework for inference in functional data analysis. *Biometrics* 72(3), 835–845.
+- Degras, D. A. (2011). Simultaneous confidence bands for nonparametric regression with functional data. *Statistica Sinica* 21(4), 1735–1765.
 - Tucker, J. D., Yarger, D. (2024). Elastic functional changepoint detection of climate impacts from localized sources. *Environmetrics* 35(1), e2826.

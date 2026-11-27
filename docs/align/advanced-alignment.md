@@ -23,11 +23,13 @@ for i in range(n):
 
 ## 1. Multiresolution alignment (long curves)
 
-Dynamic programming costs $O(m^2)$ per pair. `elastic_align_pair_multires` runs the DP on a grid coarsened by `coarsen_factor`, upsamples the warp, and then takes `n_refine_steps` gradient steps on the full grid.
+Dynamic programming costs $O(m^2)$ per pair. `elastic_align_pair_multires` runs the DP on a grid coarsened by `coarsen_factor`, upsamples the warp, and then refines it on the full grid with `n_refine_steps` sweeps of a descent on the penalised objective
 
-!!! warning "Gradient refinement is under review"
-    In fdars-core 0.48 the refinement steps can make the alignment *worse* rather than better, and they ignore `lambda_`. On a 400-point oscillatory pair the coarse DP alone (`n_refine_steps=0`) reaches an elastic distance of 0.20, the default 10 refinement steps raise it to 1.56, and exact DP gives 0.10. Until this is resolved, use `n_refine_steps=0` (a pure coarse-to-fine DP) and compare against `elastic_align_pair`, or use [RBFGS](elastic-optimisers.md#rbfgs-a-smooth-local-optimiser) or a [band](banded-alignment.md) for long curves.
-    Tracked upstream as [sipemu/fdars#81](https://github.com/sipemu/fdars/issues/81).
+$$
+\lVert q_1 - (q_2\circ\gamma)\sqrt{\dot\gamma}\rVert^2 + \lambda \sum_j \Big(\frac{\Delta\gamma_j}{\Delta t_j} - 1\Big)^2 \Delta t_j .
+$$
+
+Each sweep moves the warp values one coordinate at a time with backtracking and accepts only strict decreases, so refinement never makes the coarse warp worse, and `lambda_` enters both the coarse DP and the refinement. The refined warp is not restricted to the DP's quantised slopes, so it can end below the exact DP's distance, but it is a local descent from the coarse warp and is not guaranteed to.
 
 ```python exec="1" source="above" result="text"
 import numpy as np
@@ -39,7 +41,7 @@ t = np.linspace(0, 1, m)
 f1 = np.sin(2 * np.pi * 2 * t) + 0.5 * np.sin(2 * np.pi * 5 * t)
 f2 = np.interp(t, np.clip(t + 0.09 * np.sin(np.pi * t), 0, 1), f1)   # non-linear phase distortion
 
-for steps in (0, 10):
+for steps in (0, 3, 10):
     t0 = perf_counter()
     r = elastic_align_pair_multires(f1, f2, t, coarsen_factor=4, n_refine_steps=steps)
     rms = np.sqrt(np.mean((np.asarray(r["f_aligned"]) - f1) ** 2))
@@ -51,14 +53,14 @@ print(f"exact DP:                     distance {r['distance']:.3f}  RMS {rms:.4f
 print("FDARS_FENCE_OK")
 ```
 
-The coarse DP is more than ten times faster than the exact DP at about twice its distance; the refinement steps then make the result worse. Returns `f_aligned`, `gamma` and `distance`.
+The coarse DP alone (`n_refine_steps=0`) is an order of magnitude faster than the exact DP, at about twice its distance: that is the speed option for long curves. The refinement lowers the distance with every sweep (here below the exact DP's), but each sweep is a line search over all $m$ warp values, so a few sweeps already cost about as much as the exact DP, and the cost grows quickly with $m$. Use the coarse DP when speed matters, refinement when you want to improve on the coarse warp without a full-grid DP, and `elastic_align_pair` (or a [band](banded-alignment.md)) as the reference. Returns `f_aligned`, `gamma` and `distance`.
 
 | Parameter | Description |
 |-----------|-------------|
 | `coarsen_factor` | Grid downsampling factor for the coarse DP (default `4`) |
-| `n_refine_steps` | Gradient refinement steps on the full grid (default `10`; see the warning) |
-| `step_size` | Refinement step size (default `0.01`) |
-| `lambda_` | Used by the coarse DP only |
+| `n_refine_steps` | Refinement sweeps on the full grid (default `10`; `0` = coarse DP only) |
+| `step_size` | Initial refinement step size (default `0.01`) |
+| `lambda_` | Warp penalty, used by the coarse DP and the refinement |
 
 ---
 
@@ -156,27 +158,45 @@ The orange sub-interval that the search selects overlaps the green planted regio
 
 ## 4. Transfer alignment across populations
 
-When curves come from two populations (two sites, two devices), `transfer_alignment` is meant to map the target curves into the source population's time frame: it computes both Karcher means, a bridging warp $\gamma_B$ that aligns the target mean to the source mean, and each target curve's within-population warp $\gamma_i$, and composes them.
+When curves come from two populations (two sites, two devices), `transfer_alignment` maps the target curves into the source population's time frame. It computes both Karcher means, a bridging warp $\gamma_B$ that aligns the target mean to the source mean ($\mu_T\circ\gamma_B\approx\mu_S$), and each target curve's within-population warp $\gamma_i$ ($f_i\circ\gamma_i\approx\mu_T$), and composes them as $\gamma_i\circ\gamma_B$: first into the target mean's frame, then across the bridge, so that $f_i\circ\gamma_i\circ\gamma_B\approx\mu_S$.
 
-!!! warning "Warp composition order is wrong in fdars-core 0.48"
-    The total warp should be $\gamma_i \circ \gamma_B$ (first move into the target mean's frame, then across the bridge), but 0.48 composes $\gamma_B\circ\gamma_i$. On a simple test, the aligned curves miss the source mean by 0.14–0.18 in sup norm, against 0.05–0.07 with the correct order. The reported `distances` re-optimise the warp and hide the error. Until this is fixed upstream, do not use `aligned_data` or `gammas` from `transfer_alignment`; instead align the target curves directly to the source Karcher mean with `align_to_target(target_data, source_mean, t)`.
-    Tracked upstream as [sipemu/fdars#77](https://github.com/sipemu/fdars/issues/77).
+Below, both populations share a two-peak shape with individual timing variation, and the target population additionally runs on a distorted clock:
 
-```python
-from fdars.alignment import karcher_mean, align_to_target
+```python exec="1" source="above" result="text"
+import numpy as np
+from fdars.alignment import transfer_alignment
 
-source_mean = karcher_mean(source, t)["mean"]
-res = align_to_target(target, source_mean, t)   # target curves in the source frame
-aligned, gammas = res["aligned_data"], res["gammas"]
+rng = np.random.default_rng(0)
+m = 120
+t = np.linspace(0, 1, m)
+mu = lambda s: np.exp(-(s - 0.3) ** 2 / 0.006) + 0.7 * np.exp(-(s - 0.7) ** 2 / 0.006)
+
+def population(n, clock):
+    curves = []
+    for _ in range(n):
+        w = t + rng.uniform(-0.3, 0.3) * t * (1 - t)                     # individual timing
+        curves.append(mu(np.clip(w + clock * 0.1 * np.sin(np.pi * t), 0, 1)))
+    return np.array(curves)
+
+source, target = population(15, clock=0.0), population(15, clock=1.0)
+r = transfer_alignment(source, target, t)
+S = np.asarray(r["source_mean"])
+sup = lambda X: np.abs(np.asarray(X) - S).max(axis=1)
+print(f"sup |f_i - source mean|, before: [{sup(target).min():.3f}, {sup(target).max():.3f}]")
+print(f"sup |f_i - source mean|, after:  [{sup(r['aligned_data']).min():.3f}, {sup(r['aligned_data']).max():.3f}]")
+print(f"bridging warp: max |gamma_B(t) - t| = {np.abs(np.asarray(r['bridging_gamma']) - t).max():.3f}")
+print("FDARS_FENCE_OK")
 ```
+
+The transferred target curves lie within about 0.05 of the source mean everywhere (against up to 0.96 before), and the bridging warp carries the population-level clock difference. Aligning the target curves straight to the source mean with `align_to_target(target_data, source_mean, t)` gives a similar result on data like these; the two-step transfer additionally returns the population-level warp $\gamma_B$ separately from the individual warps, and its within-population step is anchored at the target's own mean.
 
 | `transfer_alignment` key | Description |
 |-----|-------------|
 | `source_mean` | Karcher mean of the source population |
-| `aligned_data` | Target curves in the source frame (affected by the warning) |
-| `gammas` | Composed warps (affected by the warning) |
-| `bridging_gamma` | Warp aligning the target mean to the source mean |
-| `distances` | Elastic distances after transfer (re-optimised) |
+| `aligned_data` | Target curves in the source frame, $f_i\circ\gamma_i\circ\gamma_B$ |
+| `gammas` | Composed warps $\gamma_i\circ\gamma_B$ |
+| `bridging_gamma` | Warp $\gamma_B$ aligning the target mean to the source mean |
+| `distances` | `elastic_distance` of each transferred curve to the source mean (which re-optimises a residual warp) |
 
 ---
 
@@ -224,10 +244,6 @@ The viridis-graded intermediates start at $f_1$ and end at $f_2$ *aligned to $f_
 
 After separating amplitude and phase, you can *generate* new curves by sampling from the estimated score distributions -- useful for augmentation and simulation. `gauss_model` fits Gaussians to the vertical (amplitude) and horizontal (phase) FPC scores and draws new samples.
 
-!!! warning "`joint_gauss_model` does not keep amplitude–phase correlation"
-    `joint_gauss_model` is documented as sampling the joint [amplitude | phase] scores, but in fdars-core 0.48 it draws each score from an independent (diagonal) Gaussian. On training data where peak height and peak location are correlated at 0.999, its samples show a correlation of −0.02. Treat its samples as amplitude and phase drawn *independently*; if the coupling matters, fit `jfpca_fit` and sample its scores with their full covariance yourself.
-    Tracked upstream as [sipemu/fdars#80](https://github.com/sipemu/fdars/issues/80).
-
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_fig import fig, render
@@ -254,12 +270,37 @@ ax.legend(fontsize=9)
 print(render(f))
 ```
 
-The orange synthetic curves occupy the same amplitude-and-timing envelope as the blue originals: the model samples amplitude and phase scores and recombines them, rather than memorising individual curves. Because the two score sets are sampled independently, any dependence between how tall and how late a feature is in the data is not reproduced.
+The orange synthetic curves occupy the same amplitude-and-timing envelope as the blue originals: the model samples amplitude and phase scores and recombines them (each sampled amplitude is composed with the inverse of a sampled alignment warp), rather than memorising individual curves.
+
+`gauss_model` samples the amplitude and the phase scores **independently**, so any dependence between how tall and how late a feature is in the data is lost. `joint_gauss_model` instead concatenates the amplitude and phase scores (the phase block weighted by `balance_c`) and samples the joint score vector from a Gaussian with its full sample covariance, cross-covariance included; this is equivalent in distribution to sampling the joint FPCA scores, as in fdasrsf. It keeps the amplitude–phase correlation. Below, taller peaks also come later:
+
+```python exec="1" source="above" result="text"
+import numpy as np
+from fdars.alignment import gauss_model, joint_gauss_model
+
+rng = np.random.default_rng(1)
+n, m = 40, 120
+t = np.linspace(0, 1, m)
+z = rng.standard_normal(n)
+data = np.array([(3 + 0.4 * zi) * np.exp(-((t - 0.5 - 0.06 * zi) ** 2) / (2 * 0.1 ** 2)) for zi in z])
+
+def height_location_corr(X):
+    X = np.asarray(X)
+    return np.corrcoef(X.max(axis=1), t[X.argmax(axis=1)])[0, 1]
+
+print(f"training data:     corr(height, location) = {height_location_corr(data):+.3f}")
+for model in (gauss_model, joint_gauss_model):
+    samples = model(data, t, ncomp=3, n_samples=200, seed=0)["samples"]
+    print(f"{model.__name__:18s} corr(height, location) = {height_location_corr(samples):+.3f}")
+print("FDARS_FENCE_OK")
+```
+
+Both models reproduce the spread of heights and locations, but only `joint_gauss_model` reproduces their coupling. Use `gauss_model` when amplitude and phase are plausibly independent, `joint_gauss_model` when they are not.
 
 | Key | Description |
 |-----|-------------|
 | `samples` | Synthetic curves, shape `(n_samples, m)` |
-| `warps` | Warps applied to the synthetic amplitudes |
+| `warps` | Sampled alignment warps (the samples use their inverses) |
 | `scores` | Sampled FPC scores |
 
 ---

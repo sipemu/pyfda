@@ -142,7 +142,7 @@ Functional observations vary in two ways: *amplitude* (how tall or deep the feat
 <a class="fdars-gallery-item" href="alignment-inference/">
 <img class="fdars-gallery-thumb" aria-hidden="true" src="../assets/thumb/alignment-inference.svg" alt="">
 <div class="fdars-gallery-title">Inference after Alignment</div>
-<div class="fdars-gallery-desc">Amplitude/phase PERMANOVA, elastic box plots, depth, outliers, DP-means and partial-curve conformal.</div>
+<div class="fdars-gallery-desc">Amplitude/phase PERMANOVA, localised group differences, elastic box plots, depth, outliers, DP-means and partial-curve conformal.</div>
 </a>
 </div>
 

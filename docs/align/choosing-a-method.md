@@ -57,10 +57,10 @@ The classes are nested only loosely: shift ⊂ affine ⊂ $\Gamma$ (all increasi
 **Q3. Modifiers**, whatever Q2 chose:
 
 - **Noisy curves.** Pre-smooth before any SRSF or derivative-based method (`srsf_presmooth`), and use $\lambda > 0$.
-- **Large $n \cdot m$.** A band (`band_frac`), the coarse-to-fine Karcher mean (automatic for $m > 50$), or a cheaper warp class.
+- **Large $n \cdot m$.** A band (`band_frac`), the coarse-to-fine Karcher mean (automatic for $m > 50$), a coarse DP for long pairs (`elastic_align_pair_multires` with `n_refine_steps=0`), or a cheaper warp class.
 - **Outliers.** `karcher_median`, `robust_karcher_mean`; flag them with `elastic_outlier_detection`.
 - **Periodic or closed data.** `karcher_mean_closed` / `elastic_align_pair_closed` (elastic), `periodic=True` (continuous), `extrapolation="periodic"` (shift).
-- **Groups to compare.** Align *all* curves together without labels, then test with `elastic_phase_amplitude_test` ([Inference after Alignment](alignment-inference.md)).
+- **Groups to compare.** Align *all* curves together without labels, then test *whether* the groups differ in amplitude or phase with `elastic_phase_amplitude_test`, or *where* and in which direction with `elastic_local_difference_test` ([Inference after Alignment](alignment-inference.md#localised-differences-where-do-the-groups-differ)).
 
 ---
 
@@ -102,7 +102,7 @@ The classes are nested only loosely: shift ⊂ affine ⊂ $\Gamma$ (all increasi
 7. **For $\mathbb{R}^d$ outlines use `curve_shape_*`, not the `*_nd_with_config` functions.** The `_nd` aligners share one warp across coordinates but have no rotation or scale quotient, and they normalise each coordinate on its own.
 8. **For binary or count curves, `register_fpca` beats aligning `logit(p̂)` or $\sqrt{\text{counts}}$**: it registers on the likelihood scale. Prefer `fpca_type="two_step"` for Gamma and Poisson data, because the variational EM treats them as Gaussian.
 9. **For warp uncertainty, use `bayesian_align_group(sampler="infhmc", n_chains>=4)`** and read $\hat R$ and the ESS; add tempering (`n_temperatures>1`) if the multimodality flags fire. Do not trust single pCN chains without diagnostics.
-10. **When comparing groups, align all curves together without the labels**, then run `elastic_phase_amplitude_test(amplitude_metric="pairwise")`. Per-group templates break the validity of the permutation test, and noisy curves should be pre-smoothed lightly, or SRSF noise leaks phase differences into the amplitude test ([Inference after Alignment](alignment-inference.md#example-phase-only-differences-and-why-noise-matters)).
+10. **When comparing groups, align all curves together without the labels**, then run `elastic_phase_amplitude_test(amplitude_metric="pairwise")` for a global answer, or `elastic_local_difference_test` to find the time intervals where amplitude or timing differ. Per-group templates break the validity of the permutation test, and noisy curves should be pre-smoothed lightly, or SRSF noise leaks phase differences into the amplitude test ([Inference after Alignment](alignment-inference.md#example-phase-only-differences-and-why-noise-matters)).
 
 ---
 
@@ -185,7 +185,7 @@ The lesson is the rule of thumb behind the decision tree: **pick the smallest wa
     - **$\lambda$ is not portable.** The same number means a different strength on different grids and under DP vs RBFGS. Use `lambda_scale` to convert between optimisers; `lambda_cv` tends to pick the smallest candidate.
     - **Templates drift.** Iterative shift and continuous registration do not centre their warps, so the registered sample can sit early or late as a whole. Affine registration and the elastic Karcher mean centre them.
     - **Boundaries.** Shift and affine registration fill the uncovered edge by clamping (`extrapolation="boundary"`), so flat edges enter the criterion. Use `restrict_domain=True`, `domain="overlap"` or `extrapolation="periodic"` where appropriate.
-    - **`converged` is not a quality flag.** In `continuous_registration` it is also `True` when the Levenberg–Marquardt step stalls; in the Karcher mean, `converged=False` is reported, not raised.
+    - **`converged` is about the optimiser, not the warps.** In `continuous_registration` it means the tolerance was met (`termination` says why a curve stopped otherwise: `"stalled"`, `"coef_limit"` or `"max_iter"`); in the Karcher mean, `converged=False` is reported, not raised. Inspect the criterion and the warps as well.
 
     **Distances and metrics**
 
@@ -195,7 +195,7 @@ The lesson is the rule of thumb behind the decision tree: **pick the smallest wa
 
     **Method-specific traps**
 
-    - **Landmark detection matches by order** and `landmark_detect_and_register` raises if any curve has fewer than `expected_count` features; `landmark_register` returns all-zero warps (not the identity) on invalid input.
+    - **Landmark detection matches by order** and `landmark_detect_and_register` raises if any curve has fewer than `expected_count` features; `landmark_register` does not raise on inconsistent input (for example, fewer landmark lists than curves) but returns identity warps and the curves unchanged.
     - **The closed-curve start-point search is heuristic** (coarse, then fine).
     - **`elastic_partial_match` distances** are not comparable across window lengths.
     - **`elastic_depth` is not a lens depth**: it is $1/(1 + \text{mean distance})$, separately for amplitude and phase, which live on different scales.

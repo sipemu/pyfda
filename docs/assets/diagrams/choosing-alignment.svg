@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" fill="none" role="img" aria-label="Choosing an Alignment Method" aria-labelledby="choosing-alignment-title choosing-alignment-desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 536" fill="none" role="img" aria-label="Choosing an Alignment Method" aria-labelledby="choosing-alignment-title choosing-alignment-desc">
   <title id="choosing-alignment-title">Choosing an Alignment Method</title>
-  <desc id="choosing-alignment-desc">Decision tree for picking an fdars alignment method. Q0 asks what one observation is: a curve in R^d leads to curve_shape_*, ab_elastic_distance_pl or sparse_elastic_mean; a discrete time series leads to the DTW family; a real-valued function leads to Q1 on the value type (register_fpca for non-Gaussian or incomplete curves) and Q2 on the phase type, whose leaves are landmark or iterative shift, affine, landmark, landmark-constrained elastic, continuous, elastic Karcher mean, pairwise synchronisation and Bayesian group alignment. Q3 modifiers for noise, size, outliers, periodicity and group comparison apply on top.</desc>
+  <desc id="choosing-alignment-desc">Decision tree for picking an fdars alignment method. Q0 asks what one observation is: a curve in R^d leads to curve_shape_*, ab_elastic_distance_pl or sparse_elastic_mean; a discrete time series leads to the DTW family; a real-valued function leads to Q1 on the value type (register_fpca for non-Gaussian or incomplete curves) and Q2 on the phase type, whose leaves are landmark or iterative shift, affine, landmark, landmark-constrained elastic, continuous, elastic Karcher mean, pairwise synchronisation and Bayesian group alignment. Q3 modifiers for noise, size, outliers, periodicity and group comparison (a global test with elastic_phase_amplitude_test, or a localised one with elastic_local_difference_test) apply on top.</desc>
   <style>
     .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
     .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
@@ -106,8 +106,9 @@
   <text class="mono" x="274" y="456" fill="#198754">bayesian_align_group</text>
   <text class="sm" x="504" y="456">need warp / template uncertainty</text>
   <line x1="258" y1="230" x2="258" y2="453" stroke="#adb5bd" stroke-width="1.2"/>
-  <rect x="12" y="474" width="696" height="40" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <rect x="12" y="474" width="696" height="56" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
   <text class="lab" x="22" y="490" fill="#fd7e14">Q3</text>
   <text class="sm" x="46" y="490">noisy → srsf_presmooth, λ &gt; 0 · large n·m → band_frac, shift or affine · outliers → karcher_median, robust_karcher_mean</text>
-  <text class="sm" x="46" y="506">periodic → *_closed, periodic=True, extrapolation="periodic" · groups → align label-free, then elastic_phase_amplitude_test</text>
+  <text class="sm" x="46" y="506">periodic → *_closed, periodic=True, extrapolation="periodic"</text>
+  <text class="sm" x="46" y="522">groups → align label-free; whether: elastic_phase_amplitude_test · where: elastic_local_difference_test</text>
 </svg>

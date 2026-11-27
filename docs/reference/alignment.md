@@ -28,6 +28,7 @@ Elastic alignment, shape analysis, and warping operations for functional data us
 | [`joint_fpca`](#joint_fpca) | Joint amplitude + phase FPCA |
 | [`elastic_regression`](#elastic_regression) | Elastic scalar-on-function regression |
 | [`elastic_logistic`](#elastic_logistic) | Elastic logistic regression |
+| [`elastic_local_difference_test`](#elastic_local_difference_test) | Where two groups differ in amplitude and in phase |
 
 ---
 
@@ -510,7 +511,7 @@ hfpca = fdars.horiz_fpca(data, t, n_comp=3)
 fdars.joint_fpca(data, argvals, n_comp=3, lambda_=0.0, max_iter=20, tol=1e-4)
 ```
 
-Joint amplitude + phase FPCA. Combines vertical and horizontal variability into a single decomposition.
+Joint amplitude + phase FPCA. Combines vertical and horizontal variability into a single decomposition; the phase weight `balance_c` is chosen automatically by minimising the SRSF reconstruction error (fdasrsf `jointFPCA`).
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -587,4 +588,39 @@ Elastic logistic regression for binary classification.
 ```python
 fit = fdars.elastic_logistic(data, t, labels, ncomp_beta=10)
 print(f"Accuracy: {fit['accuracy']:.3f}")
+```
+
+---
+
+### `elastic_local_difference_test`
+
+```python
+fdars.alignment.elastic_local_difference_test(
+    data, argvals, labels, test="itp", alpha=0.05,
+    nbasis=15, n_perm=999, seed=42, mapping="dominant",          # ITP
+    scb_bandwidth=None, scb_nb=999, multiplier="gaussian",       # SCB
+    phase_representation="displacement", max_iter=20, tol=1e-4,
+    method="dp", lambda_=0.0, ...)                                # warp optimiser
+```
+
+Aligns all curves to one elastic Karcher mean without the labels, then runs a local two-sample test on the aligned curves (amplitude) and on the warps (phase, as $\gamma_i(t) - t$ or $\sqrt{\gamma_i'}$). The local test is the interval-wise testing procedure (`test="itp"`, as `inference.itp_two_pop_regions`) or a simultaneous confidence band (`test="scb"`, as `inference.scb_two_sample_band`). The remaining keyword arguments configure the warp optimiser as in `elastic_align_pair_with_config`. Guide: [Inference after Alignment](../align/alignment-inference.md#localised-differences-where-do-the-groups-differ).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `data` | `ndarray (n, m)` | | Curves |
+| `argvals` | `ndarray (m,)` | | Strictly increasing grid, $m \ge 3$ |
+| `labels` | `ndarray (n,)` of `int` | | Exactly two distinct labels; group A is the smaller |
+| `test` | `str` | `"itp"` | `"itp"` or `"scb"` |
+| `alpha` | `float` | `0.05` | Significance level |
+| `nbasis` | `int` | `15` | ITP: B-spline basis size (choose for the effect width) |
+| `phase_representation` | `str` | `"displacement"` | `"displacement"` ($\gamma(t) - t$) or `"psi"` ($\sqrt{\gamma'}$) |
+
+| Returns | Type | Description |
+|---------|------|-------------|
+| result | `dict` | `amplitude`, `phase`: dicts with `regions` (`t_start`, `t_end`, `direction`, `min_adjusted_pvalue`; phase regions also `timing`: `"a_later"` / `"a_earlier"`), `effect` (m,), `pointwise_adjusted_pvalues` and `itp` (ITP) or `lower` / `upper` (SCB); also `phase_data`, `alignment`, `group_labels`, `group_sizes` |
+
+```python
+res = fdars.alignment.elastic_local_difference_test(data, t, labels, nbasis=30)
+for g in res["phase"]["regions"]:
+    print(g["t_start"], g["t_end"], g["timing"])
 ```

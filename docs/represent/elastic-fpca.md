@@ -317,8 +317,8 @@ The leading phase direction departs most from the identity warp, describing the 
 
 `joint_fpca` reports a single cumulative-variance curve for the coupled representation. To gauge how much of the sample's total variation is amplitude versus phase, compare the amplitude-space and phase-space eigenvalues directly (from `vert_fpca` and `horiz_fpca`). Here we deliberately use a sample with **large phase variation** (the peak location wanders widely) and only modest amplitude variation, so phase carries roughly half the total variance.
 
-!!! note "`joint_fpca`'s internal balance"
-    This binding's `joint_fpca` auto-computes a small `balance_c`, which down-weights the phase (warping) block relative to the amplitude block before the joint SVD -- so its returned `horiz_component` energy is near zero and its joint modes essentially track the amplitude modes. To see the genuine amplitude/phase split we therefore read the two eigenvalue spectra from `vert_fpca` / `horiz_fpca` rather than the joint `horiz_component`.
+!!! note "`joint_fpca`'s automatic balance"
+    `joint_fpca` chooses `balance_c` itself, as fdasrsf's `jointFPCA` does: the value that minimises the error with which the rank-`n_comp` joint reconstruction reproduces the original SRSFs. The joint components are unit vectors over both blocks, so the squared norm of `horiz_component[k]` is the share of component $k$ that lies in the phase block. That share depends on `balance_c` and on the units of the two blocks, so it is not the amplitude/phase split of the sample's variance; read that from the `vert_fpca` and `horiz_fpca` spectra, as below. (With fdars-core before 0.48.1 the automatic choice collapsed to $c \approx 0$ and the joint modes ignored phase.)
 
 ```python exec="1" html="1" source="above"
 import numpy as np
@@ -353,9 +353,12 @@ a1.set(title="Amplitude vs phase share of total variance",
        ylabel="variance fraction", ylim=(0, 1.0))
 a1.axhline(0.5, ls="--", color="#6c757d", lw=1)
 print(render(f))
+phase_part = (np.asarray(joint["horiz_component"]) ** 2).sum(axis=1)
+print(f"<p>automatic balance_c = {float(joint['balance_c']):.2f}; phase share of joint components 1-3: "
+      f"{', '.join(f'{v:.0%}' for v in phase_part)}; amplitude share of total variance (vert/horiz spectra): {amp_share:.0%}</p>")
 ```
 
-With this phase-rich sample the two blocks are near-balanced -- phase accounts for close to half the total variation, exactly the regime where separating amplitude and phase pays off.
+With this phase-rich sample the two blocks are near-balanced -- phase accounts for close to half the total variation, exactly the regime where separating amplitude and phase pays off. The joint decomposition puts the first component almost entirely in the amplitude block and brings the phase block in from the second component on: the joint modes describe how timing and height vary *together*, not how much of each there is.
 
 ## Contrast with ordinary FPCA
 

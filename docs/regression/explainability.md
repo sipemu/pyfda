@@ -884,8 +884,24 @@ print("FDARS_FENCE_OK")
 
 Component 1 is a pure phase mode: it shifts the peak earlier or later. Component 2 is a pure amplitude mode: it changes the height. Permuting component 1 raises the MSE from 0.002 to about 0.12; permuting the others changes nothing. So the model uses timing, not height. A standard FPCA would spread the timing effect over several components that also carry height.
 
-!!! tip "Set `balance_c` when timing may matter"
-    `balance_c=None` picks the phase weight by a golden-section search on $[0, 10]$ that minimises the joint reconstruction error. Because the phase block is multiplied by $c$, that search tends to favour small $c$. On the data above it chooses $c \approx 0.0003$, which effectively drops phase from the decomposition. Fix `balance_c` (here 1.0) or compare a few values when the response may depend on timing. Tracked upstream as [sipemu/fdars#84](https://github.com/sipemu/fdars/issues/84).
+!!! tip "Choosing `balance_c`"
+    `balance_c` sets how strongly phase counts against amplitude in the joint FPCA. `balance_c=None` chooses it automatically as fdasrsf's `jointFPCA` does: it minimises the error with which the rank-`ncomp` joint reconstruction (amplitude through the SRSF block, phase through the shooting vector mapped back to a warp) reproduces the original SRSFs, over $(0,\ \operatorname{round}(\max q_{\text{aug}}) + 1]$, by a grid scan and golden-section refinement. On the data above it picks $c \approx 3.4$, and component 1 is again the timing mode; the fixed $c = 1$ used above separates height and timing into one component each, while the larger automatic $c$ splits the height over components 2 and 3. Results with `balance_c=None` changed with fdars-core 0.48.1: earlier versions drove the automatic choice to $c \approx 0$, which dropped phase.
+
+    ```python exec="1" source="above" result="text"
+    import numpy as np
+    from fdars.alignment import jfpca_fit
+
+    rng = np.random.default_rng(10)
+    t = np.linspace(0, 1, 51)
+    height, timing = rng.uniform(0.7, 1.3, 30), rng.uniform(0.35, 0.65, 30)
+    X = height[:, None] * np.exp(-0.5 * ((t - timing[:, None]) / 0.08) ** 2)
+
+    for c in (None, 1.0):
+        fit = jfpca_fit(X, t, ncomp=3, balance_c=c)
+        corr = lambda v: [round(float(abs(np.corrcoef(fit["scores"][:, k], v)[0, 1])), 2) for k in range(3)]
+        print(f"balance_c={c!s:4s} -> c = {fit['balance_c']:.2f}; |corr| with timing {corr(timing)}, with height {corr(height)}")
+    print("FDARS_FENCE_OK")
+    ```
 
 `explain.veesa_pipeline(data, argvals, y, predict, ...)` runs the three steps in one call: jfPCA fit, exact training scores, then permutation importance. `predict` receives the jfPCA training scores, so it must already be a model of those scores. In practice, fit the jfPCA and your model first (as above) and use `elastic_pfi`; the pipeline is convenient when the predictor is known up front, e.g. a fixed scoring rule.
 

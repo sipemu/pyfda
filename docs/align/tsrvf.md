@@ -96,11 +96,38 @@ multiplying by the stored norm `srsf_norms[i]` restores the scale, and `srsf_inv
 
 ### Transport methods
 
-`tsrvf_transform_with_method(..., method=...)` selects how the vectors are carried to the tangent space at the mean. Use `method="log_map"` (the default, and what `tsrvf_transform` does): it is the exact Riemannian logarithm on the unit sphere.
+The TSRVF is defined by *parallel transport*: the vector at $\tilde q_i$ that points away from the mean, $v = -\log_{\tilde q_i}(\bar q)$, is carried along the geodesic to $T_{\bar q}$ (Su et al. 2014). `tsrvf_transform_with_method(..., method=...)` offers three ways to compute it:
 
-!!! warning "The ladder transports are under review"
-    `method="pole_ladder"` and `method="schilds_ladder"` are meant to approximate parallel transport and should give vectors close to `log_map`. In fdars-core 0.48 they do not: the pole ladder returns (numerically) zero vectors for every curve, and Schild's ladder returns exactly twice the `log_map` vectors. Do not use them until this is fixed upstream.
-    Tracked upstream as [sipemu/fdars#79](https://github.com/sipemu/fdars/issues/79).
+| `method` | What it computes |
+|---|---|
+| `"log_map"` (default, what `tsrvf_transform` does) | $\log_{\bar q}(\tilde q_i)$ directly, the closed form above |
+| `"schilds_ladder"` | one rung of Schild's ladder: shoot $x_0 = \exp_{\tilde q_i}(v)$, take the geodesic midpoint $p$ of $x_0$ and $\bar q$, extend the geodesic $\tilde q_i \to p$ to twice its length, and take the log at $\bar q$ of its endpoint |
+| `"pole_ladder"` | one rung of the pole ladder: reflect $x_0 = \exp_{\tilde q_i}(v)$ through the midpoint ("pole") of $\tilde q_i$ and $\bar q$, and take minus the log at $\bar q$ of the reflected point |
+
+Both ladders are the one-rung constructions of Lorenzi & Pennec (2014), built only from exp and log maps, so they work on any manifold where those are available. On the sphere the pole ladder is exact (the reflection through the pole is an isometry), and Schild's ladder is exact for a vector that lies along the geodesic, as $-\log_{\tilde q_i}(\bar q)$ does. The three methods therefore return the same tangent vectors, up to round-off:
+
+```python exec="1" source="above" result="text"
+import numpy as np
+from fdars.alignment import tsrvf_transform_with_method
+
+rng = np.random.default_rng(4)
+n, m = 16, 120
+t = np.linspace(0, 1, m)
+base = np.sin(2 * np.pi * t) + 0.5 * np.sin(4 * np.pi * t)
+data = np.zeros((n, m))
+for i in range(n):
+    warp = t ** rng.uniform(0.7, 1.5)
+    data[i] = np.interp(t, (warp - warp.min()) / np.ptp(warp), base) + 0.05 * rng.standard_normal(m)
+
+V = {method: np.asarray(tsrvf_transform_with_method(data, t, method=method)["tangent_vectors"])
+     for method in ("log_map", "schilds_ladder", "pole_ladder")}
+for method, v in V.items():
+    norm = np.sqrt(np.trapezoid(v ** 2, t, axis=1)).mean()
+    print(f"{method:15s} mean ||v_i|| = {norm:.3f}   max |v - v_log_map| = {np.abs(v - V['log_map']).max():.1e}")
+print("FDARS_FENCE_OK")
+```
+
+Use `log_map`: it is the closed form, and the ladders add nothing on the sphere. The ladders are useful as an independent numerical check of a transport-based pipeline, or when comparing against implementations that define the TSRVF through a ladder scheme; their run time is about the same, since the Karcher mean dominates.
 
 ---
 
@@ -422,4 +449,6 @@ See also [Elastic Alignment](elastic-alignment.md) for the underlying SRSF machi
 
 - Srivastava, A., Klassen, E., Joshi, S.H., Jermyn, I.H. (2011). *Shape analysis of elastic curves in Euclidean spaces.* IEEE TPAMI 33(7):1415-1428.
 - Srivastava, A., Klassen, E. (2016). *Functional and Shape Data Analysis.* Springer. (Exp/log maps on the SRVF sphere.)
+- Su, J., Kurtek, S., Klassen, E., Srivastava, A. (2014). *Statistical analysis of trajectories on Riemannian manifolds: bird migration, hurricane tracking and video surveillance.* Annals of Applied Statistics 8(1):530-552.
+- Lorenzi, M., Pennec, X. (2014). *Efficient parallel transport of deformations in time series of images: from Schild's to pole ladder.* Journal of Mathematical Imaging and Vision 50(1-2):5-17.
 - Kurtek, S., Srivastava, A., Klassen, E., Ding, Z. (2012). *Statistical modeling of curves using shapes and related features.* Journal of the American Statistical Association 107(499):1152-1165.

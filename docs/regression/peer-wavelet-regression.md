@@ -117,17 +117,22 @@ Ignoring the subject effect treats $u_i$ as noise that happens to be shared by t
 
 Smoothness penalties and FPC bases spread $\beta$ over the whole domain, so a coefficient that is zero almost everywhere with a few sharp features is estimated badly. Wavelets localise in both time and scale: a jump or a short burst needs only a few wavelet coefficients. Wavelet regression (Zhao, Ogden & Reiss 2012) therefore works in coefficient space:
 
-1. each curve is transformed with an orthogonal discrete wavelet transform (`basis.wavelet_decompose_matrix`; Daubechies `"haar"`/`"db1"` to `"db10"`, `"periodic"` or `"symmetric"` boundaries, `level=None` for the deepest useful level) and its coefficients are concatenated into a row of the design;
+1. each curve is transformed with a discrete wavelet transform (`basis.wavelet_decompose_matrix`; Daubechies `"haar"`/`"db1"` to `"db10"`, `"periodic"` or `"symmetric"` boundaries, `level=None` for the deepest useful level) and its coefficients are concatenated into a row of the design;
 2. a regression is fitted on that design: **`wcr`** uses principal-component (`method="pcr"`) or partial-least-squares (`method="pls"`) regression with `ncomp` components, while **`wnet`** fits an elastic net (`alpha` = L1 share, 1 is the lasso) with $\lambda$ chosen by `n_folds`-fold cross-validation (deterministic folds from `seed`);
-3. the coefficient weights are mapped back by the inverse wavelet transform to `beta_t`.
+3. the coefficient weights are mapped back to the time domain as `beta_t`, by the adjoint of the wavelet transform (for the orthogonal periodic transform this is the inverse transform).
 
 Both return `intercept`, `beta_t`, `fitted_values`, `residuals`, `coeff_weights` (in wavelet space), the effective `level`, and `model` with `predict(new_data)`. `wnet` also returns `selected`, the indices of non-zero wavelet coefficients, and the chosen `lambda_`.
 
 !!! note "Coefficient scale: per sample, not per unit time"
     `wcr` and `wnet` take no `argvals`. They model $y_i = \alpha + \sum_j x_i(t_j)\,\beta_j$ on the **sampling index**, without quadrature weights. Their `beta_t` therefore equals $\beta(t_j)\,\Delta t$ in the integral model. Multiply PEER's `beta` by $\Delta t$, or divide `beta_t` by it, before comparing the two.
 
-!!! warning "Use `mode=\"periodic\"` when you interpret `beta_t`"
-    With `mode="symmetric"`, the `beta_t` returned by `wcr`/`wnet` (fdars-core 0.48) is inconsistent with the fitted model: `X @ beta_t + intercept` does not reproduce `fitted_values`. The fit, `fitted_values` and `model.predict` are correct. The symmetric transform is orthonormal on the mirror-extended signal, and mapping the weights back drops the mirrored half. The default `mode="periodic"` is exact. Tracked upstream as [sipemu/fdars#82](https://github.com/sipemu/fdars/issues/82).
+!!! note "Boundary mode: `periodic` or `symmetric`"
+    Both modes give a `beta_t` that is consistent with the fit: `beta_t` is the adjoint of the wavelet analysis operator applied to `coeff_weights`, so `X @ beta_t + intercept` reproduces `fitted_values` to round-off in either mode. They differ in how the transform treats the ends of the curve:
+
+    - `mode="periodic"` (default) wraps the curve around, so the last sample is treated as the neighbour of the first. The transform is orthogonal with $m$ coefficients for a power-of-two $m$. If $x(t_1)$ and $x(t_m)$ differ, the wrap creates an artificial jump that costs fine-scale coefficients near both ends.
+    - `mode="symmetric"` mirrors the curve at each end, so there is no artificial jump; the price is a redundant, non-orthogonal transform with more coefficients than samples (448 instead of 64 for the Haar transform of the 64-point curves below).
+
+    Use `periodic` for periodic data and when the features of $\beta$ are away from the ends, `symmetric` when the curves' end values differ and the behaviour of $\beta$ near the boundaries matters. The example below uses `periodic`; with `symmetric`, WNET's estimate is about as good.
 
 The coefficient below is piecewise constant: zero except for a positive block and a narrower negative block. The predictors are rough, Brownian-like curves.
 
@@ -159,7 +164,7 @@ corr = lambda b: np.corrcoef(b, beta)[0, 1]
 print(f"<p>correlation with the truth: WNET {corr(wn['beta_t']):.2f}, WCR {corr(wc['beta_t']):.2f}, "
       f"PEER {corr(pe['beta']):.2f}; WNET kept {len(wn['selected'])} of {wn['coeff_weights'].size} "
       f"wavelet coefficients (lambda={wn['lambda_']:.3g}); "
-      f"exact on the periodic transform: {np.allclose(X @ wn['beta_t'] + wn['intercept'], wn['fitted_values'])}</p>")
+      f"X @ beta_t + intercept reproduces the fit: {np.allclose(X @ wn['beta_t'] + wn['intercept'], wn['fitted_values'])}</p>")
 print("FDARS_FENCE_OK")
 ```
 
@@ -169,7 +174,7 @@ WNET keeps 14 of the 64 Haar coefficients and recovers both blocks with sharp ed
 
 - **`wavelet`**: `"haar"` suits piecewise-constant coefficients; smoother Daubechies wavelets (`"db4"`, the default, up to `"db10"`) suit smooth bumps. A longer filter gives a smoother basis but fewer usable levels.
 - **`level`**: `None` uses the deepest level the signal length allows, `basis.wavelet_max_level(m, wavelet)` $= \lfloor \log_2(m / (\text{filter length} - 1)) \rfloor$ ($\lfloor\log_2 m\rfloor$ for Haar). Shallower levels leave a larger coarse approximation band.
-- **`mode`**: keep the default `"periodic"` (see the warning above). With periodic boundaries the grid length should ideally be a power of two; odd lengths are extended by one sample internally.
+- **`mode`**: `"periodic"` (default) or `"symmetric"`, see the note on boundary modes above. With periodic boundaries the grid length should ideally be a power of two; odd lengths are extended by one sample internally.
 
 See [Basis Representation](../represent/basis-representation.md#wavelet-decomposition) for the wavelet transform itself, including thresholding-based denoising.
 

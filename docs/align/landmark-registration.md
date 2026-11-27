@@ -130,9 +130,8 @@ print("FDARS_FENCE_OK")
 
 Between one and four velocity peaks are detected per child. With `expected_count=1` the *first* peak (often a small bump before the spurt) is registered, so the target lands at 11.5 years and the variance barely moves (0.95). Choosing the most prominent peak, as in the previous example, targets 12.8 years and halves it. Inspect the detections, choose the landmarks yourself when the features are ambiguous, and pass them to `landmark_register`.
 
-!!! warning "Invalid input returns zero warps"
-    `landmark_register` does not raise on inconsistent input (for example, fewer landmark lists than curves): it returns `gammas` filled with **zeros**, not identity warps, and leaves the curves unregistered. Check that `len(landmarks) == data.shape[0]` and that every curve has the same number of landmarks, or test `gammas[:, -1]` against `argvals[-1]`.
-    Tracked upstream as [sipemu/fdars#78](https://github.com/sipemu/fdars/issues/78).
+!!! note "Inconsistent input returns identity warps"
+    `landmark_register` does not raise on inconsistent input (for example, fewer landmark lists than curves, or `argvals` of the wrong length): it returns **identity** warps on $[t_1, t_m]$ and the curves unchanged. A registration that changed nothing is therefore a hint to check that `len(landmarks) == data.shape[0]` and `len(argvals) == data.shape[1]`.
 
 Other properties to keep in mind:
 

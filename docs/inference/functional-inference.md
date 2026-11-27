@@ -150,6 +150,9 @@ where $\hat\sigma(t)$ is the local-polynomial pointwise standard error estimated
 
 `scb_two_sample_test` takes `data_a`, `data_b`, `argvals`, `bandwidth` (plus the same optional parameters) and returns `{"statistic": float, "p_value": float, "n_perm": int}` with `n_perm` always `0`.
 
+!!! tip "Where does the band exclude zero?"
+    `scb_two_sample_test` gives only the decision. `scb_two_sample_band` takes the same arguments and also returns the band for the mean difference (`estimate`, `lower`, `upper`) and the `regions` of $t$ where it excludes zero, with their direction; `itp_two_pop_regions` answers the same question with the interval-wise testing procedure. See [Interval-wise Inference](interval-inference.md#where-do-the-means-differ-itp_two_pop_regions).
+
 ```python exec="1" html="1" source="above"
 import numpy as np
 from docs_data import load_canadian_weather

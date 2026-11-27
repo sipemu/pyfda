@@ -59,9 +59,16 @@ Each curve is registered independently by penalised Gauss–Newton with Levenber
 - coefficients with $|c_k| > 50$ are rejected (R's `climit`), which keeps $\exp W$ finite;
 - the iteration stops when the relative decrease falls below `tol` (default $10^{-8}$), when no damping gives a decrease (a **stall**), or after `max_iter` iterations (default 50).
 
-!!! warning "`converged` means 'stopped without error'"
-    `converged[i]` is `True` both when the relative decrease fell below `tol` *and* when the Levenberg–Marquardt step control stalled. A stall is usually a (local) optimum, but not always. Do not use the flag as a quality check: inspect `criterion` and the warps instead.
-    Tracked upstream as [sipemu/fdars#83](https://github.com/sipemu/fdars/issues/83).
+The result records why each curve stopped in `termination[i]`:
+
+| `termination` | Meaning |
+|---|---|
+| `"converged"` | the relative decrease fell below `tol` |
+| `"stalled"` | no damped step decreased the criterion before `tol` was met |
+| `"coef_limit"` | a stall in which a candidate step was rejected by the coefficient limit |
+| `"max_iter"` | the iteration budget ran out |
+
+`converged[i]` is `True` exactly when `termination[i] == "converged"`. A stall is often a local optimum, but the tolerance was not met. Convergence is a statement about the optimiser, not about the warps: also inspect `criterion` and the warps themselves.
 
 **Template passes.** By default the target is the cross-sectional mean of the *unregistered* curves, which is blurred. `max_template_iter > 1` re-estimates the target as the mean of the registered curves and registers again (a Procrustes-style loop that R does not offer), stopping when the target changes by less than `template_tol`. The warps are not centred, so the registered sample can drift as a whole.
 
@@ -116,6 +123,7 @@ The same sample, now registered without knowing the template. Without a penalty 
 
 ```python exec="1" source="above" result="text"
 import numpy as np
+from collections import Counter
 from fdars import alignment as A
 
 rng = np.random.default_rng(3)
@@ -134,11 +142,12 @@ err = lambda W: 1000 * np.abs(((np.asarray(W) - np.mean(W, 0)) - (H - H.mean(0))
 
 for kw in (dict(), dict(lambda_=1e-3), dict(lambda_=1e-3, max_template_iter=5), dict(r_defaults=True, max_template_iter=5)):
     r = A.continuous_registration(X, t, **kw)
-    print(f"{str(kw):45s} warp error {err(r['warps']):6.2f} x 1e-3,  converged {int(np.sum(r['converged']))}/{n}")
+    stops = ", ".join(f"{k} {v}" for k, v in sorted(Counter(r["termination"]).items()))
+    print(f"{str(kw):45s} warp error {err(r['warps']):6.2f} x 1e-3   {stops}")
 print("FDARS_FENCE_OK")
 ```
 
-The penalty matters most: it cuts the error four-fold. R's linear $W$ (`r_defaults=True`) is stiff enough not to need a penalty, but it cannot express warps that speed up and then slow down, so it stays at a similar error level. The `converged` counts show that the flag says little about the quality of the warps.
+The penalty matters most: it cuts the error four-fold. R's linear $W$ (`r_defaults=True`) is stiff enough not to need a penalty, but it cannot express warps that speed up and then slow down, so it stays at a similar error level. The stop reasons show the unpenalised fit running out of iterations on 4 of the 20 curves while every curve meets the tolerance in the other three runs.
 
 ---
 
@@ -198,7 +207,8 @@ r = A.continuous_registration(
 | `w_coefficients`, `w_knots` | coefficients $(n, K)$ and knots of $W_i$ |
 | `criterion` | $(n,)$ final criterion values |
 | `target` | $(m,)$ final target |
-| `n_iter`, `converged` | $(n,)$ per-curve iterations and stop flags (see the warning) |
+| `n_iter`, `converged` | $(n,)$ per-curve iterations and convergence flags (tolerance met) |
+| `termination` | list of $n$ stop reasons: `"converged"`, `"stalled"`, `"coef_limit"` or `"max_iter"` |
 | `n_template_iter` | template passes used |
 | `shift` | $(n,)$ periodic shift (0 unless `periodic=True`) |
 

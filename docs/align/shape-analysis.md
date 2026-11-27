@@ -609,7 +609,7 @@ print(f"Joint variance explained: {cum_var[-1]*100:.1f}%")
 | `scores` | `ndarray (n, k)` | Joint FPC scores |
 | `eigenvalues` | `ndarray (k,)` | Eigenvalues |
 | `cumulative_variance` | `ndarray (k,)` | Cumulative proportion of variance |
-| `balance_c` | `float` | Balance between amplitude and phase |
+| `balance_c` | `float` | Phase weight $c$, chosen automatically to minimise the SRSF reconstruction error (as fdasrsf's `jointFPCA`) |
 | `vert_component` | `ndarray (k, m)` | Amplitude part of each eigenfunction |
 | `horiz_component` | `ndarray (k, m)` | Phase part of each eigenfunction |
 
