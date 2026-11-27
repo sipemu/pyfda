@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Multi-domain joint FPCA">
+  <line x1="30" y1="150" x2="140" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="50" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="178" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="178" y1="150" x2="178" y2="50" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 110 C60 75 100 120 140 90" stroke="#6f42c1" stroke-width="3" stroke-linecap="round"/>
+  <path d="M178 80 C210 100 250 60 298 85" stroke="#6f42c1" stroke-width="3" stroke-linecap="round"/>
+  <path d="M140 90 C150 85 158 78 164 72" stroke="#6f42c1" stroke-opacity=".5" stroke-width="1.6" stroke-dasharray="4 3"/>
+  <path d="M178 80 C172 78 168 75 164 72" stroke="#6f42c1" stroke-opacity=".5" stroke-width="1.6" stroke-dasharray="4 3"/>
+  <circle cx="164" cy="72" r="5" stroke="#6f42c1" stroke-width="2" fill="#6f42c1" fill-opacity=".4"/>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Optimal sampling design">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 116 C80 70 130 50 180 70 C225 88 260 112 298 92" stroke="#198754" stroke-opacity=".45" stroke-width="2" stroke-dasharray="5 5"/>
+  <path d="M30 116 C80 70 130 50 180 70 C225 88 260 112 298 92" stroke="#198754" stroke-opacity=".12" stroke-width="22" stroke-linecap="round"/>
+  <g stroke="#198754" stroke-width="1.6" stroke-dasharray="4 4">
+    <line x1="120" y1="150" x2="120" y2="56"/><line x1="232" y1="150" x2="232" y2="92"/><line x1="290" y1="150" x2="290" y2="94"/>
+  </g>
+  <circle cx="120" cy="56" r="5" fill="#198754"/>
+  <circle cx="232" cy="92" r="5" fill="#198754"/>
+  <circle cx="290" cy="94" r="5" fill="#198754"/>
+</svg>

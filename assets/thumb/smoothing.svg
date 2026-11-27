@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Smoothing">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.4"/>
+  <g fill="#0d6efd" fill-opacity=".45">
+    <circle cx="44" cy="118" r="3"/><circle cx="72" cy="96" r="3"/><circle cx="90" cy="112" r="3"/><circle cx="116" cy="78" r="3"/><circle cx="138" cy="92" r="3"/><circle cx="162" cy="66" r="3"/><circle cx="186" cy="82" r="3"/><circle cx="210" cy="58" r="3"/><circle cx="236" cy="74" r="3"/><circle cx="262" cy="52" r="3"/><circle cx="288" cy="66" r="3"/>
+  </g>
+  <path d="M30 116 C80 98 120 78 168 74 C214 70 252 58 298 56" stroke="#0d6efd" stroke-width="3" stroke-linecap="round"/>
+</svg>

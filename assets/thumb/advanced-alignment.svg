@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Advanced alignment">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="278" y2="40" stroke="#fd7e14" stroke-opacity=".4" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <g stroke="#fd7e14" stroke-linecap="round" fill="none">
+    <path d="M30 150 C110 132 150 78 278 40" stroke-width="2" stroke-opacity=".55"/>
+    <path d="M30 150 C90 108 200 92 278 40" stroke-width="2" stroke-opacity=".55"/>
+    <path d="M30 150 C120 144 170 64 278 40" stroke-width="3"/>
+    <path d="M30 150 C80 96 210 108 278 40" stroke-width="2" stroke-opacity=".55"/>
+  </g>
+</svg>

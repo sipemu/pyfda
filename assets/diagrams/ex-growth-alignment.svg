@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Growth Curve Alignment" aria-labelledby="ex-growth-alignment-title ex-growth-alignment-desc">
+  <title id="ex-growth-alignment-title">Growth Curve Alignment</title>
+  <desc id="ex-growth-alignment-desc">Growth curve alignment computes velocity curves via deriv_1d, then uses karcher_mean to align pubertal spurts; FPCA before vs after alignment shows that phase variation between individuals is a dominant source of apparent shape variability, with warping functions revealing sex differences in maturation timing.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Growth Curve Alignment</text>
+  <text class="sub" x="360" y="38" text-anchor="middle">deriv_1d velocity · alignment_quality phase/amplitude split · karcher_mean sharpens spurt</text>
+  <text class="sub" x="360" y="52" text-anchor="middle">warping functions γ(t) reveal sex-timing difference · equivalence_test confirms 2.1-yr gap</text>
+
+  <!-- Dataset panel -->
+  <rect x="24" y="62" width="200" height="72" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="124" y="82" text-anchor="middle" fill="#495057">load_growth</text>
+  <text class="sm" x="124" y="97" text-anchor="middle">39 boys · 54 girls</text>
+  <text class="sm" x="124" y="111" text-anchor="middle">31 ages (1–18 yr) · heights</text>
+  <text class="sm" x="124" y="125" text-anchor="middle">deriv_1d(X, age, nderiv=1) → velocity</text>
+
+  <!-- Arrow -->
+  <line x1="224" y1="98" x2="250" y2="98" stroke="#666" stroke-width="1.5"/>
+  <polygon points="246,94 254,98 246,102" fill="#666"/>
+
+  <!-- Phase/amplitude split -->
+  <rect x="254" y="62" width="220" height="72" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="364" y="82" text-anchor="middle" fill="#fd7e14">alignment_quality</text>
+  <text class="sm" x="364" y="97" text-anchor="middle">full range + pubertal (age≥8) separately</text>
+  <text class="sm" x="364" y="111" text-anchor="middle">phase_amplitude_ratio: rises 0.57→0.82</text>
+  <text class="sm" x="364" y="125" text-anchor="middle">dominant spread = WHEN spurt happens</text>
+
+  <!-- Arrow -->
+  <line x1="474" y1="98" x2="500" y2="98" stroke="#fd7e14" stroke-width="1.5"/>
+  <polygon points="496,94 504,98 496,102" fill="#fd7e14"/>
+
+  <!-- elastic_align_pair -->
+  <rect x="504" y="62" width="192" height="72" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="600" y="82" text-anchor="middle" fill="#495057">elastic_align_pair</text>
+  <text class="sm" x="600" y="97" text-anchor="middle">pairwise: warps curve2 → curve1</text>
+  <text class="sm" x="600" y="111" text-anchor="middle">γ(age): bends at spurt region</text>
+  <text class="sm" x="600" y="125" text-anchor="middle">distance = elastic amplitude gap</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="150" x2="680" y2="150" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Karcher mean row -->
+  <rect x="24" y="162" width="300" height="80" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="174" y="182" text-anchor="middle" fill="#3f51b5">karcher_mean (pubertal, age ≥ 8)</text>
+  <text class="sm" x="174" y="197" text-anchor="middle">max_iter=25 · aligned_data + gammas</text>
+  <text class="sm" x="174" y="211" text-anchor="middle">cross-sectional mean peak: ~6.4 cm/yr (smeared)</text>
+  <text class="mono" x="174" y="228" text-anchor="middle" fill="#3f51b5">aligned template peak: ~8 cm/yr (sharp)</text>
+
+  <!-- FPCA before/after -->
+  <rect x="340" y="162" width="356" height="80" rx="8" fill="#f0fff4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="518" y="182" text-anchor="middle" fill="#198754">fpca before vs after alignment</text>
+  <text class="sm" x="518" y="197" text-anchor="middle">n_comp=3 · singular_values → PVE per PC</text>
+  <text class="sm" x="518" y="211" text-anchor="middle">alignment redistributes variance away from PC1</text>
+  <text class="mono" x="518" y="228" text-anchor="middle" fill="#198754">after: amplitude structure (size/shape of spurt)</text>
+
+  <!-- Divider 2 -->
+  <line x1="40" y1="258" x2="680" y2="258" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Warping functions panel -->
+  <rect x="24" y="268" width="400" height="80" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="224" y="288" text-anchor="middle" fill="#fd7e14">km["gammas"] — warping functions by sex</text>
+  <text class="sm" x="224" y="303" text-anchor="middle">boys γ above diagonal: reach spurt LATER</text>
+  <text class="sm" x="224" y="317" text-anchor="middle">girls γ below diagonal: reach spurt EARLIER</text>
+  <text class="mono" x="224" y="334" text-anchor="middle" fill="#fd7e14">boys peak: 13.5 yr · girls peak: 11.4 yr (Δ = 2.1 yr)</text>
+
+  <!-- Equivalence test panel -->
+  <rect x="440" y="268" width="256" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="568" y="288" text-anchor="middle" fill="#495057">equivalence_test (TOST)</text>
+  <text class="sm" x="568" y="303" text-anchor="middle">delta=0.5 yr · nb=500 · seed=42</text>
+  <text class="sm" x="568" y="317" text-anchor="middle">statistic > δ → NOT equivalent</text>
+  <text class="mono" x="568" y="334" text-anchor="middle" fill="#dc3545">p = 1.0 · genuine 2.1-yr gap</text>
+
+  <!-- Bottom note -->
+  <text class="sub" x="360" y="392" text-anchor="middle">Elastic alignment separates amplitude (how big) from phase (when) · warpings = timing scores</text>
+  <text class="sub" x="360" y="408" text-anchor="middle">karcher_mean["converged"] stays False on coarse grid · use km["aligned_data"].mean() as sharpened template</text>
+</svg>

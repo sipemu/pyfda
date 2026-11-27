@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Fréchet metric-space regression">
+  <line x1="30" y1="155" x2="298" y2="155" stroke="#dc3545" stroke-opacity=".3" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <path d="M55 148 C100 60 200 40 280 90" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+  <path d="M45 152 C95 68 200 48 285 95" stroke="#dc3545" stroke-opacity=".2" stroke-width="1.4"/>
+  <circle cx="92" cy="118" r="5" fill="#dc3545" fill-opacity=".85"/>
+  <circle cx="220" cy="58" r="5" fill="#dc3545" fill-opacity=".85"/>
+  <circle cx="168" cy="72" r="6" stroke="#dc3545" stroke-width="2.2"/>
+</svg>

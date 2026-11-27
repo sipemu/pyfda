@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Inline monitoring detection power">
+  <defs><linearGradient id="img" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3f51b5" stop-opacity=".16"/><stop offset="1" stop-color="#3f51b5" stop-opacity="0"/></linearGradient></defs>
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="298" y2="40" stroke="#3f51b5" stroke-opacity=".3" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <path d="M30 148 C70 96 110 60 160 48 C210 40 260 40 298 40 L298 150 L30 150 Z" fill="url(#img)"/>
+  <path d="M30 148 C70 96 110 60 160 48 C210 40 260 40 298 40" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+</svg>

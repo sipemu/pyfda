@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Shift registration">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 140 C80 138 110 52 140 48 C170 44 200 132 250 138 C268 140 285 140 298 140" stroke="#fd7e14" stroke-opacity=".45" stroke-width="2"/>
+  <path d="M50 140 C100 138 130 52 160 48 C190 44 220 132 270 138 C282 140 292 140 298 140" stroke="#fd7e14" stroke-opacity=".45" stroke-width="2"/>
+  <path d="M136 38 C148 30 152 30 164 38" stroke="#fd7e14" stroke-opacity=".7" stroke-width="1.6"/>
+  <path d="M160 32 L166 39 L158 42 Z" fill="#fd7e14" fill-opacity=".7"/>
+  <path d="M30 140 C90 138 120 52 150 48 C180 44 210 132 260 138 C278 140 290 140 298 140" stroke="#fd7e14" stroke-width="3" stroke-linecap="round"/>
+</svg>

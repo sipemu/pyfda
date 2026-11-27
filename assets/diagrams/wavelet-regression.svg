@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Wavelet-Domain Regression" aria-labelledby="wavelet-regression-title wavelet-regression-desc">
+  <title id="wavelet-regression-title">Wavelet-Domain Regression</title>
+  <desc id="wavelet-regression-desc">Each predictor curve is replaced by its discrete wavelet coefficients, a regression is fitted on those coefficients (PCR or PLS in wcr, a cross-validated elastic net in wnet that keeps only a few coefficients), and the coefficient weights are mapped back by the inverse wavelet transform to a coefficient function beta(t) that can have jumps and local bursts.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Wavelet-Domain Regression</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Transform the curves, fit on wavelet coefficients, transform the fit back</text>
+
+  <!-- Panel 1: curves to coefficients -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Curve → Coefficients</text>
+  <g transform="translate(40,104)">
+    <path d="M0 30 L10 22 L20 28 L30 16 L40 24 L50 12 L60 26 L70 20 L80 34 L90 26 L100 38 L110 30 L120 22 L130 30 L140 18 L150 26 L164 20" stroke="#3f51b5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <text class="sm" x="0" y="56">x_i(t), m samples</text>
+    <path d="M82 62 v10" stroke="#adb5bd" stroke-width="2"/>
+    <path d="M82 76 l-5 -8 h10 z" fill="#adb5bd"/>
+    <line x1="0" y1="120" x2="164" y2="120" stroke="#adb5bd" stroke-width="1.2"/>
+    <g stroke="#3f51b5" stroke-width="3" stroke-linecap="round">
+      <line x1="6" y1="120" x2="6" y2="88"/><line x1="16" y1="120" x2="16" y2="96"/><line x1="26" y1="120" x2="26" y2="104"/>
+      <line x1="40" y1="120" x2="40" y2="110"/><line x1="50" y1="120" x2="50" y2="126"/><line x1="60" y1="120" x2="60" y2="114"/>
+      <line x1="74" y1="120" x2="74" y2="116"/><line x1="84" y1="120" x2="84" y2="124"/><line x1="94" y1="120" x2="94" y2="117"/><line x1="104" y1="120" x2="104" y2="123"/>
+      <line x1="118" y1="120" x2="118" y2="118"/><line x1="128" y1="120" x2="128" y2="122"/><line x1="138" y1="120" x2="138" y2="119"/><line x1="148" y1="120" x2="148" y2="121"/><line x1="158" y1="120" x2="158" y2="119"/>
+    </g>
+    <text class="sm" x="0" y="146">DWT: coarse → fine</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: fit -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="mono" x="360" y="94" text-anchor="middle" fill="#dc3545">wcr() / wnet()</text>
+  <text class="sm" x="360" y="112" text-anchor="middle">regress y on coefficients</text>
+  <g transform="translate(290,124)">
+    <rect x="0" y="0" width="140" height="40" rx="6" fill="#fff" stroke="#f1c2c8"/>
+    <text class="sm" x="10" y="16">wcr: PCR or PLS,</text>
+    <text class="sm" x="10" y="31">ncomp components</text>
+    <rect x="0" y="50" width="140" height="40" rx="6" fill="#fff" stroke="#dc3545"/>
+    <text class="sm" x="10" y="66">wnet: elastic net,</text>
+    <text class="sm" x="10" y="81">λ by K-fold CV</text>
+  </g>
+  <text class="sm" x="360" y="240" text-anchor="middle">wnet keeps few coefficients</text>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: beta(t) -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#fdeef0" stroke="#dc3545" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#dc3545">β(t) by Inverse DWT</text>
+  <text class="sm" x="598" y="112" text-anchor="middle">local features stay sharp</text>
+  <g transform="translate(516,126)">
+    <line x1="0" y1="56" x2="164" y2="56" stroke="#adb5bd" stroke-width="1.2" stroke-dasharray="4 4"/>
+    <path d="M44 56 L44 16 L72 16 L72 56 Z" fill="#dc3545" fill-opacity=".14"/>
+    <path d="M114 56 L114 86 L128 86 L128 56 Z" fill="#dc3545" fill-opacity=".14"/>
+    <path d="M0 56 L44 56 L44 16 L72 16 L72 56 L114 56 L114 86 L128 86 L128 56 L164 56" stroke="#dc3545" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <text class="sm" x="0" y="112">beta_t: weight per sample</text>
+  </g>
+</svg>

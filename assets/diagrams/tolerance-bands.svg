@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Tolerance Bands: Where Future Curves Will Fall" aria-labelledby="t-tbands d-tbands">
+  <title id="t-tbands">Tolerance Bands: Where Future Curves Will Fall</title>
+  <desc id="d-tbands">Illustrates functional tolerance bands: a region constructed via FPCA, bootstrap, or conformal methods that is expected to contain a specified proportion of future curves, distinguishing the tolerance band (coverage guarantee) from ordinary confidence intervals.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Tolerance Bands: Where Future Curves Will Fall</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">A region built to contain a set fraction of individual curves</text>
+
+  <!-- Panel 1: curve sample -->
+  <rect x="24" y="70" width="196" height="188" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="122" y="94" text-anchor="middle" fill="#495057">Curve Sample</text>
+  <g transform="translate(44,116)">
+    <line x1="0" y1="118" x2="156" y2="118" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 70 C40 44 80 90 120 58 C138 46 150 64 156 56" stroke="#6c757d" stroke-opacity=".4" stroke-width="1.3"/>
+    <path d="M0 86 C40 62 80 104 120 76 C138 62 150 84 156 74" stroke="#6c757d" stroke-opacity=".4" stroke-width="1.3"/>
+    <path d="M0 78 C40 52 80 96 120 66 C138 54 150 72 156 64" stroke="#6c757d" stroke-opacity=".4" stroke-width="1.3"/>
+    <path d="M0 94 C40 70 80 112 120 84 C138 70 150 92 156 82" stroke="#6c757d" stroke-opacity=".4" stroke-width="1.3"/>
+    <path d="M0 62 C40 38 80 82 120 50 C138 38 150 56 156 48" stroke="#6c757d" stroke-opacity=".4" stroke-width="1.3"/>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M228 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M262 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 2: method -->
+  <rect x="272" y="70" width="176" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="mono" x="360" y="98" text-anchor="middle" fill="#6f42c1">fpca_tolerance_band()</text>
+  <text class="sm" x="360" y="118" text-anchor="middle">Band the PC scores</text>
+  <g transform="translate(292,132)">
+    <rect x="0" y="0" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="16">FPCA · bootstrap</text>
+    <rect x="0" y="32" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="48">Conformal · elastic</text>
+    <rect x="0" y="64" width="136" height="24" rx="6" fill="#fff" stroke="#d9c8ef"/>
+    <text class="sm" x="12" y="80">Coverage 1 − α</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M456 164 h34" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M490 164 l-9 -5 v10 z" fill="#adb5bd"/>
+
+  <!-- Panel 3: mean + tolerance band -->
+  <rect x="500" y="70" width="196" height="188" rx="12" fill="#f2ecf9" stroke="#6f42c1" stroke-width="1.5"/>
+  <text class="lab" x="598" y="94" text-anchor="middle" fill="#6f42c1">Mean + Band</text>
+  <g transform="translate(520,116)">
+    <line x1="0" y1="118" x2="156" y2="118" stroke="#adb5bd" stroke-width="1.2"/>
+    <path d="M0 48 C40 22 80 68 120 36 C138 24 150 42 156 34
+             L156 78 C150 86 138 68 120 80 C80 112 40 66 0 92 Z"
+          fill="#6f42c1" fill-opacity=".16"/>
+    <path d="M0 70 C40 44 80 90 120 58 C138 46 150 64 156 56" stroke="#6f42c1" stroke-width="2.4"/>
+  </g>
+  <text class="sm" x="598" y="252" text-anchor="middle" fill="#6c757d">shaded = tolerance region</text>
+</svg>

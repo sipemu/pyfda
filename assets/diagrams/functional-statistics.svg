@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none" role="img" aria-label="Functional Summary Statistics" aria-labelledby="t-fstats d-fstats">
+  <title id="t-fstats">Functional Summary Statistics</title>
+  <desc id="d-fstats">Presents four functional summary statistics in a four-quadrant layout: mean with pointwise variance band, depth-based scores and the depth-based median, a comparison showing median vs mean vs geometric median, and the depth-trimmed mean; illustrates how functional statistics differ from their scalar analogues.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <text class="ttl" x="360" y="26" text-anchor="middle">Functional Summary Statistics</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">Pointwise variance band · depth-based median (observed curve) · covariance surface</text>
+
+  <!-- ROW 1: Two main panels -->
+
+  <!-- PANEL 1: Curves + mean + ±1 std band (left, wide) -->
+  <rect x="18" y="64" width="428" height="196" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="232" y="86" text-anchor="middle" fill="#495057">Mean &amp; Pointwise ±1 Std Band</text>
+
+  <!-- Coordinate area: translate to (40, 100) -->
+  <g transform="translate(40, 100)">
+    <!-- x-axis -->
+    <line x1="0" y1="138" x2="384" y2="138" stroke="#ced4da" stroke-width="1.2"/>
+    <!-- y-axis -->
+    <line x1="0" y1="0" x2="0" y2="138" stroke="#ced4da" stroke-width="1.2"/>
+    <!-- x label -->
+    <text class="sm" x="192" y="156" text-anchor="middle">t (domain)</text>
+    <text class="sm" x="-14" y="70" text-anchor="middle" transform="rotate(-90,-14,70)">X(t)</text>
+
+    <!-- Background curves (light grey, representing raw observations) -->
+    <path d="M0 120 C48 115 80 80 120 72 C160 64 200 58 240 48 C280 38 320 32 384 30" stroke="#adb5bd" stroke-width="1.2" stroke-opacity=".5"/>
+    <path d="M0 110 C48 108 80 90 120 82 C160 74 200 65 240 52 C280 42 320 38 384 35" stroke="#adb5bd" stroke-width="1.2" stroke-opacity=".5"/>
+    <path d="M0 130 C48 122 80 100 120 88 C160 78 200 72 240 60 C280 48 320 42 384 40" stroke="#adb5bd" stroke-width="1.2" stroke-opacity=".5"/>
+    <path d="M0 100 C48 96 80 74 120 60 C160 46 200 42 240 36 C280 28 320 22 384 18" stroke="#adb5bd" stroke-width="1.2" stroke-opacity=".5"/>
+    <path d="M0 118 C48 112 80 86 120 76 C160 66 200 62 240 56 C280 45 320 40 384 38" stroke="#adb5bd" stroke-width="1.2" stroke-opacity=".5"/>
+
+    <!-- ±1 std band (shaded polygon — widest where curves diverge most at left) -->
+    <!-- Upper band boundary: mean + std -->
+    <!-- Lower band boundary: mean - std -->
+    <!-- Band wider on left (high winter variance), narrower on right (summer) -->
+    <path d="M0 88 C48 84 80 68 120 60 C160 52 200 48 240 44 C280 36 320 28 384 22
+             L384 48 C320 54 280 62 240 66 C200 70 160 76 120 84 C80 92 48 100 0 108 Z"
+          fill="#3f51b5" fill-opacity=".12"/>
+    <!-- Mean curve (bold dark blue) -->
+    <path d="M0 98 C48 92 80 78 120 72 C160 64 200 58 240 55 C280 49 320 41 384 35"
+          stroke="#3f51b5" stroke-width="2.8" stroke-linecap="round"/>
+    <text class="sm" x="320" y="28" text-anchor="start" fill="#3f51b5">mean X̄(t)</text>
+
+    <!-- Depth-based median (bold red, an actual observed curve — slightly different from mean) -->
+    <path d="M0 110 C48 108 80 90 120 82 C160 74 200 65 240 52 C280 42 320 38 384 35"
+          stroke="#dc3545" stroke-width="2.4" stroke-dasharray="6 3" stroke-linecap="round"/>
+    <text class="sm" x="320" y="45" text-anchor="start" fill="#dc3545">median (obs.)</text>
+
+    <!-- std width annotation at left (wide): brace -->
+    <line x1="2" y1="88" x2="2" y2="108" stroke="#495057" stroke-width="1.2"/>
+    <line x1="0" y1="88" x2="4" y2="88" stroke="#495057" stroke-width="1.2"/>
+    <line x1="0" y1="108" x2="4" y2="108" stroke="#495057" stroke-width="1.2"/>
+    <text class="sm" x="10" y="100" fill="#495057">±σ</text>
+
+    <!-- std width annotation at right (narrow): brace -->
+    <line x1="382" y1="22" x2="382" y2="48" stroke="#495057" stroke-width="1.2"/>
+    <line x1="378" y1="22" x2="384" y2="22" stroke="#495057" stroke-width="1.2"/>
+    <line x1="378" y1="48" x2="384" y2="48" stroke="#495057" stroke-width="1.2"/>
+    <text class="sm" x="340" y="37" fill="#495057">narrower σ</text>
+  </g>
+
+  <!-- PANEL 2: Depth score bar chart + median highlighted (right panel) -->
+  <rect x="460" y="64" width="242" height="196" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="581" y="86" text-anchor="middle" fill="#495057">Depth Scores (5 of n)</text>
+  <text class="sm" x="581" y="104" text-anchor="middle">deepest = depth-based median</text>
+
+  <g transform="translate(480, 116)">
+    <!-- 5 bars representing depth scores, highest bar = median -->
+    <!-- Bar 1 (shortest depth) -->
+    <rect x="0" y="80" width="28" height="50" fill="#adb5bd" fill-opacity=".5" rx="3"/>
+    <text class="sm" x="14" y="144" text-anchor="middle">obs 1</text>
+    <!-- Bar 2 -->
+    <rect x="38" y="60" width="28" height="70" fill="#adb5bd" fill-opacity=".5" rx="3"/>
+    <text class="sm" x="52" y="144" text-anchor="middle">obs 2</text>
+    <!-- Bar 3 — DEEPEST (the median) — highlighted red -->
+    <rect x="76" y="12" width="28" height="118" fill="#dc3545" fill-opacity=".75" rx="3"/>
+    <text class="sm" x="90" y="144" text-anchor="middle" fill="#dc3545">obs 3 ★</text>
+    <text class="sm" x="90" y="8" text-anchor="middle" fill="#dc3545">D_FM</text>
+    <!-- Bar 4 -->
+    <rect x="114" y="50" width="28" height="80" fill="#adb5bd" fill-opacity=".5" rx="3"/>
+    <text class="sm" x="128" y="144" text-anchor="middle">obs 4</text>
+    <!-- Bar 5 -->
+    <rect x="152" y="72" width="28" height="58" fill="#adb5bd" fill-opacity=".5" rx="3"/>
+    <text class="sm" x="166" y="144" text-anchor="middle">obs 5</text>
+    <!-- Label axis -->
+    <line x1="0" y1="130" x2="196" y2="130" stroke="#ced4da" stroke-width="1.2"/>
+    <text class="sm" x="196" y="162" text-anchor="end" fill="#6c757d">depth score →</text>
+  </g>
+
+  <!-- ROW 2: Explanatory panels for depth-median vs mean vs geometric_median, and trim_mean -->
+
+  <!-- PANEL 3: depth-median vs mean distinction (left lower) -->
+  <rect x="18" y="278" width="336" height="184" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="186" y="300" text-anchor="middle" fill="#495057">Median ≠ Mean ≠ Geometric Median</text>
+
+  <g transform="translate(38, 316)">
+    <line x1="0" y1="124" x2="296" y2="124" stroke="#ced4da" stroke-width="1.2"/>
+
+    <!-- Raw curves (3 grey curves) -->
+    <path d="M0 110 C40 108 80 90 120 80 C160 70 200 65 296 60" stroke="#adb5bd" stroke-width="1.4" stroke-opacity=".55"/>
+    <path d="M0 118 C40 115 80 98 120 88 C160 78 200 74 296 70" stroke="#adb5bd" stroke-width="1.4" stroke-opacity=".55"/>
+    <path d="M0 100 C40 96 80 76 120 64 C160 52 200 48 296 44" stroke="#adb5bd" stroke-width="1.4" stroke-opacity=".55"/>
+    <path d="M0 124 C40 120 80 102 120 92 C160 82 200 78 296 74" stroke="#adb5bd" stroke-width="1.4" stroke-opacity=".55"/>
+
+    <!-- Cross-sectional mean (dashed blue) -->
+    <path d="M0 113 C40 110 80 91 120 81 C160 71 200 66 296 62"
+          stroke="#3f51b5" stroke-width="2.2" stroke-dasharray="7 3" stroke-linecap="round"/>
+    <!-- Depth-based median (bold red — one of the actual curves) -->
+    <path d="M0 118 C40 115 80 98 120 88 C160 78 200 74 296 70"
+          stroke="#dc3545" stroke-width="2.6" stroke-linecap="round"/>
+    <!-- Geometric median (dotted green — a NEW curve not in the sample) -->
+    <path d="M0 112 C40 109 80 90 120 80 C160 70 200 65 296 62"
+          stroke="#198754" stroke-width="1.8" stroke-dasharray="3 3" stroke-linecap="round" stroke-opacity=".8"/>
+
+    <!-- Legend -->
+    <line x1="0" y1="8" x2="24" y2="8" stroke="#3f51b5" stroke-width="2" stroke-dasharray="7 3"/>
+    <text class="sm" x="28" y="12" fill="#3f51b5">mean X̄(t) — pointwise average</text>
+    <line x1="0" y1="28" x2="24" y2="28" stroke="#dc3545" stroke-width="2.6"/>
+    <text class="sm" x="28" y="32" fill="#dc3545">depth median — deepest observed curve ★</text>
+    <line x1="0" y1="48" x2="24" y2="48" stroke="#198754" stroke-width="1.8" stroke-dasharray="3 3" stroke-opacity=".8"/>
+    <text class="sm" x="28" y="52" fill="#198754">geom. median — new synthetic curve</text>
+  </g>
+
+  <!-- PANEL 4: trim_mean (right lower) -->
+  <rect x="368" y="278" width="334" height="184" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="535" y="300" text-anchor="middle" fill="#fd7e14">Depth-Trimmed Mean (trim_mean)</text>
+  <text class="sm" x="535" y="316" text-anchor="middle">alpha=0.1 excludes 10% least-deep curves</text>
+
+  <g transform="translate(388, 332)">
+    <line x1="0" y1="108" x2="294" y2="108" stroke="#ced4da" stroke-width="1.2"/>
+
+    <!-- Peripheral/excluded curves (very faded) -->
+    <path d="M0 106 C50 104 100 86 150 78 C200 68 240 60 294 42" stroke="#adb5bd" stroke-width="1.2" stroke-opacity=".3" stroke-dasharray="3 2"/>
+    <path d="M0 104 C50 100 100 82 150 74 C200 64 240 58 294 40" stroke="#adb5bd" stroke-width="1.2" stroke-opacity=".3" stroke-dasharray="3 2"/>
+    <!-- Retained curves (mid-opacity) -->
+    <path d="M0 96 C50 93 100 78 150 70 C200 60 240 54 294 50" stroke="#adb5bd" stroke-width="1.4" stroke-opacity=".6"/>
+    <path d="M0 90 C50 87 100 72 150 62 C200 52 240 48 294 44" stroke="#adb5bd" stroke-width="1.4" stroke-opacity=".6"/>
+    <path d="M0 100 C50 96 100 80 150 72 C200 62 240 56 294 52" stroke="#adb5bd" stroke-width="1.4" stroke-opacity=".6"/>
+    <!-- Naive mean (dashed grey) -->
+    <path d="M0 99 C50 96 100 80 150 70 C200 61 240 55 294 47"
+          stroke="#6c757d" stroke-width="1.8" stroke-dasharray="5 3"/>
+    <!-- Trim_mean (bold orange) -->
+    <path d="M0 93 C50 90 100 75 150 66 C200 56 240 51 294 47"
+          stroke="#fd7e14" stroke-width="2.8" stroke-linecap="round"/>
+
+    <!-- Excluded zone annotation -->
+    <text class="sm" x="0" y="126" fill="#adb5bd">excluded (low depth)</text>
+    <text class="sm" x="294" y="126" text-anchor="end" fill="#fd7e14">trim_mean(alpha=0.1)</text>
+    <!-- Legend -->
+    <line x1="0" y1="10" x2="20" y2="10" stroke="#6c757d" stroke-width="1.8" stroke-dasharray="5 3"/>
+    <text class="sm" x="24" y="14">mean (all n)</text>
+    <line x1="110" y1="10" x2="130" y2="10" stroke="#fd7e14" stroke-width="2.8"/>
+    <text class="sm" x="134" y="14" fill="#fd7e14">trim_mean</text>
+  </g>
+</svg>

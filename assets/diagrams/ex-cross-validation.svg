@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Cross-Validation: Honest Model Comparison" aria-labelledby="ex-cross-validation-title ex-cross-validation-desc">
+  <title id="ex-cross-validation-title">Cross-Validation: Honest Model Comparison</title>
+  <desc id="ex-cross-validation-desc">fregre_cv compares FPC-LM, PLS, and NP regression via k-fold out-of-fold R² on Tecator data; the OOF R² is materially lower than the in-sample R², revealing the gap between apparent and honest fit quality.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Cross-Validation: Honest Model Comparison</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">fregre_cv 5-fold OOF predictions · in-sample R² vs honest OOF R² · FPC-LM vs PLS vs NP on Tecator D2</text>
+
+  <!-- Data + deriv panel -->
+  <rect x="24" y="62" width="150" height="70" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="99" y="82" text-anchor="middle" fill="#495057">Tecator D2</text>
+  <text class="sm" x="99" y="97" text-anchor="middle">240 samples · deriv_1d</text>
+  <text class="sm" x="99" y="111" text-anchor="middle">nderiv=2 · fat response</text>
+
+  <!-- Arrow -->
+  <line x1="174" y1="97" x2="200" y2="97" stroke="#666" stroke-width="1.5"/>
+  <polygon points="196,93 204,97 196,101" fill="#666"/>
+
+  <!-- k-fold panel -->
+  <rect x="204" y="62" width="200" height="70" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="304" y="82" text-anchor="middle" fill="#fd7e14">fregre_cv — 5-fold CV</text>
+  <text class="sm" x="304" y="97" text-anchor="middle">k_min=1 · k_max=25 · rotate folds</text>
+  <text class="sm" x="304" y="112" text-anchor="middle">each sample predicted by model it never saw</text>
+
+  <!-- Arrow -->
+  <line x1="404" y1="97" x2="430" y2="97" stroke="#fd7e14" stroke-width="1.5"/>
+  <polygon points="426,93 434,97 426,101" fill="#fd7e14"/>
+
+  <!-- OOF panel -->
+  <rect x="434" y="62" width="262" height="70" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="565" y="82" text-anchor="middle" fill="#3f51b5">optimal_k · OOF predictions</text>
+  <text class="sm" x="565" y="97" text-anchor="middle">CV error curve: dip marks best k</text>
+  <text class="sm" x="565" y="112" text-anchor="middle">in-sample R² rises; OOF R² peaks then falls</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="148" x2="680" y2="148" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Method comparison panels -->
+  <rect x="24" y="160" width="200" height="70" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="124" y="180" text-anchor="middle" fill="#3f51b5">FPC-LM (fregre_lm)</text>
+  <text class="sm" x="124" y="195" text-anchor="middle">fregre_cv → oof_predictions</text>
+  <text class="mono" x="124" y="213" text-anchor="middle" fill="#3f51b5">OOF R² ≈ 0.956</text>
+
+  <rect x="260" y="160" width="200" height="70" rx="8" fill="#f0fff4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="360" y="180" text-anchor="middle" fill="#198754">PLS (fregre_pls)</text>
+  <text class="sm" x="360" y="195" text-anchor="middle">predict_fregre_pls · n_comp=5</text>
+  <text class="mono" x="360" y="213" text-anchor="middle" fill="#198754">OOF R² ≈ 0.956</text>
+
+  <rect x="496" y="160" width="200" height="70" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="596" y="180" text-anchor="middle" fill="#fd7e14">NP (fregre_np)</text>
+  <text class="sm" x="596" y="195" text-anchor="middle">lp_cross_1d → N-W predict</text>
+  <text class="mono" x="596" y="213" text-anchor="middle" fill="#fd7e14">OOF R² ≈ 0.978 ★</text>
+
+  <!-- Bottom note -->
+  <text class="sub" x="360" y="258" text-anchor="middle">All R² values are out-of-fold (OOF): honest generalisation, not memorisation. NP edges ahead; FPC-LM ≈ PLS.</text>
+  <text class="sub" x="360" y="275" text-anchor="middle">fregre_cv returns fold_assignments for stability checks · model_selection_ncomp(gcv) is cheaper for component count</text>
+</svg>

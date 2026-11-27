@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Align">
+  <defs>
+    <marker id="algarr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0 0 L6 3 L0 6 Z" fill="#fd7e14"/>
+    </marker>
+  </defs>
+  <line x1="28" y1="150" x2="292" y2="150" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.5"/>
+  <line x1="28" y1="150" x2="28" y2="26" stroke="#fd7e14" stroke-opacity=".35" stroke-width="1.5"/>
+  <!-- peak-shifted curves -->
+  <path d="M28 128 C74 128 88 44 118 44 C150 44 168 128 292 128" stroke="#fd7e14" stroke-opacity=".4" stroke-width="2.5"/>
+  <path d="M28 128 C150 128 176 56 208 56 C242 56 258 128 292 128" stroke="#fd7e14" stroke-opacity=".4" stroke-width="2.5"/>
+  <!-- aligned template -->
+  <path d="M28 132 C118 132 146 62 163 62 C182 62 210 132 292 132" stroke="#fd7e14" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- warping arrows -->
+  <path d="M118 44 C138 30 150 30 161 60" stroke="#fd7e14" stroke-width="1.6" marker-end="url(#algarr)"/>
+  <path d="M208 56 C190 40 176 40 165 60" stroke="#fd7e14" stroke-width="1.6" marker-end="url(#algarr)"/>
+  <circle cx="118" cy="44" r="3.5" fill="#fd7e14" fill-opacity=".55"/>
+  <circle cx="208" cy="56" r="3.5" fill="#fd7e14" fill-opacity=".55"/>
+  <circle cx="163" cy="62" r="4.5" fill="#fd7e14"/>
+</svg>

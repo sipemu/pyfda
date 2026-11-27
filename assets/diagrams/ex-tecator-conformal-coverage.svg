@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="The Conformal Coverage Guarantee" aria-labelledby="ex-tecator-conformal-coverage-title ex-tecator-conformal-coverage-desc">
+  <title id="ex-tecator-conformal-coverage-title">The Conformal Coverage Guarantee</title>
+  <desc id="ex-tecator-conformal-coverage-desc">Split conformal prediction on Tecator NIR spectra calibrates a prediction interval from a single held-out calibration set; repeated random splits confirm the empirical coverage tracks the target 1−α level, validating the distribution-free guarantee.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">The Conformal Coverage Guarantee</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">conformal_fregre_lm: train/calibrate/test split → prediction bands → empirical coverage ≥ 1 − α</text>
+
+  <!-- Dataset panel -->
+  <rect x="24" y="62" width="140" height="70" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="94" y="82" text-anchor="middle" fill="#495057">Tecator</text>
+  <text class="sm" x="94" y="97" text-anchor="middle">240 NIR spectra</text>
+  <text class="sm" x="94" y="111" text-anchor="middle">fat % response</text>
+
+  <!-- Arrow to conformal -->
+  <line x1="164" y1="97" x2="190" y2="97" stroke="#666" stroke-width="1.5"/>
+  <polygon points="186,93 194,97 186,101" fill="#666"/>
+
+  <!-- Split panel -->
+  <rect x="194" y="62" width="200" height="70" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="294" y="82" text-anchor="middle" fill="#fd7e14">conformal_fregre_lm</text>
+  <text class="sm" x="294" y="97" text-anchor="middle">ncomp=8 · cal_fraction=0.3</text>
+  <text class="sm" x="294" y="112" text-anchor="middle">train fit → calibrate residuals → test</text>
+
+  <!-- Arrow to band -->
+  <line x1="394" y1="97" x2="420" y2="97" stroke="#fd7e14" stroke-width="1.5"/>
+  <polygon points="416,93 424,97 416,101" fill="#fd7e14"/>
+
+  <!-- Prediction band panel -->
+  <rect x="424" y="62" width="272" height="70" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="560" y="82" text-anchor="middle" fill="#3f51b5">Conformal prediction band</text>
+  <text class="sm" x="560" y="97" text-anchor="middle">variable-width intervals · lower / upper / predictions</text>
+  <text class="mono" x="560" y="114" text-anchor="middle" fill="#3f51b5">α = 0.10 → target coverage 90%</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="148" x2="680" y2="148" stroke="#ced4da" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Single-split result -->
+  <rect x="24" y="160" width="296" height="68" rx="8" fill="#f0fff4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="172" y="180" text-anchor="middle" fill="#198754">Single split — empirical coverage</text>
+  <text class="sm" x="172" y="196" text-anchor="middle">60 test samples · green = covered · red = missed</text>
+  <text class="mono" x="172" y="213" text-anchor="middle" fill="#198754">coverage ≈ 90–93%  (≥ 1 − α)</text>
+
+  <!-- Arrow -->
+  <line x1="320" y1="194" x2="346" y2="194" stroke="#495057" stroke-width="1.5"/>
+  <polygon points="342,190 350,194 342,198" fill="#495057"/>
+
+  <!-- Multi-split panel -->
+  <rect x="350" y="160" width="346" height="68" rx="8" fill="#f0f7ff" stroke="#3f51b5" stroke-width="1.5"/>
+  <text class="lab" x="523" y="180" text-anchor="middle" fill="#3f51b5">60 random splits — coverage distribution</text>
+  <text class="sm" x="523" y="196" text-anchor="middle">histogram concentrates at or above nominal 0.90</text>
+  <text class="mono" x="523" y="213" text-anchor="middle" fill="#3f51b5">mean ≥ 0.90 · slightly conservative (one-sided)</text>
+
+  <!-- Bottom note -->
+  <text class="sub" x="360" y="258" text-anchor="middle">Conformal guarantee: finite-sample marginal coverage ≥ 1−α — no Gaussian assumption, no model correctness requirement.</text>
+  <text class="sub" x="360" y="275" text-anchor="middle">Band width varies (model confidence); ~10% of test points fall outside, as budgeted by α.</text>
+</svg>

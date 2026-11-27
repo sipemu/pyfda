@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Explainability regions">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <rect x="150" y="34" width="72" height="116" fill="#3f51b5" fill-opacity=".14"/>
+  <path d="M30 96 C70 92 100 100 130 96 C150 94 158 60 186 48 C214 60 220 94 240 96 C268 100 280 92 298 94" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+  <text x="156" y="146" fill="#3f51b5" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">λ*</text>
+</svg>

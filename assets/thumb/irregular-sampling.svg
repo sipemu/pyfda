@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Irregular sampling">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#0d6efd" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 112 C70 60 100 130 138 96 C170 68 196 118 236 76 C262 50 282 90 298 74" stroke="#0d6efd" stroke-width="3" stroke-linecap="round"/>
+  <g fill="#0d6efd">
+    <circle cx="38" cy="106" r="3.4"/><circle cx="66" cy="70" r="3.4"/><circle cx="112" cy="118" r="3.4"/><circle cx="138" cy="96" r="3.4"/><circle cx="168" cy="70" r="3.4"/><circle cx="210" cy="94" r="3.4"/><circle cx="236" cy="76" r="3.4"/><circle cx="288" cy="78" r="3.4"/>
+  </g>
+</svg>

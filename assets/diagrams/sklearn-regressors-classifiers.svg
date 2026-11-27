@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="sklearn Regressors and Classifiers: FPC-Score Predict Pipeline" aria-labelledby="t-skrc d-skrc">
+  <title id="t-skrc">sklearn Regressors and Classifiers: FPC-Score Predict Pipeline</title>
+  <desc id="d-skrc">Depicts the shared FPC-score predict pipeline. At fit, (n_obs, n_points) training curves are projected to (n_obs, k) FPC scores via the stored FPC basis and a sklearn model is fitted on those scores. At predict, new curves are projected onto the stored FPC basis to produce test scores; the stored sklearn model predicts from those scores — no re-fit, no vstack. Output branches into scalar y-hat from five RegressorMixin estimators (FPCRegressor, PLSRegressor, RobustFPCRegressor, GLMRegressor, NonparametricRegressor) or class labels from six ClassifierMixin estimators (FPCLDAClassifier, FPCQDAClassifier, FPCKNNClassifier, DDClassifier, LogisticFPCClassifier, ElasticMultinomialClassifier).</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <defs>
+    <marker id="arr-rc" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arr-rc-org" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="26" text-anchor="middle">sklearn Regressors and Classifiers: FPC-Score Predict Pipeline</text>
+  <text class="sub" x="360" y="44" text-anchor="middle">stored FPC basis — project new curves — stored sklearn model predicts — no re-fit, no vstack</text>
+
+  <!-- ===== Input: raw curves ===== -->
+  <rect x="12" y="58" width="118" height="102" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="71" y="77" text-anchor="middle" fill="#495057">Curves</text>
+  <text class="mono" x="71" y="93" text-anchor="middle" fill="#1a1a2e">X ndarray</text>
+  <text class="sm" x="71" y="109" text-anchor="middle">(n_obs, n_points)</text>
+  <path d="M22 130 C38 118 52 126 66 112 C80 98 90 122 110 116" stroke="#3f51b5" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M22 142 C36 134 54 142 68 130 C82 118 94 138 110 130" stroke="#e8710a" stroke-width="2" fill="none" opacity="0.7"/>
+  <text class="sm" x="71" y="165" text-anchor="middle">each row</text>
+  <text class="sm" x="71" y="178" text-anchor="middle">one curve</text>
+
+  <!-- Arrow: curves → FPC basis -->
+  <line x1="130" y1="109" x2="148" y2="109" stroke="#fd7e14" stroke-width="2" marker-end="url(#arr-rc-org)"/>
+
+  <!-- ===== FPC basis panel (orange: method/process) ===== -->
+  <rect x="150" y="58" width="172" height="102" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="236" y="77" text-anchor="middle" fill="#fd7e14">Stored FPC Basis</text>
+  <text class="mono" x="236" y="94" text-anchor="middle" fill="#1a1a2e">FPCATransformer</text>
+  <text class="sm" x="236" y="110" text-anchor="middle">fit: compute + store FPC basis</text>
+  <line x1="170" y1="117" x2="312" y2="117" stroke="#f8d7b8" stroke-width="1" stroke-dasharray="3 2"/>
+  <text class="sm" x="236" y="131" text-anchor="middle">predict: project new curves</text>
+  <text class="sm" x="236" y="145" text-anchor="middle">onto stored basis → FPC scores</text>
+
+  <!-- Score matrix annotation -->
+  <text class="sm" x="236" y="178" text-anchor="middle" fill="#fd7e14">(n_obs, k) FPC scores</text>
+
+  <!-- Arrow: FPC basis → regressor branch -->
+  <line x1="322" y1="95" x2="350" y2="78" stroke="#fd7e14" stroke-width="2" marker-end="url(#arr-rc-org)"/>
+
+  <!-- Arrow: FPC basis → classifier branch -->
+  <line x1="322" y1="130" x2="350" y2="198" stroke="#fd7e14" stroke-width="2" marker-end="url(#arr-rc-org)"/>
+
+  <!-- ===== Regressors branch (top, orange: method) ===== -->
+  <rect x="352" y="58" width="196" height="102" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="450" y="77" text-anchor="middle" fill="#fd7e14">RegressorMixin (5)</text>
+  <text class="sm" x="450" y="91" text-anchor="middle">stored sklearn model predicts</text>
+  <text class="mono" x="450" y="107" text-anchor="middle" fill="#1a1a2e" font-size="11">FPCRegressor · PLSRegressor</text>
+  <text class="mono" x="450" y="121" text-anchor="middle" fill="#1a1a2e" font-size="11">RobustFPCRegressor · GLMRegressor</text>
+  <text class="mono" x="450" y="136" text-anchor="middle" fill="#1a1a2e" font-size="11">NonparametricRegressor</text>
+  <text class="sm" x="450" y="152" text-anchor="middle">no re-fit at predict time</text>
+
+  <!-- Arrow: regressor → output y-hat -->
+  <line x1="548" y1="100" x2="566" y2="100" stroke="#fd7e14" stroke-width="2" marker-end="url(#arr-rc-org)"/>
+
+  <!-- Regressor output -->
+  <rect x="568" y="68" width="140" height="60" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="638" y="88" text-anchor="middle" fill="#fd7e14">Scalar ŷ</text>
+  <text class="sm" x="638" y="106" text-anchor="middle">continuous prediction</text>
+  <text class="mono" x="638" y="121" text-anchor="middle" fill="#1a1a2e">(n_obs,)</text>
+
+  <!-- ===== Classifiers branch (bottom, orange: method) ===== -->
+  <rect x="352" y="176" width="196" height="112" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="450" y="195" text-anchor="middle" fill="#fd7e14">ClassifierMixin (6)</text>
+  <text class="sm" x="450" y="210" text-anchor="middle">stored sklearn model predicts</text>
+  <text class="mono" x="450" y="225" text-anchor="middle" fill="#1a1a2e" font-size="11">FPCLDAClassifier · FPCQDAClassifier</text>
+  <text class="mono" x="450" y="239" text-anchor="middle" fill="#1a1a2e" font-size="11">FPCKNNClassifier · DDClassifier</text>
+  <text class="mono" x="450" y="253" text-anchor="middle" fill="#1a1a2e" font-size="11">LogisticFPCClassifier</text>
+  <text class="mono" x="450" y="267" text-anchor="middle" fill="#1a1a2e" font-size="11">ElasticMultinomialClassifier</text>
+  <text class="sm" x="450" y="283" text-anchor="middle">no re-fit at predict time</text>
+
+  <!-- Arrow: classifier → output labels -->
+  <line x1="548" y1="232" x2="566" y2="232" stroke="#fd7e14" stroke-width="2" marker-end="url(#arr-rc-org)"/>
+
+  <!-- Classifier output -->
+  <rect x="568" y="202" width="140" height="60" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="638" y="222" text-anchor="middle" fill="#fd7e14">Class Labels</text>
+  <text class="sm" x="638" y="240" text-anchor="middle">discrete prediction</text>
+  <text class="mono" x="638" y="255" text-anchor="middle" fill="#1a1a2e">(n_obs,)</text>
+</svg>

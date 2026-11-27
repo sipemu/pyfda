@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none"
+     role="img" aria-label="Functional Time Series — FTSM forecast concept"
+     aria-labelledby="fts-title fts-desc">
+  <title id="fts-title">Functional Time Series</title>
+  <desc id="fts-desc">Illustrates the FTSM forecast pipeline: observed functional curves indexed by time are decomposed into a mean function plus basis components, and the score trajectories are extrapolated to produce forecast curves at future time points.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Functional Time Series</text>
+  <text class="sub" x="360" y="48" text-anchor="middle">FTSM: mean + basis decomposition → score forecast → future curves</text>
+
+  <!-- ===== Panel 1: Observed functional time series ===== -->
+  <rect x="16" y="68" width="196" height="168" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="114" y="90" text-anchor="middle" fill="#495057">Observed Series</text>
+  <text class="mono" x="114" y="108" text-anchor="middle" fill="#6c757d">X₁(t), …, Xₙ(t)</text>
+
+  <!-- Observed curves in time order (indigo shades, fading older) -->
+  <path d="M30 168 Q57 148 84 155 Q111 162 138 148 Q165 135 196 145" stroke="#3f51b5" stroke-width="1.4" fill="none" opacity="0.35"/>
+  <path d="M30 172 Q57 152 84 162 Q111 172 138 158 Q165 144 196 152" stroke="#3f51b5" stroke-width="1.4" fill="none" opacity="0.45"/>
+  <path d="M30 175 Q57 155 84 168 Q111 178 138 162 Q165 148 196 157" stroke="#3f51b5" stroke-width="1.6" fill="none" opacity="0.55"/>
+  <path d="M30 178 Q57 158 84 172 Q111 184 138 168 Q165 153 196 162" stroke="#3f51b5" stroke-width="1.8" fill="none" opacity="0.7"/>
+  <path d="M30 181 Q57 160 84 175 Q111 188 138 172 Q165 157 196 166" stroke="#3f51b5" stroke-width="2.2" fill="none" opacity="0.9"/>
+
+  <!-- Time axis label -->
+  <line x1="30" y1="224" x2="196" y2="224" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="113" y="238" text-anchor="middle">t = 1, 2, …, T (time index)</text>
+
+  <!-- Arrow to decomposition -->
+  <line x1="212" y1="152" x2="242" y2="152" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-fts)"/>
+
+  <!-- ===== Panel 2: Decomposition (orange accent) ===== -->
+  <rect x="246" y="68" width="212" height="168" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="352" y="90" text-anchor="middle" fill="#fd7e14">FTSM Decomposition</text>
+  <text class="mono" x="352" y="108" text-anchor="middle" fill="#6c757d">ftsm(data, argvals)</text>
+
+  <!-- Mean function line -->
+  <text class="sm" x="258" y="128" fill="#495057">mean μ(t)</text>
+  <path d="M258 142 Q294 138 330 140 Q366 142 402 139 Q438 136 450 138" stroke="#e8710a" stroke-width="2.4" fill="none"/>
+
+  <!-- Basis component 1 -->
+  <text class="sm" x="258" y="162" fill="#495057">basis φ₁(t)</text>
+  <path d="M258 176 Q294 162 330 168 Q366 180 402 172 Q438 160 450 165" stroke="#3f51b5" stroke-width="2.0" fill="none"/>
+
+  <!-- Basis component 2 -->
+  <text class="sm" x="258" y="196" fill="#495057">basis φ₂(t)</text>
+  <path d="M258 210 Q285 202 312 216 Q339 228 366 214 Q402 198 450 205" stroke="#198754" stroke-width="1.6" fill="none" stroke-dasharray="4 3"/>
+
+  <!-- Score label -->
+  <text class="sm" x="352" y="232" text-anchor="middle" fill="#495057">scores β₁, …, βₙ (time series)</text>
+
+  <!-- Arrow to forecast panel -->
+  <line x1="458" y1="152" x2="488" y2="152" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-fts)"/>
+
+  <!-- ===== Panel 3: Forecast ===== -->
+  <rect x="492" y="68" width="212" height="168" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="598" y="90" text-anchor="middle" fill="#495057">Forecast</text>
+  <text class="mono" x="598" y="108" text-anchor="middle" fill="#6c757d">ftsm_forecast(data, t, h)</text>
+
+  <!-- Observed portion (dashed divider) -->
+  <line x1="596" y1="118" x2="596" y2="228" stroke="#ced4da" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <text class="sm" x="550" y="130" text-anchor="middle" fill="#6c757d">observed</text>
+  <text class="sm" x="658" y="130" text-anchor="middle" fill="#fd7e14">forecast</text>
+
+  <!-- Observed portion of mean (left of divider) -->
+  <path d="M506 165 Q530 158 556 161 Q570 163 596 162" stroke="#e8710a" stroke-width="2.2" fill="none"/>
+  <!-- Forecast extrapolation (right of divider) -->
+  <path d="M596 162 Q618 160 640 158 Q662 156 686 153" stroke="#e8710a" stroke-width="2.2" fill="none" stroke-dasharray="6 3"/>
+
+  <!-- Forecast curve h=1 -->
+  <path d="M596 172 Q618 170 640 168 Q662 165 686 162" stroke="#3f51b5" stroke-width="2.0" fill="none" stroke-dasharray="5 3"/>
+  <!-- Forecast curve h=2 -->
+  <path d="M596 178 Q618 177 640 175 Q662 172 686 168" stroke="#198754" stroke-width="1.6" fill="none" stroke-dasharray="5 3"/>
+  <!-- Forecast curve h=3 -->
+  <path d="M596 185 Q618 184 640 182 Q662 179 686 175" stroke="#6f42c1" stroke-width="1.4" fill="none" stroke-dasharray="5 3"/>
+
+  <!-- Horizon label -->
+  <text class="sm" x="641" y="205" text-anchor="middle">h steps ahead</text>
+  <text class="sm" x="641" y="220" text-anchor="middle">X̂_{T+1}, …, X̂_{T+h}</text>
+
+  <!-- ===== Bottom: Key functions strip ===== -->
+  <line x1="16" y1="252" x2="704" y2="252" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="lab" x="360" y="276" text-anchor="middle" fill="#495057">Key Functions — fdars.fts</text>
+
+  <!-- ftsm -->
+  <rect x="16" y="288" width="156" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="94" y="308" text-anchor="middle" fill="#3f51b5">ftsm</text>
+  <text class="sm" x="94" y="326" text-anchor="middle">Fit model</text>
+  <text class="sm" x="94" y="342" text-anchor="middle">mean + basis</text>
+  <text class="sm" x="94" y="358" text-anchor="middle">+ scores</text>
+
+  <!-- ftsm_forecast -->
+  <rect x="184" y="288" width="156" height="80" rx="8" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="262" y="308" text-anchor="middle" fill="#fd7e14">ftsm_forecast</text>
+  <text class="sm" x="262" y="326" text-anchor="middle">h-step ahead</text>
+  <text class="sm" x="262" y="342" text-anchor="middle">curve forecast</text>
+  <text class="sm" x="262" y="358" text-anchor="middle">shape (h, m)</text>
+
+  <!-- stationarity_test -->
+  <rect x="352" y="288" width="176" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="440" y="308" text-anchor="middle" fill="#198754">stationarity_test</text>
+  <text class="sm" x="440" y="326" text-anchor="middle">Permutation test</text>
+  <text class="sm" x="440" y="342" text-anchor="middle">for score series</text>
+  <text class="sm" x="440" y="358" text-anchor="middle">statistic + p_value</text>
+
+  <!-- dpca -->
+  <rect x="540" y="288" width="164" height="80" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="622" y="308" text-anchor="middle" fill="#6f42c1">dpca</text>
+  <text class="sm" x="622" y="326" text-anchor="middle">Dynamic FPCA</text>
+  <text class="sm" x="622" y="342" text-anchor="middle">order-p filters</text>
+  <text class="sm" x="622" y="358" text-anchor="middle">+ eigenvalues</text>
+
+  <!-- Bottom info row -->
+  <line x1="16" y1="384" x2="704" y2="384" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="360" y="406" text-anchor="middle">Also: functional_acf · functional_pacf · long_run_covariance · fplsr · ftsm_update · functional_difference</text>
+  <text class="sm" x="360" y="428" text-anchor="middle" fill="#6c757d">Non-stationary series: apply functional_difference(data, lag=1) before ftsm</text>
+  <text class="sm" x="360" y="450" text-anchor="middle" fill="#6c757d">All functions in fdars.fts  ·  Fixture convention: n ≠ m (transposition guard)</text>
+
+  <defs>
+    <marker id="arr-fts" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+  </defs>
+</svg>

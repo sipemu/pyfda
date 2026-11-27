@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Analyze">
+  <line x1="28" y1="150" x2="292" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.5"/>
+  <line x1="28" y1="150" x2="28" y2="26" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.5"/>
+  <!-- outer 100% band -->
+  <path d="M28 60 C96 30 150 46 292 34 L292 118 C150 132 96 148 28 128 Z" fill="#6f42c1" fill-opacity=".12"/>
+  <!-- inner 50% central band -->
+  <path d="M28 84 C96 62 150 70 292 60 L292 96 C150 106 96 116 28 106 Z" fill="#6f42c1" fill-opacity=".22"/>
+  <!-- median curve -->
+  <path d="M28 95 C96 74 150 84 292 78" stroke="#6f42c1" stroke-width="3" stroke-linecap="round"/>
+  <!-- outlier curve -->
+  <path d="M28 118 C90 150 150 40 210 128 C244 168 270 66 292 52" stroke="#6f42c1" stroke-opacity=".5" stroke-width="2" stroke-dasharray="5 4"/>
+  <circle cx="28" cy="95" r="4" fill="#6f42c1"/>
+  <circle cx="292" cy="78" r="4" fill="#6f42c1"/>
+</svg>

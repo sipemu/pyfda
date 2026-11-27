@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Functional time series forecast">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6f42c1" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 115 C80 95 130 130 180 105 C210 90 240 112 270 100" stroke="#6f42c1" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/>
+  <path d="M30 105 C80 85 130 120 180 95 C210 80 240 102 270 90" stroke="#6f42c1" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>
+  <path d="M30 95 C80 75 130 110 180 85 C210 70 240 92 270 80" stroke="#6f42c1" stroke-opacity=".75" stroke-width="2" stroke-linecap="round"/>
+  <path d="M30 85 C80 65 130 100 180 75 C210 60 240 82 270 70 C282 65 292 55 298 50" stroke="#6f42c1" stroke-width="3" stroke-linecap="round"/>
+  <path d="M270 70 C282 65 292 52 298 46" stroke="#6f42c1" stroke-opacity=".6" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 4"/>
+</svg>

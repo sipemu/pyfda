@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img"
+     aria-label="PACE FPCA — Sparse, Irregular Observations to Smooth Eigenfunctions"
+     aria-labelledby="pace-fpca-title pace-fpca-desc">
+  <title id="pace-fpca-title">PACE FPCA — Sparse, Irregular Observations to Smooth Eigenfunctions</title>
+  <desc id="pace-fpca-desc">Shows how PACE (Principal Analysis by Conditional Expectation) recovers smooth eigenfunctions on a common grid from sparse, ragged per-curve observations — each curve contributes only a few irregularly-spaced points yet the method estimates the full covariance surface and principal components.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">PACE FPCA — Sparse, Irregular Observations to Smooth Eigenfunctions</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">PACE recovers smooth eigenfunctions from sparse, irregular per-curve grids</text>
+
+  <!-- Left panel: sparse irregular observations -->
+  <rect x="24" y="58" width="316" height="208" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="182" y="76" text-anchor="middle" fill="#1a1a2e">Sparse Irregular Input</text>
+
+  <!-- Axes left panel -->
+  <line x1="52" y1="88" x2="52" y2="244" stroke="#495057" stroke-width="1.2"/>
+  <line x1="52" y1="244" x2="320" y2="244" stroke="#495057" stroke-width="1.2"/>
+  <text class="sm" x="186" y="260" text-anchor="middle">t (domain)</text>
+  <text class="sm" x="36" y="168" text-anchor="middle" transform="rotate(-90,36,168)">X(t)</text>
+
+  <!-- Tick marks on left panel x-axis -->
+  <line x1="52"  y1="244" x2="52"  y2="250" stroke="#495057" stroke-width="1.0"/>
+  <line x1="186" y1="244" x2="186" y2="250" stroke="#495057" stroke-width="1.0"/>
+  <line x1="320" y1="244" x2="320" y2="250" stroke="#495057" stroke-width="1.0"/>
+  <text class="sm" x="52"  y="260" text-anchor="middle">0</text>
+  <text class="sm" x="320" y="260" text-anchor="middle">1</text>
+
+  <!-- Curve 1: irregular scattered dots (indigo) — 6 obs at ragged positions -->
+  <circle cx="68"  cy="178" r="3.5" fill="#3f51b5"/>
+  <circle cx="96"  cy="142" r="3.5" fill="#3f51b5"/>
+  <circle cx="131" cy="118" r="3.5" fill="#3f51b5"/>
+  <circle cx="178" cy="128" r="3.5" fill="#3f51b5"/>
+  <circle cx="243" cy="156" r="3.5" fill="#3f51b5"/>
+  <circle cx="298" cy="188" r="3.5" fill="#3f51b5"/>
+
+  <!-- Curve 2: irregular scattered dots (orange) — 5 obs at different positions -->
+  <circle cx="72"  cy="196" r="3.5" fill="#e8710a"/>
+  <circle cx="113" cy="168" r="3.5" fill="#e8710a"/>
+  <circle cx="159" cy="138" r="3.5" fill="#e8710a"/>
+  <circle cx="220" cy="144" r="3.5" fill="#e8710a"/>
+  <circle cx="289" cy="174" r="3.5" fill="#e8710a"/>
+
+  <!-- Curve 3: irregular scattered dots (green) — 7 obs -->
+  <circle cx="60"  cy="190" r="3.5" fill="#198754"/>
+  <circle cx="88"  cy="158" r="3.5" fill="#198754"/>
+  <circle cx="122" cy="130" r="3.5" fill="#198754"/>
+  <circle cx="164" cy="110" r="3.5" fill="#198754"/>
+  <circle cx="207" cy="124" r="3.5" fill="#198754"/>
+  <circle cx="262" cy="152" r="3.5" fill="#198754"/>
+  <circle cx="308" cy="180" r="3.5" fill="#198754"/>
+
+  <!-- Curve 4: irregular scattered dots (red) — 5 obs at shifted positions -->
+  <circle cx="80"  cy="208" r="3.5" fill="#dc3545"/>
+  <circle cx="139" cy="182" r="3.5" fill="#dc3545"/>
+  <circle cx="195" cy="160" r="3.5" fill="#dc3545"/>
+  <circle cx="250" cy="148" r="3.5" fill="#dc3545"/>
+  <circle cx="305" cy="168" r="3.5" fill="#dc3545"/>
+
+  <!-- Curve 5: irregular scattered dots (purple) — 6 obs -->
+  <circle cx="65"  cy="202" r="3.5" fill="#6f42c1"/>
+  <circle cx="106" cy="176" r="3.5" fill="#6f42c1"/>
+  <circle cx="148" cy="148" r="3.5" fill="#6f42c1"/>
+  <circle cx="198" cy="132" r="3.5" fill="#6f42c1"/>
+  <circle cx="267" cy="144" r="3.5" fill="#6f42c1"/>
+  <circle cx="312" cy="164" r="3.5" fill="#6f42c1"/>
+
+  <!-- PACE mean curve on left panel (orange, smooth) -->
+  <path d="M52 206 Q100 178 155 140 Q210 108 260 132 Q295 152 320 178"
+        stroke="#fd7e14" stroke-width="2.4" fill="none" stroke-dasharray="6 3"/>
+
+  <!-- Label: PACE mean -->
+  <text class="sm" x="264" y="106" fill="#fd7e14">PACE mean</text>
+
+  <!-- Label: ragged grids annotation -->
+  <text class="sm" x="62" y="98">each curve: own</text>
+  <text class="sm" x="62" y="110">t-grid (ragged)</text>
+
+  <!-- Arrow pointing to dots to show irregularity -->
+  <line x1="100" y1="118" x2="96" y2="140" stroke="#6c757d" stroke-width="1.2"/>
+  <polygon points="96,140 93,132 99,132" fill="#6c757d"/>
+
+  <!-- Right panel: smooth recovered eigenfunctions -->
+  <rect x="380" y="58" width="316" height="208" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="538" y="76" text-anchor="middle" fill="#1a1a2e">Recovered Eigenfunctions (work grid)</text>
+
+  <!-- Axes right panel -->
+  <line x1="408" y1="88" x2="408" y2="244" stroke="#495057" stroke-width="1.2"/>
+  <line x1="408" y1="244" x2="676" y2="244" stroke="#495057" stroke-width="1.2"/>
+  <text class="sm" x="542" y="260" text-anchor="middle">t (domain)</text>
+  <text class="sm" x="394" y="168" text-anchor="middle" transform="rotate(-90,394,168)">φ(t)</text>
+
+  <!-- Tick marks on right panel x-axis -->
+  <line x1="408" y1="244" x2="408" y2="250" stroke="#495057" stroke-width="1.0"/>
+  <line x1="542" y1="244" x2="542" y2="250" stroke="#495057" stroke-width="1.0"/>
+  <line x1="676" y1="244" x2="676" y2="250" stroke="#495057" stroke-width="1.0"/>
+  <text class="sm" x="408" y="260" text-anchor="middle">0</text>
+  <text class="sm" x="676" y="260" text-anchor="middle">1</text>
+
+  <!-- Zero line on right panel -->
+  <line x1="408" y1="166" x2="676" y2="166" stroke="#ced4da" stroke-width="1.0" stroke-dasharray="3 3"/>
+
+  <!-- PC 1 smooth curve (indigo) — gentle wave -->
+  <path d="M408 200 Q450 182 500 138 Q540 104 590 124 Q630 142 676 158"
+        stroke="#3f51b5" stroke-width="2.6" fill="none"/>
+
+  <!-- PC 2 smooth curve (orange) — oscillating wave -->
+  <path d="M408 152 Q440 128 478 156 Q516 190 554 172 Q598 148 640 166 Q658 174 676 178"
+        stroke="#e8710a" stroke-width="2.6" fill="none"/>
+
+  <!-- PC 1 label -->
+  <text class="lab" x="500" y="96" fill="#3f51b5">φ₁(t) — PC 1</text>
+
+  <!-- PC 2 label with line -->
+  <text class="lab" x="500" y="200" fill="#e8710a">φ₂(t) — PC 2</text>
+
+  <!-- Arrow and label: smooth on common grid -->
+  <text class="sm" x="412" y="100">51 uniform grid pts</text>
+  <text class="sm" x="412" y="112">(common work grid)</text>
+
+  <!-- Central arrow between panels -->
+  <line x1="340" y1="162" x2="374" y2="162" stroke="#fd7e14" stroke-width="2.0"/>
+  <polygon points="374,162 366,157 366,167" fill="#fd7e14"/>
+  <text class="sm" x="357" y="152" text-anchor="middle" fill="#fd7e14">PACE</text>
+</svg>

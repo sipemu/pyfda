@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Elastic clustering of curve families">
+  <!-- x-axis -->
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#ced4da" stroke-opacity=".6" stroke-width="1.2"/>
+  <!-- Cluster 1: low amplitude (indigo) — 3 curves grouped together -->
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none">
+    <path d="M30 150 C60 150 74 102 90 102 C106 102 114 150 148 150 C180 150 220 150 298 150" stroke-width="2.8" opacity=".85"/>
+    <path d="M30 150 C56 150 68 106 86 106 C104 106 112 150 146 150 C178 150 220 150 298 150" stroke-width="1.8" opacity=".6"/>
+    <path d="M30 150 C64 150 80 98 96 98 C112 98 118 150 152 150 C184 150 220 150 298 150" stroke-width="1.6" opacity=".5"/>
+  </g>
+  <!-- Cluster 2: high amplitude (orange) — 3 curves grouped together -->
+  <g stroke="#e8710a" stroke-linecap="round" fill="none">
+    <path d="M30 150 C52 150 64 60 82 60 C100 60 108 150 144 150 C176 150 220 150 298 150" stroke-width="2.8" opacity=".85"/>
+    <path d="M30 150 C56 150 70 56 88 56 C106 56 114 150 148 150 C180 150 220 150 298 150" stroke-width="1.8" opacity=".6"/>
+    <path d="M30 150 C60 150 76 64 94 64 C112 64 120 150 154 150 C186 150 220 150 298 150" stroke-width="1.6" opacity=".5"/>
+  </g>
+  <!-- Divider line between clusters -->
+  <line x1="30" y1="83" x2="295" y2="83" stroke="#ced4da" stroke-width="1" stroke-dasharray="5 3" opacity=".5"/>
+  <!-- Cluster labels -->
+  <text font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#3f51b5" x="240" y="116" text-anchor="start">C1: low</text>
+  <text font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#e8710a" x="240" y="62" text-anchor="start">C2: high</text>
+</svg>

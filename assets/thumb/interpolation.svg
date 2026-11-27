@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Spline interpolation">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <circle cx="80" cy="118" r="4" fill="#198754" fill-opacity=".5"/>
+  <line x1="80" y1="150" x2="80" y2="118" stroke="#198754" stroke-opacity=".4" stroke-width="1.4"/>
+  <circle cx="148" cy="72" r="4" fill="#198754" fill-opacity=".5"/>
+  <line x1="148" y1="150" x2="148" y2="72" stroke="#198754" stroke-opacity=".4" stroke-width="1.4"/>
+  <circle cx="216" cy="96" r="4" fill="#198754" fill-opacity=".5"/>
+  <line x1="216" y1="150" x2="216" y2="96" stroke="#198754" stroke-opacity=".4" stroke-width="1.4"/>
+  <circle cx="270" cy="60" r="4" fill="#198754" fill-opacity=".5"/>
+  <line x1="270" y1="150" x2="270" y2="60" stroke="#198754" stroke-opacity=".4" stroke-width="1.4"/>
+  <path d="M80 118 C104 90 124 56 148 72 C172 88 192 100 216 96 C240 92 256 50 270 60" stroke="#198754" stroke-width="3" stroke-linecap="round"/>
+</svg>

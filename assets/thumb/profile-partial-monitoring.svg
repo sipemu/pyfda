@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Profile partial monitoring">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#6610f2" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#6610f2" stroke-opacity=".35" stroke-width="1.4"/>
+  <rect x="164" y="28" width="70" height="122" fill="#6610f2" fill-opacity=".14"/>
+  <line x1="164" y1="28" x2="164" y2="150" stroke="#6610f2" stroke-opacity=".4" stroke-width="1.4" stroke-dasharray="4 4"/>
+  <line x1="234" y1="28" x2="234" y2="150" stroke="#6610f2" stroke-opacity=".4" stroke-width="1.4" stroke-dasharray="4 4"/>
+  <path d="M30 96 C74 60 118 112 162 82 C186 66 210 108 234 72 C258 52 278 88 298 74" stroke="#6610f2" stroke-width="3" stroke-linecap="round"/>
+  <text x="170" y="44" fill="#6610f2" font-family="system-ui,sans-serif" font-size="12" font-weight="700" opacity=".75">watch</text>
+</svg>

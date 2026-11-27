@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="sklearn Clusterers and Outlier Detectors: Grouping and Anomaly Detection" aria-labelledby="t-skco d-skco">
+  <title id="t-skco">sklearn Clusterers and Outlier Detectors: Grouping and Anomaly Detection</title>
+  <desc id="d-skco">Two estimator families take (n_obs, n_points) curves. Clusterers (FunctionalKMeans, FuzzyFunctionalCMeans, FunctionalGMM) return integer cluster labels via fit_predict. Outlier detectors label each curve inlier (+1) or outlier (-1) via predict with a continuous score via score_samples. Method-accuracy distinction: MagnitudeShapeDetector is method-faithful using a genuine MS-plot decomposition against stored training statistics mu_ and var_; the other five detectors (LRTOutlierDetector, OutliergramDetector, TVDMSSDetector, MUODDetector, DepthgramDetector) use a subset-invariant modified-band-depth surrogate score in the sklearn layer while storing eponymous batch statistics as provenance attributes.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <defs>
+    <marker id="arr-co" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arr-co-org" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+    <marker id="arr-co-grn" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#198754"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="26" text-anchor="middle">sklearn Clusterers and Outlier Detectors</text>
+  <text class="sub" x="360" y="44" text-anchor="middle">3 ClusterMixin (fit_predict → labels) · 6 OutlierMixin (predict → ±1 · score_samples → continuous)</text>
+
+  <!-- ===== Input panel ===== -->
+  <rect x="12" y="56" width="112" height="216" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="68" y="74" text-anchor="middle" fill="#495057">Curves</text>
+  <text class="mono" x="68" y="89" text-anchor="middle" fill="#1a1a2e" font-size="11">X ndarray</text>
+  <text class="sm" x="68" y="103" text-anchor="middle">(n_obs, n_points)</text>
+  <!-- cluster-1 curves -->
+  <path d="M22 130 C36 118 50 128 64 114 C76 102 86 124 114 118" stroke="#3f51b5" stroke-width="2.0" fill="none" opacity="0.8"/>
+  <path d="M22 144 C34 136 52 144 66 132 C78 120 90 140 114 132" stroke="#3f51b5" stroke-width="1.4" fill="none" opacity="0.6"/>
+  <!-- cluster-2 curves -->
+  <path d="M22 168 C36 156 52 168 66 154 C80 140 90 162 114 154" stroke="#e8710a" stroke-width="2.0" fill="none" opacity="0.8"/>
+  <path d="M22 182 C36 174 52 182 66 170 C78 158 92 176 114 170" stroke="#e8710a" stroke-width="1.4" fill="none" opacity="0.6"/>
+  <!-- outlier curve -->
+  <path d="M22 218 C30 200 44 196 58 188 C72 180 84 214 114 218" stroke="#dc3545" stroke-width="2.4" fill="none" opacity="0.85"/>
+  <text class="sm" x="68" y="248" text-anchor="middle">2 clusters</text>
+  <text class="sm" x="68" y="261" text-anchor="middle">+ outlier (red)</text>
+
+  <!-- Arrow: input → clusterers -->
+  <line x1="124" y1="114" x2="142" y2="104" stroke="#495057" stroke-width="2" marker-end="url(#arr-co)"/>
+
+  <!-- Arrow: input → outliers -->
+  <line x1="124" y1="175" x2="142" y2="215" stroke="#495057" stroke-width="2" marker-end="url(#arr-co)"/>
+
+  <!-- ===== Clusterers panel ===== -->
+  <rect x="144" y="56" width="192" height="110" rx="10" fill="#f0fbf4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="240" y="74" text-anchor="middle" fill="#198754">ClusterMixin (3)</text>
+  <text class="sm" x="240" y="89" text-anchor="middle">fit_predict(X) → integer cluster labels</text>
+  <text class="mono" x="240" y="106" text-anchor="middle" fill="#1a1a2e">FunctionalKMeans</text>
+  <text class="sm" x="240" y="120" text-anchor="middle">k-means on functional distance</text>
+  <line x1="164" y1="127" x2="326" y2="127" stroke="#c3e6cb" stroke-width="1" stroke-dasharray="3 2"/>
+  <text class="mono" x="240" y="141" text-anchor="middle" fill="#1a1a2e">FuzzyFunctionalCMeans</text>
+  <line x1="164" y1="148" x2="326" y2="148" stroke="#c3e6cb" stroke-width="1" stroke-dasharray="3 2"/>
+  <text class="mono" x="240" y="160" text-anchor="middle" fill="#1a1a2e">FunctionalGMM</text>
+
+  <!-- Arrow: clusterers → cluster output -->
+  <line x1="336" y1="111" x2="354" y2="111" stroke="#198754" stroke-width="2" marker-end="url(#arr-co-grn)"/>
+
+  <!-- Cluster labels output -->
+  <rect x="356" y="66" width="168" height="90" rx="8" fill="#f0fbf4" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="440" y="85" text-anchor="middle" fill="#198754">Cluster Labels</text>
+  <text class="mono" x="440" y="103" text-anchor="middle" fill="#1a1a2e">[0, 1, 0, 2, 1, …]</text>
+  <text class="sm" x="440" y="119" text-anchor="middle">integer assignment</text>
+  <text class="sm" x="440" y="137" text-anchor="middle">(n_obs,) via fit_predict</text>
+
+  <!-- ===== Method-faithful detector panel (orange) ===== -->
+  <rect x="144" y="180" width="192" height="90" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="240" y="198" text-anchor="middle" fill="#fd7e14">Method-Faithful</text>
+  <text class="mono" x="240" y="214" text-anchor="middle" fill="#1a1a2e">MagnitudeShapeDetector</text>
+  <text class="sm" x="240" y="229" text-anchor="middle">genuine MS-plot: MO(x) + VO(x)</text>
+  <text class="sm" x="240" y="243" text-anchor="middle">scored vs stored mu_ / var_</text>
+  <text class="sm" x="240" y="257" text-anchor="middle">subset-invariant by construction</text>
+
+  <!-- ===== Surrogate detectors panel (neutral) ===== -->
+  <rect x="356" y="174" width="168" height="98" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="440" y="192" text-anchor="middle" fill="#495057">Surrogate-Scored (5)</text>
+  <text class="sm" x="440" y="207" text-anchor="middle">score_samples: MBD proxy</text>
+  <text class="mono" x="440" y="222" text-anchor="middle" fill="#1a1a2e" font-size="10">LRTOutlierDetector</text>
+  <text class="mono" x="440" y="235" text-anchor="middle" fill="#1a1a2e" font-size="10">OutliergramDetector</text>
+  <text class="mono" x="440" y="248" text-anchor="middle" fill="#1a1a2e" font-size="10">TVDMSSDetector</text>
+  <text class="mono" x="440" y="261" text-anchor="middle" fill="#1a1a2e" font-size="10">MUODDetector · DepthgramDetector</text>
+
+  <!-- Method-faithful arrow → inlier/outlier output -->
+  <line x1="336" y1="225" x2="354" y2="225" stroke="#fd7e14" stroke-width="2" marker-end="url(#arr-co-org)"/>
+
+  <!-- Surrogate arrow → same output -->
+  <line x1="524" y1="231" x2="542" y2="231" stroke="#495057" stroke-width="2" marker-end="url(#arr-co)"/>
+
+  <!-- Inlier/outlier output panel -->
+  <rect x="544" y="166" width="164" height="116" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="626" y="185" text-anchor="middle" fill="#495057">Inlier / Outlier</text>
+  <text class="mono" x="626" y="203" text-anchor="middle" fill="#1a1a2e">predict → ±1</text>
+  <text class="sm" x="626" y="219" text-anchor="middle">+1 inlier · −1 outlier</text>
+  <line x1="564" y1="228" x2="698" y2="228" stroke="#ced4da" stroke-width="1" stroke-dasharray="3 2"/>
+  <text class="mono" x="626" y="245" text-anchor="middle" fill="#1a1a2e">score_samples</text>
+  <text class="sm" x="626" y="261" text-anchor="middle">continuous anomaly score</text>
+  <text class="sm" x="626" y="277" text-anchor="middle">higher = more normal</text>
+</svg>

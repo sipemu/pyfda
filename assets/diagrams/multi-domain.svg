@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" fill="none"
+     role="img" aria-label="Multi-Domain FDA — MFPCA over multiple functional variables"
+     aria-labelledby="multi-title multi-desc">
+  <title id="multi-title">Multi-Domain FDA</title>
+  <desc id="multi-desc">Shows Multivariate Functional PCA (MFPCA) combining multiple simultaneous functional variables measured on the same subjects into shared multivariate scores, with per-variable eigenfunctions and a single low-dimensional representation per subject.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="30" text-anchor="middle">Multi-Domain FDA</text>
+  <text class="sub" x="360" y="50" text-anchor="middle">MFPCA: joint principal components across multiple simultaneous functional variables</text>
+
+  <!-- ===== Variable 1 panel ===== -->
+  <rect x="16" y="64" width="180" height="150" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="106" y="84" text-anchor="middle" fill="#3f51b5">Variable 1</text>
+  <text class="sm" x="106" y="100" text-anchor="middle">X⁽¹⁾ shape (n, m₁)</text>
+  <!-- sin-like curves -->
+  <path d="M28 170 Q66 100 106 105 Q146 110 188 170" stroke="#3f51b5" stroke-width="2.0" fill="none"/>
+  <path d="M28 175 Q70 108 106 112 Q142 118 188 175" stroke="#3f51b5" stroke-width="1.4" fill="none" opacity="0.6"/>
+  <path d="M28 168 Q60 103 106 108 Q150 112 188 168" stroke="#3f51b5" stroke-width="1.4" fill="none" opacity="0.5"/>
+  <!-- axis -->
+  <line x1="28" y1="195" x2="188" y2="195" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="106" y="210" text-anchor="middle">grid t₁ (m₁ pts)</text>
+
+  <!-- ===== Variable 2 panel ===== -->
+  <rect x="16" y="228" width="180" height="150" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="106" y="248" text-anchor="middle" fill="#e8710a">Variable 2</text>
+  <text class="sm" x="106" y="264" text-anchor="middle">X⁽²⁾ shape (n, m₂)</text>
+  <!-- cos-like curves with different grid length -->
+  <path d="M28 300 Q66 360 106 365 Q146 360 188 300" stroke="#e8710a" stroke-width="2.0" fill="none"/>
+  <path d="M28 305 Q66 358 106 362 Q146 358 188 305" stroke="#e8710a" stroke-width="1.4" fill="none" opacity="0.6"/>
+  <path d="M28 298 Q66 356 106 362 Q146 356 188 298" stroke="#e8710a" stroke-width="1.4" fill="none" opacity="0.5"/>
+  <line x1="28" y1="360" x2="188" y2="360" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="106" y="375" text-anchor="middle">grid t₂ (m₂ pts, m₂ ≠ m₁)</text>
+
+  <!-- Variable P dotted -->
+  <text class="sub" x="106" y="415" text-anchor="middle">· · · Variable P · · ·</text>
+
+  <!-- Arrow to MFPCA -->
+  <line x1="196" y1="148" x2="264" y2="200" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-mfpca)"/>
+  <line x1="196" y1="300" x2="264" y2="248" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-mfpca)"/>
+
+  <!-- ===== MFPCA center panel (orange accent) ===== -->
+  <rect x="268" y="120" width="184" height="240" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="360" y="142" text-anchor="middle" fill="#fd7e14">MFPCA</text>
+  <text class="mono" x="360" y="162" text-anchor="middle" fill="#fd7e14">mfpca([V1, V2], ncomp)</text>
+  <line x1="280" y1="172" x2="440" y2="172" stroke="#f8d7b8" stroke-width="1.0"/>
+
+  <!-- Joint SVD illustration -->
+  <text class="sm" x="360" y="192" text-anchor="middle">Joint SVD across P variables</text>
+  <!-- schematic matrix blocks -->
+  <rect x="290" y="202" width="48" height="36" rx="4" fill="#3f51b5" opacity="0.3"/>
+  <text class="sm" x="314" y="225" text-anchor="middle" fill="#3f51b5">V₁</text>
+  <rect x="348" y="202" width="40" height="36" rx="4" fill="#e8710a" opacity="0.3"/>
+  <text class="sm" x="368" y="225" text-anchor="middle" fill="#e8710a">V₂</text>
+  <text class="sm" x="400" y="225" text-anchor="middle">···</text>
+
+  <text class="sm" x="360" y="260" text-anchor="middle">weighted (1/std-dev)</text>
+  <text class="sm" x="360" y="278" text-anchor="middle">equalize scale across domains</text>
+
+  <line x1="280" y1="292" x2="440" y2="292" stroke="#f8d7b8" stroke-width="1.0"/>
+
+  <!-- Result keys -->
+  <text class="sm" x="280" y="312">scores      (n, ncomp)</text>
+  <text class="sm" x="280" y="328">eigenvalues (ncomp,)</text>
+  <text class="sm" x="280" y="344">eigenfunctions [P × (mₚ, ncomp)]</text>
+
+  <!-- Arrow to outputs -->
+  <line x1="452" y1="200" x2="488" y2="170" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-mfpca)"/>
+  <line x1="452" y1="280" x2="488" y2="340" stroke="#495057" stroke-width="2.0" marker-end="url(#arr-mfpca)"/>
+
+  <!-- ===== Scores panel ===== -->
+  <rect x="492" y="64" width="212" height="170" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="598" y="84" text-anchor="middle" fill="#1a1a2e">Scores</text>
+  <text class="mono" x="598" y="102" text-anchor="middle" fill="#6c757d">result['scores'] — (n, ncomp)</text>
+  <!-- scatter plot of PC1 vs PC2 -->
+  <circle cx="540" cy="145" r="4" fill="#3f51b5"/>
+  <circle cx="558" cy="138" r="4" fill="#3f51b5"/>
+  <circle cx="548" cy="160" r="4" fill="#3f51b5"/>
+  <circle cx="620" cy="170" r="4" fill="#e8710a"/>
+  <circle cx="638" cy="158" r="4" fill="#e8710a"/>
+  <circle cx="630" cy="182" r="4" fill="#e8710a"/>
+  <circle cx="680" cy="145" r="4" fill="#198754"/>
+  <circle cx="665" cy="160" r="4" fill="#198754"/>
+  <!-- axes -->
+  <line x1="520" y1="200" x2="520" y2="115" stroke="#ced4da" stroke-width="1.2" marker-end="url(#arr-mfpca)"/>
+  <line x1="515" y1="195" x2="695" y2="195" stroke="#ced4da" stroke-width="1.2" marker-end="url(#arr-mfpca)"/>
+  <text class="sm" x="522" y="212" text-anchor="start">PC 1</text>
+  <text class="sm" x="510" y="113" text-anchor="middle">PC 2</text>
+  <text class="sm" x="598" y="228" text-anchor="middle">One point per subject — integrates all P variables</text>
+
+  <!-- ===== Eigenfunctions panel ===== -->
+  <rect x="492" y="252" width="212" height="170" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="598" y="272" text-anchor="middle" fill="#1a1a2e">Eigenfunctions</text>
+  <text class="sm" x="598" y="290" text-anchor="middle">Per-variable loading curves</text>
+  <!-- var 1 loading -->
+  <text class="sm" x="500" y="312" fill="#3f51b5">V₁:</text>
+  <path d="M520 340 Q560 300 598 310 Q636 320 694 345" stroke="#3f51b5" stroke-width="2.0" fill="none"/>
+  <!-- var 2 loading -->
+  <text class="sm" x="500" y="368" fill="#e8710a">V₂:</text>
+  <path d="M520 385 Q560 405 598 402 Q636 398 694 385" stroke="#e8710a" stroke-width="2.0" fill="none"/>
+  <text class="sm" x="598" y="414" text-anchor="middle">shape (mₚ, ncomp) per variable</text>
+
+  <!-- Bottom note -->
+  <rect x="16" y="440" width="688" height="30" rx="6" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.0"/>
+  <text class="sm" x="360" y="459" text-anchor="middle">Pass a Python list of 2D arrays — mfpca([V1, V2]) — not a stacked 3D array (Pitfall 9)</text>
+
+  <defs>
+    <marker id="arr-mfpca" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7" fill="#495057"/>
+    </marker>
+  </defs>
+</svg>

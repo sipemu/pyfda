@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Canadian precipitation by region">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none" stroke-width="2.4">
+    <path d="M30 118 C74 108 118 70 162 60 C206 68 250 104 298 116"/>
+    <path d="M30 124 C74 116 118 82 162 72 C206 80 250 112 298 122" stroke-opacity=".8"/>
+  </g>
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none" stroke-width="2.4" stroke-opacity=".4">
+    <path d="M30 96 C74 100 118 108 162 104 C206 100 250 92 298 96"/>
+    <path d="M30 104 C74 108 118 116 162 112 C206 108 250 100 298 104"/>
+  </g>
+</svg>

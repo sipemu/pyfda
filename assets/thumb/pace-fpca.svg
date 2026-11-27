@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="PACE sparse FPCA">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#198754" stroke-opacity=".35" stroke-width="1.4"/>
+  <path d="M30 112 C80 70 140 130 200 86 C245 54 275 90 298 78" stroke="#198754" stroke-opacity=".35" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <circle cx="45" cy="118" r="4" fill="#198754" fill-opacity=".7"/>
+  <circle cx="82" cy="88" r="4" fill="#198754" fill-opacity=".7"/>
+  <circle cx="130" cy="114" r="4" fill="#198754" fill-opacity=".7"/>
+  <circle cx="175" cy="96" r="4" fill="#198754" fill-opacity=".7"/>
+  <circle cx="218" cy="72" r="4" fill="#198754" fill-opacity=".7"/>
+  <circle cx="260" cy="84" r="4" fill="#198754" fill-opacity=".7"/>
+  <circle cx="290" cy="76" r="4" fill="#198754" fill-opacity=".7"/>
+  <path d="M30 112 C80 70 140 130 200 86 C245 54 275 90 298 78" stroke="#198754" stroke-width="3" stroke-linecap="round"/>
+</svg>

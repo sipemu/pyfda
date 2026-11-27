@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Regression">
+  <defs>
+    <linearGradient id="regb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dc3545" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#dc3545" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="28" y1="150" x2="292" y2="150" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.5"/>
+  <line x1="28" y1="150" x2="28" y2="26" stroke="#dc3545" stroke-opacity=".35" stroke-width="1.5"/>
+  <!-- prediction band -->
+  <path d="M28 118 C96 92 150 70 292 44 L292 74 C150 100 96 122 28 148 Z" fill="url(#regb)"/>
+  <!-- fitted functional coefficient -->
+  <path d="M28 133 C96 107 150 85 292 59" stroke="#dc3545" stroke-width="3" stroke-linecap="round"/>
+  <!-- scattered observations -->
+  <circle cx="58" cy="122" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+  <circle cx="92" cy="128" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+  <circle cx="120" cy="102" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+  <circle cx="150" cy="112" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+  <circle cx="186" cy="80" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+  <circle cx="220" cy="94" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+  <circle cx="252" cy="66" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+  <circle cx="278" cy="74" r="3.5" fill="#dc3545" fill-opacity=".8"/>
+</svg>

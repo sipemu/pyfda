@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" role="img" aria-label="Functional outlier workflow">
+  <line x1="30" y1="150" x2="298" y2="150" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <line x1="30" y1="150" x2="30" y2="28" stroke="#3f51b5" stroke-opacity=".35" stroke-width="1.4"/>
+  <g stroke="#3f51b5" stroke-linecap="round" fill="none" stroke-width="2" stroke-opacity=".45">
+    <path d="M30 100 C90 96 150 92 210 96 C250 98 275 100 298 98"/>
+    <path d="M30 108 C90 104 150 100 210 104 C250 106 275 108 298 106"/>
+    <path d="M30 116 C90 112 150 108 210 112 C250 114 275 116 298 114"/>
+  </g>
+  <path d="M30 112 C80 60 130 38 164 32" stroke="#3f51b5" stroke-opacity=".7" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="164" cy="32" r="5" stroke="#3f51b5" stroke-opacity=".7" stroke-width="1.6"/>
+  <path d="M30 104 C90 108 150 116 210 88 C240 72 268 120 298 118" stroke="#3f51b5" stroke-opacity=".7" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="298" cy="118" r="5" stroke="#3f51b5" stroke-opacity=".7" stroke-width="1.6"/>
+</svg>

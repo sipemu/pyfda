@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Elastic Clustering" aria-labelledby="t-eclust d-eclust">
+  <title id="t-eclust">Elastic Clustering</title>
+  <desc id="d-eclust">Illustrates elastic clustering: a family of curves with shared shape but varying peak positions (phase variation) is measured by elastic (Fisher-Rao / SRVF amplitude) pairwise distances via elastic_self_distance_matrix, then grouped into clusters by shape using hierarchical_cut — recovering amplitude-based groups while ignoring phase.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <defs>
+    <marker id="arrEC" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#adb5bd"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="360" y="26" text-anchor="middle">Elastic Clustering</text>
+  <text class="sub" x="360" y="45" text-anchor="middle">Group curves by amplitude shape — phase variation is ignored</text>
+
+  <!-- ===== Panel 1: Input curves (mixed phase, two amplitude levels) ===== -->
+  <rect x="18" y="60" width="198" height="210" rx="12" fill="#eef4fd" stroke="#4A90D9" stroke-width="1.5"/>
+  <text class="lab" x="117" y="80" text-anchor="middle" fill="#2C5F8A">Curve Family</text>
+  <text class="sm" x="117" y="96" text-anchor="middle">mixed phase (peak location)</text>
+
+  <!-- Cluster-1 curves (low amp ~height 50): peaks at varying x positions -->
+  <!-- Curve 1a: peak near left -->
+  <path d="M28 222 C50 222 58 148 72 148 C86 148 90 222 120 222 C150 222 154 222 206 222"
+        stroke="#3f51b5" stroke-width="2.0" fill="none" opacity="0.75"/>
+  <!-- Curve 1b: peak near center-left -->
+  <path d="M28 222 C60 222 72 142 88 142 C104 142 108 222 140 222 C170 222 180 222 206 222"
+        stroke="#3f51b5" stroke-width="2.0" fill="none" opacity="0.75"/>
+  <!-- Curve 1c: peak near center -->
+  <path d="M28 222 C70 222 88 138 105 138 C122 138 126 222 158 222 C178 222 196 222 206 222"
+        stroke="#3f51b5" stroke-width="2.0" fill="none" opacity="0.75"/>
+
+  <!-- Cluster-2 curves (high amp ~height 90): peaks at varying x positions -->
+  <!-- Curve 2a: peak near left -->
+  <path d="M28 222 C46 222 54 108 70 108 C86 108 90 222 118 222 C148 222 162 222 206 222"
+        stroke="#e8710a" stroke-width="2.2" fill="none" opacity="0.75"/>
+  <!-- Curve 2b: peak near center -->
+  <path d="M28 222 C58 222 74 102 92 102 C110 102 116 222 148 222 C172 222 192 222 206 222"
+        stroke="#e8710a" stroke-width="2.2" fill="none" opacity="0.75"/>
+  <!-- Curve 2c: peak near right -->
+  <path d="M28 222 C64 222 90 98 110 98 C130 98 136 222 168 222 C186 222 200 222 206 222"
+        stroke="#e8710a" stroke-width="2.2" fill="none" opacity="0.75"/>
+
+  <!-- x-axis -->
+  <line x1="28" y1="222" x2="206" y2="222" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="117" y="242" text-anchor="middle">same shape, different timing</text>
+  <text class="sm" x="117" y="256" text-anchor="middle">2 amplitude levels mixed</text>
+
+  <!-- ===== Arrow 1 → 2 ===== -->
+  <line x1="216" y1="165" x2="252" y2="165" stroke="#adb5bd" stroke-width="1.4" marker-end="url(#arrEC)"/>
+  <text class="mono" x="234" y="155" text-anchor="middle" fill="#495057" font-size="9">elastic_self</text>
+  <text class="mono" x="234" y="167" text-anchor="middle" fill="#495057" font-size="9">_distance</text>
+  <text class="mono" x="234" y="179" text-anchor="middle" fill="#495057" font-size="9">_matrix()</text>
+
+  <!-- ===== Panel 2: Distance step ===== -->
+  <rect x="256" y="60" width="198" height="210" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="355" y="80" text-anchor="middle" fill="#B37700">Elastic Distance</text>
+  <text class="sm" x="355" y="96" text-anchor="middle">amplitude (SRVF / Fisher-Rao)</text>
+
+  <!-- Distance matrix heatmap (6x6, two blocks) -->
+  <g transform="translate(280,108)">
+    <!-- Row 0 (cluster 1) -->
+    <rect x="0" y="0" width="20" height="20" rx="2" fill="#c8daf5"/>
+    <rect x="20" y="0" width="20" height="20" rx="2" fill="#c8daf5"/>
+    <rect x="40" y="0" width="20" height="20" rx="2" fill="#c8daf5"/>
+    <rect x="60" y="0" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="80" y="0" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="100" y="0" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <!-- Row 1 -->
+    <rect x="0" y="20" width="20" height="20" rx="2" fill="#c8daf5"/>
+    <rect x="20" y="20" width="20" height="20" rx="2" fill="#c8daf5"/>
+    <rect x="40" y="20" width="20" height="20" rx="2" fill="#c8daf5"/>
+    <rect x="60" y="20" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="80" y="20" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="100" y="20" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <!-- Row 2 -->
+    <rect x="0" y="40" width="20" height="20" rx="2" fill="#c8daf5"/>
+    <rect x="20" y="40" width="20" height="20" rx="2" fill="#c8daf5"/>
+    <rect x="40" y="40" width="20" height="20" rx="2" fill="#c8daf5"/>
+    <rect x="60" y="40" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="80" y="40" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="100" y="40" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <!-- Row 3 (cluster 2) -->
+    <rect x="0" y="60" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="20" y="60" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="40" y="60" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="60" y="60" width="20" height="20" rx="2" fill="#f5e0c8"/>
+    <rect x="80" y="60" width="20" height="20" rx="2" fill="#f5e0c8"/>
+    <rect x="100" y="60" width="20" height="20" rx="2" fill="#f5e0c8"/>
+    <!-- Row 4 -->
+    <rect x="0" y="80" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="20" y="80" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="40" y="80" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="60" y="80" width="20" height="20" rx="2" fill="#f5e0c8"/>
+    <rect x="80" y="80" width="20" height="20" rx="2" fill="#f5e0c8"/>
+    <rect x="100" y="80" width="20" height="20" rx="2" fill="#f5e0c8"/>
+    <!-- Row 5 -->
+    <rect x="0" y="100" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="20" y="100" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="40" y="100" width="20" height="20" rx="2" fill="#f5c8c8"/>
+    <rect x="60" y="100" width="20" height="20" rx="2" fill="#f5e0c8"/>
+    <rect x="80" y="100" width="20" height="20" rx="2" fill="#f5e0c8"/>
+    <rect x="100" y="100" width="20" height="20" rx="2" fill="#f5e0c8"/>
+    <!-- Legend -->
+    <text class="sm" x="60" y="136" text-anchor="middle" font-size="9" fill="#3f51b5">small d</text>
+    <text class="sm" x="60" y="148" text-anchor="middle" font-size="9" fill="#e8710a">large d</text>
+  </g>
+
+  <text class="mono" x="355" y="245" text-anchor="middle" fill="#B37700" font-size="10">hierarchical_cut(D, k=2)</text>
+  <text class="sm" x="355" y="260" text-anchor="middle">phase-invariant distance</text>
+
+  <!-- ===== Arrow 2 → 3 ===== -->
+  <line x1="454" y1="165" x2="490" y2="165" stroke="#adb5bd" stroke-width="1.4" marker-end="url(#arrEC)"/>
+  <text class="sm" x="472" y="156" text-anchor="middle">clusters</text>
+  <text class="sm" x="472" y="170" text-anchor="middle">by shape</text>
+
+  <!-- ===== Panel 3: Cluster outputs ===== -->
+  <rect x="494" y="60" width="208" height="210" rx="12" fill="#eef7f0" stroke="#198754" stroke-width="1.5"/>
+  <text class="lab" x="598" y="80" text-anchor="middle" fill="#198754">Clusters by Shape</text>
+  <text class="sm" x="598" y="96" text-anchor="middle">amplitude groups · phase ignored</text>
+
+  <!-- Cluster 1: low amplitude (indigo) -->
+  <text class="lab" x="598" y="116" text-anchor="middle" fill="#3f51b5" font-size="11">Cluster 1 — low amplitude</text>
+  <path d="M504 162 C520 162 526 128 536 128 C546 128 550 162 570 162 C586 162 596 162 620 162"
+        stroke="#3f51b5" stroke-width="2.2" fill="none"/>
+  <path d="M504 162 C524 162 532 124 544 124 C556 124 560 162 580 162 C598 162 610 162 620 162"
+        stroke="#3f51b5" stroke-width="1.6" fill="none" opacity="0.55"/>
+  <path d="M504 162 C530 162 540 120 553 120 C566 120 570 162 590 162 C605 162 614 162 620 162"
+        stroke="#3f51b5" stroke-width="1.6" fill="none" opacity="0.45"/>
+
+  <!-- Divider -->
+  <line x1="504" y1="180" x2="692" y2="180" stroke="#ced4da" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <!-- Cluster 2: high amplitude (orange) -->
+  <text class="lab" x="598" y="200" text-anchor="middle" fill="#e8710a" font-size="11">Cluster 2 — high amplitude</text>
+  <path d="M504 248 C516 248 522 200 534 200 C546 200 550 248 572 248 C590 248 604 248 620 248"
+        stroke="#e8710a" stroke-width="2.4" fill="none"/>
+  <path d="M504 248 C520 248 530 196 544 196 C558 196 562 248 582 248 C598 248 612 248 620 248"
+        stroke="#e8710a" stroke-width="1.8" fill="none" opacity="0.55"/>
+  <path d="M504 248 C524 248 536 192 550 192 C564 192 568 248 588 248 C604 248 616 248 620 248"
+        stroke="#e8710a" stroke-width="1.8" fill="none" opacity="0.45"/>
+
+  <!-- x-axis for each cluster -->
+  <line x1="504" y1="162" x2="620" y2="162" stroke="#ced4da" stroke-width="1.0"/>
+  <line x1="504" y1="248" x2="620" y2="248" stroke="#ced4da" stroke-width="1.0"/>
+</svg>

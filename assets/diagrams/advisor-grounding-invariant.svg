@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="Grounding Invariant" aria-labelledby="t-ground d-ground">
+  <title id="t-ground">Grounding Invariant</title>
+  <desc id="d-ground">Shows the fdars-computes / LLM-explains boundary: all numerical diagnostics are computed deterministically by fdars; the LLM cites these values and explains them but never fabricates numbers, enforcing the grounding invariant that the LLM cannot produce diagnostic values that fdars did not compute.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="28" text-anchor="middle">Grounding Invariant</text>
+  <text class="sub" x="360" y="46" text-anchor="middle">fdars computes every number — the LLM only interprets and cites</text>
+
+  <!-- ===== Left lane: fdars computes numbers ===== -->
+  <rect x="24" y="62" width="290" height="218" rx="12" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="169" y="84" text-anchor="middle" fill="#495057">fdars computes numbers</text>
+
+  <!-- Data input box -->
+  <rect x="56" y="96" width="226" height="40" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="sm" x="169" y="112" text-anchor="middle">your fdars result</text>
+  <text class="sm" x="169" y="127" text-anchor="middle">(clustering, FPCA, alignment, …)</text>
+
+  <!-- Arrow down -->
+  <line x1="169" y1="136" x2="169" y2="153" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- build_diagnostics box -->
+  <rect x="56" y="153" width="226" height="40" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="mono" x="169" y="170" text-anchor="middle" fill="#1a1a2e">build_diagnostics(result,</text>
+  <text class="mono" x="169" y="185" text-anchor="middle" fill="#1a1a2e">  method)</text>
+
+  <!-- Arrow down -->
+  <line x1="169" y1="193" x2="169" y2="210" stroke="#495057" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Diagnostics box -->
+  <rect x="56" y="210" width="226" height="52" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.2"/>
+  <text class="lab" x="169" y="230" text-anchor="middle" fill="#495057">numeric diagnostics dict</text>
+  <text class="sm" x="169" y="246" text-anchor="middle">offline · deterministic · JSON-serialisable</text>
+  <text class="sm" x="169" y="259" text-anchor="middle">no network · no RNG · no LLM</text>
+
+  <!-- ===== Divider / boundary ===== -->
+  <line x1="356" y1="62" x2="356" y2="280" stroke="#ced4da" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text class="sm" x="356" y="57" text-anchor="middle">boundary</text>
+  <text class="sm" x="356" y="291" text-anchor="middle" fill="#6c757d">no fabrication</text>
+
+  <!-- Cites arrow from diagnostics to evidence -->
+  <path d="M282 240 Q320 240 320 190 Q320 160 390 160" stroke="#fd7e14" stroke-width="2" fill="none" marker-end="url(#arrorange)"/>
+  <text class="sm" x="318" y="205" text-anchor="middle" fill="#fd7e14">cites</text>
+
+  <!-- ===== Right lane: LLM interprets and cites ===== -->
+  <rect x="368" y="62" width="328" height="218" rx="12" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="532" y="84" text-anchor="middle" fill="#fd7e14">LLM interprets and cites</text>
+
+  <!-- advise box -->
+  <rect x="390" y="96" width="284" height="40" rx="8" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="mono" x="532" y="113" text-anchor="middle" fill="#1a1a2e">advise(diagnostics, task=…)</text>
+  <text class="sm" x="532" y="128" text-anchor="middle" fill="#495057">requires ANTHROPIC_API_KEY</text>
+
+  <!-- Arrow down -->
+  <line x1="532" y1="136" x2="532" y2="153" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrorange)"/>
+
+  <!-- Advice / Recommendation box -->
+  <rect x="390" y="153" width="284" height="109" rx="8" fill="#fff4ea" stroke="#f8d7b8" stroke-width="1.2"/>
+  <text class="mono" x="532" y="172" text-anchor="middle" fill="#1a1a2e">Advice</text>
+  <text class="sm" x="402" y="192">interpretation  — plain-language summary</text>
+  <text class="sm" x="402" y="210">recommendations — concrete next actions</text>
+  <text class="sm" x="402" y="228">  · action, kind, rationale, expected_effect</text>
+  <text class="mono" x="402" y="246" fill="#fd7e14">  · evidence  ← cites diagnostic values</text>
+  <text class="sm" x="402" y="261" fill="#495057">caveats — limitations and qualifications</text>
+
+  <!-- Defs: arrowheads -->
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arrorange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+  </defs>
+</svg>

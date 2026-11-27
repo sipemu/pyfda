@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" fill="none" role="img" aria-label="sklearn Transformers: Raw Curves to Downstream-Ready Matrix" aria-labelledby="t-sktr d-sktr">
+  <title id="t-sktr">sklearn Transformers: Raw Curves to Downstream-Ready Matrix</title>
+  <desc id="d-sktr">Eight TransformerMixin estimators split into two families. Per-curve transformers (Imputer, BSplineSmoother, LocalPolynomialSmoother, SplineInterpolator) clean or resample each curve and return an (n_obs, n_points) matrix. Scalar-output transformers (DepthTransformer, NormTransformer) reduce each curve to a single (n_obs, 1) scalar column. Reducing transformers (FPCATransformer and BasisRepresentation) project curves onto basis components and return an (n_obs, k) score or coefficient matrix suitable for downstream sklearn predictors.</desc>
+  <style>
+    .ttl{font:700 17px system-ui,-apple-system,sans-serif;fill:#1a1a2e}
+    .sub{font:400 12px system-ui,sans-serif;fill:#6c757d}
+    .lab{font:700 13px system-ui,sans-serif}
+    .sm{font:400 11px system-ui,sans-serif;fill:#495057}
+    .mono{font:600 12px ui-monospace,monospace}
+  </style>
+  <defs>
+    <marker id="arr-tr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#495057"/>
+    </marker>
+    <marker id="arr-tr-org" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="#fd7e14"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text class="ttl" x="360" y="26" text-anchor="middle">sklearn Transformers: Raw Curves to Downstream-Ready Matrix</text>
+  <text class="sub" x="360" y="44" text-anchor="middle">8 TransformerMixin estimators — clean, smooth, resample, or project functional data</text>
+
+  <!-- ===== Input panel ===== -->
+  <rect x="12" y="58" width="118" height="216" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="71" y="78" text-anchor="middle" fill="#495057">Input</text>
+  <text class="mono" x="71" y="95" text-anchor="middle" fill="#1a1a2e">X ndarray</text>
+  <text class="sm" x="71" y="112" text-anchor="middle">(n_obs, n_points)</text>
+  <!-- Stylised raw curves -->
+  <path d="M22 148 C38 130 52 140 62 125 C72 110 80 135 92 128 C104 121 112 142 120 138" stroke="#3f51b5" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M22 160 C38 148 50 158 64 145 C76 132 84 152 96 146 C108 140 114 155 120 150" stroke="#e8710a" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M22 172 C36 164 54 172 68 160 C82 148 90 168 102 162 C112 156 116 167 120 163" stroke="#198754" stroke-width="2" fill="none" opacity="0.7"/>
+  <text class="sm" x="71" y="215" text-anchor="middle">raw / noisy</text>
+  <text class="sm" x="71" y="228" text-anchor="middle">measurements</text>
+
+  <!-- ===== Arrow input → per-curve panel ===== -->
+  <line x1="130" y1="148" x2="148" y2="148" stroke="#495057" stroke-width="2" marker-end="url(#arr-tr)"/>
+
+  <!-- ===== Per-curve transformers panel (neutral) ===== -->
+  <rect x="150" y="58" width="182" height="216" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="241" y="78" text-anchor="middle" fill="#495057">Per-Curve Cleaners</text>
+  <text class="sm" x="241" y="94" text-anchor="middle">output: (n_obs, n_points)</text>
+
+  <text class="mono" x="241" y="116" text-anchor="middle" fill="#1a1a2e">Imputer</text>
+  <text class="sm" x="241" y="130" text-anchor="middle">fills NaN values</text>
+
+  <line x1="200" y1="138" x2="282" y2="138" stroke="#ced4da" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <text class="mono" x="241" y="152" text-anchor="middle" fill="#1a1a2e">BSplineSmoother</text>
+  <text class="sm" x="241" y="166" text-anchor="middle">kernel smooth per curve</text>
+
+  <line x1="200" y1="174" x2="282" y2="174" stroke="#ced4da" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <text class="mono" x="241" y="188" text-anchor="middle" fill="#1a1a2e">LocalPolynomialSmoother</text>
+  <text class="sm" x="241" y="202" text-anchor="middle">local poly smooth</text>
+
+  <line x1="200" y1="210" x2="282" y2="210" stroke="#ced4da" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <text class="mono" x="241" y="224" text-anchor="middle" fill="#1a1a2e">SplineInterpolator</text>
+  <text class="sm" x="241" y="238" text-anchor="middle">resample to new grid</text>
+
+  <text class="sm" x="241" y="265" text-anchor="middle">each curve cleaned / resampled</text>
+
+  <!-- ===== Arrow per-curve → scalar panel ===== -->
+  <line x1="332" y1="128" x2="350" y2="108" stroke="#495057" stroke-width="2" marker-end="url(#arr-tr)"/>
+
+  <!-- ===== Scalar output panel (neutral) ===== -->
+  <rect x="352" y="58" width="160" height="100" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text class="lab" x="432" y="78" text-anchor="middle" fill="#495057">Scalar Extractors</text>
+  <text class="sm" x="432" y="93" text-anchor="middle">output: (n_obs, 1)</text>
+  <text class="mono" x="432" y="111" text-anchor="middle" fill="#1a1a2e">DepthTransformer</text>
+  <text class="sm" x="432" y="125" text-anchor="middle">depth score per curve</text>
+  <line x1="372" y1="132" x2="502" y2="132" stroke="#ced4da" stroke-width="1" stroke-dasharray="3 2"/>
+  <text class="mono" x="432" y="146" text-anchor="middle" fill="#1a1a2e">NormTransformer</text>
+
+  <!-- ===== Arrow per-curve → reducing panel ===== -->
+  <line x1="332" y1="178" x2="350" y2="198" stroke="#fd7e14" stroke-width="2" marker-end="url(#arr-tr-org)"/>
+
+  <!-- ===== Reducing transformers panel (orange = method/process) ===== -->
+  <rect x="352" y="178" width="160" height="96" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="432" y="197" text-anchor="middle" fill="#fd7e14">Reducers</text>
+  <text class="sm" x="432" y="212" text-anchor="middle">output: (n_obs, k)</text>
+  <text class="mono" x="432" y="230" text-anchor="middle" fill="#1a1a2e">FPCATransformer</text>
+  <text class="sm" x="432" y="244" text-anchor="middle">FPC scores</text>
+  <line x1="372" y1="251" x2="502" y2="251" stroke="#f8d7b8" stroke-width="1" stroke-dasharray="3 2"/>
+  <text class="mono" x="432" y="263" text-anchor="middle" fill="#1a1a2e">BasisRepresentation</text>
+
+  <!-- ===== Arrow scalar → output ===== -->
+  <line x1="512" y1="108" x2="546" y2="138" stroke="#495057" stroke-width="2" marker-end="url(#arr-tr)"/>
+
+  <!-- ===== Arrow reducing → output ===== -->
+  <line x1="512" y1="226" x2="546" y2="196" stroke="#fd7e14" stroke-width="2" marker-end="url(#arr-tr-org)"/>
+
+  <!-- ===== Output panel ===== -->
+  <rect x="548" y="118" width="158" height="136" rx="10" fill="#fff4ea" stroke="#fd7e14" stroke-width="1.5"/>
+  <text class="lab" x="627" y="138" text-anchor="middle" fill="#fd7e14">Numeric Matrix</text>
+  <text class="sm" x="627" y="154" text-anchor="middle">downstream-ready</text>
+  <text class="mono" x="627" y="174" text-anchor="middle" fill="#1a1a2e">(n_obs, n_points)</text>
+  <text class="sm" x="627" y="190" text-anchor="middle">cleaned / resampled</text>
+  <line x1="568" y1="198" x2="696" y2="198" stroke="#f8d7b8" stroke-width="1" stroke-dasharray="3 2"/>
+  <text class="mono" x="627" y="214" text-anchor="middle" fill="#1a1a2e">(n_obs, 1)</text>
+  <text class="sm" x="627" y="228" text-anchor="middle">depth or norm scalar</text>
+  <line x1="568" y1="235" x2="696" y2="235" stroke="#f8d7b8" stroke-width="1" stroke-dasharray="3 2"/>
+  <text class="mono" x="627" y="250" text-anchor="middle" fill="#1a1a2e">(n_obs, k)</text>
+  <text class="sm" x="627" y="264" text-anchor="middle">FPC / basis coefficients</text>
+  <text class="sm" x="627" y="278" text-anchor="middle">→ any sklearn predictor</text>
+</svg>
